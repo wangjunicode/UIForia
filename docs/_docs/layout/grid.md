@@ -46,6 +46,10 @@ The left image shows the grid, the right shows the same but with the inspector's
 What we see is that our simple cells don't have a size, since they are of course content sized by default.
 The grid, however, allocates space for the cells according to the column and row template that we defined.
 
+See also:
+- [`GridLayoutColTemplate`](/docs/style/style-properties#gridlayoutcoltemplate) 
+- [`GridLayoutRowTemplate`](/docs/style/style-properties#gridlayoutrowtemplate) 
+
 Building on what is known about [LayoutFit](/docs/layout/#layoutfit) we could add the `LayoutFit` property
 to the `simple-cell` style group and make the cells fill up all the allocated space:
 
@@ -188,6 +192,8 @@ style grid-auto-item {
     MinWidth = auto;
 }
 ```
+
+### Grid Cell Functions
 
 `cell(base, fr grow, fr shrink, shrink-limit, grow-limit)`  
 `grow(base, max)` -> `clamp(base, fr grow, fr shrink, base, grow-limit)`  

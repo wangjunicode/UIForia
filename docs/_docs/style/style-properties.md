@@ -180,6 +180,7 @@ BorderRadius = 10px 50%; // top-left and bottom-right: 10px; bottom-left and top
 #### `BorderRadiusBottomLeft`
 <button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
+----------------
 
 ### Corner Bevels
 Cuts off a corner in a 45 degree angle. The size you define is the length of the cutout from the corner.
@@ -196,23 +197,39 @@ Cuts off a corner in a 45 degree angle. The size you define is the length of the
 #### `CornerBevelBottomRight`
 <button class="api-button">[UIFixedLength](/docs/types#uifixedlength)</button>
  
+----------------
 
 ## Alignments
 There's an [extensive guide around alignments](/docs/alignments) for more details.
 
-### `AlignmentTarget` : [AlignmentTarget](/docs/types#alignmenttarget)
+### `AlignmentTarget`
+<button class="api-button">[AlignmentTarget](/docs/types#alignmenttarget)</button>
+
 Shorthand to set `AlignmentTargetX` and `AlignmentTargetY` to the same value.
-### `AlignmentTargetX` : [AlignmentTarget](/docs/types#alignmenttarget)
-### `AlignmentTargetY` : [AlignmentTarget](/docs/types#alignmenttarget)
 
-### `AlignmentDirectionX` : [AlignmentDirection](/docs/types#alignmentdirection)
-### `AlignmentDirectionY` : [AlignmentDirection](/docs/types#alignmentdirection)
+### `AlignmentTargetX`
+<button class="api-button">[AlignmentTarget](/docs/types#alignmenttarget)</button>
 
-### `AlignmentOriginX` : [OffsetMeasurement](/docs/types#offsetmeasurement)
-### `AlignmentOriginY` : [OffsetMeasurement](/docs/types#offsetmeasurement)
+### `AlignmentTargetY`
+<button class="api-button">[AlignmentTarget](/docs/types#alignmenttarget)</button>
 
-### `AlignmentOffsetX` : [OffsetMeasurement](/docs/types#offsetmeasurement)
-### `AlignmentOffsetY` : [OffsetMeasurement](/docs/types#offsetmeasurement)
+### `AlignmentDirectionX`
+<button class="api-button">[AlignmentDirection](/docs/types#alignmentdirection)</button>
+
+### `AlignmentDirectionY`
+<button class="api-button">[AlignmentDirection](/docs/types#alignmentdirection)</button>
+
+### `AlignmentOriginX`
+<button class="api-button">[OffsetMeasurement](/docs/types#offsetmeasurement)</button>
+
+### `AlignmentOriginY`
+<button class="api-button">[OffsetMeasurement](/docs/types#offsetmeasurement)</button>
+
+### `AlignmentOffsetX`
+<button class="api-button">[OffsetMeasurement](/docs/types#offsetmeasurement)</button>
+
+### `AlignmentOffsetY`
+<button class="api-button">[OffsetMeasurement](/docs/types#offsetmeasurement)</button>
 
 ### `AlignX`
 Shorthand to set all the horizontal alignment properties at once:
@@ -222,17 +239,37 @@ Shorthand to set all the horizontal alignment properties at once:
 Shorthand to set all the vertical alignment properties at once:
 `AlignY = AlignmentOriginY [AlignmentOffsetY] [AlignmentTargetY] [AlignmentDirectionY]`
 
-## Layout
+----------------
 
-### LayoutFit
+### `LayoutFit`
+<button class="api-button">[LayoutFit](/docs/types#layoutfit)</button>
 
-### LayoutFitHorizontal
-### LayoutFitVertical
+Shorthand for settings `LayoutFitHorizontal` and `LayoutFitVertical` at once.
+Accepts one or two values to set both properties to the same or different values respectively. 
 
-### `LayoutBehavior` : [LayoutBehavior](structs.md)
-Set to `Ignored` to ignore the parent element's style 
+Have a look at [the LayoutFit guide](/docs/layout/#layoutfit) for more information.
+
+### `LayoutFitHorizontal`
+<button class="api-button">[LayoutFit](/docs/types#layoutfit)</button>
+
+### `LayoutFitVertical`
+<button class="api-button">[LayoutFit](/docs/types#layoutfit)</button>
+
+### `LayoutBehavior`
+<button class="api-button">[LayoutBehavior](/docs/types#layoutbehavior)</button>
+
+This property lets you opt-out of the normal layout flow.
+
+- `Ignored` is usually used with [alignments](/docs/alignments) or transforms. To
+    place an element at a specific place without affecting the layout of siblings.
+    In a grid it will *not* count towards any cell in a row or column track.
  
-### `LayoutType` : [LayoutType](structs.md)
+- `TranscludeChildren` is automatically applied to all `<Children />` elements but
+    can be applied to any user element as well. Useful when a dedicated custom
+    UIElement is created to wrap some functionality but some critical style requirements
+    apply.
+ 
+### `LayoutType`
 `Grid` or `Flex`  
 
 ### `Margin` : [UIMeasurement](/docs/types#uimeasurement) 
@@ -250,7 +287,7 @@ Sets the margin on the left.
 ### `MarginRight` : [UIMeasurement](/docs/types#uimeasurement) 
 Sets the margin on the right.    
   
-#### `PreferredSize` : [UIMeasurement](/docs/types#uimeasurement) 
+### `PreferredSize` : [UIMeasurement](/docs/types#uimeasurement) 
 Sets the preferred size. 
 ```
 PreferredSize = 300px, 1cnt;  
@@ -334,61 +371,44 @@ Sets the padding on the left side of the element.
  
 Sets the padding on the right side of an element.
   
-<br/>
-
-#### `Visibility` : [Visibility](/docs/misc#types)
+### `Visibility` : [Visibility](/docs/misc#types)
 Shows or hides an element 
 * `Visible` 
 * `Hidden`
-#### `ZIndex` : int
+
+### `ZIndex` : int
 Sets the stack order of an element. 
 `ZIndex = 1`
 
--------------------------  
-
-###  FlexBox
-Flexbox is a one-dimensional layout mode, which was designed with a flexible and consistent layout for different screen sizes. 
-
-Flexbox is described as one-dimensional since you can only utilize one dimension at a time — either a column or a row. If you wish to use a two-dimensional layout, a grid layout will provide option of using both rows and columns.
-
-#### Flex Container
-Although flexbox is set as the default layout, you would set `LayoutType` to `flex` in the parent element which holds the children in your XML.  
-  
-##### `LayoutType = Flex`
-
-#### `FlexLayoutDirection` : [LayoutDirection](/docs/misc#types)
+### `FlexLayoutDirection` : [LayoutDirection](/docs/misc#types)
  `FlexLayoutDirection`  sets the direction in which your elements are laid out. There are four possible values:
 
 * `Horizontal` aligns elements horizontally. 
 * `Vertical` aligns elements vertically. 
   
-#### `FlexItemGrow` : int      
+### `FlexItemGrow` : int      
 When there is remaining space, defines what ratio of that extra space the element will get  
   
-#### `FlexItemShrink` : int
+### `FlexItemShrink` : int
 When there is not enough space to fit all elements, define what ratio of that extra space gets deducted from the element  
   
-#### `FlexLayoutWrap` : [LayoutWrap](/docs/misc#types) 
+### `FlexLayoutWrap` : [LayoutWrap](/docs/misc#types) 
 Defines whether flex items area forced on a single line or multiple lines in the flexbox container  
+ 
 
--------------------------
+### `GridLayoutColTemplate`
+<button class="api-button">[GridTrackSize](/docs/types#gridtracksize)</button>
 
-### Grid
-Grid is a 2-dimensional system, which allows for both columns and rows, unlike flexbox which is 1-dimensional (rows or columns). 
+Accepts multiple values. Each value is a `GridTrackSize` and defines the width of the column track.
+[Grid Cell Functions](/docs/layout/grid#grid-cell-functions) may also be used instead of mixed with
+`GridTrackSizes`: `GridLayoutColTemplate = 100px cell(0, 1fr, 1fr, 0, infinite) 100px;`
 
-#### Grid Container
-To use a grid box layout, set `LayoutType` to `Grid` 
-  
-By default, grid elements are placed in rows and span the full width of the container.
+### `GridLayoutRowTemplate`
+<button class="api-button">[GridTrackSize](/docs/types#gridtracksize)</button>
 
-#### Adding Columns and Rows 
-
-#### `GridLayoutColTemplate` : [GridTrackSize](/docs/misc#types)
-Specifies the number and size of columns in a grid layout.  
-  
-#### `GridLayoutRowTemplate` : [GridTrackSize](/docs/misc#types)
-Specifies the number and size of rows in a grid layout.  
-
+Accepts multiple values. Each value is a `GridTrackSize` and defines the height of the row track.
+[Grid Cell Functions](/docs/layout/grid#grid-cell-functions) may also be used instead of mixed with
+`GridTrackSizes`: `GridLayoutRowTemplate = 100px cell(0, 1fr, 1fr, 0, infinite) 100px;`
 ```
 style grid-window {
     LayoutType = Grid;
@@ -455,13 +475,18 @@ Place grid items in empty spaces based on their size
 ```      
 
 -------------------------
-#### `Cursor` : [CursorStyle](/docs/misc#types)
-Cursor specifies the cursor displayed when the mouse pointer is over an element.
+#### `Cursor`
+<button class="api-button">[CursorStyle](/docs/types#cursorstyle)</button>
 
-`Cursor = url("images/cursor1.png") 15` sets the cursor image displayed over an element and the size (15 pixels)  
+Sets the cursor if the mouse pointer is over an element.
 
+`Cursor = url("images/cursor1.png") 15` changes the cursor texture to `cursor1.png` and sets 
+the cursor hot spot x and y to be 15px. For more information about cursors in unity 
+[check their docs](https://docs.unity3d.com/ScriptReference/Cursor.SetCursor.html).  
 
-#### `Painter` : string
+The cursor mode cannot be changed, we're always using `CursorMode.Auto`.
+
+#### `Painter`
 Allows you to draw graphics. More information on Painter can be found [here](Painter.md)
 
 

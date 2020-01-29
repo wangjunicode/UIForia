@@ -174,7 +174,7 @@ namespace UIForia.Elements {
             return new ScrollbarDragEvent(orientation, baseOffset, this);
         }
 
-        protected virtual DragEvent OnCreateVerticalDrag(MouseInputEvent evt) {
+        public virtual DragEvent OnCreateVerticalDrag(MouseInputEvent evt) {
             if (evt.IsMouseRightDown) return null;
             lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
             float handlePosition = verticalHandle.layoutResult.screenPosition.y;
@@ -182,7 +182,7 @@ namespace UIForia.Elements {
             return new ScrollbarDragEvent(ScrollbarOrientation.Vertical, new Vector2(0, baseOffset), this);
         }
 
-        protected virtual DragEvent OnCreateHorizontalDrag(MouseInputEvent evt) {
+        public virtual DragEvent OnCreateHorizontalDrag(MouseInputEvent evt) {
             if (evt.IsMouseRightDown) return null;
             lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
             float handlePosition = horizontalHandle.layoutResult.screenPosition.x;

@@ -173,7 +173,7 @@ namespace UIForia.Elements {
     }
 
     // todo use StructList<char> instead of string to alloc less
-    
+    [TemplateTagName("Input")]
     [Template(TemplateType.Internal, "Elements/InputElement.xml")]
     public class InputElement<T> : UIInputElement where T : IEquatable<T> {
 
@@ -188,8 +188,7 @@ namespace UIForia.Elements {
         
         public int MaxLength = Int32.MaxValue;
         
-        [WriteBinding(nameof(value))]
-        public event Action<T> onValueChanged;
+        // public event Action<T> onValueChanged;
 
         public override void OnCreate() {
             base.OnCreate();
@@ -204,9 +203,9 @@ namespace UIForia.Elements {
         }
 
         [OnPropertyChanged(nameof(value))]
-        public void OnInputValueChanged(string name) {
+        public void OnInputValueChanged(T val) {
             string oldText = text;
-            text = serializer.Serialize(value) ?? string.Empty;
+            text = serializer.Serialize(val) ?? string.Empty;
 
             selectionRange = new SelectionRange(int.MaxValue);
             T v = deserializer.Deserialize(text);
@@ -215,7 +214,9 @@ namespace UIForia.Elements {
                 ScrollToCursor();
             }
 
-            onValueChanged?.Invoke(v);
+            value = v;
+
+            // onValueChanged?.Invoke(v);
 
             if (oldText != text) {
                 EmitTextChanged();
@@ -261,7 +262,7 @@ namespace UIForia.Elements {
 
             if ((value == null && newValue != null) || !value.Equals(newValue)) {
                 value = newValue;
-                onValueChanged?.Invoke(value);
+                // onValueChanged?.Invoke(value);
             }
 
             if (text != previous) {
@@ -272,7 +273,7 @@ namespace UIForia.Elements {
         public bool ShowPlaceholder => placeholder != null && string.IsNullOrEmpty(text);
 
         public override string GetDisplayName() {
-            return $"InputElement<{typeof(T).Name}>";
+            return $"Input<{typeof(T).Name}>";
         }
 
         protected object GetDeserializer() {

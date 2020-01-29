@@ -39,10 +39,10 @@
     </Style>
 
     <Contents style="input">
-        <Text x-id="input-element-text" style="input-element-text"/>
+        <Text attr:id="input-element-text" style="input-element-text"/>
 
 <!--        <DefineSlot slot:name="placeholder" style="placeholder-slot" if="ShowPlaceholder">-->
-<!--            <Text style="placeholder" x-id="placeholder-text">{placeholder}</Text>-->
+<!--            <Text style="placeholder" attr:id="placeholder-text">{placeholder}</Text>-->
 <!--        </DefineSlot>-->
     </Contents>
 

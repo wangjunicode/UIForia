@@ -234,11 +234,15 @@ namespace UIForia.Systems {
         public virtual void OnLateUpdate() {
             int lateHandlersCount = lateHandlers.Count;
             KeyboardEventHandlerInvocation[] invocations = lateHandlers.Array;
-            for (int index = 0; index < lateHandlersCount; index++) {
-                KeyboardEventHandlerInvocation invocation = invocations[index];
+
+            if (lateHandlersCount > 0) {
                 throw new NotImplementedException();
-//                invocation.handler.Invoke(invocation.target, invocation.evt);
             }
+
+            // for (int index = 0; index < lateHandlersCount; index++) {
+            //     KeyboardEventHandlerInvocation invocation = invocations[index];
+            //     invocation.handler.Invoke(invocation.target, invocation.evt);
+            // }
 
             lateHandlers.Clear();
 
@@ -715,8 +719,8 @@ namespace UIForia.Systems {
             GenericInputEvent keyEvent = new GenericInputEvent(eventType, modifiers, m_EventPropagator, character, keyCode, m_FocusedElement != null);
             KeyboardInputEvent keyInputEvent = keyEvent.AsKeyInputEvent;
             if (m_FocusedElement == null) {
-                m_KeyboardEventTree.ConditionalTraversePreOrder(keyEvent, (item, evt) => {
-                    if (evt.propagator.shouldStopPropagation) return false;
+                m_KeyboardEventTree.ConditionalTraversePreOrder(keyInputEvent, (item, evt) => {
+                    if (evt.stopPropagation) return false;
 
                     UIElement element = (UIElement) item.Element;
                     if (element.isDestroyed || element.isDisabled) {
@@ -726,18 +730,18 @@ namespace UIForia.Systems {
                     InputHandlerGroup evtHandlerGroup = item.inputHandlers;
 
                     for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
-                        if (evt.propagator.shouldStopPropagation) break;
+                        if (evt.stopPropagation) break;
                         ref InputHandlerGroup.HandlerData handler = ref evtHandlerGroup.eventHandlers.array[i];
                         if (!ShouldRun(handler, keyInputEvent)) {
                             continue;
                         }
 
-                        Action<GenericInputEvent> keyHandler = handler.handlerFn as Action<GenericInputEvent>;
+                        Action<KeyboardInputEvent> keyHandler = handler.handlerFn as Action<KeyboardInputEvent>;
                         Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
                         keyHandler.Invoke(evt);
                     }
 
-                    return !evt.propagator.shouldStopPropagation;
+                    return !evt.stopPropagation;
                 });
             }
 
@@ -750,9 +754,9 @@ namespace UIForia.Systems {
                         continue;
                     }
 
-                    Action<GenericInputEvent> keyHandler = evtHandlerGroup.eventHandlers[i].handlerFn as Action<GenericInputEvent>;
+                    Action<KeyboardInputEvent> keyHandler = evtHandlerGroup.eventHandlers[i].handlerFn as Action<KeyboardInputEvent>;
                     Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
-                    keyHandler.Invoke(keyEvent);
+                    keyHandler.Invoke(keyInputEvent);
                 }
             }
         }

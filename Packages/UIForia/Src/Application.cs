@@ -50,6 +50,8 @@ namespace UIForia {
         public event Action<UIElement> onElementDestroyed;
         public event Action<UIElement> onElementEnabled;
         public event Action<UIView[]> onViewsSorted;
+        public event Action<UIView> onViewRemoved;
+        public event Action onRefresh;
 
         internal CompiledTemplateData templateData;
 
@@ -77,13 +79,12 @@ namespace UIForia {
         private int NextElementId => elementIdGenerator++;
 
         private TemplateSettings templateSettings;
-        private Action<UIElement> onRegister;
         private bool isPreCompiled;
         
-        protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onRegister) {
+        protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
             this.isPreCompiled = isPreCompiled;
             this.templateSettings = templateSettings;
-            this.onRegister = onRegister;
+            this.onElementRegistered = onElementRegistered;
             this.id = templateSettings.applicationName;
             this.width = Screen.width;
             this.height = Screen.height;
@@ -215,6 +216,7 @@ namespace UIForia {
             }
 
             DestroyElement(view.dummyRoot);
+            onViewRemoved?.Invoke(view);
             return view;
         }
 
@@ -223,8 +225,8 @@ namespace UIForia {
             if (isPreCompiled) {
                 Debug.Log("Cannot refresh application because it is using precompiled templates");
                 return;
-            }
-            
+            }            
+
             foreach (ISystem system in systems) {
                 system.OnDestroy();
             }
@@ -243,6 +245,8 @@ namespace UIForia {
             elementIdGenerator = 0;
             
             Initialize();
+            
+            onRefresh?.Invoke();
         }
 
         public void Destroy() {
@@ -948,15 +952,15 @@ namespace UIForia {
 
         public void AddTemplateChildren(SlotTemplateElement slotTemplateElement, int templateId, int count) {
             throw new Exception("Verify this");
-            if (templateId < 0) return;
-
-            TemplateScope scope = new TemplateScope(this, null);
-
-            for (int i = 0; i < count; i++) {
-                UIElement root = slotTemplateElement.bindingNode.root;
-                UIElement child = templateData.slots[templateId](root, root, scope);
-                InsertChild(slotTemplateElement, child, (uint) slotTemplateElement.children.Count);
-            }
+            // if (templateId < 0) return;
+            //
+            // TemplateScope scope = new TemplateScope(this, null);
+            //
+            // for (int i = 0; i < count; i++) {
+            //     UIElement root = slotTemplateElement.bindingNode.root;
+            //     UIElement child = templateData.slots[templateId](root, root, scope);
+            //     InsertChild(slotTemplateElement, child, (uint) slotTemplateElement.children.Count);
+            // }
         }
 
     }

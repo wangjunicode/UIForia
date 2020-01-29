@@ -45,14 +45,14 @@
     
     <Contents style="scrollview">
 
-        <Children x-id="scroll-root" />
+        <Children attr:id="scroll-root" />
 
-        <Group onMouseClick="OnClickVertical($event)" onMouseHover="OnHoverVertical($event)" x-id="scroll-track-vertical" style="scroll-track-vertical">
-            <Div onDragCreate.capture="OnCreateVerticalDrag($event)" x-id="scroll-handle-vertical" style="scroll-handle-vertical"/>
+        <Group mouse:click="OnClickVertical($event)" mouse:hover="OnHoverVertical($event)" attr:id="scroll-track-vertical" style="scroll-track-vertical">
+            <Div drag:create="OnCreateVerticalDrag($evt)" attr:id="scroll-handle-vertical" style="scroll-handle-vertical"/>
         </Group>
 
-        <Group onMouseClick="OnClickHorizontal($event)" onMouseHover="OnHoverHorizontal($event)" x-id="scroll-track-horizontal" style="scroll-track-horizontal">
-            <Div onDragCreate.capture="OnCreateHorizontalDrag($event)" x-id="scroll-handle-horizontal" style="scroll-handle-horizontal"/>
+        <Group mouse:click="OnClickHorizontal($event)" mouse:hover="OnHoverHorizontal($event)" attr:id="scroll-track-horizontal" style="scroll-track-horizontal">
+            <Div drag:create="OnCreateHorizontalDrag($evt)" attr:id="scroll-handle-horizontal" style="scroll-handle-horizontal"/>
         </Group>
 
     </Contents>

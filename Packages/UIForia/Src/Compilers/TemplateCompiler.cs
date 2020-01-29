@@ -350,7 +350,8 @@ namespace UIForia.Compilers {
 
                 return CompileRepeatList(ctx, repeatNode);
             }
-            else if (repeatNode.HasProperty("page") || repeatNode.HasProperty("pageSize")) { }
+            else if (repeatNode.HasProperty("page") || repeatNode.HasProperty("pageSize")) {
+            }
 
             throw new NotImplementedException();
         }
@@ -942,7 +943,6 @@ namespace UIForia.Compilers {
 
         }
 
-
         private struct ChangeHandlerDefinition {
 
             public bool wasHandled;
@@ -966,7 +966,6 @@ namespace UIForia.Compilers {
                 }
             }
         }
-
 
         // Binding order
         // - conditional
@@ -1037,7 +1036,7 @@ namespace UIForia.Compilers {
                 changeHandlerDefinitions?.Release();
             }
             catch (CompileException exception) {
-                exception.SetFileName(ctx.compiledTemplate.filePath);
+                exception.SetFileName($"{ctx.compiledTemplate.filePath} {templateNode.TemplateNodeDebugData.tagName}{templateNode.TemplateNodeDebugData.lineInfo}");
                 throw;
             }
 
@@ -1743,7 +1742,6 @@ namespace UIForia.Compilers {
             parameters.Release();
         }
 
-
         private void CompileInputHandlers(ProcessedType processedType, StructList<AttributeDefinition> attributes) {
             StructList<InputHandler> handlers = InputCompiler.CompileInputAnnotations(processedType.rawType);
 
@@ -2022,7 +2020,7 @@ namespace UIForia.Compilers {
                 LambdaExpressionNode n = (LambdaExpressionNode) astNode;
 
                 if (n.signature.size == 0) {
-                    parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    currentEvent = parameters.AddReturn(new Parameter<KeyboardInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
                     closure = compiler.CreateClosure(parameters, typeof(void));
                     closure.Statement(n.body);
                 }
@@ -2033,10 +2031,8 @@ namespace UIForia.Compilers {
                         Debug.LogWarning("Input handler lambda should not define a type");
                     }
 
-                    Parameter parameter = parameters.AddReturn(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    currentEvent = parameters.AddReturn(new Parameter<KeyboardInputEvent>(signature.identifier, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
                     closure = compiler.CreateClosure(parameters, typeof(void));
-                    ParameterExpression variable = closure.AddVariable(typeof(KeyboardInputEvent), signature.identifier);
-                    closure.Assign(variable, Expression.Property(parameter.expression, s_GenericInputEvent_AsKeyInputEvent));
                     closure.Statement(n.body);
                 }
                 else {
@@ -2044,14 +2040,14 @@ namespace UIForia.Compilers {
                 }
             }
             else {
-                parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                currentEvent = parameters.AddReturn(new Parameter<KeyboardInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
                 closure = compiler.CreateClosure(parameters, typeof(void));
                 closure.Statement(attr.value);
                 LightList<Parameter>.Release(ref parameters);
             }
 
             LambdaExpression lambda = closure.BuildLambda();
-
+            currentEvent = null;
             InputHandlerDescriptor descriptor = InputCompiler.ParseKeyboardDescriptor(attr.key);
 
             MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(compiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddKeyboardEvent,
@@ -2097,7 +2093,7 @@ namespace UIForia.Compilers {
                 LambdaExpressionNode n = (LambdaExpressionNode) astNode;
 
                 if (n.signature.size == 0) {
-                    parameters.Add(new Parameter<MouseInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    currentEvent = parameters.AddReturn(new Parameter<MouseInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
                     closure = createdCompiler.CreateClosure(parameters, typeof(DragEvent));
                     closure.Return(n.body);
                 }
@@ -2108,7 +2104,7 @@ namespace UIForia.Compilers {
                         Debug.LogWarning("Drag event lambda should not define a type");
                     }
 
-                    parameters.AddReturn(new Parameter<MouseInputEvent>(signature.identifier, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    currentEvent = parameters.AddReturn(new Parameter<MouseInputEvent>(signature.identifier, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
                     closure = createdCompiler.CreateClosure(parameters, typeof(DragEvent));
                     try {
                         closure.Return(n.body);
@@ -2123,11 +2119,12 @@ namespace UIForia.Compilers {
                 }
             }
             else {
-                parameters.Add(new Parameter<MouseInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                currentEvent = parameters.AddReturn(new Parameter<MouseInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
                 closure = createdCompiler.CreateClosure(parameters, typeof(DragEvent));
                 closure.Return(attr.value);
             }
 
+            currentEvent = null;
             LambdaExpression lambda = closure.BuildLambda();
 
             MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragCreator,
@@ -2228,6 +2225,7 @@ namespace UIForia.Compilers {
                 closure.Statement(attr.value);
                 LightList<Parameter>.Release(ref parameters);
             }
+            currentEvent = null;
 
             LambdaExpression lambda = closure.BuildLambda();
 
@@ -2400,7 +2398,7 @@ namespace UIForia.Compilers {
             compiler.CommentNewLineBefore($"{attributeDefinition.key}=\"{attributeDefinition.value}\"");
             compiler.BeginIsolatedSection();
             try {
-                compiler.SetImplicitContext(castElement);
+                SetImplicitContext(compiler, attributeDefinition);
                 compiler.AssignableStatement(attributeDefinition.key);
             }
             catch (Exception e) {
@@ -2458,10 +2456,6 @@ namespace UIForia.Compilers {
 
             // todo -- I can figure out if a value is constant using IsConstant(expr), use this information to push the expression onto the const compiler
 
-            // read binding
-            // store if has change handler
-            // compare and fire property change handler
-
             CompileChangeHandlerPropertyBindingStore(processedType.rawType, attributeDefinition, changeHandlerAttrs, right);
 
             StructList<ProcessedType.PropertyChangeHandlerDesc> changeHandlers = StructList<ProcessedType.PropertyChangeHandlerDesc>.Get();
@@ -2491,7 +2485,7 @@ namespace UIForia.Compilers {
                             continue;
                         }
 
-                        throw CompileException.UnresolvedPropertyChangeHandler(methodInfo.Name, right.Type);
+                        throw CompileException.UnresolvedPropertyChangeHandler(methodInfo.Name, right.Type); // todo -- better error message
                     }
                 });
             }
@@ -2638,7 +2632,6 @@ namespace UIForia.Compilers {
             );
         }
 
-
         private ProcessedType ResolveGenericElementType(IList<string> namespaces, Type rootType, TemplateNode templateNode) {
             ProcessedType processedType = templateNode.processedType;
 
@@ -2655,6 +2648,10 @@ namespace UIForia.Compilers {
             typeResolver.SetImplicitContext(typeResolver.GetParameter("__root"));
             typeResolver.resolveAlias = ResolveAlias;
             typeResolver.Setup(rootType, null);
+
+            if (templateNode.attributes == null) {
+                throw CompileException.UnresolvedGenericElement(processedType, templateNode.TemplateNodeDebugData);
+            }
 
             for (int i = 0; i < templateNode.attributes.size; i++) {
                 ref AttributeDefinition attr = ref templateNode.attributes.array[i];
@@ -2732,6 +2729,9 @@ namespace UIForia.Compilers {
                         string genericName = memberGenericArgs[a].Name;
                         int typeIndex = GetTypeIndex(arguments, genericName);
 
+                        if (typeIndex == -1) {
+                            throw new CompileException(templateNode.TemplateNodeDebugData.tagName + templateNode.TemplateNodeDebugData.lineInfo);
+                        }
                         Assert.IsTrue(typeIndex != -1);
 
                         if (resolvedTypes[typeIndex] != null) {

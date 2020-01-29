@@ -8,6 +8,7 @@ namespace UIForia.Systems {
 
         void OnLateUpdate();
         void RegisterKeyboardHandler(UIElement element);
+        IReadOnlyList<UIElement> ElementsThisFrame { get; }
         
 #if UNITY_EDITOR
         List<UIElement> DebugElementsThisFrame { get; }

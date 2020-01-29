@@ -24,7 +24,7 @@ namespace UIForia.Elements {
             });
         }
 
-        public void AddMouseEvent(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, Action<GenericInputEvent> handler) {
+        public void AddMouseEvent(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, Action<MouseInputEvent> handler) {
             handledEvents |= eventType;
             eventHandlers = eventHandlers ?? new LightList<HandlerData>(2);
             eventHandlers.Add(new HandlerData() {
@@ -52,7 +52,7 @@ namespace UIForia.Elements {
             });
         }
 
-        public void AddKeyboardEvent(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, KeyCode keyCode, char character, Action<GenericInputEvent> handler) {
+        public void AddKeyboardEvent(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, KeyCode keyCode, char character, Action<KeyboardInputEvent> handler) {
             handledEvents |= eventType;
             eventHandlers = eventHandlers ?? new LightList<HandlerData>(2);
             eventHandlers.Add(new HandlerData() {
@@ -74,7 +74,7 @@ namespace UIForia.Elements {
             public char character;
             public bool requireFocus;
             public EventPhase eventPhase;
-            public object handlerFn; //Action<GenericInputEvent> handler;
+            public object handlerFn;
 
         }
 

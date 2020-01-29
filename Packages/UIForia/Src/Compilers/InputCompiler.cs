@@ -67,6 +67,7 @@ namespace UIForia.Compilers {
             retn.eventPhase = EventPhase.Bubble;
             retn.modifiers = KeyboardModifiers.None;
             retn.requiresFocus = false;
+            input = input.ToLower();
             int dotIndex = input.IndexOf('.');
             if (dotIndex == -1) {
                 retn.eventName = input;
@@ -81,6 +82,9 @@ namespace UIForia.Compilers {
                     string part = parts[i];
 
                     switch (part) {
+                        case "focus":
+                            retn.requiresFocus = true;
+                            break;
                         case "capture": {
                             retn.eventPhase = EventPhase.Capture;
                             break;
@@ -113,7 +117,7 @@ namespace UIForia.Compilers {
         }
 
         private static InputEventType ParseKeyboardInputEventType(string input) {
-            switch (input) {
+            switch (input.ToLower()) {
                 case "down":
                     return InputEventType.KeyDown;
                 case "up":
@@ -127,7 +131,7 @@ namespace UIForia.Compilers {
         }
 
         private static InputEventType ParseMouseInputEventType(string input) {
-            switch (input) {
+            switch (input.ToLower()) {
                 case "click":
                     return InputEventType.MouseClick;
 
@@ -254,7 +258,7 @@ namespace UIForia.Compilers {
                     descriptor = new InputHandlerDescriptor() {
                         eventPhase = attr.keyEventPhase,
                         modifiers = attr.modifiers,
-                        requiresFocus = false,
+                        requiresFocus = attr.requiresFocus,
                         handlerType = attr.eventType
                     },
                     keyCode = attr.key,

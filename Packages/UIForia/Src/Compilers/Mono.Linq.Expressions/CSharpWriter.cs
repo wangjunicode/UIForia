@@ -951,7 +951,7 @@ namespace Mono.Linq.Expressions {
 
                 }
                 case TypeCode.String:
-                    return "\"" + ((string) value) + "\"";
+                    return "@\"" + ((string) value) + "\"";
 
                 case TypeCode.Int32:
                     return ((IFormattable) value).ToString(null, CultureInfo.InvariantCulture);

@@ -133,10 +133,7 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_StringBuilder_AppendSByte = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(sbyte)});
         private static readonly MethodInfo s_StringBuilder_AppendBool = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(bool)});
         private static readonly MethodInfo s_StringBuilder_AppendChar = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
-
-        private static readonly PropertyInfo s_GenericInputEvent_AsKeyInputEvent = typeof(GenericInputEvent).GetProperty(nameof(GenericInputEvent.AsKeyInputEvent));
-        private static readonly PropertyInfo s_GenericInputEvent_AsMouseInputEvent = typeof(GenericInputEvent).GetProperty(nameof(GenericInputEvent.AsMouseInputEvent));
-
+        
         private TemplateCompiler(TemplateSettings settings) {
             this.templateCache = new TemplateCache(settings);
             this.templateMap = new Dictionary<Type, CompiledTemplate>();
@@ -1633,7 +1630,6 @@ namespace UIForia.Compilers {
             currentEvent = parameters[0];
 
             if (handler.useEventParameter) {
-                // Expression toMouseEvent = Expression.Property(parameters[0].expression, s_GenericInputEvent_AsMouseInputEvent);
                 closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, currentEvent));
             }
             else {
@@ -1658,12 +1654,11 @@ namespace UIForia.Compilers {
         private void CompileKeyboardHandlerFromAttribute(in InputHandler handler) {
             LightList<Parameter> parameters = LightList<Parameter>.Get();
 
-            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+            parameters.Add(new Parameter<KeyboardInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
             LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(void));
 
             if (handler.useEventParameter) {
-                Expression toMouseEvent = Expression.Property(parameters[0].expression, s_GenericInputEvent_AsKeyInputEvent);
-                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, toMouseEvent));
+                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0]));
             }
             else {
                 closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
@@ -1689,7 +1684,7 @@ namespace UIForia.Compilers {
         private void CompileDragHandlerFromAttribute(in InputHandler handler) {
             LightList<Parameter> parameters = LightList<Parameter>.Get();
 
-            parameters.Add(new Parameter<GenericInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+            parameters.Add(new Parameter<DragEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
             LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(void));
 
             if (handler.useEventParameter) {
@@ -2210,8 +2205,6 @@ namespace UIForia.Compilers {
                     Parameter parameter = parameters.AddReturn(new Parameter<MouseInputEvent>(signature.identifier, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
                     currentEvent = parameter;
                     closure = compiler.CreateClosure(parameters, typeof(void));
-                    // ParameterExpression variable = closure.AddVariable(typeof(MouseInputEvent), signature.identifier);
-                    // closure.Assign(variable, Expression.Property(parameter.expression, s_GenericInputEvent_AsMouseInputEvent));
                     closure.Statement(n.body);
                 }
                 else {
@@ -2401,10 +2394,9 @@ namespace UIForia.Compilers {
                 SetImplicitContext(compiler, attributeDefinition);
                 compiler.AssignableStatement(attributeDefinition.key);
             }
-            catch (Exception e) {
+            catch (Exception) {
                 compiler.EndIsolatedSection();
-                Debug.LogError(e);
-                return;
+                throw;
             }
 
             compiler.SetImplicitContext(castRoot);

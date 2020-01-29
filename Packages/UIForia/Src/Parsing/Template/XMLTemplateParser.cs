@@ -203,6 +203,30 @@ namespace UIForia.Parsing {
             ProcessedType processedType = null;
             TemplateNode node = null;
 
+            if (namespacePath == "DefineSlot") {
+                processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Define);
+                templateRoot.AddSlot((SlotNode) node);
+                parent.AddChild(node);
+                return node;
+            }
+            else if (namespacePath == "OverrideSlot") {
+                processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
+                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Override);
+                if (!(parent is ExpandedTemplateNode expanded)) {
+                    throw ParseException.InvalidSlotOverride(parent.originalString, node.originalString);
+                }
+
+                expanded.AddSlotOverride((SlotNode) node);
+                return node;
+            }
+            else if (namespacePath == "ForwardSlot") {
+                processedType = TypeProcessor.GetProcessedType(typeof(UISlotForward));
+                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Forward);
+                templateRoot.AddSlot((SlotNode) node);
+                parent.AddChild(node);
+                return node;
+            }
 
             if (string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
                 node = new RepeatNode(templateRoot, parent, null, attributes, templateLineInfo);
@@ -216,53 +240,6 @@ namespace UIForia.Parsing {
                 templateRoot.AddSlot((SlotNode) node);
                 parent.AddChild(node);
                 return node;
-            }
-
-            if (string.Equals(tagName, "Slot", StringComparison.Ordinal)) {
-                processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
-                string slotName = GetSlotName(attributes);
-                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Override);
-
-                if (!(parent is ExpandedTemplateNode expanded)) {
-                    throw ParseException.InvalidSlotOverride(parent.originalString, node.originalString);
-                }
-
-                expanded.AddSlotOverride((SlotNode) node);
-
-                processedType.ValidateAttributes(attributes);
-
-                return node;
-            }
-
-            if (string.Equals(tagName, "DefineSlot", StringComparison.Ordinal)) {
-                processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
-                string slotName = GetSlotName(attributes);
-                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Default);
-                templateRoot.AddSlot((SlotNode) node);
-                parent.AddChild(node);
-                return node;
-            }
-
-            if (string.Equals(tagName, "ExternSlot", StringComparison.Ordinal)) {
-                processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
-
-                if (!(parent is ExpandedTemplateNode)) {
-                    throw ParseException.InvalidSlotOverride(parent.originalString, node.originalString);
-                }
-
-                // when forwarding slots we need to tell the exposer that it accepts a slot, and the 
-
-                // todo -- error check
-                string slotName = GetSlotName(attributes);
-                // string slotAlias = GetSlotAlias(slotName, attributes);
-
-                SlotNode slotNode = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, slotName, SlotType.Extern);
-
-                // expanded.ValidateSlot((slotNode).slotName, templateLineInfo);
-
-                templateRoot.AddSlot(slotNode);
-
-                return slotNode;
             }
 
             if (namespacePath == "UIForia") namespacePath = "UIForia.Elements";

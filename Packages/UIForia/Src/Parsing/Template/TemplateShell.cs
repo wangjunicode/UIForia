@@ -10,7 +10,7 @@ namespace UIForia.Parsing {
         public XElement content;
 
     }
-    
+
     public class TemplateShell {
 
         public readonly string filePath;
@@ -26,13 +26,12 @@ namespace UIForia.Parsing {
             this.referencedNamespaces = new LightList<string>(4);
             this.unprocessedContentNodes = new StructList<RawTemplateContent>(2);
         }
-        
+
         public bool HasContentNode(string templateId) {
             return GetElementTemplateContent(templateId) != null;
         }
 
         public XElement GetElementTemplateContent(string templateId) {
-            
             for (int i = 0; i < unprocessedContentNodes.size; i++) {
                 if (unprocessedContentNodes.array[i].templateId == templateId) {
                     return unprocessedContentNodes.array[i].content;

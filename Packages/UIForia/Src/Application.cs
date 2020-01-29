@@ -876,7 +876,7 @@ namespace UIForia {
             LightStack<UIElement>.Release(ref stack);
         }
 
-        public UIElement CreateSlot2(string slotName, TemplateScope scope, int defaultSlotId, UIElement root, UIElement parent) {
+        public UIElement CreateSlot(string slotName, TemplateScope scope, int defaultSlotId, UIElement root, UIElement parent) {
             int slotId = ResolveSlotId(slotName, scope.slotInputs, defaultSlotId, out UIElement contextRoot);
             if (contextRoot == null) {
                 Assert.AreEqual(slotId, defaultSlotId);

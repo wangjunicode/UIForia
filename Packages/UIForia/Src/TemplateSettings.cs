@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -17,6 +18,7 @@ namespace UIForia {
         public Type rootType;
         public ResourceManager resourceManager;
         public Func<Type, string, string> filePathResolver;
+        public List<Type> dynamicallyCreatedTypes;
         
         public TemplateSettings() {
             this.applicationName = "DefaultApplication";

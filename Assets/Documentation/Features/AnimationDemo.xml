@@ -10,15 +10,16 @@
 
     <Contents style="container">
 
-        <Div style="util.button">
-            Text
-        </Div>
+<!--        <Div style="util.button">-->
+<!--            {SelectedOption}-->
+<!--        </Div>-->
 
-        <Select 
-                style="dropdown mb3"
-                options="Options"
-                disableOverflowX="true"
-        />
+        <Input sync:value="SelectedOption" placeholder="'hello'"/>
+<!--        <Select -->
+<!--                style="dropdown mb3"-->
+<!--                options="Options"-->
+<!--                disableOverflowX="true"-->
+<!--        />-->
 
         <!--        <Select style="input" options="timingFunctions" sync:selectedValue="timingFunction" />-->
 

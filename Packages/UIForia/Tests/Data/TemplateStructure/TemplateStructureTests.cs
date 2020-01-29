@@ -168,9 +168,82 @@ namespace TemplateStructure {
             MockApplication.s_GenerateCode = true;
             MockApplication app = MockApplication.Setup<TemplateStructure_AliasStyles>();
             TemplateStructure_AliasStyles root = (TemplateStructure_AliasStyles) app.RootElement;
-            
-            
-            
+        }
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#outer")]
+        public class TestTemplateStructure_UseDefaultSlotContent_Outer : UIElement { }
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#slot_definer")]
+        public class TestTemplateStructure_UseDefaultSlotContent_Inner : UIElement {
+
+            public string str;
+
+        }
+
+
+        [Test]
+        public void UseDefaultSlotContent() {
+            MockApplication app = MockApplication.Setup<TestTemplateStructure_UseDefaultSlotContent_Outer>();
+            TestTemplateStructure_UseDefaultSlotContent_Outer root = (TestTemplateStructure_UseDefaultSlotContent_Outer) app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual("from default slot", GetText(root[1][0][0]));
+        }
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#outer_override")]
+        public class TestTemplateStructure_UseDefaultSlotContent_OuterOverride : UIElement { }
+
+        [Test]
+        public void OverrideSlotContent() {
+            MockApplication app = MockApplication.Setup<TestTemplateStructure_UseDefaultSlotContent_OuterOverride>();
+            TestTemplateStructure_UseDefaultSlotContent_OuterOverride root = (TestTemplateStructure_UseDefaultSlotContent_OuterOverride) app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual("from override slot", GetText(root[0][0][0]));
+        }
+
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#use_default_children_outer")]
+        public class UseDefaultChildrenOuter : UIElement { }
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#use_default_children_inner")]
+        public class UseDefaultChildrenInner : UIElement { }
+
+        [Test]
+        public void UseDefaultChildren() {
+            MockApplication app = MockApplication.Setup<UseDefaultChildrenOuter>();
+            UseDefaultChildrenOuter root = (UseDefaultChildrenOuter) app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual("default children", GetText(root[0][0][0]));
+        }
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#override_children_outer")]
+        public class OverrideChildrenOuter : UIElement {
+
+            public string overrideBinding;
+
+        }
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#override_children_inner")]
+        public class OverrideChildrenInner : UIElement { }
+
+        [Test]
+        public void OverrideDefaultChildren() {
+            MockApplication app = MockApplication.Setup<OverrideChildrenOuter>();
+            OverrideChildrenOuter root = (OverrideChildrenOuter) app.RootElement;
+            root.overrideBinding = "fromRoot";
+            app.Update();
+
+            Assert.AreEqual("fromRoot", GetText(root[0][0][0]));
+        }
+
+        public static string GetText(UIElement element) {
+            UITextElement textEl = element as UITextElement;
+            return textEl.text.Trim();
         }
 
     }

@@ -1,10 +1,10 @@
 namespace UIForia.Elements {
 
-    public class UISlotExtern : UIElement {
+    public class UISlotForward : UIElement {
 
         public readonly string slotId;
 
-        public UISlotExtern() {}
+        public UISlotForward() {}
 
         public override string GetDisplayName() {
             return "Slot:" + slotId;

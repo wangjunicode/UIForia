@@ -26,7 +26,7 @@ namespace UIForia.Compilers {
         public string GetComment() {
             
             string retn = "Slot name=\"" + slotName + "\"";
-            if (slotType == SlotType.Default) {
+            if (slotType == SlotType.Define) {
                 retn += " (Default)";
             }
             else if (slotType == SlotType.Override) {

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using UIForia.Attributes;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
@@ -12,7 +11,6 @@ using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Templates;
-using UIForia.Text;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
@@ -22,7 +20,6 @@ namespace UIForia.Compilers {
 
     public class TemplateCompiler {
 
-        private const string k_InputEventAliasName = "evt";
         internal const string k_InputEventParameterName = "__evt";
         private static readonly char[] s_StyleSeparator = {' '};
 
@@ -70,7 +67,6 @@ namespace UIForia.Compilers {
         private static readonly FieldInfo s_TextElement_Text = typeof(UITextElement).GetField(nameof(UITextElement.text), BindingFlags.Instance | BindingFlags.Public);
         private static readonly MethodInfo s_TextElement_SetText = typeof(UITextElement).GetMethod(nameof(UITextElement.SetText), BindingFlags.Instance | BindingFlags.Public);
 
-        private static readonly FieldInfo s_UIElement_inputHandlerGroup = typeof(UIElement).GetField(nameof(UIElement.inputHandlers), BindingFlags.Instance | BindingFlags.Public);
         private static readonly FieldInfo s_UIElement_StyleSet = typeof(UIElement).GetField(nameof(UIElement.style), BindingFlags.Instance | BindingFlags.Public);
         private static readonly FieldInfo s_UIElement_TemplateMetaData = typeof(UIElement).GetField(nameof(UIElement.templateMetaData), BindingFlags.Instance | BindingFlags.Public);
         private static readonly PropertyInfo s_UIElement_Application = typeof(UIElement).GetProperty(nameof(UIElement.application), BindingFlags.Instance | BindingFlags.Public);
@@ -90,10 +86,9 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_LightList_UIStyleGroupContainer_Get = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Get), BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_LightList_UIStyleGroupContainer_Release = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Release), BindingFlags.Public | BindingFlags.Instance);
         private static readonly MethodInfo s_LightList_UIStyleGroupContainer_Add = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Add), BindingFlags.Public | BindingFlags.Instance);
-        private static readonly MethodInfo s_LightList_UIStyle_Release = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Release), BindingFlags.Public | BindingFlags.Instance);
         private static readonly FieldInfo s_LightList_UIStyleGroupContainer_Array = typeof(LightList<UIStyleGroupContainer>).GetField(nameof(LightList<UIStyleGroupContainer>.array), BindingFlags.Public | BindingFlags.Instance);
 
-        private static readonly MethodInfo s_Application_CreateSlot2 = typeof(Application).GetMethod(nameof(Application.CreateSlot2), BindingFlags.Public | BindingFlags.Instance);
+        private static readonly MethodInfo s_Application_CreateSlot2 = typeof(Application).GetMethod(nameof(Application.CreateSlot), BindingFlags.Public | BindingFlags.Instance);
         private static readonly MethodInfo s_Application_HydrateTemplate = typeof(Application).GetMethod(nameof(Application.HydrateTemplate), BindingFlags.Public | BindingFlags.Instance);
         private static readonly MethodInfo s_Application_GetTemplateMetaData = typeof(Application).GetMethod(nameof(Application.GetTemplateMetaData), BindingFlags.Public | BindingFlags.Instance);
 
@@ -106,7 +101,6 @@ namespace UIForia.Compilers {
         internal static readonly FieldInfo s_UIElement_BindingNode = typeof(UIElement).GetField(nameof(UIElement.bindingNode));
 
         private static readonly MethodInfo s_LinqBindingNode_CreateLocalContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.CreateLocalContextVariable));
-        private static readonly MethodInfo s_LinqBindingNode_GetLocalContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetLocalContextVariable));
         internal static readonly MethodInfo s_LinqBindingNode_GetContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetContextVariable));
         internal static readonly MethodInfo s_LinqBindingNode_GetRepeatItem = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetRepeatItem));
         internal static readonly FieldInfo s_LinqBindingNode_InnerContext = typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.innerContext));
@@ -119,7 +113,6 @@ namespace UIForia.Compilers {
         private static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
         private static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
         private static readonly MethodInfo s_StringBuilder_AppendString = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(string)});
-        private static readonly MethodInfo s_StringBuilder_AppendCharacter = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
         private static readonly MethodInfo s_StringBuilder_AppendInt16 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(short)});
         private static readonly MethodInfo s_StringBuilder_AppendInt32 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(int)});
         private static readonly MethodInfo s_StringBuilder_AppendInt64 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(long)});
@@ -490,7 +483,7 @@ namespace UIForia.Compilers {
 
             ParameterExpression slotRootParam = ctx.GetVariable(typeof(UISlotOverride), "slotRoot");
             ctx.rootType = parentContext.rootType;
-            ctx.rootParam = slotRootParam;
+            ctx.rootParam = rootParam;
             ctx.templateScope = scopeParam;
             ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
             ctx.Initialize(slotRootParam);
@@ -1998,13 +1991,6 @@ namespace UIForia.Compilers {
 
             // todo -- eliminate generated closure by passing in template root and element from input system and doing casting as normal in the callback
 
-            contextStack.Peek().Push(new ContextVariableDefinition() {
-                id = NextContextId,
-                name = k_InputEventAliasName,
-                type = typeof(KeyboardInputEvent),
-                variableType = AliasResolverType.KeyEvent
-            });
-
             SetImplicitContext(compiler, attr);
 
             LinqCompiler closure = null;
@@ -2058,7 +2044,6 @@ namespace UIForia.Compilers {
             compiler.RawExpression(expression);
 
             closure.Release();
-            contextStack.Peek().Pop();
         }
 
         private void CompileDragBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
@@ -2072,12 +2057,6 @@ namespace UIForia.Compilers {
         }
 
         private void CompileDragCreateBinding(in AttributeDefinition attr, in InputHandlerDescriptor descriptor) {
-            contextStack.Peek().Push(new ContextVariableDefinition() {
-                id = NextContextId,
-                name = "evt",
-                type = typeof(MouseInputEvent),
-                variableType = AliasResolverType.DragCreateMouseEvent
-            });
 
             SetImplicitContext(createdCompiler, attr);
             LinqCompiler closure = null;
@@ -2132,7 +2111,6 @@ namespace UIForia.Compilers {
             createdCompiler.RawExpression(expression);
             parameters.Release();
             closure.Release();
-            contextStack.Peek().Pop();
         }
 
         private void CompileDragEventBinding(in AttributeDefinition attr, in InputHandlerDescriptor descriptor) {
@@ -2173,13 +2151,6 @@ namespace UIForia.Compilers {
 
             // todo -- eliminate generated closure by passing in template root and element from input system and doing casting as normal in the callback
 
-            contextStack.Peek().Push(new ContextVariableDefinition() {
-                id = NextContextId,
-                name = k_InputEventAliasName,
-                type = typeof(MouseInputEvent),
-                variableType = AliasResolverType.MouseEvent
-            });
-
             SetImplicitContext(compiler, attr);
 
             LinqCompiler closure = null;
@@ -2218,6 +2189,7 @@ namespace UIForia.Compilers {
                 closure.Statement(attr.value);
                 LightList<Parameter>.Release(ref parameters);
             }
+            
             currentEvent = null;
 
             LambdaExpression lambda = closure.BuildLambda();
@@ -2235,7 +2207,6 @@ namespace UIForia.Compilers {
             compiler.RawExpression(expression);
 
             closure.Release();
-            contextStack.Peek().Pop();
         }
 
         private static void CompileEventBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr, EventInfo eventInfo) {
@@ -2391,7 +2362,7 @@ namespace UIForia.Compilers {
             compiler.CommentNewLineBefore($"{attributeDefinition.key}=\"{attributeDefinition.value}\"");
             compiler.BeginIsolatedSection();
             try {
-                SetImplicitContext(compiler, attributeDefinition);
+                compiler.SetImplicitContext(castElement);
                 compiler.AssignableStatement(attributeDefinition.key);
             }
             catch (Exception) {

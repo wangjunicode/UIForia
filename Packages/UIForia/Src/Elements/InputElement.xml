@@ -4,47 +4,72 @@
     <Style>
 
         style input {
-            LayoutType = Stack;
-            PreferredHeight = 1cnt;
-            Border = 2px;
-            BorderColor = black;
-            BackgroundColor = white;
-            Padding = 4px 8px;
-            PreferredWidth = 1cnt;
-            MinWidth = 20px;
-            MarginBottom = 10px;
-            Overflow = Hidden;
-            ClipBounds = ContentBox;
+        LayoutType = Stack;
+        PreferredHeight = 1cnt;
+        Border = 2px;
+        BorderColor = black;
+        BackgroundColor = white;
+        Padding = 4px 8px;
+        PreferredWidth = 1cnt;
+        MinWidth = 20px;
+        MarginBottom = 10px;
+        Overflow = Hidden;
+        ClipBounds = ContentBox;
         }
 
         style input-element-text {
-            TextWhitespaceMode = NoWrap;
-            MinHeight = 1em;
-            AlignY = 50% ParentContentArea;
+        TextWhitespaceMode = NoWrap;
+        MinHeight = 1em;
+        AlignY = 50% ParentContentArea;
         }
 
         style placeholder {
-            [attr:empty] {
-                Visibility = Hidden;
-            }
+        [attr:empty] {
+        Visibility = Hidden;
         }
-        
+        }
+
         style placeholder-slot {
-            PreferredHeight = 1cnt;
-            AlignY = 50% ParentContentArea;
-            AlignX = 0% ParentContentArea;
-            TextColor = rgb(150, 150, 150);
+        PreferredHeight = 1cnt;
+        AlignY = 50% ParentContentArea;
+        AlignX = 0% ParentContentArea;
+        TextColor = rgb(150, 150, 150);
         }
 
     </Style>
 
     <Contents style="input">
+
         <Text attr:id="input-element-text" style="input-element-text"/>
 
-<!--        <DefineSlot slot:name="placeholder" style="placeholder-slot" if="ShowPlaceholder">-->
-<!--            <Text style="placeholder" attr:id="placeholder-text">{placeholder}</Text>-->
-<!--        </DefineSlot>-->
+        <DefineSlot:Placeholder if="ShowPlaceholder" slot:name="placeholder" style="placeholder-slot">
+            
+            <Text style="placeholder" attr:id="placeholder-text">{placeholder}</Text>
+            
+        </DefineSlot:Placeholder>
+
     </Contents>
+
+<!--    <DefineSlot:Placeholder/>-->
+<!--        -->
+<!--    <ForwardSlot:Placeholder as="slotName" expose:var="" expose:x="1"/>-->
+
+<!--    <OverrideSlot:Placeholder/>-->
+<!--    <InputElement>-->
+
+<!--        <Children if="" transclude="true">-->
+
+<!--        </Children>-->
+
+<!--        <Div slot:name="PlaceHolder">-->
+
+<!--        </Div>-->
+
+<!--        <Slot:Placeholder if="" style="" transclude="true">-->
+
+<!--        </Slot:Placeholder>-->
+
+<!--    </InputElement>-->
 
 </UITemplate>
 

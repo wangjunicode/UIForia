@@ -312,7 +312,7 @@ namespace UIForia.Compilers {
             }
 
             if (templateNode.processedType.IsUnresolvedGeneric) {
-                templateNode.processedType = ResolveGenericElementType(ctx.templateRootNode.ElementType, templateNode);
+                templateNode.processedType = ResolveGenericElementType(ctx.namespaces, ctx.templateRootNode.ElementType, templateNode);
             }
 
             switch (templateNode) {
@@ -392,7 +392,7 @@ namespace UIForia.Compilers {
             ParameterExpression nodeExpr = ctx.ElementExpr;
 
             repeatNode.processedType = TypeProcessor.GetProcessedType(typeof(UIRepeatElement<>));
-            repeatNode.processedType = ResolveGenericElementType(ctx.templateRootNode.ElementType, repeatNode);
+            repeatNode.processedType = ResolveGenericElementType(ctx.namespaces, ctx.templateRootNode.ElementType, repeatNode);
 
             ctx.Comment("new " + TypeNameGenerator.GetTypeName(typeof(UIRepeatCountElement)));
             ctx.Assign(nodeExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
@@ -498,6 +498,7 @@ namespace UIForia.Compilers {
             ctx.Initialize(slotRootParam);
             ctx.compiledTemplate = parentContext.compiledTemplate; // todo -- might be wrong
             ctx.ContextExpr = rootParam;
+            ctx.namespaces = parentContext.namespaces;
 
             Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool,
                 Expression.Constant(TypeProcessor.GetProcessedType(typeof(UISlotOverride)).id),
@@ -562,6 +563,8 @@ namespace UIForia.Compilers {
             ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
             ctx.compiledTemplate = parentContext.compiledTemplate;
             ctx.ContextExpr = rootParam;
+            ctx.namespaces = parentContext.namespaces;
+
             ctx.Initialize(parentParam);
 
             ctx.PushScope();
@@ -623,6 +626,8 @@ namespace UIForia.Compilers {
             ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
             ctx.compiledTemplate = parentContext.compiledTemplate;
             ctx.ContextExpr = Expression.Field(scopeParam, s_TemplateScope_InnerContext);
+            ctx.namespaces = parentContext.namespaces;
+
             ctx.Initialize(slotRootParam);
 
             Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool,
@@ -640,7 +645,15 @@ namespace UIForia.Compilers {
             exposedVariableData.scopedVariables = definition.scopedVariables;
             exposedVariableData.exposedAttrs = definition.exposedAttributes ?? new AttributeDefinition[0];
 
-            ProcessAttrsAndVisitChildren(ctx, slotOverrideNode, exposedVariableData);
+            SlotNode node = slotOverrideNode;
+
+            //  StructList<ContextAliasActions> contextMods = CompileBindings(ctx, node, node.attributes, exposedVariableData).contextModifications;
+
+            VisitChildren(ctx, node);
+
+            //UndoContextMods(contextMods);
+
+            // ProcessAttrsAndVisitChildren(ctx, slotOverrideNode, exposedVariableData);
 
             ctx.Return(slotRootParam);
 
@@ -999,7 +1012,7 @@ namespace UIForia.Compilers {
 
                 CompileAliases(attributes, ref contextModifications);
 
-                CompilePropertyBindingsAndContextVariables(templateNode.processedType, attributes, changeHandlerDefinitions, ref contextModifications);
+                CompilePropertyBindingsAndContextVariables(ctx, templateNode.processedType, attributes, changeHandlerDefinitions, ref contextModifications);
 
                 CompileTextBinding(templateNode);
 
@@ -1148,7 +1161,7 @@ namespace UIForia.Compilers {
                     throw new NotImplementedException("We do not support lambda syntax for onChange handlers yet");
                 }
                 else {
-                    // assume its a method, probably doesn't have to be once we suppport assignment
+                    // assume its a method, probably doesn't have to be once we support assignment
                     lateCompiler.Statement(attrValue);
                 }
 
@@ -1289,7 +1302,7 @@ namespace UIForia.Compilers {
             }
         }
 
-        private void CompilePropertyBindingsAndContextVariables(ProcessedType processedType, StructList<AttributeDefinition> attributes, StructList<ChangeHandlerDefinition> changeHandlers,
+        private void CompilePropertyBindingsAndContextVariables(CompilationContext ctx, ProcessedType processedType, StructList<AttributeDefinition> attributes, StructList<ChangeHandlerDefinition> changeHandlers,
             ref StructList<ContextAliasActions> contextModifications) {
             if (attributes == null) return;
 
@@ -2421,7 +2434,6 @@ namespace UIForia.Compilers {
             }
 
             //castElement.value = root.value
-
             SetImplicitContext(compiler, attributeDefinition);
 
             if (ReflectionUtil.IsFunc(left.targetExpression.Type)) {
@@ -2627,7 +2639,7 @@ namespace UIForia.Compilers {
         }
 
 
-        private ProcessedType ResolveGenericElementType(Type rootType, TemplateNode templateNode) {
+        private ProcessedType ResolveGenericElementType(IList<string> namespaces, Type rootType, TemplateNode templateNode) {
             ProcessedType processedType = templateNode.processedType;
 
             Type generic = processedType.rawType;
@@ -2638,6 +2650,7 @@ namespace UIForia.Compilers {
 
             typeResolver.Reset();
 
+            typeResolver.SetNamespaces(namespaces);
             typeResolver.SetSignature(new Parameter(rootType, "__root", ParameterFlags.NeverNull));
             typeResolver.SetImplicitContext(typeResolver.GetParameter("__root"));
             typeResolver.resolveAlias = ResolveAlias;
@@ -2686,6 +2699,23 @@ namespace UIForia.Compilers {
                     return;
                 }
 
+                // List<IOption<T>> options
+                // resolve T
+                // options = (<IList<IOption<string>>)someExpression();
+
+                // find out if we have a generic argument in our field
+                // either field type is generic 
+                // or field is a constructed generic type
+                // if constructed 
+                // recurse both sides
+                // class StringList : List<String> {} 
+                // have generic type defintion and expression
+                // solve for generic type defs by extracting 'T' arguments from expression
+
+                // dont care about type checking yet
+
+                // need to 'step into' constructed types until non constructed found
+
                 if (inputType.IsConstructedGenericType) {
                     if (ReflectionUtil.IsAction(inputType) || ReflectionUtil.IsFunc(inputType)) {
                         return;
@@ -2694,12 +2724,12 @@ namespace UIForia.Compilers {
                     Type expressionType = typeResolver.GetExpressionType(attr.value);
 
                     Type[] typeArgs = expressionType.GetGenericArguments();
-                    Type[] fieldArgs = inputType.GetGenericArguments();
+                    Type[] memberGenericArgs = inputType.GetGenericArguments();
 
-                    Assert.AreEqual(fieldArgs.Length, typeArgs.Length);
+                    Assert.AreEqual(memberGenericArgs.Length, typeArgs.Length);
 
-                    for (int a = 0; a < fieldArgs.Length; a++) {
-                        string genericName = fieldArgs[a].Name;
+                    for (int a = 0; a < memberGenericArgs.Length; a++) {
+                        string genericName = memberGenericArgs[a].Name;
                         int typeIndex = GetTypeIndex(arguments, genericName);
 
                         Assert.IsTrue(typeIndex != -1);

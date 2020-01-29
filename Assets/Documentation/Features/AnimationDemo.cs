@@ -10,15 +10,17 @@ using UIForia.Util;
 namespace Documentation.Features {
 
     public class SelectOptionService<T> where T : Enum {
-        
+
         public static RepeatableList<ISelectOption<T>> EnumToSelectOptions() {
             RepeatableList<ISelectOption<T>> result = new RepeatableList<ISelectOption<T>>();
             T[] values = (T[]) Enum.GetValues(typeof(T));
             for (int i = 0; i < values.Length; i++) {
                 result.Add(new SelectOption<T>(values[i].ToString(), values[i]));
             }
+
             return result;
         }
+
     }
 
     [Template("Documentation/Features/AnimationDemo.xml")]
@@ -27,6 +29,10 @@ namespace Documentation.Features {
         private UIElement animationTarget;
 
         public AnimationData animationData;
+
+        public RepeatableList<ISelectOption<string>> Options;
+
+        public string SelectedOption;
 
         public float duration;
         public float delay;
@@ -46,6 +52,13 @@ namespace Documentation.Features {
 
         public override void OnCreate() {
             animationTarget = FindById("animation-target");
+            Options = new RepeatableList<ISelectOption<string>>() {
+                new SelectOption<string>("None", "1"),
+                new SelectOption<string>("A bit", "2"),
+                new SelectOption<string>("Rather more", "3"),
+                new SelectOption<string>("Unlimited", "4"),
+                new SelectOption<string>("A very very long text label thing here", "5")
+            };
         }
 
         public void ChangeAnimation(string animation) {
@@ -76,12 +89,12 @@ namespace Documentation.Features {
             animationData.options.iterations = iterations;
             animationData.options.timingFunction = timingFunction;
             animationData.options.direction = direction;
-            
+
             animationTask = application.Animate(animationTarget, animationData);
         }
 
         public void PauseAnimation() {
-            application.PauseAnimation(animationTarget, animationData);   
+            application.PauseAnimation(animationTarget, animationData);
         }
 
         public void ResumeAnimation() {
@@ -91,6 +104,7 @@ namespace Documentation.Features {
         public void StopAnimation() {
             application.StopAnimation(animationTarget, animationData);
         }
+
     }
 
 }

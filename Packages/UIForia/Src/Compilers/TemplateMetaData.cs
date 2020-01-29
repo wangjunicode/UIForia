@@ -61,14 +61,17 @@ namespace UIForia.Compilers {
 
             int cnt = 0;
 
-            // todo -- this is ignoring aliases atm
-
             for (int i = 0; i < styleReferences.Length; i++) {
                 string alias = styleReferences[i].alias;
                 StyleSheet sheet = styleReferences[i].styleSheet;
 
                 for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
-                    searchMap[cnt++] = new IndexedStyleRef(alias, sheet.styleGroupContainers[j]);
+                    if (!string.IsNullOrEmpty(alias)) {
+                        searchMap[cnt++] = new IndexedStyleRef(alias + "." + sheet.styleGroupContainers[j].name, sheet.styleGroupContainers[j]);
+                    }
+                    else {
+                        searchMap[cnt++] = new IndexedStyleRef(sheet.styleGroupContainers[j].name, sheet.styleGroupContainers[j]);
+                    }
                 }
             }
 
@@ -78,12 +81,10 @@ namespace UIForia.Compilers {
         private struct IndexedStyleRef {
 
             public readonly string name;
-            public readonly string alias;
             public readonly UIStyleGroupContainer container;
 
-            public IndexedStyleRef(string alias, UIStyleGroupContainer container) {
-                this.alias = alias;
-                this.name = container.name;
+            public IndexedStyleRef(string aliasedName, UIStyleGroupContainer container) {
+                this.name = aliasedName;
                 this.container = container;
             }
 
@@ -158,7 +159,9 @@ namespace UIForia.Compilers {
             int num2 = searchMap.Length - 1;
             while (num1 <= num2) {
                 int index1 = num1 + (num2 - num1 >> 1);
+
                 int num3 = string.CompareOrdinal(searchMap[index1].name, name);
+
                 if (num3 == 0) {
                     return index1;
                 }

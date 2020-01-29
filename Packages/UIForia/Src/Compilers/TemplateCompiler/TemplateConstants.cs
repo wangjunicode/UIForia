@@ -3,7 +3,6 @@ namespace UIForia.Compilers {
     public class TemplateConstants {
 
         public const string InitSource = @"using System;
-using System;
 using System.Collections.Generic;
 using UIForia.Compilers;
 using UIForia.Elements;
@@ -43,12 +42,14 @@ namespace UIForia.Generated {
         }
 
     }
+#pragma warning restore 0164
 
 }";
 
         public const string TemplateSource = @"using System;
 using UIForia.Compilers;
 using UIForia.Elements;
+#pragma warning disable 0164
 
 namespace UIForia.Generated {
 
@@ -60,7 +61,7 @@ namespace UIForia.Generated {
     }
 
 }
-#pragma warning enable 0164
+#pragma warning restore 0164
 
                 ";
 

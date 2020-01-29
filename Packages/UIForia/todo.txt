@@ -6,10 +6,19 @@ Template Compiler
     Support keyboard
     Support triggered event natively
     Support Focus / Blur
-    
+    Support terminal elements
+     
 Linq Compiler
     [feature] Better support for type wrapped statements
     
 XML Parser
     Validate attributes
     
+verify Margin for first last element in containers
+
+
+Using namespace not working
+styles with alias not looked up 
+slots have the wrong context
+$event doesn't work everywhere
+some generic type resolution case still doesn't work

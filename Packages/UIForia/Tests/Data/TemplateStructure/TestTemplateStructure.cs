@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using NUnit.Framework;
@@ -31,7 +33,7 @@ namespace TemplateStructure {
             if (generateCode) {
                 TemplateCodeGenerator.Generate(typeof(T), settings);
             }
-            
+
             CompiledTemplateData compiledTemplates = usePreCompiledTemplates
                 ? TemplateLoader.LoadPrecompiledTemplates(settings)
                 : TemplateLoader.LoadRuntimeTemplates(typeof(T), settings);
@@ -96,7 +98,7 @@ namespace TemplateStructure {
 
         [Template("Data/TemplateStructure/SlotOverride_Extern_ExternDefault/TemplateStructure_SlotOverride_Extern_ExternDefault_Exposer.xml")]
         public class TemplateStructure_SlotOverride_Extern_ExternDefault_Exposer : UIElement { }
-        
+
         [Template("Data/TemplateStructure/SlotOverride_Extern_ExternDefault/TemplateStructure_SlotOverride_Extern_ExternDefault_Definer.xml")]
         public class TemplateStructure_SlotOverride_Extern_ExternDefault_Definer : UIElement { }
 
@@ -116,7 +118,7 @@ namespace TemplateStructure {
 
         [Template("Data/TemplateStructure/SlotOverride_Extern_DefinerDefault/TemplateStructure_SlotOverride_Extern_DefinerDefault_Exposer.xml")]
         public class TemplateStructure_SlotOverride_Extern_DefinerDefault_Exposer : UIElement { }
-        
+
         [Template("Data/TemplateStructure/SlotOverride_Extern_DefinerDefault/TemplateStructure_SlotOverride_Extern_DefinerDefault_Definer.xml")]
         public class TemplateStructure_SlotOverride_Extern_DefinerDefault_Definer : UIElement { }
 
@@ -129,6 +131,46 @@ namespace TemplateStructure {
             Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0][0]);
             UITextElement textElement = (UITextElement) app.RootElement[0][0][0][0];
             Assert.AreEqual("Not overridden", textElement.GetText().Trim());
+        }
+
+
+        [Template("Data/TemplateStructure/ChildrenSlot.xml")]
+        public class TemplateStructure_RadioButtonTest : UIElement {
+
+            public string selectedRadioOption;
+
+        }
+
+        [Template("Data/TemplateStructure/ChildrenSlot.xml#button")]
+        public class RadioButton<T> : UIElement {
+
+            public T value;
+
+        }
+
+        [Template("Data/TemplateStructure/ChildrenSlot.xml#group")]
+        public class RadioGroup<T> : UIElement where T : IEquatable<T> {
+
+            public T value;
+
+        }
+
+        [Test]
+        public void SlotOverrideContext() {
+            MockApplication app = MockApplication.Setup<TemplateStructure_RadioButtonTest>();
+        }
+
+        [Template("Data/TemplateStructure/AliasStyles.xml")]
+        public class TemplateStructure_AliasStyles : UIElement { }
+
+        [Test]
+        public void AliasStyles() {
+            MockApplication.s_GenerateCode = true;
+            MockApplication app = MockApplication.Setup<TemplateStructure_AliasStyles>();
+            TemplateStructure_AliasStyles root = (TemplateStructure_AliasStyles) app.RootElement;
+            
+            
+            
         }
 
     }

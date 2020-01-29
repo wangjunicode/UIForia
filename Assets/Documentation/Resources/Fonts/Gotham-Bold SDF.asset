@@ -15,7 +15,7 @@ MonoBehaviour:
   hashCode: 392376833
   material: {fileID: 21589413041687652}
   materialHashCode: -1572720662
-  fontAssetType: 1
+  fontAssetType: 0
   m_fontInfo:
     Name: Gotham
     PointSize: 39

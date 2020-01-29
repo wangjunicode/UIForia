@@ -51,7 +51,6 @@ public class TestLinqCompiler {
 
     public class AttributeDefinition {
 
-        internal bool isCompiled;
         public readonly string key;
         public readonly string value;
         public int line;

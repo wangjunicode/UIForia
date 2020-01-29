@@ -1143,7 +1143,7 @@ namespace UIForia.Compilers {
             MemberInfo memberInfo = ReflectionUtil.GetFieldOrProperty(head.Type, fieldOrPropertyName);
 
             if (memberInfo == null) {
-                throw new CompileException($"Type {head.Type} does not declare an accessible instance field or property with the name {fieldOrPropertyName}");
+                throw new CompileException($"Type {head.Type} does not declare an accessible instance field or property with the name `{fieldOrPropertyName}`");
             }
 
             // cascade a null check, if we are looking up a value and trying to read from something that is null,

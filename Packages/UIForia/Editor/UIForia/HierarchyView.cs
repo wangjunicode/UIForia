@@ -98,6 +98,9 @@ public class HierarchyView : TreeView {
         root.displayName = "ROOT";
         SetupDepthsFromParentsAndChildren(root);
         needsReload = false;
+        if (root.children == null) {
+            root.children = new List<TreeViewItem>();
+        }
         return root;
     }
 

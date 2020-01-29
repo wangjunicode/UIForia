@@ -704,13 +704,13 @@ namespace UIForia.Rendering {
             // todo -- do not allocate
 
             if (packer == null) {
-                packer = new SimpleRectPacker(Screen.width, Screen.height, 5);
+                packer = new SimpleRectPacker(Application.UiApplicationSize.width, Application.UiApplicationSize.height, 5);
 
                 if (!packer.TryPackRect(size.width, size.height, out rect)) {
                     throw new Exception($"Cannot fit size {size} in a render texture. Max texture size is {s_MaxTextureSize}");
                 }
 
-                renderTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, defaultRTDepth, RenderTextureFormat.DefaultHDR);
+                renderTexture = RenderTexture.GetTemporary(Application.UiApplicationSize.width, Application.UiApplicationSize.height, defaultRTDepth, RenderTextureFormat.DefaultHDR);
                 scratchTextures.Add(new ScratchRenderTexture() {
                     packer = packer,
                     renderTexture = renderTexture
@@ -778,30 +778,20 @@ namespace UIForia.Rendering {
 
             // assert camera & has texture
 
-            float dpiScale = 1;
             Vector3 cameraOrigin = camera.transform.position;
-            if (Screen.dpi >= 120) {
-                dpiScale = 2;
-                cameraOrigin.x -= 0.5f * (Screen.width);
-                cameraOrigin.y += 0.5f * (Screen.height); // for some reason editor needs this minor adjustment
-                
-            }
-            else {
-                cameraOrigin.x -= 0.5f * (Screen.width);
-                cameraOrigin.y += 0.5f * (Screen.height); 
-            }
-
             cameraOrigin.z += 200;
+            cameraOrigin.x -= 0.5f * (Application.UiApplicationSize.width);
+            cameraOrigin.y += 0.5f * (Application.UiApplicationSize.height); 
 
-            if (Screen.width % 2 != 0) {
+            if (Application.UiApplicationSize.width % 2 != 0) {
                 cameraOrigin.x -= 0.5f;
             }
 
-            if (Screen.height % 2 != 0) {
+            if (Application.UiApplicationSize.height % 2 != 0) {
                 cameraOrigin.y += 0.5f;
             }
 
-            Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one * dpiScale);
+            Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one * Application.dpiScaleFactor);
 
             Batch[] batches = pendingBatches.array;
 
@@ -887,7 +877,7 @@ namespace UIForia.Rendering {
 
                         if (next.renderTexture == rt) {
                             if (pingPongTexture == null) {
-                                pingPongTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, 0, RenderTextureFormat.DefaultHDR);
+                                pingPongTexture = RenderTexture.GetTemporary(Application.UiApplicationSize.width, Application.UiApplicationSize.height, 0, RenderTextureFormat.DefaultHDR);
                             }
 
                             commandBuffer.CopyTexture(rt, 0, 0, srcX, srcY, srcWidth, srcHeight, pingPongTexture, 0, 0, dstX, dstY);

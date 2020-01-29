@@ -58,7 +58,7 @@ namespace UIForia.Rendering {
             matBlock.SetVectorArray(s_ClipUVKey, clipUVs);
             matBlock.SetVectorArray(s_ClipRectKey, clipRects);
             matBlock.SetVectorArray(s_CornerDataKey, cornerData);
-            matBlock.SetFloat(s_DPIScaleKey, Screen.dpi >= 120 ? 0.5f : 1f);
+            matBlock.SetFloat(s_DPIScaleKey, 1f / Application.dpiScaleFactor);
             if (data.mainTexture != null) {
                 matBlock.SetTexture(s_MainTextureKey, data.mainTexture);
             }

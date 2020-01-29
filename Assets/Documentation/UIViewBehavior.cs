@@ -47,6 +47,7 @@ namespace UIForia {
         private void Update() {
             if (type == null) return;
             application?.Update();
+            application.GetView(0).SetSize((int)application.Width, (int)application.Height);
         }
 
     }

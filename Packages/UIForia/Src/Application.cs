@@ -20,6 +20,12 @@ namespace UIForia {
 
     public abstract class Application {
 
+        private static SizeInt UIApplicationSize;
+
+        public static float dpiScaleFactor = Mathf.Max(1, Screen.dpi / 100f);
+        
+        public static SizeInt UiApplicationSize => UIApplicationSize;
+
 #if UNITY_EDITOR
         public static List<Application> Applications = new List<Application>();
 #endif
@@ -29,8 +35,6 @@ namespace UIForia {
         internal Stopwatch bindingTimer = new Stopwatch();
 
         public readonly string id;
-        private int width;
-        private int height;
         internal IStyleSystem styleSystem;
         internal ILayoutSystem layoutSystem;
         internal IRenderSystem renderSystem;
@@ -86,9 +90,6 @@ namespace UIForia {
             this.templateSettings = templateSettings;
             this.onElementRegistered = onElementRegistered;
             this.id = templateSettings.applicationName;
-            this.width = Screen.width;
-            this.height = Screen.height;
-            
             this.resourceManager = resourceManager ?? new ResourceManager();
             
 #if UNITY_EDITOR
@@ -196,29 +197,20 @@ namespace UIForia {
         public ResourceManager ResourceManager => resourceManager;
 
         public void SetScreenSize(int width, int height) {
-            this.width = width;
-            this.height = height;
+            UIApplicationSize.width = width;
+            UIApplicationSize.height = height;
         }
 
-        public float Width {
-            get {
-                if (Screen.dpi >= 120) {
-                    return width * 0.5f;
-                }
-                return width;
-            }
-        }
-        
-        public float Height {
-            get {
-                if (Screen.dpi >= 120) {
-                    return height * 0.5f;
-                }
-                return height;
-            }
-        }
+        public float Width => UiApplicationSize.width / dpiScaleFactor;
+
+        public float Height => UiApplicationSize.height / dpiScaleFactor;
 
         public void SetCamera(Camera camera) {
+
+            Rect rect = camera.pixelRect;
+            UIApplicationSize.height = (int) rect.height;
+            UIApplicationSize.width = (int) rect.width;
+
             Camera = camera;
             RenderSystem.SetCamera(camera);
         }
@@ -391,6 +383,11 @@ namespace UIForia {
         private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
 
         public void Update() {
+
+            Rect rect = Camera.pixelRect;
+            UIApplicationSize.height = (int) rect.height;
+            UIApplicationSize.width = (int) rect.width;
+
             // OnEnable()
             // get pending queue, enqueue
             // adding 1 element many times to the queue is fine

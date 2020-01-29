@@ -10,6 +10,8 @@
           url: "docs/layout"
         - title: FlexBox
           url: "docs/layout/flex"
+        - title: Grid
+          url: "docs/layout/grid"
     - title: "Alignments"
       url: "docs/alignments"
       children:

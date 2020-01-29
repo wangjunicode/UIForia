@@ -50,14 +50,14 @@ float sdTriangle(float2 p, float2 p0, float2 p1, float2 p2 ) {
 
 float2 UnpackSize(float packedSize);
 
-fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 screenUV, float4 clipData, float4 clipUvs) {
+fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 screenUV, float4 clipData, float4 clipUvs, float invDpiScale) {
     screenUV.y = 1 - screenUV.y;
     
     // todo -- if mask render texture is packed with padding we need to account for that padding
     // todo -- mask at half resolution
     // todo -- for clipping we don't want to blend do much, for masking we might
     
-    float2 screenPos = float2(screenUV.x * _ScreenParams.x, screenUV.y * _ScreenParams.y);
+    float2 screenPos = float2(screenUV.x * (invDpiScale * _ScreenParams.x), screenUV.y * (_ScreenParams.y * invDpiScale));
     half2 unpackedSizeXY = UnpackSize(clipData.x);
     half2 unpackedSizeZW = UnpackSize(clipData.y);
                 

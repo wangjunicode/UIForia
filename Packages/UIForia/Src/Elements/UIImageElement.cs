@@ -19,7 +19,6 @@ namespace UIForia.Elements {
         }
         
         [OnPropertyChanged(nameof(src))]
-        [OnPropertyChanged(nameof(texture))]
         public void OnSrcChanged(string name) {
             if (src != null) {
                 texture = application.ResourceManager.GetTexture(src);

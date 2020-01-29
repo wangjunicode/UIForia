@@ -57,6 +57,7 @@ Shader "UIForia/Standard"
             float4 _ClipUVs[BATCH_SIZE];
             float4 _ClipRects[BATCH_SIZE];
             float4x4 _TransformData[BATCH_SIZE];
+            float _DPIScale;
             
             #define _FontGradientScale _FontScales.x
             #define _FontScaleRatioA _FontScales.y
@@ -225,7 +226,7 @@ Shader "UIForia/Standard"
                         return mainColor;
                     }
                     
-                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs);
+                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs, _DPIScale);
                     mainColor.rgb *= mainColor.a;
                     return mainColor;
                 }
@@ -262,7 +263,7 @@ Shader "UIForia/Standard"
                 underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
                 faceColor = lerp(faceColor, underlayColor, hasUnderlay);
            //     faceColor.rgb *= faceColor.a;
-                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs);
+                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs, _DPIScale);
                 return faceColor;               
 
             }

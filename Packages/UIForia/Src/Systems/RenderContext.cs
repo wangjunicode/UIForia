@@ -778,9 +778,19 @@ namespace UIForia.Rendering {
 
             // assert camera & has texture
 
+            float dpiScale = 1;
             Vector3 cameraOrigin = camera.transform.position;
-            cameraOrigin.x -= 0.5f * (Screen.width);
-            cameraOrigin.y += 0.5f * (Screen.height); // for some reason editor needs this minor adjustment
+            if (Screen.dpi >= 120) {
+                dpiScale = 2;
+                cameraOrigin.x -= 0.5f * (Screen.width);
+                cameraOrigin.y += 0.5f * (Screen.height); // for some reason editor needs this minor adjustment
+                
+            }
+            else {
+                cameraOrigin.x -= 0.5f * (Screen.width);
+                cameraOrigin.y += 0.5f * (Screen.height); 
+            }
+
             cameraOrigin.z += 200;
 
             if (Screen.width % 2 != 0) {
@@ -791,7 +801,7 @@ namespace UIForia.Rendering {
                 cameraOrigin.y += 0.5f;
             }
 
-            Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one);
+            Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one * dpiScale);
 
             Batch[] batches = pendingBatches.array;
 

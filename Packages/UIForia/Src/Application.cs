@@ -134,7 +134,7 @@ namespace UIForia {
 
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this, null));
 
-            view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(width, height));
+            view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Width, Height));
 
             views.Add(view);
 
@@ -200,8 +200,23 @@ namespace UIForia {
             this.height = height;
         }
 
-        public float Width => width;
-        public float Height => height;
+        public float Width {
+            get {
+                if (Screen.dpi >= 120) {
+                    return width * 0.5f;
+                }
+                return width;
+            }
+        }
+        
+        public float Height {
+            get {
+                if (Screen.dpi >= 120) {
+                    return height * 0.5f;
+                }
+                return height;
+            }
+        }
 
         public void SetCamera(Camera camera) {
             Camera = camera;

@@ -34,10 +34,14 @@ namespace UIForia.Systems.Input {
             retn.leftMouseButtonState.isDrag = mouseState.leftMouseButtonState.isDrag;
             retn.rightMouseButtonState.isDrag = mouseState.rightMouseButtonState.isDrag;
             retn.middleMouseButtonState.isDrag = mouseState.middleMouseButtonState.isDrag;
+            
+            
             retn.mousePosition = ConvertMousePosition(UnityEngine.Input.mousePosition);
+            
             float now = Time.unscaledTime;
 
             bool didClick = false;
+
 
             if (clickCount > 0 && now - lastMouseDownTime > k_clickThresholdSeconds) {
                 clickCount = 0;
@@ -78,7 +82,8 @@ namespace UIForia.Systems.Input {
         }
 
         private static Vector2 ConvertMousePosition(Vector2 position) {
-            return new Vector2(position.x, Screen.height - position.y);
+            float dpiScale = Screen.dpi >= 120 ? 0.5f : 1f;
+            return new Vector2(position.x, Screen.height - position.y) * dpiScale;
         }
     }
 }

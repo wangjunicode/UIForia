@@ -31,6 +31,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using UIForia.Compilers;
 using UIForia.Extensions;
 using UIForia.Util;
@@ -115,10 +116,12 @@ namespace Mono.Linq.Expressions {
             switch (expression.NodeType) {
                 case ExpressionType.Conditional:
                     return !IsTernaryConditional((ConditionalExpression) expression);
+
                 case ExpressionType.Try:
                 case ExpressionType.Loop:
                 case ExpressionType.Switch:
                     return true;
+
                 default:
                     var custom = expression as CustomExpression;
                     if (custom != null)
@@ -136,6 +139,7 @@ namespace Mono.Linq.Expressions {
                 case CustomExpressionType.UsingExpression:
                 case CustomExpressionType.WhileExpression:
                     return true;
+
                 default:
                     return false;
             }
@@ -145,17 +149,19 @@ namespace Mono.Linq.Expressions {
             switch (expression.NodeType) {
                 case ExpressionType.Label:
                     return false;
+
                 case ExpressionType.Conditional:
                     return IsTernaryConditional((ConditionalExpression) expression);
+
                 case ExpressionType.Try:
                 case ExpressionType.Loop:
                 case ExpressionType.Switch:
                     return false;
+
                 default:
                     return true;
             }
         }
-
 
         void VisitSingleExpressionBody(LambdaExpression node) {
             VisitBlock(() => {
@@ -301,32 +307,46 @@ namespace Mono.Linq.Expressions {
             switch (Type.GetTypeCode(type)) {
                 case TypeCode.Boolean:
                     return "bool";
+
                 case TypeCode.Byte:
                     return "byte";
+
                 case TypeCode.Char:
                     return "char";
+
                 case TypeCode.Decimal:
                     return "decimal";
+
                 case TypeCode.Double:
                     return "double";
+
                 case TypeCode.Int16:
                     return "short";
+
                 case TypeCode.Int32:
                     return "int";
+
                 case TypeCode.Int64:
                     return "long";
+
                 case TypeCode.SByte:
                     return "sbyte";
+
                 case TypeCode.Single:
                     return "float";
+
                 case TypeCode.String:
                     return "string";
+
                 case TypeCode.UInt16:
                     return "ushort";
+
                 case TypeCode.UInt32:
                     return "uint";
+
                 case TypeCode.UInt64:
                     return "ulong";
+
                 default:
                     return GetPrintableTypeName(type);
             }
@@ -539,6 +559,7 @@ namespace Mono.Linq.Expressions {
                 case ExpressionType.SubtractChecked:
                 case ExpressionType.UnaryPlus:
                     return true;
+
                 default:
                     return false;
             }
@@ -567,69 +588,99 @@ namespace Mono.Linq.Expressions {
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
                     return "+";
+
                 case ExpressionType.AddAssign:
                 case ExpressionType.AddAssignChecked:
                     return "+=";
+
                 case ExpressionType.And:
                     return "&";
+
                 case ExpressionType.AndAlso:
                     return "&&";
+
                 case ExpressionType.AndAssign:
                     return "&=";
+
                 case ExpressionType.Assign:
                     return "=";
+
                 case ExpressionType.Coalesce:
                     return "??";
+
                 case ExpressionType.Divide:
                     return "/";
+
                 case ExpressionType.DivideAssign:
                     return "/=";
+
                 case ExpressionType.Equal:
                     return "==";
+
                 case ExpressionType.ExclusiveOr:
                     return "^";
+
                 case ExpressionType.ExclusiveOrAssign:
                     return "^=";
+
                 case ExpressionType.GreaterThan:
                     return ">";
+
                 case ExpressionType.GreaterThanOrEqual:
                     return ">=";
+
                 case ExpressionType.LeftShift:
                     return "<<";
+
                 case ExpressionType.LeftShiftAssign:
                     return "<<=";
+
                 case ExpressionType.LessThan:
                     return "<";
+
                 case ExpressionType.LessThanOrEqual:
                     return "<=";
+
                 case ExpressionType.Modulo:
                     return "%";
+
                 case ExpressionType.ModuloAssign:
                     return "%=";
+
                 case ExpressionType.Multiply:
                 case ExpressionType.MultiplyChecked:
                     return "*";
+
                 case ExpressionType.MultiplyAssign:
                 case ExpressionType.MultiplyAssignChecked:
                     return "*=";
+
                 case ExpressionType.NotEqual:
                     return "!=";
+
                 case ExpressionType.Or:
                     return "|";
+
                 case ExpressionType.OrAssign:
                     return "|=";
+
                 case ExpressionType.OrElse:
                     return "||";
+
                 case ExpressionType.RightShift:
                     return ">>";
+
                 case ExpressionType.RightShiftAssign:
                     return ">>=";
+
                 case ExpressionType.Subtract:
                 case ExpressionType.SubtractChecked:
                     return "-";
+
                 case ExpressionType.SubtractAssign:
                 case ExpressionType.SubtractAssignChecked:
                     return "-=";
+
                 default:
                     throw new NotImplementedException(type.ToString());
             }
@@ -645,6 +696,7 @@ namespace Mono.Linq.Expressions {
                 case ExpressionType.SubtractAssignChecked:
                 case ExpressionType.SubtractChecked:
                     return true;
+
                 default:
                     return false;
             }
@@ -660,46 +712,60 @@ namespace Mono.Linq.Expressions {
                 case ExpressionType.Throw:
                     VisitThrow(node);
                     break;
+
                 case ExpressionType.IsTrue:
                     VisitIsTrue(node);
                     break;
+
                 case ExpressionType.IsFalse:
                     VisitIsFalse(node);
                     break;
+
                 case ExpressionType.ArrayLength:
                     VisitArrayLength(node);
                     break;
+
                 case ExpressionType.TypeAs:
                     VisitTypeAs(node);
                     break;
+
                 case ExpressionType.Increment:
                     VisitIncrement(node);
                     break;
+
                 case ExpressionType.Decrement:
                     VisitDecrement(node);
                     break;
+
                 case ExpressionType.PreDecrementAssign:
                     VisitPreDecrementAssign(node);
                     break;
+
                 case ExpressionType.PostDecrementAssign:
                     VisitPostDecrementAssign(node);
                     break;
+
                 case ExpressionType.PreIncrementAssign:
                     VisitPreIncrementAssign(node);
                     break;
+
                 case ExpressionType.PostIncrementAssign:
                     VisitPostIncrementAssign(node);
                     break;
+
                 case ExpressionType.ConvertChecked:
                     VisitConvertChecked(node);
                     break;
+
                 case ExpressionType.Convert:
                 case ExpressionType.Unbox:
                     VisitConvert(node);
                     break;
+
                 case ExpressionType.Quote:
                     Visit(node.Operand);
                     break;
+
                 default:
                     VisitSimpleUnary(node);
                     break;
@@ -789,13 +855,17 @@ namespace Mono.Linq.Expressions {
             switch (type) {
                 case ExpressionType.UnaryPlus:
                     return "+";
+
                 case ExpressionType.Not:
                     return "!";
+
                 case ExpressionType.Negate:
                 case ExpressionType.NegateChecked:
                     return "-";
+
                 case ExpressionType.OnesComplement:
                     return "~";
+
                 default:
                     throw new NotImplementedException(type.ToString());
             }
@@ -860,18 +930,22 @@ namespace Mono.Linq.Expressions {
                     WriteSpace();
                     Visit(node.Value);
                     break;
+
                 case GotoExpressionKind.Break:
                     WriteKeyword("break");
                     break;
+
                 case GotoExpressionKind.Continue:
                     WriteKeyword("continue");
                     break;
+
                 case GotoExpressionKind.Goto:
                     WriteKeyword("goto");
                     WriteSpace();
                     WriteToken(node.Target.Name);
 //                    Visit(node.Value);
                     break;
+
                 default:
                     throw new NotSupportedException();
             }
@@ -928,28 +1002,39 @@ namespace Mono.Linq.Expressions {
                     switch (c) {
                         case '\0':
                             return @"'\0'";
+
                         case '\n':
                             return @"'\n'";
+
                         case '\t':
                             return @"'\t'";
+
                         case '\'':
                             return @"'\'";
+
                         case '\"':
                             return @"'\""''";
+
                         case '\a':
                             return @"'\a'";
+
                         case '\b':
                             return @"'\b'";
+
                         case '\f':
                             return @"'\f'";
+
                         case '\r':
                             return @"'\r'";
+
                         case '\v':
                             return @"'\v";
+
                         default: return $"'{c}'";
                     }
 
                 }
+
                 case TypeCode.String:
                     return "@\"" + ((string) value) + "\"";
 
@@ -998,11 +1083,28 @@ namespace Mono.Linq.Expressions {
             return node;
         }
 
+        private static MethodInfo s_InlineComment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.InlineComment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
 
         private static MethodInfo s_SubscribeEvent = typeof(EventUtil).GetMethod("Subscribe");
+
+        private void TrimTrailingWhitespace(StringBuilder sb) {
+            if (sb == null || sb.Length == 0) return;
+
+            int i = sb.Length - 1;
+            for (; i >= 0; i--) {
+                if (!char.IsWhiteSpace(sb[i])) {
+                    break;
+                }
+            }
+
+            if (i < sb.Length - 1) {
+                sb.Length = i + 1;
+            }
+
+        }
 
         protected override Expression VisitMethodCall(MethodCallExpression node) {
             MethodInfo method = node.Method;
@@ -1014,7 +1116,17 @@ namespace Mono.Linq.Expressions {
                 lastWasComment = true;
                 return null;
             }
-            else if (method == s_CommentNewLineBefore) {
+            
+            if (method == s_InlineComment) {
+                ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
+                string comment = commentValue.Value as string;
+                StringBuilder builder = formatter.GetStringBuilder();
+                TrimTrailingWhitespace(builder);
+                WriteToken("// " + comment);
+                return null;
+            }
+            
+            if (method == s_CommentNewLineBefore) {
                 ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
                 string comment = commentValue.Value as string;
                 WriteLine();
@@ -1022,7 +1134,8 @@ namespace Mono.Linq.Expressions {
                 lastWasComment = true;
                 return null;
             }
-            else if (method == s_CommentNewLineAfter) {
+            
+            if (method == s_CommentNewLineAfter) {
                 ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
                 string comment = commentValue.Value as string;
                 WriteToken("// " + comment);
@@ -1030,7 +1143,8 @@ namespace Mono.Linq.Expressions {
                 lastWasComment = true;
                 return null;
             }
-            else if (method == s_SubscribeEvent) {
+            
+            if (method == s_SubscribeEvent) {
                 // when generating code we can use the event subscription syntax (evt += xxx) 
                 // however when using Linq we don't have access to this and must use reflection
                 // this branch catches event subscriptions and rewrites it to use a proper non reflection syntax.
@@ -1062,7 +1176,6 @@ namespace Mono.Linq.Expressions {
             if (method.IsGenericMethod && !method.IsGenericMethodDefinition) {
                 VisitGenericArguments(method.GetGenericArguments());
             }
-
 
             if (node.Arguments.Count == 0) {
                 WriteToken("()");

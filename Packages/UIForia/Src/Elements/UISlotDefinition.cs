@@ -1,16 +1,17 @@
 namespace UIForia.Elements {
 
-    public class UISlotDefinition : UIContainerElement {
+    public class UISlotBase : UIContainerElement {
 
-        public readonly string slotId;
+        public string slotId;
 
-        public UISlotDefinition() {
-        }
+    }
 
+    public class UISlotDefinition : UISlotBase {
 
         public override string GetDisplayName() {
             return "DefineSlot:" + slotId;
         }
+
     }
 
 }

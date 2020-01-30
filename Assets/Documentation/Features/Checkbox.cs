@@ -10,7 +10,6 @@ namespace Documentation.Features {
 
         public bool isChecked;
 
-        [WriteBinding(nameof(isChecked))]
         public event Action<bool> onValueChanged;
 
         public Color checkedColor = Color.red;

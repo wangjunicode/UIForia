@@ -731,12 +731,12 @@ public class TestLinqCompiler {
             retn_val = default(float);
             if (thing == null)
             {
-                logger.error = ""thing was null"";
+                logger.error = @""thing was null"";
                 return default(float);
             }
             if (thing2 == null)
             {
-                logger.error = ""thing2 was null"";
+                logger.error = @""thing2 was null"";
                 return default(float);
             }
             retn_val = thing.floatValue + thing2.floatValue;
@@ -867,7 +867,7 @@ public class TestLinqCompiler {
         AssertStringsEqual(@"
         () =>
         {
-            return ""0str1"";
+            return @""0str1"";
         }",
             compiler.Print());
         Assert.AreEqual("0str1", compiler.Compile<Func<string>>()());
@@ -901,7 +901,7 @@ public class TestLinqCompiler {
             {
                 return default(string);
             }
-            retn_val = string.Concat(""1"", s.Item1);
+            retn_val = string.Concat(@""1"", s.Item1);
                 retn:
                 return retn_val;
             }
@@ -1323,7 +1323,7 @@ public class TestLinqCompiler {
             nullableAccess = default(float?);
             if (root.vec3Dic != null)
             {
-                if (root.vec3Dic.TryGetValue(""two"", out outVar) == true)
+                if (root.vec3Dic.TryGetValue(@""two"", out outVar) == true)
                 {
                     nullableAccess = ((float?)outVar.z);
                 }
@@ -1422,7 +1422,7 @@ public class TestLinqCompiler {
             UnityEngine.Vector3 outVar;
             float right;
         
-            if (root.vec3Dic.TryGetValue(""two"", out outVar) != true)
+            if (root.vec3Dic.TryGetValue(@""two"", out outVar) != true)
             {
                 goto retn;
             }

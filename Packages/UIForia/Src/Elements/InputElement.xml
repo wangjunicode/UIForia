@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
     <Style>
@@ -23,12 +22,6 @@
         AlignY = 50% ParentContentArea;
         }
 
-        style placeholder {
-        [attr:empty] {
-        Visibility = Hidden;
-        }
-        }
-
         style placeholder-slot {
         PreferredHeight = 1cnt;
         AlignY = 50% ParentContentArea;
@@ -43,33 +36,12 @@
         <Text attr:id="input-element-text" style="input-element-text"/>
 
         <DefineSlot:Placeholder if="ShowPlaceholder" slot:name="placeholder" style="placeholder-slot">
-            
-            <Text style="placeholder" attr:id="placeholder-text">{placeholder}</Text>
-            
+
+            <Text attr:id="placeholder-text">{placeholder}</Text>
+
         </DefineSlot:Placeholder>
 
     </Contents>
-
-<!--    <DefineSlot:Placeholder/>-->
-<!--        -->
-<!--    <ForwardSlot:Placeholder as="slotName" expose:var="" expose:x="1"/>-->
-
-<!--    <OverrideSlot:Placeholder/>-->
-<!--    <InputElement>-->
-
-<!--        <Children if="" transclude="true">-->
-
-<!--        </Children>-->
-
-<!--        <Div slot:name="PlaceHolder">-->
-
-<!--        </Div>-->
-
-<!--        <Slot:Placeholder if="" style="" transclude="true">-->
-
-<!--        </Slot:Placeholder>-->
-
-<!--    </InputElement>-->
 
 </UITemplate>
 

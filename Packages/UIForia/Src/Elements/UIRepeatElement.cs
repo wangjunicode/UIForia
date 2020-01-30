@@ -222,7 +222,7 @@ namespace UIForia.Elements {
                     int diff = currCount - prevCount;
                     for (int i = 0; i < diff; i++) {
                         UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
-                        application.InsertChild(this, child, (uint) (prevCount + i));
+                        application.InitializeElement(child);
 
                         ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
                         ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);

@@ -48,39 +48,39 @@ namespace UIForia.Elements {
             float contentWidth = layoutResult.ContentWidth;
             float contentHeight = layoutResult.ContentHeight;
           
-            overflowSize = childrenElement.layoutResult.ComputeOverflowSize();
-
-            if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height) {
-                ScrollToVerticalPercent(0);
-            }
-            if (previousChildrenSize != default && (int) previousChildrenSize.width > (int) overflowSize.width) {
-                ScrollToHorizontalPercent(0);
-            }
-
-            previousChildrenSize = overflowSize;
-
-            if (disableOverflowX || overflowSize.width <= contentWidth) {
-                horizontalTrack.SetEnabled(false);
-            }
-            else {
-                horizontalTrack.SetEnabled(true);
-                float width = (contentWidth / overflowSize.width) * contentWidth;
-                float opacity = 1 + fadeTarget - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
-                horizontalHandle.style.SetPreferredWidth(width, StyleState.Normal);
-                horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
-            }
-
-            if (disableOverflowY || overflowSize.height <= contentHeight) {
-                verticalTrack.SetEnabled(false);
-            }
-            else {
-                verticalTrack.SetEnabled(true);
-                // todo fix bug: settings preferred height does not immediately update the height
-                float height = (contentHeight / overflowSize.height) * contentHeight;
-                float opacity = 1 + fadeTarget - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
-                verticalHandle.style.SetPreferredHeight(height, StyleState.Normal);
-                verticalTrack.style.SetOpacity(opacity, StyleState.Normal);
-            }
+            // overflowSize = childrenElement.layoutResult.ComputeOverflowSize();
+            //
+            // if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height) {
+            //     ScrollToVerticalPercent(0);
+            // }
+            // if (previousChildrenSize != default && (int) previousChildrenSize.width > (int) overflowSize.width) {
+            //     ScrollToHorizontalPercent(0);
+            // }
+            //
+            // previousChildrenSize = overflowSize;
+            //
+            // if (disableOverflowX || overflowSize.width <= contentWidth) {
+            //     horizontalTrack.SetEnabled(false);
+            // }
+            // else {
+            //     horizontalTrack.SetEnabled(true);
+            //     float width = (contentWidth / overflowSize.width) * contentWidth;
+            //     float opacity = 1 + fadeTarget - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
+            //     horizontalHandle.style.SetPreferredWidth(width, StyleState.Normal);
+            //     horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
+            // }
+            //
+            // if (disableOverflowY || overflowSize.height <= contentHeight) {
+            //     verticalTrack.SetEnabled(false);
+            // }
+            // else {
+            //     verticalTrack.SetEnabled(true);
+            //     // todo fix bug: settings preferred height does not immediately update the height
+            //     float height = (contentHeight / overflowSize.height) * contentHeight;
+            //     float opacity = 1 + fadeTarget - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
+            //     verticalHandle.style.SetPreferredHeight(height, StyleState.Normal);
+            //     verticalTrack.style.SetOpacity(opacity, StyleState.Normal);
+            // }
         }
 
         public void OnClickVertical(MouseInputEvent evt) {

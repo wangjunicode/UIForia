@@ -94,7 +94,9 @@ namespace UIForia.Parsing {
             TemplateShell shell = xmlTemplateParser.GetOuterTemplateShell(templateAttr);
             
             TemplateRootNode templateRootNode = new TemplateRootNode(templateAttr.templateId, shell, processedType, null, default); //, attributes, new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
-
+            
+            templateRootNode.tagName = processedType.tagName;
+            
             list.Add(templateRootNode);
 
             xmlTemplateParser.Parse(templateRootNode, processedType);

@@ -10,18 +10,15 @@
 
     <Contents style="container">
 
-<!--        <Div style="util.button">-->
-<!--            {SelectedOption}-->
-<!--        </Div>-->
+        <Select style="input" options="timingFunctions" sync:selectedValue="timingFunction">
+            
+<!--            <OverrideSlot:select-display>-->
+<!--                {$selectedOption.Label} is selected-->
+<!--            </OverrideSlot:select-display>-->
 
-        <Input sync:value="SelectedOption" placeholder="'hello'"/>
-<!--        <Select -->
-<!--                style="dropdown mb3"-->
-<!--                options="Options"-->
-<!--                disableOverflowX="true"-->
-<!--        />-->
+            <Text style="select-label">Here is my {$option.Label}</Text>
 
-        <!--        <Select style="input" options="timingFunctions" sync:selectedValue="timingFunction" />-->
+        </Select>
 
         <!--        <Div>Animation Task Status: {animationTask.state}</Div>-->
 
@@ -73,25 +70,25 @@
         <!--            <Div style="anims" attr:id="animation-target">A simple text that you can animate</Div>-->
         <!--        </Group>-->
 
-        <!--        <InputElement style="input" sync:value="iterations"/>-->
+        <!--        <Input style="input" sync:value="iterations"/>-->
 
         <!--        <Group style="details-container" if="animationData.name != null">-->
         <!--            <Label>Name: {animationData.name}</Label>-->
 
         <!--            <Label>Duration (in milliseconds)</Label>-->
-        <!--            <InputElement style="input" value.read.write="duration"/>-->
+        <!--            <Input style="input" sync:value="duration"/>-->
 
         <!--            <Label>Delay (in milliseconds)</Label>-->
-        <!--            <InputElement style="input" value.read.write="delay"/>-->
+        <!--            <Input style="input" sync:value="delay"/>-->
 
         <!--            <Label>Iterations (-1 is infinite)</Label>-->
-        <!--            <InputElement style="input" value.read.write="iterations"/>-->
+        <!--            <Input style="input" sync:value="iterations"/>-->
 
         <!--            <Label>Easing Function</Label>-->
-        <!--            &lt;!&ndash;            <Select style="input" options="timingFunctions" selectedValue.read.write="timingFunction" />&ndash;&gt;-->
+        <!--            <Select style="input" options="timingFunctions" sync:selectedValue="timingFunction"/>-->
 
         <!--            <Label>Animation Direction</Label>-->
-        <!--&lt;!&ndash;                        <Select&#45;&#45;AnimationDirection style="input" options="directions" selectedValue.read.write="direction" />&ndash;&gt;-->
+        <!--            <Select style="input" options="directions" sync:selectedValue="direction"/>-->
 
         <!--            <Section style="button-container" if="animationTask != null">-->
         <!--                <Div style="button" if="ShowRunButton" mouse:click="RunAnimationAgain()">Run</Div>-->
@@ -108,22 +105,22 @@
         <!--        <Paragraph>Let's see if the animation plays when you hover the center of the squares.</Paragraph>-->
         <!--        <Div style="flex-horizontal">-->
         <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" x-spriteanimation="idle"/>-->
+        <!--                <Group style="spritesheet-panel" attr:spriteanimation="idle"/>-->
         <!--            </Group>-->
         <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" x-spriteanimation="walk"/>-->
+        <!--                <Group style="spritesheet-panel" attr:spriteanimation="walk"/>-->
         <!--            </Group>-->
         <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" x-spriteanimation="kick"/>-->
+        <!--                <Group style="spritesheet-panel" attr:spriteanimation="kick"/>-->
         <!--            </Group>-->
         <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" x-spriteanimation="hurt"/>-->
+        <!--                <Group style="spritesheet-panel" attr:spriteanimation="hurt"/>-->
         <!--            </Group>-->
         <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" x-spriteanimation="sneak"/>-->
+        <!--                <Group style="spritesheet-panel" attr:spriteanimation="sneak"/>-->
         <!--            </Group>-->
         <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" x-spriteanimation="flipbook"/>-->
+        <!--                <Group style="spritesheet-panel" attr:spriteanimation="flipbook"/>-->
         <!--            </Group>-->
         <!--        </Div>-->
 

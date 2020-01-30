@@ -1,45 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using NUnit.Framework;
 using Tests.Mocks;
-using UIForia;
 using UIForia.Attributes;
-using UIForia.Compilers;
 using UIForia.Elements;
 
 namespace TemplateStructure {
 
     public class TestTemplateStructure {
-
-        private bool usePreCompiledTemplates = false;
-        private bool generateCode = false;
-
-        public MockApplication Setup<T>(string appName = null) {
-            if (appName == null) {
-                StackTrace stackTrace = new StackTrace();
-                appName = stackTrace.GetFrame(1).GetMethod().Name;
-            }
-
-            TemplateSettings settings = new TemplateSettings();
-            settings.applicationName = appName;
-            settings.assemblyName = GetType().Assembly.GetName().Name;
-            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
-            settings.codeFileExtension = "generated.xml.cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
-            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
-
-            if (generateCode) {
-                TemplateCodeGenerator.Generate(typeof(T), settings);
-            }
-
-            CompiledTemplateData compiledTemplates = usePreCompiledTemplates
-                ? TemplateLoader.LoadPrecompiledTemplates(settings)
-                : TemplateLoader.LoadRuntimeTemplates(typeof(T), settings);
-
-            return null; //new MockApplication(compiledTemplates, null);
-        }
 
         [Template("Data/TemplateStructure/SlotOverride/TemplateStructure_SlotOverride_Main.xml")]
         public class TemplateStructure_SlotOverride_Main : UIElement { }
@@ -127,7 +94,7 @@ namespace TemplateStructure {
             MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Extern_DefinerDefault_Main>();
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_DefinerDefault_Exposer>(app.RootElement[0]);
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_DefinerDefault_Definer>(app.RootElement[0][0]);
-            Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0][0]);
+            Assert.IsInstanceOf<UISlotDefinition>(app.RootElement[0][0][0]);
             Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0][0]);
             UITextElement textElement = (UITextElement) app.RootElement[0][0][0][0];
             Assert.AreEqual("Not overridden", textElement.GetText().Trim());
@@ -165,7 +132,6 @@ namespace TemplateStructure {
 
         [Test]
         public void AliasStyles() {
-            MockApplication.s_GenerateCode = true;
             MockApplication app = MockApplication.Setup<TemplateStructure_AliasStyles>();
             TemplateStructure_AliasStyles root = (TemplateStructure_AliasStyles) app.RootElement;
         }

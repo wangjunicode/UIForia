@@ -23,7 +23,7 @@ namespace UIForia {
         private static SizeInt UIApplicationSize;
 
         public static float dpiScaleFactor = Mathf.Max(1, Screen.dpi / 100f);
-        
+
         public static SizeInt UiApplicationSize => UIApplicationSize;
 
 #if UNITY_EDITOR
@@ -84,14 +84,14 @@ namespace UIForia {
 
         private TemplateSettings templateSettings;
         private bool isPreCompiled;
-        
+
         protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
             this.isPreCompiled = isPreCompiled;
             this.templateSettings = templateSettings;
             this.onElementRegistered = onElementRegistered;
             this.id = templateSettings.applicationName;
             this.resourceManager = resourceManager ?? new ResourceManager();
-            
+
 #if UNITY_EDITOR
             Applications.Add(this);
 #endif
@@ -106,13 +106,13 @@ namespace UIForia {
             animationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
         }
-        
+
         internal void Initialize() {
             systems = new List<ISystem>();
             views = new List<UIView>();
 
             CreateSystems();
-            
+
             systems.Add(styleSystem);
             systems.Add(linqBindingSystem);
             systems.Add(routingSystem);
@@ -120,10 +120,10 @@ namespace UIForia {
             systems.Add(animationSystem);
             systems.Add(layoutSystem);
             systems.Add(renderSystem);
-            
+
             m_BeforeUpdateTaskSystem = new UITaskSystem();
             m_AfterUpdateTaskSystem = new UITaskSystem();
-            
+
             UIView view = null;
 
             if (isPreCompiled) {
@@ -133,7 +133,7 @@ namespace UIForia {
                 templateData = TemplateLoader.LoadRuntimeTemplates(templateSettings.rootType, templateSettings);
             }
 
-            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this, null));
+            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this, false));
 
             view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Width, Height));
 
@@ -148,7 +148,7 @@ namespace UIForia {
             Func<UIElement, TemplateScope, UIElement> template = templateData.GetTemplate<T>();
 
             if (template != null) {
-                UIElement element = template.Invoke(null, new TemplateScope(this, null));
+                UIElement element = template.Invoke(null, new TemplateScope(this, false));
                 UIView view = new UIView(this, name, element, matrix, size);
                 views.Add(view);
 
@@ -232,7 +232,7 @@ namespace UIForia {
             if (isPreCompiled) {
                 Debug.Log("Cannot refresh application because it is using precompiled templates");
                 return;
-            }            
+            }
 
             foreach (ISystem system in systems) {
                 system.OnDestroy();
@@ -250,9 +250,9 @@ namespace UIForia {
             GC.Collect();
 
             elementIdGenerator = 0;
-            
+
             Initialize();
-            
+
             onRefresh?.Invoke();
         }
 
@@ -351,49 +351,15 @@ namespace UIForia {
             element.children.QuickClear();
         }
 
-        // Triggered events fire immediately
-        // Application Update future state
-        //
-        // Normal binding update for all elements
-        // Input system update()
-        // sync properties are written back to targets. these will invoke OnPropertySynchronized() if provided (just like OnPropertyChanged, but explicitly for `sync` write backs)
-        // late update bindings & OnLateUpdate()
-        // animation system update
-        // style system update -> triggers OnStylePropertyChanged handlers
-        // OnFrameCompleted()
-        // user code finished here
-        //
-        // buffer changes from style system for render & layout thread to pick up (future state)
-        //
-        // render layout thread -> 
-        // read buffered changes
-        //     layout
-        //     render
-        //     join with user thread
-        //     pause user thread
-        // write layoutResult changes back to elements
-        // maybe invoke render/layout callbacks if we support this
-        // OnCulled()
-        // OnLayoutChanged()
-        // OnSizeChanged()
-        // etc
-        // continue user thread
-
         private LightList<UIElement> activeBuffer = new LightList<UIElement>(32);
         private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
 
         public void Update() {
 
-            Rect rect = Camera.pixelRect;
+            Rect rect = Camera?.pixelRect ?? new Rect(0, 0, 1920, 1080); //UIApplicationSize.width, UIApplicationSize.height);
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
 
-            // OnEnable()
-            // get pending queue, enqueue
-            // adding 1 element many times to the queue is fine
-            // invoke enable callback immediately or deferred?
-
-            // m_InputSystem.ReadInput();
             bool loop = true;
             bool firstRun = true;
 
@@ -404,16 +370,10 @@ namespace UIForia {
             }
 
             linqBindingSystem.BeginFrame();
-
-
-            // enable element
-            // it gets an update
-            // it gets disabled
-            // it gets enabled
-            // now what? need to be lateUpdated?
+            bindingTimer.Reset();
+            bindingTimer.Start();
             while (loop) {
-                // bindings
-                // OnBindingsUpdated()
+
                 linqBindingSystem.BeforeUpdate(activeBuffer); // normal bindings + OnBeforeUpdate call 
 
                 if (firstRun) {
@@ -421,15 +381,7 @@ namespace UIForia {
                     firstRun = false;
                 }
 
-                // late bindings?
-                // onChange()
-                // sync
                 linqBindingSystem.AfterUpdate(activeBuffer); // on update call + write back 'sync' & onChange
-
-                // m_AnimationSystem.OnUpdate(activeBuffer);
-
-                // AfterUpdate()
-                // linqBindingSystem.AfterUpdate(activeBuffer); // after update call
 
                 if (queuedBuffer.size == 0) {
                     break;
@@ -442,20 +394,12 @@ namespace UIForia {
                 // sort queued buffer by depth?
             }
 
-            // bindingTimer.Reset();
-            // bindingTimer.Start();
-            // linqBindingSystem.OnUpdate();
-            // bindingTimer.Stop();
-            //
-            // m_InputSystem.OnUpdate();
-            //
-            // linqBindingSystem.OnLateUpdate();
-            //
+            bindingTimer.Stop();
+
             animationSystem.OnUpdate();
             //
             // m_RoutingSystem.OnUpdate(); // todo -- remove
             //
-            // linqBindingSystem.OnFrameCompleted();
 
             styleSystem.OnUpdate(); // buffer changes here
 
@@ -896,6 +840,8 @@ namespace UIForia {
             }
 
             scope.innerSlotContext = root;
+            // for each override with same name add to reference array at index?
+            // will have to be careful with names but can change to unique ids when we need alias support and match on that
             UIElement retn = templateData.slots[slotId](contextRoot, parent, scope);
             retn.View = parent.View;
             return retn;
@@ -920,7 +866,6 @@ namespace UIForia {
             retn.flags = UIElementFlags.Enabled | UIElementFlags.Alive;
 
             retn.children = LightList<UIElement>.GetMinSize(childCount);
-            retn.children.size = childCount;
 
             if (attributeCount > 0) {
                 retn.attributes = new StructList<ElementAttribute>(attributeCount);
@@ -928,6 +873,8 @@ namespace UIForia {
             }
 
             retn.parent = parent;
+
+            parent?.children.Add(retn);
 
             return retn;
         }
@@ -960,6 +907,7 @@ namespace UIForia {
         // Doesn't expect to create the root
         public void HydrateTemplate(int templateId, UIElement root, TemplateScope scope) {
             templateData.templates[templateId](root, scope);
+            scope.Release();
         }
 
         public void AddTemplateChildren(SlotTemplateElement slotTemplateElement, int templateId, int count) {

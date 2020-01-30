@@ -9,6 +9,7 @@ namespace UIForia.Compilers {
         public Type rootType;
         public ScopedContextVariable[] scopedVariables;
         public AttributeDefinition[] exposedAttrs;
+        public int originSlotId;
 
     }
 

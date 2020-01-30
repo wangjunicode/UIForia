@@ -2,6 +2,7 @@ using System;
 using System.Linq.Expressions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
+using UIForia.Util;
 using UnityEditor;
 
 namespace UIForia.Compilers {
@@ -18,6 +19,12 @@ namespace UIForia.Compilers {
         public Type rootElementType;
         public ScopedContextVariable[] scopedVariables;
         public AttributeDefinition[] exposedAttributes;
+        public StructList<AttributeDefinition> originalAttributes;
+        public LightList<ExposedVariableData> exposedVariableDataList;
+
+        public CompiledSlot() {
+            this.slotId = -1;
+        }
         
         public string GetVariableName() {
             return $"Slot_{slotType}_{slotId}_{guid}";

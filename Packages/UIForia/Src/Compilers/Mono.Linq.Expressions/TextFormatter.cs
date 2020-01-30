@@ -28,6 +28,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 
 namespace Mono.Linq.Expressions {
 
@@ -107,5 +108,10 @@ namespace Mono.Linq.Expressions {
 		{
 			indent--;
 		}
+
+		public StringBuilder GetStringBuilder() {
+			return (writer as StringWriter).GetStringBuilder();
+		}
+
 	}
 }

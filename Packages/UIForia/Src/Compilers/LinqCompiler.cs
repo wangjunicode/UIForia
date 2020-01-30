@@ -1141,7 +1141,7 @@ namespace UIForia.Compilers {
 
         private Expression MemberAccess(Expression head, string fieldOrPropertyName) {
             MemberInfo memberInfo = ReflectionUtil.GetFieldOrProperty(head.Type, fieldOrPropertyName);
-
+         
             if (memberInfo == null) {
                 throw new CompileException($"Type {head.Type} does not declare an accessible instance field or property with the name `{fieldOrPropertyName}`");
             }
@@ -2377,11 +2377,38 @@ namespace UIForia.Compilers {
 
         protected virtual void SetupClosure(LinqCompiler parent) { }
 
-        public LinqCompiler CreateClosure(IList<Parameter> parameters, Type retnType) {
+        public LinqCompiler CreateClosure(Parameter parameter, Type retnType) {
+            LightList<Parameter> parameterList = LightList<Parameter>.Get();
+            parameterList.Add(parameter);
+            LinqCompiler retn = CreateClosure(parameterList, retnType);
+            parameterList.Release();
+            return retn;
+        }
+        
+        public LinqCompiler CreateClosure(Parameter parameter0, Parameter parameter1, Type retnType) {
+            LightList<Parameter> parameterList = LightList<Parameter>.Get();
+            parameterList.Add(parameter0);
+            parameterList.Add(parameter1);
+            LinqCompiler retn = CreateClosure(parameterList, retnType);
+            parameterList.Release();
+            return retn;
+        }
+
+        public LinqCompiler CreateClosure(Parameter parameter0, Parameter parameter1, Parameter parameter2, Type retnType) {
+            LightList<Parameter> parameterList = LightList<Parameter>.Get();
+            parameterList.Add(parameter0);
+            parameterList.Add(parameter1);
+            parameterList.Add(parameter2);
+            LinqCompiler retn = CreateClosure(parameterList, retnType);
+            parameterList.Release();
+            return retn;
+        }
+        
+        public LinqCompiler CreateClosure(IList<Parameter> parameterList, Type retnType) {
             LinqCompiler nested = CreateNested();
             nested.SetupClosure(this);
             nested.parameters.Clear();
-            nested.parameters.AddRange(parameters);
+            nested.parameters.AddRange(parameterList);
 
             nested.returnType = retnType ?? typeof(void);
             nested.SetImplicitContext(implicitContext, ParameterFlags.NeverNull);
@@ -2791,6 +2818,17 @@ namespace UIForia.Compilers {
         public void SetNamespaces(IList<string> namespaceList) {
             namespaces.Clear();
             namespaces.AddRange(namespaceList);
+        }
+
+        public IList<string> GetNamespaces() {
+            return namespaces;
+        }
+
+        public Expression GetParameterAtIndex(int i) {
+            if (i < 0 || i >= parameters.size) {
+                return null;
+            }
+            return parameters[i];
         }
 
     }

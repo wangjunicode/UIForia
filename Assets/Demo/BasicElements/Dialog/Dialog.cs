@@ -14,7 +14,6 @@ namespace Demo.BasicElements.Dialog {
         public bool isVisible;
         public Color confirmColor;
 
-        [WriteBinding(nameof(isVisible))]
         public event Action<bool> onVisibilityChanged;
         
         [OnPropertyChanged(nameof(isVisible))]

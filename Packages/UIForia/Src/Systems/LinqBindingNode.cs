@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using JetBrains.Annotations;
+using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Util;
 using LinqBinding = System.Action<UIForia.Elements.UIElement, UIForia.Elements.UIElement, UIForia.Util.StructStack<UIForia.Compilers.TemplateContextWrapper>>;
@@ -79,8 +80,21 @@ namespace UIForia.Systems {
         
         internal ContextVariable localVariable;
         internal LinqBindingNode parent;
-        public ulong iterationId;
+        public UIElement[] referencedContexts;
 
+        public void InitializeContextArray(string slotName, TemplateScope templateScope, int size) {
+            referencedContexts = new UIElement[size];
+
+            int idx = 0;
+            
+            for (int i = 0; i < templateScope.slotInputs.size; i++) {
+                if (templateScope.slotInputs.array[i].slotName == slotName) {
+                    referencedContexts[idx++] = templateScope.slotInputs.array[i].outerContext;
+                }
+            }
+            
+        }
+        
         public void CreateLocalContextVariable(ContextVariable variable) {
             if (localVariable == null) {
                 localVariable = variable;
@@ -140,22 +154,6 @@ namespace UIForia.Systems {
             return value;
         }
 
-        // todo -- maybe make generic
-        public ContextVariable GetLocalContextVariable(string variableName) {
-            // should never be null since we only use this via generated code that is pre-validated
-
-            ContextVariable ptr = localVariable;
-            while (ptr != null) {
-                if (ptr.name == variableName) {
-                    return ptr;
-                }
-
-                ptr = ptr.next;
-            }
-
-            return default; // should never hit this
-        }
-        
         [UsedImplicitly] // called from template functions, 
         public static LinqBindingNode Get(Application application, UIElement rootElement, UIElement element, UIElement innerContext, int createdId, int enabledId, int updatedId, int lateId) {
             LinqBindingNode node = new LinqBindingNode(); // todo -- pool
@@ -197,16 +195,6 @@ namespace UIForia.Systems {
 
         public ContextVariable<T> GetRepeatItem<T>(int id) {
             return (ContextVariable<T>) GetContextVariable(id);
-            // ContextVariable ptr = localVariable; 
-            // while (ptr != null) {
-                // if (ptr.id == id) {
-                    // return (ContextVariable<T>) ptr;
-                // }
-
-                // ptr = ptr.next;
-            // }
-
-            // return null;
         }
         
     }

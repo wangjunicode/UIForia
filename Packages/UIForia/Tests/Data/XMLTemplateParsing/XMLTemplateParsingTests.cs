@@ -54,7 +54,7 @@ namespace TemplateParsing_XML {
             Assert.AreEqual(2, text.ChildCount);
             Assert.AreEqual("Hello", text.textExpressionList[0].text.Trim());
 
-            TerminalNode terminalNode = AssertAndReturn<TerminalNode>(text[0]);
+            ContainerNode terminalNode = AssertAndReturn<ContainerNode>(text[0]);
             TextNode subText = AssertAndReturn<TextNode>(text[1]);
             Assert.AreEqual("Templates", subText.textExpressionList[0].text.Trim());
         }

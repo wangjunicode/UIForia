@@ -2,9 +2,9 @@
     <Contents>
 
         <TemplateStructure_SlotOverride_Extern_ExternDefault_Definer>
-            <ExternSlot slot:name="override-me">
+            <ForwardSlot:override-me>
                 Override from exposer layer
-            </ExternSlot>
+            </ForwardSlot:override-me>
         </TemplateStructure_SlotOverride_Extern_ExternDefault_Definer>
     </Contents>
 </UITemplate>

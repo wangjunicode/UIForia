@@ -13,7 +13,7 @@ namespace UIForia.Compilers {
 
         public bool outputComments;
         public ProcessedType rootType;
-        
+
         public CompiledTemplate compiledTemplate;
         public CompiledTemplate innerTemplate; // used when expanding a template to get a reference to the inner template that was expanded
 
@@ -23,7 +23,7 @@ namespace UIForia.Compilers {
         public Expression rootParam;
         public Expression templateScope;
         public Expression applicationExpr;
-        
+
         private int currentDepth;
         private int maxDepth;
         private int bindingNodeCount;
@@ -32,6 +32,7 @@ namespace UIForia.Compilers {
         private readonly LightStack<ParameterExpression> hierarchyStack;
 
         private static readonly MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
+        private static readonly MethodInfo s_InlineComment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.InlineComment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly char[] s_SplitChar = {'.'};
@@ -269,6 +270,12 @@ namespace UIForia.Compilers {
 
         public void PushContextVariable(string aliasName) {
             throw new NotImplementedException("PushContextVariable");
+        }
+
+        public void InlineComment(string comment) {
+            if (outputComments) {
+                AddStatement(Expression.Call(s_InlineComment, Expression.Constant(comment)));
+            }
         }
 
     }

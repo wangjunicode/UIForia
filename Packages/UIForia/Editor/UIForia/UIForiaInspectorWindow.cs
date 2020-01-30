@@ -223,52 +223,56 @@ namespace UIForia.Editor {
             Rect contentRect = layoutResult.ContentRect;
 
             DrawLabel("Enabled", selectedElement.isEnabled.ToString());
-            DrawLabel("View", selectedElement.View.name);
-            DrawLabel("Viewport", $"X: {selectedElement.View.Viewport.x}, Y: {selectedElement.View.Viewport.y}, W: {selectedElement.View.Viewport.width}, H: {selectedElement.View.Viewport.height}");
-            DrawVector2Value("Local Position", layoutResult.localPosition);
-            DrawVector2Value("Screen Position", layoutResult.screenPosition);
-            DrawVector2Value("Scale", layoutResult.scale);
-            DrawSizeValue("Allocated Size", layoutResult.allocatedSize);
-            DrawSizeValue("Actual Size", layoutResult.actualSize);
+            if (selectedElement.isEnabled) {
 
-            DrawLabel("Rotation", layoutResult.rotation.ToString());
-            DrawLabel("Content Rect", $"X: {contentRect.x}, Y: {contentRect.y}, W: {contentRect.width}, H: {contentRect.height}");
+                DrawLabel("Culled", selectedElement.layoutResult.isCulled.ToString());
+                DrawLabel("View", selectedElement.View.name);
+                DrawLabel("Viewport", $"X: {selectedElement.View.Viewport.x}, Y: {selectedElement.View.Viewport.y}, W: {selectedElement.View.Viewport.width}, H: {selectedElement.View.Viewport.height}");
+                DrawVector2Value("Local Position", layoutResult.localPosition);
+                DrawVector2Value("Screen Position", layoutResult.screenPosition);
+                DrawVector2Value("Scale", layoutResult.scale);
+                DrawSizeValue("Allocated Size", layoutResult.allocatedSize);
+                DrawSizeValue("Actual Size", layoutResult.actualSize);
 
-            DrawLabel("Render Layer", selectedElement.style.RenderLayer.ToString());
+                DrawLabel("Rotation", layoutResult.rotation.ToString());
+                DrawLabel("Content Rect", $"X: {contentRect.x}, Y: {contentRect.y}, W: {contentRect.width}, H: {contentRect.height}");
 
-            GUILayout.Space(16);
+                DrawLabel("Render Layer", selectedElement.style.RenderLayer.ToString());
 
-            DrawEnumWithValue<LayoutType>(selectedElement.style.GetComputedStyleProperty(StylePropertyId.LayoutType), false);
-            DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredWidth), false);
-            DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredHeight), false);
+                GUILayout.Space(16);
 
-            DrawLabel("Block Width Provider:", selectedElement.layoutBox.GetBlockWidthProvider() + " size: " + selectedElement.layoutBox.ComputeBlockWidth(1));
-            DrawLabel("Block Height Provider:", selectedElement.layoutBox.GetBlockHeightProvider() + " size: " + selectedElement.layoutBox.ComputeBlockHeight(1));
-            
-            GUILayout.Space(16);
+                DrawEnumWithValue<LayoutType>(selectedElement.style.GetComputedStyleProperty(StylePropertyId.LayoutType), false);
+                DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredWidth), false);
+                DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredHeight), false);
 
-            OffsetRect margin = selectedElement.layoutResult.margin;
-            DrawLabel("Margin Top", margin.top.ToString());
-            DrawLabel("Margin Right", margin.right.ToString());
-            DrawLabel("Margin Bottom", margin.bottom.ToString());
-            DrawLabel("Margin Left", margin.left.ToString());
+                DrawLabel("Block Width Provider:", selectedElement.layoutBox.GetBlockWidthProvider() + " size: " + selectedElement.layoutBox.ComputeBlockWidth(1));
+                DrawLabel("Block Height Provider:", selectedElement.layoutBox.GetBlockHeightProvider() + " size: " + selectedElement.layoutBox.ComputeBlockHeight(1));
 
-            GUILayout.Space(16);
+                GUILayout.Space(16);
 
-            OffsetRect border = selectedElement.layoutResult.border;
+                OffsetRect margin = selectedElement.layoutResult.margin;
+                DrawLabel("Margin Top", margin.top.ToString());
+                DrawLabel("Margin Right", margin.right.ToString());
+                DrawLabel("Margin Bottom", margin.bottom.ToString());
+                DrawLabel("Margin Left", margin.left.ToString());
 
-            DrawLabel("Border Top", border.top.ToString());
-            DrawLabel("Border Right", border.right.ToString());
-            DrawLabel("Border Bottom", border.bottom.ToString());
-            DrawLabel("Border Left", border.left.ToString());
+                GUILayout.Space(16);
 
-            GUILayout.Space(16);
+                OffsetRect border = selectedElement.layoutResult.border;
 
-            OffsetRect padding = selectedElement.layoutResult.padding;
-            DrawLabel("Padding Top", padding.top.ToString());
-            DrawLabel("Padding Right", padding.right.ToString());
-            DrawLabel("Padding Bottom", padding.bottom.ToString());
-            DrawLabel("Padding Left", padding.left.ToString());
+                DrawLabel("Border Top", border.top.ToString());
+                DrawLabel("Border Right", border.right.ToString());
+                DrawLabel("Border Bottom", border.bottom.ToString());
+                DrawLabel("Border Left", border.left.ToString());
+
+                GUILayout.Space(16);
+
+                OffsetRect padding = selectedElement.layoutResult.padding;
+                DrawLabel("Padding Top", padding.top.ToString());
+                DrawLabel("Padding Right", padding.right.ToString());
+                DrawLabel("Padding Bottom", padding.bottom.ToString());
+                DrawLabel("Padding Left", padding.left.ToString());
+            }
 
             EditorGUIUtility.labelWidth = labelWidth;
         }
@@ -408,9 +412,11 @@ namespace UIForia.Editor {
                 case 0:
                     DrawElementInfo();
                     break;
+
                 case 1:
                     DrawStyles();
                     break;
+
                 case 2:
                     DrawComputedStyle();
                     break;
@@ -512,11 +518,11 @@ namespace UIForia.Editor {
                 case StylePropertyId.AlignItemsHorizontal:
                 case StylePropertyId.AlignItemsVertical:
                     return DrawFloat(property, isEditable);
-                
+
                 case StylePropertyId.DistributeExtraSpaceHorizontal:
                 case StylePropertyId.DistributeExtraSpaceVertical:
                     return DrawEnumWithValue<SpaceDistribution>(property, isEditable);
-                
+
                 case StylePropertyId.FitItemsHorizontal:
                 case StylePropertyId.FitItemsVertical:
                     return DrawEnumWithValue<LayoutFit>(property, isEditable);
@@ -536,6 +542,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.BackgroundImage:
                     return DrawTextureAsset(property, isEditable);
+
                 case StylePropertyId.Cursor:
                     return DrawCursor(property, isEditable);
 
@@ -618,7 +625,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.TransformRotation:
                     return DrawFloat(property, isEditable);
-                
+
                 case StylePropertyId.TextColor:
                 case StylePropertyId.ShadowColor:
                 case StylePropertyId.ShadowTint:
@@ -640,6 +647,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.TextWhitespaceMode:
                     return DrawEnumWithValue<WhitespaceMode>(property, isEditable);
+
                 //
                 case StylePropertyId.TextTransform:
                     return DrawEnumWithValue<TextTransform>(property, isEditable);
@@ -796,7 +804,7 @@ namespace UIForia.Editor {
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new OffsetMeasurement(value, unit)) : property;
         }
-        
+
         private static StyleProperty DrawMeasurement(StyleProperty property, bool isEditable) {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUI.enabled = isEditable;
@@ -846,8 +854,8 @@ namespace UIForia.Editor {
             else {
                 EditorGUILayout.LabelField(s_Content);
                 for (int i = 0; i < template.Count; i++) {
-                  float value = EditorGUILayout.FloatField(template[i].cell.baseSize.value);
-                  GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(template[i].cell.baseSize.unit);
+                    float value = EditorGUILayout.FloatField(template[i].cell.baseSize.value);
+                    GridTemplateUnit unit = (GridTemplateUnit) EditorGUILayout.EnumPopup(template[i].cell.baseSize.unit);
                 }
             }
 

@@ -1,9 +1,8 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Attributes;
-using UIForia.Parsing;
 using UIForia.Rendering;
 using UIForia.UIInput;
-using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Elements {
@@ -28,7 +27,6 @@ namespace UIForia.Elements {
     }
 
     [Template(TemplateType.Internal, "Elements/Select.xml")]
-    [GenericElementTypeResolvedBy(nameof(selectedValue))]
     public class Select<T> : UIElement, IFocusable {
 
         private const string disabledAttributeValue = "select-disabled";
@@ -51,52 +49,47 @@ namespace UIForia.Elements {
         public bool disableOverflowX;
         public bool disableOverflowY;
 
-        public RepeatableList<ISelectOption<T>> options;
-        private RepeatableList<ISelectOption<T>> previousOptions;
+        public IList<ISelectOption<T>> options;
+        private List<ISelectOption<T>> previousOptions;
         private Action<ISelectOption<T>, int> onInsert;
         private Action<ISelectOption<T>, int> onRemove;
         private Action onClear;
 
         public bool selecting = false;
         internal UIChildrenElement childrenElement;
-        internal ScrollView optionList;
+        internal UIElement optionList;
 
-        [WriteBinding(nameof(selectedValue))]
         public event Action<T> onValueChanged;
 
-        [WriteBinding(nameof(selectedIndex))]
         public event Action<int> onIndexChanged;
 
         [OnPropertyChanged(nameof(options))]
         private void OnSelectionChanged(string propertyName) {
-            if (previousOptions != options) {
-                if (previousOptions != null) {
-                    previousOptions.onItemInserted -= onInsert;
-                    options.onItemRemoved -= onRemove;
-                    options.onClear -= onClear;
-                }
-            }
-
-            if (options != null) {
-                options.onItemInserted += onInsert;
-                options.onItemRemoved += onRemove;
-                options.onClear += onClear;
-                for (int i = 0; i < options.Count; i++) {
-                    childrenElement.AddChild(childrenElement.InstantiateTemplate());
-                }
-
-                if (selectedIndex == -1) {
-                    for (int i = 0; i < options.Count; i++) {
-                        if (options[i].Value.Equals(selectedValue)) {
-                            selectedIndex = i;
-                            selectedValue = options[selectedIndex].Value;
-                            onIndexChanged?.Invoke(selectedIndex);
-                            onValueChanged?.Invoke(selectedValue);
-                            return;
-                        }
-                    }
-                }
-            }
+            // if (previousOptions != options) {
+            //     if (previousOptions != null) {
+            //     }
+            // }
+            //
+            // if (options != null) {
+            //     options.onItemInserted += onInsert;
+            //     options.onItemRemoved += onRemove;
+            //     options.onClear += onClear;
+            //     for (int i = 0; i < options.Count; i++) {
+            //         childrenElement.AddChild(childrenElement.InstantiateTemplate());
+            //     }
+            //
+            //     if (selectedIndex == -1) {
+            //         for (int i = 0; i < options.Count; i++) {
+            //             if (options[i].Value.Equals(selectedValue)) {
+            //                 selectedIndex = i;
+            //                 selectedValue = options[selectedIndex].Value;
+            //                 onIndexChanged?.Invoke(selectedIndex);
+            //                 onValueChanged?.Invoke(selectedValue);
+            //                 return;
+            //             }
+            //         }
+            //     }
+            // }
         }
 
         [OnPropertyChanged(nameof(selectedValue))]
@@ -143,26 +136,26 @@ namespace UIForia.Elements {
             onClear = OnClear;
             onRemove = OnRemove;
             childrenElement = FindById<UIChildrenElement>("option-children");
-            optionList = FindById<ScrollView>("option-list");
+            optionList = this["option-list"];
 
            // Application.InputSystem.RegisterFocusable(this);
         }
 
         public override void OnUpdate() {
-
-            if (!disabled && HasAttribute("disabled")) {
-                SetAttribute("disabled", null);
-                EnableAllChildren(this);
-            }
-            else if (disabled && !HasAttribute("disabled")) {
-                SetAttribute("disabled", disabledAttributeValue);
-                DisableAllChildren(this);
-            }
-
-            if (selecting) {
-                AdjustOptionPosition();
-            }
-            optionList.style.SetVisibility(selecting ? Visibility.Visible : Visibility.Hidden, StyleState.Normal);
+            //
+            // if (!disabled && HasAttribute("disabled")) {
+            //     SetAttribute("disabled", null);
+            //     EnableAllChildren(this);
+            // }
+            // else if (disabled && !HasAttribute("disabled")) {
+            //     SetAttribute("disabled", disabledAttributeValue);
+            //     DisableAllChildren(this);
+            // }
+            //
+            // if (selecting) {
+            //     AdjustOptionPosition();
+            // }
+            // optionList.style.SetVisibility(selecting ? Visibility.Visible : Visibility.Hidden, StyleState.Normal);
         }
         
         private void DisableAllChildren(UIElement element) {
@@ -310,7 +303,7 @@ namespace UIForia.Elements {
             }
             UIElement element = childrenElement.children[keyboardNavigationIndex];
             element.style.EnterState(StyleState.Hover);
-            optionList.ScrollElementIntoView(element);
+            //optionList.ScrollElementIntoView(element);
         }
 
         [OnMouseClick()]
@@ -352,19 +345,11 @@ namespace UIForia.Elements {
             // optionList.style.SetTransformPositionY(-Math.Min(maxOffset, Math.Max(offset, minOffset)), StyleState.Normal);
         }
 
-        public void SelectElement(MouseInputEvent evt) {
-            UIElement[] childrenArray = childrenElement.children.Array;
-            int count = childrenElement.children.Count;
-            for (int i = 0; i < count; i++) {
-                if (childrenArray[i].layoutResult.ScreenRect.Contains(evt.MousePosition)) {
-                    selectedIndex = i;
-                    selectedValue = options[selectedIndex].Value;
-                    onValueChanged?.Invoke(selectedValue);
-                    onIndexChanged?.Invoke(selectedIndex);
-                    break;
-                }
-            }
-
+        public void SelectElement(MouseInputEvent evt, int index) {
+            selectedIndex = index;
+            selectedValue = options[selectedIndex].Value;
+            onValueChanged?.Invoke(selectedValue);
+            onIndexChanged?.Invoke(selectedIndex);
             selecting = false;
             evt.StopPropagation();
             evt.Consume();
@@ -376,14 +361,6 @@ namespace UIForia.Elements {
 
         public void Blur() {
             selecting = false;
-        }
-
-        public override void OnDestroy() {
-            if (options != null) {
-                options.onItemInserted -= onInsert;
-                options.onItemRemoved -= onRemove;
-                options.onClear -= onClear;
-            }
         }
 
         public bool DisplaySelectedIcon(ISelectOption<T> option) {

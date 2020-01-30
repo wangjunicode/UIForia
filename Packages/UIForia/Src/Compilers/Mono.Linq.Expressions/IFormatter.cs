@@ -26,6 +26,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+using System.Text;
+
 namespace Mono.Linq.Expressions {
 
 	public interface IFormatter {
@@ -39,5 +41,8 @@ namespace Mono.Linq.Expressions {
 		void WriteIdentifier (string value, object identifier);
 		void Indent ();
 		void Dedent ();
+
+		StringBuilder GetStringBuilder();
+
 	}
 }

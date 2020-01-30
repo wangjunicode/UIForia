@@ -29,6 +29,29 @@ namespace UIForia.Compilers {
             slots.Add(slot);
         }
 
+        public CompiledSlot GetCompiledSlot(string slotName) {
+            if (slots == null) return null;
+            for (int i = slots.size - 1; i >= 0; i--) {
+            // for (int i = 0; i < slots.size; i++) {
+                if (slots.array[i].slotName == slotName) {
+                    return slots.array[i];
+                }
+            }
+
+            return null;
+        }
+
+        public bool HasChildrenSlot() {
+            if (slots == null) return false;
+            for (int i = 0; i < slots.size; i++) {
+                if (slots.array[i].slotName == "Children") {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
     }
 
 }

@@ -30,6 +30,11 @@ namespace Tests.Mocks {
             
         }
 
+        public static void Generate(bool shouldGenerate = true) {
+            s_GenerateCode = shouldGenerate;
+            s_UsePreCompiledTemplates = shouldGenerate;
+        }
+        
         public static TemplateSettings GetDefaultSettings(string appName) {
             TemplateSettings settings = new TemplateSettings();
             settings.applicationName = appName;

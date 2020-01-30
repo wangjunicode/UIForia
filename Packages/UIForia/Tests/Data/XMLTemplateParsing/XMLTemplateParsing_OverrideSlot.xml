@@ -2,9 +2,9 @@
     <Contents>
         Hello Before
         <XMLTemplateParsing_DefineSlot>
-            <Slot slot:name="my-slot">
+            <OverrideSlot:my-slot>
                 Hello Between
-            </Slot>
+            </OverrideSlot:my-slot>
         </XMLTemplateParsing_DefineSlot>
         Hello After
     </Contents>

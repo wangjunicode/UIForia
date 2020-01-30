@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using JetBrains.Annotations;
@@ -210,7 +209,8 @@ namespace UIForia.Parsing {
                 parent.AddChild(node);
                 return node;
             }
-            else if (namespacePath == "OverrideSlot") {
+            
+            if (namespacePath == "OverrideSlot") {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Override);
                 if (!(parent is ExpandedTemplateNode expanded)) {
@@ -220,7 +220,8 @@ namespace UIForia.Parsing {
                 expanded.AddSlotOverride((SlotNode) node);
                 return node;
             }
-            else if (namespacePath == "ForwardSlot") {
+            
+            if (namespacePath == "ForwardSlot") {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotForward));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Forward);
                 templateRoot.AddSlot((SlotNode) node);
@@ -513,10 +514,6 @@ namespace UIForia.Parsing {
                             }
 
                             break;
-                        // case "late":
-                        //     attributeType = AttributeType.Property;
-                        //     flags |= AttributeFlags.LateBinding;
-                        //     break;
                         case "sync":
                             attributeType = AttributeType.Property;
                             flags |= AttributeFlags.Sync;

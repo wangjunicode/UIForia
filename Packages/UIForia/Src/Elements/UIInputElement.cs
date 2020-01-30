@@ -437,7 +437,6 @@ namespace UIForia.Elements {
 
         protected Vector2 textScroll = new Vector2(0, 0);
 
-        [WriteBinding(nameof(text))]
         public event Action<string> onTextChanged;
 
         protected float keyLockTimestamp;

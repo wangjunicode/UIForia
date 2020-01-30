@@ -16,10 +16,8 @@ namespace UIForia.Parsing {
 
     public class SlotNode : TemplateNode {
 
-        public string slotName;
-        public SlotType slotType;
-
-        public CompiledSlot compiledSlot;
+        public readonly string slotName;
+        public readonly SlotType slotType;
 
         public SlotNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo, string slotName, SlotType slotType)
             : base(root, parent, processedType, attributes, templateLineInfo) {

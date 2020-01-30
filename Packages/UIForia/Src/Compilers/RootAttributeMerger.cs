@@ -21,7 +21,7 @@ namespace UIForia.Compilers {
             }
 
             if (outerAttributes == null) {
-                return null;
+                return innerAttributes;
             }
 
             StructList<AttributeDefinition> output = new StructList<AttributeDefinition>(outerAttributes.size + innerAttributes.size);

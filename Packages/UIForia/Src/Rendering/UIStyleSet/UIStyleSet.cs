@@ -66,13 +66,16 @@ namespace UIForia.Rendering {
 
                     break;
                 }
+
                 case DataType.CharArray: {
                     UIStyleGroupContainer style = metaData.ResolveStyleByName((char[]) data);
                     if (style != null) {
                         containers.Add(style);
                     }
+
                     break;
                 }
+
                 case DataType.StringList: {
                     IList<string> list = (IList<string>) data;
                     for (int i = 0; i < list.Count; i++) {
@@ -84,10 +87,12 @@ namespace UIForia.Rendering {
 
                     break;
                 }
+
                 case DataType.StyleRef: {
                     containers.Add((UIStyleGroupContainer) data);
                     break;
                 }
+
                 case DataType.StyleRefList: {
                     IList<UIStyleGroupContainer> list = (IList<UIStyleGroupContainer>) data;
                     for (int i = 0; i < list.Count; i++) {
@@ -111,7 +116,7 @@ namespace UIForia.Rendering {
         private UIStyleGroup instanceStyle;
         internal StyleState containedStates;
 
-        private readonly LightList<StyleEntry> availableStyles;
+        private readonly StructList<StyleEntry> availableStyles;
         private readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
         internal readonly IntMap<StyleProperty> propertyMap;
         internal IStyleSystem styleSystem; // needed? can reference via element
@@ -124,8 +129,8 @@ namespace UIForia.Rendering {
             this.element = element;
             this.currentState = StyleState.Normal;
             this.containedStates = StyleState.Normal;
-            this.availableStyles = new LightList<StyleEntry>();
-            this.styleGroupContainers = new LightList<UIStyleGroupContainer>();
+            this.availableStyles = new StructList<StyleEntry>(4);
+            this.styleGroupContainers = new LightList<UIStyleGroupContainer>(3);
             this.propertyMap = new IntMap<StyleProperty>();
             this.hasAttributeStyles = false;
         }
@@ -195,44 +200,33 @@ namespace UIForia.Rendering {
             LightList<StyleProperty>.Release(ref inherited);
         }
 
-        public void internal_Initialize(LightList<UIStyleGroupContainer> baseStyles) {
-            SetBaseStyles(baseStyles);
+        public void internal_AddBaseStyle(UIStyleGroupContainer style) {
+            styleGroupContainers.Add(style);
         }
 
-        internal void Initialize() {
-            throw new NotImplementedException();
-//            UITemplate originTemplate = element.OriginTemplate;
-//
-//            if (originTemplate == null) {
-//                return;
-//            }
-//
-//            UIStyleGroupContainer[] baseStyles = originTemplate.baseStyles;
-//
-//            containedStates = 0;
-//            hasAttributeStyles = false;
-//
-//            ParsedTemplate template = originTemplate.SourceTemplate;
-//
-//            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
-//            styleGroupContainers.EnsureCapacity(baseStyles.Length);
-//
-//            for (int i = 0; i < baseStyles.Length; i++) {
-//                styleGroupContainers.AddUnchecked(baseStyles[i]);
-//                CreateStyleGroups(baseStyles[i], toUpdate);
-//            }
-//
-//            // todo -- reimplement without ParsedTemplate
-////            UIStyleGroupContainer implicitStyle = template.GetImplicitStyle(element.GetDisplayName());
-////            if (implicitStyle != null) {
-////                CreateStyleGroups(implicitStyle, toUpdate);
-////            }
-//
-//            SortStyles();
-//
-//            UpdatePropertyMap(toUpdate);
-//
-//            LightList<StylePropertyId>.Release(ref toUpdate);
+        public void internal_Initialize() {
+
+            containedStates = 0;
+            hasAttributeStyles = false;
+
+            LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
+
+            if (instanceStyle != null) {
+                CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.normal, StyleType.Instance, StyleState.Normal, 0);
+                CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.hover, StyleType.Instance, StyleState.Hover, 0);
+                CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.focused, StyleType.Instance, StyleState.Focused, 0);
+                CreateStyleEntry(toUpdate, instanceStyle, instanceStyle.active, StyleType.Instance, StyleState.Active, 0);
+            }
+
+            for (int i = 0; i < styleGroupContainers.size; i++) {
+                CreateStyleGroups(styleGroupContainers.array[i], toUpdate);
+            }
+
+            SortStyles();
+
+            UpdatePropertyMap(toUpdate);
+
+            LightList<StylePropertyId>.Release(ref toUpdate);
         }
 
         private void AppendSharedStyles(LightList<UIStyleGroupContainer> updatedStyles, int index) {
@@ -258,13 +252,13 @@ namespace UIForia.Rendering {
 
         private void ResetSharedStyles(LightList<UIStyleGroupContainer> updatedStyles) {
             int count = updatedStyles.Count;
-            UIStyleGroupContainer[] updatedStyleArray = updatedStyles.Array;
+            UIStyleGroupContainer[] updatedStyleArray = updatedStyles.array;
 
             availableStyles.Clear();
             styleGroupContainers.Clear();
             ClearPropertyMap();
 
-            styleGroupContainers.EnsureCapacity(updatedStyles.Count);
+            styleGroupContainers.EnsureCapacity(updatedStyles.size);
 
             containedStates = 0;
             hasAttributeStyles = false;
@@ -284,7 +278,7 @@ namespace UIForia.Rendering {
             }
 
             styleGroupContainers.size = count;
-            
+
             SortStyles();
 
             UpdatePropertyMap(toUpdate);
@@ -716,12 +710,16 @@ namespace UIForia.Rendering {
                         switch (availableStyles[i].state) {
                             case StyleState.Normal:
                                 return $"{containerName} [Normal]";
+
                             case StyleState.Active:
                                 return $"{containerName} [Active]";
+
                             case StyleState.Hover:
                                 return $"{containerName} [Hover]";
+
                             case StyleState.Focused:
                                 return $"{containerName} [Focused]";
+
                             default:
                                 throw new ArgumentOutOfRangeException();
                         }
@@ -730,12 +728,16 @@ namespace UIForia.Rendering {
                     switch (availableStyles[i].state) {
                         case StyleState.Normal:
                             return $"<{element.GetDisplayName()}> [Normal]";
+
                         case StyleState.Active:
                             return $"<{element.GetDisplayName()}> [Active]";
+
                         case StyleState.Hover:
                             return $"<{element.GetDisplayName()}> [Hover]";
+
                         case StyleState.Focused:
                             return $"<{element.GetDisplayName()}> [Focused]";
+
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
@@ -986,11 +988,6 @@ namespace UIForia.Rendering {
             return instanceStyle;
         }
 #endif
-
-
-        public void SetBaseStyles_Dynamic(LightList<DynamicStyleList> styles) {
-            for (int i = 0; i < styles.size; i++) { }
-        }
 
         public void SetBaseStyles(LightList<UIStyleGroupContainer> styles) {
             // todo -- this could be a lot faster, this is happening every frame in dynamic bindings :(

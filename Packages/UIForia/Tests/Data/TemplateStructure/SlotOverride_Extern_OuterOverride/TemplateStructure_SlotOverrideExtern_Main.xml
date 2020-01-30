@@ -2,9 +2,9 @@
     <Contents>
 
         <TemplateStructure_SlotOverrideExternOuterOverride_Exposer>
-            <Slot slot:name="override-me">
+            <OverrideSlot:override-me>
                 Override from outer layer
-            </Slot>
+            </OverrideSlot:override-me>
         </TemplateStructure_SlotOverrideExternOuterOverride_Exposer>
         
     </Contents>

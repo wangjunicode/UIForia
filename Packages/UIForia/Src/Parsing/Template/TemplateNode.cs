@@ -75,7 +75,7 @@ namespace UIForia.Parsing {
         public TemplateNodeDebugData TemplateNodeDebugData => new TemplateNodeDebugData() {
             lineInfo = lineInfo,
             tagName = tagName,
-            fileName = root.templateShell.filePath
+            fileName = root != null ? root.templateShell.filePath : ((TemplateRootNode)this).templateShell.filePath
         };
 
 

@@ -61,11 +61,8 @@ namespace Documentation.DocumentationElements {
 
         public float num;
 
-        [WriteBinding(nameof(Value))]
         public event Action<CustomInputData> onValueChanged;
         
-        [WriteBinding(nameof(num))]
-        // (value) => parent.num = this.num;
         public event Action<float> onNumChanged;
 
         [OnPropertyChanged(nameof(Value))]

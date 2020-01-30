@@ -32,7 +32,7 @@ namespace Mono.Linq.Expressions {
 
 	public abstract class ExpressionWriter : CustomExpressionVisitor, IExpressionWriter {
 
-		readonly IFormatter formatter;
+		public readonly IFormatter formatter;
 
 		protected ExpressionWriter (IFormatter formatter)
 		{

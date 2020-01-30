@@ -6,37 +6,48 @@ namespace UIForia.Compilers {
 
     public struct TemplateScope {
 
-        public readonly Application application;
-        public readonly StructList<SlotUsage> slotInputs;
+        public Application application;
+        public StructList<SlotUsage> slotInputs;
         public UIElement innerSlotContext;
+        public readonly bool retain;
         
         [DebuggerStepThrough]
-        public TemplateScope(Application application, StructList<SlotUsage> slotInputs) {
+        public TemplateScope(Application application, bool retain) {
             this.application = application;
-            this.slotInputs = slotInputs;
+            this.slotInputs = null;
             this.innerSlotContext = null;
+            this.retain = retain;
         }
 
-        public void ForwardSlotUsage(string slotName, StructList<SlotUsage> slotList) {
-            for (int i = 0; i < slotInputs.size; i++) {
-                if (slotInputs.array[i].slotName == slotName) {
-                    slotList.Add(slotInputs.array[i]);
-                    return;
+        public void AddSlotOverride(string slotName, UIElement context, int slotId) {
+            slotInputs = slotInputs ?? StructList<SlotUsage>.Get();
+            slotInputs.Add(new SlotUsage(slotName, slotId, context));
+        }
+
+        public void AddSlotForward(TemplateScope parentScope, string slotName, UIElement context, int slotId) {
+            slotInputs = slotInputs ?? StructList<SlotUsage>.Get();
+            if (parentScope.slotInputs == null) {
+                slotInputs.Add(new SlotUsage(slotName, slotId, context));
+            }
+            else {
+                for (int i = 0; i < parentScope.slotInputs.size; i++) {
+                    if (parentScope.slotInputs.array[i].slotName == slotName) {
+                        slotInputs.Add(parentScope.slotInputs.array[i]);
+                        break;
+                    }
                 }
             }
-        }
-        
-          public void ForwardSlotUsageWithFallback(string slotName, StructList<SlotUsage> slotList, UIElement fallbackContext, int fallbackId) {
-              if (slotInputs != null) {
-                  for (int i = 0; i < slotInputs.size; i++) {
-                      if (slotInputs.array[i].slotName == slotName) {
-                          slotList.Add(slotInputs.array[i]);
-                          return;
-                      }
-                  }
-              }
 
-              slotList.Add(new SlotUsage(slotName, fallbackId, fallbackContext));
+            slotInputs.Add(new SlotUsage(slotName, slotId, context));
+        }
+
+        public void Release() {
+            if (retain) {
+                return;
+            }
+            slotInputs?.Release();
+            application = null;
+            innerSlotContext = null;
         }
 
     }

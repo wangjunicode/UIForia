@@ -1280,6 +1280,14 @@ namespace UIForia.Util {
                 return propertyInfo;
             }
 
+            Type[] interfaces = type.GetInterfaces();
+
+            for (int i = 0; i < interfaces.Length; i++) {
+                if (IsProperty(interfaces[i], memberName, out propertyInfo)) {
+                    return propertyInfo;
+                }
+            }
+
             return null;
         }
 

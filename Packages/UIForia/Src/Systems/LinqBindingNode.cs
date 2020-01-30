@@ -86,7 +86,6 @@ namespace UIForia.Systems {
             referencedContexts = new UIElement[size];
 
             int idx = 0;
-            
             for (int i = 0; i < templateScope.slotInputs.size; i++) {
                 if (templateScope.slotInputs.array[i].slotName == slotName) {
                     referencedContexts[idx++] = templateScope.slotInputs.array[i].outerContext;

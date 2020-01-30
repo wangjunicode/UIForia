@@ -2409,17 +2409,6 @@ namespace UIForia.Compilers {
             throw CompileException.UnknownAlias(aliasName);
         }
 
-        private SlotNode GetMatchingInputSlotNode(LightList<SlotNode> inputSlots, CompiledSlot accepted) {
-            for (int i = 0; i < inputSlots.size; i++) {
-                // todo -- handle aliasing
-                if (inputSlots.array[i].slotName == accepted.slotName) {
-                    return inputSlots.array[i];
-                }
-            }
-
-            return null;
-        }
-
         private static Expression CreateElement(CompilationContext ctx, TemplateNode node) {
             return ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
                 Expression.Constant(node.processedType.id),
@@ -2428,19 +2417,6 @@ namespace UIForia.Compilers {
                 Expression.Constant(CountRealAttributes(node.attributes)),
                 Expression.Constant(ctx.compiledTemplate.templateId)
             );
-        }
-
-        private Type GetExpressionType(Type rootType, Type elementType, IList<string> namespaces, string val) {
-            typeResolver.Reset();
-
-            typeResolver.SetNamespaces(namespaces);
-            typeResolver.SetSignature(new Parameter(rootType, "__root", ParameterFlags.NeverNull));
-            typeResolver.SetImplicitContext(typeResolver.GetParameter("__root"));
-            typeResolver.resolveAlias = ResolveAlias;
-            typeResolver.Setup(rootType, elementType);
-            Type retn = typeResolver.GetExpressionType(val);
-            typeResolver.Reset();
-            return retn;
         }
 
         private ProcessedType ResolveGenericElementType(IList<string> namespaces, Type rootType, TemplateNode templateNode) {

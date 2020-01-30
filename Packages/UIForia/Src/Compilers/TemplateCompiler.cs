@@ -770,6 +770,11 @@ namespace UIForia.Compilers {
             return count;
         }
 
+        // todo -- not working for slots & exposing
+        // context vars also seem not to work
+        // one issue is that repeat uses regular slot compilation, might need to change
+        // other issue is that we match slots by name, probably need unique ids for this
+        // might want to pull out Children as a formal visit concept and not just a type distinction
         private Expression CompileExpandedNode(CompilationContext ctx, ExpandedTemplateNode expandedTemplateNode) {
             ProcessedType templateType = expandedTemplateNode.processedType;
 

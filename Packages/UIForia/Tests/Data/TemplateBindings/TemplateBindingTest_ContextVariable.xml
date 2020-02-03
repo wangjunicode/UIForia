@@ -6,13 +6,13 @@
             answer = {$myVar}
             
             <TemplateBindingTest_ContextVariable_SlotExposer>
-                <OverrideSlot:some-slot>
+                <override:some-slot>
                     
                     <Text id="text-el">
                         slot answer is = {$myVar * 2}
                     </Text>
                     
-                </OverrideSlot:some-slot>
+                </override:some-slot>
             </TemplateBindingTest_ContextVariable_SlotExposer>
             
         </Div>
@@ -20,9 +20,9 @@
     </Contents>
     
     <Contents id="slotexposer">
-        <DefineSlot:some-slot>
+        <define:some-slot>
             Default
-        </DefineSlot:some-slot>
+        </define:some-slot>
     </Contents>
     
 </UITemplate>

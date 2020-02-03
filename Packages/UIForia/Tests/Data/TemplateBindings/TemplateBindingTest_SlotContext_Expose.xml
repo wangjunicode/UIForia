@@ -18,7 +18,7 @@
         
         <TemplateBindingTest_ExposeFromSlot_1>
 
-            <Children expose:exposedFieldFrom2="fieldFrom2"/>
+            <forward:Children expose:exposedFieldFrom2="fieldFrom2"/>
 
         </TemplateBindingTest_ExposeFromSlot_1>
         
@@ -28,7 +28,7 @@
         
         <TemplateBindingTest_ExposeFromSlot_0>
             
-            <Children expose:exposedFieldFrom1="fieldFrom1"/>
+            <forward:Children expose:exposedFieldFrom1="fieldFrom1"/>
             
         </TemplateBindingTest_ExposeFromSlot_0>
         
@@ -36,7 +36,7 @@
 
     <Contents id="level-0">
 
-        <Children expose:exposedFieldFrom0="fieldFrom0"/>
+        <define:Children expose:exposedFieldFrom0="fieldFrom0"/>
 
     </Contents>
 

@@ -1,9 +1,9 @@
 <UITemplate>
     <Contents>
 
-        <DefineSlot:override-me>
+        <define:override-me>
             Default slot content
-        </DefineSlot:override-me>
+        </define:override-me>
         
     </Contents>
 </UITemplate>

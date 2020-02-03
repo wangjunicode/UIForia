@@ -79,7 +79,7 @@
     <Contents id="expose_context_var_slotted_inner">
 
         <Div ctx:variable2="'hello'">
-            <Children expose:variable0="variable0" expose:variable1="variable1 + $variable2"/>
+            <define:Children expose:variable0="variable0" expose:variable1="variable1 + $variable2"/>
         </Div>
 
     </Contents>

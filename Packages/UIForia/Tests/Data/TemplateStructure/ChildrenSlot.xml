@@ -12,11 +12,11 @@
     </Contents>
 
     <Contents id="button">
-        <Children/>
+        <define:Children/>
     </Contents>
 
     <Contents id="group">
-        <Children/>
+        <define:Children/>
     </Contents>
 
 </UITemplate>

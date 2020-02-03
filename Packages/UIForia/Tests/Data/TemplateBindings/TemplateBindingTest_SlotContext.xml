@@ -12,12 +12,12 @@
 
     <Contents id="level-1">
         <TemplateBindingTest_ResolveSlotContext_0>
-            <Children attr:level-1="{ctx}"/>
+            <forward:Children attr:level-1="{ctx}"/>
         </TemplateBindingTest_ResolveSlotContext_0>
     </Contents>
 
     <Contents id="level-0">
-        <Children attr:level-0="{ctx}"/>
+        <define:Children attr:level-0="{ctx}"/>
     </Contents>
 
 </UITemplate>

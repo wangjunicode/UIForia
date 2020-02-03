@@ -3,11 +3,11 @@
 
         <TemplateStructure_SlotOverrideExternOuterOverride_Definer>
             
-            <ForwardSlot:override-me>
+            <forward:override-me>
             
                 Override from exposer layer
                 
-            </ForwardSlot:override-me>
+            </forward:override-me>
             
         </TemplateStructure_SlotOverrideExternOuterOverride_Definer>
         

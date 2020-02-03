@@ -1,7 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using NUnit.Framework;
 using Tests.Mocks;
 using UIForia;
@@ -12,36 +9,11 @@ using UIForia.Exceptions;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
-using Application = UnityEngine.Application;
 
 namespace TemplateBinding {
 
     public class TemplateBindingTests {
-
-        private bool usePreCompiledTemplates = false;
-        private bool generateCode = false;
-
-        public MockApplication Setup<T>(string appName = null) {
-            if (appName == null) {
-                StackTrace stackTrace = new StackTrace();
-                appName = stackTrace.GetFrame(1).GetMethod().Name;
-            }
-
-            TemplateSettings settings = new TemplateSettings();
-            settings.rootType = typeof(T);
-            settings.applicationName = appName;
-            settings.assemblyName = GetType().Assembly.GetName().Name;
-            settings.outputPath = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
-            settings.codeFileExtension = "generated.xml.cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
-            settings.templateResolutionBasePath = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests");
-
-            if (generateCode) {
-                TemplateCodeGenerator.Generate(typeof(T), settings);
-            }
-
-            return MockApplication.Setup(settings, usePreCompiledTemplates);
-        }
+        
 
         [Template("Data/TemplateBindings/TemplateBindingTest_BasicBinding.xml")]
         public class TemplateBindingTest_BasicBindingOuter : UIElement { }
@@ -55,7 +27,7 @@ namespace TemplateBinding {
 
         [Test]
         public void SimpleBinding() {
-            MockApplication app = Setup<TemplateBindingTest_BasicBindingOuter>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_BasicBindingOuter>();
             TemplateBindingTest_BasicBindingInner inner = (TemplateBindingTest_BasicBindingInner) app.RootElement[0];
             Assert.AreEqual(5, inner.intVal);
             app.Update();
@@ -82,7 +54,7 @@ namespace TemplateBinding {
 
         [Test]
         public void CreatedBinding() {
-            MockApplication app = Setup<TemplateBindingTest_CreatedBindingOuter>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_CreatedBindingOuter>();
 
             TemplateBindingTest_CreatedBindingOuter outer = (TemplateBindingTest_CreatedBindingOuter) app.RootElement;
             TemplateBindingTest_CreatedBindingInner inner = (TemplateBindingTest_CreatedBindingInner) app.RootElement[0];
@@ -105,7 +77,7 @@ namespace TemplateBinding {
 
         [Test]
         public void AttributeBinding() {
-            MockApplication app = Setup<TemplateBindingTest_AttributeBinding>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_AttributeBinding>();
 
             TemplateBindingTest_AttributeBinding outer = (TemplateBindingTest_AttributeBinding) app.RootElement;
             UIElement inner = outer[0];
@@ -171,7 +143,7 @@ namespace TemplateBinding {
 
         [Test]
         public void MouseHandlerBinding() {
-            MockApplication app = Setup<TemplateBindingTest_MouseBindingBinding>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_MouseBindingBinding>();
             TemplateBindingTest_MouseBindingBinding e = (TemplateBindingTest_MouseBindingBinding) app.RootElement;
             app.SetScreenSize(1000, 1000);
 
@@ -320,7 +292,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ConditionBinding() {
-            MockApplication app = Setup<TemplateBindingTest_ConditionalBinding>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_ConditionalBinding>();
             TemplateBindingTest_ConditionalBinding e = (TemplateBindingTest_ConditionalBinding) app.RootElement;
 
             app.Update();
@@ -342,7 +314,7 @@ namespace TemplateBinding {
 
         [Test]
         public void StyleBinding() {
-            MockApplication app = Setup<TemplateBindingTest_StyleBinding>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleBinding>();
             TemplateBindingTest_StyleBinding e = (TemplateBindingTest_StyleBinding) app.RootElement;
 
             app.Update();
@@ -368,7 +340,7 @@ namespace TemplateBinding {
 
         [Test]
         public void DynamicStyleBinding() {
-            MockApplication app = Setup<TemplateBindingTest_DynamicStyleBinding>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_DynamicStyleBinding>();
             TemplateBindingTest_DynamicStyleBinding e = (TemplateBindingTest_DynamicStyleBinding) app.RootElement;
 
             e.useDynamic = false;
@@ -416,7 +388,7 @@ namespace TemplateBinding {
 
         [Test]
         public void DynamicStyleBinding_UnresolvedDynamic() {
-            MockApplication app = Setup<TemplateBindingTest_UnresolvedDynamicStyle>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_UnresolvedDynamicStyle>();
             TemplateBindingTest_UnresolvedDynamicStyle e = (TemplateBindingTest_UnresolvedDynamicStyle) app.RootElement;
 
             e.val = 1;
@@ -445,7 +417,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariableBinding() {
-            MockApplication app = Setup<TemplateBindingTest_ContextVariable>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_ContextVariable>();
             TemplateBindingTest_ContextVariable e = (TemplateBindingTest_ContextVariable) app.RootElement;
 
             app.Update();
@@ -466,7 +438,7 @@ namespace TemplateBinding {
 
         [Test]
         public void LocalContextVariable() {
-            CompileException exception = Assert.Throws<CompileException>(() => { Setup<TemplateBindingTest_ContextVariableOutOfScope>(nameof(TemplateBindingTest_ContextVariableOutOfScope)); });
+            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<TemplateBindingTest_ContextVariableOutOfScope>(nameof(TemplateBindingTest_ContextVariableOutOfScope)); });
             Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("cvar0").Message));
         }
 
@@ -475,7 +447,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariable_UseAlias() {
-            MockApplication app = Setup<TemplateBindingTest_ContextVariable_UseAlias>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_ContextVariable_UseAlias>();
             TemplateBindingTest_ContextVariable_UseAlias e = (TemplateBindingTest_ContextVariable_UseAlias) app.RootElement;
 
             app.Update();
@@ -489,7 +461,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariable_UseAliasOutOfScope() {
-            CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_UseAliasOutOfScope>());
+            CompileException exception = Assert.Throws<CompileException>(() => MockApplication.Setup<TemplateBindingTest_ContextVariable_UseAliasOutOfScope>());
             Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("custom").Message));
         }
 
@@ -498,7 +470,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariable_UseAliasOnOwnContext() {
-            CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_UseAliasOnOwnContext>());
+            CompileException exception = Assert.Throws<CompileException>(() => MockApplication.Setup<TemplateBindingTest_ContextVariable_UseAliasOnOwnContext>());
             Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("custom").Message));
         }
 
@@ -510,7 +482,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariable_NonExposed_NotAvailable() {
-            CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer>(nameof(TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer)));
+            CompileException exception = Assert.Throws<CompileException>(() => MockApplication.Setup<TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer>(nameof(TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer)));
             Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("thing").Message));
         }
 
@@ -548,7 +520,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariable_Expose_OutOfScope() {
-            CompileException exception = Assert.Throws<CompileException>(() => Setup<TemplateBindingTest_ContextVariable_Expose_OutOfScope>());
+            CompileException exception = Assert.Throws<CompileException>(() => MockApplication.Setup<TemplateBindingTest_ContextVariable_Expose_OutOfScope>());
             Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("variable0").Message));
         }
 
@@ -620,7 +592,7 @@ namespace TemplateBinding {
 
         [Test]
         public void RepeatList_ArrayData() {
-            MockApplication app = Setup<TemplateBindingTest_RepeatList>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatList>();
             TemplateBindingTest_RepeatList e = (TemplateBindingTest_RepeatList) app.RootElement;
 
             e.data = new[] {
@@ -680,7 +652,7 @@ namespace TemplateBinding {
 
         [Test]
         public void RepeatList_ListData() {
-            MockApplication app = Setup<TemplateBindingTest_RepeatList>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatList>();
             TemplateBindingTest_RepeatList e = (TemplateBindingTest_RepeatList) app.RootElement;
 
             e.data = new List<Vector3>(new[] {
@@ -746,7 +718,7 @@ namespace TemplateBinding {
 
         [Test]
         public void RepeatList_KeyFn() {
-            MockApplication app = Setup<TemplateBindingTest_RepeatList_Key>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatList_Key>();
             TemplateBindingTest_RepeatList_Key e = (TemplateBindingTest_RepeatList_Key) app.RootElement;
 
             e.data = new List<Vector3>(new[] {
@@ -820,7 +792,7 @@ namespace TemplateBinding {
 
         [Test]
         public void RepeatMultiChild() {
-            MockApplication app = Setup<TemplateBindingTest_RepeatMultiChild>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatMultiChild>();
             TemplateBindingTest_RepeatMultiChild e = (TemplateBindingTest_RepeatMultiChild) app.RootElement;
             e.data = new[] {new Vector3(1, 2, 3), new Vector3(4, 5, 6)};
 
@@ -853,7 +825,7 @@ namespace TemplateBinding {
 
         [Test]
         public void SyncBinding_Sync() {
-            MockApplication app = Setup<TemplateBindingTest_SyncBinding_Sync>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_SyncBinding_Sync>();
             TemplateBindingTest_SyncBinding_Sync e = (TemplateBindingTest_SyncBinding_Sync) app.RootElement;
             TemplateBindingTest_SyncBinding_FakeInput child = (TemplateBindingTest_SyncBinding_FakeInput) e[0];
 
@@ -879,7 +851,7 @@ namespace TemplateBinding {
 
         [Test]
         public void InnerContext_Styled() {
-            MockApplication app = Setup<TemplateBindingTest_InnerContext_Outer>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_InnerContext_Outer>();
             TemplateBindingTest_InnerContext_Outer e = (TemplateBindingTest_InnerContext_Outer) app.RootElement;
             TemplateBindingTest_InnerContext_Inner child = (TemplateBindingTest_InnerContext_Inner) e[0];
 
@@ -927,7 +899,7 @@ namespace TemplateBinding {
 
         [Test]
         public void OnChange() {
-            MockApplication app = Setup<TemplateBindingTest_OnChange_Outer>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_Outer>();
             TemplateBindingTest_OnChange_Outer e = (TemplateBindingTest_OnChange_Outer) app.RootElement;
             TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
 
@@ -953,7 +925,7 @@ namespace TemplateBinding {
 
         [Test]
         public void OnChange_WithOldValue() {
-            MockApplication app = Setup<TemplateBindingTest_OnChange_WithOldValue>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_WithOldValue>();
             TemplateBindingTest_OnChange_WithOldValue e = (TemplateBindingTest_OnChange_WithOldValue) app.RootElement;
             TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
 
@@ -980,7 +952,7 @@ namespace TemplateBinding {
 
         [Test]
         public void OnChange_WithNewValue() {
-            MockApplication app = Setup<TemplateBindingTest_OnChange_WithNewValue>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_WithNewValue>();
             TemplateBindingTest_OnChange_WithNewValue e = (TemplateBindingTest_OnChange_WithNewValue) app.RootElement;
             TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
 
@@ -1008,7 +980,7 @@ namespace TemplateBinding {
 
         [Test]
         public void OnChange_WithSync() {
-            MockApplication app = Setup<TemplateBindingTest_OnChange_WithSync>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_WithSync>();
             TemplateBindingTest_OnChange_WithSync e = (TemplateBindingTest_OnChange_WithSync) app.RootElement;
             TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
 
@@ -1043,7 +1015,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ResolveGeneric() {
-            MockApplication app = Setup<TemplateBindingTest_ResolveGeneric_Outer>();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_ResolveGeneric_Outer>();
             TemplateBindingTest_ResolveGeneric_Outer e = (TemplateBindingTest_ResolveGeneric_Outer) app.RootElement;
             Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[0]);
             Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[1]);
@@ -1179,19 +1151,19 @@ namespace TemplateBinding {
 
         [Test]
         public void DefineSlotInsideOverride() {
-            MockApplication.Generate();
             MockApplication app = MockApplication.Setup<TemplateBindingTest_DefineSlotInsideOverride_Main>();
-            return;
             TemplateBindingTest_DefineSlotInsideOverride_Main e = (TemplateBindingTest_DefineSlotInsideOverride_Main) app.RootElement;
 
             UIElement slotRoot = e[0][0][0][0];
+            UIElement div = slotRoot[0];
+            UIElement slotRoot2 = div[0];
 
-            app.Update();
-
-            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingLeft);
-            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingRight);
-            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingTop);
-            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingBottom);
+            Assert.IsInstanceOf<UISlotBase>(slotRoot);
+            Assert.IsInstanceOf<UIDivElement>(div);
+            Assert.IsInstanceOf<UISlotBase>(slotRoot2);
+            Assert.IsInstanceOf<UITextElement>(slotRoot2[0]);
+            Assert.AreEqual("children go here", GetText(slotRoot2[0]));
+            
         }
 
         public static string GetText(UIElement element) {

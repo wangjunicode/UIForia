@@ -1,7 +1,7 @@
 <UITemplate>
     <Contents>
         <Div>
-            <DefineSlot:my-slot/>
+            <define:my-slot/>
         </Div>
     </Contents>
 </UITemplate>

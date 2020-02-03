@@ -7,9 +7,7 @@ namespace UIForia.Parsing {
     public enum SlotType {
 
         Define,
-        Children,
         Forward,
-        Template,
         Override
 
     }

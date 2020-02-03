@@ -12,9 +12,9 @@
 
         <TestTemplateStructure_UseDefaultSlotContent_Inner str="'from default slot'">
 
-            <OverrideSlot:Slot0>
+            <override:Slot0>
                 from override slot
-            </OverrideSlot:Slot0>
+            </override:Slot0>
 
         </TestTemplateStructure_UseDefaultSlotContent_Inner>
 
@@ -22,9 +22,9 @@
 
     <Contents id="slot_definer">
 
-        <DefineSlot:Slot0>
+        <define:Slot0>
             {str}
-        </DefineSlot:Slot0>
+        </define:Slot0>
 
     </Contents>
 
@@ -36,9 +36,9 @@
     
     <Contents id="use_default_children_inner">
 
-        <Children>
+        <define:Children>
             default children
-        </Children>
+        </define:Children>
 
     </Contents>
     
@@ -52,9 +52,9 @@
     
     <Contents id="override_children_inner">
 
-        <Children>
+        <define:Children>
             default children
-        </Children>
+        </define:Children>
 
     </Contents>
 

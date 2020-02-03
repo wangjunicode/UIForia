@@ -64,9 +64,7 @@ namespace UIForia.Compilers {
                 }
             }
         }
-
-        public bool IsTemplate => slotType == SlotType.Template;
-
+        
     }
 
 }

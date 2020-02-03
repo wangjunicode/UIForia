@@ -34,17 +34,22 @@ namespace UIForia.Compilers {
         public string GetComment() {
             
             string retn = "Slot name=\"" + slotName + "\"";
-            if (slotType == SlotType.Define) {
-                retn += " (Default)";
-            }
-            else if (slotType == SlotType.Override) {
-                retn += " (Override" + filePath + ")";
-            }
-            else if (slotType == SlotType.Children) {
-                retn += " (Children" + filePath + ")";
+            
+            switch (slotType) {
+                case SlotType.Define:
+                    retn += " (Define) " + filePath;
+                    break;
+
+                case SlotType.Forward:
+                    retn += " (Forward) " + filePath;
+                    break;
+
+                case SlotType.Override:
+                    retn += " (Override) " + filePath;
+                    break;
             }
 
-            retn += " id = " + slotId;
+            retn += "        id = " + slotId;
             return retn;
         }
 

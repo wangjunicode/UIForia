@@ -1,9 +1,9 @@
 <UITemplate>
     <Contents>
         <TemplateStructure_SlotOverride_Expand>
-            <OverrideSlot:override-me>
+            <override:override-me>
                 Override successful
-            </OverrideSlot:override-me>
+            </override:override-me>
         </TemplateStructure_SlotOverride_Expand>
     </Contents>
 </UITemplate>

@@ -1,29 +1,59 @@
 <UITemplate>
 
-    <Style>
-        
-        style m {
-            PreferredSize = 100px;
-        }
-        
-    </Style>
-    
-    <Contents>
+    <Contents id="main">
+        <TemplateBindingTest_DefineSlotInsideOverride_2>
 
-        <Div style="m" mouse:down="HandleMouseClick_NoParams()"/>
-        
-        <Div style="m" mouse:down="HandleMouseClick_EvtParam($evt)"/>
-        
-        <Div style="m" mouse:down="HandleMouseClick_MixedParams($evt, $evt.MousePosition.x * 5)"/>
-        
-        <Div style="m" mouse:down="HandleMouseClick_NoEvtParam('string goes here', $evt.MousePosition.x * 5)"/>
-        
-        <Div style="m" mouse:down="(evt) => SetValue(evt.MousePosition.y)"/>
-        
-        <Div style="m" mouse:down="() => SetValue($evt.MousePosition.y)"/>
-        
-<!--        <TemplateBindingTest_ThingWithMouseHandler style="m" attr:id="mousedownthing"/>-->
-        
+            <override:Children>
+
+                <Text>children go here</Text>
+
+            </override:Children>
+
+            <!--            <forward:Children2/>-->
+            <!--            -->
+            <!--            <override:Children3/>-->
+            <!--            -->
+        </TemplateBindingTest_DefineSlotInsideOverride_2>
     </Contents>
-    
+
+    <Contents id="level-2">
+
+        <TemplateBindingTest_DefineSlotInsideOverride_1>
+
+            <forward:Children/>
+
+        </TemplateBindingTest_DefineSlotInsideOverride_1>
+
+    </Contents>
+
+    <Contents id="level-1">
+
+        <TemplateBindingTest_DefineSlotInsideOverride_0>
+
+            <override:Children>
+                <Div>
+                    <define:Children/>
+                </Div>
+            </override:Children>
+
+            <!--            <override:Children2>-->
+            <!--                <Group>-->
+
+            <!--                    <define:Children2>-->
+
+            <!--                        <define:Children3/>-->
+
+            <!--                    </define:Children2>-->
+
+            <!--                </Group>-->
+
+            <!--            </override:Children2>-->
+
+        </TemplateBindingTest_DefineSlotInsideOverride_0>
+    </Contents>
+
+    <Contents id="level-0">
+        <define:Children/>
+    </Contents>
+
 </UITemplate>

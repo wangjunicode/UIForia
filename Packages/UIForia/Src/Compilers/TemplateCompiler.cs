@@ -49,11 +49,15 @@ namespace UIForia.Compilers {
         private static readonly MethodInfo s_BindingNodePool_Get = typeof(LinqBindingNode).GetMethod("Get", BindingFlags.Static | BindingFlags.Public);
         private static readonly FieldInfo s_StructList_ElementAttr_Array = typeof(StructList<ElementAttribute>).GetField("array");
 
+        private static readonly FieldInfo s_SlotElement_SlotId = typeof(UISlotBase).GetField(nameof(UISlotBase.slotId));
+
         private static readonly ConstructorInfo s_TemplateScope_Ctor = typeof(TemplateScope).GetConstructor(new[] {typeof(Application), typeof(bool)});
         private static readonly FieldInfo s_TemplateScope_ApplicationField = typeof(TemplateScope).GetField(nameof(TemplateScope.application));
         private static readonly FieldInfo s_TemplateScope_InnerContext = typeof(TemplateScope).GetField(nameof(TemplateScope.innerSlotContext));
         private static readonly MethodInfo s_TemplateScope_AddSlotForward = typeof(TemplateScope).GetMethod(nameof(TemplateScope.AddSlotForward));
         private static readonly MethodInfo s_TemplateScope_AddSlotOverride = typeof(TemplateScope).GetMethod(nameof(TemplateScope.AddSlotOverride));
+        private static readonly MethodInfo s_TemplateScope_SetParentScopeList = typeof(TemplateScope).GetMethod(nameof(TemplateScope.SetParentScope));
+        private static readonly MethodInfo s_TemplateScope_GetOverrideScope = typeof(TemplateScope).GetMethod(nameof(TemplateScope.GetOverrideScope));
 
         private static readonly ConstructorInfo s_ElementAttributeCtor = typeof(ElementAttribute).GetConstructor(new[] {typeof(string), typeof(string)});
         private static readonly FieldInfo s_ElementAttributeList = typeof(UIElement).GetField("attributes", BindingFlags.Public | BindingFlags.Instance);
@@ -486,7 +490,7 @@ namespace UIForia.Compilers {
             );
 
             ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, slotNode.processedType.rawType));
-
+            ctx.Assign(Expression.Field(slotRootParam, s_SlotElement_SlotId), Expression.Constant(slotNode.slotName));
             StructList<ContextAliasActions> contextMods = CompileBindings(ctx, slotNode, attributes).contextModifications;
 
             VisitChildren(ctx, slotNode);
@@ -496,7 +500,6 @@ namespace UIForia.Compilers {
             ctx.Return(slotRootParam);
 
             compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
-
 
             return nodeExpr;
         }
@@ -554,6 +557,7 @@ namespace UIForia.Compilers {
             );
 
             ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, type));
+            ctx.Assign(Expression.Field(slotRootParam, s_SlotElement_SlotId), Expression.Constant(slotOverrideNode.slotName));
 
             LightList<ExposedVariableData> exposedVariableDataList = new LightList<ExposedVariableData>();
 
@@ -574,6 +578,7 @@ namespace UIForia.Compilers {
             SlotNode node = slotOverrideNode;
 
             MethodInfo method = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.InitializeContextArray));
+
             StructList<ContextAliasActions> contextMods = CompileBindings(ctx, node, attributes, exposedVariableDataList).contextModifications;
 
             ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(
@@ -583,6 +588,10 @@ namespace UIForia.Compilers {
                 ctx.templateScope,
                 Expression.Constant(exposedVariableDataList.size))
             );
+
+            if (slotOverrideNode.slotType == SlotType.Override) {
+                ctx.Assign(ctx.templateScope, ExpressionFactory.CallInstanceUnchecked(ctx.templateScope, s_TemplateScope_GetOverrideScope));
+            }
 
             VisitChildren(ctx, node);
 
@@ -603,84 +612,84 @@ namespace UIForia.Compilers {
         }
 
         private int CompileRepeatTemplate(CompilationContext parentContext, RepeatNode repeatNode, RepeatType repeatType, out int itemVarId, out int indexVarId) {
-            CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, "__template__", SlotType.Template);
 
             throw new NotImplementedException("Re do repeat compilation, cannot be treated as a slot");
+            // CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, "__template__", SlotType.Template);
             // parentContext.compiledTemplate.AddSlot(compiledSlot);
-
-            ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
-            ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
-            ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
-
-            CompilationContext ctx = new CompilationContext(parentContext.templateRootNode);
-
-            itemVarId = -1;
-            indexVarId = NextContextId;
-
-            if (repeatType != RepeatType.Count) {
-                itemVarId = NextContextId;
-                contextStack.Peek().Push(new ContextVariableDefinition() {
-                    name = repeatNode.GetItemVariableName(),
-                    id = itemVarId,
-                    type = repeatNode.processedType.rawType.GetGenericArguments()[0],
-                    variableType = AliasResolverType.RepeatItem
-                });
-            }
-
-            contextStack.Peek().Push(new ContextVariableDefinition() {
-                name = repeatNode.GetIndexVariableName(),
-                id = indexVarId,
-                type = typeof(int),
-                variableType = AliasResolverType.RepeatIndex
-            });
-
-            ctx.rootType = parentContext.rootType;
-            ctx.rootParam = rootParam;
-            ctx.templateScope = scopeParam;
-            ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
-            ctx.compiledTemplate = parentContext.compiledTemplate;
-            ctx.ContextExpr = rootParam;
-            ctx.namespaces = parentContext.namespaces;
-
-            ctx.Initialize(parentParam);
-
-            ctx.PushScope();
-
-            if (repeatNode.ChildCount != 1) {
-                ctx.Assign(ctx.ElementExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-                    Expression.Constant(TypeProcessor.GetProcessedType(typeof(RepeatMultiChildContainerElement)).id),
-                    ctx.ParentExpr,
-                    Expression.Constant(repeatNode.ChildCount),
-                    Expression.Constant(0),
-                    Expression.Constant(ctx.compiledTemplate.templateId)
-                ));
-                ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_BindingNodePool_Get,
-                        ctx.applicationExpr,
-                        ctx.rootParam,
-                        ctx.ElementExpr,
-                        ctx.ContextExpr,
-                        Expression.Constant(-1),
-                        Expression.Constant(-1),
-                        Expression.Constant(-1),
-                        Expression.Constant(-1)
-                    )
-                );
-                VisitChildren(ctx, repeatNode);
-                ctx.Return(ctx.ElementExpr);
-            }
-            else {
-                ctx.Return(Visit(ctx, repeatNode.children[0]));
-            }
-
-            contextStack.Peek().Pop();
-
-            if (repeatType != RepeatType.Count) {
-                contextStack.Peek().Pop();
-            }
-
-            compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
-
-            return compiledSlot.slotId;
+            //
+            // ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
+            // ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
+            // ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
+            //
+            // CompilationContext ctx = new CompilationContext(parentContext.templateRootNode);
+            //
+            // itemVarId = -1;
+            // indexVarId = NextContextId;
+            //
+            // if (repeatType != RepeatType.Count) {
+            //     itemVarId = NextContextId;
+            //     contextStack.Peek().Push(new ContextVariableDefinition() {
+            //         name = repeatNode.GetItemVariableName(),
+            //         id = itemVarId,
+            //         type = repeatNode.processedType.rawType.GetGenericArguments()[0],
+            //         variableType = AliasResolverType.RepeatItem
+            //     });
+            // }
+            //
+            // contextStack.Peek().Push(new ContextVariableDefinition() {
+            //     name = repeatNode.GetIndexVariableName(),
+            //     id = indexVarId,
+            //     type = typeof(int),
+            //     variableType = AliasResolverType.RepeatIndex
+            // });
+            //
+            // ctx.rootType = parentContext.rootType;
+            // ctx.rootParam = rootParam;
+            // ctx.templateScope = scopeParam;
+            // ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
+            // ctx.compiledTemplate = parentContext.compiledTemplate;
+            // ctx.ContextExpr = rootParam;
+            // ctx.namespaces = parentContext.namespaces;
+            //
+            // ctx.Initialize(parentParam);
+            //
+            // ctx.PushScope();
+            //
+            // if (repeatNode.ChildCount != 1) {
+            //     ctx.Assign(ctx.ElementExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
+            //         Expression.Constant(TypeProcessor.GetProcessedType(typeof(RepeatMultiChildContainerElement)).id),
+            //         ctx.ParentExpr,
+            //         Expression.Constant(repeatNode.ChildCount),
+            //         Expression.Constant(0),
+            //         Expression.Constant(ctx.compiledTemplate.templateId)
+            //     ));
+            //     ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_BindingNodePool_Get,
+            //             ctx.applicationExpr,
+            //             ctx.rootParam,
+            //             ctx.ElementExpr,
+            //             ctx.ContextExpr,
+            //             Expression.Constant(-1),
+            //             Expression.Constant(-1),
+            //             Expression.Constant(-1),
+            //             Expression.Constant(-1)
+            //         )
+            //     );
+            //     VisitChildren(ctx, repeatNode);
+            //     ctx.Return(ctx.ElementExpr);
+            // }
+            // else {
+            //     ctx.Return(Visit(ctx, repeatNode.children[0]));
+            // }
+            //
+            // contextStack.Peek().Pop();
+            //
+            // if (repeatType != RepeatType.Count) {
+            //     contextStack.Peek().Pop();
+            // }
+            //
+            // compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
+            //
+            // return compiledSlot.slotId;
         }
 
         private Expression CompileTextNode(CompilationContext ctx, TextNode textNode) {
@@ -710,7 +719,6 @@ namespace UIForia.Compilers {
 
             UndoContextMods(contextMods);
         }
-
 
         private void UndoContextMods(StructList<ContextAliasActions> mods) {
             if (mods == null || mods.size == 0) {
@@ -802,11 +810,17 @@ namespace UIForia.Compilers {
 
             BindingOutput result = CompileBindings(ctx, expandedTemplateNode, attributes);
 
+            bool didOverride = false;
+
             if (hasForwardOrOverrides) {
                 for (int i = 0; i < expandedTemplateNode.slotOverrideNodes.size; i++) {
                     SlotNode node = expandedTemplateNode.slotOverrideNodes.array[i];
 
                     CompiledSlot toOverride = innerTemplate.GetCompiledSlot(node.slotName);
+
+                    if (toOverride == null) {
+                        throw new CompileException($"Error compiling {node.TemplateNodeDebugData}: No slot called {node.slotName} was found in template for {innerTemplate.elementType.tagName} to {node.slotType}");
+                    }
 
                     Assert.IsNotNull(toOverride, "toOverride != null");
 
@@ -815,8 +829,13 @@ namespace UIForia.Compilers {
                     // its per slot... override is probably the correct place to create the array 
                     // ultimately we need the slot that runs to instantiate w/ references
 
-                    if (node.slotType == SlotType.Children) {
-                        if (innerTemplate.HasChildrenSlot()) {
+                    switch (node.slotType) {
+
+                        case SlotType.Define:
+                            // technically this can't happen, should be part of implicit <override:Children/> where it is legal.
+                            break;
+
+                        case SlotType.Forward: {
                             ctx.AddStatement(Expression.Call(
                                 hydrateScope,
                                 s_TemplateScope_AddSlotForward,
@@ -825,8 +844,11 @@ namespace UIForia.Compilers {
                                 ctx.rootParam,
                                 Expression.Constant(compiledSlot.slotId))
                             );
+                            break;
                         }
-                        else {
+
+                        case SlotType.Override: {
+                            didOverride = true;
                             ctx.AddStatement(Expression.Call(
                                 hydrateScope,
                                 s_TemplateScope_AddSlotOverride,
@@ -834,30 +856,18 @@ namespace UIForia.Compilers {
                                 ctx.rootParam,
                                 Expression.Constant(compiledSlot.slotId))
                             );
+                            break;
                         }
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
 
-                    else if (node.slotType == SlotType.Override) {
-                        ctx.AddStatement(Expression.Call(
-                            hydrateScope,
-                            s_TemplateScope_AddSlotOverride,
-                            Expression.Constant(compiledSlot.slotName), // todo -- alias as needed
-                            ctx.rootParam,
-                            Expression.Constant(compiledSlot.slotId))
-                        );
-                    }
-
-                    else if (node.slotType == SlotType.Forward) {
-                        ctx.AddStatement(Expression.Call(
-                            hydrateScope,
-                            s_TemplateScope_AddSlotForward,
-                            ctx.templateScope,
-                            Expression.Constant(compiledSlot.slotName), // todo -- alias as needed
-                            ctx.rootParam,
-                            Expression.Constant(compiledSlot.slotId))
-                        );
-                    }
                 }
+            }
+
+            if (didOverride) {
+                ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(hydrateScope, s_TemplateScope_SetParentScopeList, ctx.templateScope));
             }
 
             ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_Application_HydrateTemplate, Expression.Constant(innerTemplate.templateId), nodeExpr, hydrateScope));
@@ -1432,8 +1442,7 @@ namespace UIForia.Compilers {
                 CompileStaticSharedStyles(ctx, styleExpressions, styleIds);
             }
             else {
-                throw new NotImplementedException();
-                // CompileDynamicSharedStyles(ctx, list, innerContextSplit, styleIds);
+                CompileDynamicSharedStyles(ctx, styleExpressions, styleIds);
             }
 
             styleExpressions.Release();
@@ -1490,7 +1499,7 @@ namespace UIForia.Compilers {
             styleIds.Release();
         }
 
-        private void CompileDynamicSharedStyles(CompilationContext ctx, StructList<TextExpression> list, int innerContextSplit, LightList<StyleRefInfo> styleIds) {
+        private void CompileDynamicSharedStyles(CompilationContext ctx, StructList<StyleExpression> styleExpressionGroups, LightList<StyleRefInfo> styleIds) {
             Expression metaData = Expression.Field(updateCompiler.GetElement(), s_UIElement_TemplateMetaData);
             Expression innerMetaData = null;
 
@@ -1521,44 +1530,45 @@ namespace UIForia.Compilers {
 
             updateCompiler.SetNullCheckingEnabled(false);
 
-            for (int i = 0; i < list.size; i++) {
-                bool fromInnerContext = i <= innerContextSplit;
-
-                updateCompiler.SetImplicitContext(fromInnerContext ? updateCompiler.GetCastElement() : updateCompiler.GetCastRoot());
-
-                if (list.array[i].isExpression) {
-                    Expression templateContext = fromInnerContext ? innerMetaData : metaData;
-
-                    Expression dynamicStyleList = updateCompiler.TypeWrapStatement(s_DynamicStyleListTypeWrapper, typeof(DynamicStyleList), list.array[i].text);
-
-                    updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(dynamicStyleList, s_DynamicStyleList_Flatten, templateContext, updateStyleList));
-                }
-                else {
-                    string text = list.array[i].text;
-                    string[] splitStyles = text.Split(s_StyleSeparator);
-
-                    for (int s = 0; s < splitStyles.Length; s++) {
-                        string styleName = splitStyles[s];
-
-                        int styleId = -1;
-                        if (fromInnerContext) {
-                            Assert.IsNotNull(ctx.innerTemplate);
-                            styleId = ctx.innerTemplate.templateMetaData.ResolveStyleNameSlow(styleName);
-                        }
-                        else {
-                            styleId = ctx.compiledTemplate.templateMetaData.ResolveStyleNameSlow(styleName);
-                        }
-
-                        if (styleId >= 0) {
-                            updateCompiler.Comment(styleName);
-                            Expression target = fromInnerContext ? innerMetaData : metaData;
-                            MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(target, s_TemplateMetaData_GetStyleById, Expression.Constant(styleId));
-                            MethodCallExpression addCall = ExpressionFactory.CallInstanceUnchecked(updateStyleList, s_LightList_UIStyleGroupContainer_Add, expr);
-                            updateCompiler.RawExpression(addCall);
-                        }
-                    }
-                }
-            }
+            throw new NotImplementedException("Finish this Matt!");
+            // for (int i = 0; i < list.size; i++) {
+            //     bool fromInnerContext = i <= innerContextSplit;
+            //
+            //     updateCompiler.SetImplicitContext(fromInnerContext ? updateCompiler.GetCastElement() : updateCompiler.GetCastRoot());
+            //
+            //     if (list.array[i].isExpression) {
+            //         Expression templateContext = fromInnerContext ? innerMetaData : metaData;
+            //
+            //         Expression dynamicStyleList = updateCompiler.TypeWrapStatement(s_DynamicStyleListTypeWrapper, typeof(DynamicStyleList), list.array[i].text);
+            //
+            //         updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(dynamicStyleList, s_DynamicStyleList_Flatten, templateContext, updateStyleList));
+            //     }
+            //     else {
+            //         string text = list.array[i].text;
+            //         string[] splitStyles = text.Split(s_StyleSeparator);
+            //
+            //         for (int s = 0; s < splitStyles.Length; s++) {
+            //             string styleName = splitStyles[s];
+            //
+            //             int styleId = -1;
+            //             if (fromInnerContext) {
+            //                 Assert.IsNotNull(ctx.innerTemplate);
+            //                 styleId = ctx.innerTemplate.templateMetaData.ResolveStyleNameSlow(styleName);
+            //             }
+            //             else {
+            //                 styleId = ctx.compiledTemplate.templateMetaData.ResolveStyleNameSlow(styleName);
+            //             }
+            //
+            //             if (styleId >= 0) {
+            //                 updateCompiler.Comment(styleName);
+            //                 Expression target = fromInnerContext ? innerMetaData : metaData;
+            //                 MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(target, s_TemplateMetaData_GetStyleById, Expression.Constant(styleId));
+            //                 MethodCallExpression addCall = ExpressionFactory.CallInstanceUnchecked(updateStyleList, s_LightList_UIStyleGroupContainer_Add, expr);
+            //                 updateCompiler.RawExpression(addCall);
+            //             }
+            //         }
+            //     }
+            // }
 
             MemberExpression styleSet = Expression.Field(updateCompiler.GetElement(), s_UIElement_StyleSet);
             MethodCallExpression setBaseStyles = ExpressionFactory.CallInstanceUnchecked(styleSet, s_StyleSet_SetBaseStyles, updateStyleList);

@@ -1,10 +1,10 @@
 <UITemplate>
     <Contents>
         <Div>
-            <DefineSlot:my-slot/>
+            <define:my-slot/>
         </Div>
         <Panel>
-            <DefineSlot:my-slot/>
+            <define:my-slot/>
         </Panel>
     </Contents>
 </UITemplate>

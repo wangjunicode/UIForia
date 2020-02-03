@@ -3,8 +3,16 @@
     <Contents id="main">
         <TemplateBindingTest_DefineSlotInsideOverride_2>
 
-            <Text>children go here</Text>
+            <override:Children>
 
+                <Text>children go here</Text>
+
+            </override:Children>
+
+<!--            <forward:Children2/>-->
+<!--            -->
+<!--            <override:Children3/>-->
+<!--            -->
         </TemplateBindingTest_DefineSlotInsideOverride_2>
     </Contents>
 
@@ -19,12 +27,28 @@
     </Contents>
 
     <Contents id="level-1">
+        
         <TemplateBindingTest_DefineSlotInsideOverride_0>
+            
             <override:Children>
                 <Div>
                     <define:Children/>
                 </Div>
             </override:Children>
+
+<!--            <override:Children2>-->
+<!--                <Group>-->
+
+<!--                    <define:Children2>-->
+
+<!--                        <define:Children3/>-->
+
+<!--                    </define:Children2>-->
+
+<!--                </Group>-->
+
+<!--            </override:Children2>-->
+
         </TemplateBindingTest_DefineSlotInsideOverride_0>
     </Contents>
 

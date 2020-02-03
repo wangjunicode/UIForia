@@ -199,11 +199,11 @@ namespace UIForia.Parsing {
         }
 
         private TemplateNode ParseElementTag(TemplateRootNode templateRoot, TemplateNode parent, string namespacePath, string tagName, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
-            ProcessedType processedType = null;
+            ProcessedType processedType;
             TemplateNode node = null;
 
             string lowerNamespace = namespacePath.ToLower();
-            if (lowerNamespace == "DefineSlot" || lowerNamespace == "define") {
+            if (lowerNamespace == "define") {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Define);
                 templateRoot.AddSlot((SlotNode) node);
@@ -211,7 +211,7 @@ namespace UIForia.Parsing {
                 return node;
             }
             
-            if (lowerNamespace == "OverrideSlot" || lowerNamespace == "override") {
+            if (lowerNamespace == "override") {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Override);
                 if (!(parent is ExpandedTemplateNode expanded)) {
@@ -222,7 +222,7 @@ namespace UIForia.Parsing {
                 return node;
             }
             
-            if (lowerNamespace == "ForwardSlot" || lowerNamespace == "forward") {
+            if (lowerNamespace == "forward") {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotForward));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Forward);
                 if (!(parent is ExpandedTemplateNode expanded)) {
@@ -239,12 +239,8 @@ namespace UIForia.Parsing {
                 return node;
             }
 
-            if (string.Equals(tagName, "Children", StringComparison.Ordinal)) {
-                processedType = TypeProcessor.GetProcessedType(typeof(UIChildrenElement));
-                node = new ChildrenNode(templateRoot, parent, processedType, attributes, templateLineInfo, SlotType.Define);
-                templateRoot.AddSlot((SlotNode) node);
-                parent.AddChild(node);
-                return node;
+            if (string.IsNullOrEmpty(lowerNamespace) && string.Equals(tagName, "Children", StringComparison.Ordinal)) {
+                throw new ParseException($"Error parsing file {templateRoot.templateShell.filePath} on line {templateLineInfo}: <Children> tag is not supported. Please use an appropriate prefix `forward`, `override`, or `define`");
             }
 
             if (namespacePath == "UIForia") namespacePath = "UIForia.Elements";

@@ -6,7 +6,7 @@
 
     <Contents>
         <Group style="simple-grid">
-            <Div style="simple-cell">1</Div>
+            <Div style="simple-cell" mouse:up="() => UnityEngine.Debug.Log('working')">1</Div>
             <Div style="simple-cell">2</Div>
             <Div style="simple-cell">3</Div>
             <Div style="simple-cell">4</Div>

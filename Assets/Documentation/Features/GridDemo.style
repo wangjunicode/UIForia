@@ -1,4 +1,4 @@
-style <GridDemo> {
+style <this> {
     LayoutFitVertical = Fill;
     Padding = 5px;
     BackgroundColor = white;

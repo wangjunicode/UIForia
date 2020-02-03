@@ -226,7 +226,7 @@ MonoBehaviour:
   typeName: Documentation.Features.AnimationDemo, Assembly-CSharp, Version=0.0.0.0,
     Culture=neutral, PublicKeyToken=null
   camera: {fileID: 534669904}
-  usePreCompiledTemplates: 1
+  usePreCompiledTemplates: 0
   applicationName: Game App 2
 --- !u!4 &1506585480
 Transform:

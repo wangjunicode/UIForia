@@ -531,6 +531,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariable_Expose_Slotted() {
+            MockApplication.Generate();
             MockApplication app = MockApplication.Setup<TemplateBindingTest_ContextVariable_Expose_Slotted_Outer>();
             TemplateBindingTest_ContextVariable_Expose_Slotted_Outer e = (TemplateBindingTest_ContextVariable_Expose_Slotted_Outer) app.RootElement;
 
@@ -561,7 +562,6 @@ namespace TemplateBinding {
 
         [Test]
         public void RepeatCount() {
-            MockApplication.Generate();
             MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatCount>();
             TemplateBindingTest_RepeatCount e = (TemplateBindingTest_RepeatCount) app.RootElement;
 

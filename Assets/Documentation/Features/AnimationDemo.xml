@@ -16,7 +16,7 @@
 <!--                {$selectedOption.Label} is selected-->
 <!--            </OverrideSlot:select-display>-->
 
-            <Text style="select-label">Here is my {$option.Label}</Text>
+<!--            <Text style="select-label"> {$option.Label} Here is my item {$option.Label} </Text>-->
 
         </Select>
 

@@ -839,6 +839,9 @@ namespace UIForia {
                 contextRoot = root;
             }
 
+            // context 0 = innermost
+            // context[context.size - 1] = outermost
+            
             scope.innerSlotContext = root;
             // for each override with same name add to reference array at index?
             // will have to be careful with names but can change to unique ids when we need alias support and match on that

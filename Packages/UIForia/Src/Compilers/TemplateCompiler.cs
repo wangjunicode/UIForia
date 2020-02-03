@@ -503,6 +503,10 @@ namespace UIForia.Compilers {
             return nodeExpr;
         }
 
+        // compile slot attributes
+        // each attribute needs a depth attached to it to reference that context, not just inner/outer
+        // might need to store referenced namespaces too
+        // might need to store context stack per level
         private CompiledSlot CompileSlotOverride(CompilationContext parentContext, SlotNode slotOverrideNode, CompiledSlot toOverride, Type type = null) {
             if (type == null) type = slotOverrideNode.processedType.rawType;
 
@@ -593,7 +597,8 @@ namespace UIForia.Compilers {
         private int CompileRepeatTemplate(CompilationContext parentContext, RepeatNode repeatNode, RepeatType repeatType, out int itemVarId, out int indexVarId) {
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, "__template__", SlotType.Template);
 
-            parentContext.compiledTemplate.AddSlot(compiledSlot);
+            throw new NotImplementedException("Re do repeat compilation, cannot be treated as a slot");
+            // parentContext.compiledTemplate.AddSlot(compiledSlot);
 
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
@@ -803,6 +808,10 @@ namespace UIForia.Compilers {
 
             ctx.Assign(hydrateScope, templateScopeCtor);
 
+            ctx.innerTemplate = innerTemplate;
+            
+            BindingOutput result = CompileBindings(ctx, expandedTemplateNode, attributes);
+
             if (hasForwardOrOverrides) {
 
                 for (int i = 0; i < expandedTemplateNode.slotOverrideNodes.size; i++) {
@@ -867,10 +876,9 @@ namespace UIForia.Compilers {
 
             ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_Application_HydrateTemplate, Expression.Constant(innerTemplate.templateId), nodeExpr, hydrateScope));
 
-            ctx.innerTemplate = innerTemplate;
 
-            CompileBindings(ctx, expandedTemplateNode, attributes);
-
+            UndoContextMods(result.contextModifications);
+            
             ctx.innerTemplate = null;
 
             return nodeExpr;

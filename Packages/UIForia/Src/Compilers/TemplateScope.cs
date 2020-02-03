@@ -28,6 +28,7 @@ namespace UIForia.Compilers {
             slotInputs = slotInputs ?? StructList<SlotUsage>.Get();
             if (parentScope.slotInputs == null) {
                 slotInputs.Add(new SlotUsage(slotName, slotId, context));
+                return;
             }
             else {
                 for (int i = 0; i < parentScope.slotInputs.size; i++) {

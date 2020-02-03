@@ -158,17 +158,17 @@
             <Div style="chevron-up"/>
             <Div style="chevron-down"/>
         </Group>
-
-        <ScrollView ctx:item2="options[1]" style="select-options" attr:id="option-list" if="selecting">
+        
+        <ScrollView ctx:item="options[1]" style="select-options" attr:id="option-list" if="selecting">
             
-            <Repeat list="options" style="transclude">
+<!--            <Repeat list="options" style="transclude">-->
                 
                 <Children style="select-option-container select-option" expose:option="$item">
                     <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($item)"/>
                     <Text style="select-label">{$item.Label}</Text>
                 </Children>
                 
-            </Repeat>
+<!--            </Repeat>-->
 
         </ScrollView>
 

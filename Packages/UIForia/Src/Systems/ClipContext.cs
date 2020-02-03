@@ -72,6 +72,7 @@ namespace UIForia.Rendering {
             this.batchesToRender = new StructList<ClipBatch>();
             this.clippers = new LightList<ClipData>();
             this.meshPool = new MeshPool();
+            // todo -- dont use screen dimensions
             this.clipTexture = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
             this.countTexture = new RenderTexture(Screen.width, Screen.height, 24, RenderTextureFormat.ARGB32);
             this.clipTexture.name = "UIForia Clip Draw Texture";

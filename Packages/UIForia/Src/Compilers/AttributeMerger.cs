@@ -1,9 +1,32 @@
+using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
 
-    public static class RootAttributeMerger {
+    public static class AttributeMerger {
+
+        public static StructList<AttributeDefinition> MergeSlotAttributes(StructList<AttributeDefinition> innerAttributes, SlotAttributeData slotAttributeData, StructList<AttributeDefinition> outerAttributes) {
+            StructList<AttributeDefinition> retn = new StructList<AttributeDefinition>();
+
+            if (innerAttributes == null && outerAttributes == null) {
+                retn = new StructList<AttributeDefinition>();
+            }
+
+            if (innerAttributes != null) {
+                retn.AddRange(innerAttributes);
+            }
+
+            if (outerAttributes != null) {
+                for (int i = 0; i < outerAttributes.size; i++) {
+                    AttributeDefinition attrCopy = outerAttributes[i];
+                    attrCopy.slotAttributeData = slotAttributeData;
+                    retn.Add(attrCopy);
+                }
+            }
+
+            return retn;
+        }
 
         // Template Root attribute rules
         // - No if binding allowed
@@ -14,8 +37,8 @@ namespace UIForia.Compilers {
         // - Event subscriptions are ok
         // - Input handler declarations are ok
         // - Context variables are ok
-        
-        public static StructList<AttributeDefinition> MergeAttributes(StructList<AttributeDefinition> innerAttributes, StructList<AttributeDefinition> outerAttributes) {
+
+        public static StructList<AttributeDefinition> MergeExpandedAttributes(StructList<AttributeDefinition> innerAttributes, StructList<AttributeDefinition> outerAttributes) {
             if (innerAttributes == null) {
                 return outerAttributes;
             }

@@ -32,8 +32,8 @@ namespace UIForia.Exceptions {
             return new ParseException($"{filePath} defines a slot with the name '{slotName}' multiple times.");
         }
 
-        public static ParseException InvalidSlotOverride(string parentTag, string slotTag) {
-            return new ParseException($"Slot overrides can only be defined as a direct child of an expanded template. {parentTag} is not an expanded template and cannot support slot override {slotTag}");
+        public static ParseException InvalidSlotOverride(string verb, TemplateNodeDebugData parentData, TemplateNodeDebugData childData) {
+            return new ParseException($"Error while parsing {parentData.fileName}. Slot overrides can only be defined as a direct child of an expanded template. <{parentData.tagName}> is not an expanded template and cannot support slot {verb} <{childData.tagName}>");
         }
 
         public static ParseException MultipleSlotOverrides(string nodeSlotName) {

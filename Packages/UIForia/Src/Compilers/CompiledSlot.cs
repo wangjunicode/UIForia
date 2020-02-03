@@ -11,6 +11,7 @@ namespace UIForia.Compilers {
 
         public string filePath;
         public int slotId;
+        public int overrideDepth;
         public GUID guid;
         public string slotName;
         public SlotType slotType;

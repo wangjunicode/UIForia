@@ -23,6 +23,7 @@ namespace UIForia.Parsing {
             : base(root, parent, processedType, attributes, templateLineInfo) {
             this.slotName = slotName;
             this.slotType = slotType;
+            this.tagName = slotName;
         }
         
         public AttributeDefinition[] GetAttributes(AttributeType expose) {

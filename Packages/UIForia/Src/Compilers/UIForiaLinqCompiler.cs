@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Elements;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
@@ -16,6 +17,7 @@ namespace UIForia.Compilers {
         private ParameterExpression castElementParameter;
         private ParameterExpression castRootParameter;
         private MemberExpression inputHandlerGroup;
+        public SlotAttributeData attributeData;
 
         private Type elementType;
         private Type rootElementType;
@@ -23,7 +25,8 @@ namespace UIForia.Compilers {
         private const string k_CastElement = "__castElement";
         private const string k_CastRoot = "__castRoot";
         private UIForiaLinqCompiler parent;
-        
+        private bool attrMode;
+
         private static readonly FieldInfo s_UIElement_InputHandlerGroup = typeof(UIElement).GetField(nameof(UIElement.inputHandlers), BindingFlags.Instance | BindingFlags.Public);
 
         public void Setup(Type rootElementType, Type elementType) {
@@ -58,7 +61,23 @@ namespace UIForia.Compilers {
             return elementParameter;
         }
 
+        private ParameterExpression slotContext;
+        private ParameterExpression castSlotContext;
+
         public ParameterExpression GetRoot() {
+            if (attributeData != null) {
+                if (slotContext == null) {
+                    Parameter p = new Parameter(attributeData.slotContextType.rawType, "__slotCtx" + attributeData.slotDepth + "_cast", ParameterFlags.NeverNull);
+                    MemberExpression bindingNode = Expression.Field(GetElement(), TemplateCompiler.s_UIElement_BindingNode);
+                    MemberExpression referenceArray = Expression.Field(bindingNode, TemplateCompiler.s_LinqBindingNode_ReferencedContext);
+                    BinaryExpression index = Expression.ArrayIndex(referenceArray, Expression.Constant(attributeData.slotDepth));
+                    slotContext = AddVariableUnchecked(p, ExpressionFactory.Convert(index, attributeData.slotContextType.rawType));
+                }
+
+                return slotContext;
+            }
+
+
             if (rootParameter == null) {
                 rootParameter = GetParameter("__root");
             }
@@ -77,6 +96,18 @@ namespace UIForia.Compilers {
         }
 
         public ParameterExpression GetCastRoot() {
+            if (attributeData != null) {
+                if (castSlotContext == null) {
+                    Parameter p = new Parameter(attributeData.slotContextType.rawType, "__slotCtx" + attributeData.slotDepth + "_cast", ParameterFlags.NeverNull);
+                    MemberExpression bindingNode = Expression.Field(GetElement(), TemplateCompiler.s_UIElement_BindingNode);
+                    MemberExpression referenceArray = Expression.Field(bindingNode, TemplateCompiler.s_LinqBindingNode_ReferencedContext);
+                    BinaryExpression index = Expression.ArrayIndex(referenceArray, Expression.Constant(attributeData.slotDepth));
+                    castSlotContext = AddVariableUnchecked(p, ExpressionFactory.Convert(index, attributeData.slotContextType.rawType));
+                }
+
+                return castSlotContext;
+            }
+
             if (castRootParameter == null) {
                 Parameter p = new Parameter(rootElementType, k_CastRoot, ParameterFlags.NeverNull);
                 castRootParameter = AddVariableUnchecked(p, ExpressionFactory.Convert(GetRoot(), rootElementType));
@@ -96,6 +127,12 @@ namespace UIForia.Compilers {
         public override void Release() {
             Reset();
             s_CompilerPool.Add(this);
+        }
+
+        public void SetupAttributeData(SlotAttributeData attributeData) {
+            this.attributeData = attributeData;
+            this.castSlotContext = null;
+            this.slotContext = null;
         }
 
     }

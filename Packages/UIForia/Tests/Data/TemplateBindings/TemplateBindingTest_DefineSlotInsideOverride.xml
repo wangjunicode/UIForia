@@ -1,0 +1,35 @@
+<UITemplate>
+
+    <Contents id="main">
+        <TemplateBindingTest_DefineSlotInsideOverride_2>
+
+            <Text>children go here</Text>
+
+        </TemplateBindingTest_DefineSlotInsideOverride_2>
+    </Contents>
+
+    <Contents id="level-2">
+
+        <TemplateBindingTest_DefineSlotInsideOverride_1>
+
+            <forward:Children/>
+
+        </TemplateBindingTest_DefineSlotInsideOverride_1>
+
+    </Contents>
+
+    <Contents id="level-1">
+        <TemplateBindingTest_DefineSlotInsideOverride_0>
+            <override:Children>
+                <Div>
+                    <define:Children/>
+                </Div>
+            </override:Children>
+        </TemplateBindingTest_DefineSlotInsideOverride_0>
+    </Contents>
+
+    <Contents id="level-0">
+        <define:Children/>
+    </Contents>
+
+</UITemplate>

@@ -88,6 +88,10 @@ namespace UIForia.Compilers {
             Assembly assembly = AppDomain.CurrentDomain.GetAssemblyByName(templateSettings.assemblyName);
             Type type = assembly.GetType("UIForia.Generated.UIForiaGeneratedTemplates_" + templateSettings.StrippedApplicationName);
 
+            if (type == null) {
+                throw new ArgumentException("Trying to use precompiled templates for " + templateSettings.StrippedApplicationName + " but couldn't find the type. Maybe you need to regenerate the code?");
+            }
+            
             CompiledTemplateData compiledTemplateData = new CompiledTemplateData(templateSettings);
 
             compiledTemplateData.styleImporter.importResolutionPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);

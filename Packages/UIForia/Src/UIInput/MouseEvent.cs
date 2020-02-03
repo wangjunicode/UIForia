@@ -62,7 +62,7 @@ namespace UIForia.UIInput {
         public Vector2 ScrollDelta => source.mouseState.scrollDelta;
 
         public Vector2 MousePosition => source.mouseState.mousePosition;
-        public Vector2 MousePositionInvertY => new Vector2(source.mouseState.mousePosition.x, Screen.height - source.mouseState.mousePosition.y);
+        public Vector2 MousePositionInvertY => new Vector2(source.mouseState.mousePosition.x, source.origin.application.Height - source.mouseState.mousePosition.y);
         public Vector2 LeftMouseDownPosition => source.mouseState.leftMouseButtonState.downPosition;
         public Vector2 RightMouseDownPosition => source.mouseState.rightMouseButtonState.downPosition;
         public Vector2 MiddleMouseDownPosition => source.mouseState.middleMouseButtonState.downPosition;

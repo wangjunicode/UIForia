@@ -34,7 +34,6 @@ namespace UIForia.Compilers {
                 for (int i = 0; i < parentScope.slotInputs.size; i++) {
                     if (parentScope.slotInputs.array[i].slotName == slotName) {
                         slotInputs.Add(parentScope.slotInputs.array[i]);
-                        break;
                     }
                 }
             }

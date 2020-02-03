@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics;
+using UIForia.Compilers;
+using UIForia.Util;
 
 namespace UIForia.Parsing.Expressions {
 
@@ -40,8 +42,18 @@ namespace UIForia.Parsing.Expressions {
         StyleStateActive = 1 << 8
 
     }
-    
-    
+
+
+    public class SlotAttributeData {
+
+        public int slotDepth;
+        public ProcessedType slotContextType;
+        public ScopedContextVariable[] contextStack;
+        public LightList<string> namespaces;
+        public TemplateMetaData templateMetaData;
+
+    }
+
     [DebuggerDisplay("type={type} {key}={value}")]
     public struct AttributeDefinition {
 
@@ -52,7 +64,8 @@ namespace UIForia.Parsing.Expressions {
         public int column;
         public AttributeType type;
         public AttributeFlags flags;
-
+        public SlotAttributeData slotAttributeData;
+        
         public AttributeDefinition(string rawValue, AttributeType type, AttributeFlags flags,  string key, string value, int line = -1, int column = -1) {
             this.rawValue = rawValue;
             this.type = type;
@@ -61,6 +74,7 @@ namespace UIForia.Parsing.Expressions {
             this.value = value;
             this.line = line;
             this.column = column;
+            this.slotAttributeData = null;
         }
 
         public string StrippedValue {

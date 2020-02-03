@@ -11,6 +11,10 @@ namespace UIForia.Parsing {
         public string tagName;
         public TemplateLineInfo lineInfo;
 
+        public override string ToString() {
+            return $"<{tagName}> @ {fileName} line {lineInfo}";
+        }
+
     }
 
     public struct AttributeNodeDebugData {

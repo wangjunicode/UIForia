@@ -9,12 +9,12 @@ using LinqBinding = System.Action<UIForia.Elements.UIElement, UIForia.Elements.U
 namespace UIForia.Systems {
 
     [DebuggerTypeProxy(typeof(LinqBindingNode))]
-    internal class LinqBindingNodeDebugView  {
+    internal class LinqBindingNodeDebugView {
 
         private readonly LinqBindingNode node;
 
         public LightList<ContextVariable> localVars;
-        
+
         public LinqBindingNodeDebugView(LinqBindingNode node) {
             this.node = node;
             this.localVars = new LightList<ContextVariable>();
@@ -26,7 +26,7 @@ namespace UIForia.Systems {
         }
 
     }
-    
+
     public abstract class ContextVariable {
 
         public int id;
@@ -35,23 +35,23 @@ namespace UIForia.Systems {
         public ContextVariable reference;
 
         public bool IsReference => reference != null;
-        
+
         public abstract ContextVariable CreateReference();
 
     }
-    
+
     [DebuggerDisplay("{name} {id}")]
     public class ContextVariable<T> : ContextVariable {
 
         public T value;
-        
+
         private ContextVariable(ContextVariable<T> original) {
             this.id = original.id;
             this.name = original.name;
             this.reference = original;
             this.value = original.value;
         }
-        
+
         public ContextVariable(int id, string name, T value) {
             this.id = id;
             this.name = name;
@@ -59,7 +59,7 @@ namespace UIForia.Systems {
         }
 
         public override ContextVariable CreateReference() {
-            return new ContextVariable<T>((ContextVariable<T>)reference ?? this);
+            return new ContextVariable<T>((ContextVariable<T>) reference ?? this);
         }
 
     }
@@ -72,28 +72,35 @@ namespace UIForia.Systems {
 
         internal uint lastBeforeUpdateFrame;
         internal uint lastAfterUpdateFrame;
-        
+
         internal Action<UIElement, UIElement> createdBinding;
         internal Action<UIElement, UIElement> enabledBinding;
         internal Action<UIElement, UIElement> updateBindings;
         internal Action<UIElement, UIElement> lateBindings;
-        
+
         internal ContextVariable localVariable;
         internal LinqBindingNode parent;
         public UIElement[] referencedContexts;
 
         public void InitializeContextArray(string slotName, TemplateScope templateScope, int size) {
-            referencedContexts = new UIElement[size];
+            referencedContexts = new UIElement[size + 1];
 
-            int idx = 0;
-            for (int i = 0; i < templateScope.slotInputs.size; i++) {
+            int idx = 1;
+            
+            for (int i = templateScope.slotInputs.size - 1; i >= 0; i--) {
                 if (templateScope.slotInputs.array[i].slotName == slotName) {
                     referencedContexts[idx++] = templateScope.slotInputs.array[i].outerContext;
                 }
             }
-            
+
+            referencedContexts[0] = templateScope.innerSlotContext;
+            // for (int i = 0; i < templateScope.slotInputs.size; i++) {
+            //     if (templateScope.slotInputs.array[i].slotName == slotName) {
+            //         referencedContexts[idx++] = templateScope.slotInputs.array[i].outerContext;
+            //     }
+            // }
         }
-        
+
         public void CreateLocalContextVariable(ContextVariable variable) {
             if (localVariable == null) {
                 localVariable = variable;
@@ -112,10 +119,8 @@ namespace UIForia.Systems {
         }
 
         public ContextVariable GetContextVariable(int id) {
-            
             ContextVariable ptr = localVariable;
             while (ptr != null) {
-                
                 if (ptr.id == id) {
                     return ptr.reference ?? ptr;
                 }
@@ -124,11 +129,10 @@ namespace UIForia.Systems {
             }
 
             // if didnt find a local variable, start a search upwards
-            
+
             // if found, reference locally. should only hit this once
 
             if (parent == null) {
-                    
                 UIElement elemPtr = element.parent;
                 while (elemPtr != null) {
                     if (elemPtr.bindingNode != null) {
@@ -138,16 +142,15 @@ namespace UIForia.Systems {
 
                     elemPtr = elemPtr.parent;
                 }
-
             }
-            
+
             ContextVariable value = parent?.GetContextVariable(id);
-            
+
             // it is technically an error if we can't find the context variable, something went wrong with compilation
             Debug.Assert(value != null, nameof(value) + " != null");
-            
+
             value = value.CreateReference();
-            
+
             CreateLocalContextVariable(value);
 
             return value;
@@ -160,7 +163,7 @@ namespace UIForia.Systems {
             node.element = element;
             node.innerContext = innerContext;
             element.bindingNode = node;
-            
+
             // todo -- profile this against skip tree
             UIElement ptr = element.parent;
             while (ptr != null) {
@@ -184,7 +187,7 @@ namespace UIForia.Systems {
             if (updatedId != -1) {
                 node.updateBindings = application.templateData.bindings[updatedId];
             }
-            
+
             if (lateId != -1) {
                 node.lateBindings = application.templateData.bindings[lateId];
             }
@@ -195,7 +198,7 @@ namespace UIForia.Systems {
         public ContextVariable<T> GetRepeatItem<T>(int id) {
             return (ContextVariable<T>) GetContextVariable(id);
         }
-        
+
     }
 
 }

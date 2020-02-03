@@ -258,11 +258,11 @@ namespace TemplateBinding {
             public void SetValue2(char value) {
                 output_value2 = value;
             }
+
         }
 
         [Test]
         public void KeyboardHandlerBinding() {
-            
             MockApplication app = MockApplication.Setup<TemplateBindingTest_KeyboardBinding>();
             TemplateBindingTest_KeyboardBinding e = (TemplateBindingTest_KeyboardBinding) app.RootElement;
 
@@ -531,7 +531,6 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariable_Expose_Slotted() {
-            MockApplication.Generate();
             MockApplication app = MockApplication.Setup<TemplateBindingTest_ContextVariable_Expose_Slotted_Outer>();
             TemplateBindingTest_ContextVariable_Expose_Slotted_Outer e = (TemplateBindingTest_ContextVariable_Expose_Slotted_Outer) app.RootElement;
 
@@ -1049,6 +1048,150 @@ namespace TemplateBinding {
             Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[0]);
             Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[1]);
             Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<float>>(e[2]);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext.xml#level-2")]
+        public class TemplateBindingTest_ResolveSlotContext_2 : UIElement {
+
+            public string ctx = "level 2";
+
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext.xml#level-1")]
+        public class TemplateBindingTest_ResolveSlotContext_1 : UIElement {
+
+            public string ctx = "level 1";
+
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext.xml#level-0")]
+        public class TemplateBindingTest_ResolveSlotContext_0 : UIElement {
+
+            public string ctx = "level 0";
+
+        }
+
+        [Test]
+        public void AttributeBoundFromCorrectSlotOrigin() {
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_ResolveSlotContext_2>();
+            TemplateBindingTest_ResolveSlotContext_2 e = (TemplateBindingTest_ResolveSlotContext_2) app.RootElement;
+            UIElement slotRoot = e[0][0][0];
+            app.Update();
+
+            Assert.AreEqual("level 1", slotRoot.GetAttribute("level-1"));
+            Assert.AreEqual("level 0", slotRoot.GetAttribute("level-0"));
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext_Expose.xml#main")]
+        public class TemplateBindingTest_ExposeFromSlot_Main : UIElement { }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext_Expose.xml#level-2")]
+        public class TemplateBindingTest_ExposeFromSlot_2 : UIElement {
+
+            public string fieldFrom2 = "data from field in 2";
+
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext_Expose.xml#level-1")]
+        public class TemplateBindingTest_ExposeFromSlot_1 : UIElement {
+
+            public string fieldFrom1 = "data from field in 1";
+
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext_Expose.xml#level-0")]
+        public class TemplateBindingTest_ExposeFromSlot_0 : UIElement {
+
+            public string fieldFrom0 = "data from field in 0";
+
+        }
+
+        [Test]
+        public void ExposeDataFromNestedSlots() {
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_ExposeFromSlot_Main>();
+            TemplateBindingTest_ExposeFromSlot_Main e = (TemplateBindingTest_ExposeFromSlot_Main) app.RootElement;
+
+            UIChildrenElement slotRoot = e[0][0][0][0] as UIChildrenElement;
+
+            app.Update();
+
+            Assert.AreEqual("data from field in 0", GetText(slotRoot[0]));
+            Assert.AreEqual("data from field in 1", GetText(slotRoot[1]));
+            Assert.AreEqual("data from field in 2", GetText(slotRoot[2]));
+        }
+
+        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleFromNestedSlots.xml")]
+        public class TemplateBindingTest_StyleFromNestedSlots : UIElement { }
+
+        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleFromNestedSlots2.xml")]
+        public class TemplateBindingTest_StyleFromNestedSlots_2 : UIElement { }
+
+        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleFromNestedSlots1.xml")]
+        public class TemplateBindingTest_StyleFromNestedSlots_1 : UIElement { }
+
+        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleFromNestedSlots0.xml")]
+        public class TemplateBindingTest_StyleFromNestedSlots_0 : UIElement { }
+
+        [Test]
+        public void ApplyStylesFromNestedSlots() {
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleFromNestedSlots>();
+            TemplateBindingTest_StyleFromNestedSlots e = (TemplateBindingTest_StyleFromNestedSlots) app.RootElement;
+
+            UIElement slotRoot = e[0][0][0][0];
+
+            app.Update();
+
+            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingLeft);
+            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingRight);
+            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingTop);
+            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingBottom);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SlotInvalidUsage.xml#main")]
+        public class TemplateBindingTest_InvalidForwardSlot_Main : UIElement { }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SlotInvalidUsage.xml#level-2")]
+        public class TemplateBindingTest_InvalidForwardSlot_2 : UIElement { }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SlotInvalidUsage.xml#level-1")]
+        public class TemplateBindingTest_InvalidForwardSlot_1 : UIElement { }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_SlotInvalidUsage.xml#level-0")]
+        public class TemplateBindingTest_InvalidForwardSlot_0 : UIElement { }
+
+        [Test]
+        public void InvalidSlotForwardUsage() {
+            ParseException exception = Assert.Throws<ParseException>(() => { MockApplication.Setup<TemplateBindingTest_InvalidForwardSlot_Main>(); });
+            Assert.IsTrue(exception.Message.Contains("Slot overrides can only be defined as a direct child of an expanded template"));
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_DefineSlotInsideOverride.xml#main")]
+        public class TemplateBindingTest_DefineSlotInsideOverride_Main : UIElement { }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_DefineSlotInsideOverride.xml#level-2")]
+        public class TemplateBindingTest_DefineSlotInsideOverride_2 : UIElement { }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_DefineSlotInsideOverride.xml#level-1")]
+        public class TemplateBindingTest_DefineSlotInsideOverride_1 : UIElement { }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_DefineSlotInsideOverride.xml#level-0")]
+        public class TemplateBindingTest_DefineSlotInsideOverride_0 : UIElement { }
+
+        [Test]
+        public void DefineSlotInsideOverride() {
+            MockApplication.Generate();
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_DefineSlotInsideOverride_Main>();
+            return;
+            TemplateBindingTest_DefineSlotInsideOverride_Main e = (TemplateBindingTest_DefineSlotInsideOverride_Main) app.RootElement;
+
+            UIElement slotRoot = e[0][0][0][0];
+
+            app.Update();
+
+            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingLeft);
+            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingRight);
+            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingTop);
+            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingBottom);
         }
 
         public static string GetText(UIElement element) {

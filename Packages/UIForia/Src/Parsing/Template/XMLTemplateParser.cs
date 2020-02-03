@@ -202,7 +202,8 @@ namespace UIForia.Parsing {
             ProcessedType processedType = null;
             TemplateNode node = null;
 
-            if (namespacePath == "DefineSlot") {
+            string lowerNamespace = namespacePath.ToLower();
+            if (lowerNamespace == "DefineSlot" || lowerNamespace == "define") {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Define);
                 templateRoot.AddSlot((SlotNode) node);
@@ -210,20 +211,23 @@ namespace UIForia.Parsing {
                 return node;
             }
             
-            if (namespacePath == "OverrideSlot") {
+            if (lowerNamespace == "OverrideSlot" || lowerNamespace == "override") {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Override);
                 if (!(parent is ExpandedTemplateNode expanded)) {
-                    throw ParseException.InvalidSlotOverride(parent.originalString, node.originalString);
+                    throw ParseException.InvalidSlotOverride("override", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
                 }
 
                 expanded.AddSlotOverride((SlotNode) node);
                 return node;
             }
             
-            if (namespacePath == "ForwardSlot") {
+            if (lowerNamespace == "ForwardSlot" || lowerNamespace == "forward") {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotForward));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Forward);
+                if (!(parent is ExpandedTemplateNode expanded)) {
+                    throw ParseException.InvalidSlotOverride("forward", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
+                }
                 templateRoot.AddSlot((SlotNode) node);
                 parent.AddChild(node);
                 return node;
@@ -237,7 +241,7 @@ namespace UIForia.Parsing {
 
             if (string.Equals(tagName, "Children", StringComparison.Ordinal)) {
                 processedType = TypeProcessor.GetProcessedType(typeof(UIChildrenElement));
-                node = new ChildrenNode(templateRoot, parent, processedType, attributes, templateLineInfo);
+                node = new ChildrenNode(templateRoot, parent, processedType, attributes, templateLineInfo, SlotType.Define);
                 templateRoot.AddSlot((SlotNode) node);
                 parent.AddChild(node);
                 return node;

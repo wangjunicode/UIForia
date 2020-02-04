@@ -2192,7 +2192,7 @@ namespace UIForia.Compilers {
             SetImplicitContext(compiler, attr);
 
             ParameterExpression element = compiler.GetElement();
-            Expression value = compiler.Value(attr.StrippedValue);
+            Expression value = compiler.TypedValue(typeof(string), attr.StrippedValue);
 
             if (value.Type != typeof(string)) {
                 value = ExpressionFactory.CallInstanceUnchecked(value, value.Type.GetMethod("ToString", Type.EmptyTypes));

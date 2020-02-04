@@ -2255,6 +2255,17 @@ namespace UIForia.Compilers {
                     throw new CompileException($"Bad ternary, expected the right hand side to be a TernarySelection but it was {select.operatorType}");
                 }
 
+             
+                
+                if (targetType == null) {
+                    Type leftType = GetExpressionType(select.left);
+                    Type rightType = select.right.type == ASTNodeType.DefaultLiteral ? leftType : GetExpressionType(@select.right);
+                    
+                    if (leftType == rightType || leftType.IsAssignableFrom(rightType)) {
+                        targetType = leftType;
+                    }
+                }
+                
                 Debug.Assert(targetType != null);
 
                 // if target type is null & left type & right type are not compatible, error
@@ -2290,7 +2301,8 @@ namespace UIForia.Compilers {
                 Type t = TypeProcessor.ResolveType(typeNode.typeLookup, namespaces);
                 return Expression.TypeIs(left, t);
             }
-            else if (operatorNode.operatorType == OperatorType.As) {
+            
+            if (operatorNode.operatorType == OperatorType.As) {
                 TypeNode typeNode = (TypeNode) operatorNode.right;
                 Type t = TypeProcessor.ResolveType(typeNode.typeLookup, namespaces);
                 return Expression.TypeAs(left, t);
@@ -2306,7 +2318,7 @@ namespace UIForia.Compilers {
                 if (invalidOp.Message.Contains("is not defined for the types")) {
                     throw CompileException.MissingBinaryOperator(operatorNode.operatorType, left.Type, right.Type);
                 }
-                else throw;
+                throw;
             }
         }
 
@@ -2809,6 +2821,20 @@ namespace UIForia.Compilers {
             SetNullCheckingEnabled(false);
             SetOutOfBoundsCheckingEnabled(false);
             Expression expr = Statement(expression);
+            SetNullCheckingEnabled(wasNullChecking);
+            SetOutOfBoundsCheckingEnabled(wasBoundsChecking);
+            addingStatements = wasAddingStatements;
+            return expr.Type;
+        }
+        
+        public Type GetExpressionType(ASTNode node) {
+            bool wasAddingStatements = addingStatements;
+            addingStatements = false;
+            bool wasNullChecking = shouldNullCheck;
+            bool wasBoundsChecking = shouldBoundsCheck;
+            SetNullCheckingEnabled(false);
+            SetOutOfBoundsCheckingEnabled(false);
+            Expression expr = Statement(node);
             SetNullCheckingEnabled(wasNullChecking);
             SetOutOfBoundsCheckingEnabled(wasBoundsChecking);
             addingStatements = wasAddingStatements;

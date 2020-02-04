@@ -15,8 +15,8 @@ namespace UIForia.Parsing {
             for (int i = 0; i < attributes.size; i++) {
                 ref AttributeDefinition attr = ref attributes.array[i];
                 if (attr.type == AttributeType.ImplicitVariable) {
-                    if (attr.key == "item") {
-                        return attr.value.Trim();
+                    if (attr.value == "item") {
+                        return attr.key;
                     }
                 }
             }
@@ -32,8 +32,8 @@ namespace UIForia.Parsing {
             for (int i = 0; i < attributes.size; i++) {
                 ref AttributeDefinition attr = ref attributes.array[i];
                 if (attr.type == AttributeType.ImplicitVariable) {
-                    if (attr.key == "index") {
-                        return attr.value.Trim();
+                    if (attr.value == "index") {
+                        return attr.key;
                     }
                 }
             }

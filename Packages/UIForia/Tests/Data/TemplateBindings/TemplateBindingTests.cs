@@ -13,7 +13,6 @@ using UnityEngine;
 namespace TemplateBinding {
 
     public class TemplateBindingTests {
-        
 
         [Template("Data/TemplateBindings/TemplateBindingTest_BasicBinding.xml")]
         public class TemplateBindingTest_BasicBindingOuter : UIElement { }
@@ -1163,7 +1162,39 @@ namespace TemplateBinding {
             Assert.IsInstanceOf<UISlotBase>(slotRoot2);
             Assert.IsInstanceOf<UITextElement>(slotRoot2[0]);
             Assert.AreEqual("children go here", GetText(slotRoot2[0]));
-            
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_NestedRepeat.xml")]
+        public class TemplateBindingTest_NestedRepeat : UIElement {
+
+            public List<NestedRepeatData> data;
+
+        }
+
+        public struct NestedRepeatData {
+
+            public List<string> data;
+
+        }
+
+        [Test]
+        public void NestedRepeat() {
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_NestedRepeat>();
+            TemplateBindingTest_NestedRepeat e = (TemplateBindingTest_NestedRepeat) app.RootElement;
+
+            e.data = new List<NestedRepeatData>();
+            e.data.Add(new NestedRepeatData() {
+                data = new List<string>() {"one", "two", "three"}
+            });
+            app.Update();
+
+            Assert.IsInstanceOf<UIRepeatElement<NestedRepeatData>>(e[0]);
+            Assert.IsInstanceOf<UIRepeatElement<string>>(e[0][0][0]);
+            var repeat = e[0][0][0];
+            Assert.AreEqual(3, repeat.ChildCount);
+            Assert.AreEqual("one", GetText(repeat[0]));
+            Assert.AreEqual("two", GetText(repeat[1]));
+            Assert.AreEqual("three", GetText(repeat[2]));
         }
 
         public static string GetText(UIElement element) {

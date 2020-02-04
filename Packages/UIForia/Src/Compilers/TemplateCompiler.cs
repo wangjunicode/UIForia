@@ -1795,8 +1795,7 @@ namespace UIForia.Compilers {
             int updateBindingId = -1;
             int lateBindingId = -1;
 
-          
-            
+
             // we always have 4 statements because of Initialize(), so only consider compilers with more than 4 statements
 
             if (createdCompiler.StatementCount > 0) {
@@ -1826,9 +1825,9 @@ namespace UIForia.Compilers {
                 lateBindingId = lateBinding.bindingId;
                 ctx.compiledTemplate.AddBinding(lateBinding);
             }
-            
+
             if (templateNode is SlotNode slotNode) {
-                     ctx.AddStatement(Expression.Call(null, s_LinqBindingNode_GetSlotNode,
+                ctx.AddStatement(Expression.Call(null, s_LinqBindingNode_GetSlotNode,
                         ctx.applicationExpr,
                         ctx.rootParam,
                         ctx.ElementExpr,
@@ -2491,6 +2490,10 @@ namespace UIForia.Compilers {
             ContextVariableDefinition contextVar = FindContextByName(aliasName);
 
             if (contextVar != null) {
+                if (resolvingTypeOnly) {
+                    return contextVar.ResolveType(compiler);
+                }
+
                 return contextVar.Resolve(compiler);
             }
 
@@ -2507,6 +2510,8 @@ namespace UIForia.Compilers {
             );
         }
 
+        private bool resolvingTypeOnly;
+
         private ProcessedType ResolveGenericElementType(IList<string> namespaces, Type rootType, TemplateNode templateNode) {
             ProcessedType processedType = templateNode.processedType;
 
@@ -2517,7 +2522,7 @@ namespace UIForia.Compilers {
             Type[] resolvedTypes = new Type[arguments.Length];
 
             typeResolver.Reset();
-
+            resolvingTypeOnly = true;
             typeResolver.SetNamespaces(namespaces);
             typeResolver.SetSignature(new Parameter(rootType, "__root", ParameterFlags.NeverNull));
             typeResolver.SetImplicitContext(typeResolver.GetParameter("__root"));
@@ -2555,6 +2560,7 @@ namespace UIForia.Compilers {
 
             Type newType = ReflectionUtil.CreateGenericType(processedType.rawType, resolvedTypes);
             ProcessedType retn = TypeProcessor.AddResolvedGenericElementType(newType, processedType.templateAttr, processedType.tagName);
+            resolvingTypeOnly = false;
             return retn;
 
             bool ValidForGenericResolution(Type checkType) {

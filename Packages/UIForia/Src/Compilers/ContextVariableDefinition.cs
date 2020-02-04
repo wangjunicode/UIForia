@@ -23,9 +23,10 @@ namespace UIForia.Compilers {
             if (nameList == null) {
                 nameList = new LightList<string>(4);
             }
+
             nameList.Add(alias);
         }
-        
+
         public string GetName() {
             if (nameList != null && nameList.size > 0) {
                 return nameList.Last;
@@ -104,7 +105,24 @@ namespace UIForia.Compilers {
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
+
+        public Expression ResolveType(LinqCompiler _compiler) {
+            UIForiaLinqCompiler compiler = (UIForiaLinqCompiler) _compiler;
+            switch (variableType) {
+                case AliasResolverType.ContextVariable: {
+                    return compiler.AddVariable(type, "ctxvar_" + GetName());;
+                }
+                case AliasResolverType.RepeatItem: {
+                    return compiler.AddVariable(type, "repeat_item_" + GetName());
+                }
+                case AliasResolverType.RepeatIndex: {
+                    return compiler.AddVariable(typeof(int), "ctxvar_" + GetName());
+                }
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
     }
 
 }

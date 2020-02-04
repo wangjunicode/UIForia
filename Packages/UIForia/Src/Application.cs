@@ -23,7 +23,7 @@ namespace UIForia {
         private static SizeInt UIApplicationSize;
 
         public static float dpiScaleFactor = Mathf.Max(1, Screen.dpi / 100f);
-        
+
         public static readonly float originalDpiScaleFactor = Mathf.Max(1, Screen.dpi / 100f);
 
         public static SizeInt UiApplicationSize => UIApplicationSize;
@@ -84,6 +84,8 @@ namespace UIForia {
 
         private int NextElementId => elementIdGenerator++;
 
+        public TemplateMetaData[] zz_Internal_TemplateMetaData => templateData.templateMetaData;
+
         private TemplateSettings templateSettings;
         private bool isPreCompiled;
 
@@ -135,7 +137,7 @@ namespace UIForia {
                 templateData = TemplateLoader.LoadRuntimeTemplates(templateSettings.rootType, templateSettings);
             }
 
-            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this, false));
+            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this));
 
             view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Width, Height));
 
@@ -150,7 +152,7 @@ namespace UIForia {
             Func<UIElement, TemplateScope, UIElement> template = templateData.GetTemplate<T>();
 
             if (template != null) {
-                UIElement element = template.Invoke(null, new TemplateScope(this, false));
+                UIElement element = template.Invoke(null, new TemplateScope(this));
                 UIView view = new UIView(this, name, element, matrix, size);
                 views.Add(view);
 
@@ -208,7 +210,6 @@ namespace UIForia {
         public float Height => UiApplicationSize.height / dpiScaleFactor;
 
         public void SetCamera(Camera camera) {
-
             Rect rect = camera.pixelRect;
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
@@ -230,7 +231,6 @@ namespace UIForia {
         }
 
         public void Refresh() {
-
             if (isPreCompiled) {
                 Debug.Log("Cannot refresh application because it is using precompiled templates");
                 return;
@@ -357,7 +357,6 @@ namespace UIForia {
         private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
 
         public void Update() {
-
             Rect rect = Camera?.pixelRect ?? new Rect(0, 0, 1920, 1080); //UIApplicationSize.width, UIApplicationSize.height);
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
@@ -375,7 +374,6 @@ namespace UIForia {
             bindingTimer.Reset();
             bindingTimer.Start();
             while (loop) {
-
                 linqBindingSystem.BeforeUpdate(activeBuffer); // normal bindings + OnBeforeUpdate call 
 
                 if (firstRun) {
@@ -682,7 +680,7 @@ namespace UIForia {
             // throw new NotImplementedException("Re design this not to use style importer");
         }
 
-        internal void InitializeElement(UIElement child) {
+        private void InitializeElement(UIElement child) {
             bool parentEnabled = child.parent.isEnabled;
 
             UIView view = child.parent.View;
@@ -843,7 +841,7 @@ namespace UIForia {
 
             // context 0 = innermost
             // context[context.size - 1] = outermost
-            
+
             scope.innerSlotContext = root;
             // for each override with same name add to reference array at index?
             // will have to be careful with names but can change to unique ids when we need alias support and match on that
@@ -854,7 +852,9 @@ namespace UIForia {
 
         public UIElement CreateTemplate(int templateSpawnId, UIElement contextRoot, UIElement parent, TemplateScope scope) {
             UIElement retn = templateData.slots[templateSpawnId](contextRoot, parent, scope);
-            retn.View = parent.View;
+            
+            InitializeElement(retn);
+
             return retn;
         }
 
@@ -900,7 +900,7 @@ namespace UIForia {
 
             for (int i = 0; i < slotList.size; i++) {
                 if (slotList.array[i].slotName == slotName) {
-                    contextRoot = slotList.array[i].outerContext;
+                    contextRoot = slotList.array[i].context;
                     return slotList.array[i].slotId;
                 }
             }

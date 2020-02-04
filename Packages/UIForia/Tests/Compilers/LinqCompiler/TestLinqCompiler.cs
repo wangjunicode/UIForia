@@ -233,7 +233,7 @@ public class TestLinqCompiler {
                 }
             });
 
-            compiler.Log();
+            // // compiler.Log();
             return compiler.BuildLambda();
         }
 
@@ -255,7 +255,7 @@ public class TestLinqCompiler {
         LinqCompiler compiler = new LinqCompiler();
         compiler.SetSignature<float>();
         compiler.Return("5f");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         () => 
         {
@@ -271,7 +271,7 @@ public class TestLinqCompiler {
             new Parameter<LinqThing>("thing")
         );
         compiler.Return("thing.floatValue");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
@@ -301,7 +301,7 @@ public class TestLinqCompiler {
             new Parameter<LinqThing>("thing", ParameterFlags.NeverNull)
         );
         compiler.Return("thing.floatValue");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
@@ -324,7 +324,7 @@ public class TestLinqCompiler {
             new Parameter<LinqThing>("thing")
         );
         compiler.Return("thing.vec3Array[0].x");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
@@ -347,7 +347,7 @@ public class TestLinqCompiler {
             new Parameter<LinqThing>("thing")
         );
         compiler.Return("thing.vec3Array[0].x");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
@@ -388,7 +388,7 @@ public class TestLinqCompiler {
             new Parameter<LinqThing>("thing")
         );
         compiler.Return("thing.vec3Array[0].x");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
@@ -428,7 +428,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing", ParameterFlags.NeverNull));
         compiler.Return("thing.vec3Array[1]");
         Assert.AreEqual(thing.vec3Array[1], compiler.Compile<Func<LinqThing, Vector3>>()(thing));
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
@@ -454,7 +454,7 @@ public class TestLinqCompiler {
 
         compiler.SetSignature<Vector3>(new Parameter<LinqThing>("thing"));
         compiler.Return("thing.vec3Array[1 + 1]");
-        compiler.Log();
+        // compiler.Log();
         Assert.AreEqual(thing.vec3Array[2], compiler.Compile<Func<LinqThing, Vector3>>()(thing));
         compiler.Reset();
 
@@ -488,7 +488,7 @@ public class TestLinqCompiler {
         );
 
         compiler.Return("thing.vec3Array[arg0 + thing.intVal - arg1]");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
         {
@@ -539,7 +539,7 @@ public class TestLinqCompiler {
 
         compiler.SetOutOfBoundsCheckingEnabled(false);
         compiler.Return("thing.vec3Array[arg0 + thing.intVal - arg1]");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
         {
@@ -585,7 +585,7 @@ public class TestLinqCompiler {
         compiler.SetOutOfBoundsCheckingEnabled(false);
         compiler.SetNullCheckingEnabled(false);
         compiler.Return("thing.vec3Array[arg0 + thing.intVal - arg1]");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
         {
@@ -618,7 +618,7 @@ public class TestLinqCompiler {
         compiler.SetNullCheckingEnabled(false);
 
         compiler.Return("thing.vec3Array?[arg0 + thing.intVal - arg1] ?? Vector3.one");
-        compiler.Log();
+        // compiler.Log();
 
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
@@ -722,7 +722,7 @@ public class TestLinqCompiler {
         });
 
         compiler.Return("thing.floatValue + thing2.floatValue");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing, TestLinqCompiler.LinqThing thing2, TestLinqCompiler.ExpressionErrorLogger logger) =>
         {
@@ -779,7 +779,7 @@ public class TestLinqCompiler {
         element1.intVal = 12044;
 
         Assert.AreEqual(element.intVal, fn(element)());
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root) =>
         {
@@ -813,7 +813,7 @@ public class TestLinqCompiler {
 
         compiler.SetSignature<Func<LinqThing, int>>(new Parameter<LinqThing>("root"));
         compiler.Return("(el) => root.intVal + el.intVal");
-        compiler.Log();
+        // compiler.Log();
         Func<LinqThing, Func<LinqThing, int>> fn2 = compiler.Compile<Func<LinqThing, Func<LinqThing, int>>>();
         Assert.AreEqual(element.intVal + element1.intVal, fn2(element)(element1));
     }
@@ -840,7 +840,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<string>();
 
         compiler.Return("'str0' + 'str1'");
-        compiler.Log();
+        // compiler.Log();
         Assert.AreEqual("str0str1", compiler.Compile<Func<string>>()());
     }
 
@@ -851,7 +851,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<string>();
 
         compiler.Return("'str0' + 1");
-        compiler.Log();
+        // compiler.Log();
 
         Assert.AreEqual("str01", compiler.Compile<Func<string>>()());
     }
@@ -863,7 +863,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<string>();
 
         compiler.Return("0 + 'str1'");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         () =>
         {
@@ -880,7 +880,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<string>(new Parameter<Tuple<string>>("s"));
         compiler.Return("s.Item1 + 1");
         Tuple<string> s = new Tuple<string>("hello");
-        compiler.Log();
+        // compiler.Log();
         Assert.AreEqual("hello1", compiler.Compile<Func<Tuple<string>, string>>()(s));
     }
 
@@ -919,7 +919,7 @@ public class TestLinqCompiler {
         LinqThing thing = new LinqThing();
         thing.svHolderVec3.value.z = 12;
         Assert.AreEqual(12, fn(thing));
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root) => 
         {
@@ -968,7 +968,7 @@ public class TestLinqCompiler {
         thing.nestedValueHolder.value = new ValueHolder<Vector3>();
         thing.nestedValueHolder.value.value = new Vector3(10, 11, 12);
         Assert.AreEqual(12, fn(thing));
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root) =>
         {
@@ -1267,7 +1267,7 @@ public class TestLinqCompiler {
         compiler.SetOutOfBoundsCheckingEnabled(false);
         compiler.Return("root.vec3List?[3].z ?? 2f");
 
-        compiler.Log();
+        // compiler.Log();
         root.vec3List = new List<Vector3>(new[] {
             new Vector3(),
             new Vector3(),
@@ -1847,7 +1847,7 @@ public class TestLinqCompiler {
         compiler.AddNamespace("System.Collections");
         compiler.SetSignature<IList>(new Parameter<LinqThing>("thing", ParameterFlags.NeverNull));
         compiler.Return("thing.vec3Array as IList");
-        compiler.Log();
+        // compiler.Log();
         Assert.AreEqual(thing.vec3Array, compiler.Compile<Func<LinqThing, IList>>()(thing));
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
@@ -1876,7 +1876,7 @@ public class TestLinqCompiler {
         compiler.AddNamespace("System.Collections.Generic");
         compiler.AddNamespace("UnityEngine");
         compiler.Return("(IReadOnlyList<Vector3>)thing.vec3Array");
-        compiler.Log();
+        // compiler.Log();
         Assert.AreEqual(thing.vec3Array, compiler.Compile<Func<LinqThing, IReadOnlyList<Vector3>>>()(thing));
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
@@ -1996,7 +1996,7 @@ public class TestLinqCompiler {
         LinqCompiler compiler = new LinqCompiler();
         compiler.SetSignature<float>();
         compiler.Return("UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatValue");
-        compiler.Log();
+        // compiler.Log();
         Assert.AreEqual(NamespaceTestClass.FloatValue, compiler.Compile<Func<float>>()());
         AssertStringsEqual(@"
         () =>
@@ -2008,7 +2008,7 @@ public class TestLinqCompiler {
         compiler.Reset();
         compiler.SetSignature<float>();
         compiler.Return("UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatArray[0]");
-        compiler.Log();
+        // compiler.Log();
 
         Assert.AreEqual(NamespaceTestClass.FloatArray[0], compiler.Compile<Func<float>>()());
         AssertStringsEqual(@"
@@ -2120,7 +2120,7 @@ public class TestLinqCompiler {
 
         compiler.SetSignature<Vector3>(new Parameter<LinqThing>("root", ParameterFlags.NeverNull));
         compiler.Return("root.GetVectorValue()");
-        compiler.Log();
+        // compiler.Log();
         LinqThing thing = new LinqThing();
         thing.svHolderVec3 = new StructValueHolder<Vector3>(new Vector3(10, 11, 12));
         Assert.AreEqual(thing.GetVectorValue(), compiler.Compile<Func<LinqThing, Vector3>>()(thing));
@@ -2159,7 +2159,7 @@ public class TestLinqCompiler {
 
         compiler.SetSignature<float>(new Parameter<LinqThing>("root"));
         compiler.Return("root.OverloadWithValue(root.floatValue)");
-        compiler.Log();
+        // compiler.Log();
         Func<LinqThing, float> fn = compiler.Compile<Func<LinqThing, float>>();
 
         Assert.AreEqual(thing.floatValue, fn(thing));
@@ -2252,7 +2252,7 @@ public class TestLinqCompiler {
         LinqCompiler compiler = new LinqCompiler();
         compiler.SetSignature<bool>();
         compiler.Return("3 > 4 ? true : false");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         () =>
         {
@@ -2276,7 +2276,7 @@ public class TestLinqCompiler {
         LinqCompiler compiler = new LinqCompiler();
         compiler.SetSignature<float>(new Parameter<LinqThing>("thing", ParameterFlags.NeverNull));
         compiler.Return("thing ? thing.floatValue");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
@@ -2304,7 +2304,7 @@ public class TestLinqCompiler {
 
         var thing = new LinqThing();
 
-        compiler.Log();
+        // compiler.Log();
         Func<LinqThing, int> fn = compiler.Compile<Func<LinqThing, int>>();
         thing.floatValue = 10;
         Assert.AreEqual(1, fn(thing));
@@ -2346,7 +2346,7 @@ public class TestLinqCompiler {
         LinqCompiler compiler = new LinqCompiler();
         compiler.SetSignature<int>(new Parameter<LinqThing>("thing"));
         compiler.Return("thing ? thing.floatValue > 5 ? 1");
-        compiler.Log();
+        // compiler.Log();
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
@@ -2392,7 +2392,7 @@ public class TestLinqCompiler {
         );
 
         compiler.Return("thing.Method().self.Method().Method()");
-        compiler.Log();
+        // compiler.Log();
 
         Func<LinqThing, LinqThing> fn = compiler.Compile<Func<LinqThing, LinqThing>>();
 
@@ -2446,7 +2446,7 @@ public class TestLinqCompiler {
 
         compiler.Return("thing.Method(1).Method().Method(1, 2).Method(1, 2, 3)");
 
-        compiler.Log();
+        // compiler.Log();
 
         Func<LinqThing, LinqThing> fn = compiler.Compile<Func<LinqThing, LinqThing>>();
 
@@ -2535,7 +2535,7 @@ public class TestLinqCompiler {
 
         LinqThing thing = new LinqThing();
         compiler.Return("thing.FnReturningFunction()(123)");
-        compiler.Log();
+        // compiler.Log();
 
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
@@ -2570,7 +2570,7 @@ public class TestLinqCompiler {
         LinqThing thing = new LinqThing();
         compiler.SetNullCheckingEnabled(false);
         compiler.Return("thing.indexable[123456][2]");
-        compiler.Log();
+        // compiler.Log();
 
         AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
@@ -2599,7 +2599,7 @@ public class TestLinqCompiler {
         compiler.SetSignature();
         StaticThing.value = 10;
         compiler.Statement("TestLinqCompiler.StaticThing.Increment()");
-        compiler.Log();
+        // compiler.Log();
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(11, StaticThing.value);
@@ -2616,7 +2616,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<string>();
         StaticThing.value = 10;
         compiler.Statement("(5 + 8).ToString()");
-        compiler.Log();
+        // compiler.Log();
         Func<string> fn = compiler.Compile<Func<string>>();
         string str = fn();
 

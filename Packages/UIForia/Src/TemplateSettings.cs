@@ -54,10 +54,6 @@ namespace UIForia {
             return Path.GetFullPath(Path.Combine(templateResolutionBasePath, templateAttrTemplate)); 
         }
 
-        public string ResolveDefaultPathToElement(string path) {
-            return path;
-        }
-
     }
 
 }

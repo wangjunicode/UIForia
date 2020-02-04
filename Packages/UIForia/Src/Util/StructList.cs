@@ -551,7 +551,7 @@ namespace UIForia.Util {
 
         public void Insert(int index, in T item) {
             if (size + 1 >= array.Length) {
-                ArrayPool<T>.Resize(ref array, (size + 1) * 2);
+                System.Array.Resize(ref array, (size + 1) * 2);
             }
 
             size++;

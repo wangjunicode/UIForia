@@ -42,86 +42,93 @@ namespace UIForia.Compilers {
 
         private readonly LightStack<LightStack<ContextVariableDefinition>> contextStack;
 
-        private static readonly DynamicStyleListTypeWrapper s_DynamicStyleListTypeWrapper = new DynamicStyleListTypeWrapper();
-        private static readonly RepeatKeyFnTypeWrapper s_RepeatKeyFnTypeWrapper = new RepeatKeyFnTypeWrapper();
+        internal static readonly DynamicStyleListTypeWrapper s_DynamicStyleListTypeWrapper = new DynamicStyleListTypeWrapper();
+        internal static readonly RepeatKeyFnTypeWrapper s_RepeatKeyFnTypeWrapper = new RepeatKeyFnTypeWrapper();
 
-        private static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod(nameof(Application.CreateElementFromPoolWithType));
-        private static readonly MethodInfo s_BindingNodePool_Get = typeof(LinqBindingNode).GetMethod("Get", BindingFlags.Static | BindingFlags.Public);
-        private static readonly FieldInfo s_StructList_ElementAttr_Array = typeof(StructList<ElementAttribute>).GetField("array");
+        internal static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod(nameof(Application.CreateElementFromPoolWithType));
+        internal static readonly MethodInfo s_BindingNodePool_Get = typeof(LinqBindingNode).GetMethod("Get", BindingFlags.Static | BindingFlags.Public);
+        internal static readonly FieldInfo s_StructList_ElementAttr_Array = typeof(StructList<ElementAttribute>).GetField("array");
 
-        private static readonly FieldInfo s_SlotElement_SlotId = typeof(UISlotBase).GetField(nameof(UISlotBase.slotId));
+        internal static readonly FieldInfo s_SlotElement_SlotId = typeof(UISlotBase).GetField(nameof(UISlotBase.slotId));
 
-        private static readonly ConstructorInfo s_TemplateScope_Ctor = typeof(TemplateScope).GetConstructor(new[] {typeof(Application), typeof(bool)});
-        private static readonly FieldInfo s_TemplateScope_ApplicationField = typeof(TemplateScope).GetField(nameof(TemplateScope.application));
-        private static readonly FieldInfo s_TemplateScope_InnerContext = typeof(TemplateScope).GetField(nameof(TemplateScope.innerSlotContext));
-        private static readonly MethodInfo s_TemplateScope_AddSlotForward = typeof(TemplateScope).GetMethod(nameof(TemplateScope.AddSlotForward));
-        private static readonly MethodInfo s_TemplateScope_AddSlotOverride = typeof(TemplateScope).GetMethod(nameof(TemplateScope.AddSlotOverride));
-        private static readonly MethodInfo s_TemplateScope_SetParentScopeList = typeof(TemplateScope).GetMethod(nameof(TemplateScope.SetParentScope));
-        private static readonly MethodInfo s_TemplateScope_GetOverrideScope = typeof(TemplateScope).GetMethod(nameof(TemplateScope.GetOverrideScope));
+        internal static readonly FieldInfo s_RepeatElement_IndexVar = typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.indexVarId));
+        internal static readonly FieldInfo s_RepeatElement_ItemVar = typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.itemVarId));
+        internal static readonly FieldInfo s_RepeatElement_Scope = typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.scope));
+        internal static readonly FieldInfo s_RepeatElement_ContextRoot = typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.templateContextRoot));
+        internal static readonly FieldInfo s_RepeatElement_TemplateSpawnId = typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.templateSpawnId));
 
-        private static readonly ConstructorInfo s_ElementAttributeCtor = typeof(ElementAttribute).GetConstructor(new[] {typeof(string), typeof(string)});
-        private static readonly FieldInfo s_ElementAttributeList = typeof(UIElement).GetField("attributes", BindingFlags.Public | BindingFlags.Instance);
-        private static readonly FieldInfo s_TextElement_Text = typeof(UITextElement).GetField(nameof(UITextElement.text), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly MethodInfo s_TextElement_SetText = typeof(UITextElement).GetMethod(nameof(UITextElement.SetText), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly ConstructorInfo s_TemplateScope_Ctor = typeof(TemplateScope).GetConstructor(new[] {typeof(Application)});
+        internal static readonly FieldInfo s_TemplateScope_ApplicationField = typeof(TemplateScope).GetField(nameof(TemplateScope.application));
+        internal static readonly FieldInfo s_TemplateScope_InnerContext = typeof(TemplateScope).GetField(nameof(TemplateScope.innerSlotContext));
+        internal static readonly MethodInfo s_TemplateScope_AddSlotForward = typeof(TemplateScope).GetMethod(nameof(TemplateScope.AddSlotForward));
+        internal static readonly MethodInfo s_TemplateScope_AddSlotOverride = typeof(TemplateScope).GetMethod(nameof(TemplateScope.AddSlotOverride));
+        internal static readonly MethodInfo s_TemplateScope_SetParentScopeList = typeof(TemplateScope).GetMethod(nameof(TemplateScope.SetParentScope));
+        internal static readonly MethodInfo s_TemplateScope_GetOverrideScope = typeof(TemplateScope).GetMethod(nameof(TemplateScope.GetOverrideScope));
+        internal static readonly MethodInfo s_TemplateScope_Clone = typeof(TemplateScope).GetMethod(nameof(TemplateScope.Clone));
 
-        private static readonly FieldInfo s_UIElement_StyleSet = typeof(UIElement).GetField(nameof(UIElement.style), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly FieldInfo s_UIElement_TemplateMetaData = typeof(UIElement).GetField(nameof(UIElement.templateMetaData), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly PropertyInfo s_UIElement_Application = typeof(UIElement).GetProperty(nameof(UIElement.application), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly MethodInfo s_UIElement_OnUpdate = typeof(UIElement).GetMethod(nameof(UIElement.OnUpdate), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly MethodInfo s_UIElement_OnBeforePropertyBindings = typeof(UIElement).GetMethod(nameof(UIElement.OnBeforePropertyBindings), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly MethodInfo s_UIElement_OnAfterPropertyBindings = typeof(UIElement).GetMethod(nameof(UIElement.OnAfterPropertyBindings), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly MethodInfo s_UIElement_SetAttribute = typeof(UIElement).GetMethod(nameof(UIElement.SetAttribute), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly MethodInfo s_UIElement_SetEnabled = typeof(UIElement).GetMethod(nameof(UIElement.SetEnabled), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly FieldInfo s_UIElement_Parent = typeof(UIElement).GetField(nameof(UIElement.parent), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly ConstructorInfo s_ElementAttributeCtor = typeof(ElementAttribute).GetConstructor(new[] {typeof(string), typeof(string)});
+        internal static readonly FieldInfo s_ElementAttributeList = typeof(UIElement).GetField("attributes", BindingFlags.Public | BindingFlags.Instance);
+        internal static readonly FieldInfo s_TextElement_Text = typeof(UITextElement).GetField(nameof(UITextElement.text), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_TextElement_SetText = typeof(UITextElement).GetMethod(nameof(UITextElement.SetText), BindingFlags.Instance | BindingFlags.Public);
 
-        private static readonly MethodInfo s_StyleSet_InternalInitialize = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.internal_Initialize), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly MethodInfo s_StyleSet_SetBaseStyles = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.SetBaseStyles), BindingFlags.Instance | BindingFlags.Public);
-        private static readonly MethodInfo s_StyleSet_AddBaseStyle = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.internal_AddBaseStyle));
+        internal static readonly FieldInfo s_UIElement_StyleSet = typeof(UIElement).GetField(nameof(UIElement.style), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly PropertyInfo s_UIElement_Application = typeof(UIElement).GetProperty(nameof(UIElement.application), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_UIElement_OnUpdate = typeof(UIElement).GetMethod(nameof(UIElement.OnUpdate), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_UIElement_OnBeforePropertyBindings = typeof(UIElement).GetMethod(nameof(UIElement.OnBeforePropertyBindings), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_UIElement_OnAfterPropertyBindings = typeof(UIElement).GetMethod(nameof(UIElement.OnAfterPropertyBindings), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_UIElement_SetAttribute = typeof(UIElement).GetMethod(nameof(UIElement.SetAttribute), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_UIElement_SetEnabled = typeof(UIElement).GetMethod(nameof(UIElement.SetEnabled), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly FieldInfo s_UIElement_Parent = typeof(UIElement).GetField(nameof(UIElement.parent), BindingFlags.Instance | BindingFlags.Public);
 
-        private static readonly MethodInfo s_TemplateMetaData_GetStyleById = typeof(TemplateMetaData).GetMethod(nameof(TemplateMetaData.GetStyleById), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_StyleSet_InternalInitialize = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.internal_Initialize), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_StyleSet_SetBaseStyles = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.SetBaseStyles), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_StyleSet_AddBaseStyle = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.internal_AddBaseStyle));
 
-        private static readonly MethodInfo s_LightList_UIStyleGroupContainer_Get = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Get), BindingFlags.Public | BindingFlags.Static);
-        private static readonly MethodInfo s_LightList_UIStyleGroupContainer_Release = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Release), BindingFlags.Public | BindingFlags.Instance);
-        private static readonly MethodInfo s_LightList_UIStyleGroupContainer_Add = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Add), BindingFlags.Public | BindingFlags.Instance);
+        internal static readonly MethodInfo s_TemplateMetaData_GetStyleById = typeof(TemplateMetaData).GetMethod(nameof(TemplateMetaData.GetStyleById), BindingFlags.Instance | BindingFlags.Public);
 
-        private static readonly MethodInfo s_Application_CreateSlot = typeof(Application).GetMethod(nameof(Application.CreateSlot), BindingFlags.Public | BindingFlags.Instance);
-        private static readonly MethodInfo s_Application_HydrateTemplate = typeof(Application).GetMethod(nameof(Application.HydrateTemplate), BindingFlags.Public | BindingFlags.Instance);
-        private static readonly MethodInfo s_Application_GetTemplateMetaData = typeof(Application).GetMethod(nameof(Application.GetTemplateMetaData), BindingFlags.Public | BindingFlags.Instance);
+        internal static readonly MethodInfo s_LightList_UIStyleGroupContainer_Get = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Get), BindingFlags.Public | BindingFlags.Static);
+        internal static readonly MethodInfo s_LightList_UIStyleGroupContainer_Release = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Release), BindingFlags.Public | BindingFlags.Instance);
+        internal static readonly MethodInfo s_LightList_UIStyleGroupContainer_Add = typeof(LightList<UIStyleGroupContainer>).GetMethod(nameof(LightList<UIStyleGroupContainer>.Add), BindingFlags.Public | BindingFlags.Instance);
 
-        private static readonly MethodInfo s_InputHandlerGroup_AddMouseEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddMouseEvent));
-        private static readonly MethodInfo s_InputHandlerGroup_AddDragCreator = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddDragCreator));
-        private static readonly MethodInfo s_InputHandlerGroup_AddDragEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddDragEvent));
-        private static readonly MethodInfo s_InputHandlerGroup_AddKeyboardEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddKeyboardEvent));
+        internal static readonly MethodInfo s_Application_CreateSlot = typeof(Application).GetMethod(nameof(Application.CreateSlot), BindingFlags.Public | BindingFlags.Instance);
+        internal static readonly MethodInfo s_Application_HydrateTemplate = typeof(Application).GetMethod(nameof(Application.HydrateTemplate), BindingFlags.Public | BindingFlags.Instance);
+        internal static readonly MethodInfo s_Application_GetTemplateMetaData = typeof(Application).GetMethod(nameof(Application.GetTemplateMetaData), BindingFlags.Public | BindingFlags.Instance);
+        internal static readonly PropertyInfo s_Application_GetTemplateMetaDataArray = typeof(Application).GetProperty(nameof(Application.zz_Internal_TemplateMetaData), BindingFlags.Public | BindingFlags.Instance);
 
-        private static readonly PropertyInfo s_Element_IsEnabled = typeof(UIElement).GetProperty(nameof(UIElement.isEnabled));
+        internal static readonly MethodInfo s_InputHandlerGroup_AddMouseEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddMouseEvent));
+        internal static readonly MethodInfo s_InputHandlerGroup_AddDragCreator = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddDragCreator));
+        internal static readonly MethodInfo s_InputHandlerGroup_AddDragEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddDragEvent));
+        internal static readonly MethodInfo s_InputHandlerGroup_AddKeyboardEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddKeyboardEvent));
+
+        internal static readonly PropertyInfo s_Element_IsEnabled = typeof(UIElement).GetProperty(nameof(UIElement.isEnabled));
         internal static readonly FieldInfo s_UIElement_BindingNode = typeof(UIElement).GetField(nameof(UIElement.bindingNode));
 
-        private static readonly MethodInfo s_LinqBindingNode_CreateLocalContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.CreateLocalContextVariable));
+        internal static readonly MethodInfo s_LinqBindingNode_CreateLocalContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.CreateLocalContextVariable));
         internal static readonly MethodInfo s_LinqBindingNode_GetContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetContextVariable));
         internal static readonly MethodInfo s_LinqBindingNode_GetRepeatItem = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetRepeatItem));
         internal static readonly FieldInfo s_LinqBindingNode_ReferencedContext = typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.referencedContexts));
 
-        private static readonly MethodInfo s_EventUtil_Subscribe = typeof(EventUtil).GetMethod(nameof(EventUtil.Subscribe));
+        internal static readonly MethodInfo s_EventUtil_Subscribe = typeof(EventUtil).GetMethod(nameof(EventUtil.Subscribe));
 
-        private static readonly MethodInfo s_DynamicStyleList_Flatten = typeof(DynamicStyleList).GetMethod(nameof(DynamicStyleList.Flatten));
+        internal static readonly MethodInfo s_DynamicStyleList_Flatten = typeof(DynamicStyleList).GetMethod(nameof(DynamicStyleList.Flatten));
 
-        private static readonly Expression s_StringBuilderExpr = Expression.Field(null, typeof(StringUtil), nameof(StringUtil.s_CharStringBuilder));
-        private static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
-        private static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
-        private static readonly MethodInfo s_StringBuilder_AppendString = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(string)});
-        private static readonly MethodInfo s_StringBuilder_AppendInt16 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(short)});
-        private static readonly MethodInfo s_StringBuilder_AppendInt32 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(int)});
-        private static readonly MethodInfo s_StringBuilder_AppendInt64 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(long)});
-        private static readonly MethodInfo s_StringBuilder_AppendUInt16 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(ushort)});
-        private static readonly MethodInfo s_StringBuilder_AppendUInt32 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(uint)});
-        private static readonly MethodInfo s_StringBuilder_AppendUInt64 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(ulong)});
-        private static readonly MethodInfo s_StringBuilder_AppendFloat = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(float)});
-        private static readonly MethodInfo s_StringBuilder_AppendDouble = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(double)});
-        private static readonly MethodInfo s_StringBuilder_AppendDecimal = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(decimal)});
-        private static readonly MethodInfo s_StringBuilder_AppendByte = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(byte)});
-        private static readonly MethodInfo s_StringBuilder_AppendSByte = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(sbyte)});
-        private static readonly MethodInfo s_StringBuilder_AppendBool = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(bool)});
-        private static readonly MethodInfo s_StringBuilder_AppendChar = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
+        internal static readonly Expression s_StringBuilderExpr = Expression.Field(null, typeof(StringUtil), nameof(StringUtil.s_CharStringBuilder));
+        internal static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
+        internal static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
+        internal static readonly MethodInfo s_StringBuilder_AppendString = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(string)});
+        internal static readonly MethodInfo s_StringBuilder_AppendInt16 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(short)});
+        internal static readonly MethodInfo s_StringBuilder_AppendInt32 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(int)});
+        internal static readonly MethodInfo s_StringBuilder_AppendInt64 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(long)});
+        internal static readonly MethodInfo s_StringBuilder_AppendUInt16 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(ushort)});
+        internal static readonly MethodInfo s_StringBuilder_AppendUInt32 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(uint)});
+        internal static readonly MethodInfo s_StringBuilder_AppendUInt64 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(ulong)});
+        internal static readonly MethodInfo s_StringBuilder_AppendFloat = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(float)});
+        internal static readonly MethodInfo s_StringBuilder_AppendDouble = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(double)});
+        internal static readonly MethodInfo s_StringBuilder_AppendDecimal = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(decimal)});
+        internal static readonly MethodInfo s_StringBuilder_AppendByte = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(byte)});
+        internal static readonly MethodInfo s_StringBuilder_AppendSByte = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(sbyte)});
+        internal static readonly MethodInfo s_StringBuilder_AppendBool = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(bool)});
+        internal static readonly MethodInfo s_StringBuilder_AppendChar = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
 
         private TemplateCompiler(TemplateSettings settings) {
             this.templateCache = new TemplateCache(settings);
@@ -147,27 +154,26 @@ namespace UIForia.Compilers {
         public static CompiledTemplateData CompileTemplates(Type appRootType, TemplateSettings templateSettings) {
             TemplateCompiler instance = new TemplateCompiler(templateSettings);
 
-            CompiledTemplateData compiledTemplateData = instance.CompileRoot(appRootType);
+            CompiledTemplateData compiledTemplateData = instance.CompileRoot(appRootType, templateSettings.dynamicallyCreatedTypes);
 
             return compiledTemplateData;
         }
 
-        private CompiledTemplateData CompileRoot(Type appRootType) {
-            // todo -- errors
+        private CompiledTemplateData CompileRoot(Type appRootType, List<Type> dynamicallyCreatedTypes) {
             if (!typeof(UIElement).IsAssignableFrom(appRootType)) {
                 throw new ArgumentException($"You can only create elements which are subclasses of UIElement. {appRootType} does not inherit from UIElement");
             }
 
             if (typeof(UIContainerElement).IsAssignableFrom(appRootType)) {
-                throw new ArgumentException();
+                throw new ArgumentException($"You can only create elements which are subclasses of UIElement and are not subclasses of UITerminalElement, UITextElement or UIContainerElement. {appRootType} inherits from UIContainerElement");
             }
 
             if (typeof(UITerminalElement).IsAssignableFrom(appRootType)) {
-                throw new ArgumentException();
+                throw new ArgumentException($"You can only create elements which are subclasses of UIElement and are not subclasses of UITerminalElement, UITextElement or UIContainerElement. {appRootType} inherits from UITerminalElement");
             }
 
             if (typeof(UITextElement).IsAssignableFrom(appRootType)) {
-                throw new ArgumentException();
+                throw new ArgumentException($"You can only create elements which are subclasses of UIElement and are not subclasses of UITerminalElement, UITextElement or UIContainerElement. {appRootType} inherits from UITextElement");
             }
 
             ProcessedType appRoot = TypeProcessor.GetProcessedType(appRootType);
@@ -175,6 +181,24 @@ namespace UIForia.Compilers {
             TemplateRootNode templateRootNode = templateCache.GetParsedTemplate(appRoot);
 
             Compile(templateRootNode, true);
+
+            if (dynamicallyCreatedTypes != null) {
+                for (int i = 0; i < dynamicallyCreatedTypes.Count; i++) {
+                    Type type = dynamicallyCreatedTypes[i];
+
+                    if (type == null) continue;
+
+                    if (type.IsGenericTypeDefinition) {
+                        throw new ArgumentException($"You can only create elements dynamically which are of concrete class types. {type} is a generic type definition and cannot be compiled");
+                    }
+
+                    if (!typeof(UIElement).IsAssignableFrom(type)) {
+                        throw new ArgumentException($"You can only create elements which are subclasses of UIElement. {type} does not inherit from UIElement");
+                    }
+
+                    GetCompiledTemplate(TypeProcessor.GetProcessedType(type));
+                }
+            }
 
             return templateData;
         }
@@ -348,10 +372,10 @@ namespace UIForia.Compilers {
                 Expression.Constant(ctx.compiledTemplate.templateId)
             ));
 
-            MemberExpression templateSpawnIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.templateSpawnId)));
-            MemberExpression templateRootContext = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.templateContextRoot)));
-            MemberExpression scopeVar = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.scope)));
-            MemberExpression indexVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.indexVarId)));
+            MemberExpression templateSpawnIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_TemplateSpawnId);
+            MemberExpression templateRootContext = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_ContextRoot);
+            MemberExpression scopeVar = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_Scope);
+            MemberExpression indexVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_IndexVar);
 
             StructList<ContextAliasActions> mods = CompileBindings(ctx, repeatNode, repeatNode.attributes).contextModifications;
 
@@ -361,11 +385,12 @@ namespace UIForia.Compilers {
 
             ctx.Assign(templateSpawnIdField, Expression.Constant(spawnId));
             ctx.Assign(templateRootContext, ctx.rootParam);
-            ctx.Assign(scopeVar, ctx.templateScope);
+            ctx.Assign(scopeVar, ExpressionFactory.CallInstanceUnchecked(ctx.templateScope, s_TemplateScope_Clone));
             ctx.Assign(indexVarIdField, Expression.Constant(indexVarId));
 
             return nodeExpr;
         }
+
 
         private Expression CompileRepeatList(CompilationContext ctx, RepeatNode repeatNode) {
             ParameterExpression nodeExpr = ctx.ElementExpr;
@@ -382,11 +407,11 @@ namespace UIForia.Compilers {
                 Expression.Constant(ctx.compiledTemplate.templateId)
             ));
 
-            MemberExpression templateSpawnIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.templateSpawnId)));
-            MemberExpression templateRootContext = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.templateContextRoot)));
-            MemberExpression scopeVar = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.scope)));
-            MemberExpression itemVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.itemVarId)));
-            MemberExpression indexVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), typeof(UIRepeatElement).GetField(nameof(UIRepeatElement.indexVarId)));
+            MemberExpression templateSpawnIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_TemplateSpawnId);
+            MemberExpression templateRootContext = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_ContextRoot);
+            MemberExpression scopeVar = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_Scope);
+            MemberExpression itemVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_ItemVar);
+            MemberExpression indexVarIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_IndexVar);
 
             BindingOutput bindingOutput = CompileBindings(ctx, repeatNode, repeatNode.attributes);
 
@@ -569,7 +594,6 @@ namespace UIForia.Compilers {
             exposedVariableData.rootType = toOverride.rootElementType;
             exposedVariableData.scopedVariables = toOverride.scopedVariables;
             exposedVariableData.exposedAttrs = toOverride.exposedAttributes ?? new AttributeDefinition[0];
-            exposedVariableData.originSlotId = toOverride.slotId;
 
             exposedVariableDataList.Add(exposedVariableData);
 
@@ -612,84 +636,84 @@ namespace UIForia.Compilers {
         }
 
         private int CompileRepeatTemplate(CompilationContext parentContext, RepeatNode repeatNode, RepeatType repeatType, out int itemVarId, out int indexVarId) {
+            CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, "__template__", SlotType.Template);
 
-            throw new NotImplementedException("Re do repeat compilation, cannot be treated as a slot");
-            // CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, "__template__", SlotType.Template);
-            // parentContext.compiledTemplate.AddSlot(compiledSlot);
-            //
-            // ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
-            // ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
-            // ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
-            //
-            // CompilationContext ctx = new CompilationContext(parentContext.templateRootNode);
-            //
-            // itemVarId = -1;
-            // indexVarId = NextContextId;
-            //
-            // if (repeatType != RepeatType.Count) {
-            //     itemVarId = NextContextId;
-            //     contextStack.Peek().Push(new ContextVariableDefinition() {
-            //         name = repeatNode.GetItemVariableName(),
-            //         id = itemVarId,
-            //         type = repeatNode.processedType.rawType.GetGenericArguments()[0],
-            //         variableType = AliasResolverType.RepeatItem
-            //     });
-            // }
-            //
-            // contextStack.Peek().Push(new ContextVariableDefinition() {
-            //     name = repeatNode.GetIndexVariableName(),
-            //     id = indexVarId,
-            //     type = typeof(int),
-            //     variableType = AliasResolverType.RepeatIndex
-            // });
-            //
-            // ctx.rootType = parentContext.rootType;
-            // ctx.rootParam = rootParam;
-            // ctx.templateScope = scopeParam;
-            // ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
-            // ctx.compiledTemplate = parentContext.compiledTemplate;
-            // ctx.ContextExpr = rootParam;
-            // ctx.namespaces = parentContext.namespaces;
-            //
-            // ctx.Initialize(parentParam);
-            //
-            // ctx.PushScope();
-            //
-            // if (repeatNode.ChildCount != 1) {
-            //     ctx.Assign(ctx.ElementExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-            //         Expression.Constant(TypeProcessor.GetProcessedType(typeof(RepeatMultiChildContainerElement)).id),
-            //         ctx.ParentExpr,
-            //         Expression.Constant(repeatNode.ChildCount),
-            //         Expression.Constant(0),
-            //         Expression.Constant(ctx.compiledTemplate.templateId)
-            //     ));
-            //     ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_BindingNodePool_Get,
-            //             ctx.applicationExpr,
-            //             ctx.rootParam,
-            //             ctx.ElementExpr,
-            //             ctx.ContextExpr,
-            //             Expression.Constant(-1),
-            //             Expression.Constant(-1),
-            //             Expression.Constant(-1),
-            //             Expression.Constant(-1)
-            //         )
-            //     );
-            //     VisitChildren(ctx, repeatNode);
-            //     ctx.Return(ctx.ElementExpr);
-            // }
-            // else {
-            //     ctx.Return(Visit(ctx, repeatNode.children[0]));
-            // }
-            //
-            // contextStack.Peek().Pop();
-            //
-            // if (repeatType != RepeatType.Count) {
-            //     contextStack.Peek().Pop();
-            // }
-            //
-            // compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
-            //
-            // return compiledSlot.slotId;
+            parentContext.compiledTemplate.AddSlot(compiledSlot);
+
+            ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
+            ParameterExpression parentParam = Expression.Parameter(typeof(UIElement), "parent");
+            ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
+
+            CompilationContext ctx = new CompilationContext(parentContext.templateRootNode);
+
+            itemVarId = -1;
+            indexVarId = NextContextId;
+            // todo -- maybe call a static method on type that returns the context definitions
+            if (repeatType != RepeatType.Count) {
+                itemVarId = NextContextId;
+                contextStack.Peek().Push(new ContextVariableDefinition() {
+                    name = repeatNode.GetItemVariableName(),
+                    id = itemVarId,
+                    type = repeatNode.processedType.rawType.GetGenericArguments()[0],
+                    variableType = AliasResolverType.RepeatItem
+                });
+            }
+
+            contextStack.Peek().Push(new ContextVariableDefinition() {
+                name = repeatNode.GetIndexVariableName(),
+                id = indexVarId,
+                type = typeof(int),
+                variableType = AliasResolverType.RepeatIndex
+            });
+
+            ctx.rootType = parentContext.rootType;
+            ctx.rootParam = rootParam;
+            ctx.templateScope = scopeParam;
+            ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
+            ctx.compiledTemplate = parentContext.compiledTemplate;
+            ctx.ContextExpr = rootParam;
+            ctx.namespaces = parentContext.namespaces;
+
+            ctx.Initialize(parentParam);
+
+            ctx.PushScope();
+
+            if (repeatNode.ChildCount != 1) {
+                ctx.Assign(ctx.ElementExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
+                    Expression.Constant(TypeProcessor.GetProcessedType(typeof(RepeatMultiChildContainerElement)).id),
+                    ctx.ParentExpr,
+                    Expression.Constant(repeatNode.ChildCount),
+                    Expression.Constant(0),
+                    Expression.Constant(ctx.compiledTemplate.templateId)
+                ));
+                // need to create a binding node since we implicitly create this node instead of visiting it.
+                ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_BindingNodePool_Get,
+                        ctx.applicationExpr,
+                        ctx.rootParam,
+                        ctx.ElementExpr,
+                        ctx.ContextExpr,
+                        Expression.Constant(-1),
+                        Expression.Constant(-1),
+                        Expression.Constant(-1),
+                        Expression.Constant(-1)
+                    )
+                );
+                VisitChildren(ctx, repeatNode);
+                ctx.Return(ctx.ElementExpr);
+            }
+            else {
+                ctx.Return(Visit(ctx, repeatNode.children[0]));
+            }
+
+            contextStack.Peek().Pop();
+
+            if (repeatType != RepeatType.Count) {
+                contextStack.Peek().Pop();
+            }
+
+            compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
+
+            return compiledSlot.slotId;
         }
 
         private Expression CompileTextNode(CompilationContext ctx, TextNode textNode) {
@@ -802,7 +826,7 @@ namespace UIForia.Compilers {
 
             ParameterExpression hydrateScope = ctx.GetVariable<TemplateScope>("hydrateScope");
 
-            Expression templateScopeCtor = Expression.New(s_TemplateScope_Ctor, ctx.applicationExpr, Expression.Constant(false));
+            Expression templateScopeCtor = Expression.New(s_TemplateScope_Ctor, ctx.applicationExpr);
 
             ctx.Assign(hydrateScope, templateScopeCtor);
 
@@ -830,7 +854,6 @@ namespace UIForia.Compilers {
                     // ultimately we need the slot that runs to instantiate w/ references
 
                     switch (node.slotType) {
-
                         case SlotType.Define:
                             // technically this can't happen, should be part of implicit <override:Children/> where it is legal.
                             break;
@@ -862,7 +885,6 @@ namespace UIForia.Compilers {
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
-
                 }
             }
 
@@ -1375,6 +1397,8 @@ namespace UIForia.Compilers {
 
             public TemplateMetaData templateMetaData;
             public StructList<TextExpression> expressions;
+            public SlotAttributeData slotData;
+            public bool fromInnerContext;
 
         }
 
@@ -1420,10 +1444,12 @@ namespace UIForia.Compilers {
 
                     if (attr.slotAttributeData != null) {
                         styleExpression.templateMetaData = attr.slotAttributeData.templateMetaData;
+                        styleExpression.slotData = attr.slotAttributeData;
                     }
 
                     else if ((attr.flags & AttributeFlags.InnerContext) != 0) {
                         styleExpression.templateMetaData = ctx.innerTemplate.templateMetaData;
+                        styleExpression.fromInnerContext = true;
                     }
                     else {
                         styleExpression.templateMetaData = ctx.compiledTemplate.templateMetaData;
@@ -1451,7 +1477,6 @@ namespace UIForia.Compilers {
 
         private void CompileStaticSharedStyles(CompilationContext ctx, StructList<StyleExpression> styleExpressionGroups, LightList<StyleRefInfo> styleIds) {
             for (int i = 0; i < styleExpressionGroups.size; i++) {
-
                 StyleExpression styleExpression = styleExpressionGroups.array[i];
 
                 StructList<TextExpression> expressionList = styleExpression.expressions;
@@ -1472,7 +1497,6 @@ namespace UIForia.Compilers {
                         }
                     }
                 }
-
             }
 
             if (styleIds.Count > 0) {
@@ -1500,13 +1524,7 @@ namespace UIForia.Compilers {
         }
 
         private void CompileDynamicSharedStyles(CompilationContext ctx, StructList<StyleExpression> styleExpressionGroups, LightList<StyleRefInfo> styleIds) {
-            Expression metaData = Expression.Field(updateCompiler.GetElement(), s_UIElement_TemplateMetaData);
-            Expression innerMetaData = null;
-
-            if (ctx.innerTemplate != null) {
-                innerMetaData = ExpressionFactory.CallInstanceUnchecked(Expression.Property(updateCompiler.GetElement(), s_UIElement_Application), s_Application_GetTemplateMetaData,
-                    Expression.Constant(ctx.innerTemplate.templateMetaData.id));
-            }
+            updateCompiler.SetNullCheckingEnabled(false);
 
             ParameterExpression styleList = ctx.GetVariable<LightList<UIStyleGroupContainer>>("styleList");
             ctx.Assign(styleList, ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_Get));
@@ -1518,57 +1536,58 @@ namespace UIForia.Compilers {
             for (int i = 0; i < styleIds.size; i++) {
                 ref StyleRefInfo styleRefInfo = ref styleIds.array[i];
 
-                ctx.Comment(styleRefInfo.styleName);
+                Expression target = ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_Application_GetTemplateMetaData, Expression.Constant(styleRefInfo.templateMetaData.id));
+                MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(target, s_TemplateMetaData_GetStyleById, Expression.Constant(styleRefInfo.styleId));
+                MethodCallExpression addCall = ExpressionFactory.CallInstanceUnchecked(styleList, s_LightList_UIStyleGroupContainer_Add, expr);
 
-                // Expression target = styleRefInfo.fromInnerContext ? innerMetaData : metaData;
-                //
-                // MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(target, s_TemplateMetaData_GetStyleById, Expression.Constant(styleRefInfo.styleId));
-                // MethodCallExpression addCall = ExpressionFactory.CallInstanceUnchecked(styleList, s_LightList_UIStyleGroupContainer_Add, expr);
-                //
-                // ctx.AddStatement(addCall);
+                ctx.AddStatement(addCall);
+                ctx.InlineComment(styleRefInfo.styleName + " -> from template " + styleRefInfo.templateMetaData.filePath);
             }
 
             updateCompiler.SetNullCheckingEnabled(false);
 
-            throw new NotImplementedException("Finish this Matt!");
-            // for (int i = 0; i < list.size; i++) {
-            //     bool fromInnerContext = i <= innerContextSplit;
-            //
-            //     updateCompiler.SetImplicitContext(fromInnerContext ? updateCompiler.GetCastElement() : updateCompiler.GetCastRoot());
-            //
-            //     if (list.array[i].isExpression) {
-            //         Expression templateContext = fromInnerContext ? innerMetaData : metaData;
-            //
-            //         Expression dynamicStyleList = updateCompiler.TypeWrapStatement(s_DynamicStyleListTypeWrapper, typeof(DynamicStyleList), list.array[i].text);
-            //
-            //         updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(dynamicStyleList, s_DynamicStyleList_Flatten, templateContext, updateStyleList));
-            //     }
-            //     else {
-            //         string text = list.array[i].text;
-            //         string[] splitStyles = text.Split(s_StyleSeparator);
-            //
-            //         for (int s = 0; s < splitStyles.Length; s++) {
-            //             string styleName = splitStyles[s];
-            //
-            //             int styleId = -1;
-            //             if (fromInnerContext) {
-            //                 Assert.IsNotNull(ctx.innerTemplate);
-            //                 styleId = ctx.innerTemplate.templateMetaData.ResolveStyleNameSlow(styleName);
-            //             }
-            //             else {
-            //                 styleId = ctx.compiledTemplate.templateMetaData.ResolveStyleNameSlow(styleName);
-            //             }
-            //
-            //             if (styleId >= 0) {
-            //                 updateCompiler.Comment(styleName);
-            //                 Expression target = fromInnerContext ? innerMetaData : metaData;
-            //                 MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(target, s_TemplateMetaData_GetStyleById, Expression.Constant(styleId));
-            //                 MethodCallExpression addCall = ExpressionFactory.CallInstanceUnchecked(updateStyleList, s_LightList_UIStyleGroupContainer_Add, expr);
-            //                 updateCompiler.RawExpression(addCall);
-            //             }
-            //         }
-            //     }
-            // }
+            for (int i = 0; i < styleExpressionGroups.size; i++) {
+                StyleExpression styleExpression = styleExpressionGroups.array[i];
+
+                StructList<TextExpression> expressionList = styleExpression.expressions;
+
+                updateCompiler.SetupAttributeData(styleExpression.slotData);
+                updateCompiler.SetImplicitContext(styleExpression.fromInnerContext ? updateCompiler.GetCastElement() : updateCompiler.GetCastRoot());
+
+                ParameterExpression templateMetaDataExpr = updateCompiler.AddVariable(typeof(TemplateMetaData[]), "metaData");
+                MemberExpression application = Expression.Property(updateCompiler.GetElement(), s_UIElement_Application);
+                updateCompiler.Assign(templateMetaDataExpr, Expression.Property(application, s_Application_GetTemplateMetaDataArray));
+
+                Expression templateContext = Expression.ArrayIndex(templateMetaDataExpr, Expression.Constant(styleExpression.templateMetaData.id));
+                for (int k = 0; k < expressionList.size; k++) {
+                    TextExpression textExpression = expressionList.array[k];
+
+
+                    if (textExpression.isExpression) {
+                        Expression dynamicStyleList = updateCompiler.TypeWrapStatement(s_DynamicStyleListTypeWrapper, typeof(DynamicStyleList), textExpression.text);
+
+                        updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(dynamicStyleList, s_DynamicStyleList_Flatten, templateContext, updateStyleList));
+                    }
+
+                    else {
+                        string text = textExpression.text;
+                        string[] splitStyles = text.Split(s_StyleSeparator);
+
+                        for (int s = 0; s < splitStyles.Length; s++) {
+                            string styleName = splitStyles[s];
+
+                            int styleId = styleExpression.templateMetaData.ResolveStyleNameSlow(styleName);
+
+                            if (styleId >= 0) {
+                                MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(templateContext, s_TemplateMetaData_GetStyleById, Expression.Constant(styleId));
+                                MethodCallExpression addCall = ExpressionFactory.CallInstanceUnchecked(updateStyleList, s_LightList_UIStyleGroupContainer_Add, expr);
+                                updateCompiler.RawExpression(addCall);
+                                ctx.InlineComment(styleName + " -> from template " + styleExpression.templateMetaData.filePath);
+                            }
+                        }
+                    }
+                }
+            }
 
             MemberExpression styleSet = Expression.Field(updateCompiler.GetElement(), s_UIElement_StyleSet);
             MethodCallExpression setBaseStyles = ExpressionFactory.CallInstanceUnchecked(styleSet, s_StyleSet_SetBaseStyles, updateStyleList);
@@ -1577,9 +1596,8 @@ namespace UIForia.Compilers {
             updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateStyleList, s_LightList_UIStyleGroupContainer_Release));
 
             MemberExpression style = Expression.Field(ctx.ElementExpr, s_UIElement_StyleSet);
-            MethodCallExpression initStyle = ExpressionFactory.CallInstanceUnchecked(style, s_StyleSet_InternalInitialize, styleList);
+            MethodCallExpression initStyle = ExpressionFactory.CallInstanceUnchecked(style, s_StyleSet_InternalInitialize);
             ctx.AddStatement(initStyle);
-            ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(styleList, s_LightList_UIStyleGroupContainer_Release));
             styleIds.Release();
             updateCompiler.SetNullCheckingEnabled(true);
         }

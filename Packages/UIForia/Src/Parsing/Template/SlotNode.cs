@@ -8,7 +8,9 @@ namespace UIForia.Parsing {
 
         Define,
         Forward,
-        Override
+        Override,
+
+        Template
 
     }
 

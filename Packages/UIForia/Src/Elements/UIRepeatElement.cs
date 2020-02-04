@@ -76,9 +76,7 @@ namespace UIForia.Elements {
                 int diff = count - prevCount;
                 for (int i = 0; i < diff; i++) {
                     UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
-
-                    application.InsertChild(this, child, (uint) (prevCount + i));
-
+                    
                     ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", prevCount + i);
 
                     child.bindingNode.CreateLocalContextVariable(indexVariable);
@@ -178,7 +176,6 @@ namespace UIForia.Elements {
 
                 if (keypair.element == null) {
                     UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
-                    application.InitializeElement(child);
                     ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
                     ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);
                     child.bindingNode.CreateLocalContextVariable(itemVariable);
@@ -222,7 +219,6 @@ namespace UIForia.Elements {
                     int diff = currCount - prevCount;
                     for (int i = 0; i < diff; i++) {
                         UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
-                        application.InitializeElement(child);
 
                         ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
                         ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);

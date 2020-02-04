@@ -13,7 +13,6 @@ namespace UIForia.Compilers {
         public int id;
         public Type type;
         public string name;
-        public bool isExposed;
         public LightList<string> nameList;
         public Type contextVarType;
         public AliasResolverType variableType;

@@ -26,15 +26,14 @@ namespace UIForia.Compilers {
         public CompiledSlot() {
             this.slotId = -1;
         }
-        
+
         public string GetVariableName() {
             return $"Slot_{slotType}_{slotId}_{guid}";
         }
 
         public string GetComment() {
-            
             string retn = "Slot name=\"" + slotName + "\"";
-            
+
             switch (slotType) {
                 case SlotType.Define:
                     retn += " (Define) " + filePath;
@@ -46,6 +45,9 @@ namespace UIForia.Compilers {
 
                 case SlotType.Override:
                     retn += " (Override) " + filePath;
+                    break;
+                case SlotType.Template:
+                    retn += " (Template) " + filePath;
                     break;
             }
 

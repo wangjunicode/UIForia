@@ -10,15 +10,13 @@ namespace UIForia.Compilers {
         public StructList<SlotUsage> slotInputs;
         public StructList<SlotUsage> parentInputs;
         public UIElement innerSlotContext;
-        public readonly bool retain;
 
         [DebuggerStepThrough]
-        public TemplateScope(Application application, bool retain) {
+        public TemplateScope(Application application) {
             this.application = application;
             this.slotInputs = null;
             this.parentInputs = null;
             this.innerSlotContext = null;
-            this.retain = retain;
         }
 
         public void AddSlotOverride(string slotName, UIElement context, int slotId) {
@@ -55,11 +53,16 @@ namespace UIForia.Compilers {
             };
         }
 
+        public TemplateScope Clone() {
+             return new TemplateScope() {
+                slotInputs = slotInputs?.Clone(),
+                application = application,
+                innerSlotContext = innerSlotContext,
+                parentInputs = parentInputs?.Clone()
+            };
+        }
+        
         public void Release() {
-            if (retain) {
-                return;
-            }
-
             slotInputs?.Release();
             application = null;
             innerSlotContext = null;

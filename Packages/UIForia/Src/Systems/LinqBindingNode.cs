@@ -4,7 +4,6 @@ using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Util;
-using LinqBinding = System.Action<UIForia.Elements.UIElement, UIForia.Elements.UIElement, UIForia.Util.StructStack<UIForia.Compilers.TemplateContextWrapper>>;
 
 namespace UIForia.Systems {
 
@@ -89,7 +88,7 @@ namespace UIForia.Systems {
             
             for (int i = templateScope.slotInputs.size - 1; i >= 0; i--) {
                 if (templateScope.slotInputs.array[i].slotName == slotName) {
-                    referencedContexts[idx++] = templateScope.slotInputs.array[i].outerContext;
+                    referencedContexts[idx++] = templateScope.slotInputs.array[i].context;
                 }
             }
 

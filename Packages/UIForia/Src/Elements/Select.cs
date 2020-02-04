@@ -128,7 +128,7 @@ namespace UIForia.Elements {
         }
 
         private void OnInsert(ISelectOption<T> option, int index) {
-            childrenElement.InsertChild((uint) index, childrenElement.InstantiateTemplate());
+          //  childrenElement.InsertChild((uint) index, childrenElement.InstantiateTemplate());
         }
 
         public override void OnCreate() {

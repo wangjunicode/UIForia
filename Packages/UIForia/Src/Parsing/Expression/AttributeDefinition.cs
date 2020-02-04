@@ -48,7 +48,7 @@ namespace UIForia.Parsing.Expressions {
 
         public int slotDepth;
         public ProcessedType slotContextType;
-        public ScopedContextVariable[] contextStack;
+        public ContextVariableDefinition[] contextStack;
         public LightList<string> namespaces;
         public TemplateMetaData templateMetaData;
 

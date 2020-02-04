@@ -37,28 +37,28 @@ namespace UIForia.Compilers {
         public Expression Resolve(LinqCompiler _compiler) {
             UIForiaLinqCompiler compiler = (UIForiaLinqCompiler) _compiler;
             switch (variableType) {
-                case AliasResolverType.MouseEvent:
-                    return compiler.Value(TemplateCompiler.k_InputEventParameterName + "." + nameof(GenericInputEvent.AsMouseInputEvent));
-
-                case AliasResolverType.KeyEvent:
-                    return compiler.Value(TemplateCompiler.k_InputEventParameterName + "." + nameof(GenericInputEvent.AsKeyInputEvent));
-
-                case AliasResolverType.TouchEvent:
-                case AliasResolverType.ControllerEvent:
-                    throw new NotImplementedException();
-
-                case AliasResolverType.DragEvent:
-                case AliasResolverType.DragCreateMouseEvent:
-                    return compiler.GetParameter(TemplateCompiler.k_InputEventParameterName);
-                
-                case AliasResolverType.Element:
-                    return compiler.GetCastElement();
-
-                case AliasResolverType.Root:
-                    return compiler.GetCastRoot();
-
-                case AliasResolverType.Parent:
-                    return Expression.Field(compiler.GetElement(), s_UIElement_Parent);
+                // case AliasResolverType.MouseEvent:
+                //     return compiler.Value(TemplateCompiler.k_InputEventParameterName + "." + nameof(GenericInputEvent.AsMouseInputEvent));
+                //
+                // case AliasResolverType.KeyEvent:
+                //     return compiler.Value(TemplateCompiler.k_InputEventParameterName + "." + nameof(GenericInputEvent.AsKeyInputEvent));
+                //
+                // case AliasResolverType.TouchEvent:
+                // case AliasResolverType.ControllerEvent:
+                //     throw new NotImplementedException();
+                //
+                // case AliasResolverType.DragEvent:
+                // case AliasResolverType.DragCreateMouseEvent:
+                //     return compiler.GetParameter(TemplateCompiler.k_InputEventParameterName);
+                //
+                // case AliasResolverType.Element:
+                //     return compiler.GetCastElement();
+                //
+                // case AliasResolverType.Root:
+                //     return compiler.GetCastRoot();
+                //
+                // case AliasResolverType.Parent:
+                //     return Expression.Field(compiler.GetElement(), s_UIElement_Parent);
 
                 case AliasResolverType.ContextVariable: {
                     ParameterExpression el = compiler.GetElement();
@@ -75,7 +75,7 @@ namespace UIForia.Compilers {
                 case AliasResolverType.RepeatItem: {
                     compiler.Comment(name);
                     //var repeat_item_name = element.bindingNode.GetRepeatItem<T>(id).value;
-                    ParameterExpression el = compiler.GetCastElement();
+                    ParameterExpression el = compiler.GetElement();
                     Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_UIElement_BindingNode);
 
                     ReflectionUtil.TypeArray1[0] = type;

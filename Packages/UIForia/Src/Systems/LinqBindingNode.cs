@@ -3,28 +3,8 @@ using System.Diagnostics;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Elements;
-using UIForia.Util;
 
 namespace UIForia.Systems {
-
-    [DebuggerTypeProxy(typeof(LinqBindingNode))]
-    internal class LinqBindingNodeDebugView {
-
-        private readonly LinqBindingNode node;
-
-        public LightList<ContextVariable> localVars;
-
-        public LinqBindingNodeDebugView(LinqBindingNode node) {
-            this.node = node;
-            this.localVars = new LightList<ContextVariable>();
-            ContextVariable ptr = node.localVariable;
-            while (ptr != null) {
-                localVars.Add(ptr);
-                ptr = ptr.next;
-            }
-        }
-
-    }
 
     public abstract class ContextVariable {
 
@@ -84,20 +64,17 @@ namespace UIForia.Systems {
         public void InitializeContextArray(string slotName, TemplateScope templateScope, int size) {
             referencedContexts = new UIElement[size + 1];
 
-            int idx = 1;
-            
-            for (int i = templateScope.slotInputs.size - 1; i >= 0; i--) {
-                if (templateScope.slotInputs.array[i].slotName == slotName) {
-                    referencedContexts[idx++] = templateScope.slotInputs.array[i].context;
+
+            if (templateScope.slotInputs != null) {
+                int idx = 1;
+                for (int i = templateScope.slotInputs.size - 1; i >= 0; i--) {
+                    if (templateScope.slotInputs.array[i].slotName == slotName) {
+                        referencedContexts[idx++] = templateScope.slotInputs.array[i].context;
+                    }
                 }
             }
 
             referencedContexts[0] = templateScope.innerSlotContext;
-            // for (int i = 0; i < templateScope.slotInputs.size; i++) {
-            //     if (templateScope.slotInputs.array[i].slotName == slotName) {
-            //         referencedContexts[idx++] = templateScope.slotInputs.array[i].outerContext;
-            //     }
-            // }
         }
 
         public void CreateLocalContextVariable(ContextVariable variable) {
@@ -153,6 +130,46 @@ namespace UIForia.Systems {
             CreateLocalContextVariable(value);
 
             return value;
+        }
+
+        public static LinqBindingNode GetSlotNode(Application application, UIElement rootElement, UIElement element, UIElement innerContext, int createdId, int enabledId, int updatedId, int lateId, string slotName, TemplateScope templateScope, int slotContextSize) {
+            LinqBindingNode node = new LinqBindingNode(); // todo -- pool
+            node.root = rootElement;
+            node.element = element;
+            node.innerContext = innerContext;
+            element.bindingNode = node;
+
+            // todo -- profile this against skip tree
+            UIElement ptr = element.parent;
+            while (ptr != null) {
+                if (ptr.bindingNode != null) {
+                    node.parent = ptr.bindingNode;
+                    break;
+                }
+
+                ptr = ptr.parent;
+            }
+
+            node.InitializeContextArray(slotName, templateScope, slotContextSize);
+
+            if (createdId != -1) {
+                node.createdBinding = application.templateData.bindings[createdId];
+                node.createdBinding?.Invoke(rootElement, element);
+            }
+
+            if (enabledId != -1) {
+                node.enabledBinding = application.templateData.bindings[enabledId];
+            }
+
+            if (updatedId != -1) {
+                node.updateBindings = application.templateData.bindings[updatedId];
+            }
+
+            if (lateId != -1) {
+                node.lateBindings = application.templateData.bindings[lateId];
+            }
+
+            return node;
         }
 
         [UsedImplicitly] // called from template functions, 

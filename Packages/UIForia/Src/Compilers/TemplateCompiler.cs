@@ -46,7 +46,8 @@ namespace UIForia.Compilers {
         internal static readonly RepeatKeyFnTypeWrapper s_RepeatKeyFnTypeWrapper = new RepeatKeyFnTypeWrapper();
 
         internal static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod(nameof(Application.CreateElementFromPoolWithType));
-        internal static readonly MethodInfo s_BindingNodePool_Get = typeof(LinqBindingNode).GetMethod("Get", BindingFlags.Static | BindingFlags.Public);
+        internal static readonly MethodInfo s_LinqBindingNode_Get = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.Get), BindingFlags.Static | BindingFlags.Public);
+        internal static readonly MethodInfo s_LinqBindingNode_GetSlotNode = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetSlotNode), BindingFlags.Static | BindingFlags.Public);
         internal static readonly FieldInfo s_StructList_ElementAttr_Array = typeof(StructList<ElementAttribute>).GetField("array");
 
         internal static readonly FieldInfo s_SlotElement_SlotId = typeof(UISlotBase).GetField(nameof(UISlotBase.slotId));
@@ -421,7 +422,7 @@ namespace UIForia.Compilers {
 
             ctx.Assign(templateSpawnIdField, Expression.Constant(spawnId));
             ctx.Assign(templateRootContext, ctx.rootParam);
-            ctx.Assign(scopeVar, ctx.templateScope);
+            ctx.Assign(scopeVar, ExpressionFactory.CallInstanceUnchecked(ctx.templateScope, s_TemplateScope_Clone));
             ctx.Assign(indexVarIdField, Expression.Constant(indexVarId));
             ctx.Assign(itemVarIdField, Expression.Constant(itemVarId));
 
@@ -432,18 +433,8 @@ namespace UIForia.Compilers {
             throw new NotImplementedException();
         }
 
-        private ScopedContextVariable[] CloneContextStack() {
-            LightStack<ContextVariableDefinition> stack = contextStack.Peek();
-            ScopedContextVariable[] clone = new ScopedContextVariable[stack.size];
-            for (int i = 0; i < stack.size; i++) {
-                clone[i] = new ScopedContextVariable() {
-                    name = stack.array[i].GetName(),
-                    id = stack.array[i].id,
-                    type = stack.array[i].type
-                };
-            }
-
-            return clone;
+        private ContextVariableDefinition[] CloneContextStack() {
+            return contextStack.Peek().ToArray();
         }
 
         private Expression CompileSlotDefinition(CompilationContext parentContext, SlotNode slotNode) {
@@ -455,6 +446,8 @@ namespace UIForia.Compilers {
             parentContext.compiledTemplate.AddSlot(compiledSlot);
 
             StructList<AttributeDefinition> attributes = new StructList<AttributeDefinition>();
+            StructList<AttributeDefinition> exposedAttributes = StructList<AttributeDefinition>.Get();
+
             if (slotNode.attributes != null) {
                 SlotAttributeData attrData = new SlotAttributeData();
                 attrData.slotDepth = 0;
@@ -467,6 +460,9 @@ namespace UIForia.Compilers {
                     AttributeDefinition attrCopy = slotNode.attributes.array[i];
                     attrCopy.slotAttributeData = attrData;
                     attributes.Add(attrCopy);
+                    if (attrCopy.type == AttributeType.Expose) {
+                        exposedAttributes.Add(attrCopy);
+                    }
                 }
             }
 
@@ -474,7 +470,9 @@ namespace UIForia.Compilers {
             compiledSlot.originalAttributes = attributes;
             compiledSlot.rootElementType = parentContext.rootType.rawType;
             compiledSlot.scopedVariables = CloneContextStack();
-            compiledSlot.exposedAttributes = slotNode.GetAttributes(AttributeType.Expose);
+            compiledSlot.exposedAttributes = exposedAttributes.ToArray();
+
+            exposedAttributes.Release();
 
             Expression nodeExpr = parentContext.ElementExpr;
 
@@ -601,17 +599,17 @@ namespace UIForia.Compilers {
 
             SlotNode node = slotOverrideNode;
 
-            MethodInfo method = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.InitializeContextArray));
+            // MethodInfo method = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.InitializeContextArray));
 
             StructList<ContextAliasActions> contextMods = CompileBindings(ctx, node, attributes, exposedVariableDataList).contextModifications;
 
-            ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(
-                Expression.Field(slotRootParam, s_UIElement_BindingNode),
-                method,
-                Expression.Constant(compiledSlot.slotName),
-                ctx.templateScope,
-                Expression.Constant(exposedVariableDataList.size))
-            );
+            // ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(
+            //     Expression.Field(slotRootParam, s_UIElement_BindingNode),
+            //     method,
+            //     Expression.Constant(compiledSlot.slotName),
+            //     ctx.templateScope,
+            //     Expression.Constant(exposedVariableDataList.size))
+            // );
 
             if (slotOverrideNode.slotType == SlotType.Override) {
                 ctx.Assign(ctx.templateScope, ExpressionFactory.CallInstanceUnchecked(ctx.templateScope, s_TemplateScope_GetOverrideScope));
@@ -687,7 +685,7 @@ namespace UIForia.Compilers {
                     Expression.Constant(ctx.compiledTemplate.templateId)
                 ));
                 // need to create a binding node since we implicitly create this node instead of visiting it.
-                ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_BindingNodePool_Get,
+                ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_LinqBindingNode_Get,
                         ctx.applicationExpr,
                         ctx.rootParam,
                         ctx.ElementExpr,
@@ -764,11 +762,20 @@ namespace UIForia.Compilers {
         }
 
         private ContextVariableDefinition FindContextByName(string name) {
-            LightStack<ContextVariableDefinition> stack = contextStack.Peek();
-            for (int j = stack.size - 1; j >= 0; j--) {
-                ContextVariableDefinition definition = stack.array[j];
-                if (definition.GetName() == name) {
-                    return definition;
+            if (slotScope == null) {
+                LightStack<ContextVariableDefinition> stack = contextStack.Peek();
+                for (int j = stack.size - 1; j >= 0; j--) {
+                    ContextVariableDefinition definition = stack.array[j];
+                    if (definition.GetName() == name) {
+                        return definition;
+                    }
+                }
+            }
+            else {
+                for (int i = 0; i < slotScope.contextStack.Length; i++) {
+                    if (slotScope.contextStack[i].GetName() == name) {
+                        return slotScope.contextStack[i];
+                    }
                 }
             }
 
@@ -849,9 +856,6 @@ namespace UIForia.Compilers {
                     Assert.IsNotNull(toOverride, "toOverride != null");
 
                     CompiledSlot compiledSlot = CompileSlotOverride(ctx, node, toOverride);
-
-                    // its per slot... override is probably the correct place to create the array 
-                    // ultimately we need the slot that runs to instantiate w/ references
 
                     switch (node.slotType) {
                         case SlotType.Define:
@@ -1046,12 +1050,12 @@ namespace UIForia.Compilers {
 
                 CompileCheckChangeHandlers(changeHandlerDefinitions);
 
-                retn.hasBindingNode = BuildBindings(ctx, templateNode);
+                retn.hasBindingNode = BuildBindings(ctx, templateNode, exposedVariableData?.size ?? 0);
 
                 changeHandlerDefinitions?.Release();
             }
             catch (CompileException exception) {
-                exception.SetFileName($"{ctx.compiledTemplate.filePath} {templateNode.TemplateNodeDebugData.tagName}{templateNode.TemplateNodeDebugData.lineInfo}");
+                exception.SetFileName($"{ctx.compiledTemplate.filePath} {templateNode.TemplateNodeDebugData.lineInfo} <{templateNode.TemplateNodeDebugData.tagName}>");
                 throw;
             }
 
@@ -1140,13 +1144,13 @@ namespace UIForia.Compilers {
                 contextModifications = contextModifications ?? StructList<ContextAliasActions>.Get();
 
                 for (int i = 0; i < exposedData.scopedVariables.Length; i++) {
-                    ScopedContextVariable exposed = exposedData.scopedVariables[i];
-                    contextStack.Peek().Push(new ContextVariableDefinition() {
-                        id = exposed.id,
-                        name = exposed.name,
-                        type = exposed.type,
-                        variableType = AliasResolverType.ContextVariable
-                    });
+                    contextStack.Peek().Push(exposedData.scopedVariables[i]);
+                    // new ContextVariableDefinition() {
+                    // id = exposed.id,
+                    // name = exposed.name,
+                    // type = exposed.type,
+                    // variableType = AliasResolverType.ContextVariable
+                    // });
                 }
 
                 if (exposedData.exposedAttrs.Length != 0) {
@@ -1785,12 +1789,14 @@ namespace UIForia.Compilers {
             createdCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(inputSystem, method, elementVar));
         }
 
-        private bool BuildBindings(CompilationContext ctx, TemplateNode templateNode) {
+        private bool BuildBindings(CompilationContext ctx, TemplateNode templateNode, int slotContextSize) {
             int createdBindingId = -1;
             int enabledBindingId = -1;
             int updateBindingId = -1;
             int lateBindingId = -1;
 
+          
+            
             // we always have 4 statements because of Initialize(), so only consider compilers with more than 4 statements
 
             if (createdCompiler.StatementCount > 0) {
@@ -1820,27 +1826,38 @@ namespace UIForia.Compilers {
                 lateBindingId = lateBinding.bindingId;
                 ctx.compiledTemplate.AddBinding(lateBinding);
             }
+            
+            if (templateNode is SlotNode slotNode) {
+                     ctx.AddStatement(Expression.Call(null, s_LinqBindingNode_GetSlotNode,
+                        ctx.applicationExpr,
+                        ctx.rootParam,
+                        ctx.ElementExpr,
+                        ctx.ContextExpr,
+                        Expression.Constant(createdBindingId),
+                        Expression.Constant(enabledBindingId),
+                        Expression.Constant(updateBindingId),
+                        Expression.Constant(lateBindingId),
+                        Expression.Constant(slotNode.slotName),
+                        ctx.templateScope,
+                        Expression.Constant(slotContextSize)
+                    )
+                );
+            }
+            else {
+                ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_LinqBindingNode_Get,
+                        ctx.applicationExpr,
+                        ctx.rootParam,
+                        ctx.ElementExpr,
+                        ctx.ContextExpr,
+                        Expression.Constant(createdBindingId),
+                        Expression.Constant(enabledBindingId),
+                        Expression.Constant(updateBindingId),
+                        Expression.Constant(lateBindingId)
+                    )
+                );
+            }
 
-            // create binding node if needed
-            // todo -- some nodes like repeat children always need a binding node created. 
-            // most nodes without bindings do not
-            //if (createdBindingId >= 0 || updateBindingId >= 0 || enabledBindingId >= 0 || lateBindingId >= 0) {
-            // scope.application.BindingNodePool.Get(root, element);
-            ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_BindingNodePool_Get,
-                    ctx.applicationExpr,
-                    ctx.rootParam,
-                    ctx.ElementExpr,
-                    ctx.ContextExpr,
-                    Expression.Constant(createdBindingId),
-                    Expression.Constant(enabledBindingId),
-                    Expression.Constant(updateBindingId),
-                    Expression.Constant(lateBindingId)
-                )
-            );
             return true;
-            //   }
-
-            //   return false;
         }
 
         private MethodCallExpression CreateLocalContextVariableExpression(ContextVariableDefinition definition, out Type contextVarType) {
@@ -2013,7 +2030,17 @@ namespace UIForia.Compilers {
             createdCompiler.RawExpression(expression);
         }
 
+        private void SetupForAttribute(in AttributeDefinition attr) {
+            slotScope = attr.slotAttributeData;
+        }
+
+        private void TeardownAttributeData(in AttributeDefinition attr) {
+            slotScope = null;
+        }
+
         private LambdaExpression BuildInputTemplateBinding<T>(UIForiaLinqCompiler compiler, in AttributeDefinition attr, Type returnType = null) {
+            SetupForAttribute(attr);
+            compiler.SetupAttributeData(attr.slotAttributeData);
             SetImplicitContext(compiler, attr);
 
             ASTNode astNode = ExpressionParser.Parse(attr.value);
@@ -2056,6 +2083,8 @@ namespace UIForia.Compilers {
 
             LambdaExpression lambda = closure.BuildLambda();
             closure.Release();
+
+            TeardownAttributeData(attr);
 
             return lambda;
         }
@@ -2408,6 +2437,8 @@ namespace UIForia.Compilers {
             MemberExpression valueField = Expression.Field(target, contextVarType.GetField(nameof(ContextVariable<object>.value)));
             updateCompiler.Assign(valueField, value);
         }
+
+        private SlotAttributeData slotScope;
 
         private Expression ResolveAlias(string aliasName, LinqCompiler compiler) {
             if (aliasName == "oldValue") {

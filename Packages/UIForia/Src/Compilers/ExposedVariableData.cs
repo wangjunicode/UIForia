@@ -6,7 +6,7 @@ namespace UIForia.Compilers {
     public class ExposedVariableData {
 
         public Type rootType;
-        public ScopedContextVariable[] scopedVariables;
+        public ContextVariableDefinition[] scopedVariables;
         public AttributeDefinition[] exposedAttrs;
 
     }

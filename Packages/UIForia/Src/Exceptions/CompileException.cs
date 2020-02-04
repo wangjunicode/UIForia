@@ -233,7 +233,7 @@ namespace UIForia.Exceptions {
         }
 
         public static CompileException UnknownAlias(string aliasName) {
-            return new CompileException($"Unknown alias {aliasName}");
+            return new CompileException($"Unknown alias `{aliasName}`");
         }
 
         public static CompileException DuplicateResolvedGenericArgument(string tagName, string argName, Type original, Type duplicate) {

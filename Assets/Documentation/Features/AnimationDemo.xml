@@ -11,12 +11,16 @@
     <Contents style="container">
 
         <Select style="input" options="timingFunctions" sync:selectedValue="timingFunction">
-            
-<!--            <OverrideSlot:select-display>-->
-<!--                {$selectedOption.Label} is selected-->
-<!--            </OverrideSlot:select-display>-->
 
-            <Text style="select-label"> {$option.Label} Here is my item {$option.Label} </Text>
+            <override:select-display>
+                {$selectedOption.Label} is selected
+            </override:select-display>
+
+            <override:placeholder>
+                Please enter an item
+            </override:placeholder>
+            
+            <Text style="select-label">{$option.Label} Here is my item</Text>
 
         </Select>
 

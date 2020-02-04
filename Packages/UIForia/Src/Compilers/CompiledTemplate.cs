@@ -30,8 +30,9 @@ namespace UIForia.Compilers {
         public CompiledSlot GetCompiledSlot(string slotName) {
             if (slots == null) return null;
             for (int i = 0; i < slots.size; i++) {
-                if (slots.array[i].slotType != SlotType.Template && slots.array[i].slotName == slotName) {
-                    return slots.array[i];
+                CompiledSlot slot = slots.array[i];
+                if ((slot.slotType == SlotType.Forward || slot.slotType == SlotType.Define) && slot.slotName == slotName) {
+                    return slot;
                 }
             }
 

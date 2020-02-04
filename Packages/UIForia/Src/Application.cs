@@ -704,7 +704,6 @@ namespace UIForia {
 
                 if ((current.flags & UIElementFlags.Created) == 0) {
                     current.flags |= UIElementFlags.Created;
-//                    current.style.Initialize();
                     for (int i = 0; i < systems.Count; i++) {
                         systems[i].OnElementCreated(current);
                     }
@@ -715,7 +714,7 @@ namespace UIForia {
 
                 UIElement[] children = current.children.array;
                 int childCount = current.children.size;
-                // reverse this?
+                // reverse this? inline stack push
                 for (int i = 0; i < childCount; i++) {
                     children[i].siblingIndex = i;
                     elemRefStack.Push(new ElemRef() {element = children[i]});
@@ -913,19 +912,6 @@ namespace UIForia {
         public void HydrateTemplate(int templateId, UIElement root, TemplateScope scope) {
             templateData.templates[templateId](root, scope);
             scope.Release();
-        }
-
-        public void AddTemplateChildren(SlotTemplateElement slotTemplateElement, int templateId, int count) {
-            throw new Exception("Verify this");
-            // if (templateId < 0) return;
-            //
-            // TemplateScope scope = new TemplateScope(this, null);
-            //
-            // for (int i = 0; i < count; i++) {
-            //     UIElement root = slotTemplateElement.bindingNode.root;
-            //     UIElement child = templateData.slots[templateId](root, root, scope);
-            //     InsertChild(slotTemplateElement, child, (uint) slotTemplateElement.children.Count);
-            // }
         }
 
     }

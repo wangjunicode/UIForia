@@ -18,7 +18,7 @@ namespace UIForia.Compilers {
         public LambdaExpression templateFn;
         public string templateName;
         public Type rootElementType;
-        public ScopedContextVariable[] scopedVariables;
+        public ContextVariableDefinition[] scopedVariables;
         public AttributeDefinition[] exposedAttributes;
         public StructList<AttributeDefinition> originalAttributes;
         public LightList<ExposedVariableData> exposedVariableDataList;

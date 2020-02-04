@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Style>
 
@@ -45,7 +44,7 @@
     
     <Contents style="scrollview">
 
-        <Children attr:id="scroll-root" />
+        <define:Children attr:id="scroll-root" />
 
         <Group mouse:click="OnClickVertical($event)" mouse:hover="OnHoverVertical($event)" attr:id="scroll-track-vertical" style="scroll-track-vertical">
             <Div drag:create="OnCreateVerticalDrag($evt)" attr:id="scroll-handle-vertical" style="scroll-handle-vertical"/>

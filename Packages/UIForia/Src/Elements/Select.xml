@@ -143,15 +143,15 @@
     <Contents style="select">
 
         <Group if="selectedIndex >= 0" style="select-display">
-            <DefineSlot:select-display style="select-display" expose:selectedOption="options[selectedIndex]">
+            <define:select-display style="select-display" expose:selectedOption="options[selectedIndex]">
                 {options[selectedIndex].Label}
-            </DefineSlot:select-display>
+            </define:select-display>
         </Group>
 
         <Group if="selectedIndex &lt; 0" style="select-display">
-            <DefineSlot:placeholder style="select-placeholder">
+            <define:placeholder style="select-placeholder">
                 Select a value
-            </DefineSlot:placeholder>
+            </define:placeholder>
         </Group>
 
         <Group style="select-chevron-holder">
@@ -159,14 +159,14 @@
             <Div style="chevron-down"/>
         </Group>
         
-        <ScrollView ctx:item="options[1]" style="select-options" attr:id="option-list" if="selecting">
+        <ScrollView style="select-options" attr:id="option-list" if="selecting">
             
             <Repeat list="options" style="transclude">
                 
-                <Children style="select-option-container select-option" expose:option="$item">
+                <define:Children style="select-option-container select-option" expose:option="$item" mouse:click="SelectElement($event, $index)">
                     <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($item)"/>
                     <Text style="select-label">{$item.Label}</Text>
-                </Children>
+                </define:Children>
                 
             </Repeat>
 

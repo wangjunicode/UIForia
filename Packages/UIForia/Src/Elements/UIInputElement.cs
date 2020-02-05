@@ -816,7 +816,7 @@ namespace UIForia.Elements {
 
             protected readonly UIInputElement _uiInputElement;
 
-            public TextSelectDragEvent(UIInputElement origin) : base(origin) {
+            public TextSelectDragEvent(UIInputElement origin)  {
                 this._uiInputElement = origin;
                 _uiInputElement.isSelecting = true;
             }

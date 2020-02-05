@@ -234,6 +234,8 @@ namespace UIForia.Compilers {
 
             compiledTemplate.elementType = processedType;
 
+            compiledTemplate.namespaces = namespaces;
+
             CompilationContext ctx = new CompilationContext(templateRootNode) {
                 namespaces = namespaces,
                 rootType = processedType,
@@ -341,8 +343,8 @@ namespace UIForia.Compilers {
 
         private Expression CompileRepeatNode(CompilationContext ctx, RepeatNode repeatNode) {
             if (repeatNode.HasProperty("count")) {
-                if (repeatNode.HasProperty("list") || repeatNode.HasProperty("start") || repeatNode.HasProperty("end") || repeatNode.HasProperty("page") || repeatNode.HasProperty("pageSize")) {
-                    throw CompileException.UnresolvedRepeatType("count", "list", "start", "page", "pageSize");
+                if (repeatNode.HasProperty("list") || repeatNode.HasProperty("start") || repeatNode.HasProperty("end")) {
+                    throw CompileException.UnresolvedRepeatType("count", "list", "start", "end");
                 }
 
                 return CompileRepeatCount(ctx, repeatNode);
@@ -354,9 +356,9 @@ namespace UIForia.Compilers {
 
                 return CompileRepeatList(ctx, repeatNode);
             }
-            else if (repeatNode.HasProperty("page") || repeatNode.HasProperty("pageSize")) { }
+            // else if (repeatNode.HasProperty("page") || repeatNode.HasProperty("pageSize")) { }
 
-            throw new NotImplementedException();
+            throw new NotImplementedException("<Repeat> must have either a `count` or a `list` property");
         }
 
         private Expression CompileRepeatCount(CompilationContext ctx, RepeatNode repeatNode) {
@@ -911,11 +913,6 @@ namespace UIForia.Compilers {
             createdCompiler.Reset();
             lateCompiler.Reset();
 
-            updateCompiler.SetNamespaces(namespaces);
-            enabledCompiler.SetNamespaces(namespaces);
-            createdCompiler.SetNamespaces(namespaces);
-            lateCompiler.SetNamespaces(namespaces);
-
             Parameter p0 = new Parameter(typeof(UIElement), "__root", ParameterFlags.NeverNull);
             Parameter p1 = new Parameter(typeof(UIElement), "__element", ParameterFlags.NeverNull);
 
@@ -924,10 +921,10 @@ namespace UIForia.Compilers {
             createdCompiler.SetSignature(p0, p1);
             lateCompiler.SetSignature(p0, p1);
 
-            updateCompiler.Setup(rootType, elementType);
-            enabledCompiler.Setup(rootType, elementType);
-            createdCompiler.Setup(rootType, elementType);
-            lateCompiler.Setup(rootType, elementType);
+            updateCompiler.Setup(rootType, elementType, namespaces);
+            enabledCompiler.Setup(rootType, elementType, namespaces);
+            createdCompiler.Setup(rootType, elementType, namespaces);
+            lateCompiler.Setup(rootType, elementType, namespaces);
         }
 
         private static void InitializeAttributes(CompilationContext ctx, StructList<AttributeDefinition> attributes) {
@@ -1057,6 +1054,9 @@ namespace UIForia.Compilers {
             catch (CompileException exception) {
                 exception.SetFileName($"{ctx.compiledTemplate.filePath} {templateNode.TemplateNodeDebugData.lineInfo} <{templateNode.TemplateNodeDebugData.tagName}>");
                 throw;
+            }
+            catch (TypeResolutionException typeResolutionException) {
+                throw new CompileException($"Error in file {ctx.compiledTemplate.filePath} at line {templateNode.TemplateNodeDebugData.lineInfo} while compiling <{templateNode.TemplateNodeDebugData.tagName}>: " + typeResolutionException.Message);
             }
 
             retn.contextModifications = contextModifications;
@@ -1401,7 +1401,7 @@ namespace UIForia.Compilers {
 
             public TemplateMetaData templateMetaData;
             public StructList<TextExpression> expressions;
-            public SlotAttributeData slotData;
+            public AttributeDefinition attribute;
             public bool fromInnerContext;
 
         }
@@ -1445,10 +1445,10 @@ namespace UIForia.Compilers {
                     }
 
                     StyleExpression styleExpression = default;
+                    styleExpression.attribute = attr;
 
                     if (attr.slotAttributeData != null) {
                         styleExpression.templateMetaData = attr.slotAttributeData.templateMetaData;
-                        styleExpression.slotData = attr.slotAttributeData;
                     }
 
                     else if ((attr.flags & AttributeFlags.InnerContext) != 0) {
@@ -1555,7 +1555,7 @@ namespace UIForia.Compilers {
 
                 StructList<TextExpression> expressionList = styleExpression.expressions;
 
-                updateCompiler.SetupAttributeData(styleExpression.slotData);
+                updateCompiler.SetupAttributeData(styleExpression.attribute);
                 updateCompiler.SetImplicitContext(styleExpression.fromInnerContext ? updateCompiler.GetCastElement() : updateCompiler.GetCastRoot());
 
                 ParameterExpression templateMetaDataExpr = updateCompiler.AddVariable(typeof(TemplateMetaData[]), "metaData");
@@ -1878,6 +1878,8 @@ namespace UIForia.Compilers {
                 return;
             }
 
+            updateCompiler.TeardownAttributeData();
+            
             if (textNode.textExpressionList != null && textNode.textExpressionList.size > 0 && !textNode.IsTextConstant()) {
                 updateCompiler.AddNamespace("UIForia.Util");
                 updateCompiler.AddNamespace("UIForia.Text");
@@ -2039,7 +2041,7 @@ namespace UIForia.Compilers {
 
         private LambdaExpression BuildInputTemplateBinding<T>(UIForiaLinqCompiler compiler, in AttributeDefinition attr, Type returnType = null) {
             SetupForAttribute(attr);
-            compiler.SetupAttributeData(attr.slotAttributeData);
+            compiler.SetupAttributeData(attr);
             SetImplicitContext(compiler, attr);
 
             ASTNode astNode = ExpressionParser.Parse(attr.value);
@@ -2129,7 +2131,7 @@ namespace UIForia.Compilers {
                 parameterCount--;
             }
 
-            compiler.SetupAttributeData(attr.slotAttributeData);
+            compiler.SetupAttributeData(attr);
 
             SetImplicitContext(compiler, attr);
             LightList<Parameter> parameters = LightList<Parameter>.Get();
@@ -2164,7 +2166,7 @@ namespace UIForia.Compilers {
 
                 compiler.BeginIsolatedSection();
 
-                compiler.SetupAttributeData(attr.slotAttributeData);
+                compiler.SetupAttributeData(attr);
 
                 SetImplicitContext(compiler, attr);
 
@@ -2187,7 +2189,7 @@ namespace UIForia.Compilers {
             // __castElement.SetAttribute("attribute-name", computedValue);
             compiler.CommentNewLineBefore($"{attr.key}=\"{attr.value}\"");
 
-            compiler.SetupAttributeData(attr.slotAttributeData);
+            compiler.SetupAttributeData(attr);
 
             SetImplicitContext(compiler, attr);
 
@@ -2222,14 +2224,11 @@ namespace UIForia.Compilers {
 
             compiler.BeginIsolatedSection();
 
-            compiler.SetupAttributeData(attr.slotAttributeData);
+            compiler.SetupAttributeData(attr);
 
             SetImplicitContext(compiler, attr);
 
             compiler.CommentNewLineBefore($"style.{attr.key}=\"{attr.value}\"");
-
-            // todo -- check if constant and pick different compiler
-            // Debug.Log(attributeDefinition.key + ExpressionUtil.IsConstant(value));
 
             if (!char.IsUpper(key[0])) {
                 char[] keyChars = key.ToCharArray();
@@ -2304,11 +2303,12 @@ namespace UIForia.Compilers {
             compiler.CommentNewLineBefore($"{attr.key}=\"{attr.value}\"");
             compiler.BeginIsolatedSection();
             try {
-                compiler.SetupAttributeData(attr.slotAttributeData);
+                compiler.SetupAttributeData(attr);
                 compiler.SetImplicitContext(castElement);
                 left = compiler.AssignableStatement(attr.key);
             }
             catch (Exception e) {
+                TeardownAttributeData(attr);
                 compiler.EndIsolatedSection();
                 Debug.LogError(e);
                 return;
@@ -2376,6 +2376,7 @@ namespace UIForia.Compilers {
                 compiler.Assign(left, right);
             }
 
+            TeardownAttributeData(attr);
             compiler.EndIsolatedSection();
             changeHandlers.Release();
         }
@@ -2523,11 +2524,10 @@ namespace UIForia.Compilers {
 
             typeResolver.Reset();
             resolvingTypeOnly = true;
-            typeResolver.SetNamespaces(namespaces);
             typeResolver.SetSignature(new Parameter(rootType, "__root", ParameterFlags.NeverNull));
             typeResolver.SetImplicitContext(typeResolver.GetParameter("__root"));
             typeResolver.resolveAlias = ResolveAlias;
-            typeResolver.Setup(rootType, null);
+            typeResolver.Setup(rootType, null, (LightList<string>)namespaces);
 
             if (templateNode.attributes == null) {
                 throw CompileException.UnresolvedGenericElement(processedType, templateNode.TemplateNodeDebugData);

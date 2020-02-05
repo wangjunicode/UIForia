@@ -26,17 +26,21 @@ namespace UIForia.Compilers {
         private const string k_CastRoot = "__castRoot";
         private UIForiaLinqCompiler parent;
         private bool attrMode;
-
+        private LightList<string> originalNamespaces;
+        
         private static readonly FieldInfo s_UIElement_InputHandlerGroup = typeof(UIElement).GetField(nameof(UIElement.inputHandlers), BindingFlags.Instance | BindingFlags.Public);
 
-        public void Setup(Type rootElementType, Type elementType) {
+        public void Setup(Type rootElementType, Type elementType, LightList<string> originalNamespaces) {
             this.rootElementType = rootElementType;
             this.elementType = elementType;
+            this.originalNamespaces = originalNamespaces;
             elementParameter = null;
             rootParameter = null;
             castElementParameter = null;
             castRootParameter = null;
             inputHandlerGroup = null;
+            castSlotContext = null;
+            slotContext = null;
         }
 
         protected override void SetupClosure(LinqCompiler p) {
@@ -102,7 +106,7 @@ namespace UIForia.Compilers {
                     MemberExpression bindingNode = Expression.Field(GetElement(), TemplateCompiler.s_UIElement_BindingNode);
                     MemberExpression referenceArray = Expression.Field(bindingNode, TemplateCompiler.s_LinqBindingNode_ReferencedContext);
                     BinaryExpression index = Expression.ArrayIndex(referenceArray, Expression.Constant(attributeData.slotDepth));
-                    castSlotContext = AddVariableUnchecked(p, ExpressionFactory.Convert(index, attributeData.slotContextType.rawType));
+                    castSlotContext = AddVariableUnchecked(p, Expression.Convert(index, attributeData.slotContextType.rawType));
                 }
 
                 return castSlotContext;
@@ -129,10 +133,18 @@ namespace UIForia.Compilers {
             s_CompilerPool.Add(this);
         }
 
-        public void SetupAttributeData(SlotAttributeData attributeData) {
-            this.attributeData = attributeData;
+        public void SetupAttributeData(in AttributeDefinition attr) {
+            this.attributeData = attr.slotAttributeData;
             this.castSlotContext = null;
             this.slotContext = null;
+            SetNamespaces(attr.templateShell.referencedNamespaces);
+        }
+
+        public void TeardownAttributeData() {
+            this.attributeData = null;
+            this.castSlotContext = null;
+            this.slotContext = null;
+            SetNamespaces(originalNamespaces);
         }
 
     }

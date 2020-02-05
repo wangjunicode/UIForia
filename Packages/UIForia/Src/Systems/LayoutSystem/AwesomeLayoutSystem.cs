@@ -29,11 +29,15 @@ namespace UIForia.Systems {
             };
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+            // application.StyleSystem.onStylePropertyAnimated += HandleStylepropertyAnimated;
         }
 
         internal void CreateLayoutBox(UIElement currentElement) {
             if (currentElement is UITextElement) {
                 currentElement.layoutBox = new AwesomeTextLayoutBox();
+            }
+            else if (currentElement is ScrollView) {
+                currentElement.layoutBox = new AwesomeScrollViewLayoutBox();
             }
             else if (currentElement is UIImageElement) {
                 currentElement.layoutBox = new AwesomeImageLayoutBox();
@@ -62,7 +66,7 @@ namespace UIForia.Systems {
         internal void ChangeLayoutBox(UIElement currentElement, LayoutType layoutType) {
             Assert.IsNotNull(currentElement.layoutBox);
 
-            if (currentElement is UITextElement || currentElement is UIImageElement) {
+            if (currentElement is UITextElement || currentElement is ScrollView || currentElement is UIImageElement) {
                 return;
             }
 

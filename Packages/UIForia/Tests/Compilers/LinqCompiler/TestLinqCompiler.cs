@@ -1124,7 +1124,6 @@ public class TestLinqCompiler {
 
         Assert.AreEqual(0, element.floatValue);
         Assert.AreEqual(42, root.vec3Array[3].z);
-        Debug.Log(PrintCode(expr));
 
         fn.Invoke(root, element);
 
@@ -1359,7 +1358,6 @@ public class TestLinqCompiler {
 
         Assert.AreEqual(0, element.floatValue);
         Assert.AreEqual(42, root.vec3List[3].z);
-        Debug.Log(PrintCode(expr));
 
         fn.Invoke(root, element);
 
@@ -1571,7 +1569,6 @@ public class TestLinqCompiler {
 
         Assert.AreEqual(0, element.svHolderVec3.value.x);
         Assert.AreEqual(42, root.vec3List[3].z);
-        Debug.Log(PrintCode(expr));
 
         fn.Invoke(root, element);
 

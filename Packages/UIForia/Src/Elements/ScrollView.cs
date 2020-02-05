@@ -1,6 +1,5 @@
 using UIForia.Attributes;
 using UIForia.Layout;
-using UIForia.Rendering;
 using UIForia.UIInput;
 using UnityEngine;
 
@@ -9,146 +8,141 @@ namespace UIForia.Elements {
     [Template(TemplateType.Internal, "Elements/ScrollView.xml")]
     public class ScrollView : UIElement {
 
-        public UIElement verticalHandle { get; protected set; }
-        public UIElement verticalTrack { get; protected set; }
-
-        public UIElement horizontalHandle { get; protected set; }
-        public UIElement horizontalTrack { get; protected set; }
-
-        public float scrollSpeed = 50f;
+        public float scrollSpeed = 1f;
         public float fadeTime = 2f;
+        public float trackSize = 10f;
 
         public bool disableOverflowX;
         public bool disableOverflowY;
 
-        public float fadeTarget; 
+        public bool verticalScrollingEnabled => !disableOverflowY && isOverflowingY;
+        public bool horizontalScrollingEnabled => !disableOverflowX && isOverflowingX;
 
-        protected float lastScrollVerticalTimestamp;
-        protected float lastScrollHorizontalTimestamp;
-
-        protected UIElement childrenElement;
-        // todo -- without layout system integration this is an overlay scroll bar only
-
-        private Size overflowSize;
+        public float fadeTarget;
 
         private Size previousChildrenSize;
 
-        private float scrollPercentageX;
-        private float scrollPercentageY;
+        public float scrollPercentageX;
+        public float scrollPercentageY;
+
+        public float horizontalScrollPosition;
+        public float verticalScrollPosition;
+
+        public bool isOverflowingX { get; internal set; }
+        public bool isOverflowingY { get; internal set; }
+
+        internal float scrollDeltaX;
+        internal float scrollDeltaY;
+        internal int xDirection;
+        internal int yDirection;
+
+        internal UIElement verticalHandle;
+        internal UIElement horizontalHandle;
 
         public override void OnEnable() {
-            childrenElement = FindById("scroll-root");
-            verticalHandle = FindById("scroll-handle-vertical");
-            verticalTrack = FindById("scroll-track-vertical");
-            horizontalHandle = FindById("scroll-handle-horizontal");
-            horizontalTrack = FindById("scroll-track-horizontal");
+            verticalHandle = children[2];
+            horizontalHandle = children[4];
         }
 
         public override void OnUpdate() {
-            float contentWidth = layoutResult.ContentWidth;
-            float contentHeight = layoutResult.ContentHeight;
-          
-            // overflowSize = childrenElement.layoutResult.ComputeOverflowSize();
-            //
-            // if (previousChildrenSize != default && (int) previousChildrenSize.height > (int) overflowSize.height) {
-            //     ScrollToVerticalPercent(0);
-            // }
-            // if (previousChildrenSize != default && (int) previousChildrenSize.width > (int) overflowSize.width) {
-            //     ScrollToHorizontalPercent(0);
-            // }
-            //
-            // previousChildrenSize = overflowSize;
-            //
-            // if (disableOverflowX || overflowSize.width <= contentWidth) {
-            //     horizontalTrack.SetEnabled(false);
-            // }
-            // else {
-            //     horizontalTrack.SetEnabled(true);
-            //     float width = (contentWidth / overflowSize.width) * contentWidth;
-            //     float opacity = 1 + fadeTarget - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollHorizontalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
-            //     horizontalHandle.style.SetPreferredWidth(width, StyleState.Normal);
-            //     horizontalTrack.style.SetOpacity(opacity, StyleState.Normal);
-            // }
-            //
-            // if (disableOverflowY || overflowSize.height <= contentHeight) {
-            //     verticalTrack.SetEnabled(false);
-            // }
-            // else {
-            //     verticalTrack.SetEnabled(true);
-            //     // todo fix bug: settings preferred height does not immediately update the height
-            //     float height = (contentHeight / overflowSize.height) * contentHeight;
-            //     float opacity = 1 + fadeTarget - Mathf.Clamp01(Easing.Interpolate((Time.realtimeSinceStartup - lastScrollVerticalTimestamp) / fadeTime, EasingFunction.CubicEaseInOut));
-            //     verticalHandle.style.SetPreferredHeight(height, StyleState.Normal);
-            //     verticalTrack.style.SetOpacity(opacity, StyleState.Normal);
-            // }
+            scrollDeltaX *= 0.1f;
+            scrollDeltaY *= 0.1f;
+
+            if (scrollDeltaX < 0.0001) scrollDeltaX = 0;
+            if (scrollDeltaY < 0.0001) scrollDeltaY = 0;
+
+            scrollPercentageX = Mathf.Clamp01(scrollPercentageX + (Time.unscaledDeltaTime * scrollDeltaX * xDirection));
+            scrollPercentageY = Mathf.Clamp01(scrollPercentageY + (Time.unscaledDeltaTime * scrollDeltaY * yDirection));
+
+            if (!children[0].isEnabled) {
+                isOverflowingX = false;
+                isOverflowingY = false;
+            }
+            else {
+                isOverflowingX = children[0].layoutResult.allocatedSize.width > layoutResult.allocatedSize.width;
+                isOverflowingY = children[0].layoutResult.allocatedSize.height > layoutResult.allocatedSize.height;
+            }
+        }
+
+
+        public override void OnDisable() {
+            scrollDeltaX = 0;
+            scrollDeltaY = 0;
+        }
+
+        [OnMouseWheel]
+        public void OnMouseWheel(MouseInputEvent evt) {
+            if (verticalScrollingEnabled) {
+                scrollDeltaY = -evt.ScrollDelta.y * scrollSpeed;
+                yDirection = (int) Mathf.Sign(scrollDeltaY);
+                scrollDeltaY = Mathf.Abs(scrollDeltaY);
+                scrollPercentageY = Mathf.Clamp01(scrollPercentageY + (Time.unscaledDeltaTime * scrollDeltaY * yDirection));
+                evt.StopPropagation();
+            }
+
+            if (horizontalScrollingEnabled) {
+                scrollDeltaX = evt.ScrollDelta.x * scrollSpeed;
+                xDirection = (int) Mathf.Sign(scrollDeltaX);
+                scrollDeltaX = Mathf.Abs(scrollDeltaX);
+                scrollPercentageX = Mathf.Clamp01(scrollPercentageX + (Time.unscaledDeltaTime * scrollDeltaX * xDirection));
+                evt.StopPropagation();
+            }
         }
 
         public void OnClickVertical(MouseInputEvent evt) {
-            ScrollPageTowardsY(evt.MousePosition.y);
+            float y = evt.MousePosition.y - layoutResult.screenPosition.y;
+
+            float contentAreaHeight = layoutResult.ContentAreaHeight;
+            float contentHeight = children[0].layoutResult.actualSize.height;
+
+            if (contentHeight == 0) return;
+
+            float handleHeight = (contentAreaHeight / contentHeight) * contentAreaHeight;
+
+            float handlePosition = (contentAreaHeight - handleHeight) * scrollPercentageY;
+
+            float pageSize = evt.element.layoutResult.allocatedSize.height / contentHeight;
+
+            if (y < handlePosition) {
+                pageSize = -pageSize;
+            }
+
+            ScrollToVerticalPercent(scrollPercentageY + pageSize);
+
             evt.StopPropagation();
         }
 
         public void OnClickHorizontal(MouseInputEvent evt) {
-            ScrollPageTowardsX(evt.MousePosition.x);
+            float x = evt.MousePosition.x - layoutResult.screenPosition.x;
+
+            float contentAreaWidth = layoutResult.ContentAreaWidth;
+            float contentWidth = children[0].layoutResult.actualSize.width;
+
+            if (contentWidth == 0) return;
+
+            float handleWidth = (contentAreaWidth / contentWidth) * contentAreaWidth;
+
+            float handlePosition = (contentAreaWidth - handleWidth) * scrollPercentageX;
+
+            float pageSize = evt.element.layoutResult.allocatedSize.width / contentWidth;
+
+            if (x < handlePosition) {
+                pageSize = -pageSize;
+            }
+
+            ScrollToHorizontalPercent(scrollPercentageX + pageSize);
+
             evt.StopPropagation();
         }
-        
-        [OnMouseWheel]
-        public void OnMouseWheel(MouseInputEvent evt) {
-            if (verticalTrack.isEnabled) {
-                float max = GetMaxHeight();
-                float offset = (verticalHandle.layoutResult.screenPosition.y - verticalTrack.layoutResult.screenPosition.y) + (scrollSpeed * -evt.ScrollDelta.y);
-                ScrollToVerticalPercent(offset / max);
-                evt.StopPropagation();
-            }
 
-            if (horizontalTrack.isEnabled) {
-                float max = GetMaxWidth();
-                float offset = (horizontalHandle.layoutResult.screenPosition.x - horizontalTrack.layoutResult.screenPosition.x) - (scrollSpeed * evt.ScrollDelta.x);
-                ScrollToHorizontalPercent(offset / max);
-                evt.StopPropagation();
-            }
-        }
 
-        public void OnHoverHorizontal(MouseInputEvent evt) {
-            lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
-        }
-
-        public void OnHoverVertical(MouseInputEvent evt) {
-            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-        }
-
-        private void ScrollPageTowardsY(float y) {
-            float pageSize = verticalTrack.layoutResult.allocatedSize.height / overflowSize.height;
-            float handleTop = verticalHandle.layoutResult.screenPosition.y;
-
-            if (y < handleTop) {
-                pageSize = -pageSize;
-            }
-
-            if (handleTop == 0) {
-                ScrollToVerticalPercent(0);
-            }
-            else {
-                ScrollToVerticalPercent(handleTop / GetMaxHeight() + pageSize);
-            }
-        }
-
-        private void ScrollPageTowardsX(float x) {
-            float pageSize = horizontalTrack.layoutResult.allocatedSize.width / overflowSize.width;
-            float handleLeft = horizontalHandle.layoutResult.screenPosition.x;
-
-            if (x < handleLeft) {
-                pageSize = -pageSize;
-            }
-
-            if (handleLeft == 0) {
-                ScrollToVerticalPercent(0);
-            }
-            else {
-                ScrollToHorizontalPercent(handleLeft / GetMaxWidth() + pageSize);
-            }
-        }
+        // public void OnHoverHorizontal(MouseInputEvent evt) {
+        //     lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
+        // }
+        //
+        // public void OnHoverVertical(MouseInputEvent evt) {
+        //     lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
+        // }
 
         [OnDragCreate(EventPhase.Capture)]
         public DragEvent OnMiddleMouseDrag(MouseInputEvent evt) {
@@ -159,14 +153,12 @@ namespace UIForia.Elements {
             Vector2 baseOffset = new Vector2();
             ScrollbarOrientation orientation = 0;
 
-            if (!disableOverflowX && overflowSize.width > layoutResult.ContentWidth) {
-                lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
+            if (horizontalScrollingEnabled) {
                 baseOffset.x = evt.MousePosition.x - horizontalHandle.layoutResult.screenPosition.x;
                 orientation |= ScrollbarOrientation.Horizontal;
             }
 
-            if (!disableOverflowY && overflowSize.height > layoutResult.ContentHeight) {
-                lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
+            if (verticalScrollingEnabled) {
                 baseOffset.y = evt.MousePosition.y - verticalHandle.layoutResult.screenPosition.y;
                 orientation |= ScrollbarOrientation.Vertical;
             }
@@ -176,17 +168,13 @@ namespace UIForia.Elements {
 
         public virtual DragEvent OnCreateVerticalDrag(MouseInputEvent evt) {
             if (evt.IsMouseRightDown) return null;
-            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-            float handlePosition = verticalHandle.layoutResult.screenPosition.y;
-            float baseOffset = evt.LeftMouseDownPosition.y - handlePosition;
+            float baseOffset = evt.MousePosition.y - evt.element.layoutResult.screenPosition.y;
             return new ScrollbarDragEvent(ScrollbarOrientation.Vertical, new Vector2(0, baseOffset), this);
         }
 
         public virtual DragEvent OnCreateHorizontalDrag(MouseInputEvent evt) {
             if (evt.IsMouseRightDown) return null;
-            lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
-            float handlePosition = horizontalHandle.layoutResult.screenPosition.x;
-            float baseOffset = evt.LeftMouseDownPosition.x - handlePosition;
+            float baseOffset = evt.MousePosition.x - evt.element.layoutResult.screenPosition.x;
             return new ScrollbarDragEvent(ScrollbarOrientation.Horizontal, new Vector2(baseOffset, 0), this);
         }
 
@@ -203,77 +191,13 @@ namespace UIForia.Elements {
         }
 
         public void ScrollToVerticalPercent(float percentage) {
-            if (!verticalTrack.isEnabled) {
-                return;
-            }
-
+            scrollDeltaY = 0;
             scrollPercentageY = Mathf.Clamp01(percentage);
-            lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-            float scrollPixels = overflowSize.height - layoutResult.ContentHeight;
-
-            verticalHandle.style.SetAlignmentOffsetY(new OffsetMeasurement(-scrollPercentageY, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            verticalHandle.style.SetAlignmentOriginY(new OffsetMeasurement(scrollPercentageY, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            childrenElement.style.SetAlignmentOriginY(new OffsetMeasurement(-scrollPercentageY * scrollPixels), StyleState.Normal);
         }
 
         public void ScrollToHorizontalPercent(float percentage) {
-            if (!horizontalTrack.isEnabled) {
-                return;
-            }
-
-            lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
+            scrollDeltaX = 0;
             scrollPercentageX = Mathf.Clamp01(percentage);
-            float scrollPixels = overflowSize.width - layoutResult.ContentWidth;
-
-            horizontalHandle.style.SetAlignmentOffsetX(new OffsetMeasurement(-scrollPercentageX, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            horizontalHandle.style.SetAlignmentOriginX(new OffsetMeasurement(scrollPercentageX, OffsetMeasurementUnit.Percent), StyleState.Normal);
-            childrenElement.style.SetAlignmentOriginX(new OffsetMeasurement(-scrollPercentageX * scrollPixels), StyleState.Normal);
-        }
-        
-        public void ScrollElementIntoView(UIElement element) {
-
-            float localPositionY = element.layoutResult.localPosition.y;
-            UIElement ptr = element.parent;
-            while (ptr != childrenElement) {
-                if (ptr == null) {
-                    // maybe throw an exception. cannot scroll something into view that's not a child
-                    return;
-                }
-
-                localPositionY += ptr.layoutResult.localPosition.y;
-                ptr = ptr.parent;
-            }
-
-            float elementHeight = element.layoutResult.ActualHeight;
-            float elementBottom = localPositionY + elementHeight;
-
-            float trackHeight = layoutResult.ContentHeight;
-            float minY = layoutResult.localPosition.y;
-            if (elementBottom + childrenElement.style.AlignmentOriginY.value <= trackHeight
-                && localPositionY + childrenElement.style.AlignmentOriginY.value >= 0) {
-                return;
-            }
-
-            if (localPositionY < 0) {
-                // scrolls up to the upper edge of the element
-                ScrollToVerticalPercent((localPositionY - minY) / (trackHeight - overflowSize.height));
-            }
-            else {
-                // scrolls down but keeps the element at the lower edge of the scrollView
-                ScrollToVerticalPercent((elementBottom - trackHeight - minY) / (overflowSize.height - trackHeight));
-            }
-        }
-
-        private float GetMaxHeight() {
-            float trackRectHeight = verticalTrack.layoutResult.actualSize.height;
-            float handleHeight = verticalHandle.layoutResult.actualSize.height;
-            return trackRectHeight - handleHeight;
-        }
-
-        private float GetMaxWidth() {
-            float trackRectWidth = horizontalTrack.layoutResult.actualSize.width;
-            float handleWidth = horizontalHandle.layoutResult.actualSize.width;
-            return trackRectWidth - handleWidth;
         }
 
         public class ScrollbarDragEvent : DragEvent {
@@ -282,7 +206,7 @@ namespace UIForia.Elements {
             public readonly ScrollView scrollView;
             public readonly ScrollbarOrientation orientation;
 
-            public ScrollbarDragEvent(ScrollbarOrientation orientation, Vector2 baseOffset, ScrollView scrollView) : base(scrollView) {
+            public ScrollbarDragEvent(ScrollbarOrientation orientation, Vector2 baseOffset, ScrollView scrollView) {
                 this.orientation = orientation;
                 this.baseOffset = baseOffset;
                 this.scrollView = scrollView;
@@ -290,17 +214,38 @@ namespace UIForia.Elements {
 
             public override void Update() {
                 if ((orientation & ScrollbarOrientation.Vertical) != 0) {
-                    float max = scrollView.GetMaxHeight();
-                    float offset = Mathf.Clamp(MousePosition.y - scrollView.verticalTrack.layoutResult.screenPosition.y - baseOffset.y, 0, max);
-                    scrollView.ScrollToVerticalPercent(offset / max);
+                    float height = scrollView.layoutResult.ContentAreaHeight;
+
+                    height -= scrollView.verticalHandle.layoutResult.actualSize.height;
+
+                    float y = Mathf.Clamp(MousePosition.y - scrollView.layoutResult.screenPosition.y - baseOffset.y, 0, height);
+
+                    if (height == 0) {
+                        scrollView.ScrollToVerticalPercent(0);
+                    }
+                    else {
+                        scrollView.ScrollToVerticalPercent(y / height);
+                    }
                 }
 
                 if ((orientation & ScrollbarOrientation.Horizontal) != 0) {
-                    float max = scrollView.GetMaxWidth();
-                    float offset = Mathf.Clamp(MousePosition.x - scrollView.horizontalTrack.layoutResult.screenPosition.x - baseOffset.x, 0, max);
-                    scrollView.ScrollToHorizontalPercent(offset / max);
+                    float width = scrollView.layoutResult.ContentAreaWidth;
+
+                    width -= scrollView.horizontalHandle.layoutResult.actualSize.width;
+
+                    float y = Mathf.Clamp(MousePosition.x - scrollView.layoutResult.screenPosition.x - baseOffset.x, 0, width);
+
+                    if (width == 0) {
+                        scrollView.ScrollToHorizontalPercent(0);
+                    }
+                    else {
+                        scrollView.ScrollToHorizontalPercent(y / width);
+                    }
                 }
             }
+
         }
+
     }
+
 }

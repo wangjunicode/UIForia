@@ -9,7 +9,7 @@ namespace UIForia.Elements {
     public class UISlotDefinition : UISlotBase {
 
         public override string GetDisplayName() {
-            return "DefineSlot:" + slotId;
+            return "define:" + slotId;
         }
 
     }

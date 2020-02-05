@@ -39,7 +39,7 @@ namespace Documentation.DocumentationElements {
 
         private Vector2 offset;
         
-        public DemoDragEvent(UIElement element, Vector2 offset) : base(element) {
+        public DemoDragEvent(UIElement element, Vector2 offset) {
             this.offset = offset - element.layoutResult.screenPosition;
         }
 

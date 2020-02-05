@@ -35,6 +35,7 @@ namespace UIForia {
         internal Stopwatch layoutTimer = new Stopwatch();
         internal Stopwatch renderTimer = new Stopwatch();
         internal Stopwatch bindingTimer = new Stopwatch();
+        internal Stopwatch loopTimer = new Stopwatch();
 
         public readonly string id;
         internal IStyleSystem styleSystem;
@@ -214,6 +215,10 @@ namespace UIForia {
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
 
+            if (views.Count > 0) {
+                views[0].Viewport = new Rect(0, 0, Width, Height);
+            }
+
             Camera = camera;
             RenderSystem.SetCamera(camera);
         }
@@ -357,6 +362,8 @@ namespace UIForia {
         private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
 
         public void Update() {
+            loopTimer.Reset();
+            loopTimer.Start();
             Rect rect = Camera?.pixelRect ?? new Rect(0, 0, 1920, 1080); //UIApplicationSize.width, UIApplicationSize.height);
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
@@ -419,6 +426,7 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnUpdate();
 
             frameId++;
+            loopTimer.Stop();
         }
 
         /// <summary>

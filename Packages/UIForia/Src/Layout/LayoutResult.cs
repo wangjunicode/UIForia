@@ -47,8 +47,8 @@ namespace UIForia.Layout {
         public float ActualWidth => actualSize.width;
         public float ActualHeight => actualSize.height;
 
-        public float ContentWidth => actualSize.width - padding.left - border.left - padding.right - border.right;
-        public float ContentHeight => actualSize.height - padding.top - border.top - padding.bottom - border.bottom;
+        public float ContentAreaWidth => actualSize.width - padding.left - border.left - padding.right - border.right;
+        public float ContentAreaHeight => actualSize.height - padding.top - border.top - padding.bottom - border.bottom;
 
         public LayoutResult layoutParent;
         public UIElement element;

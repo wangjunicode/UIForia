@@ -29,7 +29,7 @@ namespace Demo.MMODemo {
 
         public readonly InventoryItem item;
         
-        public InventoryItemDragEvent(UIElement origin, InventoryItem item) : base(origin) {
+        public InventoryItemDragEvent(UIElement origin, InventoryItem item) {
             this.item = item;
         }
 

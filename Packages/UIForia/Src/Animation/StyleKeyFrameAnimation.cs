@@ -148,11 +148,13 @@ namespace UIForia.Animation {
                     case StylePropertyId.PreferredWidth:
                     case StylePropertyId.MinWidth:
                     case StylePropertyId.MaxWidth: {
-                        float v0 = ResolveWidthMeasurement(target, viewport, prev.value.styleProperty.AsUIMeasurement);
+                        
+                        //float v0 = ResolveWidthMeasurement(target, viewport, prev.value.styleProperty.AsUIMeasurement);
 
-                        float v1 = ResolveWidthMeasurement(target, viewport, next.value.styleProperty.AsUIMeasurement);
+                        //float v1 = ResolveWidthMeasurement(target, viewport, next.value.styleProperty.AsUIMeasurement);
 
-                        target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
+                        target.style.SetAnimatedMeasurementProperty(propertyId, prev.value.styleProperty, next.value.styleProperty, t);
+                        // target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
                         break;
                     }
 
@@ -259,7 +261,7 @@ namespace UIForia.Animation {
                     case StylePropertyId.ShadowTint:
                     case StylePropertyId.TextColor: {
                         Color c0 = prev.value.styleProperty.AsColor;
-                        Color c1 =next.value.styleProperty.AsColor;
+                        Color c1 = next.value.styleProperty.AsColor;
                         target.style.SetAnimatedProperty(new StyleProperty(propertyId, Color.Lerp(c0, c1, t)));
                         break;
                     }

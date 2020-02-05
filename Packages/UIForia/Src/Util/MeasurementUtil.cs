@@ -149,7 +149,7 @@ namespace UIForia.Util {
                         return viewportWidth;
                     }
 
-                    return Mathf.Max(0, layoutResult.layoutParent.ContentWidth);
+                    return Mathf.Max(0, layoutResult.layoutParent.ContentAreaWidth);
 
                 case AlignmentTarget.Template:
                     // todo handle transclusion
@@ -188,7 +188,7 @@ namespace UIForia.Util {
                         return viewportHeight;
                     }
 
-                    return Mathf.Max(0, result.layoutParent.ContentHeight);
+                    return Mathf.Max(0, result.layoutParent.ContentAreaHeight);
 
                 case AlignmentTarget.Template:
                     // todo handle transclusion

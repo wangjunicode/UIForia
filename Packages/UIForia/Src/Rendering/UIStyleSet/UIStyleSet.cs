@@ -205,7 +205,6 @@ namespace UIForia.Rendering {
         }
 
         public void internal_Initialize() {
-
             containedStates = 0;
             hasAttributeStyles = false;
 
@@ -773,6 +772,7 @@ namespace UIForia.Rendering {
 
         public void SetAnimatedProperty(StyleProperty property) {
             if (StyleUtil.CanAnimate(property.propertyId)) {
+                //animatedProperties[property.propertyId] = animatedProperty;
                 SetProperty(property, StyleState.Normal); // todo -- need another priority group for this
             }
         }
@@ -1078,6 +1078,75 @@ namespace UIForia.Rendering {
         public void RemoveSelectorStyleGroup(Selector selector) {
             throw new NotImplementedException();
         }
+
+        internal StructList<AnimatedProperty> animatedProperties;
+
+        internal AnimationFlags animationFlags;
+
+        internal bool TryGetAnimatedProperty(StylePropertyId propertyId, out AnimatedProperty property) {
+            if (animatedProperties == null) {
+                property = default;
+                return false;
+            }
+
+            for (int i = 0; i < animatedProperties.size; i++) {
+                ref AnimatedProperty animatedProperty = ref animatedProperties.array[i];
+                if (animatedProperty.propertyId == propertyId) {
+                    property = animatedProperty;
+                    return true;
+                }
+            }
+
+            property = default;
+            return false;
+        }
+
+        internal void SetAnimatedMeasurementProperty(StylePropertyId propertyId, in StyleProperty v0, in StyleProperty v1, float time) {
+            animatedProperties = animatedProperties ?? StructList<AnimatedProperty>.Get();
+            switch (propertyId) {
+                case StylePropertyId.PreferredWidth:
+                    animationFlags |= AnimationFlags.PreferredWidth;
+                    break;
+                case StylePropertyId.MinWidth:
+                    animationFlags |= AnimationFlags.MinWidth;
+                    break;
+                case StylePropertyId.MaxWidth:
+                    animationFlags |= AnimationFlags.MaxWidth;
+                    break;
+                case StylePropertyId.PreferredHeight:
+                    animationFlags |= AnimationFlags.PreferredHeight;
+                    break;
+                case StylePropertyId.MinHeight:
+                    animationFlags |= AnimationFlags.MinHeight;
+                    break;
+                case StylePropertyId.MaxHeight:
+                    animationFlags |= AnimationFlags.MaxHeight;
+                    break;
+            }
+
+            for (int i = 0; i < animatedProperties.size; i++) {
+                ref AnimatedProperty animatedProperty = ref animatedProperties.array[i];
+                if (animatedProperty.propertyId == propertyId) {
+                    animatedProperty = new AnimatedProperty(propertyId, v0, v1, time);
+                    return;
+                }
+            }
+
+            animatedProperties.Add(new AnimatedProperty(propertyId, v0, v1, time));
+           // styleSystem.SetStyleProperty(element, propertyId);
+        }
+
+    }
+
+    [Flags]
+    public enum AnimationFlags {
+
+        PreferredWidth = 1 << 0,
+        MinWidth = 1 << 1,
+        MaxWidth = 1 << 2,
+        PreferredHeight = 1 << 3,
+        MinHeight = 1 << 4,
+        MaxHeight = 1 << 5
 
     }
 

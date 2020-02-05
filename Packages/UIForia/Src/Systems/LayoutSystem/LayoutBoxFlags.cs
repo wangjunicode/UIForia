@@ -9,7 +9,7 @@ namespace UIForia.Systems {
         RequireLayoutHorizontal = 1,
         RequireLayoutVertical = 1 << 1,
         Ignored = 1 << 2,
-        Transcluded = 1 << 3,
+        AlwaysUpdate = 1 << 3,
             
 
         WidthBlockProvider = 1 << 4,
@@ -31,8 +31,8 @@ namespace UIForia.Systems {
         TransformDirty = 1 << 13,
 
         ContentAreaWidthChanged = 1 << 14,
-        ContentAreaHeightChanged = 1 << 15
-
+        ContentAreaHeightChanged = 1 << 15,
+        
     }
 
 }

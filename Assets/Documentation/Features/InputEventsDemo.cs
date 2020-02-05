@@ -139,7 +139,7 @@ namespace Documentation.Features {
         private float offsetX;
         private float offsetY;
 
-        public DemoDragEvent(Vector2 offset, UIElement element) : base(element) {
+        public DemoDragEvent(Vector2 offset, UIElement element) {
             this.baseX = element.layoutResult.screenPosition.x - offset.x;
             this.baseY = element.layoutResult.screenPosition.y - offset.y;
         }

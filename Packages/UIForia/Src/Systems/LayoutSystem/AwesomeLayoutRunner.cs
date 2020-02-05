@@ -100,7 +100,7 @@ namespace UIForia.Systems {
 
             float screenWidth = rootElement.application.Width;
             float screenHeight = rootElement.application.Height;
-            
+
             screenClipper.orientedBounds.p0 = new Vector2(0, 0);
             screenClipper.orientedBounds.p1 = new Vector2(screenWidth, 0);
             screenClipper.orientedBounds.p2 = new Vector2(screenWidth, screenHeight);
@@ -280,6 +280,7 @@ namespace UIForia.Systems {
                     else {
                         layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
                     }
+
                     layoutBox.clipData.clipList.Clear();
                     clipStack.Push(layoutBox.clipData);
                     clipperList.Add(layoutBox.clipData);
@@ -324,6 +325,7 @@ namespace UIForia.Systems {
                         if (elemRefStack.array.Length <= elemRefStack.size) {
                             elemRefStack.EnsureAdditionalCapacity(childCount);
                         }
+
                         elemRefStack.array[elemRefStack.size++].element = childArray[i];
                     }
                 }
@@ -378,6 +380,7 @@ namespace UIForia.Systems {
                 else {
                     layoutBox.clipData.parent = clipStack.size != 0 ? clipStack.array[clipStack.size - 1] : screenClipper;
                 }
+
                 layoutBox.clipData.clipList.Clear();
                 clipStack.Push(layoutBox.clipData);
                 clipperList.Add(layoutBox.clipData);
@@ -540,6 +543,9 @@ namespace UIForia.Systems {
             for (int i = 0; i < alignHorizontalList.size; i++) {
                 UIElement element = alignHorizontalList.array[i];
                 AwesomeLayoutBox box = element.layoutBox;
+                
+                // if box was aligned from a scroll view, continue
+                
                 LayoutResult result = element.layoutResult;
 
                 // todo -- cache these values on layout box or make style reads fast
@@ -630,7 +636,7 @@ namespace UIForia.Systems {
                     layoutBox.UpdateContentAreaWidth();
                 }
 
-                if ((layoutBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
+                if ((layoutBox.flags & (LayoutBoxFlags.AlwaysUpdate | LayoutBoxFlags.RequireLayoutHorizontal)) != 0) {
                     layoutBox.RunLayoutHorizontal(frameId);
                     layoutBox.flags &= ~LayoutBoxFlags.RequireLayoutHorizontal;
                 }
@@ -657,7 +663,7 @@ namespace UIForia.Systems {
                     layoutBox.UpdateContentAreaHeight();
                 }
 
-                if ((layoutBox.flags & LayoutBoxFlags.RequireLayoutVertical) != 0) {
+                if ((layoutBox.flags & (LayoutBoxFlags.AlwaysUpdate | LayoutBoxFlags.RequireLayoutVertical)) != 0) {
                     layoutBox.RunLayoutVertical(frameId);
                     layoutBox.flags &= ~LayoutBoxFlags.RequireLayoutVertical;
                 }
@@ -671,7 +677,7 @@ namespace UIForia.Systems {
                         layoutBox.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
                     }
                 }
-
+                
                 // if we need to update this element's matrix then add to the list
                 // this can happen if the parent assigned a different position to 
                 // this element (and the element doesn't have an alignment override)
@@ -703,13 +709,16 @@ namespace UIForia.Systems {
             for (int i = 0; i < ignoredList.size; i++) {
                 AwesomeLayoutBox ignoredBox = ignoredList.array[i];
                 AwesomeLayoutBox.LayoutSize size = default;
-                // todo -- account for margin on ignored element
-
-                ignoredBox.GetWidths(ref size);
-                float outputSize = size.Clamped;
-                ignoredBox.ApplyLayoutHorizontal(0, 0, size, outputSize, ignoredBox.parent?.finalWidth ?? outputSize, LayoutFit.None, frameId);
-                PerformLayoutStepHorizontal(ignoredBox);
                 
+                // todo -- account for margin on ignored element
+                
+                //if ((ignoredBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
+                    ignoredBox.GetWidths(ref size);
+                    float outputSize = size.Clamped;
+                    ignoredBox.ApplyLayoutHorizontal(0, 0, size, outputSize, ignoredBox.parent?.finalWidth ?? outputSize, LayoutFit.None, frameId);
+                    PerformLayoutStepHorizontal(ignoredBox);
+                //}
+
                 ignoredBox.GetHeights(ref size);
                 outputSize = size.Clamped;
                 ignoredBox.ApplyLayoutVertical(0, 0, size, outputSize, ignoredBox.parent?.finalHeight ?? outputSize, LayoutFit.None, frameId);
@@ -720,7 +729,6 @@ namespace UIForia.Systems {
         private void ApplyLayoutResults() {
             int size = matrixUpdateList.size;
             UIElement[] array = matrixUpdateList.array;
-            //            ElemRef[] array = queryableElements.array; //matrixUpdateList.array;
 
             float viewWidth = rootElement.View.Viewport.width;
             float viewHeight = rootElement.View.Viewport.height;
@@ -973,9 +981,8 @@ namespace UIForia.Systems {
         // public void QueryPoint(Vector2 point, QueryFilter filter, IList<UIElement> retn) { }
 
         public void QueryPoint(Vector2 point, IList<UIElement> retn) {
-            
             Application app = rootElement.application;
-            
+
             if (!new Rect(0, 0, app.Width, app.Height).Contains(point) || rootElement.isDisabled) {
                 return;
             }
@@ -986,6 +993,7 @@ namespace UIForia.Systems {
                     if (pointerQueryHandler.ContainsPoint(point)) {
                         retn.Add(element);
                     }
+
                     continue;
                 }
 
@@ -1016,7 +1024,7 @@ namespace UIForia.Systems {
                 if (layoutResult.actualSize.width == 0 || layoutResult.actualSize.height == 0) {
                     continue;
                 }
-                
+
                 if (PolygonUtil.PointInOrientedBounds(point, layoutResult.orientedBounds)) {
                     // todo -- make this property look up not slow
                     if (element.style.Visibility == Visibility.Hidden) {

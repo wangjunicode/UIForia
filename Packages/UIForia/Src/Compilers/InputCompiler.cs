@@ -21,7 +21,6 @@ namespace UIForia.Compilers {
 
     public struct InputHandler {
 
-        public Action<GenericInputEvent> handler;
         public InputHandlerDescriptor descriptor;
         public MethodInfo methodInfo;
         public bool useEventParameter;

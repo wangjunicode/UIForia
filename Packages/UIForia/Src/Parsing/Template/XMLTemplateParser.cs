@@ -154,8 +154,7 @@ namespace UIForia.Parsing {
 
             IXmlLineInfo xmlLineInfo = root;
 
-            StructList<AttributeDefinition> attributes = ParseAttributes(shell.filePath, "Contents", root.Attributes());
-            // ElementTemplateNode templateNode = new ElementTemplateNode(processedType.templateAttr.templateId, shell, processedType, attributes, new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
+            StructList<AttributeDefinition> attributes = ParseAttributes(shell, "Contents", root.Attributes());
             templateRootNode.attributes = ValidateRootAttributes(shell.filePath, attributes);
             templateRootNode.lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
 
@@ -354,7 +353,7 @@ namespace UIForia.Parsing {
                         string tagName = element.Name.LocalName;
                         string namespaceName = element.Name.NamespaceName;
 
-                        StructList<AttributeDefinition> attributes = ParseAttributes(templateRoot.templateShell.filePath, tagName, element.Attributes());
+                        StructList<AttributeDefinition> attributes = ParseAttributes(templateRoot.templateShell, tagName, element.Attributes());
 
                         IXmlLineInfo lineInfo = element;
                         TemplateNode p = ParseElementTag(templateRoot, parent, namespaceName, tagName, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
@@ -376,7 +375,7 @@ namespace UIForia.Parsing {
             }
         }
 
-        private static StructList<AttributeDefinition> ParseAttributes(string fileName, string tagName, IEnumerable<XAttribute> xmlAttributes) {
+        private static StructList<AttributeDefinition> ParseAttributes(TemplateShell templateShell, string tagName, IEnumerable<XAttribute> xmlAttributes) {
             StructList<AttributeDefinition> attributes = StructList<AttributeDefinition>.GetMinSize(4);
             foreach (XAttribute attr in xmlAttributes) {
                 string prefix = attr.Name.NamespaceName;
@@ -486,7 +485,7 @@ namespace UIForia.Parsing {
                                     name = name.Substring("active.".Length);
                                 }
                                 else {
-                                    throw CompileException.UnknownStyleState(new AttributeNodeDebugData(fileName, tagName, new TemplateLineInfo(line, column), attr.ToString()), name.Split('.')[0]);
+                                    throw CompileException.UnknownStyleState(new AttributeNodeDebugData(templateShell.filePath, tagName, new TemplateLineInfo(line, column), attr.ToString()), name.Split('.')[0]);
                                 }
                             }
 
@@ -560,7 +559,7 @@ namespace UIForia.Parsing {
                     TextUtil.StringBuilder.Clear();
                 }
 
-                attributes.Add(new AttributeDefinition(raw, attributeType, flags, name, attr.Value, line, column));
+                attributes.Add(new AttributeDefinition(raw, attributeType, flags, name, attr.Value, templateShell, line, column));
             }
 
             if (attributes.size == 0) {

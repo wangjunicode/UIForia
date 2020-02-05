@@ -22,7 +22,7 @@ namespace DragEventTests {
 
             public string sourceName;
 
-            public TestDragEvent(string sourceName) : base(null) {
+            public TestDragEvent(string sourceName) {
                 this.sourceName = sourceName;
             }
 

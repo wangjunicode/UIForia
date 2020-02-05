@@ -6,6 +6,7 @@ using UIForia.Attributes;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
+using UIForia.Parsing;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
@@ -1197,6 +1198,63 @@ namespace TemplateBinding {
             Assert.AreEqual("three", GetText(repeat[2]));
         }
 
+        [Template("Data/TemplateBindings/Namespaces/TemplateBindingTest_Namespace_Outer.xml")]
+        public class TemplateBindingTest_NamespaceOuter : UIElement {
+
+            public LightList<string> list;
+
+        }
+
+        [Template("Data/TemplateBindings/Namespaces/TemplateBindingTest_Namespace_Inner.xml")]
+        public class TemplateBindingTest_NamespaceInner : UIElement {
+
+            public Color color;
+
+        }
+
+        [Test]
+        public void ThrowWhenMissingNamespace() {
+            CompileException exception = Assert.Throws<CompileException>(() => MockApplication.Setup<TemplateBindingTest_NamespaceOuter>());
+            Assert.IsTrue(exception.Message.Contains("Unable to resolve type Color"));
+        }
+        
+         [Template("Data/TemplateBindings/Namespaces/TemplateBindingTest_Namespace_Resolve_Outer.xml")]
+        public class TemplateBindingTest_Namespace_Resolve_Outer : UIElement {
+
+            public LightList<string> list;
+
+        }
+
+        [Template("Data/TemplateBindings/Namespaces/TemplateBindingTest_Namespace_Resolve_Inner.xml")]
+        public class TemplateBindingTest_Namespace_Resolve_Inner : UIElement {
+
+            public NamespaceTest.Color color;
+
+        }
+
+        [Test]
+        public void ResolveCorrectTypeInDifferentNamespaces() {
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_Namespace_Resolve_Outer>();
+            TemplateBindingTest_Namespace_Resolve_Outer e = (TemplateBindingTest_Namespace_Resolve_Outer) app.RootElement;
+            TemplateBindingTest_Namespace_Resolve_Inner inner = e[0] as TemplateBindingTest_Namespace_Resolve_Inner;
+            
+            app.Update();
+            
+            Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
+            Assert.IsNotNull(inner.color);
+        }
+        
+        // [Test]
+        // public void RespectInnerNamespaceUsage() {
+        //     MockApplication app = 
+        //     TemplateBindingTest_NamespaceOuter e = (TemplateBindingTest_NamespaceOuter) app.RootElement;
+        //
+        //     app.Update();
+        //     
+        //     Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
+        //
+        // }
+
         public static string GetText(UIElement element) {
             UITextElement textEl = element as UITextElement;
             return textEl.text.Trim();
@@ -1204,4 +1262,11 @@ namespace TemplateBinding {
 
     }
 
+
 }
+
+    namespace NamespaceTest {
+
+        public class Color { }
+
+    }

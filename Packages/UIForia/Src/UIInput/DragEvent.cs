@@ -8,12 +8,11 @@ namespace UIForia.UIInput {
 
         public readonly Type type;
         internal EventPropagator source;
-        public readonly UIElement origin;
+        public UIElement origin { get; internal set; }
         public UIElement target { get; internal set; }
         
-        protected DragEvent(UIElement origin) {
+        protected DragEvent() {
             this.type = GetType();
-            this.origin = origin;
         }
 
         public Vector2 MousePosition { get; internal set; }

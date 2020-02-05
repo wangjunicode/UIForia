@@ -459,6 +459,11 @@ namespace UIForia.Editor {
         private void DrawMetrics() {
             if (s_SelectedApplication != null) {
                 EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Frame time: ");
+                EditorGUILayout.LabelField(s_SelectedApplication.loopTimer.Elapsed.TotalMilliseconds.ToString("F3"));
+                EditorGUILayout.EndHorizontal();
+                
+                EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PrefixLabel("Layout: ");
                 EditorGUILayout.LabelField(s_SelectedApplication.layoutTimer.Elapsed.TotalMilliseconds.ToString("F3"));
                 EditorGUILayout.EndHorizontal();

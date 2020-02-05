@@ -1,18 +1,18 @@
-// using UIForia.Attributes;
-// using UIForia.Elements;
-// using UIForia.UIInput;
-// using UnityEngine;
-//
-//
-//
-// [Template("Data/Layout/Tmp.xml#main")]
-// public class TemplateBindingTest_DefineSlotInsideOverride_Main : UIElement { }
-//
-// [Template("Data/Layout/Tmp.xml#level-2")]
-// public class TemplateBindingTest_DefineSlotInsideOverride_2 : UIElement { }
-//
-// [Template("Data/Layout/Tmp.xml#level-1")]
-// public class TemplateBindingTest_DefineSlotInsideOverride_1 : UIElement { }
-//
-// [Template("Data/Layout/Tmp.xml#level-0")]
-// public class TemplateBindingTest_DefineSlotInsideOverride_0 : UIElement { }
+using System.Collections.Generic;
+using UIForia.Attributes;
+using UIForia.Elements;
+
+[Template("Data/Layout/Tmp.xml")]
+public class Tmp : UIElement {
+
+    public string selectedValue;
+    
+    public List<ISelectOption<string>> options = new List<ISelectOption<string>>() {
+        new SelectOption<string>("hello", "world"),
+        new SelectOption<string>("hello", "world"),
+        new SelectOption<string>("hello", "world"),
+        new SelectOption<string>("hello", "world"),
+        new SelectOption<string>("hello", "world")
+    };
+
+}

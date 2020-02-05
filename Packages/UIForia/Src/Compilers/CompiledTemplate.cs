@@ -16,6 +16,7 @@ namespace UIForia.Compilers {
         internal ProcessedType elementType;
         public LightList<CompiledBinding> bindings;
         public LightList<CompiledSlot> slots;
+        public LightList<string> namespaces;
 
         public void AddBinding(CompiledBinding binding) {
             bindings = bindings ?? new LightList<CompiledBinding>();

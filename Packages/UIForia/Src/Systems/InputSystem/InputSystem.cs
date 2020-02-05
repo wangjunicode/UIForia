@@ -492,7 +492,6 @@ namespace UIForia.Systems {
 
             IsDragging = true;
             m_EventPropagator.Reset(mouseState);
-            MouseInputEvent mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame, false);
 
             m_EventPropagator.origin = m_MouseDownElements.array[0];
 
@@ -510,12 +509,12 @@ namespace UIForia.Systems {
                 for (int creatorIndex = 0; creatorIndex < element.inputHandlers.dragCreators.size; creatorIndex++) {
                     InputHandlerGroup.DragCreatorData data = element.inputHandlers.dragCreators.array[creatorIndex];
 
-                    m_CurrentDragEvent = data.handler.Invoke(mouseEvent);
+                    m_CurrentDragEvent = data.handler.Invoke( new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame, false, element));
 
                     if (m_CurrentDragEvent != null) {
                         m_CurrentDragEvent.StartTime = Time.realtimeSinceStartup;
                         m_CurrentDragEvent.DragStartPosition = MousePosition;
-
+                        m_CurrentDragEvent.origin = element;
                         UpdateDrag(true);
                         return;
                     }
@@ -717,8 +716,8 @@ namespace UIForia.Systems {
         }
 
         protected void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
-            GenericInputEvent keyEvent = new GenericInputEvent(eventType, modifiers, m_EventPropagator, character, keyCode, m_FocusedElement != null);
-            KeyboardInputEvent keyInputEvent = keyEvent.AsKeyInputEvent;
+            // GenericInputEvent keyEvent = new GenericInputEvent(eventType, modifiers, m_EventPropagator, character, keyCode, m_FocusedElement != null);
+            KeyboardInputEvent keyInputEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, m_FocusedElement != null);
             if (m_FocusedElement == null) {
                 m_KeyboardEventTree.ConditionalTraversePreOrder(keyInputEvent, (item, evt) => {
                     if (evt.stopPropagation) return false;
@@ -733,7 +732,7 @@ namespace UIForia.Systems {
                     for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                         if (evt.stopPropagation) break;
                         ref InputHandlerGroup.HandlerData handler = ref evtHandlerGroup.eventHandlers.array[i];
-                        if (!ShouldRun(handler, keyInputEvent)) {
+                        if (!ShouldRun(handler, evt)) {
                             continue;
                         }
 
@@ -812,7 +811,7 @@ namespace UIForia.Systems {
                     if ((handlerData.modifiers & modifiersThisFrame) == handlerData.modifiers) {
                         Action<MouseInputEvent> handler = handlerData.handlerFn as Action<MouseInputEvent>;
                         Debug.Assert(handler != null, nameof(handler) + " != null");
-                        handler.Invoke(new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame, element == m_FocusedElement));
+                        handler.Invoke(new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame, element == m_FocusedElement, element));
                     }
 
                     if (m_EventPropagator.shouldStopPropagation) {
@@ -830,8 +829,7 @@ namespace UIForia.Systems {
                 Action<MouseInputEvent> handler = (Action<MouseInputEvent>) m_MouseEventCaptureList[i].Item1;
                 UIElement element = m_MouseEventCaptureList[i].Item2;
 
-                handler.Invoke(new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame, element == m_FocusedElement));
-
+                handler.Invoke(new MouseInputEvent(m_EventPropagator, eventType, modifiersThisFrame, element == m_FocusedElement, element));
 
                 if (m_EventPropagator.shouldStopPropagation) {
                     m_MouseEventCaptureList.Clear();

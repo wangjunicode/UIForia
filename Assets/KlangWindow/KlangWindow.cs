@@ -259,7 +259,7 @@ namespace UI {
 
             private readonly Vector2 offset;
 
-            public WindowDragEvent(UIElement origin, Vector2 offset) : base(origin) {
+            public WindowDragEvent(UIElement origin, Vector2 offset){
                 this.offset = offset;
             }
 
@@ -278,7 +278,7 @@ namespace UI {
             private readonly Vector2 originalScreenPosition;
             private readonly Vector2 originalAlignment;
 
-            public WindowResizeEvent(UIElement origin, WindowSide side) : base(origin) {
+            public WindowResizeEvent(UIElement origin, WindowSide side)  {
                 this.windowSide = side;
                 this.originalScreenPosition = origin.layoutResult.screenPosition;
                 this.originalAlignment = new Vector2(origin.style.AlignmentOriginX.value, origin.style.AlignmentOriginY.value);

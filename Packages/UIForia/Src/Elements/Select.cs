@@ -45,7 +45,6 @@ namespace UIForia.Elements {
 
         public bool disabled;
 
-        public float scrollSpeed = 10;
         public bool disableOverflowX;
         public bool disableOverflowY;
 

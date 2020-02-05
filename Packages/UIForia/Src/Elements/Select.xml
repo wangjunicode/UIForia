@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-
+    
     <Style>
 
         style select {
         LayoutType = Stack;
         AlignItemsVertical = Center Parent;
         BackgroundColor = white;
-        PreferredSize = 1cnt 48px;
-        TextFontSize = 32px;
+        MinSize = 48px 32px;
         BorderRadius = 8px;
         Border = 2px;
         BorderColor = #B2B2B2;
@@ -73,10 +72,12 @@
         Padding = 8px 0;
         ZIndex = 20;
         ClipBehavior = Never;
+        LayoutBehavior = Ignored;
+        PreferredWidth = 1psz;
         }
 
         style transclude {
-        LayoutBehavior = TranscludeChildren;
+            LayoutBehavior = TranscludeChildren;
         }
 
         style select-chevron {
@@ -98,42 +99,42 @@
         PaddingTop = 4px;
         PaddingBottom = 4px;
 
-        [attr:disabled="select-disabled"] {
-        BorderColor = #666;
-        BackgroundColor = #999;
-        }
+            [attr:disabled="select-disabled"] {
+                BorderColor = #666;
+                BackgroundColor = #999;
+            }
         }
 
         style chevron-down {
-        PreferredSize = 10px 6px;
-        BackgroundImage = url("UIForia/icons/ui_selectbox_down_chevron@2x");
+            PreferredSize = 10px 6px;
+            BackgroundImage = url("UIForia/icons/ui_selectbox_down_chevron@2x");
         }
 
         style chevron-up {
-        MarginTop = 1px;
-        MarginBottom = 4px;
-        PreferredSize = 10px 6px;
-        BackgroundImage = url("UIForia/icons/ui_selectbox_up_chevron@2x");
+            MarginTop = 1px;
+            MarginBottom = 4px;
+            PreferredSize = 10px 6px;
+            BackgroundImage = url("UIForia/icons/ui_selectbox_up_chevron@2x");
         }
 
         style select-display {
-        TextColor = black;
-        MarginRight = 16px;
-        [attr:disabled] {
-        TextColor = rgba(0, 0, 0, 102);
-        }
+            TextColor = black;
+            MarginRight = 16px;
+            [attr:disabled] {
+                TextColor = rgba(0, 0, 0, 102);
+            }
         }
 
         style select-placeholder {
-        TextColor = #666;
+            TextColor = #666;
         }
 
         style options-container {
-        TextColor = #666;
+            TextColor = #666;
         }
 
         style select-option-container {
-        PreferredWidth = 1psz;
+            PreferredWidth = 1psz;
         }
 
     </Style>
@@ -142,34 +143,30 @@
 
     <Contents style="select">
 
-        <Group if="selectedIndex >= 0" style="select-display">
-            <define:select-display style="select-display" expose:selectedOption="options[selectedIndex]">
-                {options[selectedIndex].Label}
-            </define:select-display>
-        </Group>
+        <define:select-display if="selectedIndex >= 0" style="select-display" expose:selectedOption="options[selectedIndex]">
+            {options[selectedIndex].Label}
+        </define:select-display>
 
-        <Group if="selectedIndex &lt; 0" style="select-display">
-            <define:placeholder style="select-placeholder">
-                Select a value
-            </define:placeholder>
-        </Group>
+        <define:placeholder if="selectedIndex &lt; 0" style="select-display select-placeholder">
+            Select a value
+        </define:placeholder>
 
         <Group style="select-chevron-holder">
             <Div style="chevron-up"/>
             <Div style="chevron-down"/>
         </Group>
-        
+
         <ScrollView style="select-options" attr:id="option-list" if="selecting">
-            
+
             <Repeat list="options" style="transclude">
-                
+
                 <define:Children style="select-option-container select-option" expose:option="$item" mouse:click="SelectElement($event, $index)">
                     <Image src="selectedElementIcon" style="selected-element-icon" if="DisplaySelectedIcon($item)"/>
                     <Text style="select-label">{$item.Label}</Text>
                 </define:Children>
-                
-            </Repeat>
 
+            </Repeat>
+            
         </ScrollView>
 
     </Contents>

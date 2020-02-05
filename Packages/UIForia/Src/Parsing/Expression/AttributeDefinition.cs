@@ -65,13 +65,15 @@ namespace UIForia.Parsing.Expressions {
         public AttributeType type;
         public AttributeFlags flags;
         public SlotAttributeData slotAttributeData;
+        public TemplateShell templateShell;
         
-        public AttributeDefinition(string rawValue, AttributeType type, AttributeFlags flags,  string key, string value, int line = -1, int column = -1) {
+        public AttributeDefinition(string rawValue, AttributeType type, AttributeFlags flags,  string key, string value, TemplateShell templateShell, int line = -1, int column = -1) {
             this.rawValue = rawValue;
             this.type = type;
             this.flags = flags;
             this.key = key;
             this.value = value;
+            this.templateShell = templateShell;
             this.line = line;
             this.column = column;
             this.slotAttributeData = null;

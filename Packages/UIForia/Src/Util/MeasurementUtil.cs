@@ -2,13 +2,15 @@ using System;
 using System.Diagnostics;
 using UIForia.Elements;
 using UIForia.Layout;
+using UIForia.Rendering;
+using UIForia.Systems;
 using UnityEngine;
 
 namespace UIForia.Util {
 
     public static class MeasurementUtil {
 
-        public static float ResolveOriginBaseX(LayoutResult result, float viewportX, AlignmentTarget target, AlignmentDirection direction) {
+        public static float ResolveOriginBaseX(LayoutResult result, float viewportX, AlignmentTarget target, AlignmentDirection direction, InputSystem inputSystem) {
             switch (target) {
                 case AlignmentTarget.Unset:
                 case AlignmentTarget.LayoutBox:
@@ -64,13 +66,18 @@ namespace UIForia.Util {
 
                     return output;
                 }
-                
+
+                case AlignmentTarget.Mouse: {
+                    float dist = GetXDistanceToScreen(result);
+                    return inputSystem.MousePosition.x + dist;
+                }
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
             }
         }
 
-        public static float ResolveOriginBaseY(LayoutResult result, float viewportY, AlignmentTarget target, AlignmentDirection direction) {
+        public static float ResolveOriginBaseY(LayoutResult result, float viewportY, AlignmentTarget target, AlignmentDirection direction, InputSystem inputSystem) {
             switch (target) {
                 case AlignmentTarget.Unset:
                 case AlignmentTarget.LayoutBox:
@@ -125,11 +132,139 @@ namespace UIForia.Util {
                     return output;
                 }
 
+                case AlignmentTarget.Mouse:
+                    float dist = GetYDistanceToScreen(result);
+                    return inputSystem.MousePosition.y + dist;
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
             }
         }
 
+        public static float GetXDistanceToClipper(LayoutResult result, out float width) {
+            LayoutResult ptr = result.element.parent.layoutResult;
+
+            float output = 0;
+
+            ClipData clipper = result.clipper;
+
+            if (clipper == null) {
+                width = ptr.element.application.Width;
+                return GetXDistanceToScreen(result);
+            }
+
+            LayoutResult clipResult = clipper.element.layoutResult;
+
+            width = clipResult.actualSize.width;
+
+            while (ptr != clipResult) {
+                output -= ptr.alignedPosition.x;
+                if (ptr.element.parent == null) {
+                    return output;
+                }
+
+                ptr = ptr.element.parent.layoutResult;
+            }
+
+            return output;
+        }
+
+        public static float GetYDistanceToClipper(LayoutResult result, out float height) {
+            LayoutResult ptr = result.element.parent.layoutResult;
+
+            float output = 0;
+
+            ClipData clipper = result.clipper;
+
+            if (clipper == null) {
+                height = ptr.element.application.Height;
+                return GetYDistanceToScreen(result);
+            }
+
+            LayoutResult clipResult = clipper.element.layoutResult;
+
+            height = clipResult.actualSize.height;
+
+            while (ptr != clipResult) {
+                output -= ptr.alignedPosition.y;
+                if (ptr.element.parent == null) {
+                    return output;
+                }
+
+                ptr = ptr.element.parent.layoutResult;
+            }
+
+            return output;
+        }
+
+        public static float GetXDistanceToView(LayoutResult result) {
+            LayoutResult view = result.element.View.RootElement.layoutResult;
+
+            float output = 0;
+
+            LayoutResult ptr = result.element.parent.layoutResult;
+
+            while (ptr != view) {
+                output -= ptr.alignedPosition.x;
+                if (ptr.element.parent == null) {
+                    return output;
+                }
+
+                ptr = ptr.element.parent.layoutResult;
+            }
+
+            return output;
+        }
+
+        public static float GetYDistanceToView(LayoutResult result) {
+            LayoutResult view = result.element.View.RootElement.layoutResult;
+
+            float output = 0;
+
+            LayoutResult ptr = result.element.parent.layoutResult;
+
+            while (ptr != view) {
+                output -= ptr.alignedPosition.y;
+                if (ptr.element.parent == null) {
+                    return output;
+                }
+
+                ptr = ptr.element.parent.layoutResult;
+            }
+
+            return output;
+        }
+
+
+        public static float GetXDistanceToScreen(LayoutResult result) {
+            LayoutResult ptr = result.element.parent.layoutResult;
+            float output = 0;
+            while (ptr != null) {
+                output -= ptr.alignedPosition.x;
+                if (ptr.element.parent == null) {
+                    return output;
+                }
+
+                ptr = ptr.element.parent.layoutResult;
+            }
+
+            return output;
+        }
+
+        public static float GetYDistanceToScreen(LayoutResult result) {
+            LayoutResult ptr = result.element.parent.layoutResult;
+            float output = 0;
+            while (ptr != null) {
+                output -= ptr.alignedPosition.y;
+                if (ptr.element.parent == null) {
+                    return output;
+                }
+
+                ptr = ptr.element.parent.layoutResult;
+            }
+
+            return output;
+        }
 
         public static float ResolveOffsetOriginSizeX(LayoutResult layoutResult, float viewportWidth, AlignmentTarget target) {
             switch (target) {
@@ -165,6 +300,9 @@ namespace UIForia.Util {
                 case AlignmentTarget.Screen:
                     return layoutResult.element.application.Width;
 
+                case AlignmentTarget.Mouse: {
+                    return 0;
+                }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
             }
@@ -204,6 +342,9 @@ namespace UIForia.Util {
                 case AlignmentTarget.Screen:
                     return result.element.application.Height;
 
+                case AlignmentTarget.Mouse: {
+                    return 0;
+                }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
             }

@@ -16,8 +16,20 @@ namespace UIForia.Layout {
         Template,
         TemplateContentArea,
         View,
-        Screen
+        Screen,
+        Mouse
 
+    }
+
+    public enum AlignmentBoundary {
+
+        Unset = 0,
+        Screen,
+        Parent,
+        ParentContentArea,
+        Clipper,
+        View,
+        
     }
 
 }

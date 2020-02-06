@@ -40,22 +40,22 @@
             <Div style="tools-area">
                 <Div style="grid-with-buttons">
                     <!-- Asset paths must be relative to your Resources directory -->
-                    <Image x-id="SELECT"      src="'new_ui_icons/ui_icon_select'"       style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.SELECT)"/>
-                    <Image x-id="GRID_UP"     src="'new_ui_icons/ui_icon_grid_up'"      style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.GRID_UP)"/>
-                    <Image x-id="ERASER"      src="'new_ui_icons/ui_icon_eraser'"       style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.ERASER)"/>
-                    <Image x-id="GRID_DOWN"   src="'new_ui_icons/ui_icon_grid_down'"    style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.GRID_DOWN)"/>
-                    <Image x-id="BRUSH"       src="'new_ui_icons/ui_icon_paint_brush'"  style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.BRUSH)"/>
-                    <Image x-id="MAGIC_WAND"  src="'new_ui_icons/ui_icon_magic_wand'"   style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.MAGIC_WAND)"/>
-                    <Image x-id="BUCKET"      src="'new_ui_icons/ui_icon_paint_bucket'" style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.BUCKET)"/>
-                    <Image x-id="DELETE_ALL"  src="'new_ui_icons/ui_icon_delete_all'"   style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.DELETE_ALL)"/>
-                    <Image x-id="EYE_DROPPER" src="'new_ui_icons/ui_icon_eye_dropper'"  style="tools-button" onMouseClick="ToolButtonClicked(ToolButton.EYE_DROPPER)"/>
+                    <Image attr:id="SELECT"      src="'new_ui_icons/ui_icon_select'"       style="tools-button" mouse:click="ToolButtonClicked(ToolButton.SELECT)"/>
+                    <Image attr:id="GRID_UP"     src="'new_ui_icons/ui_icon_grid_up'"      style="tools-button" mouse:click="ToolButtonClicked(ToolButton.GRID_UP)"/>
+                    <Image attr:id="ERASER"      src="'new_ui_icons/ui_icon_eraser'"       style="tools-button" mouse:click="ToolButtonClicked(ToolButton.ERASER)"/>
+                    <Image attr:id="GRID_DOWN"   src="'new_ui_icons/ui_icon_grid_down'"    style="tools-button" mouse:click="ToolButtonClicked(ToolButton.GRID_DOWN)"/>
+                    <Image attr:id="BRUSH"       src="'new_ui_icons/ui_icon_paint_brush'"  style="tools-button" mouse:click="ToolButtonClicked(ToolButton.BRUSH)"/>
+                    <Image attr:id="MAGIC_WAND"  src="'new_ui_icons/ui_icon_magic_wand'"   style="tools-button" mouse:click="ToolButtonClicked(ToolButton.MAGIC_WAND)"/>
+                    <Image attr:id="BUCKET"      src="'new_ui_icons/ui_icon_paint_bucket'" style="tools-button" mouse:click="ToolButtonClicked(ToolButton.BUCKET)"/>
+                    <Image attr:id="DELETE_ALL"  src="'new_ui_icons/ui_icon_delete_all'"   style="tools-button" mouse:click="ToolButtonClicked(ToolButton.DELETE_ALL)"/>
+                    <Image attr:id="EYE_DROPPER" src="'new_ui_icons/ui_icon_eye_dropper'"  style="tools-button" mouse:click="ToolButtonClicked(ToolButton.EYE_DROPPER)"/>
                     <ColorPicker availableColors="availableColors" style="tools-button" />
                 </Div>
             </Div>
 
-            <ScrollView x-id="brushes-container" style="previews-area">
+            <ScrollView attr:id="brushes-container" style="previews-area">
                 <Repeat list="GetBrushes()" style="grid-with-brushes">
-                    <Div style="brush-button" onMouseClick="SelectBrush($event, $item)">
+                    <Div style="brush-button" mouse:click="SelectBrush($event, $item)">
                         <Image texture="$item.Texture" style="image-width"/>
                         <Text style="brush-label">{$item.Label}</Text>
                     </Div>
@@ -76,14 +76,14 @@
             </Group>
 
             <Group style="flex-horizontal-centered footer-right-area">
-                <Div onMouseClick="ShowConfirmDialog()" style="footer-button confirm-button flex-horizontal-centered">CONFIRM</Div>
-                <Div onMouseClick="SaveAndExit()" style="footer-button save-exit-button flex-horizontal-centered">SAVE &amp; EXIT</Div>
-                <Div onMouseClick="ShowCancelDialog()" style="footer-button cancel-button flex-horizontal-centered mr2">CANCEL</Div>
+                <Div mouse:click="ShowConfirmDialog()" style="footer-button confirm-button flex-horizontal-centered">CONFIRM</Div>
+                <Div mouse:click="SaveAndExit()" style="footer-button save-exit-button flex-horizontal-centered">SAVE &amp; EXIT</Div>
+                <Div mouse:click="ShowCancelDialog()" style="footer-button cancel-button flex-horizontal-centered mr2">CANCEL</Div>
             </Group>
 
         </Group>
 
-        <Dialog onConfirm="onConfirm" confirmColor="green" isVisible.read.write="showConfirm">
+        <Dialog onConfirm="onConfirm" confirmColor="green" sync:isVisible="showConfirm">
             <SlotContent name="title">
                 Are you sure you 
                 want to confirm?
@@ -94,7 +94,7 @@
             </SlotContent>
         </Dialog>
         
-        <Dialog onConfirm="onCancel" confirmColor="red" isVisible.read.write="showCancel">
+        <Dialog onConfirm="onCancel" confirmColor="red" sync:isVisible="showCancel">
             <SlotContent name="title">
                 Are you sure you 
                 want to cancel?

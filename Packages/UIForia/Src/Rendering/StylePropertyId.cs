@@ -145,6 +145,9 @@ namespace UIForia.Rendering {
         AlignmentTargetX = 2007,
         AlignmentTargetY = 2008,
         
+        AlignmentBoundaryX = 2020,
+        AlignmentBoundaryY = 2021,
+        
         LayoutFitHorizontal = 2009,
         LayoutFitVertical = 2010,
 

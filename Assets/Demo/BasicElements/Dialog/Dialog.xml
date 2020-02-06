@@ -6,8 +6,8 @@
     <Contents>
         <Slot name="title" style="dialog-title" />
         <Div style="dialog-buttons">
-            <Div style="dialog-button color-grey" onMouseClick="Cancel()">No</Div>
-            <Div onMouseClick="Confirm()" style="dialog-button" style.backgroundColor="confirmColor">Yes</Div>
+            <Div style="dialog-button color-grey" mouse:click="Cancel()">No</Div>
+            <Div mouse:click="Confirm()" style="dialog-button" style.backgroundColor="confirmColor">Yes</Div>
         </Div>
         <Slot name="description" style="description" />
     </Contents>

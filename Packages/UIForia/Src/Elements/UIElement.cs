@@ -463,6 +463,40 @@ namespace UIForia.Elements {
 
         // element.animator.Stop();
 
+        public void ScrollIntoView() {
+            UIElement ptr = parent;
+
+            float crawlPositionX = layoutResult.localPosition.x;
+            float crawlPositionY = layoutResult.localPosition.y;
+            
+            while (ptr != null) {
+
+                if (ptr is ScrollView scrollView) {
+                    scrollView.ScrollElementIntoView(this, crawlPositionX, crawlPositionY);
+                    return;
+                }
+
+                crawlPositionX += ptr.layoutResult.localPosition.x;
+                crawlPositionY += ptr.layoutResult.localPosition.y;
+                
+                ptr = ptr.parent;
+            }
+        }
+
+        public T FindParent<T>() where T : UIElement{
+            UIElement ptr = parent;
+            while (ptr != null) {
+                if (ptr is T retn) {
+                    return retn;
+                }
+
+                ptr = ptr.parent;
+            }
+
+            return null;
+
+        }
+
     }
 
 }

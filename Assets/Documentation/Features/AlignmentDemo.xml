@@ -4,17 +4,19 @@
     <Style path="Documentation/Features/AlignmentDemo.style" />
     <Style src="Documentation/Documentation.style" alias="theme" />
 
+    <Using namespace="UIForia.Layout"/>
+    
     <Contents>
         
         <Heading1>Learn all about Alignments here!</Heading1>
         
-        <Group style="button-group">
-            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.Screen)">Screen</Div>
-            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.Parent)">Parent</Div>
-            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.ParentContentArea)">Parent Content Area</Div>
-            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.LayoutBox)">Layout Box</Div>
-            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.Unset)">Unset</Div>
-<!--            <Div style="button" onMouseClick="SetAlignmentTarget(AlignmentTarget.View)">View</Div>-->
+        <Group style="theme.button-group">
+            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.Screen)">Screen</Div>
+            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.Parent)">Parent</Div>
+            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.ParentContentArea)">Parent Content Area</Div>
+            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.LayoutBox)">Layout Box</Div>
+            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.Unset)">Unset</Div>
+<!--            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.View)">View</Div>-->
         </Group>
 
         <Text>Current Anchor Target is {alignmentTarget}</Text>

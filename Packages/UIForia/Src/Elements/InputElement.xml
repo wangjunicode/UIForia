@@ -35,11 +35,11 @@
 
         <Text attr:id="input-element-text" style="input-element-text"/>
 
-        <DefineSlot:Placeholder if="ShowPlaceholder" slot:name="placeholder" style="placeholder-slot">
+        <define:placeholder if="ShowPlaceholder" style="placeholder-slot">
 
             <Text attr:id="placeholder-text">{placeholder}</Text>
 
-        </DefineSlot:Placeholder>
+        </define:placeholder>
 
     </Contents>
 

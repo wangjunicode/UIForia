@@ -79,6 +79,13 @@ namespace UIForia.Parsing.Expressions {
             this.slotAttributeData = null;
         }
 
+        public AttributeNodeDebugData DebugData => new AttributeNodeDebugData() {
+            content = rawValue,
+            fileName = templateShell.filePath,
+            lineInfo = new TemplateLineInfo(line, column),
+            tagName = ""
+        };
+        
         public string StrippedValue {
             get {
                 if (value[0] == '{' && value[value.Length -1] == '}') {

@@ -20,17 +20,17 @@
         <Div style="box box-black">
                 Text
         </Div>
-<!--&lt;!&ndash;            onMouseClick="OnBoxClicked(1)">&ndash;&gt;-->
+<!--&lt;!&ndash;            mouse:click="OnBoxClicked(1)">&ndash;&gt;-->
 <!--            Clicked {boxClicks1} times-->
 <!--        </Div>-->
 <!--        -->
 <!--        <Div style="box box-red">-->
-<!--&lt;!&ndash;            onMouseClick="OnBoxClicked(2)">&ndash;&gt;-->
+<!--&lt;!&ndash;            mouse:click="OnBoxClicked(2)">&ndash;&gt;-->
 <!--           Clicked {boxClicks2} times-->
 <!--        </Div>-->
 <!--        -->
 <!--        <Div style="box box-gold">-->
-<!--&lt;!&ndash;            onMouseClick="OnBoxClicked(3)">&ndash;&gt;-->
+<!--&lt;!&ndash;            mouse:click="OnBoxClicked(3)">&ndash;&gt;-->
 <!--            Clicked {boxClicks3} times-->
 <!--        </Div>-->
 

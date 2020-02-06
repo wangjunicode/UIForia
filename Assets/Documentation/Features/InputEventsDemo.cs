@@ -1,17 +1,12 @@
-using System;
-using System.ComponentModel.Design;
-using UIForia;
-using UIForia.Animation;
 using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.UIInput;
 using UnityEngine;
 
 namespace Documentation.Features {
 
-    [Template("Documentation/Features/InputEventsDemo")]
+    [Template("Documentation/Features/InputEventsDemo.xml")]
     public class InputEventsDemo : UIElement {
 
         public bool IsInStartZone;
@@ -44,7 +39,7 @@ namespace Documentation.Features {
             return new DemoDragEvent(evt.MousePosition, element);
         }
 
-        public void DropDrag(DragEvent evt, UIElement target) {
+        public void DropDrag(UIElement target) {
             activeEvent = "onDragDrop";
 
             IsInDropZone = target.GetAttribute("id") == "dropZone";

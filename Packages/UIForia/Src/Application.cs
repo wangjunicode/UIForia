@@ -41,7 +41,7 @@ namespace UIForia {
         internal IStyleSystem styleSystem;
         internal ILayoutSystem layoutSystem;
         internal IRenderSystem renderSystem;
-        internal IInputSystem inputSystem;
+        internal InputSystem inputSystem;
         internal RoutingSystem routingSystem;
         internal AnimationSystem animationSystem;
         internal UISoundSystem m_UISoundSystem;
@@ -193,7 +193,7 @@ namespace UIForia {
         public IStyleSystem StyleSystem => styleSystem;
         public IRenderSystem RenderSystem => renderSystem;
         public ILayoutSystem LayoutSystem => layoutSystem;
-        public IInputSystem InputSystem => inputSystem;
+        public InputSystem InputSystem => inputSystem;
         public RoutingSystem RoutingSystem => routingSystem;
         public UISoundSystem SoundSystem => m_UISoundSystem;
 
@@ -362,11 +362,14 @@ namespace UIForia {
         private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
 
         public void Update() {
+            inputSystem.Read();
             loopTimer.Reset();
             loopTimer.Start();
             Rect rect = Camera?.pixelRect ?? new Rect(0, 0, 1920, 1080); //UIApplicationSize.width, UIApplicationSize.height);
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
+            
+            m_BeforeUpdateTaskSystem.OnUpdate();
 
             bool loop = true;
             bool firstRun = true;
@@ -416,7 +419,6 @@ namespace UIForia {
             layoutSystem.OnUpdate();
             layoutTimer.Stop();
 
-            m_BeforeUpdateTaskSystem.OnUpdate();
 
             renderTimer.Reset();
             renderTimer.Start();

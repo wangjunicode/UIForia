@@ -4,12 +4,12 @@
     <Contents style="root-container">
         <Group style="main-container">
             
-            <Group style="burger" onMouseClick="ToggleMenu()">
+            <Group style="burger" mouse:click="ToggleMenu()">
                 <Div style="burger-patty" />
                 <Div style="burger-patty" />
             </Group>
 
-            <ScrollView style="navigation" x-id="nav">
+            <ScrollView style="navigation" attr:id="nav">
                 <Heading1>Choose a feature</Heading1>
                 <Anchor href="'/index'">Home</Anchor>
                 <Anchor href="'/AlignmentDemo'">Alignment Demo</Anchor>
@@ -17,9 +17,8 @@
                 <Anchor href="'/SoundSystemDemo'">Sound Demo</Anchor>
                 <Anchor href="'/BindingsDemo'">Bindings</Anchor>
                 <Anchor href="'/input'">Input</Anchor>
-                <Anchor href="'/inputEvents'">Input Events</Anchor>
+<!--                <Anchor href="'/inputEvents'">Input Events</Anchor>-->
                 <Anchor href="'/cursors'">Cursors</Anchor>
-                <Anchor href="'/DynamicDemo'">Dynamic</Anchor>
                 <Anchor href="'/FlexDemo'">FlexDemo</Anchor>
                 <Anchor href="'/GridDemo'">GridDemo</Anchor>
                 <Anchor href="'/RepeatALot'">Repeat Element</Anchor>
@@ -33,32 +32,31 @@
 
             </ScrollView>
 
-            <ScrollView style="demo-panel" x-router="demo" x-defaultRoute="/index">
+            <ScrollView style="demo-panel" attr:router="demo" attr:defaultRoute="/index">
 
-                <Group x-route="/index">
+                <Group attr:route="/index">
                     <Heading1>UIForia Documentation</Heading1>
                     <Heading2>Hi, this is the demo.</Heading2>
                     <Paragraph>Choose a demo from the menu on the left.</Paragraph>
                 </Group>
 
-                <AlignmentDemo x-route="/AlignmentDemo"/>
-                <AnimationDemo x-route="/AnimationDemo"/>
-                <SoundSystemDemo x-route="/SoundSystemDemo"/>
-                <InputDemo x-route="/input"/>
-                <InputEventsDemo x-route="/inputEvents"/>
-                <SelectDemo x-route="/SelectDemo"/>
-                <BindingsDemo x-route="/BindingsDemo"/>
-                <Cursors x-route="/cursors"/>
-                <DynamicDemo x-route="/DynamicDemo"/>
-                <FlexDemo x-route="/FlexDemo"/>
-                <GridDemo x-route="/GridDemo"/>
-                <RepeatALot x-route="/RepeatALot"/>
-                <ScrollDemo x-route="/ScrollDemo"/>
-                <TransclusionDemo x-route="/TransclusionDemo"/>
-                <RepeatExample x-route="/RepeatExample"/>
-                <StylePropertiesDemo x-route="/StylePropertiesDemo"/>
-                <WindowDemo x-route="/Window"/>
-                <CheckboxDemo x-route="/Checkbox"/>
+                <AlignmentDemo attr:route="/AlignmentDemo"/>
+                <AnimationDemo attr:route="/AnimationDemo"/>
+                <SoundSystemDemo attr:route="/SoundSystemDemo"/>
+                <InputDemo attr:route="/input"/>
+<!--                <InputEventsDemo attr:route="/inputEvents"/>-->
+                <SelectDemo attr:route="/SelectDemo"/>
+                <BindingsDemo attr:route="/BindingsDemo"/>
+                <Cursors attr:route="/cursors"/>
+                <FlexDemo attr:route="/FlexDemo"/>
+                <GridDemo attr:route="/GridDemo"/>
+                <RepeatALot attr:route="/RepeatALot"/>
+                <ScrollDemo attr:route="/ScrollDemo"/>
+                <TransclusionDemo attr:route="/TransclusionDemo"/>
+                <RepeatExample attr:route="/RepeatExample"/>
+                <StylePropertiesDemo attr:route="/StylePropertiesDemo"/>
+                <WindowDemo attr:route="/Window"/>
+                <CheckboxDemo attr:route="/Checkbox"/>
                 
             </ScrollView>
 

@@ -1,11 +1,11 @@
 <UITemplate>
     <Style>
 
-        const scrollBarSize = 10px;
         const trackColor = #b2b2b2aa;
 
         style scrollview {
             Overflow = scroll;
+            ClipBounds = ContentBox;
         }
 
         style scroll-track {
@@ -35,14 +35,6 @@
         <define:horizontal-scrollbar if="horizontalScrollingEnabled" style="scroll-track" mouse:click="OnClickHorizontal($event)"/>
 
         <define:horizontal-handle if="horizontalScrollingEnabled" style="scroll-handle" drag:create="OnCreateHorizontalDrag($event)"/>
-
-        <!--        <Group mouse:click="OnClickVertical($event)" mouse:hover="OnHoverVertical($event)" attr:id="scroll-track-vertical" style="scroll-track-vertical">-->
-        <!--            <Div drag:create="OnCreateVerticalDrag($evt)" attr:id="scroll-handle-vertical" style="scroll-handle-vertical"/>-->
-        <!--        </Group>-->
-
-        <!--        <Group mouse:click="OnClickHorizontal($event)" mouse:hover="OnHoverHorizontal($event)" attr:id="scroll-track-horizontal" style="scroll-track-horizontal">-->
-        <!--            <Div drag:create="OnCreateHorizontalDrag($evt)" attr:id="scroll-handle-horizontal" style="scroll-handle-horizontal"/>-->
-        <!--        </Group>-->
 
     </Contents>
 </UITemplate>

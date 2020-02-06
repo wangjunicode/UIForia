@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Rendering;
+using UIForia.Systems;
 using UIForia.UIInput;
 using UnityEngine;
 
@@ -13,7 +14,7 @@ namespace UIForia.Elements {
         T Value { get; }
 
     }
-    
+
     public class SelectOption<T> : ISelectOption<T> {
 
         public string Label { get; set; }
@@ -32,7 +33,7 @@ namespace UIForia.Elements {
         private const string disabledAttributeValue = "select-disabled";
 
         private float debounce;
-        
+
         public int selectedIndex = -1;
 
         public int keyboardNavigationIndex = -1;
@@ -49,18 +50,17 @@ namespace UIForia.Elements {
         public bool disableOverflowY;
 
         public IList<ISelectOption<T>> options;
-        private List<ISelectOption<T>> previousOptions;
-        private Action<ISelectOption<T>, int> onInsert;
-        private Action<ISelectOption<T>, int> onRemove;
-        private Action onClear;
 
-        public bool selecting = false;
+        public bool selecting;
         internal UIChildrenElement childrenElement;
         internal UIElement optionList;
+        internal UIElement repeat;
 
         public event Action<T> onValueChanged;
 
         public event Action<int> onIndexChanged;
+
+        public bool validSelection => options != null && selectedIndex >= 0 && selectedIndex < options.Count;
 
         [OnPropertyChanged(nameof(options))]
         private void OnSelectionChanged(string propertyName) {
@@ -126,37 +126,28 @@ namespace UIForia.Elements {
             onValueChanged?.Invoke(selectedValue);
         }
 
-        private void OnInsert(ISelectOption<T> option, int index) {
-          //  childrenElement.InsertChild((uint) index, childrenElement.InstantiateTemplate());
-        }
-
         public override void OnCreate() {
-            onInsert = OnInsert;
-            onClear = OnClear;
-            onRemove = OnRemove;
             childrenElement = FindById<UIChildrenElement>("option-children");
             optionList = this["option-list"];
-
-           // Application.InputSystem.RegisterFocusable(this);
+            repeat = this["repeated-options"];
+            application.InputSystem.RegisterFocusable(this);
         }
 
         public override void OnUpdate() {
-            //
-            // if (!disabled && HasAttribute("disabled")) {
-            //     SetAttribute("disabled", null);
-            //     EnableAllChildren(this);
-            // }
-            // else if (disabled && !HasAttribute("disabled")) {
-            //     SetAttribute("disabled", disabledAttributeValue);
-            //     DisableAllChildren(this);
-            // }
-            //
-            // if (selecting) {
-            //     AdjustOptionPosition();
-            // }
+            if (!disabled && HasAttribute("disabled")) {
+                SetAttribute("disabled", null);
+                EnableAllChildren(this);
+            }
+            else if (disabled && !HasAttribute("disabled")) {
+                SetAttribute("disabled", disabledAttributeValue);
+                DisableAllChildren(this);
+            }
+
+            if (selecting) { }
+
             // optionList.style.SetVisibility(selecting ? Visibility.Visible : Visibility.Hidden, StyleState.Normal);
         }
-        
+
         private void DisableAllChildren(UIElement element) {
             for (int index = 0; index < element.children.Count; index++) {
                 UIElement child = element.children[index];
@@ -164,9 +155,9 @@ namespace UIForia.Elements {
                     child.SetAttribute("disabled", disabledAttributeValue);
                     DisableAllChildren(child);
                 }
-            }    
+            }
         }
-        
+
         private void EnableAllChildren(UIElement element) {
             for (int index = 0; index < element.children.Count; index++) {
                 UIElement child = element.children[index];
@@ -185,34 +176,33 @@ namespace UIForia.Elements {
             onIndexChanged?.Invoke(selectedIndex);
         }
 
-        [OnKeyDownWithFocus()]
+        [OnKeyDownWithFocus]
         public void OnKeyDownNavigate(KeyboardInputEvent evt) {
-
             if (disabled) {
                 return;
             }
-            
+
             if (selecting && evt.keyCode == KeyCode.Escape) {
                 selecting = false;
                 return;
             }
 
             if (selecting && (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.Space)) {
-                
                 // space and return should only choose the currently keyboard-selected item
                 if (keyboardNavigationIndex > -1) {
                     SetSelectedValue(keyboardNavigationIndex);
                     childrenElement.children[selectedIndex].style.ExitState(StyleState.Hover);
                 }
+
                 return;
             }
-            
+
             // just submit the form if we have focus and are not in selection mode
             if (!selecting && evt.keyCode == KeyCode.Return) {
                 Input.DelayEvent(this, new SubmitEvent());
                 return;
             }
-            
+
             // enable tab navigation
             if (evt.keyCode == KeyCode.Tab) {
                 Input.DelayEvent(this, new TabNavigationEvent(evt));
@@ -233,10 +223,9 @@ namespace UIForia.Elements {
                 }
             }
         }
-        
+
         [OnKeyHeldDownWithFocus()]
         public void OnKeyboardNavigate(KeyboardInputEvent evt) {
-
             if (disabled) {
                 return;
             }
@@ -246,7 +235,7 @@ namespace UIForia.Elements {
             }
 
             debounce = Time.realtimeSinceStartup;
-            
+
             if (!selecting) {
                 // if we are NOT in selection mode using the arrow keys should just cycle through the options and set them immediately
                 if (evt.keyCode == KeyCode.UpArrow) {
@@ -270,26 +259,30 @@ namespace UIForia.Elements {
             }
             else {
                 // use the up/down arrows to navigate through the options but only visually. pressing space or return will set the new value for real.
-                
+
                 if (evt.keyCode == KeyCode.UpArrow) {
                     if (keyboardNavigationIndex > -1) {
                         childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
                     }
+
                     keyboardNavigationIndex--;
                     if (keyboardNavigationIndex < 0) {
                         keyboardNavigationIndex = options.Count - 1;
                     }
+
                     ScrollElementIntoView();
                     evt.StopPropagation();
-                } 
+                }
                 else if (evt.keyCode == KeyCode.DownArrow) {
                     if (keyboardNavigationIndex > -1) {
                         childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
                     }
+
                     keyboardNavigationIndex++;
                     if (keyboardNavigationIndex == options.Count) {
                         keyboardNavigationIndex = 0;
                     }
+
                     ScrollElementIntoView();
                     evt.StopPropagation();
                 }
@@ -297,51 +290,56 @@ namespace UIForia.Elements {
         }
 
         private void ScrollElementIntoView() {
-            if (keyboardNavigationIndex < 0 || keyboardNavigationIndex >= childrenElement.children.Count) {
+            if (keyboardNavigationIndex < 0 || keyboardNavigationIndex >= options.Count) {
                 return;
             }
-            UIElement element = childrenElement.children[keyboardNavigationIndex];
-            element.style.EnterState(StyleState.Hover);
-            //optionList.ScrollElementIntoView(element);
+
+            // repeat[keyboardNavigationIndex].ScrollIntoView();
         }
 
-        [OnMouseClick()]
+        [OnMouseClick]
         public void BeginSelecting(MouseInputEvent evt) {
             if (disabled) {
                 return;
             }
 
             if (selecting) {
-                // Application.InputSystem.ReleaseFocus(this);
+                InputSystem.ReleaseFocus(this);
                 selecting = false;
             }
             else {
-               // Application.InputSystem.RequestFocus(this);
-                selecting = true;
+                selecting = InputSystem.RequestFocus(this);
             }
+
+            AdjustOptionPosition();
 
             evt.StopPropagation();
             evt.Consume();
         }
 
-        [OnMouseMove()]
+        [OnMouseMove]
         public void OnMouseMove() {
             if (keyboardNavigationIndex > 0) {
                 childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
             }
         }
 
-        public void AdjustOptionPosition() {            
-            // todo -- bring the position adjustment back
-//            float offset = 0;
-//            float maxOffset = layoutResult.screenPosition.y - clippingElement.layoutResult.screenPosition.y;
-//            float minOffset = optionList.layoutResult.screenPosition.y - optionList.style.TransformPositionY.value + optionList.layoutResult.AllocatedHeight - (clippingElement.layoutResult.screenPosition.y + clippingElement.layoutResult.AllocatedHeight);
-//            UIElement[] childrenArray = childrenElement.children.Array;
-//            for (int i = 0; i < selectedIndex; i++) {
-//                offset += childrenArray[i].layoutResult.ActualHeight;
-//            }
+        public void AdjustOptionPosition() {
+            if (validSelection) {
+                // repeat[selectedIndex].ScrollIntoView();
 
-            // optionList.style.SetTransformPositionY(-Math.Min(maxOffset, Math.Max(offset, minOffset)), StyleState.Normal);
+                application.RegisterBeforeUpdateTask(new CallbackTaskNoArg(() => {
+                    float y = repeat[selectedIndex].layoutResult.alignedPosition.y
+                              - repeat.FindParent<ScrollView>().ScrollOffsetY
+                              - layoutResult.VerticalPaddingBorderStart
+                              + optionList.layoutResult.VerticalPaddingBorderStart;
+                    optionList.style.SetAlignmentOriginY(new OffsetMeasurement(-y), StyleState.Normal);
+                    return UITaskResult.Completed;
+                }));
+            }
+            else {
+                optionList.style.SetAlignmentOriginY(null, StyleState.Normal);
+            }
         }
 
         public void SelectElement(MouseInputEvent evt, int index) {
@@ -362,18 +360,10 @@ namespace UIForia.Elements {
             selecting = false;
         }
 
-        public bool DisplaySelectedIcon(ISelectOption<T> option) {
-            int index = options.IndexOf(option); //todo pass index directly as param
+        public bool DisplaySelectedIcon(int index) {
             return selectedElementIcon != null && selectedIndex == index;
         }
 
-        private void OnClear() {
-           // Application.DestroyChildren(childrenElement);
-        }
-
-        private void OnRemove(ISelectOption<T> selectOption, int index) {
-            childrenElement.children[index].Destroy();
-        }
     }
 
 }

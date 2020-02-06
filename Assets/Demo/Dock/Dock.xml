@@ -9,12 +9,12 @@
             <MenuItem ImageUrl="$item.ImageUrl"
                       Label="$item.Label"
                       NotificationCount="$item.NotificationCount"
-                      onMouseClick="EnterMode($item)"
+                      mouse:click="EnterMode($item)"
             />
         </Repeat>
 
         <Group style="menu-map">
-            <Group style="weather" onMouseClick="ToggleParticles()"/>
+            <Group style="weather" mouse:click="ToggleParticles()"/>
             <Group style="temp-gauge"/>
             <Group style="clock"/>
             <Group style="date"/>

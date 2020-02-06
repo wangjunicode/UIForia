@@ -1150,8 +1150,19 @@ namespace Mono.Linq.Expressions {
                 // this branch catches event subscriptions and rewrites it to use a proper non reflection syntax.
                 string targetName = ((ParameterExpression) node.Arguments[0]).Name;
                 string eventName = ((ConstantExpression) node.Arguments[1]).Value.ToString();
-                string handlerName = ((ParameterExpression) node.Arguments[2]).Name;
-                WriteToken($"{targetName}.{eventName} += {handlerName}");
+                string handlerName = null;
+                
+                if (node.Arguments[2] is ParameterExpression parameterExpression) {
+                    handlerName = parameterExpression.Name;
+                }
+                else if (node.Arguments[2] is MemberExpression memberExpression) {
+                    handlerName = memberExpression.ToString();
+                }
+
+                if (handlerName != null) {
+                    WriteToken($"{targetName}.{eventName} += {handlerName}");
+                }
+
                 return null;
             }
 

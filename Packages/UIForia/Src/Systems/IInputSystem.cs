@@ -6,9 +6,7 @@ namespace UIForia.Systems {
 
     public interface IInputSystem : ISystem, IInputProvider {
 
-        void OnLateUpdate();
         void RegisterKeyboardHandler(UIElement element);
-        IReadOnlyList<UIElement> ElementsThisFrame { get; }
         
 #if UNITY_EDITOR
         List<UIElement> DebugElementsThisFrame { get; }

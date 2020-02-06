@@ -2,7 +2,7 @@
 <UITemplate>
     <Contents>
 
-        <Group onMouseClick="SpawnWindow()">
+        <Group mouse:click="SpawnWindow()">
             Click Me
         </Group>
 

@@ -12,8 +12,8 @@
     </Style>
     
     <Contents style="container">
-        <Div style="box" x-id="one"/>
-        <Div style="box" x-id="two"/>
-        <Div style="box" x-id="three"/>
+        <Div style="box" attr:id="one"/>
+        <Div style="box" attr:id="two"/>
+        <Div style="box" attr:id="three"/>
     </Contents>
 </UITemplate>

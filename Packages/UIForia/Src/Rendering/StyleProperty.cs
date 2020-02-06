@@ -293,6 +293,7 @@ namespace UIForia.Rendering {
         public GridAxisAlignment AsGridAxisAlignment => (GridAxisAlignment) int0;
         public CrossAxisAlignment AsCrossAxisAlignment => (CrossAxisAlignment) int0;
         public SpaceDistribution AsSpaceDistribution => (SpaceDistribution) int0;
+        public AlignmentBoundary AsAlignmentBoundary => (AlignmentBoundary) int0;
         public Overflow AsOverflow => (Overflow) int0;
         public ClipBehavior AsClipBehavior => (ClipBehavior) int0;
         public Color AsColor => new StyleColor(int0);

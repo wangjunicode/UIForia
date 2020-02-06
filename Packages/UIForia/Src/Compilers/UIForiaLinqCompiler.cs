@@ -19,8 +19,8 @@ namespace UIForia.Compilers {
         private MemberExpression inputHandlerGroup;
         public SlotAttributeData attributeData;
 
-        private Type elementType;
-        private Type rootElementType;
+        public Type elementType;
+        public Type rootElementType;
 
         private const string k_CastElement = "__castElement";
         private const string k_CastRoot = "__castRoot";

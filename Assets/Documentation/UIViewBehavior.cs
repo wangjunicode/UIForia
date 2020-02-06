@@ -30,15 +30,15 @@ namespace UIForia {
         public void Start() {
             type = Type.GetType(typeName);
             if (type == null) return;
-            
+
             TemplateSettings settings = GetTemplateSettings(type);
 
-            application = usePreCompiledTemplates 
-                ? GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection) 
+            application = usePreCompiledTemplates
+                ? GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection)
                 : GameApplication.CreateFromRuntimeTemplates(settings, camera, DoDependencyInjection);
-            
+
         }
- 
+
         // optional!
         private void DoDependencyInjection(UIElement element) {
             // DiContainer.Inject(element);

@@ -66,14 +66,14 @@ namespace Documentation.DocumentationElements {
         public event Action<float> onNumChanged;
 
         [OnPropertyChanged(nameof(Value))]
-        public void OnMyValChanged(string propertyName) {
-            Debug.Log($"CustomInputElement: {propertyName} changed");
+        public void OnMyValChanged() {
+            Debug.Log($"CustomInputElement: Value changed");
             //onValueChanged?.Invoke(Value);
         }
         
         [OnPropertyChanged(nameof(num))]
-        public void OnNumValueChanged(string propertyName) {
-            Debug.Log($"CustomInputElement: {propertyName} changed");
+        public void OnNumValueChanged() {
+            Debug.Log($"CustomInputElement: num changed");
             // invoking the custom event handler trigger code in BindingsDemo.cs
             //onNumChanged?.Invoke(num);
             // Doesn't do anything obvious. Should be related to two-way-binding. todo: figure that out

@@ -9,124 +9,109 @@
     <Using namespace="UIForia.Systems"/>
 
     <Contents style="container">
+        
+        <Heading2>Click on an animation type to see the result</Heading2>
+        
+        <Group style="button-container">
+            <Div style="button" mouse:click="ChangeAnimation('bounce')">Bounce</Div>
+            <Div style="button" mouse:click="ChangeAnimation('flash')">Flash</Div>
+            <Div style="button" mouse:click="ChangeAnimation('pulse')">Pulse</Div>
+            <Div style="button" mouse:click="ChangeAnimation('rubberBand')">Rubber Band</Div>
+            <Div style="button" mouse:click="ChangeAnimation('shake')">Shake</Div>
+            <Div style="button" mouse:click="ChangeAnimation('headShake')">Head Shake</Div>
+            <Div style="button" mouse:click="ChangeAnimation('swing')">Swing</Div>
+            <Div style="button" mouse:click="ChangeAnimation('tada')">Tada</Div>
+            <Div style="button" mouse:click="ChangeAnimation('wobble')">Wobble</Div>
+            <!--            <Div style="button" mouse:click="ChangeAnimation('jello')">jello</Div>-->
+            <Div style="button" mouse:click="ChangeAnimation('heartBeat')">heartBeat</Div>
+            <Div style="button" mouse:click="ChangeAnimation('bounceIn')">bounceIn</Div>
+            <Div style="button" mouse:click="ChangeAnimation('bounceOut')">bounceOut</Div>
+            <Div style="button" mouse:click="ChangeAnimation('bounceInDown')">bounceInDown</Div>
+            <Div style="button" mouse:click="ChangeAnimation('bounceInUp')">bounceInUp</Div>
+            <Div style="button" mouse:click="ChangeAnimation('bounceInLeft')">bounceInLeft</Div>
+            <Div style="button" mouse:click="ChangeAnimation('bounceInRight')">bounceInRight</Div>
+            <Div style="button" mouse:click="ChangeAnimation('bounceOutDown')">bounceOutDown</Div>
+            <Div style="button" mouse:click="ChangeAnimation('bounceOutLeft')">bounceOutLeft</Div>
+            <Div style="button" mouse:click="ChangeAnimation('bounceOutRight')">bounceOutRight</Div>
+            <Div style="button" mouse:click="ChangeAnimation('bounceOutUp')">bounceOutUp</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeIn')">fadeIn</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeInDown')">fadeInDown</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeInDownBig')">fadeInDownBig</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeInLeft')">fadeInLeft</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeInLeftBig')">fadeInLeftBig</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeInRight')">fadeInRight</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeInRightBig')">fadeInRightBig</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeInUp')">fadeInUp</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeInUpBig')">fadeInUpBig</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeOut')">fadeOut</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeOutDown')">fadeOutDown</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeOutDownBig')">fadeOutDownBig</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeOutLeft')">fadeOutLeft</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeOutLeftBig')">fadeOutLeftBig</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeOutRightBig')">fadeOutRightBig</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeOutUp')">fadeOutUp</Div>
+            <Div style="button" mouse:click="ChangeAnimation('fadeOutUpBig')">fadeOutUpBig</Div>
+            <Div style="button" mouse:click="ChangeAnimation('rotateIn')">rotateIn</Div>
+        </Group>
 
-        <Select style="input" options="timingFunctions" sync:selectedValue="timingFunction">
+        <Heading2>Result</Heading2>
+        <Group style="anim-container">
+            <Div style="anims" attr:id="animation-target">A simple text that you can animate</Div>
+        </Group>
 
-            <override:select-display>
-                {$selectedOption.Label} is selected
-            </override:select-display>
+        <Input style="input" sync:value="iterations" />
+        
+        <Group style="details-container" if="animationData.name != null">
+            <Label>Name: {animationData.name}</Label>
 
-            <override:placeholder>
-                Please enter an item
-            </override:placeholder>
-            
-            <Text style="select-label">{$option.Label} Here is my item</Text>
+            <Label>Duration (in milliseconds)</Label>
+            <Input style="input" sync:value="duration"/>
 
-        </Select>
+            <Label>Delay (in milliseconds)</Label>
+            <Input style="input" sync:value="delay"/>
 
-        <!--        <Div>Animation Task Status: {animationTask.state}</Div>-->
+            <Label>Iterations (-1 is infinite)</Label>
+            <Input style="input" sync:value="iterations"/>
 
-        <!--        <Heading2>Click on an animation type to see the result</Heading2>-->
-        <!--        <Group style="button-container">-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('bounce')">Bounce</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('flash')">Flash</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('pulse')">Pulse</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('rubberBand')">Rubber Band</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('shake')">Shake</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('headShake')">Head Shake</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('swing')">Swing</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('tada')">Tada</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('wobble')">Wobble</Div>-->
-        <!--            &lt;!&ndash;            <Div style="button" mouse:click="ChangeAnimation('jello')">jello</Div>&ndash;&gt;-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('heartBeat')">heartBeat</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('bounceIn')">bounceIn</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('bounceOut')">bounceOut</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('bounceInDown')">bounceInDown</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('bounceInUp')">bounceInUp</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('bounceInLeft')">bounceInLeft</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('bounceInRight')">bounceInRight</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('bounceOutDown')">bounceOutDown</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('bounceOutLeft')">bounceOutLeft</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('bounceOutRight')">bounceOutRight</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('bounceOutUp')">bounceOutUp</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeIn')">fadeIn</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeInDown')">fadeInDown</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeInDownBig')">fadeInDownBig</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeInLeft')">fadeInLeft</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeInLeftBig')">fadeInLeftBig</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeInRight')">fadeInRight</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeInRightBig')">fadeInRightBig</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeInUp')">fadeInUp</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeInUpBig')">fadeInUpBig</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeOut')">fadeOut</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeOutDown')">fadeOutDown</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeOutDownBig')">fadeOutDownBig</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeOutLeft')">fadeOutLeft</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeOutLeftBig')">fadeOutLeftBig</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeOutRightBig')">fadeOutRightBig</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeOutUp')">fadeOutUp</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('fadeOutUpBig')">fadeOutUpBig</Div>-->
-        <!--            <Div style="button" mouse:click="ChangeAnimation('rotateIn')">rotateIn</Div>-->
-        <!--        </Group>-->
+            <Label>Easing Function</Label>
+            <Select style="input" options="timingFunctions" sync:selectedValue="timingFunction"/>
 
-        <!--        <Heading2>Result</Heading2>-->
-        <!--        <Group style="anim-container">-->
-        <!--            <Div style="anims" attr:id="animation-target">A simple text that you can animate</Div>-->
-        <!--        </Group>-->
+            <Label>Animation Direction</Label>
+            <Select style="input" options="directions" sync:selectedValue="direction"/>
 
-        <!--        <Input style="input" sync:value="iterations"/>-->
+            <Section style="button-container" if="animationTask != null">
+                <Div style="button" if="ShowRunButton" mouse:click="RunAnimationAgain()">Run</Div>
+                <Div style="button" if="ShowPauseButton" mouse:click="PauseAnimation()">Pause</Div>
+                <Div style="button" if="ShowResumeButton" mouse:click="ResumeAnimation()">Resume</Div>
+                <Div style="button" if="ShowStopButton" mouse:click="StopAnimation()">Stop!</Div>
+            </Section>
 
-        <!--        <Group style="details-container" if="animationData.name != null">-->
-        <!--            <Label>Name: {animationData.name}</Label>-->
+            <Div>Animation Task Status: {animationTask.state}</Div>
 
-        <!--            <Label>Duration (in milliseconds)</Label>-->
-        <!--            <Input style="input" sync:value="duration"/>-->
+        </Group>
 
-        <!--            <Label>Delay (in milliseconds)</Label>-->
-        <!--            <Input style="input" sync:value="delay"/>-->
-
-        <!--            <Label>Iterations (-1 is infinite)</Label>-->
-        <!--            <Input style="input" sync:value="iterations"/>-->
-
-        <!--            <Label>Easing Function</Label>-->
-        <!--            <Select style="input" options="timingFunctions" sync:selectedValue="timingFunction"/>-->
-
-        <!--            <Label>Animation Direction</Label>-->
-        <!--            <Select style="input" options="directions" sync:selectedValue="direction"/>-->
-
-        <!--            <Section style="button-container" if="animationTask != null">-->
-        <!--                <Div style="button" if="ShowRunButton" mouse:click="RunAnimationAgain()">Run</Div>-->
-        <!--                <Div style="button" if="ShowPauseButton" mouse:click="PauseAnimation()">Pause</Div>-->
-        <!--                <Div style="button" if="ShowResumeButton" mouse:click="ResumeAnimation()">Resume</Div>-->
-        <!--                <Div style="button" if="ShowStopButton" mouse:click="StopAnimation()">Stop!</Div>-->
-        <!--            </Section>-->
-
-        <!--            <Div>Animation Task Status: {animationTask.state}</Div>-->
-
-        <!--        </Group>-->
-
-        <!--        <Heading2>SpriteSheet Animations</Heading2>-->
-        <!--        <Paragraph>Let's see if the animation plays when you hover the center of the squares.</Paragraph>-->
-        <!--        <Div style="flex-horizontal">-->
-        <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" attr:spriteanimation="idle"/>-->
-        <!--            </Group>-->
-        <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" attr:spriteanimation="walk"/>-->
-        <!--            </Group>-->
-        <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" attr:spriteanimation="kick"/>-->
-        <!--            </Group>-->
-        <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" attr:spriteanimation="hurt"/>-->
-        <!--            </Group>-->
-        <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" attr:spriteanimation="sneak"/>-->
-        <!--            </Group>-->
-        <!--            <Group style="spritesheet-container">-->
-        <!--                <Group style="spritesheet-panel" attr:spriteanimation="flipbook"/>-->
-        <!--            </Group>-->
-        <!--        </Div>-->
+        <Heading2>SpriteSheet Animations</Heading2>
+        <Paragraph>Let's see if the animation plays when you hover the center of the squares.</Paragraph>
+        <Div style="flex-horizontal">
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" attr:spriteanimation="idle"/>
+            </Group>
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" attr:spriteanimation="walk"/>
+            </Group>
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" attr:spriteanimation="kick"/>
+            </Group>
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" attr:spriteanimation="hurt"/>
+            </Group>
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" attr:spriteanimation="sneak"/>
+            </Group>
+            <Group style="spritesheet-container">
+                <Group style="spritesheet-panel" attr:spriteanimation="flipbook"/>
+            </Group>
+        </Div>
 
     </Contents>
 

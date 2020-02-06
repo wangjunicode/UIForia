@@ -224,7 +224,6 @@ namespace UIForia.Editor {
 
             DrawLabel("Enabled", selectedElement.isEnabled.ToString());
             if (selectedElement.isEnabled) {
-
                 DrawLabel("Culled", selectedElement.layoutResult.isCulled.ToString());
                 DrawLabel("View", selectedElement.View.name);
                 DrawLabel("Viewport", $"X: {selectedElement.View.Viewport.x}, Y: {selectedElement.View.Viewport.y}, W: {selectedElement.View.Viewport.width}, H: {selectedElement.View.Viewport.height}");
@@ -692,6 +691,12 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.ClipBounds:
                     return DrawEnumWithValue<ClipBounds>(property, isEditable);
+
+                case StylePropertyId.AlignmentBoundaryX:
+                    return DrawEnumWithValue<AlignmentBoundary>(property, isEditable);
+
+                case StylePropertyId.AlignmentBoundaryY:
+                    return DrawEnumWithValue<AlignmentBoundary>(property, isEditable);
 
                 case StylePropertyId.PointerEvents:
                     return DrawEnumWithValue<PointerEvents>(property, isEditable);

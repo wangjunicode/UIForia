@@ -9,7 +9,7 @@ namespace Documentation.Features {
         public bool value1Checked;
         public int toggleCount;
         
-        public void OnToggled(bool val) {
+        public void OnToggled() {
             toggleCount++;
         }
 

@@ -6,7 +6,7 @@
 
     <Contents>
         <Repeat if="hasFocus" list="availableColors" style="color-palette color-selection-container">
-            <Div style.backgroundColor="$item" style="palette-item" onMouseClick="SelectColor($item)"/>
+            <Div style.backgroundColor="$item" style="palette-item" mouse:click="SelectColor($item)"/>
         </Repeat>
     </Contents>
 </UITemplate>

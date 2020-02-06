@@ -54,7 +54,22 @@ namespace UIForia.Compilers.Style {
                 {"alignmentdirectiony", (targetStyle, property, context) => targetStyle.AlignmentDirectionY = MapEnum<AlignmentDirection>(property.children[0], context)},
                 {"alignx", (targetStyle, property, context) => MapAlignmentX(targetStyle, property, context)},
                 {"aligny", (targetStyle, property, context) => MapAlignmentY(targetStyle, property, context)},
-
+                {"alignmentboundaryx", (targetStyle, property, context) => targetStyle.AlignmentBoundaryX = MapEnum<AlignmentBoundary>(property.children[0], context)},
+                {"alignmentboundaryy", (targetStyle, property, context) => targetStyle.AlignmentBoundaryY = MapEnum<AlignmentBoundary>(property.children[0], context)},
+                
+                {"alignmentboundary", (targetStyle, property, context) => {
+                        if (property.children.size == 1) {
+                            AlignmentBoundary value = MapEnum<AlignmentBoundary>(property.children[0], context);
+                            targetStyle.AlignmentBoundaryX = value;
+                            targetStyle.AlignmentBoundaryY = value;
+                        }
+                        else {
+                            targetStyle.AlignmentBoundaryX = MapEnum<AlignmentBoundary>(property.children[0], context);;
+                            targetStyle.AlignmentBoundaryY = MapEnum<AlignmentBoundary>(property.children[1], context);;
+                        }
+                    }
+                },
+                
                 {"layoutfit", (targetStyle, property, context) => MapLayoutFit(targetStyle, property, context)},
                 {"layoutfithorizontal", (targetStyle, property, context) => targetStyle.LayoutFitHorizontal = MapEnum<LayoutFit>(property.children[0], context)},
                 {"layoutfitvertical", (targetStyle, property, context) => targetStyle.LayoutFitVertical = MapEnum<LayoutFit>(property.children[0], context)},

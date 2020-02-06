@@ -368,7 +368,7 @@ namespace UIForia.Rendering {
             }
         }
 
-        public void EnterState(StyleState state) {
+        internal void EnterState(StyleState state) {
             if (state == StyleState.Normal || (currentState & state) != 0) {
                 return;
             }
@@ -426,7 +426,7 @@ namespace UIForia.Rendering {
             }
         }
 
-        public void ExitState(StyleState state) {
+        internal void ExitState(StyleState state) {
             if (state == StyleState.Normal || (currentState & state) == 0) {
                 return;
             }

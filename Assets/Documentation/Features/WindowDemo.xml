@@ -6,7 +6,7 @@
     <Contents style="window-demo-container">
 
         <Div style="create-button-row">
-            <Group onMouseClick="OnButtonClick()" style="button">Create Window</Group>
+            <Group mouse:click="OnButtonClick()" style="button">Create Window</Group>
         </Div>
         
     </Contents>

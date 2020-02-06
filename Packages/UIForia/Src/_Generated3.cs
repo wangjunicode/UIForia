@@ -77,6 +77,8 @@ namespace UIForia.Rendering {
 		public static readonly OffsetMeasurement AlignmentOriginY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement AlignmentOffsetX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement AlignmentOffsetY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
+		public const AlignmentBoundary AlignmentBoundaryX = UIForia.Layout.AlignmentBoundary.Unset;
+		public const AlignmentBoundary AlignmentBoundaryY = UIForia.Layout.AlignmentBoundary.Unset;
 		public const LayoutFit LayoutFitHorizontal = UIForia.Layout.LayoutFit.Unset;
 		public const LayoutFit LayoutFitVertical = UIForia.Layout.LayoutFit.Unset;
 		public static readonly UIMeasurement MinWidth = new UIMeasurement(0f, UIMeasurementUnit.Pixel);
@@ -276,6 +278,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetX, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
 				case StylePropertyId.AlignmentOffsetY:
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetY, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
+				case StylePropertyId.AlignmentBoundaryX:
+					 return new StyleProperty(StylePropertyId.AlignmentBoundaryX, (int)UIForia.Layout.AlignmentBoundary.Unset);
+				case StylePropertyId.AlignmentBoundaryY:
+					 return new StyleProperty(StylePropertyId.AlignmentBoundaryY, (int)UIForia.Layout.AlignmentBoundary.Unset);
 				case StylePropertyId.LayoutFitHorizontal:
 					 return new StyleProperty(StylePropertyId.LayoutFitHorizontal, (int)UIForia.Layout.LayoutFit.Unset);
 				case StylePropertyId.LayoutFitVertical:

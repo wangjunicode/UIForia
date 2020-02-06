@@ -8,8 +8,10 @@ namespace UIForia.Elements {
     [Template(TemplateType.Internal, "Elements/ScrollView.xml")]
     public class ScrollView : UIElement {
 
-        public float scrollSpeed = 1f;
+        public float fadeTarget;
         public float fadeTime = 2f;
+
+        public float scrollSpeed = 1f;
         public float trackSize = 10f;
 
         public bool disableOverflowX;
@@ -18,15 +20,11 @@ namespace UIForia.Elements {
         public bool verticalScrollingEnabled => !disableOverflowY && isOverflowingY;
         public bool horizontalScrollingEnabled => !disableOverflowX && isOverflowingX;
 
-        public float fadeTarget;
 
         private Size previousChildrenSize;
 
         public float scrollPercentageX;
         public float scrollPercentageY;
-
-        public float horizontalScrollPosition;
-        public float verticalScrollPosition;
 
         public bool isOverflowingX { get; internal set; }
         public bool isOverflowingY { get; internal set; }
@@ -62,9 +60,10 @@ namespace UIForia.Elements {
                 isOverflowingX = children[0].layoutResult.allocatedSize.width > layoutResult.allocatedSize.width;
                 isOverflowingY = children[0].layoutResult.allocatedSize.height > layoutResult.allocatedSize.height;
             }
+            
         }
-
-
+        
+        
         public override void OnDisable() {
             scrollDeltaX = 0;
             scrollDeltaY = 0;
@@ -90,16 +89,17 @@ namespace UIForia.Elements {
         }
 
         public void OnClickVertical(MouseInputEvent evt) {
-            float y = evt.MousePosition.y - layoutResult.screenPosition.y;
 
             float contentAreaHeight = layoutResult.ContentAreaHeight;
             float contentHeight = children[0].layoutResult.actualSize.height;
-
+            float paddingBorderStart = layoutResult.VerticalPaddingBorderStart;
+            float y = evt.MousePosition.y - layoutResult.screenPosition.y - paddingBorderStart;
+            
             if (contentHeight == 0) return;
 
             float handleHeight = (contentAreaHeight / contentHeight) * contentAreaHeight;
 
-            float handlePosition = (contentAreaHeight - handleHeight) * scrollPercentageY;
+            float handlePosition = (paddingBorderStart + contentAreaHeight - handleHeight) * scrollPercentageY;
 
             float pageSize = evt.element.layoutResult.allocatedSize.height / contentHeight;
 
@@ -135,15 +135,6 @@ namespace UIForia.Elements {
             evt.StopPropagation();
         }
 
-
-        // public void OnHoverHorizontal(MouseInputEvent evt) {
-        //     lastScrollHorizontalTimestamp = Time.realtimeSinceStartup;
-        // }
-        //
-        // public void OnHoverVertical(MouseInputEvent evt) {
-        //     lastScrollVerticalTimestamp = Time.realtimeSinceStartup;
-        // }
-
         [OnDragCreate(EventPhase.Capture)]
         public DragEvent OnMiddleMouseDrag(MouseInputEvent evt) {
             if (!evt.IsMouseMiddleDown) {
@@ -168,7 +159,7 @@ namespace UIForia.Elements {
 
         public virtual DragEvent OnCreateVerticalDrag(MouseInputEvent evt) {
             if (evt.IsMouseRightDown) return null;
-            float baseOffset = evt.MousePosition.y - evt.element.layoutResult.screenPosition.y;
+            float baseOffset = evt.MousePosition.y - (evt.element.layoutResult.screenPosition.y);
             return new ScrollbarDragEvent(ScrollbarOrientation.Vertical, new Vector2(0, baseOffset), this);
         }
 
@@ -218,7 +209,7 @@ namespace UIForia.Elements {
 
                     height -= scrollView.verticalHandle.layoutResult.actualSize.height;
 
-                    float y = Mathf.Clamp(MousePosition.y - scrollView.layoutResult.screenPosition.y - baseOffset.y, 0, height);
+                    float y = Mathf.Clamp(MousePosition.y - (scrollView.layoutResult.screenPosition.y + scrollView.layoutResult.VerticalPaddingBorderStart) - baseOffset.y, 0, height);
 
                     if (height == 0) {
                         scrollView.ScrollToVerticalPercent(0);
@@ -233,7 +224,7 @@ namespace UIForia.Elements {
 
                     width -= scrollView.horizontalHandle.layoutResult.actualSize.width;
 
-                    float y = Mathf.Clamp(MousePosition.x - scrollView.layoutResult.screenPosition.x - baseOffset.x, 0, width);
+                    float y = Mathf.Clamp(MousePosition.x - (scrollView.layoutResult.screenPosition.x  + scrollView.layoutResult.HorizontalPaddingBorderStart) - baseOffset.x, 0, width);
 
                     if (width == 0) {
                         scrollView.ScrollToHorizontalPercent(0);
@@ -244,6 +235,46 @@ namespace UIForia.Elements {
                 }
             }
 
+        }
+
+        public float ScrollOffsetX => -(children[0].layoutResult.alignedPosition.x - layoutResult.HorizontalPaddingBorderStart);
+        public float ScrollOffsetY => -(children[0].layoutResult.alignedPosition.y - layoutResult.VerticalPaddingBorderStart);
+
+        internal void ScrollElementIntoView(UIElement element, float crawlPositionX, float crawlPositionY) {
+            
+            float scrollOffsetX = ScrollOffsetX;
+            float localPositionX = crawlPositionX - layoutResult.HorizontalPaddingBorderStart;
+
+            float elementWidth = element.layoutResult.ActualWidth;
+            float elementRight = localPositionX + scrollOffsetX + elementWidth;
+
+            float childrenWidth = children[0].layoutResult.ActualWidth;
+            float contentWidth = layoutResult.ContentAreaWidth;
+
+            if (localPositionX < 0) {
+                // scrolls to the left edge of the element
+                ScrollToHorizontalPercent((localPositionX + scrollOffsetX) / (childrenWidth - contentWidth));
+            } else if (elementRight - scrollOffsetX > contentWidth) {
+                // scrolls to the right edge but keeps the element at the right edge of the scrollView
+                ScrollToHorizontalPercent(((elementRight - contentWidth) / (childrenWidth - contentWidth)));
+            }
+            
+            float scrollOffsetY = ScrollOffsetY;
+            float localPositionY = crawlPositionY - layoutResult.VerticalPaddingBorderStart;
+
+            float elementHeight = element.layoutResult.ActualHeight;
+            float elementBottom = localPositionY + scrollOffsetY + elementHeight;
+
+            float childrenHeight = children[0].layoutResult.ActualHeight;
+            float contentHeight = layoutResult.ContentAreaHeight;
+
+            if (localPositionY < 0) {
+                // scrolls up to the upper edge of the element
+                ScrollToVerticalPercent((localPositionY + scrollOffsetY) / (childrenHeight - contentHeight));
+            } else if (elementBottom - scrollOffsetY > contentHeight) {
+                // scrolls down but keeps the element at the lower edge of the scrollView
+                ScrollToVerticalPercent(((elementBottom - contentHeight) / (childrenHeight - contentHeight)));
+            }
         }
 
     }

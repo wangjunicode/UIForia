@@ -112,6 +112,8 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOriginY, new OffsetMeasurement(0)),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOffsetX, new OffsetMeasurement(0)),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.AlignmentOffsetY, new OffsetMeasurement(0)),
+            new PropertyGenerator<AlignmentBoundary>(StylePropertyId.AlignmentBoundaryX, AlignmentBoundary.Unset),
+            new PropertyGenerator<AlignmentBoundary>(StylePropertyId.AlignmentBoundaryY, AlignmentBoundary.Unset),
 
             // Fit
             new PropertyGenerator<LayoutFit>(StylePropertyId.LayoutFitHorizontal, LayoutFit.Unset),
@@ -269,34 +271,7 @@ __REPLACE_StyleUtil__IsInherited
     }
 
 }";
-
-            const string StyleBindingTemplate = @"using UIForia.Compilers.AliasSource;
-using UIForia.Expressions;
-using UIForia.Elements;
-using UIForia.Rendering;
-
-namespace UIForia.Bindings.StyleBindings {
-    __REPLACE_StyleBindingClasses
-}
-
-namespace UIForia.Compilers {
-
-    public partial class StyleBindingCompiler {
-
-__REPLACE_StyleBindingCompiler_EnumSources
-
-        private UIForia.Bindings.StyleBindings.StyleBinding DoCompile(string key, string value, Target targetState) {
-            switch(targetState.property.ToLower()) {
-
-__REPLACE_StyleBindingCompiler_DoCompile
-
-            }
-            return null;
-        }
-
-    }
-
-}";
+            
 
             string retn = "";
             for (int i = 0; i < properties.Length; i++) {
@@ -359,15 +334,7 @@ __REPLACE_StyleBindingCompiler_DoCompile
             template = template.Replace("__REPLACE__UIStyle", retn);
 
             File.WriteAllText(generatedPath, template);
-
-            template = StyleBindingTemplate;
-            template = template.Replace("__REPLACE_StyleBindingClasses", CreateStyleBindingClasses());
-            retn = InflateStyleBindingCompilerDoCompile();
-            template = template.Replace("__REPLACE_StyleBindingCompiler_DoCompile", retn);
-            retn = CreateEnumAliasSources();
-            template = template.Replace("__REPLACE_StyleBindingCompiler_EnumSources", retn);
-
-            File.WriteAllText(generatedPath2, template);
+            
 
             string code = @"using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
@@ -398,93 +365,7 @@ namespace UIForia.Rendering {
             File.WriteAllText(generatedPath3, code);
         }
 
-        private const string BaseStyleBindingTemplate = @"        
-    public class StyleBinding___NAME__ : StyleBinding {
 
-        public readonly Expression<__TYPE__> expression;
-        public readonly StylePropertyId propertyId;
-        
-        public StyleBinding___NAME__(string propertyName, StylePropertyId propertyId, StyleState state, Expression<__TYPE__> expression)
-            : base(propertyName, state) {
-            this.propertyId = propertyId;
-            this.expression = expression;
-        }
-
-        public override void Execute(UIElement element, ExpressionContext context) {
-            if (!element.style.IsInState(state)) return;
-
-            var oldValue = element.style.propertyMap[(int)propertyId].As__CAST_TYPE__;
-            var value = expression.Evaluate(context);
-            if (value != oldValue) {
-                element.style.SetProperty(__STYLE_PROPERTY_CONSTRUCTOR__, state);
-            }
-        }
-
-        public override bool IsConstant() {
-            return expression.IsConstant();
-        }
-
-        public override void Apply(UIStyle style, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            style.SetProperty(__STYLE_PROPERTY_CONSTRUCTOR__);
-        }
-
-        public override void Apply(UIStyleSet styleSet, ExpressionContext context) {
-            var value = expression.Evaluate(context);
-            styleSet.SetProperty(__STYLE_PROPERTY_CONSTRUCTOR__, state);
-        }
-
-    }
-";
-
-        private static string CreateStyleBindingClasses() {
-            HashSet<string> templates = new HashSet<string>();
-            string retn = "";
-            for (int i = 0; i < properties.Length; i++) {
-                PropertyGenerator generator = properties[i];
-                string key = generator.GetFullTypeName();
-
-                if (!templates.Contains(key)) {
-                    retn += BaseStyleBindingTemplate.Replace("__NAME__", generator.GetPrintableTypeName()).Replace("__TYPE__", generator.GetFullTypeName()).Replace("__CAST_TYPE__", generator.GetCastAccessor()).Replace("__STYLE_PROPERTY_CONSTRUCTOR__", generator.StylePropertyConstructorParameterized("propertyId"));
-                }
-
-                templates.Add(key);
-            }
-
-            return retn;
-        }
-
-        private static string CreateEnumAliasSources() {
-            string retn = "";
-            HashSet<Type> templates = new HashSet<Type>();
-            for (int i = 0; i < properties.Length; i++) {
-                PropertyGenerator generator = properties[i];
-                if (generator.type.IsEnum) {
-                    if (!templates.Contains(generator.type)) {
-                        templates.Add(generator.type);
-                        retn += $"        private static readonly EnumAliasSource<{generator.GetFullTypeName()}> s_EnumSource_{generator.GetPrintableTypeName()} = new EnumAliasSource<{generator.GetFullTypeName()}>();\n";
-                    }
-                }
-            }
-
-            return retn;
-        }
-
-        private static string InflateStyleBindingCompilerDoCompile() {
-            string retn = "";
-            for (int i = 0; i < properties.Length; i++) {
-                PropertyGenerator generator = properties[i];
-
-                string name = "UIForia.Rendering.StylePropertyId." + generator.propertyIdName;
-                string bindingName = generator.GetPrintableTypeName();
-                string type = generator.GetFullTypeName();
-                retn += $@"case ""{generator.propertyIdName.ToLower()}"":
-                    return new UIForia.Bindings.StyleBindings.StyleBinding_{bindingName}(""{generator.propertyIdName}"", {name}, targetState.state, Compile<{type}>(value, {generator.GetAliasSources()}));                
-                ";
-            }
-
-            return retn;
-        }
 
         private static string GetComputedStyle() {
             string code = "\t\t\tswitch(propertyId) {\n";

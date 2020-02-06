@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Mono.Linq.Expressions;
@@ -23,8 +24,13 @@ namespace UIForia {
 
         public static bool Generate(Type type, TemplateSettings templateSettings) {
             templateSettings.resourceManager = new ResourceManager();
+           // Stopwatch stopwatch = new Stopwatch();
+           // stopwatch.Start();
             CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
 
+           // stopwatch.Stop();
+           // UnityEngine.Debug.Log("Compiled Templates in " + stopwatch.Elapsed.Milliseconds + "ms");
+            
             string path = templateSettings.outputPath;
             string extension = templateSettings.codeFileExtension;
             if (extension[0] != '.') {

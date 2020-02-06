@@ -76,23 +76,23 @@ style horizontal {
 }
 
 style flex-start {
-    DistributeExtraSpaceVertical = AfterContent;
+    DistributeExtraSpaceHorizontal = AfterContent;
 }
 
 style flex-end {
-    DistributeExtraSpaceVertical = BeforeContent;
+    DistributeExtraSpaceHorizontal = BeforeContent;
 }
 
 style flex-center {
-    DistributeExtraSpaceVertical = CenterContent;
+    DistributeExtraSpaceHorizontal = CenterContent;
 }
 
 style flex-space-between {
-    DistributeExtraSpaceVertical = BetweenContent;
+    DistributeExtraSpaceHorizontal = BetweenContent;
 }
 
 style flex-space-around {
-    DistributeExtraSpaceVertical = AroundContent;
+    DistributeExtraSpaceHorizontal = AroundContent;
 }
 
 style flex-grow-1 {

@@ -809,7 +809,7 @@ namespace UIForia.Compilers {
                 ParameterExpression variable = ResolveVariableName(memberNode.identifier);
 
                 if (variable == null) {
-                    throw CompileException.UnresolvedIdentifier(memberNode.identifier);
+                    throw CompileException.UnresolvedIdentifier(memberNode.identifier + ". This might be because you are compiling an assignable statement that is more than just a variable");
                 }
 
                 if (parts.Count == 1) {
@@ -2421,7 +2421,7 @@ namespace UIForia.Compilers {
             nested.SetupClosure(this);
             nested.parameters.Clear();
             nested.parameters.AddRange(parameterList);
-
+            nested.SetNamespaces(namespaces);
             nested.returnType = retnType ?? typeof(void);
             nested.SetImplicitContext(implicitContext, ParameterFlags.NeverNull);
             nested.parent = this;

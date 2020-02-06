@@ -3,7 +3,7 @@
     <Contents>
 
         Toggle Count = {toggleCount}
-        <Checkbox sync:isChecked="value1Checked"/>
+        <Checkbox sync:isChecked="value1Checked" onChange:isChecked="OnToggled()"/>
         Is checked: {value1Checked}
 
     </Contents>

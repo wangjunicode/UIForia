@@ -51,22 +51,22 @@ namespace UIForia.Systems {
             float horizontalWidth = scrollView.verticalScrollingEnabled ? contentAreaWidth - trackSize : contentAreaWidth;
 
             if (verticalTrack != null && verticalTrack.element.isEnabled) {
-                verticalTrack.ApplyLayoutHorizontalExplicit(contentAreaWidth - trackSize, trackSize, frameId);
+                verticalTrack.ApplyLayoutHorizontalExplicit(paddingBorderHorizontalStart + contentAreaWidth - trackSize, trackSize, frameId);
             }
 
             if (verticalHandle != null && verticalHandle.element.isEnabled) {
-                verticalHandle.ApplyLayoutHorizontalExplicit(contentAreaWidth - trackSize, trackSize, frameId);
+                verticalHandle.ApplyLayoutHorizontalExplicit(paddingBorderHorizontalStart + contentAreaWidth - trackSize, trackSize, frameId);
                 verticalHandle.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
 
             if (horizontalTrack != null && horizontalTrack.element.isEnabled) {
-                horizontalTrack.ApplyLayoutHorizontalExplicit(0, horizontalWidth, frameId);
+                horizontalTrack.ApplyLayoutHorizontalExplicit(paddingBorderHorizontalStart, horizontalWidth, frameId);
             }
 
             if (horizontalHandle != null && horizontalHandle.element.isEnabled) {
-                float handleWidth = (horizontalWidth / contentWidth) * horizontalWidth;
-                float handlePosition = (horizontalWidth - handleWidth) * scrollOffsetPercentage;
-                horizontalHandle.ApplyLayoutHorizontalExplicit(handlePosition, handleWidth, frameId);
+                float handleWidth = (contentAreaWidth / contentWidth) * horizontalWidth;
+                float handlePosition = (contentAreaWidth - handleWidth) * scrollOffsetPercentage;
+                horizontalHandle.ApplyLayoutHorizontalExplicit(handlePosition + inset, handleWidth, frameId);
                 horizontalHandle.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
         }
@@ -99,22 +99,22 @@ namespace UIForia.Systems {
             float verticalHeight = scrollView.verticalScrollingEnabled ? contentAreaHeight - trackSize : contentAreaHeight;
 
             if (verticalTrack != null && verticalTrack.element.isEnabled) {
-                verticalTrack.ApplyLayoutVerticalExplicit(0, verticalHeight, frameId);
+                verticalTrack.ApplyLayoutVerticalExplicit(inset, contentAreaHeight, frameId);
             }
 
             if (verticalHandle != null && verticalHandle.element.isEnabled) {
-                float handleHeight = (verticalHeight / contentHeight) * verticalHeight;
-                float handlePosition = (verticalHeight - handleHeight) * scrollOffsetPercentage;
-                verticalHandle.ApplyLayoutVerticalExplicit(handlePosition, handleHeight, frameId);
+                float handleHeight = (contentAreaHeight / contentHeight) * verticalHeight;
+                float handlePosition = (contentAreaHeight - handleHeight) * scrollOffsetPercentage;
+                verticalHandle.ApplyLayoutVerticalExplicit(handlePosition + inset, handleHeight, frameId);
                 verticalHandle.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
 
             if (horizontalTrack != null && horizontalTrack.element.isEnabled) {
-                horizontalTrack.ApplyLayoutVerticalExplicit(contentAreaHeight - trackSize, trackSize, frameId);
+                horizontalTrack.ApplyLayoutVerticalExplicit(paddingBorderVerticalStart + contentAreaHeight - trackSize, trackSize, frameId);
             }
 
             if (horizontalHandle != null && horizontalHandle.element.isEnabled) {
-                horizontalHandle.ApplyLayoutVerticalExplicit(contentAreaHeight - trackSize, trackSize, frameId);
+                horizontalHandle.ApplyLayoutVerticalExplicit(paddingBorderVerticalStart + contentAreaHeight - trackSize, trackSize, frameId);
             }
         }
 

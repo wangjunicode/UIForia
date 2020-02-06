@@ -39,7 +39,7 @@
                 </Div>
                 <Div style="chat-messages">
                     <Group style="fill-container">
-                        <ScrollView x-id="scrollview" style="message-scroll-view">
+                        <ScrollView attr:id="scrollview" style="message-scroll-view">
                             <Heading1>This is the beginning of your direct message history with @Vondi</Heading1>
                             <Repeat list="messages">
                                 <Group style="message">
@@ -56,7 +56,7 @@
                         </ScrollView>
                             
                         <Group style="input-container">
-                            <Input style="message-input" placeholder="'Message Vondi...'" value.read.write="message"  />
+                            <Input style="message-input" placeholder="'Message Vondi...'" sycn:value="message"  />
                             <Image src="'Prototyping/icon__086-095'"
                                    style="emoji"
                             />

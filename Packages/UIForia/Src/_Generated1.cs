@@ -446,6 +446,20 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value), state); }
         }
         
+        public UIForia.Layout.AlignmentBoundary AlignmentBoundaryX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentBoundaryX, state).AsAlignmentBoundary; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentBoundaryX, (int)value), state); }
+        }
+        
+        public UIForia.Layout.AlignmentBoundary AlignmentBoundaryY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.AlignmentBoundaryY, state).AsAlignmentBoundary; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.AlignmentBoundaryY, (int)value), state); }
+        }
+        
         public UIForia.Layout.LayoutFit LayoutFitHorizontal {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.LayoutFitHorizontal, state).AsLayoutFit; }
@@ -1380,6 +1394,20 @@ namespace UIForia.Rendering {
             get { return FindOffsetMeasurementProperty(StylePropertyId.AlignmentOffsetY); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, value)); }
+        }
+            
+        public UIForia.Layout.AlignmentBoundary AlignmentBoundaryX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentBoundary)FindEnumProperty(StylePropertyId.AlignmentBoundaryX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentBoundaryX, (int)value)); }
+        }
+            
+        public UIForia.Layout.AlignmentBoundary AlignmentBoundaryY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.AlignmentBoundary)FindEnumProperty(StylePropertyId.AlignmentBoundaryY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.AlignmentBoundaryY, (int)value)); }
         }
             
         public UIForia.Layout.LayoutFit LayoutFitHorizontal {
@@ -2448,6 +2476,24 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentOffsetY, out property)) return property.AsOffsetMeasurement;
                     return DefaultStyleValues_Generated.AlignmentOffsetY;
+                }
+            }
+
+            public UIForia.Layout.AlignmentBoundary AlignmentBoundaryX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentBoundaryX, out property)) return property.AsAlignmentBoundary;
+                    return DefaultStyleValues_Generated.AlignmentBoundaryX;
+                }
+            }
+
+            public UIForia.Layout.AlignmentBoundary AlignmentBoundaryY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.AlignmentBoundaryY, out property)) return property.AsAlignmentBoundary;
+                    return DefaultStyleValues_Generated.AlignmentBoundaryY;
                 }
             }
 
@@ -3613,6 +3659,22 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.AlignmentOffsetY, state).AsOffsetMeasurement;
         }
         
+        public void SetAlignmentBoundaryX(in UIForia.Layout.AlignmentBoundary? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentBoundaryX, (int)value), state);
+        }
+
+        public UIForia.Layout.AlignmentBoundary GetAlignmentBoundaryX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentBoundaryX, state).AsAlignmentBoundary;
+        }
+        
+        public void SetAlignmentBoundaryY(in UIForia.Layout.AlignmentBoundary? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.AlignmentBoundaryY, (int)value), state);
+        }
+
+        public UIForia.Layout.AlignmentBoundary GetAlignmentBoundaryY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.AlignmentBoundaryY, state).AsAlignmentBoundary;
+        }
+        
         public void SetLayoutFitHorizontal(in UIForia.Layout.LayoutFit? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.LayoutFitHorizontal, (int)value), state);
         }
@@ -4302,6 +4364,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetX, AlignmentOffsetX);
 				case StylePropertyId.AlignmentOffsetY:
 					 return new StyleProperty(StylePropertyId.AlignmentOffsetY, AlignmentOffsetY);
+				case StylePropertyId.AlignmentBoundaryX:
+					 return new StyleProperty(StylePropertyId.AlignmentBoundaryX, (int)AlignmentBoundaryX);
+				case StylePropertyId.AlignmentBoundaryY:
+					 return new StyleProperty(StylePropertyId.AlignmentBoundaryY, (int)AlignmentBoundaryY);
 				case StylePropertyId.LayoutFitHorizontal:
 					 return new StyleProperty(StylePropertyId.LayoutFitHorizontal, (int)LayoutFitHorizontal);
 				case StylePropertyId.LayoutFitVertical:
@@ -4450,6 +4516,151 @@ namespace UIForia.Rendering {
 
     public static partial class StyleUtil {
         
+        public static System.Type GetPropertyType(StylePropertyId propertyId) {
+            switch (propertyId) {
+
+                                case StylePropertyId.Visibility: return typeof(UIForia.Rendering.Visibility);
+                    case StylePropertyId.Opacity: return typeof(System.Single);
+                    case StylePropertyId.Cursor: return typeof(UIForia.Rendering.CursorStyle);
+                    case StylePropertyId.Painter: return typeof(System.String);
+                    case StylePropertyId.OverflowX: return typeof(UIForia.Rendering.Overflow);
+                    case StylePropertyId.OverflowY: return typeof(UIForia.Rendering.Overflow);
+                    case StylePropertyId.ClipBehavior: return typeof(UIForia.Layout.ClipBehavior);
+                    case StylePropertyId.ClipBounds: return typeof(UIForia.Rendering.ClipBounds);
+                    case StylePropertyId.PointerEvents: return typeof(UIForia.UIInput.PointerEvents);
+                    case StylePropertyId.BackgroundColor: return typeof(UnityEngine.Color);
+                    case StylePropertyId.BackgroundTint: return typeof(UnityEngine.Color);
+                    case StylePropertyId.BackgroundImageOffsetX: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BackgroundImageOffsetY: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BackgroundImageScaleX: return typeof(System.Single);
+                    case StylePropertyId.BackgroundImageScaleY: return typeof(System.Single);
+                    case StylePropertyId.BackgroundImageTileX: return typeof(System.Single);
+                    case StylePropertyId.BackgroundImageTileY: return typeof(System.Single);
+                    case StylePropertyId.BackgroundImageRotation: return typeof(System.Single);
+                    case StylePropertyId.BackgroundImage: return typeof(UnityEngine.Texture2D);
+                    case StylePropertyId.BackgroundFit: return typeof(UIForia.Rendering.BackgroundFit);
+                    case StylePropertyId.BorderColorTop: return typeof(UnityEngine.Color);
+                    case StylePropertyId.BorderColorRight: return typeof(UnityEngine.Color);
+                    case StylePropertyId.BorderColorBottom: return typeof(UnityEngine.Color);
+                    case StylePropertyId.BorderColorLeft: return typeof(UnityEngine.Color);
+                    case StylePropertyId.CornerBevelTopLeft: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.CornerBevelTopRight: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.CornerBevelBottomRight: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.CornerBevelBottomLeft: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.FlexItemGrow: return typeof(System.Int32);
+                    case StylePropertyId.FlexItemShrink: return typeof(System.Int32);
+                    case StylePropertyId.FlexLayoutDirection: return typeof(UIForia.Layout.LayoutDirection);
+                    case StylePropertyId.FlexLayoutWrap: return typeof(UIForia.Layout.LayoutWrap);
+                    case StylePropertyId.GridItemX: return typeof(UIForia.Layout.LayoutTypes.GridItemPlacement);
+                    case StylePropertyId.GridItemY: return typeof(UIForia.Layout.LayoutTypes.GridItemPlacement);
+                    case StylePropertyId.GridItemWidth: return typeof(UIForia.Layout.LayoutTypes.GridItemPlacement);
+                    case StylePropertyId.GridItemHeight: return typeof(UIForia.Layout.LayoutTypes.GridItemPlacement);
+                    case StylePropertyId.GridLayoutDirection: return typeof(UIForia.Layout.LayoutDirection);
+                    case StylePropertyId.GridLayoutDensity: return typeof(UIForia.Layout.GridLayoutDensity);
+                    case StylePropertyId.GridLayoutColTemplate: return typeof(System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>);
+                    case StylePropertyId.GridLayoutRowTemplate: return typeof(System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>);
+                    case StylePropertyId.GridLayoutColAutoSize: return typeof(System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>);
+                    case StylePropertyId.GridLayoutRowAutoSize: return typeof(System.Collections.Generic.IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize>);
+                    case StylePropertyId.GridLayoutColGap: return typeof(System.Single);
+                    case StylePropertyId.GridLayoutRowGap: return typeof(System.Single);
+                    case StylePropertyId.GridLayoutColAlignment: return typeof(UIForia.Layout.GridAxisAlignment);
+                    case StylePropertyId.GridLayoutRowAlignment: return typeof(UIForia.Layout.GridAxisAlignment);
+                    case StylePropertyId.AlignItemsHorizontal: return typeof(System.Single);
+                    case StylePropertyId.AlignItemsVertical: return typeof(System.Single);
+                    case StylePropertyId.FitItemsVertical: return typeof(UIForia.Layout.LayoutFit);
+                    case StylePropertyId.FitItemsHorizontal: return typeof(UIForia.Layout.LayoutFit);
+                    case StylePropertyId.DistributeExtraSpaceHorizontal: return typeof(UIForia.Layout.SpaceDistribution);
+                    case StylePropertyId.DistributeExtraSpaceVertical: return typeof(UIForia.Layout.SpaceDistribution);
+                    case StylePropertyId.RadialLayoutStartAngle: return typeof(System.Single);
+                    case StylePropertyId.RadialLayoutEndAngle: return typeof(System.Single);
+                    case StylePropertyId.RadialLayoutRadius: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.AlignmentDirectionX: return typeof(UIForia.Layout.AlignmentDirection);
+                    case StylePropertyId.AlignmentDirectionY: return typeof(UIForia.Layout.AlignmentDirection);
+                    case StylePropertyId.AlignmentTargetX: return typeof(UIForia.Layout.AlignmentTarget);
+                    case StylePropertyId.AlignmentTargetY: return typeof(UIForia.Layout.AlignmentTarget);
+                    case StylePropertyId.AlignmentOriginX: return typeof(UIForia.OffsetMeasurement);
+                    case StylePropertyId.AlignmentOriginY: return typeof(UIForia.OffsetMeasurement);
+                    case StylePropertyId.AlignmentOffsetX: return typeof(UIForia.OffsetMeasurement);
+                    case StylePropertyId.AlignmentOffsetY: return typeof(UIForia.OffsetMeasurement);
+                    case StylePropertyId.AlignmentBoundaryX: return typeof(UIForia.Layout.AlignmentBoundary);
+                    case StylePropertyId.AlignmentBoundaryY: return typeof(UIForia.Layout.AlignmentBoundary);
+                    case StylePropertyId.LayoutFitHorizontal: return typeof(UIForia.Layout.LayoutFit);
+                    case StylePropertyId.LayoutFitVertical: return typeof(UIForia.Layout.LayoutFit);
+                    case StylePropertyId.MinWidth: return typeof(UIForia.Rendering.UIMeasurement);
+                    case StylePropertyId.MaxWidth: return typeof(UIForia.Rendering.UIMeasurement);
+                    case StylePropertyId.PreferredWidth: return typeof(UIForia.Rendering.UIMeasurement);
+                    case StylePropertyId.MinHeight: return typeof(UIForia.Rendering.UIMeasurement);
+                    case StylePropertyId.MaxHeight: return typeof(UIForia.Rendering.UIMeasurement);
+                    case StylePropertyId.PreferredHeight: return typeof(UIForia.Rendering.UIMeasurement);
+                    case StylePropertyId.MarginTop: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.MarginRight: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.MarginBottom: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.MarginLeft: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BorderTop: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BorderRight: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BorderBottom: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BorderLeft: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BorderRadiusTopLeft: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BorderRadiusTopRight: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BorderRadiusBottomRight: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BorderRadiusBottomLeft: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.PaddingTop: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.PaddingRight: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.PaddingBottom: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.PaddingLeft: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.TextColor: return typeof(UnityEngine.Color);
+                    case StylePropertyId.TextFontAsset: return typeof(UIForia.FontAsset);
+                    case StylePropertyId.TextFontSize: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.TextFontStyle: return typeof(UIForia.Text.FontStyle);
+                    case StylePropertyId.TextAlignment: return typeof(UIForia.Text.TextAlignment);
+                    case StylePropertyId.TextOutlineWidth: return typeof(System.Single);
+                    case StylePropertyId.TextOutlineColor: return typeof(UnityEngine.Color);
+                    case StylePropertyId.CaretColor: return typeof(UnityEngine.Color);
+                    case StylePropertyId.SelectionBackgroundColor: return typeof(UnityEngine.Color);
+                    case StylePropertyId.SelectionTextColor: return typeof(UnityEngine.Color);
+                    case StylePropertyId.TextOutlineSoftness: return typeof(System.Single);
+                    case StylePropertyId.TextGlowColor: return typeof(UnityEngine.Color);
+                    case StylePropertyId.TextGlowOffset: return typeof(System.Single);
+                    case StylePropertyId.TextGlowInner: return typeof(System.Single);
+                    case StylePropertyId.TextGlowOuter: return typeof(System.Single);
+                    case StylePropertyId.TextGlowPower: return typeof(System.Single);
+                    case StylePropertyId.TextUnderlayColor: return typeof(UnityEngine.Color);
+                    case StylePropertyId.TextUnderlayX: return typeof(System.Single);
+                    case StylePropertyId.TextUnderlayY: return typeof(System.Single);
+                    case StylePropertyId.TextUnderlayDilate: return typeof(System.Single);
+                    case StylePropertyId.TextUnderlaySoftness: return typeof(System.Single);
+                    case StylePropertyId.TextFaceDilate: return typeof(System.Single);
+                    case StylePropertyId.TextUnderlayType: return typeof(UIForia.Rendering.UnderlayType);
+                    case StylePropertyId.TextTransform: return typeof(UIForia.Text.TextTransform);
+                    case StylePropertyId.TextWhitespaceMode: return typeof(UIForia.Text.WhitespaceMode);
+                    case StylePropertyId.TransformPositionX: return typeof(UIForia.OffsetMeasurement);
+                    case StylePropertyId.TransformPositionY: return typeof(UIForia.OffsetMeasurement);
+                    case StylePropertyId.TransformPivotX: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.TransformPivotY: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.TransformScaleX: return typeof(System.Single);
+                    case StylePropertyId.TransformScaleY: return typeof(System.Single);
+                    case StylePropertyId.TransformRotation: return typeof(System.Single);
+                    case StylePropertyId.LayoutType: return typeof(UIForia.Layout.LayoutType);
+                    case StylePropertyId.LayoutBehavior: return typeof(UIForia.Layout.LayoutBehavior);
+                    case StylePropertyId.ZIndex: return typeof(System.Int32);
+                    case StylePropertyId.RenderLayerOffset: return typeof(System.Int32);
+                    case StylePropertyId.RenderLayer: return typeof(UIForia.Rendering.RenderLayer);
+                    case StylePropertyId.Layer: return typeof(System.Int32);
+                    case StylePropertyId.ShadowColor: return typeof(UnityEngine.Color);
+                    case StylePropertyId.ShadowTint: return typeof(UnityEngine.Color);
+                    case StylePropertyId.ShadowOffsetX: return typeof(UIForia.OffsetMeasurement);
+                    case StylePropertyId.ShadowOffsetY: return typeof(UIForia.OffsetMeasurement);
+                    case StylePropertyId.ShadowSizeX: return typeof(System.Single);
+                    case StylePropertyId.ShadowSizeY: return typeof(System.Single);
+                    case StylePropertyId.ShadowIntensity: return typeof(System.Single);
+                    case StylePropertyId.ShadowOpacity: return typeof(System.Single);
+
+            }
+
+            return null;
+
+        }
+
       public static bool CanAnimate(StylePropertyId propertyId) {
                 switch (propertyId) {
     

@@ -220,12 +220,14 @@ namespace UIForia.Systems {
                     case StylePropertyId.AlignmentOriginX:
                     case StylePropertyId.AlignmentOffsetX:
                     case StylePropertyId.AlignmentDirectionX:
+                    case StylePropertyId.AlignmentBoundaryX:
                         checkAlignHorizontal = true;
                         break;
                     case StylePropertyId.AlignmentTargetY:
                     case StylePropertyId.AlignmentOriginY:
                     case StylePropertyId.AlignmentOffsetY:
                     case StylePropertyId.AlignmentDirectionY:
+                    case StylePropertyId.AlignmentBoundaryY:
                         updateAlignVertical = true;
                         break;
                     case StylePropertyId.MinWidth:

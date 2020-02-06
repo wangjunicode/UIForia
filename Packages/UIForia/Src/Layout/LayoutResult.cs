@@ -66,63 +66,14 @@ namespace UIForia.Layout {
             actualSize.height - padding.top - border.top - padding.bottom - border.bottom
         );
 
+        public float VerticalPaddingBorderStart => padding.top + border.top;
+        public float VerticalPaddingBorderEnd => padding.bottom + border.bottom;
+        public float HorizontalPaddingBorderStart => padding.left + border.left;
+        public float HorizontalPaddingBorderEnd => padding.right + border.right;
+
         internal LayoutResult(UIElement element) {
             this.element = element;
             this.matrix = SVGXMatrix.identity;
-        }
-
-        public Size ComputeOverflowSize() {
-            float minX = float.MaxValue;
-            float minY = float.MaxValue;
-            float maxX = float.MinValue;
-            float maxY = float.MinValue;
-
-            UIElement[] children = element.children.array;
-            int childCount = element.children.size;
-
-            if (childCount == 0) {
-                return new Size();
-            } 
-
-            StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
-            if (stack.size + childCount >= stack.array.Length) {
-                Array.Resize(ref stack.array, stack.size + childCount);
-            }
-
-            for (int i = 0; i < childCount; i++) {
-                stack.array[stack.size++].element = children[i];
-            }
-
-            while (stack.size > 0) {
-                UIElement child = stack.array[--stack.size].element;
-
-                if (child.isDisabled) {
-                    continue;
-                }
-
-                if (child.style.LayoutBehavior == LayoutBehavior.TranscludeChildren) {
-                    if (stack.size + child.children.size >= stack.array.Length) {
-                        Array.Resize(ref stack.array, stack.size + child.children.size);
-                    }
-
-                    for (int i = 0; i < child.children.size; i++) {
-                        stack.array[stack.size++].element = child.children[i];
-                    }
-                    continue;
-                }
-
-                Rect screenRect = child.layoutResult.ScreenRect;
-                OffsetRect childMargin = child.layoutResult.margin;
-                if (screenRect.x - childMargin.left < minX) minX = screenRect.x - childMargin.left;
-                if (screenRect.y - childMargin.top < minY) minY = screenRect.y - childMargin.top;
-                if (screenRect.xMax + childMargin.right > maxX) maxX = screenRect.xMax + childMargin.right;
-                if (screenRect.yMax + childMargin.bottom > maxY) maxY = screenRect.yMax + childMargin.bottom;
-            }
-
-            StructStack<ElemRef>.Release(ref stack);
-
-            return new Size(maxX - minX, (maxY - minY));
-            
         }
 
     }

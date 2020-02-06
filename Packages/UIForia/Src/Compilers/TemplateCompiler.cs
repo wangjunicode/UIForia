@@ -39,6 +39,7 @@ namespace UIForia.Compilers {
 
         private int contextId = 1;
         private int NextContextId => contextId++;
+        private SlotAttributeData slotScope;
 
         private readonly LightStack<LightStack<ContextVariableDefinition>> contextStack;
 
@@ -822,7 +823,7 @@ namespace UIForia.Compilers {
 
             StructList<AttributeDefinition> attributes = AttributeMerger.MergeExpandedAttributes(innerRoot.attributes, expandedTemplateNode.attributes);
 
-            ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(templateType.rawType));
+            ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(templateType.rawType) + " " + expandedTemplateNode.lineInfo);
             ctx.Assign(nodeExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
                 Expression.Constant(expandedTemplateNode.processedType.id),
                 ctx.ParentExpr,
@@ -1761,6 +1762,7 @@ namespace UIForia.Compilers {
                     }
 
                     hasHandlers = true;
+                    createdCompiler.SetupAttributeData(attr);
                     switch (attr.type) {
                         case AttributeType.Mouse:
                             CompileMouseInputBinding(createdCompiler, attr);
@@ -1879,13 +1881,14 @@ namespace UIForia.Compilers {
             }
 
             updateCompiler.TeardownAttributeData();
-            
+
             if (textNode.textExpressionList != null && textNode.textExpressionList.size > 0 && !textNode.IsTextConstant()) {
                 updateCompiler.AddNamespace("UIForia.Util");
                 updateCompiler.AddNamespace("UIForia.Text");
                 StructList<TextExpression> expressionParts = textNode.textExpressionList;
 
                 MemberExpression textValueExpr = Expression.Field(updateCompiler.GetCastElement(), s_TextElement_Text);
+                updateCompiler.RawExpression(s_StringBuilderClear);
 
                 for (int i = 0; i < expressionParts.size; i++) {
                     if (expressionParts[i].isExpression) {
@@ -2149,14 +2152,44 @@ namespace UIForia.Compilers {
                 parameters.Add(new Parameter(eventHandlerTypes[i], argName));
             }
 
-            LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
             LightList<Parameter>.Release(ref parameters);
-            closure.Statement(attr.value);
-            LambdaExpression lambda = closure.BuildLambda();
-            ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
-            compiler.Assign(evtFn, lambda);
-            compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), evtFn);
-            closure.Release();
+            ASTNode astNode = ExpressionParser.Parse(attr.value);
+            
+            if (astNode.type == ASTNodeType.Identifier) {
+                
+                IdentifierNode idNode = (IdentifierNode) astNode;
+
+                if (ReflectionUtil.IsField(compiler.rootElementType, idNode.name, out FieldInfo fieldInfo)) {
+                    if (eventInfo.EventHandlerType.IsAssignableFrom(fieldInfo.FieldType)) {
+                        compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), Expression.Field(compiler.GetCastRoot(), fieldInfo));
+                        return;
+                    }
+                }
+
+                if (ReflectionUtil.IsProperty(compiler.rootElementType, idNode.name, out PropertyInfo propertyInfo)) {
+                    if (eventInfo.EventHandlerType.IsAssignableFrom(propertyInfo.PropertyType)) {
+                        compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), Expression.Property(compiler.GetCastRoot(), propertyInfo));
+                    }
+                }
+                
+                if (ReflectionUtil.IsMethod(compiler.rootElementType, idNode.name, out MethodInfo methodInfo)) {
+                    // https://stackoverflow.com/questions/50663211/access-method-group-within-expression-tree
+                    throw new NotImplementedException("Method group not yet supported");
+                }
+                 
+                throw new CompileException($"Error compiling event handler {attr.DebugData}. {idNode.name} is not assignable to type {eventInfo.EventHandlerType}");
+                
+            }
+            else {
+                LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
+
+                closure.Statement(astNode);
+                LambdaExpression lambda = closure.BuildLambda();
+                ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
+                compiler.Assign(evtFn, lambda);
+                compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), evtFn);
+                closure.Release();
+            }
         }
 
         private static void CompileConditionalBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
@@ -2274,14 +2307,16 @@ namespace UIForia.Compilers {
             return false;
         }
 
-        private void CompilePropertyBindingSync(UIForiaLinqCompiler compiler, in AttributeDefinition attributeDefinition) {
+        private void CompilePropertyBindingSync(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
             ParameterExpression castElement = compiler.GetCastElement();
             ParameterExpression castRoot = compiler.GetCastRoot();
-            compiler.CommentNewLineBefore($"{attributeDefinition.key}=\"{attributeDefinition.value}\"");
+            compiler.CommentNewLineBefore($"{attr.key}=\"{attr.value}\"");
             compiler.BeginIsolatedSection();
+            compiler.SetupAttributeData(attr);
+
             try {
                 compiler.SetImplicitContext(castElement);
-                compiler.AssignableStatement(attributeDefinition.key);
+                compiler.AssignableStatement(attr.key);
             }
             catch (Exception) {
                 compiler.EndIsolatedSection();
@@ -2289,10 +2324,10 @@ namespace UIForia.Compilers {
             }
 
             compiler.SetImplicitContext(castRoot);
-            LHSStatementChain assignableStatement = compiler.AssignableStatement(attributeDefinition.value);
+            LHSStatementChain assignableStatement = compiler.AssignableStatement(attr.value);
 
             compiler.SetImplicitContext(castElement);
-            compiler.Assign(assignableStatement, Expression.Field(castElement, castElement.Type.GetField(attributeDefinition.key)));
+            compiler.Assign(assignableStatement, Expression.Field(castElement, castElement.Type.GetField(attr.key)));
             compiler.EndIsolatedSection();
         }
 
@@ -2341,44 +2376,47 @@ namespace UIForia.Compilers {
 
             CompileChangeHandlerPropertyBindingStore(processedType.rawType, attr, changeHandlerAttrs, right);
 
-            StructList<ProcessedType.PropertyChangeHandlerDesc> changeHandlers = StructList<ProcessedType.PropertyChangeHandlerDesc>.Get();
 
-            processedType.GetChangeHandlers(attr.key, changeHandlers);
+            if ((attr.flags & AttributeFlags.Const) != 0) {
+                StructList<ProcessedType.PropertyChangeHandlerDesc> changeHandlers = StructList<ProcessedType.PropertyChangeHandlerDesc>.Get();
+                processedType.GetChangeHandlers(attr.key, changeHandlers);
 
-            bool isProperty = ReflectionUtil.IsProperty(castElement.Type, attr.key);
+                bool isProperty = ReflectionUtil.IsProperty(castElement.Type, attr.key);
 
-            // if there is a change handler or the member is a property we need to check for changes
-            // otherwise field values can be assigned w/o checking
-            if (changeHandlers.size > 0 || isProperty) {
-                ParameterExpression old = compiler.AddVariable(left.targetExpression.Type, "__oldVal");
-                compiler.RawExpression(Expression.Assign(old, left.targetExpression));
-                compiler.IfNotEqual(left, right, () => {
+                // if there is a change handler or the member is a property we need to check for changes
+                // otherwise field values can be assigned w/o checking
+                if (changeHandlers.size > 0 || isProperty) {
+                    ParameterExpression old = compiler.AddVariable(left.targetExpression.Type, "__oldVal");
+                    compiler.RawExpression(Expression.Assign(old, left.targetExpression));
+                    compiler.IfNotEqual(left, right, () => {
+                        compiler.Assign(left, right);
+                        for (int j = 0; j < changeHandlers.size; j++) {
+                            MethodInfo methodInfo = changeHandlers.array[j].methodInfo;
+                            ParameterInfo[] parameters = methodInfo.GetParameters();
+
+                            if (parameters.Length == 0) {
+                                compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo));
+                                continue;
+                            }
+
+                            if (parameters.Length == 1 && parameters[0].ParameterType == right.Type) {
+                                compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo, old));
+                                continue;
+                            }
+
+                            throw CompileException.UnresolvedPropertyChangeHandler(methodInfo.Name, right.Type); // todo -- better error message
+                        }
+                    });
+                }
+                else {
                     compiler.Assign(left, right);
-                    for (int j = 0; j < changeHandlers.size; j++) {
-                        MethodInfo methodInfo = changeHandlers.array[j].methodInfo;
-                        ParameterInfo[] parameters = methodInfo.GetParameters();
+                }
 
-                        if (parameters.Length == 0) {
-                            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo));
-                            continue;
-                        }
-
-                        if (parameters.Length == 1 && parameters[0].ParameterType == right.Type) {
-                            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo, old));
-                            continue;
-                        }
-
-                        throw CompileException.UnresolvedPropertyChangeHandler(methodInfo.Name, right.Type); // todo -- better error message
-                    }
-                });
-            }
-            else {
-                compiler.Assign(left, right);
+                changeHandlers.Release();
             }
 
             TeardownAttributeData(attr);
             compiler.EndIsolatedSection();
-            changeHandlers.Release();
         }
 
         private void CompileChangeHandlerPropertyBindingStore(Type type, in AttributeDefinition attr, StructList<ChangeHandlerDefinition> changeHandlers, Expression value) {
@@ -2438,7 +2476,6 @@ namespace UIForia.Compilers {
             updateCompiler.Assign(valueField, value);
         }
 
-        private SlotAttributeData slotScope;
 
         private Expression ResolveAlias(string aliasName, LinqCompiler compiler) {
             if (aliasName == "oldValue") {
@@ -2527,7 +2564,7 @@ namespace UIForia.Compilers {
             typeResolver.SetSignature(new Parameter(rootType, "__root", ParameterFlags.NeverNull));
             typeResolver.SetImplicitContext(typeResolver.GetParameter("__root"));
             typeResolver.resolveAlias = ResolveAlias;
-            typeResolver.Setup(rootType, null, (LightList<string>)namespaces);
+            typeResolver.Setup(rootType, null, (LightList<string>) namespaces);
 
             if (templateNode.attributes == null) {
                 throw CompileException.UnresolvedGenericElement(processedType, templateNode.TemplateNodeDebugData);

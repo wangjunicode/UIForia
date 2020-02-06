@@ -191,8 +191,11 @@ namespace UIForia.Systems {
             }
         }
 
-        public virtual void OnUpdate() {
+        public void Read() {
             mouseState = GetMouseState();
+        }
+        
+        public virtual void OnUpdate() {
 
             m_KeyboardState = keyboardInputManager.UpdateKeyboardInputState();
 

@@ -658,16 +658,16 @@ namespace UIForia.Systems {
         
         public void GetWidths(ref LayoutSize size) {
             
-            if((element.style.animationFlags & AnimationFlags.PreferredWidth) != 0) {
-                AnimatedProperty animatedProperty;
-                element.style.TryGetAnimatedProperty(StylePropertyId.PreferredWidth, out animatedProperty);
-                float v0 = ResolveWidth(animatedProperty.value0.AsUIMeasurement);
-                float v1 = ResolveWidth(animatedProperty.value1.AsUIMeasurement);
-                size.preferred = Mathf.Lerp(v0, v1, animatedProperty.time);
-            }
-            else {
+            // if((element.style.animationFlags & AnimationFlags.PreferredWidth) != 0) {
+            //     AnimatedProperty animatedProperty;
+            //     element.style.TryGetAnimatedProperty(StylePropertyId.PreferredWidth, out animatedProperty);
+            //     float v0 = ResolveWidth(animatedProperty.value0.AsUIMeasurement);
+            //     float v1 = ResolveWidth(animatedProperty.value1.AsUIMeasurement);
+            //     size.preferred = Mathf.Lerp(v0, v1, animatedProperty.time);
+            // }
+            // else {
                 size.preferred = ResolveWidth(element.style.PreferredWidth);
-            }
+            // }
             
             size.minimum = ResolveWidth(element.style.MinWidth);
             size.maximum = ResolveWidth(element.style.MaxWidth);

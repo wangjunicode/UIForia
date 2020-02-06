@@ -24,18 +24,18 @@
     </Style>
     <Contents>
 
-        <Select style="select" selectedValue="selectedValue" options="options">
-            
-        </Select>
-<!--        <ScrollView style="scroll-view">-->
+<!--        <Select style="select" selectedValue="selectedValue" options="options">-->
+<!--            -->
+<!--        </Select>-->
+        <ScrollView style="scroll-view">
 
-<!--            <Repeat count="20">-->
-<!--                <Group style="item">-->
-<!--                    {$index}-->
-<!--                </Group>-->
-<!--            </Repeat>-->
+            <Repeat count="20">
+                <Group style="item">
+                    {$index}
+                </Group>
+            </Repeat>
 
-<!--        </ScrollView>-->
+        </ScrollView>
     </Contents>
 
 </UITemplate>

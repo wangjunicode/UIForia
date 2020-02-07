@@ -38,10 +38,7 @@ namespace UIForia.Systems {
         
         public void OnReset() { }
 
-        public void OnElementCreated(UIElement element) {
-
-            element.style.styleSystem = this;
-        }
+        public void OnElementCreated(UIElement element) {}
         
         private void OnElementEnabledStep(UIElement element, StructList<StyleProperty> parentProperties) {
 
@@ -89,9 +86,9 @@ namespace UIForia.Systems {
                     return;
                 }
 
-                if (changeSet.element is IStylePropertiesWillChangeHandler willChangeHandler) {
-                    willChangeHandler.OnStylePropertiesWillChange();
-                }
+                // if (changeSet.element is IStylePropertiesWillChangeHandler willChangeHandler) {
+                //     willChangeHandler.OnStylePropertiesWillChange();
+                // }
 
                 self.onStylePropertyChanged.Invoke(changeSet.element, changeSet.changes);
 
@@ -103,9 +100,9 @@ namespace UIForia.Systems {
                     }
                 }
 
-                if (changeSet.element is IStylePropertiesDidChangeHandler didChangeHandler) {
-                    didChangeHandler.OnStylePropertiesDidChange();
-                }
+                // if (changeSet.element is IStylePropertiesDidChangeHandler didChangeHandler) {
+                //     didChangeHandler.OnStylePropertiesDidChange();
+                // }
 
                 StructList<StyleProperty>.Release(ref changeSet.changes);
                 changeSet.element = null;
@@ -157,7 +154,7 @@ namespace UIForia.Systems {
         }
 
         public void OnElementDestroyed(UIElement element) {
-            element.style.styleSystem = null;
+            element.style = null;
             m_ChangeSets.Remove(element.id);
         }
 

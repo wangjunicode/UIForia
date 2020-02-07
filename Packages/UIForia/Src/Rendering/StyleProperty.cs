@@ -17,17 +17,17 @@ namespace UIForia.Rendering {
 
         [FieldOffset(0)] public readonly StylePropertyId propertyId;
         
-        [FieldOffset(2)] private readonly ushort flags;
+        [FieldOffset(2)] internal readonly ushort flags;
         
-        [FieldOffset(4)] public readonly int int0;
+        [FieldOffset(4)] internal readonly int int0;
 
-        [FieldOffset(4)] public readonly float float0;
+        [FieldOffset(4)] internal readonly float float0;
 
-        [FieldOffset(8)] public readonly int int1; // can merge this with flags (except for 1 bit at end) if we make sure each measurement type fits in ushort - 1 bit 
+        [FieldOffset(8)] internal readonly int int1; // can merge this with flags (except for 1 bit at end) if we make sure each measurement type fits in ushort - 1 bit 
         
-        [FieldOffset(8)] public readonly int float1; // can merge this with flags (except for 1 bit at end) if we make sure each measurement type fits in ushort - 1 bit 
+        [FieldOffset(8)] internal readonly int float1; // can merge this with flags (except for 1 bit at end) if we make sure each measurement type fits in ushort - 1 bit 
         
-        [FieldOffset(16)] public readonly object objectField; // must be at offset 0 8 or 16, can probably combine int1 and this object at 8
+        [FieldOffset(16)] internal readonly object objectField; // must be at offset 0 8 or 16, can probably combine int1 and this object at 8
 
         public bool hasValue => flags != 0;
         

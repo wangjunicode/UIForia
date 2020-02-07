@@ -3,7 +3,7 @@ using System;
 namespace UIForia.Rendering {
 
     [Flags]
-    public enum StyleState {
+    public enum StyleState : byte {
 
         // todo -- reorganize by priority since this is a sort key
         Normal = 1 << 0,

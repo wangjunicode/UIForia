@@ -15,16 +15,16 @@ namespace UIForia.Rendering {
         public void Run(UIElement element) {
             switch (RunAction) {
                 case RunAction.Run:
-                    element.application.Animate(element, animationData);
+                    element.Animator.PlayAnimation(animationData);
                     break;
                 case RunAction.Pause:
-                    element.application.PauseAnimation(element, animationData);
+                    element.Animator.PauseAnimation(animationData);
                     break;
                 case RunAction.Resume:
-                    element.application.ResumeAnimation(element, animationData);
+                    element.Animator.ResumeAnimation(animationData);
                     break;
                 case RunAction.Stop:
-                    element.application.StopAnimation(element, animationData);
+                    element.Animator.StopAnimation(animationData);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

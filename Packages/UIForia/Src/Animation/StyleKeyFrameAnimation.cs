@@ -66,12 +66,12 @@ namespace UIForia.Animation {
             }
             
             AnimationOptions options = animationData.options;
-            float delay = options.delay?.AsSeconds() ?? 0; 
+            float delay = options.delay?.AsSeconds ?? 0; 
             if (delay > status.elapsedTotalTime) {
                 return UITaskResult.Running;
             }
             
-            float duration = options.duration?.AsSeconds() ?? 1;
+            float duration = options.duration?.AsSeconds ?? 1;
             float elapsedIterationTime = status.elapsedIterationTime - delay;
             float progress = Mathf.Clamp01(elapsedIterationTime / duration);
 

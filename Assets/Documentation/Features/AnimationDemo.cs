@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Animation;
 using UIForia.Attributes;
 using UIForia.Elements;
@@ -11,8 +12,8 @@ namespace Documentation.Features {
 
     public class SelectOptionService<T> where T : Enum {
 
-        public static RepeatableList<ISelectOption<T>> EnumToSelectOptions() {
-            RepeatableList<ISelectOption<T>> result = new RepeatableList<ISelectOption<T>>();
+        public static List<ISelectOption<T>> EnumToSelectOptions() {
+            List<ISelectOption<T>> result = new List<ISelectOption<T>>();
             T[] values = (T[]) Enum.GetValues(typeof(T));
             for (int i = 0; i < values.Length; i++) {
                 result.Add(new SelectOption<T>(values[i].ToString(), values[i]));
@@ -30,7 +31,7 @@ namespace Documentation.Features {
 
         public AnimationData animationData;
 
-        public RepeatableList<ISelectOption<string>> Options;
+        public List<ISelectOption<string>> Options;
 
         public string SelectedOption;
 
@@ -40,8 +41,8 @@ namespace Documentation.Features {
         public EasingFunction timingFunction;
         public AnimationDirection direction;
 
-        public RepeatableList<ISelectOption<EasingFunction>> timingFunctions = SelectOptionService<EasingFunction>.EnumToSelectOptions();
-        public RepeatableList<ISelectOption<AnimationDirection>> directions = SelectOptionService<AnimationDirection>.EnumToSelectOptions();
+        public List<ISelectOption<EasingFunction>> timingFunctions = SelectOptionService<EasingFunction>.EnumToSelectOptions();
+        public List<ISelectOption<AnimationDirection>> directions = SelectOptionService<AnimationDirection>.EnumToSelectOptions();
 
         public AnimationTask animationTask;
 
@@ -52,7 +53,7 @@ namespace Documentation.Features {
 
         public override void OnCreate() {
             animationTarget = FindById("animation-target");
-            Options = new RepeatableList<ISelectOption<string>>() {
+            Options = new List<ISelectOption<string>>() {
                 new SelectOption<string>("None", "1"),
                 new SelectOption<string>("A bit", "2"),
                 new SelectOption<string>("Rather more", "3"),
@@ -62,17 +63,22 @@ namespace Documentation.Features {
         }
 
         public void ChangeAnimation(string animation) {
-            animationData = application.GetAnimationFromFile("Documentation/Features/AnimationDemo.style", animation);
-            animationTask = application.Animate(animationTarget, animationData);
+            
+            if (!Animator.TryGetAnimationData(animation, out animationData)) {
+                 return;   
+            }
+
+            animationTask = animationTarget.Animator.PlayAnimation(animationData);
+            
             if (animationData.options.duration.HasValue) {
-                duration = animationData.options.duration.Value.AsMilliseconds();
+                duration = animationData.options.duration.Value.AsMilliseconds;
             }
             else {
                 duration = 1000;
             }
 
             if (animationData.options.delay.HasValue) {
-                delay = animationData.options.delay.Value.AsMilliseconds();
+                delay = animationData.options.delay.Value.AsMilliseconds;
             }
             else {
                 delay = 0;
@@ -90,19 +96,19 @@ namespace Documentation.Features {
             animationData.options.timingFunction = timingFunction;
             animationData.options.direction = direction;
 
-            animationTask = application.Animate(animationTarget, animationData);
+            animationTask = animationTarget.Animator.PlayAnimation(animationData);
         }
 
         public void PauseAnimation() {
-            application.PauseAnimation(animationTarget, animationData);
+            animationTarget.Animator.PauseAnimation(animationData);
         }
 
         public void ResumeAnimation() {
-            application.ResumeAnimation(animationTarget, animationData);
+            animationTarget.Animator.ResumeAnimation(animationData);
         }
 
         public void StopAnimation() {
-            application.StopAnimation(animationTarget, animationData);
+            animationTarget.Animator.StopAnimation(animationData);
         }
 
     }

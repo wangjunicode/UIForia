@@ -59,7 +59,6 @@ any other operator you might use in C#.
 ````C#
     <SomeElement someValue="76 > 18 ? 'string one' : 'string two'"/>
 ````
-  
 
 #### Unaries
 ````C#
@@ -86,7 +85,7 @@ can take computed expressions as well as literal values
     <SomeElement someValue="myMethod(45, true, someField.nested.value + something)"/>
 ````
   
-#### Aliases
+#### Aliases and Context Variables
 Various aliases can be made available to the expression engine. The most prominent use of these 
 are within `<Repeat>` tags. Aliases are defined by the context in which the expression runs. Anything
 can be an alias, the syntax is simply $ + some identifier. Important to note is that aliases are 

@@ -214,16 +214,16 @@ namespace UI {
 
             AnimationKeyFrame[] frames = {
                 new AnimationKeyFrame(0,
-                    StyleProperty.TransformPositionY(GetSideBarRunnerTransformY(currentSidebarItem))
+                    new StyleProperty(StylePropertyId.TransformPositionY, GetSideBarRunnerTransformY(currentSidebarItem))
                 ),
                 new AnimationKeyFrame(1,
-                    StyleProperty.TransformPositionY(targetTransformPosY)
+                    new StyleProperty(StylePropertyId.TransformPositionY, (targetTransformPosY))
                 )
             };
 
             currentSidebarItem = element;
 
-            application.Animate(runner, new AnimationData(options, frames));
+            runner.Animator.PlayAnimation(new AnimationData(options, frames));
         }
 
         private float GetSideBarRunnerTransformY(UIElement sideBarItem) {

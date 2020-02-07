@@ -2154,9 +2154,8 @@ namespace UIForia.Compilers {
 
             LightList<Parameter>.Release(ref parameters);
             ASTNode astNode = ExpressionParser.Parse(attr.value);
-            
+
             if (astNode.type == ASTNodeType.Identifier) {
-                
                 IdentifierNode idNode = (IdentifierNode) astNode;
 
                 if (ReflectionUtil.IsField(compiler.rootElementType, idNode.name, out FieldInfo fieldInfo)) {
@@ -2171,14 +2170,13 @@ namespace UIForia.Compilers {
                         compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), Expression.Property(compiler.GetCastRoot(), propertyInfo));
                     }
                 }
-                
+
                 if (ReflectionUtil.IsMethod(compiler.rootElementType, idNode.name, out MethodInfo methodInfo)) {
                     // https://stackoverflow.com/questions/50663211/access-method-group-within-expression-tree
                     throw new NotImplementedException("Method group not yet supported");
                 }
-                 
+
                 throw new CompileException($"Error compiling event handler {attr.DebugData}. {idNode.name} is not assignable to type {eventInfo.EventHandlerType}");
-                
             }
             else {
                 LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
@@ -2375,8 +2373,7 @@ namespace UIForia.Compilers {
             // todo -- I can figure out if a value is constant using IsConstant(expr), use this information to push the expression onto the const compiler
 
             CompileChangeHandlerPropertyBindingStore(processedType.rawType, attr, changeHandlerAttrs, right);
-
-
+            
             if ((attr.flags & AttributeFlags.Const) != 0) {
                 StructList<ProcessedType.PropertyChangeHandlerDesc> changeHandlers = StructList<ProcessedType.PropertyChangeHandlerDesc>.Get();
                 processedType.GetChangeHandlers(attr.key, changeHandlers);
@@ -2413,6 +2410,9 @@ namespace UIForia.Compilers {
                 }
 
                 changeHandlers.Release();
+            }
+            else {
+                compiler.Assign(left, right);
             }
 
             TeardownAttributeData(attr);

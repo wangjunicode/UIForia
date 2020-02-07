@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using Boo.Lang.Runtime;
 using UnityEngine;
@@ -15,25 +13,29 @@ namespace UIForia.Sound {
             this.unit = unit;
         }
 
-        public float AsSeconds() {
-            switch (unit) {
-                case UITimeMeasurementUnit.Milliseconds: return value * 0.001f;
-                case UITimeMeasurementUnit.Percentage: throw new RuntimeException("Cannot convert % to seconds.");
-                case UITimeMeasurementUnit.Unset:
-                case UITimeMeasurementUnit.Seconds:
-                default:
-                    return value;
+        public float AsSeconds {
+            get {
+                switch (unit) {
+                    case UITimeMeasurementUnit.Milliseconds: return value * 0.001f;
+                    case UITimeMeasurementUnit.Percentage: throw new RuntimeException("Cannot convert % to seconds.");
+                    case UITimeMeasurementUnit.Unset:
+                    case UITimeMeasurementUnit.Seconds:
+                    default:
+                        return value;
+                }
             }
         }
 
-        public float AsMilliseconds() {
-            switch (unit) {
-                case UITimeMeasurementUnit.Seconds: return value * 1000;
-                case UITimeMeasurementUnit.Percentage: throw new RuntimeException("Cannot convert % to milliseconds.");
-                case UITimeMeasurementUnit.Unset:
-                case UITimeMeasurementUnit.Milliseconds:
-                default:
-                    return value;
+        public float AsMilliseconds {
+            get {
+                switch (unit) {
+                    case UITimeMeasurementUnit.Seconds: return value * 1000;
+                    case UITimeMeasurementUnit.Percentage: throw new RuntimeException("Cannot convert % to milliseconds.");
+                    case UITimeMeasurementUnit.Unset:
+                    case UITimeMeasurementUnit.Milliseconds:
+                    default:
+                        return value;
+                }
             }
         }
 

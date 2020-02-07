@@ -1,6 +1,6 @@
 namespace UIForia.Rendering {
 
-    public enum StylePropertyId {
+    public enum StylePropertyId : ushort {
 
         OverflowX = 1,
         OverflowY = 2,
@@ -81,7 +81,8 @@ namespace UIForia.Rendering {
         TransformPivotX = 904,
         TransformPivotY = 905,
         TransformRotation = 906,
-
+        TransformMatrix = 910,
+        
         TextColor =  1001,
         TextFontAsset =  1002,
         TextFontSize =  1003,

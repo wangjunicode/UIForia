@@ -9,9 +9,9 @@
     <Using namespace="UIForia.Systems"/>
 
     <Contents style="container">
-        
+
         <Heading2>Click on an animation type to see the result</Heading2>
-        
+
         <Group style="button-container">
             <Div style="button" mouse:click="ChangeAnimation('bounce')">Bounce</Div>
             <Div style="button" mouse:click="ChangeAnimation('flash')">Flash</Div>
@@ -59,8 +59,8 @@
             <Div style="anims" attr:id="animation-target">A simple text that you can animate</Div>
         </Group>
 
-        <Input style="input" sync:value="iterations" />
-        
+        <Input style="input" sync:value="iterations"/>
+
         <Group style="details-container" if="animationData.name != null">
             <Label>Name: {animationData.name}</Label>
 

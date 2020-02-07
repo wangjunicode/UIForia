@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Util;
@@ -122,16 +123,16 @@ namespace UIForia.Rendering {
 
         /// <returns>true in case the depth has been changed in order to get focus</returns>
         public bool RequestFocus() {
-            var views = application.GetViews();
-            if (focusOnMouseDown && Depth < views.Length - 1) {
-                for (var index = 0; index < views.Length; index++) {
+            List<UIView> views = application.views;
+            if (focusOnMouseDown && Depth < views.Count - 1) {
+                for (var index = 0; index < views.Count; index++) {
                     UIView view = views[index];
                     if (view.Depth > Depth) {
                         view.Depth--;
                     }
                 }
 
-                Depth = views.Length - 1;
+                Depth = views.Count - 1;
                 application.SortViews();
                 return true;
             }

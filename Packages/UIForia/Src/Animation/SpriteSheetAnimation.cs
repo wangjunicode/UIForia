@@ -37,14 +37,14 @@ namespace UIForia.Animation {
             }
 
             AnimationOptions options = animationData.options;
-            float delay = options.delay?.AsSeconds() ?? 0; 
+            float delay = options.delay?.AsSeconds ?? 0; 
             if (delay > status.elapsedIterationTime) {
                 return UITaskResult.Running;
             }
 
             bool isReversed = options.direction.HasValue && options.direction.Value == AnimationDirection.Reverse;
             if (options.duration != new UITimeMeasurement(1, UITimeMeasurementUnit.Percentage)) {
-                float duration = options.duration?.AsSeconds() ?? 1;
+                float duration = options.duration?.AsSeconds ?? 1;
                 if (duration - delay <= status.elapsedTotalTime) {
                     target.style.SetBackgroundImage(frames[isReversed ? frames.size - 1 : 0], StyleState.Normal);
                     return UITaskResult.Completed;

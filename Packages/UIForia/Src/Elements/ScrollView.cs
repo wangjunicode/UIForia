@@ -11,7 +11,7 @@ namespace UIForia.Elements {
         public float fadeTarget;
         public float fadeTime = 2f;
 
-        public float scrollSpeed = 1f;
+        public float scrollSpeed = 3f;
         public float trackSize = 10f;
 
         public bool disableOverflowX;
@@ -43,8 +43,8 @@ namespace UIForia.Elements {
         }
 
         public override void OnUpdate() {
-            scrollDeltaX *= 0.1f;
-            scrollDeltaY *= 0.1f;
+            scrollDeltaX *= 0.9f;
+            scrollDeltaY *= 0.9f;
 
             if (scrollDeltaX < 0.0001) scrollDeltaX = 0;
             if (scrollDeltaY < 0.0001) scrollDeltaY = 0;

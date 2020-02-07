@@ -665,31 +665,10 @@ namespace UIForia {
             return s_CustomPainters.ContainsKey(name);
         }
 
-        public AnimationTask Animate(UIElement element, AnimationData animation) {
-            return animationSystem.Animate(element, ref animation);
-        }
-
-        public void PauseAnimation(UIElement element, AnimationData animationData) {
-            animationSystem.PauseAnimation(element, ref animationData);
-        }
-
-        public void ResumeAnimation(UIElement element, AnimationData animationData) {
-            animationSystem.ResumeAnimation(element, ref animationData);
-        }
-
-        public void StopAnimation(UIElement element, AnimationData animationData) {
-            animationSystem.StopAnimation(element, ref animationData);
-        }
-
         public UIView[] GetViews() {
             return views.ToArray();
         }
-
-        public AnimationData GetAnimationFromFile(string fileName, string animationName) {
-            return templateData.styleImporter.GetAnimation(fileName, animationName);
-            // throw new NotImplementedException("Re design this not to use style importer");
-        }
-
+        
         private void InitializeElement(UIElement child) {
             bool parentEnabled = child.parent.isEnabled;
 

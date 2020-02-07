@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Animation;
 using UIForia.Compilers.Style;
 using UIForia.Util;
 
@@ -27,9 +28,11 @@ namespace UIForia.Compilers {
         public CompiledTemplateData compiledTemplateData;
         internal UIStyleGroupContainer[] styleMap;
 
-        private IndexedStyleRef[] searchMap;
+        private IndexedAnimationRef[] animationSearchMap;
+        private IndexedStyleRef[] styleSearchMap;
 
         private static readonly IndexedStyleRef[] s_EmptySearchMap = { };
+        private static readonly IndexedAnimationRef[] s_EmptyAnimationSearchMap = { };
         private static readonly char[] s_SplitChar = {'.'};
 
         public TemplateMetaData(int id, string filePath, UIStyleGroupContainer[] styleMap, StyleSheetReference[] styleReferences) {
@@ -40,42 +43,80 @@ namespace UIForia.Compilers {
         }
 
         public void BuildSearchMap() {
-            if (searchMap != null) return;
+            
+            if (styleSearchMap != null) {
+                return;
+            }
+            
             if (styleReferences == null) {
-                searchMap = s_EmptySearchMap;
+                styleSearchMap = s_EmptySearchMap;
+                animationSearchMap = s_EmptyAnimationSearchMap;
                 return;
             }
 
-            int size = 0;
+            int animCount = 0;
+            int styleCount = 0;
 
             for (int i = 0; i < styleReferences.Length; i++) {
-                size += styleReferences[i].styleSheet.styleGroupContainers.Length;
+                styleCount += styleReferences[i].styleSheet.styleGroupContainers.Length;
+                animCount += styleReferences[i].styleSheet.animations.Length;
             }
 
-            if (size == 0) {
-                searchMap = s_EmptySearchMap;
-                return;
-            }
+            if (styleCount != 0) {
+                styleSearchMap = new IndexedStyleRef[styleCount];
 
-            searchMap = new IndexedStyleRef[size];
+                int cnt = 0;
 
-            int cnt = 0;
+                for (int i = 0; i < styleReferences.Length; i++) {
+                    string alias = styleReferences[i].alias;
+                    StyleSheet sheet = styleReferences[i].styleSheet;
 
-            for (int i = 0; i < styleReferences.Length; i++) {
-                string alias = styleReferences[i].alias;
-                StyleSheet sheet = styleReferences[i].styleSheet;
-
-                for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
-                    if (!string.IsNullOrEmpty(alias)) {
-                        searchMap[cnt++] = new IndexedStyleRef(alias + "." + sheet.styleGroupContainers[j].name, sheet.styleGroupContainers[j]);
+                    if (alias != null && alias.Length != 0) {
+                        for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+                            styleSearchMap[cnt++] = new IndexedStyleRef(alias + "." + sheet.styleGroupContainers[j].name, sheet.styleGroupContainers[j]);
+                        }
                     }
                     else {
-                        searchMap[cnt++] = new IndexedStyleRef(sheet.styleGroupContainers[j].name, sheet.styleGroupContainers[j]);
+                        for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+                            styleSearchMap[cnt++] = new IndexedStyleRef(sheet.styleGroupContainers[j].name, sheet.styleGroupContainers[j]);
+                        }
                     }
                 }
+
+                Array.Sort(styleSearchMap, (a, b) => string.CompareOrdinal(a.name, b.name));
+            }
+            else {
+                styleSearchMap = s_EmptySearchMap;
             }
 
-            Array.Sort(searchMap, (a, b) => string.CompareOrdinal(a.name, b.name));
+            if (animCount != 0) {
+                int cnt = 0;
+
+                animationSearchMap = new IndexedAnimationRef[animCount];
+                for (int i = 0; i < styleReferences.Length; i++) {
+                    string alias = styleReferences[i].alias;
+                    StyleSheet sheet = styleReferences[i].styleSheet;
+
+                    AnimationData[] animations = sheet.animations;
+                    if (alias != null && alias.Length != 0) {
+                        for (int j = 0; j < animations.Length; j++) {
+                            ref AnimationData animationData = ref animations[j];
+                            animationSearchMap[cnt++] = new IndexedAnimationRef(alias + "." + animationData.name, animationData);
+                        }
+                    }
+                    else {
+                        for (int j = 0; j < animations.Length; j++) {
+                            ref AnimationData animationData = ref animations[j];
+                            animationSearchMap[cnt++] = new IndexedAnimationRef(animationData.name, animationData);
+                        }
+                    }
+                }
+
+                Array.Sort(animationSearchMap, (a, b) => string.CompareOrdinal(a.name, b.name));
+            }
+            else {
+                animationSearchMap = s_EmptyAnimationSearchMap;
+            }
         }
 
         private struct IndexedStyleRef {
@@ -90,14 +131,26 @@ namespace UIForia.Compilers {
 
         }
 
+        private struct IndexedAnimationRef {
+
+            public readonly string name;
+            public readonly AnimationData animation;
+
+            public IndexedAnimationRef(string aliasedName, in AnimationData animation) {
+                this.name = aliasedName;
+                this.animation = animation;
+            }
+
+        }
+
         public UIStyleGroupContainer ResolveStyleByName(string name) {
-            if (string.IsNullOrEmpty(name) || searchMap == null) {
+            if (string.IsNullOrEmpty(name) || styleSearchMap == null) {
                 return null;
             }
 
-            int idx = BinarySearch(name);
+            int idx = BinarySearchStyle(name);
 
-            return idx >= 0 ? searchMap[idx].container : null;
+            return idx >= 0 ? styleSearchMap[idx].container : null;
         }
 
 
@@ -106,61 +159,42 @@ namespace UIForia.Compilers {
 
             BuildSearchMap();
 
-            return BinarySearch(name);
-
-            // string alias = string.Empty;
-            //
-            // if (name.Contains(".")) {
-            //     string[] split = name.Split(s_SplitChar, StringSplitOptions.RemoveEmptyEntries);
-            //     if (split.Length == 2) {
-            //         alias = split[0];
-            //         name = split[1];
-            //     }
-            // }
-            //
-            // if (alias != string.Empty) {
-            //     for (int i = 0; i < styleReferences.Length; i++) {
-            //         if (styleReferences[i].alias == alias) {
-            //             StyleSheet sheet = styleReferences[i].styleSheet;
-            //             for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
-            //                 UIStyleGroupContainer styleGroupContainer = sheet.styleGroupContainers[j];
-            //                 if (styleGroupContainer.name == name) {
-            //                     return i;
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
-            // else {
-            //     for (int i = 0; i < styleReferences.Length; i++) {
-            //         StyleSheet sheet = styleReferences[i].styleSheet;
-            //         if (sheet.TryResolveStyleName(name, out UIStyleGroupContainer retn)) {
-            //             return i;
-            //         }
-            //     }
-            // }
-            //
-            // return -1;
+            return BinarySearchStyle(name);
         }
 
         public UIStyleGroupContainer ResolveStyleByName(char[] name) {
             if (name == null || name.Length == 0) return null;
-            int idx = BinarySearch(name);
+            int idx = BinarySearchStyle(name);
             if (idx >= 0) {
-                return searchMap[idx].container;
+                return styleSearchMap[idx].container;
             }
 
             return null;
         }
 
+        public bool TryResolveAnimationByName(string name, out AnimationData animationData) {
+            if (name == null || name.Length == 0) {
+                animationData = default;
+                return false;
+            }
 
-        private int BinarySearch(string name) {
+            int idx = BinarySearchAnimation(name);
+            if (idx >= 0) {
+                animationData = animationSearchMap[idx].animation;
+                return true;
+            }
+
+            animationData = default;
+            return false;
+        }
+
+        private int BinarySearchAnimation(string name) {
             int num1 = 0;
-            int num2 = searchMap.Length - 1;
+            int num2 = animationSearchMap.Length - 1;
             while (num1 <= num2) {
                 int index1 = num1 + (num2 - num1 >> 1);
 
-                int num3 = string.CompareOrdinal(searchMap[index1].name, name);
+                int num3 = string.CompareOrdinal(animationSearchMap[index1].name, name);
 
                 if (num3 == 0) {
                     return index1;
@@ -177,12 +211,35 @@ namespace UIForia.Compilers {
             return ~num1;
         }
 
-        private int BinarySearch(char[] name) {
+        private int BinarySearchStyle(string name) {
             int num1 = 0;
-            int num2 = searchMap.Length - 1;
+            int num2 = styleSearchMap.Length - 1;
             while (num1 <= num2) {
                 int index1 = num1 + (num2 - num1 >> 1);
-                int num3 = StringUtil.CharCompareOrdinal(searchMap[index1].name, name);
+
+                int num3 = string.CompareOrdinal(styleSearchMap[index1].name, name);
+
+                if (num3 == 0) {
+                    return index1;
+                }
+
+                if (num3 < 0) {
+                    num1 = index1 + 1;
+                }
+                else {
+                    num2 = index1 - 1;
+                }
+            }
+
+            return ~num1;
+        }
+
+        private int BinarySearchStyle(char[] name) {
+            int num1 = 0;
+            int num2 = styleSearchMap.Length - 1;
+            while (num1 <= num2) {
+                int index1 = num1 + (num2 - num1 >> 1);
+                int num3 = StringUtil.CharCompareOrdinal(styleSearchMap[index1].name, name);
                 if (num3 == 0) {
                     return index1;
                 }
@@ -215,13 +272,13 @@ namespace UIForia.Compilers {
         }
 
         public UIStyleGroupContainer GetStyleById(int styleId) {
-            return searchMap[styleId].container;
+            return styleSearchMap[styleId].container;
         }
 
         public int ResolveStyleByIdSlow(int id) {
             BuildSearchMap();
-            for (int i = 0; i < searchMap.Length; i++) {
-                if (searchMap[i].container.id == id) return i;
+            for (int i = 0; i < styleSearchMap.Length; i++) {
+                if (styleSearchMap[i].container.id == id) return i;
             }
 
             return -1;

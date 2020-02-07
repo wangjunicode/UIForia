@@ -28,8 +28,12 @@ namespace UIForia.Rendering {
             outputList.AddRange(subjectPoly);
 
             //	Make sure it's clockwise
-            if (!IsClockwise(subjectPoly)) {
+            if (!IsClockwise(subjectPoly, out bool invalid)) {
                 outputList.Reverse();
+            }
+
+            if (invalid) {
+                return;
             }
 
             s_EdgeList = s_EdgeList ?? new StructList<Edge>();
@@ -85,7 +89,7 @@ namespace UIForia.Rendering {
             output.EnsureCapacity(polygon.size);
             output.size = 0;
 
-            if (IsClockwise(polygon)) {
+            if (IsClockwise(polygon, out bool _)) {
                 for (int i = 0; i < polygon.size - 1; i++) {
                     ref Edge edge = ref output.array[output.size++];
                     edge.from = polygon.array[i];
@@ -141,16 +145,18 @@ namespace UIForia.Rendering {
             return (tmp1X * tmp2Y) - (tmp1Y * tmp2X) <= 0;
         }
 
-        private static bool IsClockwise(StructList<Vector2> polygon) {
+        private static bool IsClockwise(StructList<Vector2> polygon, out bool invalid) {
             for (int i = 2; i < polygon.size; i++) {
                 bool? isLeft = IsLeftOf(polygon.array[0], polygon.array[1], polygon.array[i]);
                 //	some of the points may be co-linear.  That's ok as long as the overall is a polygon
                 if (isLeft != null) {
+                    invalid = false;
                     return !isLeft.Value;
                 }
             }
 
-            throw new ArgumentException("All the Vector2s in the polygon are colinear");
+            invalid = true;
+            return false;
         }
 
         /// <summary>

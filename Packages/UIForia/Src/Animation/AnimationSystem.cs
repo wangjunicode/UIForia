@@ -18,7 +18,7 @@ namespace UIForia.Animation {
             nextFrame = new LightList<AnimationTask>();
         }
 
-        public AnimationTask Animate(UIElement element, ref AnimationData styleAnimation) {
+        public AnimationTask Animate(UIElement element, AnimationData styleAnimation) {
             switch (styleAnimation.animationType) {
                 case AnimationType.KeyFrame: 
                     styleAnimation.options = EnsureDefaultAnimationOptionValues(styleAnimation);
@@ -35,10 +35,10 @@ namespace UIForia.Animation {
             }
         }
 
-        public void PauseAnimation(UIElement element, ref AnimationData animationData) {
-            AnimationTask task = FindAnimationTask(element, ref animationData, thisFrame);
+        public void PauseAnimation(UIElement element, AnimationData animationData) {
+            AnimationTask task = FindAnimationTask(element, animationData, thisFrame);
             if (task == null) {
-                task = FindAnimationTask(element, ref animationData, nextFrame);
+                task = FindAnimationTask(element, animationData, nextFrame);
             }
 
             if (task == null) {
@@ -51,10 +51,10 @@ namespace UIForia.Animation {
             }
         }
 
-        public void ResumeAnimation(UIElement element, ref AnimationData animationData) {
-            AnimationTask task = FindAnimationTask(element, ref animationData, thisFrame);
+        public void ResumeAnimation(UIElement element, in AnimationData animationData) {
+            AnimationTask task = FindAnimationTask(element, animationData, thisFrame);
             if (task == null) {
-                task = FindAnimationTask(element, ref animationData, nextFrame);
+                task = FindAnimationTask(element, animationData, nextFrame);
             }
 
             if (task == null) {
@@ -66,7 +66,7 @@ namespace UIForia.Animation {
             }
         }
 
-        private AnimationTask FindAnimationTask(UIElement element, ref AnimationData animationData, LightList<AnimationTask> tasks) {
+        private AnimationTask FindAnimationTask(UIElement element, in AnimationData animationData, LightList<AnimationTask> tasks) {
             for (int index = 0; index < tasks.Count; index++) {
                 AnimationTask task = tasks[index];
                 if (task is StyleAnimation styleAnimation 
@@ -81,10 +81,10 @@ namespace UIForia.Animation {
             return null;
         }
 
-        public void StopAnimation(UIElement element, ref AnimationData animationData) {
-            AnimationTask task = FindAnimationTask(element, ref animationData, thisFrame);
+        public void StopAnimation(UIElement element, in AnimationData animationData) {
+            AnimationTask task = FindAnimationTask(element, animationData, thisFrame);
             if (task == null) {
-                task = FindAnimationTask(element, ref animationData, nextFrame);
+                task = FindAnimationTask(element, animationData, nextFrame);
             }
 
             if (task == null) {

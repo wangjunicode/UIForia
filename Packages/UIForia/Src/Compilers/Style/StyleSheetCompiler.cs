@@ -375,6 +375,8 @@ namespace UIForia.Compilers.Style {
             for (int index = 0; index < root.children.Count; index++) {
                 StyleASTNode node = root.children[index];
                 switch (node) {
+                    case SelectNode selectNode:
+                        break;
                     case PropertyNode propertyNode:
                         // add to normal ui style set
                         StylePropertyMappers.MapProperty(targetGroup.normal.style, propertyNode, context);

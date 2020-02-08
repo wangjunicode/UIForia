@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Systems.SelectorSystem;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -230,6 +231,37 @@ namespace UIForia.Systems {
             }
         }
 
+        public void AddSelectors(Selector[] selectors) {
+            if (selectors == null) return;
+        }
+
+        public void RemoveSelectors(Selector[] selectors) {
+            if (selectors == null) return;
+        }
+
+        private LightList<UIStyleSet> selectorMatchedStyles = new LightList<UIStyleSet>();
+        
+        public void UpdateSelectorStyles() {
+            
+            // run selectors, don't apply styles yet
+            
+            // for each element affected by selector last frame
+            // if disabled || no longer affected, remove selector styles from element
+
+            // need to remove styles from cases where selectors were destroyed or no longer match
+            for (int i = 0; i < selectorMatchedStyles.size; i++) {
+                UIStyleSet styleSet = selectorMatchedStyles.array[i];
+                if (!styleSet.element.isEnabled) {
+                    // remove it
+                    //styleSet.ClearSelectorStyles();
+                }
+
+                //for (int j = 0; j < styleSet.selectorStyles.size; j++) {
+                    
+               // }
+            }    
+        }
+        
         private struct ChangeSet {
 
             public UIElement element;

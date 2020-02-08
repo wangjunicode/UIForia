@@ -17,6 +17,8 @@ namespace UIForia.Parsing.Style.AstNodes {
         }
     }
 
+    public class SelectNode : StyleNodeContainer { }
+
     public class AttributeNodeContainer : ChainableNodeContainer {
 
         public override void Release() {

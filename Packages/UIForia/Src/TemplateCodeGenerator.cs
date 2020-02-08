@@ -60,7 +60,8 @@ namespace UIForia {
             template = template.Replace("::TEMPLATE_META_CODE::", GenerateTemplateMetaDataCode(compiledTemplateData));
             template = template.Replace("::SLOT_CODE::", GenerateSlotCode(compiledTemplateData));
             template = template.Replace("::BINDING_CODE::", GenerateBindingCode(compiledTemplateData));
-            template = template.Replace("::ELEMENT_CONSTRUCTORS::", GenerateElementConstructors());
+            template = template.Replace("::ELEMENT_CONSTRUCTORS::", GenerateElementConstructors(compiledTemplateData));
+            template = template.Replace("::TAGNAME_ID_MAP::", GenerateTagNameIdMap(compiledTemplateData));
 
             string initPath = Path.Combine(path, "__init" + extension);
             Directory.CreateDirectory(Path.GetDirectoryName(initPath));
@@ -189,7 +190,7 @@ namespace UIForia {
             return styleFilePathArray;
         }
 
-        private static string GenerateElementConstructors() {
+        private static string GenerateElementConstructors(CompiledTemplateData compiledTemplateData) {
             StringBuilder builder = new StringBuilder(2048);
 
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
@@ -202,9 +203,28 @@ namespace UIForia {
                 builder.Append(kvp.Value.id);
                 builder.AppendLine(":");
                 builder.Append(s_Indent20);
-                builder.Append("return new ");
+                builder.Append("return new ConstructedElement(");
+                builder.Append(compiledTemplateData.GetTagNameId(kvp.Value.tagName));
+                builder.Append(", new ");
                 TypeNameGenerator.GetTypeName(kvp.Key, builder);
-                builder.Append("();");
+                builder.Append("());");
+                builder.AppendLine();
+            }
+
+            return builder.ToString();
+        }
+
+        private static string GenerateTagNameIdMap(CompiledTemplateData compiledTemplateData) {
+            StringBuilder builder = new StringBuilder(2048);
+
+            foreach (KeyValuePair<string, int> kvp in compiledTemplateData.tagNameIdMap) {
+                builder.Append(s_Indent12);
+                builder.Append("{ ");
+                builder.Append("\"");
+                builder.Append(kvp.Key);
+                builder.Append("\", ");
+                builder.Append(kvp.Value);
+                builder.Append("},");
                 builder.AppendLine();
             }
 

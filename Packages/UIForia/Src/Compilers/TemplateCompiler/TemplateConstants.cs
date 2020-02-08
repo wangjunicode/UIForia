@@ -34,12 +34,18 @@ namespace UIForia.Generated {
 ::SLOT_CODE::
         }
 
-        public UIElement ConstructElement(int typeId) {
+        public ConstructedElement ConstructElement(int typeId) {
             switch(typeId) {
 ::ELEMENT_CONSTRUCTORS::
             }
-            return null;
+            return default;
         }
+
+        public Dictionary<string, int> TagNameIdMap => tagNameIdMap;
+        
+        private Dictionary<string, int> tagNameIdMap = new Dictionary<string,int>() {
+::TAGNAME_ID_MAP::
+        };
 
     }
 #pragma warning restore 0164

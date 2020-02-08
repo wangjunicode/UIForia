@@ -12,7 +12,7 @@
 
         <Heading2>Click on an animation type to see the result</Heading2>
 
-        <Group style="button-container">
+        <Group style="button-container" attr:button-style="true">
             <Div style="button" mouse:click="ChangeAnimation('bounce')">Bounce</Div>
             <Div style="button" mouse:click="ChangeAnimation('flash')">Flash</Div>
             <Div style="button" mouse:click="ChangeAnimation('pulse')">Pulse</Div>

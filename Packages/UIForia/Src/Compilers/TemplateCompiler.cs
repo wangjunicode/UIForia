@@ -28,6 +28,7 @@ namespace UIForia.Compilers {
         private readonly UIForiaLinqCompiler updateCompiler;
         private readonly UIForiaLinqCompiler lateCompiler;
         private readonly UIForiaLinqCompiler typeResolver;
+        private bool resolvingTypeOnly;
 
         private Expression changeHandlerCurrentValue;
         private Expression changeHandlerPreviousValue;
@@ -277,13 +278,14 @@ namespace UIForia.Compilers {
             if (isRoot) {
                 ctx.Comment("new " + TypeNameGenerator.GetTypeName(processedType.rawType));
 
-                Expression createRootExpression = ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-                    Expression.Constant(processedType.id),
-                    Expression.Default(typeof(UIElement)), // root has no parent
-                    Expression.Constant(templateRootNode.ChildCount),
-                    Expression.Constant(CountRealAttributes(templateRootNode.attributes)),
-                    Expression.Constant(ctx.compiledTemplate.templateId)
-                );
+                Expression createRootExpression = CreateElement(ctx, processedType, Expression.Default(typeof(UIElement)), templateRootNode.ChildCount, CountRealAttributes(templateRootNode.attributes), ctx.compiledTemplate.templateId);
+                // ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
+                // Expression.Constant(processedType.id),
+                // Expression.Default(typeof(UIElement)), // root has no parent
+                // Expression.Constant(templateRootNode.ChildCount),
+                // Expression.Constant(CountRealAttributes(templateRootNode.attributes)),
+                // Expression.Constant(ctx.compiledTemplate.templateId)
+                // );
                 ctx.Assign(ctx.rootParam, createRootExpression);
                 ProcessAttrsAndVisitChildren(ctx, templateRootNode);
             }
@@ -368,13 +370,14 @@ namespace UIForia.Compilers {
             repeatNode.processedType = TypeProcessor.GetProcessedType(typeof(UIRepeatCountElement));
 
             ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(typeof(UIRepeatCountElement)));
-            ctx.Assign(nodeExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-                Expression.Constant(repeatNode.processedType.id),
-                ctx.ParentExpr,
-                Expression.Constant(0),
-                Expression.Constant(CountRealAttributes(repeatNode.attributes)),
-                Expression.Constant(ctx.compiledTemplate.templateId)
-            ));
+            ctx.Assign(nodeExpr, CreateElement(ctx, repeatNode.processedType, ctx.ParentExpr, 0, CountRealAttributes(repeatNode.attributes), ctx.compiledTemplate.templateId));
+            // ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
+            // Expression.Constant(repeatNode.processedType.id),
+            // ctx.ParentExpr,
+            // Expression.Constant(0),
+            // Expression.Constant(CountRealAttributes(repeatNode.attributes)),
+            // Expression.Constant(ctx.compiledTemplate.templateId)
+            // ));
 
             MemberExpression templateSpawnIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_TemplateSpawnId);
             MemberExpression templateRootContext = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_ContextRoot);
@@ -403,13 +406,14 @@ namespace UIForia.Compilers {
             repeatNode.processedType = ResolveGenericElementType(ctx.namespaces, ctx.templateRootNode.ElementType, repeatNode);
 
             ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(typeof(UIRepeatCountElement)));
-            ctx.Assign(nodeExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-                Expression.Constant(repeatNode.processedType.id),
-                ctx.ParentExpr,
-                Expression.Constant(0),
-                Expression.Constant(CountRealAttributes(repeatNode.attributes)),
-                Expression.Constant(ctx.compiledTemplate.templateId)
-            ));
+            ctx.Assign(nodeExpr, CreateElement(ctx, repeatNode.processedType, ctx.ParentExpr, 0, CountRealAttributes(repeatNode.attributes), ctx.compiledTemplate.templateId));
+            // ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
+            // Expression.Constant(repeatNode.processedType.id),
+            // ctx.ParentExpr,
+            // Expression.Constant(0),
+            // Expression.Constant(CountRealAttributes(repeatNode.attributes)),
+            // Expression.Constant(ctx.compiledTemplate.templateId)
+            // ));
 
             MemberExpression templateSpawnIdField = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_TemplateSpawnId);
             MemberExpression templateRootContext = Expression.Field(ExpressionFactory.Convert(nodeExpr, typeof(UIRepeatElement)), s_RepeatElement_ContextRoot);
@@ -507,13 +511,14 @@ namespace UIForia.Compilers {
             ctx.ContextExpr = rootParam;
             ctx.namespaces = parentContext.namespaces;
 
-            Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool,
-                Expression.Constant(slotNode.processedType.id),
-                parentParam,
-                Expression.Constant(slotNode.ChildCount),
-                Expression.Constant(CountRealAttributes(slotNode.attributes)),
-                Expression.Constant(parentContext.compiledTemplate.templateId)
-            );
+            Expression createRootExpression = CreateElement(ctx, slotNode.processedType, parentParam, slotNode.ChildCount, CountRealAttributes(slotNode.attributes), parentContext.compiledTemplate.templateId);
+            // Expression.Call(ctx.applicationExpr, s_CreateFromPool,
+            // Expression.Constant(slotNode.processedType.id),
+            // parentParam,
+            // Expression.Constant(slotNode.ChildCount),
+            // Expression.Constant(CountRealAttributes(slotNode.attributes)),
+            // Expression.Constant(parentContext.compiledTemplate.templateId)
+            // );
 
             ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, slotNode.processedType.rawType));
             ctx.Assign(Expression.Field(slotRootParam, s_SlotElement_SlotId), Expression.Constant(slotNode.slotName));
@@ -574,13 +579,14 @@ namespace UIForia.Compilers {
 
             ctx.Initialize(slotRootParam);
 
-            Expression createRootExpression = Expression.Call(ctx.applicationExpr, s_CreateFromPool,
-                Expression.Constant(TypeProcessor.GetProcessedType(type).id),
-                parentParam,
-                Expression.Constant(slotOverrideNode.ChildCount),
-                Expression.Constant(CountRealAttributes(attributes)),
-                Expression.Constant(parentContext.compiledTemplate.templateId)
-            );
+            Expression createRootExpression = CreateElement(ctx, TypeProcessor.GetProcessedType(type), parentParam, slotOverrideNode.ChildCount, CountRealAttributes(attributes), parentContext.compiledTemplate.templateId);
+            // Expression.Call(ctx.applicationExpr, s_CreateFromPool,
+            // Expression.Constant(TypeProcessor.GetProcessedType(type).id),
+            // parentParam,
+            // Expression.Constant(slotOverrideNode.ChildCount),
+            // Expression.Constant(CountRealAttributes(attributes)),
+            // Expression.Constant(parentContext.compiledTemplate.templateId)
+            // );
 
             ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, type));
             ctx.Assign(Expression.Field(slotRootParam, s_SlotElement_SlotId), Expression.Constant(slotOverrideNode.slotName));
@@ -680,13 +686,7 @@ namespace UIForia.Compilers {
             ctx.PushScope();
 
             if (repeatNode.ChildCount != 1) {
-                ctx.Assign(ctx.ElementExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-                    Expression.Constant(TypeProcessor.GetProcessedType(typeof(RepeatMultiChildContainerElement)).id),
-                    ctx.ParentExpr,
-                    Expression.Constant(repeatNode.ChildCount),
-                    Expression.Constant(0),
-                    Expression.Constant(ctx.compiledTemplate.templateId)
-                ));
+                ctx.Assign(ctx.ElementExpr, CreateElement(ctx, TypeProcessor.GetProcessedType(typeof(RepeatMultiChildContainerElement)), ctx.ParentExpr, repeatNode.ChildCount, 0, ctx.compiledTemplate.templateId));
                 // need to create a binding node since we implicitly create this node instead of visiting it.
                 ctx.AddStatement(ExpressionFactory.CallStaticUnchecked(s_LinqBindingNode_Get,
                         ctx.applicationExpr,
@@ -824,13 +824,15 @@ namespace UIForia.Compilers {
             StructList<AttributeDefinition> attributes = AttributeMerger.MergeExpandedAttributes(innerRoot.attributes, expandedTemplateNode.attributes);
 
             ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(templateType.rawType) + " " + expandedTemplateNode.lineInfo);
-            ctx.Assign(nodeExpr, ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-                Expression.Constant(expandedTemplateNode.processedType.id),
-                ctx.ParentExpr,
-                Expression.Constant(innerRoot.ChildCount),
-                Expression.Constant(CountRealAttributes(attributes)),
-                Expression.Constant(ctx.compiledTemplate.templateId)
-            ));
+            ctx.Assign(nodeExpr, CreateElement(ctx, expandedTemplateNode.processedType, ctx.ParentExpr, innerRoot.ChildCount, CountRealAttributes(attributes), ctx.compiledTemplate.templateId));
+
+            // ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
+            // Expression.Constant(expandedTemplateNode.processedType.id),
+            // ctx.ParentExpr,
+            // Expression.Constant(innerRoot.ChildCount),
+            // Expression.Constant(CountRealAttributes(attributes)),
+            // Expression.Constant(ctx.compiledTemplate.templateId)
+            // ));
 
             bool hasForwardOrOverrides = expandedTemplateNode.slotOverrideNodes != null && expandedTemplateNode.slotOverrideNodes.size > 0;
 
@@ -2373,7 +2375,7 @@ namespace UIForia.Compilers {
             // todo -- I can figure out if a value is constant using IsConstant(expr), use this information to push the expression onto the const compiler
 
             CompileChangeHandlerPropertyBindingStore(processedType.rawType, attr, changeHandlerAttrs, right);
-            
+
             if ((attr.flags & AttributeFlags.Const) != 0) {
                 StructList<ProcessedType.PropertyChangeHandlerDesc> changeHandlers = StructList<ProcessedType.PropertyChangeHandlerDesc>.Get();
                 processedType.GetChangeHandlers(attr.key, changeHandlers);
@@ -2538,18 +2540,20 @@ namespace UIForia.Compilers {
             throw CompileException.UnknownAlias(aliasName);
         }
 
-        private static Expression CreateElement(CompilationContext ctx, TemplateNode node) {
-            return ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-                Expression.Constant(node.processedType.id),
-                ctx.ParentExpr,
-                Expression.Constant(node.ChildCount),
-                Expression.Constant(CountRealAttributes(node.attributes)),
-                Expression.Constant(ctx.compiledTemplate.templateId)
-            );
+        private Expression CreateElement(CompilationContext ctx, TemplateNode node) {
+            return CreateElement(ctx, node.processedType, ctx.ParentExpr, node.ChildCount, CountRealAttributes(node.attributes), ctx.compiledTemplate.templateId);
         }
 
-        private bool resolvingTypeOnly;
-
+        private Expression CreateElement(CompilationContext ctx, ProcessedType processedType, Expression parentExpression, int childCount, int attrCount, int templateId) {
+            return ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
+                Expression.Constant(processedType.id),
+                parentExpression,
+                Expression.Constant(childCount),
+                Expression.Constant(attrCount),
+                Expression.Constant(templateId)
+            );
+        }
+        
         private ProcessedType ResolveGenericElementType(IList<string> namespaces, Type rootType, TemplateNode templateNode) {
             ProcessedType processedType = templateNode.processedType;
 

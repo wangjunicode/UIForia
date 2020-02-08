@@ -18,7 +18,9 @@ namespace UIForia {
 
         string[] StyleFilePaths { get; }
 
-        UIElement ConstructElement(int typeId);
+        Dictionary<string, int> TagNameIdMap { get; }
+
+        ConstructedElement ConstructElement(int typeId);
 
     }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Systems.SelectorSystem;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Layout;
@@ -11,67 +12,67 @@ using UIForia.Util;
 
 namespace UIForia.Elements {
 
-    public struct UIElementRef {
-
-        private readonly int id;
-        private UIElement element;
-
-        public UIElementRef(UIElement element) {
-            this.id = element?.id ?? -1;
-            this.element = element;
-        }
-
-        public UIElement Element {
-            get {
-                if (id != element.id) {
-                    element = null;
-                    return null;
-                }
-
-                return element;
-            }
-        }
-
-        public static implicit operator UIElement(UIElementRef elementRef) {
-            return elementRef.Element;
-        }
-
-    }
-
-    public struct UIElementRef<T> where T : UIElement {
-
-        private readonly int id;
-        private T element;
-
-        public UIElementRef(T element) {
-            this.id = element?.id ?? -1;
-            this.element = element;
-        }
-
-        public T Element {
-            get {
-                if (id != element.id) {
-                    element = null;
-                    return null;
-                }
-
-                return element;
-            }
-        }
-
-        public static implicit operator UIElementRef(UIElementRef<T> elementRef) {
-            return new UIElementRef(elementRef.Element);
-        }
-
-        public static implicit operator UIElement(UIElementRef<T> elementRef) {
-            return elementRef.Element;
-        }
-
-        public static implicit operator T(UIElementRef<T> elementRef) {
-            return elementRef.Element;
-        }
-
-    }
+    // public struct UIElementRef {
+    //
+    //     private readonly int id;
+    //     private UIElement element;
+    //
+    //     public UIElementRef(UIElement element) {
+    //         this.id = element?.id ?? -1;
+    //         this.element = element;
+    //     }
+    //
+    //     public UIElement Element {
+    //         get {
+    //             if (id != element.id) {
+    //                 element = null;
+    //                 return null;
+    //             }
+    //
+    //             return element;
+    //         }
+    //     }
+    //
+    //     public static implicit operator UIElement(UIElementRef elementRef) {
+    //         return elementRef.Element;
+    //     }
+    //
+    // }
+    //
+    // public struct UIElementRef<T> where T : UIElement {
+    //
+    //     private readonly int id;
+    //     private T element;
+    //
+    //     public UIElementRef(T element) {
+    //         this.id = element?.id ?? -1;
+    //         this.element = element;
+    //     }
+    //
+    //     public T Element {
+    //         get {
+    //             if (id != element.id) {
+    //                 element = null;
+    //                 return null;
+    //             }
+    //
+    //             return element;
+    //         }
+    //     }
+    //
+    //     public static implicit operator UIElementRef(UIElementRef<T> elementRef) {
+    //         return new UIElementRef(elementRef.Element);
+    //     }
+    //
+    //     public static implicit operator UIElement(UIElementRef<T> elementRef) {
+    //         return elementRef.Element;
+    //     }
+    //
+    //     public static implicit operator T(UIElementRef<T> elementRef) {
+    //         return elementRef.Element;
+    //     }
+    //
+    // }
 
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public abstract class UIElement : IHierarchical {
@@ -84,6 +85,7 @@ namespace UIForia.Elements {
 
         internal UIElementFlags flags;
         internal UIElement parent;
+        internal TagNameIndex tagNameIndex;
 
         // todo -- maybe move a lot of this data to an internal representation of UIElement
         public LayoutResult layoutResult;

@@ -10,19 +10,32 @@ using UnityEditor;
 
 namespace UIForia {
 
+    public struct ConstructedElement {
+
+        public readonly int tagNameId;
+        public readonly UIElement element;
+
+        public ConstructedElement(int tagNameId, UIElement element) {
+            this.tagNameId = tagNameId;
+            this.element = element;
+        }
+
+    }
+    
     public class CompiledTemplateData {
 
         public LightList<CompiledTemplate> compiledTemplates;
         public LightList<CompiledSlot> compiledSlots;
         public LightList<CompiledBinding> compiledBindings;
         public StyleSheetImporter styleImporter;
-        public Func<int, UIElement> constructElement;
-
+        public Func<int, ConstructedElement> constructElement;
+        public Dictionary<string, int> tagNameIdMap;
+        
         public TemplateMetaData[] templateMetaData;
         public Func<UIElement, TemplateScope, UIElement>[] templates;
         public Func<UIElement, UIElement, TemplateScope, UIElement>[] slots;
         public Action<UIElement, UIElement>[] bindings;
-        
+        private int nextTagNameId;
         public readonly Dictionary<Type, int> templateTypeMap = new Dictionary<Type, int>();
         public TemplateSettings templateSettings;
 
@@ -32,6 +45,8 @@ namespace UIForia {
             this.compiledTemplates = new LightList<CompiledTemplate>(128);
             this.compiledBindings = new LightList<CompiledBinding>(128);
             this.styleImporter = new StyleSheetImporter(templateSettings.templateResolutionBasePath, templateSettings.resourceManager);
+            this.tagNameIdMap = new Dictionary<string, int>();
+            this.nextTagNameId = 1;
         }
 
         public CompiledTemplate CreateTemplate(string filePath, string templateName) {
@@ -83,8 +98,18 @@ namespace UIForia {
             return null;
         }
 
-        public UIElement ConstructElement(int typeId) {
+        public ConstructedElement ConstructElement(int typeId) {
             return constructElement.Invoke(typeId);
+        }
+
+        public int GetTagNameId(string tagName) {
+            if (tagNameIdMap.TryGetValue(tagName, out int id)) {
+                return id;
+            }
+
+            id = nextTagNameId++;
+            tagNameIdMap.Add(tagName, id);
+            return id;
         }
 
     }

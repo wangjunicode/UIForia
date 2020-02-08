@@ -286,7 +286,8 @@ namespace UIForia.Rendering {
             }
 
             LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
-
+            IStyleSystem styleSystem = element.application.styleSystem;
+            
             StyleEntry[] styleEntries = availableStyles.Array;
             for (int i = 0; i < availableStyles.Count; i++) {
                 StyleEntry entry = styleEntries[i];
@@ -294,6 +295,7 @@ namespace UIForia.Rendering {
                 // if this is a state we had not been in before, mark it's properties for update
                 if ((entry.state & oldState) == 0 && (entry.state & state) != 0) {
                     AddMissingProperties(toUpdate, entry.styleRunCommand.style);
+                    styleSystem?.AddSelectors(entry.styleRunCommand.selectors);
                     RunCommands(entry.styleRunCommand.runCommands);
                 }
             }
@@ -1042,6 +1044,11 @@ namespace UIForia.Rendering {
 
             animatedProperties.Add(new AnimatedProperty(propertyId, v0, v1, time));
            // styleSystem.SetStyleProperty(element, propertyId);
+        }
+
+        private LightList<UIStyle> selectorStyles;
+        public void SetSelectorStyle(UIStyle matchStyle) {
+            selectorStyles = selectorStyles ?? new LightList<UIStyle>();
         }
 
     }

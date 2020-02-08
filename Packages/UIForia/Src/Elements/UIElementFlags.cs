@@ -25,7 +25,8 @@ internal enum UIElementFlags {
     LayoutTypeOrBehaviorDirty = 1 << 26,
 
     EnabledFlagSet = Alive | Enabled | AncestorEnabled,
-    
 
+
+    InTagIndex = 1 << 9
 
 }

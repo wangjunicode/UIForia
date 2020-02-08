@@ -59,7 +59,11 @@ namespace UIForia.Compilers {
                 templateMetaData[i].BuildSearchMap();
             }
 
-            Dictionary<int, Func<UIElement>> constructorFnMap = new Dictionary<int, Func<UIElement>>(37);
+            Dictionary<int, Func<ConstructedElement>> constructorFnMap = new Dictionary<int, Func<ConstructedElement>>(37);
+
+            ConstructorInfo constructedTypeCtor = typeof(ConstructedElement).GetConstructor(new Type[] {typeof(int), typeof(UIElement)});
+            System.Diagnostics.Debug.Assert(constructedTypeCtor != null, nameof(constructedTypeCtor) + " != null");
+            Expression[] parameters = new Expression[2];
 
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
                 if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
@@ -72,14 +76,16 @@ namespace UIForia.Compilers {
                     throw new CompileException(kvp.Key + " must provide a default constructor in order to be used in templates");
                 }
 
-                constructorFnMap[kvp.Value.id] = Expression.Lambda<Func<UIElement>>(Expression.New(ctor)).Compile();
+                parameters[0] = Expression.Constant(compiledTemplateData.GetTagNameId(kvp.Value.tagName));
+                parameters[1] = Expression.New(ctor);
+                constructorFnMap[kvp.Value.id] = Expression.Lambda<Func<ConstructedElement>>(Expression.New(constructedTypeCtor, parameters)).Compile();
             }
 
             compiledTemplateData.bindings = bindings;
             compiledTemplateData.slots = slots;
             compiledTemplateData.templates = templates;
             compiledTemplateData.templateMetaData = templateMetaData;
-            compiledTemplateData.constructElement = (int typeId) => constructorFnMap[typeId].Invoke();
+            compiledTemplateData.constructElement = (typeId) => constructorFnMap[typeId].Invoke();
 
             return compiledTemplateData;
         }
@@ -91,7 +97,7 @@ namespace UIForia.Compilers {
             if (type == null) {
                 throw new ArgumentException("Trying to use precompiled templates for " + templateSettings.StrippedApplicationName + " but couldn't find the type. Maybe you need to regenerate the code?");
             }
-            
+
             CompiledTemplateData compiledTemplateData = new CompiledTemplateData(templateSettings);
 
             compiledTemplateData.styleImporter.importResolutionPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Systems.SelectorSystem;
 using Src.Systems;
 using UIForia.Animation;
 using UIForia.Compilers;
@@ -38,6 +39,7 @@ namespace UIForia {
         internal Stopwatch loopTimer = new Stopwatch();
 
         public readonly string id;
+        internal SelectorSystem selectorSystem;
         internal IStyleSystem styleSystem;
         internal ILayoutSystem layoutSystem;
         internal IRenderSystem renderSystem;
@@ -368,7 +370,7 @@ namespace UIForia {
             Rect rect = Camera?.pixelRect ?? new Rect(0, 0, 1920, 1080); //UIApplicationSize.width, UIApplicationSize.height);
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
-            
+
             m_BeforeUpdateTaskSystem.OnUpdate();
 
             bool loop = true;
@@ -411,6 +413,7 @@ namespace UIForia {
             // m_RoutingSystem.OnUpdate(); // todo -- remove
             //
 
+            // selectorSystem.OnUpdate();
             styleSystem.OnUpdate(); // buffer changes here
 
             // todo -- read changed data into layout/render thread
@@ -486,18 +489,15 @@ namespace UIForia {
                     continue;
                 }
 
-                // todo -- profile not calling enable when it's not needed
-                // if (child.flags & UIElementFlags.RequiresEnableCall) {
-                child.style.UpdateInheritedStyles();
+                child.style.UpdateInheritedStyles(); // todo -- move this
                 child.OnEnable();
-                // }
 
                 // We need to run all runCommands now otherwise animations in [normal] style groups won't run after enabling.
                 child.style.RunCommands();
 
                 if ((child.flags & UIElementFlags.HasBeenEnabled) == 0) {
+                    // todo -- run once bindings if present
                     child.View.ElementCreated(child);
-                    // run once bindings if present
                 }
 
                 // register the flag set even if we get disabled via OnEnable, we just want to track that OnEnable was called at least once
@@ -506,6 +506,7 @@ namespace UIForia {
                 // only continue if calling enable didn't re-disable the element
                 if ((child.flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled) {
                     child.enableStateChangedFrameId = frameId;
+                    child.tagNameIndex.Add(child);
                     UIElement[] children = child.children.array;
                     int childCount = child.children.size;
                     if (stack.size + childCount >= stack.array.Length) {
@@ -629,7 +630,11 @@ namespace UIForia {
             return null;
         }
 
+        private Dictionary<string, int> attrNameToId = new Dictionary<string, int>();
+
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) {
+            if (attrNameToId.TryGetValue(attributeName, out int id)) { }
+
             for (int i = 0; i < systems.Count; i++) {
                 systems[i].OnAttributeSet(element, attributeName, currentValue, previousValue);
             }
@@ -668,7 +673,7 @@ namespace UIForia {
         public UIView[] GetViews() {
             return views.ToArray();
         }
-        
+
         private void InitializeElement(UIElement child) {
             bool parentEnabled = child.parent.isEnabled;
 
@@ -840,36 +845,57 @@ namespace UIForia {
 
         public UIElement CreateTemplate(int templateSpawnId, UIElement contextRoot, UIElement parent, TemplateScope scope) {
             UIElement retn = templateData.slots[templateSpawnId](contextRoot, parent, scope);
-            
+
             InitializeElement(retn);
 
             return retn;
         }
 
+        public struct TagNameEntry {
+
+            public int depth;
+            public UIElement element;
+
+        }
+
+        internal StructList<TagNameEntry> GetTagNameRegistry(int tagNameId) {
+            return null;
+        }
+
+        internal Dictionary<int, TagNameIndex> tagNameIndexMap = new Dictionary<int, TagNameIndex>();
+
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
         public UIElement CreateElementFromPool(int typeId, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
             // children get assigned in the template function but we need to setup the list here
-            UIElement retn = templateData.ConstructElement(typeId);
-            retn.application = this;
+            ConstructedElement retn = templateData.ConstructElement(typeId);
+            UIElement element = retn.element;
 
-            retn.templateMetaData = templateData.templateMetaData[originTemplateId];
-            retn.id = NextElementId;
-            retn.style = new UIStyleSet(retn);
-            retn.layoutResult = new LayoutResult(retn);
-            retn.flags = UIElementFlags.Enabled | UIElementFlags.Alive;
-
-            retn.children = LightList<UIElement>.GetMinSize(childCount);
-
-            if (attributeCount > 0) {
-                retn.attributes = new StructList<ElementAttribute>(attributeCount);
-                retn.attributes.size = attributeCount;
+            if (!tagNameIndexMap.TryGetValue(retn.tagNameId, out TagNameIndex index)) {
+                index = new TagNameIndex();
+                tagNameIndexMap[retn.tagNameId] = index;
             }
 
-            retn.parent = parent;
+            element.tagNameIndex = index;
 
-            parent?.children.Add(retn);
+            element.application = this;
+            element.templateMetaData = templateData.templateMetaData[originTemplateId];
+            element.id = NextElementId;
+            element.style = new UIStyleSet(element);
+            element.layoutResult = new LayoutResult(element);
+            element.flags = UIElementFlags.Enabled | UIElementFlags.Alive;
 
-            return retn;
+            element.children = LightList<UIElement>.GetMinSize(childCount);
+
+            if (attributeCount > 0) {
+                element.attributes = new StructList<ElementAttribute>(attributeCount);
+                element.attributes.size = attributeCount;
+            }
+
+            element.parent = parent;
+
+            parent?.children.Add(element);
+
+            return element;
         }
 
         public TemplateMetaData GetTemplateMetaData(int metaDataId) {

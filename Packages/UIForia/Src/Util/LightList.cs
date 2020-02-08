@@ -583,6 +583,18 @@ namespace UIForia.Util {
             return new LightList<T>(clone);
         }
 
+        public void SwapRemoveAt(int index) {
+            if (size == 1) {
+                array[0] = default;
+                size = 0;
+                return;
+            }
+
+            array[index] = array[size - 1];
+            array[size - 1] = default;
+            size--;
+        }
+
     }
 
 }

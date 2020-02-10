@@ -191,7 +191,7 @@ style myStyle {
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
-        Assert.AreEqual(2, containers[0].groups.Count);
+        Assert.AreEqual(2, containers[0].groups.Length);
 
         Assert.IsTrue(Mathf.Approximately(0.1f, containers[0].groups[0].normal.style.MarginTop.value));
         Assert.AreEqual(UIFixedUnit.Percent, containers[0].groups[0].normal.style.MarginTop.unit);
@@ -314,7 +314,7 @@ style myStyle {
 
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
-        Assert.AreEqual(2, containers[0].groups.Count);
+        Assert.AreEqual(2, containers[0].groups.Length);
 
         Assert.AreEqual(Visibility.Visible, containers[0].groups[0].normal.style.Visibility);
         Assert.AreEqual(Visibility.Hidden, containers[0].groups[1].normal.style.Visibility);
@@ -1021,7 +1021,7 @@ style xyz {
         ".Trim());
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
         Assert.AreEqual(1, styleSheet.styleGroupContainers.Length);
-        Assert.AreEqual(2, styleSheet.styleGroupContainers[0].groups.Count);
+        Assert.AreEqual(2, styleSheet.styleGroupContainers[0].groups.Length);
     }
 
     [Test]

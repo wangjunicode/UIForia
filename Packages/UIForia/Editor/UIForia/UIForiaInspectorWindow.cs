@@ -321,7 +321,7 @@ namespace UIForia.Editor {
                 UIStyleGroupContainer container = baseStyles[i];
                 s_Content.text = $"{container.name} ({container.styleType.ToString()})";
 
-                for (int j = 0; j < container.groups.Count; j++) {
+                for (int j = 0; j < container.groups.Length; j++) {
                     DrawStyleGroup(container.groups[j]);
                 }
             }

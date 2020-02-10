@@ -517,14 +517,13 @@ namespace UIForia.Compilers.Style {
         }
 
         private UIStyleRule MapAttributeContainerToRule(ChainableNodeContainer nodeContainer) {
+            
             if (nodeContainer == null) return null;
 
             if (nodeContainer is AttributeNodeContainer attribute) {
                 return new UIStyleRule(attribute.invert, attribute.identifier, attribute.value, MapAttributeContainerToRule(attribute.next));
             }
-
-            if (nodeContainer is ExpressionNodeContainer expression) { }
-
+            
             throw new NotImplementedException("Sorry this feature experiences a slight delay.");
         }
 

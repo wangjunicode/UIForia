@@ -23,13 +23,17 @@ namespace UIForia.Rendering {
         internal bool hasAttributeStyles;
 
         private UIStyleGroup instanceStyle;
-        private readonly StructList<StyleEntry> availableStyles;
-        private readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
+        internal readonly StructList<StyleEntry> availableStyles;
+        internal readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
         internal readonly IntMap<StyleProperty> propertyMap;
 
         // idea -- for styles are inactive, sort them to the back of the available styles list,
         // then we have to look though less of an array (also track a count for how many styles are active)
 
+        // reduce memory per-style
+        // improve lookup time
+        // support selectors
+        
         public UIStyleSet(UIElement element) {
             this.element = element;
             this.currentState = StyleState.Normal;
@@ -224,7 +228,7 @@ namespace UIForia.Rendering {
         }
 
         private void CreateStyleGroups(UIStyleGroupContainer groupContainer, LightList<StylePropertyId> toUpdate) {
-            for (int i = 0; i < groupContainer.groups.Count; i++) {
+            for (int i = 0; i < groupContainer.groups.Length; i++) {
                 UIStyleGroup group = groupContainer.groups[i];
 
                 if (group.HasAttributeRule) {
@@ -248,7 +252,7 @@ namespace UIForia.Rendering {
                 hasAttributeStyles = true;
             }
 
-            for (int j = 0; j < container.groups.Count; j++) {
+            for (int j = 0; j < container.groups.Length; j++) {
                 UIStyleGroup group = container.groups[j];
 
                 if (group.rule == null || group.rule != null && group.rule.IsApplicableTo(element)) {
@@ -295,7 +299,6 @@ namespace UIForia.Rendering {
                 // if this is a state we had not been in before, mark it's properties for update
                 if ((entry.state & oldState) == 0 && (entry.state & state) != 0) {
                     AddMissingProperties(toUpdate, entry.styleRunCommand.style);
-                    styleSystem?.AddSelectors(entry.styleRunCommand.selectors);
                     RunCommands(entry.styleRunCommand.runCommands);
                 }
             }
@@ -441,7 +444,7 @@ namespace UIForia.Rendering {
 
             LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
 
-            for (int i = 0; i < container.groups.Count; i++) {
+            for (int i = 0; i < container.groups.Length; i++) {
                 UIStyleGroup group = container.groups[i];
 
                 for (int j = 0; j < availableStyles.Count; j++) {
@@ -509,7 +512,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            property = default(StyleProperty);
+            property = default;
             return false;
         }
 
@@ -569,7 +572,7 @@ namespace UIForia.Rendering {
 
         private UIStyleGroupContainer FindContainerForGroup(UIStyleGroup group) {
             for (int i = 0; i < styleGroupContainers.size; i++) {
-                int groupsCount = styleGroupContainers[i].groups.Count;
+                int groupsCount = styleGroupContainers[i].groups.Length;
                 for (int j = 0; j < groupsCount; j++) {
                     if (styleGroupContainers[i].groups[j] == group) {
                         return styleGroupContainers[i];

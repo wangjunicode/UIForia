@@ -4,7 +4,7 @@ namespace UIForia.Rendering {
 
     public partial class UIStyleSet {
 
-        private struct StyleEntry {
+        internal struct StyleEntry {
 
             public readonly UIStyleRunCommand styleRunCommand;
             public readonly StyleState state;
@@ -19,6 +19,7 @@ namespace UIForia.Rendering {
                 this.type = type;
                 this.state = state;
                 this.priority = (int)BitUtil.SetBytes(styleNumber, attributeCount, (int) type, (int) state);
+
             }
 
         }

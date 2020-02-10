@@ -1,23 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using Systems.SelectorSystem;
+using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace UIForia.Systems {
-
-    public interface IStylePropertiesWillChangeHandler {
-
-        void OnStylePropertiesWillChange();
-
-    }
-
-    public interface IStylePropertiesDidChangeHandler {
-
-        void OnStylePropertiesDidChange();
-
-    }
 
     public interface IStyleChangeHandler {
 
@@ -36,17 +26,17 @@ namespace UIForia.Systems {
         public StyleSystem() {
             this.m_ChangeSets = new IntMap<ChangeSet>();
         }
-        
+
         public void OnReset() { }
 
-        public void OnElementCreated(UIElement element) {}
-        
+        public void OnElementCreated(UIElement element) { }
+
         private void OnElementEnabledStep(UIElement element, StructList<StyleProperty> parentProperties) {
 
             if (element.isDisabled) {
                 return;
             }
-            
+
             int count = parentProperties.Count;
             StyleProperty[] parentPropertiesArray = parentProperties.Array;
 
@@ -57,7 +47,7 @@ namespace UIForia.Systems {
             if (element.children == null || element.children.Count == 0) {
                 return;
             }
-            
+
             StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
             inheritedProperties.EnsureCapacity(count);
             StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
@@ -65,7 +55,7 @@ namespace UIForia.Systems {
             for (int i = 0; i < count; i++) {
                 inheritedPropertiesArray[i] = element.style.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
             }
-            
+
             inheritedProperties.Count = count;
 
             for (int i = 0; i < element.children.Count; i++) {
@@ -164,8 +154,7 @@ namespace UIForia.Systems {
         }
 
         private void AddToChangeSet(UIElement element, StyleProperty property) {
-            ChangeSet changeSet;
-            if (!m_ChangeSets.TryGetValue(element.id, out changeSet)) {
+            if (!m_ChangeSets.TryGetValue(element.id, out ChangeSet changeSet)) {
                 changeSet = new ChangeSet(element, StructList<StyleProperty>.Get());
                 m_ChangeSets[element.id] = changeSet;
             }
@@ -174,9 +163,9 @@ namespace UIForia.Systems {
         }
 
         public void SetStyleProperty(UIElement element, StyleProperty property) {
-            
+
             if (element.isDisabled) return;
-            
+
             AddToChangeSet(element, property);
 
             if (!StyleUtil.IsInherited(property.propertyId) || element.children == null || element.children.Count == 0) {
@@ -184,8 +173,10 @@ namespace UIForia.Systems {
             }
 
             if (!property.hasValue) {
+
                 UIElement ptr = element.parent;
-                StyleProperty parentProperty = StyleProperty.Unset(property.propertyId);
+
+                StyleProperty parentProperty = new StyleProperty(property.propertyId);
 
                 while (ptr != null) {
                     parentProperty = ptr.style.GetPropertyValue(property.propertyId);
@@ -239,29 +230,6 @@ namespace UIForia.Systems {
             if (selectors == null) return;
         }
 
-        private LightList<UIStyleSet> selectorMatchedStyles = new LightList<UIStyleSet>();
-        
-        public void UpdateSelectorStyles() {
-            
-            // run selectors, don't apply styles yet
-            
-            // for each element affected by selector last frame
-            // if disabled || no longer affected, remove selector styles from element
-
-            // need to remove styles from cases where selectors were destroyed or no longer match
-            for (int i = 0; i < selectorMatchedStyles.size; i++) {
-                UIStyleSet styleSet = selectorMatchedStyles.array[i];
-                if (!styleSet.element.isEnabled) {
-                    // remove it
-                    //styleSet.ClearSelectorStyles();
-                }
-
-                //for (int j = 0; j < styleSet.selectorStyles.size; j++) {
-                    
-               // }
-            }    
-        }
-        
         private struct ChangeSet {
 
             public UIElement element;

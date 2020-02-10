@@ -386,7 +386,216 @@ namespace UIForia.Rendering {
 
         [DebuggerStepThrough]
         public static StyleProperty Unset(StylePropertyId propertyId) {
-            return new StyleProperty(propertyId);
+            StyleProperty retn = new StyleProperty(propertyId);
+            return retn;
+        }
+
+        public static StyleProperty TransformPositionX(OffsetMeasurement length) {
+            return new StyleProperty(StylePropertyId.TransformPositionX, length);
+        }
+
+        public static StyleProperty TransformPositionY(OffsetMeasurement length) {
+            return new StyleProperty(StylePropertyId.TransformPositionY, length);
+        }
+
+        public static StyleProperty TransformPivotX(UIFixedLength length) {
+            return new StyleProperty(StylePropertyId.TransformPivotX, length);
+        }
+
+        public static StyleProperty TransformPivotY(UIFixedLength length) {
+            return new StyleProperty(StylePropertyId.TransformPivotY, length);
+        }
+
+        public static StyleProperty TransformScaleX(float scaleX) {
+            return new StyleProperty(StylePropertyId.TransformScaleX, scaleX);
+        }
+
+        public static StyleProperty TransformScaleY(float scaleY) {
+            return new StyleProperty(StylePropertyId.TransformScaleY, scaleY);
+        }
+
+        public static StyleProperty TransformRotation(float rotation) {
+            return new StyleProperty(StylePropertyId.TransformRotation, rotation);
+        }
+
+        public static StyleProperty BackgroundColor(Color color) {
+            return new StyleProperty(StylePropertyId.BackgroundColor, color);
+        }
+
+        public static StyleProperty BackgroundTint(Color color) {
+            return new StyleProperty(StylePropertyId.BackgroundTint, color);
+        }
+
+        public static StyleProperty BackgroundImage(Texture2D texture) {
+            return new StyleProperty(StylePropertyId.BackgroundImage, texture);
+        }
+
+        public static StyleProperty Opacity(float opacity) {
+            return new StyleProperty(StylePropertyId.Opacity, opacity);
+        }
+
+        public static StyleProperty Cursor(Texture2D texture) {
+            return new StyleProperty(StylePropertyId.Cursor, texture);
+        }
+
+        public static StyleProperty GridItemColStart(int colStart) {
+            return new StyleProperty(StylePropertyId.GridItemY, colStart);
+        }
+
+        public static StyleProperty GridItemColSpan(int colSpan) {
+            return new StyleProperty(StylePropertyId.GridItemHeight, colSpan);
+        }
+
+        public static StyleProperty GridItemRowStart(int rowStart) {
+            return new StyleProperty(StylePropertyId.GridItemX, rowStart);
+        }
+
+        public static StyleProperty GridItemRowSpan(int rowSpan) {
+            return new StyleProperty(StylePropertyId.GridItemWidth, rowSpan);
+        }
+        
+        public static StyleProperty GridLayoutDensity(GridLayoutDensity density) {
+            return new StyleProperty(StylePropertyId.GridLayoutDensity, (int) density);
+        }
+
+        public static StyleProperty GridLayoutColTemplate(IReadOnlyList<GridTrackSize> colTemplate) {
+            return new StyleProperty(StylePropertyId.GridLayoutColTemplate, colTemplate);
+        }
+
+        public static StyleProperty GridLayoutRowTemplate(IReadOnlyList<GridTrackSize> rowTemplate) {
+            return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, rowTemplate);
+        }
+
+        public static StyleProperty GridLayoutDirection(LayoutDirection direction) {
+            return new StyleProperty(StylePropertyId.GridLayoutDirection, (int) direction);
+        }
+
+        public static StyleProperty GridLayoutColAutoSize(IReadOnlyList<GridTrackSize> autoColSize) {
+            return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, autoColSize);
+        }
+
+        public static StyleProperty GridLayoutRowAutoSize(IReadOnlyList<GridTrackSize> autoRowSize) {
+            return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, autoRowSize);
+        }
+
+        public static StyleProperty GridLayoutColGap(float colGap) {
+            return new StyleProperty(StylePropertyId.GridLayoutColGap, colGap);
+        }
+
+        public static StyleProperty GridLayoutRowGap(float rowGap) {
+            return new StyleProperty(StylePropertyId.GridLayoutRowGap, rowGap);
+        }
+
+        public static StyleProperty GridLayoutColAlignment(CrossAxisAlignment alignment) {
+            return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int) alignment);
+        }
+
+        public static StyleProperty GridLayoutRowAlignment(CrossAxisAlignment alignment) {
+            return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int) alignment);
+        }
+
+        public static StyleProperty MarginTop(UIMeasurement marginTop) {
+            return new StyleProperty(StylePropertyId.MarginTop, marginTop);
+        }
+
+        public static StyleProperty MarginRight(UIMeasurement marginRight) {
+            return new StyleProperty(StylePropertyId.MarginRight, marginRight);
+        }
+
+        public static StyleProperty MarginBottom(UIMeasurement marginBottom) {
+            return new StyleProperty(StylePropertyId.MarginBottom, marginBottom);
+        }
+
+        public static StyleProperty MarginLeft(UIMeasurement marginLeft) {
+            return new StyleProperty(StylePropertyId.MarginLeft, marginLeft);
+        }
+
+        public static StyleProperty BorderTop(UIFixedLength borderTop) {
+            return new StyleProperty(StylePropertyId.BorderTop, borderTop);
+        }
+
+        public static StyleProperty BorderRight(UIFixedLength borderRight) {
+            return new StyleProperty(StylePropertyId.BorderRight, borderRight);
+        }
+
+        public static StyleProperty BorderBottom(UIFixedLength borderBottom) {
+            return new StyleProperty(StylePropertyId.BorderBottom, borderBottom);
+        }
+
+        public static StyleProperty BorderLeft(UIFixedLength borderLeft) {
+            return new StyleProperty(StylePropertyId.BorderLeft, borderLeft);
+        }
+
+        public static StyleProperty PaddingTop(UIFixedLength paddingTop) {
+            return new StyleProperty(StylePropertyId.PaddingTop, paddingTop);
+        }
+
+        public static StyleProperty PaddingRight(UIFixedLength paddingRight) {
+            return new StyleProperty(StylePropertyId.PaddingRight, paddingRight);
+        }
+
+        public static StyleProperty PaddingBottom(UIFixedLength paddingBottom) {
+            return new StyleProperty(StylePropertyId.PaddingBottom, paddingBottom);
+        }
+
+        public static StyleProperty PaddingLeft(UIFixedLength paddingLeft) {
+            return new StyleProperty(StylePropertyId.PaddingLeft, paddingLeft);
+        }
+
+        public static StyleProperty BorderRadiusTopLeft(UIFixedLength topLeftRadius) {
+            return new StyleProperty(StylePropertyId.BorderRadiusTopLeft, topLeftRadius);
+        }
+
+        public static StyleProperty BorderRadiusTopRight(UIFixedLength topRightRadius) {
+            return new StyleProperty(StylePropertyId.BorderRadiusTopRight, topRightRadius);
+        }
+
+        public static StyleProperty BorderRadiusBottomLeft(UIFixedLength bottomLeftRadius) {
+            return new StyleProperty(StylePropertyId.BorderRadiusBottomLeft, bottomLeftRadius);
+        }
+
+        public static StyleProperty BorderRadiusBottomRight(UIFixedLength bottomRightRadius) {
+            return new StyleProperty(StylePropertyId.BorderRadiusBottomRight, bottomRightRadius);
+        }
+
+        public static StyleProperty MinWidth(UIMeasurement minWidth) {
+            return new StyleProperty(StylePropertyId.MinWidth, minWidth);
+        }
+
+        public static StyleProperty MaxWidth(UIMeasurement maxWidth) {
+            return new StyleProperty(StylePropertyId.MaxWidth, maxWidth);
+        }
+
+        public static StyleProperty PreferredWidth(UIMeasurement preferredWidth) {
+            return new StyleProperty(StylePropertyId.PreferredWidth, preferredWidth);
+        }
+
+        public static StyleProperty MinHeight(UIMeasurement minHeight) {
+            return new StyleProperty(StylePropertyId.MinHeight, minHeight);
+        }
+
+        public static StyleProperty MaxHeight(UIMeasurement maxHeight) {
+            return new StyleProperty(StylePropertyId.MaxHeight, maxHeight);
+        }
+
+        public static StyleProperty PreferredHeight(UIMeasurement preferredHeight) {
+            return new StyleProperty(StylePropertyId.PreferredHeight, preferredHeight);
+        }
+
+        public static StyleProperty ZIndex(int zIndex) {
+            return new StyleProperty(StylePropertyId.ZIndex, zIndex);
+        }
+
+        public static StyleProperty LayerOffset(int layerOffset) {
+            return new StyleProperty(StylePropertyId.RenderLayerOffset, layerOffset);
+        }
+
+        public static StyleProperty RenderLayer(RenderLayer renderLayer) {
+            return new StyleProperty(StylePropertyId.RenderLayer, (int) renderLayer);
+        }
+
+        public static StyleProperty Font(FontAsset fontAsset) {
+            return new StyleProperty(StylePropertyId.TextFontAsset, fontAsset);
         }
 
     }

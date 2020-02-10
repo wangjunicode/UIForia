@@ -292,6 +292,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ConditionBinding() {
+            MockApplication.Generate();
             MockApplication app = MockApplication.Setup<TemplateBindingTest_ConditionalBinding>();
             TemplateBindingTest_ConditionalBinding e = (TemplateBindingTest_ConditionalBinding) app.RootElement;
 
@@ -874,6 +875,23 @@ namespace TemplateBinding {
             Assert.AreEqual("from-outer", styles[1].name);
         }
 
+        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleNameOverload.xml")]
+        public class TemplateBindingTest_StyleNameOverload : UIElement { }
+
+        [Test]
+        public void ResolveStyleNameOverload() {
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleNameOverload>();
+            TemplateBindingTest_StyleNameOverload e = (TemplateBindingTest_StyleNameOverload) app.RootElement;
+            
+            app.Update();
+            
+            Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
+            
+        }
+
+        // [Test]
+        // public void ResolveStyleNameAliased() { }
+
         [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml")]
         public class TemplateBindingTest_OnChange_Outer : UIElement {
 
@@ -1217,8 +1235,8 @@ namespace TemplateBinding {
             CompileException exception = Assert.Throws<CompileException>(() => MockApplication.Setup<TemplateBindingTest_NamespaceOuter>());
             Assert.IsTrue(exception.Message.Contains("Unable to resolve type Color"));
         }
-        
-         [Template("Data/TemplateBindings/Namespaces/TemplateBindingTest_Namespace_Resolve_Outer.xml")]
+
+        [Template("Data/TemplateBindings/Namespaces/TemplateBindingTest_Namespace_Resolve_Outer.xml")]
         public class TemplateBindingTest_Namespace_Resolve_Outer : UIElement {
 
             public LightList<string> list;
@@ -1237,13 +1255,13 @@ namespace TemplateBinding {
             MockApplication app = MockApplication.Setup<TemplateBindingTest_Namespace_Resolve_Outer>();
             TemplateBindingTest_Namespace_Resolve_Outer e = (TemplateBindingTest_Namespace_Resolve_Outer) app.RootElement;
             TemplateBindingTest_Namespace_Resolve_Inner inner = e[0] as TemplateBindingTest_Namespace_Resolve_Inner;
-            
+
             app.Update();
-            
+
             Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
             Assert.IsNotNull(inner.color);
         }
-        
+
         // [Test]
         // public void RespectInnerNamespaceUsage() {
         //     MockApplication app = 
@@ -1262,11 +1280,10 @@ namespace TemplateBinding {
 
     }
 
-
 }
 
-    namespace NamespaceTest {
+namespace NamespaceTest {
 
-        public class Color { }
+    public class Color { }
 
-    }
+}

@@ -81,7 +81,7 @@ namespace UIForia.Rendering {
         TransformPivotX,
         TransformPivotY,
         TransformRotation,
-        TransformMatrix,
+        // TransformMatrix,
 
         TextColor,
         TextFontAsset,

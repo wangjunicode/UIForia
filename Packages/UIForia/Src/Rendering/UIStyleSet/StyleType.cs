@@ -3,7 +3,7 @@ using System;
 namespace UIForia.Rendering {
 
     [Flags]
-    public enum StyleType {
+    public enum StyleType : byte {
 
         /// Styles applied to the element type, overrides the built-in default styles
         Implicit = 1 << 1,

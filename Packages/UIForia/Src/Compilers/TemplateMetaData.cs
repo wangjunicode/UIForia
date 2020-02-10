@@ -22,7 +22,6 @@ namespace UIForia.Compilers {
 
         public int id;
         public string filePath;
-        public int usages;
         public StyleSheetReference[] styleReferences;
 
         public CompiledTemplateData compiledTemplateData;
@@ -33,7 +32,6 @@ namespace UIForia.Compilers {
 
         private static readonly IndexedStyleRef[] s_EmptySearchMap = { };
         private static readonly IndexedAnimationRef[] s_EmptyAnimationSearchMap = { };
-        private static readonly char[] s_SplitChar = {'.'};
 
         public TemplateMetaData(int id, string filePath, UIStyleGroupContainer[] styleMap, StyleSheetReference[] styleReferences) {
             this.id = id;
@@ -43,11 +41,10 @@ namespace UIForia.Compilers {
         }
 
         public void BuildSearchMap() {
-            
             if (styleSearchMap != null) {
                 return;
             }
-            
+
             if (styleReferences == null) {
                 styleSearchMap = s_EmptySearchMap;
                 animationSearchMap = s_EmptyAnimationSearchMap;
@@ -70,20 +67,28 @@ namespace UIForia.Compilers {
                 for (int i = 0; i < styleReferences.Length; i++) {
                     string alias = styleReferences[i].alias;
                     StyleSheet sheet = styleReferences[i].styleSheet;
-
+                    
                     if (alias != null && alias.Length != 0) {
                         for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
-                            styleSearchMap[cnt++] = new IndexedStyleRef(alias + "." + sheet.styleGroupContainers[j].name, sheet.styleGroupContainers[j]);
+                            string name = sheet.styleGroupContainers[j].name;
+                            styleSearchMap[cnt++] = new IndexedStyleRef(i, name, alias + "." + name, sheet.styleGroupContainers[j]);
                         }
                     }
                     else {
                         for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
-                            styleSearchMap[cnt++] = new IndexedStyleRef(sheet.styleGroupContainers[j].name, sheet.styleGroupContainers[j]);
+                            string name = sheet.styleGroupContainers[j].name;
+                            styleSearchMap[cnt++] = new IndexedStyleRef(i, name, null, sheet.styleGroupContainers[j]);
                         }
                     }
                 }
 
-                Array.Sort(styleSearchMap, (a, b) => string.CompareOrdinal(a.name, b.name));
+                Array.Sort(styleSearchMap, (a, b) => {
+                    if (a.name != b.name) {
+                        return string.CompareOrdinal(a.name, b.name);
+                    }
+
+                    return a.index - b.index;
+                });
             }
             else {
                 styleSearchMap = s_EmptySearchMap;
@@ -121,11 +126,15 @@ namespace UIForia.Compilers {
 
         private struct IndexedStyleRef {
 
+            public readonly int index;
             public readonly string name;
+            public readonly string aliasedName;
             public readonly UIStyleGroupContainer container;
 
-            public IndexedStyleRef(string aliasedName, UIStyleGroupContainer container) {
-                this.name = aliasedName;
+            public IndexedStyleRef(int index, string name, string aliasedName, UIStyleGroupContainer container) {
+                this.index = index;
+                this.name = name;
+                this.aliasedName = aliasedName;
                 this.container = container;
             }
 
@@ -147,12 +156,28 @@ namespace UIForia.Compilers {
             if (string.IsNullOrEmpty(name) || styleSearchMap == null) {
                 return null;
             }
-
+            
             int idx = BinarySearchStyle(name);
 
+            if (idx >= 0) {
+                
+                while (idx > 0) {
+                    if (styleSearchMap[idx - 1].name == name) {
+                        idx--;
+                    }
+                    else {
+                        return styleSearchMap[idx].container;
+                    }
+                }
+
+                return styleSearchMap[idx].container;
+            }
+            else {
+                idx = BinarySearchAliasedStyle(name);
+            }
+            
             return idx >= 0 ? styleSearchMap[idx].container : null;
         }
-
 
         public int ResolveStyleNameSlow(string name) {
             if (styleReferences == null) return -1;
@@ -211,9 +236,34 @@ namespace UIForia.Compilers {
             return ~num1;
         }
 
-        private int BinarySearchStyle(string name) {
+        private int BinarySearchAliasedStyle(string name) {
             int num1 = 0;
             int num2 = styleSearchMap.Length - 1;
+
+            while (num1 <= num2) {
+                int index1 = num1 + (num2 - num1 >> 1);
+
+                int num3 = string.CompareOrdinal(styleSearchMap[index1].aliasedName, name);
+
+                if (num3 == 0) {
+                    return index1;
+                }
+
+                if (num3 < 0) {
+                    num1 = index1 + 1;
+                }
+                else {
+                    num2 = index1 - 1;
+                }
+            }
+
+            return ~num1;
+        }
+        
+         private int BinarySearchStyle(string name) {
+            int num1 = 0;
+            int num2 = styleSearchMap.Length - 1;
+
             while (num1 <= num2) {
                 int index1 = num1 + (num2 - num1 >> 1);
 

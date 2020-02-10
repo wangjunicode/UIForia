@@ -218,10 +218,10 @@ namespace UIForia.Elements {
             }
 
             if (active && isSelfDisabled) {
-                View.application.DoEnableElement(this);
+                application.DoEnableElement(this);
             }
             else if (!active && isSelfEnabled) {
-                View.application.DoDisableElement(this);
+                application.DoDisableElement(this);
             }
         }
 

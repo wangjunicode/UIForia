@@ -1208,7 +1208,7 @@ namespace UIForia.Compilers {
                     continue;
                 }
 
-                if (found) {
+                if (found) { // todo -- is this bad? with slot merging maybe not
                     throw CompileException.MultipleConditionalBindings(templateNode.TemplateNodeDebugData);
                 }
 
@@ -1260,11 +1260,15 @@ namespace UIForia.Compilers {
 
         private void CompileAfterPropertyUpdates(ProcessedType processedType) {
             if (processedType.requiresAfterPropertyUpdates) {
-                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetCastElement(), s_UIElement_OnAfterPropertyBindings));
+                ParameterExpression element = updateCompiler.GetCastElement();
+
+                updateCompiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabled), Expression.Constant(true), () => { updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetCastElement(), s_UIElement_OnAfterPropertyBindings)); });
             }
 
             if (processedType.requiresUpdateFn) {
-                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetCastElement(), s_UIElement_OnUpdate));
+                ParameterExpression element = updateCompiler.GetCastElement();
+
+                updateCompiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabled), Expression.Constant(true), () => { updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetCastElement(), s_UIElement_OnUpdate)); });
             }
         }
 
@@ -2197,25 +2201,22 @@ namespace UIForia.Compilers {
             try {
                 ParameterExpression element = compiler.GetElement();
 
-                compiler.BeginIsolatedSection();
-
                 compiler.SetupAttributeData(attr);
 
                 SetImplicitContext(compiler, attr);
 
+                compiler.CommentNewLineBefore($"if=\"{attr.value}\"");
                 MethodCallExpression setEnabled = ExpressionFactory.CallInstanceUnchecked(element, s_UIElement_SetEnabled, compiler.Value(attr.value));
                 compiler.RawExpression(setEnabled);
-                compiler.CommentNewLineBefore($"if=\"{attr.value}\"");
 
                 // if(!element.isEnabled) return
-                compiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabled), Expression.Constant(false), () => { compiler.Return(); });
+                // compiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabled), Expression.Constant(false), () => { compiler.Return(); });
             }
             catch (Exception e) {
-                compiler.EndIsolatedSection();
                 Debug.LogError(e);
             }
 
-            compiler.EndIsolatedSection();
+            // compiler.EndIsolatedSection();
         }
 
         private static void CompileAttributeBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
@@ -2553,7 +2554,7 @@ namespace UIForia.Compilers {
                 Expression.Constant(templateId)
             );
         }
-        
+
         private ProcessedType ResolveGenericElementType(IList<string> namespaces, Type rootType, TemplateNode templateNode) {
             ProcessedType processedType = templateNode.processedType;
 

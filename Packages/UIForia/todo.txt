@@ -1,6 +1,5 @@
 
 Template Compiler
-    Support exposed slots (bug)
     Support [Required] attribute 
     Support dictionary repeat
     Support keyboard
@@ -19,6 +18,4 @@ verify Margin for first last element in containers
 
 Using namespace not working
 styles with alias not looked up 
-slots have the wrong context
-$event doesn't work everywhere
 some generic type resolution case still doesn't work

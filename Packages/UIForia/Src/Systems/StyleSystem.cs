@@ -106,37 +106,7 @@ namespace UIForia.Systems {
 
         public void OnViewRemoved(UIView view) { }
 
-        public void OnElementEnabled(UIElement element) {
-            // if (element.parent != null) {
-            //     int count = StyleUtil.InheritedProperties.Count;
-            //     UIStyleSet parentStyle = element.parent.style;
-            //     StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
-            //     inheritedProperties.EnsureCapacity(count);
-            //     StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
-            //
-            //     for (int i = 0; i < count; i++) {
-            //         inheritedPropertiesArray[i] = parentStyle.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
-            //     }
-            //
-            //     inheritedProperties.Count = count;
-            //     OnElementEnabledStep(element, inheritedProperties);
-            //     StructList<StyleProperty>.Release(ref inheritedProperties);
-            // }
-            // else {
-            //     
-            //     StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
-            //     inheritedProperties.EnsureCapacity(StyleUtil.InheritedProperties.Count);
-            //     StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
-            //
-            //     for (int i = 0; i < inheritedProperties.Count; i++) {
-            //         inheritedPropertiesArray[i] = DefaultStyleValues_Generated.GetPropertyValue(StyleUtil.InheritedProperties[i]);
-            //     }
-            //
-            //     OnElementEnabledStep(element, inheritedProperties);
-            //     StructList<StyleProperty>.Release(ref inheritedProperties);
-            // }
-
-        }
+        public void OnElementEnabled(UIElement element) { }
 
         public void OnElementDisabled(UIElement element) {
             m_ChangeSets.Remove(element.id);

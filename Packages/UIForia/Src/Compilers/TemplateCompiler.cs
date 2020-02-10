@@ -2376,7 +2376,7 @@ namespace UIForia.Compilers {
 
             CompileChangeHandlerPropertyBindingStore(processedType.rawType, attr, changeHandlerAttrs, right);
 
-            if ((attr.flags & AttributeFlags.Const) != 0) {
+            if ((attr.flags & AttributeFlags.Const) == 0) {
                 StructList<ProcessedType.PropertyChangeHandlerDesc> changeHandlers = StructList<ProcessedType.PropertyChangeHandlerDesc>.Get();
                 processedType.GetChangeHandlers(attr.key, changeHandlers);
 

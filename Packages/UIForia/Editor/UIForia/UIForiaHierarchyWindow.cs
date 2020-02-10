@@ -111,6 +111,11 @@ namespace UIForia.Editor {
 
             if (app == null) return;
 
+            if (s_SelectedApplication != null) {
+                s_SelectedApplication.RenderSystem.DrawDebugOverlay2 -= DrawDebugOverlay;
+            }
+
+            app.RenderSystem.DrawDebugOverlay2 += DrawDebugOverlay;
             treeView = new HierarchyView(app.GetViews(), state);
             treeView.onSelectionChanged += OnElementSelectionChanged;
 //            treeView.view = app.GetView(0);
@@ -170,7 +175,7 @@ namespace UIForia.Editor {
                 app.onElementDestroyed += Refresh;
                 //app.onViewAdded += Refresh;
                 app.onElementEnabled += Refresh;
-                //app.onRefresh += OnRefresh;
+                app.onRefresh += OnRefresh;
             }
             
             if (s_SelectedApplication != null) {

@@ -221,13 +221,19 @@ namespace UIForia.Systems {
                     UIElement child = currentElement.children.array[iteratorIndex];
                     LinqBindingNode bindingNode = child.bindingNode;
 
+                    if ((child.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
+                        iteratorIndex++;
+                        continue;
+                    }
+
                     // if was enabled in this iteration, skip it for now
                     if (bindingNode != null && bindingNode.lastBeforeUpdateFrame != currentFrameId) {
                         bindingNode.lastBeforeUpdateFrame = currentFrameId;
                         bindingNode.updateBindings?.Invoke(bindingNode.root, child);
                     }
-
+                    
                     iteratorIndex++;
+                    
                 }
 
                 int childCount = currentElement.children.size;

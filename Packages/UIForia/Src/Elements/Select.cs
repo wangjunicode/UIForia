@@ -63,7 +63,7 @@ namespace UIForia.Elements {
         public bool validSelection => options != null && selectedIndex >= 0 && selectedIndex < options.Count;
 
         [OnPropertyChanged(nameof(options))]
-        private void OnSelectionChanged(string propertyName) {
+        private void OnSelectionChanged() {
             // if (previousOptions != options) {
             //     if (previousOptions != null) {
             //     }
@@ -92,7 +92,7 @@ namespace UIForia.Elements {
         }
 
         [OnPropertyChanged(nameof(selectedValue))]
-        private void OnSelectedValueChanged(string propertyName) {
+        public void OnSelectedValueChanged() {
             if (options == null) return;
             for (int i = 0; i < options.Count; i++) {
                 if (options[i].Value.Equals(selectedValue)) {
@@ -111,7 +111,7 @@ namespace UIForia.Elements {
         }
 
         [OnPropertyChanged(nameof(selectedIndex))]
-        private void OnSelectedIndexChanged(string propertyName) {
+        public void OnSelectedIndexChanged() {
             if (options == null) return;
 
             if (selectedIndex < 0 || selectedIndex >= options.Count) {

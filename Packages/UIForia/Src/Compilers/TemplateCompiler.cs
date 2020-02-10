@@ -2158,7 +2158,6 @@ namespace UIForia.Compilers {
                 parameters.Add(new Parameter(eventHandlerTypes[i], argName));
             }
 
-            LightList<Parameter>.Release(ref parameters);
             ASTNode astNode = ExpressionParser.Parse(attr.value);
 
             if (astNode.type == ASTNodeType.Identifier) {
@@ -2174,6 +2173,7 @@ namespace UIForia.Compilers {
                 if (ReflectionUtil.IsProperty(compiler.rootElementType, idNode.name, out PropertyInfo propertyInfo)) {
                     if (eventInfo.EventHandlerType.IsAssignableFrom(propertyInfo.PropertyType)) {
                         compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), Expression.Property(compiler.GetCastRoot(), propertyInfo));
+                        return;
                     }
                 }
 
@@ -2194,6 +2194,8 @@ namespace UIForia.Compilers {
                 compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), evtFn);
                 closure.Release();
             }
+            LightList<Parameter>.Release(ref parameters);
+
         }
 
         private static void CompileConditionalBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {

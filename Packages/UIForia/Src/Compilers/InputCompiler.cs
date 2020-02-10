@@ -192,6 +192,8 @@ namespace UIForia.Compilers {
                 GetKeyboardEventHandlers(methodInfo, parameters, customAttributes, handlers);
 
                 GetDragCreators(methodInfo, parameters, customAttributes, handlers);
+
+                GetDragHandlers(methodInfo, parameters, customAttributes, handlers);
             }
 
             if (handlers.size == 0) {
@@ -268,7 +270,32 @@ namespace UIForia.Compilers {
             }
         }
 
-        private static void GetMouseEventHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
+        private static void GetDragHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
+            for (int i = 0; i < customAttributes.Length; i++) {
+                DragEventHandlerAttribute attr = customAttributes[i] as DragEventHandlerAttribute;
+
+                if (attr == null) {
+                    continue;
+                }
+
+                if (parameters.Length > 1 || (parameters.Length > 1 && parameters[0].ParameterType != typeof(DragEvent))) {
+                    throw new Exception("Method with attribute " + customAttributes.GetType().Name + " must take 0 arguments or 1 argument of type " + nameof(DragEvent));
+                }
+
+                handlers.Add(new InputHandler() {
+                    descriptor = new InputHandlerDescriptor() {
+                        eventPhase = attr.phase,
+                        modifiers = attr.modifiers,
+                        requiresFocus = false,
+                        handlerType = attr.eventType
+                    },
+                    methodInfo = methodInfo,
+                    useEventParameter = parameters.Length == 1
+                });
+            }
+        }
+        
+         private static void GetMouseEventHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
             for (int i = 0; i < customAttributes.Length; i++) {
                 MouseEventHandlerAttribute attr = customAttributes[i] as MouseEventHandlerAttribute;
 

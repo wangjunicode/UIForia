@@ -292,7 +292,6 @@ namespace TemplateBinding {
 
         [Test]
         public void ConditionBinding() {
-            MockApplication.Generate();
             MockApplication app = MockApplication.Setup<TemplateBindingTest_ConditionalBinding>();
             TemplateBindingTest_ConditionalBinding e = (TemplateBindingTest_ConditionalBinding) app.RootElement;
 

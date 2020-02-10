@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Systems.SelectorSystem;
-using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
-using Unity.Collections.LowLevel.Unsafe;
 
 namespace UIForia.Systems {
 

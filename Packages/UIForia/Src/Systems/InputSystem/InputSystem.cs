@@ -785,9 +785,7 @@ namespace UIForia.Systems {
             m_EventPropagator.Reset(mouseState);
 
             m_EventPropagator.origin = elements[0];
-            for (int i = 0;
-                i < elements.Count;
-                i++) {
+            for (int i = 0; i < elements.Count; i++) {
                 UIElement element = elements[i];
                 if (element.isDestroyed || element.isDisabled) {
                     continue;

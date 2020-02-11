@@ -590,7 +590,7 @@ namespace UIForia.Systems {
                 for (int j = 0; j < element.inputHandlers.eventHandlers.size; j++) {
                     ref InputHandlerGroup.HandlerData handler = ref element.inputHandlers.eventHandlers.array[j];
 
-                    if (handler.eventType != eventType) {
+                    if ((handler.eventType & eventType) == 0) {
                         continue;
                     }
 

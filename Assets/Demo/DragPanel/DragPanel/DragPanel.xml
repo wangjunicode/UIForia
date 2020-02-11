@@ -1,0 +1,17 @@
+<UITemplate>
+    
+    <Style path="Demo/DragPanel/DragPanel/DragPanel.style"/>
+    
+    <Contents style="drag-panel">
+
+        <Repeat list="items">
+
+            <define:Children expose:item="$item" 
+                             drag:create="BeginDrag($event)" 
+                             drag:enter="DragEnter($event)"
+                             drag:exit="DragExit($event)"/>
+
+        </Repeat>
+
+    </Contents>
+</UITemplate>

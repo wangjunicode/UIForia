@@ -1,0 +1,13 @@
+<UITemplate>
+    
+    <Style path="Demo/DragPanel/DragPanelContainer.style"/>
+    
+    <Contents style="drag-panel-container">
+        
+        <DragPanel items="items">
+            Here is my item {$item}                            
+        </DragPanel>
+        
+    </Contents>
+    
+</UITemplate>

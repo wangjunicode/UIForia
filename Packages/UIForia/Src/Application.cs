@@ -6,6 +6,7 @@ using Src.Systems;
 using UIForia.Animation;
 using UIForia.Compilers;
 using UIForia.Elements;
+using UIForia.Exceptions;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Routing;
@@ -166,8 +167,9 @@ namespace UIForia {
 
                 return view;
             }
+            
+            throw new TemplateNotFoundException($"Unable to find a template for {typeof(T)}. This is probably because you are trying to load this template dynamically and did include the type in the ${nameof(TemplateCompiler )}");
 
-            return null;
         }
 
         public UIView CreateView<T>(string name, Size size) where T : UIElement {

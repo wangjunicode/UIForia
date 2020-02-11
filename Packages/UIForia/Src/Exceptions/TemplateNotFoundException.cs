@@ -9,6 +9,8 @@ namespace UIForia.Exceptions {
         
         public TemplateNotFoundException(string xmlPath, string templateId) : base($"Unable to template at path {xmlPath} with id `{templateId}`") { }
 
+        public TemplateNotFoundException(string message) : base(message) { }
+
     }
 
 }

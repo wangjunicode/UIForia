@@ -3,7 +3,6 @@ using System.Globalization;
 using System.Text;
 using JetBrains.Annotations;
 using UIForia.Attributes;
-using UIForia.Parsing;
 using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.UIInput;
@@ -187,8 +186,6 @@ namespace UIForia.Elements {
         public IInputDeserializer<T> deserializer;
         
         public int MaxLength = Int32.MaxValue;
-        
-        // public event Action<T> onValueChanged;
 
         public override void OnCreate() {
             base.OnCreate();
@@ -203,9 +200,9 @@ namespace UIForia.Elements {
         }
 
         [OnPropertyChanged(nameof(value))]
-        public void OnInputValueChanged(T val) {
+        public void OnInputValueChanged() {
             string oldText = text;
-            text = serializer.Serialize(val) ?? string.Empty;
+            text = serializer.Serialize(value) ?? string.Empty;
 
             selectionRange = new SelectionRange(int.MaxValue);
             T v = deserializer.Deserialize(text);
@@ -215,8 +212,6 @@ namespace UIForia.Elements {
             }
 
             value = v;
-
-            // onValueChanged?.Invoke(v);
 
             if (oldText != text) {
                 EmitTextChanged();
@@ -437,8 +432,6 @@ namespace UIForia.Elements {
 
         protected Vector2 textScroll = new Vector2(0, 0);
 
-        public event Action<string> onTextChanged;
-
         protected float keyLockTimestamp;
 
         private bool isReady;
@@ -479,7 +472,6 @@ namespace UIForia.Elements {
 
         protected void EmitTextChanged() {
             textElement.SetText(text);
-            onTextChanged?.Invoke(text);
         }
 
         protected abstract void HandleCharactersEntered(string characters);

@@ -2514,7 +2514,9 @@ namespace UIForia.Compilers {
         // todo accept compiler? or always use update?
         private void CompileChangeHandlerStore(Type type, Expression value, ref ChangeHandlerDefinition changeHandler) {
             ref AttributeDefinition attr = ref changeHandler.attributeDefinition;
-
+            createdCompiler.SetupAttributeData(attr);
+            updateCompiler.SetupAttributeData(attr);
+            
             SetImplicitContext(createdCompiler, attr);
             SetImplicitContext(updateCompiler, attr);
 

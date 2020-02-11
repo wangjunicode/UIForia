@@ -79,22 +79,25 @@ namespace UIForia.Compilers.Style {
                 }
             }
 
+            StyleConstant referencedConstant;
             if (constant.constReferenceNode.children.Count > 0) {
                 if (context.importedStyleConstants.ContainsKey(constant.constReferenceNode.identifier)) {
                     DotAccessNode importedConstant = (DotAccessNode) constant.constReferenceNode.children[0];
 
-                    StyleConstant importedStyleConstant = context.importedStyleConstants[constant.constReferenceNode.identifier]
+                    referencedConstant = context.importedStyleConstants[constant.constReferenceNode.identifier]
                         .Find(importedConstant.propertyName, s_FindStyleConstant);
 
-                    if (importedStyleConstant.name == null) {
+                    if (referencedConstant.name == null) {
                         throw new CompileException(importedConstant, "Could not find referenced property in imported scope.");
                     }
                 }
-
-                throw new CompileException(constant.constReferenceNode, "Constants cannot reference members of other constants.");
+                else {
+                    throw new CompileException(constant.constReferenceNode, "Constants cannot reference members of other constants.");
+                }
             }
-
-            StyleConstant referencedConstant = ResolveReference(context, constant.constReferenceNode);
+            else {
+                referencedConstant = ResolveReference(context, constant.constReferenceNode);
+            }
 
             StyleConstant styleConstant = new StyleConstant {
                 name = constant.name,

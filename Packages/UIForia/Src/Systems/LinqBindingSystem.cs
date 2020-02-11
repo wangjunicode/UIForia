@@ -205,6 +205,16 @@ namespace UIForia.Systems {
                 elemRefStack[size++].element = activeBuffer.array[i];
             }
 
+            if (activeBuffer.size > 0) {
+                LinqBindingNode bindingNode = activeBuffer.array[0].bindingNode;
+
+                // if was enabled in this iteration, skip it for now
+                if (bindingNode != null && bindingNode.lastBeforeUpdateFrame != currentFrameId) {
+                    bindingNode.lastBeforeUpdateFrame = currentFrameId;
+                    bindingNode.updateBindings?.Invoke(bindingNode.root,  activeBuffer.array[0]);
+                }
+            }
+            
             ElemRef[] stack = elemRefStack;
 
             while (size != 0) {

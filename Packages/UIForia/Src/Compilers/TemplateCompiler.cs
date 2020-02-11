@@ -2259,6 +2259,9 @@ namespace UIForia.Compilers {
         private static void CompileConditionalBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
             // cannot have more than 1 conditional    
             try {
+
+                compiler.SetupAttributeData(attr);
+
                 ParameterExpression element = compiler.GetElement();
 
                 compiler.SetupAttributeData(attr);

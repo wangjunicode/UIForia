@@ -878,6 +878,19 @@ namespace TemplateBinding {
 
         }
 
+        [Template("Data/TemplateBindings/TemplateBindingTest_SyncBinding.xml#sync_nested")]
+        public class TemplateBindingTest_SyncBinding_SyncNested : UIElement {
+
+            public struct Nested {
+
+                public string syncedValue;
+
+            }
+
+            public Nested nested;
+
+        }
+
         [Template("Data/TemplateBindings/TemplateBindingTest_SyncBinding.xml#fake_input")]
         public class TemplateBindingTest_SyncBinding_FakeInput : UIElement {
 
@@ -901,6 +914,20 @@ namespace TemplateBinding {
 
             Assert.AreEqual("synced__afterSync", child.value);
             Assert.AreEqual("synced__afterSync", e.syncedValue);
+        }
+
+        [Test]
+        public void SyncBinding_SyncNested() {
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_SyncBinding_SyncNested>();
+            TemplateBindingTest_SyncBinding_SyncNested e = (TemplateBindingTest_SyncBinding_SyncNested) app.RootElement;
+            TemplateBindingTest_SyncBinding_FakeInput child = (TemplateBindingTest_SyncBinding_FakeInput) e[0];
+
+            e.nested.syncedValue = "synced";
+
+            app.Update();
+
+            Assert.AreEqual("synced__afterSync", child.value);
+            Assert.AreEqual("synced__afterSync", e.nested.syncedValue);
         }
 
 

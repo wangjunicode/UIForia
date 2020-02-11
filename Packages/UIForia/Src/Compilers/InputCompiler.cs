@@ -229,6 +229,11 @@ namespace UIForia.Compilers {
                     throw CompileException.InvalidDragCreatorAnnotationReturnType(methodInfo.Name, methodInfo.DeclaringType, methodInfo.ReturnType);
                 }
 
+
+                if (!methodInfo.IsPublic || methodInfo.IsStatic) {
+                    throw new CompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as a drag creator");
+                }
+
                 handlers.Add(new InputHandler() {
                     descriptor = new InputHandlerDescriptor() {
                         eventPhase = attr.phase,
@@ -253,6 +258,11 @@ namespace UIForia.Compilers {
 
                 if (parameters.Length > 1 || (parameters.Length > 1 && parameters[0].ParameterType != typeof(KeyboardInputEvent))) {
                     throw new Exception("Method with attribute " + customAttributes.GetType().Name + " must take 0 arguments or 1 argument of type " + nameof(KeyboardInputEvent));
+                }
+
+
+                if (!methodInfo.IsPublic || methodInfo.IsStatic) {
+                    throw new CompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
                 }
 
                 handlers.Add(new InputHandler() {
@@ -280,6 +290,11 @@ namespace UIForia.Compilers {
 
                 if (parameters.Length > 1 || (parameters.Length > 1 && parameters[0].ParameterType != typeof(DragEvent))) {
                     throw new Exception("Method with attribute " + customAttributes.GetType().Name + " must take 0 arguments or 1 argument of type " + nameof(DragEvent));
+                }
+
+
+                if (!methodInfo.IsPublic || methodInfo.IsStatic) {
+                    throw new CompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
                 }
 
                 handlers.Add(new InputHandler() {

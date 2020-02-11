@@ -366,14 +366,14 @@ namespace UIForia.Compilers {
             }
 
             // for (int i = 0; i < statements.Count - 1; i++) {
-                // if (statements[i].NodeType == ExpressionType.Assign) {
-                    // BinaryExpression assignment = (BinaryExpression) statements[i];
-                    // if (assignment.Left.Type == typeof(string)) {
-                        // if (assignment.Right.NodeType == ExpressionType.Call) {
-                            // MethodCallExpression callExpression = assignment.Right as MethodCallExpression;
-                        // }
-                    // }
-                // }
+            // if (statements[i].NodeType == ExpressionType.Assign) {
+            // BinaryExpression assignment = (BinaryExpression) statements[i];
+            // if (assignment.Left.Type == typeof(string)) {
+            // if (assignment.Right.NodeType == ExpressionType.Call) {
+            // MethodCallExpression callExpression = assignment.Right as MethodCallExpression;
+            // }
+            // }
+            // }
             // }
 
             // if (statements[statements.size - 1].NodeType == ExpressionType.Call) {
@@ -773,20 +773,9 @@ namespace UIForia.Compilers {
                 }
 
                 if (implicitContext != null) {
-                    // todo -- still wrong
-//                    Expression last = MemberAccess(implicitContext.Value.expression, idNode.name);
-//                    Expression variable = currentBlock.AddInternalVariable(last.Type, idNode.name + "_assign");
-//                    currentBlock.AddStatement(Expression.Assign(variable, last));
-//                    retn.AddAssignment(variable, last);
                     retn.isSimpleAssignment = true;
                     retn.targetExpression = MemberAccess(implicitContext.Value.expression, idNode.name);
                     return retn;
-
-//                    if (TryResolveInstanceOrStaticMemberAccess(implicitContext.Value.expression, idNode.name, out Expression expression)) {
-//                        retn.isSimpleAssignment = true;
-//                        retn.targetExpression = expression;
-//                        return retn;
-//                    }
                 }
 
                 ParameterExpression head = ResolveVariableName(idNode.name);
@@ -806,8 +795,16 @@ namespace UIForia.Compilers {
 
                 // only supports dot access for now and only variables, no null checking
 
-                ParameterExpression variable = ResolveVariableName(memberNode.identifier);
+                int start = 0;
 
+                if (implicitContext.HasValue) {
+                    if (TryCreateVariableExpression(implicitContext.Value.expression, memberNode, ref start, out Expression head)) {
+                        retn.targetExpression = VisitAccessExpressionParts(head, parts, ref start);
+                        return retn;
+                    }
+                }
+
+                ParameterExpression variable = ResolveVariableName(memberNode.identifier);
                 if (variable == null) {
                     throw CompileException.UnresolvedIdentifier(memberNode.identifier + ". This might be because you are compiling an assignable statement that is more than just a variable");
                 }
@@ -1401,6 +1398,7 @@ namespace UIForia.Compilers {
                     LightList<MethodInfo>.Release(ref methodInfos);
                     return true;
                 }
+
                 LightList<MethodInfo>.Release(ref methodInfos);
             }
 

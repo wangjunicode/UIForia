@@ -48,7 +48,6 @@ namespace UIForia.Compilers {
                 output = new StructList<AttributeDefinition>(outerAttributes.size);
                 for (int i = 0; i < outerAttributes.size; i++) {
                     AttributeDefinition attr = outerAttributes.array[i];
-                    attr.flags |= AttributeFlags.InnerContext;
                     output.AddUnsafe(attr);
                 }
 

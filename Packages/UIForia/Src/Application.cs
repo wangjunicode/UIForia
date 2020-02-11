@@ -152,12 +152,15 @@ namespace UIForia {
         }
 
         public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
-            
-            Func<UIElement, TemplateScope, UIElement> template = templateData.GetTemplate<T>(out UIElement element);
 
-            if (template != null) {
-                template.Invoke(element, new TemplateScope(this));
+            if(templateData.TryGetTemplate<T>(out DynamicTemplate dynamicTemplate)) {
+                
+                UIElement element = CreateElementFromPool(dynamicTemplate.typeId, null, 0, 0, dynamicTemplate.templateId);
+
+                HydrateTemplate(dynamicTemplate.templateId, element, new TemplateScope(this));
+
                 UIView view = new UIView(this, name, element, matrix, size);
+
                 views.Add(view);
 
                 for (int i = 0; i < systems.Count; i++) {
@@ -168,6 +171,7 @@ namespace UIForia {
             }
 
             return null;
+
         }
 
         public UIView CreateView<T>(string name, Size size) where T : UIElement {

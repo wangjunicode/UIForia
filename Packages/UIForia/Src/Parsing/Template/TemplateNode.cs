@@ -12,7 +12,7 @@ namespace UIForia.Parsing {
         public TemplateLineInfo lineInfo;
 
         public override string ToString() {
-            return $"<{tagName}> @ {fileName} line {lineInfo}";
+            return $"<{tagName}> @({fileName} line {lineInfo})";
         }
 
     }

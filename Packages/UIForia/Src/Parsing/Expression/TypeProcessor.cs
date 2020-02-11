@@ -82,6 +82,7 @@ namespace UIForia.Parsing {
 
                         if (!filteredOut && currentType.IsClass && currentType.Name[0] != '<' && currentType.IsGenericTypeDefinition) {
                             if (currentType.IsSubclassOf(typeof(UIElement))) {
+                            
                                 Attribute[] attrs = Attribute.GetCustomAttributes(currentType, false);
                                 string tagName = GetTemplateAttribute(currentType, attrs, out TemplateAttribute templateAttr);
 

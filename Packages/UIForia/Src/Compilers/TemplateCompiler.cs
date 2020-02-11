@@ -278,6 +278,10 @@ namespace UIForia.Compilers {
 
             ProcessedType processedType = templateRootNode.processedType;
 
+            if (!processedType.rawType.IsPublic) {
+                throw new CompileException($"{processedType.rawType} is not public, but must be in order to be used in a template. {templateRootNode.TemplateNodeDebugData}");
+            }
+
             if (isRoot) {
                 ctx.Comment("new " + TypeNameGenerator.GetTypeName(processedType.rawType));
 

@@ -341,8 +341,8 @@ namespace TemplateBinding {
             public Thing thing;
 
         }
-        
-          [Test]
+
+        [Test]
         public void EventBinding_DotAccess() {
             MockApplication app = MockApplication.Setup<TestTemplateBinding_EventBinding_MethodGroup_AccessExpr>();
             TestTemplateBinding_EventBinding_MethodGroup_AccessExpr e = (TestTemplateBinding_EventBinding_MethodGroup_AccessExpr) app.RootElement;
@@ -953,8 +953,18 @@ namespace TemplateBinding {
             Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
         }
 
-        // [Test]
-        // public void ResolveStyleNameAliased() { }
+        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleNameAliased.xml")]
+        public class TemplateBindingTest_StyleNameAliased : UIElement { }
+
+        [Test]
+        public void ResolveStyleNameAliased() {
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleNameAliased>();
+            TemplateBindingTest_StyleNameAliased e = (TemplateBindingTest_StyleNameAliased) app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual(Color.blue, e[0].style.BackgroundColor);
+        }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml")]
         public class TemplateBindingTest_OnChange_Outer : UIElement {

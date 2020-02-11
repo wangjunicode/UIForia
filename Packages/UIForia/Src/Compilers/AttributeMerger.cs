@@ -1,4 +1,3 @@
-using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
@@ -39,15 +38,35 @@ namespace UIForia.Compilers {
         // - Context variables are ok
 
         public static StructList<AttributeDefinition> MergeExpandedAttributes(StructList<AttributeDefinition> innerAttributes, StructList<AttributeDefinition> outerAttributes) {
+            StructList<AttributeDefinition> output = null;
+
             if (innerAttributes == null) {
-                return outerAttributes;
+                if (outerAttributes == null) {
+                    return null;
+                }
+
+                output = new StructList<AttributeDefinition>(outerAttributes.size);
+                for (int i = 0; i < outerAttributes.size; i++) {
+                    AttributeDefinition attr = outerAttributes.array[i];
+                    attr.flags |= AttributeFlags.InnerContext;
+                    output.AddUnsafe(attr);
+                }
+
+                return output;
             }
 
             if (outerAttributes == null) {
-                return innerAttributes;
+                output = new StructList<AttributeDefinition>(innerAttributes.size);
+                for (int i = 0; i < innerAttributes.size; i++) {
+                    AttributeDefinition attr = innerAttributes.array[i];
+                    attr.flags |= AttributeFlags.InnerContext;
+                    output.AddUnsafe(attr);
+                }
+
+                return output;
             }
 
-            StructList<AttributeDefinition> output = new StructList<AttributeDefinition>(outerAttributes.size + innerAttributes.size);
+            output = new StructList<AttributeDefinition>(innerAttributes.size + outerAttributes.size);
 
             for (int i = 0; i < innerAttributes.size; i++) {
                 AttributeDefinition attr = innerAttributes.array[i];

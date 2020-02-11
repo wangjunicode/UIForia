@@ -283,13 +283,6 @@ namespace UIForia.Compilers {
                 ctx.Comment("new " + TypeNameGenerator.GetTypeName(processedType.rawType));
 
                 Expression createRootExpression = CreateElement(ctx, processedType, Expression.Default(typeof(UIElement)), templateRootNode.ChildCount, CountRealAttributes(templateRootNode.attributes), ctx.compiledTemplate.templateId);
-                // ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-                // Expression.Constant(processedType.id),
-                // Expression.Default(typeof(UIElement)), // root has no parent
-                // Expression.Constant(templateRootNode.ChildCount),
-                // Expression.Constant(CountRealAttributes(templateRootNode.attributes)),
-                // Expression.Constant(ctx.compiledTemplate.templateId)
-                // );
                 ctx.Assign(ctx.rootParam, createRootExpression);
                 ProcessAttrsAndVisitChildren(ctx, templateRootNode);
             }
@@ -829,14 +822,6 @@ namespace UIForia.Compilers {
 
             ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(templateType.rawType) + " " + expandedTemplateNode.lineInfo);
             ctx.Assign(nodeExpr, CreateElement(ctx, expandedTemplateNode.processedType, ctx.ParentExpr, innerRoot.ChildCount, CountRealAttributes(attributes), ctx.compiledTemplate.templateId));
-
-            // ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-            // Expression.Constant(expandedTemplateNode.processedType.id),
-            // ctx.ParentExpr,
-            // Expression.Constant(innerRoot.ChildCount),
-            // Expression.Constant(CountRealAttributes(attributes)),
-            // Expression.Constant(ctx.compiledTemplate.templateId)
-            // ));
 
             bool hasForwardOrOverrides = expandedTemplateNode.slotOverrideNodes != null && expandedTemplateNode.slotOverrideNodes.size > 0;
 
@@ -1418,22 +1403,10 @@ namespace UIForia.Compilers {
         }
 
         private void CompileStyleBindings(CompilationContext ctx, string tagName, StructList<AttributeDefinition> attributes) {
-            StyleSheetReference[] styleRefs = ctx.compiledTemplate.templateMetaData.styleReferences;
-
             LightList<StyleRefInfo> styleIds = LightList<StyleRefInfo>.Get();
+            
 
-            tagName = tagName ?? "this"; // todo -- not sure if this is correct, kinda want to kill <this> styles anyway
-
-            if (styleRefs != null) {
-                for (int i = 0; i < styleRefs.Length; i++) {
-                    if (styleRefs[i].styleSheet.TryResolveStyleByTagName(tagName, out int id)) {
-                        id = ctx.compiledTemplate.templateMetaData.ResolveStyleByIdSlow(id);
-                        styleIds.Add(new StyleRefInfo() {styleId = id, styleName = "implicit:<" + tagName + ">", templateMetaData = ctx.compiledTemplate.templateMetaData});
-                    }
-                }
-            }
-
-            styleRefs = ctx.innerTemplate?.templateMetaData.styleReferences;
+            StyleSheetReference[] styleRefs = ctx.innerTemplate?.templateMetaData.styleReferences;
 
             if (styleRefs != null) {
                 for (int i = 0; i < styleRefs.Length; i++) {
@@ -1444,6 +1417,17 @@ namespace UIForia.Compilers {
                 }
             }
 
+            styleRefs = ctx.compiledTemplate.templateMetaData.styleReferences;
+                
+            if (styleRefs != null) {
+                for (int i = 0; i < styleRefs.Length; i++) {
+                    if (styleRefs[i].styleSheet.TryResolveStyleByTagName(tagName, out int id)) {
+                        id = ctx.compiledTemplate.templateMetaData.ResolveStyleByIdSlow(id);
+                        styleIds.Add(new StyleRefInfo() {styleId = id, styleName = "implicit:<" + tagName + ">", templateMetaData = ctx.compiledTemplate.templateMetaData});
+                    }
+                }
+            }
+            
             StructList<TextExpression> list = StructList<TextExpression>.Get();
             StructList<StyleExpression> styleExpressions = StructList<StyleExpression>.Get();
 

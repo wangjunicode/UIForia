@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UIForia.Animation;
 using UIForia.Compilers.Style;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Compilers {
 
@@ -67,7 +68,7 @@ namespace UIForia.Compilers {
                 for (int i = 0; i < styleReferences.Length; i++) {
                     string alias = styleReferences[i].alias;
                     StyleSheet sheet = styleReferences[i].styleSheet;
-                    
+
                     if (alias != null && alias.Length != 0) {
                         for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
                             string name = sheet.styleGroupContainers[j].name;
@@ -156,11 +157,10 @@ namespace UIForia.Compilers {
             if (string.IsNullOrEmpty(name) || styleSearchMap == null) {
                 return null;
             }
-            
+
             int idx = BinarySearchStyle(name);
 
             if (idx >= 0) {
-                
                 while (idx > 0) {
                     if (styleSearchMap[idx - 1].name == name) {
                         idx--;
@@ -175,7 +175,7 @@ namespace UIForia.Compilers {
             else {
                 idx = BinarySearchAliasedStyle(name);
             }
-            
+
             return idx >= 0 ? styleSearchMap[idx].container : null;
         }
 
@@ -184,7 +184,27 @@ namespace UIForia.Compilers {
 
             BuildSearchMap();
 
-            return BinarySearchStyle(name);
+            int originalIndex = BinarySearchStyle(name);
+            int idx = originalIndex;
+            
+            if (idx >= 0) {
+                while (idx > 0) {
+                    if (styleSearchMap[idx - 1].name == name) {
+                        // Debug.LogWarning("Duplicate style " + name);
+                        idx--;
+                    }
+                    else {
+                        return idx;
+                    }
+                }
+
+                return idx;
+            }
+            else {
+                idx = BinarySearchAliasedStyle(name);
+            }
+
+            return idx;
         }
 
         public UIStyleGroupContainer ResolveStyleByName(char[] name) {
@@ -259,8 +279,8 @@ namespace UIForia.Compilers {
 
             return ~num1;
         }
-        
-         private int BinarySearchStyle(string name) {
+
+        private int BinarySearchStyle(string name) {
             int num1 = 0;
             int num2 = styleSearchMap.Length - 1;
 

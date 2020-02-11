@@ -618,7 +618,7 @@ namespace UIForia.Parsing {
         }
 
         private StyleDefinition ParseStyleSheet(string templateId, XElement styleElement) {
-            XAttribute aliasAttr = styleElement.GetAttribute("alias");
+            XAttribute aliasAttr = styleElement.GetAttribute("as");
             XAttribute importPathAttr = styleElement.GetAttribute("path") ?? styleElement.GetAttribute("src");
 
             string rawText = string.Empty;

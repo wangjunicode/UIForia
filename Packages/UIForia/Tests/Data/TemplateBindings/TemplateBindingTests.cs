@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Tests.Mocks;
@@ -288,6 +289,71 @@ namespace TemplateBinding {
                 return condition;
             }
 
+        }
+
+        public class Thing {
+
+            public int called;
+
+            public void SomethingHappened(bool val) {
+                called++;
+            }
+
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_EventBinding.xml#method_group")]
+        public class TestTemplateBinding_EventBinding_MethodGroup_Main : UIElement {
+
+            public int called;
+
+            public void OnSomethingHappened(bool value) {
+                called++;
+            }
+
+        }
+
+        public class TestTemplateBinding_EventBinding_MethodGroup : UIContainerElement {
+
+            public event Action<bool> onSomethingHappened;
+
+            public void Invoke() {
+                onSomethingHappened?.Invoke(true);
+            }
+
+        }
+
+        [Test]
+        public void EventBinding_MethodGroup() {
+            MockApplication app = MockApplication.Setup<TestTemplateBinding_EventBinding_MethodGroup_Main>();
+            TestTemplateBinding_EventBinding_MethodGroup_Main e = (TestTemplateBinding_EventBinding_MethodGroup_Main) app.RootElement;
+            TestTemplateBinding_EventBinding_MethodGroup child = (TestTemplateBinding_EventBinding_MethodGroup) e[0];
+
+            app.Update();
+
+            child.Invoke();
+
+            Assert.AreEqual(1, e.called);
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_EventBinding.xml#access_expr")]
+        public class TestTemplateBinding_EventBinding_MethodGroup_AccessExpr : UIElement {
+
+            public Thing thing;
+
+        }
+        
+          [Test]
+        public void EventBinding_DotAccess() {
+            MockApplication app = MockApplication.Setup<TestTemplateBinding_EventBinding_MethodGroup_AccessExpr>();
+            TestTemplateBinding_EventBinding_MethodGroup_AccessExpr e = (TestTemplateBinding_EventBinding_MethodGroup_AccessExpr) app.RootElement;
+            TestTemplateBinding_EventBinding_MethodGroup child = (TestTemplateBinding_EventBinding_MethodGroup) e[0];
+
+            e.thing = new Thing();
+            app.Update();
+
+            child.Invoke();
+
+            Assert.AreEqual(1, e.thing.called);
         }
 
         [Test]
@@ -881,11 +947,10 @@ namespace TemplateBinding {
         public void ResolveStyleNameOverload() {
             MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleNameOverload>();
             TemplateBindingTest_StyleNameOverload e = (TemplateBindingTest_StyleNameOverload) app.RootElement;
-            
+
             app.Update();
-            
+
             Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
-            
         }
 
         // [Test]

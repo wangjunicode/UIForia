@@ -41,7 +41,7 @@ namespace UIForia.Util {
         public const BindingFlags PublicStatic = BindingFlags.Public | BindingFlags.Static;
         public const BindingFlags PublicInstance = BindingFlags.Public | BindingFlags.Instance;
         public const BindingFlags StaticFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-        public const BindingFlags InstanceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+        public const BindingFlags InstanceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy;
         public const BindingFlags InterfaceBindFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static;
         private static readonly LRUCache<Type, MethodInfo[]> s_InstanceMethodCache = new LRUCache<Type, MethodInfo[]>(128);
         private static readonly LRUCache<Type, MethodInfo[]> s_StaticMethodCache = new LRUCache<Type, MethodInfo[]>(128);
@@ -143,21 +143,21 @@ namespace UIForia.Util {
         }
 
         public static bool IsField(Type type, string fieldName, out FieldInfo fieldInfo) {
-            fieldInfo = type.GetField(fieldName, InstanceBindFlags);
+            fieldInfo = type.GetField(fieldName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
             return fieldInfo != null;
         }
 
         public static bool IsProperty(Type type, string propertyName) {
-            return type.GetProperty(propertyName, InstanceBindFlags) != null;
+            return type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy) != null;
         }
 
         public static bool IsProperty(Type type, string propertyName, out PropertyInfo propertyInfo) {
-            propertyInfo = type.GetProperty(propertyName, InstanceBindFlags);
+            propertyInfo = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
             return propertyInfo != null;
         }
 
         public static bool IsMethod(Type type, string methodName, out MethodInfo methodInfo) {
-            methodInfo = type.GetMethod(methodName, InstanceBindFlags);
+            methodInfo = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
             return methodInfo != null;
         }
 
@@ -166,10 +166,14 @@ namespace UIForia.Util {
                 return v;
             }
             else {
-                MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+                MethodInfo[] methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                 s_InstanceMethodCache.Add(type, methods);
                 return methods;
             }
+        }
+
+        public static IList<MethodInfo> GetAllInstanceMethodsSlow(Type type, string name) {
+            return type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static).ToList().Where(m => m.Name == name).ToList();
         }
 
         public static MethodInfo[] GetStaticMethods(Type type) {

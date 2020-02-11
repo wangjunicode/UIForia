@@ -365,27 +365,27 @@ namespace UIForia.Compilers {
                 throw CompileException.NoStatementsRootBlock();
             }
 
-            for (int i = 0; i < statements.Count - 1; i++) {
-                if (statements[i].NodeType == ExpressionType.Assign) {
-                    BinaryExpression assignment = (BinaryExpression) statements[i];
-                    if (assignment.Left.Type == typeof(string)) {
-                        if (assignment.Right.NodeType == ExpressionType.Call) {
-                            MethodCallExpression callExpression = assignment.Right as MethodCallExpression;
-                        }
-                    }
-                }
-            }
+            // for (int i = 0; i < statements.Count - 1; i++) {
+                // if (statements[i].NodeType == ExpressionType.Assign) {
+                    // BinaryExpression assignment = (BinaryExpression) statements[i];
+                    // if (assignment.Left.Type == typeof(string)) {
+                        // if (assignment.Right.NodeType == ExpressionType.Call) {
+                            // MethodCallExpression callExpression = assignment.Right as MethodCallExpression;
+                        // }
+                    // }
+                // }
+            // }
 
-            if (statements[statements.size - 1].NodeType == ExpressionType.Call) {
-                Expression statement = statements[statements.size - 1];
-                if (statement is MethodCallExpression methodCallExpression) {
-                    if (methodCallExpression.Type == typeof(string)) {
-                        if (methodCallExpression.Method.Name == nameof(string.Concat)) {
-                            Debug.Log("yep");
-                        }
-                    }
-                }
-            }
+            // if (statements[statements.size - 1].NodeType == ExpressionType.Call) {
+            //     Expression statement = statements[statements.size - 1];
+            //     if (statement is MethodCallExpression methodCallExpression) {
+            //         if (methodCallExpression.Type == typeof(string)) {
+            //             if (methodCallExpression.Method.Name == nameof(string.Concat)) {
+            //                 Debug.Log("yep");
+            //             }
+            //         }
+            //     }
+            // }
 
             if (returnLabel == null) {
                 int assignmentCount = 0;
@@ -450,7 +450,7 @@ namespace UIForia.Compilers {
         public Expression Value(string input) {
             return Visit(ExpressionParser.Parse(input));
         }
-        
+
         public Expression TypedValue(Type targetType, string input) {
             return Visit(targetType, ExpressionParser.Parse(input));
         }
@@ -913,8 +913,8 @@ namespace UIForia.Compilers {
 
             MethodInfo info = ExpressionUtil.SelectEligibleMethod(methodInfos, args, conversions);
 
-            if (info == null || !info.IsPublic) {
-                throw CompileException.UnresolvedMethodOverload(head.Type, methodInfos[0].Name, args.Select(a => a.Type).ToArray());
+            if (info == null || !info.IsPublic || info.IsStatic) {
+                throw CompileException.UnresolvedInstanceMethodOverload(head.Type, methodInfos[0].Name, args.Select(a => a.Type).ToArray());
             }
 
             if (conversions.size > args.Length) {
@@ -929,7 +929,6 @@ namespace UIForia.Compilers {
 
             return Expression.Call(head, info, args);
         }
-
 
         private Expression PerformIndex(Expression head, Expression index, Type type = null) {
             type = type ?? head.Type;
@@ -1141,7 +1140,7 @@ namespace UIForia.Compilers {
 
         private Expression MemberAccess(Expression head, string fieldOrPropertyName) {
             MemberInfo memberInfo = ReflectionUtil.GetFieldOrProperty(head.Type, fieldOrPropertyName);
-         
+
             if (memberInfo == null) {
                 throw new CompileException($"Type {head.Type} does not declare an accessible instance field or property with the name `{fieldOrPropertyName}`");
             }
@@ -1402,7 +1401,6 @@ namespace UIForia.Compilers {
                     LightList<MethodInfo>.Release(ref methodInfos);
                     return true;
                 }
-
                 LightList<MethodInfo>.Release(ref methodInfos);
             }
 
@@ -1585,7 +1583,8 @@ namespace UIForia.Compilers {
             }
             else {
                 // check for generic access too
-                Type type = TypeProcessor.ResolveType(accessRootName, namespaces);
+
+                Type type = implicitContext?.type.GetNestedType(accessRootName) ?? TypeProcessor.ResolveType(accessRootName, namespaces);
 
                 if (type == null) {
                     throw CompileException.UnresolvedIdentifier(accessRootName);
@@ -1636,7 +1635,13 @@ namespace UIForia.Compilers {
 
                         if (methods.size == 0) {
                             LightList<MethodInfo>.Release(ref methods);
-                            throw CompileException.UnresolvedMethod(lastExpression.Type, part.name);
+                            IList<MethodInfo> allMethods = ReflectionUtil.GetAllInstanceMethodsSlow(lastExpression.Type, part.name);
+                            if (allMethods.Count > 0) {
+                                throw CompileException.NonAccessibleOrStatic(lastExpression.Type, part.name);
+                            }
+                            else {
+                                throw CompileException.UnresolvedMethod(lastExpression.Type, part.name);
+                            }
                         }
 
                         lastExpression = MakeMethodCall(lastExpression, methods, part.arguments);
@@ -2255,17 +2260,16 @@ namespace UIForia.Compilers {
                     throw new CompileException($"Bad ternary, expected the right hand side to be a TernarySelection but it was {select.operatorType}");
                 }
 
-             
-                
+
                 if (targetType == null) {
                     Type leftType = GetExpressionType(select.left);
                     Type rightType = select.right.type == ASTNodeType.DefaultLiteral ? leftType : GetExpressionType(@select.right);
-                    
+
                     if (leftType == rightType || leftType.IsAssignableFrom(rightType)) {
                         targetType = leftType;
                     }
                 }
-                
+
                 Debug.Assert(targetType != null);
 
                 // if target type is null & left type & right type are not compatible, error
@@ -2301,7 +2305,7 @@ namespace UIForia.Compilers {
                 Type t = TypeProcessor.ResolveType(typeNode.typeLookup, namespaces);
                 return Expression.TypeIs(left, t);
             }
-            
+
             if (operatorNode.operatorType == OperatorType.As) {
                 TypeNode typeNode = (TypeNode) operatorNode.right;
                 Type t = TypeProcessor.ResolveType(typeNode.typeLookup, namespaces);
@@ -2318,6 +2322,7 @@ namespace UIForia.Compilers {
                 if (invalidOp.Message.Contains("is not defined for the types")) {
                     throw CompileException.MissingBinaryOperator(operatorNode.operatorType, left.Type, right.Type);
                 }
+
                 throw;
             }
         }
@@ -2396,7 +2401,7 @@ namespace UIForia.Compilers {
             parameterList.Release();
             return retn;
         }
-        
+
         public LinqCompiler CreateClosure(Parameter parameter0, Parameter parameter1, Type retnType) {
             LightList<Parameter> parameterList = LightList<Parameter>.Get();
             parameterList.Add(parameter0);
@@ -2415,7 +2420,7 @@ namespace UIForia.Compilers {
             parameterList.Release();
             return retn;
         }
-        
+
         public LinqCompiler CreateClosure(IList<Parameter> parameterList, Type retnType) {
             LinqCompiler nested = CreateNested();
             nested.SetupClosure(this);
@@ -2826,7 +2831,7 @@ namespace UIForia.Compilers {
             addingStatements = wasAddingStatements;
             return expr.Type;
         }
-        
+
         public Type GetExpressionType(ASTNode node) {
             bool wasAddingStatements = addingStatements;
             addingStatements = false;
@@ -2854,6 +2859,7 @@ namespace UIForia.Compilers {
             if (i < 0 || i >= parameters.size) {
                 return null;
             }
+
             return parameters[i];
         }
 

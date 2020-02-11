@@ -169,7 +169,16 @@ namespace UIForia.Exceptions {
             return new CompileException($"Unable to find a public method '{methodName}' on type {type} with a signature matching ({argumentTypeString})");
         }
 
-        
+         public static CompileException UnresolvedInstanceMethodOverload(Type type, string methodName, Type[] inputTypeArguments) {
+            string argumentTypeString = "";
+            for (int i = 0; i < inputTypeArguments.Length; i++) {
+                argumentTypeString += inputTypeArguments[i].FullName;
+                if (i != inputTypeArguments.Length - 1) {
+                    argumentTypeString += ", ";
+                }
+            }
+            return new CompileException($"Unable to find a public instance method '{methodName}' on type {type} with a signature matching ({argumentTypeString})");
+        }
         
         public static CompileException UnresolvedConstructor(Type type, Type[] arguments) {
             string BuildArgumentList() {
@@ -231,7 +240,11 @@ namespace UIForia.Exceptions {
         public static CompileException UnresolvedPropertyChangeHandler(string methodInfoName, Type propertyType) {
             return new CompileException($"Unable to use {methodInfoName} as a property change handler. Please be sure the signature either accepts no arguments or only 1 argument with a type matching the type of the property it is bound to: {propertyType}");
         }
-
+   
+        public static CompileException NonPublicPropertyChangeHandler(string methodInfoName, Type propertyType) {
+            return new CompileException($"Unable to use {methodInfoName} as a property change handler because it is not public");
+        }
+   
         public static CompileException UnknownAlias(string aliasName) {
             return new CompileException($"Unknown alias `{aliasName}`");
         }
@@ -258,6 +271,10 @@ namespace UIForia.Exceptions {
         
         public static CompileException InvalidDragCreatorAnnotationReturnType(string methodName, Type type, Type returnType) {
             return new CompileException($"Method {methodName} in type {type.Name} is annotated with {nameof(OnDragCreateAttribute)} which expects a return type assignable to {nameof(DragEvent)}. The method returns {returnType} which is invalid");
+        }
+
+        public static CompileException NonAccessibleOrStatic(Type type, string methodName) {
+            return new CompileException($"Method {methodName} in type {type.Name} is either not public or is a static method and cannot be used in expression");
         }
 
     }

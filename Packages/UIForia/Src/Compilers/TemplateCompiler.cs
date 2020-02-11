@@ -2158,7 +2158,6 @@ namespace UIForia.Compilers {
                 parameters.Add(new Parameter(eventHandlerTypes[i], argName));
             }
 
-            LightList<Parameter>.Release(ref parameters);
             ASTNode astNode = ExpressionParser.Parse(attr.value);
 
             if (astNode.type == ASTNodeType.Identifier) {
@@ -2174,15 +2173,65 @@ namespace UIForia.Compilers {
                 if (ReflectionUtil.IsProperty(compiler.rootElementType, idNode.name, out PropertyInfo propertyInfo)) {
                     if (eventInfo.EventHandlerType.IsAssignableFrom(propertyInfo.PropertyType)) {
                         compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), Expression.Property(compiler.GetCastRoot(), propertyInfo));
+                        return;
                     }
                 }
 
                 if (ReflectionUtil.IsMethod(compiler.rootElementType, idNode.name, out MethodInfo methodInfo)) {
-                    // https://stackoverflow.com/questions/50663211/access-method-group-within-expression-tree
-                    throw new NotImplementedException("Method group not yet supported");
+                    LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
+
+                    string statement = idNode.name + "(";
+
+                    for (int i = 0; i < parameters.size; i++) {
+                        statement += parameters.array[i].name;
+                        if (i != parameters.size - 1) {
+                            statement += ", ";
+                        }
+                    }
+
+                    statement += ")";
+                    closure.Statement(statement);
+                    LambdaExpression lambda = closure.BuildLambda();
+                    ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
+                    compiler.Assign(evtFn, lambda);
+                    compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), evtFn);
+                    closure.Release();
+                    LightList<Parameter>.Release(ref parameters);
+
+                    return;
                 }
 
                 throw new CompileException($"Error compiling event handler {attr.DebugData}. {idNode.name} is not assignable to type {eventInfo.EventHandlerType}");
+            }
+
+            else if (astNode.type == ASTNodeType.AccessExpression) {
+                MemberAccessExpressionNode accessNode = (MemberAccessExpressionNode) astNode;
+                LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
+                string statement = string.Empty;
+
+                if (accessNode.parts[accessNode.parts.size - 1] is InvokeNode) {
+                    statement = attr.value;
+                }
+                else {
+                    statement = attr.value + "(";
+
+                    for (int i = 0; i < parameters.size; i++) {
+                        statement += parameters.array[i].name;
+                        if (i != parameters.size - 1) {
+                            statement += ", ";
+                        }
+                    }
+
+                    statement += ")";
+                }
+
+                closure.Statement(statement);
+                LambdaExpression lambda = closure.BuildLambda();
+                ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
+                compiler.Assign(evtFn, lambda);
+                compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), evtFn);
+                closure.Release();
+                LightList<Parameter>.Release(ref parameters);
             }
             else {
                 LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
@@ -2194,6 +2243,8 @@ namespace UIForia.Compilers {
                 compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), evtFn);
                 closure.Release();
             }
+
+            LightList<Parameter>.Release(ref parameters);
         }
 
         private static void CompileConditionalBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
@@ -2393,6 +2444,10 @@ namespace UIForia.Compilers {
                         for (int j = 0; j < changeHandlers.size; j++) {
                             MethodInfo methodInfo = changeHandlers.array[j].methodInfo;
                             ParameterInfo[] parameters = methodInfo.GetParameters();
+
+                            if (!methodInfo.IsPublic) {
+                                throw CompileException.NonPublicPropertyChangeHandler(methodInfo.Name, right.Type);
+                            }
 
                             if (parameters.Length == 0) {
                                 compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo));

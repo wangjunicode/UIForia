@@ -104,21 +104,20 @@ namespace UIForia {
             return styleImporter.Import(styleDefinition, true);
         }
 
-        public Func<UIElement, TemplateScope, UIElement> GetTemplate<T>(out UIElement element) where T : UIElement {
-            element = null;
+        public bool TryGetTemplate<T>(out DynamicTemplate retn) where T : UIElement {
+            retn = default;
             if (dynamicTemplates == null) {
-                return null;
+                return false;
             }
 
             for (int i = 0; i < dynamicTemplates.Count; i++) {
                 if (dynamicTemplates[i].type == typeof(T)) {
-                    DynamicTemplate template = dynamicTemplates[i];
-                    element = ConstructElement(template.typeId).element;
-                    return templates[template.templateId];
+                    retn = dynamicTemplates[i];
+                    return true;
                 }
             }
 
-            return null;
+            return false;
         }
 
         public ConstructedElement ConstructElement(int typeId) {

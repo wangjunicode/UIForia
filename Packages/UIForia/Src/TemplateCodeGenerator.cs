@@ -246,7 +246,7 @@ namespace UIForia {
                 builder.Append(template.typeId);
                 builder.Append(", ");
                 builder.Append(template.templateId);
-                builder.Append(")\n");
+                builder.Append("),\n");
             }
 
             return builder.ToString();

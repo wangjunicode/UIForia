@@ -2158,6 +2158,7 @@ namespace UIForia.Compilers {
                 parameters.Add(new Parameter(eventHandlerTypes[i], argName));
             }
 
+            LightList<Parameter>.Release(ref parameters);
             ASTNode astNode = ExpressionParser.Parse(attr.value);
 
             if (astNode.type == ASTNodeType.Identifier) {

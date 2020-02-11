@@ -57,13 +57,20 @@ namespace UIForia.Elements {
                 isOverflowingY = false;
             }
             else {
-                isOverflowingX = children[0].layoutResult.allocatedSize.width > layoutResult.allocatedSize.width;
-                isOverflowingY = children[0].layoutResult.allocatedSize.height > layoutResult.allocatedSize.height;
+                Size currentChildrenSize = new Size(children[0].layoutResult.allocatedSize.width, children[0].layoutResult.allocatedSize.height);
+
+                isOverflowingX = currentChildrenSize.width > layoutResult.allocatedSize.width;
+                isOverflowingY = currentChildrenSize.height > layoutResult.allocatedSize.height;
+
+                if (currentChildrenSize != previousChildrenSize) {
+                    ScrollToHorizontalPercent(0);
+                    ScrollToVerticalPercent(0);
+                }
+
+                previousChildrenSize = currentChildrenSize;
             }
-            
         }
-        
-        
+
         public override void OnDisable() {
             scrollDeltaX = 0;
             scrollDeltaY = 0;

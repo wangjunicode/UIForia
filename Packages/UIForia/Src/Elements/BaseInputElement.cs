@@ -12,7 +12,7 @@ namespace UIForia.Elements {
         }
 
         [OnPropertyChanged(nameof(disabled))]
-        protected void OnDisabledChanged(string name) {
+        public void OnDisabledChanged() {
             if (disabled) {
                 SetAttribute("disabled", "true");
             }

@@ -220,6 +220,7 @@ namespace UIForia.Elements {
                     for (int i = 0; i < diff; i++) {
                         UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
 
+                        
                         ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
                         ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);
 
@@ -237,6 +238,8 @@ namespace UIForia.Elements {
 
             for (int i = 0; i < children.size; i++) {
                 UIElement child = children.array[i];
+                child.siblingIndex = i;
+
                 ContextVariable ptr = child.bindingNode.localVariable;
                 
                 while (ptr != null) {

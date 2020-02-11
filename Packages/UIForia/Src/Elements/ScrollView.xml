@@ -17,16 +17,12 @@
             BorderRadius = 50%;
             BackgroundColor = grey;
         }
-        
-        style scroll-children {
-            LayoutFitHorizontal = Grow;
-        }
-        
+
     </Style>
 
     <Contents style="scrollview">
 
-        <define:Children style="scroll-children"/>
+        <define:Children />
 
         <define:vertical-scrollbar if="verticalScrollingEnabled" style="scroll-track" mouse:click="OnClickVertical($event)"/>
 

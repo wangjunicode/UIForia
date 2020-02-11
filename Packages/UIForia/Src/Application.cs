@@ -47,7 +47,7 @@ namespace UIForia {
         internal InputSystem inputSystem;
         internal RoutingSystem routingSystem;
         internal AnimationSystem animationSystem;
-        internal UISoundSystem m_UISoundSystem;
+        internal UISoundSystem soundSystem;
         internal LinqBindingSystem linqBindingSystem;
 
         private int elementIdGenerator;
@@ -113,6 +113,7 @@ namespace UIForia {
             routingSystem = new RoutingSystem();
             animationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
+            soundSystem = new UISoundSystem(); 
         }
 
         internal void Initialize() {
@@ -153,9 +154,7 @@ namespace UIForia {
         }
 
         public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
-
-            if(templateData.TryGetTemplate<T>(out DynamicTemplate dynamicTemplate)) {
-                
+            if (templateData.TryGetTemplate<T>(out DynamicTemplate dynamicTemplate)) {
                 UIElement element = CreateElementFromPool(dynamicTemplate.typeId, null, 0, 0, dynamicTemplate.templateId);
 
                 HydrateTemplate(dynamicTemplate.templateId, element, new TemplateScope(this));
@@ -170,9 +169,8 @@ namespace UIForia {
 
                 return view;
             }
-            
-            throw new TemplateNotFoundException($"Unable to find a template for {typeof(T)}. This is probably because you are trying to load this template dynamically and did include the type in the ${nameof(TemplateCompiler )}");
 
+            throw new TemplateNotFoundException($"Unable to find a template for {typeof(T)}. This is probably because you are trying to load this template dynamically and did include the type in the ${nameof(TemplateCompiler)}");
         }
 
         public UIView CreateView<T>(string name, Size size) where T : UIElement {
@@ -203,7 +201,7 @@ namespace UIForia {
         public ILayoutSystem LayoutSystem => layoutSystem;
         public InputSystem InputSystem => inputSystem;
         public RoutingSystem RoutingSystem => routingSystem;
-        public UISoundSystem SoundSystem => m_UISoundSystem;
+        public UISoundSystem SoundSystem => soundSystem;
 
         public Camera Camera { get; private set; }
 
@@ -415,11 +413,9 @@ namespace UIForia {
             bindingTimer.Stop();
 
             animationSystem.OnUpdate();
-            //
-            // m_RoutingSystem.OnUpdate(); // todo -- remove
-            //
 
-            // selectorSystem.OnUpdate();
+            routingSystem.OnUpdate();
+
             styleSystem.OnUpdate(); // buffer changes here
 
             // todo -- read changed data into layout/render thread
@@ -503,6 +499,7 @@ namespace UIForia {
 
                 if ((child.flags & UIElementFlags.HasBeenEnabled) == 0) {
                     // todo -- run once bindings if present
+                    routingSystem.OnElementCreated(child);
                     child.View.ElementCreated(child);
                 }
 

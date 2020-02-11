@@ -71,11 +71,11 @@ namespace UIForia.Routing {
 
                 Route route = new Route(path, element, defaultRouteAttr.value);
 
-                if (TryGetAttribute("onRouteEnter", m_ScratchAttrList, out ElementAttribute onRouteEnterAttr)) { }
-
-                if (TryGetAttribute("onRouteEnter", m_ScratchAttrList, out ElementAttribute onRouteChangedAttr)) { }
-
-                if (TryGetAttribute("onRouteEnter", m_ScratchAttrList, out ElementAttribute onRouteExitAttr)) { }
+                // if (TryGetAttribute("onRouteEnter", m_ScratchAttrList, out ElementAttribute onRouteEnterAttr)) { }
+                //
+                // if (TryGetAttribute("onRouteEnter", m_ScratchAttrList, out ElementAttribute onRouteChangedAttr)) { }
+                //
+                // if (TryGetAttribute("onRouteEnter", m_ScratchAttrList, out ElementAttribute onRouteExitAttr)) { }
 
                 Router router = FindRouterInHierarchy(element);
                 if (router == null) {

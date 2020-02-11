@@ -100,7 +100,7 @@ namespace UIForia.Elements {
 
         public UIView View { get; internal set; }
         public Application application { get; internal set; }
-        public int depth { get; internal set; }
+        public int hierarchyDepth { get; internal set; }
         private int _siblingIndex;
 
         public int siblingIndex {
@@ -183,7 +183,7 @@ namespace UIForia.Elements {
                 element.parent = this;
                 element.View = null;
                 element.siblingIndex = children.Count;
-                element.depth = depth + 1;
+                element.hierarchyDepth = hierarchyDepth + 1;
                 children.Add(element);
             }
             else {

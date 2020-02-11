@@ -2158,7 +2158,6 @@ namespace UIForia.Compilers {
                 parameters.Add(new Parameter(eventHandlerTypes[i], argName));
             }
 
-            LightList<Parameter>.Release(ref parameters);
             ASTNode astNode = ExpressionParser.Parse(attr.value);
 
             if (astNode.type == ASTNodeType.Identifier) {
@@ -2167,6 +2166,7 @@ namespace UIForia.Compilers {
                 if (ReflectionUtil.IsField(compiler.rootElementType, idNode.name, out FieldInfo fieldInfo)) {
                     if (eventInfo.EventHandlerType.IsAssignableFrom(fieldInfo.FieldType)) {
                         compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), Expression.Field(compiler.GetCastRoot(), fieldInfo));
+                        LightList<Parameter>.Release(ref parameters);
                         return;
                     }
                 }
@@ -2174,6 +2174,8 @@ namespace UIForia.Compilers {
                 if (ReflectionUtil.IsProperty(compiler.rootElementType, idNode.name, out PropertyInfo propertyInfo)) {
                     if (eventInfo.EventHandlerType.IsAssignableFrom(propertyInfo.PropertyType)) {
                         compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), Expression.Property(compiler.GetCastRoot(), propertyInfo));
+                        LightList<Parameter>.Release(ref parameters);
+
                         return;
                     }
                 }
@@ -2201,6 +2203,8 @@ namespace UIForia.Compilers {
 
                     return;
                 }
+
+                LightList<Parameter>.Release(ref parameters);
 
                 throw new CompileException($"Error compiling event handler {attr.DebugData}. {idNode.name} is not assignable to type {eventInfo.EventHandlerType}");
             }

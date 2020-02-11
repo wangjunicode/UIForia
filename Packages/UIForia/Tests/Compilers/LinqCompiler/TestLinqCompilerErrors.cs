@@ -15,7 +15,7 @@ public class TestLinqCompilerErrors {
         CompileException exception = Assert.Throws<CompileException>(() =>
             compiler.Return("Color.red.GetHashCode(14, 15)")
         );
-        string expected = CompileException.UnresolvedMethodOverload(typeof(Color), "GetHashCode", new Type[] {typeof(int), typeof(int)}).Message;
+        string expected = CompileException.UnresolvedInstanceMethodOverload(typeof(Color), "GetHashCode", new Type[] {typeof(int), typeof(int)}).Message;
         Assert.AreEqual(expected, exception.Message);
     }
 

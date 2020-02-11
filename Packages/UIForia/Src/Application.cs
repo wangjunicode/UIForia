@@ -685,7 +685,7 @@ namespace UIForia {
             while (elemRefStack.size > 0) {
                 UIElement current = elemRefStack.array[--elemRefStack.size].element;
 
-                current.depth = current.parent.depth + 1;
+                current.hierarchyDepth = current.parent.hierarchyDepth + 1;
 
                 current.View = view;
 
@@ -738,7 +738,7 @@ namespace UIForia {
             while (elemRefStack.size > 0) {
                 UIElement current = elemRefStack.Pop().element;
 
-                current.depth = current.parent.depth + 1;
+                current.hierarchyDepth = current.parent.hierarchyDepth + 1;
 
                 current.View = view;
 

@@ -23,7 +23,7 @@ namespace Systems.SelectorSystem {
             child.flags |= UIElementFlags.InTagIndex;
             entries.Add(new TagNameIndexEntry() {
                 element = child,
-                depth = child.depth,
+                depth = child.hierarchyDepth,
                 templateId = child.templateMetaData.id
             });
         }
@@ -58,7 +58,7 @@ namespace Systems.SelectorSystem {
                 isDirty = false;
             }
 
-            int depth = origin.depth;
+            int depth = origin.hierarchyDepth;
             // todo -- keep sorted by depth
             for (int i = 0; i < entries.size; i++) {
                 ref TagNameIndexEntry entry = ref entries.array[i];

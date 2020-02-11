@@ -20,10 +20,10 @@ namespace Systems.SelectorSystem {
         }
 
         public override void Gather(UIElement origin, int templateId, LightList<UIElement> resultSet) {
-            int depth = origin.depth;
+            int depth = origin.hierarchyDepth;
             for (int i = 0; i < elements.size; i++) {
                 UIElement element = elements.array[i];
-                if (element.depth < depth && element.templateMetaData.id == templateId) {
+                if (element.hierarchyDepth < depth && element.templateMetaData.id == templateId) {
                     resultSet.Add(element);
                 }
             }

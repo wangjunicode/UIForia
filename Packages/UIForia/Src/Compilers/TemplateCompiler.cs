@@ -203,7 +203,6 @@ namespace UIForia.Compilers {
                     CompiledTemplate template = GetCompiledTemplate(processedType);
 
                     templateData.AddDynamicTemplate(type, processedType.id, template.templateId);
-
                 }
             }
 
@@ -1404,7 +1403,7 @@ namespace UIForia.Compilers {
 
         private void CompileStyleBindings(CompilationContext ctx, string tagName, StructList<AttributeDefinition> attributes) {
             LightList<StyleRefInfo> styleIds = LightList<StyleRefInfo>.Get();
-            
+
 
             StyleSheetReference[] styleRefs = ctx.innerTemplate?.templateMetaData.styleReferences;
 
@@ -1418,7 +1417,7 @@ namespace UIForia.Compilers {
             }
 
             styleRefs = ctx.compiledTemplate.templateMetaData.styleReferences;
-                
+
             if (styleRefs != null) {
                 for (int i = 0; i < styleRefs.Length; i++) {
                     if (styleRefs[i].styleSheet.TryResolveStyleByTagName(tagName, out int id)) {
@@ -1427,7 +1426,7 @@ namespace UIForia.Compilers {
                     }
                 }
             }
-            
+
             StructList<TextExpression> list = StructList<TextExpression>.Get();
             StructList<StyleExpression> styleExpressions = StructList<StyleExpression>.Get();
 
@@ -1602,6 +1601,10 @@ namespace UIForia.Compilers {
         }
 
         private void CompileMouseHandlerFromAttribute(in InputHandler handler) {
+            if (!handler.methodInfo.IsPublic) {
+                throw new CompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+            }
+
             LightList<Parameter> parameters = LightList<Parameter>.Get();
 
             parameters.Add(new Parameter<MouseInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
@@ -1632,6 +1635,10 @@ namespace UIForia.Compilers {
         }
 
         private void CompileKeyboardHandlerFromAttribute(in InputHandler handler) {
+            if (!handler.methodInfo.IsPublic) {
+                throw new CompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+            }
+
             LightList<Parameter> parameters = LightList<Parameter>.Get();
 
             parameters.Add(new Parameter<KeyboardInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
@@ -1662,6 +1669,10 @@ namespace UIForia.Compilers {
         }
 
         private void CompileDragHandlerFromAttribute(in InputHandler handler) {
+            if (!handler.methodInfo.IsPublic) {
+                throw new CompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+            }
+
             LightList<Parameter> parameters = LightList<Parameter>.Get();
 
             parameters.Add(new Parameter<DragEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
@@ -1690,6 +1701,10 @@ namespace UIForia.Compilers {
         }
 
         private void CompileDragCreateFromAttribute(in InputHandler handler) {
+            if (!handler.methodInfo.IsPublic) {
+                throw new CompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+            }
+
             LightList<Parameter> parameters = LightList<Parameter>.Get();
 
             parameters.Add(new Parameter<MouseInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
@@ -2243,7 +2258,6 @@ namespace UIForia.Compilers {
         private static void CompileConditionalBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
             // cannot have more than 1 conditional    
             try {
-
                 compiler.SetupAttributeData(attr);
 
                 ParameterExpression element = compiler.GetElement();

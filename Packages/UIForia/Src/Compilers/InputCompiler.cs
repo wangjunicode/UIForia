@@ -185,6 +185,10 @@ namespace UIForia.Compilers {
                     continue;
                 }
 
+                if (!methodInfo.IsPublic || methodInfo.IsStatic) {
+                    throw new CompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
+                }
+
                 ParameterInfo[] parameters = methodInfo.GetParameters();
 
                 GetMouseEventHandlers(methodInfo, parameters, customAttributes, handlers);
@@ -294,8 +298,8 @@ namespace UIForia.Compilers {
                 });
             }
         }
-        
-         private static void GetMouseEventHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
+
+        private static void GetMouseEventHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
             for (int i = 0; i < customAttributes.Length; i++) {
                 MouseEventHandlerAttribute attr = customAttributes[i] as MouseEventHandlerAttribute;
 

@@ -6,7 +6,7 @@ using UIForia.Elements;
 
 namespace UIForia {
 
-    public interface ITemplateLoader{
+    public interface ITemplateLoader {
 
         Func<UIElement, TemplateScope, UIElement>[] LoadTemplates();
         
@@ -21,6 +21,8 @@ namespace UIForia {
         Dictionary<string, int> TagNameIdMap { get; }
 
         ConstructedElement ConstructElement(int typeId);
+
+        DynamicTemplate[] DynamicTemplates { get; }
 
     }
 

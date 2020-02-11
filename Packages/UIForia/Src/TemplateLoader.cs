@@ -133,7 +133,8 @@ namespace UIForia.Compilers {
             }
 
             compiledTemplateData.constructElement = loader.ConstructElement;
-
+            compiledTemplateData.dynamicTemplates = loader.DynamicTemplates;
+            
             return compiledTemplateData;
         }
 

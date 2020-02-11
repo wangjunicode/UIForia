@@ -41,6 +41,12 @@ namespace UIForia.Generated {
             return default;
         }
 
+        public DynamicTemplate[] DynamicTemplates => dynamicTemplates;
+
+        private DynamicTemplate[] dynamicTemplates = {
+::DYNAMIC_TEMPLATES::
+        };
+
         public Dictionary<string, int> TagNameIdMap => tagNameIdMap;
         
         private Dictionary<string, int> tagNameIdMap = new Dictionary<string,int>() {

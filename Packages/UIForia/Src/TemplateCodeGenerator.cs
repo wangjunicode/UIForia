@@ -62,6 +62,7 @@ namespace UIForia {
             template = template.Replace("::BINDING_CODE::", GenerateBindingCode(compiledTemplateData));
             template = template.Replace("::ELEMENT_CONSTRUCTORS::", GenerateElementConstructors(compiledTemplateData));
             template = template.Replace("::TAGNAME_ID_MAP::", GenerateTagNameIdMap(compiledTemplateData));
+            template = template.Replace("::DYNAMIC_TEMPLATES::", GenerateDynamicTemplates(compiledTemplateData));
 
             string initPath = Path.Combine(path, "__init" + extension);
             Directory.CreateDirectory(Path.GetDirectoryName(initPath));
@@ -231,6 +232,26 @@ namespace UIForia {
             return builder.ToString();
         }
 
+        private static string GenerateDynamicTemplates(CompiledTemplateData compiledTemplateData) {
+            if (compiledTemplateData.dynamicTemplates == null) return string.Empty;
+            
+            StringBuilder builder = new StringBuilder(2048);
+
+            for (int i = 0; i < compiledTemplateData.dynamicTemplates.size; i++) {
+                DynamicTemplate template = compiledTemplateData.dynamicTemplates.array[i];
+                builder.Append(s_Indent12);
+                builder.Append("new DynamicTemplate(typeof(");
+                TypeNameGenerator.GetTypeName(template.type, builder);
+                builder.Append("), ");
+                builder.Append(template.typeId);
+                builder.Append(", ");
+                builder.Append(template.templateId);
+                builder.Append(")\n");
+            }
+
+            return builder.ToString();
+        }
+        
         private static void GenerateTemplateCode(string path, string extension, CompiledTemplateData compiledTemplateData) {
             TemplateSettings templateSettings = compiledTemplateData.templateSettings;
 

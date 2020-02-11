@@ -152,10 +152,11 @@ namespace UIForia {
         }
 
         public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
-            Func<UIElement, TemplateScope, UIElement> template = templateData.GetTemplate<T>();
+            
+            Func<UIElement, TemplateScope, UIElement> template = templateData.GetTemplate<T>(out UIElement element);
 
             if (template != null) {
-                UIElement element = template.Invoke(null, new TemplateScope(this));
+                template.Invoke(element, new TemplateScope(this));
                 UIView view = new UIView(this, name, element, matrix, size);
                 views.Add(view);
 

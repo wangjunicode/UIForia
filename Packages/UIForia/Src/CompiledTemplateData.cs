@@ -21,16 +21,31 @@ namespace UIForia {
         }
 
     }
-    
+
+    public struct DynamicTemplate {
+
+        public readonly int typeId;
+        public readonly int templateId;
+        public readonly Type type;
+
+        public DynamicTemplate(Type type, int typeId, int templateId) {
+            this.type = type;
+            this.typeId = typeId;
+            this.templateId = templateId;
+        }
+
+    }
+
     public class CompiledTemplateData {
 
         public LightList<CompiledTemplate> compiledTemplates;
         public LightList<CompiledSlot> compiledSlots;
         public LightList<CompiledBinding> compiledBindings;
+        public LightList<DynamicTemplate> dynamicTemplates;
         public StyleSheetImporter styleImporter;
         public Func<int, ConstructedElement> constructElement;
         public Dictionary<string, int> tagNameIdMap;
-        
+
         public TemplateMetaData[] templateMetaData;
         public Func<UIElement, TemplateScope, UIElement>[] templates;
         public Func<UIElement, UIElement, TemplateScope, UIElement>[] slots;
@@ -71,7 +86,7 @@ namespace UIForia {
             compiledSlots.Add(compiledSlot);
             return compiledSlot;
         }
-        
+
         public CompiledBinding AddBinding(TemplateNode templateNode, CompiledBindingType bindingType) {
             CompiledBinding binding = new CompiledBinding();
             TemplateRootNode root = templateNode as TemplateRootNode ?? templateNode.root;
@@ -84,15 +99,23 @@ namespace UIForia {
             compiledBindings.Add(binding);
             return binding;
         }
-        
+
         public StyleSheet ImportStyleSheet(in StyleDefinition styleDefinition) {
             return styleImporter.Import(styleDefinition, true);
         }
 
-        public Func<UIElement, TemplateScope, UIElement> GetTemplate<T>() where T : UIElement {
-            
-            if (templateTypeMap.TryGetValue(typeof(T), out int id)) {
-                return templates[id];
+        public Func<UIElement, TemplateScope, UIElement> GetTemplate<T>(out UIElement element) where T : UIElement {
+            element = null;
+            if (dynamicTemplates == null) {
+                return null;
+            }
+
+            for (int i = 0; i < dynamicTemplates.Count; i++) {
+                if (dynamicTemplates[i].type == typeof(T)) {
+                    DynamicTemplate template = dynamicTemplates[i];
+                    element = ConstructElement(template.typeId).element;
+                    return templates[template.templateId];
+                }
             }
 
             return null;
@@ -110,6 +133,12 @@ namespace UIForia {
             id = nextTagNameId++;
             tagNameIdMap.Add(tagName, id);
             return id;
+        }
+
+
+        public void AddDynamicTemplate(Type type, int typeId, int templateId) {
+            dynamicTemplates = dynamicTemplates ?? new LightList<DynamicTemplate>();
+            dynamicTemplates.Add(new DynamicTemplate(type, typeId, templateId));
         }
 
     }

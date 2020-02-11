@@ -199,7 +199,11 @@ namespace UIForia.Compilers {
                         throw new ArgumentException($"You can only create elements which are subclasses of UIElement. {type} does not inherit from UIElement");
                     }
 
-                    GetCompiledTemplate(TypeProcessor.GetProcessedType(type));
+                    ProcessedType processedType = TypeProcessor.GetProcessedType(type);
+                    CompiledTemplate template = GetCompiledTemplate(processedType);
+
+                    templateData.AddDynamicTemplate(type, processedType.id, template.templateId);
+
                 }
             }
 

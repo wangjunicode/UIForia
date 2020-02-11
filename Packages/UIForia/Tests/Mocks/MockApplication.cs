@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Src.Systems;
@@ -47,7 +48,7 @@ namespace Tests.Mocks {
             return settings;
         }
 
-        public static MockApplication Setup<T>(string appName = null) where T : UIElement {
+        public static MockApplication Setup<T>(string appName = null, List<Type> dynamicTemplateTypes = null) where T : UIElement {
             if (appName == null) {
                 StackTrace stackTrace = new StackTrace();
                 appName = stackTrace.GetFrame(1).GetMethod().Name;
@@ -62,7 +63,8 @@ namespace Tests.Mocks {
             settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
             settings.rootType = typeof(T);
-
+            settings.dynamicallyCreatedTypes = dynamicTemplateTypes;
+            
             if (s_GenerateCode) {
                 TemplateCodeGenerator.Generate(typeof(T), settings);
             }

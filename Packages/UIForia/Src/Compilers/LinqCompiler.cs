@@ -848,7 +848,8 @@ namespace UIForia.Compilers {
                     throw CompileException.AccessNonReadableField(head.Type, fieldInfo);
                 }
 
-                if (fieldInfo.IsStatic || fieldInfo.IsInitOnly) {
+                // catch const field case
+                if (fieldInfo.IsStatic || (fieldInfo.IsInitOnly && fieldInfo.IsLiteral)) {
                     accessExpression = Expression.MakeMemberAccess(null, fieldInfo);
                     return true;
                 }

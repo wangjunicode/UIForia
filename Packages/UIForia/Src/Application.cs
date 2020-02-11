@@ -499,7 +499,6 @@ namespace UIForia {
 
                 if ((child.flags & UIElementFlags.HasBeenEnabled) == 0) {
                     // todo -- run once bindings if present
-                    routingSystem.OnElementCreated(child);
                     child.View.ElementCreated(child);
                 }
 

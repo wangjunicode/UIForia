@@ -10,7 +10,8 @@ namespace UIForia.Compilers.Style {
         public StyleType styleType;
         public UIStyleGroup[] groups; // can this become an int[]?
         public readonly bool hasAttributeStyles;
-        
+        public StyleSheet styleSheet;
+
         public UIStyleGroupContainer(int id, string name, StyleType styleType, UIStyleGroup[] groups) {
             this.id = id;
             this.name = name;

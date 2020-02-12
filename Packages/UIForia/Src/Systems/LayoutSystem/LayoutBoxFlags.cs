@@ -32,7 +32,9 @@ namespace UIForia.Systems {
 
         ContentAreaWidthChanged = 1 << 14,
         ContentAreaHeightChanged = 1 << 15,
-        
+
+        IdentityTransform = 1 << 16
+
     }
 
 }

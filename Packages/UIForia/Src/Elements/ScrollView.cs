@@ -20,7 +20,6 @@ namespace UIForia.Elements {
         public bool verticalScrollingEnabled => !disableOverflowY && isOverflowingY;
         public bool horizontalScrollingEnabled => !disableOverflowX && isOverflowingX;
 
-
         private Size previousChildrenSize;
 
         public float scrollPercentageX;

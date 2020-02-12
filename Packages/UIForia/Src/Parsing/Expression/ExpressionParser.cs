@@ -565,6 +565,8 @@ namespace UIForia.Parsing.Expressions {
                         return false;
                     }
 
+                    arg.generics = null;
+                    
                     continue;
                 }
 
@@ -663,6 +665,17 @@ namespace UIForia.Parsing.Expressions {
             return true;
         }
 
+        public static bool TryParseTypeName(string typeName, out TypeLookup typeLookup) {
+            StructList<ExpressionToken> list = StructList<ExpressionToken>.Get();
+            ExpressionTokenizer.Tokenize(typeName, list);
+            ExpressionParser parser = new ExpressionParser(new TokenStream(list));
+            typeLookup = default;
+            bool valid = parser.ParseTypePath(ref typeLookup);
+            parser.Release();
+            list.Release();
+            return valid;
+        }
+        
         private bool ParseTypeOfExpression(ref ASTNode retn) {
             if (tokenStream.Current != ExpressionTokenType.TypeOf || tokenStream.Next != ExpressionTokenType.ParenOpen) {
                 return false;

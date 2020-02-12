@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Compilers.Style;
@@ -13,8 +14,8 @@ using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
-using UnityEngine;
 using UnityEngine.Assertions;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Compilers {
 
@@ -163,6 +164,8 @@ namespace UIForia.Compilers {
         }
 
         private CompiledTemplateData CompileRoot(Type appRootType, List<Type> dynamicallyCreatedTypes) {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
             if (!typeof(UIElement).IsAssignableFrom(appRootType)) {
                 throw new ArgumentException($"You can only create elements which are subclasses of UIElement. {appRootType} does not inherit from UIElement");
             }
@@ -206,6 +209,8 @@ namespace UIForia.Compilers {
                 }
             }
 
+            stopwatch.Stop();
+            Debug.Log("Compiled UIForia templates in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
             return templateData;
         }
 
@@ -278,7 +283,7 @@ namespace UIForia.Compilers {
 
             ProcessedType processedType = templateRootNode.processedType;
 
-            if (!processedType.rawType.IsPublic) {
+            if (!processedType.rawType.IsNested && !processedType.rawType.IsPublic) {
                 throw new CompileException($"{processedType.rawType} is not public, but must be in order to be used in a template. {templateRootNode.TemplateNodeDebugData}");
             }
 
@@ -1165,18 +1170,18 @@ namespace UIForia.Compilers {
                         variableDefinition.id = NextContextId;
                         variableDefinition.type = expressionType;
                         variableDefinition.variableType = AliasResolverType.ContextVariable;
-                        
+
                         MethodCallExpression createVariable = CreateLocalContextVariableExpression(variableDefinition, out Type contextVarType);
 
                         CompileAssignContextVariable(updateCompiler, attr, contextVarType, variableDefinition.id);
-  
+
                         contextStack.Peek().Push(variableDefinition);
 
                         contextModifications.Add(new ContextAliasActions() {
                             modType = ModType.Context,
                             name = variableDefinition.name
                         });
-                        
+
                         createdCompiler.RawExpression(createVariable);
                     }
                 }
@@ -1905,9 +1910,8 @@ namespace UIForia.Compilers {
 
                 for (int i = 0; i < expressionParts.size; i++) {
                     if (expressionParts[i].isExpression) {
-                        
                         updateCompiler.SetImplicitContext(updateCompiler.GetCastRoot());
-                        
+
                         Expression val = updateCompiler.Value(expressionParts[i].text);
                         if (val.Type.IsEnum) {
                             MethodCallExpression toString = ExpressionFactory.CallInstanceUnchecked(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
@@ -2174,16 +2178,50 @@ namespace UIForia.Compilers {
 
                 if (ReflectionUtil.IsField(compiler.rootElementType, idNode.name, out FieldInfo fieldInfo)) {
                     if (eventInfo.EventHandlerType.IsAssignableFrom(fieldInfo.FieldType)) {
-                        compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), Expression.Field(compiler.GetCastRoot(), fieldInfo));
+                        LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
+                        string statement = fieldInfo.Name + "(";
+
+                        for (int i = 0; i < parameters.size; i++) {
+                            statement += parameters.array[i].name;
+                            if (i != parameters.size - 1) {
+                                statement += ", ";
+                            }
+                        }
+
+                        statement += ")";
+                        closure.Statement(statement);
+                        LambdaExpression lambda = closure.BuildLambda();
+                        ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
+                        compiler.Assign(evtFn, lambda);
+                        compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), evtFn);
+                        closure.Release();
                         LightList<Parameter>.Release(ref parameters);
+
                         return;
                     }
                 }
 
                 if (ReflectionUtil.IsProperty(compiler.rootElementType, idNode.name, out PropertyInfo propertyInfo)) {
                     if (eventInfo.EventHandlerType.IsAssignableFrom(propertyInfo.PropertyType)) {
-                        compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), Expression.Property(compiler.GetCastRoot(), propertyInfo));
+                        LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
+                        string statement = propertyInfo.Name + "(";
+
+                        for (int i = 0; i < parameters.size; i++) {
+                            statement += parameters.array[i].name;
+                            if (i != parameters.size - 1) {
+                                statement += ", ";
+                            }
+                        }
+
+                        statement += ")";
+                        closure.Statement(statement);
+                        LambdaExpression lambda = closure.BuildLambda();
+                        ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
+                        compiler.Assign(evtFn, lambda);
+                        compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), evtFn);
+                        closure.Release();
                         LightList<Parameter>.Release(ref parameters);
+
 
                         return;
                     }
@@ -2518,7 +2556,7 @@ namespace UIForia.Compilers {
             ref AttributeDefinition attr = ref changeHandler.attributeDefinition;
             createdCompiler.SetupAttributeData(attr);
             updateCompiler.SetupAttributeData(attr);
-            
+
             SetImplicitContext(createdCompiler, attr);
             SetImplicitContext(updateCompiler, attr);
 
@@ -2632,10 +2670,68 @@ namespace UIForia.Compilers {
             ProcessedType processedType = templateNode.processedType;
 
             Type generic = processedType.rawType;
-
             Type[] arguments = processedType.rawType.GetGenericArguments();
-
             Type[] resolvedTypes = new Type[arguments.Length];
+
+            if (templateNode.genericTypeResolver != null) {
+                string replaceSpec = templateNode.genericTypeResolver.Replace("[", "<").Replace("]", ">");
+
+                int ptr = 0;
+                int rangeStart = 0;
+                int depth = 0;
+
+                LightList<string> strings = LightList<string>.Get();
+
+                while (ptr != replaceSpec.Length) {
+                    char c = replaceSpec[ptr];
+                    switch (c) {
+                        case '<':
+                            depth++;
+                            break;
+                        case '>':
+                            depth--;
+                            break;
+                        case ',': {
+                            if (depth == 0) {
+                                strings.Add(replaceSpec.Substring(rangeStart, ptr));
+                                rangeStart = ptr;
+                            }
+
+                            break;
+                        }
+                    }
+
+                    ptr++;
+                }
+
+                if (rangeStart != ptr) {
+                    strings.Add(replaceSpec.Substring(rangeStart, ptr));
+                }
+
+                if (arguments.Length != strings.size) {
+                    throw new CompileException($"Unable to resolve generic type of tag <{templateNode.tagName}>. Expected {arguments.Length} arguments but was only provided {strings.size} {templateNode.genericTypeResolver}");
+                }
+
+                for (int i = 0; i < strings.size; i++) {
+                    if (ExpressionParser.TryParseTypeName(strings[i], out TypeLookup typeLookup)) {
+                        Type type = TypeProcessor.ResolveType(typeLookup, (IReadOnlyList<string>) namespaces);
+
+                        if (type == null) {
+                            throw CompileException.UnresolvedType(typeLookup, (IReadOnlyList<string>) namespaces);
+                        }
+
+                        resolvedTypes[i] = type;
+                    }
+                    else {
+                        throw new CompileException($"Unable to resolve generic type of tag <{templateNode.tagName}>. Failed to parse generic specifier {strings[i]}. Original expression = {templateNode.genericTypeResolver}");
+                    }
+                }
+
+                strings.Release();
+                Type createdType = ReflectionUtil.CreateGenericType(processedType.rawType, resolvedTypes);
+                return TypeProcessor.AddResolvedGenericElementType(createdType, processedType.templateAttr, processedType.tagName);
+            }
+
 
             typeResolver.Reset();
             resolvingTypeOnly = true;

@@ -154,10 +154,11 @@ namespace UIForia.Parsing {
 
             IXmlLineInfo xmlLineInfo = root;
 
-            StructList<AttributeDefinition> attributes = ParseAttributes(shell, "Contents", root.Attributes());
+            StructList<AttributeDefinition> attributes = ParseAttributes(shell, "Contents", root.Attributes(), out string genericTypeResolver);
             templateRootNode.attributes = ValidateRootAttributes(shell.filePath, attributes);
             templateRootNode.lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
-
+            templateRootNode.genericTypeResolver = genericTypeResolver;
+            
             ParseChildren(templateRootNode, templateRootNode, root.Nodes());
         }
 
@@ -353,11 +354,13 @@ namespace UIForia.Parsing {
                         string tagName = element.Name.LocalName;
                         string namespaceName = element.Name.NamespaceName;
 
-                        StructList<AttributeDefinition> attributes = ParseAttributes(templateRoot.templateShell, tagName, element.Attributes());
+                        StructList<AttributeDefinition> attributes = ParseAttributes(templateRoot.templateShell, tagName, element.Attributes(), out string genericTypeResolver);
 
                         IXmlLineInfo lineInfo = element;
                         TemplateNode p = ParseElementTag(templateRoot, parent, namespaceName, tagName, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
-
+                        
+                        p.genericTypeResolver = genericTypeResolver;
+                        
                         ParseChildren(templateRoot, p, element.Nodes());
 
                         continue;
@@ -375,8 +378,9 @@ namespace UIForia.Parsing {
             }
         }
 
-        private static StructList<AttributeDefinition> ParseAttributes(TemplateShell templateShell, string tagName, IEnumerable<XAttribute> xmlAttributes) {
+        private static StructList<AttributeDefinition> ParseAttributes(TemplateShell templateShell, string tagName, IEnumerable<XAttribute> xmlAttributes, out string genericTypeResolver) {
             StructList<AttributeDefinition> attributes = StructList<AttributeDefinition>.GetMinSize(4);
+            genericTypeResolver = null;
             foreach (XAttribute attr in xmlAttributes) {
                 string prefix = attr.Name.NamespaceName;
                 string name = attr.Name.LocalName.Trim();
@@ -388,6 +392,11 @@ namespace UIForia.Parsing {
                     prefix = "attr";
                 }
 
+                if (prefix == "generic" && name == "type") {
+                    genericTypeResolver = attr.Value;
+                    continue;
+                }
+                 
                 AttributeType attributeType = AttributeType.Property;
                 AttributeFlags flags = 0;
 

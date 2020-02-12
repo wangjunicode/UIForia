@@ -35,6 +35,7 @@ namespace UIForia.Systems {
         public float transformY;
         public ClipData clipData;
         public ClipBehavior clipBehavior;
+        public ClipBounds clipBounds;
         public int traversalIndex;
         public int zIndex;
 
@@ -887,8 +888,9 @@ namespace UIForia.Systems {
             transformPivotY = element.style.TransformPivotY;
             transformScaleX = element.style.TransformScaleX;
             transformScaleY = element.style.TransformScaleY;
-
+            
             clipBehavior = element.style.ClipBehavior;
+            clipBounds = element.style.ClipBounds;
             UpdateBlockProviderWidth();
             UpdateBlockProviderHeight();
 

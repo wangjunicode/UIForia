@@ -844,6 +844,24 @@ namespace UIForia.Systems {
             PerformLayoutStepVertical(rootBox);
         }
 
+        private void PerformLayoutStepHorizontal_Ignored(AwesomeLayoutBox ignoredBox) {
+            AwesomeLayoutBox.LayoutSize size = default;
+            //if ((ignoredBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
+            ignoredBox.GetWidths(ref size);
+            float outputSize = size.Clamped;
+            ignoredBox.ApplyLayoutHorizontal(0, 0, size, outputSize, ignoredBox.parent?.finalWidth ?? outputSize, LayoutFit.None, frameId);
+            PerformLayoutStepHorizontal(ignoredBox);
+            //}
+        }
+
+        private void PerformLayoutStepVertical_Ignored(AwesomeLayoutBox ignoredBox) {
+            AwesomeLayoutBox.LayoutSize size = default;
+            ignoredBox.GetHeights(ref size);
+            float outputSize = size.Clamped;
+            ignoredBox.ApplyLayoutVertical(0, 0, size, outputSize, ignoredBox.parent?.finalHeight ?? outputSize, LayoutFit.None, frameId);
+            PerformLayoutStepVertical(ignoredBox);
+        }
+
         private void PerformLayout() {
             // save size checks later while traversing
             boxRefStack.EnsureCapacity(elemRefStack.array.Length * 4);
@@ -852,21 +870,11 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < ignoredList.size; i++) {
                 AwesomeLayoutBox ignoredBox = ignoredList.array[i];
-                AwesomeLayoutBox.LayoutSize size = default;
 
                 // todo -- account for margin on ignored element
 
-                //if ((ignoredBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
-                ignoredBox.GetWidths(ref size);
-                float outputSize = size.Clamped;
-                ignoredBox.ApplyLayoutHorizontal(0, 0, size, outputSize, ignoredBox.parent?.finalWidth ?? outputSize, LayoutFit.None, frameId);
-                PerformLayoutStepHorizontal(ignoredBox);
-                //}
-
-                ignoredBox.GetHeights(ref size);
-                outputSize = size.Clamped;
-                ignoredBox.ApplyLayoutVertical(0, 0, size, outputSize, ignoredBox.parent?.finalHeight ?? outputSize, LayoutFit.None, frameId);
-                PerformLayoutStepVertical(ignoredBox);
+                PerformLayoutStepHorizontal_Ignored(ignoredBox);
+                PerformLayoutStepVertical_Ignored(ignoredBox);
             }
         }
 
@@ -876,6 +884,8 @@ namespace UIForia.Systems {
 
             float viewWidth = rootElement.View.Viewport.width;
             float viewHeight = rootElement.View.Viewport.height;
+
+            SVGXMatrix identity = SVGXMatrix.identity;
 
             for (int i = 0; i < size; i++) {
                 UIElement startElement = array[i];
@@ -897,34 +907,53 @@ namespace UIForia.Systems {
 
                         ref SVGXMatrix localMatrix = ref result.localMatrix;
 
-                        // todo -- only need to do this if transform is not identity
-                        float x = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentBox.transformPositionX, currentBox.finalWidth);
-                        float y = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentBox.transformPositionY, currentBox.finalHeight);
+                        // todo -- maybe faster to get pointer to struct and check that memory is 0
+                        bool isIdentity = (
+                            currentBox.transformRotation == 0 &&
+                            currentBox.transformPositionX.value == 0 &&
+                            currentBox.transformPositionY.value == 0 &&
+                            currentBox.transformScaleX == 1 &&
+                            currentBox.transformScaleY == 1
+                            // don't think we need to apply pivot unless transforming
+                            // currentBox.transformPivotX.value == 0 && 
+                            // currentBox.transformPivotY.value == 0
+                        );
 
-                        // todo -- em size
-                        float px = MeasurementUtil.ResolveFixedSize(result.actualSize.width, viewWidth, viewHeight, 0, currentBox.transformPivotX);
-                        float py = MeasurementUtil.ResolveFixedSize(result.actualSize.height, viewWidth, viewHeight, 0, currentBox.transformPivotY);
+                        if (!isIdentity) {
+                            // todo -- only need to do this if transform is not identity
+                            float x = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentBox.transformPositionX, currentBox.finalWidth);
+                            float y = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentBox.transformPositionY, currentBox.finalHeight);
 
-                        float rotation = currentBox.transformRotation * Mathf.Deg2Rad;
-                        float ca = Mathf.Cos(rotation);
-                        float sa = Mathf.Sin(rotation);
-                        float scaleX = currentBox.transformScaleX;
-                        float scaleY = currentBox.transformScaleY;
+                            // todo -- em size
+                            float px = MeasurementUtil.ResolveFixedSize(result.actualSize.width, viewWidth, viewHeight, 0, currentBox.transformPivotX);
+                            float py = MeasurementUtil.ResolveFixedSize(result.actualSize.height, viewWidth, viewHeight, 0, currentBox.transformPivotY);
 
-                        localMatrix.m0 = ca * scaleX;
-                        localMatrix.m1 = sa * scaleX;
-                        localMatrix.m2 = -sa * scaleY;
-                        localMatrix.m3 = ca * scaleY;
-                        localMatrix.m4 = result.alignedPosition.x + x; // not totally sure just adding x and y is correct
-                        localMatrix.m5 = result.alignedPosition.y + y; // not totally sure just adding x and y is correct
+                            float rotation = currentBox.transformRotation * Mathf.Deg2Rad;
+                            float ca = Mathf.Cos(rotation);
+                            float sa = Mathf.Sin(rotation);
+                            float scaleX = currentBox.transformScaleX;
+                            float scaleY = currentBox.transformScaleY;
 
-                        if (px != 0 || py != 0) {
-                            SVGXMatrix pivot = new SVGXMatrix(1, 0, 0, 1, px, py);
-                            SVGXMatrix pivotBack = pivot;
-                            pivotBack.m4 = -px;
-                            pivotBack.m5 = -py;
-                            // todo -- there must be a way to not do a matrix multiply here
-                            localMatrix = pivot * localMatrix * pivotBack;
+                            localMatrix.m0 = ca * scaleX;
+                            localMatrix.m1 = sa * scaleX;
+                            localMatrix.m2 = -sa * scaleY;
+                            localMatrix.m3 = ca * scaleY;
+                            localMatrix.m4 = result.alignedPosition.x + x; // not totally sure just adding x and y is correct
+                            localMatrix.m5 = result.alignedPosition.y + y; // not totally sure just adding x and y is correct
+
+                            if (px != 0 || py != 0) {
+                                SVGXMatrix pivot = new SVGXMatrix(1, 0, 0, 1, px, py);
+                                SVGXMatrix pivotBack = pivot;
+                                pivotBack.m4 = -px;
+                                pivotBack.m5 = -py;
+                                // todo -- there must be a way to not do a matrix multiply here
+                                localMatrix = pivot * localMatrix * pivotBack;
+                            }
+                        }
+                        else {
+                            localMatrix = identity;
+                            localMatrix.m4 = result.localPosition.x;
+                            localMatrix.m5 = result.localPosition.y;
                         }
 
                         // todo -- avoid this null check by never adding root to stack
@@ -950,7 +979,10 @@ namespace UIForia.Systems {
                         result.screenPosition.y = result.matrix.m5; // maybe should be aabb position?
 
                         int childCount = currentElement.children.size;
-                        elemRefStack.EnsureAdditionalCapacity(childCount);
+
+                        if (elemRefStack.size + childCount > elemRefStack.array.Length) {
+                            elemRefStack.EnsureAdditionalCapacity(childCount);
+                        }
 
                         for (int childIdx = 0; childIdx < childCount; childIdx++) {
                             UIElement child = currentElement.children.array[childIdx];
@@ -981,8 +1013,8 @@ namespace UIForia.Systems {
 
                 float width = result.actualSize.width;
                 float height = result.actualSize.height;
-                
-                switch (currentElement.style.ClipBounds) {
+
+                switch (currentElement.layoutBox.clipBounds) {
                     case ClipBounds.ContentBox:
                         x = result.padding.left + result.border.left;
                         y = result.padding.top + result.border.top;

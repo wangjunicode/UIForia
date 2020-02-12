@@ -2009,6 +2009,11 @@ namespace UIForia.Compilers {
                         return wrapped;
                     }
 
+                    if(targetType == typeof(string)){
+                        // null check?
+                        return ExpressionFactory.CallInstanceUnchecked(retn, retn.Type.GetMethod("ToString", Type.EmptyTypes));    
+                    }
+                    
                     throw CompileException.InvalidTargetType(targetType, retn.Type);
                 }
             }

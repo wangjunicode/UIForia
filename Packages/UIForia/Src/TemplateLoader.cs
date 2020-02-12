@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -9,15 +10,19 @@ using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Util;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Compilers {
 
     public static class TemplateLoader {
 
         public static CompiledTemplateData LoadRuntimeTemplates(Type type, TemplateSettings templateSettings) {
+            
             CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
 
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            
             Func<UIElement, TemplateScope, UIElement>[] templates = new Func<UIElement, TemplateScope, UIElement>[compiledTemplateData.compiledTemplates.size];
             Action<UIElement, UIElement>[] bindings = new Action<UIElement, UIElement>[compiledTemplateData.compiledBindings.size];
             Func<UIElement, UIElement, TemplateScope, UIElement>[] slots = new Func<UIElement, UIElement, TemplateScope, UIElement>[compiledTemplateData.compiledSlots.size];
@@ -86,6 +91,9 @@ namespace UIForia.Compilers {
             compiledTemplateData.templates = templates;
             compiledTemplateData.templateMetaData = templateMetaData;
             compiledTemplateData.constructElement = (typeId) => constructorFnMap[typeId].Invoke();
+
+            stopwatch.Stop();
+            Debug.Log("Loaded UIForia templates in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
 
             return compiledTemplateData;
         }

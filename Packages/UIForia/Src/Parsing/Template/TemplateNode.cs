@@ -44,6 +44,7 @@ namespace UIForia.Parsing {
         public string tagName;
         public string namespaceName;
         public TemplateLineInfo lineInfo;
+        public string genericTypeResolver;
 
         protected TemplateNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
             this.root = root;

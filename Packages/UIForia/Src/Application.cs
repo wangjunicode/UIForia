@@ -170,7 +170,7 @@ namespace UIForia {
                 return view;
             }
 
-            throw new TemplateNotFoundException($"Unable to find a template for {typeof(T)}. This is probably because you are trying to load this template dynamically and did include the type in the ${nameof(TemplateCompiler)}");
+            throw new TemplateNotFoundException($"Unable to find a template for {typeof(T)}. This is probably because you are trying to load this template dynamically and did include the type in the {nameof(TemplateSettings.dynamicallyCreatedTypes)} list.");
         }
 
         public UIView CreateView<T>(string name, Size size) where T : UIElement {
@@ -375,6 +375,10 @@ namespace UIForia {
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
 
+            for (int i = 0; i < views.Count; i++) {
+                views[i].Viewport = new Rect(0, 0, Width, Height);
+            }
+            
             m_BeforeUpdateTaskSystem.OnUpdate();
 
             bool loop = true;

@@ -314,15 +314,15 @@ namespace UIForia.Editor {
             UIStyleGroup instanceStyle = styleSet.GetInstanceStyle();
             if (instanceStyle != null) {
                 s_Content.text = "Instance";
-                DrawStyleGroup(instanceStyle);
+                DrawStyleGroup("", instanceStyle);
             }
-
+//
             for (int i = 0; i < baseStyles.Count; i++) {
                 UIStyleGroupContainer container = baseStyles[i];
                 s_Content.text = $"{container.name} ({container.styleType.ToString()})";
 
                 for (int j = 0; j < container.groups.Length; j++) {
-                    DrawStyleGroup(container.groups[j]);
+                    DrawStyleGroup(container.styleSheet?.path, container.groups[j]);
                 }
             }
 
@@ -330,24 +330,24 @@ namespace UIForia.Editor {
             GUILayout.EndVertical();
         }
 
-        private void DrawStyleGroup(UIStyleGroup group) {
+        private void DrawStyleGroup(string fileName, UIStyleGroup group) {
             if (group.normal.style != null) {
-                DrawStyle(group.name + " [Normal]", group.normal.style);
+                DrawStyle(fileName, group.name + " [Normal]", group.normal.style);
                 DrawRunCommands(group.normal.runCommands);
             }
 
             if (group.hover.style != default) {
-                DrawStyle(group.name + " [Hover]", group.hover.style);
+                DrawStyle(fileName, group.name + " [Hover]", group.hover.style);
                 DrawRunCommands(group.hover.runCommands);
             }
 
             if (group.focused.style != default) {
-                DrawStyle(group.name + " [Focus]", group.focused.style);
+                DrawStyle(fileName, group.name + " [Focus]", group.focused.style);
                 DrawRunCommands(group.focused.runCommands);
             }
 
             if (group.active.style != default) {
-                DrawStyle(group.name + " [Active]", group.active.style);
+                DrawStyle(fileName, group.name + " [Active]", group.active.style);
                 DrawRunCommands(group.active.runCommands);
             }
         }
@@ -428,14 +428,14 @@ namespace UIForia.Editor {
             GUILayout.EndScrollView();
         }
 
-        private void DrawStyle(string name, UIStyle style) {
+        private void DrawStyle(string fileName, string name, UIStyle style) {
             bool expanded = true;
 
             if (m_ExpandedMap.ContainsKey(style)) {
                 m_ExpandedMap.TryGetValue(style, out expanded);
             }
 
-            expanded = EditorGUILayout.Foldout(expanded, name);
+            expanded = EditorGUILayout.Foldout(expanded, name + "           " + fileName);
             m_ExpandedMap[style] = expanded;
 
             if (expanded) {

@@ -73,7 +73,7 @@ namespace UIForia.Exceptions {
         }
 
         public static CompileException InvalidTargetType(Type expected, Type actual) {
-            return new CompileException($"Expected expression to be compatible with type {expected} but got {actual} which was not convertable");
+            return new CompileException($"Expected expression to be compatible with type {expected} but got {actual} which was not convertible");
         }
 
         public static CompileException InvalidAccessExpression() {
@@ -210,7 +210,8 @@ namespace UIForia.Exceptions {
         }
 
         public static CompileException UnresolvedGenericElement(ProcessedType processedType, TemplateNodeDebugData data) {
-            return new CompileException($"Unable to resolve the concrete type for " + processedType.rawType + $"\n\nFailed parsing {data.tagName} at {data.fileName}:{data.lineInfo}\n");
+            return new CompileException($"Unable to resolve the concrete type for " + processedType.rawType + $"\n\nFailed parsing {data.tagName} at {data.fileName}:{data.lineInfo}\n" +
+                                        $"You can try to fix this by providing the type explicitly. (add an attribute generic:type=\"your,types,here\"");
         }
 
         public static CompileException GenericElementMissingResolver(ProcessedType processedType) {

@@ -208,6 +208,27 @@ namespace TemplateStructure {
             Assert.AreEqual("fromRoot", GetText(root[0][0][0]));
         }
 
+
+        public class GenericThing1<T> : UIContainerElement { }
+        public class GenericThing2<T, U> : UIContainerElement { }
+        public class GenericThing3<T, U, V> : UIContainerElement { }
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_ResolveGeneric.xml")]
+        public class ResolveGeneric : UIElement { }
+
+        [Test]
+        public void ResolveGenericType() {
+            MockApplication app = MockApplication.Setup<ResolveGeneric>();
+            ResolveGeneric root = (ResolveGeneric) app.RootElement;
+
+            app.Update();
+            
+            Assert.IsInstanceOf<GenericThing1<int>>(root[0]);
+            Assert.IsInstanceOf<GenericThing1<float>>(root[1]);
+            Assert.IsInstanceOf<GenericThing1<List<string>>>(root[2]);
+            Assert.IsInstanceOf<GenericThing1<Dictionary<List<string>, int>>>(root[3]);
+        }
+        
         public static string GetText(UIElement element) {
             UITextElement textEl = element as UITextElement;
             return textEl.text.Trim();

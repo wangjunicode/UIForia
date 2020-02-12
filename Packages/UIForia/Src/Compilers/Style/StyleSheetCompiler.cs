@@ -108,6 +108,7 @@ namespace UIForia.Compilers.Style {
                         break;
                     case StyleRootNode styleRoot:
                         styleSheet.styleGroupContainers[containerIndex] = CompileStyleGroup(styleRoot, styleSheet.animations, styleSheet.sounds);
+                        styleSheet.styleGroupContainers[containerIndex].styleSheet = styleSheet;
                         containerIndex++;
                         break;
                 }

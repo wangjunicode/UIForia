@@ -22,9 +22,9 @@ namespace UIForia.Systems {
             // for (int i = 0; i < application.views.Count; i++) {
             //     runners.Add(new AwesomeLayoutRunner(this, application.views[i].dummyRoot));
             // }
-            
+
             application.onViewsSorted += uiViews => {
-                runners.Sort((a, b) => 
+                runners.Sort((a, b) =>
                     Array.IndexOf(uiViews, b.rootElement.View) - Array.IndexOf(uiViews, a.rootElement.View));
             };
 
@@ -146,11 +146,12 @@ namespace UIForia.Systems {
                         break;
 
                     case StylePropertyId.ClipBounds:
+                        element.layoutBox.clipBounds = property.AsClipBounds;
 
                         break;
                     case StylePropertyId.OverflowX:
                     case StylePropertyId.OverflowY:
-                        element.layoutBox?.UpdateClipper();
+                        element.layoutBox.UpdateClipper();
                         break;
 
                     case StylePropertyId.LayoutType:
@@ -161,57 +162,43 @@ namespace UIForia.Systems {
                         element.flags |= UIElementFlags.LayoutTypeOrBehaviorDirty;
                         break;
                     case StylePropertyId.TransformRotation: {
-                        if (element.layoutBox != null) {
-                            element.layoutBox.transformRotation = property.AsFloat;
-                        }
+                        element.layoutBox.transformRotation = property.AsFloat;
 
                         updateTransform = true;
                         break;
                     }
                     case StylePropertyId.TransformPositionX: {
-                        if (element.layoutBox != null) {
-                            element.layoutBox.transformPositionX = property.AsOffsetMeasurement;
-                        }
+                        element.layoutBox.transformPositionX = property.AsOffsetMeasurement;
 
                         updateTransform = true;
                         break;
                     }
                     case StylePropertyId.TransformPositionY: {
-                        if (element.layoutBox != null) {
-                            element.layoutBox.transformPositionY = property.AsOffsetMeasurement;
-                        }
+                        element.layoutBox.transformPositionY = property.AsOffsetMeasurement;
 
                         updateTransform = true;
                         break;
                     }
                     case StylePropertyId.TransformScaleX: {
-                        if (element.layoutBox != null) {
-                            element.layoutBox.transformScaleX = property.AsFloat;
-                        }
+                        element.layoutBox.transformScaleX = property.AsFloat;
 
                         updateTransform = true;
                         break;
                     }
                     case StylePropertyId.TransformScaleY: {
-                        if (element.layoutBox != null) {
-                            element.layoutBox.transformScaleY = property.AsFloat;
-                        }
+                        element.layoutBox.transformScaleY = property.AsFloat;
 
                         updateTransform = true;
                         break;
                     }
                     case StylePropertyId.TransformPivotX: {
-                        if (element.layoutBox != null) {
-                            element.layoutBox.transformPivotX = property.AsUIFixedLength;
-                        }
+                        element.layoutBox.transformPivotX = property.AsUIFixedLength;
 
                         updateTransform = true;
                         break;
                     }
                     case StylePropertyId.TransformPivotY:
-                        if (element.layoutBox != null) {
-                            element.layoutBox.transformPivotY = property.AsUIFixedLength;
-                        }
+                        element.layoutBox.transformPivotY = property.AsUIFixedLength;
 
                         updateTransform = true;
                         break;
@@ -252,7 +239,10 @@ namespace UIForia.Systems {
                     case StylePropertyId.PaddingBottom:
                     case StylePropertyId.BorderTop:
                     case StylePropertyId.BorderBottom:
-                        element.layoutBox.flags |= LayoutBoxFlags.ContentAreaHeightChanged;
+                        if (element.layoutBox != null) {
+                            element.layoutBox.flags |= LayoutBoxFlags.ContentAreaHeightChanged;
+                        }
+
                         break;
                     case StylePropertyId.LayoutFitHorizontal:
                         element.flags |= UIElementFlags.LayoutFitWidthDirty;

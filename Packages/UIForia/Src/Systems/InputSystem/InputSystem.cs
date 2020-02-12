@@ -35,7 +35,7 @@ namespace UIForia.Systems {
         private CursorStyle currentCursor;
 
         protected UIElement m_FocusedElement;
-        protected DragEvent m_CurrentDragEvent;
+        protected DragEvent currentDragEvent;
         private KeyboardModifiers modifiersThisFrame;
 
         protected MouseState mouseState;
@@ -94,7 +94,7 @@ namespace UIForia.Systems {
             this.hoveredElements = new LightList<UIElement>(16);
         }
 
-        public DragEvent CurrentDragEvent => m_CurrentDragEvent;
+        public DragEvent CurrentDragEvent => currentDragEvent;
 
         public bool IsMouseLeftDown => mouseState.isLeftMouseDown;
         public bool IsMouseLeftDownThisFrame => mouseState.isLeftMouseDownThisFrame;
@@ -452,36 +452,36 @@ namespace UIForia.Systems {
         }
 
         private void UpdateDrag(bool firstFrame = false) {
-            if (m_CurrentDragEvent == null) {
+            if (currentDragEvent == null) {
                 return;
             }
 
-            m_CurrentDragEvent.MousePosition = MousePosition;
-            m_CurrentDragEvent.Modifiers = modifiersThisFrame;
+            currentDragEvent.MousePosition = MousePosition;
+            currentDragEvent.Modifiers = modifiersThisFrame;
 
             if (firstFrame) {
                 RunDragEvent(m_ElementsThisFrame, InputEventType.DragEnter);
-                m_CurrentDragEvent.Update();
+                currentDragEvent.Update();
             }
             else {
                 RunDragEvent(m_ExitedElements, InputEventType.DragExit);
                 RunDragEvent(m_EnteredElements, InputEventType.DragEnter);
-                m_CurrentDragEvent.Update();
+                currentDragEvent.Update();
                 RunDragEvent(m_ElementsThisFrame,
                     mouseState.DidMove ? InputEventType.DragMove : InputEventType.DragHover);
             }
 
-            if (m_CurrentDragEvent.IsCanceled) {
+            if (currentDragEvent.IsCanceled) {
                 EndDrag(InputEventType.DragCancel);
             }
 
-            if (m_CurrentDragEvent.IsDropped) {
+            if (currentDragEvent.IsDropped) {
                 EndDrag(InputEventType.DragDrop);
             }
         }
 
         private void BeginDrag() {
-            if (m_CurrentDragEvent != null) {
+            if (currentDragEvent != null) {
                 return;
             }
 
@@ -512,12 +512,13 @@ namespace UIForia.Systems {
                 for (int creatorIndex = 0; creatorIndex < element.inputHandlers.dragCreators.size; creatorIndex++) {
                     InputHandlerGroup.DragCreatorData data = element.inputHandlers.dragCreators.array[creatorIndex];
 
-                    m_CurrentDragEvent = data.handler.Invoke( new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame, false, element));
+                    currentDragEvent = data.handler.Invoke( new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, modifiersThisFrame, false, element));
 
-                    if (m_CurrentDragEvent != null) {
-                        m_CurrentDragEvent.StartTime = Time.realtimeSinceStartup;
-                        m_CurrentDragEvent.DragStartPosition = MousePosition;
-                        m_CurrentDragEvent.origin = element;
+                    if (currentDragEvent != null) {
+                        currentDragEvent.StartTime = Time.realtimeSinceStartup;
+                        currentDragEvent.DragStartPosition = MousePosition;
+                        currentDragEvent.origin = element;
+                        currentDragEvent.Begin();
                         UpdateDrag(true);
                         return;
                     }
@@ -530,44 +531,45 @@ namespace UIForia.Systems {
         private void EndDrag(InputEventType evtType) {
             IsDragging = false;
 
-            if (m_CurrentDragEvent == null) {
+            if (currentDragEvent == null) {
                 return;
             }
 
-            m_CurrentDragEvent.MousePosition = MousePosition;
-            m_CurrentDragEvent.Modifiers = modifiersThisFrame;
+            currentDragEvent.MousePosition = MousePosition;
+            currentDragEvent.Modifiers = modifiersThisFrame;
 
             bool isOriginElementThisFrame = false;
             for (int i = 0; i < m_ElementsThisFrame.Count; i++) {
-                if (m_ElementsThisFrame[i].id == m_CurrentDragEvent.origin.id) {
+                if (m_ElementsThisFrame[i].id == currentDragEvent.origin.id) {
                     isOriginElementThisFrame = true;
                     break;
                 }
             }
 
             if (!isOriginElementThisFrame) {
-                m_ElementsThisFrame.Add(m_CurrentDragEvent.origin);
+                m_ElementsThisFrame.Add(currentDragEvent.origin);
             }
 
             if (evtType == InputEventType.DragCancel) {
                 RunDragEvent(m_ElementsThisFrame, InputEventType.DragCancel);
+                currentDragEvent.Cancel();
             }
             else if (evtType == InputEventType.DragDrop) {
                 RunDragEvent(m_ElementsThisFrame, InputEventType.DragDrop);
-                m_CurrentDragEvent.Drop(true);
+                currentDragEvent.Drop(true);
             }
 
-            m_CurrentDragEvent.OnComplete();
-            m_CurrentDragEvent = null;
+            currentDragEvent.OnComplete();
+            currentDragEvent = null;
         }
 
         private void RunDragEvent(List<UIElement> elements, InputEventType eventType) {
-            if (m_CurrentDragEvent.IsCanceled && eventType != InputEventType.DragCancel) {
+            if (currentDragEvent.IsCanceled && eventType != InputEventType.DragCancel) {
                 return;
             }
 
-            m_CurrentDragEvent.CurrentEventType = eventType;
-            m_CurrentDragEvent.source = m_EventPropagator;
+            currentDragEvent.CurrentEventType = eventType;
+            currentDragEvent.source = m_EventPropagator;
 
             m_EventPropagator.Reset(mouseState);
 
@@ -575,6 +577,9 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < elements.Count; i++) {
                 UIElement element = elements[i];
+                
+                if(element == currentDragEvent.origin) continue;
+                
                 if (element.isDestroyed || element.isDisabled) {
                     continue;
                 }
@@ -601,26 +606,26 @@ namespace UIForia.Systems {
                         continue;
                     }
 
-                    CurrentDragEvent.target = element;
-                    castHandler.Invoke(m_CurrentDragEvent);
+                    CurrentDragEvent.element = element;
+                    castHandler.Invoke(currentDragEvent);
 
-                    if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
+                    if (currentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
                         break;
                     }
                 }
 
-                if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
+                if (currentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
                     captureList.Release();
                     return;
                 }
             }
 
             for (int i = 0; i < captureList.size; i++) {
-                if (m_CurrentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
+                if (currentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
                     break;
                 }
 
-                captureList.array[i].Invoke(m_CurrentDragEvent);
+                captureList.array[i].Invoke(currentDragEvent);
             }
 
             captureList.Release();
@@ -643,7 +648,7 @@ namespace UIForia.Systems {
 //            m_KeyboardEventTree.Clear();
             m_DragCreatorMap.Clear();
 
-            m_CurrentDragEvent = null;
+            currentDragEvent = null;
 
             IsDragging = false;
         }

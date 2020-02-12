@@ -264,7 +264,7 @@ namespace UI {
             }
 
             public override void Update() {
-                if (MousePosition.x > 0 && MousePosition.x < target.application.Width && MousePosition.y > 0 && MousePosition.y < target.application.Width) {
+                if (MousePosition.x > 0 && MousePosition.x < element.application.Width && MousePosition.y > 0 && MousePosition.y < element.application.Width) {
                     origin.style.SetAlignmentOriginX(MousePosition.x - offset.x, StyleState.Normal);
                     origin.style.SetAlignmentOriginY(MousePosition.y - offset.y, StyleState.Normal);
                 }

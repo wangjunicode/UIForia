@@ -71,7 +71,13 @@ namespace UIForia.Compilers {
         public ParameterExpression GetRoot() {
             if (attributeData != null) {
                 if (slotContext == null) {
-                    Parameter p = new Parameter(attributeData.slotContextType.rawType, "__slotCtx" + attributeData.slotDepth + "_cast", ParameterFlags.NeverNull);
+                    string variableName = "__slotCtx" + attributeData.slotDepth;
+                    ParameterExpression variable = GetVariable(variableName);
+                    if (variable != null) {
+                        slotContext = variable;
+                        return slotContext;
+                    }
+                    Parameter p = new Parameter(attributeData.slotContextType.rawType, variableName, ParameterFlags.NeverNull);
                     MemberExpression bindingNode = Expression.Field(GetElement(), TemplateCompiler.s_UIElement_BindingNode);
                     MemberExpression referenceArray = Expression.Field(bindingNode, TemplateCompiler.s_LinqBindingNode_ReferencedContext);
                     BinaryExpression index = Expression.ArrayIndex(referenceArray, Expression.Constant(attributeData.slotDepth));
@@ -102,7 +108,14 @@ namespace UIForia.Compilers {
         public ParameterExpression GetCastRoot() {
             if (attributeData != null) {
                 if (castSlotContext == null) {
-                    Parameter p = new Parameter(attributeData.slotContextType.rawType, "__slotCtx" + attributeData.slotDepth + "_cast", ParameterFlags.NeverNull);
+                    
+                    string variableName = "__slotCtx" + attributeData.slotDepth + "_cast";
+                    ParameterExpression variable = GetVariable(variableName);
+                    if (variable != null) {
+                        castSlotContext = variable;
+                        return variable;
+                    }
+                    Parameter p = new Parameter(attributeData.slotContextType.rawType, variableName, ParameterFlags.NeverNull);
                     MemberExpression bindingNode = Expression.Field(GetElement(), TemplateCompiler.s_UIElement_BindingNode);
                     MemberExpression referenceArray = Expression.Field(bindingNode, TemplateCompiler.s_LinqBindingNode_ReferencedContext);
                     BinaryExpression index = Expression.ArrayIndex(referenceArray, Expression.Constant(attributeData.slotDepth));

@@ -9,8 +9,8 @@ namespace UIForia.UIInput {
         public readonly Type type;
         internal EventPropagator source;
         public UIElement origin { get; internal set; }
-        public UIElement target { get; internal set; }
-        
+        public UIElement element { get; internal set; }
+
         protected DragEvent() {
             this.type = GetType();
         }
@@ -25,12 +25,10 @@ namespace UIForia.UIInput {
         public bool IsCanceled { get; protected set; }
         public bool IsDropped { get; }
 
-        public virtual void Update() { }
-
         public bool IsConsumed => source.isConsumed;
 
         public Vector2 DragDelta => source.mouseState.MouseDelta;
-        
+
         public bool Alt => (Modifiers & KeyboardModifiers.Alt) != 0;
 
         public bool Shift => (Modifiers & KeyboardModifiers.Shift) != 0;
@@ -54,7 +52,7 @@ namespace UIForia.UIInput {
         public bool IsMouseRightDown => source.mouseState.isRightMouseDown;
         public bool IsMouseRightDownThisFrame => source.mouseState.isRightMouseDownThisFrame;
         public bool IsMouseRightUpThisFrame => source.mouseState.isRightMouseUpThisFrame;
-        
+
         public bool IsMouseMiddleDown => source.mouseState.isMiddleMouseDown;
         public bool IsMouseMiddleDownThisFrame => source.mouseState.isMiddleMouseDownThisFrame;
         public bool IsMouseMiddleUpThisFrame => source.mouseState.isMiddleMouseUpThisFrame;
@@ -71,6 +69,10 @@ namespace UIForia.UIInput {
                 source.isConsumed = true;
             }
         }
+
+        public virtual void Begin() { }
+
+        public virtual void Update() { }
 
         public virtual void Drop(bool success) { }
 

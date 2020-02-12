@@ -210,35 +210,35 @@ namespace UIForia.Compilers.Style {
             }
 
             for (int i = 0; i < optionNodes.Count; i++) {
-                string optionName = optionNodes[i].optionName;
+                string optionName = optionNodes[i].optionName.ToLower();
                 StyleASTNode value = optionNodes[i].value;
 
                 switch (optionName) {
-                    case nameof(AnimationOptions.duration):
+                    case "duration":
                         options.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
                         break;
-                    case nameof(AnimationOptions.iterations):
+                    case "iterations":
                         options.iterations = (int) StylePropertyMappers.MapNumberOrInfinite(value, context);
                         break;
-                    case nameof(AnimationOptions.loopTime):
+                    case "looptime":
                         options.loopTime = StylePropertyMappers.MapNumber(value, context);
                         break;
-                    case nameof(AnimationOptions.delay):
+                    case "delay":
                         options.delay = StylePropertyMappers.MapUITimeMeasurement(value, context);
                         break;
-                    case nameof(AnimationOptions.direction):
+                    case "direction":
                         options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
                         break;
-                    case nameof(AnimationOptions.loopType):
+                    case "looptype":
                         options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
                         break;
-                    case nameof(AnimationOptions.forwardStartDelay):
+                    case "forwardstartdelay":
                         options.forwardStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                         break;
-                    case nameof(AnimationOptions.reverseStartDelay):
+                    case "reversestartdelay":
                         options.reverseStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                         break;
-                    case nameof(AnimationOptions.timingFunction):
+                    case "timingfunction":
                         options.timingFunction = StylePropertyMappers.MapEnum<EasingFunction>(value, context);
                         break;
                     default:
@@ -259,41 +259,41 @@ namespace UIForia.Compilers.Style {
 
             for (int i = 0; i < spriteSheetProperties.Count; i++) {
                 if (spriteSheetProperties[i] is PropertyNode property) {
-                    string optionName = property.identifier;
+                    string optionName = property.identifier.ToLower();
                     StyleASTNode value = property.children[0];
 
                     switch (optionName) {
-                        case nameof(AnimationOptions.iterations):
+                        case "iterations":
                             options.iterations = (int) StylePropertyMappers.MapNumberOrInfinite(value, context);
                             break;
-                        case nameof(AnimationOptions.delay):
+                        case "delay":
                             options.delay = StylePropertyMappers.MapUITimeMeasurement(value, context);
                             break;
-                        case nameof(AnimationOptions.duration):
+                        case "duration":
                             options.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
                             break;
-                        case nameof(AnimationOptions.loopType):
+                        case "loopType":
                             options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
                             break;
-                        case nameof(AnimationOptions.direction):
+                        case "direction":
                             options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
                             break;
-                        case nameof(AnimationOptions.forwardStartDelay):
+                        case "forwardstartdelay":
                             options.forwardStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
-                        case nameof(AnimationOptions.reverseStartDelay):
+                        case "reversestartdelay":
                             options.reverseStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
-                        case nameof(AnimationOptions.fps):
+                        case "fps":
                             options.fps = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
-                        case nameof(AnimationOptions.startFrame):
+                        case "startframe":
                             options.startFrame = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
-                        case nameof(AnimationOptions.endFrame):
+                        case "endframe":
                             options.endFrame = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
-                        case nameof(AnimationOptions.pathPrefix):
+                        case "pathprefix":
                             options.pathPrefix = StylePropertyMappers.MapString(value, context);
                             break;
 

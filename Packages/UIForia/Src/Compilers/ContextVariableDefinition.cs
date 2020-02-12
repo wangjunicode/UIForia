@@ -17,8 +17,6 @@ namespace UIForia.Compilers {
         public Type contextVarType;
         public AliasResolverType variableType;
 
-        private static readonly FieldInfo s_UIElement_Parent = typeof(UIElement).GetField(nameof(UIElement.parent));
-
         public void PushAlias(string alias) {
             if (nameList == null) {
                 nameList = new LightList<string>(4);
@@ -38,29 +36,7 @@ namespace UIForia.Compilers {
         public Expression Resolve(LinqCompiler _compiler) {
             UIForiaLinqCompiler compiler = (UIForiaLinqCompiler) _compiler;
             switch (variableType) {
-                // case AliasResolverType.MouseEvent:
-                //     return compiler.Value(TemplateCompiler.k_InputEventParameterName + "." + nameof(GenericInputEvent.AsMouseInputEvent));
-                //
-                // case AliasResolverType.KeyEvent:
-                //     return compiler.Value(TemplateCompiler.k_InputEventParameterName + "." + nameof(GenericInputEvent.AsKeyInputEvent));
-                //
-                // case AliasResolverType.TouchEvent:
-                // case AliasResolverType.ControllerEvent:
-                //     throw new NotImplementedException();
-                //
-                // case AliasResolverType.DragEvent:
-                // case AliasResolverType.DragCreateMouseEvent:
-                //     return compiler.GetParameter(TemplateCompiler.k_InputEventParameterName);
-                //
-                // case AliasResolverType.Element:
-                //     return compiler.GetCastElement();
-                //
-                // case AliasResolverType.Root:
-                //     return compiler.GetCastRoot();
-                //
-                // case AliasResolverType.Parent:
-                //     return Expression.Field(compiler.GetElement(), s_UIElement_Parent);
-
+              
                 case AliasResolverType.ContextVariable: {
                     ParameterExpression el = compiler.GetElement();
                     Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_UIElement_BindingNode);
@@ -68,7 +44,7 @@ namespace UIForia.Compilers {
                     Type varType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
 
                     UnaryExpression convert = Expression.Convert(call, varType);
-                    ParameterExpression variable = compiler.AddVariable(type, "ctxvar_" + GetName());
+                    ParameterExpression variable = compiler.AddVariable(type, "ctxVar_resolve_" + GetName());
 
                     compiler.Assign(variable, Expression.MakeMemberAccess(convert, varType.GetField("value")));
                     return variable;
@@ -95,7 +71,7 @@ namespace UIForia.Compilers {
                     Expression call = ExpressionFactory.CallInstanceUnchecked(access, TemplateCompiler.s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
 
                     UnaryExpression convert = Expression.Convert(call, typeof(ContextVariable<int>));
-                    ParameterExpression variable = compiler.AddVariable(type, "ctxvar_" + GetName());
+                    ParameterExpression variable = compiler.AddVariable(type, "repeat_index_" + GetName());
 
                     compiler.Assign(variable, Expression.MakeMemberAccess(convert, typeof(ContextVariable<int>).GetField(nameof(ContextVariable<int>.value))));
                     return variable;

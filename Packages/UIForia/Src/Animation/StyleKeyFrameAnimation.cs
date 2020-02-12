@@ -114,7 +114,6 @@ namespace UIForia.Animation {
 
                 switch (propertyId) {
                     case StylePropertyId.TransformPivotX:
-                    case StylePropertyId.TransformPositionX:
                     case StylePropertyId.PaddingLeft:
                     case StylePropertyId.PaddingRight:
                     case StylePropertyId.BorderLeft:
@@ -129,7 +128,6 @@ namespace UIForia.Animation {
                     }
 
                     case StylePropertyId.TransformPivotY:
-                    case StylePropertyId.TransformPositionY:
                     case StylePropertyId.PaddingTop:
                     case StylePropertyId.PaddingBottom:
                     case StylePropertyId.BorderTop:
@@ -140,7 +138,6 @@ namespace UIForia.Animation {
                         float v0 = ResolveFixedHeight(target, viewport, prev.value.styleProperty.AsUIFixedLength);
 
                         float v1 = ResolveFixedHeight(target, viewport, next.value.styleProperty.AsUIFixedLength);
-                        
                         target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
                         break;
                     }
@@ -199,24 +196,27 @@ namespace UIForia.Animation {
                     }
 
                     case StylePropertyId.ShadowOffsetX:
+                    case StylePropertyId.TransformPositionX:
                     case StylePropertyId.AlignmentOffsetX: {
                         Rect viewRect = target.View.Viewport;
                         if (target.layoutBox != null) {
                             float v0 = MeasurementUtil.ResolveOffsetMeasurement(target, viewRect.width, viewRect.height, prev.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.width);
                             float v1 = MeasurementUtil.ResolveOffsetMeasurement(target, viewRect.width, viewRect.height, next.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.width);
-                            target.style.SetAnimatedProperty(new StyleProperty(StylePropertyId.AlignmentOffsetX, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                            
+                            target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
                         }
 
                         break;
                     }
 
                     case StylePropertyId.ShadowOffsetY:
+                    case StylePropertyId.TransformPositionY:
                     case StylePropertyId.AlignmentOffsetY: {
                         Rect viewRect = target.View.Viewport;
                         if (target.layoutBox != null) {
                             float v0 = MeasurementUtil.ResolveOffsetMeasurement(target, viewRect.width, viewRect.height, prev.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.height);
                             float v1 = MeasurementUtil.ResolveOffsetMeasurement(target, viewRect.width, viewRect.height, next.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.height);
-                            target.style.SetAnimatedProperty(new StyleProperty(StylePropertyId.AlignmentOffsetY, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                            target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
                         }
 
                         break;
@@ -229,7 +229,7 @@ namespace UIForia.Animation {
                             float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(target.layoutResult, viewRect.width, target.style.AlignmentTargetX);
                             float v0 = MeasurementUtil.ResolveOffsetMeasurement(target, viewRect.width, viewRect.height, prev.value.styleProperty.AsOffsetMeasurement, originSize);
                             float v1 = MeasurementUtil.ResolveOffsetMeasurement(target, viewRect.width, viewRect.height, next.value.styleProperty.AsOffsetMeasurement, originSize);
-                            target.style.SetAnimatedProperty(new StyleProperty(StylePropertyId.AlignmentOriginX, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                            target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
                         }
 
                         break;
@@ -242,7 +242,7 @@ namespace UIForia.Animation {
                             float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(target.layoutResult, viewRect.width, target.style.AlignmentTargetY);
                             float v0 = MeasurementUtil.ResolveOffsetMeasurement(target, viewRect.width, viewRect.height, prev.value.styleProperty.AsOffsetMeasurement, originSize);
                             float v1 = MeasurementUtil.ResolveOffsetMeasurement(target, viewRect.width, viewRect.height, next.value.styleProperty.AsOffsetMeasurement, originSize);
-                            target.style.SetAnimatedProperty(new StyleProperty(StylePropertyId.AlignmentOriginY, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                            target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
                         }
 
                         break;

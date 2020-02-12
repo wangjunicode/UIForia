@@ -61,7 +61,7 @@ namespace Documentation.Features {
 
         public void OnDragHover(DragEvent evt) {
             activeEvent = "onDragHover";
-            evt.target.style.SetBackgroundColor(Color.yellow, StyleState.Normal);
+            evt.element.style.SetBackgroundColor(Color.yellow, StyleState.Normal);
         }
 
         public string MousePositionToString(Vector2 mousePosition) {

@@ -1,2 +1,52 @@
 style drag-panel {
 }
+
+style drag-panel-item {
+    
+    [attr:dragging] {
+        BackgroundColor = green;
+        AlignmentTarget = Mouse;
+        ZIndex = 10;
+    }
+    
+    [attr:drag-over-top] {
+        BackgroundColor = red;
+      //  [enter] run animation(shift-up);
+    }
+    
+    [attr:drag-over-bottom] {
+        BackgroundColor = red;
+        [enter] run animation(shift-down);
+    }
+
+}
+
+animation shift-up {
+    
+    [options] {
+        Duration = 200ms;
+        TimingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        100% {
+            TransformPositionY = 1h;
+        }
+    }
+    
+}
+
+animation shift-down {
+    
+    [options] {
+        Duration = 200ms;
+        TimingFunction = CubicEaseInOut;
+    }
+    
+    [keyframes] {
+        100% {
+            TransformPositionY = -1h;
+        }
+    }
+    
+}

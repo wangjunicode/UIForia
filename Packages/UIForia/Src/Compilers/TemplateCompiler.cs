@@ -1149,10 +1149,10 @@ namespace UIForia.Compilers {
                 }
 
                 if (exposedData.exposedAttrs.Length != 0) {
-                    ParameterExpression innerSlotContext_update = updateCompiler.AddVariable(exposedData.rootType, "__innerContext");
+                    // ParameterExpression innerSlotContext_update = updateCompiler.AddVariable(exposedData.rootType, "__innerContext");
 
-                    updateCompiler.Assign(innerSlotContext_update, Expression.Convert(idx, exposedData.rootType));
-                    updateCompiler.SetImplicitContext(innerSlotContext_update);
+                    // updateCompiler.Assign(innerSlotContext_update, Expression.Convert(idx, exposedData.rootType));
+                    // updateCompiler.SetImplicitContext(innerSlotContext_update);
 
                     for (int i = 0; i < exposedData.exposedAttrs.Length; i++) {
                         ref AttributeDefinition attr = ref exposedData.exposedAttrs[i];
@@ -1165,18 +1165,18 @@ namespace UIForia.Compilers {
                         variableDefinition.id = NextContextId;
                         variableDefinition.type = expressionType;
                         variableDefinition.variableType = AliasResolverType.ContextVariable;
+                        
+                        MethodCallExpression createVariable = CreateLocalContextVariableExpression(variableDefinition, out Type contextVarType);
 
+                        CompileAssignContextVariable(updateCompiler, attr, contextVarType, variableDefinition.id);
+  
                         contextStack.Peek().Push(variableDefinition);
 
                         contextModifications.Add(new ContextAliasActions() {
                             modType = ModType.Context,
                             name = variableDefinition.name
                         });
-
-                        MethodCallExpression createVariable = CreateLocalContextVariableExpression(variableDefinition, out Type contextVarType);
-
-                        CompileAssignContextVariable(updateCompiler, attr, contextVarType, variableDefinition.id);
-
+                        
                         createdCompiler.RawExpression(createVariable);
                     }
                 }
@@ -1905,7 +1905,9 @@ namespace UIForia.Compilers {
 
                 for (int i = 0; i < expressionParts.size; i++) {
                     if (expressionParts[i].isExpression) {
+                        
                         updateCompiler.SetImplicitContext(updateCompiler.GetCastRoot());
+                        
                         Expression val = updateCompiler.Value(expressionParts[i].text);
                         if (val.Type.IsEnum) {
                             MethodCallExpression toString = ExpressionFactory.CallInstanceUnchecked(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
@@ -1995,7 +1997,7 @@ namespace UIForia.Compilers {
         public static void CompileAssignContextVariable(UIForiaLinqCompiler compiler, in AttributeDefinition attr, Type contextVarType, int varId) {
             //ContextVariable<T> ctxVar = (ContextVariable<T>)__castElement.bindingNode.GetContextVariable(id);
             //ctxVar.value = expression;
-            Expression access = Expression.MakeMemberAccess(compiler.GetCastElement(), s_UIElement_BindingNode);
+            Expression access = Expression.MakeMemberAccess(compiler.GetElement(), s_UIElement_BindingNode);
             Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(varId));
             compiler.Comment(attr.key);
             Expression cast = Expression.Convert(call, contextVarType);

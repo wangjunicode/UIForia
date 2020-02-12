@@ -6,8 +6,9 @@
 
         <Repeat list="items">
 
-            <define:Children expose:item="$item" 
-                             drag:create="BeginDrag($event)" 
+            <define:Children style="drag-panel-item"
+                             expose:item="$item" 
+                             drag:create="BeginDrag()" 
                              drag:enter="DragEnter($event)"
                              drag:exit="DragExit($event)"/>
 

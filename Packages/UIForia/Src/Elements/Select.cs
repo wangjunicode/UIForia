@@ -329,6 +329,11 @@ namespace UIForia.Elements {
                 // repeat[selectedIndex].ScrollIntoView();
 
                 application.RegisterBeforeUpdateTask(new CallbackTaskNoArg(() => {
+                    
+                    if (!isEnabled || !validSelection) {
+                        return UITaskResult.Completed;
+                    }
+                    
                     float y = repeat[selectedIndex].layoutResult.alignedPosition.y
                               - repeat.FindParent<ScrollView>().ScrollOffsetY
                               - layoutResult.VerticalPaddingBorderStart

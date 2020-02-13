@@ -135,6 +135,8 @@ namespace UIForia {
 
             UIView view = null;
 
+           // Stopwatch timer = Stopwatch.StartNew();
+            
             if (isPreCompiled) {
                 templateData = TemplateLoader.LoadPrecompiledTemplates(templateSettings);
             }
@@ -151,6 +153,8 @@ namespace UIForia {
             for (int i = 0; i < systems.Count; i++) {
                 systems[i].OnViewAdded(view);
             }
+            //timer.Stop();
+            //Debug.Log("Initialized UIForia application in " + timer.Elapsed.TotalSeconds.ToString("F2") + " seconds");
         }
 
         public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
@@ -247,6 +251,8 @@ namespace UIForia {
                 return;
             }
 
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            
             foreach (ISystem system in systems) {
                 system.OnDestroy();
             }
@@ -260,13 +266,18 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnDestroy();
             m_BeforeUpdateTaskSystem.OnDestroy();
 
-            GC.Collect();
 
             elementIdGenerator = 0;
 
             Initialize();
 
             onRefresh?.Invoke();
+            
+            GC.Collect();
+            
+            stopwatch.Stop();
+            Debug.Log("Refreshed " + id + " in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
+            
         }
 
         public void Destroy() {

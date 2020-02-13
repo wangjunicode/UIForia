@@ -273,7 +273,7 @@ namespace UIForia.Compilers.Style {
                         case "duration":
                             options.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
                             break;
-                        case "loopType":
+                        case "looptype":
                             options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
                             break;
                         case "direction":

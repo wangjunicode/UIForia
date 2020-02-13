@@ -2,7 +2,7 @@ using System;
 
 namespace UIForia.Systems {
 
-    internal class CallbackTaskNoArg : UITask {
+    public class CallbackTaskNoArg : UITask {
 
         private readonly Func<UITaskResult> task;
 

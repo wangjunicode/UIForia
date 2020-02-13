@@ -34,6 +34,11 @@ namespace UIForia {
             animationSystem.StopAnimation(element, animationData);
         }
 
+        public bool TryGetActiveAnimation(string animationName, out AnimationTask animationTask) {
+            animationTask = animationSystem.GetActiveAnimationByName(element, animationName);
+            return animationTask != null;
+        }
+
     }
 
 }

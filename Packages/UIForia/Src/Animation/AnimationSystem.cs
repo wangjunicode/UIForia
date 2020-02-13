@@ -35,6 +35,20 @@ namespace UIForia.Animation {
             }
         }
 
+        public AnimationTask GetActiveAnimationByName(UIElement element, string animationName) {
+            for (int i = 0; i < thisFrame.size; i++) {
+                if (thisFrame.array[i] is StyleKeyFrameAnimation styleKeyFrameAnimation) {
+                    if (styleKeyFrameAnimation.target == element) {
+                        if (styleKeyFrameAnimation.animationData.name == animationName) {
+                            return styleKeyFrameAnimation;
+                        } 
+                    }
+                }
+            }
+
+            return null;
+        }
+        
         public void PauseAnimation(UIElement element, AnimationData animationData) {
             AnimationTask task = FindAnimationTask(element, animationData, thisFrame);
             if (task == null) {

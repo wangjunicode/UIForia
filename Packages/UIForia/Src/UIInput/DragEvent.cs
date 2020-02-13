@@ -16,7 +16,7 @@ namespace UIForia.UIInput {
         }
 
         public Vector2 MousePosition { get; internal set; }
-        public Vector2 MousePositionInvertY => new Vector2(MousePosition.x, source.origin.application.Height - MousePosition.y);
+        public Vector2 MousePositionInvertY => new Vector2(MousePosition.x, element.application.Height - MousePosition.y);
         public Vector2 DragStartPosition { get; internal set; }
         public KeyboardModifiers Modifiers { get; internal set; }
         public InputEventType CurrentEventType { get; internal set; }

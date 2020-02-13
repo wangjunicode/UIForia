@@ -570,15 +570,13 @@ namespace UIForia.Systems {
 
             currentDragEvent.CurrentEventType = eventType;
             currentDragEvent.source = m_EventPropagator;
-
+            
             m_EventPropagator.Reset(mouseState);
 
             LightList<Action<DragEvent>> captureList = LightList<Action<DragEvent>>.Get();
 
             for (int i = 0; i < elements.Count; i++) {
                 UIElement element = elements[i];
-                
-                if(element == currentDragEvent.origin) continue;
                 
                 if (element.isDestroyed || element.isDisabled) {
                     continue;

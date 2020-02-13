@@ -719,8 +719,13 @@ namespace UIForia {
                         systems[i].OnElementCreated(current);
                     }
 
-                    onElementRegistered?.Invoke(current);
-                    current.OnCreate();
+                    try {
+                        onElementRegistered?.Invoke(current);
+                        current.OnCreate();
+                    }
+                    catch (Exception e) {
+                        Debug.LogWarning(e);
+                    }
                 }
 
                 UIElement[] children = current.children.array;

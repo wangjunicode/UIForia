@@ -193,7 +193,12 @@ namespace UIForia.Systems {
 
             if (createdId != -1) {
                 node.createdBinding = application.templateData.bindings[createdId];
-                node.createdBinding?.Invoke(rootElement, element);
+                try {
+                    node.createdBinding?.Invoke(rootElement, element);
+                }
+                catch (Exception e) {
+                    UnityEngine.Debug.LogWarning(e);
+                }
             }
 
             if (enabledId != -1) {

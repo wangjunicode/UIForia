@@ -326,19 +326,22 @@ namespace UIForia.Elements {
 
         public void AdjustOptionPosition() {
             if (validSelection) {
-                // repeat[selectedIndex].ScrollIntoView();
 
                 application.RegisterBeforeUpdateTask(new CallbackTaskNoArg(() => {
-                    
                     if (!isEnabled || !validSelection) {
                         return UITaskResult.Completed;
                     }
-                    
+
+                    if (options == null || options.Count == 0) {
+                        return UITaskResult.Completed;
+                    }
+
                     float y = repeat[selectedIndex].layoutResult.alignedPosition.y
                               - repeat.FindParent<ScrollView>().ScrollOffsetY
                               - layoutResult.VerticalPaddingBorderStart
                               + optionList.layoutResult.VerticalPaddingBorderStart;
                     optionList.style.SetAlignmentOriginY(new OffsetMeasurement(-y), StyleState.Normal);
+
                     return UITaskResult.Completed;
                 }));
             }

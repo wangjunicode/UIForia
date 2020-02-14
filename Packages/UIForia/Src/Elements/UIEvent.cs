@@ -3,7 +3,7 @@ using UIForia.UIInput;
 namespace UIForia.Elements {
     public class UIEvent {
 
-        public UIElement origin;
+        public UIElement origin { get; internal set; }
 
         public readonly string eventType;
         

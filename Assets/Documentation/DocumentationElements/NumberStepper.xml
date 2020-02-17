@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style path="Documentation/DocumentationElements/NumberStepper.style" />
+    
+    <Using namespace="UIForia.Elements" />
+    
+    <Contents>
+
+        <Group style="stepper-container">
+            <Input attr:id="input-element" 
+                   sync:value="value"
+                   onChange:value="InputValueChanged()"
+                   style="input-element" 
+                   placeholder="placeholder"
+                   disabled="disabled"
+                   key:down="OnKeyPressed($event)"
+                   key:heldDown.focus="OnKeyHeldDownWithFocus($event)"
+            />
+
+            <Group style="arrows {disabled ? 'disabled-arrows'}">
+                <Div style="arrow-container arrow-up" mouse:Down="Increment($event)" mouse:heldDown="IncrementContinuously($event)">
+                    <Image src="'Client\UI\Sprites\ui_treeview_collapse_arrow_right'" style="arrow rotate-up" />
+                </Div>
+                <Div style="arrow-container arrow-down" mouse:Down="Decrement($event)" mouse:heldDown="DecrementContinuously($event)">
+                    <Image src="'Client\UI\Sprites\ui_treeview_collapse_arrow_right'" style="arrow" />
+                </Div>
+            </Group>
+        </Group>
+
+    </Contents>
+</UITemplate>

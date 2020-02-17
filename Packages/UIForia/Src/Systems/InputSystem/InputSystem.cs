@@ -194,6 +194,52 @@ namespace UIForia.Systems {
         public void Read() {
             mouseState = GetMouseState();
         }
+
+        private void RunBindings(UIElement element) {
+            UIElement start = element;
+
+            LightList<UIElement> tmp = LightList<UIElement>.Get();
+
+            UIElement ptr = start;
+            while (ptr != null) {
+                tmp.Add(ptr);
+                ptr = ptr.parent;
+            }
+            
+            for (int i = tmp.Count - 1; i >= 0; i--) {
+                LinqBindingNode bindingNode = tmp[i].bindingNode;
+                if (bindingNode == null) {
+                    continue;
+                }
+                bindingNode.updateBindings?.Invoke(bindingNode.root, bindingNode.element);
+                // UnityEngine.Debug.Log($"{new string(' ', bindingNode.element.hierarchyDepth * 4)}pre-binding" + bindingNode.element.GetDisplayName());
+            }
+            
+            tmp.Release();
+        }
+        
+        private void RunWriteBindings(UIElement element) {
+            UIElement start = element;
+
+            LightList<UIElement> tmp = LightList<UIElement>.Get();
+
+            UIElement ptr = start;
+            while (ptr != null) {
+                tmp.Add(ptr);
+                ptr = ptr.parent;
+            }
+            
+            for (int i = 0; i < tmp.size; i++) {
+                LinqBindingNode bindingNode = tmp[i].bindingNode;
+                if (bindingNode == null) {
+                    continue;
+                }
+                bindingNode.lateBindings?.Invoke(bindingNode.root, bindingNode.element);
+                // UnityEngine.Debug.Log($"{new string(' ', bindingNode.element.hierarchyDepth * 4)}pre-binding" + bindingNode.element.GetDisplayName());
+            }
+            
+            tmp.Release();
+        }
         
         public virtual void OnUpdate() {
 
@@ -201,6 +247,12 @@ namespace UIForia.Systems {
 
             ProcessKeyboardEvents();
             ProcessMouseInput();
+            UIElement firstElement = null;
+            if (m_ElementsThisFrame.Count != 0) {
+                firstElement = m_ElementsThisFrame[0];
+
+                RunBindings(firstElement);
+            }
 
             if (!IsDragging) {
                 ProcessMouseEvents();
@@ -210,6 +262,10 @@ namespace UIForia.Systems {
             }
 
             ProcessDragEvents();
+
+            if (firstElement != null) {
+                RunWriteBindings(firstElement);
+            }
 
             List<UIElement> temp = m_ElementsLastFrame;
             m_ElementsLastFrame = m_ElementsThisFrame;
@@ -735,6 +791,7 @@ namespace UIForia.Systems {
 
                     InputHandlerGroup evtHandlerGroup = item.inputHandlers;
 
+                    bool ran = false;
                     for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                         if (evt.stopPropagation) break;
                         ref InputHandlerGroup.HandlerData handler = ref evtHandlerGroup.eventHandlers.array[i];
@@ -742,16 +799,26 @@ namespace UIForia.Systems {
                             continue;
                         }
 
+                        if (!ran) {
+                            ran = true;
+                            RunBindings(element);
+                        }
                         Action<KeyboardInputEvent> keyHandler = handler.handlerFn as Action<KeyboardInputEvent>;
                         Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
                         keyHandler.Invoke(evt);
                     }
 
+                    if (ran) {
+                        RunWriteBindings(element);
+                    }
+                    
                     return !evt.stopPropagation;
                 });
             }
 
             else {
+                UIElement element = m_FocusedElement;
+                RunBindings(element);
                 InputHandlerGroup evtHandlerGroup = m_FocusedElement.inputHandlers;
                 for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                     if (m_EventPropagator.shouldStopPropagation) break;
@@ -764,6 +831,8 @@ namespace UIForia.Systems {
                     Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
                     keyHandler.Invoke(keyInputEvent);
                 }
+
+                RunWriteBindings(element);
             }
         }
 

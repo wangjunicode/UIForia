@@ -211,16 +211,20 @@ namespace UIForia.Elements {
             }
         }
 
-        public void SetEnabled(bool active) {
-            if (View == null) {
-                flags &= ~UIElementFlags.Enabled;
-                return;
+        public void internal__dontcallmeplease_SetEnabledIfBinding(bool enabled) {
+            if (enabled && isSelfDisabled) {
+                application.DoEnableElement(this, false);
             }
+            else if (!enabled && isSelfEnabled) {
+                application.DoDisableElement(this);
+            }
+        }
 
-            if (active && isSelfDisabled) {
-                application.DoEnableElement(this);
+        public void SetEnabled(bool enabled) {
+            if (enabled && isSelfDisabled) {
+                application.DoEnableElement(this, true);
             }
-            else if (!active && isSelfEnabled) {
+            else if (!enabled && isSelfEnabled) {
                 application.DoDisableElement(this);
             }
         }

@@ -81,7 +81,7 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_UIElement_OnBeforePropertyBindings = typeof(UIElement).GetMethod(nameof(UIElement.OnBeforePropertyBindings), BindingFlags.Instance | BindingFlags.Public);
         internal static readonly MethodInfo s_UIElement_OnAfterPropertyBindings = typeof(UIElement).GetMethod(nameof(UIElement.OnAfterPropertyBindings), BindingFlags.Instance | BindingFlags.Public);
         internal static readonly MethodInfo s_UIElement_SetAttribute = typeof(UIElement).GetMethod(nameof(UIElement.SetAttribute), BindingFlags.Instance | BindingFlags.Public);
-        internal static readonly MethodInfo s_UIElement_SetEnabled = typeof(UIElement).GetMethod(nameof(UIElement.SetEnabled), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_UIElement_SetEnabled = typeof(UIElement).GetMethod(nameof(UIElement.internal__dontcallmeplease_SetEnabledIfBinding), BindingFlags.Instance | BindingFlags.Public);
         internal static readonly FieldInfo s_UIElement_Parent = typeof(UIElement).GetField(nameof(UIElement.parent), BindingFlags.Instance | BindingFlags.Public);
 
         internal static readonly MethodInfo s_StyleSet_InternalInitialize = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.internal_Initialize), BindingFlags.Instance | BindingFlags.Public);
@@ -1151,7 +1151,8 @@ namespace UIForia.Compilers {
                         ref AttributeDefinition attr = ref exposedData.exposedAttrs[i];
                         // bindingNode.CreateContextVariable<string>(id);
                         ContextVariableDefinition variableDefinition = new ContextVariableDefinition();
-
+                        updateCompiler.SetupAttributeData(attr);
+                        SetImplicitContext(updateCompiler, attr);
                         Type expressionType = updateCompiler.GetExpressionType(attr.value);
 
                         variableDefinition.name = attr.key;

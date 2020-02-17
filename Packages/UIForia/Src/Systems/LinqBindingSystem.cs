@@ -2,6 +2,7 @@ using System;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Systems {
 
@@ -192,6 +193,24 @@ namespace UIForia.Systems {
         public void OnFrameCompleted() { }
 
         public void OnFrameStarted() { }
+        
+        public void NewUpdateFn(UIElement element) {
+            
+           // Debug.Log($"{new string(' ', element.hierarchyDepth * 4)}Before {element.GetDisplayName()}");
+            
+            element.bindingNode.updateBindings?.Invoke(element.bindingNode.root, element);
+            if (element.isEnabled) {
+                
+                for (int i = 0; i < element.children.size; i++) {
+                    NewUpdateFn(element.children[i]);
+                }
+                
+               // Debug.Log($"{new string(' ', element.hierarchyDepth * 4)}After {element.GetDisplayName()}");
+
+                element.bindingNode.lateBindings?.Invoke(element.bindingNode.root, element);
+            }
+
+        }
 
         public void BeforeUpdate(LightList<UIElement> activeBuffer) {
             int size = 0;
@@ -251,56 +270,59 @@ namespace UIForia.Systems {
                 for (int i = childCount - 1; i >= 0; i--) {
                     stack[size++].element = currentElement.children.array[i];
                 }
+
+            
             }
         }
 
-        public void AfterUpdate(LightList<UIElement> activeBuffer) {
-            int size = 0;
-
-            if (activeBuffer.size >= elemRefStack.Length) {
-                elemRefStack = new ElemRef[activeBuffer.size + 16];
-            }
-
-            for (int i = activeBuffer.size - 1; i >= 0; i--) {
-                elemRefStack[size++].element = activeBuffer.array[i];
-            }
-
-            ElemRef[] stack = elemRefStack;
-
-            while (size != 0) {
-                currentElement = stack[--size].element;
-
-                // if current element is destroyed or disabled, bail out
-                if ((currentElement.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
-                    continue;
-                }
-
-                iteratorIndex = 0;
-
-                while (iteratorIndex != currentElement.children.size) {
-                    UIElement child = currentElement.children.array[iteratorIndex];
-                    LinqBindingNode bindingNode = child.bindingNode;
-
-                    // if was enabled in this iteration, skip it for now
-                    if (bindingNode != null && bindingNode.lastAfterUpdateFrame != currentFrameId) {
-                        bindingNode.lastAfterUpdateFrame = currentFrameId;
-                        bindingNode.lateBindings?.Invoke(bindingNode.root, child);
-                    }
-
-                    iteratorIndex++;
-                }
-
-                int childCount = currentElement.children.size;
-
-                if (size + childCount >= stack.Length) {
-                    Array.Resize(ref elemRefStack, size + childCount + 16);
-                    stack = elemRefStack;
-                }
-
-                for (int i = childCount - 1; i >= 0; i--) {
-                    stack[size++].element = currentElement.children.array[i];
-                }
-            }
+        public void AfterUpdate() {
+          
+            // int size = 0;
+            //
+            // if (activeBuffer.size >= elemRefStack.Length) {
+            //     elemRefStack = new ElemRef[activeBuffer.size + 16];
+            // }
+            //
+            // for (int i = activeBuffer.size - 1; i >= 0; i--) {
+            //     elemRefStack[size++].element = activeBuffer.array[i];
+            // }
+            //
+            // ElemRef[] stack = elemRefStack;
+            //
+            // while (size != 0) {
+            //     currentElement = stack[--size].element;
+            //
+            //     // if current element is destroyed or disabled, bail out
+            //     if ((currentElement.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
+            //         continue;
+            //     }
+            //
+            //     iteratorIndex = 0;
+            //
+            //     while (iteratorIndex != currentElement.children.size) {
+            //         UIElement child = currentElement.children.array[iteratorIndex];
+            //         LinqBindingNode bindingNode = child.bindingNode;
+            //
+            //         // if was enabled in this iteration, skip it for now
+            //         if (bindingNode != null && bindingNode.lastAfterUpdateFrame != currentFrameId) {
+            //             bindingNode.lastAfterUpdateFrame = currentFrameId;
+            //             bindingNode.lateBindings?.Invoke(bindingNode.root, child);
+            //         }
+            //
+            //         iteratorIndex++;
+            //     }
+            //
+            //     int childCount = currentElement.children.size;
+            //
+            //     if (size + childCount >= stack.Length) {
+            //         Array.Resize(ref elemRefStack, size + childCount + 16);
+            //         stack = elemRefStack;
+            //     }
+            //
+            //     for (int i = childCount - 1; i >= 0; i--) {
+            //         stack[size++].element = currentElement.children.array[i];
+            //     }
+            // }
         }
 
         public void BeginFrame() {

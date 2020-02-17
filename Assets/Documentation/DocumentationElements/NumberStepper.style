@@ -1,0 +1,95 @@
+import "Documentation/Documentation.style" as theme;
+
+style <NumberStepper> {
+    PreferredSize = 400px 1.6em;
+    MarginBottom = 10px;
+    FlexLayoutDirection = Horizontal;
+}
+
+style stepper-container {
+    FlexLayoutDirection = Horizontal;
+    PreferredWidth = 1pca;
+}
+
+style input-element {
+    TextFontSize = 15px;
+    Overflow = Hidden;
+//    TextFontAsset = @theme.fontGothamBook;
+    Border = 1px;
+    BorderColor = grey;
+    BackgroundColor = white;
+    BorderRadius = 4px;
+    MinWidth = 50px;
+    MinHeight = 1.6em;
+    MarginRight = 4px;
+    MarginBottom = 0px;
+    FlexItemGrow = 1;
+    PreferredHeight = 1psz;
+    [hover] {
+//        Cursor = @theme.cursorTextInput;
+    }
+    [active] {
+//        BorderColor = @theme.lightBlue;
+    }
+    [focus] {
+//        BorderColor = @theme.lightBlue;
+    }
+    [attr:disabled] {
+        Opacity = 0.4;
+    }
+}
+
+style vertical-center-within-input {
+    AlignX = 8px Parent;
+    AlignY = 50% Parent;
+}
+
+style placeholder-slot {
+    TextColor = rgb(150, 150, 150);
+}
+
+style arrows {
+    PreferredSize = 24px 1psz;
+    Opacity = 1;
+    AlignY = 0% Parent;
+    AlignX = 100% Parent;
+}
+
+style disabled-arrows {
+    Opacity = 0.4;
+}
+
+style arrow-container {
+    BackgroundColor = white;
+    Border = 1px;
+    BorderColor = grey;
+    PreferredSize = 1pca 0.5pca;
+    [hover] {
+        BorderColor = #006d82;
+//        BackgroundColor = @theme.lightBlue;
+    }
+    DistributeExtraSpace = CenterContent;
+}
+
+style arrow {
+    PreferredSize = 12px 12px;
+    BackgroundTint = rgb(100, 100, 100);
+    TransformRotation = 90;
+    [hover] {
+        BackgroundTint = black;
+    }
+}
+
+style rotate-up {
+    TransformRotation = -90;
+}
+
+style arrow-up {
+    BorderRadius = 4px 4px 0 0;
+    BorderBottom = 0;
+    BackgroundColor = black;
+}
+style arrow-down {
+    BorderTop = 0;
+    BorderRadius = 0 0 4px 4px;
+}

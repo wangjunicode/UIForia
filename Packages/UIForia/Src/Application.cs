@@ -399,6 +399,8 @@ namespace UIForia {
                 views[i].Viewport = new Rect(0, 0, Width, Height);
             }
             
+            
+            inputSystem.OnUpdate();
             m_BeforeUpdateTaskSystem.OnUpdate();
 
             activeBuffer.Clear();
@@ -413,26 +415,30 @@ namespace UIForia {
 
             bool firstRun = true;
             bool loop = true; // lets us escape infinite loop in debugger
-            while (loop) {
-                linqBindingSystem.BeforeUpdate(activeBuffer); // normal bindings + OnBeforeUpdate call 
 
-                if (firstRun) {
-                    inputSystem.OnUpdate();
-                    firstRun = false;
-                }
-
-                linqBindingSystem.AfterUpdate(activeBuffer); // on update call + write back 'sync' & onChange
-
-                if (queuedBuffer.size == 0) {
-                    break;
-                }
-
-                LightList<UIElement> tmp = activeBuffer;
-                activeBuffer = queuedBuffer;
-                queuedBuffer = tmp;
-                activeBuffer.Clear();
-                // sort queued buffer by depth?
+            for (int i = 0; i < views.Count; i++) {
+                linqBindingSystem.NewUpdateFn(views[i].RootElement);
             }
+            // while (loop) {
+            //     linqBindingSystem.BeforeUpdate(activeBuffer); // normal bindings + OnBeforeUpdate call 
+            //
+            //     if (firstRun) {
+            //         inputSystem.OnUpdate();
+            //         firstRun = false;
+            //     }
+            //
+            //     linqBindingSystem.AfterUpdate(); // on update call + write back 'sync' & onChange
+            //
+            //     if (queuedBuffer.size == 0) {
+            //         break;
+            //     }
+            //
+            //     LightList<UIElement> tmp = activeBuffer;
+            //     activeBuffer = queuedBuffer;
+            //     queuedBuffer = tmp;
+            //     activeBuffer.Clear();
+            //     // sort queued buffer by depth?
+            // }
 
             bindingTimer.Stop();
 
@@ -482,15 +488,7 @@ namespace UIForia {
             return m_AfterUpdateTaskSystem.AddTask(task);
         }
 
-        public static void EnableElement(UIElement element) {
-            element.View.application.DoEnableElement(element);
-        }
-
-        public static void DisableElement(UIElement element) {
-            element.View.application.DoDisableElement(element);
-        }
-
-        public void DoEnableElement(UIElement element) {
+        internal void DoEnableElement(UIElement element, bool queued) {
             element.flags |= UIElementFlags.Enabled;
 
             // if element is not enabled (ie has a disabled ancestor or is not alive), no-op 
@@ -498,7 +496,9 @@ namespace UIForia {
                 return;
             }
 
-            queuedBuffer.Add(element);
+            if (queued) {
+                queuedBuffer.Add(element);
+            }
 
             StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
             // if element is now enabled we need to walk it's children
@@ -751,7 +751,7 @@ namespace UIForia {
             if (parentEnabled && child.isEnabled) {
                 child.enableStateChangedFrameId = frameId;
                 child.flags &= ~UIElementFlags.Enabled;
-                DoEnableElement(child);
+                DoEnableElement(child, false);
             }
 
             StructStack<ElemRef>.Release(ref elemRefStack);
@@ -809,7 +809,7 @@ namespace UIForia {
             if (parentEnabled && child.isEnabled) {
                 child.enableStateChangedFrameId = frameId;
                 child.flags &= ~UIElementFlags.Enabled;
-                DoEnableElement(child);
+                DoEnableElement(child, false);
             }
 
             StructStack<ElemRef>.Release(ref elemRefStack);

@@ -6,6 +6,7 @@ using UIForia.Attributes;
 using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.UIInput;
+using UIForia.Util;
 using UnityEngine;
 
 #pragma warning disable 0649
@@ -53,24 +54,30 @@ namespace UIForia.Elements {
         public static IInputDeserializer<int> IntDeserializer = new CallbackDeserializer<int>((string input) => {
             try {
                 return int.Parse(input);
-            } catch (Exception) {
+            }
+            catch (Exception) {
                 return 0;
             }
         });
+
         public static IInputDeserializer<float> FloatDeserializer = new CallbackDeserializer<float>((string input) => {
             try {
                 return float.Parse(input);
-            } catch (Exception) {
+            }
+            catch (Exception) {
                 return 0f;
             }
         });
+
         public static IInputDeserializer<double> DoubleDeserializer = new CallbackDeserializer<double>((string input) => {
             try {
                 return double.Parse(input);
-            } catch (Exception) {
+            }
+            catch (Exception) {
                 return 0f;
             }
         });
+
         public static IInputDeserializer<string> StringDeserializer = new CallbackDeserializer<string>((string input) => input);
 
     }
@@ -106,6 +113,7 @@ namespace UIForia.Elements {
 
             return builder.ToString();
         }
+
     }
 
     public class FloatFormatter : IInputFormatter {
@@ -139,6 +147,7 @@ namespace UIForia.Elements {
 
             return builder.ToString();
         }
+
     }
 
     public interface IInputFormatter {
@@ -178,13 +187,10 @@ namespace UIForia.Elements {
 
         public T value;
 
-//        public Func<string, T> parseValue;
-//        public Func<string, string> formatValueAsString;
-//        public Func<T, string> formatValue;
         public IInputFormatter formatter;
         public IInputSerializer<T> serializer;
         public IInputDeserializer<T> deserializer;
-        
+
         public int MaxLength = Int32.MaxValue;
 
         public override void OnCreate() {
@@ -315,9 +321,11 @@ namespace UIForia.Elements {
             if (typeof(T) == typeof(float)) {
                 return InputFormatters.FloatFormatter;
             }
+
             if (typeof(T) == typeof(double)) {
                 return InputFormatters.FloatFormatter;
             }
+
             if (typeof(T) == typeof(int)) {
                 return InputFormatters.IntFormatter;
             }
@@ -331,18 +339,18 @@ namespace UIForia.Elements {
     public abstract class UIInputElement : BaseInputElement, IFocusableEvented {
 
         [CustomPainter("UIForia::Input")]
-        internal class InputElementPainter : StandardRenderBox  {
+        internal class InputElementPainter : StandardRenderBox {
 
             public Path2D path = new Path2D();
 
             public override void PaintBackground(RenderContext ctx) {
                 base.PaintBackground(ctx);
-                
+
                 UIInputElement inputElement = (UIInputElement) element;
 
                 path.Clear();
                 path.SetTransform(inputElement.layoutResult.matrix.ToMatrix4x4());
-                
+
                 float blinkPeriod = 1f / inputElement.caretBlinkRate;
 
                 bool blinkState = (Time.unscaledTime - inputElement.blinkStartTime) % blinkPeriod < blinkPeriod / 2;
@@ -370,14 +378,14 @@ namespace UIForia.Elements {
                     RangeInt lineRange = new RangeInt(0, 1); //textInfo.GetLineRange(selectionRange));textInfo.GetLineRange(selectionRange);
                     path.BeginPath();
                     path.SetFill(inputElement.style.SelectionBackgroundColor);
-    
+
                     if (lineRange.length > 1) {
                         // todo this doesn't really work yet
                         for (int i = lineRange.start + 1; i < lineRange.end - 1; i++) {
-    //                        Rect rect = textInfo.GetLineRect(i);
-    //                        rect.x += contentRect.x;
-    //                        rect.y += contentRect.y;
-    //                        path.Rect(rect);
+                            //                        Rect rect = textInfo.GetLineRect(i);
+                            //                        rect.x += contentRect.x;
+                            //                        rect.y += contentRect.y;
+                            //                        path.Rect(rect);
                         }
                     }
                     else {
@@ -394,26 +402,27 @@ namespace UIForia.Elements {
                         float cursorToMax = maxX - x;
                         path.Rect(x, rect.y, Mathf.Min(cursorToContentEnd, cursorToMax), rect.height);
                     }
-    
+
                     path.Fill();
                 }
 
                 ctx.DrawPath(path);
             }
+
         }
 
         private UITextElement textElement;
+
         // internal TextInfo textInfo;
         internal string text;
 
         private string m_placeholder;
+
         public string placeholder {
-            get {
-                return string.IsNullOrEmpty(m_placeholder) ? "" : m_placeholder;
-            }
+            get { return string.IsNullOrEmpty(m_placeholder) ? "" : m_placeholder; }
             set { m_placeholder = value; }
         }
-        
+
         public event Action<FocusEvent> onFocus;
         public event Action<BlurEvent> onBlur;
         public bool autofocus;
@@ -462,12 +471,57 @@ namespace UIForia.Elements {
             }
         }
 
-        public override void OnUpdate() {
-           if (isReady) {
-                ScrollToCursor();
-           }
+        private StructList<KeyboardInputEvent> eventBuffer = new StructList<KeyboardInputEvent>(4);
 
-           isReady = true;
+        public override void OnUpdate() {
+            if (isReady) {
+                ScrollToCursor();
+            }
+
+            if (eventBuffer.size > 0) {
+                for (int i = 0; i < eventBuffer.size; i++) {
+                    KeyboardInputEvent evt = eventBuffer.array[i];
+                    switch (evt.keyCode) {
+                        case KeyCode.Home:
+                            HandleHome(evt);
+                            break;
+                        case KeyCode.End:
+                            HandleEnd(evt);
+                            break;
+                        case KeyCode.Backspace:
+                            HandleBackspace(evt);
+                            break;
+                        case KeyCode.Delete:
+                            HandleDelete(evt);
+                            break;
+                        case KeyCode.LeftArrow:
+                            HandleLeftArrowDown(evt);
+                            break;
+                        case KeyCode.RightArrow:
+                            HandleRightArrow(evt);
+                            break;
+                        case KeyCode.C when evt.onlyControl && selectionRange.HasSelection:
+                            HandleCopy(evt);
+                            break;
+                        case KeyCode.V when evt.onlyControl && selectionRange.HasSelection:
+                            HandlePaste(evt);
+                            break;
+                        case KeyCode.X when evt.onlyControl && selectionRange.HasSelection:
+                            HandleCut(evt);
+                            break;
+                        case KeyCode.A when evt.onlyControl && selectionRange.HasSelection:
+                            HandleSelectAll(evt);
+                            break;
+                        default:
+                            OnTextEntered(evt);
+                            break;
+                    }
+                }
+
+                eventBuffer.Clear();
+            }
+
+            isReady = true;
         }
 
         protected void EmitTextChanged() {
@@ -513,7 +567,7 @@ namespace UIForia.Elements {
                 selectionRange = textElement.textInfo.SelectWordAtPoint(mouse);
             }
             else if (evt.IsTripleClick) {
-               selectionRange = textElement.textInfo.SelectLineAtPoint(mouse);
+                selectionRange = textElement.textInfo.SelectLineAtPoint(mouse);
             }
             else {
                 selectionRange = new SelectionRange(textElement.textInfo.GetIndexAtPoint(mouse));
@@ -525,6 +579,7 @@ namespace UIForia.Elements {
 
         [UsedImplicitly]
         [OnKeyDownWithFocus]
+        [OnKeyHeldDownWithFocus]
         public void EnterText(KeyboardInputEvent evt) {
             if (evt.ctrl) {
                 return;
@@ -532,7 +587,21 @@ namespace UIForia.Elements {
 
             evt.StopPropagation();
             if (HasDisabledAttr()) return;
+            eventBuffer.Add(evt);
+        }
 
+        // [OnKeyDownWithFocus]
+        // public void EnterText(KeyboardInputEvent evt) {
+        //     if (evt.ctrl) {
+        //         return;
+        //     }
+        //
+        //     evt.StopPropagation();
+        //     if (HasDisabledAttr()) return;
+        //     eventBuffer.Add(evt);
+        // }
+
+        private void OnTextEntered(KeyboardInputEvent evt) {
             char c = evt.character;
 
             if (evt.keyCode == KeyCode.Return) {
@@ -558,7 +627,7 @@ namespace UIForia.Elements {
         }
 
         protected void ScrollToCursor() {
-            if (!hasFocus || textElement == null || textElement.textInfo == null) {
+            if (!hasFocus || textElement?.textInfo == null) {
                 return;
             }
 
@@ -573,172 +642,158 @@ namespace UIForia.Elements {
                 textScroll.x = (cursor.x - rect.x);
                 if (textScroll.x < 0) textScroll.x = 0;
             }
-            
+
             if (VisibleTextRect.width >= textElement.layoutResult.ActualWidth) {
                 textScroll.x = 0;
             }
- 
+
             textElement.style.SetTransformPositionX(-textScroll.x, StyleState.Normal);
         }
 
-        [UsedImplicitly]
-        [OnKeyDownWithFocus(KeyCode.Home)]
+        // [OnKeyDownWithFocus(KeyCode.Home)]
         public void HandleHome(KeyboardInputEvent evt) {
-            evt.StopPropagation();
-            if (HasDisabledAttr()) return;
             selectionRange = textElement.textInfo.MoveToStartOfLine(selectionRange, evt.shift);
             blinkStartTime = Time.unscaledTime;
             ScrollToCursor();
         }
 
-        [UsedImplicitly]
-        [OnKeyDownWithFocus(KeyCode.End)]
+        // [OnKeyDownWithFocus(KeyCode.End)]
         public void HandleEnd(KeyboardInputEvent evt) {
-            evt.StopPropagation();
-            if (HasDisabledAttr()) return;
             selectionRange = textElement.textInfo.MoveToEndOfLine(selectionRange, evt.shift);
             ScrollToCursor();
             blinkStartTime = Time.unscaledTime;
         }
 
-        [UsedImplicitly]
-        [OnKeyDownWithFocus(KeyCode.Backspace)]
-        public void HandleBackspace(KeyboardInputEvent evt) {
-            evt.StopPropagation();
-            if (HasDisabledAttr()) return;
-            keyLockTimestamp = Time.unscaledTime;
+        // [OnKeyDownWithFocus(KeyCode.Backspace)]
+        private void HandleBackspace(KeyboardInputEvent evt) {
+            if (evt.eventType == InputEventType.KeyHeldDown) {
+                if (!CanTriggerHeldKey()) return;
+                timestamp = Time.unscaledTime;
+            }
+            else {
+                keyLockTimestamp = Time.unscaledTime;
+            }
+
             blinkStartTime = Time.unscaledTime;
             HandleCharactersDeletedBackwards();
             ScrollToCursor();
         }
 
-        [UsedImplicitly]
-        [OnKeyHeldDownWithFocus(KeyCode.Backspace)]
-        public void HandleBackspaceHeld(KeyboardInputEvent evt) {
-            evt.StopPropagation();
-            if (!CanTriggerHeldKey()) return;
-            timestamp = Time.unscaledTime;
-            blinkStartTime = Time.unscaledTime;
-            HandleCharactersDeletedBackwards();
-            ScrollToCursor();
-        }
+        // [OnKeyHeldDownWithFocus(KeyCode.Backspace)]
+        // public void HandleBackspaceHeld(KeyboardInputEvent evt) {
+        //     timestamp = Time.unscaledTime;
+        //     blinkStartTime = Time.unscaledTime;
+        //     HandleCharactersDeletedBackwards();
+        //     ScrollToCursor();
+        // }
 
-        [UsedImplicitly]
-        [OnKeyHeldDownWithFocus(KeyCode.Delete)]
-        public void HandleDeleteHeld(KeyboardInputEvent evt) {
-            evt.StopPropagation();
-            if (!CanTriggerHeldKey()) return;
-            timestamp = Time.unscaledTime;
-            blinkStartTime = Time.unscaledTime;
-            HandleCharactersDeletedForwards();
-            ScrollToCursor();
-        }
+        // [OnKeyHeldDownWithFocus(KeyCode.Delete)]
+        // public void HandleDeleteHeld(KeyboardInputEvent evt) {
+        //     timestamp = Time.unscaledTime;
+        //     blinkStartTime = Time.unscaledTime;
+        //     HandleCharactersDeletedForwards();
+        //     ScrollToCursor();
+        // }
 
-        [UsedImplicitly]
-        [OnKeyDownWithFocus(KeyCode.Delete)]
-        public void HandleDelete(KeyboardInputEvent evt) {
-            evt.StopPropagation();
-            if (HasDisabledAttr()) return;
-            keyLockTimestamp = Time.unscaledTime;
+        // [OnKeyDownWithFocus(KeyCode.Delete)]
+        private void HandleDelete(KeyboardInputEvent evt) {
+            if (evt.eventType == InputEventType.KeyHeldDown) {
+                if (!CanTriggerHeldKey()) return;
+                timestamp = Time.unscaledTime;
+            }
+            else {
+                keyLockTimestamp = Time.unscaledTime;
+            }
+
             blinkStartTime = Time.unscaledTime;
             if (evt.ctrl || evt.command) {
                 selectionRange = new SelectionRange(selectionRange.cursorIndex, text.Length);
             }
+
             HandleCharactersDeletedForwards();
             ScrollToCursor();
         }
 
-        [UsedImplicitly]
-        [OnKeyHeldDownWithFocus(KeyCode.LeftArrow)]
-        public void HandleLeftArrowHeld(KeyboardInputEvent evt) {
-            evt.StopPropagation();
-            if (!CanTriggerHeldKey()) return;
+        // [UsedImplicitly]
+        // [OnKeyHeldDownWithFocus(KeyCode.LeftArrow)]
+        // private void HandleLeftArrowHeld(KeyboardInputEvent evt) {
+        //     evt.StopPropagation();
+        //     if (!CanTriggerHeldKey()) return;
+        //
+        //     timestamp = Time.unscaledTime;
+        //     selectionRange = textElement.textInfo.MoveCursorLeft(selectionRange, evt.shift, evt.ctrl || evt.command);
+        //     blinkStartTime = Time.unscaledTime;
+        //     ScrollToCursor();
+        // }
 
-            timestamp = Time.unscaledTime;
-            selectionRange = textElement.textInfo.MoveCursorLeft(selectionRange, evt.shift, evt.ctrl || evt.command);
+        // [OnKeyDownWithFocus(KeyCode.LeftArrow)]
+        private void HandleLeftArrowDown(KeyboardInputEvent evt) {
+            if (evt.eventType == InputEventType.KeyHeldDown) {
+                if (!CanTriggerHeldKey()) return;
+                timestamp = Time.unscaledTime;
+            }
+            else {
+                keyLockTimestamp = Time.unscaledTime;
+            }
+
             blinkStartTime = Time.unscaledTime;
+            selectionRange = textElement.textInfo.MoveCursorLeft(selectionRange, evt.shift, evt.ctrl || evt.command);
             ScrollToCursor();
         }
 
-        [UsedImplicitly]
-        [OnKeyDownWithFocus(KeyCode.LeftArrow)]
-        public void HandleLeftArrowDown(KeyboardInputEvent evt) {
-            evt.StopPropagation();
+        // [OnKeyHeldDownWithFocus(KeyCode.RightArrow)]
+        // private void HandleRightArrowHeld(KeyboardInputEvent evt) {
+        //     evt.StopPropagation();
+        //
+        //     if (!CanTriggerHeldKey()) return;
+        //
+        //     blinkStartTime = Time.unscaledTime;
+        //     timestamp = Time.unscaledTime;
+        //
+        //     selectionRange = textElement.textInfo.MoveCursorRight(selectionRange, evt.shift, evt.ctrl || evt.command);
+        //     ScrollToCursor();
+        // }
 
-            if (HasDisabledAttr()) return;
+        // [OnKeyDownWithFocus(KeyCode.RightArrow)]
+        private void HandleRightArrow(KeyboardInputEvent evt) {
+            if (evt.eventType == InputEventType.KeyHeldDown) {
+                if (!CanTriggerHeldKey()) return;
+                timestamp = Time.unscaledTime;
+            }
+            else {
+                keyLockTimestamp = Time.unscaledTime;
+            }
 
-            keyLockTimestamp = Time.unscaledTime;
-            selectionRange = textElement.textInfo.MoveCursorLeft(selectionRange, evt.shift, evt.ctrl || evt.command);
             blinkStartTime = Time.unscaledTime;
-            ScrollToCursor();
-        }
-
-        [UsedImplicitly]
-        [OnKeyHeldDownWithFocus(KeyCode.RightArrow)]
-        public void HandleRightArrowHeld(KeyboardInputEvent evt) {
-            evt.StopPropagation();
-
-            if (!CanTriggerHeldKey()) return;
-
-            blinkStartTime = Time.unscaledTime;
-            timestamp = Time.unscaledTime;
-
             selectionRange = textElement.textInfo.MoveCursorRight(selectionRange, evt.shift, evt.ctrl || evt.command);
             ScrollToCursor();
         }
 
-        [UsedImplicitly]
-        [OnKeyDownWithFocus(KeyCode.RightArrow)]
-        public void HandleRightArrow(KeyboardInputEvent evt) {
-            evt.StopPropagation();
-
-            if (HasDisabledAttr()) return;
-            keyLockTimestamp = Time.unscaledTime;
-
-            blinkStartTime = Time.unscaledTime;
-
-            selectionRange = textElement.textInfo.MoveCursorRight(selectionRange, evt.shift, evt.ctrl || evt.command);
-            ScrollToCursor();
-        }
-
-        [UsedImplicitly]
-        [OnKeyDownWithFocus(KeyCode.C, KeyboardModifiers.Control)]
-        public void HandleCopy(KeyboardInputEvent evt) {
+        // [OnKeyDownWithFocus(KeyCode.C, KeyboardModifiers.Control)]
+        private void HandleCopy(KeyboardInputEvent evt) {
             if (evt.onlyControl && selectionRange.HasSelection) {
                 clipboard = textElement.textInfo.GetSelectedString(selectionRange);
                 evt.StopPropagation();
             }
         }
 
-        [UsedImplicitly]
-        [OnKeyDownWithFocus(KeyCode.X, KeyboardModifiers.Control)]
-        public void HandleCut(KeyboardInputEvent evt) {
-            if (GetAttribute("disabled") != null) return;
-            if (evt.onlyControl && selectionRange.HasSelection) {
-                clipboard = textElement.textInfo.GetSelectedString(selectionRange);
-                HandleCharactersDeletedBackwards();
-                evt.StopPropagation();
-            }
+        // [OnKeyDownWithFocus(KeyCode.X, KeyboardModifiers.Control)]
+        private void HandleCut(KeyboardInputEvent evt) {
+            clipboard = textElement.textInfo.GetSelectedString(selectionRange);
+            HandleCharactersDeletedBackwards();
+            evt.StopPropagation();
         }
 
-        [UsedImplicitly]
-        [OnKeyDownWithFocus(KeyCode.V, KeyboardModifiers.Control)]
-        public void HandlePaste(KeyboardInputEvent evt) {
-            if (GetAttribute("disabled") != null) return;
-            if (evt.onlyControl) {
-                HandleCharactersEntered(clipboard);
-                evt.StopPropagation();
-            }
+        //[OnKeyDownWithFocus(KeyCode.V, KeyboardModifiers.Control)]
+        private void HandlePaste(KeyboardInputEvent evt) {
+            HandleCharactersEntered(clipboard);
+            evt.StopPropagation();
         }
 
-        [UsedImplicitly]
-        [OnKeyDownWithFocus(KeyCode.A, KeyboardModifiers.Control)]
-        public void HandleSelectAll(KeyboardInputEvent evt) {
-            if (GetAttribute("disabled") != null) return;
-            if (evt.onlyControl) {
-                selectionRange = new SelectionRange(0, int.MaxValue);
-                evt.StopPropagation();
-            }
+        // [OnKeyDownWithFocus(KeyCode.A, KeyboardModifiers.Control)]
+        private void HandleSelectAll(KeyboardInputEvent evt) {
+            selectionRange = new SelectionRange(0, int.MaxValue);
+            evt.StopPropagation();
         }
 
         public bool HasDisabledAttr() {
@@ -767,10 +822,11 @@ namespace UIForia.Elements {
             if (!hasFocus) {
                 application.InputSystem.RequestFocus(this);
             }
+
             TextSelectDragEvent retn = new TextSelectDragEvent(this);
             Vector2 mouseDownPosition = evt.LeftMouseDownPosition - layoutResult.screenPosition - layoutResult.ContentRect.position + textScroll;
             Vector2 mousePosition = evt.MousePosition - layoutResult.screenPosition - layoutResult.ContentRect.position + textScroll;
-            
+
             int indexAtDownPoint = textElement.textInfo.GetIndexAtPoint(mouseDownPosition);
             int indexAtPoint = textElement.textInfo.GetIndexAtPoint(mousePosition);
             if (indexAtDownPoint < indexAtPoint) {
@@ -779,6 +835,7 @@ namespace UIForia.Elements {
             else {
                 selectionRange = new SelectionRange(indexAtDownPoint, indexAtPoint);
             }
+
             return retn;
         }
 
@@ -808,7 +865,7 @@ namespace UIForia.Elements {
 
             protected readonly UIInputElement _uiInputElement;
 
-            public TextSelectDragEvent(UIInputElement origin)  {
+            public TextSelectDragEvent(UIInputElement origin) {
                 this._uiInputElement = origin;
                 _uiInputElement.isSelecting = true;
             }
@@ -816,9 +873,9 @@ namespace UIForia.Elements {
             public override void Update() {
                 Vector2 mouse = MousePosition - _uiInputElement.layoutResult.screenPosition - _uiInputElement.layoutResult.ContentRect.position;
                 mouse += _uiInputElement.textScroll;
-                _uiInputElement.selectionRange = new SelectionRange(_uiInputElement.textElement.textInfo.GetIndexAtPoint(mouse), _uiInputElement.selectionRange.selectIndex > -1 
-                        ? _uiInputElement.selectionRange.selectIndex 
-                        : _uiInputElement.selectionRange.cursorIndex);
+                _uiInputElement.selectionRange = new SelectionRange(_uiInputElement.textElement.textInfo.GetIndexAtPoint(mouse), _uiInputElement.selectionRange.selectIndex > -1
+                    ? _uiInputElement.selectionRange.selectIndex
+                    : _uiInputElement.selectionRange.cursorIndex);
                 _uiInputElement.ScrollToCursor();
             }
 
@@ -826,6 +883,9 @@ namespace UIForia.Elements {
                 _uiInputElement.isSelecting = false;
                 _uiInputElement.selectionRange = new SelectionRange(_uiInputElement.selectionRange.selectIndex, _uiInputElement.selectionRange.cursorIndex);
             }
+
         }
+
     }
+
 }

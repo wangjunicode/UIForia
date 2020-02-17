@@ -379,10 +379,16 @@ namespace UIForia {
         private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
 
         public void Update() {
+            
+            // input queries against last frame layout
             inputSystem.Read();
+            inputSystem.OnUpdate();
+
             loopTimer.Reset();
             loopTimer.Start();
+            
             Rect rect = Camera?.pixelRect ?? new Rect(0, 0, 1920, 1080); //UIApplicationSize.width, UIApplicationSize.height);
+            
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
 
@@ -391,10 +397,7 @@ namespace UIForia {
             }
             
             m_BeforeUpdateTaskSystem.OnUpdate();
-
-            bool loop = true;
-            bool firstRun = true;
-
+            
             activeBuffer.Clear();
 
             for (int i = 0; i < views.Count; i++) {
@@ -404,14 +407,12 @@ namespace UIForia {
             linqBindingSystem.BeginFrame();
             bindingTimer.Reset();
             bindingTimer.Start();
+            
+            bool loop = true; // lets us escape infinite loop in debugger
             while (loop) {
+                
                 linqBindingSystem.BeforeUpdate(activeBuffer); // normal bindings + OnBeforeUpdate call 
-
-                if (firstRun) {
-                    inputSystem.OnUpdate();
-                    firstRun = false;
-                }
-
+                
                 linqBindingSystem.AfterUpdate(activeBuffer); // on update call + write back 'sync' & onChange
 
                 if (queuedBuffer.size == 0) {
@@ -425,6 +426,8 @@ namespace UIForia {
                 // sort queued buffer by depth?
             }
 
+            // style & attribute bindings (no user code here)
+            
             bindingTimer.Stop();
 
             animationSystem.OnUpdate();

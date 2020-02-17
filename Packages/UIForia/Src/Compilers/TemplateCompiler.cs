@@ -1037,7 +1037,7 @@ namespace UIForia.Compilers {
 
                 CompileAttributeBindings(attributes);
 
-                CompileInstanceStyleBindings(isRootTemplate, attributes);
+                CompileInstanceStyleBindings(attributes);
 
                 CompileStyleBindings(ctx, templateNode.tagName, attributes);
 
@@ -1135,22 +1135,10 @@ namespace UIForia.Compilers {
 
                 // exposer needs to write & update
 
-                ParameterExpression element = createdCompiler.GetElement();
-                MemberExpression bindingNode = Expression.Field(element, s_UIElement_BindingNode);
-                MemberExpression innerContext = Expression.Field(bindingNode, typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.referencedContexts)));
-
-                BinaryExpression idx = Expression.ArrayIndex(innerContext, Expression.Constant(x));
-
                 contextModifications = contextModifications ?? StructList<ContextAliasActions>.Get();
 
                 for (int i = 0; i < exposedData.scopedVariables.Length; i++) {
                     contextStack.Peek().Push(exposedData.scopedVariables[i]);
-                    // new ContextVariableDefinition() {
-                    // id = exposed.id,
-                    // name = exposed.name,
-                    // type = exposed.type,
-                    // variableType = AliasResolverType.ContextVariable
-                    // });
                 }
 
                 if (exposedData.exposedAttrs.Length != 0) {
@@ -1390,7 +1378,7 @@ namespace UIForia.Compilers {
             }
         }
 
-        private void CompileInstanceStyleBindings(bool isRoot, StructList<AttributeDefinition> attributes) {
+        private void CompileInstanceStyleBindings(StructList<AttributeDefinition> attributes) {
             if (attributes == null) return;
 
             for (int i = 0; i < attributes.size; i++) {

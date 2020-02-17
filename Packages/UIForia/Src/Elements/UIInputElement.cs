@@ -536,13 +536,13 @@ namespace UIForia.Elements {
             char c = evt.character;
 
             if (evt.keyCode == KeyCode.Return) {
-                Input.DelayEvent(this, new SubmitEvent());
+                TriggerEvent(new SubmitEvent());
                 return;
             }
 
             if (evt.keyCode == KeyCode.Tab) {
                 // todo: find next IFocusable; implement tab index
-                Input.DelayEvent(this, new TabNavigationEvent(evt));
+                TriggerEvent(new TabNavigationEvent(evt));
                 return;
             }
 

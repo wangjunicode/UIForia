@@ -336,6 +336,10 @@ namespace UIForia.Elements {
                         return UITaskResult.Completed;
                     }
 
+                    if (repeat.ChildCount == 0) {
+                        return UITaskResult.Running;
+                    }
+
                     float y = repeat[selectedIndex].layoutResult.alignedPosition.y
                               - repeat.FindParent<ScrollView>().ScrollOffsetY
                               - layoutResult.VerticalPaddingBorderStart

@@ -381,8 +381,6 @@ namespace UIForia {
         public void Update() {
             // input queries against last frame layout
             inputSystem.Read();
-            inputSystem.OnUpdate();
-
             loopTimer.Reset();
             loopTimer.Start();
 
@@ -413,11 +411,17 @@ namespace UIForia {
             bindingTimer.Reset();
             bindingTimer.Start();
 
+            bool firstRun = true;
             bool loop = true; // lets us escape infinite loop in debugger
             while (loop) {
                 linqBindingSystem.BeforeUpdate(activeBuffer); // normal bindings + OnBeforeUpdate call 
 
-                linqBindingSystem.AfterUpdate(activeBuffer);
+                if (firstRun) {
+                    inputSystem.OnUpdate();
+                    firstRun = false;
+                }
+
+                linqBindingSystem.AfterUpdate(activeBuffer); // on update call + write back 'sync' & onChange
 
                 if (queuedBuffer.size == 0) {
                     break;

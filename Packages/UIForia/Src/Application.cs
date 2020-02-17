@@ -113,7 +113,7 @@ namespace UIForia {
             routingSystem = new RoutingSystem();
             animationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
-            soundSystem = new UISoundSystem(); 
+            soundSystem = new UISoundSystem();
         }
 
         internal void Initialize() {
@@ -135,8 +135,8 @@ namespace UIForia {
 
             UIView view = null;
 
-           // Stopwatch timer = Stopwatch.StartNew();
-            
+            // Stopwatch timer = Stopwatch.StartNew();
+
             if (isPreCompiled) {
                 templateData = TemplateLoader.LoadPrecompiledTemplates(templateSettings);
             }
@@ -153,6 +153,7 @@ namespace UIForia {
             for (int i = 0; i < systems.Count; i++) {
                 systems[i].OnViewAdded(view);
             }
+
             //timer.Stop();
             //Debug.Log("Initialized UIForia application in " + timer.Elapsed.TotalSeconds.ToString("F2") + " seconds");
         }
@@ -252,7 +253,7 @@ namespace UIForia {
             }
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            
+
             foreach (ISystem system in systems) {
                 system.OnDestroy();
             }
@@ -272,12 +273,11 @@ namespace UIForia {
             Initialize();
 
             onRefresh?.Invoke();
-            
+
             GC.Collect();
-            
+
             stopwatch.Stop();
             Debug.Log("Refreshed " + id + " in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
-            
         }
 
         public void Destroy() {
@@ -379,16 +379,21 @@ namespace UIForia {
         private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
 
         public void Update() {
-            
             // input queries against last frame layout
             inputSystem.Read();
             inputSystem.OnUpdate();
 
             loopTimer.Reset();
             loopTimer.Start();
-            
-            Rect rect = Camera?.pixelRect ?? new Rect(0, 0, 1920, 1080); //UIApplicationSize.width, UIApplicationSize.height);
-            
+
+            Rect rect;
+            if (!ReferenceEquals(Camera, null)) {
+                rect = Camera.pixelRect;
+            }
+            else {
+                rect = new Rect(0, 0, 1920, 1080);
+            }
+
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
 
@@ -397,7 +402,7 @@ namespace UIForia {
             }
             
             m_BeforeUpdateTaskSystem.OnUpdate();
-            
+
             activeBuffer.Clear();
 
             for (int i = 0; i < views.Count; i++) {
@@ -407,13 +412,12 @@ namespace UIForia {
             linqBindingSystem.BeginFrame();
             bindingTimer.Reset();
             bindingTimer.Start();
-            
+
             bool loop = true; // lets us escape infinite loop in debugger
             while (loop) {
-                
                 linqBindingSystem.BeforeUpdate(activeBuffer); // normal bindings + OnBeforeUpdate call 
-                
-                linqBindingSystem.AfterUpdate(activeBuffer); // on update call + write back 'sync' & onChange
+
+                linqBindingSystem.AfterUpdate(activeBuffer);
 
                 if (queuedBuffer.size == 0) {
                     break;
@@ -426,9 +430,10 @@ namespace UIForia {
                 // sort queued buffer by depth?
             }
 
-            // style & attribute bindings (no user code here)
-            
             bindingTimer.Stop();
+
+            // style & attribute bindings (no user code here)
+            // linqBindingSystem.UpdateStylesAndAttributes();
 
             animationSystem.OnUpdate();
 
@@ -441,7 +446,6 @@ namespace UIForia {
             layoutTimer.Start();
             layoutSystem.OnUpdate();
             layoutTimer.Stop();
-
 
             renderTimer.Reset();
             renderTimer.Start();
@@ -516,7 +520,7 @@ namespace UIForia {
                 child.style.RunCommands();
 
                 //if ((child.flags & UIElementFlags.HasBeenEnabled) == 0) {
-                    // todo -- run once bindings if present
+                // todo -- run once bindings if present
                 //    child.View.ElementCreated(child);
                 //}
 

@@ -33,7 +33,7 @@ namespace UIForia.Animation {
 
     }
     
-    public struct AnimationOptions {      
+    public struct AnimationOptions {
 
         public float? loopTime;
         public int? iterations;

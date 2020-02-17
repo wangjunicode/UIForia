@@ -20,8 +20,6 @@ namespace UIForia.Exceptions {
 
         private ExpressionTokenType tokenType;
 
-        private ExpressionToken token;
-
         private ASTNode node;
 
         public TemplateParseException(string message, ASTNode node) : base(message) {
@@ -64,7 +62,6 @@ namespace UIForia.Exceptions {
 
         public override string Message => fileName + $"\nYour template contains an error in line {line} column {column}."
                                                    + $"\n\tMessage:\n\t\t{message}"
-                                                   + $"\n\tToken:\n\t\t{token.value}"
                                                    + $"\nloadTemplatesFromStreamingAssets: {Application.Settings.loadTemplatesFromStreamingAssets}"
                                                    + (node != default ? $"\n\tNode:\n\t\t{node}" : string.Empty);
 

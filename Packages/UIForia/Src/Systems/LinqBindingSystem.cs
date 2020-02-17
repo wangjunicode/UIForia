@@ -308,6 +308,10 @@ namespace UIForia.Systems {
             currentFrameId++;
         }
 
+        public void UpdateStylesAndAttributes() {
+            
+        }
+
     }
 
 }

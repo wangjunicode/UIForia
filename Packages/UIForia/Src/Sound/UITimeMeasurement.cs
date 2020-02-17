@@ -5,6 +5,21 @@ using UnityEngine;
 namespace UIForia.Sound {
     [DebuggerDisplay("{unit}({value})")]
     public struct UITimeMeasurement {
+
+        public bool Equals(UITimeMeasurement other) {
+            return value.Equals(other.value) && unit == other.unit;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is UITimeMeasurement other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                return (value.GetHashCode() * 397) ^ (int) unit;
+            }
+        }
+
         public readonly float value;
         public readonly UITimeMeasurementUnit unit;
 

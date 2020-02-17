@@ -333,14 +333,14 @@ namespace LayoutSystem {
             UIElement contentSize = blockProvider[2];
             UIElement blockUser = contentSize[0];
 
-            app.GetView(0).SetSize(1000, 1000);
+            app.GetView(0).SetSize(1920, 1080);
 
             blockProvider.style.SetPreferredWidth(new UIMeasurement(1f, UIMeasurementUnit.Content), StyleState.Normal);
 
             app.Update();
 
             Assert.AreEqual(3, blockProvider.layoutBox.childCount);
-            Assert.AreEqual(1000, blockUser.layoutBox.finalWidth);
+            Assert.AreEqual(1920, blockUser.layoutBox.finalWidth);
         }
 
         //     [Template("Data/Layout/System/LayoutSystemTest_Sorting.xml#sort_layers_ascending")]

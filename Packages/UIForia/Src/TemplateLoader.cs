@@ -21,31 +21,45 @@ namespace UIForia.Compilers {
         public static CompiledTemplateData LoadRuntimeTemplates(Type type, TemplateSettings templateSettings) {
             CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
 
-           // Stopwatch stopwatch = Stopwatch.StartNew();
+            // Stopwatch stopwatch = Stopwatch.StartNew();
 
             Func<UIElement, TemplateScope, UIElement>[] templates = new Func<UIElement, TemplateScope, UIElement>[compiledTemplateData.compiledTemplates.size];
             Action<UIElement, UIElement>[] bindings = new Action<UIElement, UIElement>[compiledTemplateData.compiledBindings.size];
             Func<UIElement, UIElement, TemplateScope, UIElement>[] slots = new Func<UIElement, UIElement, TemplateScope, UIElement>[compiledTemplateData.compiledSlots.size];
             TemplateMetaData[] templateMetaData = new TemplateMetaData[compiledTemplateData.compiledTemplates.size];
+            OrderablePartitioner<Tuple<int, int>> partition;
 
-            OrderablePartitioner<Tuple<int, int>> partition = Partitioner.Create(0, templateMetaData.Length);
-            
-            Parallel.ForEach(partition, (range, loopState) => {
-                for (int i = range.Item1; i < range.Item2; i++) {
+            if (templateMetaData.Length < 10) {
+                for (int i = 0; i < templateMetaData.Length; i++) {
                     templates[i] = (Func<UIElement, TemplateScope, UIElement>) compiledTemplateData.compiledTemplates[i].templateFn.Compile();
                 }
-            });
-            
-            partition = Partitioner.Create(0, compiledTemplateData.compiledSlots.size);
-            Parallel.ForEach(partition, (range, loopState) => {
-                for (int i = range.Item1; i < range.Item2; i++) {
+            }
+            else {
+                partition = Partitioner.Create(0, templateMetaData.Length);
+
+                Parallel.ForEach(partition, (range, loopState) => {
+                    for (int i = range.Item1; i < range.Item2; i++) {
+                        templates[i] = (Func<UIElement, TemplateScope, UIElement>) compiledTemplateData.compiledTemplates[i].templateFn.Compile();
+                    }
+                });
+            }
+
+            if (compiledTemplateData.compiledSlots.size < 10) {
+                for (int i = 0; i < compiledTemplateData.compiledSlots.size; i++) {
                     slots[i] = (Func<UIElement, UIElement, TemplateScope, UIElement>) compiledTemplateData.compiledSlots[i].templateFn.Compile();
                 }
-            });
-            
-            partition = Partitioner.Create(0, bindings.Length);
-            Parallel.ForEach(partition, (range, loopState) => {
-                for (int i = range.Item1; i < range.Item2; i++) {
+            }
+            else {
+                partition = Partitioner.Create(0, compiledTemplateData.compiledSlots.size);
+                Parallel.ForEach(partition, (range, loopState) => {
+                    for (int i = range.Item1; i < range.Item2; i++) {
+                        slots[i] = (Func<UIElement, UIElement, TemplateScope, UIElement>) compiledTemplateData.compiledSlots[i].templateFn.Compile();
+                    }
+                });
+            }
+
+            if (bindings.Length < 10) {
+                for (int i = 0; i < bindings.Length; i++) {
                     try {
                         bindings[i] = (Action<UIElement, UIElement>) compiledTemplateData.compiledBindings[i].bindingFn.Compile();
                     }
@@ -54,7 +68,21 @@ namespace UIForia.Compilers {
                         Debug.Log(e);
                     }
                 }
-            });
+            }
+            else {
+                partition = Partitioner.Create(0, bindings.Length);
+                Parallel.ForEach(partition, (range, loopState) => {
+                    for (int i = range.Item1; i < range.Item2; i++) {
+                        try {
+                            bindings[i] = (Action<UIElement, UIElement>) compiledTemplateData.compiledBindings[i].bindingFn.Compile();
+                        }
+                        catch (Exception e) {
+                            Debug.Log("binding " + compiledTemplateData.compiledBindings[i].bindingFn.ToCSharpCode());
+                            Debug.Log(e);
+                        }
+                    }
+                });
+            }
 
             LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
 
@@ -82,7 +110,7 @@ namespace UIForia.Compilers {
 
             // todo -- this can be improved, cannot currently parallelize because the write target (constructorFnMap) is a dictionary which is not threadsafe
             // can convert the constructorFnMap to an array but would need a unique index for each type that is sequential
-            
+
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
                 if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
                     continue;
@@ -106,7 +134,7 @@ namespace UIForia.Compilers {
             compiledTemplateData.constructElement = (typeId) => constructorFnMap[typeId]?.Invoke() ?? default;
 
             // stopwatch.Stop();
-           // Debug.Log("Loaded UIForia templates in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
+            // Debug.Log("Loaded UIForia templates in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
 
             return compiledTemplateData;
         }

@@ -94,7 +94,7 @@ namespace UIForia.Parsing {
                                 try {
                                     s_GenericMap.Add(tagName, processedType);
                                 }
-                                catch (Exception e) {
+                                catch (Exception) {
                                     Debug.LogError($"UIForia does not support multiple elements with the same tag name. Tried to register type {processedType.rawType} for `{tagName}` " +
                                                    $"but this tag name was already taken by type {s_GenericMap[tagName].rawType}. For generic overload types with multiple arguments you need to supply a unique [TagName] attribute");
                                     continue;

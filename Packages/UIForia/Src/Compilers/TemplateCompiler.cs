@@ -1005,8 +1005,6 @@ namespace UIForia.Compilers {
 
             StructList<ChangeHandlerDefinition> changeHandlerDefinitions = null;
 
-            bool isRootTemplate = ctx.templateRootNode == templateNode;
-
             BindingOutput retn = default;
 
             // for template roots (which are not the app root!) we dont want to generate bindings in their own template definition functions
@@ -1142,16 +1140,14 @@ namespace UIForia.Compilers {
                 }
 
                 if (exposedData.exposedAttrs.Length != 0) {
-                    // ParameterExpression innerSlotContext_update = updateCompiler.AddVariable(exposedData.rootType, "__innerContext");
-
-                    // updateCompiler.Assign(innerSlotContext_update, Expression.Convert(idx, exposedData.rootType));
-                    // updateCompiler.SetImplicitContext(innerSlotContext_update);
 
                     for (int i = 0; i < exposedData.exposedAttrs.Length; i++) {
                         ref AttributeDefinition attr = ref exposedData.exposedAttrs[i];
                         // bindingNode.CreateContextVariable<string>(id);
                         ContextVariableDefinition variableDefinition = new ContextVariableDefinition();
 
+                        updateCompiler.SetupAttributeData(attr);
+                        SetImplicitContext(updateCompiler, attr);
                         Type expressionType = updateCompiler.GetExpressionType(attr.value);
 
                         variableDefinition.name = attr.key;
@@ -1294,19 +1290,7 @@ namespace UIForia.Compilers {
                 }
             }
         }
-
-        private void SetupCompilers(in AttributeDefinition attr) {
-            // if (attr.slotDepth == -1) {
-            // do normal stuff with element & root    
-            // }
-
-            // attr.contextType;
-
-            // SetContextStack();
-            // SetNamespaces
-            // when resolving aliases, might need to store namespaces and types there
-        }
-
+        
         private void CompileContextVariable(in AttributeDefinition attr, ref StructList<ContextAliasActions> contextModifications) {
             SetImplicitContext(createdCompiler, attr);
 
@@ -1373,7 +1357,7 @@ namespace UIForia.Compilers {
                     CompileAttributeBinding(enabledCompiler, attr);
                 }
                 else {
-                    CompileAttributeBinding(updateCompiler, attr);
+                    CompileAttributeBinding(lateCompiler, attr);
                 }
             }
         }
@@ -1384,7 +1368,7 @@ namespace UIForia.Compilers {
             for (int i = 0; i < attributes.size; i++) {
                 ref AttributeDefinition attr = ref attributes.array[i];
                 if (attr.type == AttributeType.InstanceStyle) {
-                    CompileInstanceStyleBinding(updateCompiler, attr);
+                    CompileInstanceStyleBinding(lateCompiler, attr);
                 }
             }
         }
@@ -1463,7 +1447,7 @@ namespace UIForia.Compilers {
                 CompileStaticSharedStyles(ctx, styleExpressions, styleIds);
             }
             else {
-                CompileDynamicSharedStyles(ctx, styleExpressions, styleIds);
+                CompileDynamicSharedStyles(lateCompiler, ctx, styleExpressions, styleIds);
             }
 
             styleExpressions.Release();
@@ -1518,14 +1502,14 @@ namespace UIForia.Compilers {
             styleIds.Release();
         }
 
-        private void CompileDynamicSharedStyles(CompilationContext ctx, StructList<StyleExpression> styleExpressionGroups, LightList<StyleRefInfo> styleIds) {
-            updateCompiler.SetNullCheckingEnabled(false);
+        private void CompileDynamicSharedStyles(UIForiaLinqCompiler compiler, CompilationContext ctx, StructList<StyleExpression> styleExpressionGroups, LightList<StyleRefInfo> styleIds) {
+            compiler.SetNullCheckingEnabled(false);
 
             ParameterExpression styleList = ctx.GetVariable<LightList<UIStyleGroupContainer>>("styleList");
             ctx.Assign(styleList, ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_Get));
 
             Parameter updateStyleParam = new Parameter<LightList<UIStyleGroupContainer>>("styleList");
-            ParameterExpression updateStyleList = updateCompiler.AddVariable(updateStyleParam, ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_Get));
+            ParameterExpression updateStyleList = compiler.AddVariable(updateStyleParam, ExpressionFactory.CallStaticUnchecked(s_LightList_UIStyleGroupContainer_Get));
 
             // this makes sure we always use implicit styles
             for (int i = 0; i < styleIds.size; i++) {
@@ -1539,19 +1523,19 @@ namespace UIForia.Compilers {
                 ctx.InlineComment(styleRefInfo.styleName + " -> from template " + styleRefInfo.templateMetaData.filePath);
             }
 
-            updateCompiler.SetNullCheckingEnabled(false);
+            compiler.SetNullCheckingEnabled(false);
 
             for (int i = 0; i < styleExpressionGroups.size; i++) {
                 StyleExpression styleExpression = styleExpressionGroups.array[i];
 
                 StructList<TextExpression> expressionList = styleExpression.expressions;
 
-                updateCompiler.SetupAttributeData(styleExpression.attribute);
-                updateCompiler.SetImplicitContext(styleExpression.fromInnerContext ? updateCompiler.GetCastElement() : updateCompiler.GetCastRoot());
+                compiler.SetupAttributeData(styleExpression.attribute);
+                compiler.SetImplicitContext(styleExpression.fromInnerContext ? compiler.GetCastElement() : compiler.GetCastRoot());
 
-                ParameterExpression templateMetaDataExpr = updateCompiler.AddVariable(typeof(TemplateMetaData[]), "metaData");
-                MemberExpression application = Expression.Property(updateCompiler.GetElement(), s_UIElement_Application);
-                updateCompiler.Assign(templateMetaDataExpr, Expression.Property(application, s_Application_GetTemplateMetaDataArray));
+                ParameterExpression templateMetaDataExpr = compiler.AddVariable(typeof(TemplateMetaData[]), "metaData");
+                MemberExpression application = Expression.Property(compiler.GetElement(), s_UIElement_Application);
+                compiler.Assign(templateMetaDataExpr, Expression.Property(application, s_Application_GetTemplateMetaDataArray));
 
                 Expression templateContext = Expression.ArrayIndex(templateMetaDataExpr, Expression.Constant(styleExpression.templateMetaData.id));
                 for (int k = 0; k < expressionList.size; k++) {
@@ -1559,9 +1543,9 @@ namespace UIForia.Compilers {
 
 
                     if (textExpression.isExpression) {
-                        Expression dynamicStyleList = updateCompiler.TypeWrapStatement(s_DynamicStyleListTypeWrapper, typeof(DynamicStyleList), textExpression.text);
+                        Expression dynamicStyleList = compiler.TypeWrapStatement(s_DynamicStyleListTypeWrapper, typeof(DynamicStyleList), textExpression.text);
 
-                        updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(dynamicStyleList, s_DynamicStyleList_Flatten, templateContext, updateStyleList));
+                        compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(dynamicStyleList, s_DynamicStyleList_Flatten, templateContext, updateStyleList));
                     }
 
                     else {
@@ -1576,7 +1560,7 @@ namespace UIForia.Compilers {
                             if (styleId >= 0) {
                                 MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(templateContext, s_TemplateMetaData_GetStyleById, Expression.Constant(styleId));
                                 MethodCallExpression addCall = ExpressionFactory.CallInstanceUnchecked(updateStyleList, s_LightList_UIStyleGroupContainer_Add, expr);
-                                updateCompiler.RawExpression(addCall);
+                                compiler.RawExpression(addCall);
                                 ctx.InlineComment(styleName + " -> from template " + styleExpression.templateMetaData.filePath);
                             }
                         }
@@ -1584,17 +1568,17 @@ namespace UIForia.Compilers {
                 }
             }
 
-            MemberExpression styleSet = Expression.Field(updateCompiler.GetElement(), s_UIElement_StyleSet);
+            MemberExpression styleSet = Expression.Field(compiler.GetElement(), s_UIElement_StyleSet);
             MethodCallExpression setBaseStyles = ExpressionFactory.CallInstanceUnchecked(styleSet, s_StyleSet_SetBaseStyles, updateStyleList);
 
-            updateCompiler.RawExpression(setBaseStyles);
-            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateStyleList, s_LightList_UIStyleGroupContainer_Release));
+            compiler.RawExpression(setBaseStyles);
+            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateStyleList, s_LightList_UIStyleGroupContainer_Release));
 
             MemberExpression style = Expression.Field(ctx.ElementExpr, s_UIElement_StyleSet);
             MethodCallExpression initStyle = ExpressionFactory.CallInstanceUnchecked(style, s_StyleSet_InternalInitialize);
             ctx.AddStatement(initStyle);
             styleIds.Release();
-            updateCompiler.SetNullCheckingEnabled(true);
+            compiler.SetNullCheckingEnabled(true);
         }
 
         private void CompileMouseHandlerFromAttribute(in InputHandler handler) {
@@ -2402,20 +2386,11 @@ namespace UIForia.Compilers {
         }
 
         private void CompilePropertyBindingSync(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
+            compiler.SetupAttributeData(attr);
             ParameterExpression castElement = compiler.GetCastElement();
             ParameterExpression castRoot = compiler.GetCastRoot();
             compiler.CommentNewLineBefore($"{attr.key}=\"{attr.value}\"");
             compiler.BeginIsolatedSection();
-            compiler.SetupAttributeData(attr);
-
-            try {
-                compiler.SetImplicitContext(castElement);
-                compiler.AssignableStatement(attr.key);
-            }
-            catch (Exception) {
-                compiler.EndIsolatedSection();
-                throw;
-            }
 
             compiler.SetImplicitContext(castRoot);
             LHSStatementChain assignableStatement = compiler.AssignableStatement(attr.value);
@@ -2431,6 +2406,9 @@ namespace UIForia.Compilers {
             ParameterExpression castElement = compiler.GetCastElement();
             compiler.CommentNewLineBefore($"{attr.key}=\"{attr.value}\"");
             compiler.BeginIsolatedSection();
+            
+         
+            
             try {
                 compiler.SetupAttributeData(attr);
                 compiler.SetImplicitContext(castElement);
@@ -2515,6 +2493,10 @@ namespace UIForia.Compilers {
                 compiler.Assign(left, right);
             }
 
+            // if((attr.flags & AttributeFlags.Sync) != 0) {
+            //     CompileAssignContextVariable(compiler, attr, left.targetExpression.Type, NextContextId);
+            // }
+               
             TeardownAttributeData(attr);
             compiler.EndIsolatedSection();
         }

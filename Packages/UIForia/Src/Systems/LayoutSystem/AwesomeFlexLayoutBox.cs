@@ -738,7 +738,7 @@ namespace UIForia.Systems {
             }
 
             float itemAlignment = element.style.AlignItemsVertical;
-            float gap = 0; //element.style.GridLayoutColGap;
+            //float gap = 0; //element.style.GridLayoutColGap;
 
             for (int i = 0; i < items.size; i++) {
                 ref FlexItem item = ref items.array[i];

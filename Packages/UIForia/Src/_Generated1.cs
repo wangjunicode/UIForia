@@ -1978,7 +1978,6 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ClipBounds, out property)) return property.AsClipBounds;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.ClipBounds), out property)) return property.AsClipBounds;
                     return DefaultStyleValues_Generated.ClipBounds;
                 }
             }
@@ -4765,7 +4764,6 @@ namespace UIForia.Rendering {
                     case StylePropertyId.Visibility: return true;
                     case StylePropertyId.Opacity: return true;
                     case StylePropertyId.ClipBehavior: return true;
-                    case StylePropertyId.ClipBounds: return true;
                     case StylePropertyId.PointerEvents: return true;
                     case StylePropertyId.TextColor: return true;
                     case StylePropertyId.TextFontAsset: return true;

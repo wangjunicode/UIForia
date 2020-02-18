@@ -1277,8 +1277,8 @@ namespace UIForia.Compilers {
                         }
 
                         if ((attr.flags & AttributeFlags.Sync) != 0) {
-                            CompilePropertyBinding(updateCompiler, processedType, attr, changeHandlers);
-                            CompilePropertyBindingSync(lateCompiler, attr);
+                            ContextVariableDefinition ctxVar = CompilePropertyBinding(updateCompiler, processedType, attr, changeHandlers);
+                            CompilePropertyBindingSync(lateCompiler, attr, ctxVar);
                         }
                         else if ((attr.flags & AttributeFlags.Const) != 0) {
                             CompilePropertyBinding(createdCompiler, processedType, attr, changeHandlers);
@@ -1876,7 +1876,7 @@ namespace UIForia.Compilers {
             ConstructorInfo ctor = type.GetConstructor(ReflectionUtil.TypeArray3);
 
             Expression contextVariable = Expression.New(ctor, Expression.Constant(definition.id), Expression.Constant(definition.name), Expression.Default(definition.type));
-            Expression access = Expression.MakeMemberAccess(createdCompiler.GetCastElement(), s_UIElement_BindingNode);
+            Expression access = Expression.MakeMemberAccess(createdCompiler.GetElement(), s_UIElement_BindingNode);
             contextVarType = type;
             definition.contextVarType = type;
             return ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_CreateLocalContextVariable, contextVariable);
@@ -1987,17 +1987,17 @@ namespace UIForia.Compilers {
             }
         }
 
-        public static void CompileAssignContextVariable(UIForiaLinqCompiler compiler, in AttributeDefinition attr, Type contextVarType, int varId) {
+        public static void CompileAssignContextVariable(UIForiaLinqCompiler compiler, in AttributeDefinition attr, Type contextVarType, int varId, string varPrefix = null, Expression value = null) {
             //ContextVariable<T> ctxVar = (ContextVariable<T>)__castElement.bindingNode.GetContextVariable(id);
             //ctxVar.value = expression;
             Expression access = Expression.MakeMemberAccess(compiler.GetElement(), s_UIElement_BindingNode);
             Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(varId));
             compiler.Comment(attr.key);
             Expression cast = Expression.Convert(call, contextVarType);
-            ParameterExpression target = compiler.AddVariable(contextVarType, "ctxVar_" + attr.key);
+            ParameterExpression target = compiler.AddVariable(contextVarType, (varPrefix ?? "ctxVar_") + attr.key);
             compiler.Assign(target, cast);
             MemberExpression valueField = Expression.Field(target, contextVarType.GetField(nameof(ContextVariable<object>.value)));
-            compiler.Assign(valueField, compiler.Value(attr.value));
+            compiler.Assign(valueField, value ?? compiler.Value(attr.value));
         }
 
         private void CompileKeyboardInputBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
@@ -2402,31 +2402,20 @@ namespace UIForia.Compilers {
             return false;
         }
 
-        private void CompilePropertyBindingSync(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
-            ParameterExpression castElement = compiler.GetCastElement();
-            ParameterExpression castRoot = compiler.GetCastRoot();
-            compiler.CommentNewLineBefore($"{attr.key}=\"{attr.value}\"");
-            compiler.BeginIsolatedSection();
-            compiler.SetupAttributeData(attr);
+        private Expression GetContextVariableValue(UIForiaLinqCompiler compiler, ContextVariableDefinition ctxVar, string prefix) {
+            ParameterExpression el = compiler.GetElement();
+            Expression access = Expression.MakeMemberAccess(el, s_UIElement_BindingNode);
+            Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(ctxVar.id));
+            Type varType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), ctxVar.type);
 
-            try {
-                compiler.SetImplicitContext(castElement);
-                compiler.AssignableStatement(attr.key);
-            }
-            catch (Exception) {
-                compiler.EndIsolatedSection();
-                throw;
-            }
+            UnaryExpression convert = Expression.Convert(call, varType);
+            ParameterExpression variable = compiler.AddVariable(ctxVar.type, prefix + ctxVar.GetName());
 
-            compiler.SetImplicitContext(castRoot);
-            LHSStatementChain assignableStatement = compiler.AssignableStatement(attr.value);
-
-            compiler.SetImplicitContext(castElement);
-            compiler.Assign(assignableStatement, Expression.Field(castElement, castElement.Type.GetField(attr.key)));
-            compiler.EndIsolatedSection();
+            compiler.Assign(variable, Expression.MakeMemberAccess(convert, varType.GetField("value")));
+            return variable;
         }
 
-        private void CompilePropertyBinding(UIForiaLinqCompiler compiler, ProcessedType processedType, in AttributeDefinition attr, StructList<ChangeHandlerDefinition> changeHandlerAttrs) {
+        private ContextVariableDefinition CompilePropertyBinding(UIForiaLinqCompiler compiler, ProcessedType processedType, in AttributeDefinition attr, StructList<ChangeHandlerDefinition> changeHandlerAttrs) {
             LHSStatementChain left;
             Expression right = null;
             ParameterExpression castElement = compiler.GetCastElement();
@@ -2441,7 +2430,7 @@ namespace UIForia.Compilers {
                 TeardownAttributeData(attr);
                 compiler.EndIsolatedSection();
                 Debug.LogError(e);
-                return;
+                return null;
             }
 
             //castElement.value = root.value
@@ -2516,7 +2505,59 @@ namespace UIForia.Compilers {
                 compiler.Assign(left, right);
             }
 
+            ContextVariableDefinition ctxVar = null;
+            if ((attr.flags & AttributeFlags.Sync) != 0) {
+                ctxVar = new ContextVariableDefinition();
+                ctxVar.id = NextContextId;
+                ctxVar.name = "sync_" + attr.key;
+                ctxVar.type = left.targetExpression.Type;
+                ctxVar.variableType = AliasResolverType.ContextVariable;
+
+                MethodCallExpression createVariable = CreateLocalContextVariableExpression(ctxVar, out Type contextVarType);
+
+                createdCompiler.RawExpression(createVariable);
+
+                ctxVar.contextVarType = contextVarType;
+
+                CompileAssignContextVariable(compiler, attr, ctxVar.contextVarType, ctxVar.id, "sync_", right);
+            }
+
             TeardownAttributeData(attr);
+            compiler.EndIsolatedSection();
+            return ctxVar;
+        }
+
+        private void CompilePropertyBindingSync(UIForiaLinqCompiler compiler, in AttributeDefinition attr, ContextVariableDefinition ctxVar) {
+            ParameterExpression castElement = compiler.GetCastElement();
+            ParameterExpression castRoot = compiler.GetCastRoot();
+
+            compiler.BeginIsolatedSection();
+            compiler.SetupAttributeData(attr);
+
+            Expression right = null;
+
+            //castElement.value = root.value
+            SetImplicitContext(compiler, attr);
+
+            LHSStatementChain assignableStatement = compiler.AssignableStatement(attr.value);
+
+            Expression accessor = compiler.AccessorStatement(assignableStatement.targetExpression.Type, attr.value);
+
+            if (accessor is ConstantExpression) {
+                right = accessor;
+            }
+            else {
+                right = compiler.AddVariable(assignableStatement.targetExpression.Type, "__right");
+                compiler.Assign(right, accessor);
+            }
+
+            compiler.SetImplicitContext(castRoot);
+            Expression expr = GetContextVariableValue(compiler, ctxVar, "");
+            compiler.SetImplicitContext(castElement);
+            string key = attr.key;
+            compiler.IfEqual(expr, right, () => {
+                compiler.Assign(assignableStatement, Expression.Field(castElement, castElement.Type.GetField(key)));
+            });
             compiler.EndIsolatedSection();
         }
 

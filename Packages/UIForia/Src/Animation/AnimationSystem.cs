@@ -8,6 +8,12 @@ using UnityEngine;
 
 namespace UIForia.Animation {
 
+    public interface IAnimationCompletedHandler {
+
+        void OnAnimationCompleted(string name);
+
+    }
+
     public class AnimationSystem : ISystem {
 
         private LightList<AnimationTask> thisFrame;
@@ -143,13 +149,9 @@ namespace UIForia.Animation {
         public void OnReset() { }
 
         public void OnUpdate() {
-            int count = thisFrame.Count;
-            AnimationTask[] animations = thisFrame.Array;
-
-            // todo handle generics in a different function / list set
-
-            for (int i = 0; i < thisFrame.Count; i++) {
-                AnimationTask task = thisFrame[i];
+            
+            for (int i = 0; i < thisFrame.size; i++) {
+                AnimationTask task = thisFrame.array[i];
                 
                 StyleAnimation styleAnimation = (StyleAnimation) task;
 
@@ -211,6 +213,11 @@ namespace UIForia.Animation {
                                 styleAnimation.status,
                                 styleAnimationAnimationData.options)
                             );
+                            
+                            if (styleAnimation.target is IAnimationCompletedHandler completedHandler) {
+                                completedHandler.OnAnimationCompleted(styleAnimation.animationData.name);
+                            }
+                            
                             styleAnimationAnimationData.onEnd?.Invoke(new StyleAnimationEvent(
                                 AnimationEventType.End,
                                 styleAnimation.target,

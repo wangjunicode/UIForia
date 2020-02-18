@@ -130,7 +130,8 @@ namespace UIForia.Compilers {
             compiledTemplateData.slots = slots;
             compiledTemplateData.templates = templates;
             compiledTemplateData.templateMetaData = templateMetaData;
-            compiledTemplateData.constructElement = (typeId) => constructorFnMap[typeId]?.Invoke() ?? default;
+            compiledTemplateData.constructorFnMap = constructorFnMap;
+            compiledTemplateData.constructElement = (typeId) => compiledTemplateData.constructorFnMap[typeId].Invoke();
 
             // stopwatch.Stop();
             // Debug.Log("Loaded UIForia templates in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");

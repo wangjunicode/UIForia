@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -15,6 +16,7 @@ namespace UIForia {
         public readonly int tagNameId;
         public readonly UIElement element;
 
+        [UsedImplicitly]
         public ConstructedElement(int tagNameId, UIElement element) {
             this.tagNameId = tagNameId;
             this.element = element;
@@ -51,8 +53,9 @@ namespace UIForia {
         public Func<UIElement, UIElement, TemplateScope, UIElement>[] slots;
         public Action<UIElement, UIElement>[] bindings;
         private int nextTagNameId;
-        public readonly Dictionary<Type, int> templateTypeMap = new Dictionary<Type, int>();
+       // public readonly Dictionary<Type, int> templateTypeMap = new Dictionary<Type, int>();
         public TemplateSettings templateSettings;
+        public Dictionary<int, Func<ConstructedElement>> constructorFnMap;
 
         public CompiledTemplateData(TemplateSettings templateSettings) {
             this.templateSettings = templateSettings;
@@ -133,11 +136,19 @@ namespace UIForia {
             tagNameIdMap.Add(tagName, id);
             return id;
         }
-
-
+        
         public void AddDynamicTemplate(Type type, int typeId, int templateId) {
             dynamicTemplates = dynamicTemplates ?? new LightList<DynamicTemplate>();
             dynamicTemplates.Add(new DynamicTemplate(type, typeId, templateId));
+        }
+
+        public void Destroy() {
+            Array.Clear(compiledTemplates.array, 0, compiledTemplates.size);
+            Array.Clear(compiledBindings.array, 0, compiledBindings.size);
+            Array.Clear(compiledSlots.array, 0, compiledSlots.size);
+            Array.Clear(templateMetaData, 0, templateMetaData.Length);
+            constructElement = null;
+            constructorFnMap?.Clear();
         }
 
     }

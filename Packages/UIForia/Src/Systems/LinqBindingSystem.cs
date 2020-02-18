@@ -193,23 +193,22 @@ namespace UIForia.Systems {
         public void OnFrameCompleted() { }
 
         public void OnFrameStarted() { }
-        
+
         public void NewUpdateFn(UIElement element) {
-            
-           // Debug.Log($"{new string(' ', element.hierarchyDepth * 4)}Before {element.GetDisplayName()}");
-            
-            element.bindingNode.updateBindings?.Invoke(element.bindingNode.root, element);
+            // Debug.Log($"{new string(' ', element.hierarchyDepth * 4)}Before {element.GetDisplayName()}");
+
+            element.bindingNode?.updateBindings?.Invoke(element.bindingNode.root, element);
+
             if (element.isEnabled) {
                 
                 for (int i = 0; i < element.children.size; i++) {
                     NewUpdateFn(element.children[i]);
                 }
-                
-               // Debug.Log($"{new string(' ', element.hierarchyDepth * 4)}After {element.GetDisplayName()}");
 
-                element.bindingNode.lateBindings?.Invoke(element.bindingNode.root, element);
+                // Debug.Log($"{new string(' ', element.hierarchyDepth * 4)}After {element.GetDisplayName()}");
+
+                element.bindingNode?.lateBindings?.Invoke(element.bindingNode.root, element);
             }
-
         }
 
         public void BeforeUpdate(LightList<UIElement> activeBuffer) {
@@ -230,10 +229,10 @@ namespace UIForia.Systems {
                 // if was enabled in this iteration, skip it for now
                 if (bindingNode != null && bindingNode.lastBeforeUpdateFrame != currentFrameId) {
                     bindingNode.lastBeforeUpdateFrame = currentFrameId;
-                    bindingNode.updateBindings?.Invoke(bindingNode.root,  activeBuffer.array[0]);
+                    bindingNode.updateBindings?.Invoke(bindingNode.root, activeBuffer.array[0]);
                 }
             }
-            
+
             ElemRef[] stack = elemRefStack;
 
             while (size != 0) {
@@ -255,9 +254,8 @@ namespace UIForia.Systems {
                         bindingNode.lastBeforeUpdateFrame = currentFrameId;
                         bindingNode.updateBindings?.Invoke(bindingNode.root, child);
                     }
-                    
+
                     iteratorIndex++;
-                    
                 }
 
                 int childCount = currentElement.children.size;
@@ -270,13 +268,10 @@ namespace UIForia.Systems {
                 for (int i = childCount - 1; i >= 0; i--) {
                     stack[size++].element = currentElement.children.array[i];
                 }
-
-            
             }
         }
 
         public void AfterUpdate() {
-          
             // int size = 0;
             //
             // if (activeBuffer.size >= elemRefStack.Length) {
@@ -330,9 +325,7 @@ namespace UIForia.Systems {
             currentFrameId++;
         }
 
-        public void UpdateStylesAndAttributes() {
-            
-        }
+        public void UpdateStylesAndAttributes() { }
 
     }
 

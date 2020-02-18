@@ -102,10 +102,19 @@ namespace UIForia {
 
 #if UNITY_EDITOR
             Applications.Add(this);
+            UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnEditorReload;
 #endif
         }
 
-        protected virtual void CreateSystems() {
+#if UNITY_EDITOR
+        private void OnEditorReload() {
+            templateData.Destroy();
+            templateData = null;
+            UnityEditor.AssemblyReloadEvents.beforeAssemblyReload -= OnEditorReload;
+        }
+#endif
+ 
+        protected void CreateSystems() {
             styleSystem = new StyleSystem();
             layoutSystem = new AwesomeLayoutSystem(this);
             inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
@@ -264,6 +273,8 @@ namespace UIForia {
 
             resourceManager.Reset();
 
+            templateData.Destroy();
+
             m_AfterUpdateTaskSystem.OnDestroy();
             m_BeforeUpdateTaskSystem.OnDestroy();
 
@@ -274,8 +285,6 @@ namespace UIForia {
 
             onRefresh?.Invoke();
 
-            GC.Collect();
-
             stopwatch.Stop();
             Debug.Log("Refreshed " + id + " in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
         }
@@ -283,6 +292,7 @@ namespace UIForia {
         public void Destroy() {
 #if UNITY_EDITOR
             Applications.Remove(this);
+            templateData.Destroy();
 #endif
 
             foreach (ISystem system in systems) {
@@ -398,8 +408,8 @@ namespace UIForia {
             for (int i = 0; i < views.Count; i++) {
                 views[i].Viewport = new Rect(0, 0, Width, Height);
             }
-            
-            
+
+
             inputSystem.OnUpdate();
             m_BeforeUpdateTaskSystem.OnUpdate();
 

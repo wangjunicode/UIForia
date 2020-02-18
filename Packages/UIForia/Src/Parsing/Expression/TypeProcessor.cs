@@ -176,7 +176,6 @@ namespace UIForia.Parsing {
 
             watch.Stop();
             Debug.Log($"Loaded types in: {watch.ElapsedMilliseconds} ms from {count} assemblies");
-            GC.Collect();
         }
 
         private static string GetTemplateAttribute(Type currentType, Attribute[] attrs, out TemplateAttribute templateAttr) {

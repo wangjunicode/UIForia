@@ -34,11 +34,11 @@ namespace UIForia.Elements {
 
         private float debounce;
 
-        public int selectedIndex = -1;
+        public int selectedIndex { get; private set; } = -1;
 
         public int keyboardNavigationIndex = -1;
 
-        public T defaultValue { get; set; }
+        public T defaultValue;
 
         public T selectedValue;
 
@@ -56,74 +56,18 @@ namespace UIForia.Elements {
         internal UIElement optionList;
         internal UIElement repeat;
 
-        public event Action<T> onValueChanged;
-
-        public event Action<int> onIndexChanged;
-
         public bool validSelection => options != null && selectedIndex >= 0 && selectedIndex < options.Count;
+
+        private bool reselect;
 
         [OnPropertyChanged(nameof(options))]
         public void OnSelectionChanged() {
-            // if (previousOptions != options) {
-            //     if (previousOptions != null) {
-            //     }
-            // }
-            //
-            // if (options != null) {
-            //     options.onItemInserted += onInsert;
-            //     options.onItemRemoved += onRemove;
-            //     options.onClear += onClear;
-            //     for (int i = 0; i < options.Count; i++) {
-            //         childrenElement.AddChild(childrenElement.InstantiateTemplate());
-            //     }
-            //
-            //     if (selectedIndex == -1) {
-            //         for (int i = 0; i < options.Count; i++) {
-            //             if (options[i].Value.Equals(selectedValue)) {
-            //                 selectedIndex = i;
-            //                 selectedValue = options[selectedIndex].Value;
-            //                 onIndexChanged?.Invoke(selectedIndex);
-            //                 onValueChanged?.Invoke(selectedValue);
-            //                 return;
-            //             }
-            //         }
-            //     }
-            // }
+            reselect = true;
         }
 
         [OnPropertyChanged(nameof(selectedValue))]
         public void OnSelectedValueChanged() {
-            if (options == null) return;
-            for (int i = 0; i < options.Count; i++) {
-                if (options[i].Value.Equals(selectedValue)) {
-                    if (selectedIndex != i) {
-                        selectedIndex = i;
-                        selectedValue = options[selectedIndex].Value;
-                        onValueChanged?.Invoke(selectedValue);
-                        onIndexChanged?.Invoke(selectedIndex);
-                    }
-
-                    return;
-                }
-            }
-
-            selectedIndex = -1;
-        }
-
-        [OnPropertyChanged(nameof(selectedIndex))]
-        public void OnSelectedIndexChanged() {
-            if (options == null) return;
-
-            if (selectedIndex < 0 || selectedIndex >= options.Count) {
-                selectedIndex = -1;
-                selectedValue = defaultValue;
-            }
-            else {
-                selectedValue = options[selectedIndex].Value;
-            }
-
-            onIndexChanged?.Invoke(selectedIndex);
-            onValueChanged?.Invoke(selectedValue);
+            reselect = true;
         }
 
         public override void OnCreate() {
@@ -134,6 +78,8 @@ namespace UIForia.Elements {
         }
 
         public override void OnUpdate() {
+            UpdateSelection();
+
             if (!disabled && HasAttribute("disabled")) {
                 SetAttribute("disabled", null);
                 EnableAllChildren(this);
@@ -142,10 +88,36 @@ namespace UIForia.Elements {
                 SetAttribute("disabled", disabledAttributeValue);
                 DisableAllChildren(this);
             }
-
-            if (selecting) { }
-
+            
             // optionList.style.SetVisibility(selecting ? Visibility.Visible : Visibility.Hidden, StyleState.Normal);
+        }
+
+        private void UpdateSelection() {
+            if (!reselect) {
+                return;
+            }
+
+            reselect = false;
+
+            if (options == null) {
+                selectedIndex = -1;
+                selectedValue = defaultValue;
+                return;
+            }
+
+            for (int i = 0; i < options.Count; i++) {
+                if (options[i].Value.Equals(selectedValue)) {
+                    if (selectedIndex != i) {
+                        selectedIndex = i;
+                        selectedValue = options[selectedIndex].Value;
+                    }
+
+                    return;
+                }
+            }
+
+            selectedValue = defaultValue;
+            selectedIndex = -1;
         }
 
         private void DisableAllChildren(UIElement element) {
@@ -172,8 +144,6 @@ namespace UIForia.Elements {
             selecting = false;
             selectedIndex = index;
             selectedValue = options[selectedIndex].Value;
-            onValueChanged?.Invoke(selectedValue);
-            onIndexChanged?.Invoke(selectedIndex);
         }
 
         [OnKeyDownWithFocus]
@@ -357,8 +327,6 @@ namespace UIForia.Elements {
         public void SelectElement(MouseInputEvent evt, int index) {
             selectedIndex = index;
             selectedValue = options[selectedIndex].Value;
-            onValueChanged?.Invoke(selectedValue);
-            onIndexChanged?.Invoke(selectedIndex);
             selecting = false;
             evt.StopPropagation();
             evt.Consume();

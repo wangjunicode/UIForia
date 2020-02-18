@@ -113,8 +113,8 @@ namespace UIForia {
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload -= OnEditorReload;
         }
 #endif
- 
-        protected void CreateSystems() {
+
+        protected virtual void CreateSystems() {
             styleSystem = new StyleSystem();
             layoutSystem = new AwesomeLayoutSystem(this);
             inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());

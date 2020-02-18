@@ -28,7 +28,6 @@ namespace Tests.Mocks {
             routingSystem = new RoutingSystem();
             animationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
-            
         }
 
         public static void Generate(bool shouldGenerate = true) {

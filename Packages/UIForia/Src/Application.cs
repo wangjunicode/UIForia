@@ -108,7 +108,7 @@ namespace UIForia {
 
 #if UNITY_EDITOR
         private void OnEditorReload() {
-            templateData.Destroy();
+            templateData?.Destroy();
             templateData = null;
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload -= OnEditorReload;
         }

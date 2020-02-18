@@ -295,7 +295,10 @@ namespace UIForia.Compilers {
                 ProcessAttrsAndVisitChildren(ctx, templateRootNode);
             }
             else {
-                VisitChildren(ctx, templateRootNode);
+                ProcessAttrsAndVisitChildren(ctx, templateRootNode);
+
+                // CompileBindings(ctx, templateRootNode, templateRootNode.attributes, null);
+                // VisitChildren(ctx, templateRootNode);
             }
 
             ctx.templateRootNode = templateRootNode;

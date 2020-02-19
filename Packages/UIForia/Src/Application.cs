@@ -311,8 +311,8 @@ namespace UIForia {
                 system.OnDestroy();
             }
 
-            foreach (UIView view in views) {
-                view.Destroy();
+            for (int i = views.Count - 1; i >= 0; i--) {
+                views[i].Destroy();
             }
 
             onElementEnabled = null;

@@ -146,12 +146,12 @@ namespace UIForia.Animation {
                     case StylePropertyId.MinWidth:
                     case StylePropertyId.MaxWidth: {
                         
-                        //float v0 = ResolveWidthMeasurement(target, viewport, prev.value.styleProperty.AsUIMeasurement);
+                        float v0 = ResolveWidthMeasurement(target, viewport, prev.value.styleProperty.AsUIMeasurement);
 
-                        //float v1 = ResolveWidthMeasurement(target, viewport, next.value.styleProperty.AsUIMeasurement);
+                        float v1 = ResolveWidthMeasurement(target, viewport, next.value.styleProperty.AsUIMeasurement);
 
-                        target.style.SetAnimatedMeasurementProperty(propertyId, prev.value.styleProperty, next.value.styleProperty, t);
-                        // target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
+                        //target.style.SetAnimatedMeasurementProperty(propertyId, prev.value.styleProperty, next.value.styleProperty, t);
+                         target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
                         break;
                     }
 

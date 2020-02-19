@@ -273,38 +273,6 @@ namespace UIForia.Systems {
             lateTriggers.Add(evt);
         }
 
-        public virtual void OnLateUpdate() {
-            int lateHandlersCount = lateHandlers.Count;
-            KeyboardEventHandlerInvocation[] invocations = lateHandlers.Array;
-
-            if (lateHandlersCount > 0) {
-                throw new NotImplementedException();
-            }
-
-            // for (int index = 0; index < lateHandlersCount; index++) {
-            //     KeyboardEventHandlerInvocation invocation = invocations[index];
-            //     invocation.handler.Invoke(invocation.target, invocation.evt);
-            // }
-
-            lateHandlers.Clear();
-
-            for (int index = 0; index < lateTriggers.Count; index++) {
-                UIEvent uiEvent = lateTriggers[index];
-                uiEvent.origin.TriggerEvent(uiEvent);
-                if (uiEvent is TabNavigationEvent && uiEvent.IsPropagating()) {
-                    // If the TabNavigationEvent isn't handled we assume it's ok to tab to the next input element.
-                    if (uiEvent.keyboardInputEvent.shift) {
-                        FocusPrevious();
-                    }
-                    else {
-                        FocusNext();
-                    }
-                }
-            }
-
-            lateTriggers.Clear();
-        }
-
         private void ProcessKeyboardEvents() {
             StructList<KeyCodeState> keyCodeStates = m_KeyboardState.GetKeyCodeStates();
             for (int i = 0; i < keyCodeStates.size; i++) {
@@ -792,8 +760,13 @@ namespace UIForia.Systems {
 
             else {
                 UIElement element = m_FocusedElement;
-                RunBindings(element);
                 InputHandlerGroup evtHandlerGroup = m_FocusedElement.inputHandlers;
+                if (evtHandlerGroup == null) {
+                    return;
+                }
+
+                RunBindings(element);
+
                 for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                     if (m_EventPropagator.shouldStopPropagation) break;
                     ref InputHandlerGroup.HandlerData handler = ref evtHandlerGroup.eventHandlers.array[i];

@@ -147,8 +147,6 @@ namespace UIForia.Elements {
 
         public virtual void OnDestroy() { }
 
-        public virtual void HandleUIEvent(UIEvent evt) { }
-
         public void Destroy() {
             View.application.DoDestroyElement(this);
         }
@@ -191,24 +189,6 @@ namespace UIForia.Elements {
             }
 
             return element;
-        }
-
-        public void TriggerEvent(UIEvent evt) {
-            evt.origin = this;
-            UIElement ptr = this;
-            while (evt.IsPropagating() && ptr != null) {
-                ptr.HandleUIEvent(evt);
-                ptr = ptr.parent;
-            }
-        }
-
-        public void TriggerEvent<T>(T evt) where T : UIEvent {
-            evt.origin = this;
-            UIElement ptr = this;
-            while (evt.IsPropagating() && ptr != null) {
-                ptr.HandleUIEvent(evt);
-                ptr = ptr.parent;
-            }
         }
 
         public void internal__dontcallmeplease_SetEnabledIfBinding(bool enabled) {

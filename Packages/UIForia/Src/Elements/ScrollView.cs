@@ -17,6 +17,8 @@ namespace UIForia.Elements {
         public bool disableOverflowX;
         public bool disableOverflowY;
 
+        public bool disableAutoScroll = false;
+
         public bool verticalScrollingEnabled => !disableOverflowY && isOverflowingY;
         public bool horizontalScrollingEnabled => !disableOverflowX && isOverflowingX;
 
@@ -61,7 +63,7 @@ namespace UIForia.Elements {
                 isOverflowingX = currentChildrenSize.width > layoutResult.allocatedSize.width;
                 isOverflowingY = currentChildrenSize.height > layoutResult.allocatedSize.height;
 
-                if (currentChildrenSize != previousChildrenSize) {
+                if (!disableAutoScroll && currentChildrenSize != previousChildrenSize) {
                     ScrollToHorizontalPercent(0);
                     ScrollToVerticalPercent(0);
                 }
@@ -173,18 +175,6 @@ namespace UIForia.Elements {
             if (evt.IsMouseRightDown) return null;
             float baseOffset = evt.MousePosition.x - evt.element.layoutResult.screenPosition.x;
             return new ScrollbarDragEvent(ScrollbarOrientation.Horizontal, new Vector2(baseOffset, 0), this);
-        }
-
-        public override void HandleUIEvent(UIEvent evt) {
-            if (evt is UIScrollEvent scrollEvent) {
-                if (scrollEvent.ScrollDestinationX >= 0) {
-                    ScrollToHorizontalPercent(scrollEvent.ScrollDestinationX);
-                }
-
-                if (scrollEvent.ScrollDestinationY >= 0) {
-                    ScrollToVerticalPercent(scrollEvent.ScrollDestinationY);
-                }
-            }
         }
 
         public void ScrollToVerticalPercent(float percentage) {

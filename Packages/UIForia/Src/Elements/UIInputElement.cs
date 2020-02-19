@@ -192,8 +192,6 @@ namespace UIForia.Elements {
             }
 
             if (evt.keyCode == KeyCode.Tab) {
-                // todo: find next IFocusable; implement tab index
-                TriggerEvent(new TabNavigationEvent(evt));
                 return;
             }
 

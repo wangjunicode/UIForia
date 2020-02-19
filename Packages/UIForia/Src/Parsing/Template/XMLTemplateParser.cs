@@ -154,7 +154,19 @@ namespace UIForia.Parsing {
 
             IXmlLineInfo xmlLineInfo = root;
 
-            StructList<AttributeDefinition> attributes = ParseAttributes(shell, "Contents", root.Attributes(), out string genericTypeResolver, out string requireType);
+            StructList<AttributeDefinition> attributes = StructList<AttributeDefinition>.Get();
+            StructList<AttributeDefinition> injectedAttributes = StructList<AttributeDefinition>.Get();
+
+            ParseAttributes(shell, "Contents", root.Attributes(), attributes, injectedAttributes, out string genericTypeResolver, out string requireType);
+
+            if (attributes.size == 0) {
+                StructList<AttributeDefinition>.Release(ref attributes);
+            }
+
+            if (injectedAttributes.size == 0) {
+                StructList<AttributeDefinition>.Release(ref injectedAttributes);
+            }
+
             templateRootNode.attributes = ValidateRootAttributes(shell.filePath, attributes);
             templateRootNode.lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
             templateRootNode.genericTypeResolver = genericTypeResolver;
@@ -202,31 +214,31 @@ namespace UIForia.Parsing {
             ProcessedType processedType;
             TemplateNode node = null;
 
-            string lowerNamespace = namespacePath.ToLower();
-            if (lowerNamespace == "define") {
-                int idx = tagName.IndexOf('.');
-                if (idx != -1) {
-                    string[] split = tagName.Split('.');
-                    tagName = split[0];
-                    string suffix = split[1];
-                    SlotType slotType = SlotType.Define;
-                    if (suffix == "Modify") {
-                        slotType = slotType = SlotType.Modify;
-                    }
+            // int idx = tagName.IndexOf('.');
+            //   if (idx != -1) {
+            //       string[] split = tagName.Split('.');
+            //       tagName = split[0];
+            //       string suffix = split[1];
+            //       SlotType slotType = SlotType.Define;
+            //       if (suffix == "Modify") {
+            //           slotType = slotType = SlotType.Modify;
+            //       }
+            //
+            //       processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+            //       node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, slotType);
+            //       templateRoot.AddSlot((SlotNode) node);
+            //       parent.AddChild(node);
+            //       return node;
+            //   }
 
-                    processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
-                    node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, slotType);
-                    templateRoot.AddSlot((SlotNode) node);
-                    parent.AddChild(node);
-                    return node;
-                }
-                else {
-                    processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
-                    node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Define);
-                    templateRoot.AddSlot((SlotNode) node);
-                    parent.AddChild(node);
-                    return node;
-                }
+            string lowerNamespace = namespacePath.ToLower();
+
+            if (lowerNamespace == "define") {
+                processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Define);
+                templateRoot.AddSlot((SlotNode) node);
+                parent.AddChild(node);
+                return node;
             }
 
             if (lowerNamespace == "override") {
@@ -372,14 +384,32 @@ namespace UIForia.Parsing {
                         string tagName = element.Name.LocalName;
                         string namespaceName = element.Name.NamespaceName;
 
-                        StructList<AttributeDefinition> attributes = ParseAttributes(templateRoot.templateShell, tagName, element.Attributes(), out string genericTypeResolver, out string requireType);
+                        StructList<AttributeDefinition> attributes = StructList<AttributeDefinition>.Get();
+                        StructList<AttributeDefinition> injectedAttributes = StructList<AttributeDefinition>.Get();
 
+                        ParseAttributes(templateRoot.templateShell, tagName, element.Attributes(), attributes, injectedAttributes, out string genericTypeResolver, out string requireType);
+
+                        if (attributes.size == 0) {
+                            StructList<AttributeDefinition>.Release(ref attributes);
+                        }
+
+                        if (injectedAttributes.size == 0) {
+                            StructList<AttributeDefinition>.Release(ref injectedAttributes);
+                        }
+                        
                         IXmlLineInfo lineInfo = element;
                         TemplateNode p = ParseElementTag(templateRoot, parent, namespaceName, tagName, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
 
                         p.genericTypeResolver = genericTypeResolver;
                         p.requireType = requireType;
 
+                        if (p is SlotNode slotNode) {
+                            slotNode.injectedAttributes = injectedAttributes;
+                        }
+                        else if (injectedAttributes != null) {
+                            throw new ParseException("Only slot nodes can have injected attributes");
+                        }
+                        
                         ParseChildren(templateRoot, p, element.Nodes());
 
                         continue;
@@ -397,10 +427,175 @@ namespace UIForia.Parsing {
             }
         }
 
-        private static StructList<AttributeDefinition> ParseAttributes(TemplateShell templateShell, string tagName, IEnumerable<XAttribute> xmlAttributes, out string genericTypeResolver, out string requireType) {
-            StructList<AttributeDefinition> attributes = StructList<AttributeDefinition>.GetMinSize(4);
+        private static void HandleAttribute(TemplateShell templateShell, string tagName, string prefix, string name, int line, int column, string value, StructList<AttributeDefinition> attributes) {
+            AttributeType attributeType = AttributeType.Property;
+            AttributeFlags flags = 0;
+
+            // once:if=""
+            // enable:if=""
+            // todo -- not valid everywhere
+            if (name.Contains(".once") || name.Contains(".const")) {
+                name = name.Replace(".once", "");
+                name = name.Replace(".const", "");
+                flags |= AttributeFlags.Const;
+            }
+
+            // todo -- validate this syntax
+            if (name.Contains(".enable")) {
+                name = name.Replace(".enable", "");
+                flags |= AttributeFlags.EnableOnly;
+            }
+
+            if (name == "if") {
+                attributeType = AttributeType.Conditional;
+            }
+            else if (prefix == string.Empty) {
+                if (name == "style") {
+                    attributeType = AttributeType.Style;
+                    name = "style";
+                }
+                else if (name.StartsWith("style.")) {
+                    attributeType = AttributeType.InstanceStyle;
+                    name = name.Substring("style.".Length);
+                }
+            }
+            else {
+                switch (prefix) {
+                    case "property":
+                        break;
+                    case "attr": {
+                        attributeType = AttributeType.Attribute;
+                        if (value[0] != '{' || value[value.Length - 1] != '}') {
+                            flags |= AttributeFlags.Const;
+                        }
+
+                        break;
+                    }
+                    case "slot": {
+                        attributeType = AttributeType.Slot;
+                        break;
+                    }
+                    case "mouse":
+                        attributeType = AttributeType.Mouse;
+                        break;
+
+                    case "key":
+                        attributeType = AttributeType.Key;
+                        break;
+
+                    case "drag":
+                        attributeType = AttributeType.Drag;
+                        break;
+
+                    case "onChange":
+                        attributeType = AttributeType.ChangeHandler;
+                        break;
+
+                    case "touch":
+                        attributeType = AttributeType.Touch;
+                        break;
+
+                    case "controller":
+                        attributeType = AttributeType.Controller;
+                        break;
+
+                    case "style":
+                        attributeType = AttributeType.InstanceStyle;
+                        if (name.Contains(".")) {
+                            if (name.StartsWith("hover.")) {
+                                flags |= AttributeFlags.StyleStateHover;
+                                name = name.Substring("hover.".Length);
+                            }
+                            else if (name.StartsWith("focus.")) {
+                                flags |= AttributeFlags.StyleStateFocus;
+                                name = name.Substring("focus.".Length);
+                            }
+                            else if (name.StartsWith("active.")) {
+                                flags |= AttributeFlags.StyleStateActive;
+                                name = name.Substring("active.".Length);
+                            }
+                            else {
+                                throw CompileException.UnknownStyleState(new AttributeNodeDebugData(templateShell.filePath, tagName, new TemplateLineInfo(line, column), value), name.Split('.')[0]);
+                            }
+                        }
+
+                        break;
+
+                    case "evt":
+                        attributeType = AttributeType.Event;
+                        break;
+
+                    case "ctx":
+
+                        attributeType = AttributeType.Context;
+
+                        if (name == "element" || name == "parent" || name == "root" || name == "evt") {
+                            throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
+                        }
+
+                        break;
+
+                    case "var":
+                        attributeType = AttributeType.ImplicitVariable;
+
+                        if (name == "element" || name == "parent" || name == "root" || name == "evt") {
+                            throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
+                        }
+
+                        break;
+                    case "sync":
+                        attributeType = AttributeType.Property;
+                        flags |= AttributeFlags.Sync;
+                        break;
+
+                    case "expose":
+                        attributeType = AttributeType.Expose;
+                        if (name == "element" || name == "parent" || name == "root" || name == "evt") {
+                            throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
+                        }
+
+                        break;
+
+                    case "alias":
+                        attributeType = AttributeType.Alias;
+                        if (name == "element" || name == "parent" || name == "root" || name == "evt") {
+                            throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
+                        }
+
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException("Unknown attribute prefix: " + prefix);
+                }
+            }
+
+            string raw = string.Empty;
+            if (!string.IsNullOrEmpty(prefix)) {
+                TextUtil.StringBuilder.Append(prefix);
+                TextUtil.StringBuilder.Append(":");
+                TextUtil.StringBuilder.Append(name);
+                TextUtil.StringBuilder.Append("=\"");
+                TextUtil.StringBuilder.Append(value);
+                TextUtil.StringBuilder.Append("\"");
+                raw = TextUtil.StringBuilder.ToString();
+                TextUtil.StringBuilder.Clear();
+            }
+            else {
+                TextUtil.StringBuilder.Append(name);
+                TextUtil.StringBuilder.Append("=\"");
+                TextUtil.StringBuilder.Append(value);
+                TextUtil.StringBuilder.Append("\"");
+                raw = TextUtil.StringBuilder.ToString();
+                TextUtil.StringBuilder.Clear();
+            }
+
+            attributes.Add(new AttributeDefinition(raw, attributeType, flags, name, value, templateShell, line, column));
+        }
+
+        private static void ParseAttributes(TemplateShell templateShell, string tagName, IEnumerable<XAttribute> xmlAttributes, StructList<AttributeDefinition> attributes, StructList<AttributeDefinition> injectedAttributes, out string genericTypeResolver, out string requireType) {
             genericTypeResolver = null;
             requireType = null;
+
             foreach (XAttribute attr in xmlAttributes) {
                 string prefix = attr.Name.NamespaceName;
                 string name = attr.Name.LocalName.Trim();
@@ -411,7 +606,7 @@ namespace UIForia.Parsing {
                 if (name == "id" && string.IsNullOrEmpty(prefix)) {
                     prefix = "attr";
                 }
-
+                
                 if (prefix == "generic" && name == "type") {
                     genericTypeResolver = attr.Value;
                     continue;
@@ -422,217 +617,16 @@ namespace UIForia.Parsing {
                     continue;
                 }
 
-                AttributeType attributeType = AttributeType.Property;
-                AttributeFlags flags = 0;
-
-                // once:if=""
-                // enable:if=""
-                // todo -- not valid everywhere
-                if (name.Contains(".once") || name.Contains(".const")) {
-                    name = name.Replace(".once", "");
-                    name = name.Replace(".const", "");
-                    flags |= AttributeFlags.Const;
+                if (prefix.StartsWith("inject.")) {
+                    prefix = prefix.Substring("inject.".Length);
+                    HandleAttribute(templateShell, tagName, prefix, name, line, column, attr.Value, injectedAttributes);
+                    continue;
                 }
 
-                // todo -- validate this syntax
-                if (name.Contains(".enable")) {
-                    name = name.Replace(".enable", "");
-                    flags |= AttributeFlags.EnableOnly;
-                }
 
-                if (name.Contains(".read.write")) {
-                    name = name.Replace(".read.write", "");
-                    prefix = "sync";
-                }
-
-                if (name == "if") {
-                    attributeType = AttributeType.Conditional;
-                }
-                else if (prefix == string.Empty) {
-                    if (attr.Name.LocalName == "style") {
-                        attributeType = AttributeType.Style;
-                        name = "style";
-                    }
-                    else if (attr.Name.LocalName.StartsWith("style.")) {
-                        attributeType = AttributeType.InstanceStyle;
-                        name = attr.Name.LocalName.Substring("style.".Length);
-                    }
-                    else if (attr.Name.LocalName.StartsWith("x-")) {
-                        attributeType = AttributeType.Attribute;
-                        name = attr.Name.LocalName.Substring("x-".Length);
-                        if (name[0] != '{' || name[name.Length - 1] != '}') {
-                            flags |= AttributeFlags.Const;
-                        }
-                    }
-                }
-                else {
-                    switch (prefix) {
-                        case "attr": {
-                            attributeType = AttributeType.Attribute;
-                            if (attr.Value[0] != '{' || attr.Value[attr.Value.Length - 1] != '}') {
-                                flags |= AttributeFlags.Const;
-                            }
-
-                            break;
-                        }
-                        case "slot": {
-                            attributeType = AttributeType.Slot;
-                            break;
-                        }
-                        case "mouse":
-                            attributeType = AttributeType.Mouse;
-                            break;
-
-                        case "key":
-                            attributeType = AttributeType.Key;
-                            break;
-
-                        case "drag":
-                            attributeType = AttributeType.Drag;
-                            break;
-
-                        case "onChange":
-                            attributeType = AttributeType.ChangeHandler;
-                            break;
-
-                        case "touch":
-                            attributeType = AttributeType.Touch;
-                            break;
-
-                        case "controller":
-                            attributeType = AttributeType.Controller;
-                            break;
-
-                        case "style":
-                            attributeType = AttributeType.InstanceStyle;
-                            if (name.Contains(".")) {
-                                if (name.StartsWith("hover.")) {
-                                    flags |= AttributeFlags.StyleStateHover;
-                                    name = name.Substring("hover.".Length);
-                                }
-                                else if (name.StartsWith("focus.")) {
-                                    flags |= AttributeFlags.StyleStateFocus;
-                                    name = name.Substring("focus.".Length);
-                                }
-                                else if (name.StartsWith("active.")) {
-                                    flags |= AttributeFlags.StyleStateActive;
-                                    name = name.Substring("active.".Length);
-                                }
-                                else {
-                                    throw CompileException.UnknownStyleState(new AttributeNodeDebugData(templateShell.filePath, tagName, new TemplateLineInfo(line, column), attr.ToString()), name.Split('.')[0]);
-                                }
-                            }
-
-                            break;
-
-                        case "evt":
-                            attributeType = AttributeType.Event;
-                            break;
-
-                        case "ctx":
-
-                            attributeType = AttributeType.Context;
-
-                            if (name == "element" || name == "parent" || name == "root" || name == "evt") {
-                                throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
-                            }
-
-                            break;
-
-                        case "var":
-                            attributeType = AttributeType.ImplicitVariable;
-
-                            if (name == "element" || name == "parent" || name == "root" || name == "evt") {
-                                throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
-                            }
-
-                            break;
-                        case "sync":
-                            attributeType = AttributeType.Property;
-                            flags |= AttributeFlags.Sync;
-                            break;
-
-                        case "expose":
-                            attributeType = AttributeType.Expose;
-                            if (name == "element" || name == "parent" || name == "root" || name == "evt") {
-                                throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
-                            }
-
-                            break;
-
-                        case "alias":
-                            attributeType = AttributeType.Alias;
-                            if (name == "element" || name == "parent" || name == "root" || name == "evt") {
-                                throw new ParseException($"`{name} is a reserved name and cannot be used as a context variable name");
-                            }
-
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException("Unknown attribute prefix: " + prefix);
-                    }
-                }
-
-                string raw = string.Empty;
-                if (!string.IsNullOrEmpty(prefix)) {
-                    TextUtil.StringBuilder.Append(prefix);
-                    TextUtil.StringBuilder.Append(":");
-                    TextUtil.StringBuilder.Append(name);
-                    TextUtil.StringBuilder.Append("=\"");
-                    TextUtil.StringBuilder.Append(attr.Value);
-                    TextUtil.StringBuilder.Append("\"");
-                    raw = TextUtil.StringBuilder.ToString();
-                    TextUtil.StringBuilder.Clear();
-                }
-                else {
-                    TextUtil.StringBuilder.Append(name);
-                    TextUtil.StringBuilder.Append("=\"");
-                    TextUtil.StringBuilder.Append(attr.Value);
-                    TextUtil.StringBuilder.Append("\"");
-                    raw = TextUtil.StringBuilder.ToString();
-                    TextUtil.StringBuilder.Clear();
-                }
-
-                attributes.Add(new AttributeDefinition(raw, attributeType, flags, name, attr.Value, templateShell, line, column));
+                HandleAttribute(templateShell, tagName, prefix, name, line, column, attr.Value, attributes);
             }
 
-            if (attributes.size == 0) {
-                StructList<AttributeDefinition>.Release(ref attributes);
-            }
-
-            return attributes;
-        }
-
-
-        private static bool Escape(string input, ref int ptr, out char result) {
-            // xml parser might already do this for us
-            if (StringCompare(input, ref ptr, "amp;", '&', out result)) return true;
-            if (StringCompare(input, ref ptr, "lt;", '<', out result)) return true;
-            if (StringCompare(input, ref ptr, "amp;", '>', out result)) return true;
-            if (StringCompare(input, ref ptr, "amp;", '"', out result)) return true;
-            if (StringCompare(input, ref ptr, "amp;", '\'', out result)) return true;
-            if (StringCompare(input, ref ptr, "obrc;", '{', out result)) return true;
-            if (StringCompare(input, ref ptr, "cbrc;", '}', out result)) return true;
-            return false;
-        }
-
-        private static bool StringCompare(string input, ref int ptr, string target, char match, out char result) {
-            result = '\0';
-            if (ptr + target.Length - 1 >= input.Length) {
-                return false;
-            }
-
-            for (int i = 0;
-                i < target.Length;
-                i++) {
-                if (target[i] != input[ptr + i]) {
-                    return false;
-                }
-            }
-
-            ptr += target.Length;
-            result = match;
-            return true;
         }
 
         private UsingDeclaration ParseUsing(XElement element) {

@@ -32,7 +32,7 @@ namespace UIForia.Compilers {
             if (slots == null) return null;
             for (int i = 0; i < slots.size; i++) {
                 CompiledSlot slot = slots.array[i];
-                if ((slot.slotType == SlotType.Forward || slot.slotType == SlotType.Modify || slot.slotType == SlotType.Define) && slot.slotName == slotName) {
+                if ((slot.slotType == SlotType.Forward || slot.slotType == SlotType.Define) && slot.slotName == slotName) {
                     return slot;
                 }
             }

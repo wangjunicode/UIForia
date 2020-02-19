@@ -23,6 +23,7 @@ namespace UIForia.Compilers {
         public StructList<AttributeDefinition> originalAttributes;
         public LightList<ExposedVariableData> exposedVariableDataList;
         public Type requiredChildType;
+        public StructList<AttributeDefinition> injectedAttributes;
 
         public CompiledSlot() {
             this.slotId = -1;

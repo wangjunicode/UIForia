@@ -224,16 +224,34 @@ namespace UIForia.Parsing {
             return null;
         }
 
-        private static LightList<Type> ResolveGenericTypes(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null) {
+        private static LightList<Type> ResolveGenericTypes(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null, Type scopeType = null) {
             int count = typeLookup.generics.size;
 
             LightList<Type> results = LightList<Type>.Get();
             results.EnsureCapacity(count);
 
-            Type[] array = results.Array;
-
+            Type[] array = results.array;
+            Type[] generics = null;
+            Type[] concreteArgs = null;
+            if (scopeType != null) {
+                if (scopeType.IsGenericType) {
+                    generics = scopeType.GetGenericTypeDefinition().GetGenericArguments();
+                    concreteArgs = scopeType.GetGenericArguments();
+                }
+            }
+            
             for (int i = 0; i < count; i++) {
-                array[i] = ResolveType(typeLookup.generics[i], namespaces);
+                
+                if (generics != null) {
+                    for (int j = 0; j < generics.Length; j++) {
+                        if (typeLookup.generics[i].typeName == generics[j].Name) {
+                            array[i] = concreteArgs[i];
+                            break;
+                        }
+                    }
+                }
+                
+                array[i] = array[i] ?? ResolveType(typeLookup.generics[i], namespaces);
 
                 if (array[i] == null) {
                     throw new TypeResolutionException($"Failed to find a type from string {typeLookup.generics[i]}");
@@ -328,7 +346,7 @@ namespace UIForia.Parsing {
             return ResolveType(typeLookup, s_SingleNamespace);
         }
 
-        public static Type ResolveType(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null) {
+        public static Type ResolveType(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null, Type scopeType = null) {
             if (typeLookup.resolvedType != null) {
                 return typeLookup.resolvedType;
             }
@@ -343,7 +361,7 @@ namespace UIForia.Parsing {
                     throw new TypeResolutionException($"{baseType} is not a generic type definition but we are trying to resolve a generic type with it because generic arguments were provided");
                 }
 
-                baseType = ReflectionUtil.CreateGenericType(baseType, ResolveGenericTypes(typeLookup, namespaces));
+                baseType = ReflectionUtil.CreateGenericType(baseType, ResolveGenericTypes(typeLookup, namespaces, scopeType));
             }
 
             if (typeLookup.isArray) {

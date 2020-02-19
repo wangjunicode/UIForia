@@ -5,6 +5,7 @@ using Tests.Mocks;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
+using UnityEngine;
 
 namespace TemplateStructure {
 
@@ -250,7 +251,7 @@ namespace TemplateStructure {
         [Test]
         public void ModifySlotRequireChildrenOfElementTypeInvalid() {
             CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireTypeMainInvalid>(); });
-            Assert.IsTrue(exception.Message.Contains($"Expected element that can be assigned to {typeof(UIDivElement)} but {typeof(UITextElement)} is not."));
+            Assert.IsTrue(exception.Message.Contains($"Expected element that can be assigned to {typeof(UIDivElement)} but {typeof(UITextElement)} (<Text>) is not."));
         }
 
         [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#radio_group_with_attr_main")]
@@ -282,7 +283,7 @@ namespace TemplateStructure {
             Assert.AreEqual("true", child[0][1].GetAttribute("selected"));
             Assert.AreEqual("false", child[0][2].GetAttribute("selected"));
         }
-        
+
         [Test]
         public void ModifySlot_TypedWithField() {
             MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_TypedWithFieldMain>();
@@ -311,6 +312,19 @@ namespace TemplateStructure {
             Assert.AreEqual(c2.typedField, 2 * inner.value);
         }
 
+        [Test]
+        public void ModifySlot_RequireGeneric() {
+            MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireGenericMain>();
+            TestTemplateStructure_ModifySlot_RequireGenericMain root = (TestTemplateStructure_ModifySlot_RequireGenericMain) app.RootElement;
+
+            TestTemplateStructure_ModifySlot_RequireGenericInner<string> inner = (TestTemplateStructure_ModifySlot_RequireGenericInner<string>) root[0];
+
+            TestTemplateStructure_ModifySlot_RequireGenericThing<string> c0 = inner[0][0] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
+            TestTemplateStructure_ModifySlot_RequireGenericThing<string> c1 = inner[0][1] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
+            TestTemplateStructure_ModifySlot_RequireGenericThing<string> c2 = inner[0][2] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
+
+        }
+
         public static string GetText(UIElement element) {
             UITextElement textEl = element as UITextElement;
             return textEl.text.Trim();
@@ -331,6 +345,28 @@ namespace TemplateStructure {
     public class TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing : UIContainerElement {
 
         public int typedField;
+
+    }
+
+    public interface IInterface {
+
+        string Value { get; set; }
+
+    }
+    
+    [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#require_generic_main")]
+    public class TestTemplateStructure_ModifySlot_RequireGenericMain : UIElement { }
+
+    [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#require_generic_inner")]
+    public class TestTemplateStructure_ModifySlot_RequireGenericInner<T> : UIElement {
+
+        public T value;
+
+    }
+
+    public class TestTemplateStructure_ModifySlot_RequireGenericThing<T> : UIContainerElement {
+
+        public T field;
 
     }
 

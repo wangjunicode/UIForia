@@ -21,7 +21,7 @@
     </Contents>
 
     <Contents id="radio_group_div">
-        <define:Children.Modify require:type="UIDivElement"/>
+        <define:Children require:type="UIDivElement"/>
     </Contents>
 
     <Contents id="radio_group_with_attr_main">
@@ -31,9 +31,21 @@
             <Div/>
         </TestTemplateStructure_ModifySlot_RadioGroupWithAttr>
     </Contents>
+    
+    <Contents id="require_generic_inner">
+        <define:Children require:type="TestTemplateStructure_ModifySlot_RequireGenericThing[T]"/>
+    </Contents>
+    
+    <Contents id="require_generic_main">
+        <TestTemplateStructure_ModifySlot_RequireGenericInner value="'str'">
+            <TestTemplateStructure_ModifySlot_RequireGenericThing generic:type="string"/>
+            <TestTemplateStructure_ModifySlot_RequireGenericThing generic:type="string"/>
+            <TestTemplateStructure_ModifySlot_RequireGenericThing generic:type="string"/>
+        </TestTemplateStructure_ModifySlot_RequireGenericInner>
+    </Contents>
 
     <Contents id="radio_group_with_attr">
-        <define:Children.Modify attr:selected="{$element.siblingIndex == index ? 'true' : 'false'}"/>
+        <define:Children inject.attr:selected="{$element.siblingIndex == index ? 'true' : 'false'}"/>
     </Contents>
 
      <Contents id="type_with_field_main">
@@ -45,7 +57,7 @@
     </Contents>
 
     <Contents id="type_with_field_inner">
-        <define:Children.Modify require:type="TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing" typedField="{$element.siblingIndex * value}"/>
+        <define:Children require:type="TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing" inject.property:typedField="{$element.siblingIndex * value}"/>
     </Contents>
 
     

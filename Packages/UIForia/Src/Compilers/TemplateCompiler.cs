@@ -307,9 +307,9 @@ namespace UIForia.Compilers {
             return ctx.compiledTemplate;
         }
 
-        private Type ResolveRequiredType(IList<string> namespaces, string typeName) {
+        private Type ResolveRequiredType(IList<string> namespaces, string typeName, Type rootType) {
             if (typeName != null) {
-                Type requiredType = ResolveTypeExpression(namespaces, typeName);
+                Type requiredType = ResolveTypeExpression(rootType, namespaces, typeName);
 
                 if (requiredType == null) {
                     throw new CompileException($"Unable to resolve required child type `{typeName}`");
@@ -332,26 +332,26 @@ namespace UIForia.Compilers {
             ctx.PushScope();
 
             for (int i = 0; i < templateNode.ChildCount; i++) {
-                if (requiredType != null) {
-                    // todo -- unsure about resolving generic type here, might not have happened yet
-                    if (!requiredType.IsAssignableFrom(templateNode[i].processedType.rawType)) {
-                        throw new CompileException($"Expected element that can be assigned to {requiredType} but {templateNode[i].processedType.rawType} (<{templateNode[i].processedType.tagName}>) is not.");
-                    }
-                }
-
-                Visit(ctx, templateNode[i]);
+                Visit(ctx, templateNode[i], requiredType);
             }
 
             ctx.PopScope();
         }
 
-        private Expression Visit(CompilationContext ctx, TemplateNode templateNode) {
+        private Expression Visit(CompilationContext ctx, TemplateNode templateNode, Type requiredType) {
             if (templateNode is RepeatNode repeatNode) {
+                // todo -- fix loop hole with required type
                 return CompileRepeatNode(ctx, repeatNode);
             }
 
             if (templateNode.processedType.IsUnresolvedGeneric) {
                 templateNode.processedType = ResolveGenericElementType(ctx.namespaces, ctx.templateRootNode.ElementType, templateNode);
+            }
+
+            if (requiredType != null) {
+                if (!requiredType.IsAssignableFrom(templateNode.processedType.rawType)) {
+                    throw new CompileException($"Expected element that can be assigned to {requiredType} but {templateNode.processedType.rawType} (<{templateNode.processedType.tagName}>) is not.");
+                }
             }
 
             switch (templateNode) {
@@ -489,8 +489,23 @@ namespace UIForia.Compilers {
                 }
             }
 
+            if (slotNode.injectedAttributes != null) {
+                SlotAttributeData attrData = new SlotAttributeData();
+                attrData.slotDepth = 0;
+                attrData.slotContextType = parentContext.rootType;
+                attrData.namespaces = parentContext.namespaces.Clone();
+                attrData.contextStack = CloneContextStack();
+                attrData.templateMetaData = parentContext.compiledTemplate.templateMetaData;
+
+                for (int i = 0; i < slotNode.injectedAttributes.size; i++) {
+                    ref AttributeDefinition injectedAttr = ref slotNode.injectedAttributes.array[i];
+                    injectedAttr.slotAttributeData = attrData;
+                }
+            }
+
             compiledSlot.overrideDepth = 0;
             compiledSlot.originalAttributes = attributes;
+            compiledSlot.injectedAttributes = slotNode.injectedAttributes;
             compiledSlot.rootElementType = parentContext.rootType.rawType;
             compiledSlot.scopedVariables = CloneContextStack();
             compiledSlot.exposedAttributes = exposedAttributes.ToArray();
@@ -527,27 +542,27 @@ namespace UIForia.Compilers {
             ctx.ContextExpr = rootParam;
             ctx.namespaces = parentContext.namespaces;
 
-            if (compiledSlot.slotType == SlotType.Modify) {
-                ctx.Return(Expression.Default(slotNode.processedType.rawType));
-                compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
-            }
-            else {
-                Expression createRootExpression = CreateElement(ctx, slotNode.processedType, parentParam, slotNode.ChildCount, CountRealAttributes(slotNode.attributes), parentContext.compiledTemplate.templateId);
+            // if (compiledSlot.slotType == SlotType.Modify) {
+            //     ctx.Return(Expression.Default(slotNode.processedType.rawType));
+            //     compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
+            // }
+            // else {
+            Expression createRootExpression = CreateElement(ctx, slotNode.processedType, parentParam, slotNode.ChildCount, CountRealAttributes(slotNode.attributes), parentContext.compiledTemplate.templateId);
 
-                ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, slotNode.processedType.rawType));
-                ctx.Assign(Expression.Field(slotRootParam, s_SlotElement_SlotId), Expression.Constant(slotNode.slotName));
-                StructList<ContextAliasActions> contextMods = CompileBindings(ctx, slotNode, attributes).contextModifications;
+            ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, slotNode.processedType.rawType));
+            ctx.Assign(Expression.Field(slotRootParam, s_SlotElement_SlotId), Expression.Constant(slotNode.slotName));
+            StructList<ContextAliasActions> contextMods = CompileBindings(ctx, slotNode, attributes).contextModifications;
 
-                VisitChildren(ctx, slotNode);
+            VisitChildren(ctx, slotNode);
 
-                UndoContextMods(contextMods);
+            UndoContextMods(contextMods);
 
-                ctx.Return(slotRootParam);
+            ctx.Return(slotRootParam);
 
-                compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
-            }
+            compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
+            // }
 
-            compiledSlot.requiredChildType = ResolveRequiredType(ctx.namespaces, slotNode.requireType);
+            compiledSlot.requiredChildType = ResolveRequiredType(ctx.namespaces, slotNode.requireType, ctx.rootType.rawType);
 
             return nodeExpr;
         }
@@ -559,9 +574,9 @@ namespace UIForia.Compilers {
         private CompiledSlot CompileSlotOverride(CompilationContext parentContext, SlotNode slotOverrideNode, CompiledSlot toOverride, Type type = null) {
             if (type == null) type = slotOverrideNode.processedType.rawType;
 
-            if (slotOverrideNode.slotType == SlotType.Forward && toOverride.slotType == SlotType.Modify) {
-                throw new CompileException("Forwarding modified slots is not yet implemented");
-            }
+            // if (slotOverrideNode.slotType == SlotType.Forward && toOverride.slotType == SlotType.Modify) {
+            //     throw new CompileException("Forwarding modified slots is not yet implemented");
+            // }
 
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, slotOverrideNode.slotName, slotOverrideNode.slotType);
 
@@ -622,26 +637,33 @@ namespace UIForia.Compilers {
 
             SlotNode node = slotOverrideNode;
 
-            if (toOverride.slotType == SlotType.Modify) {
-                // modify slots have no attributes, they push all attributes onto their children
+            if (toOverride.injectedAttributes != null) {
                 for (int i = 0; i < node.ChildCount; i++) {
                     node[i].isModified = true;
-                    node[i].attributes = AttributeMerger.MergeModifySlotAttributes(node[i].attributes, toOverride.originalAttributes);
+                    node[i].attributes = AttributeMerger.MergeModifySlotAttributes(node[i].attributes, toOverride.injectedAttributes);
                 }
-
-                VisitChildren(ctx, node, toOverride.requiredChildType);
             }
-            else {
-                StructList<ContextAliasActions> contextMods = CompileBindings(ctx, node, attributes, exposedVariableDataList).contextModifications;
 
-                if (slotOverrideNode.slotType == SlotType.Override) {
-                    ctx.Assign(ctx.templateScope, ExpressionFactory.CallInstanceUnchecked(ctx.templateScope, s_TemplateScope_GetOverrideScope));
-                }
+            // if (toOverride.slotType == SlotType.Modify) {
+            //     // modify slots have no attributes, they push all attributes onto their children
+            //     for (int i = 0; i < node.ChildCount; i++) {
+            //         node[i].isModified = true;
+            //         node[i].attributes = AttributeMerger.MergeModifySlotAttributes(node[i].attributes, toOverride.originalAttributes);
+            //     }
+            //
+            //     VisitChildren(ctx, node, toOverride.requiredChildType);
+            // }
+            // else {
+            StructList<ContextAliasActions> contextMods = CompileBindings(ctx, node, attributes, exposedVariableDataList).contextModifications;
 
-                VisitChildren(ctx, node);
-
-                UndoContextMods(contextMods);
+            if (slotOverrideNode.slotType == SlotType.Override) {
+                ctx.Assign(ctx.templateScope, ExpressionFactory.CallInstanceUnchecked(ctx.templateScope, s_TemplateScope_GetOverrideScope));
             }
+
+            VisitChildren(ctx, node, toOverride.requiredChildType);
+
+            UndoContextMods(contextMods);
+            // }
 
             ctx.Return(slotRootParam);
 
@@ -718,7 +740,7 @@ namespace UIForia.Compilers {
                 ctx.Return(ctx.ElementExpr);
             }
             else {
-                ctx.Return(Visit(ctx, repeatNode.children[0]));
+                ctx.Return(Visit(ctx, repeatNode.children[0], null));
             }
 
             contextStack.Peek().Pop();
@@ -2704,9 +2726,10 @@ namespace UIForia.Compilers {
             );
         }
 
-        private Type ResolveTypeExpression(IList<string> namespaces, string typeExpression) {
+        private Type ResolveTypeExpression(Type invokingType, IList<string> namespaces, string typeExpression) {
+            typeExpression = typeExpression.Replace("[", "<").Replace("]", ">");
             if (ExpressionParser.TryParseTypeName(typeExpression, out TypeLookup typeLookup)) {
-                return TypeProcessor.ResolveType(typeLookup, (IReadOnlyList<string>) namespaces);
+                return TypeProcessor.ResolveType(typeLookup, (IReadOnlyList<string>) namespaces, invokingType);
             }
 
             return null;

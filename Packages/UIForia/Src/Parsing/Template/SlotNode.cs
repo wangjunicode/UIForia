@@ -8,8 +8,7 @@ namespace UIForia.Parsing {
         Define,
         Forward,
         Override,
-        Template,
-        Modify
+        Template
 
     }
 
@@ -17,6 +16,7 @@ namespace UIForia.Parsing {
 
         public readonly string slotName;
         public readonly SlotType slotType;
+        public StructList<AttributeDefinition> injectedAttributes;
 
         public SlotNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo, string slotName, SlotType slotType)
             : base(root, parent, processedType, attributes, templateLineInfo) {

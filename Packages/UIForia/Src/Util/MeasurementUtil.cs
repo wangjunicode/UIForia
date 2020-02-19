@@ -21,6 +21,7 @@ namespace UIForia.Util {
 
                 case AlignmentTarget.ParentContentArea:
                     LayoutResult parentResult = result.layoutParent;
+                    if (parentResult == null) return 0;
 
                     if (direction == AlignmentDirection.Start) {
                         return parentResult.padding.left + parentResult.border.left;
@@ -38,6 +39,7 @@ namespace UIForia.Util {
                     return 0;
 
                 case AlignmentTarget.View: {
+                    if (result.element.parent == null) return 0;
                     LayoutResult ptr = result.element.parent.layoutResult;
                     float output = viewportX;
                     while (ptr != null) {
@@ -53,6 +55,7 @@ namespace UIForia.Util {
                 }
 
                 case AlignmentTarget.Screen: {
+                    if (result.element.parent == null) return 0;
                     LayoutResult ptr = result.element.parent.layoutResult;
                     float output = 0;
                     while (ptr != null) {
@@ -88,6 +91,7 @@ namespace UIForia.Util {
 
                 case AlignmentTarget.ParentContentArea:
                     LayoutResult parentResult = result.layoutParent;
+                    if (parentResult == null) return 0;
 
                     if (direction == AlignmentDirection.Start) {
                         return parentResult.padding.top + parentResult.border.top;
@@ -103,6 +107,8 @@ namespace UIForia.Util {
                     throw new NotImplementedException();
 
                 case AlignmentTarget.View: {
+                    if (result.element.parent == null) return 0;
+
                     LayoutResult ptr = result.element.parent.layoutResult;
                     float output = viewportY;
                     while (ptr != null) {
@@ -118,6 +124,7 @@ namespace UIForia.Util {
                 }
 
                 case AlignmentTarget.Screen: {
+                    if (result.element.parent == null) return 0;
                     LayoutResult ptr = result.element.parent.layoutResult;
                     float output = 0;
                     while (ptr != null) {
@@ -237,6 +244,8 @@ namespace UIForia.Util {
 
 
         public static float GetXDistanceToScreen(LayoutResult result) {
+            if (result.element.parent == null) return 0;
+
             LayoutResult ptr = result.element.parent.layoutResult;
             float output = 0;
             while (ptr != null) {
@@ -252,6 +261,7 @@ namespace UIForia.Util {
         }
 
         public static float GetYDistanceToScreen(LayoutResult result) {
+            if (result.element.parent == null) return 0;
             LayoutResult ptr = result.element.parent.layoutResult;
             float output = 0;
             while (ptr != null) {

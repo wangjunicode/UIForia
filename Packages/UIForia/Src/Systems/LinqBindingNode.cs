@@ -64,7 +64,6 @@ namespace UIForia.Systems {
         public void InitializeContextArray(string slotName, TemplateScope templateScope, int size) {
             referencedContexts = new UIElement[size + 1];
 
-
             if (templateScope.slotInputs != null) {
                 int idx = 1;
                 for (int i = templateScope.slotInputs.size - 1; i >= 0; i--) {
@@ -152,24 +151,59 @@ namespace UIForia.Systems {
 
             node.InitializeContextArray(slotName, templateScope, slotContextSize);
 
+            node.SetBindings(application, rootElement, createdId, enabledId, updatedId, lateId);
+
+            return node;
+        }
+
+        public static LinqBindingNode GetSlotModifyNode(Application application, UIElement rootElement, UIElement element, UIElement innerContext, int createdId, int enabledId, int updatedId, int lateId) {
+            LinqBindingNode node = new LinqBindingNode(); // todo -- pool
+            node.root = rootElement;
+            node.element = element;
+            node.innerContext = innerContext;
+            element.bindingNode = node;
+
+            // todo -- profile this against skip tree
+            UIElement ptr = element.parent;
+            while (ptr != null) {
+                if (ptr.bindingNode != null) {
+                    node.parent = ptr.bindingNode;
+                    break;
+                }
+
+                ptr = ptr.parent;
+            }
+
+            node.referencedContexts = new UIElement[1];
+            node.referencedContexts[0] = innerContext;
+
+            node.SetBindings(application, rootElement, createdId, enabledId, updatedId, lateId);
+
+            return node;
+        }
+
+        private void SetBindings(Application application, UIElement rootElement, int createdId, int enabledId, int updatedId, int lateId) {
             if (createdId != -1) {
-                node.createdBinding = application.templateData.bindings[createdId];
-                node.createdBinding?.Invoke(rootElement, element);
+                try {
+                    createdBinding = application.templateData.bindings[createdId];
+                    createdBinding?.Invoke(rootElement, element);
+                }
+                catch (Exception e) {
+                    UnityEngine.Debug.LogWarning(e);
+                }
             }
 
             if (enabledId != -1) {
-                node.enabledBinding = application.templateData.bindings[enabledId];
+                enabledBinding = application.templateData.bindings[enabledId];
             }
 
             if (updatedId != -1) {
-                node.updateBindings = application.templateData.bindings[updatedId];
+                updateBindings = application.templateData.bindings[updatedId];
             }
 
             if (lateId != -1) {
-                node.lateBindings = application.templateData.bindings[lateId];
+                lateBindings = application.templateData.bindings[lateId];
             }
-
-            return node;
         }
 
         [UsedImplicitly] // called from template functions, 
@@ -191,27 +225,7 @@ namespace UIForia.Systems {
                 ptr = ptr.parent;
             }
 
-            if (createdId != -1) {
-                node.createdBinding = application.templateData.bindings[createdId];
-                try {
-                    node.createdBinding?.Invoke(rootElement, element);
-                }
-                catch (Exception e) {
-                    UnityEngine.Debug.LogWarning(e);
-                }
-            }
-
-            if (enabledId != -1) {
-                node.enabledBinding = application.templateData.bindings[enabledId];
-            }
-
-            if (updatedId != -1) {
-                node.updateBindings = application.templateData.bindings[updatedId];
-            }
-
-            if (lateId != -1) {
-                node.lateBindings = application.templateData.bindings[lateId];
-            }
+            node.SetBindings(application, rootElement, createdId, enabledId, updatedId, lateId);
 
             return node;
         }

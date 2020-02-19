@@ -1,6 +1,8 @@
 <UITemplate>
-    
+
     <Using namespace="UIForia.Elements"/>
+    
+    <Using namespace="TemplateStructure"/>
     
     <Contents id="require_type_main">
         <TestTemplateStructure_ModifySlot_RadioGroupDiv>
@@ -9,7 +11,7 @@
             <Div/>
         </TestTemplateStructure_ModifySlot_RadioGroupDiv>
     </Contents>
-    
+
     <Contents id="require_type_main_invalid">
         <TestTemplateStructure_ModifySlot_RadioGroupDiv>
             <Div/>
@@ -17,9 +19,34 @@
             <Div/>
         </TestTemplateStructure_ModifySlot_RadioGroupDiv>
     </Contents>
-    
+
     <Contents id="radio_group_div">
         <define:Children.Modify require:type="UIDivElement"/>
     </Contents>
+
+    <Contents id="radio_group_with_attr_main">
+        <TestTemplateStructure_ModifySlot_RadioGroupWithAttr>
+            <Div/>
+            <Div/>
+            <Div/>
+        </TestTemplateStructure_ModifySlot_RadioGroupWithAttr>
+    </Contents>
+
+    <Contents id="radio_group_with_attr">
+        <define:Children.Modify attr:selected="{$element.siblingIndex == index ? 'true' : 'false'}"/>
+    </Contents>
+
+     <Contents id="type_with_field_main">
+        <TestTemplateStructure_ModifySlot_TypedWithFieldInner>
+            <TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing/>
+            <TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing/>
+            <TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing/>
+        </TestTemplateStructure_ModifySlot_TypedWithFieldInner>
+    </Contents>
+
+    <Contents id="type_with_field_inner">
+        <define:Children.Modify require:type="TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing" typedField="{$element.siblingIndex * value}"/>
+    </Contents>
+
     
 </UITemplate>

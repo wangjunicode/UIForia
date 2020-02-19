@@ -45,9 +45,8 @@ namespace UIForia.Parsing {
         public string namespaceName;
         public TemplateLineInfo lineInfo;
         public string genericTypeResolver;
-        public bool isModify;
-        public bool isReplace;
         public string requireType;
+        public bool isModified;
 
         protected TemplateNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
             this.root = root;

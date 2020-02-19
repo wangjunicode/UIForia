@@ -26,6 +26,27 @@ namespace UIForia.Compilers {
 
             return retn;
         }
+        
+        public static StructList<AttributeDefinition> MergeModifySlotAttributes(StructList<AttributeDefinition> innerAttributes, StructList<AttributeDefinition> outerAttributes) {
+            StructList<AttributeDefinition> retn = new StructList<AttributeDefinition>();
+
+            if (innerAttributes == null && outerAttributes == null) {
+                retn = new StructList<AttributeDefinition>();
+            }
+
+            if (innerAttributes != null) {
+                retn.AddRange(innerAttributes);
+            }
+
+            if (outerAttributes != null) {
+                for (int i = 0; i < outerAttributes.size; i++) {
+                    AttributeDefinition attrCopy = outerAttributes[i];
+                    retn.Add(attrCopy);
+                }
+            }
+
+            return retn;
+        }
 
         // Template Root attribute rules
         // - No if binding allowed

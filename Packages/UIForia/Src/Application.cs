@@ -903,10 +903,6 @@ namespace UIForia {
 
         }
 
-        internal StructList<TagNameEntry> GetTagNameRegistry(int tagNameId) {
-            return null;
-        }
-
         internal Dictionary<int, TagNameIndex> tagNameIndexMap = new Dictionary<int, TagNameIndex>();
 
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth

@@ -253,10 +253,84 @@ namespace TemplateStructure {
             Assert.IsTrue(exception.Message.Contains($"Expected element that can be assigned to {typeof(UIDivElement)} but {typeof(UITextElement)} is not."));
         }
 
+        [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#radio_group_with_attr_main")]
+        public class TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain : UIElement { }
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#radio_group_with_attr")]
+        public class TestTemplateStructure_ModifySlot_RadioGroupWithAttr : UIElement {
+
+            public int index;
+
+        }
+
+        [Test]
+        public void ModifySlot_WithAttr() {
+            MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain>();
+            TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain root = (TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain) app.RootElement;
+            TestTemplateStructure_ModifySlot_RadioGroupWithAttr child = (TestTemplateStructure_ModifySlot_RadioGroupWithAttr) root[0];
+
+            app.Update();
+
+            Assert.AreEqual("true", child[0][0].GetAttribute("selected"));
+            Assert.AreEqual("false", child[0][1].GetAttribute("selected"));
+            Assert.AreEqual("false", child[0][2].GetAttribute("selected"));
+
+            child.index = 1;
+            app.Update();
+
+            Assert.AreEqual("false", child[0][0].GetAttribute("selected"));
+            Assert.AreEqual("true", child[0][1].GetAttribute("selected"));
+            Assert.AreEqual("false", child[0][2].GetAttribute("selected"));
+        }
+        
+        [Test]
+        public void ModifySlot_TypedWithField() {
+            MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_TypedWithFieldMain>();
+            TestTemplateStructure_ModifySlot_TypedWithFieldMain root = (TestTemplateStructure_ModifySlot_TypedWithFieldMain) app.RootElement;
+
+            TestTemplateStructure_ModifySlot_TypedWithFieldInner inner = (TestTemplateStructure_ModifySlot_TypedWithFieldInner) root[0];
+
+            TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing c0 = inner[0][0] as TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing;
+            TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing c1 = inner[0][1] as TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing;
+            TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing c2 = inner[0][2] as TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing;
+
+            inner.value = 10;
+
+            app.Update();
+
+            Assert.AreEqual(c0.typedField, 0 * inner.value);
+            Assert.AreEqual(c1.typedField, 1 * inner.value);
+            Assert.AreEqual(c2.typedField, 2 * inner.value);
+
+            inner.value = 20;
+
+            app.Update();
+
+            Assert.AreEqual(c0.typedField, 0 * inner.value);
+            Assert.AreEqual(c1.typedField, 1 * inner.value);
+            Assert.AreEqual(c2.typedField, 2 * inner.value);
+        }
+
         public static string GetText(UIElement element) {
             UITextElement textEl = element as UITextElement;
             return textEl.text.Trim();
         }
+
+    }
+
+    [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#type_with_field_main")]
+    public class TestTemplateStructure_ModifySlot_TypedWithFieldMain : UIElement { }
+
+    [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#type_with_field_inner")]
+    public class TestTemplateStructure_ModifySlot_TypedWithFieldInner : UIElement {
+
+        public int value;
+
+    }
+
+    public class TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing : UIContainerElement {
+
+        public int typedField;
 
     }
 

@@ -50,6 +50,7 @@ namespace UIForia.Compilers {
 
         internal static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod(nameof(Application.CreateElementFromPoolWithType));
         internal static readonly MethodInfo s_LinqBindingNode_Get = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.Get), BindingFlags.Static | BindingFlags.Public);
+        internal static readonly MethodInfo s_LinqBindingNode_GetSlotModifyNode = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetSlotModifyNode), BindingFlags.Static | BindingFlags.Public);
         internal static readonly MethodInfo s_LinqBindingNode_GetSlotNode = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetSlotNode), BindingFlags.Static | BindingFlags.Public);
         internal static readonly FieldInfo s_StructList_ElementAttr_Array = typeof(StructList<ElementAttribute>).GetField("array");
 
@@ -334,7 +335,7 @@ namespace UIForia.Compilers {
                 if (requiredType != null) {
                     // todo -- unsure about resolving generic type here, might not have happened yet
                     if (!requiredType.IsAssignableFrom(templateNode[i].processedType.rawType)) {
-                        throw new CompileException($"Expected element that can be assigned to {requiredType} but {templateNode[i].processedType.rawType} is not.");
+                        throw new CompileException($"Expected element that can be assigned to {requiredType} but {templateNode[i].processedType.rawType} (<{templateNode[i].processedType.tagName}>) is not.");
                     }
                 }
 
@@ -522,23 +523,29 @@ namespace UIForia.Compilers {
             ctx.templateScope = scopeParam;
             ctx.applicationExpr = Expression.Field(scopeParam, s_TemplateScope_ApplicationField);
             ctx.Initialize(slotRootParam);
-            ctx.compiledTemplate = parentContext.compiledTemplate; // todo -- might be wrong
+            ctx.compiledTemplate = parentContext.compiledTemplate;
             ctx.ContextExpr = rootParam;
             ctx.namespaces = parentContext.namespaces;
 
-            Expression createRootExpression = CreateElement(ctx, slotNode.processedType, parentParam, slotNode.ChildCount, CountRealAttributes(slotNode.attributes), parentContext.compiledTemplate.templateId);
+            if (compiledSlot.slotType == SlotType.Modify) {
+                ctx.Return(Expression.Default(slotNode.processedType.rawType));
+                compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
+            }
+            else {
+                Expression createRootExpression = CreateElement(ctx, slotNode.processedType, parentParam, slotNode.ChildCount, CountRealAttributes(slotNode.attributes), parentContext.compiledTemplate.templateId);
 
-            ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, slotNode.processedType.rawType));
-            ctx.Assign(Expression.Field(slotRootParam, s_SlotElement_SlotId), Expression.Constant(slotNode.slotName));
-            StructList<ContextAliasActions> contextMods = CompileBindings(ctx, slotNode, attributes).contextModifications;
+                ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, slotNode.processedType.rawType));
+                ctx.Assign(Expression.Field(slotRootParam, s_SlotElement_SlotId), Expression.Constant(slotNode.slotName));
+                StructList<ContextAliasActions> contextMods = CompileBindings(ctx, slotNode, attributes).contextModifications;
 
-            VisitChildren(ctx, slotNode);
+                VisitChildren(ctx, slotNode);
 
-            UndoContextMods(contextMods);
+                UndoContextMods(contextMods);
 
-            ctx.Return(slotRootParam);
+                ctx.Return(slotRootParam);
 
-            compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
+                compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
+            }
 
             compiledSlot.requiredChildType = ResolveRequiredType(ctx.namespaces, slotNode.requireType);
 
@@ -553,9 +560,9 @@ namespace UIForia.Compilers {
             if (type == null) type = slotOverrideNode.processedType.rawType;
 
             if (slotOverrideNode.slotType == SlotType.Forward && toOverride.slotType == SlotType.Modify) {
-                throw new CompileException("Forwarding modified slots is not yet implemented");    
+                throw new CompileException("Forwarding modified slots is not yet implemented");
             }
-            
+
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, slotOverrideNode.slotName, slotOverrideNode.slotType);
 
             compiledSlot.rootElementType = parentContext.rootType.rawType;
@@ -617,6 +624,11 @@ namespace UIForia.Compilers {
 
             if (toOverride.slotType == SlotType.Modify) {
                 // modify slots have no attributes, they push all attributes onto their children
+                for (int i = 0; i < node.ChildCount; i++) {
+                    node[i].isModified = true;
+                    node[i].attributes = AttributeMerger.MergeModifySlotAttributes(node[i].attributes, toOverride.originalAttributes);
+                }
+
                 VisitChildren(ctx, node, toOverride.requiredChildType);
             }
             else {
@@ -794,7 +806,7 @@ namespace UIForia.Compilers {
 
             ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(processedType.rawType));
 
-            ctx.Assign(nodeExpr, CreateElement(ctx, containerNode));
+            ctx.Assign(nodeExpr, CreateElement(ctx, processedType, ctx.ParentExpr, containerNode.ChildCount, CountRealAttributes(containerNode.attributes), ctx.compiledTemplate.templateId));
 
             ProcessAttrsAndVisitChildren(ctx, containerNode);
 
@@ -1790,7 +1802,6 @@ namespace UIForia.Compilers {
             int updateBindingId = -1;
             int lateBindingId = -1;
 
-
             // we always have 4 statements because of Initialize(), so only consider compilers with more than 4 statements
 
             if (createdCompiler.StatementCount > 0) {
@@ -1834,6 +1845,19 @@ namespace UIForia.Compilers {
                         Expression.Constant(slotNode.slotName),
                         ctx.templateScope,
                         Expression.Constant(slotContextSize)
+                    )
+                );
+            }
+            else if (templateNode.isModified) {
+                ctx.AddStatement(Expression.Call(null, s_LinqBindingNode_GetSlotModifyNode,
+                        ctx.applicationExpr,
+                        ctx.rootParam,
+                        ctx.ElementExpr,
+                        ctx.ContextExpr,
+                        Expression.Constant(createdBindingId),
+                        Expression.Constant(enabledBindingId),
+                        Expression.Constant(updateBindingId),
+                        Expression.Constant(lateBindingId)
                     )
                 );
             }

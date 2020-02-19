@@ -1,0 +1,25 @@
+<UITemplate>
+    
+    <Using namespace="UIForia.Elements"/>
+    
+    <Contents id="require_type_main">
+        <TestTemplateStructure_ModifySlot_RadioGroupDiv>
+            <Div/>
+            <Div/>
+            <Div/>
+        </TestTemplateStructure_ModifySlot_RadioGroupDiv>
+    </Contents>
+    
+    <Contents id="require_type_main_invalid">
+        <TestTemplateStructure_ModifySlot_RadioGroupDiv>
+            <Div/>
+            <Text/>
+            <Div/>
+        </TestTemplateStructure_ModifySlot_RadioGroupDiv>
+    </Contents>
+    
+    <Contents id="radio_group_div">
+        <define:Children.Modify require:type="UIDivElement"/>
+    </Contents>
+    
+</UITemplate>

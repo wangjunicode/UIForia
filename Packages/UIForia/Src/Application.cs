@@ -169,9 +169,21 @@ namespace UIForia {
 
         public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
             if (templateData.TryGetTemplate<T>(out DynamicTemplate dynamicTemplate)) {
-                UIElement element = CreateElementFromPool(dynamicTemplate.typeId, null, 0, 0, dynamicTemplate.templateId);
-
-                HydrateTemplate(dynamicTemplate.templateId, element, new TemplateScope(this));
+                UIElement element = templateData.templates[dynamicTemplate.templateId].Invoke(null, new TemplateScope(this));
+                //
+                // view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Width, Height));
+                //
+                // views.Add(view);
+                //
+                // for (int i = 0; i < systems.Count; i++) {
+                //     systems[i].OnViewAdded(view);
+                // }
+                //     UIElement element = CreateElementFromPool(dynamicTemplate.typeId, null, 0, 0, dynamicTemplate.templateId);
+                //
+                //     HydrateTemplate(dynamicTemplate.templateId, element, new TemplateScope(this));
+                // todo -- need a binding node on dynamically created templates
+                // currently not working, compiler needs to change
+                // templateData.templates[dynamicTemplate.templateId]
 
                 UIView view = new UIView(this, name, element, matrix, size);
 
@@ -292,7 +304,7 @@ namespace UIForia {
         public void Destroy() {
 #if UNITY_EDITOR
             Applications.Remove(this);
-            templateData.Destroy();
+            templateData?.Destroy();
 #endif
 
             foreach (ISystem system in systems) {
@@ -369,22 +381,6 @@ namespace UIForia {
             onElementDestroyed?.Invoke(element);
         }
 
-        internal void DestroyChildren(UIElement element) {
-            if (element.isDestroyed) {
-                return;
-            }
-
-            if (element.children == null || element.children.Count == 0) {
-                return;
-            }
-
-            for (int i = 0; i < element.children.size; i++) {
-                DoDestroyElement(element.children[i], true);
-            }
-
-            element.children.QuickClear();
-        }
-
         private LightList<UIElement> activeBuffer = new LightList<UIElement>(32);
         private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
 
@@ -423,21 +419,18 @@ namespace UIForia {
             bindingTimer.Reset();
             bindingTimer.Start();
 
-            bool firstRun = true;
-            bool loop = true; // lets us escape infinite loop in debugger
-
+            // right now, out of order elements wont get bindings until next frame. this miiight be ok but probably will cause weirdness. likely want this to change
             for (int i = 0; i < views.Count; i++) {
                 linqBindingSystem.NewUpdateFn(views[i].RootElement);
             }
+
+            // bool loop = true;
+
             // while (loop) {
-            //     linqBindingSystem.BeforeUpdate(activeBuffer); // normal bindings + OnBeforeUpdate call 
-            //
-            //     if (firstRun) {
-            //         inputSystem.OnUpdate();
-            //         firstRun = false;
+            //     
+            //     for (int i = 0; i < activeBuffer.size; i++) {
+            //         linqBindingSystem.NewUpdateFn(views[i].RootElement);
             //     }
-            //
-            //     linqBindingSystem.AfterUpdate(); // on update call + write back 'sync' & onChange
             //
             //     if (queuedBuffer.size == 0) {
             //         break;
@@ -528,7 +521,12 @@ namespace UIForia {
                 }
 
                 child.style.UpdateInheritedStyles(); // todo -- move this
-                child.OnEnable();
+                try {
+                    child.OnEnable();
+                }
+                catch (Exception e) {
+                    Debug.Log(e);
+                }
 
                 // We need to run all runCommands now otherwise animations in [normal] style groups won't run after enabling.
                 child.style.RunCommands();
@@ -567,7 +565,6 @@ namespace UIForia {
             onElementEnabled?.Invoke(element);
         }
 
-        // todo bad things happen if we add children during disabling or enabling (probably)
         public void DoDisableElement(UIElement element) {
             // if element is already disabled or destroyed, no op
             if ((element.flags & UIElementFlags.Alive) == 0) {
@@ -602,7 +599,12 @@ namespace UIForia {
 
                 // todo -- profile not calling disable when it's not needed
                 // if (child.flags & UIElementFlags.RequiresEnableCall) {
-                child.OnDisable();
+                try {
+                    child.OnDisable();
+                }
+                catch (Exception e) {
+                    Debug.Log(e);
+                }
                 // }
 
                 // todo -- maybe do this on enable instead

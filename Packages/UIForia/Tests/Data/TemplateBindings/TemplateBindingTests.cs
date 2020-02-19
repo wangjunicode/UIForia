@@ -904,7 +904,6 @@ namespace TemplateBinding {
 
         [Test]
         public void SyncBinding_Sync() {
-            MockApplication.Generate();
             MockApplication app = MockApplication.Setup<TemplateBindingTest_SyncBinding_Sync>();
             TemplateBindingTest_SyncBinding_Sync e = (TemplateBindingTest_SyncBinding_Sync) app.RootElement;
             TemplateBindingTest_SyncBinding_FakeInput child = (TemplateBindingTest_SyncBinding_FakeInput) e[0];

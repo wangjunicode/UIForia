@@ -1,4 +1,3 @@
-using UIForia.Compilers;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
@@ -9,8 +8,8 @@ namespace UIForia.Parsing {
         Define,
         Forward,
         Override,
-
-        Template
+        Template,
+        Modify
 
     }
 
@@ -25,7 +24,7 @@ namespace UIForia.Parsing {
             this.slotType = slotType;
             this.tagName = slotName;
         }
-        
+
         public AttributeDefinition[] GetAttributes(AttributeType expose) {
             if (attributes == null) {
                 return null;

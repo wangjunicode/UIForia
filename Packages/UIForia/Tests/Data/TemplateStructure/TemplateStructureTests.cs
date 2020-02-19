@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.Exceptions;
 
 namespace TemplateStructure {
 
@@ -210,7 +211,9 @@ namespace TemplateStructure {
 
 
         public class GenericThing1<T> : UIContainerElement { }
+
         public class GenericThing2<T, U> : UIContainerElement { }
+
         public class GenericThing3<T, U, V> : UIContainerElement { }
 
         [Template("Data/TemplateStructure/TestTemplateStructure_ResolveGeneric.xml")]
@@ -222,13 +225,34 @@ namespace TemplateStructure {
             ResolveGeneric root = (ResolveGeneric) app.RootElement;
 
             app.Update();
-            
+
             Assert.IsInstanceOf<GenericThing1<int>>(root[0]);
             Assert.IsInstanceOf<GenericThing1<float>>(root[1]);
             Assert.IsInstanceOf<GenericThing1<List<string>>>(root[2]);
             Assert.IsInstanceOf<GenericThing1<Dictionary<List<string>, int>>>(root[3]);
         }
-        
+
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#require_type_main")]
+        public class TestTemplateStructure_ModifySlot_RequireTypeMain : UIElement { }
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#radio_group_div")]
+        public class TestTemplateStructure_ModifySlot_RadioGroupDiv : UIElement { }
+
+        [Test]
+        public void ModifySlotRequireChildrenOfElementType() {
+            Assert.DoesNotThrow(() => { MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireTypeMain>(); });
+        }
+
+        [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#require_type_main_invalid")]
+        public class TestTemplateStructure_ModifySlot_RequireTypeMainInvalid : UIElement { }
+
+        [Test]
+        public void ModifySlotRequireChildrenOfElementTypeInvalid() {
+            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireTypeMainInvalid>(); });
+            Assert.IsTrue(exception.Message.Contains($"Expected element that can be assigned to {typeof(UIDivElement)} but {typeof(UITextElement)} is not."));
+        }
+
         public static string GetText(UIElement element) {
             UITextElement textEl = element as UITextElement;
             return textEl.text.Trim();

@@ -154,11 +154,11 @@ namespace UIForia.Parsing {
 
             IXmlLineInfo xmlLineInfo = root;
 
-            StructList<AttributeDefinition> attributes = ParseAttributes(shell, "Contents", root.Attributes(), out string genericTypeResolver);
+            StructList<AttributeDefinition> attributes = ParseAttributes(shell, "Contents", root.Attributes(), out string genericTypeResolver, out string requireType);
             templateRootNode.attributes = ValidateRootAttributes(shell.filePath, attributes);
             templateRootNode.lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
             templateRootNode.genericTypeResolver = genericTypeResolver;
-            
+            templateRootNode.requireType = requireType; // always null I think
             ParseChildren(templateRootNode, templateRootNode, root.Nodes());
         }
 
@@ -204,13 +204,31 @@ namespace UIForia.Parsing {
 
             string lowerNamespace = namespacePath.ToLower();
             if (lowerNamespace == "define") {
-                processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
-                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Define);
-                templateRoot.AddSlot((SlotNode) node);
-                parent.AddChild(node);
-                return node;
+                int idx = tagName.IndexOf('.');
+                if (idx != -1) {
+                    string[] split = tagName.Split('.');
+                    tagName = split[0];
+                    string suffix = split[1];
+                    SlotType slotType = SlotType.Define;
+                    if (suffix == "Modify") {
+                        slotType = slotType = SlotType.Modify;
+                    }
+
+                    processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+                    node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, slotType);
+                    templateRoot.AddSlot((SlotNode) node);
+                    parent.AddChild(node);
+                    return node;
+                }
+                else {
+                    processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+                    node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Define);
+                    templateRoot.AddSlot((SlotNode) node);
+                    parent.AddChild(node);
+                    return node;
+                }
             }
-            
+
             if (lowerNamespace == "override") {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Override);
@@ -221,13 +239,14 @@ namespace UIForia.Parsing {
                 expanded.AddSlotOverride((SlotNode) node);
                 return node;
             }
-            
+
             if (lowerNamespace == "forward") {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotForward));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Forward);
                 if (!(parent is ExpandedTemplateNode expanded)) {
                     throw ParseException.InvalidSlotOverride("forward", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
                 }
+
                 templateRoot.AddSlot((SlotNode) node);
                 parent.AddChild(node);
                 return node;
@@ -350,17 +369,17 @@ namespace UIForia.Parsing {
                             textContext = string.Empty;
                         }
 
-
                         string tagName = element.Name.LocalName;
                         string namespaceName = element.Name.NamespaceName;
 
-                        StructList<AttributeDefinition> attributes = ParseAttributes(templateRoot.templateShell, tagName, element.Attributes(), out string genericTypeResolver);
+                        StructList<AttributeDefinition> attributes = ParseAttributes(templateRoot.templateShell, tagName, element.Attributes(), out string genericTypeResolver, out string requireType);
 
                         IXmlLineInfo lineInfo = element;
                         TemplateNode p = ParseElementTag(templateRoot, parent, namespaceName, tagName, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
-                        
+
                         p.genericTypeResolver = genericTypeResolver;
-                        
+                        p.requireType = requireType;
+
                         ParseChildren(templateRoot, p, element.Nodes());
 
                         continue;
@@ -378,9 +397,10 @@ namespace UIForia.Parsing {
             }
         }
 
-        private static StructList<AttributeDefinition> ParseAttributes(TemplateShell templateShell, string tagName, IEnumerable<XAttribute> xmlAttributes, out string genericTypeResolver) {
+        private static StructList<AttributeDefinition> ParseAttributes(TemplateShell templateShell, string tagName, IEnumerable<XAttribute> xmlAttributes, out string genericTypeResolver, out string requireType) {
             StructList<AttributeDefinition> attributes = StructList<AttributeDefinition>.GetMinSize(4);
             genericTypeResolver = null;
+            requireType = null;
             foreach (XAttribute attr in xmlAttributes) {
                 string prefix = attr.Name.NamespaceName;
                 string name = attr.Name.LocalName.Trim();
@@ -396,7 +416,12 @@ namespace UIForia.Parsing {
                     genericTypeResolver = attr.Value;
                     continue;
                 }
-                 
+
+                if (prefix == "require" && name == "type") {
+                    requireType = attr.Value;
+                    continue;
+                }
+
                 AttributeType attributeType = AttributeType.Property;
                 AttributeFlags flags = 0;
 

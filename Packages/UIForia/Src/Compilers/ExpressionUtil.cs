@@ -20,27 +20,27 @@ namespace UIForia.Compilers {
         // used in expressions to output comments in compiled functions
         public static void CommentNewLineAfter(string comment) { }
 
-        public static bool IsConstant(Expression n) {
-            while (true) {
-                switch (n) {
-                    case DefaultExpression _:
-                    case ConstantExpression _:
-                        return true;
-
-                    case ConditionalExpression conditionalExpression:
-                        return IsConstant(conditionalExpression.Test) && IsConstant(conditionalExpression.IfTrue) && IsConstant(conditionalExpression.IfFalse);
-
-                    case UnaryExpression unary:
-                        n = unary.Operand;
-                        continue;
-
-                    case BinaryExpression binaryExpression:
-                        return IsConstant(binaryExpression.Left) && IsConstant(binaryExpression.Right);
-                }
-
-                return false;
-            }
-        }
+        // public static bool IsConstant(Expression n) {
+        //     while (true) {
+        //         switch (n) {
+        //             case DefaultExpression _:
+        //             case ConstantExpression _:
+        //                 return true;
+        //
+        //             case ConditionalExpression conditionalExpression:
+        //                 return IsConstant(conditionalExpression.Test) && IsConstant(conditionalExpression.IfTrue) && IsConstant(conditionalExpression.IfFalse);
+        //
+        //             case UnaryExpression unary:
+        //                 n = unary.Operand;
+        //                 continue;
+        //
+        //             case BinaryExpression binaryExpression:
+        //                 return IsConstant(binaryExpression.Left) && IsConstant(binaryExpression.Right);
+        //         }
+        //
+        //         return false;
+        //     }
+        // }
 
         internal struct ParameterConversion {
 
@@ -222,7 +222,6 @@ namespace UIForia.Compilers {
 
             if (context.Length > candidate.dependencies.Length) {
                 candidatePoints = 0;
-                conversions = null;
                 return false;
             }
 

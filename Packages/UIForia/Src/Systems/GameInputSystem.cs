@@ -82,8 +82,9 @@ namespace UIForia.Systems.Input {
         }
 
         private static Vector2 ConvertMousePosition(Vector2 position) {
-            Vector2 scaledPosition = position * Application.dpiScaleFactor;
-            return new Vector2(scaledPosition.x, Application.UiApplicationSize.height - scaledPosition.y);
+            Vector2 scaledPosition = position / Application.dpiScaleFactor;
+            float scaledHeight = Application.UiApplicationSize.height / Application.dpiScaleFactor;
+            return new Vector2(scaledPosition.x, scaledHeight - scaledPosition.y);
         }
     }
 }

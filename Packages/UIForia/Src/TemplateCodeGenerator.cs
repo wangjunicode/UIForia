@@ -81,7 +81,7 @@ namespace UIForia {
             builder.AppendLine($"{s_Indent12}Func<UIElement, TemplateScope, UIElement>[] templates = new Func<{nameof(UIElement)}, {nameof(TemplateScope)}, {nameof(UIElement)}>[{compiledTemplates.size}];");
 
             for (int i = 0; i < compiledTemplates.size; i++) {
-                builder.AppendLine($"{s_Indent12}templates[{i}] = Template_{compiledTemplates.array[i].guid.ToString()}; // {compiledTemplates.array[i].filePath}");
+                builder.AppendLine($"{s_Indent12}templates[{i}] = Template_{compiledTemplates.array[i].guid}; // {compiledTemplates.array[i].filePath}");
             }
 
             builder.AppendLine($"{s_Indent12}return templates;");
@@ -166,7 +166,8 @@ namespace UIForia {
             string styleFilePathArray = "";
 
             if (sheets.Length > 0) {
-                string streamingAssetPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
+                
+                string streamingAssetPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
 
                 if (Directory.Exists(streamingAssetPath)) {
                     Directory.Delete(streamingAssetPath, true);
@@ -181,7 +182,7 @@ namespace UIForia {
                         Directory.CreateDirectory(directory);
                     }
 
-                    styleFilePathArray += s_Indent12 + "@\"" + filepath + "\",\n";
+                    styleFilePathArray += s_Indent12 + "@\"" + sheets[i].path + "\",\n";
 
                     File.WriteAllText(filepath, sheets[i].source);
                 }
@@ -321,7 +322,7 @@ namespace UIForia {
                 string templateBody = compiledTemplate.templateFn.ToTemplateBodyFunction();
                 string template = TemplateConstants.TemplateSource;
                 template = template.Replace("::TEMPLATE_COMMENT::", compiledTemplate.templateMetaData.filePath);
-                template = template.Replace("::GUID::", compiledTemplate.guid.ToString());
+                template = template.Replace("::GUID::", compiledTemplate.guid);
                 template = template.Replace("::CODE::", templateBody);
                 template = template.Replace("::BINDINGS::", bindingCode);
                 template = template.Replace("::SLOTS::", slotCode);

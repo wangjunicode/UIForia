@@ -149,7 +149,7 @@ namespace UIForia.Compilers {
 
             CompiledTemplateData compiledTemplateData = new CompiledTemplateData(templateSettings);
 
-            compiledTemplateData.styleImporter.importResolutionPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
+            compiledTemplateData.styleImporter.importResolutionPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
 
             ITemplateLoader loader = (ITemplateLoader) Activator.CreateInstance(type);
             string[] files = loader.StyleFilePaths;
@@ -159,8 +159,6 @@ namespace UIForia.Compilers {
             LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
             Dictionary<string, StyleSheet> styleSheetMap = new Dictionary<string, StyleSheet>(128);
 
-            string streamingAssetPath = Path.Combine(UnityEngine.Application.dataPath, "StreamingAssets", "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
-
             for (int i = 0; i < files.Length; i++) {
                 StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i]);
                 styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
@@ -168,8 +166,9 @@ namespace UIForia.Compilers {
                 for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
                     styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
                 }
-
-                styleSheetMap.Add(sheet.path.Substring(streamingAssetPath.Length + 1), sheet);
+                
+                styleSheetMap.Add(sheet.path, sheet);
+  
             }
 
             compiledTemplateData.templates = loader.LoadTemplates();

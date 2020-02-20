@@ -28,6 +28,8 @@ namespace UIForia {
 
         public static readonly float originalDpiScaleFactor = Mathf.Max(1, Screen.dpi / 100f);
 
+        public float DPIScaleFactor => dpiScaleFactor;
+        
         public static SizeInt UiApplicationSize => UIApplicationSize;
         
         public static List<Application> Applications = new List<Application>();
@@ -168,20 +170,6 @@ namespace UIForia {
         public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
             if (templateData.TryGetTemplate<T>(out DynamicTemplate dynamicTemplate)) {
                 UIElement element = templateData.templates[dynamicTemplate.templateId].Invoke(null, new TemplateScope(this));
-                //
-                // view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Width, Height));
-                //
-                // views.Add(view);
-                //
-                // for (int i = 0; i < systems.Count; i++) {
-                //     systems[i].OnViewAdded(view);
-                // }
-                //     UIElement element = CreateElementFromPool(dynamicTemplate.typeId, null, 0, 0, dynamicTemplate.templateId);
-                //
-                //     HydrateTemplate(dynamicTemplate.templateId, element, new TemplateScope(this));
-                // todo -- need a binding node on dynamically created templates
-                // currently not working, compiler needs to change
-                // templateData.templates[dynamicTemplate.templateId]
 
                 UIView view = new UIView(this, name, element, matrix, size);
 
@@ -799,7 +787,12 @@ namespace UIForia {
                     }
 
                     onElementRegistered?.Invoke(current);
-                    current.OnCreate();
+                    try {
+                        current.OnCreate();
+                    } catch (Exception e){
+                        Debug.Log(e);
+                    }
+                    view.ElementRegistered(current);
                 }
 
                 UIElement[] children = current.children.array;

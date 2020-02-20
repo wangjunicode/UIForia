@@ -307,20 +307,21 @@ namespace UIForia.Systems {
 
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
 
+            // todo -- bug!
             queryResults.Sort((a, b) => {
-                int viewDepthComparison = a.View.Depth - b.View.Depth;
+                int viewDepthComparison = b.View.Depth - a.View.Depth;
                 if (viewDepthComparison != 0) return viewDepthComparison;
-                if (a.layoutBox.zIndex != b.layoutBox.zIndex) {
-                    return a.layoutBox.zIndex - b.layoutBox.zIndex;
+                if (b.layoutBox.zIndex != a.layoutBox.zIndex) {
+                    return b.layoutBox.zIndex - a.layoutBox.zIndex;
                 }
 
-                return a.layoutBox.traversalIndex - b.layoutBox.traversalIndex;
+                return b.layoutBox.traversalIndex - a.layoutBox.traversalIndex;
             });
 
             if (!IsDragging) {
                 LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
 
-                if (queryResults.Count > 0) {
+                if (queryResults.size > 0) {
                     /*
                      * Every following element must be a parent of the first.
                      * This makes no sense for drag events but a lot for every other.

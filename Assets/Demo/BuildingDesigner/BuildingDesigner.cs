@@ -67,11 +67,11 @@ namespace Demo {
         #region event handlers
 
         private void ConfirmDesign() {
-            TriggerEvent(new UIPanelEvent(UIPanel.Dock));
+            //TriggerEvent(new UIPanelEvent(UIPanel.Dock));
         }
         
         private void ExitBuildingDesigner() {
-            TriggerEvent(new UIPanelEvent(UIPanel.Dock));
+            //TriggerEvent(new UIPanelEvent(UIPanel.Dock));
         }
         
         private void BasicStyleChanged(int style) {
@@ -101,7 +101,7 @@ namespace Demo {
 
         public void SaveAndExit() {
             SaveBuilding();
-            TriggerEvent(new UIPanelEvent(UIPanel.Dock));
+            //TriggerEvent(new UIPanelEvent(UIPanel.Dock));
         }
 
         public RepeatableList<Brush> GetBrushes() {

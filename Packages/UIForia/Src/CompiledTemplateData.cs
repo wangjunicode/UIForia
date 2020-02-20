@@ -7,7 +7,6 @@ using UIForia.Elements;
 using UIForia.Parsing;
 using UIForia.Templates;
 using UIForia.Util;
-using UnityEditor;
 
 namespace UIForia {
 
@@ -70,7 +69,7 @@ namespace UIForia {
         public CompiledTemplate CreateTemplate(string filePath, string templateName) {
             CompiledTemplate compiledTemplate = new CompiledTemplate();
             compiledTemplate.filePath = filePath;
-            compiledTemplate.guid = GUID.Generate();
+            compiledTemplate.guid = Guid.NewGuid().ToString().Replace('-', '_');
             compiledTemplate.templateId = compiledTemplates.size;
             compiledTemplates.Add(compiledTemplate);
             compiledTemplate.templateMetaData = new TemplateMetaData(compiledTemplate.templateId, filePath, null, null);
@@ -84,7 +83,7 @@ namespace UIForia {
             compiledSlot.templateName = templateName;
             compiledSlot.slotName = slotName;
             compiledSlot.slotType = slotType;
-            compiledSlot.guid = GUID.Generate();
+            compiledSlot.guid = Guid.NewGuid().ToString().Replace('-', '_');
             compiledSlot.slotId = compiledSlots.size;
             compiledSlots.Add(compiledSlot);
             return compiledSlot;
@@ -97,7 +96,7 @@ namespace UIForia {
             binding.bindingType = bindingType;
             binding.elementTag = templateNode.originalString;
             binding.bindingId = compiledBindings.size;
-            binding.guid = GUID.Generate().ToString();
+            binding.guid = Guid.NewGuid().ToString().Replace('-', '_');
             binding.templateName = root.templateName;
             compiledBindings.Add(binding);
             return binding;

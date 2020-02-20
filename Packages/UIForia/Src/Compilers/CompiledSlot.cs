@@ -3,7 +3,6 @@ using System.Linq.Expressions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
-using UnityEditor;
 
 namespace UIForia.Compilers {
 
@@ -12,7 +11,7 @@ namespace UIForia.Compilers {
         public string filePath;
         public int slotId;
         public int overrideDepth;
-        public GUID guid;
+        public string guid;
         public string slotName;
         public SlotType slotType;
         public LambdaExpression templateFn;

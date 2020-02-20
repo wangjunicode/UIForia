@@ -29,11 +29,9 @@ namespace UIForia {
         public static readonly float originalDpiScaleFactor = Mathf.Max(1, Screen.dpi / 100f);
 
         public static SizeInt UiApplicationSize => UIApplicationSize;
-
-#if UNITY_EDITOR
+        
         public static List<Application> Applications = new List<Application>();
-#endif
-
+        
         internal Stopwatch layoutTimer = new Stopwatch();
         internal Stopwatch renderTimer = new Stopwatch();
         internal Stopwatch bindingTimer = new Stopwatch();
@@ -100,8 +98,8 @@ namespace UIForia {
             this.id = templateSettings.applicationName;
             this.resourceManager = resourceManager ?? new ResourceManager();
 
-#if UNITY_EDITOR
             Applications.Add(this);
+#if UNITY_EDITOR
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnEditorReload;
 #endif
         }
@@ -302,10 +300,8 @@ namespace UIForia {
         }
 
         public void Destroy() {
-#if UNITY_EDITOR
             Applications.Remove(this);
             templateData?.Destroy();
-#endif
 
             foreach (ISystem system in systems) {
                 system.OnDestroy();
@@ -681,6 +677,7 @@ namespace UIForia {
         }
 
         public static void RefreshAll() {
+
             for (int i = 0; i < Applications.Count; i++) {
                 Applications[i].Refresh();
             }

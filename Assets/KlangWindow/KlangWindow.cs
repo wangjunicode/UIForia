@@ -191,11 +191,11 @@ namespace UI {
             return null;
         }
 
-        public override void HandleUIEvent(UIEvent evt) {
-            if (evt is SideBarActionEvent sideBarActionEvent) {
-                SelectSidebarItem(evt.origin);
-            }
-        }
+        // public override void HandleUIEvent(UIEvent evt) {
+        //     if (evt is SideBarActionEvent sideBarActionEvent) {
+        //         SelectSidebarItem(evt.origin);
+        //     }
+        // }
 
         public void SelectSidebarItem(UIElement element) {
             AnimationOptions options = new AnimationOptions();

@@ -308,13 +308,13 @@ namespace UIForia.Systems {
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
 
             queryResults.Sort((a, b) => {
-                int viewDepthComparison = b.View.Depth - a.View.Depth;
+                int viewDepthComparison = a.View.Depth - b.View.Depth;
                 if (viewDepthComparison != 0) return viewDepthComparison;
-                if (b.layoutBox.zIndex != a.layoutBox.zIndex) {
-                    return b.layoutBox.zIndex - a.layoutBox.zIndex;
+                if (a.layoutBox.zIndex != b.layoutBox.zIndex) {
+                    return a.layoutBox.zIndex - b.layoutBox.zIndex;
                 }
 
-                return b.layoutBox.traversalIndex - a.layoutBox.traversalIndex;
+                return a.layoutBox.traversalIndex - b.layoutBox.traversalIndex;
             });
 
             if (!IsDragging) {

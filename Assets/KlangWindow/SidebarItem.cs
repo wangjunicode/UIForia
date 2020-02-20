@@ -16,7 +16,7 @@ namespace UI {
 
         [OnMouseClick]
         public void OnClick() {
-            TriggerEvent(new SideBarActionEvent());
+          //  TriggerEvent(new SideBarActionEvent());
         }
     }
 

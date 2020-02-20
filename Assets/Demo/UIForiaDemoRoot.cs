@@ -8,20 +8,20 @@ namespace Demo {
 
         public UIPanel currentPanel = UIPanel.Dock;
 
-        public override void HandleUIEvent(UIEvent evt) {
-            switch (evt) {
-                case UIPanelEvent dockEvent:
-                    currentPanel = dockEvent.Panel;
-                    break;
-                case UIWindowEvent windowEvent:
-                    switch (windowEvent.Window) {
-                        case UIWindow.Chat:
-                            Chat chat = FindFirstByType<Chat>();
-                            chat.SetEnabled(!chat.isEnabled); 
-                            break;
-                    }
-                    break;
-            }
-        }
+        // public override void HandleUIEvent(UIEvent evt) {
+        //     switch (evt) {
+        //         case UIPanelEvent dockEvent:
+        //             currentPanel = dockEvent.Panel;
+        //             break;
+        //         case UIWindowEvent windowEvent:
+        //             switch (windowEvent.Window) {
+        //                 case UIWindow.Chat:
+        //                     Chat chat = FindFirstByType<Chat>();
+        //                     chat.SetEnabled(!chat.isEnabled); 
+        //                     break;
+        //             }
+        //             break;
+        //     }
+        // }
     }
 }

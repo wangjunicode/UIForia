@@ -44,11 +44,11 @@ namespace Demo {
         }
 
         private void OpenBuildMenu() {
-            TriggerEvent(new UIPanelEvent(UIPanel.Building));
+            //TriggerEvent(new UIPanelEvent(UIPanel.Building));
         }
 
         private void OpenChat() {
-            TriggerEvent(new UIWindowEvent(UIWindow.Chat));
+           // TriggerEvent(new UIWindowEvent(UIWindow.Chat));
         }
 
         public void EnterMode(MenuItemData item) {

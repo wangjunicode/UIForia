@@ -42,12 +42,12 @@ namespace Documentation {
             Autocomplete(default);
         }
 
-        public override void HandleUIEvent(UIEvent evt) {
-            if (evt is SubmitEvent && autocompleteList.Count > 0) {
-                rwValue = autocompleteList[0];
-                evt.StopPropagation();
-            }
-        }
+        // public override void HandleUIEvent(UIEvent evt) {
+        //     if (evt is SubmitEvent && autocompleteList.Count > 0) {
+        //         rwValue = autocompleteList[0];
+        //         evt.StopPropagation();
+        //     }
+        // }
 
         public void Autocomplete(KeyboardInputEvent evt) {
             autocompleteList.Clear();

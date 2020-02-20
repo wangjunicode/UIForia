@@ -9,7 +9,6 @@ using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Parsing;
 using UIForia.Util;
-using UnityEditor;
 
 namespace UIForia {
 
@@ -72,7 +71,7 @@ namespace UIForia {
             }
 
             File.WriteAllText(initPath, template);
-            AssetDatabase.Refresh();
+         
         }
 
         private static string GenerateTemplateLoadCode(CompiledTemplateData compiledTemplateData) {

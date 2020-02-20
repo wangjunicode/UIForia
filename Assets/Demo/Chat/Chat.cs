@@ -20,19 +20,19 @@ namespace Demo {
             CreateDummyData();
         }
 
-        public override void HandleUIEvent(UIEvent evt) {
-            if (evt is SubmitEvent) {
-                messages.Add(new ChatMessage() {
-                    icon = "icon_2",
-                    date = "09/26/2019",
-                    text = message,
-                    sender = "You"
-                });
-
-                message = "";
-                application.RegisterAfterUpdateTask(new ScrollTask(FindById<ScrollView>("scrollview"), 1));
-            }
-        }
+        // public override void HandleUIEvent(UIEvent evt) {
+        //     if (evt is SubmitEvent) {
+        //         messages.Add(new ChatMessage() {
+        //             icon = "icon_2",
+        //             date = "09/26/2019",
+        //             text = message,
+        //             sender = "You"
+        //         });
+        //
+        //         message = "";
+        //         application.RegisterAfterUpdateTask(new ScrollTask(FindById<ScrollView>("scrollview"), 1));
+        //     }
+        // }
 
         private void CreateDummyData() {
             messages = new RepeatableList<ChatMessage>() {

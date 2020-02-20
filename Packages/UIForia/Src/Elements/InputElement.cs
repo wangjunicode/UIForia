@@ -90,7 +90,8 @@ namespace UIForia.Elements {
                 selectionRange = new SelectionRange(selectionRange.cursorIndex + diff);
             }
 
-            if ((value == null && newValue != null) || !value.Equals(newValue)) {
+            // todo -- fix this boxing!
+            if (!Equals(value, newValue)) {
                 value = newValue;
                 // onValueChanged?.Invoke(value);
             }

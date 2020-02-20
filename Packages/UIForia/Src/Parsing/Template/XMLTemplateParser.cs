@@ -279,7 +279,7 @@ namespace UIForia.Parsing {
             processedType = TypeProcessor.ResolveTagName(tagName, namespacePath, templateRoot.templateShell.referencedNamespaces);
 
             if (processedType == null) {
-                throw ParseException.UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, namespacePath == null ? tagName : namespacePath + ":" + tagName);
+                throw ParseException.UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, namespacePath + ":" + tagName);
             }
 
             processedType.ValidateAttributes(attributes);

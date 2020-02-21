@@ -7,13 +7,14 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Extensions;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using Debug = UnityEngine.Debug;
 
 namespace UIForia.Parsing {
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    public class GenericElementTypeResolvedByAttribute : Attribute {
+    public sealed class GenericElementTypeResolvedByAttribute : Attribute {
 
         public readonly string propertyName;
 
@@ -24,7 +25,7 @@ namespace UIForia.Parsing {
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class ResolveGenericTemplateArguments : Attribute { }
+    public sealed class ResolveGenericTemplateArguments : Attribute { }
 
     public static class TypeProcessor {
 
@@ -82,7 +83,6 @@ namespace UIForia.Parsing {
 
                         if (!filteredOut && currentType.IsClass && currentType.Name[0] != '<' && currentType.IsGenericTypeDefinition) {
                             if (currentType.IsSubclassOf(typeof(UIElement))) {
-                            
                                 Attribute[] attrs = Attribute.GetCustomAttributes(currentType, false);
                                 string tagName = GetTemplateAttribute(currentType, attrs, out TemplateAttribute templateAttr);
 
@@ -224,6 +224,15 @@ namespace UIForia.Parsing {
             return null;
         }
 
+        public static Type ResolveTypeExpression(Type invokingType, IList<string> namespaces, string typeExpression) {
+            typeExpression = typeExpression.Replace("[", "<").Replace("]", ">");
+            if (ExpressionParser.TryParseTypeName(typeExpression, out TypeLookup typeLookup)) {
+                return ResolveType(typeLookup, (IReadOnlyList<string>) namespaces, invokingType);
+            }
+
+            return null;
+        }
+
         private static LightList<Type> ResolveGenericTypes(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null, Type scopeType = null) {
             int count = typeLookup.generics.size;
 
@@ -239,9 +248,8 @@ namespace UIForia.Parsing {
                     concreteArgs = scopeType.GetGenericArguments();
                 }
             }
-            
+
             for (int i = 0; i < count; i++) {
-                
                 if (generics != null) {
                     for (int j = 0; j < generics.Length; j++) {
                         if (typeLookup.generics[i].typeName == generics[j].Name) {
@@ -250,7 +258,7 @@ namespace UIForia.Parsing {
                         }
                     }
                 }
-                
+
                 array[i] = array[i] ?? ResolveType(typeLookup.generics[i], namespaces);
 
                 if (array[i] == null) {
@@ -561,6 +569,16 @@ namespace UIForia.Parsing {
             }
 
             return retn;
+        }
+
+        private static readonly List<ProcessedType> dynamicTypes = new List<ProcessedType>();
+
+        public static void AddDynamicElementType(ProcessedType processedType) {
+            processedType.id = typeMap.Count;
+            typeMap[processedType.rawType] = processedType;
+            dynamicTypes.Add(processedType);
+            // templateTypes.Add(processedType);
+            // todo -- maybe add to namespace map?
         }
 
     }

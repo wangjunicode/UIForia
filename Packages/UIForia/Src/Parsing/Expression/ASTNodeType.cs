@@ -22,7 +22,15 @@ namespace UIForia.Parsing.Expressions {
         Paren,
         GenericTypePath,
 
-        LambdaExpression
+        LambdaExpression,
+
+        UnaryPreIncrement,
+
+        UnaryPreDecrement,
+
+        UnaryPostIncrement,
+
+        UnaryPostDecrement
 
     }
 

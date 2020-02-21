@@ -3,7 +3,7 @@ using UIForia.UIInput;
 
 namespace UIForia.Attributes {
     [AttributeUsage(AttributeTargets.Method)]
-    public class OnMouseMoveAttribute : MouseEventHandlerAttribute {
+    public sealed class OnMouseMoveAttribute : MouseEventHandlerAttribute {
 
         public OnMouseMoveAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
             : base(modifiers, InputEventType.MouseMove, phase) { }

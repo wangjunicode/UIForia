@@ -3,7 +3,7 @@ using UIForia.UIInput;
 
 namespace UIForia.Attributes {
     [AttributeUsage(AttributeTargets.Method)]
-    public class OnMouseUpAttribute : MouseEventHandlerAttribute {
+    public sealed class OnMouseUpAttribute : MouseEventHandlerAttribute {
 
         public OnMouseUpAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
             : base(modifiers, InputEventType.MouseUp, phase) { }

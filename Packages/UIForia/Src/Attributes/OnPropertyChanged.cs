@@ -3,7 +3,7 @@ using System;
 namespace UIForia.Attributes {
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class OnPropertyChanged : Attribute {
+    public sealed class OnPropertyChanged : Attribute {
 
         public readonly string propertyName;
 

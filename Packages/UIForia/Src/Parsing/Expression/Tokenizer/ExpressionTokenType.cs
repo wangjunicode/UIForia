@@ -57,16 +57,22 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
         LessThanEqualTo,
         QuestionMark,
         Colon, 
+     
+        Assign,
+        AddAssign,
+        SubtractAssign,
+        MultiplyAssign,
+        DivideAssign,
+        ModAssign,
+        AndAssign,
+        OrAssign,
+        XorAssign,
+        LeftShiftAssign,
+        RightShiftAssign,
         
-        // todo -- use these to make numeric parsing better
-        Number_Float,
-        Number_Long,
-        Number_ULong,
-        Number_Decimal,
-        Number_Double,
-        Number_Byte,
-        Number_UInt,
-
+        Increment,
+        Decrement,
+        
         LambdaArrow,
 
         Coalesce,

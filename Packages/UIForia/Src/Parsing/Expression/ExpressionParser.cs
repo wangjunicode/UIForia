@@ -6,6 +6,7 @@ using UIForia.Exceptions;
 using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Parsing.Expressions.Tokenizer;
 using UIForia.Util;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Parsing.Expressions {
 
@@ -85,6 +86,61 @@ namespace UIForia.Parsing.Expressions {
             tokenStream.Advance();
 
             switch (tokenStream.Previous.expressionTokenType) {
+                case ExpressionTokenType.Assign:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Assign);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
+                case ExpressionTokenType.AddAssign:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Assign | OperatorType.Plus);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
+                case ExpressionTokenType.SubtractAssign:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Assign | OperatorType.Minus);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
+                case ExpressionTokenType.MultiplyAssign:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Assign | OperatorType.Times);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
+                case ExpressionTokenType.DivideAssign:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Assign | OperatorType.Divide);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
+                case ExpressionTokenType.ModAssign:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Assign | OperatorType.Mod);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
+                case ExpressionTokenType.AndAssign:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Assign | OperatorType.And);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
+                case ExpressionTokenType.OrAssign:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Assign | OperatorType.Or);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
+                case ExpressionTokenType.XorAssign:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Assign | OperatorType.BinaryXor);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
+                case ExpressionTokenType.LeftShiftAssign:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Assign | OperatorType.ShiftLeft);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
+                case ExpressionTokenType.RightShiftAssign:
+                    operatorNode = ASTNode.OperatorNode(OperatorType.Assign | OperatorType.ShiftRight);
+                    operatorNode.WithLocation(tokenStream.Previous);
+                    return true;
+
                 case ExpressionTokenType.Plus:
                     operatorNode = ASTNode.OperatorNode(OperatorType.Plus);
                     operatorNode.WithLocation(tokenStream.Previous);
@@ -237,7 +293,18 @@ namespace UIForia.Parsing.Expressions {
             while (tokenStream.HasMoreTokens) {
                 ASTNode operand = default;
                 if (ParseExpression(ref operand)) {
-                    expressionStack.Push(operand);
+                    if (tokenStream.Current == ExpressionTokenType.Increment) {
+                        tokenStream.Advance();
+                        expressionStack.Push(ASTNode.UnaryExpressionNode(ASTNodeType.UnaryPostIncrement, operand));
+                    }
+                    else if (tokenStream.Current == ExpressionTokenType.Decrement) {
+                        tokenStream.Advance();
+                        expressionStack.Push(ASTNode.UnaryExpressionNode(ASTNodeType.UnaryPostDecrement, operand));
+                    }
+                    else {
+                        expressionStack.Push(operand);
+                    }
+
                     continue;
                 }
 
@@ -488,6 +555,30 @@ namespace UIForia.Parsing.Expressions {
 
             tokenStream.Save();
 
+            if (tokenStream.Current == ExpressionTokenType.Increment) {
+                tokenStream.Advance();
+                ASTNode expr = null;
+                if (!ParseExpression(ref expr)) {
+                    tokenStream.Restore();
+                    return false;
+                }
+
+                retn = ASTNode.UnaryExpressionNode(ASTNodeType.UnaryPreIncrement, expr);
+                return true;
+            }
+
+            if (tokenStream.Current == ExpressionTokenType.Decrement) {
+                tokenStream.Advance();
+                ASTNode expr = null;
+                if (!ParseExpression(ref expr)) {
+                    tokenStream.Restore();
+                    return false;
+                }
+
+                retn = ASTNode.UnaryExpressionNode(ASTNodeType.UnaryPreDecrement, expr);
+                return true;
+            }
+
             if (tokenStream.Current == ExpressionTokenType.Not) {
                 tokenStream.Advance();
                 ASTNode expr = null;
@@ -566,7 +657,7 @@ namespace UIForia.Parsing.Expressions {
                     }
 
                     arg.generics = null;
-                    
+
                     continue;
                 }
 
@@ -675,7 +766,7 @@ namespace UIForia.Parsing.Expressions {
             list.Release();
             return valid;
         }
-        
+
         private bool ParseTypeOfExpression(ref ASTNode retn) {
             if (tokenStream.Current != ExpressionTokenType.TypeOf || tokenStream.Next != ExpressionTokenType.ParenOpen) {
                 return false;
@@ -816,25 +907,22 @@ namespace UIForia.Parsing.Expressions {
             ASTNode access = null;
 
             if (ParseParenAccessExpression(ref access)) {
-                
                 ParenNode parenNode = (ParenNode) retn;
-                parenNode.accessExpression = (MemberAccessExpressionNode)access;
-
+                parenNode.accessExpression = (MemberAccessExpressionNode) access;
             }
-            
+
             subParser.Release();
             return true;
         }
 
         private bool ParseParenAccessExpression(ref ASTNode retn) {
-            
             // string identifier = tokenStream.Current.value;
             // tokenStream.Save();
             // tokenStream.Advance();
-            
+
             LightList<ASTNode> parts = LightList<ASTNode>.Get();
             tokenStream.Save();
-            
+
             while (tokenStream.HasMoreTokens) {
                 if (tokenStream.Current == ExpressionTokenType.Dot || tokenStream.Current == ExpressionTokenType.Elvis) {
                     if (tokenStream.Next != ExpressionTokenType.Identifier) {

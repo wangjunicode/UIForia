@@ -6,7 +6,7 @@ namespace UIForia {
     public class EffectParameter : System.Attribute { }
 
     [AttributeUsage(AttributeTargets.Class)]
-    public class CustomPainterAttribute : Attribute {
+    public sealed class CustomPainterAttribute : Attribute {
 
         public readonly string name;
 

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Text;
 using Mono.Linq.Expressions;
 using UIForia.Compilers;
@@ -59,7 +59,7 @@ namespace UIForia {
             template = template.Replace("::TEMPLATE_META_CODE::", GenerateTemplateMetaDataCode(compiledTemplateData));
             template = template.Replace("::SLOT_CODE::", GenerateSlotCode(compiledTemplateData));
             template = template.Replace("::BINDING_CODE::", GenerateBindingCode(compiledTemplateData));
-            template = template.Replace("::ELEMENT_CONSTRUCTORS::", GenerateElementConstructors(compiledTemplateData));
+            template = template.Replace("::ELEMENT_CONSTRUCTORS::", GenerateElementConstructors(compiledTemplateData, out List<ProcessedType> dynamicElementTypes));
             template = template.Replace("::TAGNAME_ID_MAP::", GenerateTagNameIdMap(compiledTemplateData));
             template = template.Replace("::DYNAMIC_TEMPLATES::", GenerateDynamicTemplates(compiledTemplateData));
 
@@ -70,8 +70,58 @@ namespace UIForia {
                 File.Delete(initPath);
             }
 
+            StringBuilder fieldBuilder = new StringBuilder(128);
+            
+            for (int i = 0; i < dynamicElementTypes.Count; i++) {
+
+                ProcessedType processedType = dynamicElementTypes[i];
+                string output = TemplateConstants.DynamicElement;
+
+                output = output.Replace("::CLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType));
+                output = output.Replace("::BASECLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType.BaseType));
+
+                FieldInfo[] fields = processedType.rawType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+                for (int f = 0; f < fields.Length; f++) {
+                    fieldBuilder.Append(s_Indent12);
+                    fieldBuilder.Append("public ");
+                    fieldBuilder.Append(TypeNameGenerator.GetTypeName(fields[f].FieldType));
+                    fieldBuilder.Append(" ");
+                    fieldBuilder.Append(fields[f].Name);
+                    fieldBuilder.AppendLine(";");
+                }
+
+                output = output.Replace("::FIELDS::", fieldBuilder.ToString());
+                fieldBuilder.Clear();
+
+                CompiledTemplate compiled = FindCompiledTemplate(compiledTemplateData, processedType);
+                
+                string file = Path.Combine(path, compiled.filePath);
+
+                file = Path.ChangeExtension(file, "");
+                file = file.Substring(0, file.Length - 1);
+                file += "_class_" + processedType.templateAttr.templateId;
+                
+                file += ".cs";
+
+                Directory.CreateDirectory(Path.GetDirectoryName(file));
+
+                File.WriteAllText(file, output);
+
+            }
+            
             File.WriteAllText(initPath, template);
          
+        }
+
+        private static CompiledTemplate FindCompiledTemplate(CompiledTemplateData compiledTemplateData, ProcessedType processedType) {
+            for (int i = 0; i < compiledTemplateData.compiledTemplates.size; i++) {
+                if (compiledTemplateData.compiledTemplates.array[i].elementType == processedType) {
+                    return compiledTemplateData.compiledTemplates.array[i];
+                }
+            }
+
+            return null;
         }
 
         private static string GenerateTemplateLoadCode(CompiledTemplateData compiledTemplateData) {
@@ -191,12 +241,19 @@ namespace UIForia {
             return styleFilePathArray;
         }
 
-        private static string GenerateElementConstructors(CompiledTemplateData compiledTemplateData) {
+        private static string GenerateElementConstructors(CompiledTemplateData compiledTemplateData, out List<ProcessedType> dynamicElementTypes) {
+            
             StringBuilder builder = new StringBuilder(2048);
+        
+            dynamicElementTypes = new List<ProcessedType>();
 
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
                 if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
                     continue;
+                }
+
+                if (kvp.Value.isDynamic) {
+                   dynamicElementTypes.Add(kvp.Value); 
                 }
 
                 builder.Append(s_Indent16);

@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using UIForia.Elements;
+using UIForia.Parsing;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -1175,9 +1176,14 @@ namespace UIForia.Util {
 
         private static ClassBuilder classBuilder;
 
-        public static Type CreateType(string id, Type baseType, IList<FieldDefinition> fields) {
+        public static Type CreateType(string id, Type baseType, IList<FieldDefinition> fields, IList<string> namespaces) {
             if (classBuilder == null) classBuilder = new ClassBuilder();
-            return classBuilder.CreateRuntimeType(id, baseType, fields);
+            return classBuilder.CreateRuntimeType(id, baseType, fields, namespaces);
+        }
+
+        public static Type CreateGenericRuntimeType(string id, Type baseType, GenericTypeDefinition[] generics, IList<FieldDefinition> fields, IList<string> namespaces) {
+            if (classBuilder == null) classBuilder = new ClassBuilder();
+            return classBuilder.CreateGenericRuntimeType(id, baseType, generics, fields, namespaces);
         }
 
         public static bool TryCreateInstance<T>(string id, out T instance) {
@@ -1192,12 +1198,20 @@ namespace UIForia.Util {
         public struct FieldDefinition {
 
             public readonly string fieldName;
-            public readonly Type fieldType;
+            public readonly string fieldType;
 
-            public FieldDefinition(Type fieldType, string fieldName) {
+            public FieldDefinition(string fieldType, string fieldName) {
                 this.fieldType = fieldType;
                 this.fieldName = fieldName;
             }
+
+        }
+
+        public struct GenericTypeDefinition {
+
+            public string name;
+            public GenericParameterAttributes restrictions;
+            public Type[] interfaceTypes;
 
         }
 
@@ -1209,7 +1223,7 @@ namespace UIForia.Util {
             private readonly Dictionary<string, Type> typeMap;
 
             public ClassBuilder() {
-                this.assemblyName = new AssemblyName("ReflectionUtil.Dynamic");
+                this.assemblyName = new AssemblyName("UIForia.Generated");
                 this.assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
                 this.moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
                 this.typeMap = new Dictionary<string, Type>();
@@ -1219,13 +1233,65 @@ namespace UIForia.Util {
                 typeMap.Clear();
             }
 
-            public Type CreateRuntimeType(string id, Type baseType, IList<FieldDefinition> fields) {
+
+            public Type CreateGenericRuntimeType(string id, Type baseType, GenericTypeDefinition[] generics, IList<FieldDefinition> fieldDefinitions, IList<string> namespaces) {
                 if (typeMap.ContainsKey(id)) {
                     return null; //todo -- exception
                 }
 
                 TypeBuilder typeBuilder = moduleBuilder.DefineType(
-                    assemblyName.FullName + "_" + id,
+                    id,
+                    TypeAttributes.Public |
+                    TypeAttributes.Class |
+                    TypeAttributes.AutoClass |
+                    TypeAttributes.AnsiClass |
+                    TypeAttributes.BeforeFieldInit |
+                    TypeAttributes.AutoLayout,
+                    baseType
+                );
+
+                string[] typeNames = new string[generics.Length];
+
+                for (int i = 0; i < generics.Length; i++) {
+                    typeNames[i] = generics[i].name;
+                }
+
+                GenericTypeParameterBuilder[] typeParams = typeBuilder.DefineGenericParameters(typeNames);
+
+                for (int i = 0; i < fieldDefinitions.Count; i++) {
+                    string typeName = fieldDefinitions[i].fieldType;
+
+                    Type fieldType = ResolveFieldTypeFromGenerics(typeName, typeParams);
+
+                    if (fieldType == null) {
+                        fieldType = TypeProcessor.ResolveTypeExpression(null, namespaces, typeName);
+                    }
+
+                    typeBuilder.DefineField(fieldDefinitions[i].fieldName, fieldType, FieldAttributes.Public);
+                }
+
+                Type retn = typeBuilder.CreateType();
+                typeMap[id] = retn;
+                return retn;
+            }
+
+            private static Type ResolveFieldTypeFromGenerics(string fieldType, GenericTypeParameterBuilder[] typeParams) {
+                for (int i = 0; i < typeParams.Length; i++) {
+                    if (fieldType == typeParams[i].Name) {
+                        return typeParams[i];
+                    }
+                }
+
+                return null;
+            }
+
+            public Type CreateRuntimeType(string id, Type baseType, IList<FieldDefinition> fields, IList<string> namespaces) {
+                if (typeMap.ContainsKey(id)) {
+                    return null; //todo -- exception
+                }
+
+                TypeBuilder typeBuilder = moduleBuilder.DefineType(
+                    id,
                     TypeAttributes.Public |
                     TypeAttributes.Class |
                     TypeAttributes.AutoClass |
@@ -1238,13 +1304,14 @@ namespace UIForia.Util {
                 typeBuilder.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
 
                 // todo -- ensure no duplicate field names
-                for (int i = 0; i < fields.Count; i++) {
-                    if (IsField(typeof(UIElement), fields[i].fieldName)) {
-                        throw new Exception($"Cannot create field {fields[i].fieldName} because it is already defined on nameof(UIElement)");
-                    }
+                if (fields != null) {
+                    for (int i = 0; i < fields.Count; i++) {
+                        Type fieldType = TypeProcessor.ResolveTypeExpression(null, namespaces, fields[i].fieldName);
 
-                    typeBuilder.DefineField(fields[i].fieldName, fields[i].fieldType, FieldAttributes.Public);
+                        typeBuilder.DefineField(fields[i].fieldName, fieldType, FieldAttributes.Public);
+                    }
                 }
+
 
                 Type retn = typeBuilder.CreateType();
                 typeMap[id] = retn;

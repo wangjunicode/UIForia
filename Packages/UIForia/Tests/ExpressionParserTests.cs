@@ -989,6 +989,16 @@ public class ExpressionParserTests {
     }
 
     [Test]
+    public void Parse_Assignment() {
+        ASTNode root = ExpressionParser.Parse("thing.x = 5");
+    }
+    
+     [Test]
+    public void Parse_PlusEqual() {
+        ASTNode root = ExpressionParser.Parse("thing.x += 5");
+    }
+    
+    [Test]
     public void Parse_MethodChainExpression() {
         ASTNode root = ExpressionParser.Parse(("Method()().Property"));
 

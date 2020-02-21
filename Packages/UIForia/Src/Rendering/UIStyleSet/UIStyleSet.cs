@@ -5,6 +5,7 @@ using Systems.SelectorSystem;
 using SVGX;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Systems;
 using UIForia.Text;

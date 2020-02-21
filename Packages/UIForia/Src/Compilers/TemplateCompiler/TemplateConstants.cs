@@ -77,6 +77,20 @@ namespace UIForia.Generated {
 
                 ";
 
+        public static string DynamicElement = @"#pragma warning disable 0164
+    
+namespace UIForia.Generated {
+
+    public class ::CLASS_NAME:: : ::BASECLASS_NAME:: {
+
+::FIELDS::
+    }
+
+}
+
+#pragma warning restore 0164
+";
+
     }
 
 }

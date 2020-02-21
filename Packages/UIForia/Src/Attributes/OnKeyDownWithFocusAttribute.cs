@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UIForia.Attributes {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class OnKeyDownWithFocusAttribute : KeyboardInputBindingAttribute {
+    public sealed class OnKeyDownWithFocusAttribute : KeyboardInputBindingAttribute {
 
         public OnKeyDownWithFocusAttribute(KeyCode key = KeyCodeUtil.AnyKey, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase keyEventPhase = EventPhase.Bubble)
             : base(key, '\0', modifiers, InputEventType.KeyDown, true, keyEventPhase) {

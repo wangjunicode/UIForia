@@ -191,13 +191,15 @@ namespace UIForia.Elements {
             return element;
         }
 
-        public void internal__dontcallmeplease_SetEnabledIfBinding(bool enabled) {
+        public bool internal__dontcallmeplease_SetEnabledIfBinding(bool enabled) {
             if (enabled && isSelfDisabled) {
                 application.DoEnableElement(this, false);
             }
             else if (!enabled && isSelfEnabled) {
                 application.DoDisableElement(this);
             }
+
+            return false;
         }
 
         public void SetEnabled(bool enabled) {

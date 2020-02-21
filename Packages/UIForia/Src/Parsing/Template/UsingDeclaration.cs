@@ -1,9 +1,17 @@
 namespace UIForia.Parsing {
 
+    public enum UsingDeclarationType {
+
+        Namespace,
+        Element
+
+    }
+    
     public struct UsingDeclaration {
 
-        public string namespaceName;
-        // todo -- support aliases a la using xxx as y;
+        public string name;
+        public string pathName;
+        public UsingDeclarationType type;
 
     }
 

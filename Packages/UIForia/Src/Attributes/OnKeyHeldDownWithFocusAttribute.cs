@@ -6,7 +6,7 @@ using UnityEngine;
 namespace UIForia.Attributes {
 
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class OnKeyHeldDownWithFocusAttribute : KeyboardInputBindingAttribute {
+    public sealed class OnKeyHeldDownWithFocusAttribute : KeyboardInputBindingAttribute {
 
         public OnKeyHeldDownWithFocusAttribute(KeyCode key = KeyCodeUtil.AnyKey, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase keyEventPhase = EventPhase.Bubble)
             : base(key, '\0', modifiers, InputEventType.KeyHeldDown, true, keyEventPhase) { }

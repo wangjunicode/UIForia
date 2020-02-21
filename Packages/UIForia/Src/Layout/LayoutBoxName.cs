@@ -3,7 +3,7 @@ using System;
 namespace UIForia.Layout {
 
     [AttributeUsage(AttributeTargets.Class)]
-    public class LayoutBoxName : Attribute {
+    public sealed class LayoutBoxName : Attribute {
 
         public readonly string name;
 

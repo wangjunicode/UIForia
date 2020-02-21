@@ -1926,8 +1926,20 @@ namespace UIForia.Compilers {
                 case ASTNodeType.UnaryNot:
                     return VisitUnaryNot((UnaryExpressionNode) node);
 
+                case ASTNodeType.UnaryPreIncrement:
+                    return VisitUnaryPreIncrement((UnaryExpressionNode) node);
+
+                case ASTNodeType.UnaryPreDecrement:
+                    return VisitUnaryPreDecrement((UnaryExpressionNode) node);
+
+                case ASTNodeType.UnaryPostIncrement:
+                    return VisitUnaryPostIncrement((UnaryExpressionNode) node);
+
+                case ASTNodeType.UnaryPostDecrement:
+                    return VisitUnaryPostDecrement((UnaryExpressionNode) node);
+
                 case ASTNodeType.UnaryMinus:
-                    return VisitUnaryNot((UnaryExpressionNode) node);
+                    return VisitUnaryMinus((UnaryExpressionNode) node);
 
                 case ASTNodeType.UnaryBitwiseNot:
                     return VisitBitwiseNot((UnaryExpressionNode) node);
@@ -2009,11 +2021,11 @@ namespace UIForia.Compilers {
                         return wrapped;
                     }
 
-                    if(targetType == typeof(string)){
+                    if (targetType == typeof(string)) {
                         // null check?
-                        return ExpressionFactory.CallInstanceUnchecked(retn, retn.Type.GetMethod("ToString", Type.EmptyTypes));    
+                        return ExpressionFactory.CallInstanceUnchecked(retn, retn.Type.GetMethod("ToString", Type.EmptyTypes));
                     }
-                    
+
                     throw CompileException.InvalidTargetType(targetType, retn.Type);
                 }
             }
@@ -2095,6 +2107,39 @@ namespace UIForia.Compilers {
 
             // todo -- more constant folding
             switch (operatorType) {
+                case OperatorType.Assign:
+                    return Expression.Assign(left, right);
+
+                case OperatorType.Assign | OperatorType.Plus:
+                    return Expression.AddAssign(left, right);
+
+                case OperatorType.Assign | OperatorType.Minus:
+                    return Expression.SubtractAssign(left, right);
+
+                case OperatorType.Assign | OperatorType.Times:
+                    return Expression.MultiplyAssign(left, right);
+
+                case OperatorType.Assign | OperatorType.Divide:
+                    return Expression.DivideAssign(left, right);
+
+                case OperatorType.Assign | OperatorType.Mod:
+                    return Expression.ModuloAssign(left, right);
+
+                case OperatorType.Assign | OperatorType.And:
+                    return Expression.AndAssign(left, right);
+
+                case OperatorType.Assign | OperatorType.Or:
+                    return Expression.OrAssign(left, right);
+
+                case OperatorType.Assign | OperatorType.BinaryXor:
+                    return Expression.ExclusiveOrAssign(left, right);
+
+                case OperatorType.Assign | OperatorType.ShiftLeft:
+                    return Expression.LeftShiftAssign(left, right);
+
+                case OperatorType.Assign | OperatorType.ShiftRight:
+                    return Expression.RightShiftAssign(left, right);
+
                 case OperatorType.Coalesce:
                     return Expression.Coalesce(left, right);
 
@@ -2489,9 +2534,27 @@ namespace UIForia.Compilers {
             return Expression.Not(body);
         }
 
+        private Expression VisitUnaryPreIncrement(UnaryExpressionNode node) {
+            Expression body = Visit(node.expression);
+            return Expression.PreIncrementAssign(body);
+        }
+
+        private Expression VisitUnaryPreDecrement(UnaryExpressionNode node) {
+            Expression body = Visit(node.expression);
+            return Expression.PreDecrementAssign(body);
+        }
+
         private Expression VisitUnaryMinus(UnaryExpressionNode node) {
             Expression body = Visit(node.expression);
             return Expression.Negate(body);
+        }
+
+        private Expression VisitUnaryPostIncrement(UnaryExpressionNode node) {
+            return Expression.PostIncrementAssign(Visit(node.expression));
+        }
+
+        private Expression VisitUnaryPostDecrement(UnaryExpressionNode node) {
+            return Expression.PostDecrementAssign(Visit(node.expression));
         }
 
         private Expression VisitBitwiseNot(UnaryExpressionNode node) {

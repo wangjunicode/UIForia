@@ -1,0 +1,39 @@
+<UITemplate>
+    
+    <Contents>
+        
+        <DynamicElement name="'Matt'"/>
+        
+    </Contents>
+    
+    <Element id="DynamicElement">
+        
+        <Field name="name" type="string"/>
+        
+        <Template>
+            Hello {name}!
+        </Template>
+        
+    </Element>
+    
+    <Contents id="generic_main">
+        
+        <GenericElement valueT="1f" valueU="1"/>
+        <GenericElement valueT="1" valueU="'str'"/>
+        <GenericElement valueT="'str'" valueU="vector"/>
+        
+    </Contents>
+    
+     <Element id="GenericElement" generic="T, U">
+        
+        <Field name="valueT" type="T"/>
+        <Field name="valueU" type="U"/>
+        
+        <Template>
+            ValueT = {valueT}
+            ValueU = {valueU}
+        </Template>
+        
+    </Element>
+    
+</UITemplate>

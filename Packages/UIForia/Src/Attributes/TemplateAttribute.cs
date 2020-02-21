@@ -11,7 +11,7 @@ namespace UIForia.Attributes {
     }
 
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    public class TemplateAttribute : Attribute {
+    public sealed class TemplateAttribute : Attribute {
 
         public string source;
         public string filePath;

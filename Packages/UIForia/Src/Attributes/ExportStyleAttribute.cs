@@ -4,7 +4,7 @@ using UIForia.Rendering;
 namespace UIForia.Attributes {
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class ExportStyleAttribute : Attribute {
+    public sealed class ExportStyleAttribute : Attribute {
 
         public readonly string name;
         public UIStyle cachedStyle;

@@ -2375,9 +2375,9 @@ public class TestLinqCompiler {
 
     // [Test]
     // public void CompileObjectInitializer() {
-        // LinqCompiler compiler = new LinqCompiler();
-        // compiler.SetSignature<int[]>();
-        // compiler.Return("{x = 4, y = 13, z = 'str'}");
+    // LinqCompiler compiler = new LinqCompiler();
+    // compiler.SetSignature<int[]>();
+    // compiler.Return("{x = 4, y = 13, z = 'str'}");
     // }
 
     [Test]
@@ -2578,6 +2578,262 @@ public class TestLinqCompiler {
 
         Func<LinqThing, int> fn = compiler.Compile<Func<LinqThing, int>>();
         Assert.AreEqual((int) thing.indexable[123456][2], fn(thing));
+    }
+
+    [Test]
+    public void CompileStatement_Assign() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value = 12");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(12, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value = 12;
+        }", compiler.Print());
+    }
+
+
+    [Test]
+    public void CompileStatement_AddAssign() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value += 5");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(15, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value += 5;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_SubtractAssign() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value -= 5");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(5, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value -= 5;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_MultiplyAssign() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value *= 5");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(50, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value *= 5;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_DivideAssign() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value /= 5");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(2, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value /= 5;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_ModAssign() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value %= 3");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(1, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value %= 3;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_AndAssign() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value &= 3");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(2, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value &= 3;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_OrAssign() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value |= 3");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(11, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value |= 3;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_XorAssign() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value ^= 3");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(9, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value ^= 3;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_ShiftLeftAssign() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value <<= 3");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(80, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value <<= 3;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_ShiftRightAssign() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value >>= 3");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(1, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value >>= 3;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_PreIncrement() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("++TestLinqCompiler.StaticThing.value");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(11, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            ++TestLinqCompiler.StaticThing.value;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_PreDecrement() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("--TestLinqCompiler.StaticThing.value");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(9, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            --TestLinqCompiler.StaticThing.value;
+        }", compiler.Print());
+    }
+
+    [Test]
+    public void CompileStatement_PostIncrement() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value++");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(11, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value++;
+        }", compiler.Print());
+    }
+    
+        [Test]
+    public void CompileStatement_PostDecrement() {
+        LinqCompiler compiler = new LinqCompiler();
+        compiler.SetSignature();
+        StaticThing.value = 10;
+        compiler.Statement("TestLinqCompiler.StaticThing.value--");
+        // compiler.Log();
+        Action fn = compiler.Compile<Action>();
+        fn();
+        Assert.AreEqual(9, StaticThing.value);
+        AssertStringsEqual(@"
+        () =>
+        {
+            TestLinqCompiler.StaticThing.value--;
+        }", compiler.Print());
     }
 
     public class StaticThing {

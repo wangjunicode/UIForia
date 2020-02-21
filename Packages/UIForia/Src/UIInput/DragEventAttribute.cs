@@ -3,7 +3,7 @@ using System;
 namespace UIForia.UIInput {
 
     [AttributeUsage(AttributeTargets.Method)]
-    public class OnDragCreateAttribute : Attribute {
+    public sealed class OnDragCreateAttribute : Attribute {
 
         public readonly EventPhase phase;
         public readonly KeyboardModifiers modifiers;

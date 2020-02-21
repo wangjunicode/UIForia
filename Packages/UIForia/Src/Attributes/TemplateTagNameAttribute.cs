@@ -2,7 +2,7 @@ using System;
 
 namespace UIForia.Attributes {
     [AttributeUsage(AttributeTargets.Class)]
-    public class TemplateTagNameAttribute : Attribute {
+    public sealed class TemplateTagNameAttribute : Attribute {
 
         public readonly string tagName;
 

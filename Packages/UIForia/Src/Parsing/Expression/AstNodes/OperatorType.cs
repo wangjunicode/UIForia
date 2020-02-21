@@ -30,6 +30,7 @@ namespace UIForia.Parsing.Expressions.AstNodes {
         ShiftRight = 1 << 23,
         Coalesce = 1 << 24,
         Elvis = 1 << 25,
+        Assign = 1 << 26,
 
     }
 }

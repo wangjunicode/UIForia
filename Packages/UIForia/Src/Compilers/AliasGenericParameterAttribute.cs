@@ -2,7 +2,7 @@ using System;
 
 namespace UIForia.Compilers {
 
-    public class AliasGenericParameterAttribute : Attribute {
+    public sealed class AliasGenericParameterAttribute : Attribute {
 
         public string aliasName;
         public int parameterIndex;

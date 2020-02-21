@@ -153,7 +153,7 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
             while (context.HasMore()) {
                 char character = context.input[context.ptr];
                 
-                if (!(char.IsLetterOrDigit(character) || character == '_' || character == '-' || character == '$')) {
+                if (!(char.IsLetterOrDigit(character) || character == '_' || character == '$')) {
                     break;
                 }
 
@@ -248,6 +248,22 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
                 TryReadCharacters(context, "=>", ExpressionTokenType.LambdaArrow, output);
                 TryReadCharacters(context, "==", ExpressionTokenType.Equals, output);
                 TryReadCharacters(context, "!=", ExpressionTokenType.NotEquals, output);
+                
+                TryReadCharacters(context, "++", ExpressionTokenType.Increment, output);
+                TryReadCharacters(context, "--", ExpressionTokenType.Decrement, output);
+                
+                TryReadCharacters(context, "=", ExpressionTokenType.Assign, output);
+                TryReadCharacters(context, "+=", ExpressionTokenType.AddAssign, output);
+                TryReadCharacters(context, "-=", ExpressionTokenType.SubtractAssign, output);
+                TryReadCharacters(context, "*=", ExpressionTokenType.MultiplyAssign, output);
+                TryReadCharacters(context, "/=", ExpressionTokenType.DivideAssign, output);
+                TryReadCharacters(context, "%=", ExpressionTokenType.ModAssign, output);
+                TryReadCharacters(context, "&=", ExpressionTokenType.AndAssign, output);
+                TryReadCharacters(context, "|=", ExpressionTokenType.OrAssign, output);
+                TryReadCharacters(context, "^=", ExpressionTokenType.XorAssign, output);
+                TryReadCharacters(context, "<<=", ExpressionTokenType.LeftShiftAssign, output);
+                TryReadCharacters(context, ">>=", ExpressionTokenType.RightShiftAssign, output);
+                
                 TryReadCharacters(context, ">=", ExpressionTokenType.GreaterThanEqualTo, output);
                 TryReadCharacters(context, "<=", ExpressionTokenType.LessThanEqualTo, output);
                 TryReadCharacters(context, ">", ExpressionTokenType.GreaterThan, output);

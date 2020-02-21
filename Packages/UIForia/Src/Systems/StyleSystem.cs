@@ -29,40 +29,6 @@ namespace UIForia.Systems {
 
         public void OnElementCreated(UIElement element) { }
 
-        private void OnElementEnabledStep(UIElement element, StructList<StyleProperty> parentProperties) {
-
-            if (element.isDisabled) {
-                return;
-            }
-
-            int count = parentProperties.Count;
-            StyleProperty[] parentPropertiesArray = parentProperties.Array;
-
-            for (int i = 0; i < count; i++) {
-                element.style.SetInheritedStyle(parentPropertiesArray[i]);
-            }
-
-            if (element.children == null || element.children.Count == 0) {
-                return;
-            }
-
-            StructList<StyleProperty> inheritedProperties = StructList<StyleProperty>.Get();
-            inheritedProperties.EnsureCapacity(count);
-            StyleProperty[] inheritedPropertiesArray = inheritedProperties.Array;
-
-            for (int i = 0; i < count; i++) {
-                inheritedPropertiesArray[i] = element.style.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
-            }
-
-            inheritedProperties.Count = count;
-
-            for (int i = 0; i < element.children.Count; i++) {
-                OnElementEnabledStep(element.children[i], inheritedProperties);
-            }
-
-            StructList<StyleProperty>.Release(ref inheritedProperties);
-        }
-
         public void OnUpdate() {
             if (onStylePropertyChanged == null) {
                 return;

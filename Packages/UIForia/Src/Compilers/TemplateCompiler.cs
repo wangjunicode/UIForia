@@ -234,7 +234,9 @@ namespace UIForia.Compilers {
 
             if (templateRootNode.templateShell.usings != null) {
                 for (int i = 0; i < templateRootNode.templateShell.usings.size; i++) {
-                    namespaces.Add(templateRootNode.templateShell.usings[i].namespaceName);
+                    if (templateRootNode.templateShell.usings.array[i].type == UsingDeclarationType.Namespace) {
+                        namespaces.Add(templateRootNode.templateShell.usings.array[i].name);
+                    }
                 }
             }
 
@@ -307,9 +309,9 @@ namespace UIForia.Compilers {
             return ctx.compiledTemplate;
         }
 
-        private Type ResolveRequiredType(IList<string> namespaces, string typeName, Type rootType) {
+        private static Type ResolveRequiredType(IList<string> namespaces, string typeName, Type rootType) {
             if (typeName != null) {
-                Type requiredType = ResolveTypeExpression(rootType, namespaces, typeName);
+                Type requiredType = TypeProcessor.ResolveTypeExpression(rootType, namespaces, typeName);
 
                 if (requiredType == null) {
                     throw new CompileException($"Unable to resolve required child type `{typeName}`");
@@ -1037,8 +1039,6 @@ namespace UIForia.Compilers {
 
             StructList<ChangeHandlerDefinition> changeHandlerDefinitions = null;
 
-            bool isRootTemplate = ctx.templateRootNode == templateNode;
-
             BindingOutput retn = default;
 
             // for template roots (which are not the app root!) we dont want to generate bindings in their own template definition functions
@@ -1065,8 +1065,10 @@ namespace UIForia.Compilers {
 
                 CompileRemainingChangeHandlerStores(templateNode.processedType.rawType, changeHandlerDefinitions);
 
+                CompileEnabledThisFrame(templateNode.processedType);
+                
                 CompileAfterPropertyUpdates(templateNode.processedType);
-
+                
                 CompileAttributeBindings(attributes);
 
                 CompileInstanceStyleBindings(attributes);
@@ -1093,6 +1095,13 @@ namespace UIForia.Compilers {
 
             retn.contextModifications = contextModifications;
             return retn;
+        }
+
+        private void CompileEnabledThisFrame(ProcessedType processed) {
+            if (processed.requiresOnEnable) {
+               // ParameterExpression element = updateCompiler.GetElement();
+                
+            }    
         }
 
         private void CompileCheckChangeHandlers(StructList<ChangeHandlerDefinition> changeHandlers) {
@@ -2724,15 +2733,6 @@ namespace UIForia.Compilers {
                 Expression.Constant(attrCount),
                 Expression.Constant(templateId)
             );
-        }
-
-        private Type ResolveTypeExpression(Type invokingType, IList<string> namespaces, string typeExpression) {
-            typeExpression = typeExpression.Replace("[", "<").Replace("]", ">");
-            if (ExpressionParser.TryParseTypeName(typeExpression, out TypeLookup typeLookup)) {
-                return TypeProcessor.ResolveType(typeLookup, (IReadOnlyList<string>) namespaces, invokingType);
-            }
-
-            return null;
         }
 
         private ProcessedType ResolveGenericElementType(IList<string> namespaces, Type rootType, TemplateNode templateNode) {

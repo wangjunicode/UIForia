@@ -1,32 +1,36 @@
 ﻿using System;
 
-[Flags]
-internal enum UIElementFlags {
+namespace UIForia.Elements {
 
-    // Element Flags
-    ImplicitElement = 1,
-    Enabled = 1 << 1,
-    AncestorEnabled = 1 << 2,
-    Alive = 1 << 3,
-    HasBeenEnabled = 1 << 4,
-    Primitive = 1 << 5,
-    Created = 1 << 6, // can maybe get rid fo this when revisiting 
-    TemplateRoot = 1 << 7,
-    IndexChanged = 1 << 8,
-    
-    SelfAndAncestorEnabled = Alive | Enabled | AncestorEnabled,
-    
-    // Layout Flags
-    DebugLayout = 1 << 16,
-    LayoutHierarchyDirty = 1 << 19,
-    LayoutTransformNotIdentity = 1 << 20,
-    LayoutFitWidthDirty = 1 << 24,
-    LayoutFitHeightDirty = 1 << 25,
-    LayoutTypeOrBehaviorDirty = 1 << 26,
+    [Flags]
+    internal enum UIElementFlags {
 
-    EnabledFlagSet = Alive | Enabled | AncestorEnabled,
+        // Element Flags
+        ImplicitElement = 1,
+        Enabled = 1 << 1,
+        AncestorEnabled = 1 << 2,
+        Alive = 1 << 3,
+        HasBeenEnabled = 1 << 4,
+        Primitive = 1 << 5,
+        Created = 1 << 6, // can maybe get rid fo this when revisiting 
+        TemplateRoot = 1 << 7,
+        IndexChanged = 1 << 8,
+
+        SelfAndAncestorEnabled = Alive | Enabled | AncestorEnabled,
+
+        // Layout Flags
+        DebugLayout = 1 << 16,
+        LayoutHierarchyDirty = 1 << 19,
+        LayoutTransformNotIdentity = 1 << 20,
+        LayoutFitWidthDirty = 1 << 24,
+        LayoutFitHeightDirty = 1 << 25,
+        LayoutTypeOrBehaviorDirty = 1 << 26,
+
+        EnabledFlagSet = Alive | Enabled | AncestorEnabled,
 
 
-    InTagIndex = 1 << 9
+        InTagIndex = 1 << 9
+
+    }
 
 }

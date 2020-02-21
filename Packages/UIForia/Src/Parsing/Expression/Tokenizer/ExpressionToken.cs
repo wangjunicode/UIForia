@@ -58,6 +58,18 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
             IsArithmeticOperator ||
             IsComparator ||
             IsBooleanTest ||
+            expressionTokenType == ExpressionTokenType.AddAssign ||
+            expressionTokenType == ExpressionTokenType.SubtractAssign ||
+            expressionTokenType == ExpressionTokenType.ModAssign ||
+            expressionTokenType == ExpressionTokenType.MultiplyAssign ||
+            expressionTokenType == ExpressionTokenType.DivideAssign ||
+            expressionTokenType == ExpressionTokenType.LeftShiftAssign ||
+            expressionTokenType == ExpressionTokenType.RightShiftAssign ||
+            expressionTokenType == ExpressionTokenType.XorAssign ||
+            expressionTokenType == ExpressionTokenType.AndAssign ||
+            expressionTokenType == ExpressionTokenType.OrAssign ||
+            
+            expressionTokenType == ExpressionTokenType.Assign || 
             expressionTokenType == ExpressionTokenType.Coalesce ||
             expressionTokenType == ExpressionTokenType.Elvis ||
             expressionTokenType == ExpressionTokenType.As ||
@@ -69,6 +81,8 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
             expressionTokenType == ExpressionTokenType.Plus ||
             expressionTokenType == ExpressionTokenType.Minus ||
             expressionTokenType == ExpressionTokenType.BinaryNot ||
+            expressionTokenType == ExpressionTokenType.Increment ||
+            expressionTokenType == ExpressionTokenType.Decrement ||
             expressionTokenType == ExpressionTokenType.Not;
 
         public bool UnaryRequiresCheck =>

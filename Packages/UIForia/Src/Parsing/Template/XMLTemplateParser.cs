@@ -84,6 +84,7 @@ namespace UIForia.Parsing {
             IEnumerable<XElement> styleElements = root.GetChildren("Style");
             IEnumerable<XElement> usingElements = root.GetChildren("Using");
             IEnumerable<XElement> contentElements = root.GetChildren("Contents");
+            IEnumerable<XElement> elementDefElements = root.GetChildren("Element");
 
             foreach (XElement usingElement in usingElements) {
                 retn.usings.Add(ParseUsing(usingElement));
@@ -112,7 +113,28 @@ namespace UIForia.Parsing {
 
                 retn.unprocessedContentNodes.Add(new RawTemplateContent() {
                     templateId = templateId,
-                    content = contentElement
+                    type = ParsedTemplateType.FromCode,
+                    content = contentElement,
+                    elementDefinition = null
+                });
+            }
+
+            foreach (XElement elementDef in elementDefElements) {
+                XAttribute attr = elementDef.GetAttribute("id");
+
+                string templateId = null;
+
+                if (attr != null) {
+                    templateId = attr.Value.Trim();
+                }
+
+                XElement template = elementDef.GetChild("Template");
+
+                retn.unprocessedContentNodes.Add(new RawTemplateContent() {
+                    templateId = templateId,
+                    type = ParsedTemplateType.Dynamic,
+                    content = template,
+                    elementDefinition = elementDef
                 });
             }
 
@@ -125,7 +147,7 @@ namespace UIForia.Parsing {
             string filePath = templateAttr.filePath;
 
             if (parsedFiles.TryGetValue(filePath, out TemplateShell rootNode)) {
-                ParseInnerTemplate(templateRootNode, rootNode, processedType);
+                ParseContentTemplate(templateRootNode, rootNode, processedType);
                 return;
             }
 
@@ -133,7 +155,7 @@ namespace UIForia.Parsing {
 
             parsedFiles.Add(filePath, shell);
 
-            ParseInnerTemplate(templateRootNode, shell, processedType);
+            ParseContentTemplate(templateRootNode, shell, processedType);
         }
 
         internal TemplateShell GetOuterTemplateShell(TemplateAttribute templateAttr) {
@@ -144,8 +166,9 @@ namespace UIForia.Parsing {
             return ParseOuterShell(templateAttr);
         }
 
+
         // this might be getting called too many times since im not sure im caching the result
-        private void ParseInnerTemplate(TemplateRootNode templateRootNode, TemplateShell shell, ProcessedType processedType) {
+        private void ParseContentTemplate(TemplateRootNode templateRootNode, TemplateShell shell, ProcessedType processedType) {
             XElement root = shell.GetElementTemplateContent(processedType.templateAttr.templateId);
 
             if (root == null) {
@@ -204,8 +227,8 @@ namespace UIForia.Parsing {
         private void BuildNamespaceListFromUsings(StructList<UsingDeclaration> usings, LightList<string> namespaces) {
             if (usings == null) return;
             for (int i = 0; i < usings.size; i++) {
-                if (usings.array[i].namespaceName != null) {
-                    namespaces.Add(usings.array[i].namespaceName);
+                if (usings.array[i].name != null) {
+                    namespaces.Add(usings.array[i].name);
                 }
             }
         }
@@ -213,23 +236,6 @@ namespace UIForia.Parsing {
         private TemplateNode ParseElementTag(TemplateRootNode templateRoot, TemplateNode parent, string namespacePath, string tagName, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
             ProcessedType processedType;
             TemplateNode node = null;
-
-            // int idx = tagName.IndexOf('.');
-            //   if (idx != -1) {
-            //       string[] split = tagName.Split('.');
-            //       tagName = split[0];
-            //       string suffix = split[1];
-            //       SlotType slotType = SlotType.Define;
-            //       if (suffix == "Modify") {
-            //           slotType = slotType = SlotType.Modify;
-            //       }
-            //
-            //       processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
-            //       node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, slotType);
-            //       templateRoot.AddSlot((SlotNode) node);
-            //       parent.AddChild(node);
-            //       return node;
-            //   }
 
             string lowerNamespace = namespacePath.ToLower();
 
@@ -255,7 +261,7 @@ namespace UIForia.Parsing {
             if (lowerNamespace == "forward") {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotForward));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Forward);
-                if (!(parent is ExpandedTemplateNode expanded)) {
+                if (!(parent is ExpandedTemplateNode)) {
                     throw ParseException.InvalidSlotOverride("forward", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
                 }
 
@@ -276,7 +282,7 @@ namespace UIForia.Parsing {
 
             if (namespacePath == "UIForia") namespacePath = "UIForia.Elements";
 
-            processedType = TypeProcessor.ResolveTagName(tagName, namespacePath, templateRoot.templateShell.referencedNamespaces);
+            processedType = ResolveTagName(tagName, namespacePath, templateRoot.templateShell);
 
             if (processedType == null) {
                 throw ParseException.UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, namespacePath + ":" + tagName);
@@ -312,30 +318,122 @@ namespace UIForia.Parsing {
             return node;
         }
 
-        private static string GetSlotName(StructList<AttributeDefinition> attributes) {
-            if (attributes == null) return null;
-            for (int i = 0; i < attributes.size; i++) {
-                if (attributes.array[i].type == AttributeType.Slot && string.Equals(attributes.array[i].key, "name", StringComparison.Ordinal)) {
-                    string slotName = attributes.array[i].value.Trim();
-                    attributes.RemoveAt(i);
-                    return slotName;
+        private static ProcessedType ResolveTagName(string tagName, string namespacePath, TemplateShell templateShell) {
+            for (int i = 0; i < templateShell.unprocessedContentNodes.size; i++) {
+                ref RawTemplateContent node = ref templateShell.unprocessedContentNodes.array[i];
+
+                if (node.type == ParsedTemplateType.Dynamic && node.templateId == tagName) {
+                    if (node.processedType == null) {
+                        node.processedType = CreateDynamicElementType(templateShell, node);
+                        return node.processedType;
+                    }
+                    else {
+                        return node.processedType;
+                    }
                 }
             }
 
-            return null;
+            for (int i = 0; i < templateShell.usings.size; i++) {
+                UsingDeclaration usingDef = templateShell.usings.array[i];
+                if (usingDef.type == UsingDeclarationType.Element) {
+                    // todo -- load from using
+                }
+            }
+
+            return TypeProcessor.ResolveTagName(tagName, namespacePath, templateShell.referencedNamespaces);
         }
 
-        private static string GetSlotAlias(string slotName, StructList<AttributeDefinition> attributes) {
-            if (attributes == null) return slotName;
-            for (int i = 0; i < attributes.size; i++) {
-                if (attributes.array[i].type == AttributeType.Slot && string.Equals(attributes.array[i].key, "alias", StringComparison.Ordinal)) {
-                    string slotAlias = attributes.array[i].value.Trim();
-                    attributes.RemoveAt(i);
-                    return slotAlias;
+        private static ProcessedType CreateDynamicElementType(TemplateShell templateShell, RawTemplateContent node) {
+
+            XElement rootNode = node.elementDefinition;
+
+            IEnumerable<XElement> fields = rootNode.GetChildren("Field");
+
+
+            if (!IsValidIdentifier(node.templateId)) {
+                throw new ParseException($"Expected a valid identifier for template id but `{node.templateId}` is not valid. Please use only letters or numbers (except for first character)");
+            }
+
+            XAttribute generics = rootNode.GetAttribute("generic");
+
+            Type type = null;
+            if (generics != null) {
+                string[] genericNames = generics.Value.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+
+                ReflectionUtil.GenericTypeDefinition[] genericTypeDefinitions = new ReflectionUtil.GenericTypeDefinition[genericNames.Length];
+                // todo -- validate identifier
+                for (int i = 0; i < genericNames.Length; i++) {
+                    genericNames[i] = genericNames[i].Trim();
+                    if (!IsValidIdentifier(genericNames[i])) {
+                        throw new ParseException("Invalid generic name: " + genericNames[i] + ". Please use only letters or numbers (except for first character)");
+                    }
+
+                    genericTypeDefinitions[i].name = genericNames[i];
+                }
+
+                List<ReflectionUtil.FieldDefinition> fieldDefinitions = new List<ReflectionUtil.FieldDefinition>();
+
+                foreach (XElement field in fields) {
+                    XAttribute fieldName = field.GetAttribute("name");
+                    XAttribute fieldType = field.GetAttribute("type");
+
+                    ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldType.Value.Trim(), fieldName.Value.Trim());
+
+                    fieldDefinitions.Add(fieldDefinition);
+                }
+
+                string typeName = node.templateId + "_" + Guid.NewGuid().ToString().Replace("-", "_");
+
+                type = ReflectionUtil.CreateGenericRuntimeType(typeName, typeof(UIElement), genericTypeDefinitions, fieldDefinitions, templateShell.referencedNamespaces);
+            }
+            else {
+                List<ReflectionUtil.FieldDefinition> fieldDefinitions = new List<ReflectionUtil.FieldDefinition>();
+
+                foreach (XElement field in fields) {
+                    XAttribute fieldName = field.GetAttribute("name");
+                    XAttribute fieldType = field.GetAttribute("type");
+                
+                
+                    ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldType.Value.Trim(), fieldName.Value.Trim());
+                
+                    fieldDefinitions.Add(fieldDefinition);
+                }
+
+                string typeName = node.templateId + "_" + Guid.NewGuid().ToString().Replace("-", "_");
+
+                type = ReflectionUtil.CreateType(typeName, typeof(UIElement), fieldDefinitions, templateShell.referencedNamespaces);
+            }
+
+            TemplateAttribute templateAttribute = new TemplateAttribute(TemplateType.File, templateShell.filePath + "#" + node.templateId);
+
+            ProcessedType processedType = new ProcessedType(type, templateAttribute, node.templateId);
+
+            processedType.IsUnresolvedGeneric = generics != null;
+            
+            if (generics == null) {
+                processedType.Reference();
+            }
+            
+            TypeProcessor.AddDynamicElementType(processedType);
+
+            processedType.isDynamic = true;
+
+            return processedType;
+        }
+
+        private static bool IsValidIdentifier(string input) {
+            char first = input[0];
+
+            if (!char.IsLetter(first) && first != '_') return false;
+
+            for (int i = 1; i < input.Length; i++) {
+                char c = input[i];
+                if (!(char.IsLetterOrDigit(c) || c == '_')) {
+                    return false;
                 }
             }
 
-            return slotName;
+            return true;
         }
 
         private static void CreateOrUpdateTextNode(TemplateRootNode templateRootRoot, TemplateNode parent, string textContent, in TemplateLineInfo templateLineInfo) {
@@ -396,7 +494,7 @@ namespace UIForia.Parsing {
                         if (injectedAttributes.size == 0) {
                             StructList<AttributeDefinition>.Release(ref injectedAttributes);
                         }
-                        
+
                         IXmlLineInfo lineInfo = element;
                         TemplateNode p = ParseElementTag(templateRoot, parent, namespaceName, tagName, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
 
@@ -409,7 +507,7 @@ namespace UIForia.Parsing {
                         else if (injectedAttributes != null) {
                             throw new ParseException("Only slot nodes can have injected attributes");
                         }
-                        
+
                         ParseChildren(templateRoot, p, element.Nodes());
 
                         continue;
@@ -606,7 +704,7 @@ namespace UIForia.Parsing {
                 if (name == "id" && string.IsNullOrEmpty(prefix)) {
                     prefix = "attr";
                 }
-                
+
                 if (prefix == "generic" && name == "type") {
                     genericTypeResolver = attr.Value;
                     continue;
@@ -626,11 +724,29 @@ namespace UIForia.Parsing {
 
                 HandleAttribute(templateShell, tagName, prefix, name, line, column, attr.Value, attributes);
             }
-
         }
 
         private UsingDeclaration ParseUsing(XElement element) {
             XAttribute namespaceAttr = element.GetAttribute("namespace");
+            XAttribute elementAttr = element.GetAttribute("element");
+            XAttribute pathAttr = element.GetAttribute("path");
+
+            if (elementAttr != null || pathAttr != null) {
+                if (elementAttr == null) {
+                    throw new CompileException("<Using> tag requires `element` attribute if `path` is provided");
+                }
+
+                if (pathAttr == null) {
+                    throw new CompileException("<Using> tag requires `path` attribute if `element` is provided");
+                }
+
+                return new UsingDeclaration() {
+                    name = elementAttr.Value.Trim(),
+                    pathName = pathAttr.Value.Trim(),
+                    type = UsingDeclarationType.Element
+                };
+            }
+
             if (namespaceAttr == null) {
                 throw new TemplateParseException(element, "<Using/> tags require a 'namespace' attribute");
             }
@@ -641,7 +757,8 @@ namespace UIForia.Parsing {
             }
 
             return new UsingDeclaration() {
-                namespaceName = value
+                name = value,
+                type = UsingDeclarationType.Namespace
             };
         }
 

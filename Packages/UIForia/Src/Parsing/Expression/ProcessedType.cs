@@ -24,6 +24,8 @@ namespace UIForia.Parsing {
         public int references;
         public bool requiresBeforePropertyUpdates;
         public bool requiresAfterPropertyUpdates;
+        public bool requiresOnEnable;
+        public bool isDynamic;
 
         public ProcessedType(Type rawType, TemplateAttribute templateAttr, string tagName = null) {
             this.id = -1; // set by TypeProcessor
@@ -31,6 +33,7 @@ namespace UIForia.Parsing {
             this.templateAttr = templateAttr;
             this.tagName = tagName;
             this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate)));
+            this.requiresOnEnable = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnEnable)));
             this.requiresBeforePropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnBeforePropertyBindings)));
             this.requiresAfterPropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnAfterPropertyBindings)));
             this.namespaceName = rawType.Namespace;

@@ -12,7 +12,13 @@ namespace UIForia.Compilers {
             return builder.ToString();
         }
 
-        public static void GetTypeName(Type type, StringBuilder builder) {
+        public static string GetGenericTypeName(Type type) {
+            StringBuilder builder = new StringBuilder();
+            GetTypeName(type, builder, true);
+            return builder.ToString();
+        }
+
+        public static void GetTypeName(Type type, StringBuilder builder, bool genericName = false) {
             if (type.IsArray) {
                 VisitArrayType(type, builder);
                 return;
@@ -29,14 +35,13 @@ namespace UIForia.Compilers {
             }
 
             if (type.IsGenericType && !type.IsGenericTypeDefinition) {
-                VisitGenericTypeInstance(type, builder);
+                VisitGenericTypeInstance(type, builder, genericName);
                 return;
             }
 
             builder.Append(GetSimpleTypeName(type));
         }
 
-         
         private static string CleanGenericName(Type type) {
             string name = GetPrintableTypeName(type);
             int position = name.LastIndexOf("`");
@@ -92,17 +97,14 @@ namespace UIForia.Compilers {
         }
 
         private static string GetPrintableTypeName(Type type) {
-            string typeName = type.FullName;
+            string typeName = type.FullName ?? type.Name;
 
-            if (typeName.Contains("+")) {
-                return typeName.Replace("+", ".");
-            }
-
-            return typeName;
+            return typeName.Contains("+") 
+                ? typeName.Replace("+", ".") 
+                : typeName;
         }
 
-       
-        private static void VisitGenericTypeInstance(Type type, StringBuilder builder) {
+        private static void VisitGenericTypeInstance(Type type, StringBuilder builder, bool genericName) {
             Type[] genericArguments = type.GetGenericArguments();
             int argIndx = 0;
 
@@ -135,16 +137,43 @@ namespace UIForia.Compilers {
                     builder.Append(">");
                 }
                 else {
-                    if (typeName[i] == '[') {
-                        return;
+                    switch (typeName[i]) {
+                        case '[':
+                            // weird case where runtime generated type names are not prefixed with standard `x where x = generic parameter count
+                            if (genericArguments.Length != 0) {
+                                builder.Append("<");
+                                if (genericName) {
+                                    // todo -- wont handle things like Element<string, T> where generics are mixed with concrete 
+                                    Type[] args = type.GetGenericTypeDefinition().GetGenericArguments();
+                                    for (int c = 0; c < args.Length; c++) {
+                                        builder.Append(args[c].Name);
+                                        if (c != args.Length - 1) {
+                                            builder.Append(", ");
+                                        }
+                                    }
+                                }
+                                else {
+                                    for (int c = 0; c < genericArguments.Length; c++) {
+                                        GetTypeName(genericArguments[c], builder);
+                                        if (c != genericArguments.Length - 1) {
+                                            builder.Append(", ");
+                                        }
+                                    }
+
+                                }
+                                builder.Append(">");
+                            }
+                            return;
+
+                        case '+':
+                            builder.Append(".");
+                            break;
+
+                        default:
+                            builder.Append(typeName[i]);
+                            break;
                     }
 
-                    if (typeName[i] == '+') {
-                        builder.Append(".");
-                    }
-                    else {
-                        builder.Append(typeName[i].ToString());
-                    }
                 }
             }
         }
@@ -162,10 +191,18 @@ namespace UIForia.Compilers {
         private static void VisitGenericTypeDefinition(Type type, StringBuilder builder) {
             builder.Append(CleanGenericName(type));
             builder.Append("<");
-            var arity = type.GetGenericArguments().Length;
-            for (int i = 1; i < arity; i++) {
-                builder.Append(",");
+            Type[] genericArguments = type.GetGenericArguments();
+            
+            for (int c = 0; c < genericArguments.Length; c++) {
+                GetTypeName(genericArguments[c], builder);
+                if (c != genericArguments.Length - 1) {
+                    builder.Append(", ");
+                }
             }
+            
+            //for (int i = 1; i < arity; i++) {
+            //    builder.Append(",");
+            //}
 
             builder.Append(">");
         }

@@ -8,6 +8,7 @@ namespace UIForia.Util {
 
         public static CharStringBuilder s_CharStringBuilder = new CharStringBuilder(128);
 
+        public static readonly char[] s_SplitComma = {','};
         
         public static int FindMatchingIndex(string input, char open, char close) {
 

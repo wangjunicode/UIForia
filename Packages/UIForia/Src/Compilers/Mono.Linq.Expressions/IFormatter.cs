@@ -35,6 +35,7 @@ namespace Mono.Linq.Expressions {
 		void WriteLine ();
 		void WriteSpace ();
 		void WriteToken (string token);
+		void WriteToken (char token);
 		void WriteKeyword (string keyword);
 		void WriteLiteral (string literal);
 		void WriteReference (string value, object reference);

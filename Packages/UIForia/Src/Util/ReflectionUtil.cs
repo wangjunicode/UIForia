@@ -1181,9 +1181,9 @@ namespace UIForia.Util {
             return classBuilder.CreateRuntimeType(id, baseType, fields, namespaces);
         }
 
-        public static Type CreateGenericRuntimeType(string id, Type baseType, GenericTypeDefinition[] generics, IList<FieldDefinition> fields, IList<string> namespaces) {
+        public static Type CreateGenericRuntimeType(string id, Type baseType, GenericTypeDefinition[] genericsArgs, IList<FieldDefinition> fields, IList<string> namespaces) {
             if (classBuilder == null) classBuilder = new ClassBuilder();
-            return classBuilder.CreateGenericRuntimeType(id, baseType, generics, fields, namespaces);
+            return classBuilder.CreateGenericRuntimeType(id, baseType, genericsArgs, fields, namespaces);
         }
 
         public static bool TryCreateInstance<T>(string id, out T instance) {
@@ -1306,7 +1306,7 @@ namespace UIForia.Util {
                 // todo -- ensure no duplicate field names
                 if (fields != null) {
                     for (int i = 0; i < fields.Count; i++) {
-                        Type fieldType = TypeProcessor.ResolveTypeExpression(null, namespaces, fields[i].fieldName);
+                        Type fieldType = TypeProcessor.ResolveTypeExpression(null, namespaces, fields[i].fieldType);
 
                         typeBuilder.DefineField(fields[i].fieldName, fieldType, FieldAttributes.Public);
                     }

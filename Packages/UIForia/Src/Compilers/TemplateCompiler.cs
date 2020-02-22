@@ -157,6 +157,9 @@ namespace UIForia.Compilers {
         }
 
         public static CompiledTemplateData CompileTemplates(Type appRootType, TemplateSettings templateSettings) {
+            
+            TypeProcessor.ClearDynamics();
+            
             TemplateCompiler instance = new TemplateCompiler(templateSettings);
 
             CompiledTemplateData compiledTemplateData = instance.CompileRoot(appRootType, templateSettings.dynamicallyCreatedTypes);

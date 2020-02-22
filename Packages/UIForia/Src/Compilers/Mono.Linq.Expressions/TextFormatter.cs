@@ -62,7 +62,14 @@ namespace Mono.Linq.Expressions {
 			writer.Write (str);
 			write_indent = false;
 		}
-
+		
+		public void Write (char c)
+		{
+			WriteIndent ();
+			writer.Write (c);
+			write_indent = false;
+		}
+		
 		public void WriteLine ()
 		{
 			writer.WriteLine ();
@@ -79,6 +86,11 @@ namespace Mono.Linq.Expressions {
 			Write (token);
 		}
 
+		public void WriteToken (char token)
+		{
+			Write (token);
+		}
+		
 		public void WriteKeyword (string keyword)
 		{
 			Write (keyword);

@@ -33,12 +33,12 @@ namespace UIForia.Parsing {
     // <RecursiveConst: 
     // <ConstTree
     // <Shadow:
-    // elements can start & end with : so we can have anonymous elements
 
     public class XMLTemplateParser {
 
         private readonly XmlParserContext parserContext;
         private readonly Dictionary<string, TemplateShell> parsedFiles;
+        private TemplateSettings settings;
 
         private class CustomNamespaceReader : XmlNamespaceManager {
 
@@ -50,36 +50,22 @@ namespace UIForia.Parsing {
 
         }
 
-        public XMLTemplateParser() {
+        public XMLTemplateParser(TemplateSettings settings) {
             this.parsedFiles = new Dictionary<string, TemplateShell>(37);
             XmlNamespaceManager nameSpaceManager = new CustomNamespaceReader(new NameTable());
-            nameSpaceManager.AddNamespace("attr", "attr");
-            nameSpaceManager.AddNamespace("alias", "alias");
-            nameSpaceManager.AddNamespace("expose", "expose");
-            nameSpaceManager.AddNamespace("slot", "slot");
-            nameSpaceManager.AddNamespace("sync", "sync");
-            nameSpaceManager.AddNamespace("var", "var");
-            nameSpaceManager.AddNamespace("evt", "evt");
-            nameSpaceManager.AddNamespace("style", "style");
-            nameSpaceManager.AddNamespace("onChange", "onChange");
-            nameSpaceManager.AddNamespace("ctx", "ctx");
-            nameSpaceManager.AddNamespace("drag", "drag");
-            nameSpaceManager.AddNamespace("mouse", "mouse");
-            nameSpaceManager.AddNamespace("key", "key");
-            nameSpaceManager.AddNamespace("touch", "touch");
-            nameSpaceManager.AddNamespace("controller", "controller");
             this.parserContext = new XmlParserContext(null, nameSpaceManager, null, XmlSpace.None);
+            this.settings = settings;
         }
 
         // first time we get a file parse request we need to create the shell 
         // then, as more templates from that shell are requested, return them bit by bit
 
-        private TemplateShell ParseOuterShell(TemplateAttribute templateAttribute) {
-            XElement root = XElement.Load(new XmlTextReader(templateAttribute.source, XmlNodeType.Element, parserContext), LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);
+        private TemplateShell ParseOuterShell(string filePath, string source) {
+            XElement root = XElement.Load(new XmlTextReader(source, XmlNodeType.Element, parserContext), LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);
 
             root.MergeTextNodes();
 
-            TemplateShell retn = new TemplateShell(templateAttribute.filePath);
+            TemplateShell retn = new TemplateShell(filePath);
 
             IEnumerable<XElement> styleElements = root.GetChildren("Style");
             IEnumerable<XElement> usingElements = root.GetChildren("Using");
@@ -93,7 +79,7 @@ namespace UIForia.Parsing {
             BuildNamespaceListFromUsings(retn.usings, retn.referencedNamespaces);
 
             foreach (XElement styleElement in styleElements) {
-                retn.styles.Add(ParseStyleSheet(templateAttribute.filePath, styleElement));
+                retn.styles.Add(ParseStyleSheet(filePath, styleElement));
             }
 
             XElement[] array = contentElements.ToArray();
@@ -115,7 +101,7 @@ namespace UIForia.Parsing {
                     templateId = templateId,
                     type = ParsedTemplateType.FromCode,
                     content = contentElement,
-                    elementDefinition = null
+                    elementDefinition = null,
                 });
             }
 
@@ -126,8 +112,20 @@ namespace UIForia.Parsing {
 
                 if (attr != null) {
                     templateId = attr.Value.Trim();
-                }
+                    if (!IsValidIdentifier(templateId)) {
+                        throw new ParseException($"Element definitions require an id attribute. `{templateId}` in file `{retn.filePath}` is not a valid identifier");
+                    }
 
+                    if (!IsUniqueUsingIdentifier(retn.unprocessedContentNodes, templateId)) {
+                        throw new ParseException($"Element definitions require an id that is unique in its file. `{templateId}` was already registered in {retn.filePath}");
+                    }
+                    
+                }
+                else {
+                    int line = ((IXmlLineInfo) elementDef).LineNumber;
+                    throw new ParseException($"Element definitions require an id attribute but Element definition at `{retn.filePath} line {line}` did not declare one");
+                }
+                
                 XElement template = elementDef.GetChild("Template");
 
                 retn.unprocessedContentNodes.Add(new RawTemplateContent() {
@@ -141,6 +139,16 @@ namespace UIForia.Parsing {
             return retn;
         }
 
+        private static bool IsUniqueUsingIdentifier(StructList<RawTemplateContent> contents, string templateId) {
+            for (int i = 0; i < contents.size; i++) {
+                if (contents.array[i].templateId == templateId) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         internal void Parse(TemplateRootNode templateRootNode, ProcessedType processedType) {
             TemplateAttribute templateAttr = processedType.templateAttr;
 
@@ -151,21 +159,27 @@ namespace UIForia.Parsing {
                 return;
             }
 
-            TemplateShell shell = ParseOuterShell(templateAttr);
+            TemplateShell shell = ParseOuterShell(templateAttr.filePath, templateAttr.source);
 
             parsedFiles.Add(filePath, shell);
 
             ParseContentTemplate(templateRootNode, shell, processedType);
         }
 
-        internal TemplateShell GetOuterTemplateShell(TemplateAttribute templateAttr) {
-            if (parsedFiles.TryGetValue(templateAttr.filePath, out TemplateShell rootNode)) {
+        internal TemplateShell GetOuterTemplateShell(TemplateAttribute templateAttribute) {
+            return GetOuterTemplateShell(templateAttribute.filePath, templateAttribute.source);
+        }
+
+        internal TemplateShell GetOuterTemplateShell(string filePath, string source) {
+            if (parsedFiles.TryGetValue(filePath, out TemplateShell rootNode)) {
                 return rootNode;
             }
 
-            return ParseOuterShell(templateAttr);
+            source = source ?? settings.TryReadFile(settings.GetTemplatePath(filePath));
+            TemplateShell shell = ParseOuterShell(filePath, source);
+            parsedFiles.Add(filePath, shell);
+            return shell;
         }
-
 
         // this might be getting called too many times since im not sure im caching the result
         private void ParseContentTemplate(TemplateRootNode templateRootNode, TemplateShell shell, ProcessedType processedType) {
@@ -318,25 +332,55 @@ namespace UIForia.Parsing {
             return node;
         }
 
-        private static ProcessedType ResolveTagName(string tagName, string namespacePath, TemplateShell templateShell) {
+        private ProcessedType GetDynamicElementType(TemplateShell templateShell, string tagName) {
             for (int i = 0; i < templateShell.unprocessedContentNodes.size; i++) {
                 ref RawTemplateContent node = ref templateShell.unprocessedContentNodes.array[i];
 
-                if (node.type == ParsedTemplateType.Dynamic && node.templateId == tagName) {
-                    if (node.processedType == null) {
-                        node.processedType = CreateDynamicElementType(templateShell, node);
-                        return node.processedType;
-                    }
-                    else {
-                        return node.processedType;
-                    }
+                if (node.type != ParsedTemplateType.Dynamic || node.templateId != tagName) {
+                    continue;
                 }
+
+                node.processedType = node.processedType ?? CreateDynamicElementType(templateShell, node);
+
+                return node.processedType;
+            }
+
+            return null;
+        }
+
+        private ProcessedType ResolveTagName(string tagName, string namespacePath, TemplateShell templateShell) {
+
+            ProcessedType retn = GetDynamicElementType(templateShell, tagName);
+
+            if (retn != null) {
+                return retn;
             }
 
             for (int i = 0; i < templateShell.usings.size; i++) {
                 UsingDeclaration usingDef = templateShell.usings.array[i];
-                if (usingDef.type == UsingDeclarationType.Element) {
-                    // todo -- load from using
+                if (usingDef.type == UsingDeclarationType.Element && usingDef.name == tagName) {
+
+                    int index = usingDef.pathName.IndexOf("#", StringComparison.Ordinal);
+                    if (index != -1) {
+                        string path = usingDef.pathName.Substring(0, index);
+                        string id = usingDef.pathName.Substring(index + 1);
+                        TemplateShell shell = GetOuterTemplateShell(path, null);
+                        if (shell == null) {
+                            throw new ParseException($"Error in file {templateShell.filePath} line {usingDef.lineNumber}. Unable to find template file at path `{path}`");
+                        }
+
+                        return GetDynamicElementType(shell, id);
+
+                    }
+                    else {
+                        TemplateShell shell = GetOuterTemplateShell(usingDef.pathName, null);
+                        if (shell == null) {
+                            throw new ParseException($"Error in file {templateShell.filePath} line {usingDef.lineNumber}. Unable to find template file at path `{usingDef.pathName}`");
+                        }
+
+                        return GetDynamicElementType(shell, tagName);
+                    }
+
                 }
             }
 
@@ -349,19 +393,18 @@ namespace UIForia.Parsing {
 
             IEnumerable<XElement> fields = rootNode.GetChildren("Field");
 
-
             if (!IsValidIdentifier(node.templateId)) {
                 throw new ParseException($"Expected a valid identifier for template id but `{node.templateId}` is not valid. Please use only letters or numbers (except for first character)");
             }
 
             XAttribute generics = rootNode.GetAttribute("generic");
 
-            Type type = null;
+            Type type;
             if (generics != null) {
-                string[] genericNames = generics.Value.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                string[] genericNames = generics.Value.Split(StringUtil.s_SplitComma, StringSplitOptions.RemoveEmptyEntries);
 
                 ReflectionUtil.GenericTypeDefinition[] genericTypeDefinitions = new ReflectionUtil.GenericTypeDefinition[genericNames.Length];
-                // todo -- validate identifier
+
                 for (int i = 0; i < genericNames.Length; i++) {
                     genericNames[i] = genericNames[i].Trim();
                     if (!IsValidIdentifier(genericNames[i])) {
@@ -385,6 +428,7 @@ namespace UIForia.Parsing {
                 string typeName = node.templateId + "_" + Guid.NewGuid().ToString().Replace("-", "_");
 
                 type = ReflectionUtil.CreateGenericRuntimeType(typeName, typeof(UIElement), genericTypeDefinitions, fieldDefinitions, templateShell.referencedNamespaces);
+
             }
             else {
                 List<ReflectionUtil.FieldDefinition> fieldDefinitions = new List<ReflectionUtil.FieldDefinition>();
@@ -392,10 +436,9 @@ namespace UIForia.Parsing {
                 foreach (XElement field in fields) {
                     XAttribute fieldName = field.GetAttribute("name");
                     XAttribute fieldType = field.GetAttribute("type");
-                
-                
+
                     ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldType.Value.Trim(), fieldName.Value.Trim());
-                
+
                     fieldDefinitions.Add(fieldDefinition);
                 }
 
@@ -406,14 +449,14 @@ namespace UIForia.Parsing {
 
             TemplateAttribute templateAttribute = new TemplateAttribute(TemplateType.File, templateShell.filePath + "#" + node.templateId);
 
-            ProcessedType processedType = new ProcessedType(type, templateAttribute, node.templateId);
+            ProcessedType processedType = new ProcessedType(type, templateAttribute, node.templateId) {
+                IsUnresolvedGeneric = generics != null
+            };
 
-            processedType.IsUnresolvedGeneric = generics != null;
-            
             if (generics == null) {
                 processedType.Reference();
             }
-            
+
             TypeProcessor.AddDynamicElementType(processedType);
 
             processedType.isDynamic = true;
@@ -561,6 +604,7 @@ namespace UIForia.Parsing {
                 switch (prefix) {
                     case "property":
                         break;
+
                     case "attr": {
                         attributeType = AttributeType.Attribute;
                         if (value[0] != '{' || value[value.Length - 1] != '}') {
@@ -569,10 +613,12 @@ namespace UIForia.Parsing {
 
                         break;
                     }
+
                     case "slot": {
                         attributeType = AttributeType.Slot;
                         break;
                     }
+
                     case "mouse":
                         attributeType = AttributeType.Mouse;
                         break;
@@ -641,6 +687,7 @@ namespace UIForia.Parsing {
                         }
 
                         break;
+
                     case "sync":
                         attributeType = AttributeType.Property;
                         flags |= AttributeFlags.Sync;
@@ -721,12 +768,11 @@ namespace UIForia.Parsing {
                     continue;
                 }
 
-
                 HandleAttribute(templateShell, tagName, prefix, name, line, column, attr.Value, attributes);
             }
         }
 
-        private UsingDeclaration ParseUsing(XElement element) {
+        private static UsingDeclaration ParseUsing(XElement element) {
             XAttribute namespaceAttr = element.GetAttribute("namespace");
             XAttribute elementAttr = element.GetAttribute("element");
             XAttribute pathAttr = element.GetAttribute("path");
@@ -743,7 +789,8 @@ namespace UIForia.Parsing {
                 return new UsingDeclaration() {
                     name = elementAttr.Value.Trim(),
                     pathName = pathAttr.Value.Trim(),
-                    type = UsingDeclarationType.Element
+                    type = UsingDeclarationType.Element,
+                    lineNumber = ((IXmlLineInfo)element).LineNumber 
                 };
             }
 
@@ -758,7 +805,8 @@ namespace UIForia.Parsing {
 
             return new UsingDeclaration() {
                 name = value,
-                type = UsingDeclarationType.Namespace
+                type = UsingDeclarationType.Namespace,
+                lineNumber = ((IXmlLineInfo)element).LineNumber
             };
         }
 

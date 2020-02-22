@@ -69,8 +69,6 @@ namespace UIForia.Rendering.Vertigo {
 
     }
 
-
-    
     public class MeshPool {
 
         private readonly LightList<PooledMesh> dynamicPool;

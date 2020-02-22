@@ -258,6 +258,19 @@ namespace Mono.Linq.Expressions {
                 }
                 else {
                     if (typeName[i] == '[') {
+                        // runtime generated generic types apparently dont include the `1 so we need to run this branch only if its generic and missing the tick
+                        if (genericArguments.Length != 0 && typeName.IndexOf('`') == -1) {
+                            WriteToken("<");
+                            for (int c = 0; c < genericArguments.Length; c++) {
+                                VisitType(genericArguments[c]);
+                        
+                                if (c != genericArguments.Length - 1) {
+                                    WriteToken(", ");
+                                }
+                            }
+                        
+                            WriteToken(">");
+                        }
                         return;
                     }
 
@@ -265,7 +278,7 @@ namespace Mono.Linq.Expressions {
                         WriteToken(".");
                     }
                     else {
-                        WriteToken(typeName[i].ToString());
+                        WriteToken(typeName[i]);
                     }
                 }
             }

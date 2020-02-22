@@ -42,6 +42,10 @@ namespace UIForia.Parsing {
         internal static readonly Dictionary<string, TypeList> templateTypeMap = new Dictionary<string, TypeList>();
         public static readonly Dictionary<string, LightList<Assembly>> s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
         public static readonly Dictionary<string, ProcessedType> s_GenericMap = new Dictionary<string, ProcessedType>();
+        private static readonly List<ProcessedType> dynamicTypes = new List<ProcessedType>();
+
+        private static int currentTypeId;
+        private static int NextTypeId => currentTypeId++;
 
         private static readonly string[] s_SingleNamespace = new string[1];
 
@@ -149,7 +153,7 @@ namespace UIForia.Parsing {
                                 }
 
                                 // templateTypeMap.Add(tagName, processedType);
-                                processedType.id = typeMap.Count;
+                                processedType.id = NextTypeId;
                                 typeMap[currentType] = processedType;
                             }
                         }
@@ -560,7 +564,7 @@ namespace UIForia.Parsing {
             ProcessedType retn = null;
             if (!typeMap.TryGetValue(newType, out retn)) {
                 retn = new ProcessedType(newType, templateAttr, tagName);
-                retn.id = typeMap.Count;
+                retn.id = NextTypeId;
                 typeMap.Add(retn.rawType, retn);
             }
 
@@ -571,14 +575,19 @@ namespace UIForia.Parsing {
             return retn;
         }
 
-        private static readonly List<ProcessedType> dynamicTypes = new List<ProcessedType>();
-
+        // todo -- would be good to have this be an instance property because we need to clear dynamics every time we compile
         public static void AddDynamicElementType(ProcessedType processedType) {
-            processedType.id = typeMap.Count;
+            processedType.id = NextTypeId;
             typeMap[processedType.rawType] = processedType;
             dynamicTypes.Add(processedType);
             // templateTypes.Add(processedType);
             // todo -- maybe add to namespace map?
+        }
+
+        public static void ClearDynamics() {
+            for (int i = 0; i < dynamicTypes.Count; i++) {
+                typeMap.Remove(dynamicTypes[i].rawType);
+            }
         }
 
     }

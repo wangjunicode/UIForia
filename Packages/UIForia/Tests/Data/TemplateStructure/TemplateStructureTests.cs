@@ -6,6 +6,7 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UnityEngine;
+// ReSharper disable ClassNeverInstantiated.Global
 
 namespace TemplateStructure {
 

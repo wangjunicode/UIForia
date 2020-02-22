@@ -8,28 +8,52 @@
         <!-- todo: input does not work because the bindings clear the value every frame -->
         <Group style="char-info">
             <Label>Character Name</Label>
-            <InputElement sync:value="characterName" />
+            <Input sync:value="characterName" />
         </Group>
 
         Hello, mighty {characterName}!
         
-        <Group style="character">
-            
-            <Div style="slot head" drag:drop="DropItem(__evt)">{headSlot}</Div>
-            <Div style="slot body" />
-            <Div style="slot left-arm" />
-            <Div style="slot right-arm" />
-            <Div style="slot legs" />
-            <Div style="slot shoes" />
-            <Div style="slot accessories" />
-            <Div style="slot quick" />
+<!--        <Group style="character">-->
+<!--            -->
+<!--            <Div style="slot head" drag:drop="DropItem(__evt)">{headSlot}</Div>-->
+<!--            <Div style="slot body" />-->
+<!--            <Div style="slot left-arm" />-->
+<!--            <Div style="slot right-arm" />-->
+<!--            <Div style="slot legs" />-->
+<!--            <Div style="slot shoes" />-->
+<!--            <Div style="slot accessories" />-->
+<!--            <Div style="slot quick" />-->
 
-        </Group>
-
+<!--        </Group>-->
+        <Character/>
+        
         <Repeat list="inventoryItems" style="inventory">
             <Div style="slot inventory-item">
                 <Div drag:create="StartDragInventoryItem($element, $item)">{$item.id}</Div>
             </Div>
         </Repeat>
     </Contents>
+    
+    <Element id="Character">
+        
+        <Field name="value" type="int"/>
+        
+        <Template mouse:click="value++">
+            Value is {value} 
+            <Group style="character">
+            
+                <Div style="slot head"/>
+                <Div style="slot body" />
+                <Div style="slot left-arm" />
+                <Div style="slot right-arm" />
+                <Div style="slot legs" />
+                <Div style="slot shoes" />
+                <Div style="slot accessories" />
+                <Div style="slot quick" />
+
+            </Group>
+            
+        </Template>
+        
+    </Element>
 </UITemplate>

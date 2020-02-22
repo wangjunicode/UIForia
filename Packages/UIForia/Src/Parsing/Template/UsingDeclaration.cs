@@ -12,6 +12,7 @@ namespace UIForia.Parsing {
         public string name;
         public string pathName;
         public UsingDeclarationType type;
+        public int lineNumber;
 
     }
 

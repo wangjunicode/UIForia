@@ -94,6 +94,11 @@ namespace Mono.Linq.Expressions {
 			formatter.WriteToken (token);
 		}
 
+		protected void WriteToken (char token)
+		{
+			formatter.WriteToken (token);
+		}
+		
 		protected void WriteKeyword (string keyword)
 		{
 			formatter.WriteKeyword (keyword);

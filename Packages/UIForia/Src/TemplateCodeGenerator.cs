@@ -69,14 +69,17 @@ namespace UIForia {
             if (File.Exists(initPath)) {
                 File.Delete(initPath);
             }
+            
+            File.WriteAllText(initPath, template);
 
             StringBuilder fieldBuilder = new StringBuilder(128);
             
             for (int i = 0; i < dynamicElementTypes.Count; i++) {
 
                 ProcessedType processedType = dynamicElementTypes[i];
+                
                 string output = TemplateConstants.DynamicElement;
-
+                
                 output = output.Replace("::CLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType));
                 output = output.Replace("::BASECLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType.BaseType));
 
@@ -94,34 +97,19 @@ namespace UIForia {
                 output = output.Replace("::FIELDS::", fieldBuilder.ToString());
                 fieldBuilder.Clear();
 
-                CompiledTemplate compiled = FindCompiledTemplate(compiledTemplateData, processedType);
-                
-                string file = Path.Combine(path, compiled.filePath);
+                string file = Path.Combine(path, processedType.templateAttr.filePath);
 
                 file = Path.ChangeExtension(file, "");
                 file = file.Substring(0, file.Length - 1);
                 file += "_class_" + processedType.templateAttr.templateId;
-                
                 file += ".cs";
-
+                
                 Directory.CreateDirectory(Path.GetDirectoryName(file));
 
                 File.WriteAllText(file, output);
 
             }
-            
-            File.WriteAllText(initPath, template);
-         
-        }
 
-        private static CompiledTemplate FindCompiledTemplate(CompiledTemplateData compiledTemplateData, ProcessedType processedType) {
-            for (int i = 0; i < compiledTemplateData.compiledTemplates.size; i++) {
-                if (compiledTemplateData.compiledTemplates.array[i].elementType == processedType) {
-                    return compiledTemplateData.compiledTemplates.array[i];
-                }
-            }
-
-            return null;
         }
 
         private static string GenerateTemplateLoadCode(CompiledTemplateData compiledTemplateData) {
@@ -248,12 +236,13 @@ namespace UIForia {
             dynamicElementTypes = new List<ProcessedType>();
 
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
+                
+                if (kvp.Value.isDynamic) {
+                    dynamicElementTypes.Add(kvp.Value); 
+                }
+                
                 if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
                     continue;
-                }
-
-                if (kvp.Value.isDynamic) {
-                   dynamicElementTypes.Add(kvp.Value); 
                 }
 
                 builder.Append(s_Indent16);

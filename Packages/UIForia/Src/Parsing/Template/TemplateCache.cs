@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -16,7 +15,7 @@ namespace UIForia.Parsing {
 
         public TemplateCache(TemplateSettings settings) {
             this.settings = settings;
-            this.xmlTemplateParser = new XMLTemplateParser();
+            this.xmlTemplateParser = new XMLTemplateParser(settings);
             this.templateMap = new Dictionary<string, LightList<TemplateRootNode>>(37);
         }
 
@@ -33,14 +32,11 @@ namespace UIForia.Parsing {
                 namespaceName = namespaceName.Replace(".", Path.PathSeparator.ToString());
             }
 
-            string basePath = null;
+            string basePath;
             
-            if (namespaceName == null) {
-                basePath = Path.Combine(settings.templateRoot, processedType.rawType.Name, processedType.rawType.Name);
-            }
-            else {
-                basePath = Path.Combine(settings.templateRoot, namespaceName, processedType.rawType.Name, processedType.rawType.Name);
-            }
+            basePath = namespaceName == null 
+                ? Path.Combine(settings.templateRoot, processedType.rawType.Name, processedType.rawType.Name) 
+                : Path.Combine(settings.templateRoot, namespaceName, processedType.rawType.Name, processedType.rawType.Name);
             
             // todo -- support more extensions
             string xmlPath = Path.GetFullPath(Path.Combine(settings.templateResolutionBasePath, basePath + ".xml"));
@@ -92,11 +88,11 @@ namespace UIForia.Parsing {
             templateAttr.source = templateDefinition.contents;
             
             TemplateShell shell = xmlTemplateParser.GetOuterTemplateShell(templateAttr);
-            
-            TemplateRootNode templateRootNode = new TemplateRootNode(templateAttr.templateId, shell, processedType, null, default); //, attributes, new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
-            
-            templateRootNode.tagName = processedType.tagName;
-            
+
+            TemplateRootNode templateRootNode = new TemplateRootNode(templateAttr.templateId, shell, processedType, null, default) {
+                tagName = processedType.tagName
+            };
+
             list.Add(templateRootNode);
 
             xmlTemplateParser.Parse(templateRootNode, processedType);

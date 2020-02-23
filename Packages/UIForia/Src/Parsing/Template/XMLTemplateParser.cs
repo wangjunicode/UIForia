@@ -433,6 +433,12 @@ namespace UIForia.Parsing {
             else {
                 List<ReflectionUtil.FieldDefinition> fieldDefinitions = new List<ReflectionUtil.FieldDefinition>();
 
+                XCData cdata = rootNode.GetCDataChild();
+                
+                if (cdata != null) {
+                    string contents = cdata.Value.Trim();
+                }
+                
                 foreach (XElement field in fields) {
                     XAttribute fieldName = field.GetAttribute("name");
                     XAttribute fieldType = field.GetAttribute("type");

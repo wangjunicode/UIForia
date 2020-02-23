@@ -77,7 +77,11 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
 
         Coalesce,
 
-        Elvis
+        Elvis,
+
+        If,
+        Else,
+        SemiColon
 
     }
 

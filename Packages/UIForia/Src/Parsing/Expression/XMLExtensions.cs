@@ -11,6 +11,18 @@ namespace UIForia.Parsing.Expressions {
             return element.Attributes(attrName).FirstOrDefault();
         }
 
+        public static XCData GetCDataChild(this XElement element) {
+            XNode ptr = element.FirstNode;
+            while (ptr != null) {
+                if (ptr.NodeType == XmlNodeType.CDATA) {
+                    return ptr as XCData;
+                }
+                ptr = ptr.NextNode;
+            }
+
+            return null;
+        }
+        
         public static XElement GetChild(this XElement element, string tagName) {
             return element.Elements(tagName).FirstOrDefault();
         }
@@ -29,7 +41,7 @@ namespace UIForia.Parsing.Expressions {
 
         public static void MergeTextNodes(this XContainer element) {
             List<XNode> nodes = element.Nodes()
-                .Where((n) => n.NodeType == XmlNodeType.Element || n.NodeType == XmlNodeType.Text).ToList();
+                .Where((n) => n.NodeType == XmlNodeType.Element || n.NodeType == XmlNodeType.Text || n.NodeType == XmlNodeType.CDATA).ToList();
 
             if (nodes.Count == 0) {
                 return;

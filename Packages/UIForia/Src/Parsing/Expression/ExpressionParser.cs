@@ -6,7 +6,6 @@ using UIForia.Exceptions;
 using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Parsing.Expressions.Tokenizer;
 using UIForia.Util;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia.Parsing.Expressions {
 
@@ -23,13 +22,13 @@ namespace UIForia.Parsing.Expressions {
             return new ExpressionParser().ParseInternal(input);
         }
 
-        private ExpressionParser(TokenStream stream) {
+        public ExpressionParser(TokenStream stream) {
             tokenStream = stream;
             operatorStack = StackPool<OperatorNode>.Get();
             expressionStack = StackPool<ASTNode>.Get();
         }
 
-        private void Release(bool releaseTokenStream = true) {
+        public void Release(bool releaseTokenStream = true) {
             if (releaseTokenStream) {
                 tokenStream.Release();
             }
@@ -417,6 +416,7 @@ namespace UIForia.Parsing.Expressions {
 
         // todo string concat expression "string {nested expression}"
         private bool ParseExpression(ref ASTNode retn) {
+            // if (ParseIfExpression(ref retn)) return true;
             if (ParseNewExpression(ref retn)) return true;
             if (ParseLambdaExpression(ref retn)) return true;
             if (ParseDirectCastExpression(ref retn)) return true;
@@ -430,6 +430,36 @@ namespace UIForia.Parsing.Expressions {
 
             return false;
         }
+
+        // private bool ParseIfExpression(ref ASTNode retn) {
+        //     
+        //     if (tokenStream.Current != ExpressionTokenType.If) {
+        //         return false;
+        //     }
+        //     
+        //     tokenStream.Save();
+        //     
+        //     tokenStream.Advance();
+        //     if (tokenStream.Current != ExpressionTokenType.ParenOpen) {
+        //         tokenStream.Restore();
+        //         return false;
+        //     }
+        //
+        //     int advance = tokenStream.FindMatchingIndex(ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose);
+        //     
+        //     ExpressionParser subParser = CreateSubParser(advance);
+        //
+        //     ASTNode expr = null;
+        //
+        //     if (subParser.ParseExpression(ref expr)) {
+        //         
+        //     }
+        //     
+        // }
+        //
+        // private bool ParseBlock() { }
+        //
+        // private bool ParseStatement() { }
 
         private bool ParseLambdaExpression(ref ASTNode node) {
             if (tokenStream.Current != ExpressionTokenType.ParenOpen) {
@@ -474,7 +504,18 @@ namespace UIForia.Parsing.Expressions {
             return true;
         }
 
-        private bool ParseLambdaSignature(ref StructList<LambdaArgument> signature) {
+        public static bool ParseSignature(TokenStream tokenStream, StructList<LambdaArgument> signature) {
+            ExpressionParser parser = new ExpressionParser(tokenStream);
+            bool retn = parser.ParseLambdaSignature(ref signature);
+            parser.Release();
+            if (!retn) {
+                signature.Clear();
+            }
+
+            return retn;
+        }
+
+        public bool ParseLambdaSignature(ref StructList<LambdaArgument> signature) {
             tokenStream.Save();
 
             while (tokenStream.HasMoreTokens) {
@@ -520,8 +561,8 @@ namespace UIForia.Parsing.Expressions {
 
                 // better be a comma or end if have more tokens
                 if (tokenStream.Current != ExpressionTokenType.Comma) {
-                    Abort($"Failed parse LambdaExpression signature because we expected a comma and we hit {tokenStream.Current} instead.");
                     signature.Clear();
+                    Abort($"Failed parse LambdaExpression signature because we expected a comma and we hit {tokenStream.Current} instead.");
                     return false;
                 }
 
@@ -619,7 +660,6 @@ namespace UIForia.Parsing.Expressions {
             return false;
         }
 
-
         private bool ParseTypePathGenerics(ref TypeLookup retn) {
             if (tokenStream.Current != ExpressionTokenType.LessThan) {
                 return false;
@@ -630,7 +670,6 @@ namespace UIForia.Parsing.Expressions {
                 //  Abort();
                 return false;
             }
-
 
             tokenStream.Save();
 
@@ -685,7 +724,6 @@ namespace UIForia.Parsing.Expressions {
             return true;
         }
 
-
         private bool ParseTypePathHead(ref TypeLookup retn) {
             if (tokenStream.Current != ExpressionTokenType.Identifier) {
                 return false;
@@ -725,7 +763,7 @@ namespace UIForia.Parsing.Expressions {
             return true;
         }
 
-        private bool ParseTypePath(ref TypeLookup retn) {
+        public bool ParseTypePath(ref TypeLookup retn) {
             if (tokenStream.Current != ExpressionTokenType.Identifier) {
                 return false;
             }
@@ -1155,19 +1193,24 @@ namespace UIForia.Parsing.Expressions {
                 case ExpressionTokenType.Null:
                     retn = ASTNode.NullLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
+
                 case ExpressionTokenType.String:
                     retn = ASTNode.StringLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
+
                 case ExpressionTokenType.Boolean:
                     retn = ASTNode.BooleanLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
+
                 case ExpressionTokenType.Number:
                     retn = ASTNode.NumericLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
+
                 case ExpressionTokenType.Default:
                     // todo -- allow a type expression a-la default(List<float>);
                     retn = ASTNode.DefaultLiteralNode(tokenStream.Current.value).WithLocation(tokenStream.Current);
                     break;
+
                 default:
                     return false;
             }

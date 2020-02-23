@@ -34,7 +34,36 @@
         </Repeat>
     </Contents>
     
-    <Element id="Character">
+    <Element id="Character"><![CDATA[
+       
+       int value;
+       string strValue;    
+        
+       event Action<T> onEvent;
+        
+       [Inject]
+       public ICameraSystem cameraSystem;
+       
+       string Method(int x, int y, int z) 
+       {
+           return x;
+       }
+       
+       string GetValue() {
+            
+            var x = 5;
+            type t = default;
+            
+            if(statement) { 
+                value = 5;
+            }
+            else {
+                
+            }
+            return "value";
+       }
+            
+       ]]>
         
         <Field name="value" type="int"/>
         

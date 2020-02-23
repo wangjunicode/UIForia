@@ -134,7 +134,7 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_StringBuilder_AppendSByte = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(sbyte)});
         internal static readonly MethodInfo s_StringBuilder_AppendBool = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(bool)});
         internal static readonly MethodInfo s_StringBuilder_AppendChar = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
-
+    
         private TemplateCompiler(TemplateSettings settings) {
             this.templateCache = new TemplateCache(settings);
             this.templateMap = new Dictionary<Type, CompiledTemplate>();

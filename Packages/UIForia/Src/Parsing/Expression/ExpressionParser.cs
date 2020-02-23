@@ -1237,6 +1237,10 @@ namespace UIForia.Parsing.Expressions {
             LightList<ASTNode>.Release(ref list);
         }
 
+        public int GetTokenPosition() {
+            return tokenStream.CurrentIndex;
+        }
+        
     }
 
 }

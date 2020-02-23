@@ -49,6 +49,7 @@
            return x;
        }
        
+       [Require]
        string GetValue() {
             
             var x = 5;

@@ -6,190 +6,263 @@ using UIForia.Util;
 
 namespace UIForia.Parsing.Expressions {
 
-    
     public class ClassBodyParser {
 
         private TokenStream tokenStream;
         private Stack<ASTNode> expressionStack;
         private Stack<OperatorNode> operatorStack;
 
-        public ASTNode Parse(string input, string fileName, int lineStart) {
-            
+        private static readonly LambdaArgument[] s_EmptySignature = { };
+
+        public TypeBodyNode Parse(string input, string fileName, int lineStart) {
+
             tokenStream = new TokenStream(ExpressionTokenizer.Tokenize(input, StructList<ExpressionToken>.Get()));
-            
+
             if (!tokenStream.HasMoreTokens) {
                 throw new ParseException("Failed trying to parse empty expression");
             }
+
+            TypeBodyNode retn = new TypeBodyNode();
 
             while (tokenStream.HasMoreTokens) {
                 ExpressionToken current = tokenStream.Current;
 
                 ASTNode node = null;
-                if (ParseFieldDefinition(ref node)) {
+
+                if (ParseDeclaration(ref node)) {
+                    retn.nodes.Add(node);
                     continue;
                 }
-                
-                    
+
                 if (current == tokenStream.Current) {
+                    throw new ParseException($"Failed to parse {fileName}. Got stuck on {current.value}");
+                }
+            }
+
+            return retn;
+
+        }
+
+        private bool ParseAttribute(ref AttributeNode node) {
+            if (tokenStream.Current != ExpressionTokenType.ArrayAccessOpen) {
+                return false;
+            }
+
+            tokenStream.Save();
+            tokenStream.Advance();
+            TypeLookup typeLookup = default;
+            ExpressionParser parser = new ExpressionParser(tokenStream);
+
+            if (!parser.ParseTypePath(ref typeLookup)) {
+                goto fail;
+            }
+
+            tokenStream.Set(parser.GetTokenPosition());
+            parser.Release(false);
+
+            if (tokenStream.Current == ExpressionTokenType.ArrayAccessClose) {
+                tokenStream.Advance();
+                node = new AttributeNode() {
+                    typeLookup = typeLookup
+                };
+                return true;
+            }
+
+            fail:
+            {
+                typeLookup.Release();
+                parser.Release(false);
+                return false;
+            }
+        }
+
+        private bool ParseDeclaration(ref ASTNode node) {
+
+            AttributeNode attrNode = null;
+            LightList<AttributeNode> attributes = LightList<AttributeNode>.Get();
+            while (ParseAttribute(ref attrNode)) {
+                attributes.Add(attrNode);
+                if (tokenStream.Current != ExpressionTokenType.ArrayAccessOpen) {
                     break;
                 }
             }
 
-            return null;
+            if (attributes.size == 0) {
+                LightList<AttributeNode>.Release(ref attributes);
+            }
 
-        }
-
-        private bool ParseMethodDefinition(ref ASTNode node) {
             if (tokenStream.Current != ExpressionTokenType.Identifier) {
                 return false;
             }
 
             // modifiers? -> returnType -> name -> signature -> openBrace * closeBrace
-            
-            tokenStream.Save();
-           
-            ExpressionParser parser = new ExpressionParser(tokenStream);
 
+            tokenStream.Save();
+
+            ExpressionParser parser = new ExpressionParser(tokenStream);
+            StructList<LambdaArgument> signature = null;
             TypeLookup typeLookup = default;
+
             if (!parser.ParseTypePath(ref typeLookup)) {
-                tokenStream.Restore();
-                parser.Release(false);
-                return false;
+                goto fail;
             }
-            
+
+            tokenStream.Set(parser.GetTokenPosition());
+            parser.Release(false);
+
             if (tokenStream.Current != ExpressionTokenType.Identifier) {
-                typeLookup.Release();
-                tokenStream.Restore();
-                return false;
+                goto fail;
             }
 
             string name = tokenStream.Current.value;
-            
+
             tokenStream.Advance();
 
-            if (!tokenStream.NextTokenIs(ExpressionTokenType.ParenOpen)) {
-                typeLookup.Release();
-                tokenStream.Restore();
-                return false;
+            // if semi colon then we have a field!
+            if (tokenStream.Current == ExpressionTokenType.SemiColon) {
+                tokenStream.Advance();
+                node = new FieldNode() {
+                    name = name,
+                    attributes = attributes,
+                    typeLookup = typeLookup
+                };
+                return true;
             }
-            
-            StructList<LambdaArgument> signature = StructList<LambdaArgument>.Get();
 
-            if (!ExpressionParser.ParseSignature(tokenStream, signature)) {
-                tokenStream.Restore();
-                typeLookup.Release();
-                signature?.Release();
-                return false;
+            if (tokenStream.Current != ExpressionTokenType.ParenOpen) {
+                goto fail;
+            }
+
+            signature = StructList<LambdaArgument>.Get();
+
+            if (tokenStream.NextTokenIs(ExpressionTokenType.ParenClose)) {
+                tokenStream.Advance(2);
+            }
+            else {
+                int matchingIndex = tokenStream.FindMatchingIndex(ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose);
+
+                if (matchingIndex == -1) {
+                    goto fail;
+                }
+
+                TokenStream subStream = tokenStream.AdvanceAndReturnSubStream(matchingIndex);
+                subStream.Advance();
+                tokenStream.Advance();
+                if (!ExpressionParser.ParseSignature(subStream, signature)) {
+                    goto fail;
+                }
+
+                for (int i = 0; i < signature.size; i++) {
+                    if (signature.array[i].type == null) {
+                        throw new ParseException($"When defining a method you must specify a type for all arguments. Found identifier {signature.array[i].identifier} but no type was given.");
+                    }
+                }
             }
 
             if (tokenStream.Current != ExpressionTokenType.ExpressionOpen) {
-                tokenStream.Restore();
-                typeLookup.Release();
-                signature?.Release();
-                return false;
+                goto fail;
             }
 
-            int matchingIndex = tokenStream.FindMatchingIndex(ExpressionTokenType.ExpressionOpen, ExpressionTokenType.ExpressionClose);
+            int expressionMatch = tokenStream.FindMatchingIndex(ExpressionTokenType.ExpressionOpen, ExpressionTokenType.ExpressionClose);
 
-            if (matchingIndex == -1) {
-                tokenStream.Restore();
-                typeLookup.Release();
-                signature?.Release();
-                return false;
+            if (expressionMatch == -1) {
+                goto fail;
             }
 
-            TokenStream subStream = tokenStream.AdvanceAndReturnSubStream(matchingIndex);
-            
-            MethodNode retn = new MethodNode();
-            retn.tokens = subStream;
-            retn.returnTypeLookup = typeLookup;
-            retn.name = name;
-            node = retn;
+            TokenStream bodyStream = tokenStream.AdvanceAndReturnSubStream(expressionMatch);
+            tokenStream.Advance(); // stop over expression close
+            bodyStream.Advance(); // might be an issue with token stream advance and return
+            node = new MethodNode() {
+                tokens = bodyStream,
+                returnTypeLookup = typeLookup,
+                attributes = attributes,
+                name = name,
+                signatureList = signature != null ? signature.ToArray() : s_EmptySignature
+            };
+
+            StructList<LambdaArgument>.Release(ref signature);
+            parser.Release(false);
+
             return true;
-        }
 
-        private bool ParseFieldDefinition(ref ASTNode node) {
-            if (tokenStream.Current != ExpressionTokenType.Identifier) {
-                return false;
-            }
-            // todo -- support attribute parsing
-            // todo -- support prefixes (require, public, private, others?)
-            
-            // type -> name -> semicolon
-            
-            tokenStream.Save();
-            
-            ExpressionParser parser = new ExpressionParser(tokenStream);
-
-            TypeLookup typeLookup = default;
-            if (!parser.ParseTypePath(ref typeLookup)) {
+            fail:
+            {
                 tokenStream.Restore();
                 parser.Release(false);
-                return false;
-            }
-
-            if (tokenStream.Current != ExpressionTokenType.Identifier) {
                 typeLookup.Release();
-                tokenStream.Restore();
+                signature?.Release();
                 return false;
             }
-
-            string name = tokenStream.Current.value;
-            
-            tokenStream.Advance();
-
-            if (tokenStream.Current != ExpressionTokenType.SemiColon) {
-                typeLookup.Release();
-                tokenStream.Restore();
-                return false;
-            }
-
-            FieldNode retn = new FieldNode() {
-                name = name,
-                typeLookup = typeLookup
-            };
-            
-            node = retn;
-            return true;
-
         }
-        
+
     }
 
-    public class FieldNode : ASTNode {
+    public class TypeBodyNode : ASTNode {
 
-        // todo -- attribute list
+        public LightList<ASTNode> nodes = new LightList<ASTNode>();
+
+        public override void Release() {
+            for (int i = 0; i < nodes.size; i++) {
+                nodes[i].Release();
+            }
+        }
+
+    }
+
+    public class AttributeNode : ASTNode {
+
         public TypeLookup typeLookup;
-        public string name;
-        
+
         public override void Release() {
             typeLookup.Release();
         }
 
     }
-    
-    public class MethodNode : ASTNode {
 
-        public TypeLookup returnTypeLookup;
-        public StructList<LambdaArgument> signatureList;
+    public abstract class DeclarationNode : ASTNode {
+
         public string name;
+        public LightList<AttributeNode> attributes;
 
-        public TokenStream tokens;
-        
-        // todo -- modifier list
-        // todo -- attribute list
-        
         public override void Release() {
-            returnTypeLookup.Release();
-            
-            if (signatureList == null) return;
-            
-            for (int i = 0; i < signatureList.size; i++) {
-                signatureList.array[i].type?.Release();
+            if (attributes == null) return;
+            for (int i = 0; i < attributes.size; i++) {
+                attributes[i].Release();
             }
         }
 
     }
-    
+
+    public class FieldNode : DeclarationNode {
+
+        public TypeLookup typeLookup;
+
+        public override void Release() {
+            base.Release();
+            typeLookup.Release();
+        }
+
+    }
+
+    public class MethodNode : DeclarationNode {
+
+        public TypeLookup returnTypeLookup;
+        public LambdaArgument[] signatureList;
+        public TokenStream tokens;
+
+        // todo -- modifier list
+
+        public override void Release() {
+            base.Release();
+            returnTypeLookup.Release();
+
+            if (signatureList == null) return;
+
+            for (int i = 0; i < signatureList.Length; i++) {
+                signatureList[i].type?.Release();
+            }
+        }
+
+    }
 
 }

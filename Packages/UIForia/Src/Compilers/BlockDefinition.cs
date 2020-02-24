@@ -114,6 +114,10 @@ namespace UIForia.Compilers {
             return false;
         }
 
+        public Expression GetLastStatement() {
+            return statements[statements.size - 1];
+        }
+
     }
 
 }

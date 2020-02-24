@@ -31,7 +31,9 @@ namespace UIForia.Parsing.Expressions {
         VariableDeclaration,
         IfStatement,
         Method,
-        Field
+        Field,
+
+        ElseIf
 
     }
 

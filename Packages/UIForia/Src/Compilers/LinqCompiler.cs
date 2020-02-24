@@ -12,7 +12,6 @@ using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
-using UIForia.Parsing.Style.AstNodes;
 using UIForia.Util;
 using Debug = UnityEngine.Debug;
 using DotAccessNode = UIForia.Parsing.Expressions.AstNodes.DotAccessNode;
@@ -47,6 +46,7 @@ namespace UIForia.Compilers {
             ReflectionUtil.SetTempTypeArray(typeof(string), typeof(string))
         );
 
+        private int ifTableId = 0;
         private LinqCompiler parent;
         private Parameter? implicitContext;
         private LightList<BlockDefinition2> blocksToRelease;
@@ -287,7 +287,7 @@ namespace UIForia.Compilers {
 
         // helpful for debugging to see exactly where a statement was added from
         private Expression AddStatement(Expression expression) {
-            if (addingStatements) {
+            if (addingStatements && expression != null) {
                 currentBlock.AddStatement(expression);
             }
 
@@ -490,6 +490,28 @@ namespace UIForia.Compilers {
             labelStack.Push(returnLabel);
         }
 
+        private Expression VisitReturn(ReturnStatementNode node) {
+
+            EnsureReturnLabel();
+
+            if (node.expression == null) {
+                return Expression.Return(returnLabel);
+            }
+
+            if (returnType == typeof(void)) { }
+
+            if (returnVar == null) {
+                returnVar = id == 0
+                    ? blockStack.Stack[0].AddInternalVariable(returnType, "retn_val")
+                    : blockStack.Stack[0].AddInternalVariable(returnType, "retn_val_" + id);
+            }
+
+            // because return is really just a goto, we need to assign to our retn_val or return doesn't take the value into effect
+            Expression returnVal = Visit(returnType, node.expression);
+            RawExpression(Expression.Assign(returnVar, returnVal));
+            return Expression.Return(returnLabel, returnVar);
+        }
+
         public Expression Return(ASTNode ast) {
             if (returnType == null) {
                 throw CompileException.SignatureNotDefined();
@@ -629,7 +651,6 @@ namespace UIForia.Compilers {
 
         public void IfEqual(Expression left, Expression right, Action bodyTrue, Action bodyFalse = null) {
             Expression condition = Expression.Equal(left, right);
-
 
             PushBlock();
 
@@ -1081,7 +1102,6 @@ namespace UIForia.Compilers {
                 //     result = array[index]; (bounds checked)
                 // return result
 
-
                 start++;
 
                 Expression nullableAccessVar = null;
@@ -1337,7 +1357,6 @@ namespace UIForia.Compilers {
             throw CompileException.UnknownStaticOrConstMember(type, propertyName);
         }
 
-
         private Expression VisitStaticAccessExpression(Type type, LightList<ProcessedPart> parts, int start) {
             Expression head = null;
 
@@ -1381,6 +1400,7 @@ namespace UIForia.Compilers {
                     }
 
                     break;
+
                 default:
                     throw new NotImplementedException();
             }
@@ -1514,7 +1534,6 @@ namespace UIForia.Compilers {
 
             return retn;
         }
-
 
         private Expression ResolveAlias(string aliasName) {
             aliasName = aliasName.Substring(1);
@@ -1965,14 +1984,15 @@ namespace UIForia.Compilers {
                 case ASTNodeType.VariableDeclaration:
                     return VisitLocalVariable((LocalVariableNode) node);
 
-                case ASTNodeType.Return: {
-                    ReturnStatementNode returnNode = (ReturnStatementNode) node;
-                    return Return(returnNode.expression);
-                }
+                case ASTNodeType.Return:
+                    return VisitReturn((ReturnStatementNode) node);
+
+                case ASTNodeType.IfStatement:
+                    return VisitIfStatement((IfStatementNode) node);
 
                 case ASTNodeType.Block:
                     return VisitBlock((BlockNode) node);
-                   
+
                 case ASTNodeType.ListInitializer:
                     // this might just not make sense as a feature
                     // [] if not used as a return value then use pooling for the array 
@@ -2009,11 +2029,12 @@ namespace UIForia.Compilers {
 
         private Expression VisitLocalVariable(LocalVariableNode node) {
             Type variableType = null;
-            
+
             if (node.typeLookup.typeName == null) {
                 if (node.value == null) {
                     throw new CompileException("undefined var");
                 }
+
                 variableType = GetExpressionType(node.value);
             }
             else {
@@ -2025,8 +2046,86 @@ namespace UIForia.Compilers {
             if (node.value != null) {
                 Assign(variable, Visit(variableType, node.value));
             }
+
             return variable;
-            
+
+        }
+
+        private Expression VisitIfStatement(IfStatementNode node) {
+            Expression condition = Visit(typeof(bool), node.condition);
+
+            if (node.elseIfStatements.Length == 0) {
+
+                if (node.elseBlock == null) {
+                    PushBlock();
+
+                    StatementList(node.thenBlock);
+
+                    return Expression.IfThen(condition, PopBlock());
+
+                }
+
+                PushBlock();
+                StatementList(node.thenBlock);
+                BlockExpression thenBlock = PopBlock();
+
+                PushBlock();
+                StatementList(node.elseBlock);
+                BlockExpression elseBlock = PopBlock();
+
+                return Expression.IfThenElse(condition, thenBlock, elseBlock);
+            }
+            else {
+                LabelTarget end = Expression.Label("ladder_end_" + (ifTableId++));
+
+                int labelRefs = 0;
+
+                PushBlock();
+                StatementList(node.thenBlock);
+
+                if (!(currentBlock.GetLastStatement() is GotoExpression)) {
+                    RawExpression(Expression.Goto(end));
+                    labelRefs++;
+                }
+
+                RawExpression(Expression.IfThen(condition, PopBlock()));
+
+                for (int i = 0; i < node.elseIfStatements.Length; i++) {
+                    ElseIfNode elseIf = node.elseIfStatements[i];
+                    condition = Visit(typeof(bool), elseIf.condition);
+
+                    PushBlock();
+
+                    StatementList(elseIf.thenBlock);
+
+                    if (!(currentBlock.GetLastStatement() is GotoExpression)) {
+                        RawExpression(Expression.Goto(end));
+                        labelRefs++;
+                    }
+
+                    BlockExpression thenBlock = PopBlock();
+                    
+                    if (i == node.elseIfStatements.Length - 1 && node.elseBlock != null) {
+                        PushBlock();
+                        StatementList(node.elseBlock);
+                        BlockExpression elseBlock = PopBlock();
+                        RawExpression(Expression.IfThenElse(condition, thenBlock, elseBlock));
+                    }
+                    else {
+                        RawExpression(Expression.IfThen(condition, thenBlock));
+
+                    }
+
+                }
+
+                if (labelRefs > 0) {
+                    RawExpression(Expression.Label(end));
+                }
+
+            }
+
+            return null;
+
         }
 
         private Expression VisitBlock(BlockNode node) {
@@ -2361,7 +2460,6 @@ namespace UIForia.Compilers {
                     throw new CompileException($"Bad ternary, expected the right hand side to be a TernarySelection but it was {select.operatorType}");
                 }
 
-
                 if (targetType == null) {
                     Type leftType = GetExpressionType(select.left);
                     Type rightType = select.right.type == ASTNodeType.DefaultLiteral ? leftType : GetExpressionType(@select.right);
@@ -2480,7 +2578,6 @@ namespace UIForia.Compilers {
                     }
                 }
             }
-
 
             nested.Return(lambda.body);
 
@@ -2652,7 +2749,6 @@ namespace UIForia.Compilers {
 //                currentBlock.AddStatement(Expression.Assign(variable, expr));
 //                return variable;
 //            }
-
 
 //            if (implicitContext != null) {
 //                LightList<MethodInfo> methodInfos = LightList<MethodInfo>.Get();

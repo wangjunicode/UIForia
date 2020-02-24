@@ -23,7 +23,9 @@ namespace UIForia.Parsing.Expressions {
 
             TypeBodyNode retn = new TypeBodyNode();
 
-            while (tokenStream.HasMoreTokens) {
+            int cnt = 0;
+            while (tokenStream.HasMoreTokens && cnt < 10000) {
+                cnt++;
                 ExpressionToken current = tokenStream.Current;
 
                 ASTNode node = null;
@@ -163,6 +165,8 @@ namespace UIForia.Parsing.Expressions {
                 return false;
             }
 
+            LightList<ElseIfNode> statements = LightList<ElseIfNode>.Get();
+
             tokenStream.Advance();
 
             ASTNode condition = null;
@@ -175,17 +179,17 @@ namespace UIForia.Parsing.Expressions {
                 throw new ParseException("Expected a block statement following an if statement but failed to parse the block");
             }
 
-            if (!tokenStream.NextTokenIs(ExpressionTokenType.ElseIf) && tokenStream.NextTokenIs(ExpressionTokenType.Else)) {
+            if (tokenStream.Current != ExpressionTokenType.ElseIf && tokenStream.Current != ExpressionTokenType.Else) {
                 node = new IfStatementNode() {
+                    // elseIfStatements = statements.ToArray(),
                     condition = condition,
                     thenBlock = thenBlock
                 };
                 return true;
             }
 
-            LightList<ASTNode> elseIfs = LightList<ASTNode>.Get();
+            while (tokenStream.Current == ExpressionTokenType.ElseIf) {
 
-            while (tokenStream.NextTokenIs(ExpressionTokenType.ElseIf)) {
                 tokenStream.Advance();
 
                 ASTNode elseIfCondition = null;
@@ -200,8 +204,8 @@ namespace UIForia.Parsing.Expressions {
                     throw new ParseException("Expected a block statement following an if statement but failed to parse the block");
                 }
 
-                elseIfs.Add(new IfStatementNode() {
-                    condition = condition,
+                statements.Add(new ElseIfNode() {
+                    condition = elseIfCondition,
                     thenBlock = block
                 });
             }
@@ -219,9 +223,12 @@ namespace UIForia.Parsing.Expressions {
             node = new IfStatementNode() {
                 condition = condition,
                 thenBlock = thenBlock,
-                elseIfStatements = elseIfs,
+                elseIfStatements = statements.size == 0 ? null : statements.ToArray(),
                 elseBlock = elseBlock
             };
+
+            statements.Release();
+
             return true;
         }
 
@@ -242,12 +249,17 @@ namespace UIForia.Parsing.Expressions {
             while (tokenStream.CurrentIndex != expressionMatch) {
                 ASTNode statement = null;
 
+                int current = tokenStream.CurrentIndex;
+                
                 if (!ParseStatement(ref statement)) {
                     retn.Release();
                     tokenStream.Restore();
                     return null;
                 }
 
+                if (current == tokenStream.CurrentIndex) {
+                    throw new ParseException("fail recurse");
+                }
                 retn.statements.Add(statement);
             }
 
@@ -507,10 +519,10 @@ namespace UIForia.Parsing.Expressions {
 
         public TypeLookup typeLookup;
 
-           public FieldNode() {
+        public FieldNode() {
             type = ASTNodeType.Field;
         }
-        
+
         public override void Release() {
             base.Release();
             typeLookup.Release();
@@ -565,7 +577,7 @@ namespace UIForia.Parsing.Expressions {
         public ASTNode condition;
         public BlockNode elseBlock;
         public BlockNode thenBlock;
-        public LightList<ASTNode> elseIfStatements;
+        public ElseIfNode[] elseIfStatements;
 
         public IfStatementNode() {
             type = ASTNodeType.IfStatement;
@@ -576,10 +588,26 @@ namespace UIForia.Parsing.Expressions {
             condition?.Release();
             elseBlock?.Release();
             if (elseIfStatements != null) {
-                for (int i = 0; i < elseIfStatements.size; i++) {
+                for (int i = 0; i < elseIfStatements.Length; i++) {
                     elseIfStatements[i].Release();
                 }
             }
+        }
+
+    }
+
+    public class ElseIfNode : ASTNode {
+
+        public ASTNode condition;
+        public BlockNode thenBlock;
+
+        public ElseIfNode() {
+            type = ASTNodeType.ElseIf;
+        }
+
+        public override void Release() {
+            condition?.Release();
+            thenBlock?.Release();
         }
 
     }

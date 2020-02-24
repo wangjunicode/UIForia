@@ -20,6 +20,8 @@ namespace UIForia.Parsing.Expressions.AstNodes {
         protected static readonly ObjectPool<GenericTypePathNode> s_GenericTypePathNode = new ObjectPool<GenericTypePathNode>();
         protected static readonly ObjectPool<LambdaExpressionNode> s_LambdaExpressionPool = new ObjectPool<LambdaExpressionNode>();
 
+        public static readonly ASTNode[] EmptyArray = { };
+
         public ASTNodeType type;
 
         public bool IsCompound {
@@ -31,6 +33,7 @@ namespace UIForia.Parsing.Expressions.AstNodes {
                 return false;
             }
         }
+
 
         public int line;
         public int column;

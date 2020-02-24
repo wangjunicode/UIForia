@@ -44,8 +44,18 @@
        }
        
        int GetValue() {
-           DoStuff();
-           return value * 3; 
+           if(value == 1) {
+               return 2;
+           }
+           else if(value == 2) {
+               return 3;
+           }
+           else if(value == 3) {
+               return 4;
+           }
+           else {
+            return value;
+           }       
        }
             
        ]]>

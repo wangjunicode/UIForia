@@ -362,7 +362,8 @@ namespace UIForia.Util {
                         }
                     }
 
-                    Debug.Log(linqCompiler.Print());
+                    // todo -- somehow need to save the lambda to be printed by code generator.
+                    // probably in a dictionary on reflection util?
                     fieldInfo.SetValue(null, fn);
                 }
             }

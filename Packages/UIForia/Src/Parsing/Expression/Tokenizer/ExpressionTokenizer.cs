@@ -21,9 +21,8 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
                 }
             }
 
-            
             while (ptr < context.input.Length) {
-                if (char.IsWhiteSpace(context.input[ptr + 1])) {
+                if (char.IsWhiteSpace(context.input[ptr])) {
                     ptr++;
                 }
                 else {
@@ -32,13 +31,13 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
             }
             
             for (int i = 0; i < match2.Length; i++) {
-                if (context.input[ptr + i] != match2[i]) {
+                if (context.input[ptr++] != match2[i]) {
                     return;
                 }
             }
             
             output.Add(new ExpressionToken(expressionTokenType, match1 + " " + match2, context.line, context.column));
-            TryConsumeWhiteSpace(context.Advance(ptr));
+            TryConsumeWhiteSpace(context.Advance(ptr - context.ptr));
         }
               
         private static void TryReadCharacters(TokenizerContext context, string match, ExpressionTokenType expressionTokenType, StructList<ExpressionToken> output) {

@@ -8,6 +8,7 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expressions;
+using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Templates;
 using UIForia.Text;
 using UIForia.Util;
@@ -119,13 +120,12 @@ namespace UIForia.Parsing {
                     if (!IsUniqueUsingIdentifier(retn.unprocessedContentNodes, templateId)) {
                         throw new ParseException($"Element definitions require an id that is unique in its file. `{templateId}` was already registered in {retn.filePath}");
                     }
-                    
                 }
                 else {
                     int line = ((IXmlLineInfo) elementDef).LineNumber;
                     throw new ParseException($"Element definitions require an id attribute but Element definition at `{retn.filePath} line {line}` did not declare one");
                 }
-                
+
                 XElement template = elementDef.GetChild("Template");
 
                 retn.unprocessedContentNodes.Add(new RawTemplateContent() {
@@ -349,7 +349,6 @@ namespace UIForia.Parsing {
         }
 
         private ProcessedType ResolveTagName(string tagName, string namespacePath, TemplateShell templateShell) {
-
             ProcessedType retn = GetDynamicElementType(templateShell, tagName);
 
             if (retn != null) {
@@ -359,7 +358,6 @@ namespace UIForia.Parsing {
             for (int i = 0; i < templateShell.usings.size; i++) {
                 UsingDeclaration usingDef = templateShell.usings.array[i];
                 if (usingDef.type == UsingDeclarationType.Element && usingDef.name == tagName) {
-
                     int index = usingDef.pathName.IndexOf("#", StringComparison.Ordinal);
                     if (index != -1) {
                         string path = usingDef.pathName.Substring(0, index);
@@ -370,7 +368,6 @@ namespace UIForia.Parsing {
                         }
 
                         return GetDynamicElementType(shell, id);
-
                     }
                     else {
                         TemplateShell shell = GetOuterTemplateShell(usingDef.pathName, null);
@@ -380,7 +377,6 @@ namespace UIForia.Parsing {
 
                         return GetDynamicElementType(shell, tagName);
                     }
-
                 }
             }
 
@@ -388,7 +384,6 @@ namespace UIForia.Parsing {
         }
 
         private static ProcessedType CreateDynamicElementType(TemplateShell templateShell, RawTemplateContent node) {
-
             XElement rootNode = node.elementDefinition;
 
             IEnumerable<XElement> fields = rootNode.GetChildren("Field");
@@ -416,41 +411,66 @@ namespace UIForia.Parsing {
 
                 List<ReflectionUtil.FieldDefinition> fieldDefinitions = new List<ReflectionUtil.FieldDefinition>();
 
-                foreach (XElement field in fields) {
-                    XAttribute fieldName = field.GetAttribute("name");
-                    XAttribute fieldType = field.GetAttribute("type");
-
-                    ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldType.Value.Trim(), fieldName.Value.Trim());
-
-                    fieldDefinitions.Add(fieldDefinition);
-                }
+                // foreach (XElement field in fields) {
+                //     XAttribute fieldName = field.GetAttribute("name");
+                //     XAttribute fieldType = field.GetAttribute("type");
+                //
+                //     ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldType.Value.Trim(), fieldName.Value.Trim());
+                //
+                //     fieldDefinitions.Add(fieldDefinition);
+                // }
 
                 string typeName = node.templateId + "_" + Guid.NewGuid().ToString().Replace("-", "_");
 
                 type = ReflectionUtil.CreateGenericRuntimeType(typeName, typeof(UIElement), genericTypeDefinitions, fieldDefinitions, templateShell.referencedNamespaces);
-
             }
             else {
                 List<ReflectionUtil.FieldDefinition> fieldDefinitions = new List<ReflectionUtil.FieldDefinition>();
+                List<ReflectionUtil.MethodDefinition> methodDefinitions = new List<ReflectionUtil.MethodDefinition>();
 
                 XCData cdata = rootNode.GetCDataChild();
-                
+
                 if (cdata != null) {
                     string contents = cdata.Value.Trim();
-                }
-                
-                foreach (XElement field in fields) {
-                    XAttribute fieldName = field.GetAttribute("name");
-                    XAttribute fieldType = field.GetAttribute("type");
+                    var typeBodyParser = new TypeBodyParser();
+                    IXmlLineInfo lineInfo = cdata;
 
-                    ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldType.Value.Trim(), fieldName.Value.Trim());
+                    TypeBodyNode astNode = typeBodyParser.Parse(contents, templateShell.filePath, lineInfo.LineNumber);
 
-                    fieldDefinitions.Add(fieldDefinition);
+                    for (int i = 0; i < astNode.nodes.size; i++) {
+                        ASTNode n = astNode.nodes.array[i];
+                        if (n is FieldNode fieldNode) {
+                            
+                            ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldNode.typeLookup, fieldNode.name);
+
+                            fieldDefinitions.Add(fieldDefinition);
+                        }
+                        else if (n is MethodNode methodNode) {
+                                
+                            ReflectionUtil.MethodDefinition methodDefinition = new ReflectionUtil.MethodDefinition() {
+                                arguments = methodNode.signatureList,
+                                returnType = methodNode.returnTypeLookup,
+                                body = methodNode.body,
+                                methodName = methodNode.name
+                            };
+                            
+                            methodDefinitions.Add(methodDefinition);
+                        }
+                    }
                 }
+
+                // foreach (XElement field in fields) {
+                //     XAttribute fieldName = field.GetAttribute("name");
+                //     XAttribute fieldType = field.GetAttribute("type");
+                //
+                //     ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldType.Value.Trim(), fieldName.Value.Trim());
+                //
+                //     fieldDefinitions.Add(fieldDefinition);
+                // }
 
                 string typeName = node.templateId + "_" + Guid.NewGuid().ToString().Replace("-", "_");
 
-                type = ReflectionUtil.CreateType(typeName, typeof(UIElement), fieldDefinitions, templateShell.referencedNamespaces);
+                type = ReflectionUtil.CreateType(typeName, typeof(UIElement), fieldDefinitions, methodDefinitions, templateShell.referencedNamespaces);
             }
 
             TemplateAttribute templateAttribute = new TemplateAttribute(TemplateType.File, templateShell.filePath + "#" + node.templateId);
@@ -796,7 +816,7 @@ namespace UIForia.Parsing {
                     name = elementAttr.Value.Trim(),
                     pathName = pathAttr.Value.Trim(),
                     type = UsingDeclarationType.Element,
-                    lineNumber = ((IXmlLineInfo)element).LineNumber 
+                    lineNumber = ((IXmlLineInfo) element).LineNumber
                 };
             }
 
@@ -812,7 +832,7 @@ namespace UIForia.Parsing {
             return new UsingDeclaration() {
                 name = value,
                 type = UsingDeclarationType.Namespace,
-                lineNumber = ((IXmlLineInfo)element).LineNumber
+                lineNumber = ((IXmlLineInfo) element).LineNumber
             };
         }
 

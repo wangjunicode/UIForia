@@ -8,10 +8,17 @@
     
     <Element id="DynamicElement">
         
-        <Field name="name" type="string"/>
+        <![CDATA[
+            string name;
+            
+            string Get(string value) {
+                return value;
+            }
+                             
+        ]]>
         
         <Template>
-            Hello {name}!
+            Hello {Get(name)}!
         </Template>
         
     </Element>

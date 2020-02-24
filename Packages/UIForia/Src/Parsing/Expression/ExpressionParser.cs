@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Text;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expressions.AstNodes;
@@ -37,6 +38,13 @@ namespace UIForia.Parsing.Expressions {
             StackPool<ASTNode>.Release(expressionStack);
         }
 
+        public static ASTNode Parse(TokenStream tokenStream) {
+            ExpressionParser parser = new ExpressionParser(tokenStream);
+            ASTNode retn = parser.ParseLoop();
+            parser.Release();
+            return retn;
+        }
+        
         private ASTNode ParseInternal(string input) {
             tokenStream = new TokenStream(ExpressionTokenizer.Tokenize(input, StructList<ExpressionToken>.Get()));
             expressionStack = expressionStack ?? StackPool<ASTNode>.Get();
@@ -416,7 +424,6 @@ namespace UIForia.Parsing.Expressions {
 
         // todo string concat expression "string {nested expression}"
         private bool ParseExpression(ref ASTNode retn) {
-            // if (ParseIfExpression(ref retn)) return true;
             if (ParseNewExpression(ref retn)) return true;
             if (ParseLambdaExpression(ref retn)) return true;
             if (ParseDirectCastExpression(ref retn)) return true;
@@ -430,37 +437,7 @@ namespace UIForia.Parsing.Expressions {
 
             return false;
         }
-
-        // private bool ParseIfExpression(ref ASTNode retn) {
-        //     
-        //     if (tokenStream.Current != ExpressionTokenType.If) {
-        //         return false;
-        //     }
-        //     
-        //     tokenStream.Save();
-        //     
-        //     tokenStream.Advance();
-        //     if (tokenStream.Current != ExpressionTokenType.ParenOpen) {
-        //         tokenStream.Restore();
-        //         return false;
-        //     }
-        //
-        //     int advance = tokenStream.FindMatchingIndex(ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose);
-        //     
-        //     ExpressionParser subParser = CreateSubParser(advance);
-        //
-        //     ASTNode expr = null;
-        //
-        //     if (subParser.ParseExpression(ref expr)) {
-        //         
-        //     }
-        //     
-        // }
-        //
-        // private bool ParseBlock() { }
-        //
-        // private bool ParseStatement() { }
-
+        
         private bool ParseLambdaExpression(ref ASTNode node) {
             if (tokenStream.Current != ExpressionTokenType.ParenOpen) {
                 return false;

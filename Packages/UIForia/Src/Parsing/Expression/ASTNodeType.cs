@@ -21,16 +21,17 @@ namespace UIForia.Parsing.Expressions {
         New,
         Paren,
         GenericTypePath,
-
         LambdaExpression,
-
         UnaryPreIncrement,
-
         UnaryPreDecrement,
-
         UnaryPostIncrement,
-
-        UnaryPostDecrement
+        UnaryPostDecrement,
+        Block,
+        Return,
+        VariableDeclaration,
+        IfStatement,
+        Method,
+        Field
 
     }
 

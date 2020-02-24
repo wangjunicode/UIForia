@@ -20,7 +20,7 @@ namespace UIForia.Compilers {
         public bool HasStatements => statements.Count > 0;
         public int StatementCount => statements.size;
 
-        public ParameterExpression AddInternalVariable(Type type, string name = null) {
+        public ParameterExpression AddInternalVariable(Type type, string name = null, ParameterFlags flags = 0) {
 
             if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name)) {
                 name = "_var$";
@@ -34,7 +34,7 @@ namespace UIForia.Compilers {
                 name = retn.Name,
                 type = retn.Type,
                 expression = retn,
-                flags = 0
+                flags = flags
             });
             return retn;
         }

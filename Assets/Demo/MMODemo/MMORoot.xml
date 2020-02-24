@@ -38,30 +38,14 @@
        
        int value;
        string strValue;    
-        
-       event Action<T> onEvent;
-        
-       [Inject]
-       public ICameraSystem cameraSystem;
-       
-       string Method(int x, int y, int z) 
-       {
-           return x;
+      
+       void DoStuff() {
+          UnityEngine.Debug.Log(value);
        }
        
-       [Require]
-       string GetValue() {
-            
-            var x = 5;
-            type t = default;
-            
-            if(statement) { 
-                value = 5;
-            }
-            else {
-                
-            }
-            return "value";
+       int GetValue() {
+           DoStuff();
+           return value * 3; 
        }
             
        ]]>
@@ -69,7 +53,7 @@
         <Field name="value" type="int"/>
         
         <Template mouse:click="value++">
-            Value is {value} 
+            Value is {GetValue()} 
             <Group style="character">
             
                 <Div style="slot head"/>

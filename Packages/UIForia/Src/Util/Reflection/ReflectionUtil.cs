@@ -6,7 +6,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using UIForia.Elements;
-using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
+using UIForia.Parsing.Expressions.AstNodes;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -50,6 +51,7 @@ namespace UIForia.Util {
         private static readonly List<GenericTypeEntry> generics = new List<GenericTypeEntry>();
         private static readonly List<DelegateEntry> staticDelegates = new List<DelegateEntry>();
         private static readonly List<DelegateEntry> openDelegates = new List<DelegateEntry>();
+        private static ClassBuilder classBuilder;
 
         private static readonly Dictionary<Type, List<LinqAccessor>> linqDelegates = new Dictionary<Type, List<LinqAccessor>>();
 
@@ -144,8 +146,14 @@ namespace UIForia.Util {
         }
 
         public static bool IsField(Type type, string fieldName, out FieldInfo fieldInfo) {
-            fieldInfo = type.GetField(fieldName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-            return fieldInfo != null;
+            try {
+                fieldInfo = type.GetField(fieldName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+                return fieldInfo != null;
+            }
+            catch (NotSupportedException ex) {
+                fieldInfo = null;
+                return false;
+            }
         }
 
         public static bool IsProperty(Type type, string propertyName) {
@@ -153,8 +161,14 @@ namespace UIForia.Util {
         }
 
         public static bool IsProperty(Type type, string propertyName, out PropertyInfo propertyInfo) {
-            propertyInfo = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
-            return propertyInfo != null;
+            try {
+                propertyInfo = type.GetProperty(propertyName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.FlattenHierarchy);
+                return propertyInfo != null;
+            }
+            catch (NotSupportedException ex) {
+                propertyInfo = null;
+                return false;
+            }
         }
 
         public static bool IsMethod(Type type, string methodName, out MethodInfo methodInfo) {
@@ -535,6 +549,7 @@ namespace UIForia.Util {
             return Delegate.CreateDelegate(type, null, info);
         }
 
+     
         public static Type GetOpenDelegateType(MethodInfo info) {
             ParameterInfo[] parameters = info.GetParameters();
 
@@ -601,6 +616,74 @@ namespace UIForia.Util {
                     throw new ArgumentOutOfRangeException();
             }
         }
+
+        public static Type GetClosedDelegateType(Type[] parameters, Type returnType = null) {
+
+            int additionalSize = returnType == typeof(void) ? 0 : 1;
+
+            Type[] signatureTypes = new Type[parameters.Length + additionalSize];
+
+            for (int i = 0; i < parameters.Length; i++) {
+                signatureTypes[i] = parameters[i];
+            }
+
+            if (returnType != typeof(void)) {
+                signatureTypes[parameters.Length] = returnType;
+
+                switch (signatureTypes.Length) {
+                    case 1:
+                        return typeof(Func<>).MakeGenericType(signatureTypes);
+                    case 2:
+                        return typeof(Func<,>).MakeGenericType(signatureTypes);
+                    case 3:
+                        return typeof(Func<,,>).MakeGenericType(signatureTypes);
+                    case 4:
+                        return typeof(Func<,,,>).MakeGenericType(signatureTypes);
+                    case 5:
+                        return typeof(Func<,,,,>).MakeGenericType(signatureTypes);
+                    case 6:
+                        return typeof(Func<,,,,,>).MakeGenericType(signatureTypes);
+                    case 7:
+                        return typeof(Func<,,,,,,>).MakeGenericType(signatureTypes);
+                    case 8:
+                        return typeof(Func<,,,,,,,>).MakeGenericType(signatureTypes);
+                    case 9:
+                        return typeof(Func<,,,,,,,,>).MakeGenericType(signatureTypes);
+                    case 10:
+                        return typeof(Func<,,,,,,,,,>).MakeGenericType(signatureTypes);
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            switch (signatureTypes.Length) {
+                case 0:
+                    return typeof(Action);
+                case 1:
+                    return typeof(Action<>).MakeGenericType(signatureTypes);
+                case 2:
+                    return typeof(Action<,>).MakeGenericType(signatureTypes);
+                case 3:
+                    return typeof(Action<,,>).MakeGenericType(signatureTypes);
+                case 4:
+                    return typeof(Action<,,,>).MakeGenericType(signatureTypes);
+                case 5:
+                    return typeof(Action<,,,,>).MakeGenericType(signatureTypes);
+                case 6:
+                    return typeof(Action<,,,,,>).MakeGenericType(signatureTypes);
+                case 7:
+                    return typeof(Action<,,,,,,>).MakeGenericType(signatureTypes);
+                case 8:
+                    return typeof(Action<,,,,,,,>).MakeGenericType(signatureTypes);
+                case 9:
+                    return typeof(Action<,,,,,,,,>).MakeGenericType(signatureTypes);
+                case 10:
+                    return typeof(Action<,,,,,,,,,>).MakeGenericType(signatureTypes);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+        
 
         public static Type GetClosedDelegateType(MethodInfo info) {
             ParameterInfo[] parameters = info.GetParameters();
@@ -1174,11 +1257,10 @@ namespace UIForia.Util {
             return rootType.GetField(fieldName, BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy);
         }
 
-        private static ClassBuilder classBuilder;
 
-        public static Type CreateType(string id, Type baseType, IList<FieldDefinition> fields, IList<string> namespaces) {
+        public static Type CreateType(string id, Type baseType, IList<FieldDefinition> fields, IList<MethodDefinition> methods, IList<string> namespaces) {
             if (classBuilder == null) classBuilder = new ClassBuilder();
-            return classBuilder.CreateRuntimeType(id, baseType, fields, namespaces);
+            return classBuilder.CreateRuntimeType(id, baseType, fields, methods, namespaces);
         }
 
         public static Type CreateGenericRuntimeType(string id, Type baseType, GenericTypeDefinition[] genericsArgs, IList<FieldDefinition> fields, IList<string> namespaces) {
@@ -1198,11 +1280,27 @@ namespace UIForia.Util {
         public struct FieldDefinition {
 
             public readonly string fieldName;
-            public readonly string fieldType;
+            public readonly TypeLookup fieldType;
 
-            public FieldDefinition(string fieldType, string fieldName) {
+            public FieldDefinition(TypeLookup fieldType, string fieldName) {
                 this.fieldType = fieldType;
                 this.fieldName = fieldName;
+            }
+
+        }
+
+        public struct MethodDefinition {
+
+            public string methodName;
+            public TypeLookup returnType;
+            public LambdaArgument[] arguments;
+            public BlockNode body;
+
+            public MethodDefinition(TypeLookup returnType, string methodName, LambdaArgument[] arguments, BlockNode body) {
+                this.returnType = returnType;
+                this.methodName = methodName;
+                this.arguments = arguments;
+                this.body = body;
             }
 
         }
@@ -1212,127 +1310,6 @@ namespace UIForia.Util {
             public string name;
             public GenericParameterAttributes restrictions;
             public Type[] interfaceTypes;
-
-        }
-
-        private class ClassBuilder {
-
-            private readonly AssemblyName assemblyName;
-            private readonly AssemblyBuilder assemblyBuilder;
-            private readonly ModuleBuilder moduleBuilder;
-            private readonly Dictionary<string, Type> typeMap;
-
-            public ClassBuilder() {
-                this.assemblyName = new AssemblyName("UIForia.Generated");
-                this.assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-                this.moduleBuilder = assemblyBuilder.DefineDynamicModule("MainModule");
-                this.typeMap = new Dictionary<string, Type>();
-            }
-
-            public void Reset() {
-                typeMap.Clear();
-            }
-
-
-            public Type CreateGenericRuntimeType(string id, Type baseType, GenericTypeDefinition[] generics, IList<FieldDefinition> fieldDefinitions, IList<string> namespaces) {
-                if (typeMap.ContainsKey(id)) {
-                    return null; //todo -- exception
-                }
-
-                TypeBuilder typeBuilder = moduleBuilder.DefineType(
-                    id,
-                    TypeAttributes.Public |
-                    TypeAttributes.Class |
-                    TypeAttributes.AutoClass |
-                    TypeAttributes.AnsiClass |
-                    TypeAttributes.BeforeFieldInit |
-                    TypeAttributes.AutoLayout,
-                    baseType
-                );
-
-                string[] typeNames = new string[generics.Length];
-
-                for (int i = 0; i < generics.Length; i++) {
-                    typeNames[i] = generics[i].name;
-                }
-
-                GenericTypeParameterBuilder[] typeParams = typeBuilder.DefineGenericParameters(typeNames);
-
-                for (int i = 0; i < fieldDefinitions.Count; i++) {
-                    string typeName = fieldDefinitions[i].fieldType;
-
-                    Type fieldType = ResolveFieldTypeFromGenerics(typeName, typeParams);
-
-                    if (fieldType == null) {
-                        fieldType = TypeProcessor.ResolveTypeExpression(null, namespaces, typeName);
-                    }
-
-                    typeBuilder.DefineField(fieldDefinitions[i].fieldName, fieldType, FieldAttributes.Public);
-                }
-
-                Type retn = typeBuilder.CreateType();
-                typeMap[id] = retn;
-                return retn;
-            }
-
-            private static Type ResolveFieldTypeFromGenerics(string fieldType, GenericTypeParameterBuilder[] typeParams) {
-                for (int i = 0; i < typeParams.Length; i++) {
-                    if (fieldType == typeParams[i].Name) {
-                        return typeParams[i];
-                    }
-                }
-
-                return null;
-            }
-
-            public Type CreateRuntimeType(string id, Type baseType, IList<FieldDefinition> fields, IList<string> namespaces) {
-                if (typeMap.ContainsKey(id)) {
-                    return null; //todo -- exception
-                }
-
-                TypeBuilder typeBuilder = moduleBuilder.DefineType(
-                    id,
-                    TypeAttributes.Public |
-                    TypeAttributes.Class |
-                    TypeAttributes.AutoClass |
-                    TypeAttributes.AnsiClass |
-                    TypeAttributes.BeforeFieldInit |
-                    TypeAttributes.AutoLayout,
-                    baseType
-                );
-
-                typeBuilder.DefineDefaultConstructor(MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName);
-
-                // todo -- ensure no duplicate field names
-                if (fields != null) {
-                    for (int i = 0; i < fields.Count; i++) {
-                        Type fieldType = TypeProcessor.ResolveTypeExpression(null, namespaces, fields[i].fieldType);
-
-                        typeBuilder.DefineField(fields[i].fieldName, fieldType, FieldAttributes.Public);
-                    }
-                }
-
-
-                Type retn = typeBuilder.CreateType();
-                typeMap[id] = retn;
-                return retn;
-            }
-
-            public Type GetCreatedType(string id) {
-                Type type = null;
-                typeMap.TryGetValue(id, out type);
-                return type;
-            }
-
-            public bool TryCreateInstance<T>(string id, out T instance) {
-                if (typeMap.TryGetValue(id, out Type toCreate)) {
-                    instance = (T) Activator.CreateInstance(toCreate);
-                    return true;
-                }
-
-                instance = default;
-                return false;
-            }
 
         }
 
@@ -1518,13 +1495,6 @@ namespace UIForia.Util {
                 }
             }
         }
-
-    }
-
-    public struct MethodDescriptor {
-
-        public MethodInfo methodInfo;
-        public ParameterInfo[] parameterInfos;
 
     }
 

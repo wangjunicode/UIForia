@@ -6,12 +6,20 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
+using UIForia.Parsing.Style.AstNodes;
 using UIForia.Util;
 using Debug = UnityEngine.Debug;
+using DotAccessNode = UIForia.Parsing.Expressions.AstNodes.DotAccessNode;
+using InvokeNode = UIForia.Parsing.Expressions.AstNodes.InvokeNode;
+using MemberAccessExpressionNode = UIForia.Parsing.Expressions.AstNodes.MemberAccessExpressionNode;
+using ParenNode = UIForia.Parsing.Expressions.AstNodes.ParenNode;
+using UnaryExpressionNode = UIForia.Parsing.Expressions.AstNodes.UnaryExpressionNode;
 
 namespace UIForia.Compilers {
 
@@ -334,9 +342,9 @@ namespace UIForia.Compilers {
             };
         }
 
-        public ParameterExpression AddVariable(Type type, string name) {
+        public ParameterExpression AddVariable(Type type, string name, ParameterFlags flags = 0) {
             if (addingStatements) {
-                return currentBlock.AddInternalVariable(type, name);
+                return currentBlock.AddInternalVariable(type, name, flags);
             }
             else {
                 return Expression.Parameter(type, "__" + NextId);
@@ -482,7 +490,7 @@ namespace UIForia.Compilers {
             labelStack.Push(returnLabel);
         }
 
-        public void Return(ASTNode ast) {
+        public Expression Return(ASTNode ast) {
             if (returnType == null) {
                 throw CompileException.SignatureNotDefined();
             }
@@ -492,8 +500,7 @@ namespace UIForia.Compilers {
                 // emit a goto for the label
                 EnsureReturnLabel();
 
-                AddStatement(Expression.Return(returnLabel));
-                return;
+                return AddStatement(Expression.Return(returnLabel));
             }
 
             if (returnVar == null) {
@@ -507,7 +514,7 @@ namespace UIForia.Compilers {
 
             Expression returnVal = Visit(returnType, ast);
 
-            AddStatement(Expression.Assign(returnVar, returnVal));
+            return AddStatement(Expression.Assign(returnVar, returnVal));
         }
 
         public void Return(string input, out Type retnType) {
@@ -697,6 +704,14 @@ namespace UIForia.Compilers {
 
         public T Compile<T>() where T : Delegate {
             return (T) BuildLambda().Compile();
+        }
+
+        public Delegate Compile() {
+            return BuildLambda().Compile();
+        }
+
+        public void CompileToMethod(MethodBuilder builder, DebugInfoGenerator debugInfoGenerator = null) {
+            BuildLambda().CompileToMethod(builder, debugInfoGenerator);
         }
 
         public void SetNullCheckHandler(Action<LinqCompiler, Expression> nullCHeckHandler) {
@@ -1947,6 +1962,17 @@ namespace UIForia.Compilers {
                 case ASTNodeType.DirectCast:
                     return VisitDirectCast((UnaryExpressionNode) node);
 
+                case ASTNodeType.VariableDeclaration:
+                    return VisitLocalVariable((LocalVariableNode) node);
+
+                case ASTNodeType.Return: {
+                    ReturnStatementNode returnNode = (ReturnStatementNode) node;
+                    return Return(returnNode.expression);
+                }
+
+                case ASTNodeType.Block:
+                    return VisitBlock((BlockNode) node);
+                   
                 case ASTNodeType.ListInitializer:
                     // this might just not make sense as a feature
                     // [] if not used as a return value then use pooling for the array 
@@ -1979,6 +2005,32 @@ namespace UIForia.Compilers {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private Expression VisitLocalVariable(LocalVariableNode node) {
+            Type variableType = null;
+            
+            if (node.typeLookup.typeName == null) {
+                if (node.value == null) {
+                    throw new CompileException("undefined var");
+                }
+                variableType = GetExpressionType(node.value);
+            }
+            else {
+                // todo -- generics probably need invoking type passed in
+                variableType = TypeProcessor.ResolveType(node.typeLookup, namespaces, null);
+            }
+
+            ParameterExpression variable = AddVariable(variableType, node.name);
+            if (node.value != null) {
+                Assign(variable, Visit(variableType, node.value));
+            }
+            return variable;
+            
+        }
+
+        private Expression VisitBlock(BlockNode node) {
+            return null;
         }
 
         public Expression TypeWrapStatement(ITypeWrapper wrapper, Type targetType, ASTNode ast) {
@@ -2928,6 +2980,12 @@ namespace UIForia.Compilers {
             }
 
             return parameters[i];
+        }
+
+        public void StatementList(BlockNode blockNode) {
+            for (int i = 0; i < blockNode.statements.size; i++) {
+                Statement(blockNode.statements[i]);
+            }
         }
 
     }

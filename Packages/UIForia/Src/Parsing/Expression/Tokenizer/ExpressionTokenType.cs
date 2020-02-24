@@ -81,7 +81,16 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
 
         If,
         Else,
-        SemiColon
+        ElseIf,
+        SemiColon,
+
+        Var,
+
+        While,
+
+        For,
+
+        Return
 
     }
 

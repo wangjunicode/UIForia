@@ -49,7 +49,7 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
         public void Advance(int count = 1) {
             ptr = Mathf.Min(ptr + count, tokens.Count);
         }
-        
+
         [DebuggerStepThrough]
         public void Set(int idx) {
             ptr = Mathf.Min(idx, tokens.Count);
@@ -126,14 +126,14 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
 
             return -1;
         }
-        
+
         public int FindMatchingTernaryColon() {
             int i = 0;
             int level = 0;
             while (HasTokenAt(i)) {
                 ExpressionTokenType expressionToken = Peek(i);
                 // find paren open, recurse
-                
+
                 if (expressionToken == ExpressionTokenType.ParenOpen) {
                     i = FindMatchingIndex(ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose);
 //                    level++;
@@ -190,11 +190,44 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
             return -1;
         }
 
+        public int FindMatchingIndexNoAdvance(ExpressionTokenType braceOpen, ExpressionTokenType braceClose) {
+            if (Current != braceOpen) {
+                return -1;
+            }
+
+            int i = ptr;
+            int counter = 1;
+            while (i != lastTokenIndex - 1) {
+                i++;
+
+                if (tokens.array[i].expressionTokenType == braceOpen) {
+                    counter++;
+                }
+
+                if (tokens.array[i].expressionTokenType == braceClose) {
+                    counter--;
+                    if (counter == 0) {
+                        return i;
+                    }
+                }
+            }
+
+            return -1;
+        }
+
         [DebuggerStepThrough]
         public TokenStream AdvanceAndReturnSubStream(int advance) {
             StructList<ExpressionToken> subStreamTokens = tokens.GetRange(ptr, advance);
             Advance(advance);
             return new TokenStream(subStreamTokens);
+        }
+
+        public TokenStream GetSubStreamTo(int index) {
+            return new TokenStream(tokens.GetRange(ptr, index - ptr));
+        }
+        
+         public TokenStream GetSubStreamFromRange(int start, int end) {
+             return new TokenStream(tokens.GetRange(start, end - start));
         }
 
         [DebuggerStepThrough]
@@ -229,6 +262,31 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
         public bool NextTokenIs(ExpressionTokenType tokenType) {
             if (ptr + 1 >= lastTokenIndex) return false;
             return Next == tokenType;
+        }
+
+        public TokenStream AdvanceAndGetSubStreamBetween(ExpressionTokenType open, ExpressionTokenType close) {
+            int index = FindMatchingIndexNoAdvance(open, close);
+            
+            if (index == -1) {
+                return default;
+            }
+
+            TokenStream retn = GetSubStreamFromRange(ptr + 1, index); 
+            
+            Set(index + 1);
+            
+            return retn;
+
+        }
+        
+        public TokenStream GetSubStreamBetween(ExpressionTokenType open, ExpressionTokenType close) {
+            int index = FindMatchingIndexNoAdvance(open, close);
+            if (index == -1) {
+                return default;
+            }
+
+            return GetSubStreamFromRange(ptr + 1, index);
+
         }
 
     }

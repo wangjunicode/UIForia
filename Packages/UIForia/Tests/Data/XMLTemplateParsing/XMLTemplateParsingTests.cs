@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using Tests.Mocks;
@@ -6,6 +8,8 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
+using UIForia.Parsing.Expressions.AstNodes;
+using UIForia.Util;
 using UnityEngine;
 using Application = UnityEngine.Application;
 
@@ -204,7 +208,7 @@ namespace TemplateParsing_XML {
 
         [Template("Data/XMLTemplateParsing/XMLTemplateParsing_UsingElement.xml")]
         public class XMLTemplateParsing_UsingElement : UIElement { }
-        
+
         [Test]
         public void ParseUsingElement() {
             MockApplication app = MockApplication.Setup<XMLTemplateParsing_UsingElement>();
@@ -216,8 +220,26 @@ namespace TemplateParsing_XML {
             Assert.AreEqual("Hello 2!", GetText(e[1][0]));
             Assert.AreEqual("Hello Same File 3!", GetText(e[2][0]));
             Assert.AreEqual("Hello Same File 4!", GetText(e[3][0]));
-        
         }
+
+        [Test]
+        public void GenerateTypeSkeleton() {
+            ClassBuilder builder = new ClassBuilder();
+            Type type = builder.CreateRuntimeType("SkeletonTest", typeof(object),
+                new List<ReflectionUtil.FieldDefinition>() { },
+                new List<ReflectionUtil.MethodDefinition>() {
+                    new ReflectionUtil.MethodDefinition() {
+                        methodName = "InstanceMethod0",
+                        returnType = new TypeLookup(typeof(string)),
+                        arguments = new LambdaArgument[0],
+                        // body = 
+                    }
+                },
+                null);
+            
+            
+        }
+
 
         public static string GetText(UIElement element) {
             UITextElement textEl = element as UITextElement;

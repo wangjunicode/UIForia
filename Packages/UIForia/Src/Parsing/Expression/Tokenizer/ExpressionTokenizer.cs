@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UIForia.Exceptions;
 using UIForia.Util;
 using UnityEngine;
@@ -10,6 +9,38 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
 
         private static readonly char stringCharacter = '\'';
 
+        private static void TryReadCharacterSequence(TokenizerContext context, string match1, string match2, ExpressionTokenType expressionTokenType, StructList<ExpressionToken> output) {
+            
+            if (context.ptr + match1.Length > context.input.Length) return;
+
+            int ptr = context.ptr;
+            
+            for (int i = 0; i < match1.Length; i++) {
+                if (context.input[ptr++] != match1[i]) {
+                    return;
+                }
+            }
+
+            
+            while (ptr < context.input.Length) {
+                if (char.IsWhiteSpace(context.input[ptr + 1])) {
+                    ptr++;
+                }
+                else {
+                    break;
+                }
+            }
+            
+            for (int i = 0; i < match2.Length; i++) {
+                if (context.input[ptr + i] != match2[i]) {
+                    return;
+                }
+            }
+            
+            output.Add(new ExpressionToken(expressionTokenType, match1 + " " + match2, context.line, context.column));
+            TryConsumeWhiteSpace(context.Advance(ptr));
+        }
+              
         private static void TryReadCharacters(TokenizerContext context, string match, ExpressionTokenType expressionTokenType, StructList<ExpressionToken> output) {
             if (context.ptr + match.Length > context.input.Length) return;
             for (int i = 0; i < match.Length; i++) {
@@ -170,6 +201,12 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
 
         private static ExpressionToken TransformIdentifierToTokenType(TokenizerContext context, string identifier) {
             switch (identifier) {
+                case "var": return new ExpressionToken(ExpressionTokenType.Var, identifier, context.line, context.column);
+                case "if": return new ExpressionToken(ExpressionTokenType.If, identifier, context.line, context.column);
+                case "else": return new ExpressionToken(ExpressionTokenType.Else, identifier, context.line, context.column);
+                case "for": return new ExpressionToken(ExpressionTokenType.For, identifier, context.line, context.column);
+                case "while": return new ExpressionToken(ExpressionTokenType.While, identifier, context.line, context.column);
+                case "return": return new ExpressionToken(ExpressionTokenType.Return, identifier, context.line, context.column);
                 case "null": return new ExpressionToken(ExpressionTokenType.Null, identifier, context.line, context.column);
                 case "true": return new ExpressionToken(ExpressionTokenType.Boolean, identifier, context.line, context.column);
                 case "false": return new ExpressionToken(ExpressionTokenType.Boolean, identifier, context.line, context.column);
@@ -314,6 +351,7 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
                 TryReadCharacters(context, "}", ExpressionTokenType.ExpressionClose, output);
                 
                 TryReadCharacters(context, "if", ExpressionTokenType.If, output);
+                TryReadCharacterSequence(context, "else", "if", ExpressionTokenType.ElseIf, output);
                 TryReadCharacters(context, "else", ExpressionTokenType.Else, output);
 
                 TryReadDigit(context, output);

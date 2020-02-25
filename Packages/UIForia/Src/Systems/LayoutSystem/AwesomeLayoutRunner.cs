@@ -176,8 +176,14 @@ namespace UIForia.Systems {
                 return;
             }
 
-            element.layoutBox.Invalidate();
+            if (element.layoutBox != null) {
+                element.layoutBox.Invalidate();
+            }
 
+            if (element.children == null) {
+                return;
+            }
+            
             for (int i = 0; i < element.children.size; i++) {
                 InvalidateAll(element.children[i]);
             }

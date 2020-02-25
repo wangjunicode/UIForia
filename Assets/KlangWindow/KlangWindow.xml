@@ -4,16 +4,9 @@
     <Style path="KlangWindow/KlangWindow.style"/>
 
     <Contents style="window-container">
+        <Group style="side-bar-container default-shadow" if="!HideSidebar">
 
-        <Group style="side-bar-container default-shadow" if="!hideSideBar">
-
-            <Slot attr:id="side-bar" style="side-bar-slot" name="KlangWindow.Sidebar">
-
-                <SidebarItem icon="'SpriteSettingOverwrite/ui_icon_traits_unfocused'" tooltip="'Tooltip Here'" mouse:click="SelectSidebarItem($element)"/>
-                <SidebarItem icon="'SpriteSettingOverwrite/ui_icon_traits_unfocused'" mouse:click="SelectSidebarItem($element)"/>
-                <SidebarItem icon="'SpriteSettingOverwrite/ui_icon_traits_unfocused'" mouse:click="SelectSidebarItem($element)"/>
-
-            </Slot>
+            <define:sidebar attr:id="side-bar" style="side-bar-slot" inject.mouse:click="SelectSidebarItem($element)" />
 
             <Group attr:id="side-bar-runner" style="side-bar-runner">
                 <Group style="side-bar-runner-display"/>
@@ -21,15 +14,14 @@
         </Group>
 
         <Div style="default-shadow main-content">
-            <Group style="title-bar" onDragCreate="CreateDrag_TitleBar($event)">
-
-                <Slot name="KlangWindow.Titlebar" attr:id="drag-box">
+            <Group style="title-bar" drag:create="CreateDrag_TitleBar($event)">
+                <define:titlebar attr:id="drag-box">
                     <Heading3>
                         {windowTitle}
                     </Heading3>
-                </Slot>
+                </define:titlebar>
 
-                <Slot name="KlangWindow.TitlebarButtons" attr:id="title-button-group" style="title-buttons">
+                <define:titlebarButtons attr:id="title-button-group" style="title-buttons">
                     <WindowTitleButton if="Resizable" style="title-button maximize-button" attr:variant="green" mouse:click="Maximize()">
                         <Div style="horizontal title-button-part"/>
                         <Div style="vertical title-button-part"/>
@@ -41,15 +33,35 @@
                         <Div style="left-leg title-button-part"/>
                         <Div style="right-leg title-button-part"/>
                     </WindowTitleButton>
-                </Slot>
-
+                </define:titlebarButtons>
             </Group>
 
-            <ScrollView style="body {DarkTheme ? 'body-dark'}">
-                <Children/>
-            </ScrollView>
+            <forward:Children />
         </Div>
 
     </Contents>
 
+    <Contents extends="path/to/template">
+        
+        <override:Children>
+            
+        </override:Children>
+        
+    </Contents>
+    
+    <Contents>
+        <KlangWindow>
+            <Group>
+                all the people online
+            </Group>
+            
+            <ScrollView>
+                chat messages here
+            </ScrollView>
+
+            <Input value="'your message'" />
+        </KlangWindow>
+    </Contents>
+    
 </UITemplate>
+

@@ -452,7 +452,7 @@ namespace UIForia.Systems {
                 }
             }
             else if (mouseState.AnyMouseDown) {
-                if (Vector2.Distance(mouseState.MouseDownPosition, mouseState.mousePosition) >= k_DragThreshold) {
+                if (Vector2.Distance(mouseState.MouseDownPosition, mouseState.mousePosition) >= k_DragThreshold / Application.dpiScaleFactor) {
                     BeginDrag();
                 }
             }

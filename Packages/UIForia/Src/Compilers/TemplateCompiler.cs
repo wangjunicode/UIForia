@@ -106,6 +106,7 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_InputHandlerGroup_AddKeyboardEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddKeyboardEvent));
 
         internal static readonly PropertyInfo s_Element_IsEnabled = typeof(UIElement).GetProperty(nameof(UIElement.isEnabled));
+        internal static readonly PropertyInfo s_Element_IsEnabledAndNeedsUpdate = typeof(UIElement).GetProperty(nameof(UIElement.__internal_isEnabledAndNeedsUpdate));
         internal static readonly FieldInfo s_UIElement_BindingNode = typeof(UIElement).GetField(nameof(UIElement.bindingNode));
 
         internal static readonly MethodInfo s_LinqBindingNode_CreateLocalContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.CreateLocalContextVariable));
@@ -1292,13 +1293,13 @@ namespace UIForia.Compilers {
             if (processedType.requiresAfterPropertyUpdates) {
                 ParameterExpression element = updateCompiler.GetCastElement();
 
-                updateCompiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabled), Expression.Constant(true), () => { updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetCastElement(), s_UIElement_OnAfterPropertyBindings)); });
+                updateCompiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabledAndNeedsUpdate), Expression.Constant(true), () => { updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetCastElement(), s_UIElement_OnAfterPropertyBindings)); });
             }
 
             if (processedType.requiresUpdateFn) {
                 ParameterExpression element = updateCompiler.GetCastElement();
 
-                updateCompiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabled), Expression.Constant(true), () => { updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetCastElement(), s_UIElement_OnUpdate)); });
+                updateCompiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabledAndNeedsUpdate), Expression.Constant(true), () => { updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetCastElement(), s_UIElement_OnUpdate)); });
             }
         }
 

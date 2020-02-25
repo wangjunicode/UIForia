@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -9,7 +8,7 @@ using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
-using Debug = UnityEngine.Debug;
+using UnityEngine.Assertions;
 
 namespace UIForia.Util {
 
@@ -20,6 +19,7 @@ namespace UIForia.Util {
         private readonly ModuleBuilder moduleBuilder;
         private readonly Dictionary<string, Type> typeMap;
         private readonly LinqCompiler linqCompiler;
+        private static Dictionary<Type, TypeData> s_DynamicTypeData = new Dictionary<Type, TypeData>();
 
         public ClassBuilder() {
             this.linqCompiler = new LinqCompiler();
@@ -122,124 +122,6 @@ namespace UIForia.Util {
             // }
 
             il.Emit(OpCodes.Ret);
-
-            // for (int i = 0; i < parameters.Length; i++) {
-            //     if (parameters[i].IsByRef) {
-            //         parameters[i] = parameters[i].GetElementType();
-            //     }
-            // }
-            //
-            //
-            // LocalBuilder[] locals = new LocalBuilder[parameters.Length];
-            //
-            // for (int i = 0; i < parameters.Length; i++) {
-            //     locals[i] = il.DeclareLocal(parameters[i], true);
-            // }
-            //
-            // for (int i = 0; i < parameters.Length; i++) {
-            //     il.Emit(OpCodes.Ldarg_1);
-            //     EmitFastInt(il, i);
-            //     il.Emit(OpCodes.Ldelem_Ref);
-            //     EmitCastToReference(il, parameters[i]);
-            //     il.Emit(OpCodes.Stloc, locals[i]);
-            // }
-            //
-            // if (!methodInfo.IsStatic) {
-            //     il.Emit(OpCodes.Ldarg_0);
-            // }
-            //
-            // for (int i = 0; i < parameters.Length; i++) {
-            //     if (parameters[i].IsByRef)
-            //         il.Emit(OpCodes.Ldloca_S, locals[i]);
-            //     else
-            //         il.Emit(OpCodes.Ldloc, locals[i]);
-            // }
-            //
-            // if (methodInfo.IsStatic) {
-            //     il.EmitCall(OpCodes.Call, methodInfo, null);
-            // }
-            // else {
-            //     il.EmitCall(OpCodes.Callvirt, methodInfo, null);
-            // }
-            //
-            // if (methodInfo.ReturnType == typeof(void)) {
-            //     il.Emit(OpCodes.Ldnull);
-            // }
-            // else {
-            //     EmitBoxIfNeeded(il, methodInfo.ReturnType);
-            // }
-            //
-            // for (int i = 0; i < parameters.Length; i++) {
-            //     if (parameters[i].IsByRef) {
-            //         il.Emit(OpCodes.Ldarg_1);
-            //         EmitFastInt(il, i);
-            //         il.Emit(OpCodes.Ldloc, locals[i]);
-            //         if (locals[i].LocalType.IsValueType) {
-            //             il.Emit(OpCodes.Box, locals[i].LocalType);
-            //         }
-            //
-            //         il.Emit(OpCodes.Stelem_Ref);
-            //     }
-            // }
-            //
-            // il.Emit(OpCodes.Ret);
-        }
-
-        private static void EmitCastToReference(ILGenerator il, System.Type type) {
-            if (type.IsValueType) {
-                il.Emit(OpCodes.Unbox_Any, type);
-            }
-            else {
-                il.Emit(OpCodes.Castclass, type);
-            }
-        }
-
-        private static void EmitBoxIfNeeded(ILGenerator il, System.Type type) {
-            if (type.IsValueType) {
-                il.Emit(OpCodes.Box, type);
-            }
-        }
-
-        private static void EmitFastInt(ILGenerator il, int value) {
-            switch (value) {
-                case -1:
-                    il.Emit(OpCodes.Ldc_I4_M1);
-                    return;
-                case 0:
-                    il.Emit(OpCodes.Ldc_I4_0);
-                    return;
-                case 1:
-                    il.Emit(OpCodes.Ldc_I4_1);
-                    return;
-                case 2:
-                    il.Emit(OpCodes.Ldc_I4_2);
-                    return;
-                case 3:
-                    il.Emit(OpCodes.Ldc_I4_3);
-                    return;
-                case 4:
-                    il.Emit(OpCodes.Ldc_I4_4);
-                    return;
-                case 5:
-                    il.Emit(OpCodes.Ldc_I4_5);
-                    return;
-                case 6:
-                    il.Emit(OpCodes.Ldc_I4_6);
-                    return;
-                case 7:
-                    il.Emit(OpCodes.Ldc_I4_7);
-                    return;
-                case 8:
-                    il.Emit(OpCodes.Ldc_I4_8);
-                    return;
-            }
-
-            if (value > -129 && value < 128) {
-                il.Emit(OpCodes.Ldc_I4_S, (sbyte) value);
-            }
-            else {
-                il.Emit(OpCodes.Ldc_I4, value);
-            }
         }
 
         public Type CreateRuntimeType(string id, Type baseType, IList<ReflectionUtil.FieldDefinition> fields, IList<ReflectionUtil.MethodDefinition> methods, IList<string> namespaces) {
@@ -264,7 +146,13 @@ namespace UIForia.Util {
                 for (int i = 0; i < fields.Count; i++) {
                     Type fieldType = TypeProcessor.ResolveType(fields[i].fieldType, (IReadOnlyList<string>) namespaces);
 
-                    typeBuilder.DefineField(fields[i].fieldName, fieldType, FieldAttributes.Public);
+                    if (fields[i].isStatic) {
+                        typeBuilder.DefineField(fields[i].fieldName, fieldType, FieldAttributes.Public  | FieldAttributes.Static);
+                    }
+                    else {
+                        typeBuilder.DefineField(fields[i].fieldName, fieldType, FieldAttributes.Public);
+                    }
+                    
                 }
             }
 
@@ -291,24 +179,41 @@ namespace UIForia.Util {
                     // instead we resort to treating 'this' as an object type and invoking methods via cast.
                     // this won't be the case for production code though
                     staticSignature[0] = typeof(object);
-                    
+
                     for (int j = 0; j < methodDefinition.arguments.Length; j++) {
-                        Type type = TypeProcessor.ResolveType(methodDefinition.arguments[i].type.Value, (IReadOnlyList<string>) namespaces);
+                        ref LambdaArgument argument = ref methodDefinition.arguments[j];
+                        TypeLookup? typeLookup = argument.type;
+                        
+                        Assert.IsTrue(typeLookup.HasValue);
+                        
+                        Type type = TypeProcessor.ResolveType(typeLookup.Value, (IReadOnlyList<string>) namespaces);
+
+                        if (type == null) {
+                            throw new CompileException($"Unable to resolve type for {typeLookup.Value.ToString()}");
+                        }
+                        
                         signatureTypes[j] = type;
                         signature[j] = new ResolvedParameter() {
                             type = type,
-                            name = methodDefinition.arguments[i].identifier
+                            name = argument.identifier
                         };
                         staticSignature[j + 1] = signature[j].type;
                     }
 
                     Type fnType = ReflectionUtil.GetClosedDelegateType(staticSignature, returnType ?? typeof(void));
 
-                    FieldBuilder fnField = typeBuilder.DefineField("__" + methodDefinition.methodName, fnType, FieldAttributes.Public | FieldAttributes.Static);
+                    FieldBuilder fnField = typeBuilder.DefineField("__" + methodDefinition.methodName, fnType, FieldAttributes.Private | FieldAttributes.Static);
+
+                    MethodAttributes methodAttributes = k_MethodAttributes;
+                    
+                    if (methodDefinition.isStatic) {
+                        methodAttributes |= MethodAttributes.Static;
+                        throw new CompileException("Static methods are not yet supported in Dynamic element types");
+                    }
                     
                     MethodBuilder method = typeBuilder.DefineMethod(
                         methodDefinition.methodName,
-                        k_MethodAttributes,
+                        methodAttributes,
                         CallingConventions.Standard,
                         returnType,
                         signatureTypes
@@ -320,7 +225,8 @@ namespace UIForia.Util {
                         body = methodDefinition.body,
                         signature = signature,
                         returnType = returnType,
-                        name = methodDefinition.methodName
+                        name = methodDefinition.methodName,
+                        isStatic = methodDefinition.isStatic
                     });
                 }
             }
@@ -328,32 +234,67 @@ namespace UIForia.Util {
             Type retn = typeBuilder.CreateType();
             typeMap[id] = retn;
 
-            FieldInfo[] fieldInfos = retn.GetFields(BindingFlags.Public | BindingFlags.Static);
+            FieldInfo[] fieldInfos = retn.GetFields(BindingFlags.NonPublic | BindingFlags.Static);
+
+            TypeData typeData = default;
+            typeData.fieldData = new StructList<FieldData>();
+            typeData.methodData = new StructList<MethodData>();
 
             if (methods != null) {
+
                 for (int i = 0; i < methods.Count; i++) {
                     linqCompiler.Reset();
                     ref ExpressionData exprData = ref expressionData.array[i];
 
                     LightList<Parameter> parameters = LightList<Parameter>.Get();
 
-                    parameters.Add(new Parameter(typeof(object), "__thisObject", ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+
+                    if (!exprData.isStatic) {
+                        parameters.Add(new Parameter(typeof(object), "__thisObject", ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
+                    }
 
                     for (int j = 0; j < exprData.signature.Length; j++) {
                         ref ResolvedParameter parameter = ref exprData.signature[j];
                         parameters.Add(new Parameter(parameter.type, parameter.name));
                     }
 
-                    Expression castExpr = Expression.Convert(parameters[0], retn);
+                    MethodData methodData = new MethodData() {
+                        isStatic = false,
+                        methodName = exprData.name,
+                        returnType = exprData.returnType,
+                        signature = exprData.signature
+                    };
+                        
+                    typeData.methodData.Add(methodData);
+                    
 
                     linqCompiler.SetSignature(parameters, exprData.returnType);
-                    linqCompiler.SetImplicitContext(parameters[0]);
 
-                    ParameterExpression thisRef = linqCompiler.AddVariable(retn, "_this");
-                    linqCompiler.RawExpression(Expression.Assign(thisRef, castExpr));
-                    linqCompiler.SetImplicitContext(thisRef);
+                    if (!methodData.isStatic) {
+                        Expression castExpr = Expression.Convert(parameters[0], retn);
+                        ParameterExpression thisRef = linqCompiler.AddVariable(retn, "_this");
+                        linqCompiler.RawExpression(Expression.Assign(thisRef, castExpr));
+                        linqCompiler.SetImplicitContext(thisRef);
+                    }
+                    else {
+                        linqCompiler.SetImplicitStaticContext(retn);
+                    }
+
                     linqCompiler.StatementList(exprData.body);
-                    Delegate fn = linqCompiler.Compile();
+
+                    LambdaExpression lambda = linqCompiler.BuildLambda();
+
+                    Delegate fn = lambda.Compile();
+
+                    string fnName = "__" + exprData.name;
+
+                    FieldData fieldData = new FieldData() {
+                        lambdaValue = lambda,
+                        fieldName = fnName
+                    };
+
+                    typeData.fieldData.Add(fieldData);
+                    
                     FieldInfo fieldInfo = null;
                     for (int j = 0; j < fieldInfos.Length; j++) {
                         if (fieldInfos[j].Name == "__" + exprData.name) {
@@ -362,16 +303,70 @@ namespace UIForia.Util {
                         }
                     }
 
-                    // todo -- somehow need to save the lambda to be printed by code generator.
-                    // probably in a dictionary on reflection util?
                     fieldInfo.SetValue(null, fn);
                 }
             }
 
+            s_DynamicTypeData[retn] = typeData;
             expressionData.Release();
             return retn;
         }
 
+        public static TypeData GetDynamicTypeData(Type type) {
+            if (s_DynamicTypeData.TryGetValue(type, out TypeData retn)) {
+                return retn;
+            }
+
+            return default;
+        }
+
+        public struct FieldData {
+
+            public string fieldName;
+            public LambdaExpression lambdaValue;
+
+        }
+
+        public struct MethodData {
+
+            public string methodName;
+            public Type returnType;
+            public bool isStatic;
+            public ResolvedParameter[] signature;
+
+        }
+        
+        public struct LambdaField {
+
+            public readonly string fnName;
+            public readonly LambdaExpression lambdaExpression;
+
+            public LambdaField(string fnName, LambdaExpression lambdaExpression) {
+                this.fnName = fnName;
+                this.lambdaExpression = lambdaExpression;
+            }
+
+        }
+
+        public struct TypeData {
+
+            public StructList<FieldData> fieldData;
+            public StructList<MethodData> methodData;
+
+            public FieldData GetFieldData(string fieldName) {
+                if (fieldData == null) return default;
+
+                for (int i = 0; i < fieldData.size; i++) {
+                    ref FieldData f = ref fieldData.array[i];
+                    if (f.fieldName == fieldName) {
+                        return f;
+                    }
+                }
+
+                return default;
+            }
+
+        }
 
         private struct ExpressionData {
 
@@ -379,10 +374,11 @@ namespace UIForia.Util {
             public Type returnType;
             public BlockNode body;
             public string name;
+            public bool isStatic;
 
         }
 
-        private struct ResolvedParameter {
+        public struct ResolvedParameter {
 
             public Type type;
             public string name;

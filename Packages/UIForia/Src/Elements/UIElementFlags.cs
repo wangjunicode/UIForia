@@ -15,7 +15,11 @@ namespace UIForia.Elements {
         Created = 1 << 6, // can maybe get rid fo this when revisiting 
         TemplateRoot = 1 << 7,
         IndexChanged = 1 << 8,
-
+    
+        InTagIndex = 1 << 9,
+        
+        NeedsUpdate = 1 << 10,
+        
         SelfAndAncestorEnabled = Alive | Enabled | AncestorEnabled,
 
         // Layout Flags
@@ -27,9 +31,7 @@ namespace UIForia.Elements {
         LayoutTypeOrBehaviorDirty = 1 << 26,
 
         EnabledFlagSet = Alive | Enabled | AncestorEnabled,
-
-
-        InTagIndex = 1 << 9
+        EnabledFlagSetWithUpdate = EnabledFlagSet | NeedsUpdate,
 
     }
 

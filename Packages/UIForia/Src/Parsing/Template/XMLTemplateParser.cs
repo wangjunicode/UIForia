@@ -411,15 +411,6 @@ namespace UIForia.Parsing {
 
                 List<ReflectionUtil.FieldDefinition> fieldDefinitions = new List<ReflectionUtil.FieldDefinition>();
 
-                // foreach (XElement field in fields) {
-                //     XAttribute fieldName = field.GetAttribute("name");
-                //     XAttribute fieldType = field.GetAttribute("type");
-                //
-                //     ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldType.Value.Trim(), fieldName.Value.Trim());
-                //
-                //     fieldDefinitions.Add(fieldDefinition);
-                // }
-
                 string typeName = node.templateId + "_" + Guid.NewGuid().ToString().Replace("-", "_");
 
                 type = ReflectionUtil.CreateGenericRuntimeType(typeName, typeof(UIElement), genericTypeDefinitions, fieldDefinitions, templateShell.referencedNamespaces);
@@ -441,7 +432,7 @@ namespace UIForia.Parsing {
                         ASTNode n = astNode.nodes.array[i];
                         if (n is FieldNode fieldNode) {
                             
-                            ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldNode.typeLookup, fieldNode.name);
+                            ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldNode.typeLookup, fieldNode.name, fieldNode.isStatic);
 
                             fieldDefinitions.Add(fieldDefinition);
                         }
@@ -451,22 +442,14 @@ namespace UIForia.Parsing {
                                 arguments = methodNode.signatureList,
                                 returnType = methodNode.returnTypeLookup,
                                 body = methodNode.body,
-                                methodName = methodNode.name
+                                methodName = methodNode.name,
+                                isStatic = methodNode.isStatic,
                             };
                             
                             methodDefinitions.Add(methodDefinition);
                         }
                     }
                 }
-
-                // foreach (XElement field in fields) {
-                //     XAttribute fieldName = field.GetAttribute("name");
-                //     XAttribute fieldType = field.GetAttribute("type");
-                //
-                //     ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldType.Value.Trim(), fieldName.Value.Trim());
-                //
-                //     fieldDefinitions.Add(fieldDefinition);
-                // }
 
                 string typeName = node.templateId + "_" + Guid.NewGuid().ToString().Replace("-", "_");
 

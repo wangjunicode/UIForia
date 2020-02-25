@@ -90,6 +90,9 @@ namespace UIForia.Parsing.Expressions.AstNodes {
                     case OperatorType.And:
                         return 2; // todo -- not sure about this 
                     
+                    case OperatorType.Assign:
+                        return 2; // todo -- not sure about this 
+                    
                     default:
                         throw new TemplateParseException($"Operator {operatorType} could not be parsed because it is not supported right now.", left);
                 }

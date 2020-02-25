@@ -189,7 +189,6 @@ namespace UIForia.Parsing.Expressions {
             }
 
             while (tokenStream.Current == ExpressionTokenType.ElseIf) {
-
                 tokenStream.Advance();
 
                 ASTNode elseIfCondition = null;
@@ -250,7 +249,7 @@ namespace UIForia.Parsing.Expressions {
                 ASTNode statement = null;
 
                 int current = tokenStream.CurrentIndex;
-                
+
                 if (!ParseStatement(ref statement)) {
                     retn.Release();
                     tokenStream.Restore();
@@ -260,6 +259,7 @@ namespace UIForia.Parsing.Expressions {
                 if (current == tokenStream.CurrentIndex) {
                     throw new ParseException("fail recurse");
                 }
+
                 retn.statements.Add(statement);
             }
 
@@ -360,6 +360,13 @@ namespace UIForia.Parsing.Expressions {
 
             tokenStream.Save();
 
+            bool isStatic = false;
+
+            if (tokenStream.Current == "static") {
+                isStatic = true;
+                tokenStream.Advance();
+            }
+
             ExpressionParser parser = new ExpressionParser(tokenStream);
             StructList<LambdaArgument> signature = null;
             TypeLookup typeLookup = default;
@@ -384,6 +391,7 @@ namespace UIForia.Parsing.Expressions {
                 tokenStream.Advance();
                 node = new FieldNode() {
                     name = name,
+                    isStatic = isStatic,
                     attributes = attributes,
                     typeLookup = typeLookup
                 };
@@ -424,16 +432,6 @@ namespace UIForia.Parsing.Expressions {
                 goto fail;
             }
 
-            // int expressionMatch = tokenStream.FindMatchingIndex(ExpressionTokenType.ExpressionOpen, ExpressionTokenType.ExpressionClose);
-            //
-            // if (expressionMatch == -1) {
-            //     goto fail;
-            // }
-            //
-            // TokenStream bodyStream = tokenStream.AdvanceAndReturnSubStream(expressionMatch);
-            // tokenStream.Advance(); // stop over expression close
-            // bodyStream.Advance(); // might be an issue with token stream advance and return
-
             BlockNode block = ParseBlock();
 
             node = new MethodNode() {
@@ -441,6 +439,7 @@ namespace UIForia.Parsing.Expressions {
                 returnTypeLookup = typeLookup,
                 attributes = attributes,
                 name = name,
+                isStatic = isStatic,
                 signatureList = signature != null ? signature.ToArray() : s_EmptySignature
             };
 
@@ -504,6 +503,7 @@ namespace UIForia.Parsing.Expressions {
     public abstract class DeclarationNode : ASTNode {
 
         public string name;
+        public bool isStatic;
         public LightList<AttributeNode> attributes;
 
         public override void Release() {

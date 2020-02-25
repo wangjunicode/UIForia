@@ -913,7 +913,7 @@ namespace UIForia {
             element.id = NextElementId;
             element.style = new UIStyleSet(element);
             element.layoutResult = new LayoutResult(element);
-            element.flags = UIElementFlags.Enabled | UIElementFlags.Alive;
+            element.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
 
             element.children = LightList<UIElement>.GetMinSize(childCount);
 

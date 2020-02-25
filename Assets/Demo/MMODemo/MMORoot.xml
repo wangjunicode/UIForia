@@ -36,11 +36,16 @@
     
     <Element id="Character"><![CDATA[
        
+       [Required]
        int value;
        string strValue;    
       
        void DoStuff() {
           UnityEngine.Debug.Log(value);
+       }
+       
+       string Complex(string data) {
+          return data + ' fucking god';
        }
        
        int GetValue() {
@@ -60,10 +65,10 @@
             
        ]]>
         
-        <Field name="value" type="int"/>
-        
         <Template mouse:click="value++">
             Value is {GetValue()} 
+            Value is {value}
+            <Text>Complex is {Complex(value.ToString())}</Text> 
             <Group style="character">
             
                 <Div style="slot head"/>

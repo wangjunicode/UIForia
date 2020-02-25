@@ -83,7 +83,7 @@ namespace UIForia.Generated {
 
     public class ::CLASS_NAME:: : ::BASECLASS_NAME:: {
 
-::FIELDS::
+::TYPE_BODY::
     }
 
 }

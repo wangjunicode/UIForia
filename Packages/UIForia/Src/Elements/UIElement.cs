@@ -120,6 +120,8 @@ namespace UIForia.Elements {
 
         public int ChildCount => children?.Count ?? 0;
 
+        public bool __internal_isEnabledAndNeedsUpdate => (flags & UIElementFlags.EnabledFlagSetWithUpdate ) == (UIElementFlags.EnabledFlagSetWithUpdate);
+        
         public bool isSelfEnabled => (flags & UIElementFlags.Enabled) != 0;
 
         public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
@@ -482,7 +484,12 @@ namespace UIForia.Elements {
             }
 
             return null;
+        }
 
+        public void RunBindings() {
+            flags &= ~UIElementFlags.NeedsUpdate;
+            bindingNode.updateBindings?.Invoke(bindingNode.root, this);
+            flags |= UIElementFlags.NeedsUpdate;
         }
 
     }

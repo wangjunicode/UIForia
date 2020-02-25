@@ -3084,6 +3084,10 @@ namespace UIForia.Compilers {
             }
         }
 
+        public void SetImplicitStaticContext(Type retn) {
+            // todo -- implement this
+        }
+
     }
 
     public struct Parameter<T> {

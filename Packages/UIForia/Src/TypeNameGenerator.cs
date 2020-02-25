@@ -7,18 +7,18 @@ namespace UIForia.Compilers {
     public static class TypeNameGenerator {
 
         public static string GetTypeName(Type type) {
+            if (type == typeof(void)) return "void";
             StringBuilder builder = new StringBuilder();
             GetTypeName(type, builder);
             return builder.ToString();
         }
-
-        public static string GetGenericTypeName(Type type) {
-            StringBuilder builder = new StringBuilder();
-            GetTypeName(type, builder, true);
-            return builder.ToString();
-        }
-
+        
         public static void GetTypeName(Type type, StringBuilder builder, bool genericName = false) {
+            if (type == null || type == typeof(void)) {
+                builder.Append("void");
+                return;
+            }
+
             if (type.IsArray) {
                 VisitArrayType(type, builder);
                 return;
@@ -121,8 +121,10 @@ namespace UIForia.Compilers {
 
             string typeName = type.ToString();
 
+            bool printedGenerics = false;
             for (int i = 0; i < typeName.Length; i++) {
                 if (typeName[i] == '`') {
+                    printedGenerics = true;
                     i++;
                     int count = int.Parse(typeName[i].ToString());
                     builder.Append("<");
@@ -139,6 +141,9 @@ namespace UIForia.Compilers {
                 else {
                     switch (typeName[i]) {
                         case '[':
+                            if (printedGenerics) {
+                                return;
+                            }
                             // weird case where runtime generated type names are not prefixed with standard `x where x = generic parameter count
                             if (genericArguments.Length != 0) {
                                 builder.Append("<");

@@ -1279,12 +1279,14 @@ namespace UIForia.Util {
 
         public struct FieldDefinition {
 
+            public bool isStatic;
             public readonly string fieldName;
             public readonly TypeLookup fieldType;
 
-            public FieldDefinition(TypeLookup fieldType, string fieldName) {
+            public FieldDefinition(TypeLookup fieldType, string fieldName, bool isStatic) {
                 this.fieldType = fieldType;
                 this.fieldName = fieldName;
+                this.isStatic = isStatic;
             }
 
         }
@@ -1295,12 +1297,14 @@ namespace UIForia.Util {
             public TypeLookup returnType;
             public LambdaArgument[] arguments;
             public BlockNode body;
+            public bool isStatic;
 
-            public MethodDefinition(TypeLookup returnType, string methodName, LambdaArgument[] arguments, BlockNode body) {
+            public MethodDefinition(TypeLookup returnType, string methodName, LambdaArgument[] arguments, BlockNode body, bool isStatic) {
                 this.returnType = returnType;
                 this.methodName = methodName;
                 this.arguments = arguments;
                 this.body = body;
+                this.isStatic = isStatic;
             }
 
         }

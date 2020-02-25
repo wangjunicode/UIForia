@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Mono.Linq.Expressions;
@@ -23,13 +24,13 @@ namespace UIForia {
 
         public static bool Generate(Type type, TemplateSettings templateSettings) {
             templateSettings.resourceManager = new ResourceManager();
-           // Stopwatch stopwatch = new Stopwatch();
-           // stopwatch.Start();
+            // Stopwatch stopwatch = new Stopwatch();
+            // stopwatch.Start();
             CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
 
-           // stopwatch.Stop();
-           // UnityEngine.Debug.Log("Compiled Templates in " + stopwatch.Elapsed.Milliseconds + "ms");
-            
+            // stopwatch.Stop();
+            // UnityEngine.Debug.Log("Compiled Templates in " + stopwatch.Elapsed.Milliseconds + "ms");
+
             string path = templateSettings.outputPath;
             string extension = templateSettings.codeFileExtension;
             if (extension[0] != '.') {
@@ -69,33 +70,95 @@ namespace UIForia {
             if (File.Exists(initPath)) {
                 File.Delete(initPath);
             }
-            
+
             File.WriteAllText(initPath, template);
 
-            StringBuilder fieldBuilder = new StringBuilder(128);
-            
-            for (int i = 0; i < dynamicElementTypes.Count; i++) {
+            GenerateDynamicTypes(path, dynamicElementTypes);
+        }
 
+        private static void GenerateDynamicTypes(string path, List<ProcessedType> dynamicElementTypes) {
+            StringBuilder typeBuilder = new StringBuilder(128);
+
+            for (int i = 0; i < dynamicElementTypes.Count; i++) {
                 ProcessedType processedType = dynamicElementTypes[i];
-                
+
+                ClassBuilder.TypeData data = ClassBuilder.GetDynamicTypeData(processedType.rawType);
+
                 string output = TemplateConstants.DynamicElement;
-                
+
                 output = output.Replace("::CLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType));
                 output = output.Replace("::BASECLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType.BaseType));
 
-                FieldInfo[] fields = processedType.rawType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+                FieldInfo[] fields = processedType.rawType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
                 for (int f = 0; f < fields.Length; f++) {
-                    fieldBuilder.Append(s_Indent12);
-                    fieldBuilder.Append("public ");
-                    fieldBuilder.Append(TypeNameGenerator.GetTypeName(fields[f].FieldType));
-                    fieldBuilder.Append(" ");
-                    fieldBuilder.Append(fields[f].Name);
-                    fieldBuilder.AppendLine(";");
+                    bool isStatic = fields[f].IsStatic;
+
+                    ClassBuilder.FieldData fieldData = data.GetFieldData(fields[f].Name);
+
+                    typeBuilder.Append(s_Indent8);
+                    typeBuilder.Append("public ");
+
+                    if (isStatic) {
+                        typeBuilder.Append("static ");
+                    }
+
+                    typeBuilder.Append(TypeNameGenerator.GetTypeName(fields[f].FieldType));
+                    typeBuilder.Append(" ");
+                    typeBuilder.Append(fields[f].Name);
+
+                    // todo -- check for default value
+                    if (fieldData.lambdaValue != null) {
+                        typeBuilder.Append(" = ");
+                        typeBuilder.AppendLine(fieldData.lambdaValue.ToTemplateBodyFunction());
+                    }
+                    else {
+                        typeBuilder.AppendLine(";");
+                    }
                 }
 
-                output = output.Replace("::FIELDS::", fieldBuilder.ToString());
-                fieldBuilder.Clear();
+                typeBuilder.AppendLine();
+                typeBuilder.AppendLine();
+
+                for (int m = 0; m < data.methodData.size; m++) {
+                    ref ClassBuilder.MethodData methodData = ref data.methodData.array[m];
+
+                    // attributes
+
+                    typeBuilder.Append(s_Indent8);
+                    typeBuilder.Append("public ");
+
+                    if (methodData.isStatic) {
+                        typeBuilder.Append("static ");
+                    }
+
+                    typeBuilder.Append(TypeNameGenerator.GetTypeName(methodData.returnType));
+                    typeBuilder.Append(" ");
+                    typeBuilder.Append(methodData.methodName);
+                    typeBuilder.Append("(");
+
+                    PrintMethodSignature(methodData.signature, typeBuilder);
+
+                    typeBuilder.AppendLine(") {");
+                    typeBuilder.Append(s_Indent12);
+
+                    if (methodData.returnType != null && methodData.returnType != typeof(void)) {
+                        typeBuilder.Append("return ");
+                    }
+
+                    typeBuilder.Append("__");
+                    typeBuilder.Append(methodData.methodName);
+                    typeBuilder.Append("(");
+
+                    PrintMethodArgumentsSignature(methodData.isStatic, methodData.signature, typeBuilder);
+
+                    typeBuilder.AppendLine(");");
+                    typeBuilder.Append(s_Indent8);
+                    typeBuilder.AppendLine("}\n");
+                }
+
+                output = output.Replace("::TYPE_BODY::", typeBuilder.ToString());
+                typeBuilder.Clear();
 
                 string file = Path.Combine(path, processedType.templateAttr.filePath);
 
@@ -103,13 +166,39 @@ namespace UIForia {
                 file = file.Substring(0, file.Length - 1);
                 file += "_class_" + processedType.templateAttr.templateId;
                 file += ".cs";
-                
+
                 Directory.CreateDirectory(Path.GetDirectoryName(file));
 
                 File.WriteAllText(file, output);
+            }
+        }
 
+        private static void PrintMethodArgumentsSignature(bool isStatic, ClassBuilder.ResolvedParameter[] parameters, StringBuilder stringBuilder) {
+            if (!isStatic) {
+                stringBuilder.Append("this");
             }
 
+            if (parameters == null || parameters.Length == 0) {
+                return;
+            }
+
+            for (int i = 0; i < parameters.Length; i++) {
+                stringBuilder.Append(", ");
+                stringBuilder.Append(parameters[i].name);
+            }
+        }
+
+        private static void PrintMethodSignature(ClassBuilder.ResolvedParameter[] parameters, StringBuilder stringBuilder) {
+            if (parameters == null || parameters.Length == 0) return;
+
+            for (int i = 0; i < parameters.Length; i++) {
+                TypeNameGenerator.GetTypeName(parameters[i].type, stringBuilder);
+                stringBuilder.Append(" ");
+                stringBuilder.Append(parameters[i].name);
+                if (i != parameters.Length - 1) {
+                    stringBuilder.Append(", ");
+                }
+            }
         }
 
         private static string GenerateTemplateLoadCode(CompiledTemplateData compiledTemplateData) {
@@ -204,7 +293,6 @@ namespace UIForia {
             string styleFilePathArray = "";
 
             if (sheets.Length > 0) {
-                
                 string streamingAssetPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
 
                 if (Directory.Exists(streamingAssetPath)) {
@@ -230,17 +318,15 @@ namespace UIForia {
         }
 
         private static string GenerateElementConstructors(CompiledTemplateData compiledTemplateData, out List<ProcessedType> dynamicElementTypes) {
-            
             StringBuilder builder = new StringBuilder(2048);
-        
+
             dynamicElementTypes = new List<ProcessedType>();
 
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
-                
                 if (kvp.Value.isDynamic) {
-                    dynamicElementTypes.Add(kvp.Value); 
+                    dynamicElementTypes.Add(kvp.Value);
                 }
-                
+
                 if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
                     continue;
                 }
@@ -280,7 +366,7 @@ namespace UIForia {
 
         private static string GenerateDynamicTemplates(CompiledTemplateData compiledTemplateData) {
             if (compiledTemplateData.dynamicTemplates == null) return string.Empty;
-            
+
             StringBuilder builder = new StringBuilder(2048);
 
             for (int i = 0; i < compiledTemplateData.dynamicTemplates.size; i++) {
@@ -297,7 +383,7 @@ namespace UIForia {
 
             return builder.ToString();
         }
-        
+
         private static void GenerateTemplateCode(string path, string extension, CompiledTemplateData compiledTemplateData) {
             TemplateSettings templateSettings = compiledTemplateData.templateSettings;
 
@@ -309,18 +395,17 @@ namespace UIForia {
                 if (compiled.elementType.rawType.IsGenericType) {
                     file = Path.ChangeExtension(file, "");
                     file = file.Substring(0, file.Length - 1);
-                  
+
                     if (!string.IsNullOrEmpty(compiled.templateName)) {
                         file += "__" + compiled.templateName;
                     }
-                    
+
                     string typeName = compiled.elementType.rawType.ToString();
                     int start = typeName.IndexOf('[');
                     file += typeName.Substring(start);
                     file = Path.Combine(path, file + extension);
                 }
                 else {
-
                     if (!string.IsNullOrEmpty(compiled.templateName)) {
                         file = Path.ChangeExtension(file, "");
                         file = file.Substring(0, file.Length - 1);

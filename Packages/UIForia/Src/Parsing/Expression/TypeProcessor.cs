@@ -589,7 +589,7 @@ namespace UIForia.Parsing {
                 typeMap.Remove(dynamicTypes[i].rawType);
             }
         }
-
+        
     }
 
     public class TypeResolutionException : Exception {

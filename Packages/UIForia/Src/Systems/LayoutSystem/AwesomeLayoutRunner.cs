@@ -67,6 +67,8 @@ namespace UIForia.Systems {
 
         private static readonly StructList<Vector2> s_SubjectRect = new StructList<Vector2>(4);
 
+        private float lastDpi;
+
         public AwesomeLayoutRunner(AwesomeLayoutSystem layoutSystem, UIElement rootElement) {
             this.layoutSystem = layoutSystem;
             this.rootElement = rootElement;
@@ -84,13 +86,21 @@ namespace UIForia.Systems {
             this.screenClipper = new ClipData(null);
             this.viewClipper = new ClipData(rootElement);
             this.clipStack = new LightStack<ClipData>();
+            lastDpi = rootElement.application.DPIScaleFactor;
         }
+
 
         public void RunLayout() {
             frameId = rootElement.application.frameId;
 
+
             if (rootElement.isDisabled) {
                 return;
+            }
+
+            float currentDpi = rootElement.application.DPIScaleFactor;
+            if (currentDpi != lastDpi) {
+                InvalidateAll(rootElement);
             }
 
             clipperList.Clear();
@@ -159,6 +169,18 @@ namespace UIForia.Systems {
             ApplyLayoutResults();
             ApplyBoxSizeChanges();
             UpdateClippers();
+        }
+
+        private void InvalidateAll(UIElement element) {
+            if (!element.isEnabled) {
+                return;
+            }
+
+            element.layoutBox.Invalidate();
+
+            for (int i = 0; i < element.children.size; i++) {
+                InvalidateAll(element.children[i]);
+            }
         }
 
         public void GatherLayoutData() {

@@ -974,6 +974,16 @@ namespace UIForia.Systems {
             return element.View.RootElement;
         }
 
+        public void Invalidate() {
+            cachedBlockWidth = -1;
+            cachedBlockHeight = -1;
+            cachedContentWidth = -1;
+            cachedContentHeight = -1;
+            finalWidth = -1;
+            finalHeight = -1;
+            flags |= LayoutBoxFlags.RequireLayoutVertical | LayoutBoxFlags.RequireLayoutHorizontal;
+        }
+
     }
 
 }

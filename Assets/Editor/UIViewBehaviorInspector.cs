@@ -17,12 +17,12 @@ namespace UIForia.Editor {
         private Type[] types;
         private string[] names;
         private bool didEnable;
-        
+
         [UnityEditor.Callbacks.DidReloadScripts]
         private static void OnScriptsReloaded() {
             // todo try to track if pre-compiled templates are out of date or not
         }
-        
+
         public void OnEnable() {
             didEnable = true;
             LightList<ProcessedType> typeData = TypeProcessor.GetTemplateTypes();
@@ -32,9 +32,10 @@ namespace UIForia.Editor {
                 if (typeData[i].rawType.Assembly.FullName.StartsWith("UIForia")) {
                     continue;
                 }
+
                 validTypes.Add(typeData[i].rawType);
             }
-            
+
             types = new Type[validTypes.Count];
             names = new string[types.Length];
             for (int i = 0; i < types.Length; i++) {
@@ -42,7 +43,7 @@ namespace UIForia.Editor {
                 names[i] = validTypes[i].FullName;
             }
         }
-        
+
         public override void OnInspectorGUI() {
             serializedObject.Update();
             UIViewBehavior behavior = (UIViewBehavior) target;
@@ -53,15 +54,16 @@ namespace UIForia.Editor {
             else if (behavior.type == null) {
                 behavior.type = Type.GetType(typeName);
             }
+
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel("Root Template");
 
             if (types == null || types.Length == 0) {
-                if(!didEnable) OnEnable();
+                if (!didEnable) OnEnable();
                 EditorGUILayout.EndHorizontal();
                 return;
             }
-            
+
             if (behavior.type == null) {
                 behavior.type = types[0];
             }
@@ -77,11 +79,10 @@ namespace UIForia.Editor {
             }
 
             behavior.usePreCompiledTemplates = GUILayout.Toggle(behavior.usePreCompiledTemplates, "Use Precompiled");
-            
+
             if (GUILayout.Button("Generate Code")) {
-                
                 TemplateCodeGenerator.Generate(behavior.type, behavior.GetTemplateSettings(behavior.type));
-                
+
 //                TemplateCompiler compiler = new TemplateCompiler(settings);
 //                
 //                // maybe this should also know the root type for an application
@@ -90,13 +91,30 @@ namespace UIForia.Editor {
 //                compiler.CompileTemplates(behavior.type, compiledOutput);
 //
 //                compiledOutput.GenerateCode();
-
             }
-            
+
             EditorGUILayout.ObjectField(serializedObject.FindProperty("camera"));
             serializedObject.FindProperty("typeName").stringValue = behavior.typeName;
             serializedObject.ApplyModifiedProperties();
+
+            if (UnityEditor.EditorApplication.isPlaying) {
+                EditorGUILayout.BeginHorizontal();
+                float dpi = behavior.application.DPIScaleFactor;
+                if (newDpi <= 0) newDpi = dpi;
+                newDpi = EditorGUILayout.FloatField("DPI Override", newDpi);
+                if (GUILayout.Button("Update DPI")) {
+                    behavior.application.DPIScaleFactor = Mathf.Max(1, newDpi);
+                }
+
+                if (GUILayout.Button("Reset DPI")) {
+                    newDpi = behavior.application.DPIScaleFactor = Application.originalDpiScaleFactor;
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
         }
+
+        private float newDpi;
 
     }
 

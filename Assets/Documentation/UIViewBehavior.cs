@@ -12,7 +12,7 @@ namespace UIForia {
         public new Camera camera;
         public Application application;
         public bool usePreCompiledTemplates;
-
+        
         [HideInInspector] public string applicationName = "Game App 2";
 
         public TemplateSettings GetTemplateSettings(Type type) {

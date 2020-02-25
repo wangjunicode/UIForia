@@ -65,8 +65,9 @@
             
        ]]>
         
+<!--        <Template mouse:click="if(value == 0) { value = 5; } else { value++; }">-->
         <Template mouse:click="value++">
-            Value is {GetValue()} 
+            Value is {GetValue()}  
             Value is {value}
             <Text>Complex is {Complex(value.ToString())}</Text> 
             <Group style="character">

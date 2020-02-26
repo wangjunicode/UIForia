@@ -1,0 +1,49 @@
+<UITemplate>
+
+    <Style>
+
+        style container {
+            TextFontSize = 24px;
+            TextWhitespaceMode = PreserveNewLines;
+            TextColor = white;
+
+        }
+        
+        style scroll-view {
+            PreferredSize = 1vw 1vh;
+            LayoutFitVertical = Shrink;
+        }
+        
+        style select {
+            TextFontSize = 18px;
+            PreferredWidth = 1vw;
+        }
+        
+        style expression {
+            TextColor = yellow;
+            MarginBottom = 12px;
+        }
+        
+    
+    </Style>
+
+    <Contents style="container">
+
+        <Select style="select" sync:selectedValue="selected" options="options" onChange:selectedValue="OnValueChanged()"/>
+        
+        <Text style="expression">{expression} </Text>
+        
+        <ScrollView style="scroll-view">
+
+            
+            <Text>{compiledCode}</Text>
+
+            <Text if="output != null">output is {output}</Text>
+
+        </ScrollView>
+
+    </Contents>
+
+   
+
+</UITemplate>

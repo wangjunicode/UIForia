@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<UITemplate>
+
+    <Style>
+        
+        style print-self {
+            BackgroundColor = white;
+            PreferredWidth = 1vw;
+            TextColor = black;
+        }
+        
+    </Style>
+    <Element id="PrintSelf"><![CDATA[
+       
+       int v;
+       
+       int GetV() {
+           return v;
+       }
+                    
+       ]]>
+
+        <Template style="print-self">
+            {UIForia.TemplateCodeGenerator.PrintDynamicTypeOutput(GetType())}
+        </Template>
+
+    </Element>
+    
+</UITemplate>

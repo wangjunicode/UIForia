@@ -98,6 +98,7 @@ namespace UIForia.Editor {
             serializedObject.ApplyModifiedProperties();
 
             if (UnityEditor.EditorApplication.isPlaying) {
+                if (behavior.application == null) return;
                 EditorGUILayout.BeginHorizontal();
                 float dpi = behavior.application.DPIScaleFactor;
                 if (newDpi <= 0) newDpi = dpi;

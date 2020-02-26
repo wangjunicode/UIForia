@@ -176,6 +176,7 @@ namespace UIForia {
 
                 UIView view = new UIView(this, name, element, matrix, size);
 
+                view.Depth = views.Count;
                 views.Add(view);
 
                 for (int i = 0; i < systems.Count; i++) {

@@ -34,7 +34,6 @@
         <Text style="expression">{expression} </Text>
         
         <ScrollView style="scroll-view">
-
             
             <Text>{compiledCode}</Text>
 

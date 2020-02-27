@@ -76,18 +76,49 @@ namespace UIForia {
             GenerateDynamicTypes(path, dynamicElementTypes);
         }
 
+        public static string PrintDynamicTypeOutput(Type type) {
+            ProcessedType processedType = TypeProcessor.GetProcessedType(type);
+            StringBuilder stringBuilder = new StringBuilder();
+            
+            string output = TemplateConstants.DynamicElement;
+            GetTypeOutput(processedType, stringBuilder);
+            output = output.Replace("::CLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType));
+            output = output.Replace("::BASECLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType.BaseType));
+            output = output.Replace("::TYPE_BODY::", stringBuilder.ToString());
+
+            return output;
+        }
+        
         private static void GenerateDynamicTypes(string path, List<ProcessedType> dynamicElementTypes) {
             StringBuilder typeBuilder = new StringBuilder(128);
 
             for (int i = 0; i < dynamicElementTypes.Count; i++) {
                 ProcessedType processedType = dynamicElementTypes[i];
 
-                ClassBuilder.TypeData data = ClassBuilder.GetDynamicTypeData(processedType.rawType);
-
                 string output = TemplateConstants.DynamicElement;
 
                 output = output.Replace("::CLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType));
                 output = output.Replace("::BASECLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType.BaseType));
+                GetTypeOutput(processedType, typeBuilder);
+                typeBuilder.Clear();
+
+                string file = Path.Combine(path, processedType.templateAttr.filePath);
+
+                file = Path.ChangeExtension(file, "");
+                file = file.Substring(0, file.Length - 1);
+                file += "_class_" + processedType.templateAttr.templateId;
+                file += ".cs";
+
+                Directory.CreateDirectory(Path.GetDirectoryName(file));
+                output = output.Replace("::TYPE_BODY::", typeBuilder.ToString());
+
+                File.WriteAllText(file, output);
+            }
+        }
+
+        private static void GetTypeOutput(ProcessedType processedType, StringBuilder typeBuilder) {
+            
+                ClassBuilder.TypeData data = ClassBuilder.GetDynamicTypeData(processedType.rawType);
 
                 FieldInfo[] fields = processedType.rawType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
@@ -157,22 +188,8 @@ namespace UIForia {
                     typeBuilder.AppendLine("}\n");
                 }
 
-                output = output.Replace("::TYPE_BODY::", typeBuilder.ToString());
-                typeBuilder.Clear();
-
-                string file = Path.Combine(path, processedType.templateAttr.filePath);
-
-                file = Path.ChangeExtension(file, "");
-                file = file.Substring(0, file.Length - 1);
-                file += "_class_" + processedType.templateAttr.templateId;
-                file += ".cs";
-
-                Directory.CreateDirectory(Path.GetDirectoryName(file));
-
-                File.WriteAllText(file, output);
-            }
         }
-
+        
         private static void PrintMethodArgumentsSignature(bool isStatic, ClassBuilder.ResolvedParameter[] parameters, StringBuilder stringBuilder) {
             if (!isStatic) {
                 stringBuilder.Append("this");

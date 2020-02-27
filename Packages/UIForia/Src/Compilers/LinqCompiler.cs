@@ -2054,7 +2054,7 @@ namespace UIForia.Compilers {
         private Expression VisitIfStatement(IfStatementNode node) {
             Expression condition = Visit(typeof(bool), node.condition);
 
-            if (node.elseIfStatements.Length == 0) {
+            if (node.elseIfStatements == null || node.elseIfStatements.Length == 0) {
 
                 if (node.elseBlock == null) {
                     PushBlock();

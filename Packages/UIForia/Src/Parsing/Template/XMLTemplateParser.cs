@@ -386,8 +386,6 @@ namespace UIForia.Parsing {
         private static ProcessedType CreateDynamicElementType(TemplateShell templateShell, RawTemplateContent node) {
             XElement rootNode = node.elementDefinition;
 
-            IEnumerable<XElement> fields = rootNode.GetChildren("Field");
-
             if (!IsValidIdentifier(node.templateId)) {
                 throw new ParseException($"Expected a valid identifier for template id but `{node.templateId}` is not valid. Please use only letters or numbers (except for first character)");
             }

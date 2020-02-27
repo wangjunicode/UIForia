@@ -18,10 +18,12 @@ namespace Tests.Mocks {
         public static bool s_GenerateCode;
         public static bool s_UsePreCompiledTemplates;
 
-        protected MockApplication(bool isPreCompiled, TemplateSettings templateData, ResourceManager resourceManager, Action<UIElement> onRegister) : base(isPreCompiled, templateData, resourceManager, onRegister) { }
+        protected MockApplication(bool isPreCompiled, TemplateSettings templateData, ResourceManager resourceManager, Action<UIElement> onRegister) 
+            : base(isPreCompiled, templateData, resourceManager, onRegister) { }
 
         protected override void CreateSystems() {
             styleSystem = new StyleSystem();
+            styleSystem2 = new StyleSystem2();
             layoutSystem = new MockLayoutSystem(this);
             inputSystem = new MockInputSystem(layoutSystem);
             renderSystem = new MockRenderSystem(Camera, this);

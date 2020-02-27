@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Systems.SelectorSystem;
+using UIForia.Selectors;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -155,14 +155,7 @@ namespace UIForia.Systems {
                 }
             }
         }
-
-        public void AddSelectors(Selector[] selectors) {
-            if (selectors == null) return;
-        }
-
-        public void RemoveSelectors(Selector[] selectors) {
-            if (selectors == null) return;
-        }
+        
 
         private struct ChangeSet {
 

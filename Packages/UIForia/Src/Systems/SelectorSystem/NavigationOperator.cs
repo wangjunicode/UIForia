@@ -1,4 +1,4 @@
-namespace Systems.SelectorSystem {
+namespace UIForia.Selectors {
 
     public enum NavigationOperator {
 

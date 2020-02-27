@@ -1,7 +1,7 @@
 using UIForia;
 using UIForia.Rendering;
 
-namespace Systems.SelectorSystem {
+namespace UIForia.Selectors {
 
     public class SelectorSystem {
 

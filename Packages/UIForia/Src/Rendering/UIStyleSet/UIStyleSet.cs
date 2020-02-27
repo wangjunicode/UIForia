@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Systems.SelectorSystem;
+using UIForia.Selectors;
 using SVGX;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -984,15 +984,7 @@ namespace UIForia.Rendering {
                 underlayDilate = TextUnderlayDilate,
             };
         }
-
-        public void AddSelectorStyleGroup(Selector selector) {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveSelectorStyleGroup(Selector selector) {
-            throw new NotImplementedException();
-        }
-
+        
         internal StructList<AnimatedProperty> animatedProperties;
 
         internal AnimationFlags animationFlags;

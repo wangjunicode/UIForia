@@ -1,6 +1,6 @@
 using UIForia.Elements;
 
-namespace Systems.SelectorSystem {
+namespace UIForia.Selectors {
 
     public struct TagNameIndexEntry {
 

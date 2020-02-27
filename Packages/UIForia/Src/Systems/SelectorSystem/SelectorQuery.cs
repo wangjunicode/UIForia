@@ -2,7 +2,7 @@ using System;
 using UIForia.Elements;
 using UIForia.Util;
 
-namespace Systems.SelectorSystem {
+namespace UIForia.Selectors {
 
     public class SelectorQuery {
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Systems.SelectorSystem;
+using UIForia.Selectors;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Layout;
@@ -102,6 +102,7 @@ namespace UIForia.Elements {
         public Application application { get; internal set; }
         public int hierarchyDepth { get; internal set; }
         private int _siblingIndex;
+        public StyleSet2 styleSet2;
 
         public int siblingIndex {
             get => _siblingIndex;

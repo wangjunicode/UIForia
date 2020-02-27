@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Systems.SelectorSystem;
+using UIForia.Selectors;
 using Src.Systems;
 using UIForia.Animation;
 using UIForia.Compilers;
@@ -52,7 +52,8 @@ namespace UIForia {
         internal AnimationSystem animationSystem;
         internal UISoundSystem soundSystem;
         internal LinqBindingSystem linqBindingSystem;
-
+        internal StyleSystem2 styleSystem2;
+        
         private int elementIdGenerator;
 
         protected ResourceManager resourceManager;
@@ -126,6 +127,7 @@ namespace UIForia {
             animationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
             soundSystem = new UISoundSystem();
+            styleSystem2 = new StyleSystem2();
         }
 
         internal void Initialize() {
@@ -368,10 +370,7 @@ namespace UIForia {
 
             onElementDestroyed?.Invoke(element);
         }
-
-        private LightList<UIElement> activeBuffer = new LightList<UIElement>(32);
-        private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
-
+        
         public void Update() {
             // input queries against last frame layout
             inputSystem.Read();
@@ -392,16 +391,9 @@ namespace UIForia {
             for (int i = 0; i < views.Count; i++) {
                 views[i].Viewport = new Rect(0, 0, Width, Height);
             }
-
-
+            
             inputSystem.OnUpdate();
             m_BeforeUpdateTaskSystem.OnUpdate();
-
-            activeBuffer.Clear();
-
-            for (int i = 0; i < views.Count; i++) {
-                activeBuffer.Add(views[i].RootElement);
-            }
 
             linqBindingSystem.BeginFrame();
             bindingTimer.Reset();
@@ -411,30 +403,8 @@ namespace UIForia {
             for (int i = 0; i < views.Count; i++) {
                 linqBindingSystem.NewUpdateFn(views[i].RootElement);
             }
-
-            // bool loop = true;
-
-            // while (loop) {
-            //     
-            //     for (int i = 0; i < activeBuffer.size; i++) {
-            //         linqBindingSystem.NewUpdateFn(views[i].RootElement);
-            //     }
-            //
-            //     if (queuedBuffer.size == 0) {
-            //         break;
-            //     }
-            //
-            //     LightList<UIElement> tmp = activeBuffer;
-            //     activeBuffer = queuedBuffer;
-            //     queuedBuffer = tmp;
-            //     activeBuffer.Clear();
-            //     // sort queued buffer by depth?
-            // }
-
+            
             bindingTimer.Stop();
-
-            // style & attribute bindings (no user code here)
-            // linqBindingSystem.UpdateStylesAndAttributes();
 
             animationSystem.OnUpdate();
 
@@ -486,11 +456,7 @@ namespace UIForia {
             if ((element.flags & UIElementFlags.SelfAndAncestorEnabled) != UIElementFlags.SelfAndAncestorEnabled) {
                 return;
             }
-
-            if (queued) {
-                queuedBuffer.Add(element);
-            }
-
+            
             StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
@@ -666,6 +632,10 @@ namespace UIForia {
             for (int i = 0; i < systems.Count; i++) {
                 systems[i].OnAttributeSet(element, attributeName, currentValue, previousValue);
             }
+            
+            // if had previous value. get index for previous. remove
+            // get index for new, add
+            
         }
 
         public static void RefreshAll() {
@@ -916,6 +886,7 @@ namespace UIForia {
             element.templateMetaData = templateData.templateMetaData[originTemplateId];
             element.id = NextElementId;
             element.style = new UIStyleSet(element);
+            element.styleSet2 = new StyleSet2(styleSystem2, element);
             element.layoutResult = new LayoutResult(element);
             element.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
 

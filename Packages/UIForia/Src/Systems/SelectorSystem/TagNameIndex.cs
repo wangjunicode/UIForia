@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Util;
 
-namespace Systems.SelectorSystem {
+namespace UIForia.Selectors {
 
     public class TagNameIndex : SelectorIndex {
 

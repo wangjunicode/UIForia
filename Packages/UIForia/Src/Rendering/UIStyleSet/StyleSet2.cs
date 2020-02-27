@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Rendering;
+using UIForia.Selectors;
 using UIForia.Systems;
 using UIForia.Util;
 
@@ -16,7 +17,7 @@ namespace UIForia {
         internal StyleUsage[] styleUsages;
         internal StyleSystem2 styleSystem;
         internal StructList<StyleGroup> dynamicGroups;
-        internal StructList<StyleUsage> changeSet;
+        internal StyleSystem2.ChangeSet changeSet;
         internal StructList<int> affectedSelectorIds;
         internal StyleState activeStates;
         
@@ -95,6 +96,7 @@ namespace UIForia {
         }
 
         public static StylePriorityComparer s_StylePriorityComparer = new StylePriorityComparer();
+        public LightList<Selector> selectors;
 
         public class StylePriorityComparer : IComparer<StyleUsage> {
 

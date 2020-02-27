@@ -165,6 +165,7 @@ namespace UIForia.Rendering {
         DistributeExtraSpaceVertical,
         DistributeExtraSpaceHorizontal,
 
+        INVALID
     }
 
 }

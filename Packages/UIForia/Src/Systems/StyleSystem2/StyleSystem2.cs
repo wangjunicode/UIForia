@@ -7,25 +7,31 @@ namespace UIForia.Systems {
 
     public class StyleSystem2 {
 
-        private class ChangeSet {
+        public class ChangeSet {
 
             public StyleState state;
             public StructList<StyleUsage> instanceChanges;
             public LightList<StyleGroup> groupChanges;
 
         }
-        
+
         private UIElement[] stack;
+        private Application application;
+
+        public StyleSystem2(Application application) {
+            this.application = application;
+            this.stack = new UIElement[32];
+        }
 
         public void SetInstanceProperty(StyleSet2 styleSet2, in StyleProperty property, StyleState state) {
-            if (styleSet2.changeSet == null) {
-                styleSet2.changeSet = StructList<StyleUsage>.Get();
-            }
-
-            styleSet2.changeSet.Add(new StyleUsage() {
-                property = property,
-                priority = new StylePriority(SourceType.Instance, state)
-            });
+            // if (styleSet2.changeSet == null) {
+            //     styleSet2.changeSet = StructList<StyleUsage>.Get();
+            // }
+            //
+            // styleSet2.changeSet.Add(new StyleUsage() {
+            //     property = property,
+            //     priority = new StylePriority(SourceType.Instance, state)
+            // });
         }
 
         public void SetDynamicStyles(StyleSet2 styleSet, StructList<StyleGroup> styleGroupList) { }
@@ -38,7 +44,7 @@ namespace UIForia.Systems {
 
         public void ExitState(StyleSet2 styleSet, StyleState state) { }
 
-        public void Update() {
+        public unsafe void Update() {
             // traversal sort all things marked for change
             // for each element
             // set style groups (if created this frame or using dynamics and dynamics changed)
@@ -47,11 +53,18 @@ namespace UIForia.Systems {
             // simple way is to traverse the tree and just ask each element for its changes
 
             // complex way would be to record that an element is a selector source and also walk that
-
-            UIView view = default;
-
+            
             int size = 0;
-            stack[size++] = view.RootElement;
+
+            if (application.views.Count > stack.Length) {
+                Array.Resize(ref stack, stack.Length + application.views.Count);
+            }
+
+            for (int i = 0; i < application.views.Count; i++) {
+                stack[size++] = application.views[i].RootElement;
+            }
+
+            int* map = stackalloc int[(int)StylePropertyId.INVALID];
 
             while (size > 0) {
                 UIElement current = stack[--size];
@@ -78,6 +91,16 @@ namespace UIForia.Systems {
                 // add to reference count
 
                 if (styleSet2.changeSet != null) {
+
+                    StructList<StyleUsage> changeSet = styleSet2.changeSet;
+
+                    StructList<StyleGroup> dynamicGroups = styleSet2.dynamicGroups;
+
+                    int diff = dynamicGroups.size - changeSet.newDynamicGroups.size;
+                    for (int i = 0; i < dynamicGroups.size; i++) {
+                            
+                    }
+                    
                     // flush instance & shared changes
                     // add new selectors
                     // remove old ones
@@ -86,13 +109,24 @@ namespace UIForia.Systems {
                     styleSet2.changeSet = null;
                 }
 
+                for (int i = 0; i < styleSet2.selectors.size; i++) {
+                    
+                    if (styleSet2.selectors[i].isActive) {
+                        // run selector    
+                        styleSet2.selectors[i].Run(resultSet);
+                        
+                    }
+                    
+                    // need to write 
+                    
+                }
+                
                 // if (styleSet2.selectors) {
                 //     
                 // }
 
                 // flush all property changes before running animation
                 // 
-
 
                 // we want to apply style changes once per frame 
                 // except when something gets animated, then twice is ok. (or just defer those changes for that element if animating)
@@ -114,7 +148,6 @@ namespace UIForia.Systems {
                     stack[size++] = children[i];
                 }
             }
-
 
             // all things with selectors
             // all things with changes to flush

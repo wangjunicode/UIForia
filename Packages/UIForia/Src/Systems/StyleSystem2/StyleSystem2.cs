@@ -332,7 +332,7 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < changeSet.size; i++) {
                 StyleSet2 style = changeSet.array[i];
-
+ 
                 // if groups changed we need to swap remove all styles from removed groups. we need to recompute active styles and reprioritize anyway later on
                 if (style.changeSet.groupChanges != null) {
                     ApplyStyleGroupChanges(style);

@@ -23,7 +23,7 @@ namespace Tests.Mocks {
 
         protected override void CreateSystems() {
             styleSystem = new StyleSystem();
-            styleSystem2 = new StyleSystem2();
+            styleSystem2 = new StyleSystem2(this);
             layoutSystem = new MockLayoutSystem(this);
             inputSystem = new MockInputSystem(layoutSystem);
             renderSystem = new MockRenderSystem(Camera, this);

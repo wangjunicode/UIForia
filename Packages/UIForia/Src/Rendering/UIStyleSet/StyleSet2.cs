@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Selectors;
@@ -8,10 +9,41 @@ using UIForia.Util;
 
 namespace UIForia {
 
+    // compress a map of 128 bools keyed by 0 - 127 into 4 integers
+    public unsafe struct IntBoolMap128 {
+
+        // ReSharper disable once UnassignedField.Global
+        public fixed uint map[4];
+
+        [PublicAPI]
+        public bool this[int idx] {
+            get {
+                // >> 5 divides by 32
+                // << 5 multiplies by 32
+                // want to figure out which index to use
+                // index map by dividing index by 32 (integer division)
+                // then using that number, multiply by bit position to generate mask
+                int mapIdx = idx >> 5;
+                return (map[mapIdx] & (idx - (mapIdx << 5))) != 0;
+            }
+            set {
+                int mapIdx = idx >> 5;
+                if (value) {
+                    map[mapIdx] |= ((uint)idx - ((uint)mapIdx << 5));
+                }
+                else {
+                    map[mapIdx] &= ~((uint)idx - ((uint)mapIdx << 5));
+                }
+            }
+        }
+
+    }
+
     public class StyleSet2 {
 
         internal UIElement element;
 
+        internal int traversalIndex;
         internal ushort splitIndex;
         internal ushort usageCount;
         internal StyleUsage[] styleUsages;
@@ -20,7 +52,9 @@ namespace UIForia {
         internal StyleSystem2.ChangeSet changeSet;
         internal StructList<int> affectedSelectorIds;
         internal StyleState activeStates;
-        
+        internal LightList<Selector> selectors;
+        internal StructList<SelectorEffect> selectorEffects;
+
         public StyleSet2(StyleSystem2 styleSystem, UIElement element) {
             this.styleSystem = styleSystem;
             this.element = element;
@@ -49,10 +83,10 @@ namespace UIForia {
         }
 
         public void Initialize(StyleGroup styleGroup) {
-            int cnt = styleGroup.normal.propertyBlock.properties.Length
-                      + styleGroup.focus.propertyBlock.properties.Length
-                      + styleGroup.hover.propertyBlock.properties.Length
-                      + styleGroup.active.propertyBlock.properties.Length;
+            int cnt = styleGroup.normal.properties.Length
+                      + styleGroup.focus.properties.Length
+                      + styleGroup.hover.properties.Length
+                      + styleGroup.active.properties.Length;
 
             usageCount = (ushort) cnt;
             styleUsages = new StyleUsage[cnt + 2];
@@ -60,9 +94,9 @@ namespace UIForia {
             ushort idx = 0;
 
             StylePriority priority = new StylePriority(SourceType.Shared, StyleState.Normal);
-            for (int i = 0; i < styleGroup.normal.propertyBlock.properties.Length; i++) {
+            for (int i = 0; i < styleGroup.normal.properties.Length; i++) {
                 ref StyleUsage usage = ref styleUsages[idx++];
-                usage.property = styleGroup.normal.propertyBlock.properties[i];
+                usage.property = styleGroup.normal.properties[i];
                 usage.sourceId.id = (ushort) styleGroup.id;
                 usage.priority = priority;
             }
@@ -70,33 +104,32 @@ namespace UIForia {
             splitIndex = idx;
 
             priority = new StylePriority(SourceType.Shared, StyleState.Hover);
-            for (int i = 0; i < styleGroup.hover.propertyBlock.properties.Length; i++) {
+            for (int i = 0; i < styleGroup.hover.properties.Length; i++) {
                 ref StyleUsage usage = ref styleUsages[idx++];
-                usage.property = styleGroup.hover.propertyBlock.properties[i];
+                usage.property = styleGroup.hover.properties[i];
                 usage.sourceId.id = (ushort) styleGroup.id;
                 usage.priority = priority;
             }
 
             priority = new StylePriority(SourceType.Shared, StyleState.Active);
-            for (int i = 0; i < styleGroup.active.propertyBlock.properties.Length; i++) {
+            for (int i = 0; i < styleGroup.active.properties.Length; i++) {
                 ref StyleUsage usage = ref styleUsages[idx++];
-                usage.property = styleGroup.active.propertyBlock.properties[i];
+                usage.property = styleGroup.active.properties[i];
                 usage.sourceId.id = (ushort) styleGroup.id;
                 usage.priority = priority;
             }
 
             priority = new StylePriority(SourceType.Shared, StyleState.Focused);
-            for (int i = 0; i < styleGroup.focus.propertyBlock.properties.Length; i++) {
+            for (int i = 0; i < styleGroup.focus.properties.Length; i++) {
                 ref StyleUsage usage = ref styleUsages[idx++];
-                usage.property = styleGroup.focus.propertyBlock.properties[i];
+                usage.property = styleGroup.focus.properties[i];
                 usage.sourceId.id = (ushort) styleGroup.id;
                 usage.priority = priority;
             }
-
         }
 
         public static StylePriorityComparer s_StylePriorityComparer = new StylePriorityComparer();
-        public LightList<Selector> selectors;
+
 
         public class StylePriorityComparer : IComparer<StyleUsage> {
 
@@ -126,7 +159,6 @@ namespace UIForia {
                 int compareResult = (int) styleUsages[index1].property.propertyId - target;
 
                 if (compareResult == 0) {
-                    
                     for (int i = index1 + 1; i < splitIndex; i++) {
                         if ((int) styleUsages[i].property.propertyId != target) {
                             return styleUsages[i - 1].property;
@@ -145,6 +177,16 @@ namespace UIForia {
             }
 
             return default;
+        }
+
+        public void RemoveSelector(int changeSelectorId) {
+            if (selectors == null) return;
+            for (int i = 0; i < selectors.size; i++) {
+                if (selectors.array[i].id == changeSelectorId) {
+                    selectors.SwapRemoveAt(i);
+                    return;
+                }
+            }
         }
 
     }

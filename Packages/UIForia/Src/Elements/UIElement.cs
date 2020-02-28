@@ -103,7 +103,15 @@ namespace UIForia.Elements {
         public int hierarchyDepth { get; internal set; }
         private int _siblingIndex;
         public StyleSet2 styleSet2;
+        internal int index;
+        
+        public ElementReference reference => isDestroyed ? default : new ElementReference(id, index);
 
+        public static implicit operator ElementReference(UIElement element) {
+            if (element.isDestroyed) return default;
+            return new ElementReference(element.id, element.index);    
+        }
+        
         public int siblingIndex {
             get => _siblingIndex;
             internal set {

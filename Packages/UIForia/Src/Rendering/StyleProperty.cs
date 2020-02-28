@@ -13,9 +13,9 @@ namespace UIForia.Rendering {
 
     [StructLayout(LayoutKind.Explicit)]
     [DebuggerDisplay("type = {propertyId.ToString()}")]
-    public readonly partial struct StyleProperty {
+    public partial struct StyleProperty {
 
-        [FieldOffset(0)] internal readonly object objectField; // must be at offset 0 8 or 16 because of alignment, cannot overlap non reference types
+        [FieldOffset(0)] internal object objectField; // must be at offset 0 8 or 16 because of alignment, cannot overlap non reference types
 
         [FieldOffset(8)] public readonly StylePropertyId propertyId;
         

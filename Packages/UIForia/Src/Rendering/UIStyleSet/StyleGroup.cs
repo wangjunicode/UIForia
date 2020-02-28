@@ -1,4 +1,5 @@
 using UIForia.Rendering;
+using UIForia.Selectors;
 
 namespace UIForia {
 
@@ -6,17 +7,20 @@ namespace UIForia {
 
         public int id;
 
-        public StyleStateGroup normal;
-        public StyleStateGroup hover;
-        public StyleStateGroup active;
-        public StyleStateGroup focus;
+        public StylePropertyBlock normal;
+        public StylePropertyBlock hover;
+        public StylePropertyBlock active;
+        public StylePropertyBlock focus;
 
+        public Selector[] selectors;
+        
         public StyleGroup(int id) {
             this.id = id;
-            normal = new StyleStateGroup(null, new StylePropertyBlock(s_EmptyPropertyArray, s_EmptyRunCommands));
-            hover = new StyleStateGroup(null, new StylePropertyBlock(s_EmptyPropertyArray, s_EmptyRunCommands));
-            active = new StyleStateGroup(null, new StylePropertyBlock(s_EmptyPropertyArray, s_EmptyRunCommands));
-            focus = new StyleStateGroup(null, new StylePropertyBlock(s_EmptyPropertyArray, s_EmptyRunCommands));
+            this.normal = new StylePropertyBlock(s_EmptyPropertyArray, s_EmptyRunCommands);
+            this.hover = new StylePropertyBlock(s_EmptyPropertyArray, s_EmptyRunCommands);
+            this.active = new StylePropertyBlock(s_EmptyPropertyArray, s_EmptyRunCommands);
+            this.focus = new StylePropertyBlock(s_EmptyPropertyArray, s_EmptyRunCommands);
+            this.selectors = null;
         }
 
 

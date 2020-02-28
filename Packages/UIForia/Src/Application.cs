@@ -74,10 +74,33 @@ namespace UIForia {
 
         internal static readonly Dictionary<string, Type> s_CustomPainters;
 
+        internal StructList<int> freeListIndex;
+        internal LightList<UIElement> elementMap;
         private UITaskSystem m_BeforeUpdateTaskSystem;
         private UITaskSystem m_AfterUpdateTaskSystem;
 
         public static readonly UIForiaSettings Settings;
+
+        
+
+        public ElementReference CreateElementReference(UIElement element) {
+            if (element.isDestroyed) return default;
+            return new ElementReference(element.id, element.index);
+        }
+
+        public UIElement ResolveElementReference(in ElementReference reference) {
+            UIElement element = elementMap.array[reference.index];
+            if (element == null) return null;
+            if (element.id != reference.elementId) return null;
+            return element;
+        }
+        
+         public T ResolveElementReference<T>(in ElementReference reference) where T : UIElement {
+            UIElement element = elementMap.array[reference.index];
+            if (element == null) return null;
+            if (element.id != reference.elementId) return null;
+            return element as T;
+        }
 
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
@@ -127,7 +150,7 @@ namespace UIForia {
             animationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
             soundSystem = new UISoundSystem();
-            styleSystem2 = new StyleSystem2();
+            styleSystem2 = new StyleSystem2(this);
         }
 
         internal void Initialize() {

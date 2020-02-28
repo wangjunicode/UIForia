@@ -14,15 +14,5 @@ namespace UIForia {
         }
 
     }
-
-    public struct StyleStateGroup {
-
-        public Selector[] selectors;
-        public StylePropertyBlock propertyBlock;
-
-        public StyleStateGroup(Selector[] selectors, in StylePropertyBlock propertyBlock) {
-            this.selectors = selectors;
-            this.propertyBlock = propertyBlock;
-        }
-    }
+    
 }

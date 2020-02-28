@@ -18,7 +18,7 @@ namespace StyleSystemTest {
             public MockRootQuery(string attr, AttributeIndex attributeIndex) {
                 this.attr = attr;
             }
-            
+
         }
 
         public class MockSelector : Selector {
@@ -27,7 +27,7 @@ namespace StyleSystemTest {
 
             public MockSelector(string attr) {
                 this.attr = attr;
-                this.rootQuery = new MockRootQuery(attr, attrIndex);
+                this.rootQuery = new MockRootQuery(attr, null);
             }
 
         }
@@ -41,23 +41,18 @@ namespace StyleSystemTest {
 
         [Test]
         public void Works() {
-            
             MockApplication app = MockApplication.Setup<StyleTestElementSimple>();
 
             StyleGroup group = new StyleGroup(NextGroupId) {
-                normal = new StyleStateGroup() {
-                    selectors = new Selector[] { new MockSelector("two")},
-                    propertyBlock = new StylePropertyBlock(new[] {
-                        StyleProperty.BackgroundColor(Color.cyan),
-                        StyleProperty.BorderLeft(4f),
-                    })
-                },
-                hover = new StyleStateGroup() {
-                    propertyBlock = new StylePropertyBlock(new[] {
-                        StyleProperty.BackgroundColor(Color.red),
-                        StyleProperty.BorderLeft(12f)
-                    })
-                }
+                normal = new StylePropertyBlock(new[] {
+                    StyleProperty.BackgroundColor(Color.cyan),
+                    StyleProperty.BorderLeft(4f),
+                }),
+                hover = new StylePropertyBlock(new[] {
+                    StyleProperty.BackgroundColor(Color.red),
+                    StyleProperty.BorderLeft(12f)
+                }),
+                selectors =  new Selector[] { new MockSelector("one") }
             };
 
             /*

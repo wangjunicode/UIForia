@@ -9,11 +9,11 @@ namespace UIForia.Util {
         public static CharStringBuilder s_CharStringBuilder = new CharStringBuilder(128);
 
         public static readonly char[] s_SplitComma = {','};
-        
+
         public static int FindMatchingIndex(string input, char open, char close) {
 
             int start = -1;
-            
+
             for (int i = 0; i < input.Length; i++) {
                 if (input[i] == open) {
                     start = i;
@@ -24,7 +24,7 @@ namespace UIForia.Util {
             if (start == -1) {
                 return -1;
             }
-            
+
             int counter = 0;
             int ptr = start;
             while (ptr < input.Length) {
@@ -45,12 +45,17 @@ namespace UIForia.Util {
 
             return -1;
         }
-        
+
         public static unsafe int CharCompareOrdinal(string strA, char[] chars) {
-            int num1 = Math.Min(strA.Length, chars.Length);
+            return CharCompareOrdinal(strA, chars, 0, chars.Length);
+        }
+
+        public static unsafe int CharCompareOrdinal(string strA, char[] chars, int start, int end) {
+            int num1 = Math.Min(strA.Length, end);
             int num2 = -1;
             fixed (char* chPtr1 = strA) {
-                fixed (char* chPtr2 = chars) {
+                fixed (char* charArrayPtr = chars) {
+                    char* chPtr2 = charArrayPtr + start;
                     char* chPtr3 = chPtr1;
                     char* chPtr4 = chPtr2;
                     for (; num1 >= 10; num1 -= 10) {
@@ -87,7 +92,7 @@ namespace UIForia.Util {
                         char* chPtr5 = chPtr3 + num2;
                         char* chPtr6 = chPtr4 + num2;
                         int num3;
-                        return (num3 = (int) *chPtr5 - (int) *chPtr6) != 0 ? num3 : (int) chPtr5[1] - (int) chPtr6[1];
+                        return (num3 = (int) *chPtr5 - (int) *chPtr6) != 0 ? num3 : chPtr5[1] - chPtr6[1];
                     }
 
                     for (; num1 > 0 && *(int*) chPtr3 == *(int*) chPtr4; num1 -= 2) {
@@ -96,7 +101,7 @@ namespace UIForia.Util {
                     }
 
                     if (num1 <= 0)
-                        return strA.Length - chars.Length;
+                        return strA.Length - end;
                     int num4;
                     return (num4 = (int) *chPtr3 - (int) *chPtr4) != 0 ? num4 : chPtr3[1] - chPtr4[1];
                 }
@@ -175,6 +180,44 @@ namespace UIForia.Util {
                 }
             }
         }
+
+        public static unsafe bool EqualsRangeUnsafe(string str, char[] b, int bStart, int length) {
+            
+            if (str.Length != length) {
+                return false;
+            }
+            
+            fixed (char* strPtr = str) {
+                fixed (char* bPtr = b) {
+                    char* chPtr2 = bPtr + bStart;
+
+                    char* chPtr3 = strPtr;
+                    char* chPtr4 = chPtr2;
+
+                    // todo -- assumes 64 bit
+                    for (; length >= 12; length -= 12) {
+                        if (*(long*) chPtr3 != *(long*) chPtr4 || *(long*) (chPtr3 + 4) != *(long*) (chPtr4 + 4) || *(long*) (chPtr3 + 8) != *(long*) (chPtr4 + 8)) {
+                            return false;
+                        }
+
+                        chPtr3 += 12;
+                        chPtr4 += 12;
+                    }
+
+                    for (; length > 0 && *(int*) chPtr3 == *(int*) chPtr4; length -= 2) {
+                        chPtr3 += 2;
+                        chPtr4 += 2;
+                    }
+
+                    if (length == 1) {
+                        return *chPtr3 == *chPtr4;
+                    }
+
+                    return length <= 0;
+                }
+            }
+        }
+
 
     }
 

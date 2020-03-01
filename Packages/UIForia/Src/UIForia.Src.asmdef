@@ -2,14 +2,16 @@
     "name": "UIForia.Src",
     "references": [
         "Unity.TextMeshPro",
-        "Unity.Mathematics"
+        "Unity.Mathematics",
+        "Unity.Burst",
+        "Unity.Collections"
     ],
-    "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": []
+    "defineConstraints": [],
+    "versionDefines": []
 }

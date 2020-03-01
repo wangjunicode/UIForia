@@ -6,6 +6,7 @@ using UIForia.Rendering;
 using UIForia.Selectors;
 using UIForia.Systems;
 using UIForia.Util;
+using Unity.Collections;
 
 namespace UIForia {
 
@@ -55,9 +56,17 @@ namespace UIForia {
         internal LightList<Selector> selectors;
         internal StructList<SelectorEffect> selectorEffects;
 
+        internal int baseStyleId;
+
+        internal NativeArray<StyleUsage> usages2;
+        
         public StyleSet2(StyleSystem2 styleSystem, UIElement element) {
             this.styleSystem = styleSystem;
             this.element = element;
+        }
+
+        internal void Destroy() {
+            // style property needs some object data like strings. buuut i gotta not leak that
         }
 
         // todo -- dont release list in template compiler
@@ -83,6 +92,9 @@ namespace UIForia {
         }
 
         public void Initialize(StyleGroup styleGroup) {
+            
+            baseStyleId = styleGroup.id;
+            
             int cnt = styleGroup.normal.properties.Length
                       + styleGroup.focus.properties.Length
                       + styleGroup.hover.properties.Length

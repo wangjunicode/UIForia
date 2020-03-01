@@ -70,6 +70,8 @@ namespace UIForia {
         internal CompiledTemplateData templateData;
 
         internal int frameId;
+        private int indexGenerator;
+        private int IndexGenerator => indexGenerator++;
         protected internal List<UIView> views;
 
         internal static readonly Dictionary<string, Type> s_CustomPainters;
@@ -81,11 +83,8 @@ namespace UIForia {
 
         public static readonly UIForiaSettings Settings;
 
-        
-
         public ElementReference CreateElementReference(UIElement element) {
-            if (element.isDestroyed) return default;
-            return new ElementReference(element.id, element.index);
+            return element.isDestroyed ? default : new ElementReference(element.id, element.index);
         }
 
         public UIElement ResolveElementReference(in ElementReference reference) {
@@ -392,6 +391,7 @@ namespace UIForia {
             LightStack<UIElement>.Release(ref stack);
 
             onElementDestroyed?.Invoke(element);
+            freeListIndex.Add(element.index);
         }
         
         public void Update() {
@@ -908,6 +908,7 @@ namespace UIForia {
             element.application = this;
             element.templateMetaData = templateData.templateMetaData[originTemplateId];
             element.id = NextElementId;
+            element.index = freeListIndex.size > 0 ? freeListIndex.array[--freeListIndex.size] : indexGenerator++;
             element.style = new UIStyleSet(element);
             element.styleSet2 = new StyleSet2(styleSystem2, element);
             element.layoutResult = new LayoutResult(element);

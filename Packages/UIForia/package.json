@@ -1,12 +1,14 @@
 {
-    "name": "com.klang.uiforia",
-    "displayName": "UIForia",
-    "version": "0.0.1",
-    "unity": "2018.3",
-    "description": "",
-    "keywords": ["UI"],
-    "category": "UI",
-    "dependencies": {
-      
-    }
+  "name": "com.klang.uiforia",
+  "displayName": "UIForia",
+  "version": "0.0.1",
+  "unity": "2019.2",
+  "keywords": [
+    "UI"
+  ],
+  "category": "UI",
+  "dependencies": {
+    "com.unity.burst": "1.2.3"
+  },
+  "hideInEditor": false
 }

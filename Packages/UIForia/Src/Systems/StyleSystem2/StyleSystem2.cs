@@ -1,11 +1,88 @@
 using System;
+using System.Collections.Generic;
+using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Selectors;
 using UIForia.Util;
+using Unity.Burst;
+using Unity.Collections;
+using Unity.Jobs;
+using UnityEngine;
 
 namespace UIForia.Systems {
 
+    [BurstCompile]
+    public struct SetupSelectorDataJob : IJob {
+
+        public void Execute() { }
+
+    }
+
+    [BurstCompile]
+    public struct RunSelectorJob : IJob {
+
+        public NativeArray<StyleSystem2.SelectorChange> selectorChanges;
+
+        public void Execute() {
+
+            // for(int i = 0; i < )
+
+        }
+
+    }
+
+    [BurstCompile]
+    public struct SetupJob : IJob {
+
+        public void Execute() { }
+
+    }
+
+    [BurstCompile]
+    public struct ApplyStyleJob : IJob {
+
+        public void Execute() { }
+
+    }
+
+    /**
+     * Style System
+     *
+     *     During user code, style is given a bunch of changes to process. These get buffered in the style system until it gets a chance to run
+     * 
+     *     Changes come in 3 varieties
+     *         1. Instance style was set
+     *         2. Dynamic styles were updated
+     *         3. State changed (Hover | Focus | Active)
+     *
+     *     for every style that has pending changes we need to start flushing those changes.
+     *     We only want to actually apply style once because we need to inform other systems
+     *     as to which styles changed for which element. This means we have to run selectors
+     *     before we can write any changes into the actual elements.
+     *
+     *     So the way this works it that we first issue a job(s) that figures out the style diffs for state and group changes.
+     *     Using that result we can figure out which selectors are no longer valid and which now became valid.
+     *
+     *     Then we need to run all selectors. order should not matter if we can sort the result at the end so could probably be done
+     *     in parallel.
+     *
+     *     Now we issue all the run commands which might enqueue sounds or animations to play
+     *
+     *     At this point we apply styles to actual elements and build an initial diff list. This involves flushing the instance and inherited
+     *     style changes as well.
+     * 
+     *     At this point we can run transitions, but they won't update diff list yet because animation might be running.
+     *
+     *     Now we run animations and for any element that was animated we need to re-apply style and update diff list
+     *
+     *     Finish the frame by setting the output data for layout & rendering.
+     *
+     *     There are a few steps to styling:
+     *         The first is collecting all the style properties that have an effect on our element.
+     *         The second is finding which of those to actually apply. 
+     * 
+     */
     public class StyleSystem2 {
 
         public class ChangeSet {
@@ -49,13 +126,135 @@ namespace UIForia.Systems {
         private UIElement[] stack;
         private Application application;
         private LightList<StyleSet2> changeSet;
-        private LightList<Selector> selectorMap;
-        
+        private StructList<StyleGroup> styleGroups;
+
+        private NativeList<RunCommand> runCommands;
+        private NativeList<Selector> selectorMap;
+        private NativeList<StyleGrouping> styleGroupings;
+        private NativeList<SelectorEffect> effects;
+        private NativeArray<StyleProperty2> persistentPropertyTable;
+
+        internal NativeArray<int> persistentStringMap;
+        internal Dictionary<string, int> persistentMapReverseLookup;
+
         public StyleSystem2(Application application) {
             this.application = application;
             this.stack = new UIElement[32];
             this.changeSet = new LightList<StyleSet2>(32);
-            this.selectorMap = new LightList<Selector>(32);
+            this.selectorMap = new NativeList<Selector>(64, Allocator.Persistent);
+            this.persistentStringMap = new NativeArray<int>(2048, Allocator.Persistent);
+        }
+
+        public void ConvertStyleSheet(StyleSheet sheet) {
+
+
+            int propertyCount = 0;
+            for (int i = 0; i < sheet.styleGroupContainers.Length; i++) {
+                UIStyleGroupContainer container = sheet.styleGroupContainers[i];
+
+                for (int j = 0; j < container.groups.Length; j++) {
+                    UIStyleGroup group = container.groups[j];
+
+                    if (group.normal.style != null) {
+                        propertyCount += group.normal.style.PropertyCount;
+                    }
+
+                    if (group.hover.style != null) {
+                        propertyCount += group.hover.style.PropertyCount;
+                    }
+
+                    if (group.active.style != null) {
+                        propertyCount += group.active.style.PropertyCount;
+                    }
+
+                    if (group.focused.style != null) {
+                        propertyCount += group.focused.style.PropertyCount;
+                    }
+
+                }
+
+            }
+            
+            StructList<StyleProperty2> propertyChunk = new StructList<StyleProperty2>(propertyCount);
+            
+            for (int i = 0; i < sheet.styleGroupContainers.Length; i++) {
+                
+                UIStyleGroupContainer container = sheet.styleGroupContainers[i];
+
+                for (int j = 0; j < container.groups.Length; j++) {
+                    UIStyleGroup group = container.groups[j];
+
+                    if (group.normal.style != null) {
+                        for (int k = 0; k < group.normal.style.PropertyCount; k++) {
+                            propertyChunk.Add(new StyleProperty2() {
+                            });
+                        }
+                        
+                    }
+                    
+                    propertyCount += group.normal.style.PropertyCount;
+                    if (group.hover.style != null) {
+                        propertyCount += group.hover.style.PropertyCount;
+                    }
+
+                    if (group.active.style != null) {
+                        propertyCount += group.active.style.PropertyCount;
+                    }
+
+                    if (group.focused.style != null) {
+                        propertyCount += group.focused.style.PropertyCount;
+                    }
+
+                }
+
+            }
+            
+
+        }
+
+        public void TransformStyleData() {
+            StyleProperty2[] properties = new[] {
+                StyleProperty2.BackgroundColor(Color.black),
+                StyleProperty2.BackgroundColor(Color.red)
+            };
+
+            StyleGrouping grouping = new StyleGrouping();
+
+            grouping.normal.start = 0;
+            grouping.normal.length = 1;
+            grouping.active.start = 1;
+            grouping.active.length = 1;
+        }
+
+        public void Run() {
+
+            SetupJob setupJob = new SetupJob(); // handle all things initialized this frame or with dynamic style changes
+
+            JobHandle setupJobHandle = setupJob.Schedule();
+
+            RunSelectorJob selectorJob = new RunSelectorJob();
+
+            SetupSelectorDataJob setupSelectorDataJob = new SetupSelectorDataJob(); // get data in a format selectors can easily consume
+
+            JobHandle selectorDataHandle = setupSelectorDataJob.Schedule();
+
+            JobHandle selectorJobHandle = selectorJob.Schedule(JobHandle.CombineDependencies(setupJobHandle, selectorDataHandle)); // run the selectors
+
+            ApplyStyleJob applyStyleJob = new ApplyStyleJob();
+
+            JobHandle applyStyleHandle = applyStyleJob.Schedule(selectorJobHandle);
+
+            // animation
+
+            // apply again
+
+            // transitions
+
+            // diff & publish
+            JobHandle.ScheduleBatchedJobs();
+
+            applyStyleHandle.Complete();
+
         }
 
         public void SetInstanceProperty(StyleSet2 styleSet2, in StyleProperty property, StyleState state) {
@@ -76,7 +275,7 @@ namespace UIForia.Systems {
                 changeSet.Add(styleSet);
             }
 
-            styleSet.changeSet.groupChanges = styleGroupList;
+            // styleSet.changeSet.groupChanges = styleGroupList;
         }
 
         public void EnterState(StyleSet2 styleSet, StyleState state) {
@@ -107,24 +306,6 @@ namespace UIForia.Systems {
 
         private StructList<StyleUsage> scratch = new StructList<StyleUsage>(64);
 
-        private unsafe void ApplyStyleChanges(StyleSet2 style) {
-            if (style.changeSet == null) return;
-
-            int* changeIds = stackalloc int[style.changeSet.groupChanges.size + style.dynamicGroups.size];
-
-            int cnt = 0;
-
-            for (int i = 0; i < style.dynamicGroups.size; i++) {
-                changeIds[cnt++] = style.dynamicGroups.array[i].id;
-            }
-
-            for (int i = 0; i < changeSet.selectorEffects.size; i++) {
-                if (!changeSet.selectorEffects[i].active) {
-                    changeIds[cnt++] = selectorEffects[i].id;
-                }
-            }
-        }
-
         private unsafe void ApplyStyleGroupChangesWithStateChange(StyleSet2 style, StyleState oldState, StyleState newState) {
             int cnt = 0;
             int* changeIds = stackalloc int[style.changeSet.groupChanges.size + style.dynamicGroups.size];
@@ -149,15 +330,15 @@ namespace UIForia.Systems {
                 }
             }
 
-            for (int i = 0; i < style.selectors.size; i++) {
-                Selector selector = style.selectors[i];
-
-                for (int j = 0; j < selector.resultSet.size; i++) {
-                    selector.resultSet[j].RemoveSelector(selector.id);
-                }
-
-                selector.resultSet.Clear();
-            }
+            // for (int i = 0; i < style.selectors.size; i++) {
+            //     Selector selector = style.selectors[i];
+            //
+            //     for (int j = 0; j < selector.resultSet.size; i++) {
+            //         selector.resultSet[j].RemoveSelector(selector.id);
+            //     }
+            //
+            //     selector.resultSet.Clear();
+            // }
 
             style.selectors.Clear();
 
@@ -180,7 +361,6 @@ namespace UIForia.Systems {
                     addCount += group.focus.properties.Length;
                 }
             }
-
 
             if (style.usageCount + addCount >= style.styleUsages.Length) {
                 Array.Resize(ref style.styleUsages, style.usageCount + addCount + 8);
@@ -209,7 +389,6 @@ namespace UIForia.Systems {
                     style.usageCount += (ushort) group.focus.properties.Length;
                 }
             }
-
 
             for (int i = 0; i < style.changeSet.groupChanges.size; i++) {
                 ref StyleGroup group = ref style.changeSet.groupChanges.array[i];
@@ -282,7 +461,7 @@ namespace UIForia.Systems {
                 if (change.changeType == SelectorChangeType.RemovedFromRunList) {
 
                     styleSet2.RemoveSelector(change.selectorId);
-                    
+
                     // find all targets that were effected by this selector and remove them. if target was 'this' element, just mark in own change set
                     for (int j = 0; j < styleSet2.selectorEffects.size; j++) {
                         ref SelectorEffect effect = ref styleSet2.selectorEffects.array[i];
@@ -332,19 +511,19 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < changeSet.size; i++) {
                 StyleSet2 style = changeSet.array[i];
- 
+
                 // if groups changed we need to swap remove all styles from removed groups. we need to recompute active styles and reprioritize anyway later on
                 if (style.changeSet.groupChanges != null) {
-                    ApplyStyleGroupChanges(style);
+                    //      ApplyStyleGroupChanges(style);
                 }
 
                 if (style.changeSet.state != 0) {
                     style.activeStates = style.changeSet.state;
 
                     for (int j = 0; j < style.selectors.size; j++) {
-                        if (style.selectors[j].active && (style.selectors[j].state & style.activeStates) == 0) {
-                            // remove
-                        }
+                        // if (style.selectors[j].active && (style.selectors[j].state & style.activeStates) == 0) {
+                        //     // remove
+                        // }
                     }
                 }
             }
@@ -416,7 +595,7 @@ namespace UIForia.Systems {
                 for (int i = 0; i < styleSet2.selectors.size; i++) {
                     // run selector    
                     if ((styleSet2.selectors[i].state & styleSet2.activeStates) != 0) {
-                        styleSet2.selectors[i].Run(resultSet);
+                        //   styleSet2.selectors[i].Run(resultSet);
                     }
 
                     // need to write 
@@ -491,6 +670,10 @@ namespace UIForia.Systems {
             // to tell layout
             // to tell rendering
             // to tell animation (transitions)
+        }
+
+        public static int GetStringId(string data) {
+            throw new NotImplementedException();
         }
 
     }

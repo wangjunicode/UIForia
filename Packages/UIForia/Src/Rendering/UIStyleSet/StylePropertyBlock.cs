@@ -1,5 +1,5 @@
 using UIForia.Rendering;
-using UIForia.Selectors;
+using UnityEngine;
 
 namespace UIForia {
 
@@ -14,5 +14,18 @@ namespace UIForia {
         }
 
     }
-    
+
+    public struct StyleGrouping {
+
+        public RangeInt normal;
+        public RangeInt hover;
+        public RangeInt active;
+        public RangeInt focus;
+        public Range16 normalCommands;
+        public Range16 focusCommands;
+        public Range16 hoverCommands;
+        public Range16 activeCommands;
+
+    }
+
 }

@@ -121,8 +121,7 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
 
                 context.Advance();
             }
-
-
+            
             if (context.HasMore()) {
                 char next = context.input[context.ptr];
                 // todo -- enable the below to making parsing numbers better in the compiler (since we already know what type to try to parse it as)

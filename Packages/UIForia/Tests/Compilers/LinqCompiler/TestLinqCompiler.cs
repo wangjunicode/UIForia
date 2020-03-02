@@ -5,11 +5,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Mono.Linq.Expressions;
 using NUnit.Framework;
-using UIForia.Bindings;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
-using UIForia.Extensions;
 using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Test.NamespaceTest.SomeNamespace;
 using UnityEngine;
@@ -222,23 +220,10 @@ public class TestLinqCompiler {
             // todo -- can eliminate the if here if the assignment is to a simple field and no handlers are used
             compiler.IfNotEqual(left, right, () => {
                 compiler.Assign(left, right);
-                if (changedHandlers != null) {
-                    for (int i = 0; i < changedHandlers.Length; i++) {
-                        //compiler.Invoke(rootParameter, changedHandlers[i], compiler.GetVariable("previousValue"));
-                    }
-                }
-
-                if (elementType.Implements(typeof(IPropertyChangedHandler))) {
-                    //compiler.Invoke("element", "OnPropertyChanged", compiler.GetVariable("currentValue"));
-                }
             });
 
             // // compiler.Log();
             return compiler.BuildLambda();
-        }
-
-        public LinqBinding CompileMemberReadBinding(Type root, Type elementType, AttributeDefinition attributeDefinition) {
-            return null; //BuildMemberReadBinding(root, elementType, attributeDefinition).Compile();
         }
 
         private MethodInfo[] GetPropertyChangedHandlers(Type targetType, string fieldname) {

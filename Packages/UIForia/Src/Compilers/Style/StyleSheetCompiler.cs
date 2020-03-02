@@ -39,7 +39,7 @@ namespace UIForia.Compilers.Style {
                 //       context = new StyleCompileContext(); // todo resolve constants. should be done a per file level, should store all used constants without needing to later reference other files
                 // StyleCompileContext.Create(styleSheetImporter) //new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
             }
-            catch (CompileException e) {
+            catch (TemplateCompileException e) {
                 e.SetFileName(filePath);
                 throw;
             }
@@ -243,7 +243,7 @@ namespace UIForia.Compilers.Style {
                         options.timingFunction = StylePropertyMappers.MapEnum<EasingFunction>(value, context);
                         break;
                     default:
-                        throw new CompileException(optionNodes[i], "Invalid option argument for animation");
+                        throw new TemplateCompileException(optionNodes[i], "Invalid option argument for animation");
                 }
             }
 
@@ -299,11 +299,11 @@ namespace UIForia.Compilers.Style {
                             break;
 
                         default:
-                            throw new CompileException(property, "Invalid option argument for animation");
+                            throw new TemplateCompileException(property, "Invalid option argument for animation");
                     }
                 }
                 else {
-                    throw new CompileException(spriteSheetProperties[i], "Invalid option argument for animation");
+                    throw new TemplateCompileException(spriteSheetProperties[i], "Invalid option argument for animation");
                 }
             }
 
@@ -350,7 +350,7 @@ namespace UIForia.Compilers.Style {
                     }
                 }
                 else {
-                    throw new CompileException(property, "Expected a sound property.");
+                    throw new TemplateCompileException(property, "Expected a sound property.");
                 }
             }
 
@@ -384,7 +384,7 @@ namespace UIForia.Compilers.Style {
                         break;
                     case AttributeNodeContainer attribute:
                         if (root is AttributeNodeContainer) {
-                            throw new CompileException(attribute, "You cannot nest attribute group definitions.");
+                            throw new TemplateCompileException(attribute, "You cannot nest attribute group definitions.");
                         }
 
                         UIStyleGroup attributeGroup = new UIStyleGroup();
@@ -430,11 +430,11 @@ namespace UIForia.Compilers.Style {
                             MapProperties(styleSheetAnimations, uiSoundData, ref uiStyleRunCommand, styleContainer.children);
                             targetGroup.active = uiStyleRunCommand;
                         }
-                        else throw new CompileException(styleContainer, $"Unknown style state '{styleContainer.identifier}'. Please use [hover], [focus] or [active] instead.");
+                        else throw new TemplateCompileException(styleContainer, $"Unknown style state '{styleContainer.identifier}'. Please use [hover], [focus] or [active] instead.");
 
                         break;
                     default:
-                        throw new CompileException(node, $"You cannot have a {node} at this level.");
+                        throw new TemplateCompileException(node, $"You cannot have a {node} at this level.");
                 }
             }
         }
@@ -469,11 +469,11 @@ namespace UIForia.Compilers.Style {
                     }
                 }
                 else {
-                    throw new CompileException(animationName, $"Could not find an animation with that name or reference: {animationName}");
+                    throw new TemplateCompileException(animationName, $"Could not find an animation with that name or reference: {animationName}");
                 }
             }
 
-            throw new CompileException(animationName, $"Could not find an animation with that name or reference: {animationName}");
+            throw new TemplateCompileException(animationName, $"Could not find an animation with that name or reference: {animationName}");
         }
 
         private UISoundData FindSoundData(in UISoundData[] soundData, StyleASTNode name) {
@@ -486,11 +486,11 @@ namespace UIForia.Compilers.Style {
                     }
                 }
                 else {
-                    throw new CompileException(name, $"Could not find an sound with that name or reference: {name}");
+                    throw new TemplateCompileException(name, $"Could not find an sound with that name or reference: {name}");
                 }
             }
 
-            throw new CompileException(name, $"Could not find an sound with that name or reference: {name}");
+            throw new TemplateCompileException(name, $"Could not find an sound with that name or reference: {name}");
         }
 
         private void MapProperties(AnimationData[] animations, UISoundData[] soundData, ref UIStyleRunCommand targetStyle, LightList<StyleASTNode> styleContainerChildren) {
@@ -512,7 +512,7 @@ namespace UIForia.Compilers.Style {
 
                         break;
                     default:
-                        throw new CompileException(node, $"You cannot have a {node} at this level.");
+                        throw new TemplateCompileException(node, $"You cannot have a {node} at this level.");
                 }
             }
         }

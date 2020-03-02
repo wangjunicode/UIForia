@@ -95,7 +95,7 @@ namespace UIForia.Rendering {
 
         private int FindIntProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return !property.hasValue ? IntUtil.UnsetValue : property.int0;
+            return !property.hasValue ? int.MinValue : property.int0;
         }
 
         private int FindEnumProperty(StylePropertyId propertyId) {

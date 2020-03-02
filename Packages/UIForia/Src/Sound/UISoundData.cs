@@ -1,5 +1,9 @@
+using UIForia.Util;
+
 namespace UIForia.Sound {
+
     public struct UISoundData {
+
         public string name;
         public string styleSheetFileName;
 
@@ -11,5 +15,7 @@ namespace UIForia.Sound {
         public UITimeMeasurement duration;
         public int iterations;
         public string mixerGroup;
+
     }
+
 }

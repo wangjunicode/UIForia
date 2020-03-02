@@ -63,7 +63,7 @@ namespace UIForia.Compilers {
             if (!string.IsNullOrEmpty(alias)) {
                 for (int i = 0; i < styleSheets.size; i++) {
                     if (styleSheets.array[i].alias == alias) {
-                        throw new CompileException("Duplicate style sheet alias: " + alias);
+                        throw new TemplateCompileException("Duplicate style sheet alias: " + alias);
                     }
                 }
             }
@@ -183,7 +183,7 @@ namespace UIForia.Compilers {
             for (int i = 0; i < variables.size; i++) {
                 if (variables[i].Name == name) {
                     if (variables[i].Type != type) {
-                        throw new CompileException("Variable already taken: " + name);
+                        throw new TemplateCompileException("Variable already taken: " + name);
                     }
 
                     return variables[i];
@@ -199,7 +199,7 @@ namespace UIForia.Compilers {
             for (int i = 0; i < variables.size; i++) {
                 if (variables[i].Name == name) {
                     if (variables[i].Type != typeof(T)) {
-                        throw new CompileException("Variable already taken: " + name);
+                        throw new TemplateCompileException("Variable already taken: " + name);
                     }
 
                     return variables[i];

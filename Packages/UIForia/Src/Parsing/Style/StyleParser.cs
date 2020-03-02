@@ -761,7 +761,7 @@ namespace UIForia.Parsing.Style {
                         AssertTokenTypeAndAdvance(StyleTokenType.ParenClose);
                     }
                     else {
-                        throw new CompileException(url, "URL could not be parsed.");
+                        throw new TemplateCompileException(url, "URL could not be parsed.");
                     }
 
                     propertyValue = StyleASTNodeFactory.UrlNode(url, spriteName);

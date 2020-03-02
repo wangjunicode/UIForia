@@ -1202,8 +1202,8 @@ style xyz {
         Assert.AreEqual(2f, soundData.duration.value);
         Assert.AreEqual(-1, soundData.iterations);
         Assert.AreEqual(-0.4f, soundData.pitch);
-        Assert.AreEqual(0.1f, soundData.pitchRange.Min);
-        Assert.AreEqual(0.4f, soundData.pitchRange.Max);
+        Assert.AreEqual(0.1f, soundData.pitchRange.min);
+        Assert.AreEqual(0.4f, soundData.pitchRange.max);
         Assert.AreEqual(23.9f, soundData.tempo);
         Assert.AreEqual(0.9f, soundData.volume);
     }

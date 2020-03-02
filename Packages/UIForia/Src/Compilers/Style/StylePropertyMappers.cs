@@ -142,7 +142,7 @@ namespace UIForia.Compilers.Style {
                             targetStyle.GridItemHeight = MapGridItemPlacement(property.children[3], context);
                         }
                         else {
-                            throw new CompileException(context.fileName, property, $"Invalid GridItem style {property}.");
+                            throw new TemplateCompileException(context.fileName, property, $"Invalid GridItem style {property}.");
                         }
                     }
                 },
@@ -321,7 +321,7 @@ namespace UIForia.Compilers.Style {
                 return MapNumber(value, context);
             }
 
-            throw new CompileException("Unable to parse alignment value");
+            throw new TemplateCompileException("Unable to parse alignment value");
         }
 
         private static void MapAlignmentX(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
@@ -451,7 +451,7 @@ namespace UIForia.Compilers.Style {
                     targetStyle.AlignmentOffsetX = new OffsetMeasurement(-1f, OffsetMeasurementUnit.Percent);
                     break;
                 default:
-                    throw new CompileException(context.fileName, value, $"Invalid AlignX {value}. " +
+                    throw new TemplateCompileException(context.fileName, value, $"Invalid AlignX {value}. " +
                                                                         "Make sure you use one of the following keywords: start, center, end or provide an OffsetMeasurement.");
             }
         }
@@ -471,7 +471,7 @@ namespace UIForia.Compilers.Style {
                     targetStyle.AlignmentOffsetY = new OffsetMeasurement(-1f, OffsetMeasurementUnit.Percent);
                     break;
                 default:
-                    throw new CompileException(context.fileName, value, $"Invalid AlignY {value}. " +
+                    throw new TemplateCompileException(context.fileName, value, $"Invalid AlignY {value}. " +
                                                                         "Make sure you use one of the following keywords: start, center, end or provide an OffsetMeasurement.");
             }
         }
@@ -518,7 +518,7 @@ namespace UIForia.Compilers.Style {
 
                         break;
                     default:
-                        throw new CompileException(context.fileName, value, $"Invalid TextFontStyle {value}. " +
+                        throw new TemplateCompileException(context.fileName, value, $"Invalid TextFontStyle {value}. " +
                                                                             "Make sure you use one of those: bold, italic, underline or strikethrough.");
                 }
             }
@@ -583,7 +583,7 @@ namespace UIForia.Compilers.Style {
                 case StyleASTNodeType.NumericLiteral:
                     int number = (int) MapNumber(dereferencedValue, context);
                     if (number < 0) {
-                        return new GridItemPlacement(IntUtil.UnsetValue);
+                        return new GridItemPlacement(int.MinValue);
                     }
 
                     return new GridItemPlacement(number);
@@ -591,14 +591,14 @@ namespace UIForia.Compilers.Style {
                 case StyleASTNodeType.StringLiteral:
                     string placementName = MapString(node, context);
                     if (string.IsNullOrEmpty(placementName) || string.IsNullOrWhiteSpace(placementName) || placementName == ".") {
-                        return new GridItemPlacement(IntUtil.UnsetValue);
+                        return new GridItemPlacement(int.MinValue);
                     }
                     else {
                         return new GridItemPlacement(placementName);
                     }
             }
 
-            throw new CompileException(context.fileName, node, $"Had a hard time parsing that grid item placement: {node}.");
+            throw new TemplateCompileException(context.fileName, node, $"Had a hard time parsing that grid item placement: {node}.");
         }
 
         private static void MapTransformScale(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
@@ -659,7 +659,7 @@ namespace UIForia.Compilers.Style {
                 return cellSize;
             }
 
-            throw new CompileException("Failed to map Grid Cell Size");
+            throw new TemplateCompileException("Failed to map Grid Cell Size");
         }
 
         private static GridTrackSize MapGridTrackSize(StyleASTNode trackSize, StyleCompileContext context) {
@@ -689,7 +689,7 @@ namespace UIForia.Compilers.Style {
                         return new GridTrackSize(cellDefinition);
                     }
 
-                    throw new CompileException(context.fileName, literalNode, $"Could not create a grid track size out of the value {literalNode}.");
+                    throw new TemplateCompileException(context.fileName, literalNode, $"Could not create a grid track size out of the value {literalNode}.");
 
                 case MeasurementNode measurementNode: {
                     GridTemplateUnit unit = MapGridTemplateUnit(measurementNode.unit, context);
@@ -735,7 +735,7 @@ namespace UIForia.Compilers.Style {
                             GridCellDefinition cellDefinition = default;
 
                             if (functionNode.children.Count != 3 && functionNode.children.Count != 4 && functionNode.children.Count != 5) {
-                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. cell() must have three, four, or five arguments.");
+                                throw new TemplateCompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. cell() must have three, four, or five arguments.");
                             }
 
                             if (functionNode.children.Count == 3) {
@@ -792,7 +792,7 @@ namespace UIForia.Compilers.Style {
                         }
                         case "shrink": {
                             if (functionNode.children.Count != 2 && functionNode.children.Count != 3) {
-                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. shrnk() must have two arguments.");
+                                throw new TemplateCompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. shrnk() must have two arguments.");
                             }
 
                             GridCellDefinition cellDefinition = default;
@@ -830,7 +830,7 @@ namespace UIForia.Compilers.Style {
                             GridCellDefinition cellDefinition = default;
 
                             if (functionNode.children.Count != 2 && functionNode.children.Count != 3) {
-                                throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. grow() must have two or three arguments.");
+                                throw new TemplateCompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. grow() must have two or three arguments.");
                             }
 
                             StyleASTNode arg0 = context.GetValueForReference(functionNode.children[0]);
@@ -838,7 +838,7 @@ namespace UIForia.Compilers.Style {
 
                             cellDefinition.baseSize = MapGridCellSize(arg0, context);
                             if (cellDefinition.baseSize.unit == GridTemplateUnit.FractionalRemaining) {
-                                throw new CompileException(context.fileName, trackSize, $"You have an error in your {trackSize}. The base size cannot be fr.");
+                                throw new TemplateCompileException(context.fileName, trackSize, $"You have an error in your {trackSize}. The base size cannot be fr.");
                             }
 
                             cellDefinition.shrinkFactor = 0;
@@ -869,11 +869,11 @@ namespace UIForia.Compilers.Style {
                             }
                         }
                         default:
-                            throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Expected a known track size function (repeat, grow, shrink) but all I got was {functionNode.identifier}");
+                            throw new TemplateCompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Expected a known track size function (repeat, grow, shrink) but all I got was {functionNode.identifier}");
                     }
 
                 default:
-                    throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}.");
+                    throw new TemplateCompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}.");
             }
         }
 
@@ -1091,7 +1091,7 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
+            throw new TemplateCompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
         private static UIFixedLength MapFixedLength(StyleASTNode value, StyleCompileContext context) {
@@ -1117,7 +1117,7 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
+            throw new TemplateCompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
         private static UIMeasurementUnit MapUnit(string value, StyleCompileContext context, int line, int column) {
@@ -1273,7 +1273,7 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
+            throw new TemplateCompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
         private static OffsetMeasurementUnit MapOffsetMeasurementUnit(UnitNode unitNode, StyleCompileContext context) {
@@ -1349,7 +1349,7 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
+            throw new TemplateCompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
         internal static UITimeMeasurementUnit MapUITimeMeasurementUnit(UnitNode unitNode, StyleCompileContext context) {
@@ -1390,7 +1390,7 @@ namespace UIForia.Compilers.Style {
                 case UrlNode urlNode:
                     AssetInfo assetInfo = TransformUrlNode(urlNode, context);
                     if (assetInfo.SpriteName != null) {
-                        throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
+                        throw new TemplateCompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
 
                     return context.resourceManager?.GetTexture(assetInfo.Path);
@@ -1403,7 +1403,7 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(context.fileName, node, $"Expected url(path/to/texture) but found {node}.");
+            throw new TemplateCompileException(context.fileName, node, $"Expected url(path/to/texture) but found {node}.");
         }
 
         private static FontAsset MapFont(StyleASTNode node, StyleCompileContext context) {
@@ -1412,7 +1412,7 @@ namespace UIForia.Compilers.Style {
                 case UrlNode urlNode:
                     AssetInfo assetInfo = TransformUrlNode(urlNode, context);
                     if (assetInfo.SpriteName != null) {
-                        throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
+                        throw new TemplateCompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
 
                     return context.resourceManager?.GetFont(assetInfo.Path);
@@ -1425,7 +1425,7 @@ namespace UIForia.Compilers.Style {
                     break;
             }
 
-            throw new CompileException(context.fileName, node, $"Expected url(path/to/font) but found {node}.");
+            throw new TemplateCompileException(context.fileName, node, $"Expected url(path/to/font) but found {node}.");
         }
 
         private static AssetInfo TransformUrlNode(UrlNode urlNode, StyleCompileContext context) {
@@ -1450,7 +1450,7 @@ namespace UIForia.Compilers.Style {
                 };
             }
 
-            throw new CompileException(url, "Invalid url value.");
+            throw new TemplateCompileException(url, "Invalid url value.");
         }
 
 
@@ -1469,7 +1469,7 @@ namespace UIForia.Compilers.Style {
                 case RgbaNode rgbaNode: return MapRbgaNodeToColor(rgbaNode, context);
                 case RgbNode rgbNode: return MapRgbNodeToColor(rgbNode, context);
                 default:
-                    throw new CompileException(context.fileName, styleAstNode, "Unsupported color value.");
+                    throw new TemplateCompileException(context.fileName, styleAstNode, "Unsupported color value.");
             }
         }
 
@@ -1627,7 +1627,7 @@ namespace UIForia.Compilers.Style {
                 case "darkslategrey": return new Color32(47, 79, 79, 255);
             }
 
-            throw new CompileException(context.fileName, node, $"Unable to map color name: {node.name} to a color");
+            throw new TemplateCompileException(context.fileName, node, $"Unable to map color name: {node.name} to a color");
         }
 
         private static Color MapRbgaNodeToColor(RgbaNode rgbaNode, StyleCompileContext context) {
@@ -1657,7 +1657,7 @@ namespace UIForia.Compilers.Style {
                             measurementValue *= 0.01f;
                         }
                         else {
-                            throw new CompileException(context.fileName, node, $"This property only accepts % as a unit but you used a {measurementNode.unit.value}");
+                            throw new TemplateCompileException(context.fileName, node, $"This property only accepts % as a unit but you used a {measurementNode.unit.value}");
                         }
 
                         return measurementValue;
@@ -1669,7 +1669,7 @@ namespace UIForia.Compilers.Style {
                         case "start": return 0f;
                         case "center": return 0.5f;
                         case "end": return 1f;
-                        default: throw new CompileException(context.fileName, node, $"Expected a [start|center|end] but all I got was this lousy {node}");
+                        default: throw new TemplateCompileException(context.fileName, node, $"Expected a [start|center|end] but all I got was this lousy {node}");
                     }
                 }
                 case StyleLiteralNode literalNode: {
@@ -1683,7 +1683,7 @@ namespace UIForia.Compilers.Style {
                 }
             }
 
-            throw new CompileException(context.fileName, node, $"Expected a numeric value but all I got was this lousy {node}");
+            throw new TemplateCompileException(context.fileName, node, $"Expected a numeric value but all I got was this lousy {node}");
         }
 
         internal static float MapNumberOrInfinite(StyleASTNode node, StyleCompileContext context) {
@@ -1711,17 +1711,17 @@ namespace UIForia.Compilers.Style {
                 }
             }
 
-            throw new CompileException(context.fileName, node, $"Expected a numeric value but all I got was this lousy {node}");
+            throw new TemplateCompileException(context.fileName, node, $"Expected a numeric value but all I got was this lousy {node}");
         }
 
         internal static FloatRange MapFloatRange(StyleASTNode node, StyleCompileContext context) {
             if (node is StyleFunctionNode functionNode) {
                 if (functionNode.identifier.ToLower() != "range") {
-                    throw new CompileException(context.fileName, node, $"Expected a range function node but got this: {node}");
+                    throw new TemplateCompileException(context.fileName, node, $"Expected a range function node but got this: {node}");
                 }
 
                 if (functionNode.children.size != 2) {
-                    throw new CompileException(context.fileName, node, $"Expected two arguments but got {functionNode.children.size}");
+                    throw new TemplateCompileException(context.fileName, node, $"Expected two arguments but got {functionNode.children.size}");
                 }
 
                 float min = MapNumber(functionNode.children[0], context);
@@ -1729,7 +1729,7 @@ namespace UIForia.Compilers.Style {
                 return new FloatRange(min, max);
             }
 
-            throw new CompileException(context.fileName, node, $"Expected a random function node but got this: {node}");
+            throw new TemplateCompileException(context.fileName, node, $"Expected a random function node but got this: {node}");
         }
 
         internal static string MapString(StyleASTNode node, StyleCompileContext context) {
@@ -1743,7 +1743,7 @@ namespace UIForia.Compilers.Style {
                 return literalNode.rawValue;
             }
 
-            throw new CompileException(context.fileName, node, $"Expected a string value but all I got was this lousy {node}");
+            throw new TemplateCompileException(context.fileName, node, $"Expected a string value but all I got was this lousy {node}");
         }
 
         public static void MapProperty(UIStyle targetStyle, PropertyNode node, StyleCompileContext context) {
@@ -1751,7 +1751,7 @@ namespace UIForia.Compilers.Style {
             LightList<StyleASTNode> propertyValues = node.children;
 
             if (propertyValues.Count == 0) {
-                throw new CompileException(node, "Property does not have a value.");
+                throw new TemplateCompileException(node, "Property does not have a value.");
             }
 
             string propertyKey = propertyName.ToLower();
@@ -1770,7 +1770,7 @@ namespace UIForia.Compilers.Style {
                 }
             }
 
-            throw new CompileException(context.fileName, node, $"Expected a proper {typeof(T).Name} value, which must be one of " +
+            throw new TemplateCompileException(context.fileName, node, $"Expected a proper {typeof(T).Name} value, which must be one of " +
                                                                $"{EnumValues(typeof(T))} and your " +
                                                                $"value {node} does not match any of them.");
         }
@@ -1781,7 +1781,7 @@ namespace UIForia.Compilers.Style {
 
         private static void AssertSingleValue(LightList<StyleASTNode> propertyValues, StyleCompileContext context) {
             if (propertyValues.Count > 1) {
-                throw new CompileException(context.fileName, propertyValues[1], "Found too many values.");
+                throw new TemplateCompileException(context.fileName, propertyValues[1], "Found too many values.");
             }
         }
 

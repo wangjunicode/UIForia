@@ -118,7 +118,7 @@ namespace UIForia.Compilers {
                 ConstructorInfo ctor = kvp.Key.GetConstructor(Type.EmptyTypes);
 
                 if (ctor == null) {
-                    throw new CompileException(kvp.Key + " must provide a default constructor in order to be used in templates");
+                    throw new TemplateCompileException(kvp.Key + " must provide a default constructor in order to be used in templates");
                 }
 
                 parameters[0] = Expression.Constant(compiledTemplateData.GetTagNameId(kvp.Value.tagName));

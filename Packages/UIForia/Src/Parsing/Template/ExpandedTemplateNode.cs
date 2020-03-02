@@ -43,11 +43,15 @@ namespace UIForia.Parsing {
             slotOverrideNodes = slotOverrideNodes ?? new LightList<SlotNode>(2);
             for (int i = 0; i < slotOverrideNodes.size; i++) {
                 if (slotOverrideNodes.array[i].slotName == node.slotName) {
-                    throw ParseException.MultipleSlotOverrides(node.slotName);
+                    throw MultipleSlotOverrides(node.slotName);
                 }
             }
 
             slotOverrideNodes.Add(node);
+        }
+
+        private ParseException MultipleSlotOverrides(string nodeSlotName) {
+            return new ParseException($"Slot with name {nodeSlotName} was overridden multiple times, which is invalid");
         }
 
     }

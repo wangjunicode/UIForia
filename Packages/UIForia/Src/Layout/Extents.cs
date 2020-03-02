@@ -1,7 +1,6 @@
-﻿using UIForia.Systems;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace UIForia.Layout {
+namespace UIForia.Util {
 
     public struct Extents {
 

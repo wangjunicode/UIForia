@@ -88,11 +88,11 @@ namespace UIForia.Compilers.Style {
                         .Find(importedConstant.propertyName, s_FindStyleConstant);
 
                     if (referencedConstant.name == null) {
-                        throw new CompileException(importedConstant, "Could not find referenced property in imported scope.");
+                        throw new TemplateCompileException(importedConstant, "Could not find referenced property in imported scope.");
                     }
                 }
                 else {
-                    throw new CompileException(constant.constReferenceNode, "Constants cannot reference members of other constants.");
+                    throw new TemplateCompileException(constant.constReferenceNode, "Constants cannot reference members of other constants.");
                 }
             }
             else {
@@ -111,7 +111,7 @@ namespace UIForia.Compilers.Style {
 
         private StyleConstant ResolveReference(StyleCompileContext context, ConstReferenceNode constReference) {
             if (currentlyResolvingConstants.Contains(constReference.identifier)) {
-                throw new CompileException(constReference, "Circular dependency detected!");
+                throw new TemplateCompileException(constReference, "Circular dependency detected!");
             }
 
             for (int i = 0; i < context.constants.Count; i++) {
@@ -133,7 +133,7 @@ namespace UIForia.Compilers.Style {
                 return resolvedConstant;
             }
 
-            throw new CompileException(constReference, $"Could not resolve reference {constReference}. Known references are: " + context.PrintConstants());
+            throw new TemplateCompileException(constReference, $"Could not resolve reference {constReference}. Known references are: " + context.PrintConstants());
         }
 
         private void TransformConstNode(StyleCompileContext context, ConstNode constNode, bool exported) {

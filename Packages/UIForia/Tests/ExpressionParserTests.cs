@@ -6,6 +6,7 @@ using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
+using UIForia.Util;
 using UnityEngine;
 using static Tests.TestUtils;
 
@@ -551,7 +552,7 @@ public class ExpressionParserTests {
         Assert.AreEqual("List", AssertInstanceOfAndReturn<DotAccessNode>(node.parts[2]).propertyName);
         GenericTypePathNode typeNode = AssertInstanceOfAndReturn<GenericTypePathNode>(node.parts[3]);
         Assert.AreEqual(1, typeNode.genericPath.generics.Count);
-        Assert.AreEqual(typeof(Tuple<int, System.Collections.Generic.List<string>>), TypeProcessor.ResolveType(typeNode.genericPath.generics[0]));
+        Assert.AreEqual(typeof(Tuple<int, System.Collections.Generic.List<string>>), TypeResolver.Default.ResolveType(typeNode.genericPath.generics[0]));
     }
 
     [Test]
@@ -566,7 +567,7 @@ public class ExpressionParserTests {
     public void Parse_NewExpression() {
         ASTNode root = ExpressionParser.Parse("new Vector3(1, 2, 3)");
         NewExpressionNode expressionNode = AssertInstanceOfAndReturn<NewExpressionNode>(root);
-        Assert.AreEqual(typeof(Vector3), TypeProcessor.ResolveType(expressionNode.typeLookup, new string[] {"UnityEngine"}));
+        Assert.AreEqual(typeof(Vector3), TypeResolver.Default.ResolveType(expressionNode.typeLookup, new string[] {"UnityEngine"}));
         Assert.AreEqual(3, expressionNode.parameters.Count);
         LiteralNode param0 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[0]);
         LiteralNode param1 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[1]);
@@ -580,7 +581,7 @@ public class ExpressionParserTests {
     public void Parse_NewExpression_Generic() {
         ASTNode root = ExpressionParser.Parse("new Tuple<float, float, float>(1, 2, 3)");
         NewExpressionNode expressionNode = AssertInstanceOfAndReturn<NewExpressionNode>(root);
-        Type type = TypeProcessor.ResolveType(expressionNode.typeLookup, new string[] {"System"});
+        Type type = TypeResolver.Default.ResolveType(expressionNode.typeLookup, new string[] {"System"});
         Assert.AreEqual(typeof(Tuple<float, float, float>), type);
         Assert.AreEqual(3, expressionNode.parameters.Count);
         LiteralNode param0 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[0]);
@@ -595,7 +596,7 @@ public class ExpressionParserTests {
     public void Parse_NewExpression_NamespaceWithGeneric() {
         ASTNode root = ExpressionParser.Parse("new System.Tuple<float, float, float>(1, 2, 3)");
         NewExpressionNode expressionNode = AssertInstanceOfAndReturn<NewExpressionNode>(root);
-        Assert.AreEqual(typeof(Tuple<float, float, float>), TypeProcessor.ResolveType(expressionNode.typeLookup));
+        Assert.AreEqual(typeof(Tuple<float, float, float>), TypeResolver.Default.ResolveType(expressionNode.typeLookup));
         Assert.AreEqual(3, expressionNode.parameters.Count);
         LiteralNode param0 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[0]);
         LiteralNode param1 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[1]);
@@ -609,7 +610,7 @@ public class ExpressionParserTests {
     public void Parse_NewExpressionNoArguments() {
         ASTNode root = ExpressionParser.Parse("new Vector3()");
         NewExpressionNode expressionNode = AssertInstanceOfAndReturn<NewExpressionNode>(root);
-        Assert.AreEqual(typeof(Vector3), TypeProcessor.ResolveType(expressionNode.typeLookup, new string[] {"UnityEngine"}));
+        Assert.AreEqual(typeof(Vector3), TypeResolver.Default.ResolveType(expressionNode.typeLookup, new string[] {"UnityEngine"}));
         Assert.AreEqual(0, expressionNode.parameters.Count);
     }
 
@@ -617,7 +618,7 @@ public class ExpressionParserTests {
     public void Parse_NewExpression_Nested() {
         ASTNode root = ExpressionParser.Parse("new Vector3(5, new Vector3(1, 2, 3), 2)");
         NewExpressionNode expressionNode = AssertInstanceOfAndReturn<NewExpressionNode>(root);
-        Assert.AreEqual(typeof(Vector3), TypeProcessor.ResolveType(expressionNode.typeLookup, new string[] {"UnityEngine"}));
+        Assert.AreEqual(typeof(Vector3), TypeResolver.Default.ResolveType(expressionNode.typeLookup, new string[] {"UnityEngine"}));
         Assert.AreEqual(3, expressionNode.parameters.Count);
 
         LiteralNode p0 = AssertInstanceOfAndReturn<LiteralNode>(expressionNode.parameters[0]);
@@ -715,7 +716,7 @@ public class ExpressionParserTests {
         Assert.AreEqual(2, node.signature.Count);
         Assert.AreEqual("string", node.signature[0].type.Value.typeName);
         Assert.AreEqual("value", node.signature[0].identifier);
-        Assert.AreEqual(typeof(List<int>), TypeProcessor.ResolveType(node.signature[1].type.Value));
+        Assert.AreEqual(typeof(List<int>), TypeResolver.Default.ResolveType(node.signature[1].type.Value));
         Assert.AreEqual("listValue", node.signature[1].identifier);
     }
 

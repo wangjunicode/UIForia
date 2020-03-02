@@ -35,7 +35,7 @@ namespace UIForia.Compilers.Style {
         /// </summary>
         /// <param name="node">A node that can be a ReferenceNode or something else.</param>
         /// <returns>The referenced node or the node itself if it's a regular one.</returns>
-        /// <exception cref="CompileException">thrown in case a reference cannot be resolved.</exception>
+        /// <exception cref="TemplateCompileException">thrown in case a reference cannot be resolved.</exception>
         public StyleASTNode GetValueForReference(StyleASTNode node) {
             if (node is ConstReferenceNode referenceNode) {
                 for (int index = 0; index < constants.Count; index++) {
@@ -53,17 +53,17 @@ namespace UIForia.Compilers.Style {
                             .Find(importedConstant.propertyName, s_FindStyleConstant);
 
                         if (importedStyleConstant.name == null) {
-                            throw new CompileException(importedConstant, "Could not find referenced property in imported scope.");
+                           //  throw new Exception(importedConstant, "Could not find referenced property in imported scope.");
                         }
 
                         return importedStyleConstant.value;
                     }
 
-                    throw new CompileException(referenceNode, "Constants cannot reference members of other constants.");
+                    // throw new CompileException(referenceNode, "Constants cannot reference members of other constants.");
                 }
 
 
-                throw new CompileException(referenceNode, $"Couldn't resolve reference {referenceNode}. Known references are: {PrintConstants()}");
+                // throw new CompileException(referenceNode, $"Couldn't resolve reference {referenceNode}. Known references are: {PrintConstants()}");
             }
 
             return node;

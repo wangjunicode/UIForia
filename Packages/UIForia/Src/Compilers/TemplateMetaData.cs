@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Generic;
 using UIForia.Animation;
 using UIForia.Compilers.Style;
 using UIForia.Util;
-using UnityEngine;
 
 namespace UIForia.Compilers {
 

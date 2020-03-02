@@ -265,7 +265,7 @@ namespace UIForia.Parsing {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Override);
                 if (!(parent is ExpandedTemplateNode expanded)) {
-                    throw ParseException.InvalidSlotOverride("override", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
+                    throw InvalidSlotOverride("override", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
                 }
 
                 expanded.AddSlotOverride((SlotNode) node);
@@ -276,7 +276,7 @@ namespace UIForia.Parsing {
                 processedType = TypeProcessor.GetProcessedType(typeof(UISlotForward));
                 node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Forward);
                 if (!(parent is ExpandedTemplateNode)) {
-                    throw ParseException.InvalidSlotOverride("forward", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
+                    throw InvalidSlotOverride("forward", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
                 }
 
                 templateRoot.AddSlot((SlotNode) node);
@@ -299,7 +299,7 @@ namespace UIForia.Parsing {
             processedType = ResolveTagName(tagName, namespacePath, templateRoot.templateShell);
 
             if (processedType == null) {
-                throw ParseException.UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, namespacePath + ":" + tagName);
+                throw UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, namespacePath + ":" + tagName);
             }
 
             processedType.ValidateAttributes(attributes);
@@ -666,7 +666,7 @@ namespace UIForia.Parsing {
                                 name = name.Substring("active.".Length);
                             }
                             else {
-                                throw CompileException.UnknownStyleState(new AttributeNodeDebugData(templateShell.filePath, tagName, new TemplateLineInfo(line, column), value), name.Split('.')[0]);
+                                throw TemplateCompileException.UnknownStyleState(new AttributeNodeDebugData(templateShell.filePath, tagName, new TemplateLineInfo(line, column), value), name.Split('.')[0]);
                             }
                         }
 
@@ -786,11 +786,11 @@ namespace UIForia.Parsing {
 
             if (elementAttr != null || pathAttr != null) {
                 if (elementAttr == null) {
-                    throw new CompileException("<Using> tag requires `element` attribute if `path` is provided");
+                    throw new TemplateCompileException("<Using> tag requires `element` attribute if `path` is provided");
                 }
 
                 if (pathAttr == null) {
-                    throw new CompileException("<Using> tag requires `path` attribute if `element` is provided");
+                    throw new TemplateCompileException("<Using> tag requires `path` attribute if `element` is provided");
                 }
 
                 return new UsingDeclaration() {
@@ -859,6 +859,30 @@ namespace UIForia.Parsing {
             }
 
             return new StyleDefinition(alias, importPathAttr.Value.Trim());
+        }
+        
+         public static ParseException InvalidSlotOverride(string verb, TemplateNodeDebugData parentData, TemplateNodeDebugData childData) {
+            return new ParseException($"Error while parsing {parentData.fileName}. Slot overrides can only be defined as a direct child of an expanded template. <{parentData.tagName}> is not an expanded template and cannot support slot {verb} <{childData.tagName}>");
+        }
+        
+        public static ParseException MultipleSlotOverrides(string nodeSlotName) {
+            return new ParseException($"Slot with name {nodeSlotName} was overridden multiple times, which is invalid");
+        }
+        
+        public static ParseException UnnamedSlotOverride(string fileName, in TemplateLineInfo templateLineInfo) {
+            return new ParseException(fileName + " -> Invalid slot override at line: " + templateLineInfo + " a slot:name attribute is required");
+        }
+        
+        public static ParseException SlotNotFound(string fileName, string slotName, TemplateLineInfo templateLineInfo) {
+            return new ParseException(fileName + $" -> A slot with the name {slotName} does not exist to override at line: " + templateLineInfo);
+        }
+        
+        public static ParseException DefaultFilePathNotFound(ProcessedType processedType, string xmlPath) {
+            return new ParseException($"Unable to find default template for type {processedType.rawType}. Searched using default resolver at paths: \n[{xmlPath}]");
+        }
+        
+        public static ParseException UnresolvedTagName(string fileName, in TemplateLineInfo templateLineInfo, string unresolvedTagName) {
+            return new ParseException($"Error parsing {fileName} -> Unable to resolve tag name: <{unresolvedTagName}> at line {templateLineInfo}");
         }
 
     }

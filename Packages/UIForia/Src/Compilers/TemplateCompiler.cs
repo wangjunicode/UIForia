@@ -291,7 +291,7 @@ namespace UIForia.Compilers {
             ProcessedType processedType = templateRootNode.processedType;
 
             if (!processedType.rawType.IsNested && !processedType.rawType.IsPublic) {
-                throw new CompileException($"{processedType.rawType} is not public, but must be in order to be used in a template. {templateRootNode.TemplateNodeDebugData}");
+                throw new TemplateCompileException($"{processedType.rawType} is not public, but must be in order to be used in a template. {templateRootNode.TemplateNodeDebugData}");
             }
 
             if (isRoot) {
@@ -315,13 +315,13 @@ namespace UIForia.Compilers {
 
         private static Type ResolveRequiredType(IList<string> namespaces, string typeName, Type rootType) {
             if (typeName != null) {
-                Type requiredType = TypeProcessor.ResolveTypeExpression(rootType, namespaces, typeName);
+                Type requiredType = TypeResolver.Default.ResolveTypeExpression(rootType, namespaces, typeName);
 
                 if (requiredType == null) {
-                    throw new CompileException($"Unable to resolve required child type `{typeName}`");
+                    throw new TemplateCompileException($"Unable to resolve required child type `{typeName}`");
                 }
                 else if (!requiredType.IsInterface && !typeof(UIElement).IsAssignableFrom(requiredType)) {
-                    throw new CompileException($"When requiring an explicit child type, that type must either be an interface or a subclass of UIElement. {requiredType} was neither");
+                    throw new TemplateCompileException($"When requiring an explicit child type, that type must either be an interface or a subclass of UIElement. {requiredType} was neither");
                 }
 
                 return requiredType;
@@ -356,7 +356,7 @@ namespace UIForia.Compilers {
 
             if (requiredType != null) {
                 if (!requiredType.IsAssignableFrom(templateNode.processedType.rawType)) {
-                    throw new CompileException($"Expected element that can be assigned to {requiredType} but {templateNode.processedType.rawType} (<{templateNode.processedType.tagName}>) is not.");
+                    throw new TemplateCompileException($"Expected element that can be assigned to {requiredType} but {templateNode.processedType.rawType} (<{templateNode.processedType.tagName}>) is not.");
                 }
             }
 
@@ -383,14 +383,14 @@ namespace UIForia.Compilers {
         private Expression CompileRepeatNode(CompilationContext ctx, RepeatNode repeatNode) {
             if (repeatNode.HasProperty("count")) {
                 if (repeatNode.HasProperty("list") || repeatNode.HasProperty("start") || repeatNode.HasProperty("end")) {
-                    throw CompileException.UnresolvedRepeatType("count", "list", "start", "end");
+                    throw TemplateCompileException.UnresolvedRepeatType("count", "list", "start", "end");
                 }
 
                 return CompileRepeatCount(ctx, repeatNode);
             }
             else if (repeatNode.HasProperty("list")) {
                 if (repeatNode.HasProperty("count")) {
-                    throw CompileException.UnresolvedRepeatType("count", "");
+                    throw TemplateCompileException.UnresolvedRepeatType("count", "");
                 }
 
                 return CompileRepeatList(ctx, repeatNode);
@@ -890,7 +890,7 @@ namespace UIForia.Compilers {
                     CompiledSlot toOverride = innerTemplate.GetCompiledSlot(node.slotName);
 
                     if (toOverride == null) {
-                        throw new CompileException($"Error compiling {node.TemplateNodeDebugData}: No slot called {node.slotName} was found in template for {innerTemplate.elementType.tagName} to {node.slotType}");
+                        throw new TemplateCompileException($"Error compiling {node.TemplateNodeDebugData}: No slot called {node.slotName} was found in template for {innerTemplate.elementType.tagName} to {node.slotType}");
                     }
 
                     Assert.IsNotNull(toOverride, "toOverride != null");
@@ -1089,12 +1089,12 @@ namespace UIForia.Compilers {
 
                 changeHandlerDefinitions?.Release();
             }
-            catch (CompileException exception) {
+            catch (TemplateCompileException exception) {
                 exception.SetFileName($"{ctx.compiledTemplate.filePath} {templateNode.TemplateNodeDebugData.lineInfo} <{templateNode.TemplateNodeDebugData.tagName}>");
                 throw;
             }
             catch (TypeResolutionException typeResolutionException) {
-                throw new CompileException($"Error in file {ctx.compiledTemplate.filePath} at line {templateNode.TemplateNodeDebugData.lineInfo} while compiling <{templateNode.TemplateNodeDebugData.tagName}>: " + typeResolutionException.Message);
+                throw new TemplateCompileException($"Error in file {ctx.compiledTemplate.filePath} at line {templateNode.TemplateNodeDebugData.lineInfo} while compiling <{templateNode.TemplateNodeDebugData.tagName}>: " + typeResolutionException.Message);
             }
 
             retn.contextModifications = contextModifications;
@@ -1240,7 +1240,7 @@ namespace UIForia.Compilers {
                 }
 
                 if (found) { // todo -- is this bad? with slot merging maybe not
-                    throw CompileException.MultipleConditionalBindings(templateNode.TemplateNodeDebugData);
+                    throw TemplateCompileException.MultipleConditionalBindings(templateNode.TemplateNodeDebugData);
                 }
 
                 if ((attr.flags & AttributeFlags.Const) != 0) {
@@ -1282,7 +1282,7 @@ namespace UIForia.Compilers {
                 ContextVariableDefinition contextVar = FindContextByName(attr.value.Trim());
 
                 if (contextVar == null) {
-                    throw CompileException.UnknownAlias(attr.key);
+                    throw TemplateCompileException.UnknownAlias(attr.key);
                 }
 
                 contextVar.PushAlias(attr.key);
@@ -1633,7 +1633,7 @@ namespace UIForia.Compilers {
 
         private void CompileMouseHandlerFromAttribute(in InputHandler handler) {
             if (!handler.methodInfo.IsPublic) {
-                throw new CompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+                throw new TemplateCompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
             }
 
             LightList<Parameter> parameters = LightList<Parameter>.Get();
@@ -1667,7 +1667,7 @@ namespace UIForia.Compilers {
 
         private void CompileKeyboardHandlerFromAttribute(in InputHandler handler) {
             if (!handler.methodInfo.IsPublic) {
-                throw new CompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+                throw new TemplateCompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
             }
 
             LightList<Parameter> parameters = LightList<Parameter>.Get();
@@ -1701,7 +1701,7 @@ namespace UIForia.Compilers {
 
         private void CompileDragHandlerFromAttribute(in InputHandler handler) {
             if (!handler.methodInfo.IsPublic) {
-                throw new CompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+                throw new TemplateCompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
             }
 
             LightList<Parameter> parameters = LightList<Parameter>.Get();
@@ -1733,7 +1733,7 @@ namespace UIForia.Compilers {
 
         private void CompileDragCreateFromAttribute(in InputHandler handler) {
             if (!handler.methodInfo.IsPublic) {
-                throw new CompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+                throw new TemplateCompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
             }
 
             LightList<Parameter> parameters = LightList<Parameter>.Get();
@@ -2113,7 +2113,7 @@ namespace UIForia.Compilers {
                     }
                 }
                 else if (n.signature.size > 1) {
-                    throw CompileException.InvalidInputHandlerLambda(attr, n.signature.size);
+                    throw TemplateCompileException.InvalidInputHandlerLambda(attr, n.signature.size);
                 }
 
                 astNode = n.body;
@@ -2131,7 +2131,7 @@ namespace UIForia.Compilers {
                     closure.Return(astNode);
                 }
             }
-            catch (CompileException exception) {
+            catch (TemplateCompileException exception) {
                 exception.SetExpression(attr.rawValue + " at " + attr.line + ": " + attr.column);
                 throw;
             }
@@ -2287,7 +2287,7 @@ namespace UIForia.Compilers {
 
                 LightList<Parameter>.Release(ref parameters);
 
-                throw new CompileException($"Error compiling event handler {attr.DebugData}. {idNode.name} is not assignable to type {eventInfo.EventHandlerType}");
+                throw new TemplateCompileException($"Error compiling event handler {attr.DebugData}. {idNode.name} is not assignable to type {eventInfo.EventHandlerType}");
             }
 
             else if (astNode.type == ASTNodeType.AccessExpression) {
@@ -2412,7 +2412,7 @@ namespace UIForia.Compilers {
             MethodInfo method = typeof(UIStyleSet).GetMethod("Set" + key);
 
             if (method == null) {
-                throw CompileException.UnknownStyleMapping();
+                throw TemplateCompileException.UnknownStyleMapping();
             }
 
             ParameterInfo[] parameters = method.GetParameters();
@@ -2523,7 +2523,7 @@ namespace UIForia.Compilers {
                             ParameterInfo[] parameters = methodInfo.GetParameters();
 
                             if (!methodInfo.IsPublic) {
-                                throw CompileException.NonPublicPropertyChangeHandler(methodInfo.Name, right.Type);
+                                throw TemplateCompileException.NonPublicPropertyChangeHandler(methodInfo.Name, right.Type);
                             }
 
                             if (parameters.Length == 0) {
@@ -2536,7 +2536,7 @@ namespace UIForia.Compilers {
                                 continue;
                             }
 
-                            throw CompileException.UnresolvedPropertyChangeHandler(methodInfo.Name, right.Type); // todo -- better error message
+                            throw TemplateCompileException.UnresolvedPropertyChangeHandler(methodInfo.Name, right.Type); // todo -- better error message
                         }
                     });
                 }
@@ -2636,7 +2636,7 @@ namespace UIForia.Compilers {
             Type fieldOrPropertyType = ReflectionUtil.ResolveFieldOrPropertyType(type, attr.key);
 
             if (fieldOrPropertyType == null) {
-                throw CompileException.UnresolvedFieldOrProperty(type, attr.key);
+                throw TemplateCompileException.UnresolvedFieldOrProperty(type, attr.key);
             }
 
             // create a local context variable
@@ -2667,7 +2667,7 @@ namespace UIForia.Compilers {
         private Expression ResolveAlias(string aliasName, LinqCompiler compiler) {
             if (aliasName == "oldValue") {
                 if (changeHandlerPreviousValue == null) {
-                    throw new CompileException("Invalid use of $oldValue, this alias is only available when used inside of an onChange handler");
+                    throw new TemplateCompileException("Invalid use of $oldValue, this alias is only available when used inside of an onChange handler");
                 }
 
                 return changeHandlerPreviousValue;
@@ -2675,7 +2675,7 @@ namespace UIForia.Compilers {
 
             if (aliasName == "newValue") {
                 if (changeHandlerCurrentValue == null) {
-                    throw new CompileException("Invalid use of $newValue, this alias is only available when used inside of an onChange handler");
+                    throw new TemplateCompileException("Invalid use of $newValue, this alias is only available when used inside of an onChange handler");
                 }
 
                 return changeHandlerCurrentValue;
@@ -2694,7 +2694,7 @@ namespace UIForia.Compilers {
 
             if (aliasName == "evt") {
                 if (currentEvent == null) {
-                    throw new CompileException("Invalid use of $evt, this alias is only available when used inside of an event handler");
+                    throw new TemplateCompileException("Invalid use of $evt, this alias is only available when used inside of an event handler");
                 }
 
                 return currentEvent;
@@ -2702,7 +2702,7 @@ namespace UIForia.Compilers {
 
             if (aliasName == "event") {
                 if (currentEvent == null) {
-                    throw new CompileException("Invalid use of $event, this alias is only available when used inside of an event handler");
+                    throw new TemplateCompileException("Invalid use of $event, this alias is only available when used inside of an event handler");
                 }
 
                 return currentEvent;
@@ -2722,7 +2722,7 @@ namespace UIForia.Compilers {
                 return contextVar.Resolve(compiler);
             }
 
-            throw CompileException.UnknownAlias(aliasName);
+            throw TemplateCompileException.UnknownAlias(aliasName);
         }
 
         private Expression CreateElement(CompilationContext ctx, TemplateNode node) {
@@ -2782,21 +2782,21 @@ namespace UIForia.Compilers {
                 }
 
                 if (arguments.Length != strings.size) {
-                    throw new CompileException($"Unable to resolve generic type of tag <{templateNode.tagName}>. Expected {arguments.Length} arguments but was only provided {strings.size} {templateNode.genericTypeResolver}");
+                    throw new TemplateCompileException($"Unable to resolve generic type of tag <{templateNode.tagName}>. Expected {arguments.Length} arguments but was only provided {strings.size} {templateNode.genericTypeResolver}");
                 }
 
                 for (int i = 0; i < strings.size; i++) {
                     if (ExpressionParser.TryParseTypeName(strings[i], out TypeLookup typeLookup)) {
-                        Type type = TypeProcessor.ResolveType(typeLookup, (IReadOnlyList<string>) namespaces);
+                        Type type = TypeResolver.Default.ResolveType(typeLookup, (IReadOnlyList<string>) namespaces);
 
                         if (type == null) {
-                            throw CompileException.UnresolvedType(typeLookup, (IReadOnlyList<string>) namespaces);
+                            throw TemplateCompileException.UnresolvedType(typeLookup, (IReadOnlyList<string>) namespaces);
                         }
 
                         resolvedTypes[i] = type;
                     }
                     else {
-                        throw new CompileException($"Unable to resolve generic type of tag <{templateNode.tagName}>. Failed to parse generic specifier {strings[i]}. Original expression = {templateNode.genericTypeResolver}");
+                        throw new TemplateCompileException($"Unable to resolve generic type of tag <{templateNode.tagName}>. Failed to parse generic specifier {strings[i]}. Original expression = {templateNode.genericTypeResolver}");
                     }
                 }
 
@@ -2814,7 +2814,7 @@ namespace UIForia.Compilers {
             typeResolver.Setup(rootType, null, (LightList<string>) namespaces);
 
             if (templateNode.attributes == null) {
-                throw CompileException.UnresolvedGenericElement(processedType, templateNode.TemplateNodeDebugData);
+                throw TemplateCompileException.UnresolvedGenericElement(processedType, templateNode.TemplateNodeDebugData);
             }
 
             for (int i = 0; i < templateNode.attributes.size; i++) {
@@ -2838,7 +2838,7 @@ namespace UIForia.Compilers {
 
             for (int i = 0; i < arguments.Length; i++) {
                 if (resolvedTypes[i] == null) {
-                    throw CompileException.UnresolvedGenericElement(processedType, templateNode.TemplateNodeDebugData);
+                    throw TemplateCompileException.UnresolvedGenericElement(processedType, templateNode.TemplateNodeDebugData);
                 }
             }
 
@@ -2909,14 +2909,14 @@ namespace UIForia.Compilers {
                         int typeIndex = GetTypeIndex(arguments, genericName);
 
                         if (typeIndex == -1) {
-                            throw new CompileException(templateNode.TemplateNodeDebugData.tagName + templateNode.TemplateNodeDebugData.lineInfo);
+                            throw new TemplateCompileException(templateNode.TemplateNodeDebugData.tagName + templateNode.TemplateNodeDebugData.lineInfo);
                         }
 
                         Assert.IsTrue(typeIndex != -1);
 
                         if (resolvedTypes[typeIndex] != null) {
                             if (resolvedTypes[typeIndex] != typeArgs[a]) {
-                                throw CompileException.DuplicateResolvedGenericArgument(templateNode.tagName, inputType.Name, resolvedTypes[typeIndex], typeArgs[a]);
+                                throw TemplateCompileException.DuplicateResolvedGenericArgument(templateNode.tagName, inputType.Name, resolvedTypes[typeIndex], typeArgs[a]);
                             }
                         }
 
@@ -2931,7 +2931,7 @@ namespace UIForia.Compilers {
                     Type type = typeResolver.GetExpressionType(attr.value);
                     if (resolvedTypes[typeIndex] != null) {
                         if (resolvedTypes[typeIndex] != type) {
-                            throw CompileException.DuplicateResolvedGenericArgument(templateNode.tagName, inputType.Name, resolvedTypes[typeIndex], type);
+                            throw TemplateCompileException.DuplicateResolvedGenericArgument(templateNode.tagName, inputType.Name, resolvedTypes[typeIndex], type);
                         }
                     }
 

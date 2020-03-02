@@ -126,7 +126,7 @@ namespace UIForia.Compilers {
                     return InputEventType.KeyHeldDown;
             }
 
-            throw new CompileException("Invalid keyboard event in template: " + input);
+            throw new TemplateCompileException("Invalid keyboard event in template: " + input);
         }
 
         private static InputEventType ParseMouseInputEventType(string input) {
@@ -162,7 +162,7 @@ namespace UIForia.Compilers {
                     return InputEventType.MouseContext;
 
                 default:
-                    throw new CompileException("Invalid mouse event in template: " + input);
+                    throw new TemplateCompileException("Invalid mouse event in template: " + input);
             }
         }
 
@@ -216,22 +216,22 @@ namespace UIForia.Compilers {
                 }
 
                 if (parameters.Length > 1) {
-                    throw CompileException.TooManyInputAnnotationArguments(methodInfo.Name, methodInfo.DeclaringType, typeof(OnDragCreateAttribute), typeof(MouseInputEvent), parameters.Length);
+                    throw TemplateCompileException.TooManyInputAnnotationArguments(methodInfo.Name, methodInfo.DeclaringType, typeof(OnDragCreateAttribute), typeof(MouseInputEvent), parameters.Length);
                 }
 
                 if (parameters.Length == 1) {
                     if (!typeof(MouseInputEvent).IsAssignableFrom(parameters[0].ParameterType)) {
-                        throw CompileException.InvalidInputAnnotation(methodInfo.Name, methodInfo.DeclaringType, typeof(OnDragCreateAttribute), typeof(MouseInputEvent), parameters[0].ParameterType);
+                        throw TemplateCompileException.InvalidInputAnnotation(methodInfo.Name, methodInfo.DeclaringType, typeof(OnDragCreateAttribute), typeof(MouseInputEvent), parameters[0].ParameterType);
                     }
                 }
 
                 if (!typeof(DragEvent).IsAssignableFrom(methodInfo.ReturnType)) {
-                    throw CompileException.InvalidDragCreatorAnnotationReturnType(methodInfo.Name, methodInfo.DeclaringType, methodInfo.ReturnType);
+                    throw TemplateCompileException.InvalidDragCreatorAnnotationReturnType(methodInfo.Name, methodInfo.DeclaringType, methodInfo.ReturnType);
                 }
 
 
                 if (!methodInfo.IsPublic || methodInfo.IsStatic) {
-                    throw new CompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as a drag creator");
+                    throw new TemplateCompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as a drag creator");
                 }
 
                 handlers.Add(new InputHandler() {
@@ -262,7 +262,7 @@ namespace UIForia.Compilers {
 
 
                 if (!methodInfo.IsPublic || methodInfo.IsStatic) {
-                    throw new CompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
+                    throw new TemplateCompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
                 }
 
                 handlers.Add(new InputHandler() {
@@ -294,7 +294,7 @@ namespace UIForia.Compilers {
 
 
                 if (!methodInfo.IsPublic || methodInfo.IsStatic) {
-                    throw new CompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
+                    throw new TemplateCompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
                 }
 
                 handlers.Add(new InputHandler() {
@@ -323,7 +323,7 @@ namespace UIForia.Compilers {
                 }
 
                 if (!methodInfo.IsPublic || methodInfo.IsStatic) {
-                    throw new CompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
+                    throw new TemplateCompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
                 }
 
                 handlers.Add(new InputHandler() {
@@ -359,7 +359,7 @@ namespace UIForia.Compilers {
                     return InputEventType.DragUpdate;
             }
 
-            throw new CompileException("Invalid drag event name: " + eventName);
+            throw new TemplateCompileException("Invalid drag event name: " + eventName);
         }
 
     }

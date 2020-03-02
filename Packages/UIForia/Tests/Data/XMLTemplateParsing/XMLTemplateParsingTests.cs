@@ -165,7 +165,7 @@ namespace TemplateParsing_XML {
                 TemplateCache cache = new TemplateCache(Setup("App"));
                 cache.GetParsedTemplate(processedType);
             });
-            Assert.IsTrue(exception.Message.Contains(ParseException.UnresolvedTagName("Data/XMLTemplateParsing/XMLTemplateParsing_Namespaces.xml", new TemplateLineInfo(11, 10), "NotHere:Div").Message));
+            Assert.IsTrue(exception.Message.Contains(XMLTemplateParser.UnresolvedTagName("Data/XMLTemplateParsing/XMLTemplateParsing_Namespaces.xml", new TemplateLineInfo(11, 10), "NotHere:Div").Message));
         }
 
         [Template("Data/XMLTemplateParsing/XMLTemplateParsing_UseDynamicElement.xml")]

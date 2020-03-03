@@ -7,6 +7,7 @@ using UIForia;
 using UIForia.Animation;
 using UIForia.Elements;
 using UIForia.Routing;
+using UIForia.Style;
 using UIForia.Systems;
 using UnityEngine;
 using Application = UIForia.Application;

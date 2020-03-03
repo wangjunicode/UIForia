@@ -10,7 +10,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace UIForia.Systems {
+namespace UIForia.Style {
 
     [BurstCompile]
     public struct SetupSelectorDataJob : IJob {
@@ -213,10 +213,6 @@ namespace UIForia.Systems {
         }
 
         public void TransformStyleData() {
-            StyleProperty2[] properties = new[] {
-                StyleProperty2.BackgroundColor(Color.black),
-                StyleProperty2.BackgroundColor(Color.red)
-            };
 
             StyleGrouping grouping = new StyleGrouping();
 

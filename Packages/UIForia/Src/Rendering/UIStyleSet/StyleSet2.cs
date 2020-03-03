@@ -8,7 +8,7 @@ using UIForia.Systems;
 using UIForia.Util;
 using Unity.Collections;
 
-namespace UIForia {
+namespace UIForia.Style {
 
     // compress a map of 128 bools keyed by 0 - 127 into 4 integers
     public unsafe struct IntBoolMap128 {

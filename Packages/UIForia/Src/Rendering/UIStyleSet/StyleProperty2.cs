@@ -1,80 +1,97 @@
 using System;
 using System.Runtime.InteropServices;
-using UIForia.Selectors;
-using UIForia.Rendering;
-using UIForia.Systems;
 using Unity.Collections;
-using UnityEngine;
 
-namespace UIForia {
+namespace UIForia.Style {
 
     // todo -- these need a free call on destroy
     [StructLayout(LayoutKind.Explicit)]
-    public struct StyleProperty2 {
+    public partial struct StyleProperty2 : IEquatable<StyleProperty2> {
 
         // important! do not change these fields outside of constructors
-        [FieldOffset(0)] public readonly StylePropertyId propertyId;
-        [FieldOffset(2)] internal StylePropertyFlags flags;
-        [FieldOffset(4)] internal int int0;
-        [FieldOffset(4)] internal float float0;
-        [FieldOffset(8)] internal RawIntBuffer intPtr;
-        [FieldOffset(8)] internal int int1;
-        [FieldOffset(8)] internal float float1;
+        [FieldOffset(0)] public readonly PropertyId propertyId;
 
-        [Flags]
-        internal enum StylePropertyFlags : ushort {
+        [FieldOffset(4)] internal readonly int int0;
+        [FieldOffset(4)] internal readonly float float0;
+        [FieldOffset(4)] internal readonly IntPtr ptr;
+        [FieldOffset(8)] internal readonly int int1;
+        [FieldOffset(8)] internal readonly float float1;
 
-            IntBufferPtr = 1 << 0,
-            HasValue = 1 << 1,
+        // public StyleProperty2(PropertyId propertyId, object ptr) {
+        //     this.propertyId = propertyId;
+        //     this.float0 = 0;
+        //     this.int0 = 0;
+        //     this.int1 = 0;
+        //     this.float1 = 0;
+        //     this.ptr = GCHandle.Alloc(ptr, GCHandleType.Pinned).AddrOfPinnedObject(); // todo -- need a way to track that we allocated this -- copying struct will copy flag but we dont want that
+        //     // this.propertyId.flags |= PropertyFlags.RequireDestruction; 
+        // }
 
+        public StyleProperty2(PropertyId propertyId, int intVal, float floatVal = 0) {
+            this.propertyId = propertyId;
+            this.ptr = default;
+            this.float0 = 0;
+            this.int0 = intVal;
+            this.int1 = 0;
+            this.float1 = floatVal;
         }
 
-        internal StyleProperty2(StylePropertyId propertyId, string data) {
-            int id = StyleSystem2.GetStringId(data);
+        public StyleProperty2(PropertyId propertyId, IntPtr ptr) {
             this.propertyId = propertyId;
-            this.flags = 0;
             this.float0 = 0;
-            this.intPtr = default;
+            this.int0 = 0;
             this.int1 = 0;
             this.float1 = 0;
-            if (data != null) {
-                this.flags = StylePropertyFlags.IntBufferPtr | StylePropertyFlags.HasValue;
-                this.int0 = id;
-            }
-            else {
-                this.int0 = -1;
-            }
-
+            this.ptr = ptr;
         }
-
-        internal StyleProperty2(StylePropertyId propertyId, in Color color) {
+        
+        public StyleProperty2(PropertyId propertyId, int val0, int val1) {
             this.propertyId = propertyId;
-            this.float0 = default;
-            this.float1 = default;
-            this.intPtr = default;
-            this.int1 = default;
-            this.int0 = new StyleColor(color).rgba;
-            this.flags = StylePropertyFlags.HasValue;
+            this.ptr = default;
+            this.float0 = 0;
+            this.int0 = val0;
+            this.float1 = 0;
+            this.int1 = val1;
         }
 
-        internal StyleProperty2(StylePropertyId propertyId, in Color? color) {
+        public StyleProperty2(PropertyId propertyId, float val0, int val1 = 0) {
             this.propertyId = propertyId;
-            this.float0 = default;
-            this.float1 = default;
-            this.intPtr = default;
-            this.int1 = default;
-            if (color.HasValue) {
-                this.int0 = new StyleColor(color.Value).rgba;
-                this.flags = StylePropertyFlags.HasValue;
-            }
-            else {
-                this.int0 = default;
-                this.flags = default;
-            }
+            this.ptr = default;
+            this.int0 = 0;
+            this.float0 = val0;
+            this.float1 = 0;
+            this.int1 = val1;
         }
 
-        public static StyleProperty2 BackgroundColor(in Color color) {
-            return new StyleProperty2(StylePropertyId.BackgroundColor, color);
+        public StyleProperty2(PropertyId propertyId, float val0, float val1) {
+            this.propertyId = propertyId;
+            this.ptr = default;
+            this.int0 = 0;
+            this.float0 = val0;
+            this.int1 = 0;
+            this.float1 = val1;
+        }
+
+        public static bool operator ==(in StyleProperty2 a, in StyleProperty2 b) {
+            return a.propertyId.index == b.propertyId.index && a.int0 == b.int0 && a.int1 == b.int1;
+        }
+
+        public static bool operator !=(in StyleProperty2 a, in StyleProperty2 b) {
+            return a.propertyId.index != b.propertyId.index || a.int0 != b.int0 || a.int1 != b.int1;
+        }
+
+        public bool Equals(StyleProperty2 b) {
+            return propertyId.index == b.propertyId.index && int0 == b.int0 && int1 == b.int1;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is StyleProperty2 other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                return (propertyId.index * 397) ^ ptr.GetHashCode();
+            }
         }
 
     }

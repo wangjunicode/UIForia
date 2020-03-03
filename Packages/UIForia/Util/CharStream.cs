@@ -12,15 +12,8 @@ namespace UIForia.Util {
         private uint dataEnd;
         private uint ptr;
 
-        [Flags]
-        public enum WhitespaceHandling {
-
-            None = 0,
-            ConsumeBefore = 1 << 0,
-            ConsumeAfter = 1 << 1,
-            ConsumeAll = ConsumeBefore | ConsumeAfter
-
-        }
+        [ThreadStatic] private static string s_ScratchBuffer;
+        [ThreadStatic] private static List<EnumNameEntry> s_EnumNameEntryList;
 
         public CharStream(char[] data, uint dataStart, uint dataEnd) {
             this.data = data;
@@ -57,7 +50,7 @@ namespace UIForia.Util {
             }
         }
 
-         public bool TryMatchRange(string str) {
+        public bool TryMatchRange(string str) {
             if (ptr + str.Length >= dataEnd) {
                 return false;
             }
@@ -65,7 +58,7 @@ namespace UIForia.Util {
             unsafe {
                 fixed (char* s = str) {
                     for (int i = 0; i < str.Length; i++) {
-                        if (data[ptr + i] != *s) {
+                        if (data[ptr + i] != s[i]) {
                             return false;
                         }
                     }
@@ -75,7 +68,7 @@ namespace UIForia.Util {
             Advance((uint) str.Length);
             return true;
         }
-         
+
         public bool TryMatchRange(string str, out uint advance) {
             if (ptr + str.Length >= dataEnd) {
                 advance = 0;
@@ -119,9 +112,15 @@ namespace UIForia.Util {
             return !(stream == character);
         }
 
-        public bool TryGetSubStream(char open, char close, out CharStream charStream) {
+        public bool TryGetSubStream(char open, char close, out CharStream charStream, WhitespaceHandling whitespaceHandling = WhitespaceHandling.ConsumeAll) {
+            uint start = ptr;
+            if ((whitespaceHandling & WhitespaceHandling.ConsumeBefore) != 0) {
+                ConsumeWhiteSpace();
+            }
+
             if (data[ptr] != open) {
                 charStream = default;
+                RewindTo(start);
                 return false;
             }
 
@@ -137,17 +136,23 @@ namespace UIForia.Util {
                     counter--;
                     if (counter == 0) {
                         charStream = new CharStream(data, ptr + 1, i);
+                        ptr = i;
+                        if ((whitespaceHandling & WhitespaceHandling.ConsumeAfter) != 0) {
+                            ConsumeWhiteSpace();
+                        }
+
                         return true;
                     }
                 }
             }
 
+            RewindTo(start);
             charStream = default;
             return false;
         }
 
         public void RewindTo(uint start) {
-            ptr = start < dataStart ? start : dataStart;
+            ptr = start < dataStart ? dataStart : start;
         }
 
         public void ConsumeWhiteSpace() {
@@ -156,48 +161,63 @@ namespace UIForia.Util {
             }
         }
 
-    }
-
-    public struct CharSpan {
-
-        public readonly int rangeStart;
-        public readonly int rangeEnd;
-        
-        public char[] data { get; }
-        
-        public CharSpan(char[] data, int rangeStart, int rangeEnd) {
-            this.data = data;
-            this.rangeStart = rangeStart;
-            this.rangeEnd = rangeEnd;
-        }
-
-
-        public override string ToString() {
-            return new string(data, rangeStart, rangeEnd - rangeStart);
-        }
-
-        public string ToLowerString() {
-            int length = rangeEnd - rangeStart;
-            
-            unsafe {
-                char* buffer = stackalloc char[length + 1];
-                for (int i = rangeStart; i < rangeEnd; i++) {
-                    buffer[i] = char.ToLower(data[i]);
+        public bool TryGetSubstreamTo(char c0, char c1, out CharStream stream) {
+            uint i = ptr;
+            while (i < dataEnd) {
+                char c = data[i];
+                if (c == c0 || c == c1) {
+                    stream = new CharStream(data, ptr, i);
+                    Advance(i - ptr + 1);
+                    return true;
                 }
 
-                buffer[length] = '\0';
-                return new string(buffer);
+                i++;
             }
-            
-            
+
+            stream = default;
+            return false;
         }
 
-    }
-    
-    public static class CharacterStreamExtensions {
+        public bool TryGetSubstreamTo(char c0, out CharStream stream) {
+            uint i = ptr;
+            while (i < dataEnd) {
+                char c = data[i];
+                if (c == c0) {
+                    stream = new CharStream(data, ptr, i);
+                    Advance(i - ptr + 1);
+                    return true;
+                }
+            }
 
-        [ThreadStatic] private static string s_ScratchBuffer;
-        [ThreadStatic] private static List<EnumNameEntry> s_EnumNameEntryList;
+            stream = default;
+            return false;
+        }
+
+        public int NextIndexOf(char c) {
+            uint i = ptr;
+            while (i < dataEnd) {
+                if (data[i] == c) {
+                    return (int) i;
+                }
+
+                i++;
+            }
+
+            return -1;
+        }
+
+        public bool Contains(char c) {
+            return NextIndexOf(c) != -1;
+        }
+
+        public int GetLineNumber() {
+            int line = 0;
+            for (int i = 0; i < ptr; i++) {
+                if (data[i] == '\n') line++;
+            }
+
+            return line;
+        }
 
         private const int s_ScratchBufferLength = 128;
 
@@ -209,18 +229,29 @@ namespace UIForia.Util {
 
         }
 
-        public static bool TryParseIdentifier(this CharStream stream, out CharSpan span) {
-            if (TryParseIdentifier(stream, out int rangeStart, out int rangeEnd)) {
-                span = new CharSpan(stream.Data, rangeStart, rangeEnd);
+        public bool TryParseIdentifier(out CharSpan span, WhitespaceHandling whitespaceHandling = WhitespaceHandling.ConsumeAll) {
+            uint start = ptr;
+
+            if ((whitespaceHandling & WhitespaceHandling.ConsumeBefore) != 0) {
+                ConsumeWhiteSpace();
+            }
+
+            if (TryParseIdentifier(out int rangeStart, out int rangeEnd)) {
+                span = new CharSpan(data, rangeStart, rangeEnd);
+                if ((whitespaceHandling & WhitespaceHandling.ConsumeAfter) != 0) {
+                    ConsumeWhiteSpace();
+                }
+
                 return true;
             }
 
+            RewindTo(start);
             span = default;
             return false;
         }
-        
-        public static bool TryParseIdentifier(this CharStream stream, out int rangeStart, out int rangeEnd) {
-            char first = stream.Data[stream.Ptr];
+
+        public bool TryParseIdentifier(out int rangeStart, out int rangeEnd) {
+            char first = data[ptr];
 
             if (!char.IsLetter(first) && first != '_') {
                 rangeStart = -1;
@@ -228,21 +259,21 @@ namespace UIForia.Util {
                 return false;
             }
 
-            uint ptr = stream.Ptr;
-            while (ptr < stream.End) {
-                char c = stream[ptr];
+            uint ptr2 = ptr;
+            while (ptr2 < End) {
+                char c = data[ptr2];
                 if (!char.IsLetterOrDigit(c) && c != '_') {
                     break;
                 }
 
-                ptr++;
+                ptr2++;
             }
 
-            uint length = ptr - stream.Ptr;
+            uint length = ptr2 - ptr;
             if (length > 0) {
-                rangeStart = (int) stream.Ptr;
-                rangeEnd = (int) ptr;
-                stream.Advance(ptr);
+                rangeStart = (int) ptr;
+                rangeEnd = (int) ptr2;
+                Advance(length);
                 return true;
             }
 
@@ -251,8 +282,8 @@ namespace UIForia.Util {
             return false;
         }
 
-        public static bool TryParseByte(this CharStream stream, out byte value) {
-            if (TryParseUInt(stream, out uint val) && val <= byte.MaxValue) {
+        public bool TryParseByte(out byte value) {
+            if (TryParseUInt(out uint val) && val <= byte.MaxValue) {
                 value = (byte) val;
                 return true;
             }
@@ -261,8 +292,8 @@ namespace UIForia.Util {
             return false;
         }
 
-        public static bool TryParseUShort(this CharStream stream, out ushort value) {
-            if (TryParseUInt(stream, out uint val) && val <= ushort.MaxValue) {
+        public bool TryParseUShort(out ushort value) {
+            if (TryParseUInt(out uint val) && val <= ushort.MaxValue) {
                 value = (ushort) val;
                 return true;
             }
@@ -271,12 +302,12 @@ namespace UIForia.Util {
             return false;
         }
 
-        public static bool TryParseFloat(this CharStream stream, out float value) {
+        public bool TryParseFloat(out float value) {
             if (s_ScratchBuffer == null) {
                 s_ScratchBuffer = new string('\0', s_ScratchBufferLength);
             }
 
-            uint start = stream.Ptr;
+            uint start = ptr;
 
             unsafe {
                 // oh, you thought C# strings were immutable? How cute :)
@@ -289,14 +320,14 @@ namespace UIForia.Util {
                 fixed (char* charptr = s_ScratchBuffer) {
                     uint idx = start;
                     int dotIndex = -1;
-                    if (stream == '-') {
+                    if (data[ptr] == '-') {
                         charptr[cnt++] = '-';
                         idx++;
                     }
 
                     // read until end or whitespace
-                    while (idx < stream.End && cnt < s_ScratchBufferLength) {
-                        char c = stream[idx];
+                    while (idx < dataEnd && cnt < s_ScratchBufferLength) {
+                        char c = data[idx];
                         if (c < '0' || c > '9') {
                             if (c == '.' && dotIndex == -1) {
                                 dotIndex = (int) idx;
@@ -328,7 +359,7 @@ namespace UIForia.Util {
                     }
 
                     if (retn) {
-                        stream.Advance((uint) cnt);
+                        Advance((uint) cnt);
                     }
 
                     return retn;
@@ -336,12 +367,12 @@ namespace UIForia.Util {
             }
         }
 
-        public static bool TryParseUInt(this CharStream stream, out uint intVal) {
-            uint i = stream.Ptr;
+        public bool TryParseUInt(out uint intVal) {
+            uint i = ptr;
 
             // read until end or whitespace
-            while (i < stream.End) {
-                char c = stream[i];
+            while (i < dataEnd) {
+                char c = data[i];
                 if (c < '0' || c > '9') {
                     break;
                 }
@@ -349,19 +380,19 @@ namespace UIForia.Util {
                 i++;
             }
 
-            if (i == stream.Ptr) {
+            if (i == ptr) {
                 intVal = default;
                 return false;
             }
 
-            uint length = i - stream.Ptr;
-            stream.Advance(length);
+            uint length = i - ptr;
+            Advance(length);
 
             int number = 0;
             int multiplier = 1;
 
             while (length-- != 0) {
-                number += (stream.Data[length] - '0') * multiplier;
+                number += (data[length] - '0') * multiplier;
                 multiplier *= 10;
             }
 
@@ -370,20 +401,20 @@ namespace UIForia.Util {
             return true;
         }
 
-        public static bool TryParseInt(this CharStream stream, out int intVal) {
+        public bool TryParseInt(out int intVal) {
             int sign = 1;
             uint minusSize = 0;
-            uint i = stream.Ptr;
+            uint i = ptr;
 
-            if (stream == '-') {
+            if (data[ptr] == '-') {
                 sign = -1;
                 minusSize = 1;
                 i++;
             }
 
             // read until end or whitespace
-            while (i < stream.End) {
-                char c = stream[i];
+            while (i < dataEnd) {
+                char c = data[i];
                 if (c < '0' || c > '9') {
                     break;
                 }
@@ -391,19 +422,19 @@ namespace UIForia.Util {
                 i++;
             }
 
-            if (i == stream.Ptr) {
+            if (i == ptr) {
                 intVal = default;
                 return false;
             }
 
-            uint length = i - stream.Ptr;
-            stream.Advance(length);
+            uint length = i - ptr;
+            Advance(length);
 
             int number = 0;
             int mult = 1;
 
             while (length-- != minusSize) {
-                number += (stream.Data[length] - '0') * mult;
+                number += (data[length] - '0') * mult;
                 mult *= 10;
             }
 
@@ -413,7 +444,7 @@ namespace UIForia.Util {
         }
 
         // Cannot cast T to int to T without boxing, so we return the integer and expect the caller to cast to enum type
-        public static bool TryParseEnum<T>(this CharStream stream, out int enumValue) where T : Enum {
+        public bool TryParseEnum<T>(out int enumValue) where T : Enum {
             if (s_EnumNameEntryList == null) {
                 s_EnumNameEntryList = new List<EnumNameEntry>();
             }
@@ -440,14 +471,14 @@ namespace UIForia.Util {
                 });
             }
 
-            if (!stream.TryParseIdentifier(out int rangeStart, out int rangeEnd)) {
+            if (!TryParseIdentifier(out int rangeStart, out int rangeEnd)) {
                 enumValue = default;
                 return false;
             }
 
             for (int i = 0; i < names.Length; i++) {
                 string name = names[i];
-                if (StringUtil.EqualsRangeUnsafe(name, stream.Data, rangeStart, rangeEnd - rangeStart)) {
+                if (StringUtil.EqualsRangeUnsafe(name, data, rangeStart, rangeEnd - rangeStart)) {
                     enumValue = values[i];
                     return true;
                 }
@@ -457,82 +488,230 @@ namespace UIForia.Util {
             return false;
         }
 
-        public static bool TryParseCharacter(this CharStream stream, char character, CharStream.WhitespaceHandling whitespaceHandling = CharStream.WhitespaceHandling.None) {
-            uint save = stream.Ptr;
-            
-            if ((whitespaceHandling & CharStream.WhitespaceHandling.ConsumeBefore) != 0) {
-                stream.ConsumeWhiteSpace();
+        public bool TryParseCharacter(char character, WhitespaceHandling whitespaceHandling = WhitespaceHandling.ConsumeAll) {
+            uint save = ptr;
+
+            if ((whitespaceHandling & WhitespaceHandling.ConsumeBefore) != 0) {
+                ConsumeWhiteSpace();
             }
 
-            if (stream.Data[stream.Ptr] == character) {
-                stream.Advance();
+            if (data[ptr] == character) {
+                Advance();
 
-                if ((whitespaceHandling & CharStream.WhitespaceHandling.ConsumeAfter) != 0) {
-                    stream.ConsumeWhiteSpace();
+                if ((whitespaceHandling & WhitespaceHandling.ConsumeAfter) != 0) {
+                    ConsumeWhiteSpace();
                 }
 
                 return true;
             }
-            stream.RewindTo(save);
-            
+
+            RewindTo(save);
+
             return false;
         }
 
-        public static bool TryParseColorProperty(this CharStream stream, out Color32 color) {
-            uint start = stream.Ptr;
-            
-            stream.ConsumeWhiteSpace();
-            
-            if (stream.TryMatchRange("rgb", 'a', out bool usedOptional, out uint advance)) {
-                stream.AdvanceSkipWhitespace(advance);
+        public bool TryParseColorProperty(out Color32 color) {
+            uint start = ptr;
 
-                if (stream.TryGetSubStream('(', ')', out CharStream signature)) {
-                    stream.Advance(signature.Size + 1);
-                    
+            ConsumeWhiteSpace();
+
+            if (TryMatchRange("rgb", 'a', out bool usedOptional, out uint advance)) {
+                AdvanceSkipWhitespace(advance);
+
+                if (TryGetSubStream('(', ')', out CharStream signature)) {
+                    Advance(signature.Size + 1);
+
                     byte a = 255;
-                    
+
                     // expect four comma separated floats or integers
 
-                    if (!TryParseByte(signature, out byte r)) {
+                    if (!signature.TryParseByte(out byte r)) {
                         goto fail;
                     }
 
-                    if (!signature.TryParseCharacter(',', CharStream.WhitespaceHandling.ConsumeAll)) {
+                    if (!signature.TryParseCharacter(',')) {
                         goto fail;
                     }
 
-                    if (!TryParseByte(signature, out byte g)) {
+                    if (!signature.TryParseByte(out byte g)) {
                         goto fail;
                     }
-                    
-                    if (!signature.TryParseCharacter(',', CharStream.WhitespaceHandling.ConsumeAll)) {
+
+                    if (!signature.TryParseCharacter(',')) {
                         goto fail;
                     }
-                    
-                    if (!TryParseByte(signature, out byte b)) {
+
+                    if (!signature.TryParseByte(out byte b)) {
                         goto fail;
                     }
-                    
-                    if (usedOptional && (!signature.TryParseCharacter(',', CharStream.WhitespaceHandling.ConsumeAll) || !TryParseByte(signature, out a))) {
+
+                    if (usedOptional && (!signature.TryParseCharacter(',') || !signature.TryParseByte(out a))) {
                         goto fail;
                     }
-                    
+
                     color = new Color32(r, g, b, a);
                 }
             }
-            else if (stream == '#') {
-                // todo -- read hash color
+            else if (data[ptr] == '#') {
+                // read 6 or 8 characters
+                // https://www.includehelp.com/code-snippets/convert-hexadecimal-string-to-integer-in-c-programming.aspx
+
+                unsafe {
+                    char* buffer = stackalloc char[8];
+
+                    int i = 0;
+                    bool valid = true;
+                    for (i = 0; i < 8; i++) {
+                        if (ptr + i <= dataEnd) {
+                            break;
+                        }
+
+                        char c = data[ptr + i];
+
+                        if (c >= '0' && c <= '9') {
+                            buffer[i] = c;
+                        }
+                        else {
+                            switch (c) {
+                                case 'A':
+                                case 'a':
+                                case 'B':
+                                case 'b':
+                                case 'C':
+                                case 'c':
+                                case 'D':
+                                case 'd':
+                                case 'E':
+                                case 'e':
+                                case 'F':
+                                case 'f':
+                                    buffer[i] = c;
+                                    break;
+                                default: {
+                                    valid = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!valid || (i != 6 && i != 8)) {
+                        color = default;
+                        return false;
+                    }
+
+                    if (i == 6) {
+                        buffer[6] = 'F';
+                        buffer[7] = 'F';
+                    }
+
+                    int digit = 0;
+                    int intValue = 0;
+
+                    for (int x = 7, p = 0; x >= 0; x--, p++) {
+                        char c = buffer[x];
+                        if (c >= '0' || c <= '9') {
+                            digit = c - 0x30;
+                        }
+                        else {
+                            switch (c) {
+                                case 'A':
+                                case 'a':
+                                    digit = 10;
+                                    break;
+                                case 'B':
+                                case 'b':
+                                    digit = 11;
+                                    break;
+                                case 'C':
+                                case 'c':
+                                    digit = 12;
+                                    break;
+                                case 'D':
+                                case 'd':
+                                    digit = 13;
+                                    break;
+                                case 'E':
+                                case 'e':
+                                    digit = 14;
+                                    break;
+                                case 'F':
+                                case 'f':
+                                    digit = 15;
+                                    break;
+                            }
+                        }
+
+                        intValue = digit * (int) Mathf.Pow(16, p);
+                    }
+
+                    color = ColorUtil.ColorFromInt(intValue);
+                    return true;
+                }
             }
-            else if (ColorUtil.TryParseColorName(stream.Data, (int)stream.Ptr, (int)stream.End, out color, out int nameLength)) {
-                stream.Advance((uint)nameLength);
+
+            else if (ColorUtil.TryParseColorName(new CharSpan(data, (int) ptr, (int) dataEnd), out color, out int nameLength)) {
+                Advance((uint) nameLength);
                 return true;
             }
+
             fail:
-            stream.RewindTo(start);
+            RewindTo(start);
             color = default;
             return false;
         }
 
+        public override string ToString() {
+            return new string(data, (int) ptr, (int) (dataEnd - ptr));
+        }
+
     }
+
+    [Flags]
+    public enum WhitespaceHandling {
+
+        None = 0,
+        ConsumeBefore = 1 << 0,
+        ConsumeAfter = 1 << 1,
+        ConsumeAll = ConsumeBefore | ConsumeAfter
+
+    }
+
+    public struct CharSpan {
+
+        public readonly int rangeStart;
+        public readonly int rangeEnd;
+
+        public char[] data { get; }
+
+        public CharSpan(char[] data, int rangeStart, int rangeEnd) {
+            this.data = data;
+            this.rangeStart = rangeStart;
+            this.rangeEnd = rangeEnd;
+        }
+
+
+        public override string ToString() {
+            return new string(data, rangeStart, rangeEnd - rangeStart);
+        }
+
+        public string ToLowerString() {
+            int length = rangeEnd - rangeStart;
+
+            unsafe {
+                char* buffer = stackalloc char[length + 1];
+                int idx = 0;
+                for (int i = rangeStart; i < rangeEnd; i++) {
+                    buffer[idx++] = char.ToLower(data[i]);
+                }
+
+                buffer[length] = '\0';
+                return new string(buffer);
+            }
+        }
+
+    }
+
+    public static class CharacterStreamExtensions { }
 
 }

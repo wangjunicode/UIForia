@@ -2,9 +2,9 @@ using UIForia.Util;
 
 namespace UIForia.Style {
 
-  public interface IStylePropertyParser {
+    public interface IStylePropertyParser {
 
-        bool TryParse(CharStream stream, out PropertyData propertyData);
+        bool TryParse(CharStream stream, PropertyId propertyId, out StyleProperty2 property);
 
     }
 

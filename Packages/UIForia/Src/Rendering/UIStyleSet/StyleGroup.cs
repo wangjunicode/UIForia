@@ -1,7 +1,7 @@
 using UIForia.Rendering;
 using UIForia.Selectors;
 
-namespace UIForia {
+namespace UIForia.Style {
 
     public struct StyleGroup {
 

@@ -1,7 +1,7 @@
 using UIForia.Rendering;
 using UnityEngine;
 
-namespace UIForia {
+namespace UIForia.Style {
 
     public struct StylePropertyBlock {
 

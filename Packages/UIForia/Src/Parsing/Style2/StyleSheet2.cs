@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using UIForia.Compilers.Style;
-using UIForia.Rendering;
+using UIForia.Exceptions;
 using UIForia.Style;
 using UIForia.Util;
 
@@ -34,7 +35,9 @@ namespace UIForia.Style2 {
 
         private ConcurrentDictionary<string, StyleSheet2> parsedSheets;
 
-        public StyleSheetParser() { }
+        public StyleSheetParser() {
+            parsedSheets = new ConcurrentDictionary<string, StyleSheet2>();
+        }
 
         public StyleSheet2 Parse(string filePath) {
             if (parsedSheets.TryGetValue(filePath, out StyleSheet2 sheet)) {
@@ -43,37 +46,56 @@ namespace UIForia.Style2 {
 
             string file = File.ReadAllText(filePath);
 
+            ParseStyleSheet(file);
+
             return default;
         }
 
-        private List<StyleToken> Tokenize(string contents) {
+        public StyleSheet2 ParseString(string contents) {
+            ParseStyleSheet(contents);
+            return default;
+        }
+
+        private void ParseStyleSheet(string contents) {
             CharStream stream = new CharStream(contents.ToCharArray());
+
             while (stream.HasMoreTokens) {
+                stream.ConsumeWhiteSpace();
+
                 if (stream.TryMatchRange("style")) {
                     ParseStyle(stream);
                 }
                 else if (stream.TryMatchRange("export")) {
-                    stream.ConsumeWhiteSpace();
+                    throw new NotImplementedException();
                 }
-                else if (stream.TryMatchRange("import")) { }
-                else if (stream.TryMatchRange("const")) { }
-
-                else if (stream.TryMatchRange("animation")) { }
-
-                else if (stream.TryMatchRange("sound")) { }
-
-                else { }
+                else if (stream.TryMatchRange("import")) {
+                    throw new NotImplementedException();
+                }
+                else if (stream.TryMatchRange("const")) {
+                    throw new NotImplementedException();
+                }
+                else if (stream.TryMatchRange("animation")) {
+                    throw new NotImplementedException();
+                }
+                else if (stream.TryMatchRange("sound")) {
+                    throw new NotImplementedException();
+                }
+                else {
+                    throw new ParseException("Unexpected end of style sheet");
+                }
             }
-
-            return null;
         }
 
         private void ParseStyle(CharStream stream) {
-            if (!stream.TryParseIdentifier(out CharSpan span)) { }
+            if (!stream.TryParseIdentifier(out CharSpan span)) {
+                throw new ParseException("Expected to find an identifier after 'style' token on line " + stream.GetLineNumber());
+            }
 
             string styleName = span.ToString();
 
-            if (stream.TryParseCharacter(':', CharStream.WhitespaceHandling.ConsumeAll)) { }
+            if (stream.TryParseCharacter(':')) {
+                // Handle Extension here
+            }
             else if (stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
                 ParseStyleBody(bodyStream);
             }
@@ -84,7 +106,44 @@ namespace UIForia.Style2 {
 
             while (stream.HasMoreTokens) {
                 if (stream == '[') {
-                    ParseStyleBlock(stream);
+                    // ParseStyleBlock(stream);
+                    throw new NotImplementedException();
+                }
+                else {
+                    if (stream.TryParseIdentifier(out CharSpan span)) {
+                        string idName = span.ToLowerString();
+
+                        if (idName == "run") { }
+
+                        else if (PropertyParsers.TryResolvePropertyId(idName, out PropertyParsers.PropertyParseEntry entry)) {
+                            if (!stream.TryParseCharacter('=')) {
+                                throw new ParseException("Expected an equal sign after property name " + span + " on line " + stream.GetLineNumber());
+                            }
+
+                            if (!stream.TryGetSubstreamTo(';', '\n', out CharStream propertyStream)) {
+                                throw new ParseException("Expected a property value and then a semi colon after '" + span + " =' on line " + stream.GetLineNumber());
+                            }
+
+                            if (!entry.parser.TryParse(propertyStream, entry.propertyId, out StyleProperty2 property)) {
+                                throw new ParseException("Failed to parse");
+                            }
+
+                            currentStyleList.Add(property);
+
+                        }
+
+                        if (stream.Contains('@')) { }
+
+                        // get mutable stream 
+                        // replace variables with their values
+                        // invoke parser to attempt parsing
+                        // release mutable stream
+                        // if (parser.TryParse(stream, ctx, out StyleProperty2 property)) {
+                        //             
+                        // }
+                    }
+
+                    throw new NotImplementedException();
                 }
             }
         }
@@ -104,46 +163,6 @@ namespace UIForia.Style2 {
             if (stream == '#') { }
 
             if (stream == '[') { }
-
-            StyleCompileContext ctx = default;
-            
-            if (stream.TryParseIdentifier(out CharSpan span)) {
-                string idName = span.ToLowerString();
-
-                if (idName == "run") { }
-
-                else {
-                    // dont want to switch on string table. need to binary search the lower version
-
-                    if (PropertyParsers.TryResolvePropertyId(idName)) {
-                        
-                    }
-                    
-                    stream.TryParseCharacter('=', CharStream.WhitespaceHandling.ConsumeAll);
-
-                    // var propertyStream = GetSubstreamToTerminator(';', '\n');
-                    //
-                    // var parser = GetStyleParser(idName);
-
-                    IStylePropertyParser parser = PropertyParsers.GetParser(idName);
-                    
-                    
-                    // get mutable stream 
-                    // replace variables with their values
-                    // invoke parser to attempt parsing
-                    // release mutable stream
-                    // if (parser.TryParse(stream, ctx, out StyleProperty2 property)) {
-                    //             
-                    // }
-
-                }
-
-                // if (StylePropertyId.TryLowerNameMatch(idName, out StylePropertyDefinition definition)) {
-                //     
-                //     // definition.Parse(stream.GetSu);
-                //      
-                // }
-            }
         }
 
     }

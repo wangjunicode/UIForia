@@ -11,6 +11,7 @@ using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Sound;
+using UIForia.Style;
 using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Util;

@@ -1,45 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
+using NUnit.Framework;
 using UIForia.Compilers;
 using UIForia.Exceptions;
+using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Style;
+using UIForia.UIInput;
 using UIForia.Util;
 using UnityEditor;
-using UnityEditor.Compilation;
 using UnityEngine;
-using Assembly = System.Reflection.Assembly;
 
 namespace UIForia.Editor {
-
-    public struct StylePropertyType {
-
-        public string name;
-        public Type type;
-        public StyleFlags flags;
-
-        public StylePropertyType(string name, Type type, StyleFlags flags = 0) {
-            this.name = name;
-            this.type = type;
-            this.flags = flags;
-            if (type.IsClass) {
-                flags |= StyleFlags.RequireGCHandleFree;
-            }
-        }
-
-    }
-
-    [Flags]
-    public enum StyleFlags {
-
-        Inherited = 1 << 0,
-        Animated = 1 << 1,
-        RequireGCHandleFree = 1 << 2
-
-    }
 
     public class StyleParseContext {
 
@@ -80,7 +55,6 @@ namespace UIForia.Editor {
 
     }
 
-   
 
     public class StylePropertyGroupType {
 
@@ -92,224 +66,486 @@ namespace UIForia.Editor {
 
     }
 
-    public class EnumParser {
+    public struct TypeHandler {
 
-        // public bool TryParse(out StyleProperty2 styleProperty) {
-        //     int refId = context.GetObjectId("objectKey");
-        //     PropertyData data = new PropertyData(refId);
-        //     styleProperty = new StyleProperty2(new PropertyId(), data);
-        //     return true;
-        // }
-
-    }
-    // <ScrollView> {
-    //     LayoutType = "ScrollView" !Important;
-    // }
-
-    public class FloatParser : IStylePropertyParser {
-
-        public bool TryParse(CharStream stream, out PropertyData propertyData) {
-            if (stream.TryParseFloat(out float value)) {
-                propertyData = new PropertyData(value);
-                return true;
-            }
-
-            propertyData = default;
-            return false;
-        }
+        public Type parserType;
+        public string packer;
+        public string unpacker;
 
     }
 
-    public class IntParser : IStylePropertyParser {
-
-        public bool TryParse(CharStream stream, out PropertyData propertyData) {
-            if (stream.TryParseInt(out int value)) {
-                propertyData = new PropertyData(value);
-                return true;
-            }
-
-            propertyData = default;
-            return false;
-        }
-
-    }
-
-    // [CustomLayoutType("LayoutTypeName")]
     public class StyleCodeGen {
-
-        protected readonly Dictionary<Type, Type> parserMap;
-        protected readonly Dictionary<Type, string> styleUnpackers;
-        protected readonly List<StylePropertyType> stylePropertyTypes;
-        
-        public StyleCodeGen() {
-            
-            this.stylePropertyTypes = new List<StylePropertyType>();
-            this.styleUnpackers = new Dictionary<Type, string>();
-            this.parserMap = new Dictionary<Type, Type>();
-
-            this.styleUnpackers.Add(typeof(float), "float0");
-            this.styleUnpackers.Add(typeof(int), "int0");
-
-            this.stylePropertyTypes.Add(new StylePropertyType("Opacity", typeof(float), StyleFlags.Inherited | StyleFlags.Animated));
-            
-            this.SetStyleTypeParser<FloatParser>(typeof(float));
-            this.SetStyleTypeParser<IntParser>(typeof(int));
-            
-        }
-
-        public void SetStyleUnpacker<T>(string code) {
-            if (styleUnpackers.TryGetValue(typeof(T), out string current)) {
-                throw new Exception("Duplicate style unpacker for type " + typeof(T));
-            }
-            else {
-                styleUnpackers[typeof(T)] = code;
-            }
-        }
-
-        private void GeneratePropertyParsersCode(StringBuilder builder) {
-            builder.Clear();
-            builder.Append("public static partial class PropertyParsers {\n\n");
-
-            builder.Append("static PropertyParsers() {\n");
-            builder.Append("s_parseEntries = new PropertyParseEntry[");
-            builder.Append(stylePropertyTypes.Count);
-            builder.Append("];\n\n");
-            
-            for(int i = 0; i < stylePropertyTypes.Count; i++) {
-                builder.Append("s_parseEntries = new PropertyParseEntry(");
-                builder.Append(stylePropertyTypes[i].name);
-                builder.Append(", ");
-                builder.Append("new PropertyId(");
-                builder.Append(i);
-                builder.Append(", (PropertyId)");
-                builder.Append((int)stylePropertyTypes[i].flags);
-                builder.Append("), s_ParserTable[");
-                builder.Append(GetParserIndexForType(stylePropertyTypes[i].type));
-                builder.Append("]);\n");
-            }
-            
-            string content = builder.ToString();
-        }
-
-        private int GetParserIndexForType(Type type) {
-            throw new NotImplementedException();
-        }
 
         [MenuItem("UIForia Dev/Regenerate Styles 2")]
         public static void Generate() {
-
             StyleCodeGen styleGenerator = new StyleCodeGen();
-            
-            styleGenerator.GenerateStyleCode();
 
-            
-            // generate an enum 
+            string output = styleGenerator.GenerateStyleCode();
 
-            // generate static StyleProperty function for setting values
+            string generatedPath = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../Packages/UIForia/Src/_GeneratedStyle.cs"));
 
-            // generate list of string names somewhere
+            File.WriteAllText(generatedPath, output);
+        }
 
-            // maybe generate map name to type
 
-            // new StylePropertyData(object)
+        protected readonly List<PropertyId> propertyIds;
+        protected readonly List<StylePropertyType> stylePropertyTypes;
+        protected readonly Dictionary<Type, ParserTableEntry> parserMap;
+        protected readonly Dictionary<Type, TypeHandler> typeHandlerMap;
+        protected readonly List<string> namespaces;
 
-            // new StylePropertyData(struct) 
+        private readonly bool builtInPhase;
 
-            // generator uses extension methods to create StyleProperties
+        private const string s_Indent8 = "        ";
+        private const string s_Indent12 = "            ";
+        private const string s_Indent16 = "                ";
+        private const string s_Indent20 = "                    ";
+
+
+        public StyleCodeGen() {
+            this.propertyIds = new List<PropertyId>(128);
+            this.namespaces = new List<string>();
+            this.typeHandlerMap = new Dictionary<Type, TypeHandler>();
+            this.stylePropertyTypes = new List<StylePropertyType>();
+            this.parserMap = new Dictionary<Type, ParserTableEntry>();
+
+            this.builtInPhase = true;
+
+            AddNamespace("UIForia.Util");
+            AddNamespace("System");
+            AddNamespace("System.Runtime.InteropServices");
+
+            SetTypeHandler<float>(new TypeHandler() {
+                unpacker = nameof(StyleProperty2.float0),
+                parserType = typeof(FloatParser)
+            });
+
+            SetTypeHandler<int>(new TypeHandler() {
+                unpacker = nameof(StyleProperty2.int0),
+                parserType = typeof(IntParser)
+            });
+
+            SetTypeHandler<string>(new TypeHandler() {
+                parserType = typeof(StringParser)
+            });
+
+            SetTypeHandler<Texture2D>(new TypeHandler() {
+                parserType = typeof(StringParser) // todo -- make URL parser
+            });
+
+            SetTypeHandler<Color32>(new TypeHandler() {
+                packer = "ColorUtil.ColorToInt(value)",
+                unpacker = "ColorUtil.ColorFromInt(value)",
+                parserType = typeof(ColorParser)
+            });
+
+            SetTypeHandler<UIMeasurement>(new TypeHandler() {
+                packer = "value.value, (int)value.unit",
+                unpacker = "new UIMeasurement(float0, (UIMeasurementUnit)int1)",
+                parserType = typeof(MeasurementParser)
+            });
+
+            SetTypeHandler<UIFixedLength>(new TypeHandler() {
+                packer = "value.value, (int)value.unit",
+                unpacker = "new UIFixedLength(float0, (UIFixedLengthUnit)int1)",
+                parserType = typeof(FixedLengthParser)
+            });
+
+            SetTypeHandler<CursorStyle>(new TypeHandler() {
+                parserType = typeof(CursorStyleParser)
+            });
+
+            SetStyleTypeParser<FloatParser>(typeof(float));
+            SetStyleTypeParser<IntParser>(typeof(int));
+            SetStyleTypeParser<StringParser>(typeof(string));
+            SetStyleTypeParser<ColorParser>(typeof(Color32));
+            SetStyleTypeParser<TextureParser>(typeof(Texture2D));
+            SetStyleTypeParser<MeasurementParser>(typeof(UIMeasurement));
+            SetStyleTypeParser<FixedLengthParser>(typeof(UIFixedLength));
+            SetStyleTypeParser<CursorStyleParser>(typeof(CursorStyle));
+            SetStyleTypeParser<EnumParser<LayoutDirection>>(typeof(LayoutDirection));
+
+            AddStyleProperty("Opacity", typeof(float), "1f", PropertyFlags.Inherited | PropertyFlags.Animated);
+            AddStyleProperty("Visibility", typeof(Visibility), "Visibility.Visible", PropertyFlags.Inherited);
+            AddStyleProperty("Cursor", typeof(CursorStyle), "null");
+            AddStyleProperty("Painter", typeof(string), "null");
+            AddStyleProperty("OverflowX", typeof(Overflow), "Overflow.Visible");
+            AddStyleProperty("OverflowY", typeof(Overflow), "Overflow.Visible");
+            AddStyleProperty("ClipBehavior", typeof(ClipBehavior), "ClipBehavior.Normal");
+            AddStyleProperty("ClipBounds", typeof(ClipBounds), "ClipBounds.BorderBox");
+            AddStyleProperty("PointerEvents", typeof(PointerEvents), "PointerEvents.Normal");
+
+            // Background
+            AddStyleProperty("BackgroundColor", typeof(Color32), "default", PropertyFlags.Animated);
+            AddStyleProperty("BackgroundTint", typeof(Color32), "default", PropertyFlags.Animated);
+            AddStyleProperty("BackgroundImageOffsetX", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("BackgroundImageOffsetY", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("BackgroundImageScaleX", typeof(float), "1f", PropertyFlags.Animated);
+            AddStyleProperty("BackgroundImageScaleY", typeof(float), "1f", PropertyFlags.Animated);
+            AddStyleProperty("BackgroundImageTileX", typeof(float), "1f", PropertyFlags.Animated);
+            AddStyleProperty("BackgroundImageTileY", typeof(float), "1f", PropertyFlags.Animated);
+            AddStyleProperty("BackgroundImageRotation", typeof(float), "0f", PropertyFlags.Animated);
+            AddStyleProperty("BackgroundImage", typeof(Texture2D), "null");
+            AddStyleProperty("BackgroundFit", typeof(BackgroundFit), "BackgroundFit.Fill");
+
+            // Border
+            AddStyleProperty("BorderColorTop", typeof(Color32), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderColorRight", typeof(Color32), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderColorBottom", typeof(Color32), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderColorLeft", typeof(Color32), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderTop", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderRight", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderBottom", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderLeft", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderRadiusTopLeft", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderRadiusTopRight", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderRadiusBottomRight", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderRadiusBottomLeft", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+
+            // Padding
+            AddStyleProperty("PaddingTop", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("PaddingRight", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("PaddingBottom", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("PaddingLeft", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+
+            // Margin
+            AddStyleProperty("MarginTop", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("MarginRight", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("MarginBottom", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("MarginLeft", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+
+            // Size
+            AddStyleProperty("MinWidth", typeof(UIMeasurement), "default", PropertyFlags.Animated);
+            AddStyleProperty("MaxWidth", typeof(UIMeasurement), "new UIMeasurement(float.MaxValue)", PropertyFlags.Animated);
+            AddStyleProperty("MinHeight", typeof(UIMeasurement), "default", PropertyFlags.Animated);
+            AddStyleProperty("MaxHeight", typeof(UIMeasurement), "new UIMeasurement(float.MaxValue)", PropertyFlags.Animated);
+            AddStyleProperty("PreferredWidth", typeof(UIMeasurement), "new UIMeasurement(1, UIMeasurementUnit.Content)", PropertyFlags.Animated);
+            AddStyleProperty("PreferredHeight", typeof(UIMeasurement), "new UIMeasurement(1, UIMeasurementUnit.Content)", PropertyFlags.Animated);
+
+            builtInPhase = false;
+        }
+
+
+        protected struct ParserTableEntry {
+
+            public int? index;
+            public Type parserType;
 
         }
 
-        private void GenerateParsers() {
-            
-            StringBuilder builder = new StringBuilder(4096);
-
-            for (ushort i = 0; i < stylePropertyTypes.Count; i++) {
-                Type type = stylePropertyTypes[i].type;
-                string name = stylePropertyTypes[i].name;
-                StyleFlags flags = stylePropertyTypes[i].flags;
-
-                if (!parserMap.ContainsKey(type)) {
-                            
-                }
-                
-                
-            }
-            
-            
-        }
         
-        private void GenerateStyleCode() {
-            
-            StringBuilder builder = new StringBuilder(4096);
+        private void SetTypeHandler<T>(TypeHandler handler) {
+            typeHandlerMap[typeof(T)] = handler;
+        }
+
+        private void ValidateParserTypes() {
+            for (ushort i = 0; i < stylePropertyTypes.Count; i++) {
+                Type type = stylePropertyTypes[i].type;
+
+                if (parserMap.TryGetValue(type, out ParserTableEntry entry)) {
+                    continue;
+                }
+
+                if (type.IsEnum) {
+                    entry.parserType = typeof(EnumParser<>).MakeGenericType(type);
+                    parserMap[type] = entry;
+                    continue;
+                }
+
+                throw new Exception("Missing parser for type " + type);
+            }
+        }
+
+
+        private void BuildFromValueFunctions(StringBuilder builder) {
+            List<Type> types = new List<Type>();
+            for (ushort i = 0; i < stylePropertyTypes.Count; i++) {
+                Type type = stylePropertyTypes[i].type;
+                if (!types.Contains(type)) {
+                    types.Add(type);
+                }
+            }
+
+            List<StylePropertyType> ids = new List<StylePropertyType>();
+
+            for (int i = 0; i < types.Count; i++) {
+                ids.Clear();
+
+                Type targetType = types[i];
+
+                for (int j = 0; j < stylePropertyTypes.Count; j++) {
+                    StylePropertyType property = stylePropertyTypes[j];
+                    if (property.type == targetType) {
+                        ids.Add(property);
+                    }
+                }
+
+                builder.Append(s_Indent8);
+                builder.Append("public static ");
+                builder.Append(nameof(StyleProperty2));
+                builder.Append(" FromValue(");
+                builder.Append(nameof(PropertyId));
+                builder.Append(" propertyId, ");
+                builder.Append(TypeNameGenerator.GetTypeName(targetType));
+                builder.Append(" value) {\n");
+                builder.Append(s_Indent12);
+                builder.Append("switch(propertyId.id) {\n");
+                for (int j = 0; j < ids.Count; j++) {
+                    builder.Append(s_Indent16);
+                    builder.Append("case ");
+                    builder.Append(ids[j].propertyId.id);
+                    builder.Append(": // ");
+                    builder.Append(ids[j].name);
+                    builder.Append("\n");
+                }
+
+                builder.Append(s_Indent20);
+                builder.Append("return new ");
+                builder.Append(nameof(StyleProperty2));
+                builder.Append("(propertyId, ");
+                string packer = GetTypePacker(targetType);
+
+                builder.Append(packer);
+                builder.Append(");\n");
+                builder.Append(s_Indent16);
+                builder.Append("default:\n");
+                builder.Append(s_Indent20);
+                builder.Append($"throw new Exception($\"Tried to create a {{nameof({nameof(StyleProperty2)})}} from value but the given propertyId `{{propertyId}}` is not compatible with the value type {targetType.Name}\");\n");
+                builder.Append(s_Indent12);
+                builder.Append("}\n");
+                builder.Append(s_Indent8);
+                builder.Append("}\n\n");
+            }
+        }
+
+        private string GetTypePacker(Type type) {
+            typeHandlerMap.TryGetValue(type, out TypeHandler handler);
+
+            string packer = handler.packer;
+
+            if (handler.packer == null) {
+                if (type.IsEnum) {
+                    packer = "(int)value";
+                }
+                else if (type.IsClass) {
+                    packer = "GCHandle.Alloc(value, GCHandleType.Pinned).AddrOfPinnedObject()";
+                }
+                else {
+                    packer = "value";
+                }
+            }
+
+            return packer;
+        }
+
+        private int BuildParserTable(StringBuilder builder) {
+            ValidateParserTypes();
+
+            int idx = 0;
 
             for (ushort i = 0; i < stylePropertyTypes.Count; i++) {
                 Type type = stylePropertyTypes[i].type;
-                string name = stylePropertyTypes[i].name;
-                StyleFlags flags = stylePropertyTypes[i].flags;
 
-                if (!parserMap.ContainsKey(type)) {
-                    
+                parserMap.TryGetValue(type, out ParserTableEntry entry);
+
+                if (entry.index != null) {
+                    continue;
                 }
-                
-                
-                
+
+                entry.index = idx;
+                parserMap[type] = entry;
+
+                string result = StyleGeneratorConstants.k_ParseEntryTemplate
+                    .Replace("::INDEX::", idx.ToString())
+                    .Replace("::PARSER_TYPE_NAME::", TypeNameGenerator.GetTypeName(entry.parserType));
+
+                builder.Append(result);
+                idx++;
             }
 
-            builder.Append("    public static class StylePropertyId2 {\n\n");
-            
+            return idx;
+        }
+
+
+        private void BuildPropertyIds(StringBuilder builder) {
+            List<string> tmp = new List<string>();
+
             for (ushort i = 0; i < stylePropertyTypes.Count; i++) {
-                builder.Append("        public const int ");
+                propertyIds.Add(new PropertyId(i, stylePropertyTypes[i].flags));
+                stylePropertyTypes[i].propertyId = new PropertyId(i, stylePropertyTypes[i].flags);
+                builder.Append("        public static readonly PropertyId ");
                 builder.Append(stylePropertyTypes[i].name);
-                builder.Append(" = ");
-                builder.Append("new PropertyId(");
-                builder.Append(i + 1);
+                builder.Append(" = new PropertyId(");
+                builder.Append(propertyIds[i].index);
                 builder.Append(", ");
-                builder.Append((int) stylePropertyTypes[i].flags);
+                if (propertyIds[i].flags == 0) {
+                    builder.Append("PropertyFlags.None");
+                }
+                else {
+                    tmp.Clear();
+
+                    PropertyFlags flags = propertyIds[i].flags;
+
+                    if ((flags & PropertyFlags.BuiltIn) != 0) {
+                        tmp.Add("PropertyFlags.BuiltIn");
+                    }
+
+                    if ((flags & PropertyFlags.Inherited) != 0) {
+                        tmp.Add("PropertyFlags.Inherited");
+                    }
+
+                    if ((flags & PropertyFlags.Animated) != 0) {
+                        tmp.Add("PropertyFlags.Animated");
+                    }
+
+                    if ((flags & PropertyFlags.RequireDestruction) != 0) {
+                        tmp.Add("PropertyFlags.RequireDestruction");
+                    }
+
+                    builder.Append(StringUtil.ListToString(tmp, " | "));
+                }
+
                 builder.Append(");\n");
             }
+        }
 
-            builder.Append("\n    }\n");
-
-            string content = builder.ToString();
-
-            Debug.Log(content);
-            builder.Clear();
-
+        private int BuildPropertyList(StringBuilder builder) {
             for (ushort i = 0; i < stylePropertyTypes.Count; i++) {
+                Type type = stylePropertyTypes[i].type;
                 string name = stylePropertyTypes[i].name;
 
-                builder.Append("public static StyleProperty2 ");
-                builder.Append(stylePropertyTypes[i].name);
-                builder.Append("(");
-                builder.Append(TypeNameGenerator.GetTypeName(stylePropertyTypes[i].type));
+                parserMap.TryGetValue(type, out ParserTableEntry entry);
 
-                if (!stylePropertyTypes[i].type.IsClass) {
-                    builder.Append("?");
-                }
+                string result = StyleGeneratorConstants.k_PropertyEntryTemplate
+                    .Replace("::INDEX::", i.ToString())
+                    .Replace("::PROPERTY_NAME::", name)
+                    .Replace("::PARSER_ID::", entry.index.ToString());
 
-                builder.Append(" ");
-                builder.Append(char.ToLowerInvariant(name[0]));
-                builder.Append(name, 1, name.Length - 1);
-                builder.Append(") {\n");
-                builder.Append("return new StyleProperty(");
-                builder.Append("id, ");
-                builder.Append("StylePropertyConverter.ConverterType(value)");
-                builder.Append("}");
+                builder.Append(result);
+            }
+
+            return stylePropertyTypes.Count;
+        }
+
+        private void BuildStylePackers(StringBuilder builder) {
+            string line0 = $"        public static {nameof(StyleProperty2)} ::PROPERTY_NAME::(::ARGUMENT_TYPE:: value) {{\n";
+            string line1 = $"            return new {nameof(StyleProperty2)}({nameof(PropertyId)}.::PROPERTY_NAME::, ::CONVERT::);\n";
+            string line2 = "        }\n\n";
+
+            for (int i = 0; i < stylePropertyTypes.Count; i++) {
+                StylePropertyType property = stylePropertyTypes[i];
+
+                string result = line0
+                    .Replace("::PROPERTY_NAME::", property.name)
+                    .Replace("::ARGUMENT_TYPE::", TypeNameGenerator.GetTypeName(property.type));
+
+                string result1 = line1
+                    .Replace("::PROPERTY_NAME::", property.name)
+                    .Replace("::CONVERT::", GetTypePacker(property.type));
+
+                builder.Append(result);
+                builder.Append(result1);
+                builder.Append(line2);
             }
         }
 
-        public void AddStyleProperty(StylePropertyType propertyType) {
-            
+        public void AddNamespace(string namespaceName) {
+            if (!namespaces.Contains(namespaceName)) {
+                namespaces.Add(namespaceName);
+            }
         }
 
-        private void SetStyleTypeParser<T>(Type type) where T : IStylePropertyParser, new() {
-            if (parserMap.TryGetValue(typeof(T), out Type parserType)) {
-                if (parserType != type) {
-                    throw new Exception("Duplicate style type parser for type " + type.Name);
+        private void BuildUsings(StringBuilder builder) {
+            for (ushort i = 0; i < stylePropertyTypes.Count; i++) {
+                Type type = stylePropertyTypes[i].type;
+                if (type.Namespace != "UIForia.Style") {
+                    if (!namespaces.Contains(type.Namespace)) {
+                        namespaces.Add(type.Namespace);
+                    }
                 }
             }
 
-            parserMap[typeof(T)] = type;
+            for (int i = 0; i < namespaces.Count; i++) {
+                builder.Append("using ");
+                builder.Append(namespaces[i]);
+                builder.Append(";\n");
+            }
+        }
+
+        private string GenerateStyleCode() {
+            StringBuilder builder = new StringBuilder(4096);
+
+            stylePropertyTypes.Sort((a, b) => a.loweredName.CompareTo(b.loweredName));
+
+            int parserCount = BuildParserTable(builder);
+
+            string parserTable = builder.ToString();
+
+            builder.Clear();
+
+            BuildPropertyIds(builder);
+
+            string propertyIdCode = builder.ToString();
+
+            builder.Clear();
+
+            int propertyCount = BuildPropertyList(builder);
+
+            string propertyEntries = builder.ToString();
+
+            builder.Clear();
+
+            BuildStylePackers(builder);
+
+            string stylePropertyPackers = builder.ToString();
+
+            builder.Clear();
+
+            BuildUsings(builder);
+
+            string usings = builder.ToString();
+
+            builder.Clear();
+
+            BuildFromValueFunctions(builder);
+
+            string styleFromValueFns = builder.ToString();
+
+            return StyleGeneratorConstants.k_PropertyParserClass
+                .Replace("::USINGS::", usings)
+                .Replace("::PARSE_TABLE_COUNT::", parserCount.ToString())
+                .Replace("::PARSER_TABLE_CREATION::", parserTable)
+                .Replace("::PROPERTY_NAME_COUNT::", propertyCount.ToString())
+                .Replace("::PROPERTY_ENTRIES::", propertyEntries)
+                .Replace("::PROPERTY_IDS::", propertyIdCode)
+                .Replace("::STYLE_PROPERTY_PACKERS::", stylePropertyPackers)
+                .Replace("::STYLE_FROM_VALUE::", styleFromValueFns)
+                .Replace("::DEFAULT_STYLE_VALUES::", "")
+                .Trim();
+        }
+
+        public void AddStyleProperty(string name, Type type, string defaultValue, PropertyFlags flags = 0) {
+            if (builtInPhase) {
+                flags |= PropertyFlags.BuiltIn;
+            }
+
+            stylePropertyTypes.Add(new StylePropertyType(name, type, defaultValue, flags));
+        }
+
+        private void SetStyleTypeParser<T>(Type toBeParsedType) where T : IStylePropertyParser, new() {
+            Type parserType = typeof(T);
+
+            if (parserMap.TryGetValue(toBeParsedType, out ParserTableEntry parserEntry)) {
+                if (parserEntry.parserType != parserType) {
+                    throw new Exception("Duplicate style type parser for type " + typeof(T).Name);
+                }
+
+                return;
+            }
+
+            parserMap[toBeParsedType] = new ParserTableEntry() {
+                parserType = parserType
+            };
         }
 
     }

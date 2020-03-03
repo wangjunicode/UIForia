@@ -5,8 +5,8 @@ namespace UIForia.Style {
     
     public static partial class PropertyParsers {
 
-        private static readonly PropertyParseEntry[] s_parseEntries;
-        private static readonly IStylePropertyParser[] s_ParserTable;
+        internal static readonly PropertyParseEntry[] s_parseEntries;
+        internal static readonly IStylePropertyParser[] s_ParserTable;
 
         public static bool TryResolvePropertyId(string idName, out PropertyParseEntry entry) {
             int num1 = 0;
@@ -15,7 +15,7 @@ namespace UIForia.Style {
             while (num1 <= num2) {
                 int index1 = num1 + (num2 - num1 >> 1);
 
-                int num3 = string.CompareOrdinal(s_parseEntries[index1].name, idName);
+                int num3 = string.CompareOrdinal(s_parseEntries[index1].loweredName, idName);
 
                 if (num3 == 0) {
                     entry = s_parseEntries[index1];
@@ -36,14 +36,16 @@ namespace UIForia.Style {
 
         public struct PropertyParseEntry {
 
-            public string name;
-            public PropertyId propertyId;
-            public IStylePropertyParser parser;
+            public readonly string name;
+            public readonly string loweredName;
+            public readonly PropertyId propertyId;
+            public readonly IStylePropertyParser parser;
 
             public PropertyParseEntry(string name, PropertyId propertyId, IStylePropertyParser parser) {
                 this.name = name;
                 this.propertyId = propertyId;
                 this.parser = parser;
+                this.loweredName = name.ToLower();
             }
 
         }

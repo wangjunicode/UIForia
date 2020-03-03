@@ -10,7 +10,6 @@ namespace UIForia.Util {
         public static readonly char[] s_SplitComma = {','};
 
         public static int FindMatchingIndex(string input, char open, char close) {
-
             int start = -1;
 
             for (int i = 0; i < input.Length; i++) {
@@ -39,7 +38,6 @@ namespace UIForia.Util {
                         return ptr;
                     }
                 }
-
             }
 
             return -1;
@@ -49,8 +47,21 @@ namespace UIForia.Util {
             return CharCompareOrdinal(strA, chars, 0, chars.Length);
         }
 
-        public static unsafe int CharCompareOrdinal(string strA, char[] chars, int start, int end) {
-            int num1 = Math.Min(strA.Length, end);
+        public static unsafe int CharCompareOrdinal(string strA, char[] chars, int start, int length) {
+            if (strA == null && length == 0) return 0;
+            if (EqualsRangeUnsafe(strA, chars, start, length)) {
+                return 0;
+            }
+
+            if (strA == null) {
+                return -1;
+            }
+
+            if (length == 0) {
+                return 1;
+            }
+
+            int num1 = Math.Min(strA.Length, length);
             int num2 = -1;
             fixed (char* chPtr1 = strA) {
                 fixed (char* charArrayPtr = chars) {
@@ -99,8 +110,10 @@ namespace UIForia.Util {
                         chPtr4 += 2;
                     }
 
-                    if (num1 <= 0)
-                        return strA.Length - end;
+                    if (num1 <= 0) {
+                        return strA.Length - length;
+                    }
+
                     int num4;
                     return (num4 = (int) *chPtr3 - (int) *chPtr4) != 0 ? num4 : chPtr3[1] - chPtr4[1];
                 }
@@ -185,11 +198,10 @@ namespace UIForia.Util {
         }
 
         public static unsafe bool EqualsRangeUnsafe(string str, char[] b, int bStart, int length) {
-            
             if (str.Length != length) {
                 return false;
             }
-            
+
             fixed (char* strPtr = str) {
                 fixed (char* bPtr = b) {
                     char* chPtr2 = bPtr + bStart;
@@ -220,7 +232,6 @@ namespace UIForia.Util {
                 }
             }
         }
-
 
     }
 

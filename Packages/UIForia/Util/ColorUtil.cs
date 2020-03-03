@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -28,6 +29,40 @@ namespace UIForia.Util {
 
         }
 
+        [StructLayout(LayoutKind.Explicit)]
+        private struct BitSetter {
+
+            [FieldOffset(0)] public int intVal;
+            [FieldOffset(0)] public byte byte0;
+            [FieldOffset(1)] public byte byte1;
+            [FieldOffset(2)] public byte byte2;
+            [FieldOffset(3)] public byte byte3;
+
+            public BitSetter(int value) {
+                byte0 = 0;
+                byte1 = 0;
+                byte2 = 0;
+                byte3 = 0;
+                intVal = value;
+            }
+
+        }
+
+        public static Color32 ColorFromInt(int value) {
+            BitSetter setter = new BitSetter(value);
+            return new Color32(setter.byte0, setter.byte1, setter.byte2, setter.byte3);
+        }
+        
+        public static int ColorToInt(Color32 color) {
+            return (color.r << 24) + (color.g << 16) + (color.b << 8) + (color.a << 0);
+            // return new BitSetter() {
+            //     byte0 = color.r,
+            //     byte1 = color.g,
+            //     byte2 = color.b,
+            //     byte3 = color.a
+            // }.intVal;
+        }
+        
         private static readonly ColorLookup[] s_ColorList = new[] {
 
             new ColorLookup("clear", new Color32(0, 0, 0, 0)),
@@ -216,7 +251,7 @@ namespace UIForia.Util {
             return false;
         }
 
-        public static bool TryParseColorName(char[] data, int start, int end, out Color32 color, out int nameLength) {
+        public static bool TryParseColorName(CharSpan charSpan, out Color32 color, out int nameLength) {
             if(!isSorted) {
                 isSorted = true;
                 Array.Sort(s_ColorList, (a, b) => string.Compare(a.name, b.name, StringComparison.Ordinal));
@@ -229,7 +264,8 @@ namespace UIForia.Util {
                 int index1 = num1 + (num2 - num1 >> 1);
 
                 ref ColorLookup lookup = ref s_ColorList[index1];
-                int num3 = StringUtil.CharCompareOrdinal(lookup.name, data, start, end);
+                 // int num3 = string.CompareOrdinal(lookup.name, target); //StringUtil.CharCompareOrdinal(lookup.name, target)));
+                int num3 = StringUtil.CharCompareOrdinal(lookup.name, charSpan.data, charSpan.rangeStart, charSpan.rangeEnd - charSpan.rangeStart);
 
                 if (num3 == 0) {
                     color = lookup.color;

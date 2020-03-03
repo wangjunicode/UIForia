@@ -21,9 +21,9 @@ style child         { PreferredSize = 1psz; }
 ```
 
 ```xml
-<Div x-id="div1" style="container">
-    <Div x-id="div2" style="content-sized">
-        <Div x-id="div3" style="child" />
+<Div attr:id="div1" style="container">
+    <Div attr:id="div2" style="content-sized">
+        <Div attr:id="div3" style="child" />
     </Div>
 </Div>
 ```

@@ -188,8 +188,10 @@ life-cycle events.
 ### Load Animation From Style Sheet
 Inside your `UIElement` you can get a copy of any animation definition from your style sheets.
 ```
-AnimationData flashAnimationData = Application.GetAnimationFromFile("Documentation/Features/AnimationDemo.style", "flash");
+Animator.TryGetAnimationData("flash", out AnimationData flashAnimationData);
 ```
+Note that you can only reference animations that are imported via a `<Style>` sheet 
+reference in the element's template.
 
 You can change all the options or even add keyframes:
 ```
@@ -206,6 +208,9 @@ Application.Animate(animationTarget, flashAnimationData);
 
 Note that we refer to keyframes in code with floats between 0 and 1. The keyframe at
 `30%` of the animation was therefore defined as `0.3f`. 
+
+If you don't keep a reference of the currently running animation for your element you can
+use `Animator.TryGetActiveAnimation(animationName, out AnimationData animationData)`. 
 
 ### UIForia.Animation.AnimationTrigger
 AnimationTriggers are custom event callbacks that get triggered on specific keyframes.

@@ -103,7 +103,7 @@ style MattsStyleSheet {
  
 So you want to add a special style for your element based on its attributes?
  
-```<Input x-disabled="true" text="'some text'" style="button"/>```
+```<Input attr:disabled="true" text="'some text'" style="button"/>```
   
 Be aware of UIForia's distinction between attributes and properties. To set an attribute you have to use the
 `x-` notation. 

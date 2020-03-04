@@ -25,35 +25,34 @@ In UIForia templates you don't write `switch case` statements of course. This is
 would define a router and a `start` and `options` route for your game:
 
 ```xml
-<Div x-router="navigation" x-defaultRoute="/start">
-    <StartScreen x-route="/start" />
-    <OptionsScreen x-route="/options" />
+<Div attr:router="navigation" attr:defaultRoute="/start">
+    <StartScreen attr:route="/start" />
+    <OptionsScreen attr:route="/options" />
 </Div>
 ```
 
 The router is always initialized on some parent of your routes. Routes don't necessarily have to 
 be direct children of the router, they can be deeply nested as well.
 In this example we chose the `Div` container to become our router element, but it could be any
-of your custom elements too. The attribute `x-router` defines the name of the router, which must
-be unique in the application. `x-defaultRoute` defines the route that should be active by default
+of your custom elements too. The attribute `attr:router` defines the name of the router, which must
+be unique in the application. `attr:defaultRoute` defines the route that should be active by default
 meaning that the element of this route will be enabled when the router is created.
-Note that these are `x-` prefixed attributes and take no dynamic expressions, just string values.
 
 Let's assume `<StartScreen>` and `<OptionsScreen>` are custom elements that create screens according
-to their names. The `x-route` attribute defines their route name. Without this attribute these
-elements would just be regular elements, but since we added `x-route` they will be known to their
+to their names. The `attr:route` attribute defines their route name. Without this attribute these
+elements would just be regular elements, but since we added `attr:route` they will be known to their
 parent router. Parent as in the next router up in the hierarchy, which just happens to be their
 actual parent element.
 
 ### Recap
 Router:
  - can be any element
- - must have `x-router` attribute
- - must have `x-defaultRoute` attribute
+ - must have `attr:router` attribute
+ - must have `attr:defaultRoute` attribute
 
 Route:
  - can be any element
- - must have `x-route` attribute
+ - must have `attr:route` attribute
 
 Using slashes like in URLs is not a must, it's merely a recommendation since more complex router 
 setups will probably be more maintainable like this. Especially if we look at the next big 
@@ -65,8 +64,8 @@ parts of the route refer to the content you want to display, like a details page
 might be coming from a CMS or other static source but the structure is always the same. 
 
 ```xml
-<Div x-router="details">
-    <ItemDetails x-route="/item/:itemId" />
+<Div attr:router="details">
+    <ItemDetails attr:route="/item/:itemId" />
 </Div>
 ```
 
@@ -79,7 +78,7 @@ public class ItemDetails : UIElement {
     private Router router;
 
     public override void OnCreate() {
-        router = Application.RoutingSystem.FindRouter("details");
+        router = application.RoutingSystem.FindRouter("details");
     }
 
     public override void OnUpdate() {
@@ -93,10 +92,10 @@ In the example above we created a new router with the name `details`. The `ItemD
 only route for this router and its purpose is to display all the information of an `Item`. We omitted
 the template for `ItemDisplay` but imagine it would display a lot of useful information.
 
-Notice the syntax for defining a `route parameter`: `x-route="/item/:itemId"`. The colon denotes the 
+Notice the syntax for defining a `route parameter`: `attr:route="/item/:itemId"`. The colon denotes the 
 parameter name, not the actual value, so in the actual element class you can go ahead and get the 
 current route's parameter called `itemId` like this:
-`Application.RoutingSystem.FindRouter("details").GetParameter("itemId")`.
+`application.RoutingSystem.FindRouter("details").GetParameter("itemId")`.
 
 Since finding a router every frame (we need to read the route parameter in the OnUpdate method!) is 
 slightly wasteful and we know the router will never change, we can keep a reference instead and initialize

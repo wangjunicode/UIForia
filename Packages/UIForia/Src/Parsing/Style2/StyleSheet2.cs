@@ -124,6 +124,89 @@ namespace UIForia.Style2 {
             return true;
         }
 
+        // same as style but data wont contain substates
+        private struct _Mixin {
+
+            
+
+        }
+
+        // seperate list?
+        private struct _Selector { }
+
+        private struct _Style {
+
+            public int baseId;
+            public int partStart;
+            public int partCount;
+            public int normalStart;
+            public int hoverStart;
+            public int activeStart;
+            public int focusStart;
+            // commands & selectors? reverse map?
+            public CharSpan name;
+
+        }
+
+        internal void Build() {
+            
+            for (int i = 0; i < parts.size; i++) {
+                
+                ref StyleBodyPart part = ref parts.array[i];
+                
+                switch (part.type) {
+
+                    case BodyPartType.Property:
+                        break;
+
+                    case BodyPartType.RunCommand:
+                        break;
+
+                    case BodyPartType.Selector:
+                        break;
+
+                    case BodyPartType.Mixin:
+                        // ResolveMixin(id, data); resolve circular
+                        // foreach property in mixin 
+                        break;
+
+                    case BodyPartType.ConditionPush:
+                        // if condition failed
+                        // continue until matching condition pop
+                        // if !conditionValid -> throw
+                        break;
+
+                    case BodyPartType.ConditionPop:
+                        break;
+
+                    case BodyPartType.BeginStyle:
+                        break;
+                    
+                    case BodyPartType.ExtendBaseStyle:
+                        // resolve style, check for circular dep
+                        // if already built and local, use it
+                        // if already built and not local, use it
+                        // add / upsert properties to each state
+                        // add selectors
+                        // add commands
+                        break;
+                    
+                    case BodyPartType.EndStyle:
+                        break;
+                    
+                    case BodyPartType.StyleStatePop:
+                        // set current array to normal style array if not end
+                        break;
+
+                    case BodyPartType.StyleStatePush:
+                       break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                
+            }
+        }
 
         internal void BeginCondition(int conditionId) {
             parts.Add(new StyleBodyPart(BodyPartType.ConditionPush, conditionId));
@@ -144,14 +227,14 @@ namespace UIForia.Style2 {
 
             int retn = styles.size;
             styles.Add(new Style(name, retn));
-            parts.Add(new StyleBodyPart(BodyPartType.StylePush, retn));
+            parts.Add(new StyleBodyPart(BodyPartType.StyleStatePush, retn));
             return retn;
         }
 
         internal void BeginStyleBody(int styleId) { }
 
         internal void EndStyleBody() {
-            parts.Add(new StyleBodyPart(BodyPartType.StylePop, -1));
+            parts.Add(new StyleBodyPart(BodyPartType.StyleStatePop, -1));
         }
 
         internal void AddProperty(in StyleProperty2 property) {
@@ -197,9 +280,15 @@ namespace UIForia.Style2 {
             ConditionPush,
             ConditionPop,
 
-            StylePop,
+            StyleStatePop,
 
-            StylePush
+            StyleStatePush,
+
+            EndStyle,
+
+            BeginStyle,
+
+            ExtendBaseStyle
 
         }
 

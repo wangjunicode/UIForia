@@ -1,7 +1,6 @@
 using NUnit.Framework;
 using UIForia;
 using UIForia.Elements;
-using UIForia.Style;
 using UIForia.Style2;
 
 namespace Tests.StyleParser {
@@ -24,8 +23,31 @@ namespace Tests.StyleParser {
 
                 }
             ");
+            
+            // always hold instance style -> small list
+            // always hold implicit style -> small list
+            // always hold inherited style -> medium list
+            // sometimes hold selector styles -> variable list
+            
+            // each property should have a source associated with it for debugging and removal
 
-            Style style = sheet.GetStyle("testStyle");
+            // element.GetStyle("alias.name");
+            // element.GetStyle("name");
+            // element.CloneStyle(styleptr);
+            // clone.hover.SetProperty(property);
+            
+            // element.AddStyle(style);
+            // <Element style="regular {stylePointer}" hook:name=""/>
+            // Style style = sheet.GetStyle("testStyle", StyleState.Hover);
+            //
+            // StylePtr ptr = sheet.GetStylePointer("testStyle", StyleState.Hover);
+            //
+            // sheet.TryGetStyleProperty(style, PropertyId.Cursor);
+            
+            // pass style around
+            // debug?
+            // get style in c#
+            // apply style from c#?
 
         }
 

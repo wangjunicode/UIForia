@@ -85,9 +85,9 @@ namespace UIForia.Style2 {
                 throw new ParseException("Expected to find an identifier after the 'const' keyword on line " + stream.GetLineNumber());
             }
 
-            PendingConstant constant = new PendingConstant();
-            constant.name = identifier;
-
+            PendingConstant constant = new PendingConstant {
+                name = identifier
+            };
 
             int branchCount = 0;
 
@@ -217,7 +217,7 @@ namespace UIForia.Style2 {
                             }
 
                             if (!entry.parser.TryParse(propertyStream, entry.propertyId, out StyleProperty2 property)) {
-                                throw new ParseException("Failed to parse style property " + idName + " on line " + propertyStream.GetLineNumber());
+                                throw new ParseException("Failed to parse style property " + idName + " in style " + name + " on line " + propertyStream.GetLineNumber());
                             }
 
                             sheet.AddProperty(property);

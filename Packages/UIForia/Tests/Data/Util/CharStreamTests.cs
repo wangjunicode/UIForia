@@ -75,12 +75,6 @@ namespace Util {
             
             Assert.AreEqual(LayoutDirection.Horizontal, (LayoutDirection)d);
 
-            // style:PreferredWidth="400{px}"
-            // style:PreferredWidth="width"
-            // style:LayoutDirection="horizontal {real value here}"
-            // style:BackgroundColor="rgba({r}, {g}, {b}, {a});
-            // style:BackgroundColor="red";
-            // style:BackgroundColor="{red}";
         }
 
     }

@@ -28,4 +28,22 @@ namespace UIForia.Style {
 
     }
 
+    public struct Style {
+
+        public ushort index;
+        public ushort styleSheetId;
+        
+        public ushort propertyStart;
+        public ushort commandStart;
+
+        private byte propertyCount;
+        private byte commandCount;
+
+        // has commands
+        // has selectors
+        // commandStart byte count
+        // selectorStart byte count
+
+    }
+
 }

@@ -416,7 +416,7 @@ namespace UIForia.Elements {
 
                 Rect contentRect = inputElement.layoutResult.ContentRect;
 
-                var textInfo = inputElement.textElement.textInfo;
+                TextInfo textInfo = inputElement.textElement.textInfo;
 
                 // float baseLineHeight = textInfo.rootSpan.textStyle.fontAsset.faceInfo.LineHeight;
                 // float scaledSize = textInfo.rootSpan.fontSize / textInfo.rootSpan.textStyle.fontAsset.faceInfo.PointSize;

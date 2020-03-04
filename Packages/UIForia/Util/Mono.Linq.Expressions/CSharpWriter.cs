@@ -84,7 +84,7 @@ namespace Mono.Linq.Expressions {
             if (!string.IsNullOrEmpty(parameter.Name))
                 return parameter.Name;
 
-            var name = GeneratedNameFor(parameter);
+            string name = GeneratedNameFor(parameter);
             if (name != null)
                 return name;
 
@@ -123,7 +123,7 @@ namespace Mono.Linq.Expressions {
                     return true;
 
                 default:
-                    var custom = expression as CustomExpression;
+                    CustomExpression custom = expression as CustomExpression;
                     if (custom != null)
                         return IsStatement(custom);
 
@@ -214,7 +214,7 @@ namespace Mono.Linq.Expressions {
         void VisitGenericTypeDefinition(Type type) {
             WriteReference(CleanGenericName(type), type);
             WriteToken("<");
-            var arity = type.GetGenericArguments().Length;
+            int arity = type.GetGenericArguments().Length;
             for (int i = 1; i < arity; i++)
                 WriteToken(",");
             WriteToken(">");
@@ -295,8 +295,8 @@ namespace Mono.Linq.Expressions {
         }
 
         static string CleanGenericName(Type type) {
-            var name = GetPrintableTypeName(type);
-            var position = name.LastIndexOf("`");
+            string name = GetPrintableTypeName(type);
+            int position = name.LastIndexOf("`");
             if (position == -1)
                 return name;
 
@@ -404,7 +404,7 @@ namespace Mono.Linq.Expressions {
 
         void VisitBlockExpressions(BlockExpression node) {
             for (int i = 0; i < node.Expressions.Count; i++) {
-                var expression = node.Expressions[i];
+                Expression expression = node.Expressions[i];
 
                 if (IsActualStatement(expression) && RequiresExplicitReturn(node, i, node.Type != typeof(void))) {
                     WriteKeyword("return");
@@ -439,7 +439,7 @@ namespace Mono.Linq.Expressions {
         }
 
         void VisitBlockVariables(BlockExpression node) {
-            foreach (var variable in node.Variables) {
+            foreach (ParameterExpression variable in node.Variables) {
                 VisitType(variable.Type);
                 WriteSpace();
                 WriteIdentifier(NameFor(variable), variable);
@@ -455,11 +455,11 @@ namespace Mono.Linq.Expressions {
             if (!return_last)
                 return false;
 
-            var last_index = node.Expressions.Count - 1;
+            int last_index = node.Expressions.Count - 1;
             if (index != last_index)
                 return false;
 
-            var last = node.Expressions[last_index];
+            Expression last = node.Expressions[last_index];
             if (last.Is(ExpressionType.Goto) && ((GotoExpression) last).Kind == GotoExpressionKind.Return)
                 return false;
 
@@ -506,7 +506,7 @@ namespace Mono.Linq.Expressions {
         }
 
         void VisitPower(BinaryExpression node) {
-            var pow = Expression.Call(typeof(Math).GetMethod("Pow"), node.Left, node.Right);
+            MethodCallExpression pow = Expression.Call(typeof(Math).GetMethod("Pow"), node.Left, node.Right);
 
             if (node.Is(ExpressionType.Power))
                 Visit(pow);
@@ -1060,7 +1060,7 @@ namespace Mono.Linq.Expressions {
         }
 
         static string GetEnumLiteral(object value) {
-            var type = value.GetType();
+            Type type = value.GetType();
             if (Enum.IsDefined(type, value))
                 return GetPrintableTypeName(type) + "." + Enum.GetName(type, value);
 
@@ -1346,7 +1346,7 @@ namespace Mono.Linq.Expressions {
             Indent();
 
             for (int i = 0; i < bindings.Count; i++) {
-                var binding = bindings[i];
+                MemberBinding binding = bindings[i];
 
                 VisitMemberBinding(binding);
 
@@ -1438,7 +1438,7 @@ namespace Mono.Linq.Expressions {
             WriteLine();
             VisitAsBlock(node.Body);
 
-            foreach (var handler in node.Handlers)
+            foreach (CatchBlock handler in node.Handlers)
                 VisitCatchBlock(handler);
 
             if (node.Fault != null) {
@@ -1513,7 +1513,7 @@ namespace Mono.Linq.Expressions {
             WriteLine();
 
             VisitBlock(() => {
-                foreach (var @case in node.Cases)
+                foreach (SwitchCase @case in node.Cases)
                     VisitSwitchCase(@case);
 
                 if (node.DefaultBody != null) {
@@ -1531,7 +1531,7 @@ namespace Mono.Linq.Expressions {
         }
 
         protected override SwitchCase VisitSwitchCase(SwitchCase node) {
-            foreach (var value in node.TestValues) {
+            foreach (Expression value in node.TestValues) {
                 WriteKeyword("case");
                 WriteSpace();
                 Visit(value);

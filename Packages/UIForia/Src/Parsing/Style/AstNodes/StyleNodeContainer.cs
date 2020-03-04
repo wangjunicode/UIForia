@@ -27,7 +27,7 @@ namespace UIForia.Parsing.Style.AstNodes {
 
             string childrenToString = children.Count > 0 ? children[0].ToString() : string.Empty;
             for (int index = 1; index < children.Count; index++) {
-                var child = children[index];
+                StyleASTNode child = children[index];
                 childrenToString += ", " + child;
             }
 

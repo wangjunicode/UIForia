@@ -106,7 +106,7 @@ namespace UIForia.Rendering {
 
         public override int GetHashCode() {
             unchecked {
-                var hashCode = topLeft.GetHashCode();
+                int hashCode = topLeft.GetHashCode();
                 hashCode = (hashCode * 397) ^ topRight.GetHashCode();
                 hashCode = (hashCode * 397) ^ bottomLeft.GetHashCode();
                 hashCode = (hashCode * 397) ^ bottomRight.GetHashCode();

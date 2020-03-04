@@ -74,7 +74,7 @@ namespace Mono.Linq.Expressions {
 
 		public override Expression Reduce ()
 		{
-			var end_finally = Expression.Label ("end_finally");
+			LabelTarget end_finally = Expression.Label ("end_finally");
 
 			return Expression.Block (
 				new [] { variable },

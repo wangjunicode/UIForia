@@ -28,7 +28,7 @@ namespace UnityEngine {
 
         private List<PlayerData> MakeFriends(int friendCount, int parentId) {
 
-            var friends = new List<PlayerData>();
+            List<PlayerData> friends = new List<PlayerData>();
 
             for (int i = 0; i < friendCount; i++) {
                 int id = 1000 * (parentId + 1) + i;

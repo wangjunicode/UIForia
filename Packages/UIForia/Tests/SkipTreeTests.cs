@@ -35,9 +35,9 @@ public class SkipTreeTests {
     [Test]
     public void AddNodeToRoot() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(one, "two");
-        var three = new Item(one, "three");
+        Item one = new Item(null, "one");
+        Item two = new Item(one, "two");
+        Item three = new Item(one, "three");
         tree.AddItem(two);
         tree.AddItem(three);
         string[] output = new string[2];
@@ -51,9 +51,9 @@ public class SkipTreeTests {
     [Test]
     public void TraversePostOrder() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(one, "two");
-        var three = new Item(one, "three");
+        Item one = new Item(null, "one");
+        Item two = new Item(one, "two");
+        Item three = new Item(one, "three");
         tree.AddItem(one);
         tree.AddItem(two);
         tree.AddItem(three);
@@ -68,9 +68,9 @@ public class SkipTreeTests {
     [Test]
     public void AddParentAfterChildren() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(one, "two");
-        var three = new Item(one, "three");
+        Item one = new Item(null, "one");
+        Item two = new Item(one, "two");
+        Item three = new Item(one, "three");
         tree.AddItem(two);
         tree.AddItem(three);
         tree.AddItem(one);
@@ -85,10 +85,10 @@ public class SkipTreeTests {
     [Test]
     public void MissingParentInTree() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(one, "two");
-        var three = new Item(two, "three");
-        var four = new Item(two, "four");
+        Item one = new Item(null, "one");
+        Item two = new Item(one, "two");
+        Item three = new Item(two, "three");
+        Item four = new Item(two, "four");
         tree.AddItem(three);
         tree.AddItem(four);
         tree.AddItem(one);
@@ -103,9 +103,9 @@ public class SkipTreeTests {
     [Test]
     public void RemoveAnElement() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(one, "two");
-        var three = new Item(one, "three");
+        Item one = new Item(null, "one");
+        Item two = new Item(one, "two");
+        Item three = new Item(one, "three");
         tree.AddItem(two);
         tree.AddItem(three);
         tree.AddItem(one);
@@ -121,12 +121,12 @@ public class SkipTreeTests {
     [Test]
     public void RemoveAnElementWithSiblings() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
-        var three = new Item(null, "three");
-        var four = new Item(two, "four");
-        var five = new Item(two, "five");
-        var six = new Item(two, "six");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
+        Item three = new Item(null, "three");
+        Item four = new Item(two, "four");
+        Item five = new Item(two, "five");
+        Item six = new Item(two, "six");
         tree.AddItem(one);
         tree.AddItem(two);
         tree.AddItem(three);
@@ -146,12 +146,12 @@ public class SkipTreeTests {
     [Test]
     public void RemoveAnElementHierarchy_NodeInTree() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
-        var three = new Item(null, "three");
-        var four = new Item(two, "four");
-        var five = new Item(two, "five");
-        var six = new Item(two, "six");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
+        Item three = new Item(null, "three");
+        Item four = new Item(two, "four");
+        Item five = new Item(two, "five");
+        Item six = new Item(two, "six");
         tree.AddItem(one);
         tree.AddItem(two);
         tree.AddItem(three);
@@ -171,12 +171,12 @@ public class SkipTreeTests {
     [Test]
     public void RemoveAnElementHierarchy_NodeNotInTree() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
-        var three = new Item(null, "three");
-        var four = new Item(two, "four");
-        var five = new Item(two, "five");
-        var six = new Item(two, "six");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
+        Item three = new Item(null, "three");
+        Item four = new Item(two, "four");
+        Item five = new Item(two, "five");
+        Item six = new Item(two, "six");
         tree.AddItem(one);
 //        two not in tree
         tree.AddItem(three);
@@ -196,12 +196,12 @@ public class SkipTreeTests {
     [Test]
     public void DisableHierarchy_NodeInTree() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
-        var three = new Item(null, "three");
-        var four = new Item(two, "four");
-        var five = new Item(two, "five");
-        var six = new Item(two, "six");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
+        Item three = new Item(null, "three");
+        Item four = new Item(two, "four");
+        Item five = new Item(two, "five");
+        Item six = new Item(two, "six");
         tree.AddItem(one);
         tree.AddItem(two);
         tree.AddItem(three);
@@ -221,12 +221,12 @@ public class SkipTreeTests {
     [Test]
     public void DisableHierarchy_NodeNotInTree() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
-        var three = new Item(null, "three");
-        var four = new Item(two, "four");
-        var five = new Item(two, "five");
-        var six = new Item(two, "six");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
+        Item three = new Item(null, "three");
+        Item four = new Item(two, "four");
+        Item five = new Item(two, "five");
+        Item six = new Item(two, "six");
         tree.AddItem(one);
         // two not in tree!
         tree.AddItem(three);
@@ -246,12 +246,12 @@ public class SkipTreeTests {
     [Test]
     public void EnableHierarchy_NodeInTree() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
-        var three = new Item(null, "three");
-        var four = new Item(two, "four");
-        var five = new Item(two, "five");
-        var six = new Item(two, "six");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
+        Item three = new Item(null, "three");
+        Item four = new Item(two, "four");
+        Item five = new Item(two, "five");
+        Item six = new Item(two, "six");
         tree.AddItem(one);
         tree.AddItem(two);
         tree.AddItem(three);
@@ -272,12 +272,12 @@ public class SkipTreeTests {
     [Test]
     public void EnableHierarchy_NodeNotInTree() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
-        var three = new Item(null, "three");
-        var four = new Item(two, "four");
-        var five = new Item(two, "five");
-        var six = new Item(two, "six");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
+        Item three = new Item(null, "three");
+        Item four = new Item(two, "four");
+        Item five = new Item(two, "five");
+        Item six = new Item(two, "six");
         tree.AddItem(one);
         // two not in tree!
         tree.AddItem(three);
@@ -300,8 +300,8 @@ public class SkipTreeTests {
     public void Event_AddItem() {
         int callCount = 0;
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
         tree.onTreeChanged += (changeType) => {
             if (changeType == SkipTree<Item>.TreeChangeType.ItemAdded) {
                 callCount++;
@@ -316,8 +316,8 @@ public class SkipTreeTests {
     public void Event_RemoveItem() {
         int callCount = 0;
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
         tree.onTreeChanged += (changeType) => {
             if (changeType == SkipTree<Item>.TreeChangeType.ItemRemoved) {
                 callCount++;
@@ -333,8 +333,8 @@ public class SkipTreeTests {
     public void Event_EnableHierarchy() {
         int callCount = 0;
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
         tree.onTreeChanged += (changeType) => {
             if (changeType == SkipTree<Item>.TreeChangeType.HierarchyEnabled) {
                 callCount++;
@@ -351,8 +351,8 @@ public class SkipTreeTests {
     public void Event_DisableHierarchy() {
         int callCount = 0;
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
         tree.onTreeChanged += (changeType) => {
             if (changeType == SkipTree<Item>.TreeChangeType.HierarchyDisabled) {
                 callCount++;
@@ -368,8 +368,8 @@ public class SkipTreeTests {
     public void Event_RemoveHierarchy() {
         int callCount = 0;
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
         tree.onTreeChanged += (changeType) => {
             if (changeType == SkipTree<Item>.TreeChangeType.HierarchyRemoved) {
                 callCount++;
@@ -386,8 +386,8 @@ public class SkipTreeTests {
     public void Event_Clear() {
         int callCount = 0;
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
         tree.onTreeChanged += (changeType) => {
             if (changeType == SkipTree<Item>.TreeChangeType.Cleared) {
                 callCount++;
@@ -402,12 +402,12 @@ public class SkipTreeTests {
     [Test]
     public void GetTraversableTree_Root() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
-        var three = new Item(null, "three");
-        var four = new Item(two, "four");
-        var five = new Item(two, "five");
-        var six = new Item(two, "six");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
+        Item three = new Item(null, "three");
+        Item four = new Item(two, "four");
+        Item five = new Item(two, "five");
+        Item six = new Item(two, "six");
         tree.AddItem(one);
         tree.AddItem(two);
         tree.AddItem(three);
@@ -424,7 +424,7 @@ public class SkipTreeTests {
         int count = 0;
 
         while (stack.Count > 0) {
-            var current = stack.Pop();
+            SkipTree<Item>.TreeNode current = stack.Pop();
             if (current.item != null) {
                 output[count++] = current.item.name;
             }
@@ -448,12 +448,12 @@ public class SkipTreeTests {
     [Test]
     public void GetTraversableTree_Subtree() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
-        var three = new Item(null, "three");
-        var four = new Item(two, "four");
-        var five = new Item(two, "five");
-        var six = new Item(two, "six");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
+        Item three = new Item(null, "three");
+        Item four = new Item(two, "four");
+        Item five = new Item(two, "five");
+        Item six = new Item(two, "six");
         tree.AddItem(one);
         tree.AddItem(two);
         tree.AddItem(three);
@@ -470,7 +470,7 @@ public class SkipTreeTests {
         int count = 0;
 
         while (stack.Count > 0) {
-            var current = stack.Pop();
+            SkipTree<Item>.TreeNode current = stack.Pop();
             output[count++] = current.item.name;
             for (int i = 0; i < current.children.Length; i++) {
                 stack.Push(current.children[i]);
@@ -490,12 +490,12 @@ public class SkipTreeTests {
     [Test]
     public void SetSiblingIndex() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
-        var three = new Item(null, "three");
-        var four = new Item(null, "four");
-        var five = new Item(null, "five");
-        var six = new Item(null, "six");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
+        Item three = new Item(null, "three");
+        Item four = new Item(null, "four");
+        Item five = new Item(null, "five");
+        Item six = new Item(null, "six");
         tree.AddItem(one);
         tree.AddItem(two);
         tree.AddItem(three);
@@ -543,12 +543,12 @@ public class SkipTreeTests {
     [Test]
     public void OhForFuckSakesNotAgain() {
         SkipTree<Item> tree = new SkipTree<Item>();
-        var one = new Item(null, "one");
-        var two = new Item(null, "two");
-        var three = new Item(two, "three");
-        var four = new Item(two, "four");
-        var five = new Item(two, "five");
-        var six = new Item(null, "six");
+        Item one = new Item(null, "one");
+        Item two = new Item(null, "two");
+        Item three = new Item(two, "three");
+        Item four = new Item(two, "four");
+        Item five = new Item(two, "five");
+        Item six = new Item(null, "six");
         tree.AddItem(one);
         tree.AddItem(two);
         tree.AddItem(three);

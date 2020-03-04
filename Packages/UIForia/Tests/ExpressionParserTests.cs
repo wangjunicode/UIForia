@@ -545,7 +545,7 @@ public class ExpressionParserTests {
     public void Parse_TypePathExpression_WithGenerics() {
         ASTNode root = ExpressionParser.Parse("System.Collections.Generic.List<System.Tuple<int, System.Collections.Generic.List<string>>>.Value");
         MemberAccessExpressionNode node = AssertInstanceOfAndReturn<MemberAccessExpressionNode>(root);
-        var t = typeof(System.Collections.Generic.List<System.Tuple<int, System.Collections.Generic.List<string>>>);
+        Type t = typeof(System.Collections.Generic.List<System.Tuple<int, System.Collections.Generic.List<string>>>);
         Assert.AreEqual("System", node.identifier);
         Assert.AreEqual("Collections", AssertInstanceOfAndReturn<DotAccessNode>(node.parts[0]).propertyName);
         Assert.AreEqual("Generic", AssertInstanceOfAndReturn<DotAccessNode>(node.parts[1]).propertyName);
@@ -669,7 +669,7 @@ public class ExpressionParserTests {
     [Test]
     public void Parse_AliasAsMethod() {
         ASTNode root = ExpressionParser.Parse("$something(4 + 1)");
-        var node = AssertInstanceOfAndReturn<MemberAccessExpressionNode>(root);
+        MemberAccessExpressionNode node = AssertInstanceOfAndReturn<MemberAccessExpressionNode>(root);
         Assert.IsInstanceOf<InvokeNode>(node.parts[0]);
     }
 

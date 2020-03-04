@@ -219,7 +219,7 @@ namespace UIForia {
         }
 
         internal static void ProcessClassAttributes(Type type, Attribute[] attrs) {
-            for (var i = 0; i < attrs.Length; i++) {
+            for (int i = 0; i < attrs.Length; i++) {
                 Attribute attr = attrs[i];
                 if (attr is CustomPainterAttribute paintAttr) {
                     if (type.GetConstructor(Type.EmptyTypes) == null || !typeof(RenderBox).IsAssignableFrom(type)) {

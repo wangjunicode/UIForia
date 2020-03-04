@@ -2284,7 +2284,7 @@ public class TestLinqCompiler {
         compiler.SetNullCheckingEnabled(false);
         compiler.Return("thing != null ? thing.floatValue > 5 ? 1 : 0 : 10");
 
-        var thing = new LinqThing();
+        LinqThing thing = new LinqThing();
 
         // compiler.Log();
         Func<LinqThing, int> fn = compiler.Compile<Func<LinqThing, int>>();

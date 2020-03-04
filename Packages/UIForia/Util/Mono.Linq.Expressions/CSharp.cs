@@ -82,8 +82,8 @@ namespace Mono.Linq.Expressions {
         }
 
         static string ToLambda(Action<TemplateWriter> writer) {
-            var @string = new StringWriter();
-            var csharp = new TemplateWriter(new TextFormatter(@string));
+            StringWriter @string = new StringWriter();
+            TemplateWriter csharp = new TemplateWriter(new TextFormatter(@string));
 
             writer(csharp);
 
@@ -91,8 +91,8 @@ namespace Mono.Linq.Expressions {
         }
         
         static string ToCode(Action<CSharpWriter> writer) {
-            var @string = new StringWriter();
-            var csharp = new CSharpWriter(new TextFormatter(@string));
+            StringWriter @string = new StringWriter();
+            CSharpWriter csharp = new CSharpWriter(new TextFormatter(@string));
 
             writer(csharp);
 

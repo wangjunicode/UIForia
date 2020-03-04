@@ -16,7 +16,7 @@ namespace Src.Systems {
 
         public override int GetHashCode() {
             unchecked {
-                var hashCode = m_WriteMask.GetHashCode();
+                int hashCode = m_WriteMask.GetHashCode();
                 hashCode = (hashCode * 397) ^ m_SourceColorBlendMode.GetHashCode();
                 hashCode = (hashCode * 397) ^ m_DestinationColorBlendMode.GetHashCode();
                 hashCode = (hashCode * 397) ^ m_SourceAlphaBlendMode.GetHashCode();

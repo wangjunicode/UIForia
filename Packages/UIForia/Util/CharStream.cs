@@ -136,7 +136,7 @@ namespace UIForia.Util {
                     counter--;
                     if (counter == 0) {
                         charStream = new CharStream(data, ptr + 1, i);
-                        ptr = i;
+                        ptr = i + 1; // step over close
                         if ((whitespaceHandling & WhitespaceHandling.ConsumeAfter) != 0) {
                             ConsumeWhiteSpace();
                         }
@@ -178,6 +178,23 @@ namespace UIForia.Util {
             return false;
         }
 
+        public bool TryGetCharSpanTo(char c0, char c1, out CharSpan span) {
+            uint i = ptr;
+            while (i < dataEnd) {
+                char c = data[i];
+                if (c == c0 || c == c1) {
+                    span = new CharSpan(data, (int) ptr, (int) i);
+                    Advance(i - ptr + 1);
+                    return true;
+                }
+
+                i++;
+            }
+
+            span = default;
+            return false;
+        }
+
         public bool TryGetSubstreamTo(char c0, out CharStream stream) {
             uint i = ptr;
             while (i < dataEnd) {
@@ -187,6 +204,29 @@ namespace UIForia.Util {
                     Advance(i - ptr + 1);
                     return true;
                 }
+
+                i++;
+            }
+
+            stream = default;
+            return false;
+        }
+
+        public bool TryGetDelimitedSubstream(char target, out CharStream stream, char c1 = '\0', char c2 = '\0', char c3 = '\0') {
+            uint i = ptr;
+            while (i < dataEnd) {
+                char c = data[i];
+                if (c == target) {
+                    stream = new CharStream(data, ptr, i);
+                    Advance(i - ptr + 1);
+                    return true;
+                }
+                else if (c == c1 || c == c2 || c == c3) {
+                    stream = default;
+                    return false;
+                }
+
+                i++;
             }
 
             stream = default;
@@ -219,6 +259,24 @@ namespace UIForia.Util {
             return line;
         }
 
+        public int GetStartLineNumber() {
+            int line = 0;
+            for (int i = 0; i < dataStart; i++) {
+                if (data[i] == '\n') line++;
+            }
+
+            return line;
+        }
+
+        public int GetEndLineNumber() {
+            int line = 0;
+            for (int i = 0; i < dataEnd; i++) {
+                if (data[i] == '\n') line++;
+            }
+
+            return line;
+        }
+
         private const int s_ScratchBufferLength = 128;
 
         private struct EnumNameEntry {
@@ -229,14 +287,14 @@ namespace UIForia.Util {
 
         }
 
-        public bool TryParseIdentifier(out CharSpan span, WhitespaceHandling whitespaceHandling = WhitespaceHandling.ConsumeAll) {
+        public bool TryParseIdentifier(out CharSpan span, bool allowMinus = true, WhitespaceHandling whitespaceHandling = WhitespaceHandling.ConsumeAll) {
             uint start = ptr;
 
             if ((whitespaceHandling & WhitespaceHandling.ConsumeBefore) != 0) {
                 ConsumeWhiteSpace();
             }
 
-            if (TryParseIdentifier(out int rangeStart, out int rangeEnd)) {
+            if (TryParseIdentifier(out int rangeStart, out int rangeEnd, allowMinus)) {
                 span = new CharSpan(data, rangeStart, rangeEnd);
                 if ((whitespaceHandling & WhitespaceHandling.ConsumeAfter) != 0) {
                     ConsumeWhiteSpace();
@@ -250,7 +308,7 @@ namespace UIForia.Util {
             return false;
         }
 
-        public bool TryParseIdentifier(out int rangeStart, out int rangeEnd) {
+        public bool TryParseIdentifier(out int rangeStart, out int rangeEnd, bool allowMinus = true) {
             char first = data[ptr];
 
             if (!char.IsLetter(first) && first != '_') {
@@ -262,7 +320,7 @@ namespace UIForia.Util {
             uint ptr2 = ptr;
             while (ptr2 < End) {
                 char c = data[ptr2];
-                if (!char.IsLetterOrDigit(c) && c != '_') {
+                if (!char.IsLetterOrDigit(c) && c != '_' && (allowMinus && c != '-')) {
                     break;
                 }
 
@@ -665,6 +723,29 @@ namespace UIForia.Util {
             return new string(data, (int) ptr, (int) (dataEnd - ptr));
         }
 
+        public bool TryMatchRangeIgnoreCase(string str) {
+            if (ptr + str.Length >= dataEnd) {
+                return false;
+            }
+
+            unsafe {
+                fixed (char* s = str) {
+                    for (int i = 0; i < str.Length; i++) {
+                        char strChar = s[i];
+                        char dataChar = data[ptr + i];
+
+                        char c1 = strChar >= 'a' && strChar <= 'z' ? char.ToLower(strChar) : strChar;
+                        char c2 = dataChar >= 'a' && dataChar <= 'z' ? char.ToLower(dataChar) : dataChar;
+
+                        if (c1 != c2) return false;
+                    }
+                }
+
+                Advance((uint) str.Length);
+                return true;
+            }
+        }
+
     }
 
     [Flags]
@@ -677,12 +758,59 @@ namespace UIForia.Util {
 
     }
 
-    public struct CharSpan {
+    public struct ReflessCharSpan {
+
+        public readonly int rangeStart;
+        public readonly int rangeEnd;
+
+        public int Length => rangeEnd - rangeStart;
+
+        public ReflessCharSpan(int rangeStart, int rangeEnd) {
+            this.rangeStart = rangeStart;
+            this.rangeEnd = rangeEnd;
+        }
+
+        public ReflessCharSpan(CharSpan span) {
+            this.rangeStart = span.rangeStart;
+            this.rangeEnd = span.rangeEnd;
+        }
+
+        public ReflessCharSpan(CharStream stream) {
+            this.rangeStart = (int) stream.Ptr;
+            this.rangeEnd = (int) stream.End;
+        }
+
+        public string MakeString(char[] data) {
+            return new string(data, rangeStart, rangeEnd - rangeStart);
+        }
+        
+        public string MakeLowerString(char[] data) {
+            int length = rangeEnd - rangeStart;
+
+            unsafe {
+                char* buffer = stackalloc char[length + 1];
+                int idx = 0;
+                for (int i = rangeStart; i < rangeEnd; i++) {
+                    buffer[idx++] = char.ToLower(data[i]);
+                }
+
+                buffer[length] = '\0';
+                return new string(buffer);
+            }
+        }
+
+    }
+
+    public struct CharSpan : IEquatable<CharSpan> {
 
         public readonly int rangeStart;
         public readonly int rangeEnd;
 
         public char[] data { get; }
+
+        public bool HasValue => Length > 0;
+
+        public int Length => data != null ? rangeEnd - rangeStart : 0;
 
         public CharSpan(char[] data, int rangeStart, int rangeEnd) {
             this.data = data;
@@ -690,6 +818,66 @@ namespace UIForia.Util {
             this.rangeEnd = rangeEnd;
         }
 
+        public CharSpan(CharStream stream) {
+            this.data = stream.Data;
+            this.rangeStart = (int) stream.Ptr;
+            this.rangeEnd = (int) stream.End;
+        }
+
+        public static bool operator ==(CharSpan a, string b) {
+            return StringUtil.EqualsRangeUnsafe(b, a);
+        }
+
+        public static bool operator !=(CharSpan a, string b) {
+            return !StringUtil.EqualsRangeUnsafe(b, a);
+        }
+
+        public static bool operator !=(string b, CharSpan a) {
+            return !StringUtil.EqualsRangeUnsafe(b, a);
+        }
+
+        public static bool operator ==(string b, CharSpan a) {
+            return !(b != a);
+        }
+
+        public static bool operator ==(CharSpan a, CharSpan b) {
+            if (a.data == b.data) {
+                return a.rangeStart == b.rangeStart && a.rangeEnd == b.rangeEnd;
+            }
+            else {
+                int aLen = a.rangeEnd - a.rangeStart;
+                int bLen = b.rangeEnd - b.rangeStart;
+                if (aLen != bLen) return false;
+                for (int i = a.rangeStart; i < a.rangeEnd; i++) {
+                    if (a.data[i] != b.data[i]) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+
+        public static bool operator !=(CharSpan a, CharSpan b) {
+            return !(a == b);
+        }
+
+        public bool Equals(CharSpan other) {
+            return this == other;
+        }
+
+        public override bool Equals(object obj) {
+            return obj is CharSpan other && Equals(other);
+        }
+
+        public override int GetHashCode() {
+            unchecked {
+                int hashCode = rangeStart;
+                hashCode = (hashCode * 397) ^ rangeEnd;
+                hashCode = (hashCode * 397) ^ (data != null ? data.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
 
         public override string ToString() {
             return new string(data, rangeStart, rangeEnd - rangeStart);
@@ -710,8 +898,48 @@ namespace UIForia.Util {
             }
         }
 
-    }
+        public CharSpan Trim() {
+            int start = rangeStart;
+            int end = rangeEnd;
+            for (int i = rangeStart; i < rangeEnd; i++) {
+                if (char.IsWhiteSpace(data[i])) {
+                    start++;
+                }
+                else {
+                    break;
+                }
+            }
 
-    public static class CharacterStreamExtensions { }
+            for (int i = rangeEnd - 1; i >= start; i--) {
+                if (char.IsWhiteSpace(data[i])) {
+                    end--;
+                }
+                else {
+                    break;
+                }
+            }
+
+            return new CharSpan(data, start, end);
+        }
+
+        public int GetLineNumber() {
+            int line = 0;
+            for (int i = 0; i < rangeStart; i++) {
+                if (data[i] == '\n') line++;
+            }
+
+            return line;
+        }
+
+        public int GetEndLineNumber() {
+            int line = 0;
+            for (int i = 0; i < rangeEnd; i++) {
+                if (data[i] == '\n') line++;
+            }
+
+            return line;
+        }
+
+    }
 
 }

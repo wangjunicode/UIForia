@@ -902,7 +902,7 @@ namespace UIForia.Systems {
 
         internal void GetChildren(LightList<AwesomeLayoutBox> list) {
             for (int i = 0; i < element.children.size; i++) {
-                var child = element.children.array[i];
+                UIElement child = element.children.array[i];
                 if (!child.isEnabled) continue;
                 switch (child.style.LayoutBehavior) {
                     case LayoutBehavior.Ignored:

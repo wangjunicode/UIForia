@@ -17,11 +17,11 @@ namespace Documentation.DocumentationElements {
         }
 
         public override void OnUpdate() {
-            GetScreenSpaceCoordinates(out var positionX, out var positionY, out var positionZ);
+            GetScreenSpaceCoordinates(out float positionX, out float positionY, out float positionZ);
             PlaceUiElement(positionX, positionY);
 
-            var inFrontOfCamera = positionZ > 0;
-            var visible = inFrontOfCamera;
+            bool inFrontOfCamera = positionZ > 0;
+            bool visible = inFrontOfCamera;
 
             if (visible && activationRange != -1) {
                 visible = GetDistanceFromCamera() >= activationRange;
@@ -31,7 +31,7 @@ namespace Documentation.DocumentationElements {
         }
 
         private void GetScreenSpaceCoordinates(out float positionX, out float positionY, out float positionZ) {
-            var pos = cameraSystem.WorldToScreenPoint(worldPosition);
+            Vector3 pos = cameraSystem.WorldToScreenPoint(worldPosition);
             positionX = pos.x;
             positionY = cameraSystem.pixelRect.height - pos.y;
             positionZ = pos.z;

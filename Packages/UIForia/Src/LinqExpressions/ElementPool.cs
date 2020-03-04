@@ -24,7 +24,7 @@ namespace UIForia.LinqExpressions {
         }
 
         public static object CreateInstance(object instance, Type type, Action<object> clear) {
-            var constructor = type.GetConstructor(new Type[0]);
+            ConstructorInfo constructor = type.GetConstructor(new Type[0]);
             if (constructor == null && !type.IsValueType) {
                 throw new NotSupportedException($"Type '{type.FullName}' doesn't have a parameterless constructor");
             }
@@ -33,7 +33,7 @@ namespace UIForia.LinqExpressions {
                 clear(instance);
             }
 
-            var emptyInstance = instance ?? FormatterServices.GetUninitializedObject(type);
+            object emptyInstance = instance ?? FormatterServices.GetUninitializedObject(type);
 
             return constructor?.Invoke(emptyInstance, new object[0]) ?? emptyInstance;
         }
@@ -99,7 +99,7 @@ namespace UIForia.LinqExpressions {
             Assembly assembly = typeof(Expression).Assembly;
             Type cheating = assembly.GetType("System.Linq.Expressions.AssignBinaryExpression");
             // this is bypassing the IsInitOnly check done internally by Expression.Assign
-            var ctor = cheating.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance)[0];
+            ConstructorInfo ctor = cheating.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance)[0];
 //            ctor.GetMethodBody().LocalVariables[0
             for (int i = 0; i < fields.Length; i++) {
                 Type fieldType = fields[i].FieldType;
@@ -114,7 +114,7 @@ namespace UIForia.LinqExpressions {
 //                    );
                     // compiler will bitch about this if we actually generate code that tries to assign to read only fields....
                     // for dev and non AOT platforms this is perfectly fine to do.
-                    var ohSoBad = CreateInstance(cheating, ctor, new object[] {
+                    object ohSoBad = CreateInstance(cheating, ctor, new object[] {
                         Expression.Field(converted, fields[i]),
                         Expression.Default(fieldType)
                     });

@@ -105,11 +105,11 @@ namespace Mono.Linq.Expressions {
 
 		public override Expression Reduce ()
 		{
-			var inner_loop_break = Expression.Label ("inner_loop_break");
-			var inner_loop_continue = Expression.Label ("inner_loop_continue");
+			LabelTarget inner_loop_break = Expression.Label ("inner_loop_break");
+			LabelTarget inner_loop_continue = Expression.Label ("inner_loop_continue");
 
-			var @continue = continue_target ?? Expression.Label ("continue");
-			var @break = break_target ?? Expression.Label ("break");
+			LabelTarget @continue = continue_target ?? Expression.Label ("continue");
+			LabelTarget @break = break_target ?? Expression.Label ("break");
 
 			return Expression.Block (
 				new [] { variable },

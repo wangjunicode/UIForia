@@ -8,9 +8,9 @@ public class CodeGenTests {
 
     [Test]
     public void AssertAllStylePropertiesAreMapped() {
-        foreach (var propId in Enum.GetValues(typeof(StylePropertyId))) {
+        foreach (object propId in Enum.GetValues(typeof(StylePropertyId))) {
             bool found = false;
-            foreach (var prop in CodeGen.properties) {
+            foreach (PropertyGenerator prop in CodeGen.properties) {
                 if (propId.Equals(prop.propertyId)) {
                     found = true;
                 }

@@ -106,7 +106,7 @@ namespace Vertigo {
 
         // Creates a circular doubly linked list from polygon points in the specified winding order.
         private static Node LinkedList(float[] data, int start, int end, bool clockwise) {
-            var last = default(Node);
+            Node last = default(Node);
 
             if (clockwise == (SignedArea(data, start, end) > 0)) {
                 for (int i = start; i < end; i += 2) {
@@ -137,7 +137,7 @@ namespace Vertigo {
                 end = start;
             }
 
-            var p = start;
+            Node p = start;
             bool again;
 
             do {
@@ -172,12 +172,12 @@ namespace Vertigo {
                 IndexCurve(ear, minX, minY, invSize);
             }
 
-            var stop = ear;
+            Node stop = ear;
 
             // iterate through ears, slicing them one by one
             while (ear.prev != ear.next) {
-                var prev = ear.prev;
-                var next = ear.next;
+                Node prev = ear.prev;
+                Node next = ear.next;
 
                 if (invSize != 0 ? IsEarHashed(ear, minX, minY, invSize) : IsEar(ear)) {
                     // cut off the triangle
@@ -221,16 +221,16 @@ namespace Vertigo {
 
         // check whether a polygon node forms a valid ear with adjacent nodes
         private static bool IsEar(Node ear) {
-            var a = ear.prev;
-            var b = ear;
-            var c = ear.next;
+            Node a = ear.prev;
+            Node b = ear;
+            Node c = ear.next;
 
             if (Area(a, b, c) >= 0) {
                 return false; // reflex, can't be an ear
             }
 
             // now make sure we don't have other points inside the potential ear
-            var p = ear.next.next;
+            Node p = ear.next.next;
 
             while (p != ear.prev) {
                 if (PointInTriangle(a.x, a.y, b.x, b.y, c.x, c.y, p.x, p.y) &&
@@ -245,26 +245,26 @@ namespace Vertigo {
         }
 
         private static bool IsEarHashed(Node ear, float minX, float minY, float invSize) {
-            var a = ear.prev;
-            var b = ear;
-            var c = ear.next;
+            Node a = ear.prev;
+            Node b = ear;
+            Node c = ear.next;
 
             if (Area(a, b, c) >= 0) {
                 return false; // reflex, can't be an ear
             }
 
             // triangle bounding box; min & max are calculated like this for speed
-            var minTX = a.x < b.x ? (a.x < c.x ? a.x : c.x) : (b.x < c.x ? b.x : c.x);
-            var minTY = a.y < b.y ? (a.y < c.y ? a.y : c.y) : (b.y < c.y ? b.y : c.y);
-            var maxTX = a.x > b.x ? (a.x > c.x ? a.x : c.x) : (b.x > c.x ? b.x : c.x);
-            var maxTY = a.y > b.y ? (a.y > c.y ? a.y : c.y) : (b.y > c.y ? b.y : c.y);
+            float minTX = a.x < b.x ? (a.x < c.x ? a.x : c.x) : (b.x < c.x ? b.x : c.x);
+            float minTY = a.y < b.y ? (a.y < c.y ? a.y : c.y) : (b.y < c.y ? b.y : c.y);
+            float maxTX = a.x > b.x ? (a.x > c.x ? a.x : c.x) : (b.x > c.x ? b.x : c.x);
+            float maxTY = a.y > b.y ? (a.y > c.y ? a.y : c.y) : (b.y > c.y ? b.y : c.y);
 
             // z-order range for the current triangle bounding box;
-            var minZ = ZOrder(minTX, minTY, minX, minY, invSize);
-            var maxZ = ZOrder(maxTX, maxTY, minX, minY, invSize);
+            int minZ = ZOrder(minTX, minTY, minX, minY, invSize);
+            int maxZ = ZOrder(maxTX, maxTY, minX, minY, invSize);
 
-            var p = ear.prevZ;
-            var n = ear.nextZ;
+            Node p = ear.prevZ;
+            Node n = ear.nextZ;
 
             // look for points inside the triangle in both directions
             while (p != null && p.z >= minZ && n != null && n.z <= maxZ) {
@@ -312,10 +312,10 @@ namespace Vertigo {
 
         // go through all polygon nodes and cure small local self-intersections
         private static Node CureLocalIntersections(Node start, LightList<int> triangles) {
-            var p = start;
+            Node p = start;
             do {
-                var a = p.prev;
-                var b = p.next.next;
+                Node a = p.prev;
+                Node b = p.next.next;
 
                 if (!Equals(a, b) && Intersects(a, p, p.next, b) && LocallyInside(a, b) && LocallyInside(b, a)) {
 
@@ -339,13 +339,13 @@ namespace Vertigo {
         // try splitting polygon into two and triangulate them independently
         private static void SplitEarcut(Node start, LightList<int> triangles, float minX, float minY, float invSize) {
             // look for a valid diagonal that divides the polygon into two
-            var a = start;
+            Node a = start;
             do {
-                var b = a.next.next;
+                Node b = a.next.next;
                 while (b != a.prev) {
                     if (a.i != b.i && IsValidDiagonal(a, b)) {
                         // split the polygon in two by the diagonal
-                        var c = SplitPolygon(a, b);
+                        Node c = SplitPolygon(a, b);
 
                         // filter co-linear points around the cuts
                         a = FilterPoints(a, a.next);
@@ -367,12 +367,12 @@ namespace Vertigo {
         // link every hole into the outer loop, producing a single-ring polygon without holes
         private static Node EliminateHoles(LightList<float> data, LightList<int> holeIndices, Node outerNode) {
 
-            var len = holeIndices.Count;
+            int len = holeIndices.Count;
 
-            for (var i = 0; i < len; i++) {
-                var start = holeIndices[i] * 2;
-                var end = i < len - 1 ? holeIndices[i + 1] * 2 : data.Count;
-                var list = LinkedList(data.Array, start, end, false);
+            for (int i = 0; i < len; i++) {
+                int start = holeIndices[i] * 2;
+                int end = i < len - 1 ? holeIndices[i + 1] * 2 : data.Count;
+                Node list = LinkedList(data.Array, start, end, false);
                 if (list == list.next) {
                     list.steiner = true;
                 }
@@ -383,7 +383,7 @@ namespace Vertigo {
             holeQueue.Sort(nodeComparer);
 
             // process holes from left to right
-            for (var i = 0; i < holeQueue.Count; i++) {
+            for (int i = 0; i < holeQueue.Count; i++) {
                 EliminateHole(holeQueue[i], outerNode);
                 outerNode = FilterPoints(outerNode, outerNode.next);
             }
@@ -397,24 +397,24 @@ namespace Vertigo {
         private static void EliminateHole(Node hole, Node outerNode) {
             outerNode = FindHoleBridge(hole, outerNode);
             if (outerNode != null) {
-                var b = SplitPolygon(outerNode, hole);
+                Node b = SplitPolygon(outerNode, hole);
                 FilterPoints(b, b.next);
             }
         }
 
         // David Eberly's algorithm for finding a bridge between hole and outer polygon
         private static Node FindHoleBridge(Node hole, Node outerNode) {
-            var p = outerNode;
-            var hx = hole.x;
-            var hy = hole.y;
-            var qx = float.NegativeInfinity;
+            Node p = outerNode;
+            float hx = hole.x;
+            float hy = hole.y;
+            float qx = float.NegativeInfinity;
             Node m = null;
 
             // find a segment intersected by a ray from the hole's leftmost point to the left;
             // segment's endpoint with lesser x will be potential connection point
             do {
                 if (hy <= p.y && hy >= p.next.y && p.next.y != p.y) {
-                    var x = p.x + (hy - p.y) * (p.next.x - p.x) / (p.next.y - p.y);
+                    float x = p.x + (hy - p.y) * (p.next.x - p.x) / (p.next.y - p.y);
                     if (x <= hx && x > qx) {
                         qx = x;
                         if (x == hx) {
@@ -446,17 +446,17 @@ namespace Vertigo {
             // if there are no points found, we have a valid connection;
             // otherwise choose the point of the minimum angle with the ray as connection point
 
-            var stop = m;
-            var mx = m.x;
-            var my = m.y;
-            var tanMin = float.PositiveInfinity;
+            Node stop = m;
+            float mx = m.x;
+            float my = m.y;
+            float tanMin = float.PositiveInfinity;
 
             p = m.next;
 
             while (p != stop) {
                 if (hx >= p.x && p.x >= mx && hx != p.x && PointInTriangle(hy < my ? hx : qx, hy, mx, my, hy < my ? qx : hx, hy, p.x, p.y)) {
 
-                    var tan = Math.Abs(hy - p.y) / (hx - p.x);
+                    float tan = Math.Abs(hy - p.y) / (hx - p.x);
 
                     if ((tan < tanMin || (tan == tanMin && p.x > m.x)) && LocallyInside(p, hole)) {
                         m = p;
@@ -496,15 +496,15 @@ namespace Vertigo {
             int inSize = 1;
 
             do {
-                var p = list;
+                Node p = list;
                 list = null;
                 Node tail = null;
                 numMerges = 0;
 
                 while (p != null) {
                     numMerges++;
-                    var q = p;
-                    var pSize = 0;
+                    Node q = p;
+                    int pSize = 0;
                     int i;
                     for (i = 0; i < inSize; i++) {
                         pSize++;
@@ -514,7 +514,7 @@ namespace Vertigo {
                         }
                     }
 
-                    var qSize = inSize;
+                    int qSize = inSize;
 
                     while (pSize > 0 || (qSize > 0 && q != null)) {
 
@@ -642,10 +642,10 @@ namespace Vertigo {
 
         // check if the middle point of a polygon diagonal is inside the polygon
         private static bool MiddleInside(Node a, Node b) {
-            var p = a;
-            var inside = false;
-            var px = (a.x + b.x) / 2;
-            var py = (a.y + b.y) / 2;
+            Node p = a;
+            bool inside = false;
+            float px = (a.x + b.x) / 2;
+            float py = (a.y + b.y) / 2;
             do {
                 if (((p.y > py) != (p.next.y > py)) && p.next.y != p.y &&
                     (px < (p.next.x - p.x) * (py - p.y) / (p.next.y - p.y) + p.x)) {
@@ -661,10 +661,10 @@ namespace Vertigo {
         // link two polygon vertices with a bridge; if the vertices belong to the same ring, it splits polygon into two;
         // if one belongs to the outer ring and another to a hole, it merges it into a single ring
         private static Node SplitPolygon(Node a, Node b) {
-            var a2 = Get(a.i, a.x, a.y);
-            var b2 = Get(b.i, b.x, b.y);
-            var an = a.next;
-            var bp = b.prev;
+            Node a2 = Get(a.i, a.x, a.y);
+            Node b2 = Get(b.i, b.x, b.y);
+            Node an = a.next;
+            Node bp = b.prev;
 
             a.next = b;
             b.prev = a;
@@ -683,7 +683,7 @@ namespace Vertigo {
 
         // create a node and optionally link it with previous one (in a circular doubly linked list)
         private static Node InsertNode(int i, float x, float y, Node last) {
-            var p = Get(i, x, y);
+            Node p = Get(i, x, y);
 
             if (last == null) {
                 p.prev = p;
@@ -756,7 +756,7 @@ namespace Vertigo {
         }
 
         private static float SignedArea(float[] data, int start, int end) {
-            var sum = default(float);
+            float sum = default(float);
             for (int i = start, j = end - 2; i < end; i += 2) {
                 sum += (data[j] - data[i]) * (data[i + 1] + data[j + 1]);
                 j = i;
@@ -768,26 +768,26 @@ namespace Vertigo {
         // return a percentage difference between the polygon area and its triangulation area;
         // used to verify correctness of triangulation
         public static float Deviation(LightList<float> input, LightList<int> holeIndices, LightList<int> triangles) {
-            var hasHoles = holeIndices.Count > 0;
-            var outerLen = hasHoles ? holeIndices[0] * 2 : input.Count;
+            bool hasHoles = holeIndices.Count > 0;
+            int outerLen = hasHoles ? holeIndices[0] * 2 : input.Count;
 
             float[] data = input.Array;
-            var polygonArea = Math.Abs(SignedArea(data, 0, outerLen));
+            float polygonArea = Math.Abs(SignedArea(data, 0, outerLen));
             if (hasHoles) {
-                var len = holeIndices.Count;
+                int len = holeIndices.Count;
 
-                for (var i = 0; i < len; i++) {
-                    var start = holeIndices[i] * 2;
-                    var end = i < len - 1 ? holeIndices[i + 1] * 2 : input.Count;
+                for (int i = 0; i < len; i++) {
+                    int start = holeIndices[i] * 2;
+                    int end = i < len - 1 ? holeIndices[i + 1] * 2 : input.Count;
                     polygonArea -= Math.Abs(SignedArea(data, start, end));
                 }
             }
 
-            var trianglesArea = default(float);
-            for (var i = 0; i < triangles.Count; i += 3) {
-                var a = triangles[i] * 2;
-                var b = triangles[i + 1] * 2;
-                var c = triangles[i + 2] * 2;
+            float trianglesArea = default(float);
+            for (int i = 0; i < triangles.Count; i += 3) {
+                int a = triangles[i] * 2;
+                int b = triangles[i + 1] * 2;
+                int c = triangles[i + 2] * 2;
                 trianglesArea += Math.Abs(
                     (data[a] - data[c]) * (data[b + 1] - data[a + 1]) -
                     (data[a] - data[b]) * (data[c + 1] - data[a + 1]));

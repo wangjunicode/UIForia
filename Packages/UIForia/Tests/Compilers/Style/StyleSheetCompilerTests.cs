@@ -35,7 +35,7 @@ public class StyleSheetCompilerTests {
 
     [Test]
     public void CompileBackgroundImage() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 const path = ""testimg/cat"";
 export const img1 = url(@path);
@@ -48,7 +48,7 @@ style image3 { BackgroundImage = url(testimg/cat); }
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(3, containers.Length);
 
         Assert.AreEqual("cat", containers[0].groups[0].normal.style.BackgroundImage.name);
@@ -58,7 +58,7 @@ style image3 { BackgroundImage = url(testimg/cat); }
 
     [Test]
     public void CompileCursor() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 const path = ""testimg/Cursor1"";
 export const cursor1 = url(@path);
@@ -71,7 +71,7 @@ style image3 { Cursor = url(testimg/Cursor1); }
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(3, containers.Length);
 
         Assert.AreEqual("Cursor1", containers[0].groups[0].normal.style.Cursor.texture.name);
@@ -86,7 +86,7 @@ style image3 { Cursor = url(testimg/Cursor1); }
 
     [Test]
     public void CompileVisibility() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 const v1 = Visible;
 export const v2 = hidden;
@@ -99,7 +99,7 @@ style visi3 { Visibility = Visible; }
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(3, containers.Length);
 
         Assert.AreEqual(Visibility.Visible, containers[0].groups[0].normal.style.Visibility);
@@ -109,7 +109,7 @@ style visi3 { Visibility = Visible; }
 
     [Test]
     public void CompileOverflow() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 const o1 = hidden;
 const o2 = Scroll;
@@ -127,7 +127,7 @@ style overflow5 {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(5, containers.Length);
 
         Assert.AreEqual(Overflow.Hidden, containers[0].groups[0].normal.style.OverflowX);
@@ -148,7 +148,7 @@ style overflow5 {
 
     [Test]
     public void CompileBackgroundColor() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
             
 const alpha = 255;
 const redChannel = 255.000;
@@ -163,7 +163,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
         Assert.AreEqual(Color.red, containers[0].groups[0].normal.style.BackgroundColor);
@@ -171,7 +171,7 @@ style myStyle {
 
     [Test]
     public void CreateAttributeGroupsWithMeasurements() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 export const m1 = 10%;
 
@@ -189,7 +189,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
         Assert.AreEqual(2, containers[0].groups.Length);
 
@@ -201,7 +201,7 @@ style myStyle {
 
     [Test]
     public void UseMarginPropertyShorthand() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
             
 export const m1 = 10%;
 export const m2 = @m3;
@@ -216,7 +216,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
         Assert.AreEqual(0.1f,  containers[0].groups[0].normal.style.MarginTop.value);
@@ -231,7 +231,7 @@ style myStyle {
 
     [Test]
     public void UsePaddingPropertyShorthand() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 export const p1 = 10%;
 export const p2 = @p3;
@@ -246,7 +246,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
         Assert.IsTrue(Mathf.Approximately(10 * 0.01f, containers[0].groups[0].normal.style.PaddingTop.value));
@@ -261,7 +261,7 @@ style myStyle {
 
     [Test]
     public void UseBorderPropertyShorthand() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 export const b1 = 10%;
 export const b2 = @b3;
@@ -277,7 +277,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
         Assert.IsTrue(Mathf.Approximately(10 * 0.01f, containers[0].groups[0].normal.style.BorderTop.value));
@@ -297,7 +297,7 @@ style myStyle {
 
     [Test]
     public void CompileVisibilty() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 const v = hidden;
 
@@ -312,7 +312,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
         Assert.AreEqual(2, containers[0].groups.Length);
 
@@ -325,7 +325,7 @@ style myStyle {
 
     [Test]
     public void CompileGridItemColAndRowProperties() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 const rowStart = 2;
 
@@ -340,7 +340,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
         Assert.AreEqual(new GridItemPlacement(0), containers[0].groups[0].normal.style.GridItemX);
@@ -351,7 +351,7 @@ style myStyle {
 
     [Test]
     public void CompileGridAxisAlignmentProperties() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 const colSelfAlignment = Center;
 
@@ -364,7 +364,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
         Assert.AreEqual(GridAxisAlignment.Shrink, containers[0].groups[0].normal.style.GridLayoutColAlignment);
@@ -373,7 +373,7 @@ style myStyle {
 
     [Test]
     public void CompileGridLayoutDensity() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 const density = dense;
 
@@ -386,7 +386,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var containers = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, containers.Length);
 
         Assert.AreEqual(GridLayoutDensity.Dense, containers[0].groups[0].normal.style.GridLayoutDensity);
@@ -395,7 +395,7 @@ style myStyle {
 
     [Test]
     public void CompileGridLayoutDirection() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 const dir = Horizontal;
 
@@ -407,14 +407,14 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var styleGroup = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
         Assert.AreEqual(LayoutDirection.Horizontal, styleGroup[0].groups[0].normal.style.GridLayoutDirection);
     }
 
     [Test]
     public void CompileFlexLayoutDirection() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 
 const dir = Vertical;
 
@@ -426,7 +426,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var styleGroup = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
         Assert.AreEqual(LayoutDirection.Vertical, styleGroup[0].groups[0].normal.style.FlexLayoutDirection);
     }
@@ -505,7 +505,7 @@ style myStyle {
 
     [Test]
     public void CompileGridLayoutGaps() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 const colGap = 9;
 
 style myStyle {
@@ -516,7 +516,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var styleGroup = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
         Assert.AreEqual(9, styleGroup[0].groups[0].normal.style.GridLayoutColGap);
@@ -665,7 +665,7 @@ style myStyle {
     
     [Test]
     public void CompileFlexProperties() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 export const wrap = WrapHorizontal;
 export const grow = 1;
 
@@ -678,7 +678,7 @@ style myStyle {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var styleGroup = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup.Length);
 
         Assert.AreEqual(1, styleGroup[0].groups[0].normal.style.FlexItemGrow);
@@ -687,7 +687,7 @@ style myStyle {
 
     [Test]
     public void CompileBorder() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 export const brtl = 1px;
 export const brtr = 2%;
 export const brbr = 3vw;
@@ -718,7 +718,7 @@ style border5 {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var styleGroup = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(5, styleGroup.Length);
 
         Assert.AreEqual(new UIFixedLength(1), styleGroup[0].groups[0].normal.style.BorderTop);
@@ -749,7 +749,7 @@ style border5 {
 
     [Test]
     public void CompilBorderRadius() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 export const brtl = 1px;
 export const brtr = 2%;
 export const brbr = 3vw;
@@ -780,7 +780,7 @@ style border5 {
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var styleGroup = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(5, styleGroup.Length);
 
         Assert.AreEqual(new UIFixedLength(1), styleGroup[0].groups[0].normal.style.BorderRadiusTopLeft);
@@ -811,7 +811,7 @@ style border5 {
 
     [Test]
     public void CompileTransformPosition() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 export const x = 20sw;
 export const y = 10cah;
 
@@ -824,7 +824,7 @@ style trans4 { TransformPositionY = 15h; }
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var styleGroup = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(4, styleGroup.Length);
 
         Assert.AreEqual(new OffsetMeasurement(20, OffsetMeasurementUnit.ScreenWidth), styleGroup[0].groups[0].normal.style.TransformPositionX);
@@ -842,7 +842,7 @@ style trans4 { TransformPositionY = 15h; }
 
     [Test]
     public void CompileTransformProperties() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 export const x = 1;
 export const y = 2;
 
@@ -865,7 +865,7 @@ const pivotOffset = PivotOffset;
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
 
-        var styleGroup = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(1, styleGroup[0].groups[0].normal.style.TransformScaleX);
         Assert.AreEqual(2, styleGroup[0].groups[0].normal.style.TransformScaleY);
 
@@ -891,7 +891,7 @@ const pivotOffset = PivotOffset;
 
     [Test]
     public void CompileSizes() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 export const x = 1pca;
 export const y = 2;
 
@@ -912,7 +912,7 @@ style size2 {
         ".Trim());
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
-        var styleContainer = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleContainer = styleSheet.styleGroupContainers;
         Assert.AreEqual(new UIMeasurement(1, UIMeasurementUnit.ParentContentArea), styleContainer[0].groups[0].normal.style.MinWidth);
         Assert.AreEqual(new UIMeasurement(300), styleContainer[0].groups[0].normal.style.MinHeight);
         Assert.AreEqual(new UIMeasurement(20), styleContainer[0].groups[0].normal.style.PreferredWidth);
@@ -930,7 +930,7 @@ style size2 {
 
     [Test]
     public void CompileAnchoring() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 export const layout = Flex;
 
 style anchoring { 
@@ -944,7 +944,7 @@ style anchoring {
         ".Trim());
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
-        var styleGroup = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(LayoutBehavior.Ignored, styleGroup[0].groups[0].normal.style.LayoutBehavior);
         Assert.AreEqual(3, styleGroup[0].groups[0].normal.style.ZIndex);
         Assert.AreEqual(RenderLayer.Screen, styleGroup[0].groups[0].normal.style.RenderLayer);
@@ -954,7 +954,7 @@ style anchoring {
     [Test]
     public void CompileText() {
         // note: because of possible spaces in paths we have to support string values for urls
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 export const red = red;
 
 style teXt { 
@@ -968,7 +968,7 @@ style teXt {
         ".Trim());
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
-        var styleGroup = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.style.TextColor);
         Assert.AreEqual("GothamNarrow-Medium SDF", styleGroup[0].groups[0].normal.style.TextFontAsset.name);
         Assert.AreEqual(FontStyle.Normal
@@ -982,7 +982,7 @@ style teXt {
     [Test]
     public void CompileImport() {
         // note: because of possible spaces in paths we have to support string values for urls
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
 import ""Data/Styles/ImportFromMe.style"" as importedThings;
 
 style xyz {
@@ -991,7 +991,7 @@ style xyz {
         ".Trim());
 
         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
-        var styleGroup = styleSheet.styleGroupContainers;
+        UIStyleGroupContainer[] styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(Color.red, styleGroup[0].groups[0].normal.style.BackgroundColor);
     }
 
@@ -1026,7 +1026,7 @@ style xyz {
 
     [Test]
     public void CompileAnimation() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
             animation anim1 {
                 [keyframes] {
                     0% { 
@@ -1077,7 +1077,7 @@ style xyz {
 
     [Test]
     public void CompileAnimationOptions() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
             animation anim1 {
 
                 [options] {
@@ -1114,7 +1114,7 @@ style xyz {
     
     [Test]
     public void ReferenceAnimationInStyle() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
             animation anim1 {
                 [options] {
                     duration = 500;
@@ -1171,7 +1171,7 @@ style xyz {
 // Volume 
     [Test]
     public void RunSound() {
-        var nodes = StyleParser.Parse(@"
+        LightList<StyleASTNode> nodes = StyleParser.Parse(@"
                 sound notification {
                     Asset = ""sounds/notification1"";
                     MixerGroup = ""Master Group 1"";

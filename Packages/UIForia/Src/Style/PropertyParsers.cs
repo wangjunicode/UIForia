@@ -50,6 +50,10 @@ namespace UIForia.Style {
 
         }
 
+        public static bool TryResolvePropertyGroupId(string idName) {
+            throw new System.NotImplementedException();
+        }
+
     }
 
 }

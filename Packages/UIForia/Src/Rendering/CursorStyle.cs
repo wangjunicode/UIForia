@@ -28,7 +28,7 @@ namespace UIForia.Rendering {
 
         public override int GetHashCode() {
             unchecked {
-                var hashCode = (name != null ? name.GetHashCode() : 0);
+                int hashCode = (name != null ? name.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (texture != null ? texture.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ hotSpot.GetHashCode();
                 return hashCode;

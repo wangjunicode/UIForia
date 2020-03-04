@@ -37,11 +37,11 @@ namespace UIForia.Compilers {
             Type cheating = assembly.GetType("System.Linq.Expressions.UnaryExpression");
             ConstructorInfo info = cheating.GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance)[0];
 
-            var expressionParam = Expression.Parameter(typeof(Expression), "expression");
-            var typeParam = Expression.Parameter(typeof(Type), "type");
-            var methodParam = Expression.Parameter(typeof(MethodInfo), "methodInfo");
+            ParameterExpression expressionParam = Expression.Parameter(typeof(Expression), "expression");
+            ParameterExpression typeParam = Expression.Parameter(typeof(Type), "type");
+            ParameterExpression methodParam = Expression.Parameter(typeof(MethodInfo), "methodInfo");
 
-            var newExpression = Expression.New(info, Expression.Constant(ExpressionType.Convert), expressionParam, typeParam, methodParam);
+            NewExpression newExpression = Expression.New(info, Expression.Constant(ExpressionType.Convert), expressionParam, typeParam, methodParam);
             BlockExpression block = Expression.Block(newExpression);
             s_ConversionFactory = Expression.Lambda<Func<Expression, Type, MethodInfo, UnaryExpression>>(block, expressionParam, typeParam, methodParam).Compile();
             return s_ConversionFactory;

@@ -42,7 +42,7 @@ namespace Mono.Linq.Expressions {
 			if (combinator == null)
 				throw new ArgumentNullException ("combinator");
 
-			var parameters = ParametersFor(self);
+			ParameterExpression[] parameters = ParametersFor(self);
 
 			return Expression.Lambda<T> (combinator (RewriteBody (self, parameters)), parameters);
 		}
@@ -56,7 +56,7 @@ namespace Mono.Linq.Expressions {
 			if (combinator == null)
 				throw new ArgumentNullException ("combinator");
 
-			var parameters = ParametersFor (self);
+			ParameterExpression[] parameters = ParametersFor (self);
 
 			return Expression.Lambda<T> (combinator (RewriteBody (self, parameters), RewriteBody (expression, parameters)), parameters);
 		}

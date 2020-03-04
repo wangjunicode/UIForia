@@ -9,7 +9,7 @@ namespace UIForia.Layout {
 
         public override int GetHashCode() {
             unchecked {
-                var hashCode = top.GetHashCode();
+                int hashCode = top.GetHashCode();
                 hashCode = (hashCode * 397) ^ right.GetHashCode();
                 hashCode = (hashCode * 397) ^ bottom.GetHashCode();
                 hashCode = (hashCode * 397) ^ left.GetHashCode();

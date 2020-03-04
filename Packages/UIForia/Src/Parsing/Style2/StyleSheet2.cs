@@ -1,193 +1,207 @@
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using UIForia.Compilers.Style;
-using UIForia.Exceptions;
-using UIForia.Style;
 using UIForia.Util;
+using System.Collections.Generic;
+using UIForia.Exceptions;
+using UIForia.Selectors;
+using UIForia.Style;
 
 namespace UIForia.Style2 {
 
+    public struct Style {
+
+        public int id;
+        public CharSpan name;
+
+        public Style(CharSpan name, int id) {
+            this.id = id;
+            this.name = name;
+        }
+
+    }
+
+    // parser can check xml for for </Style> and create file for it if needed without actually parsing the content
+
+    // parsing != building
+    // parsing totally done in parallel because no building is needed
+    // building totally done in parallel because all data needed for building is present
+    // building probably able to run in jobs
+    // if path not found should be reported at parse time
+    // if variable or style not found should reported after parse before first build?
+
+    // crunching style sheet -> new implicit sheet = more memory usage (probably configurable)
+
+    // xml style files? xml parser probably needs to either call parser in a 1 off fashion or we parse all xml files, add pseudo style files, parse those too
+
+    // 2nd pass to build style parse dependencies? or encounter as needed?
+
     public class StyleSheet2 {
 
-        public int CrunchStyles(IList<int> styleIds) {
-            return 0;
+        public readonly Module module;
+        public readonly string filePath;
+
+        internal StructList<Style> styles;
+        internal StructList<Mixin> mixins;
+        internal StructList<Selector> selectors;
+        internal StructList<StyleBodyPart> parts;
+        internal StructList<RunCommand> commands;
+        internal StructList<PendingConstant> constants;
+
+        internal StructList<StyleProperty2> properties;
+        // animations
+        // spritesheets
+        // sounds
+        // cursors
+
+        internal StyleSheet2(Module module, string filePath) {
+            this.module = module;
+            this.filePath = filePath;
+            this.parts = new StructList<StyleBodyPart>(128);
         }
 
-        public StyleSheet2 Define(string define0, string define1 = null, string define2 = null, string define3 = null) {
-            return this;
-        }
-
-        public StyleSheet2 SetScreenParameters(float width, float height, int orientation, float resolution) {
-            return this;
-        }
-
-        public RuntimeStyleSheet Build() {
-            return default;
-        }
-
-    }
-
-    public class RuntimeStyleSheet { }
-
-    public class StyleSheetParser {
-
-        private ConcurrentDictionary<string, StyleSheet2> parsedSheets;
-
-        public StyleSheetParser() {
-            parsedSheets = new ConcurrentDictionary<string, StyleSheet2>();
-        }
-
-        public StyleSheet2 Parse(string filePath) {
-            if (parsedSheets.TryGetValue(filePath, out StyleSheet2 sheet)) {
-                return sheet;
-            }
-
-            string file = File.ReadAllText(filePath);
-
-            ParseStyleSheet(file);
+        public RuntimeStyleSheet Build(DisplayConfiguration configuration) {
+            // import all references -> need to build if not built already
+            // resolve all constants 
+            // resolve all mixins
+            // resolve all base classes 
+            // resolve all animations
+            // resolve all sounds
+            // resolve all cursors
+            // resolve all selectors
+            // resolve all style groups
 
             return default;
         }
 
-        public StyleSheet2 ParseString(string contents) {
-            ParseStyleSheet(contents);
+        public Style GetStyle(string name) {
             return default;
         }
 
-        private void ParseStyleSheet(string contents) {
-            CharStream stream = new CharStream(contents.ToCharArray());
+        public string GetConstant(string s, IList<bool> results = null) {
+            if (results == null) {
+                for (int i = 0; i < constants.size; i++) {
+                    PendingConstant constant = constants.array[i];
+                    if (constant.name == s) {
+                        if (constant.conditions == null) {
+                            return constant.defaultValue.ToString();
+                        }
+                    }
+                }
 
-            while (stream.HasMoreTokens) {
-                stream.ConsumeWhiteSpace();
-
-                if (stream.TryMatchRange("style")) {
-                    ParseStyle(stream);
-                }
-                else if (stream.TryMatchRange("export")) {
-                    throw new NotImplementedException();
-                }
-                else if (stream.TryMatchRange("import")) {
-                    throw new NotImplementedException();
-                }
-                else if (stream.TryMatchRange("const")) {
-                    throw new NotImplementedException();
-                }
-                else if (stream.TryMatchRange("animation")) {
-                    throw new NotImplementedException();
-                }
-                else if (stream.TryMatchRange("sound")) {
-                    throw new NotImplementedException();
-                }
-                else {
-                    throw new ParseException("Unexpected end of style sheet");
-                }
-            }
-        }
-
-        private void ParseStyle(CharStream stream) {
-            if (!stream.TryParseIdentifier(out CharSpan span)) {
-                throw new ParseException("Expected to find an identifier after 'style' token on line " + stream.GetLineNumber());
+                return null;
             }
 
-            string styleName = span.ToString();
-
-            if (stream.TryParseCharacter(':')) {
-                // Handle Extension here
-            }
-            else if (stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
-                ParseStyleBody(bodyStream);
-            }
-        }
-
-        private void ParseStyleBody(CharStream stream) {
-            stream.ConsumeWhiteSpace();
-
-            while (stream.HasMoreTokens) {
-                if (stream == '[') {
-                    // ParseStyleBlock(stream);
-                    throw new NotImplementedException();
-                }
-                else {
-                    if (stream.TryParseIdentifier(out CharSpan span)) {
-                        string idName = span.ToLowerString();
-
-                        if (idName == "run") { }
-
-                        else if (PropertyParsers.TryResolvePropertyId(idName, out PropertyParsers.PropertyParseEntry entry)) {
-                            if (!stream.TryParseCharacter('=')) {
-                                throw new ParseException("Expected an equal sign after property name " + span + " on line " + stream.GetLineNumber());
+            for (int i = 0; i < constants.size; i++) {
+                PendingConstant constant = constants.array[i];
+                if (constant.name == s) {
+                    if (constant.conditions == null) {
+                        return constant.defaultValue.ToString();
+                    }
+                    else {
+                        for (int j = 0; j < constant.conditions.Length; j++) {
+                            if (results[constant.conditions[j].conditionId]) {
+                                return constant.conditions[j].value.ToString();
                             }
-
-                            if (!stream.TryGetSubstreamTo(';', '\n', out CharStream propertyStream)) {
-                                throw new ParseException("Expected a property value and then a semi colon after '" + span + " =' on line " + stream.GetLineNumber());
-                            }
-
-                            if (!entry.parser.TryParse(propertyStream, entry.propertyId, out StyleProperty2 property)) {
-                                throw new ParseException("Failed to parse");
-                            }
-
-                            currentStyleList.Add(property);
-
                         }
 
-                        if (stream.Contains('@')) { }
-
-                        // get mutable stream 
-                        // replace variables with their values
-                        // invoke parser to attempt parsing
-                        // release mutable stream
-                        // if (parser.TryParse(stream, ctx, out StyleProperty2 property)) {
-                        //             
-                        // }
+                        return constant.defaultValue.ToString();
                     }
-
-                    throw new NotImplementedException();
                 }
             }
+
+            return null;
         }
 
-        private void ParseStyleBlock(CharStream stream) {
-            if (!stream.TryGetSubStream('[', ']', out CharStream blockStream)) {
-                // error
+
+        internal bool AddConstant(in PendingConstant constant) {
+            constants = constants ?? new StructList<PendingConstant>();
+            for (int i = 0; i < constants.size; i++) {
+                if (constants.array[i].name == constant.name) {
+                    return false;
+                }
             }
 
-            stream.ConsumeWhiteSpace();
-
-            if (!stream.TryGetSubStream('{', '}', out CharStream body)) {
-                // error    
-            }
-
-
-            if (stream == '#') { }
-
-            if (stream == '[') { }
+            constants.Add(constant);
+            return true;
         }
 
-    }
 
-    public struct StyleConfiguration {
+        internal void BeginCondition(int conditionId) {
+            parts.Add(new StyleBodyPart(BodyPartType.ConditionPush, conditionId));
+        }
 
-        public MediaCondition condition;
-        public StyleProperty2[] properties;
+        internal void EndCondition() {
+            parts.Add(new StyleBodyPart(BodyPartType.ConditionPop, -1));
+        }
 
-    }
+        internal int AddStyle(CharSpan name) {
+            styles = styles ?? new StructList<Style>();
+            for (int i = 0; i < styles.size; i++) {
+                if (styles[i].name == name) {
+                    throw new ParseException("Style " + name + " was already declared in " + filePath + ". You have redefined it on line " + name.GetLineNumber());
+                }
+            }
 
-    public class MediaCondition { }
 
-    public struct StyleBlock {
+            int retn = styles.size;
+            styles.Add(new Style(name, retn));
+            parts.Add(new StyleBodyPart(BodyPartType.StylePush, retn));
+            return retn;
+        }
 
-        public StyleConfiguration[] normal;
-        public StyleConfiguration[] hover;
-        public StyleConfiguration[] active;
-        public StyleConfiguration[] focus;
+        internal void BeginStyleBody(int styleId) { }
 
-    }
+        internal void EndStyleBody() {
+            parts.Add(new StyleBodyPart(BodyPartType.StylePop, -1));
+        }
 
-    public struct StyleToken {
+        internal void AddProperty(in StyleProperty2 property) {
+            parts.Add(new StyleBodyPart(BodyPartType.Property, properties.Count));
+            properties = properties ?? new StructList<StyleProperty2>(64);
+            properties.Add(property);
+        }
 
-        public CharStream stream;
+        internal void AddRunCommand(in RunCommand cmd) {
+            throw new NotImplementedException();
+        }
+
+        internal void ApplyMixin(int mixinId, int mixinData = -1) {
+            parts.Add(new StyleBodyPart(BodyPartType.Mixin, mixinId, mixinData));
+        }
+
+        // internal StructList<Style> styles;
+        // internal StructList<Mixin> mixins;
+        // internal StructList<Selector> selectors;
+        // internal StructList<RunCommand> commands;
+        // internal StructList<PendingConstant> constants;
+        // internal StructList<StyleProperty2> properties;
+        internal struct StyleBodyPart {
+
+            public readonly int id;
+            public readonly int dataId;
+            public readonly BodyPartType type;
+
+            public StyleBodyPart(BodyPartType type, int id, int dataId = -1) {
+                this.id = id;
+                this.type = type;
+                this.dataId = dataId;
+            }
+
+        }
+
+        internal enum BodyPartType {
+
+            Property,
+            RunCommand,
+            Selector,
+            Mixin,
+            ConditionPush,
+            ConditionPop,
+
+            StylePop,
+
+            StylePush
+
+        }
 
     }
 

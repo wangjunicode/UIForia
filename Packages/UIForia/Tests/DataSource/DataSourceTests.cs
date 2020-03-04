@@ -139,7 +139,7 @@ public class DataSourceTests {
 
     [Test]
     public void AddRecord_CanThrowFromAdapter() {
-        var ex = Assert.Throws<AggregateException >(() => {
+        AggregateException ex = Assert.Throws<AggregateException >(() => {
             DataSource<TestData> ds = new DataSource<TestData>();
             ds.onRecordAdded += (TestData t) => {
                throw new TestException();
@@ -190,14 +190,14 @@ public class DataSourceTests {
         ds.onRecordChanged += (r) => { changeCount++; };
         ds.onRecordRemoved += (r) => { removeCount++; };
         
-        var result1 = ds.SetRecord(0, new TestData(0, "hello")).Result;
+        TestData result1 = ds.SetRecord(0, new TestData(0, "hello")).Result;
         Assert.AreEqual(0, removeCount);
         Assert.AreEqual(0, changeCount);
         Assert.AreEqual(1, addCount);
-        var result2 = ds.SetRecord(0, null).Result;
+        TestData result2 = ds.SetRecord(0, null).Result;
         Assert.AreEqual(1, addCount);
         Assert.AreEqual(1, removeCount);
-        var result3 = ds.GetRecord(0).Result;
+        TestData result3 = ds.GetRecord(0).Result;
         Assert.IsNull(result3);
     }
 
@@ -207,7 +207,7 @@ public class DataSourceTests {
         TestAdapter<TestData> adapter = new TestAdapter<TestData>();
         ListRecordStore<TestData> store = new ListRecordStore<TestData>();
         DataSource<TestData> ds = new DataSource<TestData>(adapter, store);
-        var result = ds.SetRecord(100, new TestData(100, "data here")).Result;
+        TestData result = ds.SetRecord(100, new TestData(100, "data here")).Result;
         Assert.AreEqual(result, store.GetRecord(100));
     }
 
@@ -221,9 +221,9 @@ public class DataSourceTests {
         DataSource<TestData> ds = new DataSource<TestData>(adapter);
         ds.onRecordAdded += (r) => { addCount++; };
         
-        var result1 = ds.SetRecord(0, new TestData(0, "hello")).Result;
+        TestData result1 = ds.SetRecord(0, new TestData(0, "hello")).Result;
         Assert.AreEqual(1, addCount);
-        var result2 = ds.SetRecord(0, new TestData(0, "goodbye")).Result;
+        TestData result2 = ds.SetRecord(0, new TestData(0, "goodbye")).Result;
         Assert.AreEqual(1, addCount);
     }
 
@@ -235,9 +235,9 @@ public class DataSourceTests {
         int changeCount = 0;
         DataSource<TestData> ds = new DataSource<TestData>(adapter);
         ds.onRecordChanged += (r) => { changeCount++; };
-        var result1 = ds.SetRecord(0, new TestData(0, "hello")).Result;
+        TestData result1 = ds.SetRecord(0, new TestData(0, "hello")).Result;
         Assert.AreEqual(0, changeCount);
-        var result2 = ds.SetRecord(0, new TestData(0, "goodbye")).Result;
+        TestData result2 = ds.SetRecord(0, new TestData(0, "goodbye")).Result;
     }
 
     [Test]
@@ -248,9 +248,9 @@ public class DataSourceTests {
         int removedCount = 0;
         DataSource<TestData> ds = new DataSource<TestData>(adapter);
         ds.onRecordRemoved += (r) => { removedCount++; };
-        var result1 = ds.SetRecord(0, new TestData(0, "hello")).Result;
+        TestData result1 = ds.SetRecord(0, new TestData(0, "hello")).Result;
         Assert.AreEqual(0, removedCount);
-        var result2 = ds.SetRecord(0, null);
+        Task<TestData> result2 = ds.SetRecord(0, null);
         Assert.AreEqual(1, removedCount);
     }
     

@@ -127,7 +127,7 @@ namespace UIForia.Rendering {
         public bool RequestFocus() {
             List<UIView> views = application.views;
             if (focusOnMouseDown && Depth < views.Count - 1) {
-                for (var index = 0; index < views.Count; index++) {
+                for (int index = 0; index < views.Count; index++) {
                     UIView view = views[index];
                     if (view.Depth > Depth) {
                         view.Depth--;

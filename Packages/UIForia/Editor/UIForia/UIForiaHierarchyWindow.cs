@@ -308,7 +308,7 @@ namespace UIForia.Editor {
             path.SetFillOpacity(1);
             path.SetStrokeOpacity(1);
 
-            var selectedElement = s_SelectedApplication.GetElement(s_SelectedElementId);
+            UIElement selectedElement = s_SelectedApplication.GetElement(s_SelectedElementId);
 
             if (selectedElement != null && selectedElement.isEnabled) {
 

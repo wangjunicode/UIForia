@@ -615,11 +615,11 @@ namespace TemplateBinding {
 
             e.count = 7;
 
-            var e0 = e[0][0];
-            var e1 = e[0][1];
-            var e2 = e[0][2];
-            var e3 = e[0][3];
-            var e4 = e[0][4];
+            UIElement e0 = e[0][0];
+            UIElement e1 = e[0][1];
+            UIElement e2 = e[0][2];
+            UIElement e3 = e[0][3];
+            UIElement e4 = e[0][4];
 
             app.Update();
 
@@ -1310,7 +1310,7 @@ namespace TemplateBinding {
 
             Assert.IsInstanceOf<UIRepeatElement<NestedRepeatData>>(e[0]);
             Assert.IsInstanceOf<UIRepeatElement<string>>(e[0][0][0]);
-            var repeat = e[0][0][0];
+            UIElement repeat = e[0][0][0];
             Assert.AreEqual(3, repeat.ChildCount);
             Assert.AreEqual("one", GetText(repeat[0]));
             Assert.AreEqual("two", GetText(repeat[1]));

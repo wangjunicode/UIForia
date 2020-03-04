@@ -56,7 +56,7 @@ namespace Documentation {
                 rwValue = "";
             }
             
-            foreach (var val in VALUES) {
+            foreach (string val in VALUES) {
                 if (val.StartsWith(rwValue.ToLower())) {
                     autocompleteList.Add(val);
                 }

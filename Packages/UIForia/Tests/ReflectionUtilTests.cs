@@ -165,8 +165,8 @@ public class ReflectionUtilTests {
         List<string> list = new List<string>();
         list.Add("hello");
         list.Add("world");
-        var y = (Func<List<string>,int, string, string>)ReflectionUtil.CreateIndexSetter(typeof(List<string>));
-        var z = (Func<List<string>,int, string>)ReflectionUtil.CreateIndexGetter(typeof(List<string>));
+        Func<List<string>, int, string, string> y = (Func<List<string>,int, string, string>)ReflectionUtil.CreateIndexSetter(typeof(List<string>));
+        Func<List<string>, int, string> z = (Func<List<string>,int, string>)ReflectionUtil.CreateIndexGetter(typeof(List<string>));
         y.Invoke(list, 0, "hallochen");
         Assert.AreEqual(list[0], "hallochen");
         Assert.AreEqual(z.Invoke(list, 0), "hallochen");

@@ -421,7 +421,7 @@ namespace UIForia.Parsing {
 
                 if (cdata != null) {
                     string contents = cdata.Value.Trim();
-                    var typeBodyParser = new TypeBodyParser();
+                    TypeBodyParser typeBodyParser = new TypeBodyParser();
                     IXmlLineInfo lineInfo = cdata;
 
                     TypeBodyNode astNode = typeBodyParser.Parse(contents, templateShell.filePath, lineInfo.LineNumber);

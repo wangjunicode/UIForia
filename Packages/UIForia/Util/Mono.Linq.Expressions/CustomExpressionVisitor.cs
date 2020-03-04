@@ -34,7 +34,7 @@ namespace Mono.Linq.Expressions {
 
 		protected override Expression VisitExtension (Expression node)
 		{
-			var custom_node = node as CustomExpression;
+			CustomExpression custom_node = node as CustomExpression;
 			if (custom_node != null)
 				return Visit (custom_node);
 

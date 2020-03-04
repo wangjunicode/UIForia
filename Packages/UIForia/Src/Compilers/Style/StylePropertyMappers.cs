@@ -280,14 +280,14 @@ namespace UIForia.Compilers.Style {
 
         private static void MapLayoutFit(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
             if (property.children.Count == 1) {
-                var layoutFit = MapEnum<LayoutFit>(property.children[0], context);
+                LayoutFit layoutFit = MapEnum<LayoutFit>(property.children[0], context);
 
                 targetStyle.LayoutFitHorizontal = layoutFit;
                 targetStyle.LayoutFitVertical = layoutFit;
             }
             else if (property.children.Count > 1) {
-                var layoutFitX = MapEnum<LayoutFit>(property.children[0], context);
-                var layoutFitY = MapEnum<LayoutFit>(property.children[1], context);
+                LayoutFit layoutFitX = MapEnum<LayoutFit>(property.children[0], context);
+                LayoutFit layoutFitY = MapEnum<LayoutFit>(property.children[1], context);
 
                 targetStyle.LayoutFitHorizontal = layoutFitX;
                 targetStyle.LayoutFitVertical = layoutFitY;
@@ -1460,7 +1460,7 @@ namespace UIForia.Compilers.Style {
         }
 
         private static Color MapColor(StyleASTNode colorStyleAstNode, StyleCompileContext context) {
-            var styleAstNode = context.GetValueForReference(colorStyleAstNode);
+            StyleASTNode styleAstNode = context.GetValueForReference(colorStyleAstNode);
             switch (styleAstNode) {
                 case StyleIdentifierNode identifierNode:
                     return ParseColor(identifierNode, context);

@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using NUnit.Framework;
 using UIForia.Compilers;
 using UIForia.Exceptions;
 using UIForia.Layout;
@@ -154,16 +152,16 @@ namespace UIForia.Editor {
             SetTypeHandler<CursorStyle>(new TypeHandler() {
                 parserType = typeof(CursorStyleParser)
             });
-
-            SetStyleTypeParser<FloatParser>(typeof(float));
-            SetStyleTypeParser<IntParser>(typeof(int));
-            SetStyleTypeParser<StringParser>(typeof(string));
-            SetStyleTypeParser<ColorParser>(typeof(Color32));
-            SetStyleTypeParser<TextureParser>(typeof(Texture2D));
-            SetStyleTypeParser<MeasurementParser>(typeof(UIMeasurement));
-            SetStyleTypeParser<FixedLengthParser>(typeof(UIFixedLength));
-            SetStyleTypeParser<CursorStyleParser>(typeof(CursorStyle));
-            SetStyleTypeParser<EnumParser<LayoutDirection>>(typeof(LayoutDirection));
+            //
+            // SetStyleTypeParser<FloatParser>(typeof(float));
+            // SetStyleTypeParser<IntParser>(typeof(int));
+            // SetStyleTypeParser<StringParser>(typeof(string));
+            // SetStyleTypeParser<ColorParser>(typeof(Color32));
+            // SetStyleTypeParser<TextureParser>(typeof(Texture2D));
+            // SetStyleTypeParser<MeasurementParser>(typeof(UIMeasurement));
+            // SetStyleTypeParser<FixedLengthParser>(typeof(UIFixedLength));
+            // SetStyleTypeParser<CursorStyleParser>(typeof(CursorStyle));
+            // SetStyleTypeParser<EnumParser<LayoutDirection>>(typeof(LayoutDirection));
 
             AddStyleProperty("Opacity", typeof(float), "1f", PropertyFlags.Inherited | PropertyFlags.Animated);
             AddStyleProperty("Visibility", typeof(Visibility), "Visibility.Visible", PropertyFlags.Inherited);
@@ -532,21 +530,21 @@ namespace UIForia.Editor {
             stylePropertyTypes.Add(new StylePropertyType(name, type, defaultValue, flags));
         }
 
-        private void SetStyleTypeParser<T>(Type toBeParsedType) where T : IStylePropertyParser, new() {
-            Type parserType = typeof(T);
-
-            if (parserMap.TryGetValue(toBeParsedType, out ParserTableEntry parserEntry)) {
-                if (parserEntry.parserType != parserType) {
-                    throw new Exception("Duplicate style type parser for type " + typeof(T).Name);
-                }
-
-                return;
-            }
-
-            parserMap[toBeParsedType] = new ParserTableEntry() {
-                parserType = parserType
-            };
-        }
+        // private void SetStyleTypeParser<T>(Type toBeParsedType) where T : IStylePropertyParser, new() {
+        //     Type parserType = typeof(T);
+        //
+        //     if (parserMap.TryGetValue(toBeParsedType, out ParserTableEntry parserEntry)) {
+        //         if (parserEntry.parserType != parserType) {
+        //             throw new Exception("Duplicate style type parser for type " + typeof(T).Name);
+        //         }
+        //
+        //         return;
+        //     }
+        //
+        //     parserMap[toBeParsedType] = new ParserTableEntry() {
+        //         parserType = parserType
+        //     };
+        // }
 
     }
 

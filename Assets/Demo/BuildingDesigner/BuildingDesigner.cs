@@ -83,7 +83,7 @@ namespace Demo {
         }
 
         private void BrushTypeChanged(int category) {
-            var prev = currentBrushType;
+            Category prev = currentBrushType;
             currentBrushType = (Category)category;
             if (prev != currentBrushType) {
                 brushesContainer.ScrollToHorizontalPercent(0f);

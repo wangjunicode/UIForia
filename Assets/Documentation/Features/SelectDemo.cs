@@ -101,13 +101,13 @@ namespace Documentation.Features {
             RepeatableList<ISelectOption<string>> options = translations[index];
             
             List<ISelectOption<string>> temp = new List<ISelectOption<string>>();
-            foreach (var option in options) {
+            foreach (ISelectOption<string> option in options) {
                 temp.Add(option);
             }
             
             options.Clear();
                   
-            foreach (var option in temp) {
+            foreach (ISelectOption<string> option in temp) {
                 options.Add(option);
             }
 

@@ -104,13 +104,13 @@ namespace Mono.Linq.Expressions {
 
 		private Expression ReduceForArray ()
 		{
-			var inner_loop_break = Expression.Label ("inner_loop_break");
-			var inner_loop_continue = Expression.Label ("inner_loop_continue");
+			LabelTarget inner_loop_break = Expression.Label ("inner_loop_break");
+			LabelTarget inner_loop_continue = Expression.Label ("inner_loop_continue");
 
-			var @continue = continue_target ?? Expression.Label ("continue");
-			var @break = break_target ?? Expression.Label ("break");
+			LabelTarget @continue = continue_target ?? Expression.Label ("continue");
+			LabelTarget @break = break_target ?? Expression.Label ("break");
 
-			var index = Expression.Variable (typeof (int), "i");
+			ParameterExpression index = Expression.Variable (typeof (int), "i");
 
 			return Expression.Block (
 				new [] { index, variable },
@@ -143,14 +143,14 @@ namespace Mono.Linq.Expressions {
 
 			ResolveEnumerationMembers (out get_enumerator, out move_next, out get_current);
 
-			var enumerator_type = get_enumerator.ReturnType;
+			Type enumerator_type = get_enumerator.ReturnType;
 
-			var enumerator = Expression.Variable (enumerator_type);
+			ParameterExpression enumerator = Expression.Variable (enumerator_type);
 
-			var inner_loop_continue = Expression.Label ("inner_loop_continue");
-			var inner_loop_break = Expression.Label ("inner_loop_break");
-			var @continue = continue_target ?? Expression.Label ("continue");
-			var @break = break_target ?? Expression.Label ("break");
+			LabelTarget inner_loop_continue = Expression.Label ("inner_loop_continue");
+			LabelTarget inner_loop_break = Expression.Label ("inner_loop_break");
+			LabelTarget @continue = continue_target ?? Expression.Label ("continue");
+			LabelTarget @break = break_target ?? Expression.Label ("break");
 
 			Expression variable_initializer;
 
@@ -175,7 +175,7 @@ namespace Mono.Linq.Expressions {
 					inner_loop_continue),
 				Expression.Label (@break));
 
-			var dispose = CreateDisposeOperation (enumerator_type, enumerator);
+			Expression dispose = CreateDisposeOperation (enumerator_type, enumerator);
 
 			return Expression.Block (
 				new [] { enumerator },
@@ -219,7 +219,7 @@ namespace Mono.Linq.Expressions {
 
 		private static Expression CreateDisposeOperation (Type enumerator_type, ParameterExpression enumerator)
 		{
-			var dispose = typeof (IDisposable).GetMethod ("Dispose");
+			MethodInfo dispose = typeof (IDisposable).GetMethod ("Dispose");
 
 			if (typeof (IDisposable).IsAssignableFrom (enumerator_type)) {
 				//
@@ -241,7 +241,7 @@ namespace Mono.Linq.Expressions {
 			// runtime check.
 			//
 
-			var disposable = Expression.Variable (typeof (IDisposable));
+			ParameterExpression disposable = Expression.Variable (typeof (IDisposable));
 
 			return Expression.Block (
 				new [] { disposable },
@@ -257,11 +257,11 @@ namespace Mono.Linq.Expressions {
 		{
 			argument = null;
 
-			foreach (var iface in enumerable.Type.GetInterfaces ()) {
+			foreach (Type iface in enumerable.Type.GetInterfaces ()) {
 				if (!iface.IsGenericType)
 					continue;
 
-				var definition = iface.GetGenericTypeDefinition ();
+				Type definition = iface.GetGenericTypeDefinition ();
 				if (definition != typeof (IEnumerable<>))
 					continue;
 

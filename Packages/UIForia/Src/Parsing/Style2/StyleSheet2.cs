@@ -80,6 +80,9 @@ namespace UIForia.Style2 {
                 else if (stream.TryMatchRange("sound")) {
                     throw new NotImplementedException();
                 }
+                else if (stream.TryMatchRange("spritesheet")) {
+                    throw new NotImplementedException();
+                }
                 else {
                     throw new ParseException("Unexpected end of style sheet");
                 }

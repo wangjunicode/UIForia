@@ -1,5 +1,5 @@
+using System;
 using System.Diagnostics;
-using Boo.Lang.Runtime;
 using UnityEngine;
 
 namespace UIForia.Sound {
@@ -32,7 +32,7 @@ namespace UIForia.Sound {
             get {
                 switch (unit) {
                     case UITimeMeasurementUnit.Milliseconds: return value * 0.001f;
-                    case UITimeMeasurementUnit.Percentage: throw new RuntimeException("Cannot convert % to seconds.");
+                    case UITimeMeasurementUnit.Percentage: throw new Exception("Cannot convert % to seconds.");
                     case UITimeMeasurementUnit.Unset:
                     case UITimeMeasurementUnit.Seconds:
                     default:
@@ -45,7 +45,7 @@ namespace UIForia.Sound {
             get {
                 switch (unit) {
                     case UITimeMeasurementUnit.Seconds: return value * 1000;
-                    case UITimeMeasurementUnit.Percentage: throw new RuntimeException("Cannot convert % to milliseconds.");
+                    case UITimeMeasurementUnit.Percentage: throw new Exception("Cannot convert % to milliseconds.");
                     case UITimeMeasurementUnit.Unset:
                     case UITimeMeasurementUnit.Milliseconds:
                     default:

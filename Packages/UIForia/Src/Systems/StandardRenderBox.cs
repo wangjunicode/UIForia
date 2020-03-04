@@ -488,8 +488,8 @@ namespace UIForia.Rendering {
                 Vector2 size = element.layoutResult.actualSize + new Vector2(style.ShadowSizeX, style.ShadowSizeY) + new Vector2(style.ShadowIntensity, style.ShadowIntensity);
                 position -= new Vector2(style.ShadowSizeX, style.ShadowSizeY) * 0.5f;
                 position -= new Vector2(style.ShadowIntensity, style.ShadowIntensity) * 0.5f;
-                float x = 0; // todo -- pivot n stuff MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, viewWidth, viewHeight, style.ShadowOffsetX, element.layoutResult.actualSize.width);
-                float y = 0; // todo -- pivot n stuff MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, viewWidth, viewHeight, style.ShadowOffsetY, element.layoutResult.actualSize.height);
+                float x = MeasurementUtil.ResolveOffsetMeasurement(element, viewWidth, viewHeight, style.ShadowOffsetX, element.layoutResult.actualSize.width);
+                float y = MeasurementUtil.ResolveOffsetMeasurement(element, viewWidth, viewHeight, style.ShadowOffsetY, element.layoutResult.actualSize.height);
                 position.x += x;
                 position.y += y;
                 shadowGeometry.mainTexture = null;

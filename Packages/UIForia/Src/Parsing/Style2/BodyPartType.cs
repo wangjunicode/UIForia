@@ -20,7 +20,9 @@ namespace UIForia.Style2 {
 
         Style,
 
-        VariableProperty
+        VariableProperty,
+
+        ConstantBranch
 
     }
 

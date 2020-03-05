@@ -48,7 +48,14 @@ namespace UIForia.Util {
         }
 
         public static unsafe int CharCompareOrdinal(string strA, char[] chars, int start, int length) {
+            fixed (char* ptr = chars) {
+                return CharCompareOrdinal(strA, ptr, start, length);
+            }
+        }
+
+        public static unsafe int CharCompareOrdinal(string strA, char* chars, int start, int length) {
             if (strA == null && length == 0) return 0;
+
             if (EqualsRangeUnsafe(strA, chars, start, length)) {
                 return 0;
             }
@@ -64,59 +71,58 @@ namespace UIForia.Util {
             int num1 = Math.Min(strA.Length, length);
             int num2 = -1;
             fixed (char* chPtr1 = strA) {
-                fixed (char* charArrayPtr = chars) {
-                    char* chPtr2 = charArrayPtr + start;
-                    char* chPtr3 = chPtr1;
-                    char* chPtr4 = chPtr2;
-                    for (; num1 >= 10; num1 -= 10) {
-                        if (*(int*) chPtr3 != *(int*) chPtr4) {
-                            num2 = 0;
-                            break;
-                        }
-
-                        if (*(int*) (chPtr3 + 2) != *(int*) (chPtr4 + 2)) {
-                            num2 = 2;
-                            break;
-                        }
-
-                        if (*(int*) (chPtr3 + 4) != *(int*) (chPtr4 + 4)) {
-                            num2 = 4;
-                            break;
-                        }
-
-                        if (*(int*) (chPtr3 + 6) != *(int*) (chPtr4 + 6)) {
-                            num2 = 6;
-                            break;
-                        }
-
-                        if (*(int*) (chPtr3 + 8) != *(int*) (chPtr4 + 8)) {
-                            num2 = 8;
-                            break;
-                        }
-
-                        chPtr3 += 10;
-                        chPtr4 += 10;
+                char* chPtr2 = chars + start;
+                char* chPtr3 = chPtr1;
+                char* chPtr4 = chPtr2;
+                for (; num1 >= 10; num1 -= 10) {
+                    if (*(int*) chPtr3 != *(int*) chPtr4) {
+                        num2 = 0;
+                        break;
                     }
 
-                    if (num2 != -1) {
-                        char* chPtr5 = chPtr3 + num2;
-                        char* chPtr6 = chPtr4 + num2;
-                        int num3;
-                        return (num3 = (int) *chPtr5 - (int) *chPtr6) != 0 ? num3 : chPtr5[1] - chPtr6[1];
+                    if (*(int*) (chPtr3 + 2) != *(int*) (chPtr4 + 2)) {
+                        num2 = 2;
+                        break;
                     }
 
-                    for (; num1 > 0 && *(int*) chPtr3 == *(int*) chPtr4; num1 -= 2) {
-                        chPtr3 += 2;
-                        chPtr4 += 2;
+                    if (*(int*) (chPtr3 + 4) != *(int*) (chPtr4 + 4)) {
+                        num2 = 4;
+                        break;
                     }
 
-                    if (num1 <= 0) {
-                        return strA.Length - length;
+                    if (*(int*) (chPtr3 + 6) != *(int*) (chPtr4 + 6)) {
+                        num2 = 6;
+                        break;
                     }
 
-                    int num4;
-                    return (num4 = (int) *chPtr3 - (int) *chPtr4) != 0 ? num4 : chPtr3[1] - chPtr4[1];
+                    if (*(int*) (chPtr3 + 8) != *(int*) (chPtr4 + 8)) {
+                        num2 = 8;
+                        break;
+                    }
+
+                    chPtr3 += 10;
+                    chPtr4 += 10;
                 }
+
+                if (num2 != -1) {
+                    char* chPtr5 = chPtr3 + num2;
+                    char* chPtr6 = chPtr4 + num2;
+                    int num3;
+                    return (num3 = (int) *chPtr5 - (int) *chPtr6) != 0 ? num3 : chPtr5[1] - chPtr6[1];
+                }
+
+                for (; num1 > 0 && *(int*) chPtr3 == *(int*) chPtr4; num1 -= 2) {
+                    chPtr3 += 2;
+                    chPtr4 += 2;
+                }
+
+                if (num1 <= 0) {
+                    return strA.Length - length;
+                }
+
+                int num4;
+                return (num4 = (int) *chPtr3 - (int) *chPtr4) != 0 ? num4 : chPtr3[1] - chPtr4[1];
+
             }
         }
 
@@ -160,7 +166,7 @@ namespace UIForia.Util {
         //     return retn;
         // }
 
-        public static bool EqualsRangeUnsafe(string str, CharSpan span) {
+        public static unsafe bool EqualsRangeUnsafe(string str, CharSpan span) {
             return EqualsRangeUnsafe(str, span.data, span.rangeStart, span.rangeEnd - span.rangeStart);
         }
 
@@ -198,38 +204,49 @@ namespace UIForia.Util {
         }
 
         public static unsafe bool EqualsRangeUnsafe(string str, char[] b, int bStart, int length) {
+            fixed (char* charptr = b) {
+                return EqualsRangeUnsafe(str, charptr, bStart, length);
+            }
+        }
+
+        public static unsafe bool EqualsRangeUnsafe(string str, char* b, int bStart, int length) {
+            
+            if (str == null) {
+                return length != 0;
+            }
+            
             if (str.Length != length) {
                 return false;
             }
 
             fixed (char* strPtr = str) {
-                fixed (char* bPtr = b) {
-                    char* chPtr2 = bPtr + bStart;
+                char* bPtr = b;
+                char* chPtr2 = bPtr + bStart;
 
-                    char* chPtr3 = strPtr;
-                    char* chPtr4 = chPtr2;
+                char* chPtr3 = strPtr;
+                char* chPtr4 = chPtr2;
 
-                    // todo -- assumes 64 bit
-                    for (; length >= 12; length -= 12) {
-                        if (*(long*) chPtr3 != *(long*) chPtr4 || *(long*) (chPtr3 + 4) != *(long*) (chPtr4 + 4) || *(long*) (chPtr3 + 8) != *(long*) (chPtr4 + 8)) {
-                            return false;
-                        }
-
-                        chPtr3 += 12;
-                        chPtr4 += 12;
+                // todo -- assumes 64 bit
+                for (; length >= 12; length -= 12) {
+                    if (*(long*) chPtr3 != *(long*) chPtr4 || *(long*) (chPtr3 + 4) != *(long*) (chPtr4 + 4) || *(long*) (chPtr3 + 8) != *(long*) (chPtr4 + 8)) {
+                        return false;
                     }
 
-                    for (; length > 0 && *(int*) chPtr3 == *(int*) chPtr4; length -= 2) {
-                        chPtr3 += 2;
-                        chPtr4 += 2;
-                    }
-
-                    if (length == 1) {
-                        return *chPtr3 == *chPtr4;
-                    }
-
-                    return length <= 0;
+                    chPtr3 += 12;
+                    chPtr4 += 12;
                 }
+
+                for (; length > 0 && *(int*) chPtr3 == *(int*) chPtr4; length -= 2) {
+                    chPtr3 += 2;
+                    chPtr4 += 2;
+                }
+
+                if (length == 1) {
+                    return *chPtr3 == *chPtr4;
+                }
+
+                return length <= 0;
+
             }
         }
 

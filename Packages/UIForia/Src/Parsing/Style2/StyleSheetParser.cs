@@ -10,6 +10,7 @@ namespace UIForia.Style2 {
         private readonly Module module;
         private readonly StyleSheet2 sheet;
 
+        [ThreadStatic] private static StructList<char> s_CharBuffer;
         [ThreadStatic] private static StructList<ParsedStyle> s_StyleList;
         [ThreadStatic] private static ChunkedStructList<StyleBodyPart> s_Parts;
 
@@ -26,7 +27,7 @@ namespace UIForia.Style2 {
 
             s_Parts.Clear();
             s_StyleList.Clear();
-            
+
             StyleSheet2 sheet = new StyleSheet2(module, "STRING", rawContents);
 
             StyleSheetParser parser = new StyleSheetParser(module, sheet);
@@ -35,7 +36,7 @@ namespace UIForia.Style2 {
 
             sheet.SetParts(s_Parts.ToArray());
             sheet.SetStyles(s_StyleList.ToArray());
-            
+
             return sheet;
         }
 
@@ -86,14 +87,6 @@ namespace UIForia.Style2 {
             return id >= 0;
         }
 
-        private struct ConstantBranch {
-
-            public int rangeEnd;
-            public int rangeStart;
-            public int conditionId;
-
-        }
-
         private unsafe void ParseConstant(ref CharStream stream) {
             if (!stream.TryParseIdentifier(out CharSpan identifier)) {
                 throw new ParseException($"Expected to find an identifier after the 'const' keyword on line {stream.GetLineNumber()}");
@@ -103,11 +96,7 @@ namespace UIForia.Style2 {
                 name = identifier
             };
 
-            int branchCount = 0;
-
-            const int k_MaxBranchCount = 32;
-            // expect we do this in parallel, so to not introduce locking on StructList pools, I instead stack alloc some placeholders
-            ConstantBranch* p = stackalloc ConstantBranch[k_MaxBranchCount];
+            int constantPartRangeStart = s_Parts.size;
 
             if (stream.TryParseCharacter('=')) {
                 if (!stream.TryGetCharSpanTo(';', '\n', out constant.defaultValue)) {
@@ -143,11 +132,7 @@ namespace UIForia.Style2 {
                             throw new ParseException($"Unable to find a style condition with the name '{conditionStream}'. Please be sure you registered it in your template settings");
                         }
 
-                        if (branchCount + 1 >= k_MaxBranchCount) {
-                            throw new ParseException($"Too many conditions used in constant with the name '{conditionStream}'. Please use a maximum of {k_MaxBranchCount} conditions");
-                        }
-
-                        p[branchCount++] = new ConstantBranch() {rangeStart = valueSpan.rangeStart, rangeEnd = valueSpan.rangeEnd, conditionId = conditionId};
+                        s_Parts.Add(new StyleBodyPart(BodyPartType.ConstantBranch, conditionId, valueSpan.ToRefless()));
                     }
                     else if (bodyStream.TryMatchRangeIgnoreCase("default")) {
                         if (!bodyStream.TryParseCharacter('=')) {
@@ -168,14 +153,9 @@ namespace UIForia.Style2 {
                 }
             }
 
-            if (branchCount > 0) {
-                constant.conditions = new PendingConstantBranch[branchCount];
-                for (int i = 0; i < branchCount; i++) {
-                    constant.conditions[i] = new PendingConstantBranch(p[i].conditionId, new CharSpan(stream.Data, p[i].rangeStart, p[i].rangeEnd));
-                }
-            }
-
-            sheet.AddConstant(constant);
+            constant.partRange = new Range16(constantPartRangeStart, s_Parts.size);
+            constant.sourceId = sheet.id;
+            sheet.AddLocalConstant(constant);
         }
 
         private static ParseException ExpectedEqualAfterDefault(PendingConstant constant, CharStream bodyStream) {
@@ -240,26 +220,44 @@ namespace UIForia.Style2 {
             }
         }
 
-        private void ParseStyleBody(CharSpan name, ref CharStream stream) {
+        private unsafe void ParseStyleBody(CharSpan name, ref CharStream stream) {
             stream.ConsumeWhiteSpace();
 
             while (stream.HasMoreTokens) {
                 stream.ConsumeWhiteSpace();
-                
+
                 if (!stream.HasMoreTokens) {
                     break;
                 }
-                
-                if (stream.TryParseCharacter('[')) {
+
+                if (stream.TryGetSubStream('[', ']', out CharStream braceStream)) {
+                    
+                    // could be an [enter] or [exit] or [state]
+                    // remove [attr] implementation in favor of selectors / when selectors
+                    
+                    if (braceStream.TryMatchRangeIgnoreCase("hover")) { }
+
+                    if (braceStream.TryMatchRangeIgnoreCase("focus")) { }
+
+                    if (braceStream.TryMatchRangeIgnoreCase("active")) { }
+
+                    if (braceStream.TryMatchRangeIgnoreCase("normal")) { }
+
+                    if (braceStream.TryMatchRangeIgnoreCase("enter")) { }
+
+                    if (braceStream.TryMatchRangeIgnoreCase("exit")) { }
+
                     throw new NotImplementedException();
                 }
 
                 if (!stream.TryParseIdentifier(out CharSpan span)) {
                     throw new NotImplementedException();
                 }
-                
+
                 string idName = span.ToLowerString();
 
+                // run probably requires an [enter] or [exit] now
+                // same with play, pause, whatever
                 if (idName == "run") {
                     throw new NotImplementedException();
                 }
@@ -279,7 +277,13 @@ namespace UIForia.Style2 {
                     }
 
                     if (propertyStream.Contains('@') || propertyStream.Contains('$')) {
+
+                        ParseConstantIdentifiers(propertyStream);
+
+                        ParseVariableIdentifiers(propertyStream);
+
                         s_Parts.Add(new StyleBodyPart(BodyPartType.VariableProperty, entry.propertyId, new ReflessCharSpan(propertyStream)));
+
                         continue;
                     }
 
@@ -295,6 +299,73 @@ namespace UIForia.Style2 {
                 }
 
                 throw new NotImplementedException();
+            }
+        }
+
+        private static void ParseVariableIdentifiers(CharStream propertyStream) {
+
+            CharStream duplicate = new CharStream(propertyStream);
+
+            while (duplicate.HasMoreTokens) {
+                int idx = duplicate.NextIndexOf('$');
+
+                if (idx == -1) break;
+
+                duplicate.AdvanceTo(idx + 1);
+
+                if (!duplicate.TryParseIdentifier(out CharSpan identifier)) {
+                    throw new ParseException($"Expected to find a valid identifier after the '$' on line {duplicate.GetLineNumber()}");
+                }
+
+                // todo -- not sure what to do with variables yet
+                throw new NotImplementedException("Style variables are not yet implemented");
+
+            }
+        }
+
+        private void ParseConstantIdentifiers(CharStream propertyStream) {
+
+            CharStream duplicate = new CharStream(propertyStream);
+
+            while (duplicate.HasMoreTokens) {
+
+                int idx = duplicate.NextIndexOf('@');
+
+                if (idx == -1) break;
+
+                duplicate.AdvanceTo(idx + 1);
+
+                ParseConstantIdentifier(ref duplicate, out CharSpan identifier);
+
+                sheet.EnsureConstant(identifier);
+
+                duplicate.ConsumeWhiteSpace();
+
+            }
+
+        }
+
+        private static unsafe void ParseConstantIdentifier(ref CharStream stream, out CharSpan identifier) {
+
+            if (!stream.TryParseIdentifier(out identifier)) {
+                throw new ParseException($"Expected to find a valid identifier after the @ sign on line {stream.GetLineNumber()}");
+            }
+
+            if (stream.TryParseCharacter('.')) {
+                if (!stream.TryParseIdentifier(out CharSpan dotIdentifier)) {
+                    throw new ParseException($"Expected to find a valid identifier after constant reference on line {stream.GetLineNumber()}");
+                }
+
+                identifier = new CharSpan(identifier.data, identifier.rangeStart, dotIdentifier.rangeEnd);
+            }
+
+        }
+
+        private static unsafe void AppendToCharBuffer(in char* data, uint start, uint length) {
+            s_CharBuffer.EnsureAdditionalCapacity((int) length);
+            uint end = start + length;
+            for (uint j = start; j < end; j++) {
+                s_CharBuffer.array[s_CharBuffer.size++] = data[j];
             }
         }
 

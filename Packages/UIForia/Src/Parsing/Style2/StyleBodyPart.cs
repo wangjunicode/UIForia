@@ -13,6 +13,7 @@ namespace UIForia.Style2 {
         [FieldOffset(4)] public readonly int start;
         [FieldOffset(8)] public readonly int end;
         [FieldOffset(12)] public readonly PropertyId propertyId;
+        [FieldOffset(12)] public readonly int intData;
 
         public StyleBodyPart(BodyPartType type, in StyleProperty2 property) : this() {
             this.type = type;
@@ -34,6 +35,12 @@ namespace UIForia.Style2 {
             this.type = type;
             this.stringData = stringData;
             this.propertyId = propertyId;
+        }
+        
+        public StyleBodyPart(BodyPartType type, int intData, in ReflessCharSpan stringData) : this() {
+            this.type = type;
+            this.stringData = stringData;
+            this.intData = intData;
         }
 
     }

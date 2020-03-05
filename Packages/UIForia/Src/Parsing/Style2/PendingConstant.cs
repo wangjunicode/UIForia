@@ -6,10 +6,13 @@ namespace UIForia.Style2 {
 
         public int sourceId;
         public bool isExported;
+        public bool isLocal;
         public CharSpan name;
-        public CharSpan alias;
         public CharSpan defaultValue;
-        public PendingConstantBranch[] conditions;
+        public CharSpan resolvedValue;
+        public Range16 partRange;
+
+        public bool HasDefinition => defaultValue.HasValue;
 
     }
 

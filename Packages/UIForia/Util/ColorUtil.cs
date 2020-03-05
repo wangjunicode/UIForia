@@ -27,11 +27,11 @@ namespace UIForia.Util {
                 (byte) ((value >> 24) & 0xff)
             );
         }
-        
+
         public static int ColorToInt(Color32 color) {
             return (color.r << 24) + (color.g << 16) + (color.b << 8) + (color.a << 0);
         }
-        
+
         private static readonly ColorLookup[] s_ColorList = new[] {
 
             new ColorLookup("clear", new Color32(0, 0, 0, 0)),
@@ -189,11 +189,11 @@ namespace UIForia.Util {
         private static bool isSorted;
 
         public static bool TryParseColorName(char[] data, int start, int end, out Color32 color) {
-            if(!isSorted) {
+            if (!isSorted) {
                 isSorted = true;
                 Array.Sort(s_ColorList, (a, b) => string.Compare(a.name, b.name, StringComparison.Ordinal));
-            }   
-            
+            }
+
             int num1 = 0;
             int num2 = s_ColorList.Length - 1;
 
@@ -221,32 +221,35 @@ namespace UIForia.Util {
         }
 
         public static bool TryParseColorName(CharSpan charSpan, out Color32 color, out int nameLength) {
-            if(!isSorted) {
+            if (!isSorted) {
                 isSorted = true;
                 Array.Sort(s_ColorList, (a, b) => string.Compare(a.name, b.name, StringComparison.Ordinal));
-            }   
-            
+            }
+
             int num1 = 0;
             int num2 = s_ColorList.Length - 1;
 
-            while (num1 <= num2) {
-                int index1 = num1 + (num2 - num1 >> 1);
+            unsafe {
 
-                ref ColorLookup lookup = ref s_ColorList[index1];
-                 // int num3 = string.CompareOrdinal(lookup.name, target); //StringUtil.CharCompareOrdinal(lookup.name, target)));
-                int num3 = StringUtil.CharCompareOrdinal(lookup.name, charSpan.data, charSpan.rangeStart, charSpan.rangeEnd - charSpan.rangeStart);
+                while (num1 <= num2) {
+                    int index1 = num1 + (num2 - num1 >> 1);
 
-                if (num3 == 0) {
-                    color = lookup.color;
-                    nameLength = lookup.name.Length;
-                    return true;
-                }
+                    ref ColorLookup lookup = ref s_ColorList[index1];
+                    // int num3 = string.CompareOrdinal(lookup.name, target); //StringUtil.CharCompareOrdinal(lookup.name, target)));
+                    int num3 = StringUtil.CharCompareOrdinal(lookup.name, charSpan.data, charSpan.rangeStart, charSpan.rangeEnd - charSpan.rangeStart);
 
-                if (num3 < 0) {
-                    num1 = index1 + 1;
-                }
-                else {
-                    num2 = index1 - 1;
+                    if (num3 == 0) {
+                        color = lookup.color;
+                        nameLength = lookup.name.Length;
+                        return true;
+                    }
+
+                    if (num3 < 0) {
+                        num1 = index1 + 1;
+                    }
+                    else {
+                        num2 = index1 - 1;
+                    }
                 }
             }
 
@@ -254,14 +257,14 @@ namespace UIForia.Util {
             color = default;
             return false;
         }
-        
+
         public static bool TryParseColorName(string name, out Color32 color) {
-            
-            if(!isSorted) {
+
+            if (!isSorted) {
                 isSorted = true;
                 Array.Sort(s_ColorList, (a, b) => string.Compare(a.name, b.name, StringComparison.Ordinal));
-            }   
-            
+            }
+
             int num1 = 0;
             int num2 = s_ColorList.Length - 1;
 
@@ -286,7 +289,7 @@ namespace UIForia.Util {
 
             color = default;
             return false;
-            
+
         }
 
     }

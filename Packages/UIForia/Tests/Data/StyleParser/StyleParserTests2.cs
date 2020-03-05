@@ -98,15 +98,15 @@ namespace Tests.StyleParser {
 
             module.UpdateConditions(new DisplayConfiguration(300f, 300f, 1f));
 
-            Assert.AreEqual("red", sheet.GetConstant("x", module.GetDisplayConditions()));
+            Assert.AreEqual("red", sheet.GetConstant("x"));
 
             module.UpdateConditions(new DisplayConfiguration(500f, 300f, 1f));
 
-            Assert.AreEqual("green", sheet.GetConstant("x", module.GetDisplayConditions()));
+            Assert.AreEqual("green", sheet.GetConstant("x"));
 
             module.UpdateConditions(new DisplayConfiguration(0, 0, 1f));
 
-            Assert.AreEqual("orange", sheet.GetConstant("x", module.GetDisplayConditions()));
+            Assert.AreEqual("orange", sheet.GetConstant("x"));
         }
 
     }

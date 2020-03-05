@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace UIForia.Util {
 
-    public struct CharStream {
+    public unsafe struct CharStream {
 
-        private char[] data;
+        private char* data;
         private uint dataStart;
         private uint dataEnd;
         private uint ptr;
@@ -16,21 +16,32 @@ namespace UIForia.Util {
         [ThreadStatic] private static List<EnumNameEntry> s_EnumNameEntryList;
 
         public CharStream(char[] data, uint dataStart, uint dataEnd) {
-            this.data = data;
+            fixed (char* dataptr = data) {
+                this.data = dataptr;
+            }
+
             this.dataStart = dataStart;
             this.dataEnd = dataEnd;
             this.ptr = dataStart;
+
         }
 
         public CharStream(char[] data) {
-            this.data = data;
+
+            fixed (char* dataptr = data) {
+                this.data = dataptr;
+            }
+
             this.dataStart = 0;
             this.dataEnd = (uint) data.Length;
             this.ptr = dataStart;
         }
 
         public CharStream(char[] source, ReflessCharSpan span) {
-            this.data = source;
+            fixed (char* dataptr = source) {
+                this.data = dataptr;
+            }
+
             this.dataStart = (uint) span.rangeStart;
             this.dataEnd = (uint) span.rangeEnd;
             this.ptr = dataStart;
@@ -43,11 +54,28 @@ namespace UIForia.Util {
             this.ptr = dataStart;
         }
 
+        private CharStream(char* source, uint start, uint end) {
+            this.data = source;
+            this.dataStart = start;
+            this.dataEnd = end;
+            this.ptr = dataStart;
+
+        }
+
+        // copy from current pointer position
+        public CharStream(CharStream propertyStream) {
+            this.data = propertyStream.data;
+            this.dataStart = propertyStream.ptr;
+            this.dataEnd = propertyStream.dataEnd;
+            this.ptr = propertyStream.ptr;
+        }
+
         public bool HasMoreTokens => ptr < dataEnd;
         public uint Size => dataEnd - dataStart;
-        public char[] Data => data;
+        public char* Data => data;
         public uint Ptr => ptr;
         public uint End => dataEnd;
+        public int IntPtr => (int) ptr;
 
         public char this[uint idx] {
             get => data[idx];
@@ -55,10 +83,33 @@ namespace UIForia.Util {
 
         public void Advance(uint advance = 1) {
             ptr += advance;
+            if (ptr >= dataEnd) {
+                ptr = dataEnd;
+            }
+        }
+
+        public void AdvanceTo(uint target) {
+            if (target < ptr) return;
+            ptr = target;
+            if (ptr >= dataEnd) {
+                ptr = dataEnd;
+            }
+        }
+
+        public void AdvanceTo(int target) {
+            if (target < ptr) return;
+            ptr = (uint) target;
+            if (ptr >= dataEnd) {
+                ptr = dataEnd;
+            }
         }
 
         public void AdvanceSkipWhitespace(uint advance = 1) {
             ptr += advance;
+            if (ptr >= dataEnd) {
+                ptr = dataEnd;
+            }
+
             while (ptr < dataEnd && char.IsWhiteSpace(data[ptr])) {
                 ptr++;
             }
@@ -69,12 +120,10 @@ namespace UIForia.Util {
                 return false;
             }
 
-            unsafe {
-                fixed (char* s = str) {
-                    for (int i = 0; i < str.Length; i++) {
-                        if (data[ptr + i] != s[i]) {
-                            return false;
-                        }
+            fixed (char* s = str) {
+                for (int i = 0; i < str.Length; i++) {
+                    if (data[ptr + i] != s[i]) {
+                        return false;
                     }
                 }
             }
@@ -659,6 +708,7 @@ namespace UIForia.Util {
                                 case 'f':
                                     buffer[i] = c;
                                     break;
+
                                 default: {
                                     valid = false;
                                     break;
@@ -691,22 +741,27 @@ namespace UIForia.Util {
                                 case 'a':
                                     digit = 10;
                                     break;
+
                                 case 'B':
                                 case 'b':
                                     digit = 11;
                                     break;
+
                                 case 'C':
                                 case 'c':
                                     digit = 12;
                                     break;
+
                                 case 'D':
                                 case 'd':
                                     digit = 13;
                                     break;
+
                                 case 'E':
                                 case 'e':
                                     digit = 14;
                                     break;
+
                                 case 'F':
                                 case 'f':
                                     digit = 15;
@@ -737,32 +792,58 @@ namespace UIForia.Util {
             return new string(data, (int) ptr, (int) (dataEnd - ptr));
         }
 
-        public bool TryMatchRangeIgnoreCase(string str) {
+        public bool TryMatchRangeIgnoreCase(string str, WhitespaceHandling whitespaceHandling = WhitespaceHandling.ConsumeAll) {
+            uint start = ptr;
+            if ((whitespaceHandling & WhitespaceHandling.ConsumeBefore) != 0) {
+                ConsumeWhiteSpace();
+            }
+
             if (str.Length == 1 && ptr <= dataEnd && str[0] == data[ptr]) {
                 ptr++;
+                if ((whitespaceHandling & WhitespaceHandling.ConsumeAfter) != 0) {
+                    ConsumeWhiteSpace();
+                }
+
                 return true;
             }
 
             if (ptr + str.Length >= dataEnd) {
+                ptr = start;
                 return false;
             }
 
-            unsafe {
-                fixed (char* s = str) {
-                    for (int i = 0; i < str.Length; i++) {
-                        char strChar = s[i];
-                        char dataChar = data[ptr + i];
+            fixed (char* s = str) {
+                for (int i = 0; i < str.Length; i++) {
+                    char strChar = s[i];
+                    char dataChar = data[ptr + i];
 
-                        char c1 = strChar >= 'a' && strChar <= 'z' ? char.ToLower(strChar) : strChar;
-                        char c2 = dataChar >= 'a' && dataChar <= 'z' ? char.ToLower(dataChar) : dataChar;
+                    char c1 = strChar >= 'a' && strChar <= 'z' ? char.ToLower(strChar) : strChar;
+                    char c2 = dataChar >= 'a' && dataChar <= 'z' ? char.ToLower(dataChar) : dataChar;
 
-                        if (c1 != c2) return false;
+                    if (c1 != c2) {
+                        ptr = start;
+                        return false;
                     }
                 }
-
-                Advance((uint) str.Length);
-                return true;
             }
+
+            Advance((uint) str.Length);
+
+            if ((whitespaceHandling & WhitespaceHandling.ConsumeAfter) != 0) {
+                ConsumeWhiteSpace();
+            }
+
+            return true;
+
+        }
+
+        public void CopyRangeTo(char* charBuffer, object bufferStart, uint streamPtr, int idx) {
+            throw new NotImplementedException();
+        }
+
+        public void Rewind(uint i) {
+            ptr -= i;
+            if (ptr < dataStart) ptr = dataStart;
         }
 
     }
@@ -820,18 +901,27 @@ namespace UIForia.Util {
 
     }
 
-    public struct CharSpan : IEquatable<CharSpan> {
+    public unsafe struct CharSpan : IEquatable<CharSpan> {
 
         public readonly int rangeStart;
         public readonly int rangeEnd;
 
-        public char[] data { get; }
+        public char* data { get; }
 
         public bool HasValue => Length > 0;
 
         public int Length => data != null ? rangeEnd - rangeStart : 0;
 
         public CharSpan(char[] data, int rangeStart, int rangeEnd) {
+            fixed (char* charptr = data) {
+                this.data = charptr;
+            }
+
+            this.rangeStart = rangeStart;
+            this.rangeEnd = rangeEnd;
+        }
+
+        public CharSpan(char* data, int rangeStart, int rangeEnd) {
             this.data = data;
             this.rangeStart = rangeStart;
             this.rangeEnd = rangeEnd;
@@ -841,6 +931,14 @@ namespace UIForia.Util {
             this.data = stream.Data;
             this.rangeStart = (int) stream.Ptr;
             this.rangeEnd = (int) stream.End;
+        }
+
+        public CharSpan(string data) {
+            fixed (char* ptr = data) {
+                this.data = ptr;
+                this.rangeStart = 0;
+                this.rangeEnd = data.Length;
+            }
         }
 
         public static bool operator ==(CharSpan a, string b) {
@@ -860,21 +958,22 @@ namespace UIForia.Util {
         }
 
         public static bool operator ==(CharSpan a, CharSpan b) {
-            if (a.data == b.data) {
-                return a.rangeStart == b.rangeStart && a.rangeEnd == b.rangeEnd;
-            }
-            else {
-                int aLen = a.rangeEnd - a.rangeStart;
-                int bLen = b.rangeEnd - b.rangeStart;
-                if (aLen != bLen) return false;
-                for (int i = a.rangeStart; i < a.rangeEnd; i++) {
-                    if (a.data[i] != b.data[i]) {
-                        return false;
-                    }
+            // this is a value comparison
+            int aLen = a.rangeEnd - a.rangeStart;
+            int bLen = b.rangeEnd - b.rangeStart;
+            if (aLen != bLen) return false;
+            int ptrA = a.rangeStart;
+            int ptrB = b.rangeStart;
+            for (int i = 0; i < aLen; i++) {
+                if (a.data[i + ptrA] != b.data[i + ptrB]) {
+                    return false;
                 }
 
-                return true;
+                ptrA++;
+                ptrB++;
             }
+
+            return true;
         }
 
         public static bool operator !=(CharSpan a, CharSpan b) {
@@ -890,12 +989,44 @@ namespace UIForia.Util {
         }
 
         public override int GetHashCode() {
-            unchecked {
-                int hashCode = rangeStart;
-                hashCode = (hashCode * 397) ^ rangeEnd;
-                hashCode = (hashCode * 397) ^ (data != null ? data.GetHashCode() : 0);
-                return hashCode;
+
+#if WIN32
+            int hash1 = (5381<<16) + 5381;
+#else
+            int hash1 = 5381;
+#endif
+            int hash2 = hash1;
+
+#if WIN32
+                    // 32 bit machines.
+                    int* pint = (int *)src;
+                    int len = this.Length;
+                    while (len > 2)
+                    {
+                        hash1 = ((hash1 << 5) + hash1 + (hash1 >> 27)) ^ pint[0];
+                        hash2 = ((hash2 << 5) + hash2 + (hash2 >> 27)) ^ pint[1];
+                        pint += 2;
+                        len -= 4;
+                    }
+ 
+                    if (len > 0)
+                    {
+                        hash1 = ((hash1 << 5) + hash1 + (hash1 >> 27)) ^ pint[0];
+                    }
+#else
+            int c;
+            char* s = &data[rangeStart];
+            while ((c = s[0]) != 0) {
+                hash1 = ((hash1 << 5) + hash1) ^ c;
+                c = s[1];
+                if (c == 0)
+                    break;
+                hash2 = ((hash2 << 5) + hash2) ^ c;
+                s += 2;
             }
+#endif
+            return hash1 + (hash2 * 1566083941);
+
         }
 
         public override string ToString() {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using UIForia.Rendering;
 using UIForia.Selectors;
 using UIForia.Style;
@@ -145,8 +146,13 @@ namespace UIForia.Style2 {
         // cursors
 
         internal StyleBodyPart[] parts;
+        public readonly ushort id;
+
+        private static int idGenerator;
+        [ThreadStatic] private static StructList<char> s_CharBuffer;
 
         internal StyleSheet2(Module module, string filePath, char[] source) {
+            this.id = (ushort) Interlocked.Add(ref idGenerator, 1);
             this.module = module;
             this.filePath = filePath;
             this.source = source;
@@ -166,7 +172,6 @@ namespace UIForia.Style2 {
         }
 
         private unsafe void BuildExternalStyle(ref InternalStyle style) { }
-
 
         // todo -- this needs to be the last of the build steps
         private unsafe void BuildStyle(ref ParsedStyle parsedStyle) {
@@ -220,39 +225,76 @@ namespace UIForia.Style2 {
                     }
 
                     case BodyPartType.VariableProperty: {
-                        int propertyIdIndex = part.property.propertyId.index;
+                        int propertyIdIndex = part.propertyId.index;
                         ref IntBoolMap map = ref buildData.maps[buildData.stateIndex];
                         StyleProperty2* state = buildData.states[buildData.stateIndex];
 
                         if (map.TrySetIndex(propertyIdIndex)) {
                             // need to evaluate the property
-                            StyleProperty2 property = default;
-                            
-                            CharStream stream = new CharStream(source, part.stringData);
-                            
-                            CharStream mutable = new CharStream(s_CharBuffer, stream.Ptr, stream.End);
-                            
+
+                            // while has match for $ or @ 
+                            // get identifier
+                            // resolve its value
+                            // replace it 
+
                             // find @identifier
                             // find @identifier.identifier
                             // find $identifier
-                            
+
                             // replace with constant value if @
 
+                            s_CharBuffer = s_CharBuffer ?? new StructList<char>(128);
+                            s_CharBuffer.size = 0;
+
+                            StyleProperty2 property = default;
+
+                            CharStream stream = new CharStream(source, part.stringData);
+
                             int idx = stream.NextIndexOf('@');
-                            
-                            if (idx == -1) {
-                                
+
+                            if (idx != -1) {
+                                // stream.CopyTo(s_CharBuffer, 0, stream.Ptr, idx);
+
+                                s_CharBuffer.AddRange(source, stream.IntPtr, idx - stream.IntPtr);
+
+                                stream.AdvanceTo(idx + 1);
+
+                                if (!stream.TryParseIdentifier(out CharSpan identifier)) { }
+
+                                if (stream.TryParseCharacter('.')) {
+
+                                    if (!stream.TryParseIdentifier(out CharSpan dotIdentifier)) {
+                                        throw new NotImplementedException();
+                                    }
+
+                                    // todo -- figure out how to handle referenced constants
+                                    // probably want to localize them at parse time and resolve in the build step. match against whole name
+
+                                    throw new NotImplementedException();
+
+                                }
+                                else {
+
+                                    if (TryResolveLocalConstant(identifier, out CharSpan span)) {
+                                        s_CharBuffer.EnsureAdditionalCapacity(span.Length);
+                                        for (int j = span.rangeStart; j < span.rangeEnd; j++) {
+                                            s_CharBuffer.array[s_CharBuffer.size++] = span.data[j];
+                                        }
+                                    }
+
+                                }
+
+                                CharStream parseStream = new CharStream(s_CharBuffer.array, 0, (uint) s_CharBuffer.size);
+                                if (!PropertyParsers.s_parseEntries[propertyIdIndex].parser.TryParse(parseStream, part.propertyId, out property)) { }
+
                             }
 
-                            if (stream.TryGetSubStreamFromRange(idx, '.', out CharStream f)) {
-                                
-                            }
-                            
                             state[map.Occupancy - 1] = property;
                         }
 
                         break;
                     }
+
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -294,7 +336,59 @@ namespace UIForia.Style2 {
             styles.Add(style);
         }
 
+        private void BuildLocalConstants() {
+            List<bool> moduleConditions = module.GetDisplayConditions();
+
+            for (int i = 0; i < constants.size; i++) {
+
+                ref PendingConstant constant = ref constants.array[i];
+
+                constant.resolvedValue = default;
+
+                for (int j = constant.partRange.start; j < constant.partRange.end; j++) {
+                    ref StyleBodyPart part = ref parts[j];
+                    if (moduleConditions[part.intData]) {
+                        constant.resolvedValue = new CharSpan(source, part.stringData.rangeStart, part.stringData.rangeEnd);
+                        break;
+                    }
+                }
+
+                if (constant.resolvedValue != null) {
+                    constant.resolvedValue = constant.defaultValue;
+                }
+
+            }
+        }
+
+        private bool TryResolveLocalConstant(CharSpan identifier, out CharSpan charSpan) {
+
+            if (identifier.Length == 0) {
+                charSpan = default;
+                return false;
+            }
+
+            for (int i = 0; i < constants.size; i++) {
+
+                ref PendingConstant constant = ref constants.array[i];
+
+                if (constant.name != identifier) {
+                    continue;
+                }
+
+                charSpan = constant.resolvedValue;
+                return true;
+
+            }
+
+            charSpan = default;
+            return false;
+
+        }
+
         public unsafe void Build() {
+
+            BuildLocalConstants();
+
             if (rawStyles != null) {
                 // todo -- can probably be an array
                 if (styles == null) {
@@ -307,53 +401,35 @@ namespace UIForia.Style2 {
             }
         }
 
-        public string GetConstant(string s, IList<bool> results = null) {
-            if (results == null) {
-                for (int i = 0; i < constants.size; i++) {
-                    PendingConstant constant = constants.array[i];
-                    if (constant.name == s) {
-                        if (constant.conditions == null) {
-                            return constant.defaultValue.ToString();
-                        }
-                    }
-                }
+        public string GetConstant(string s) {
 
-                return null;
-            }
-
-            for (int i = 0; i < constants.size; i++) {
-                PendingConstant constant = constants.array[i];
-                if (constant.name == s) {
-                    if (constant.conditions == null) {
-                        return constant.defaultValue.ToString();
-                    }
-                    else {
-                        for (int j = 0; j < constant.conditions.Length; j++) {
-                            if (results[constant.conditions[j].conditionId]) {
-                                return constant.conditions[j].value.ToString();
-                            }
-                        }
-
-                        return constant.defaultValue.ToString();
-                    }
-                }
+            CharSpan span = new CharSpan(s);
+            if (TryResolveLocalConstant(span, out CharSpan value)) {
+                return value.ToString();
             }
 
             return null;
         }
 
-        internal bool AddConstant(in PendingConstant constant) {
+        internal bool AddLocalConstant(in PendingConstant constant) {
             constants = constants ?? new StructList<PendingConstant>();
             for (int i = 0; i < constants.size; i++) {
-                if (constants.array[i].name == constant.name) {
+
+                if (constants.array[i].name != constant.name) {
+                    continue;
+                }
+
+                if (constants.array[i].HasDefinition) {
                     return false;
                 }
+
+                constants.array[i] = constant;
+                return true;
             }
 
             constants.Add(constant);
             return true;
         }
-
 
         internal void SetParts(StyleBodyPart[] partArray) {
             this.parts = partArray;
@@ -378,6 +454,7 @@ namespace UIForia.Style2 {
 
                     case StyleState.Focused:
                         return new Range16(ptr.ranges[StyleStateIndex.Focus]);
+
                     default:
                         return new Range16(
                             new Range16(ptr.ranges[StyleStateIndex.Normal]).start,
@@ -385,6 +462,22 @@ namespace UIForia.Style2 {
                         );
                 }
             }
+        }
+
+        internal void EnsureConstant(CharSpan identifier) {
+            if (constants == null) {
+                constants = new StructList<PendingConstant>();
+            }
+
+            for (int i = 0; i < constants.size; i++) {
+                if (constants.array[i].name == identifier) {
+                    return;
+                }
+            }
+
+            constants.Add(new PendingConstant() {
+                name = identifier
+            });
         }
 
     }

@@ -1,44 +1,12 @@
-using System;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Selectors;
-using UIForia.Systems;
 using UIForia.Util;
 using Unity.Collections;
 
 namespace UIForia.Style {
-
-    // compress a map of 128 bools keyed by 0 - 127 into 4 integers
-    public unsafe struct IntBoolMap128 {
-
-        // ReSharper disable once UnassignedField.Global
-        public fixed uint map[4];
-
-        [PublicAPI]
-        public bool this[int idx] {
-            get {
-                // >> 5 divides by 32
-                // << 5 multiplies by 32
-                // want to figure out which index to use
-                // index map by dividing index by 32 (integer division)
-                // then using that number, multiply by bit position to generate mask
-                int mapIdx = idx >> 5;
-                return (map[mapIdx] & (idx - (mapIdx << 5))) != 0;
-            }
-            set {
-                int mapIdx = idx >> 5;
-                if (value) {
-                    map[mapIdx] |= ((uint)idx - ((uint)mapIdx << 5));
-                }
-                else {
-                    map[mapIdx] &= ~((uint)idx - ((uint)mapIdx << 5));
-                }
-            }
-        }
-
-    }
 
     public class StyleSet2 {
 
@@ -59,7 +27,7 @@ namespace UIForia.Style {
         internal int baseStyleId;
 
         internal NativeArray<StyleUsage> usages2;
-        
+
         public StyleSet2(StyleSystem2 styleSystem, UIElement element) {
             this.styleSystem = styleSystem;
             this.element = element;
@@ -92,9 +60,8 @@ namespace UIForia.Style {
         }
 
         public void Initialize(StyleGroup styleGroup) {
-            
             baseStyleId = styleGroup.id;
-            
+
             int cnt = styleGroup.normal.properties.Length
                       + styleGroup.focus.properties.Length
                       + styleGroup.hover.properties.Length

@@ -205,10 +205,6 @@ namespace UIForia.Compilers {
                 }
             }
             
-            //for (int i = 1; i < arity; i++) {
-            //    builder.Append(",");
-            //}
-
             builder.Append(">");
         }
 

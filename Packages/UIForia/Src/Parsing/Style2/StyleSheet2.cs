@@ -1,20 +1,109 @@
 using System;
-using UIForia.Util;
 using System.Collections.Generic;
-using UIForia.Exceptions;
+using UIForia.Rendering;
 using UIForia.Selectors;
 using UIForia.Style;
+using UIForia.Util;
+using Unity.Collections;
+using UnityEngine;
 
 namespace UIForia.Style2 {
 
+    public struct StylePointer { }
+
     public struct Style {
+
+        private int styleId;
+        private StyleSheet2 styleSheet;
+
+        internal Style(StyleSheet2 sheet, int styleId) {
+            this.styleSheet = sheet;
+            this.styleId = styleId;
+        }
+
+        public int GetPropertyCount(StyleState state = 0) {
+            return styleSheet.GetPropertyRange(styleId, state).length;
+        }
+
+        public bool TryGetProperty(PropertyId propertyId, out StyleProperty2 property, StyleState state = StyleState.Normal) {
+            if (styleSheet == null) {
+                property = default;
+                return false;
+            }
+
+            Range16 range = styleSheet.GetPropertyRange(styleId, state);
+
+            for (int i = range.start; i < range.end; i++) {
+                if (styleSheet.properties.array[i].propertyId.id == propertyId.id) {
+                    property = styleSheet.properties.array[i];
+                    return true;
+                }
+            }
+
+            property = default;
+            return false;
+        }
+
+    }
+
+    internal unsafe struct InternalStyle {
 
         public int id;
         public CharSpan name;
+        public fixed uint ranges[4];
 
-        public Style(CharSpan name, int id) {
+        public InternalStyle(CharSpan name, int id) : this() {
             this.id = id;
             this.name = name;
+        }
+
+    }
+
+    internal class TopSortNode {
+
+        public int mark;
+        public ParsedStyle style;
+        public LightList<TopSortNode> dependencies;
+
+    }
+
+    internal class DependencySorter {
+
+        private LightList<TopSortNode> temp;
+        private StructList<ParsedStyle> sorted;
+
+        public void Sort(IList<ParsedStyle> styles) {
+            LightList<TopSortNode> source = new LightList<TopSortNode>(styles.Count);
+
+            for (int i = 0; i < styles.Count; i++) {
+                // need to resolve dependencies and map to top sort nodes
+                TopSortNode n = new TopSortNode();
+                n.style = styles[i];
+                n.mark = 0;
+                n.dependencies = new LightList<TopSortNode>();
+                source.Add(n);
+            }
+
+            while (source.size != 0) {
+                Visit(source[0]);
+            }
+        }
+
+        internal void Visit(TopSortNode node) {
+            if (node.mark == 1) {
+                // error
+            }
+
+            if (node.mark == 0) {
+                node.mark = 1;
+                // get dependencies
+                for (int i = 0; i < node.dependencies.size; i++) {
+                    Visit(node.dependencies[i]);
+                }
+
+                node.mark = 2;
+                sorted.Add(node.style);
+            }
         }
 
     }
@@ -38,42 +127,184 @@ namespace UIForia.Style2 {
 
         public readonly Module module;
         public readonly string filePath;
+        internal readonly char[] source;
 
-        internal StructList<Style> styles;
+        internal StructList<InternalStyle> styles;
         internal StructList<Mixin> mixins;
         internal StructList<Selector> selectors;
-        internal StructList<StyleBodyPart> parts;
         internal StructList<RunCommand> commands;
         internal StructList<PendingConstant> constants;
 
+        internal ParsedStyle[] rawStyles;
+
         internal StructList<StyleProperty2> properties;
+
         // animations
         // spritesheets
         // sounds
         // cursors
 
-        internal StyleSheet2(Module module, string filePath) {
+        internal StyleBodyPart[] parts;
+
+        internal StyleSheet2(Module module, string filePath, char[] source) {
             this.module = module;
             this.filePath = filePath;
-            this.parts = new StructList<StyleBodyPart>(128);
+            this.source = source;
+            this.properties = new StructList<StyleProperty2>();
         }
 
-        public RuntimeStyleSheet Build(DisplayConfiguration configuration) {
-            // import all references -> need to build if not built already
-            // resolve all constants 
-            // resolve all mixins
-            // resolve all base classes 
-            // resolve all animations
-            // resolve all sounds
-            // resolve all cursors
-            // resolve all selectors
-            // resolve all style groups
+        public bool TryGetStyle(string styleName, out Style style) {
+            for (int i = 0; i < styles.size; i++) {
+                if (styles[i].name == styleName) {
+                    style = new Style(this, styles[i].id);
+                    return true;
+                }
+            }
 
-            return default;
+            style = default;
+            return false;
         }
 
-        public Style GetStyle(string name) {
-            return default;
+        private unsafe void BuildExternalStyle(ref InternalStyle style) { }
+
+
+        // todo -- this needs to be the last of the build steps
+        private unsafe void BuildStyle(ref ParsedStyle parsedStyle) {
+            int NextMultiple = BitUtil.NextMultipleOf32(PropertyParsers.PropertyCount) >> 5; // divide by 32
+
+            StyleProperty2* normal = stackalloc StyleProperty2[PropertyParsers.PropertyCount];
+            StyleProperty2* active = stackalloc StyleProperty2[PropertyParsers.PropertyCount];
+            StyleProperty2* hover = stackalloc StyleProperty2[PropertyParsers.PropertyCount];
+            StyleProperty2* focus = stackalloc StyleProperty2[PropertyParsers.PropertyCount];
+            StyleProperty2** states = stackalloc StyleProperty2*[4];
+            IntBoolMap* maps = stackalloc IntBoolMap[4];
+
+            uint* map0 = stackalloc uint[NextMultiple];
+            uint* map1 = stackalloc uint[NextMultiple];
+            uint* map2 = stackalloc uint[NextMultiple];
+            uint* map3 = stackalloc uint[NextMultiple];
+
+            maps[StyleStateIndex.Normal] = new IntBoolMap(map0, NextMultiple);
+            maps[StyleStateIndex.Active] = new IntBoolMap(map1, NextMultiple);
+            maps[StyleStateIndex.Hover] = new IntBoolMap(map2, NextMultiple);
+            maps[StyleStateIndex.Focus] = new IntBoolMap(map3, NextMultiple);
+
+            states[StyleStateIndex.Normal] = normal;
+            states[StyleStateIndex.Active] = active;
+            states[StyleStateIndex.Hover] = hover;
+            states[StyleStateIndex.Focus] = focus;
+
+            StyleBuildData buildData = new StyleBuildData() {
+                states = states,
+                targetSheet = this,
+                targetStyleName = parsedStyle.name,
+                maps = maps
+            };
+
+            InternalStyle style = new InternalStyle();
+
+            for (int i = parsedStyle.partEnd - 1; i >= parsedStyle.partStart; i--) {
+                ref StyleBodyPart part = ref parts[i];
+
+                switch (part.type) {
+                    case BodyPartType.Property: {
+                        int propertyIdIndex = part.property.propertyId.index;
+                        ref IntBoolMap map = ref buildData.maps[buildData.stateIndex];
+                        StyleProperty2* state = buildData.states[buildData.stateIndex];
+
+                        if (map.TrySetIndex(propertyIdIndex)) {
+                            state[map.Occupancy - 1] = part.property;
+                        }
+
+                        break;
+                    }
+
+                    case BodyPartType.VariableProperty: {
+                        int propertyIdIndex = part.property.propertyId.index;
+                        ref IntBoolMap map = ref buildData.maps[buildData.stateIndex];
+                        StyleProperty2* state = buildData.states[buildData.stateIndex];
+
+                        if (map.TrySetIndex(propertyIdIndex)) {
+                            // need to evaluate the property
+                            StyleProperty2 property = default;
+                            
+                            CharStream stream = new CharStream(source, part.stringData);
+                            
+                            CharStream mutable = new CharStream(s_CharBuffer, stream.Ptr, stream.End);
+                            
+                            // find @identifier
+                            // find @identifier.identifier
+                            // find $identifier
+                            
+                            // replace with constant value if @
+
+                            int idx = stream.NextIndexOf('@');
+                            
+                            if (idx == -1) {
+                                
+                            }
+
+                            if (stream.TryGetSubStreamFromRange(idx, '.', out CharStream f)) {
+                                
+                            }
+                            
+                            state[map.Occupancy - 1] = property;
+                        }
+
+                        break;
+                    }
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            style.name = parsedStyle.name;
+
+            // this could easily be converted to a native list if we need that
+
+            int normalCount = buildData.maps[StyleStateIndex.Normal].Occupancy;
+            int hoverCount = buildData.maps[StyleStateIndex.Hover].Occupancy;
+            int activeCount = buildData.maps[StyleStateIndex.Active].Occupancy;
+            int focusCount = buildData.maps[StyleStateIndex.Focus].Occupancy;
+
+            style.ranges[StyleStateIndex.Normal] = new Range16(properties.size, normalCount);
+
+            for (int i = 0; i < normalCount; i++) {
+                properties.Add(buildData.states[StyleStateIndex.Normal][i]);
+            }
+
+            style.ranges[StyleStateIndex.Hover] = new Range16(properties.size, hoverCount);
+
+            for (int i = 0; i < hoverCount; i++) {
+                properties.Add(buildData.states[StyleStateIndex.Hover][i]);
+            }
+
+            style.ranges[StyleStateIndex.Active] = new Range16(properties.size, activeCount);
+
+            for (int i = 0; i < activeCount; i++) {
+                properties.Add(buildData.states[StyleStateIndex.Active][i]);
+            }
+
+            style.ranges[StyleStateIndex.Focus] = new Range16(properties.size, focusCount);
+
+            for (int i = 0; i < focusCount; i++) {
+                properties.Add(buildData.states[StyleStateIndex.Focus][i]);
+            }
+
+            styles.Add(style);
+        }
+
+        public unsafe void Build() {
+            if (rawStyles != null) {
+                // todo -- can probably be an array
+                if (styles == null) {
+                    styles = new StructList<InternalStyle>(rawStyles.Length);
+                }
+
+                for (int i = 0; i < rawStyles.Length; i++) {
+                    BuildStyle(ref rawStyles[i]);
+                }
+            }
         }
 
         public string GetConstant(string s, IList<bool> results = null) {
@@ -111,7 +342,6 @@ namespace UIForia.Style2 {
             return null;
         }
 
-
         internal bool AddConstant(in PendingConstant constant) {
             constants = constants ?? new StructList<PendingConstant>();
             for (int i = 0; i < constants.size; i++) {
@@ -124,172 +354,37 @@ namespace UIForia.Style2 {
             return true;
         }
 
-        // same as style but data wont contain substates
-        private struct _Mixin {
 
-            
-
+        internal void SetParts(StyleBodyPart[] partArray) {
+            this.parts = partArray;
         }
 
-        // seperate list?
-        private struct _Selector { }
-
-        private struct _Style {
-
-            public int baseId;
-            public int partStart;
-            public int partCount;
-            public int normalStart;
-            public int hoverStart;
-            public int activeStart;
-            public int focusStart;
-            // commands & selectors? reverse map?
-            public CharSpan name;
-
+        internal void SetStyles(ParsedStyle[] rawStyleArray) {
+            this.rawStyles = rawStyleArray;
         }
 
-        internal void Build() {
-            
-            for (int i = 0; i < parts.size; i++) {
-                
-                ref StyleBodyPart part = ref parts.array[i];
-                
-                switch (part.type) {
+        public Range16 GetPropertyRange(int styleId, StyleState state) {
+            unsafe {
+                ref InternalStyle ptr = ref styles.array[styleId];
+                switch (state) {
+                    case StyleState.Normal:
+                        return new Range16(ptr.ranges[StyleStateIndex.Normal]);
 
-                    case BodyPartType.Property:
-                        break;
+                    case StyleState.Hover:
+                        return new Range16(ptr.ranges[StyleStateIndex.Hover]);
 
-                    case BodyPartType.RunCommand:
-                        break;
+                    case StyleState.Active:
+                        return new Range16(ptr.ranges[StyleStateIndex.Active]);
 
-                    case BodyPartType.Selector:
-                        break;
-
-                    case BodyPartType.Mixin:
-                        // ResolveMixin(id, data); resolve circular
-                        // foreach property in mixin 
-                        break;
-
-                    case BodyPartType.ConditionPush:
-                        // if condition failed
-                        // continue until matching condition pop
-                        // if !conditionValid -> throw
-                        break;
-
-                    case BodyPartType.ConditionPop:
-                        break;
-
-                    case BodyPartType.BeginStyle:
-                        break;
-                    
-                    case BodyPartType.ExtendBaseStyle:
-                        // resolve style, check for circular dep
-                        // if already built and local, use it
-                        // if already built and not local, use it
-                        // add / upsert properties to each state
-                        // add selectors
-                        // add commands
-                        break;
-                    
-                    case BodyPartType.EndStyle:
-                        break;
-                    
-                    case BodyPartType.StyleStatePop:
-                        // set current array to normal style array if not end
-                        break;
-
-                    case BodyPartType.StyleStatePush:
-                       break;
-
+                    case StyleState.Focused:
+                        return new Range16(ptr.ranges[StyleStateIndex.Focus]);
                     default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                
-            }
-        }
-
-        internal void BeginCondition(int conditionId) {
-            parts.Add(new StyleBodyPart(BodyPartType.ConditionPush, conditionId));
-        }
-
-        internal void EndCondition() {
-            parts.Add(new StyleBodyPart(BodyPartType.ConditionPop, -1));
-        }
-
-        internal int AddStyle(CharSpan name) {
-            styles = styles ?? new StructList<Style>();
-            for (int i = 0; i < styles.size; i++) {
-                if (styles[i].name == name) {
-                    throw new ParseException("Style " + name + " was already declared in " + filePath + ". You have redefined it on line " + name.GetLineNumber());
+                        return new Range16(
+                            new Range16(ptr.ranges[StyleStateIndex.Normal]).start,
+                            new Range16(ptr.ranges[StyleStateIndex.Focus]).end
+                        );
                 }
             }
-
-
-            int retn = styles.size;
-            styles.Add(new Style(name, retn));
-            parts.Add(new StyleBodyPart(BodyPartType.StyleStatePush, retn));
-            return retn;
-        }
-
-        internal void BeginStyleBody(int styleId) { }
-
-        internal void EndStyleBody() {
-            parts.Add(new StyleBodyPart(BodyPartType.StyleStatePop, -1));
-        }
-
-        internal void AddProperty(in StyleProperty2 property) {
-            parts.Add(new StyleBodyPart(BodyPartType.Property, properties.Count));
-            properties = properties ?? new StructList<StyleProperty2>(64);
-            properties.Add(property);
-        }
-
-        internal void AddRunCommand(in RunCommand cmd) {
-            throw new NotImplementedException();
-        }
-
-        internal void ApplyMixin(int mixinId, int mixinData = -1) {
-            parts.Add(new StyleBodyPart(BodyPartType.Mixin, mixinId, mixinData));
-        }
-
-        // internal StructList<Style> styles;
-        // internal StructList<Mixin> mixins;
-        // internal StructList<Selector> selectors;
-        // internal StructList<RunCommand> commands;
-        // internal StructList<PendingConstant> constants;
-        // internal StructList<StyleProperty2> properties;
-        internal struct StyleBodyPart {
-
-            public readonly int id;
-            public readonly int dataId;
-            public readonly BodyPartType type;
-
-            public StyleBodyPart(BodyPartType type, int id, int dataId = -1) {
-                this.id = id;
-                this.type = type;
-                this.dataId = dataId;
-            }
-
-        }
-
-        internal enum BodyPartType {
-
-            Property,
-            RunCommand,
-            Selector,
-            Mixin,
-            ConditionPush,
-            ConditionPop,
-
-            StyleStatePop,
-
-            StyleStatePush,
-
-            EndStyle,
-
-            BeginStyle,
-
-            ExtendBaseStyle
-
         }
 
     }

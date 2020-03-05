@@ -7,6 +7,9 @@ namespace UIForia.Style {
 
         internal static readonly PropertyParseEntry[] s_parseEntries;
         internal static readonly IStylePropertyParser[] s_ParserTable;
+        internal static readonly string[] s_PropertyNames;
+        
+        public static int PropertyCount => s_PropertyNames.Length;
 
         public static bool TryResolvePropertyId(string idName, out PropertyParseEntry entry) {
             int num1 = 0;

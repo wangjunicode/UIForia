@@ -77,8 +77,57 @@ namespace UIForia.Style {
             s_parseEntries[44] = new  PropertyParseEntry("PreferredWidth",  PropertyId.PreferredWidth, s_ParserTable[8]);
             s_parseEntries[45] = new  PropertyParseEntry("Visibility",  PropertyId.Visibility, s_ParserTable[12]);
 
-        }
 
+            s_PropertyNames = new string[] {
+                "BackgroundColor",
+                "BackgroundFit",
+                "BackgroundImage",
+                "BackgroundImageOffsetX",
+                "BackgroundImageOffsetY",
+                "BackgroundImageRotation",
+                "BackgroundImageScaleX",
+                "BackgroundImageScaleY",
+                "BackgroundImageTileX",
+                "BackgroundImageTileY",
+                "BackgroundTint",
+                "BorderBottom",
+                "BorderColorBottom",
+                "BorderColorLeft",
+                "BorderColorRight",
+                "BorderColorTop",
+                "BorderLeft",
+                "BorderRadiusBottomLeft",
+                "BorderRadiusBottomRight",
+                "BorderRadiusTopLeft",
+                "BorderRadiusTopRight",
+                "BorderRight",
+                "BorderTop",
+                "ClipBehavior",
+                "ClipBounds",
+                "Cursor",
+                "MarginBottom",
+                "MarginLeft",
+                "MarginRight",
+                "MarginTop",
+                "MaxHeight",
+                "MaxWidth",
+                "MinHeight",
+                "MinWidth",
+                "Opacity",
+                "OverflowX",
+                "OverflowY",
+                "PaddingBottom",
+                "PaddingLeft",
+                "PaddingRight",
+                "PaddingTop",
+                "Painter",
+                "PointerEvents",
+                "PreferredHeight",
+                "PreferredWidth",
+                "Visibility"
+            };
+
+        }
     }
 
     public partial struct PropertyId {
@@ -465,6 +514,84 @@ namespace UIForia.Style {
                     return new StyleProperty2(propertyId, (int)value);
                 default:
                     throw new Exception($"Tried to create a {nameof(StyleProperty2)} from value but the given propertyId `{propertyId}` is not compatible with the value type Visibility");
+            }
+        }
+
+        public UnityEngine.Color32 AsColor {
+            get {
+                return ColorUtil.ColorFromInt(int0);
+            }
+        }
+
+        public UIForia.Rendering.BackgroundFit AsBackgroundFit {
+            get {
+                return (UIForia.Rendering.BackgroundFit)int0;
+            }
+        }
+
+        public UnityEngine.Texture2D AsTexture2D {
+            get {
+                return (UnityEngine.Texture2D)GCHandle.FromIntPtr(ptr).Target;
+            }
+        }
+
+        public UIForia.UIFixedLength AsUIFixedLength {
+            get {
+                return new UIFixedLength(float0, (UIFixedUnit)int1);
+            }
+        }
+
+        public float AsFloat {
+            get {
+                return float0;
+            }
+        }
+
+        public UIForia.Layout.ClipBehavior AsClipBehavior {
+            get {
+                return (UIForia.Layout.ClipBehavior)int0;
+            }
+        }
+
+        public UIForia.Rendering.ClipBounds AsClipBounds {
+            get {
+                return (UIForia.Rendering.ClipBounds)int0;
+            }
+        }
+
+        public UIForia.Rendering.CursorStyle AsCursorStyle {
+            get {
+                return (UIForia.Rendering.CursorStyle)GCHandle.FromIntPtr(ptr).Target;
+            }
+        }
+
+        public UIForia.Rendering.UIMeasurement AsUIMeasurement {
+            get {
+                return new UIMeasurement(float0, (UIMeasurementUnit)int1);
+            }
+        }
+
+        public UIForia.Rendering.Overflow AsOverflow {
+            get {
+                return (UIForia.Rendering.Overflow)int0;
+            }
+        }
+
+        public string AsString {
+            get {
+                return (string)GCHandle.FromIntPtr(ptr).Target;
+            }
+        }
+
+        public UIForia.UIInput.PointerEvents AsPointerEvents {
+            get {
+                return (UIForia.UIInput.PointerEvents)int0;
+            }
+        }
+
+        public UIForia.Rendering.Visibility AsVisibility {
+            get {
+                return (UIForia.Rendering.Visibility)int0;
             }
         }
 

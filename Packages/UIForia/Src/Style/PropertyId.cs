@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace UIForia.Style {
 
+    [DebuggerDisplay("{PropertyParsers.s_PropertyNames[index]}")]
     [StructLayout(LayoutKind.Explicit)]
     public partial struct PropertyId {
 

@@ -147,7 +147,6 @@ namespace UIForia.Style {
 
         public void ConvertStyleSheet(StyleSheet sheet) {
 
-
             int propertyCount = 0;
             for (int i = 0; i < sheet.styleGroupContainers.Length; i++) {
                 UIStyleGroupContainer container = sheet.styleGroupContainers[i];

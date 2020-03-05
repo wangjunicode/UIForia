@@ -29,6 +29,20 @@ namespace UIForia.Util {
             this.ptr = dataStart;
         }
 
+        public CharStream(char[] source, ReflessCharSpan span) {
+            this.data = source;
+            this.dataStart = (uint) span.rangeStart;
+            this.dataEnd = (uint) span.rangeEnd;
+            this.ptr = dataStart;
+        }
+
+        public CharStream(CharSpan span) {
+            this.data = span.data;
+            this.dataStart = (uint) span.rangeStart;
+            this.dataEnd = (uint) span.rangeEnd;
+            this.ptr = dataStart;
+        }
+
         public bool HasMoreTokens => ptr < dataEnd;
         public uint Size => dataEnd - dataStart;
         public char[] Data => data;
@@ -724,6 +738,11 @@ namespace UIForia.Util {
         }
 
         public bool TryMatchRangeIgnoreCase(string str) {
+            if (str.Length == 1 && ptr <= dataEnd && str[0] == data[ptr]) {
+                ptr++;
+                return true;
+            }
+
             if (ptr + str.Length >= dataEnd) {
                 return false;
             }
@@ -780,10 +799,10 @@ namespace UIForia.Util {
             this.rangeEnd = (int) stream.End;
         }
 
-        public string MakeString(char[] data) {
-            return new string(data, rangeStart, rangeEnd - rangeStart);
+        public static string MakeString(in ReflessCharSpan span, char[] data) {
+            return new string(data, span.rangeStart, span.rangeEnd - span.rangeStart);
         }
-        
+
         public string MakeLowerString(char[] data) {
             int length = rangeEnd - rangeStart;
 
@@ -938,6 +957,10 @@ namespace UIForia.Util {
             }
 
             return line;
+        }
+
+        public ReflessCharSpan ToRefless() {
+            return new ReflessCharSpan(this);
         }
 
     }

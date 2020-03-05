@@ -1,10 +1,11 @@
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 
 namespace UIForia.Style {
-
-    // todo -- these need a free call on destroy
+    
+    [DebuggerDisplay("id = {PropertyParsers.s_PropertyNames[propertyId.index]}")]
     [StructLayout(LayoutKind.Explicit)]
     public partial struct StyleProperty2 : IEquatable<StyleProperty2> {
 

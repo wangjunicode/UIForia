@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -7,15 +6,6 @@ namespace UIForia.Util {
     public static class ColorUtil {
 
         public static readonly Color UnsetValue = new Color(-1, -1, -1, -1);
-
-        // // doesn't seem to handle alpha properly, might need to be a uint
-        // public static float ColorToFloat(Color c) {
-        //     int color = (int) (c.r * 255) |
-        //                 (int) (c.g * 255) << 8 |
-        //                 (int) (c.b * 255) << 16 |
-        //                 (int) (c.a * 255) << 24;
-        //     return FloatUtil.DecodeToFloat(color);
-        // }
 
         private struct ColorLookup {
 
@@ -29,38 +19,17 @@ namespace UIForia.Util {
 
         }
 
-        [StructLayout(LayoutKind.Explicit)]
-        private struct BitSetter {
-
-            [FieldOffset(0)] public int intVal;
-            [FieldOffset(0)] public byte byte0;
-            [FieldOffset(1)] public byte byte1;
-            [FieldOffset(2)] public byte byte2;
-            [FieldOffset(3)] public byte byte3;
-
-            public BitSetter(int value) {
-                byte0 = 0;
-                byte1 = 0;
-                byte2 = 0;
-                byte3 = 0;
-                intVal = value;
-            }
-
-        }
-
         public static Color32 ColorFromInt(int value) {
-            BitSetter setter = new BitSetter(value);
-            return new Color32(setter.byte0, setter.byte1, setter.byte2, setter.byte3);
+            return new Color32(
+                (byte) ((value >> 0) & 0xff),
+                (byte) ((value >> 8) & 0xff),
+                (byte) ((value >> 16) & 0xff),
+                (byte) ((value >> 24) & 0xff)
+            );
         }
         
         public static int ColorToInt(Color32 color) {
             return (color.r << 24) + (color.g << 16) + (color.b << 8) + (color.a << 0);
-            // return new BitSetter() {
-            //     byte0 = color.r,
-            //     byte1 = color.g,
-            //     byte2 = color.b,
-            //     byte3 = color.a
-            // }.intVal;
         }
         
         private static readonly ColorLookup[] s_ColorList = new[] {

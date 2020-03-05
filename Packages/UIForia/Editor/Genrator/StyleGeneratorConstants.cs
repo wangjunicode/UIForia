@@ -18,8 +18,12 @@ namespace UIForia.Style {{
 
             {nameof(PropertyParsers.s_parseEntries)} = new {nameof(PropertyParsers.PropertyParseEntry)}[::PROPERTY_NAME_COUNT::];
 ::PROPERTY_ENTRIES::
-        }}
 
+            {nameof(PropertyParsers.s_PropertyNames)} = new string[] {{
+::PROPERTY_NAMES::
+            }};
+
+        }}
     }}
 
     public partial struct {nameof(PropertyId)} {{
@@ -29,7 +33,7 @@ namespace UIForia.Style {{
 
     public partial struct {nameof(StyleProperty2)} {{
 
-::STYLE_PROPERTY_PACKERS::::STYLE_FROM_VALUE::
+::STYLE_PROPERTY_PACKERS::::STYLE_FROM_VALUE::::STYLE_AS_VALUE::
     }}
   
     public partial class DefaultStyleValue {{

@@ -1,16 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using UIForia.Exceptions;
 using UIForia.Rendering;
 using UIForia.Selectors;
 using UIForia.Style;
 using UIForia.Util;
-using Unity.Collections;
 using UnityEngine;
 
 namespace UIForia.Style2 {
-
-    public struct StylePointer { }
 
     public struct Style {
 
@@ -134,7 +132,8 @@ namespace UIForia.Style2 {
         internal StructList<Mixin> mixins;
         internal StructList<Selector> selectors;
         internal StructList<RunCommand> commands;
-        internal StructList<PendingConstant> constants;
+
+        internal PendingConstant[] constants;
 
         internal ParsedStyle[] rawStyles;
 
@@ -208,93 +207,44 @@ namespace UIForia.Style2 {
 
             InternalStyle style = new InternalStyle();
 
-            for (int i = parsedStyle.partEnd - 1; i >= parsedStyle.partStart; i--) {
-                ref StyleBodyPart part = ref parts[i];
+            // note: we run through the style properties BACKWARDS so that we can do a quick test to see if a property was already set.
+            // if it was, we dont need to do more work, we can just continue to the next instruction. 
+            int index = parsedStyle.partEnd - 1;
+            while (index >= parsedStyle.partStart) {
+                ref StyleBodyPart part = ref parts[index];
 
                 switch (part.type) {
+                    case BodyPartType.EnterState: {
+                        index--;
+                        BuildStyleState(ref buildData, ref index, part.enterState);
+                        continue;
+                    }
                     case BodyPartType.Property: {
-                        int propertyIdIndex = part.property.propertyId.index;
-                        ref IntBoolMap map = ref buildData.maps[buildData.stateIndex];
-                        StyleProperty2* state = buildData.states[buildData.stateIndex];
-
-                        if (map.TrySetIndex(propertyIdIndex)) {
-                            state[map.Occupancy - 1] = part.property;
-                        }
-
+                        index--;
+                        BuildProperty(part.property, ref buildData);
                         break;
                     }
-
                     case BodyPartType.VariableProperty: {
-                        int propertyIdIndex = part.propertyId.index;
-                        ref IntBoolMap map = ref buildData.maps[buildData.stateIndex];
-                        StyleProperty2* state = buildData.states[buildData.stateIndex];
+                        index--;
+                        BuildVariableProperty(part.variableProperty, ref buildData);
+                        break;
+                    }
+                    case BodyPartType.VariablePropertyShorthand: {
+                        index--;
+                        BuildVariableShorthand(part.variableShorthand, ref buildData);
+                        break;
+                    }
+                    case BodyPartType.ConditionBlock: {
+                        Part_ConditionBlock conditionBlock = part.conditionBlock;
 
-                        if (map.TrySetIndex(propertyIdIndex)) {
-                            // need to evaluate the property
-
-                            // while has match for $ or @ 
-                            // get identifier
-                            // resolve its value
-                            // replace it 
-
-                            // find @identifier
-                            // find @identifier.identifier
-                            // find $identifier
-
-                            // replace with constant value if @
-
-                            s_CharBuffer = s_CharBuffer ?? new StructList<char>(128);
-                            s_CharBuffer.size = 0;
-
-                            StyleProperty2 property = default;
-
-                            CharStream stream = new CharStream(source, part.stringData);
-
-                            int idx = stream.NextIndexOf('@');
-
-                            if (idx != -1) {
-                                // stream.CopyTo(s_CharBuffer, 0, stream.Ptr, idx);
-
-                                s_CharBuffer.AddRange(source, stream.IntPtr, idx - stream.IntPtr);
-
-                                stream.AdvanceTo(idx + 1);
-
-                                if (!stream.TryParseIdentifier(out CharSpan identifier)) { }
-
-                                if (stream.TryParseCharacter('.')) {
-
-                                    if (!stream.TryParseIdentifier(out CharSpan dotIdentifier)) {
-                                        throw new NotImplementedException();
-                                    }
-
-                                    // todo -- figure out how to handle referenced constants
-                                    // probably want to localize them at parse time and resolve in the build step. match against whole name
-
-                                    throw new NotImplementedException();
-
-                                }
-                                else {
-
-                                    if (TryResolveLocalConstant(identifier, out CharSpan span)) {
-                                        s_CharBuffer.EnsureAdditionalCapacity(span.Length);
-                                        for (int j = span.rangeStart; j < span.rangeEnd; j++) {
-                                            s_CharBuffer.array[s_CharBuffer.size++] = span.data[j];
-                                        }
-                                    }
-
-                                }
-
-                                CharStream parseStream = new CharStream(s_CharBuffer.array, 0, (uint) s_CharBuffer.size);
-                                if (!PropertyParsers.s_parseEntries[propertyIdIndex].parser.TryParse(parseStream, part.propertyId, out property)) { }
-
-                            }
-
-                            state[map.Occupancy - 1] = property;
+                        if (!module.GetDisplayConditions()[conditionBlock.conditionId]) {
+                            index = conditionBlock.rangeStart;
                         }
+
+                        index--; // need to -1 even if we hit the jump condition above
 
                         break;
                     }
-
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -336,40 +286,224 @@ namespace UIForia.Style2 {
             styles.Add(style);
         }
 
+        private static unsafe void BuildProperty(Part_Property part, ref StyleBuildData buildData) {
+            int propertyIdIndex = part.value.propertyId.index;
+            ref IntBoolMap map = ref buildData.maps[buildData.stateIndex];
+            StyleProperty2* state = buildData.states[buildData.stateIndex];
+
+            if (map.TrySetIndex(propertyIdIndex)) {
+                state[map.Occupancy - 1] = part.value;
+            }
+        }
+
+        private unsafe void BuildVariableProperty(Part_VariableProperty variableProperty, ref StyleBuildData buildData) {
+            int propertyIdIndex = variableProperty.propertyId.index;
+            ref IntBoolMap map = ref buildData.maps[buildData.stateIndex];
+            StyleProperty2* state = buildData.states[buildData.stateIndex];
+
+            if (map.TrySetIndex(propertyIdIndex)) {
+                s_CharBuffer = s_CharBuffer ?? new StructList<char>(128);
+                s_CharBuffer.size = 0;
+
+                StyleProperty2 property = default;
+
+                CharStream stream = new CharStream(variableProperty.declaration);
+
+                int idx = stream.NextIndexOf('@');
+
+                // todo this needs a while loop around it, could have multiple constants
+
+                if (idx != -1) {
+                    s_CharBuffer.AddRange(source, stream.IntPtr, idx - stream.IntPtr);
+
+                    stream.AdvanceTo(idx + 1);
+
+                    if (!stream.TryParseIdentifier(out CharSpan identifier)) { }
+
+                    if (stream.TryParseCharacter('.')) {
+                        if (!stream.TryParseIdentifier(out CharSpan dotIdentifier)) {
+                            throw new NotImplementedException();
+                        }
+
+                        // todo -- figure out how to handle referenced constants
+                        // probably want to localize them at parse time and resolve in the build step. match against whole name
+
+                        throw new NotImplementedException();
+                    }
+                    else {
+                        if (TryResolveLocalConstant(identifier, out CharSpan span)) {
+                            s_CharBuffer.EnsureAdditionalCapacity(span.Length);
+                            for (int j = span.rangeStart; j < span.rangeEnd; j++) {
+                                s_CharBuffer.array[s_CharBuffer.size++] = span.data[j];
+                            }
+                        }
+                    }
+
+                    CharStream parseStream = new CharStream(s_CharBuffer.array, 0, (uint) s_CharBuffer.size);
+
+                    if (!PropertyParsers.s_parseEntries[propertyIdIndex].parser.TryParse(parseStream, variableProperty.propertyId, out property)) {
+                        // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
+                        ParseException ex = new ParseException($"Error parsing property {variableProperty.propertyId} on line {variableProperty.declaration.GetLineNumber()}");
+                        ex.SetFileName(filePath);
+                        throw ex;
+                    }
+                }
+
+                state[map.Occupancy - 1] = property;
+            }
+        }
+
+        private unsafe void ReplaceConstants(StructList<char> buffer, CharStream propertyStream) {
+            CharStream duplicate = new CharStream(propertyStream);
+
+            while (duplicate.HasMoreTokens) {
+                int idx = duplicate.NextIndexOf('@');
+
+                if (idx == -1) {
+                    AppendRangeToCharBuffer(buffer, duplicate.Data, duplicate.IntPtr, (int) duplicate.End);
+                    break;
+                }
+
+                AppendRangeToCharBuffer(buffer, duplicate.Data, duplicate.IntPtr, idx);
+
+                duplicate.AdvanceTo(idx + 1);
+
+                // leave whitespace after identifier since we'll scoop that into the char buffer
+                if (!duplicate.TryParseIdentifier(out CharSpan identifier, true, WhitespaceHandling.ConsumeBefore)) {
+                    throw new ParseException($"Expected to find a valid identifier after the @ sign on line {duplicate.GetLineNumber()}");
+                }
+
+                if (!TryResolveLocalConstant(identifier, out CharSpan constant)) {
+                    throw new ParseException($"Unresolved constant reference in property {propertyStream} on line {propertyStream.GetLineNumber()}");
+                }
+
+                AppendRangeToCharBuffer(buffer, constant);
+            }
+        }
+
+        private static unsafe void AppendRangeToCharBuffer(StructList<char> buffer, CharSpan charSpan) {
+            AppendRangeToCharBuffer(buffer, charSpan.data, charSpan.rangeStart, charSpan.rangeEnd);
+        }
+
+        private static unsafe void AppendRangeToCharBuffer(StructList<char> buffer, char* ptr, int start, int end) {
+            buffer.EnsureAdditionalCapacity(end - start);
+            for (int i = start; i < end; i++) {
+                buffer.array[buffer.size++] = ptr[i];
+            }
+        }
+
+        private unsafe void BuildVariableShorthand(Part_VariablePropertyShorthand shorthand, ref StyleBuildData buildData) {
+            CharStream stream = new CharStream(shorthand.declaration);
+
+            s_CharBuffer = s_CharBuffer ?? new StructList<char>(64);
+            s_CharBuffer.size = 0;
+
+            ReplaceConstants(s_CharBuffer, stream);
+
+            //note! line numbers will be wrong in parser probably. we can fix this by storing a line number, or by injecting n new lines into s_CharBuffer.
+            CharStream parseStream = new CharStream(s_CharBuffer.array, 0, (ushort) s_CharBuffer.size);
+            ShorthandEntry entry = PropertyParsers.s_ShorthandEntries[shorthand.shorthandIndex];
+
+            // need a temp buffer to store output from parser
+            // using our properties list, will remove immediately afterwards
+            int propertyCount = properties.size;
+
+            try {
+                
+                if (!entry.parser.TryParse(parseStream, properties)) {
+                    ParseException ex = new ParseException($"Failed to parse shorthand '{PropertyParsers.s_ShorthandNames[shorthand.shorthandIndex]}' with value '{parseStream}' on line {stream.GetLineNumber()}. Original value was '{shorthand.declaration}'.");
+                    ex.SetFileName(filePath);
+                    throw ex;
+                }
+
+                for (int i = propertyCount; i < properties.size; i++) {
+                    int propertyIdIndex = properties.array[i].propertyId.index;
+                    ref IntBoolMap map = ref buildData.maps[buildData.stateIndex];
+                    StyleProperty2* state = buildData.states[buildData.stateIndex];
+                    if (map.TrySetIndex(propertyIdIndex)) {
+                        state[map.Occupancy - 1] = properties.array[i];
+                    }
+                }
+            }
+            finally {
+                // remove the temporary properties
+                while (properties.size != propertyCount) {
+                    properties.size--;
+                }
+            }
+        }
+
+        private void BuildStyleState(ref StyleBuildData buildData, ref int index, in Part_EnterState data) {
+            int oldIndex = buildData.stateIndex;
+            buildData.stateIndex = data.stateIndex;
+            while (index >= data.rangeStart) {
+                ref StyleBodyPart part = ref parts[index];
+
+                switch (part.type) {
+                    case BodyPartType.Property: {
+                        index--;
+                        BuildProperty(part.property, ref buildData);
+                        break;
+                    }
+                    case BodyPartType.VariableProperty: {
+                        index--;
+                        BuildVariableProperty(part.variableProperty, ref buildData);
+                        break;
+                    }
+                    case BodyPartType.VariablePropertyShorthand: {
+                        index--;
+                        BuildVariableShorthand(part.variableShorthand, ref buildData);
+                        break;
+                    }
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            buildData.stateIndex = oldIndex;
+        }
+
+
         private void BuildLocalConstants() {
+            if (constants == null) return;
+
             List<bool> moduleConditions = module.GetDisplayConditions();
 
-            for (int i = 0; i < constants.size; i++) {
-
-                ref PendingConstant constant = ref constants.array[i];
+            for (int i = 0; i < constants.Length; i++) {
+                ref PendingConstant constant = ref constants[i];
 
                 constant.resolvedValue = default;
 
-                for (int j = constant.partRange.start; j < constant.partRange.end; j++) {
-                    ref StyleBodyPart part = ref parts[j];
-                    if (moduleConditions[part.intData]) {
-                        constant.resolvedValue = new CharSpan(source, part.stringData.rangeStart, part.stringData.rangeEnd);
-                        break;
+                if (!constant.HasDefinition) {
+                    throw new ParseException($"Cannot find a definition for constant {constant}");
+                }
+
+                if (moduleConditions != null) {
+                    for (int j = constant.partRange.start; j < constant.partRange.end; j++) {
+                        ref StyleBodyPart part = ref parts[j];
+                        Part_ConstantBranch branch = part.constantBranch;
+                        if (moduleConditions[branch.conditionId]) {
+                            constant.resolvedValue = branch.value;
+                            break;
+                        }
                     }
                 }
 
                 if (constant.resolvedValue != null) {
                     constant.resolvedValue = constant.defaultValue;
                 }
-
             }
         }
 
         private bool TryResolveLocalConstant(CharSpan identifier, out CharSpan charSpan) {
-
             if (identifier.Length == 0) {
                 charSpan = default;
                 return false;
             }
 
-            for (int i = 0; i < constants.size; i++) {
-
-                ref PendingConstant constant = ref constants.array[i];
+            for (int i = 0; i < constants.Length; i++) {
+                ref PendingConstant constant = ref constants[i];
 
                 if (constant.name != identifier) {
                     continue;
@@ -377,16 +511,13 @@ namespace UIForia.Style2 {
 
                 charSpan = constant.resolvedValue;
                 return true;
-
             }
 
             charSpan = default;
             return false;
-
         }
 
-        public unsafe void Build() {
-
+        public void Build() {
             BuildLocalConstants();
 
             if (rawStyles != null) {
@@ -395,6 +526,8 @@ namespace UIForia.Style2 {
                     styles = new StructList<InternalStyle>(rawStyles.Length);
                 }
 
+                styles.Clear();
+                properties.Clear();
                 for (int i = 0; i < rawStyles.Length; i++) {
                     BuildStyle(ref rawStyles[i]);
                 }
@@ -402,7 +535,6 @@ namespace UIForia.Style2 {
         }
 
         public string GetConstant(string s) {
-
             CharSpan span = new CharSpan(s);
             if (TryResolveLocalConstant(span, out CharSpan value)) {
                 return value.ToString();
@@ -411,32 +543,16 @@ namespace UIForia.Style2 {
             return null;
         }
 
-        internal bool AddLocalConstant(in PendingConstant constant) {
-            constants = constants ?? new StructList<PendingConstant>();
-            for (int i = 0; i < constants.size; i++) {
-
-                if (constants.array[i].name != constant.name) {
-                    continue;
-                }
-
-                if (constants.array[i].HasDefinition) {
-                    return false;
-                }
-
-                constants.array[i] = constant;
-                return true;
-            }
-
-            constants.Add(constant);
-            return true;
-        }
-
         internal void SetParts(StyleBodyPart[] partArray) {
             this.parts = partArray;
         }
 
         internal void SetStyles(ParsedStyle[] rawStyleArray) {
             this.rawStyles = rawStyleArray;
+        }
+
+        internal void SetConstants(PendingConstant[] constants) {
+            this.constants = constants;
         }
 
         public Range16 GetPropertyRange(int styleId, StyleState state) {
@@ -462,22 +578,6 @@ namespace UIForia.Style2 {
                         );
                 }
             }
-        }
-
-        internal void EnsureConstant(CharSpan identifier) {
-            if (constants == null) {
-                constants = new StructList<PendingConstant>();
-            }
-
-            for (int i = 0; i < constants.size; i++) {
-                if (constants.array[i].name == identifier) {
-                    return;
-                }
-            }
-
-            constants.Add(new PendingConstant() {
-                name = identifier
-            });
         }
 
     }

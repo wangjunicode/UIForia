@@ -31,6 +31,15 @@ namespace UIForia.Style {
             return new PropertyId(id);
         }
 
+        public override string ToString() {
+            if (index < PropertyParsers.s_PropertyNames.Length) {
+                return PropertyParsers.s_PropertyNames[index];
+            }
+            else {
+                return "Invalid";
+            }
+        }
+
     }
 
 }

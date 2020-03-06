@@ -1,28 +1,16 @@
 namespace UIForia.Style2 {
 
-    internal enum BodyPartType {
+    internal enum BodyPartType : ushort {
 
-        // Property,
-        // RunCommand,
-        // Selector,
-        // Mixin,
-        // ConditionPush,
-        // ConditionPop,
-        // StyleStatePop,
-        // StyleStatePush,
-        // EndStyle,
-        // BeginStyle,
-        // ExtendBaseStyle
-
-        ExtendBaseStyle,
-
+        ExtendStyle,
         Property,
-
         Style,
-
         VariableProperty,
+        ConstantBranch,
+        EnterState,
+        ConditionBlock,
 
-        ConstantBranch
+        VariablePropertyShorthand
 
     }
 

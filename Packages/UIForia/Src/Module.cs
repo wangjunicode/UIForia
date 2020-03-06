@@ -29,7 +29,7 @@ namespace UIForia {
 
             conditionResults = conditionResults ?? new List<bool>();
             conditionResults.Clear();
-            
+
             for (int i = 0; i < styleConditions.Count; i++) {
                 conditionResults.Add(styleConditions[i].fn(displayConfiguration));
             }
@@ -64,6 +64,21 @@ namespace UIForia {
             }
 
             return -1;
+        }
+
+        public bool HasStyleCondition(string conditionName) {
+            return HasStyleCondition(new CharSpan(conditionName));
+        }
+
+        public bool HasStyleCondition(CharSpan conditionName) {
+            if (styleConditions == null) return false;
+            for (int i = 0; i < styleConditions.Count; i++) {
+                if (styleConditions[i].name == conditionName) {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
     }

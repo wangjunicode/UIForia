@@ -20,20 +20,21 @@ namespace UIForia.Util {
         }
 
         public static Color32 ColorFromInt(int value) {
+            // todo -- endianness probably matters
             return new Color32(
-                (byte) ((value >> 0) & 0xff),
-                (byte) ((value >> 8) & 0xff),
+                (byte) ((value >> 24) & 0xff),
                 (byte) ((value >> 16) & 0xff),
-                (byte) ((value >> 24) & 0xff)
+                (byte) ((value >> 8) & 0xff),
+                (byte) ((value >> 0) & 0xff)
             );
         }
 
         public static int ColorToInt(Color32 color) {
+            // todo -- endianness probably matters
             return (color.r << 24) + (color.g << 16) + (color.b << 8) + (color.a << 0);
         }
 
         private static readonly ColorLookup[] s_ColorList = new[] {
-
             new ColorLookup("clear", new Color32(0, 0, 0, 0)),
             new ColorLookup("transparent", new Color32(0, 0, 0, 0)),
             new ColorLookup("black", new Color32(0, 0, 0, 255)),
@@ -230,7 +231,6 @@ namespace UIForia.Util {
             int num2 = s_ColorList.Length - 1;
 
             unsafe {
-
                 while (num1 <= num2) {
                     int index1 = num1 + (num2 - num1 >> 1);
 
@@ -259,7 +259,6 @@ namespace UIForia.Util {
         }
 
         public static bool TryParseColorName(string name, out Color32 color) {
-
             if (!isSorted) {
                 isSorted = true;
                 Array.Sort(s_ColorList, (a, b) => string.Compare(a.name, b.name, StringComparison.Ordinal));
@@ -289,7 +288,6 @@ namespace UIForia.Util {
 
             color = default;
             return false;
-
         }
 
     }

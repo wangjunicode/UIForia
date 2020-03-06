@@ -4,59 +4,124 @@ using UIForia.Util;
 
 namespace UIForia.Style {
 
+    public class MinSizeParser : IStyleShorthandParser {
+
+        public bool TryParse(CharStream stream, StructList<StyleProperty2> output) {
+            return MeasurementParser.TryParseSize(stream, output, PropertyId.MinWidth, PropertyId.MinHeight);
+        }
+
+    }
+
+    public class MaxSizeParser : IStyleShorthandParser {
+
+        public bool TryParse(CharStream stream, StructList<StyleProperty2> output) {
+            return MeasurementParser.TryParseSize(stream, output, PropertyId.MaxWidth, PropertyId.MaxHeight);
+        }
+
+    }
+
+    public class PreferredSizeParser : IStyleShorthandParser {
+
+        public bool TryParse(CharStream stream, StructList<StyleProperty2> output) {
+            return MeasurementParser.TryParseSize(stream, output, PropertyId.PreferredWidth, PropertyId.PreferredHeight);
+        }
+
+    }
+
     public class MeasurementParser : IStylePropertyParser {
 
-        public bool TryParse(CharStream stream, PropertyId propertyId, out StyleProperty2 property) {
-            
-            if (!stream.TryParseFloat(out float value)) {
-                property = default;
+        public static bool TryParseSize(CharStream stream, StructList<StyleProperty2> output, PropertyId width, PropertyId height) {
+            UIMeasurement first = default;
+            UIMeasurement second = default;
+
+            if (!Parse(ref stream, out first)) {
                 return false;
             }
 
-            stream.ConsumeWhiteSpace();
-            
-            if (!stream.HasMoreTokens || stream.TryMatchRangeIgnoreCase("px")) {
-                property = StyleProperty2.FromValue(propertyId, new UIMeasurement(value));
+            stream.ConsumeWhiteSpaceAndComments();
+
+            if (!stream.HasMoreTokens) {
+                output.Add(StyleProperty2.FromValue(width, first));
+                output.Add(StyleProperty2.FromValue(height, first));
                 return true;
             }
+
+            // optional comma support
+            stream.TryParseCharacter(',');
             
+            if (!Parse(ref stream, out second)) {
+                return false;
+            }
+
+            // there might be remaining tokens here. we just ignore them since checking has no real benefit and hurts performance
+
+            output.Add(StyleProperty2.FromValue(width, first));
+            output.Add(StyleProperty2.FromValue(height, second));
+
+            return true;
+        }
+
+
+        public static bool Parse(ref CharStream stream, out UIMeasurement measurement) {
+            if (!stream.TryParseFloat(out float value)) {
+                measurement = default;
+                return false;
+            }
+
+            stream.ConsumeWhiteSpaceAndComments();
+
+            if (!stream.HasMoreTokens || stream.TryMatchRangeIgnoreCase("px")) {
+                measurement = new UIMeasurement(value);
+                return true;
+            }
+
             if (stream.TryMatchRangeIgnoreCase("%")) {
-                property = StyleProperty2.FromValue(propertyId, new UIMeasurement(value * 0.01f, UIMeasurementUnit.Percentage));
+                measurement = new UIMeasurement(value * 0.01f, UIMeasurementUnit.Percentage);
                 return true;
             }
 
             if (stream.TryMatchRangeIgnoreCase("pca")) {
-                property = StyleProperty2.FromValue(propertyId, new UIMeasurement(value, UIMeasurementUnit.ParentContentArea));
+                measurement = new UIMeasurement(value, UIMeasurementUnit.ParentContentArea);
                 return true;
             }
 
             if (stream.TryMatchRangeIgnoreCase("psz")) {
-                property = StyleProperty2.FromValue(propertyId, new UIMeasurement(value, UIMeasurementUnit.BlockSize));
+                measurement = new UIMeasurement(value, UIMeasurementUnit.BlockSize);
                 return true;
             }
 
             if (stream.TryMatchRangeIgnoreCase("em")) {
-                property = StyleProperty2.FromValue(propertyId, new UIMeasurement(value, UIMeasurementUnit.Em));
+                measurement = new UIMeasurement(value, UIMeasurementUnit.Em);
                 return true;
             }
 
             if (stream.TryMatchRangeIgnoreCase("cnt")) {
-                property = StyleProperty2.FromValue(propertyId, new UIMeasurement(value, UIMeasurementUnit.Content));
+                measurement = new UIMeasurement(value, UIMeasurementUnit.Content);
                 return true;
             }
 
             if (stream.TryMatchRangeIgnoreCase("vw")) {
-                property = StyleProperty2.FromValue(propertyId, new UIMeasurement(value, UIMeasurementUnit.ViewportWidth));
+                measurement = new UIMeasurement(value, UIMeasurementUnit.ViewportWidth);
                 return true;
             }
 
             if (stream.TryMatchRangeIgnoreCase("vh")) {
-                property = StyleProperty2.FromValue(propertyId, new UIMeasurement(value, UIMeasurementUnit.ViewportHeight));
+                measurement = new UIMeasurement(value, UIMeasurementUnit.ViewportHeight);
                 return true;
             }
 
             if (stream.TryMatchRangeIgnoreCase("auto")) {
-                property = StyleProperty2.FromValue(propertyId, new UIMeasurement(value, UIMeasurementUnit.Auto));
+                measurement = new UIMeasurement(value, UIMeasurementUnit.Auto);
+                return true;
+            }
+
+            measurement = default;
+            return false;
+        }
+
+        public bool TryParse(CharStream stream, PropertyId propertyId, out StyleProperty2 property) {
+            if (Parse(ref stream, out UIMeasurement measurement)) {
+                property = StyleProperty2.FromValue(propertyId, measurement);
                 return true;
             }
 

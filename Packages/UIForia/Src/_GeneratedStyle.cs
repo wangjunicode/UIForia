@@ -16,7 +16,7 @@ namespace UIForia.Style {
             s_ParserTable = new IStylePropertyParser[13];
             s_ParserTable[0] = new UIForia.Style.ColorParser();
             s_ParserTable[1] = new UIForia.Style.EnumParser<UIForia.Rendering.BackgroundFit>();
-            s_ParserTable[2] = new UIForia.Style.TextureParser();
+            s_ParserTable[2] = new UIForia.Style.StringParser();
             s_ParserTable[3] = new UIForia.Style.FixedLengthParser();
             s_ParserTable[4] = new UIForia.Style.FloatParser();
             s_ParserTable[5] = new UIForia.Style.EnumParser<UIForia.Layout.ClipBehavior>();
@@ -28,55 +28,53 @@ namespace UIForia.Style {
             s_ParserTable[11] = new UIForia.Style.EnumParser<UIForia.UIInput.PointerEvents>();
             s_ParserTable[12] = new UIForia.Style.EnumParser<UIForia.Rendering.Visibility>();
           
-
             s_parseEntries = new PropertyParseEntry[46];
-            s_parseEntries[0] = new  PropertyParseEntry("BackgroundColor",  PropertyId.BackgroundColor, s_ParserTable[0]);
-            s_parseEntries[1] = new  PropertyParseEntry("BackgroundFit",  PropertyId.BackgroundFit, s_ParserTable[1]);
-            s_parseEntries[2] = new  PropertyParseEntry("BackgroundImage",  PropertyId.BackgroundImage, s_ParserTable[2]);
-            s_parseEntries[3] = new  PropertyParseEntry("BackgroundImageOffsetX",  PropertyId.BackgroundImageOffsetX, s_ParserTable[3]);
-            s_parseEntries[4] = new  PropertyParseEntry("BackgroundImageOffsetY",  PropertyId.BackgroundImageOffsetY, s_ParserTable[3]);
-            s_parseEntries[5] = new  PropertyParseEntry("BackgroundImageRotation",  PropertyId.BackgroundImageRotation, s_ParserTable[4]);
-            s_parseEntries[6] = new  PropertyParseEntry("BackgroundImageScaleX",  PropertyId.BackgroundImageScaleX, s_ParserTable[4]);
-            s_parseEntries[7] = new  PropertyParseEntry("BackgroundImageScaleY",  PropertyId.BackgroundImageScaleY, s_ParserTable[4]);
-            s_parseEntries[8] = new  PropertyParseEntry("BackgroundImageTileX",  PropertyId.BackgroundImageTileX, s_ParserTable[4]);
-            s_parseEntries[9] = new  PropertyParseEntry("BackgroundImageTileY",  PropertyId.BackgroundImageTileY, s_ParserTable[4]);
-            s_parseEntries[10] = new  PropertyParseEntry("BackgroundTint",  PropertyId.BackgroundTint, s_ParserTable[0]);
-            s_parseEntries[11] = new  PropertyParseEntry("BorderBottom",  PropertyId.BorderBottom, s_ParserTable[3]);
-            s_parseEntries[12] = new  PropertyParseEntry("BorderColorBottom",  PropertyId.BorderColorBottom, s_ParserTable[0]);
-            s_parseEntries[13] = new  PropertyParseEntry("BorderColorLeft",  PropertyId.BorderColorLeft, s_ParserTable[0]);
-            s_parseEntries[14] = new  PropertyParseEntry("BorderColorRight",  PropertyId.BorderColorRight, s_ParserTable[0]);
-            s_parseEntries[15] = new  PropertyParseEntry("BorderColorTop",  PropertyId.BorderColorTop, s_ParserTable[0]);
-            s_parseEntries[16] = new  PropertyParseEntry("BorderLeft",  PropertyId.BorderLeft, s_ParserTable[3]);
-            s_parseEntries[17] = new  PropertyParseEntry("BorderRadiusBottomLeft",  PropertyId.BorderRadiusBottomLeft, s_ParserTable[3]);
-            s_parseEntries[18] = new  PropertyParseEntry("BorderRadiusBottomRight",  PropertyId.BorderRadiusBottomRight, s_ParserTable[3]);
-            s_parseEntries[19] = new  PropertyParseEntry("BorderRadiusTopLeft",  PropertyId.BorderRadiusTopLeft, s_ParserTable[3]);
-            s_parseEntries[20] = new  PropertyParseEntry("BorderRadiusTopRight",  PropertyId.BorderRadiusTopRight, s_ParserTable[3]);
-            s_parseEntries[21] = new  PropertyParseEntry("BorderRight",  PropertyId.BorderRight, s_ParserTable[3]);
-            s_parseEntries[22] = new  PropertyParseEntry("BorderTop",  PropertyId.BorderTop, s_ParserTable[3]);
-            s_parseEntries[23] = new  PropertyParseEntry("ClipBehavior",  PropertyId.ClipBehavior, s_ParserTable[5]);
-            s_parseEntries[24] = new  PropertyParseEntry("ClipBounds",  PropertyId.ClipBounds, s_ParserTable[6]);
-            s_parseEntries[25] = new  PropertyParseEntry("Cursor",  PropertyId.Cursor, s_ParserTable[7]);
-            s_parseEntries[26] = new  PropertyParseEntry("MarginBottom",  PropertyId.MarginBottom, s_ParserTable[3]);
-            s_parseEntries[27] = new  PropertyParseEntry("MarginLeft",  PropertyId.MarginLeft, s_ParserTable[3]);
-            s_parseEntries[28] = new  PropertyParseEntry("MarginRight",  PropertyId.MarginRight, s_ParserTable[3]);
-            s_parseEntries[29] = new  PropertyParseEntry("MarginTop",  PropertyId.MarginTop, s_ParserTable[3]);
-            s_parseEntries[30] = new  PropertyParseEntry("MaxHeight",  PropertyId.MaxHeight, s_ParserTable[8]);
-            s_parseEntries[31] = new  PropertyParseEntry("MaxWidth",  PropertyId.MaxWidth, s_ParserTable[8]);
-            s_parseEntries[32] = new  PropertyParseEntry("MinHeight",  PropertyId.MinHeight, s_ParserTable[8]);
-            s_parseEntries[33] = new  PropertyParseEntry("MinWidth",  PropertyId.MinWidth, s_ParserTable[8]);
-            s_parseEntries[34] = new  PropertyParseEntry("Opacity",  PropertyId.Opacity, s_ParserTable[4]);
-            s_parseEntries[35] = new  PropertyParseEntry("OverflowX",  PropertyId.OverflowX, s_ParserTable[9]);
-            s_parseEntries[36] = new  PropertyParseEntry("OverflowY",  PropertyId.OverflowY, s_ParserTable[9]);
-            s_parseEntries[37] = new  PropertyParseEntry("PaddingBottom",  PropertyId.PaddingBottom, s_ParserTable[3]);
-            s_parseEntries[38] = new  PropertyParseEntry("PaddingLeft",  PropertyId.PaddingLeft, s_ParserTable[3]);
-            s_parseEntries[39] = new  PropertyParseEntry("PaddingRight",  PropertyId.PaddingRight, s_ParserTable[3]);
-            s_parseEntries[40] = new  PropertyParseEntry("PaddingTop",  PropertyId.PaddingTop, s_ParserTable[3]);
-            s_parseEntries[41] = new  PropertyParseEntry("Painter",  PropertyId.Painter, s_ParserTable[10]);
-            s_parseEntries[42] = new  PropertyParseEntry("PointerEvents",  PropertyId.PointerEvents, s_ParserTable[11]);
-            s_parseEntries[43] = new  PropertyParseEntry("PreferredHeight",  PropertyId.PreferredHeight, s_ParserTable[8]);
-            s_parseEntries[44] = new  PropertyParseEntry("PreferredWidth",  PropertyId.PreferredWidth, s_ParserTable[8]);
-            s_parseEntries[45] = new  PropertyParseEntry("Visibility",  PropertyId.Visibility, s_ParserTable[12]);
-
+            s_parseEntries[0] = new PropertyParseEntry("BackgroundColor",  PropertyId.BackgroundColor, s_ParserTable[0]);
+            s_parseEntries[1] = new PropertyParseEntry("BackgroundFit",  PropertyId.BackgroundFit, s_ParserTable[1]);
+            s_parseEntries[2] = new PropertyParseEntry("BackgroundImage",  PropertyId.BackgroundImage, s_ParserTable[2]);
+            s_parseEntries[3] = new PropertyParseEntry("BackgroundImageOffsetX",  PropertyId.BackgroundImageOffsetX, s_ParserTable[3]);
+            s_parseEntries[4] = new PropertyParseEntry("BackgroundImageOffsetY",  PropertyId.BackgroundImageOffsetY, s_ParserTable[3]);
+            s_parseEntries[5] = new PropertyParseEntry("BackgroundImageRotation",  PropertyId.BackgroundImageRotation, s_ParserTable[4]);
+            s_parseEntries[6] = new PropertyParseEntry("BackgroundImageScaleX",  PropertyId.BackgroundImageScaleX, s_ParserTable[4]);
+            s_parseEntries[7] = new PropertyParseEntry("BackgroundImageScaleY",  PropertyId.BackgroundImageScaleY, s_ParserTable[4]);
+            s_parseEntries[8] = new PropertyParseEntry("BackgroundImageTileX",  PropertyId.BackgroundImageTileX, s_ParserTable[4]);
+            s_parseEntries[9] = new PropertyParseEntry("BackgroundImageTileY",  PropertyId.BackgroundImageTileY, s_ParserTable[4]);
+            s_parseEntries[10] = new PropertyParseEntry("BackgroundTint",  PropertyId.BackgroundTint, s_ParserTable[0]);
+            s_parseEntries[11] = new PropertyParseEntry("BorderBottom",  PropertyId.BorderBottom, s_ParserTable[3]);
+            s_parseEntries[12] = new PropertyParseEntry("BorderColorBottom",  PropertyId.BorderColorBottom, s_ParserTable[0]);
+            s_parseEntries[13] = new PropertyParseEntry("BorderColorLeft",  PropertyId.BorderColorLeft, s_ParserTable[0]);
+            s_parseEntries[14] = new PropertyParseEntry("BorderColorRight",  PropertyId.BorderColorRight, s_ParserTable[0]);
+            s_parseEntries[15] = new PropertyParseEntry("BorderColorTop",  PropertyId.BorderColorTop, s_ParserTable[0]);
+            s_parseEntries[16] = new PropertyParseEntry("BorderLeft",  PropertyId.BorderLeft, s_ParserTable[3]);
+            s_parseEntries[17] = new PropertyParseEntry("BorderRadiusBottomLeft",  PropertyId.BorderRadiusBottomLeft, s_ParserTable[3]);
+            s_parseEntries[18] = new PropertyParseEntry("BorderRadiusBottomRight",  PropertyId.BorderRadiusBottomRight, s_ParserTable[3]);
+            s_parseEntries[19] = new PropertyParseEntry("BorderRadiusTopLeft",  PropertyId.BorderRadiusTopLeft, s_ParserTable[3]);
+            s_parseEntries[20] = new PropertyParseEntry("BorderRadiusTopRight",  PropertyId.BorderRadiusTopRight, s_ParserTable[3]);
+            s_parseEntries[21] = new PropertyParseEntry("BorderRight",  PropertyId.BorderRight, s_ParserTable[3]);
+            s_parseEntries[22] = new PropertyParseEntry("BorderTop",  PropertyId.BorderTop, s_ParserTable[3]);
+            s_parseEntries[23] = new PropertyParseEntry("ClipBehavior",  PropertyId.ClipBehavior, s_ParserTable[5]);
+            s_parseEntries[24] = new PropertyParseEntry("ClipBounds",  PropertyId.ClipBounds, s_ParserTable[6]);
+            s_parseEntries[25] = new PropertyParseEntry("Cursor",  PropertyId.Cursor, s_ParserTable[7]);
+            s_parseEntries[26] = new PropertyParseEntry("MarginBottom",  PropertyId.MarginBottom, s_ParserTable[3]);
+            s_parseEntries[27] = new PropertyParseEntry("MarginLeft",  PropertyId.MarginLeft, s_ParserTable[3]);
+            s_parseEntries[28] = new PropertyParseEntry("MarginRight",  PropertyId.MarginRight, s_ParserTable[3]);
+            s_parseEntries[29] = new PropertyParseEntry("MarginTop",  PropertyId.MarginTop, s_ParserTable[3]);
+            s_parseEntries[30] = new PropertyParseEntry("MaxHeight",  PropertyId.MaxHeight, s_ParserTable[8]);
+            s_parseEntries[31] = new PropertyParseEntry("MaxWidth",  PropertyId.MaxWidth, s_ParserTable[8]);
+            s_parseEntries[32] = new PropertyParseEntry("MinHeight",  PropertyId.MinHeight, s_ParserTable[8]);
+            s_parseEntries[33] = new PropertyParseEntry("MinWidth",  PropertyId.MinWidth, s_ParserTable[8]);
+            s_parseEntries[34] = new PropertyParseEntry("Opacity",  PropertyId.Opacity, s_ParserTable[4]);
+            s_parseEntries[35] = new PropertyParseEntry("OverflowX",  PropertyId.OverflowX, s_ParserTable[9]);
+            s_parseEntries[36] = new PropertyParseEntry("OverflowY",  PropertyId.OverflowY, s_ParserTable[9]);
+            s_parseEntries[37] = new PropertyParseEntry("PaddingBottom",  PropertyId.PaddingBottom, s_ParserTable[3]);
+            s_parseEntries[38] = new PropertyParseEntry("PaddingLeft",  PropertyId.PaddingLeft, s_ParserTable[3]);
+            s_parseEntries[39] = new PropertyParseEntry("PaddingRight",  PropertyId.PaddingRight, s_ParserTable[3]);
+            s_parseEntries[40] = new PropertyParseEntry("PaddingTop",  PropertyId.PaddingTop, s_ParserTable[3]);
+            s_parseEntries[41] = new PropertyParseEntry("Painter",  PropertyId.Painter, s_ParserTable[10]);
+            s_parseEntries[42] = new PropertyParseEntry("PointerEvents",  PropertyId.PointerEvents, s_ParserTable[11]);
+            s_parseEntries[43] = new PropertyParseEntry("PreferredHeight",  PropertyId.PreferredHeight, s_ParserTable[8]);
+            s_parseEntries[44] = new PropertyParseEntry("PreferredWidth",  PropertyId.PreferredWidth, s_ParserTable[8]);
+            s_parseEntries[45] = new PropertyParseEntry("Visibility",  PropertyId.Visibility, s_ParserTable[12]);
 
             s_PropertyNames = new string[] {
                 "BackgroundColor",
@@ -126,6 +124,16 @@ namespace UIForia.Style {
                 "PreferredWidth",
                 "Visibility"
             };
+
+            s_ShorthandNames = new string[] {
+                "MaxSize",
+                "MinSize",
+                "PreferredSize"
+            };
+            s_ShorthandEntries = new ShorthandEntry[3];
+            s_ShorthandEntries[0] = new ShorthandEntry("MaxSize",  0, new UIForia.Style.MaxSizeParser());
+            s_ShorthandEntries[1] = new ShorthandEntry("MinSize",  1, new UIForia.Style.MinSizeParser());
+            s_ShorthandEntries[2] = new ShorthandEntry("PreferredSize",  2, new UIForia.Style.PreferredSizeParser());
 
         }
     }

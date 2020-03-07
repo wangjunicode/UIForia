@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Exceptions;
 using UIForia.Style;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Style2 {
 
@@ -13,7 +15,9 @@ namespace UIForia.Style2 {
         Constant = 1 << 1,
         Mixin = 1 << 2,
         Selector = 1 << 3,
-        StyleState = 1 << 4
+        StyleState = 1 << 4,
+        SelectorQuery = 1 << 5,
+        Import = 1 << 6
 
     }
 
@@ -23,20 +27,21 @@ namespace UIForia.Style2 {
         private readonly StyleSheet2 sheet;
         private int currentStyleState;
         private ParseMode currentParseMode;
-        private CharSpan currentStyleName;
+        private CharSpan currentScopeName;
 
         [ThreadStatic] private static StructList<char> s_CharBuffer;
         [ThreadStatic] private static StructList<ParsedStyle> s_StyleList;
         [ThreadStatic] private static ChunkedStructList<StyleBodyPart> s_Parts;
         [ThreadStatic] private static StructList<PendingConstant> s_Constants;
         [ThreadStatic] private static StructList<StyleProperty2> s_PropertyBuffer;
+        [ThreadStatic] private static StructList<ParsedMixin> s_MixinList;
 
-        public StyleSheetParser(Module module, StyleSheet2 sheet) {
+        private StyleSheetParser(Module module, StyleSheet2 sheet) {
             this.module = module;
             this.sheet = sheet;
             this.currentStyleState = StyleStateIndex.Normal;
             this.currentParseMode = ParseMode.Root;
-            this.currentStyleName = default;
+            this.currentScopeName = default;
         }
 
         public static StyleSheet2 ParseString(Module module, string contents) {
@@ -46,18 +51,19 @@ namespace UIForia.Style2 {
             s_StyleList = s_StyleList ?? new StructList<ParsedStyle>(64);
             s_Constants = s_Constants ?? new StructList<PendingConstant>(32);
             s_PropertyBuffer = s_PropertyBuffer ?? new StructList<StyleProperty2>();
+            s_MixinList = s_MixinList ?? new StructList<ParsedMixin>(16);
 
             s_Parts.Clear();
             s_StyleList.QuickClear();
             s_Constants.QuickClear();
             s_PropertyBuffer.QuickClear();
+            s_MixinList.QuickClear();
 
             StyleSheet2 sheet = new StyleSheet2(module, "STRING", rawContents);
 
             StyleSheetParser parser = new StyleSheetParser(module, sheet);
 
             parser.Parse(rawContents);
-
 
             return sheet;
         }
@@ -77,6 +83,9 @@ namespace UIForia.Style2 {
                     if (stream.TryMatchRange("style")) {
                         ParseStyle(ref stream);
                     }
+                    else if (stream.TryMatchRange("mixin")) {
+                        ParseMixin(ref stream);
+                    }
                     else if (stream.TryMatchRange("export")) {
                         throw new NotImplementedException();
                     }
@@ -87,7 +96,10 @@ namespace UIForia.Style2 {
                         ParseConstant(ref stream);
                     }
                     else if (stream.TryMatchRange("animation")) {
-                        throw new NotImplementedException();
+                        ParseAnimation(ref stream);
+                    }
+                    else if (stream.TryMatchRange("query")) {
+                        ParseSelectorQuery(ref stream);
                     }
                     else if (stream.TryMatchRange("spritesheet")) {
                         throw new NotImplementedException();
@@ -104,11 +116,15 @@ namespace UIForia.Style2 {
                 }
 
                 ValidateLocalConstants();
-
+                ValidateMixins();
+                
                 sheet.SetParts(s_Parts.ToArray());
                 sheet.SetStyles(s_StyleList.ToArray());
                 sheet.SetConstants(s_Constants.ToArray());
+                sheet.SetMixins(s_MixinList.ToArray());
+                
                 s_Parts.Clear();
+                s_MixinList.QuickClear();
                 s_StyleList.QuickClear();
             }
             catch (ParseException exception) {
@@ -122,6 +138,188 @@ namespace UIForia.Style2 {
             return id >= 0;
         }
 
+       
+
+        private void ParseSelectorQuery(ref CharStream stream) {
+            // target could be any combination of
+            // tag
+            // attribute
+            // style state
+            // modifier
+            // style name
+            // query <Tag>.style from x x x x x;
+
+            if (!stream.TryGetDelimitedSubstream(';', out CharStream queryStream)) {
+                throw new ParseException($"Failed to parse selector query on line {stream.GetLineNumber()}.");
+            }
+            
+            throw new NotImplementedException();
+            // while (queryStream.HasMoreTokens) {
+            //     if (queryStream.TryParseCharacter('.')) {
+            //         var part = new SelectorTargetPart();
+            //         part.type = 1;
+            //         queryStream.TryParseIdentifier(out CharSpan styleName);
+            //         part.name = styleName;
+            //     }
+            //
+            //     if (queryStream.TryParseCharacter('[')) {
+            //         var part = new SelectorTargetPart();
+            //         part.type = 2;
+            //         stream.TryGetSubStream('[', ']', out CharStream attrStream);
+            //
+            //         attrStream.TryParseIdentifier(out CharSpan attr);
+            //             
+            //         if (attrStream.TryMatchRange("=")) { }
+            //         if (attrStream.TryMatchRange("!=")) { }
+            //         if (attrStream.TryMatchRange("~=")) { }
+            //         if (attrStream.TryMatchRange("^=")) { }
+            //             
+            //     }
+            //
+            //     if (queryStream.TryParseCharacter('<')) {
+            //             
+            //         if (!queryStream.TryGetSubStream('<', '>', out CharStream tagStream)) {
+            //                 
+            //         }
+            //
+            //         if (tagStream.Contains(':')) { }
+            //
+            //     }
+            //
+            //     if (queryStream.TryParseCharacter(':')) {
+            //         if (queryStream.TryMatchRangeIgnoreCase("firstChild")) { }
+            //         if (queryStream.TryMatchRangeIgnoreCase("lastChild")) { }
+            //         if (queryStream.TryMatchRangeIgnoreCase("nthChild")) { }
+            //         if (queryStream.TryMatchRangeIgnoreCase("evenChildren")) { }
+            //         if (queryStream.TryMatchRangeIgnoreCase("oddChildren")) { }
+            //         if (queryStream.TryMatchRangeIgnoreCase("onlyChild")) { }
+            //         if (queryStream.TryMatchRangeIgnoreCase("childCountAtLeast")) { }
+            //         if (queryStream.TryMatchRangeIgnoreCase("childCountAtMost")) { }
+            //         if (queryStream.TryMatchRangeIgnoreCase("childCountBetween")) { }
+            //     }
+            //
+            //     if (queryStream.TryParseCharacter('%')) {
+            //             
+            //         if (queryStream.TryMatchRangeIgnoreCase("hover")) { }
+            //         if (queryStream.TryMatchRangeIgnoreCase("focus")) { }
+            //         if (queryStream.TryMatchRangeIgnoreCase("active")) { }
+            //         if (queryStream.TryMatchRangeIgnoreCase("focus-within")) { }
+            //
+            //     }
+            // }
+            //     
+            // if (stream.TryMatchRangeIgnoreCase("without")) { }
+            //
+            // if (stream.TryMatchRangeIgnoreCase("from")) { }
+            //
+            // if (stream.TryMatchRange("=>")) { }
+
+        }
+        
+        private void ParseAnimation(ref CharStream stream) {
+            if (!stream.TryParseIdentifier(out CharSpan animationName)) {
+                throw new ParseException("Expected a valid identifier after the 'animation' keyword on line " + stream.GetLineNumber());
+            }
+
+            if (!stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
+                throw new ParseException($"Expected a matching set of {{ }} after animation declaration '{animationName}' on line {animationName.GetLineNumber()}");
+            }
+
+            ParseAnimationBody(ref bodyStream);
+            
+        }
+        
+        private unsafe void ParseAnimationBody(ref CharStream stream) {
+
+            byte* times = stackalloc byte[64];
+            
+            while (stream.HasMoreTokens) {
+
+                // if (TryParseAnimationConditionBlock(ref stream)) {
+                //     continue;
+                // }
+                
+                // duration { #const = value; default = value; }
+                
+                // [keyframes] {
+                //     0% { BackgroundColor = @codeColor; }
+                //     20% { BackgroundColor = yellow; }
+                //     80% { BackgroundColor = yellow; }
+                //     100% { BackgroundColor = @codeColor;}
+                // }
+                // 0%, 100% { TransformPosition = 0; }
+                // 10%, 30%, 50%, 70%, 90% { TransformPosition = -10px 0; }
+                // 20%, 40%, 60%, 80% { TransformPosition = 10px 0; }
+                
+                // 20%,
+                // 40%,
+                // 60%,
+                // 80%
+                // { TransformPosition = 10px 0;
+                //    play animation other({data}, data = x);
+                // }
+                
+                // StructList<ParsedKeyFrame> keyframeList = new StructList<ParsedKeyFrame>();
+                //
+                // if (stream.TryGetSubStream('[', ']', out CharStream braceStream)) {
+                //     
+                //     if (braceStream.TryMatchRangeIgnoreCase("options")) { }
+                //
+                //     if (braceStream.TryMatchRangeIgnoreCase("keyframes")) {
+                //         
+                //         if (stream.TryGetSubStream('{', '}', out CharStream keyframes)) {
+                //
+                //             while (keyframes.HasMoreTokens) {
+                //                 
+                //                 keyframes.ConsumeWhiteSpaceAndComments();
+                //
+                //                 int timeCount = 0;
+                //                 
+                //                 // keyframe = new KeyFrame(byte[] times, range properties)
+                //                 while (ParseKeyframeTime(ref keyframes, out times[timeCount++])) {
+                //                     keyframes.TryParseCharacter(',');
+                //                 }
+                //
+                //                 if (!keyframes.TryGetSubStream('{', '}', out CharStream frameBody)) {
+                //                     
+                //                 }
+                //                 
+                //                 int keyframeBodyStart = s_Parts.size;
+                //                 
+                //                 ParseStyleBody(ref frameBody);
+                //                 
+                //                 ParsedKeyFrame frame = new ParsedKeyFrame(keyframeBodyStart, s_Parts.size);
+                //
+                //                 for (int i = 0; i < timeCount; i++) {
+                //                     animation.AddKeyFrame(times, frame);
+                //                 }
+                //                 
+                //             }
+                //
+                //         }   
+                //         
+                //     }
+                //     
+                // }
+
+                if (stream.TryParseIdentifier(out CharSpan param)) { }
+
+                bool ParseKeyframeTime(ref CharStream frameStream, out byte time) {
+                    
+                    if (frameStream.TryParseUInt(out uint value)) {
+                        
+                        frameStream.TryParseCharacter('%');
+                        
+                        time = (byte)Mathf.Min(value, 100);
+                        return true;
+                    }
+
+                    time = 0;
+                    return false;
+                }
+            }   
+        }
+        
         private void ParseConstant(ref CharStream stream) {
             if (!stream.TryParseIdentifier(out CharSpan identifier)) {
                 throw new ParseException($"Expected to find an identifier after the 'const' keyword on line {stream.GetLineNumber()}");
@@ -193,7 +391,6 @@ namespace UIForia.Style2 {
             AddLocalConstant(constant);
         }
 
-
         private void ParseStyleExtension(ref CharStream stream) {
             if (stream.TryParseCharacter('@')) {
                 throw new NotImplementedException();
@@ -202,7 +399,7 @@ namespace UIForia.Style2 {
                 s_Parts.Add(new Part_ExtendStyle(name, sheet.id, 0));
             }
             else {
-                throw new ParseException($"Invalid style extension for style {currentStyleName} on line {stream.GetLineNumber()}");
+                throw new ParseException($"Invalid style extension for style {currentScopeName} on line {stream.GetLineNumber()}");
             }
         }
 
@@ -211,10 +408,10 @@ namespace UIForia.Style2 {
                 throw new ParseException($"Expected to find an identifier after 'style' token on line {stream.GetLineNumber()}");
             }
 
-            currentParseMode |= ParseMode.Style;
-            currentStyleName = styleName;
+            ValidateStyleName(styleName);
 
-            ref ParsedStyle style = ref AddStyle(styleName);
+            currentParseMode |= ParseMode.Style;
+            currentScopeName = styleName;
 
             // extending will build using another sheet's context. so constants & imports are used. local vars are fine
             // when validating we can resolve style id for external things
@@ -225,19 +422,25 @@ namespace UIForia.Style2 {
             }
 
             if (stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
+
+                int rangeStart = s_Parts.size;
+
                 ParseStyleBody(ref bodyStream);
 
-                style.partEnd = s_Parts.size;
-                s_Parts.Add(new Part_Style(styleName, style.partStart));
+                ParsedStyle style = new ParsedStyle(styleName, rangeStart, s_Parts.size);
+
+                s_StyleList.Add(style);
+                s_Parts.Add(new Part_Style(styleName, (uint) style.rangeStart));
+
                 currentParseMode &= ~ParseMode.Style;
-                currentStyleName = default;
+                currentScopeName = default;
             }
             else {
                 throw new ParseException($"Invalid style block for style {styleName} on line {stream.GetLineNumber()}");
             }
         }
 
-        private unsafe void ParseStyleBody(ref CharStream stream) {
+        private void ParseStyleBody(ref CharStream stream) {
             stream.ConsumeWhiteSpaceAndComments();
 
             while (stream.HasMoreTokens) {
@@ -255,25 +458,54 @@ namespace UIForia.Style2 {
                     continue;
                 }
 
-                if (!stream.TryParseIdentifier(out CharSpan identifier)) {
-                    throw new ParseException($"Unexpected token in {currentStyleName} on line {stream.GetLineNumber()}");
-                }
-
                 // run probably requires an [enter] or [exit] now
                 // same with play, pause, whatever
+
+                if (stream.TryMatchRangeIgnoreCase("mixin")) {
+                    ApplyMixin(ref stream);
+                    continue;
+                }
 
                 if (stream.TryMatchRangeIgnoreCase("run")) { }
 
                 if (stream.TryMatchRangeIgnoreCase("selector")) { }
 
                 if (stream.TryMatchRangeIgnoreCase("when")) { }
-
+                
+                if (!stream.TryParseIdentifier(out CharSpan identifier)) {
+                    throw new ParseException($"Unexpected token in {currentScopeName} on line {stream.GetLineNumber()}");
+                }
                 if (TryParsePropertyDeclaration(identifier, ref stream)) {
                     continue;
                 }
 
-                throw new ParseException($"Unexpected token in {currentStyleName} on line {stream.GetLineNumber()}");
+                throw new ParseException($"Unexpected token in {currentScopeName} on line {stream.GetLineNumber()}.");
             }
+        }
+
+        private void ApplyMixin(ref CharStream stream) {
+            if ((currentParseMode & (ParseMode.Root | ParseMode.Constant | ParseMode.SelectorQuery | ParseMode.Import)) != 0) {
+                throw new ParseException($"Applying a mixin is not valid on line {stream.GetLineNumber()}.");
+            }
+
+            if (!stream.TryGetSubStream('(', ')', out CharStream paramStream)) {
+                throw new ParseException($"Expected a matched pair of ( ) after 'mixin' keyword on line {stream.GetLineNumber()}.");
+            }
+
+            bool isVariable = paramStream.TryParseCharacter('@');
+
+            if (!paramStream.TryParseDottedIdentifier(out CharSpan identifier)) {
+                throw new ParseException($"Expected a valid identifier inside the parens on line {paramStream.GetLineNumber()}.");
+            }
+
+            if (!isVariable) {
+                EnsureMixin(identifier);
+            }
+
+            s_Parts.Add(new Part_ApplyMixin(identifier, isVariable));
+
+            stream.TryParseCharacter(';'); // step over the semi colon if present. todo -- consider error if missing and not new line
+            stream.ConsumeWhiteSpaceAndComments();
         }
 
         private bool TryParsePropertyDeclaration(CharSpan propertyName, ref CharStream stream) {
@@ -292,6 +524,37 @@ namespace UIForia.Style2 {
             }
 
             return false;
+        }
+
+        private bool TryParseAnimationConditionBlock(ref CharStream stream) {
+            if (!stream.TryParseCharacter('#')) {
+                return false;
+            }
+
+            if (!stream.TryParseIdentifier(out CharSpan conditionName)) {
+                throw new ParseException($"Expected a valid condition identifier after '#' on line {stream.GetLineNumber()}");
+            }
+
+            conditionName = conditionName.Trim();
+
+            int conditionId = module.GetDisplayConditionId(conditionName);
+
+            // todo -- consider a 'loose' condition mode that just returns false if condition not present
+            if (conditionId == -1) {
+                throw new ParseException($"Unknown condition {conditionName} referenced on line {stream.GetLineNumber()}. Make sure you have registered all constants in your module definition.");
+            }
+
+            if (!stream.TryGetSubStream('{', '}', out CharStream conditionBody)) {
+                throw new ParseException($"Invalid condition block for condition {conditionName} referenced on line {stream.GetLineNumber()}. Make sure you wrap the body in matching braces.");
+            }
+
+            int start = s_Parts.size;
+
+            ParseAnimationBody(ref conditionBody);
+
+            s_Parts.Add(new Part_ConditionBlock(conditionName, conditionId, start));
+
+            return true;
         }
 
         private bool TryParseConditionBlock(ref CharStream stream) {
@@ -358,7 +621,7 @@ namespace UIForia.Style2 {
             }
 
             if (!entry.parser.TryParse(propertyStream, entry.propertyId, out StyleProperty2 property)) {
-                throw new ParseException($"Failed to parse style property {propertyName} in style {currentStyleName} on line {propertyStream.GetLineNumber()}.");
+                throw new ParseException($"Failed to parse style property {propertyName} in style {currentScopeName} on line {propertyStream.GetLineNumber()}.");
             }
 
             s_Parts.Add(new Part_Property(property));
@@ -387,7 +650,7 @@ namespace UIForia.Style2 {
             s_PropertyBuffer.size = 0;
 
             if (!entry.parser.TryParse(propertyStream, s_PropertyBuffer)) {
-                throw new ParseException($"Failed to parse style property {propertyName} in style {currentStyleName} on line {propertyStream.GetLineNumber()}.");
+                throw new ParseException($"Failed to parse style property {propertyName} in style {currentScopeName} on line {propertyStream.GetLineNumber()}.");
             }
 
             for (int i = 0; i < s_PropertyBuffer.size; i++) {
@@ -449,6 +712,28 @@ namespace UIForia.Style2 {
             }
 
             throw new ParseException("Invalid input");
+        }
+
+        private void ParseMixin(ref CharStream stream) {
+
+            if (!stream.TryParseIdentifier(out CharSpan mixinName)) {
+                throw new ParseException($"Expected a valid identifier after the 'mixin' keyword on line {stream.GetLineNumber()}");
+            }
+
+            if (!stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
+                throw new ParseException($"Expected a matching set of {{ }} after mixin declaration '{mixinName}' on line {mixinName.GetLineNumber()}");
+            }
+
+            currentScopeName = mixinName;
+            currentParseMode |= ParseMode.Mixin;
+            int start = s_Parts.size;
+
+            ParseStyleBody(ref bodyStream);
+
+            currentParseMode &= ~ParseMode.Mixin;
+
+            s_MixinList.Add(new ParsedMixin(mixinName, (uint) start, (uint) s_Parts.size));
+
         }
 
         private void ParseStyleState(ref CharStream stream, int stateIndex) {
@@ -552,16 +837,12 @@ namespace UIForia.Style2 {
             s_Constants.Add(constant);
         }
 
-        private static ref ParsedStyle AddStyle(CharSpan styleName) {
+        private static void ValidateStyleName(CharSpan styleName) {
             for (int i = 0; i < s_StyleList.size; i++) {
                 if (s_StyleList[i].name == styleName) {
                     throw new ParseException($"Style with name '{styleName}' was already defined on line {s_StyleList[i].name.GetLineNumber()}");
                 }
             }
-
-            s_StyleList.Add(new ParsedStyle(styleName, s_Parts.size));
-
-            return ref s_StyleList.array[s_StyleList.size - 1];
         }
 
         internal void ValidateLocalConstants() {
@@ -576,7 +857,6 @@ namespace UIForia.Style2 {
                 }
             }
         }
-
 
         internal void EnsureConstant(CharSpan identifier) {
             if (s_Constants == null) {
@@ -594,6 +874,28 @@ namespace UIForia.Style2 {
             });
         }
 
+        internal void EnsureMixin(CharSpan identifier) {
+
+            for (int i = 0; i < s_MixinList.size; i++) {
+                if (s_MixinList.array[i].name == identifier) {
+                    return;
+                }
+            }
+
+            s_MixinList.Add(new ParsedMixin(identifier, 0, 0));
+
+        }
+
+        internal void ValidateMixins() {
+            for (int i = 0; i < s_MixinList.size; i++) {
+                ref ParsedMixin mixin = ref s_MixinList.array[i];
+
+                if (mixin.rangeStart == 0 && mixin.rangeEnd == 0) {
+                    // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
+                    throw new ParseException($"Cannot find a definition for constant '{mixin.name}'. Be sure you declare it before using it on line {mixin.name.GetLineNumber()}.");
+                }
+            }
+        }
 
         private static ParseException ExpectedEqualAfterDefault(PendingConstant constant, CharStream bodyStream) {
             return new ParseException($"Expected an '=' sign after the 'default' keyword while parsing style constant '{constant.name}' on line {bodyStream.GetLineNumber()}");

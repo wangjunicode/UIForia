@@ -366,6 +366,37 @@ namespace UIForia.Util {
 
         }
 
+        public bool TryParseDottedIdentifier(out CharSpan retn, out bool wasDotted) {
+
+            if (!TryParseIdentifier(out CharSpan identifier, true, WhitespaceHandling.ConsumeBefore)) {
+                retn = default;
+                wasDotted = false;
+                return false;
+            }
+
+            if (!TryParseCharacter('.', WhitespaceHandling.None)) {
+                retn = identifier;
+                wasDotted = false;
+                return true;
+            }
+
+            if (!TryParseIdentifier(out CharSpan endIdent, true, WhitespaceHandling.ConsumeAfter)) {
+                ConsumeWhiteSpaceAndComments();
+                wasDotted = false;
+                retn = identifier;
+                return true;
+            }
+
+            wasDotted = true;
+            retn = new CharSpan(data, identifier.rangeStart, endIdent.rangeEnd);
+            return true;
+
+        }
+
+        public bool TryParseDottedIdentifier(out CharSpan retn) {
+            return TryParseDottedIdentifier(out retn, out bool _);
+        }
+
         public bool TryParseIdentifier(out CharSpan span, bool allowMinus = true, WhitespaceHandling whitespaceHandling = WhitespaceHandling.ConsumeAll) {
             uint start = ptr;
 

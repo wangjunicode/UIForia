@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Threading;
 using UIForia.Exceptions;
 using UIForia.Rendering;
-using UIForia.Selectors;
 using UIForia.Style;
 using UIForia.Util;
-using UnityEngine;
 
 namespace UIForia.Style2 {
 
@@ -128,16 +126,13 @@ namespace UIForia.Style2 {
         public readonly string filePath;
         internal readonly char[] source;
 
-        internal StructList<InternalStyle> styles;
-        internal StructList<Mixin> mixins;
-        internal StructList<Selector> selectors;
-        internal StructList<RunCommand> commands;
-
+        internal ParsedMixin[] mixins;
         internal PendingConstant[] constants;
-
         internal ParsedStyle[] rawStyles;
 
+        internal StructList<InternalStyle> styles;
         internal StructList<StyleProperty2> properties;
+        private LightStack<CharSpan> mixinTracer;
 
         // animations
         // spritesheets
@@ -156,6 +151,7 @@ namespace UIForia.Style2 {
             this.filePath = filePath;
             this.source = source;
             this.properties = new StructList<StyleProperty2>();
+            this.mixinTracer = new LightStack<CharSpan>(); // dont like this
         }
 
         public bool TryGetStyle(string styleName, out Style style) {
@@ -209,46 +205,9 @@ namespace UIForia.Style2 {
 
             // note: we run through the style properties BACKWARDS so that we can do a quick test to see if a property was already set.
             // if it was, we dont need to do more work, we can just continue to the next instruction. 
-            int index = parsedStyle.partEnd - 1;
-            while (index >= parsedStyle.partStart) {
-                ref StyleBodyPart part = ref parts[index];
+            int index = parsedStyle.rangeEnd - 1;
 
-                switch (part.type) {
-                    case BodyPartType.EnterState: {
-                        index--;
-                        BuildStyleState(ref buildData, ref index, part.enterState);
-                        continue;
-                    }
-                    case BodyPartType.Property: {
-                        index--;
-                        BuildProperty(part.property, ref buildData);
-                        break;
-                    }
-                    case BodyPartType.VariableProperty: {
-                        index--;
-                        BuildVariableProperty(part.variableProperty, ref buildData);
-                        break;
-                    }
-                    case BodyPartType.VariablePropertyShorthand: {
-                        index--;
-                        BuildVariableShorthand(part.variableShorthand, ref buildData);
-                        break;
-                    }
-                    case BodyPartType.ConditionBlock: {
-                        Part_ConditionBlock conditionBlock = part.conditionBlock;
-
-                        if (!module.GetDisplayConditions()[conditionBlock.conditionId]) {
-                            index = conditionBlock.rangeStart;
-                        }
-
-                        index--; // need to -1 even if we hit the jump condition above
-
-                        break;
-                    }
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
+            BuildPartList(ref buildData, ref index, parsedStyle.rangeStart);
 
             style.name = parsedStyle.name;
 
@@ -284,6 +243,46 @@ namespace UIForia.Style2 {
             }
 
             styles.Add(style);
+        }
+
+        private void BuildApplyMixin(Part_ApplyMixin mixin, ref StyleBuildData buildData) {
+            if (mixin.isVariable) {
+                throw new NotImplementedException();
+            }
+
+            for (int i = 0; i < mixinTracer.size; i++) {
+                
+                if (mixinTracer.array[i] != mixin.mixinName) {
+                    continue;
+                }
+                
+                string error = mixinTracer.array[0].ToString();
+                
+                for (int j = 1; j <= i; j++) {
+                    error += " -> ";
+                    error += mixinTracer.array[j].ToString();
+                }
+
+                throw new ParseException("Found recursion in building mixin:" + error);
+            }
+
+            // find mixin, probably only works locally for now
+            for (int i = 0; i < mixins.Length; i++) {
+
+                if (mixins[i].name == mixin.mixinName) {
+                    mixinTracer.Push(mixin.mixinName);
+                    int idx = (int) mixins[i].rangeEnd - 1;
+                    BuildPartList(ref buildData, ref idx, (int) mixins[i].rangeStart);
+                    mixinTracer.Pop();
+                    return;
+                }
+
+            }
+
+            // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
+            ParseException ex = new ParseException("Unable to find local mixin with name " + mixin.mixinName + " on line " + mixin.mixinName.GetLineNumber());
+            ex.SetFileName(filePath);
+            throw ex;
         }
 
         private static unsafe void BuildProperty(Part_Property part, ref StyleBuildData buildData) {
@@ -409,7 +408,7 @@ namespace UIForia.Style2 {
             int propertyCount = properties.size;
 
             try {
-                
+
                 if (!entry.parser.TryParse(parseStream, properties)) {
                     ParseException ex = new ParseException($"Failed to parse shorthand '{PropertyParsers.s_ShorthandNames[shorthand.shorthandIndex]}' with value '{parseStream}' on line {stream.GetLineNumber()}. Original value was '{shorthand.declaration}'.");
                     ex.SetFileName(filePath);
@@ -433,26 +432,57 @@ namespace UIForia.Style2 {
             }
         }
 
-        private void BuildStyleState(ref StyleBuildData buildData, ref int index, in Part_EnterState data) {
-            int oldIndex = buildData.stateIndex;
-            buildData.stateIndex = data.stateIndex;
-            while (index >= data.rangeStart) {
+        private void BuildPartList(ref StyleBuildData buildData, ref int index, int rangeStart) {
+
+            while (index >= rangeStart) {
+
                 ref StyleBodyPart part = ref parts[index];
 
                 switch (part.type) {
+
+                    case BodyPartType.Style: {
+                        throw new InvalidArgumentException("Should never hit a Style part while building. Styles cannot be nested");
+                    }
+
+                    case BodyPartType.EnterState: {
+                        index--;
+                        BuildStyleState(ref buildData, ref index, part.enterState);
+                        break;
+                    }
+
                     case BodyPartType.Property: {
                         index--;
                         BuildProperty(part.property, ref buildData);
                         break;
                     }
+
                     case BodyPartType.VariableProperty: {
                         index--;
                         BuildVariableProperty(part.variableProperty, ref buildData);
                         break;
                     }
+
                     case BodyPartType.VariablePropertyShorthand: {
                         index--;
                         BuildVariableShorthand(part.variableShorthand, ref buildData);
+                        break;
+                    }
+
+                    case BodyPartType.ApplyMixin: {
+                        index--;
+                        BuildApplyMixin(part.applyMixin, ref buildData);
+                        break;
+                    }
+
+                    case BodyPartType.ConditionBlock: {
+                        Part_ConditionBlock conditionBlock = part.conditionBlock;
+
+                        if (!module.GetDisplayConditions()[conditionBlock.conditionId]) {
+                            index = conditionBlock.rangeStart;
+                        }
+
+                        index--; // need to -1 even if we hit the jump condition above
+
                         break;
                     }
 
@@ -461,9 +491,16 @@ namespace UIForia.Style2 {
                 }
             }
 
-            buildData.stateIndex = oldIndex;
         }
 
+        private void BuildStyleState(ref StyleBuildData buildData, ref int index, in Part_EnterState data) {
+            int oldIndex = buildData.stateIndex;
+            buildData.stateIndex = data.stateIndex;
+
+            BuildPartList(ref buildData, ref index, data.rangeStart);
+
+            buildData.stateIndex = oldIndex;
+        }
 
         private void BuildLocalConstants() {
             if (constants == null) return;
@@ -549,6 +586,10 @@ namespace UIForia.Style2 {
 
         internal void SetStyles(ParsedStyle[] rawStyleArray) {
             this.rawStyles = rawStyleArray;
+        }
+
+        public void SetMixins(ParsedMixin[] rawMixins) {
+            this.mixins = rawMixins;
         }
 
         internal void SetConstants(PendingConstant[] constants) {

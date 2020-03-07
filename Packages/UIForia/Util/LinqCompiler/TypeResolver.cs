@@ -1,30 +1,32 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using UIForia.Extensions;
 using UIForia.Parsing.Expressions;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Util {
 
     public class TypeResolver {
 
-        private static readonly string[] s_SingleNamespace = new string[1];
-        private readonly Dictionary<string, LightList<Assembly>> s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
+        private readonly string[] SingleNamespace = new string[1]; // instance for thread safety
+
+        private static Dictionary<string, LightList<Assembly>> s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
 
         private static TypeResolver defaultResolver;
 
-        private Assembly[] assemblies;
         private static Assembly[] s_AllAssemblies;
 
-        // todo! I totally broke this, need to circle back and fix it later. should configurable to filter out assemblies, only gather public types, and invoke a type processor callback for class types
+        public TypeResolver() {
+            Initialize();
+        }
 
-        public TypeResolver(IList<Assembly> assemblies = null) {
-            if (assemblies == null) {
-                this.assemblies = AppDomain.CurrentDomain.GetAssemblies().ToArray();
-            }
-            else {
-                this.assemblies = assemblies.ToArray();
+        public static void Initialize() {
+            if (s_AllAssemblies == null) {
+                s_AllAssemblies = AppDomain.CurrentDomain.GetAssemblies().ToArray();
+                FilterAssemblies();
             }
         }
 
@@ -33,54 +35,74 @@ namespace UIForia.Util {
                 if (defaultResolver != null) {
                     return defaultResolver;
                 }
+
                 defaultResolver = new TypeResolver();
                 return defaultResolver;
             }
         }
 
-        private void FilterAssemblies() {
+        private static void FilterAssemblies() {
             if (s_NamespaceMap != null) return;
-            
-            // todo -- parallel this 
-            
-            for (int i = 0; i < assemblies.Length; i++) {
-                
-                Assembly assembly = assemblies[i];
+            s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
 
-                if (ShouldFilterAssembly(assembly)) {
+            Stopwatch watch = Stopwatch.StartNew();
+
+            // Note, I tried to do this in parallel but assembly.GetTypes() must be locked or something since
+            // the performance of doing this in parallel was worse than doing it single threaded
+
+            int cnt = 0;
+
+            Assembly[] a = new Assembly[1];
+            a[0] = typeof(List<>).Assembly;
+            for (int i = 0; i < s_mscorlib.Length; i++) {
+                s_NamespaceMap.Add(s_mscorlib[i], new LightList<Assembly>(a));
+            }
+
+            Assembly current = Assembly.GetExecutingAssembly();
+
+            for (int i = 0; i < s_AllAssemblies.Length; i++) {
+
+                Assembly assembly = s_AllAssemblies[i];
+
+                if (assembly.IsDynamic || assembly == a[0] || assembly.ReflectionOnly) {
                     continue;
                 }
 
-                try { }
-                catch (Exception e) { }
+                cnt++;
+
+                try {
+                    Type[] types = assembly == current ? assembly.GetTypes() : assembly.GetExportedTypes();
+                    for (int j = 0; j < types.Length; j++) {
+                        Type currentType = types[j];
+                        // can be null if assembly referenced is unavailable
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+
+                        // nested types are always in their parent namespace, no need to scan
+                        if (currentType == null || !currentType.IsPublic || currentType.IsNested) {
+                            continue;
+                        }
+
+                        if (!s_NamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> list)) {
+                            list = new LightList<Assembly>(4);
+                            s_NamespaceMap.Add(currentType.Namespace ?? "null", list);
+                        }
+
+                        if (!list.Contains(assembly)) {
+                            list.Add(assembly);
+                        }
+
+                    }
+
+                }
+                catch (ReflectionTypeLoadException) {
+                    Debug.Log($"{assembly.FullName}");
+                    throw;
+                }
 
             }
-        }
 
-        private bool ShouldFilterAssembly(Assembly assembly) {
-            string name = assembly.FullName;
-
-            if (assembly.IsDynamic ||
-                name.StartsWith("System,") ||
-                name.StartsWith("Accessibility") ||
-                name.StartsWith("Boo") ||
-                name.StartsWith("I18N") ||
-                name.StartsWith("TextMeshPro") ||
-                name.StartsWith("nunit") ||
-                name.StartsWith("System.") ||
-                name.StartsWith("Microsoft.") ||
-                name.StartsWith("Mono") ||
-                name.StartsWith("Unity.") ||
-                name.StartsWith("ExCSS.") ||
-                name.Contains("mscorlib") ||
-                name.Contains("JetBrains") ||
-                name.Contains("UnityEngine") ||
-                name.Contains("UnityEditor") ||
-                name.Contains("Jetbrains")) {
-                return false;
-            }
-
-            return name.IndexOf("-firstpass", StringComparison.Ordinal) == -1;
+            Debug.Log($"Loaded types in: {watch.ElapsedMilliseconds} ms from {cnt} assemblies");
+            watch.Stop();
         }
 
         public Type ResolveTypeExpression(Type invokingType, IList<string> namespaces, string typeExpression) {
@@ -93,7 +115,6 @@ namespace UIForia.Util {
         }
 
         public bool IsNamespace(string toCheck) {
-            FilterAssemblies();
             return s_NamespaceMap.ContainsKey(toCheck);
         }
 
@@ -106,6 +127,7 @@ namespace UIForia.Util {
                 case "decimal": return typeof(decimal);
                 case "double": return typeof(double);
                 case "float": return typeof(float);
+                case "single": return typeof(float);
                 case "int": return typeof(int);
                 case "uint": return typeof(uint);
                 case "long": return typeof(long);
@@ -225,19 +247,18 @@ namespace UIForia.Util {
                 string checkedNamespaces = string.Join(",", namespaces.ToArray());
                 throw new TypeResolutionException($"Unable to resolve type {typeLookup}. Looked in namespaces: {checkedNamespaces}");
             }
-            else {
-                throw new TypeResolutionException($"Unable to resolve type {typeLookup}.");
-            }
+
+            throw new TypeResolutionException($"Unable to resolve type {typeLookup}.");
         }
 
         public Type ResolveType(string typeName, string namespaceName) {
-            s_SingleNamespace[0] = namespaceName ?? string.Empty;
-            return ResolveType(new TypeLookup(typeName), s_SingleNamespace);
+            SingleNamespace[0] = namespaceName ?? string.Empty;
+            return ResolveType(new TypeLookup(typeName), SingleNamespace);
         }
 
         public Type ResolveType(TypeLookup typeLookup, string namespaceName) {
-            s_SingleNamespace[0] = namespaceName ?? string.Empty;
-            return ResolveType(typeLookup, s_SingleNamespace);
+            SingleNamespace[0] = namespaceName ?? string.Empty;
+            return ResolveType(typeLookup, SingleNamespace);
         }
 
         public Type ResolveType(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null, Type scopeType = null) {
@@ -317,6 +338,90 @@ namespace UIForia.Util {
 
             return null;
         }
+
+        // this is a big assembly to scan, so I hardcoded it's namespaces
+        private static readonly string[] s_mscorlib = {
+            "Internal.Runtime.CompilerServices",
+            "Internal.Runtime.Augments",
+            "XamMac.CoreFoundation",
+            "Mono",
+            "Mono.Xml",
+            "Mono.Interop",
+            "Mono.Globalization.Unicode",
+            "Mono.Security",
+            "Mono.Security.X509",
+            "Mono.Security.X509.Extensions",
+            "Mono.Security.Cryptography",
+            "Mono.Security.Authenticode",
+            "Mono.Math",
+            "Mono.Math.Prime",
+            "Mono.Math.Prime.Generator",
+            "Microsoft.Reflection",
+            "Microsoft.Win32",
+            "Microsoft.Win32.SafeHandles",
+            "System",
+            "System.Deployment.Internal",
+            "System.Configuration.Assemblies",
+            "System.Text",
+            "System.Resources",
+            "System.Reflection",
+            "System.Reflection.Metadata",
+            "System.Reflection.Emit",
+            "System.IO",
+            "System.IO.IsolatedStorage",
+            "System.Globalization",
+            "System.Numerics.Hashing",
+            "System.Threading",
+            "System.Threading.Tasks",
+            "System.Security",
+            "System.Security.Policy",
+            "System.Security.Permissions",
+            "System.Security.AccessControl",
+            "System.Security.Util",
+            "System.Security.Principal",
+            "System.Security.Claims",
+            "System.Security.Cryptography",
+            "System.Security.Cryptography.X509Certificates",
+            "System.Runtime",
+            "System.Runtime.Hosting",
+            "System.Runtime.Versioning",
+            "System.Runtime.Serialization",
+            "System.Runtime.Serialization.Formatters",
+            "System.Runtime.Serialization.Formatters.Binary",
+            "System.Runtime.Remoting",
+            "System.Runtime.Remoting.Services",
+            "System.Runtime.Remoting.Proxies",
+            "System.Runtime.Remoting.Lifetime",
+            "System.Runtime.Remoting.Contexts",
+            "System.Runtime.Remoting.Channels",
+            "System.Runtime.Remoting.Activation",
+            "System.Runtime.Remoting.Metadata",
+            "System.Runtime.Remoting.Metadata.W3cXsd2001",
+            "System.Runtime.Remoting.Messaging",
+            "System.Runtime.ExceptionServices",
+            "System.Runtime.ConstrainedExecution",
+            "System.Runtime.CompilerServices",
+            "System.Runtime.InteropServices",
+            "System.Runtime.InteropServices.WindowsRuntime",
+            "System.Runtime.InteropServices.Expando",
+            "System.Runtime.InteropServices.ComTypes",
+            "System.Buffers",
+            "System.Buffers.Binary",
+            "System.Collections",
+            "System.Collections.ObjectModel",
+            "System.Collections.Concurrent",
+            "System.Collections.Generic",
+            "System.Diagnostics",
+            "System.Diagnostics.SymbolStore",
+            "System.Diagnostics.Contracts",
+            "System.Diagnostics.Contracts.Internal",
+            "System.Diagnostics.CodeAnalysis",
+            "System.Diagnostics.Private",
+            "System.Diagnostics.Tracing",
+            "System.Diagnostics.Tracing.Internal",
+            "System.Runtime.DesignerServices",
+            "Unity",
+        };
 
     }
 

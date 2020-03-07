@@ -20,6 +20,7 @@ namespace UIForia.Editor {
                 Application.RefreshAll();
             }
         }
+
     }
 
 }

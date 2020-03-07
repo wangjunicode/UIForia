@@ -103,8 +103,8 @@ namespace UIForia {
         }
 
         static Application() {
-            ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_CustomPainters = new Dictionary<string, Type>();
+            // todo -- loading this from resources is slooooow adds ~25ms to boot up time
             Settings = Resources.Load<UIForiaSettings>("UIForiaSettings");
             if (Settings == null) {
                 throw new Exception("UIForiaSettings are missing. Use the UIForia/Create UIForia Settings to create it");

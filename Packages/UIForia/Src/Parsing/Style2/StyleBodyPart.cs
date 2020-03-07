@@ -23,6 +23,7 @@ namespace UIForia.Style2 {
         [FieldOffset(4)] public readonly Part_ConstantBranch constantBranch;
         [FieldOffset(4)] public readonly Part_ExtendStyle extendStyle;
         [FieldOffset(4)] public readonly Part_VariablePropertyShorthand variableShorthand;
+        [FieldOffset(4)] public readonly Part_ApplyMixin applyMixin;
 
         public StyleBodyPart(in Part_ConstantBranch constantBranch) : this() {
             this.type = BodyPartType.ConstantBranch;
@@ -64,6 +65,11 @@ namespace UIForia.Style2 {
             this.variableShorthand = variableShorthand;
         }
 
+        public StyleBodyPart(in Part_ApplyMixin applyMixin) : this() {
+            this.type = BodyPartType.ApplyMixin;
+            this.applyMixin = applyMixin;
+        }
+
         public static implicit operator StyleBodyPart(Part_ConstantBranch c) {
             return new StyleBodyPart(c);
         }
@@ -96,6 +102,10 @@ namespace UIForia.Style2 {
             return new StyleBodyPart(c);
         }
 
+        public static implicit operator StyleBodyPart(Part_ApplyMixin c) {
+            return new StyleBodyPart(c);
+        }
+
 #if DEBUG
         private string DebuggerDisplay() {
             switch (type) {
@@ -119,6 +129,9 @@ namespace UIForia.Style2 {
 
                 case BodyPartType.ConditionBlock:
                     return conditionBlock.ToString();
+
+                case BodyPartType.ApplyMixin:
+                    return applyMixin.ToString();
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -242,15 +255,19 @@ namespace UIForia.Style2 {
                 case StyleStateIndex.Normal:
                     stateName = "Normal";
                     break;
+
                 case StyleStateIndex.Hover:
                     stateName = "Hover";
                     break;
+
                 case StyleStateIndex.Active:
                     stateName = "Active";
                     break;
+
                 case StyleStateIndex.Focus:
                     stateName = "Focus";
                     break;
+
                 default:
                     stateName = "--Invalid--";
                     break;
@@ -261,12 +278,28 @@ namespace UIForia.Style2 {
 
     }
 
+    internal struct Part_ApplyMixin {
+
+        public readonly CharSpan mixinName;
+        public readonly bool isVariable;
+
+        public Part_ApplyMixin(in CharSpan mixinName, bool isVariable) {
+            this.mixinName = mixinName;
+            this.isVariable = isVariable;
+        }
+
+        public override string ToString() {
+            return "Apply Mixin " + mixinName;
+        }
+
+    }
+
     internal struct Part_Style {
 
         public readonly CharSpan styleName;
-        public readonly int rangeStart;
+        public readonly uint rangeStart;
 
-        public Part_Style(in CharSpan styleName, int rangeStart) {
+        public Part_Style(in CharSpan styleName, uint rangeStart) {
             this.styleName = styleName;
             this.rangeStart = rangeStart;
         }

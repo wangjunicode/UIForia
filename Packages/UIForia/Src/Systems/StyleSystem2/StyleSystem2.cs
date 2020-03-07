@@ -141,8 +141,8 @@ namespace UIForia.Style {
             this.application = application;
             this.stack = new UIElement[32];
             this.changeSet = new LightList<StyleSet2>(32);
-            this.selectorMap = new NativeList<Selector>(64, Allocator.Persistent);
-            this.persistentStringMap = new NativeArray<int>(2048, Allocator.Persistent);
+            // this.selectorMap = new NativeList<Selector>(64, Allocator.Persistent);
+            // this.persistentStringMap = new NativeArray<int>(2048, Allocator.Persistent);
         }
 
         public void ConvertStyleSheet(StyleSheet sheet) {

@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using UIForia.Compilers;
 using UIForia.Parsing;
-using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using UnityEditor;
+using UnityEditor.Callbacks;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
@@ -18,13 +16,16 @@ namespace UIForia.Editor {
         private string[] names;
         private bool didEnable;
 
-        [UnityEditor.Callbacks.DidReloadScripts]
+        [DidReloadScripts]
         private static void OnScriptsReloaded() {
             // todo try to track if pre-compiled templates are out of date or not
         }
 
         public void OnEnable() {
             didEnable = true;
+            // enumerate modules
+            // type resolver -> handles resolving types in scope, available statically by default. can subclass to only retrieve certain namespaces / assemblies
+            // type processor -> handles only template types
             LightList<ProcessedType> typeData = TypeProcessor.GetTemplateTypes();
 
             List<Type> validTypes = new List<Type>();
@@ -82,22 +83,13 @@ namespace UIForia.Editor {
 
             if (GUILayout.Button("Generate Code")) {
                 TemplateCodeGenerator.Generate(behavior.type, behavior.GetTemplateSettings(behavior.type));
-
-//                TemplateCompiler compiler = new TemplateCompiler(settings);
-//                
-//                // maybe this should also know the root type for an application
-//                PreCompiledTemplateData compiledOutput = new PreCompiledTemplateData(settings);
-//
-//                compiler.CompileTemplates(behavior.type, compiledOutput);
-//
-//                compiledOutput.GenerateCode();
             }
 
             EditorGUILayout.ObjectField(serializedObject.FindProperty("camera"));
             serializedObject.FindProperty("typeName").stringValue = behavior.typeName;
             serializedObject.ApplyModifiedProperties();
 
-            if (UnityEditor.EditorApplication.isPlaying) {
+            if (EditorApplication.isPlaying) {
                 if (behavior.application == null) return;
                 EditorGUILayout.BeginHorizontal();
                 float dpi = behavior.application.DPIScaleFactor;

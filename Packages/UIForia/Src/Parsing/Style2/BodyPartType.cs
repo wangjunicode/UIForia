@@ -10,7 +10,9 @@ namespace UIForia.Style2 {
         EnterState,
         ConditionBlock,
 
-        VariablePropertyShorthand
+        VariablePropertyShorthand,
+
+        ApplyMixin
 
     }
 

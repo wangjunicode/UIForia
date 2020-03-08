@@ -35,6 +35,9 @@ namespace UIForia {
         private static readonly Dictionary<Type, DiscoveredModule> s_DiscoveryMap = new Dictionary<Type, DiscoveredModule>();
         private static readonly Dictionary<Type, Module> s_ModuleInstances = new Dictionary<Type, Module>();
 
+        private static readonly HashSet<string> s_StringHashSet = new HashSet<string>();
+        private static readonly HashSet<Type> s_TypeHashSet = new HashSet<Type>();
+
         private static bool s_ConstructionAllowed;
 
         public Module() {
@@ -129,7 +132,10 @@ namespace UIForia {
                 throw new Exception($"Module types cannot be abstract. {TypeNameGenerator.GetTypeName(moduleType)} is abstract!");
             }
 
-            Module root = (Module) Activator.CreateInstance(moduleType);
+            if (!s_ModuleInstances.TryGetValue(moduleType, out Module root)) {
+                root = (Module) Activator.CreateInstance(moduleType);
+                s_ModuleInstances[moduleType] = root;
+            }
 
             GatherDependencies(root);
 
@@ -208,24 +214,33 @@ namespace UIForia {
 
         private static void GatherDependencies(Module m) {
 
+            if (m.dependenciesResolved) {
+                return;
+            }
+
             m.dependenciesResolved = true;
 
-            IList<ModuleReference> dependencies = m.GetCachedDependencies();
+            IList<ModuleReference> dependencies = m.dependencies;
+
+            s_StringHashSet.Clear();
+            s_TypeHashSet.Clear();
+
+            m.ValidateDependencies(s_StringHashSet, s_TypeHashSet);
 
             for (int i = 0; i < dependencies.Count; i++) {
 
                 Type moduleType = dependencies[i].GetModuleType();
 
                 if (!s_ModuleInstances.TryGetValue(moduleType, out Module instance)) {
+                    s_ConstructionAllowed = true;
                     instance = (Module) Activator.CreateInstance(moduleType);
+                    s_ConstructionAllowed = false;
                     s_ModuleInstances[moduleType] = instance;
                 }
 
                 dependencies[i].ResolveModule(instance);
-
-                if (!instance.dependenciesResolved) {
-                    GatherDependencies(instance);
-                }
+                
+                GatherDependencies(instance);
 
             }
 
@@ -245,7 +260,7 @@ namespace UIForia {
         private static int CountSizeAndReset(Module module, int count) {
             module.visitedMark = VisitMark.Alive;
 
-            IList<ModuleReference> dependencies = module.GetCachedDependencies();
+            IList<ModuleReference> dependencies = module.dependencies;
 
             for (int i = 0; i < dependencies.Count; i++) {
                 count += CountSizeAndReset(dependencies[i].GetModuleInstance(), count);
@@ -347,6 +362,7 @@ namespace UIForia {
                 }
 
                 DiscoveredModule discoveredModule = new DiscoveredModule(currentType, new Uri(GetFilePathFromAttribute(currentType)));
+
                 for (int j = 0; j < modules.size; j++) {
                     DiscoveredModule module = modules[j];
                     if (module.moduleLocation.IsBaseOf(discoveredModule.moduleLocation)) { }
@@ -359,7 +375,7 @@ namespace UIForia {
                 }
 
                 s_DiscoveryMap.Add(currentType, discoveredModule);
-                
+
                 modules.Add(discoveredModule);
             }
 

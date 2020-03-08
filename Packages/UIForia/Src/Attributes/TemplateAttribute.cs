@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace UIForia.Attributes {
 
@@ -18,19 +19,22 @@ namespace UIForia.Attributes {
         public string templateId;
         public readonly TemplateType templateType;
         public string fullPathId;
-
-        public TemplateAttribute() {
+        public string elementPath;
+        
+        public TemplateAttribute(int DO_NOT_USE = 0, [CallerFilePath] string DO_NOT_USE_ALSO = "") {
             this.templateType = TemplateType.DefaultFile;
             this.templateId = null;
             this.source = string.Empty;
             this.fullPathId = null;
+            this.elementPath = elementPath;
         }
 
-        public TemplateAttribute(TemplateType templateType, string sourceOrPath) {
+        public TemplateAttribute(TemplateType templateType, string sourceOrPath, [CallerFilePath] string elementPath = "") {
             this.templateType = templateType;
             this.templateId = null;
             this.source = string.Empty; // set later 
             this.fullPathId = null;
+            this.elementPath = elementPath;
 
             switch (templateType) {
                 case TemplateType.DefaultFile:
@@ -51,7 +55,8 @@ namespace UIForia.Attributes {
             }
         }
 
-        public TemplateAttribute(string source) : this(TemplateType.File, source) { }
+        // ReSharper disable once ExplicitCallerInfoArgument
+        public TemplateAttribute(string source, [CallerFilePath] string DO_NOT_USE = "") : this(TemplateType.File, source, DO_NOT_USE) { }
 
     }
 

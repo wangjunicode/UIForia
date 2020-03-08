@@ -10,7 +10,13 @@ using Style = UIForia.Style2.Style;
 
 namespace Tests.StyleParser {
 
-    public class StyleParserTestModule : Module { }
+    public class StyleParserTestModule : Module {
+
+        public override void Initialize() {
+            UseDefaultFilePath();
+        }
+
+    }
 
     public class StyleParserTests2 {
 

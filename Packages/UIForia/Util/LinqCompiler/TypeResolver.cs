@@ -13,7 +13,7 @@ namespace UIForia.Util {
 
         private readonly string[] SingleNamespace = new string[1]; // instance for thread safety
 
-        private static Dictionary<string, LightList<Assembly>> s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
+        private static Dictionary<string, LightList<Assembly>> s_NamespaceMap;
 
         private static TypeResolver defaultResolver;
 
@@ -42,7 +42,9 @@ namespace UIForia.Util {
         }
 
         private static void FilterAssemblies() {
+            
             if (s_NamespaceMap != null) return;
+            
             s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
 
             Stopwatch watch = Stopwatch.StartNew();

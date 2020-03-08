@@ -1,5 +1,6 @@
 using System;
 using UIForia.Elements;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
@@ -9,6 +10,13 @@ namespace UIForia {
         protected GameApplication(bool isPreCompiled, TemplateSettings templateData, ResourceManager resourceManager, Action<UIElement> onRegister) : base(isPreCompiled, templateData, resourceManager, onRegister) { }
 
         public static Application CreateFromRuntimeTemplates(TemplateSettings templateSettings, Camera camera, Action<UIElement> onRegister) {
+            
+            TypeResolver.Initialize();
+            
+            Module rootModule = Module.GetModuleFromPath(templateSettings.rootType);
+
+            //CompiledTemplateData data = rootModule.CompileApplication();
+            
             ResourceManager resourceManager = new ResourceManager();
 
             templateSettings.resourceManager = resourceManager;

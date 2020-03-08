@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
+using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.Parsing;
-using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
 
+    [Template]
     public class UIViewBehavior : MonoBehaviour {
 
         public Type type;
@@ -33,20 +33,26 @@ namespace UIForia {
             type = Type.GetType(typeName);
             if (type == null) return;
 
-            // needs a root module
-
-            Module rootModule = new KlangWindowModule();
-            TypeResolver.Initialize();
-            TypeProcessor.Initialize(new[] {rootModule});
-
-            // GameApplication.Create<KlangWindowModule>()
-            // EditorApplication.Create()
-            
             TemplateSettings settings = GetTemplateSettings(type);
+
+            // Module.CreateRootModule<>()
+            //     
+            // Module.CompileApplication();
+            //
+            // Module.CompileLibrary();
+            //
+            // Module.CreateApplication();
+            //
+            // Module.LoadCompiledApplication();
+            //
+            // application = Module.CreateApplication<CompilerDemo>(typeof(Tmp), camera);
+            
+            // we can go from template path to module
+            // how do we bootstrap this bitch?
             
             application = usePreCompiledTemplates
-            ? GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection)
-            : GameApplication.CreateFromRuntimeTemplates(settings, camera, DoDependencyInjection);
+                ? GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection)
+                : GameApplication.CreateFromRuntimeTemplates(settings, camera, DoDependencyInjection);
 
         }
 

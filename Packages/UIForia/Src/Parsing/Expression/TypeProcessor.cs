@@ -47,7 +47,8 @@ namespace UIForia.Parsing {
         private static readonly HashSet<Assembly> processedAssemblies = new HashSet<Assembly>();
 
         public static void Initialize(IList<Module> modules) {
-            
+            TypeResolver.Initialize();
+
             for (int i = 0; i < modules.Count; i++) {
                 Assembly assembly = modules[i].GetType().Assembly;
 

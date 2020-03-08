@@ -33,11 +33,11 @@ namespace UIForia {
             get => dpiScaleFactor;
             set => dpiScaleFactor = value;
         }
-        
+
         public static SizeInt UiApplicationSize => UIApplicationSize;
-        
+
         public static List<Application> Applications = new List<Application>();
-        
+
         internal Stopwatch layoutTimer = new Stopwatch();
         internal Stopwatch renderTimer = new Stopwatch();
         internal Stopwatch bindingTimer = new Stopwatch();
@@ -54,10 +54,11 @@ namespace UIForia {
         internal UISoundSystem soundSystem;
         internal LinqBindingSystem linqBindingSystem;
         internal StyleSystem2 styleSystem2;
-        
+
         private int elementIdGenerator;
 
         protected ResourceManager resourceManager;
+        internal Dictionary<int, TagNameIndex> tagNameIndexMap;
 
         protected List<ISystem> systems;
 
@@ -94,8 +95,8 @@ namespace UIForia {
             if (element.id != reference.elementId) return null;
             return element;
         }
-        
-         public T ResolveElementReference<T>(in ElementReference reference) where T : UIElement {
+
+        public T ResolveElementReference<T>(in ElementReference reference) where T : UIElement {
             UIElement element = elementMap.array[reference.index];
             if (element == null) return null;
             if (element.id != reference.elementId) return null;
@@ -126,7 +127,9 @@ namespace UIForia {
             this.onElementRegistered = onElementRegistered;
             this.id = templateSettings.applicationName;
             this.resourceManager = resourceManager ?? new ResourceManager();
-
+            this.tagNameIndexMap = new Dictionary<int, TagNameIndex>();
+            this.freeListIndex = new StructList<int>(128);
+            
             Applications.Add(this);
 #if UNITY_EDITOR
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnEditorReload;
@@ -305,7 +308,6 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnDestroy();
             m_BeforeUpdateTaskSystem.OnDestroy();
 
-
             elementIdGenerator = 0;
 
             Initialize();
@@ -394,7 +396,7 @@ namespace UIForia {
             onElementDestroyed?.Invoke(element);
             freeListIndex.Add(element.index);
         }
-        
+
         public void Update() {
             // input queries against last frame layout
             inputSystem.Read();
@@ -415,7 +417,7 @@ namespace UIForia {
             for (int i = 0; i < views.Count; i++) {
                 views[i].Viewport = new Rect(0, 0, Width, Height);
             }
-            
+
             inputSystem.OnUpdate();
             m_BeforeUpdateTaskSystem.OnUpdate();
 
@@ -427,7 +429,7 @@ namespace UIForia {
             for (int i = 0; i < views.Count; i++) {
                 linqBindingSystem.NewUpdateFn(views[i].RootElement);
             }
-            
+
             bindingTimer.Stop();
 
             animationSystem.OnUpdate();
@@ -480,7 +482,7 @@ namespace UIForia {
             if ((element.flags & UIElementFlags.SelfAndAncestorEnabled) != UIElementFlags.SelfAndAncestorEnabled) {
                 return;
             }
-            
+
             StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
@@ -656,10 +658,10 @@ namespace UIForia {
             for (int i = 0; i < systems.Count; i++) {
                 systems[i].OnAttributeSet(element, attributeName, currentValue, previousValue);
             }
-            
+
             // if had previous value. get index for previous. remove
             // get index for new, add
-            
+
         }
 
         public static void RefreshAll() {
@@ -787,9 +789,11 @@ namespace UIForia {
                     onElementRegistered?.Invoke(current);
                     try {
                         current.OnCreate();
-                    } catch (Exception e){
+                    }
+                    catch (Exception e) {
                         Debug.Log(e);
                     }
+
                     view.ElementRegistered(current);
                 }
 
@@ -890,8 +894,6 @@ namespace UIForia {
             public UIElement element;
 
         }
-
-        internal Dictionary<int, TagNameIndex> tagNameIndexMap = new Dictionary<int, TagNameIndex>();
 
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
         public UIElement CreateElementFromPool(int typeId, UIElement parent, int childCount, int attributeCount, int originTemplateId) {

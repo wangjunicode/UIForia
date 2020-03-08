@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace UIForia.Util {
@@ -15,8 +16,13 @@ namespace UIForia.Util {
 
     }
 
+    
     public static class PathUtil {
 
+        public static Uri Parent(this Uri uri) {
+            return new Uri(uri.AbsoluteUri.Remove(uri.AbsoluteUri.Length - uri.Segments.Last().Length - uri.Query.Length).TrimEnd('/'));
+        }
+        
         public static string GetCallerFilePath([CallerFilePath] string sourceFilePath = "") {
             return sourceFilePath;
         }

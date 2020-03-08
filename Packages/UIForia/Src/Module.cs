@@ -31,6 +31,8 @@ namespace UIForia {
         private IList<Type> dynamicTypeReferences;
         private Uri location;
 
+        private static readonly HashSet<Assembly> s_Assemblies = new HashSet<Assembly>();
+        private static readonly Dictionary<Type, DiscoveredModule> s_DiscoveryMap = new Dictionary<Type, DiscoveredModule>();
         private static readonly Dictionary<Type, Module> s_ModuleInstances = new Dictionary<Type, Module>();
 
         private static bool s_ConstructionAllowed;
@@ -311,7 +313,60 @@ namespace UIForia {
 
         }
 
-        internal static Module GetModuleFromPath(Type type) {
+        private struct DiscoveredModule {
+
+            public readonly Type moduleType;
+            public readonly Uri moduleLocation;
+            public readonly Uri parentLocation;
+
+            public DiscoveredModule(Type moduleType, Uri moduleLocation) {
+                this.moduleType = moduleType;
+                this.moduleLocation = moduleLocation;
+                this.parentLocation = moduleLocation.Parent();
+            }
+
+        }
+
+        internal static void ProcessAssembly(Assembly assembly) {
+
+            if (assembly.IsDynamic || s_Assemblies.Contains(assembly)) {
+                return;
+            }
+
+            s_Assemblies.Add(assembly);
+
+            Type[] types = assembly.GetExportedTypes();
+
+            StructList<DiscoveredModule> modules = StructList<DiscoveredModule>.Get();
+
+            for (int i = 0; i < types.Length; i++) {
+                Type currentType = types[i];
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                if (currentType == null || !currentType.IsClass || !currentType.IsSubclassOf(typeof(Module))) {
+                    continue;
+                }
+
+                DiscoveredModule discoveredModule = new DiscoveredModule(currentType, new Uri(GetFilePathFromAttribute(currentType)));
+                for (int j = 0; j < modules.size; j++) {
+                    DiscoveredModule module = modules[j];
+                    if (module.moduleLocation.IsBaseOf(discoveredModule.moduleLocation)) { }
+
+                    if (module.parentLocation == discoveredModule.parentLocation) {
+                        throw new Exception("Modules cannot be siblings. " +
+                                            $"{TypeNameGenerator.GetTypeName(module.moduleType)} is at the same location as " +
+                                            $"{TypeNameGenerator.GetTypeName(discoveredModule.moduleType)}. ({discoveredModule.parentLocation})");
+                    }
+                }
+
+                s_DiscoveryMap.Add(currentType, discoveredModule);
+                
+                modules.Add(discoveredModule);
+            }
+
+            modules.Release();
+        }
+
+        internal static Type GetModuleFromElementType(Type type) {
 
             TemplateAttribute attribute = type.GetCustomAttribute<TemplateAttribute>();
 
@@ -321,29 +376,37 @@ namespace UIForia {
 
             Uri locationUri = new Uri(attribute.elementPath);
 
-            foreach (KeyValuePair<Type, Module> kvp in s_ModuleInstances) {
-                Module module = kvp.Value;
-                if (module.location.IsBaseOf(locationUri)) {
-                    return module;
+            ProcessAssembly(type.Assembly);
+
+            foreach (KeyValuePair<Type, DiscoveredModule> kvp in s_DiscoveryMap) {
+                if (kvp.Value.moduleLocation.IsBaseOf(locationUri)) {
+                    return kvp.Value.moduleType;
                 }
             }
 
-            Type[] types = type.Assembly.GetExportedTypes();
-
-            for (int i = 0; i < types.Length; i++) {
-                Type currentType = types[i];
-                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                if (currentType == null || !currentType.IsClass || !currentType.IsSubclassOf(typeof(Module))) {
-                    continue;
-                }
-
-                Uri moduleUri = new Uri(GetFilePathFromAttribute(currentType));
-
-                if (moduleUri.IsBaseOf(locationUri)) {
-                    return CreateRootModule(currentType);
-                }
-
-            }
+            // foreach (KeyValuePair<Type, Module> kvp in s_ModuleInstances) {
+            //     Module module = kvp.Value;
+            //     if (module.location.IsBaseOf(locationUri)) {
+            //         return module;
+            //     }
+            // }
+            //
+            // Type[] types = type.Assembly.GetExportedTypes();
+            //
+            // for (int i = 0; i < types.Length; i++) {
+            //     Type currentType = types[i];
+            //     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            //     if (currentType == null || !currentType.IsClass || !currentType.IsSubclassOf(typeof(Module))) {
+            //         continue;
+            //     }
+            //
+            //     Uri moduleUri = new Uri(GetFilePathFromAttribute(currentType));
+            //
+            //     if (moduleUri.IsBaseOf(locationUri)) {
+            //         return CreateRootModule(currentType);
+            //     }
+            //
+            // }
 
             return null;
 

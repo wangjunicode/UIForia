@@ -13,7 +13,7 @@ namespace UIForia {
             
             TypeResolver.Initialize();
             
-            Module rootModule = Module.GetModuleFromPath(templateSettings.rootType);
+            Type rootModuleType = Module.GetModuleFromElementType(templateSettings.rootType);
 
             //CompiledTemplateData data = rootModule.CompileApplication();
             

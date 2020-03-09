@@ -52,7 +52,7 @@ public class HierarchyView : TreeView {
     }
 
     protected override TreeViewItem BuildRoot() {
-        Stack<ElementTreeItem> stack = StackPool<ElementTreeItem>.Get();
+        LightStack<ElementTreeItem> stack = LightStack<ElementTreeItem>.Get();
 
         // todo -- maybe pool tree items
 
@@ -101,6 +101,7 @@ public class HierarchyView : TreeView {
         if (root.children == null) {
             root.children = new List<TreeViewItem>();
         }
+        LightStack<ElementTreeItem>.Release(ref stack);
         return root;
     }
 

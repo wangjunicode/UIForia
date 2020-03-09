@@ -9,14 +9,14 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
 
         private int ptr;
         private int lastTokenIndex;
-        private Stack<int> stack;
+        private LightStack<int> stack;
         private StructList<ExpressionToken> tokens;
 
         public TokenStream(StructList<ExpressionToken> tokens) {
             this.ptr = 0;
             this.tokens = tokens;
             this.lastTokenIndex = tokens.Count;
-            this.stack = StackPool<int>.Get();
+            this.stack = LightStack<int>.Get();
         }
 
         public int CurrentIndex => ptr;
@@ -241,7 +241,7 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
         }
 
         public void Release() {
-            StackPool<int>.Release(stack);
+            LightStack<int>.Release(ref stack);
             StructList<ExpressionToken>.Release(ref tokens);
             stack = null;
         }

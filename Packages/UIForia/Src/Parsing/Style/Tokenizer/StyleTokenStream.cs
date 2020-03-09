@@ -9,13 +9,13 @@ namespace UIForia.Parsing.Style.Tokenizer {
 
         private int ptr;
 
-        private Stack<int> stack;
+        private LightStack<int> stack;
         private List<StyleToken> tokens;
 
         public StyleTokenStream(List<StyleToken> tokens) {
             ptr = 0;
             this.tokens = tokens;
-            stack = StackPool<int>.Get();
+            stack = LightStack<int>.Get();
         }
 
         public int CurrentIndex => ptr;
@@ -167,7 +167,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
         }
 
         public void Release() {
-            StackPool<int>.Release(stack);
+            LightStack<int>.Release(ref stack);
             ListPool<StyleToken>.Release(ref tokens);
             stack = null;
             tokens = null;

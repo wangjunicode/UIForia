@@ -84,7 +84,6 @@ namespace UIForia.Util {
             size = 0;
         }
 
-
         [DebuggerStepThrough]
         public static LightStack<T> Get() {
             s_Pool = s_Pool ?? new LightList<LightStack<T>>(4);

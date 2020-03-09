@@ -19,18 +19,18 @@ namespace UIForia.Parsing.Style {
         /// </summary>
         private LightList<StyleASTNode> nodes;
 
-        private Stack<StyleASTNode> expressionStack;
-        private Stack<StyleOperatorNode> operatorStack;
-        private Stack<AttributeNodeContainer> groupExpressionStack;
-        private Stack<StyleOperatorType> groupOperatorStack;
+        private LightStack<StyleASTNode> expressionStack;
+        private LightStack<StyleOperatorNode> operatorStack;
+        private LightStack<AttributeNodeContainer> groupExpressionStack;
+        private LightStack<StyleOperatorType> groupOperatorStack;
 
         private StyleParser(StyleTokenStream stream) {
             tokenStream = stream;
             nodes = LightList<StyleASTNode>.Get();
-            operatorStack = StackPool<StyleOperatorNode>.Get();
-            expressionStack = StackPool<StyleASTNode>.Get();
-            groupExpressionStack = StackPool<AttributeNodeContainer>.Get();
-            groupOperatorStack = StackPool<StyleOperatorType>.Get();
+            operatorStack = LightStack<StyleOperatorNode>.Get();
+            expressionStack = LightStack<StyleASTNode>.Get();
+            groupExpressionStack = LightStack<AttributeNodeContainer>.Get();
+            groupOperatorStack = LightStack<StyleOperatorType>.Get();
         }
 
         private static StyleTokenStream FromString(string input) {
@@ -43,8 +43,8 @@ namespace UIForia.Parsing.Style {
 
         private void Release() {
             tokenStream.Release();
-            StackPool<StyleOperatorNode>.Release(operatorStack);
-            StackPool<StyleASTNode>.Release(expressionStack);
+            LightStack<StyleOperatorNode>.Release(ref operatorStack);
+            LightStack<StyleASTNode>.Release(ref expressionStack);
         }
 
         private LightList<StyleASTNode> Parse() {

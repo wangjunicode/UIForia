@@ -1,4 +1,5 @@
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Elements {
@@ -16,6 +17,7 @@ namespace UIForia.Elements {
     /// Renders an arrowhead that can be used as an arrow-like border or a chevron. Uses BackgroundColor as
     /// arrow color and respects margins.
     /// </summary>
+    [RecordFilePath]
     public class Arrow : UIContainerElement, IElementBackgroundPainter {
 
         /// <summary>

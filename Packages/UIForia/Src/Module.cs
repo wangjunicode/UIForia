@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using UIForia.Attributes;
 using UIForia.Compilers;
@@ -9,10 +11,11 @@ using UIForia.Parsing;
 using UIForia.Style;
 using UIForia.Style2;
 using UIForia.Util;
+using UnityEditor;
 
 namespace UIForia {
 
-    public class ModuleLoadException : System.Exception {
+    public class ModuleLoadException : Exception {
 
         public ModuleLoadException(string message) : base(message) { }
 
@@ -34,10 +37,8 @@ namespace UIForia {
         private Type defaultRootType;
         private readonly IList<Type> dynamicTypeReferences;
         private readonly IList<ModuleReference> dependencies;
-        private Uri location;
 
         private static readonly HashSet<Assembly> s_Assemblies = new HashSet<Assembly>();
-        private static readonly Dictionary<Type, DiscoveredModule> s_DiscoveryMap = new Dictionary<Type, DiscoveredModule>();
         private static readonly Dictionary<Type, Module> s_ModuleInstances = new Dictionary<Type, Module>();
 
         private static readonly HashSet<string> s_StringHashSet = new HashSet<string>();
@@ -45,17 +46,22 @@ namespace UIForia {
 
         private static bool s_ConstructionAllowed;
 
+        internal Dictionary<string, ProcessedType> tagNameMap;
+
         protected Module() {
             if (!s_ConstructionAllowed) {
                 throw new ModuleLoadException("Modules should never have their constructor called.");
             }
 
+            this.tagNameMap = new Dictionary<string, ProcessedType>();
             this.dependencies = new List<ModuleReference>();
             this.dynamicTypeReferences = new List<Type>();
             this.visitedMark = VisitMark.Alive;
         }
 
         internal Action zz__INTERNAL_DO_NOT_CALL; // use this for precompiled loading instead of doing type reflection to find caller type
+
+        public string location { get; private set; }
 
         public virtual void Configure() { }
 
@@ -117,12 +123,12 @@ namespace UIForia {
             return CreateRootModule(typeof(T)) as T;
         }
 
-        private static Module GetModuleInstance(Type moduleType) {
+        internal static Module GetModuleInstance(Type moduleType) {
             if (!s_ModuleInstances.TryGetValue(moduleType, out Module instance)) {
                 s_ConstructionAllowed = true;
-                Uri location = new Uri(GetFilePathFromAttribute(moduleType));
                 instance = (Module) Activator.CreateInstance(moduleType);
-                instance.location = location;
+                string moduleLocation = GetFilePathFromAttribute(moduleType);
+                instance.location = Path.GetDirectoryName(moduleLocation) + Path.DirectorySeparatorChar;
                 s_ModuleInstances[moduleType] = instance;
                 s_ConstructionAllowed = false;
             }
@@ -145,7 +151,7 @@ namespace UIForia {
 
             List<Module> dependencySort = DependencySort(root);
 
-            TypeProcessor.Initialize(dependencySort);
+            TypeProcessor.Initialize();
 
             for (int i = 0; i < dependencySort.Count; i++) {
                 if (!dependencySort[i].initialized) {
@@ -288,73 +294,35 @@ namespace UIForia {
             module.visitedMark = VisitMark.Undead;
 
             sorted.Add(module);
-        }
+        } 
 
-        private struct DiscoveredModule {
+        private static Module[] modules;
 
-            public readonly Type moduleType;
-            public readonly Uri moduleLocation;
-            public readonly Uri parentLocation;
+        internal static void ValidateModulePaths() {
+            modules = s_ModuleInstances.Values.ToArray();
 
-            public DiscoveredModule(Type moduleType, Uri moduleLocation) {
-                this.moduleType = moduleType;
-                this.moduleLocation = moduleLocation;
-                this.parentLocation = moduleLocation.Parent();
-            }
-
-        }
-
-        internal static void ProcessAssembly(Assembly assembly) {
-            if (assembly.IsDynamic || s_Assemblies.Contains(assembly)) {
-                return;
-            }
-
-            s_Assemblies.Add(assembly);
-
-            Type[] types = assembly.GetExportedTypes();
-
-            StructList<DiscoveredModule> modules = StructList<DiscoveredModule>.Get();
-
-            for (int i = 0; i < types.Length; i++) {
-                Type currentType = types[i];
-                // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                if (currentType == null || !currentType.IsClass || !currentType.IsSubclassOf(typeof(Module))) {
-                    continue;
-                }
-
-                DiscoveredModule discoveredModule = new DiscoveredModule(currentType, new Uri(GetFilePathFromAttribute(currentType)));
-
-                for (int j = 0; j < modules.size; j++) {
-                    DiscoveredModule module = modules[j];
-
-                    if (module.moduleLocation.IsBaseOf(discoveredModule.moduleLocation)) {
-                        throw new ModuleLoadException("Nested Modules are not yet supported." +
-                                                      $"{TypeNameGenerator.GetTypeName(module.moduleType)} is a parent of " +
-                                                      $"{TypeNameGenerator.GetTypeName(discoveredModule.moduleType)}. ({discoveredModule.moduleLocation})");
+            for (int i = 0; i < modules.Length; i++) {
+                for (int j = i; j < modules.Length; j++) {
+                    Module moduleI = modules[i];
+                    Module moduleJ = modules[j];
+                    if (moduleI == moduleJ) continue;
+                    
+                    if (moduleI.location.StartsWith(moduleJ.location, StringComparison.Ordinal)) {
+                        throw new ModuleLoadException("Nested Modules are not yet supported. " +
+                                                      $"{TypeNameGenerator.GetTypeName(moduleI.GetType())} is a parent of " +
+                                                      $"{TypeNameGenerator.GetTypeName(moduleJ.GetType())}. ({moduleJ.location})");
                     }
 
-                    if (discoveredModule.moduleLocation.IsBaseOf(module.moduleLocation)) {
-                        throw new ModuleLoadException("Nested Modules are not yet supported." +
-                                                      $"{TypeNameGenerator.GetTypeName(discoveredModule.moduleType)} is a parent of " +
-                                                      $"{TypeNameGenerator.GetTypeName(module.moduleType)}. ({module.moduleLocation})");
-                    }
-
-                    if (module.parentLocation == discoveredModule.parentLocation) {
-                        throw new ModuleLoadException("Modules cannot be siblings. " +
-                                                      $"{TypeNameGenerator.GetTypeName(module.moduleType)} is at the same location as " +
-                                                      $"{TypeNameGenerator.GetTypeName(discoveredModule.moduleType)}. ({discoveredModule.parentLocation})");
+                    if (moduleJ.location.StartsWith(moduleI.location, StringComparison.Ordinal)) {
+                        throw new ModuleLoadException("Nested Modules are not yet supported. " +
+                                                      $"{TypeNameGenerator.GetTypeName(moduleJ.GetType())} is a parent of " +
+                                                      $"{TypeNameGenerator.GetTypeName(moduleI.GetType())}. ({moduleI.location})");
                     }
                 }
-
-                s_DiscoveryMap.Add(currentType, discoveredModule);
-
-                modules.Add(discoveredModule);
             }
-
-            modules.Release();
         }
 
-        internal static Type GetModuleFromElementType(Type type) {
+        internal static Type GetModuleTypeFromElementType(Type type) {
             if (!type.IsSubclassOf(typeof(UIElement))) {
                 throw new ModuleLoadException($"Cannot create a module for a type that is not a subclass of {TypeNameGenerator.GetTypeName(typeof(UIElement))}.");
             }
@@ -381,17 +349,11 @@ namespace UIForia {
                 throw new ModuleLoadException($"Can only create an application when the root element is annotated with [{nameof(TemplateAttribute)}]. {TypeNameGenerator.GetTypeName(type)} is missing one.");
             }
 
-            Uri locationUri = new Uri(attribute.elementPath);
-
-            ProcessAssembly(type.Assembly);
-
-            foreach (KeyValuePair<Type, DiscoveredModule> kvp in s_DiscoveryMap) {
-                if (kvp.Value.moduleLocation.IsBaseOf(locationUri)) {
-                    return kvp.Value.moduleType;
-                }
-            }
-
             return null;
+        }
+
+        internal static Module GetModuleFromElementType(ProcessedType processedType) {
+            throw new Exception("Finish this");
         }
 
         private static string GetFilePathFromAttribute(Type moduleType) {
@@ -401,7 +363,87 @@ namespace UIForia {
                 throw new ModuleLoadException($"Modules must provide a [{TypeNameGenerator.GetTypeName(typeof(RecordFilePathAttribute))}] attribute. {TypeNameGenerator.GetTypeName(moduleType)} is missing one.");
             }
 
+
             return attr.filePath;
+        }
+
+        internal CompiledTemplateData LoadRuntimeTemplates(Type rootType) {
+            return null;
+        }
+
+        internal struct DiscoveredModule {
+
+            public readonly Type moduleType;
+            public readonly string moduleLocation;
+
+
+            public DiscoveredModule(Type moduleType, string moduleLocation) {
+                this.moduleType = moduleType;
+                // todo -- maybe problem on unix, check for other slash if not present. might be compiled on windows and run on mac for example
+                this.moduleLocation = Path.GetDirectoryName(moduleLocation) + Path.DirectorySeparatorChar;
+            }
+
+        }
+
+        public static bool TryGetInstance(Type moduleType, out Module module) {
+            return s_ModuleInstances.TryGetValue(moduleType, out module);
+        }
+
+        public struct TemplateLookup {
+
+            public readonly Type elementType;
+            public readonly string elementFilePath;
+            public readonly string declaredTemplatePath;
+
+            public TemplateLookup(Type elementType, string elementFilePath, string declaredTemplatePath) {
+                this.elementType = elementType;
+                this.elementFilePath = elementFilePath;
+                this.declaredTemplatePath = declaredTemplatePath;
+            }
+
+        }
+
+        public virtual string GetTemplatePath(in TemplateLookup lookup) {
+            return Path.GetFullPath(Path.Combine(location, lookup.declaredTemplatePath));
+        }
+
+        internal ProcessedType ResolveTagName(string tagName) {
+            throw new NotImplementedException();
+        }
+
+        public static IList<ProcessedType> GetTemplateElements(Assembly assembly) {
+            TypeProcessor.Initialize();
+
+            List<ProcessedType> retn = new List<ProcessedType>();
+
+            for (int i = 0; i < modules.Length; i++) {
+                Module module = modules[i];
+
+                foreach (KeyValuePair<string, ProcessedType> kvp in module.tagNameMap) {
+                    retn.Add(kvp.Value);
+                }
+            }
+
+            return retn;
+        }
+
+        public static bool TryGetModule(ProcessedType processedType, out Module module) {
+            string path = processedType.elementPath;
+
+            if (string.IsNullOrEmpty(path)) {
+                module = default;
+                return false;
+            }
+            
+            for (int k = 0; k < modules.Length; k++) {
+                if (path.StartsWith(modules[k].location, StringComparison.Ordinal)) {
+                    module = modules[k];
+                    return true;
+                }
+            }
+
+            module = default;
+            return false;
         }
 
     }

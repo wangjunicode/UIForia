@@ -2,13 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using UIForia.Style2;
-using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
 
-  
     public class TemplateSettings {
 
         public string assemblyName;
@@ -22,11 +19,8 @@ namespace UIForia {
         public ResourceManager resourceManager;
         public Func<Type, string, string> filePathResolver;
         public List<Type> dynamicallyCreatedTypes;
-
-        private List<StyleCondition> conditions;
-
+        
         public TemplateSettings() {
-            this.conditions = new List<StyleCondition>();
             this.applicationName = "DefaultApplication";
             this.assemblyName = "UIForia.Application";
             this.outputPath = Path.Combine(UnityEngine.Application.dataPath, "__UIForiaGenerated__");
@@ -50,62 +44,6 @@ namespace UIForia {
             catch (Exception) {
                 return null;
             }
-        }
-
-        public bool TryGetStyleCondition(string conditionName, out StyleCondition condition) {
-            for (int i = 0; i < conditions.Count; i++) {
-                if (conditionName == conditions[i].name) {
-                    condition = conditions[i];
-                    return true;
-                }
-            }
-
-            condition = default;
-            return false;
-        }
-
-        public bool TryGetStyleCondition(CharSpan conditionName, out StyleCondition condition) {
-            for (int i = 0; i < conditions.Count; i++) {
-                if (StringUtil.EqualsRangeUnsafe(conditions[i].name, conditionName)) {
-                    condition = conditions[i];
-                    return true;
-                }
-            }
-
-            condition = default;
-            return false;
-        }
-
-        public Func<DisplayConfiguration, bool> GetStyleCondition(string conditionName) {
-            for (int i = 0; i < conditions.Count; i++) {
-                if (conditions[i].name == conditionName) {
-                    return conditions[i].fn;
-                }
-            }
-
-            return null;
-        }
-
-        public Func<DisplayConfiguration, bool> GetStyleCondition(int id) {
-            if (id >= 0 && id < conditions.Count) {
-                return conditions[id].fn;
-            }
-
-            return null;
-        }
-
-        public void RegisterStyleCondition(string conditionName, Func<DisplayConfiguration, bool> fn) {
-            for (int i = 0; i < conditions.Count; i++) {
-                if (conditions[i].name == conditionName) {
-                    throw new Exception("Duplicate style condition name: " + conditionName);
-                }
-            }
-
-            if (fn == null) {
-                throw new Exception("Function provided to TemplateSettings.RegisterStyleCondition cannot be null");
-            }
-
-            conditions.Add(new StyleCondition(conditions.Count, conditionName, fn));
         }
 
         public string GetInternalTemplatePath(string fileName) {

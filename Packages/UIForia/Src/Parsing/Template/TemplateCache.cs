@@ -1,9 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using UIForia.Attributes;
+using UIForia.Compilers;
 using UIForia.Exceptions;
 using UIForia.Util;
+using UnityEngine.Assertions;
 
 namespace UIForia.Parsing {
 
@@ -21,75 +24,80 @@ namespace UIForia.Parsing {
 
         public string ResolveDefaultFilePath(ProcessedType processedType) {
             if (settings.filePathResolver != null) {
-                return settings.filePathResolver(processedType.rawType, processedType.templateAttr.templateId);
+                return settings.filePathResolver(processedType.rawType, processedType.templateId);
             }
 
             // expected is templateroot/typename/typename.xml if template id == null
             // or templateroot/typename/typename/typename.xml#templateid
             string namespaceName = processedType.rawType.Namespace;
- 
+
             if (namespaceName != null && namespaceName.Contains(".")) {
                 namespaceName = namespaceName.Replace(".", Path.PathSeparator.ToString());
             }
 
             string basePath;
-            
-            basePath = namespaceName == null 
-                ? Path.Combine(settings.templateRoot, processedType.rawType.Name, processedType.rawType.Name) 
+
+            basePath = namespaceName == null
+                ? Path.Combine(settings.templateRoot, processedType.rawType.Name, processedType.rawType.Name)
                 : Path.Combine(settings.templateRoot, namespaceName, processedType.rawType.Name, processedType.rawType.Name);
-            
+
             // todo -- support more extensions
             string xmlPath = Path.GetFullPath(Path.Combine(settings.templateResolutionBasePath, basePath + ".xml"));
-            
+
             if (File.Exists(xmlPath)) {
                 basePath += ".xml";
             }
             else {
                 throw new TemplateNotFoundException(processedType, xmlPath);
             }
-            
+
             return basePath;
         }
 
         public TemplateRootNode GetParsedTemplate(ProcessedType processedType) {
-            TemplateAttribute templateAttr = processedType.templateAttr;
+            
+            // TemplateAttribute templateAttr = processedType.templateAttr;
 
-            if (templateAttr.fullPathId == null && templateAttr.templateType == TemplateType.DefaultFile) {
-                templateAttr.filePath = ResolveDefaultFilePath(processedType);
-                templateAttr.fullPathId = templateAttr.templateId == null
-                    ? templateAttr.filePath
-                    : templateAttr.filePath + "#" + templateAttr.templateId;
+            Assert.IsNotNull(processedType.moduleType);
+
+            if (!Module.TryGetInstance(processedType.moduleType, out Module module)) {
+                throw new ModuleLoadException($"Module {TypeNameGenerator.GetTypeName(processedType.moduleType)} was not loaded. Please add it to your dependencies");
             }
 
-            Debug.Assert(templateAttr.fullPathId != null, "templateAttr.fullPathId != null");
+            string templatePath = module.GetTemplatePath(new Module.TemplateLookup(processedType.rawType, processedType.templatePath, processedType.elementPath));
             
-            if (templateMap.TryGetValue(templateAttr.fullPathId, out LightList<TemplateRootNode> list)) {
+            // if (templateAttr.fullPathId == null && templateAttr.templateType == TemplateType.DefaultFile) {
+            //     templateAttr.filePath = ResolveDefaultFilePath(processedType);
+            //     templateAttr.fullPathId = templateAttr.templateId == null
+            //         ? templateAttr.filePath
+            //         : templateAttr.filePath + "#" + templateAttr.templateId;
+            // }
+            //
+            // Debug.Assert(templateAttr.fullPathId != null, "templateAttr.fullPathId != null");
 
+            if (templateMap.TryGetValue(templatePath, out LightList<TemplateRootNode> list)) {
                 for (int i = 0; i < list.size; i++) {
-                    
                     if (list.array[i].processedType.rawType == processedType.rawType) {
                         return list.array[i];
-                    }     
-                    
+                    }
                 }
 
                 TemplateRootNode retn = list[0].Clone(processedType);
                 list.Add(retn);
                 return retn;
-
             }
 
             list = new LightList<TemplateRootNode>(2);
-            
-            templateMap[templateAttr.fullPathId] = list;
+
+            templateMap[processedType.templatePath] = list;
 
             TemplateDefinition templateDefinition = GetTemplateDefinition(processedType);
 
-            templateAttr.source = templateDefinition.contents;
-            
-            TemplateShell shell = xmlTemplateParser.GetOuterTemplateShell(templateAttr);
+            processedType.templateSource = templateDefinition.contents;
 
-            TemplateRootNode templateRootNode = new TemplateRootNode(templateAttr.templateId, shell, processedType, null, default) {
+            TemplateShell shell = xmlTemplateParser.GetOuterTemplateShell(processedType);
+
+            TemplateRootNode templateRootNode = new TemplateRootNode(processedType.templateId, shell, processedType, null, default) {
                 tagName = processedType.tagName
             };
 
@@ -100,65 +108,66 @@ namespace UIForia.Parsing {
             return templateRootNode;
         }
 
-        private string ResolveTemplateFilePath(TemplateType templateType, string filepath) {
-            switch (templateType) {
-                case TemplateType.DefaultFile: {
-                    return settings.GetTemplatePath(filepath);
-                }
-                case TemplateType.Internal: {
-                    return settings.GetInternalTemplatePath(filepath);
-                }
-
-                case TemplateType.File: {
-                    return settings.GetTemplatePath(filepath);
-                }
-
-                default:
-                    return "NONE";
-            }
-        }
+        // private string ResolveTemplateFilePath(TemplateType templateType, string filepath) {
+        //     switch (templateType) {
+        //         case TemplateType.DefaultFile: {
+        //             return settings.GetTemplatePath(filepath);
+        //         }
+        //         case TemplateType.Internal: {
+        //             return settings.GetInternalTemplatePath(filepath);
+        //         }
+        //
+        //         case TemplateType.File: {
+        //             return settings.GetTemplatePath(filepath);
+        //         }
+        //
+        //         default:
+        //             return "NONE";
+        //     }
+        // }
 
         private TemplateDefinition GetTemplateDefinition(ProcessedType processedType) {
-            TemplateAttribute templateAttr = processedType.templateAttr;
-
-            string templatePath = ResolveTemplateFilePath(templateAttr.templateType, templateAttr.filePath);
-
-            switch (templateAttr.templateType) {
-                case TemplateType.Internal: {
-                    string file = settings.TryReadFile(templatePath);
-
-                    if (file == null) {
-                        throw new TemplateParseException(settings.templateResolutionBasePath, $"Cannot find template in (internal) path {templatePath}.");
-                    }
-
-                    return new TemplateDefinition() {
-                        contents = file,
-                        filePath = templateAttr.templateType == TemplateType.File ? processedType.rawType.AssemblyQualifiedName : templateAttr.filePath,
-                        language = TemplateLanguage.XML
-                    };
-                }
-
-                case TemplateType.DefaultFile: 
-                case TemplateType.File: {
-                    string file = settings.TryReadFile(templatePath);
-                    if (file == null) {
-                        throw new TemplateParseException(settings.templateResolutionBasePath, $"Cannot find template in path {templatePath}.");
-                    }
-
-                    return new TemplateDefinition() {
-                        contents = file,
-                        filePath = templateAttr.filePath,
-                        language = TemplateLanguage.XML
-                    };
-                }
-
-                default:
-                    return new TemplateDefinition() {
-                        contents = templateAttr.source,
-                        filePath = templatePath,
-                        language = TemplateLanguage.XML
-                    };
-            }
+            return default;
+            // TemplateAttribute templateAttr = processedType.templateAttr;
+            //
+            // string templatePath = ResolveTemplateFilePath(templateAttr.templateType, templateAttr.filePath);
+            //
+            // switch (templateAttr.templateType) {
+            //     case TemplateType.Internal: {
+            //         string file = settings.TryReadFile(templatePath);
+            //
+            //         if (file == null) {
+            //             throw new TemplateParseException(settings.templateResolutionBasePath, $"Cannot find template in (internal) path {templatePath}.");
+            //         }
+            //
+            //         return new TemplateDefinition() {
+            //             contents = file,
+            //             filePath = templateAttr.templateType == TemplateType.File ? processedType.rawType.AssemblyQualifiedName : templateAttr.filePath,
+            //             language = TemplateLanguage.XML
+            //         };
+            //     }
+            //
+            //     case TemplateType.DefaultFile:
+            //     case TemplateType.File: {
+            //         string file = settings.TryReadFile(templatePath);
+            //         if (file == null) {
+            //             throw new TemplateParseException(settings.templateResolutionBasePath, $"Cannot find template in path {templatePath}.");
+            //         }
+            //
+            //         return new TemplateDefinition() {
+            //             contents = file,
+            //             filePath = templateAttr.filePath,
+            //             language = TemplateLanguage.XML
+            //         };
+            //     }
+            //
+            //     default:
+            //         return new TemplateDefinition() {
+            //             contents = templateAttr.source,
+            //             filePath = templatePath,
+            //             language = TemplateLanguage.XML
+            //         };
+            // }
         }
 
     }

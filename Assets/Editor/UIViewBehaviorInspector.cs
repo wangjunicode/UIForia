@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
+using UIForia.Elements;
 using UIForia.Parsing;
 using UIForia.Util;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Editor {
 
@@ -23,13 +27,37 @@ namespace UIForia.Editor {
 
         public void OnEnable() {
             didEnable = true;
-            // enumerate modules
-            // type resolver -> handles resolving types in scope, available statically by default. can subclass to only retrieve certain namespaces / assemblies
-            // type processor -> handles only template types
-            LightList<ProcessedType> typeData = TypeProcessor.GetTemplateTypes();
+
+            Assembly assembly = target.GetType().Assembly;
+            
+                
+            TypeCache.TypeCollection moduleTypes = TypeCache.GetTypesDerivedFrom<Module>();
+            
+            for (int i = 0; i < moduleTypes.Count; i++) {
+
+                if (moduleTypes[i] == null) {
+                    Debug.Log("Null");
+                }
+                
+            }
+            
+            TypeCache.TypeCollection elementTypes = TypeCache.GetTypesDerivedFrom<UIElement>();
+              for (int i = 0; i < elementTypes.Count; i++) {
+
+                if (elementTypes[i] == null) {
+                    Debug.Log("Null");
+                }
+                
+            }
+            
+            // for (int i = 0; i < modules.Count; i++) {
+                // Module.GetTemplateElements();
+            // }
+            
+            IList<ProcessedType> typeData = Module.GetTemplateElements(assembly);
 
             List<Type> validTypes = new List<Type>();
-            for (int i = 0; i < typeData.size; i++) {
+            for (int i = 0; i < typeData.Count; i++) {
                 if (typeData[i].rawType.Assembly.FullName.StartsWith("UIForia")) {
                     continue;
                 }

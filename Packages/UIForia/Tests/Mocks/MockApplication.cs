@@ -62,7 +62,7 @@ namespace Tests.Mocks {
 
             
 
-            Type moduleType = Module.GetModuleFromElementType(settings.rootType);
+            Type moduleType = Module.GetModuleTypeFromElementType(settings.rootType);
 
             if (moduleType == null) {
                 throw new Exception($"Cannot determine module for {TypeNameGenerator.GetTypeName(settings.rootType)}. Please be sure it lives in a module hierarchy.");

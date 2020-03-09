@@ -1,296 +1,117 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using UIForia.Attributes;
+using UIForia.Compilers;
 using UIForia.Elements;
-using UIForia.Exceptions;
+using UIForia.Rendering;
+using UIForia.Systems;
 using UIForia.Util;
-using Debug = UnityEngine.Debug;
+using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace UIForia.Parsing {
 
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    public sealed class GenericElementTypeResolvedByAttribute : Attribute {
-
-        public readonly string propertyName;
-
-        public GenericElementTypeResolvedByAttribute(string propertyName) {
-            this.propertyName = propertyName;
-        }
-
-    }
-
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public sealed class ResolveGenericTemplateArguments : Attribute { }
-
     public static class TypeProcessor {
 
-        internal struct TypeList {
+        internal static readonly Dictionary<Type, ProcessedType> typeMap = new Dictionary<Type, ProcessedType>();
+        internal static readonly Dictionary<string, Type> renderBoxTypeMap = new Dictionary<string, Type>();
+        internal static readonly Dictionary<string, Type> layoutBoxTypeMap = new Dictionary<string, Type>();
+        internal static readonly List<ProcessedType> dynamicTypes = new List<ProcessedType>();
+        
+        private static bool initialized;
+        
+        public static void Initialize() {
+            if (initialized) return;
+            initialized = true;
 
-            public ProcessedType mainType;
-            public ProcessedType[] types;
-
-        }
-
-        private static readonly LightList<ProcessedType> templateTypes = new LightList<ProcessedType>(64);
-        internal static readonly Dictionary<string, TypeList> templateTypeMap = new Dictionary<string, TypeList>();
-        public static readonly Dictionary<Type, ProcessedType> typeMap = new Dictionary<Type, ProcessedType>();
-        public static readonly Dictionary<string, ProcessedType> s_GenericMap = new Dictionary<string, ProcessedType>();
-        private static readonly List<ProcessedType> dynamicTypes = new List<ProcessedType>();
-
-        private static int currentTypeId;
-        private static int NextTypeId => currentTypeId++;
-
-        // todo -- we might want this to be instance method because multiple applications would maybe blow this up
-        private static readonly HashSet<Assembly> processedAssemblies = new HashSet<Assembly>();
-
-        public static void Initialize(IList<Module> modules) {
             TypeResolver.Initialize();
 
-            for (int i = 0; i < modules.Count; i++) {
-                Assembly assembly = modules[i].GetType().Assembly;
+            // todo -- provide a non editor implementation that scans assemblies
+            IList<Type> moduleTypes;
+            IList<Type> elements;
+            IList<Type> painters;
+            IList<Type> layouts;
 
-                if (processedAssemblies.Contains(assembly)) continue;
+#if UNITY_EDITOR
+            ScanFast(out moduleTypes, out elements, out layouts, out painters);
+#else
+            ScanSlow(out moduleTypes, out elements, out layouts, out painters);
+#endif
 
-                processedAssemblies.Add(assembly);
-
-                Type[] types = assembly.GetExportedTypes();
-
-                for (int j = 0; j < types.Length; j++) {
-
-                    Type currentType = types[j];
-                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-                    if (currentType == null || !currentType.IsClass || currentType.Name[0] == '<') {
-                        continue;
-                    }
-
-                    Attribute[] attrs = Attribute.GetCustomAttributes(currentType, false);
-                    Application.ProcessClassAttributes(currentType, attrs);
-
-                    if (!currentType.IsSubclassOf(typeof(UIElement))) {
-                        continue;
-                    }
-
-                    string tagName;
-                    ProcessedType processedType;
-                    TemplateAttribute templateAttr;
-
-                    if (currentType.IsGenericTypeDefinition) {
-                        tagName = GetTemplateAttribute(currentType, attrs, out templateAttr);
-
-                        // todo -- support namespaces in the look up map
-                        tagName = tagName.Split('`')[0];
-
-                        processedType = new ProcessedType(currentType, templateAttr, tagName) {
-                            IsUnresolvedGeneric = true
-                        };
-
-                        try {
-                            s_GenericMap.Add(tagName, processedType);
-                        }
-                        catch (Exception) {
-                            Debug.LogError($"UIForia does not support multiple elements with the same tag name. Tried to register type {processedType.rawType} for `{tagName}` " +
-                                           $"but this tag name was already taken by type {s_GenericMap[tagName].rawType}. For generic overload types with multiple arguments you need to supply a unique [TagName] attribute");
-                            continue;
-                        }
-
-                        typeMap[currentType] = processedType;
-
-                        continue;
-                    }
-
-                    tagName = GetTemplateAttribute(currentType, attrs, out templateAttr);
-
-                    processedType = new ProcessedType(currentType, templateAttr, tagName);
-
-                    if (templateAttr != null) {
-                        templateTypes.Add(processedType);
-                    }
-
-                    if (templateTypeMap.TryGetValue(tagName, out TypeList typeList)) {
-                        if (typeList.types != null) {
-                            Array.Resize(ref typeList.types, typeList.types.Length + 1);
-                            typeList.types[typeList.types.Length - 1] = processedType;
-                        }
-                        else {
-                            typeList.types = new ProcessedType[2];
-                            typeList.types[0] = typeList.mainType;
-                            typeList.types[1] = processedType;
-                        }
-                    }
-                    else {
-                        typeList.mainType = processedType;
-                        templateTypeMap[tagName] = typeList;
-                    }
-
-                    processedType.id = NextTypeId;
-                    typeMap[currentType] = processedType;
-
-                }
+            for (int i = 0; i < moduleTypes.Count; i++) {
+                Module.GetModuleInstance(moduleTypes[i]);
             }
 
-            // most of this time is from Resources.Load in Application constructor.
-            // the rest is determining method overloads for element types. GetMethod() is expensive!
-            // Debug.Log("Processed UIForia types in " + stopwatch.Elapsed.TotalMilliseconds.ToString("R2") + " " + cnt);
-        }
+            Module.ValidateModulePaths();
 
-        //private static void FilterAssemblies() {
-        // if (processedTypes) return;
-        // processedTypes = true;
-        //
-        // Stopwatch watch = new Stopwatch();
-        // watch.Start();
-        //
-        // Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        // int count = 0;
-        // for (int i = 0; i < assemblies.Length; i++) {
-        //     Assembly assembly = assemblies[i];
-        //
-        //     if (assembly == null || assembly.IsDynamic) {
-        //         continue;
-        //     }
-        //
-        //     bool filteredOut = !FilterAssembly(assembly);
-        //     bool shouldProcessTypes = ShouldProcessTypes(assembly, filteredOut);
-        //
-        //     if (!shouldProcessTypes) {
-        //         continue;
-        //     }
-        //
-        //     count++;
-        //
-        //     try {
-        //         Type[] types = assembly.GetTypes();
-        //
-        //         for (int j = 0; j < types.Length; j++) {
-        //             Type currentType = types[j];
-        //             // can be null if assembly referenced is unavailable
-        //             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-        //             if (currentType == null) {
-        //                 continue;
-        //             }
-        //
-        //             if (!filteredOut && currentType.IsClass && currentType.Name[0] != '<' && currentType.IsGenericTypeDefinition) {
-        //                 if (currentType.IsSubclassOf(typeof(UIElement))) {
-        //                     Attribute[] attrs = Attribute.GetCustomAttributes(currentType, false);
-        //                     string tagName = GetTemplateAttribute(currentType, attrs, out TemplateAttribute templateAttr);
-        //
-        //                     // todo -- support namespaces in the look up map
-        //                     tagName = tagName.Split('`')[0];
-        //
-        //                     ProcessedType processedType = new ProcessedType(currentType, templateAttr, tagName);
-        //                     processedType.IsUnresolvedGeneric = true;
-        //                     try {
-        //                         s_GenericMap.Add(tagName, processedType);
-        //                     }
-        //                     catch (Exception) {
-        //                         Debug.LogError($"UIForia does not support multiple elements with the same tag name. Tried to register type {processedType.rawType} for `{tagName}` " +
-        //                                        $"but this tag name was already taken by type {s_GenericMap[tagName].rawType}. For generic overload types with multiple arguments you need to supply a unique [TagName] attribute");
-        //                         continue;
-        //                     }
-        //
-        //                     typeMap[currentType] = processedType;
-        //
-        //                     if (!s_NamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> namespaceList)) {
-        //                         namespaceList = new LightList<Assembly>(2);
-        //                         s_NamespaceMap.Add(currentType.Namespace ?? "null", namespaceList);
-        //                     }
-        //
-        //                     if (!namespaceList.Contains(assembly)) {
-        //                         namespaceList.Add(assembly);
-        //                     }
-        //
-        //                     continue;
-        //                 }
-        //             }
-        //
-        //             if (!filteredOut && currentType.IsClass && !currentType.IsGenericTypeDefinition) {
-        //                 Attribute[] attrs = Attribute.GetCustomAttributes(currentType, false);
-        //                 Application.ProcessClassAttributes(currentType, attrs);
-        //
-        //                 if (typeof(UIElement).IsAssignableFrom(currentType)) {
-        //                     string tagName = GetTemplateAttribute(currentType, attrs, out TemplateAttribute templateAttr);
-        //
-        //                     ProcessedType processedType = new ProcessedType(currentType, templateAttr, tagName);
-        //
-        //                     if (templateAttr != null) {
-        //                         templateTypes.Add(processedType);
-        //                     }
-        //
-        //                     // if (templateTypeMap.ContainsKey(tagName)) {
-        //                     //     Debug.Log($"Tried to add template key `{tagName}` from type {currentType} but it was already defined by {templateTypeMap.GetOrDefault(tagName).rawType}");
-        //                     // }
-        //
-        //                     if (templateTypeMap.TryGetValue(tagName, out TypeList typeList)) {
-        //                         if (typeList.types != null) {
-        //                             Array.Resize(ref typeList.types, typeList.types.Length + 1);
-        //                             typeList.types[typeList.types.Length - 1] = processedType;
-        //                         }
-        //                         else {
-        //                             typeList.types = new ProcessedType[2];
-        //                             typeList.types[0] = typeList.mainType;
-        //                             typeList.types[1] = processedType;
-        //                         }
-        //                     }
-        //                     else {
-        //                         typeList.mainType = processedType;
-        //                         templateTypeMap[tagName] = typeList;
-        //                     }
-        //
-        //                     // templateTypeMap.Add(tagName, processedType);
-        //                     processedType.id = NextTypeId;
-        //                     typeMap[currentType] = processedType;
-        //                 }
-        //             }
-        //
-        //             if (filteredOut && !currentType.IsPublic) {
-        //                 continue;
-        //             }
-        //
-        //             if (!s_NamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> list)) {
-        //                 list = new LightList<Assembly>(2);
-        //                 s_NamespaceMap.Add(currentType.Namespace ?? "null", list);
-        //             }
-        //
-        //             if (!list.Contains(assembly)) {
-        //                 list.Add(assembly);
-        //             }
-        //         }
-        //     }
-        //     catch (ReflectionTypeLoadException) {
-        //         Debug.Log($"{assembly.FullName}");
-        //         throw;
-        //     }
-        // }
-        //
-        // watch.Stop();
-        // Debug.Log($"Loaded types in: {watch.ElapsedMilliseconds} ms from {count} assemblies");
-        // }
+            for (int i = 0; i < elements.Count; i++) {
+                Type currentType = elements[i];
 
-        private static string GetTemplateAttribute(Type currentType, Attribute[] attrs, out TemplateAttribute templateAttr) {
-            string tagName = currentType.Name;
-            templateAttr = null;
+                if (currentType.IsAbstract) continue;
+                
+                ProcessedType processedType = ProcessedType.CreateFromType(currentType);
 
-            for (int index = 0; index < attrs.Length; index++) {
-                Attribute attr = attrs[index];
-
-                if (attr is TemplateTagNameAttribute templateTagNameAttr) {
-                    tagName = templateTagNameAttr.tagName;
+                if (string.IsNullOrEmpty(processedType.elementPath)) {
+                    Debug.LogError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} requires a location providing attribute." +
+                                   $" Please use {nameof(RecordFilePathAttribute)}, {nameof(TemplateAttribute)}, " +
+                                   $"{nameof(ImportStyleSheetAttribute)}, {nameof(StyleAttribute)}" +
+                                   $" or {nameof(TemplateTagNameAttribute)} on the class.");
+                    continue;
+                }
+                
+                if (!Module.TryGetModule(processedType, out Module module)) {
+                    Debug.LogError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} at {processedType.elementPath} was not inside a module hierarchy.");
+                    continue;
                 }
 
-                if (attr is TemplateAttribute templateAttribute) {
-                    templateAttr = templateAttribute;
+                // todo -- need to check that a reserved tag name was not taken!
+
+                try {
+                    module.tagNameMap.Add(processedType.tagName, processedType);
                 }
+                catch (ArgumentException) {
+                    Debug.LogError($"UIForia does not support multiple elements with the same tag name within the same module. Tried to register type {TypeNameGenerator.GetTypeName(processedType.rawType)} for `{processedType.tagName}` " +
+                                   $" in module {TypeNameGenerator.GetTypeName(module.GetType())} at {module.location} " +
+                                   $"but this tag name was already taken by type {TypeNameGenerator.GetTypeName(module.tagNameMap[processedType.tagName].rawType)}. " +
+                                   "For generic overload types with multiple arguments you need to supply a unique [TagName] attribute");
+                    continue;
+                }
+
+                typeMap[currentType] = processedType;
             }
 
-            // if no template attribute is defined, assume the default scheme
-            if (templateAttr == null) {
-                templateAttr = new TemplateAttribute(TemplateType.DefaultFile, null);
+            for (int i = 0; i < painters.Count; i++) {
+                Type type = painters[i];
+
+                if (type == typeof(RenderBox) || type == typeof(StandardRenderBox) || type == typeof(ImageRenderBox) || type == typeof(TextRenderBox)) {
+                    continue;
+                }
+
+                CustomPainterAttribute painter = type.GetCustomAttribute<CustomPainterAttribute>();
+
+                if (painter == null) {
+                    continue;
+                }
+
+                if (type.GetConstructor(Type.EmptyTypes) == null) {
+                    Debug.LogError($"Classes marked with [{nameof(CustomPainterAttribute)}] must provide a parameterless constructor" +
+                                   $" and the class must extend {nameof(RenderBox)}. Ensure that {type.FullName} conforms to these rules");
+                    continue;
+                }
+
+                renderBoxTypeMap.Add(painter.name, type);
+                Application.RegisterPainter(type, painter.name);
             }
 
-            return tagName;
+            // todo -- implement this
+            //for (int i = 0; i < layouts.Count; i++) {
+            // Type type = layouts[i];
+            // layoutBoxTypeMap.Add(type.FullName, type);                
+            //}
         }
 
         internal static ProcessedType GetProcessedType(Type type) {
@@ -302,86 +123,77 @@ namespace UIForia.Parsing {
             return retn;
         }
 
-        public static LightList<ProcessedType> GetTemplateTypes() {
-            return templateTypes;
-        }
-
-        private static readonly List<string> EmptyNamespaceList = new List<string>();
 
         // Namespace resolution
-        //    if there is only one element with a name then no namespace is needed
-        //    if there are multiple elements with a name
-        //        namespace is required in order to match the correct one
-        //    using declarations can provide implicit namespaces
+        //    There can be only one tag name per module.
+        //    Built in elements reserve their tag names and can bes resolved from anywhere.
+        //    A template can 'static' include with a using statement to avoid module prefixing. If there is a name collision,
+        //    the current module wins over dependencies. If the conflict is between dependencies that are both statically included,
+        //    an error is thrown.
         public static ProcessedType ResolveTagName(string tagName, string namespacePrefix, IReadOnlyList<string> namespaces) {
-
-            namespaces = namespaces ?? EmptyNamespaceList;
-
             if (string.IsNullOrEmpty(namespacePrefix)) namespacePrefix = null;
             if (string.IsNullOrWhiteSpace(namespacePrefix)) namespacePrefix = null;
 
-            if (templateTypeMap.TryGetValue(tagName, out TypeList typeList)) {
-                // if this is null we resolve using just the tag name
-                if (namespacePrefix == null) {
-                    // if only one type has this tag name we can safely return it
-                    if (typeList.types == null) {
-                        return typeList.mainType.Reference();
-                    }
-
-                    // if there are multiple tags with this name, we need to search our namespaces 
-                    // if only one match is found, we can return it. If multiple are found, throw
-                    // and ambiguous reference exception
-                    LightList<ProcessedType> resultList = LightList<ProcessedType>.Get();
-                    for (int i = 0; i < namespaces.Count; i++) {
-                        for (int j = 0; j < typeList.types.Length; j++) {
-                            string namespaceName = namespaces[i];
-                            ProcessedType testType = typeList.types[j];
-                            if (namespaceName == testType.namespaceName) {
-                                resultList.Add(testType);
-                            }
-                        }
-                    }
-
-                    if (resultList.size == 1) {
-                        ProcessedType retn = resultList[0];
-                        resultList.Release();
-                        return retn.Reference();
-                    }
-
-                    List<string> list = resultList.Select((s) => s.namespaceName).ToList();
-                    throw new ParseException("Ambiguous TagName reference: " + tagName + ". References found in namespaces " + StringUtil.ListToString(list, ", "));
-                }
-
-                if (typeList.types == null) {
-                    if (namespacePrefix == typeList.mainType.namespaceName) {
-                        return typeList.mainType.Reference();
-                    }
-                }
-                else {
-                    // if prefix is not null we can only return a match for that namespace
-                    for (int j = 0; j < typeList.types.Length; j++) {
-                        ProcessedType testType = typeList.types[j];
-                        if (namespacePrefix == testType.namespaceName) {
-                            return testType.Reference();
-                        }
-                    }
-                }
-
-                return null;
-            }
-
-            if (s_GenericMap.TryGetValue(tagName, out ProcessedType processedType)) {
-                return processedType;
-            }
+            // if (templateTypeMap.TryGetValue(tagName, out TypeList typeList)) {
+            //     // if this is null we resolve using just the tag name
+            //     if (namespacePrefix == null) {
+            //         // if only one type has this tag name we can safely return it
+            //         if (typeList.types == null) {
+            //             return typeList.mainType.Reference();
+            //         }
+            //
+            //         // if there are multiple tags with this name, we need to search our namespaces 
+            //         // if only one match is found, we can return it. If multiple are found, throw
+            //         // and ambiguous reference exception
+            //         LightList<ProcessedType> resultList = LightList<ProcessedType>.Get();
+            //         for (int i = 0; i < namespaces.Count; i++) {
+            //             for (int j = 0; j < typeList.types.Length; j++) {
+            //                 string namespaceName = namespaces[i];
+            //                 ProcessedType testType = typeList.types[j];
+            //                 if (namespaceName == testType.namespaceName) {
+            //                     resultList.Add(testType);
+            //                 }
+            //             }
+            //         }
+            //
+            //         if (resultList.size == 1) {
+            //             ProcessedType retn = resultList[0];
+            //             resultList.Release();
+            //             return retn.Reference();
+            //         }
+            //
+            //         List<string> list = resultList.Select((s) => s.namespaceName).ToList();
+            //         throw new ParseException("Ambiguous TagName reference: " + tagName + ". References found in namespaces " + StringUtil.ListToString(list, ", "));
+            //     }
+            //
+            //     if (typeList.types == null) {
+            //         if (namespacePrefix == typeList.mainType.namespaceName) {
+            //             return typeList.mainType.Reference();
+            //         }
+            //     }
+            //     else {
+            //         // if prefix is not null we can only return a match for that namespace
+            //         for (int j = 0; j < typeList.types.Length; j++) {
+            //             ProcessedType testType = typeList.types[j];
+            //             if (namespacePrefix == testType.namespaceName) {
+            //                 return testType.Reference();
+            //             }
+            //         }
+            //     }
+            //
+            //     return null;
+            // }
+            //
+            // if (s_GenericMap.TryGetValue(tagName, out ProcessedType processedType)) {
+            //     return processedType;
+            // }
 
             return null;
         }
 
-        public static ProcessedType AddResolvedGenericElementType(Type newType, TemplateAttribute templateAttr, string tagName) {
+        public static ProcessedType AddResolvedGenericElementType(Type newType, ProcessedType generic) {
             if (!typeMap.TryGetValue(newType, out ProcessedType retn)) {
-                retn = new ProcessedType(newType, templateAttr, tagName) {
-                    id = NextTypeId
-                };
+                retn = ProcessedType.ResolveGeneric(newType, generic);
                 typeMap.Add(retn.rawType, retn);
             }
 
@@ -394,16 +206,66 @@ namespace UIForia.Parsing {
 
         // todo -- would be good to have this be an instance property because we need to clear dynamics every time we compile
         public static void AddDynamicElementType(ProcessedType processedType) {
-            processedType.id = NextTypeId;
             typeMap[processedType.rawType] = processedType;
             dynamicTypes.Add(processedType);
-            // templateTypes.Add(processedType);
-            // todo -- maybe add to namespace map?
         }
 
         public static void ClearDynamics() {
             for (int i = 0; i < dynamicTypes.Count; i++) {
                 typeMap.Remove(dynamicTypes[i].rawType);
+            }
+        }
+
+        private static void ScanFast(out IList<Type> moduleTypes, out IList<Type> elementTypes, out IList<Type> layoutTypes, out IList<Type> renderTypes) {
+            moduleTypes = TypeCache.GetTypesDerivedFrom<Module>();
+            elementTypes = TypeCache.GetTypesDerivedFrom<UIElement>();
+            layoutTypes = TypeCache.GetTypesDerivedFrom<AwesomeLayoutBox>();
+            renderTypes = TypeCache.GetTypesDerivedFrom<RenderBox>();
+        }
+
+        private static void ScanSlow(out IList<Type> moduleTypes, out IList<Type> elementTypes, out IList<Type> layoutTypes, out IList<Type> renderTypes) {
+            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            moduleTypes = new List<Type>(16);
+            elementTypes = new List<Type>(128);
+            layoutTypes = new List<Type>(8);
+            renderTypes = new List<Type>(8);
+
+            for (int i = 0; i < assemblies.Length; i++) {
+                Assembly assembly = assemblies[i];
+
+                if (assembly.IsDynamic || assembly.ReflectionOnly) {
+                    continue;
+                }
+
+                Type[] types = assembly.GetExportedTypes();
+
+                for (int j = 0; j < types.Length; j++) {
+                    Type currentType = types[j];
+                    // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+                    if (currentType == null || !currentType.IsClass || currentType.IsAbstract) {
+                        continue;
+                    }
+
+                    if (currentType.IsSubclassOf(typeof(Module))) {
+                        moduleTypes.Add(currentType);
+                        continue;
+                    }
+
+                    if (currentType.IsSubclassOf(typeof(UIElement))) {
+                        elementTypes.Add(currentType);
+                        continue;
+                    }
+
+                    if (currentType.IsSubclassOf(typeof(RenderBox))) {
+                        renderTypes.Add(currentType);
+                        continue;
+                    }
+
+                    if (currentType.IsSubclassOf(typeof(AwesomeLayoutBox))) {
+                        layoutTypes.Add(currentType);
+                    }
+                }
             }
         }
 

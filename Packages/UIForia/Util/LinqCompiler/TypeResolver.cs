@@ -42,9 +42,8 @@ namespace UIForia.Util {
         }
 
         private static void FilterAssemblies() {
-            
             if (s_NamespaceMap != null) return;
-            
+
             s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
 
             Stopwatch watch = Stopwatch.StartNew();
@@ -63,17 +62,18 @@ namespace UIForia.Util {
             Assembly current = Assembly.GetExecutingAssembly();
 
             for (int i = 0; i < s_AllAssemblies.Length; i++) {
-
                 Assembly assembly = s_AllAssemblies[i];
 
-                if (assembly.IsDynamic || assembly == a[0] || assembly.ReflectionOnly) {
+                if (assembly.IsDynamic || assembly == a[0] || assembly.ReflectionOnly || assembly.FullName.StartsWith("nunit.framework", StringComparison.Ordinal)) {
                     continue;
                 }
 
                 cnt++;
 
                 try {
+                    
                     Type[] types = assembly == current ? assembly.GetTypes() : assembly.GetExportedTypes();
+                    
                     for (int j = 0; j < types.Length; j++) {
                         Type currentType = types[j];
                         // can be null if assembly referenced is unavailable
@@ -92,18 +92,15 @@ namespace UIForia.Util {
                         if (!list.Contains(assembly)) {
                             list.Add(assembly);
                         }
-
                     }
-
                 }
                 catch (ReflectionTypeLoadException) {
                     Debug.Log($"{assembly.FullName}");
                     throw;
                 }
-
             }
 
-            Debug.Log($"Loaded types in: {watch.ElapsedMilliseconds} ms from {cnt} assemblies");
+            Debug.Log($"Scanned namespaces in {watch.ElapsedMilliseconds} ms from {cnt} assemblies");
             watch.Stop();
         }
 
@@ -341,7 +338,7 @@ namespace UIForia.Util {
             return null;
         }
 
-        // this is a big assembly to scan, so I hardcoded it's namespaces
+        // this is a big assembly to scan, so I hardcoded it's namespaces. System and System.XML assemblies could also be stripped to shave another ~2.5ms probably not worth it.
         private static readonly string[] s_mscorlib = {
             "Internal.Runtime.CompilerServices",
             "Internal.Runtime.Augments",

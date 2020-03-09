@@ -14,10 +14,10 @@ namespace UIForia {
 
             TypeResolver.Initialize();
 
-            Type rootModuleType = Module.GetModuleFromElementType(templateSettings.rootType);
+            Type rootModuleType = Module.GetModuleTypeFromElementType(templateSettings.rootType);
 
             if (rootModuleType == null) {
-                throw new Exception("Unable to find module for type" + templateSettings.rootType);
+                throw new Exception("Unable to find module for type " + templateSettings.rootType);
             }
 
             Module module = Module.CreateRootModule(rootModuleType);
@@ -41,7 +41,7 @@ namespace UIForia {
 
             templateSettings.resourceManager = resourceManager;
 
-            Type rootModuleType = Module.GetModuleFromElementType(templateSettings.rootType);
+            Type rootModuleType = Module.GetModuleTypeFromElementType(templateSettings.rootType);
 
             Module module = Module.CreateRootModule(rootModuleType);
             

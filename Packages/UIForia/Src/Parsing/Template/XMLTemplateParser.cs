@@ -150,24 +150,23 @@ namespace UIForia.Parsing {
         }
 
         internal void Parse(TemplateRootNode templateRootNode, ProcessedType processedType) {
-            TemplateAttribute templateAttr = processedType.templateAttr;
 
-            string filePath = templateAttr.filePath;
+            string filePath = processedType.templatePath;
 
             if (parsedFiles.TryGetValue(filePath, out TemplateShell rootNode)) {
                 ParseContentTemplate(templateRootNode, rootNode, processedType);
                 return;
             }
 
-            TemplateShell shell = ParseOuterShell(templateAttr.filePath, templateAttr.source);
+            TemplateShell shell = ParseOuterShell(filePath, processedType.templateSource);
 
             parsedFiles.Add(filePath, shell);
 
             ParseContentTemplate(templateRootNode, shell, processedType);
         }
 
-        internal TemplateShell GetOuterTemplateShell(TemplateAttribute templateAttribute) {
-            return GetOuterTemplateShell(templateAttribute.filePath, templateAttribute.source);
+        internal TemplateShell GetOuterTemplateShell(ProcessedType processedType) {
+            return GetOuterTemplateShell(processedType.templatePath, processedType.templateSource);
         }
 
         internal TemplateShell GetOuterTemplateShell(string filePath, string source) {
@@ -183,10 +182,10 @@ namespace UIForia.Parsing {
 
         // this might be getting called too many times since im not sure im caching the result
         private void ParseContentTemplate(TemplateRootNode templateRootNode, TemplateShell shell, ProcessedType processedType) {
-            XElement root = shell.GetElementTemplateContent(processedType.templateAttr.templateId);
+            XElement root = shell.GetElementTemplateContent(processedType.templateId);
 
             if (root == null) {
-                throw new TemplateNotFoundException(processedType.templateAttr.filePath, processedType.templateAttr.templateId);
+                throw new TemplateNotFoundException(processedType.templatePath, processedType.templateId);
             }
 
             IXmlLineInfo xmlLineInfo = root;
@@ -454,11 +453,7 @@ namespace UIForia.Parsing {
                 type = ReflectionUtil.CreateType(typeName, typeof(UIElement), fieldDefinitions, methodDefinitions, templateShell.referencedNamespaces);
             }
 
-            TemplateAttribute templateAttribute = new TemplateAttribute(TemplateType.File, templateShell.filePath + "#" + node.templateId);
-
-            ProcessedType processedType = new ProcessedType(type, templateAttribute, node.templateId) {
-                IsUnresolvedGeneric = generics != null
-            };
+            ProcessedType processedType = ProcessedType.CreateFromDynamicType(type, templateShell.filePath, node.templateId);
 
             if (generics == null) {
                 processedType.Reference();

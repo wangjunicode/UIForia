@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Compilers.Style;
@@ -2797,7 +2796,7 @@ namespace UIForia.Compilers {
 
                 strings.Release();
                 Type createdType = ReflectionUtil.CreateGenericType(processedType.rawType, resolvedTypes);
-                return TypeProcessor.AddResolvedGenericElementType(createdType, processedType.templateAttr, processedType.tagName);
+                return TypeProcessor.AddResolvedGenericElementType(createdType, processedType);
             }
 
 
@@ -2838,7 +2837,7 @@ namespace UIForia.Compilers {
             }
 
             Type newType = ReflectionUtil.CreateGenericType(processedType.rawType, resolvedTypes);
-            ProcessedType retn = TypeProcessor.AddResolvedGenericElementType(newType, processedType.templateAttr, processedType.tagName);
+            ProcessedType retn = TypeProcessor.AddResolvedGenericElementType(newType, processedType);
             resolvingTypeOnly = false;
             return retn;
 

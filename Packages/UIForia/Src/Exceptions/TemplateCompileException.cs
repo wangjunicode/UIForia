@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;

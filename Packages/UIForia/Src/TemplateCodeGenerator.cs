@@ -102,11 +102,11 @@ namespace UIForia {
                 GetTypeOutput(processedType, typeBuilder);
                 typeBuilder.Clear();
 
-                string file = Path.Combine(path, processedType.templateAttr.filePath);
+                string file = Path.Combine(path, processedType.templatePath);
 
                 file = Path.ChangeExtension(file, "");
                 file = file.Substring(0, file.Length - 1);
-                file += "_class_" + processedType.templateAttr.templateId;
+                file += "_class_" + processedType.templateId;
                 file += ".cs";
 
                 Directory.CreateDirectory(Path.GetDirectoryName(file));

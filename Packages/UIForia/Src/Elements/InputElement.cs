@@ -5,7 +5,7 @@ using UIForia.Text;
 namespace UIForia.Elements {
 
     [TemplateTagName("Input")]
-    [Template(TemplateType.Internal, "Elements/InputElement.xml")]
+    [Template("Elements/InputElement.xml")]
     public class InputElement<T> : UIInputElement where T : IEquatable<T> {
 
         public T value;

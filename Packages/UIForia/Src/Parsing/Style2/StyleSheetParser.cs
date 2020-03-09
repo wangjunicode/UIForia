@@ -31,7 +31,7 @@ namespace UIForia.Style2 {
 
         [ThreadStatic] private static StructList<char> s_CharBuffer;
         [ThreadStatic] private static StructList<ParsedStyle> s_StyleList;
-        [ThreadStatic] private static ChunkedStructList<StyleBodyPart> s_Parts;
+        [ThreadStatic] private static PagedStructList<StyleBodyPart> s_Parts;
         [ThreadStatic] private static StructList<PendingConstant> s_Constants;
         [ThreadStatic] private static StructList<StyleProperty2> s_PropertyBuffer;
         [ThreadStatic] private static StructList<ParsedMixin> s_MixinList;
@@ -47,7 +47,7 @@ namespace UIForia.Style2 {
         public static StyleSheet2 ParseString(Module module, string contents) {
             char[] rawContents = contents.ToCharArray();
 
-            s_Parts = s_Parts ?? new ChunkedStructList<StyleBodyPart>(128);
+            s_Parts = s_Parts ?? new PagedStructList<StyleBodyPart>(128);
             s_StyleList = s_StyleList ?? new StructList<ParsedStyle>(64);
             s_Constants = s_Constants ?? new StructList<PendingConstant>(32);
             s_PropertyBuffer = s_PropertyBuffer ?? new StructList<StyleProperty2>();

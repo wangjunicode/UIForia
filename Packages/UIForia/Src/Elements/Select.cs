@@ -27,7 +27,7 @@ namespace UIForia.Elements {
 
     }
 
-    [Template(TemplateType.Internal, "Elements/Select.xml")]
+    [Template("Elements/Select.xml")]
     public class Select<T> : UIElement, IFocusable {
 
         private const string disabledAttributeValue = "select-disabled";

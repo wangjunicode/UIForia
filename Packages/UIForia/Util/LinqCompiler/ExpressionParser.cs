@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Text;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expressions.AstNodes;
@@ -13,8 +11,8 @@ namespace UIForia.Parsing.Expressions {
     public struct ExpressionParser {
 
         private TokenStream tokenStream;
-        private Stack<ASTNode> expressionStack;
-        private Stack<OperatorNode> operatorStack;
+        private LightStack<ASTNode> expressionStack;
+        private LightStack<OperatorNode> operatorStack;
 
         private static readonly StringBuilder s_StringBuilder = new StringBuilder(128);
 
@@ -25,8 +23,8 @@ namespace UIForia.Parsing.Expressions {
 
         public ExpressionParser(TokenStream stream) {
             tokenStream = stream;
-            operatorStack = StackPool<OperatorNode>.Get();
-            expressionStack = StackPool<ASTNode>.Get();
+            operatorStack = LightStack<OperatorNode>.Get();
+            expressionStack = LightStack<ASTNode>.Get();
         }
 
         public void Release(bool releaseTokenStream = true) {
@@ -34,8 +32,8 @@ namespace UIForia.Parsing.Expressions {
                 tokenStream.Release();
             }
 
-            StackPool<OperatorNode>.Release(operatorStack);
-            StackPool<ASTNode>.Release(expressionStack);
+            LightStack<OperatorNode>.Release(ref operatorStack);
+            LightStack<ASTNode>.Release(ref expressionStack);
         }
 
         public static ASTNode Parse(TokenStream tokenStream) {
@@ -47,8 +45,8 @@ namespace UIForia.Parsing.Expressions {
         
         private ASTNode ParseInternal(string input) {
             tokenStream = new TokenStream(ExpressionTokenizer.Tokenize(input, StructList<ExpressionToken>.Get()));
-            expressionStack = expressionStack ?? StackPool<ASTNode>.Get();
-            operatorStack = operatorStack ?? StackPool<OperatorNode>.Get();
+            expressionStack = expressionStack ?? LightStack<ASTNode>.Get();
+            operatorStack = operatorStack ?? LightStack<OperatorNode>.Get();
 
             if (tokenStream.Current == ExpressionTokenType.ExpressionOpen) {
                 tokenStream.Advance();

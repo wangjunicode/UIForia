@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using NUnit.Framework;
 using Tests.Data.Layout;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Layout;
@@ -11,6 +13,10 @@ using UnityEngine;
 
 namespace LayoutSystem {
 
+    [RecordFilePath]
+    [UsedImplicitly]
+    public class LayoutSystemTestsModule : Module { }
+    
     public class LayoutSystemTests {
 
         [Template("Data/Layout/System/LayoutSystemTest_General.xml")]

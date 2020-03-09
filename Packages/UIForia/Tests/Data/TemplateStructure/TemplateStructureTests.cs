@@ -5,11 +5,15 @@ using Tests.Mocks;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
-using UnityEngine;
+using UIForia.Util;
+
 // ReSharper disable ClassNeverInstantiated.Global
 
 namespace TemplateStructure {
 
+    [RecordFilePath]
+    public class TestTemplateStructureModule : UIForia.Module { }
+    
     public class TestTemplateStructure {
 
         [Template("Data/TemplateStructure/SlotOverride/TemplateStructure_SlotOverride_Main.xml")]
@@ -251,7 +255,7 @@ namespace TemplateStructure {
 
         [Test]
         public void ModifySlotRequireChildrenOfElementTypeInvalid() {
-            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireTypeMainInvalid>(); });
+            TemplateCompileException exception = Assert.Throws<TemplateCompileException>(() => { MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireTypeMainInvalid>(); });
             Assert.IsTrue(exception.Message.Contains($"Expected element that can be assigned to {typeof(UIDivElement)} but {typeof(UITextElement)} (<Text>) is not."));
         }
 

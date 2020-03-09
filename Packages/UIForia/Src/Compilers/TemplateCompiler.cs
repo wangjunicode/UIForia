@@ -135,7 +135,7 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_StringBuilder_AppendSByte = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(sbyte)});
         internal static readonly MethodInfo s_StringBuilder_AppendBool = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(bool)});
         internal static readonly MethodInfo s_StringBuilder_AppendChar = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
-    
+
         private TemplateCompiler(TemplateSettings settings) {
             this.templateCache = new TemplateCache(settings);
             this.templateMap = new Dictionary<Type, CompiledTemplate>();
@@ -158,9 +158,8 @@ namespace UIForia.Compilers {
         }
 
         public static CompiledTemplateData CompileTemplates(Type appRootType, TemplateSettings templateSettings) {
-            
             TypeProcessor.ClearDynamics();
-            
+
             TemplateCompiler instance = new TemplateCompiler(templateSettings);
 
             CompiledTemplateData compiledTemplateData = instance.CompileRoot(appRootType, templateSettings.dynamicallyCreatedTypes);
@@ -169,8 +168,7 @@ namespace UIForia.Compilers {
         }
 
         private CompiledTemplateData CompileRoot(Type appRootType, List<Type> dynamicallyCreatedTypes) {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
+
             if (!typeof(UIElement).IsAssignableFrom(appRootType)) {
                 throw new ArgumentException($"You can only create elements which are subclasses of UIElement. {appRootType} does not inherit from UIElement");
             }
@@ -214,8 +212,6 @@ namespace UIForia.Compilers {
                 }
             }
 
-            stopwatch.Stop();
-            Debug.Log("Compiled UIForia templates in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
             return templateData;
         }
 
@@ -1070,9 +1066,9 @@ namespace UIForia.Compilers {
                 CompileRemainingChangeHandlerStores(templateNode.processedType.rawType, changeHandlerDefinitions);
 
                 CompileEnabledThisFrame(templateNode.processedType);
-                
+
                 CompileAfterPropertyUpdates(templateNode.processedType);
-                
+
                 CompileAttributeBindings(attributes);
 
                 CompileInstanceStyleBindings(attributes);
@@ -1103,9 +1099,8 @@ namespace UIForia.Compilers {
 
         private void CompileEnabledThisFrame(ProcessedType processed) {
             if (processed.requiresOnEnable) {
-               // ParameterExpression element = updateCompiler.GetElement();
-                
-            }    
+                // ParameterExpression element = updateCompiler.GetElement();
+            }
         }
 
         private void CompileCheckChangeHandlers(StructList<ChangeHandlerDefinition> changeHandlers) {
@@ -2131,9 +2126,9 @@ namespace UIForia.Compilers {
                     closure.Return(astNode);
                 }
             }
-            catch (TemplateCompileException exception) {
+            catch (CompileException exception) {
                 exception.SetExpression(attr.rawValue + " at " + attr.line + ": " + attr.column);
-                throw;
+                throw new TemplateCompileException(exception.Message);
             }
 
             currentEvent = null;

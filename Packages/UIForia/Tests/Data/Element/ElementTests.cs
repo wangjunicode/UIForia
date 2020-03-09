@@ -1,9 +1,14 @@
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.Util;
 
 namespace ElementTests {
+
+    [RecordFilePath]
+    public class ElementTestModule : Module { }
 
     public class ElementTests {
 

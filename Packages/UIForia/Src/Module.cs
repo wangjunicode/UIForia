@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
@@ -12,6 +11,12 @@ using UIForia.Style2;
 using UIForia.Util;
 
 namespace UIForia {
+
+    public class ModuleLoadException : System.Exception {
+
+        public ModuleLoadException(string message) : base(message) { }
+
+    }
 
     public abstract class Module {
 
@@ -24,11 +29,11 @@ namespace UIForia {
         private IList<StyleCondition> styleConditions;
         private VisitMark visitedMark;
 
-        private string path;
+        private bool initialized;
         private string moduleName;
         private Type defaultRootType;
-        private IList<ModuleReference> dependencies;
-        private IList<Type> dynamicTypeReferences;
+        private readonly IList<Type> dynamicTypeReferences;
+        private readonly IList<ModuleReference> dependencies;
         private Uri location;
 
         private static readonly HashSet<Assembly> s_Assemblies = new HashSet<Assembly>();
@@ -40,21 +45,19 @@ namespace UIForia {
 
         private static bool s_ConstructionAllowed;
 
-        public Module() {
+        protected Module() {
             if (!s_ConstructionAllowed) {
-                throw new Exception("Modules should never have their constructor called.");
+                throw new ModuleLoadException("Modules should never have their constructor called.");
             }
 
             this.dependencies = new List<ModuleReference>();
             this.dynamicTypeReferences = new List<Type>();
             this.visitedMark = VisitMark.Alive;
-            this.location = new Uri(GetFilePathFromAttribute(GetType()));
-
         }
 
-        public Action zz__INTERNAL_DO_NOT_CALL; // use this for precompiled loading instead of doing type reflection to find caller type
+        internal Action zz__INTERNAL_DO_NOT_CALL; // use this for precompiled loading instead of doing type reflection to find caller type
 
-        public abstract void Initialize();
+        public virtual void Configure() { }
 
         protected void SetDefaultRootType<TElementType>() where TElementType : UIElement {
             defaultRootType = typeof(TElementType);
@@ -64,21 +67,7 @@ namespace UIForia {
             this.moduleName = moduleName;
         }
 
-        protected void SetFilePath(string filePath) {
-            Type type = GetType();
-            if (!type.Assembly.Location.Contains(UnityEngine.Application.dataPath)) { }
-
-            path = filePath;
-
-        }
-
-        protected void UseDefaultFilePath([CallerFilePath] string path = "") {
-            // todo -- validate path
-            SetFilePath(path);
-        }
-
         protected void AddDependency<TDependency>(string alias) where TDependency : Module, new() {
-
             if (typeof(TDependency).IsAbstract) {
                 throw new InvalidArgumentException("Dependencies must be concrete classes. " + TypeNameGenerator.GetTypeName(typeof(TDependency)) + " is abstract");
             }
@@ -87,22 +76,34 @@ namespace UIForia {
         }
 
         private void ValidateDependencies(HashSet<string> stringHash, HashSet<Type> typeHash) {
+            if (GetType() != typeof(UIForiaElements)) {
+                bool found = false;
+                for (int i = 0; i < dependencies.Count; i++) {
+                    if (dependencies[i].GetModuleType() == typeof(UIForiaElements)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    dependencies.Add(new ModuleReference(typeof(UIForiaElements)));
+                }
+            }
 
             for (int i = 0; i < dependencies.Count; i++) {
                 Type dependencyType = dependencies[i].GetModuleType();
                 string alias = dependencies[i].GetAlias();
 
                 if (stringHash.Contains(alias)) {
-                    throw new Exception($"Duplicate alias or module name " + alias);
+                    throw new ModuleLoadException($"Duplicate alias or module name {alias}");
                 }
 
                 if (typeHash.Contains(dependencyType)) {
-                    throw new Exception($"Duplicate dependency of type {TypeNameGenerator.GetTypeName(dependencyType)} in module {moduleName}");
+                    throw new ModuleLoadException($"Duplicate dependency of type {TypeNameGenerator.GetTypeName(dependencyType)} in module {moduleName}");
                 }
 
                 stringHash.Add(alias);
                 typeHash.Add(dependencyType);
-
             }
         }
 
@@ -112,30 +113,33 @@ namespace UIForia {
 
         public virtual void BuildCustomStyles(IStyleCodeGenerator generator) { }
 
-        public static Module CreateRootModule<T>() where T : Module {
+        public static T CreateRootModule<T>() where T : Module {
+            return CreateRootModule(typeof(T)) as T;
+        }
 
-            Module root = Activator.CreateInstance<T>();
+        private static Module GetModuleInstance(Type moduleType) {
+            if (!s_ModuleInstances.TryGetValue(moduleType, out Module instance)) {
+                s_ConstructionAllowed = true;
+                Uri location = new Uri(GetFilePathFromAttribute(moduleType));
+                instance = (Module) Activator.CreateInstance(moduleType);
+                instance.location = location;
+                s_ModuleInstances[moduleType] = instance;
+                s_ConstructionAllowed = false;
+            }
 
-            GatherDependencies(root);
-
-            List<Module> dependencySort = DependencySort(root);
-
-            TypeProcessor.Initialize(dependencySort);
-
-            return root;
-
+            return instance;
         }
 
         internal static Module CreateRootModule(Type moduleType) {
+            if (moduleType == null) {
+                throw new ModuleLoadException("Module type was null.");
+            }
 
             if (moduleType.IsAbstract) {
-                throw new Exception($"Module types cannot be abstract. {TypeNameGenerator.GetTypeName(moduleType)} is abstract!");
+                throw new ModuleLoadException($"Module types cannot be abstract. {TypeNameGenerator.GetTypeName(moduleType)} is abstract!");
             }
 
-            if (!s_ModuleInstances.TryGetValue(moduleType, out Module root)) {
-                root = (Module) Activator.CreateInstance(moduleType);
-                s_ModuleInstances[moduleType] = root;
-            }
+            Module root = GetModuleInstance(moduleType);
 
             GatherDependencies(root);
 
@@ -143,8 +147,14 @@ namespace UIForia {
 
             TypeProcessor.Initialize(dependencySort);
 
-            return root;
+            for (int i = 0; i < dependencySort.Count; i++) {
+                if (!dependencySort[i].initialized) {
+                    dependencySort[i].Configure();
+                    dependencySort[i].initialized = true;
+                }
+            }
 
+            return root;
         }
 
         protected internal void UpdateConditions(DisplayConfiguration displayConfiguration) {
@@ -171,7 +181,8 @@ namespace UIForia {
 
             for (int i = 0; i < styleConditions.Count; i++) {
                 if (styleConditions[i].name == condition) {
-                    throw new Exception("Duplicate DisplayCondition '" + condition + "'");
+                    styleConditions[i] = new StyleCondition(i, condition, fn);
+                    return;
                 }
             }
 
@@ -213,7 +224,6 @@ namespace UIForia {
         }
 
         private static void GatherDependencies(Module m) {
-
             if (m.dependenciesResolved) {
                 return;
             }
@@ -228,29 +238,18 @@ namespace UIForia {
             m.ValidateDependencies(s_StringHashSet, s_TypeHashSet);
 
             for (int i = 0; i < dependencies.Count; i++) {
-
                 Type moduleType = dependencies[i].GetModuleType();
 
-                if (!s_ModuleInstances.TryGetValue(moduleType, out Module instance)) {
-                    s_ConstructionAllowed = true;
-                    instance = (Module) Activator.CreateInstance(moduleType);
-                    s_ConstructionAllowed = false;
-                    s_ModuleInstances[moduleType] = instance;
-                }
+                Module instance = GetModuleInstance(moduleType);
 
                 dependencies[i].ResolveModule(instance);
-                
+
                 GatherDependencies(instance);
-
             }
-
         }
 
         private static List<Module> DependencySort(Module root) {
-
-            int count = CountSizeAndReset(root, 1);
-
-            List<Module> sorted = new List<Module>(count);
+            List<Module> sorted = new List<Module>(CountSizeAndReset(root, 1));
 
             Visit(root, sorted);
 
@@ -267,22 +266,20 @@ namespace UIForia {
             }
 
             return count;
-
         }
 
         private static void Visit(Module module, List<Module> sorted) {
-
             if (module.visitedMark == VisitMark.Dead) {
                 return;
             }
 
             if (module.visitedMark == VisitMark.Undead) {
-                throw new ArgumentException("Cyclic dependency found."); // probably need a stack to track this properly
+                throw new ModuleLoadException("Cyclic dependency found."); // probably need a stack to track this properly
             }
 
             module.visitedMark = VisitMark.Undead;
 
-            IList<ModuleReference> dependencies = module.GetCachedDependencies();
+            IList<ModuleReference> dependencies = module.dependencies;
 
             for (int i = 0; i < dependencies.Count; i++) {
                 Visit(dependencies[i].GetModuleInstance(), sorted);
@@ -291,41 +288,6 @@ namespace UIForia {
             module.visitedMark = VisitMark.Undead;
 
             sorted.Add(module);
-        }
-
-        private IList<ModuleReference> GetCachedDependencies() {
-            if (cachedDependencies == null) {
-                // cachedDependencies = GetDependencies();
-
-                if (cachedDependencies == null) {
-                    cachedDependencies = new ModuleReference[0];
-                }
-
-                for (int i = 0; i < cachedDependencies.Count; i++) {
-                    if (cachedDependencies[i].GetModuleType().IsAbstract) {
-                        throw new InvalidArgumentException("Dependency declared on an abstract type " + TypeNameGenerator.GetTypeName(cachedDependencies[i].GetModuleType()));
-                    }
-                }
-
-                if (cachedDependencies.Count >= 2) {
-                    // todo -- pool
-                    List<Type> references = new List<Type>(cachedDependencies.Count);
-
-                    for (int i = 0; i < cachedDependencies.Count; i++) {
-
-                        if (references.Contains(cachedDependencies[i].GetModuleType())) {
-                            throw new InvalidArgumentException($"Duplicate dependency declared on {TypeNameGenerator.GetTypeName(cachedDependencies[i].GetModuleType())}");
-                        }
-
-                        references.Add(cachedDependencies[i].GetModuleType());
-
-                    }
-                }
-
-            }
-
-            return cachedDependencies;
-
         }
 
         private struct DiscoveredModule {
@@ -343,7 +305,6 @@ namespace UIForia {
         }
 
         internal static void ProcessAssembly(Assembly assembly) {
-
             if (assembly.IsDynamic || s_Assemblies.Contains(assembly)) {
                 return;
             }
@@ -365,12 +326,23 @@ namespace UIForia {
 
                 for (int j = 0; j < modules.size; j++) {
                     DiscoveredModule module = modules[j];
-                    if (module.moduleLocation.IsBaseOf(discoveredModule.moduleLocation)) { }
+
+                    if (module.moduleLocation.IsBaseOf(discoveredModule.moduleLocation)) {
+                        throw new ModuleLoadException("Nested Modules are not yet supported." +
+                                                      $"{TypeNameGenerator.GetTypeName(module.moduleType)} is a parent of " +
+                                                      $"{TypeNameGenerator.GetTypeName(discoveredModule.moduleType)}. ({discoveredModule.moduleLocation})");
+                    }
+
+                    if (discoveredModule.moduleLocation.IsBaseOf(module.moduleLocation)) {
+                        throw new ModuleLoadException("Nested Modules are not yet supported." +
+                                                      $"{TypeNameGenerator.GetTypeName(discoveredModule.moduleType)} is a parent of " +
+                                                      $"{TypeNameGenerator.GetTypeName(module.moduleType)}. ({module.moduleLocation})");
+                    }
 
                     if (module.parentLocation == discoveredModule.parentLocation) {
-                        throw new Exception("Modules cannot be siblings. " +
-                                            $"{TypeNameGenerator.GetTypeName(module.moduleType)} is at the same location as " +
-                                            $"{TypeNameGenerator.GetTypeName(discoveredModule.moduleType)}. ({discoveredModule.parentLocation})");
+                        throw new ModuleLoadException("Modules cannot be siblings. " +
+                                                      $"{TypeNameGenerator.GetTypeName(module.moduleType)} is at the same location as " +
+                                                      $"{TypeNameGenerator.GetTypeName(discoveredModule.moduleType)}. ({discoveredModule.parentLocation})");
                     }
                 }
 
@@ -383,11 +355,30 @@ namespace UIForia {
         }
 
         internal static Type GetModuleFromElementType(Type type) {
+            if (!type.IsSubclassOf(typeof(UIElement))) {
+                throw new ModuleLoadException($"Cannot create a module for a type that is not a subclass of {TypeNameGenerator.GetTypeName(typeof(UIElement))}.");
+            }
+
+            if (type.IsAbstract) {
+                throw new ModuleLoadException($"Cannot create a module for a type that is abstract. Tried to create module for {TypeNameGenerator.GetTypeName(typeof(UIElement))} but it was abstract.");
+            }
+
+            if (type.IsSubclassOf(typeof(UITextElement))) {
+                throw new ModuleLoadException($"Cannot create a module for a type that is a subclass of {TypeNameGenerator.GetTypeName(typeof(UITextElement))}. Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
+            }
+
+            if (type.IsSubclassOf(typeof(UIContainerElement))) {
+                throw new ModuleLoadException($"Cannot create a module for a type that is a subclass of {TypeNameGenerator.GetTypeName(typeof(UIContainerElement))}. Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
+            }
+
+            if (type.IsSubclassOf(typeof(UIImageElement))) {
+                throw new ModuleLoadException($"Cannot create a module for a type that is a subclass of {TypeNameGenerator.GetTypeName(typeof(UIImageElement))}.Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
+            }
 
             TemplateAttribute attribute = type.GetCustomAttribute<TemplateAttribute>();
 
             if (attribute == null) {
-                throw new Exception($"Can only create an application when the root element is annotated with [{nameof(TemplateAttribute)}]. {TypeNameGenerator.GetTypeName(type)} is missing one.");
+                throw new ModuleLoadException($"Can only create an application when the root element is annotated with [{nameof(TemplateAttribute)}]. {TypeNameGenerator.GetTypeName(type)} is missing one.");
             }
 
             Uri locationUri = new Uri(attribute.elementPath);
@@ -400,40 +391,14 @@ namespace UIForia {
                 }
             }
 
-            // foreach (KeyValuePair<Type, Module> kvp in s_ModuleInstances) {
-            //     Module module = kvp.Value;
-            //     if (module.location.IsBaseOf(locationUri)) {
-            //         return module;
-            //     }
-            // }
-            //
-            // Type[] types = type.Assembly.GetExportedTypes();
-            //
-            // for (int i = 0; i < types.Length; i++) {
-            //     Type currentType = types[i];
-            //     // ReSharper disable once ConditionIsAlwaysTrueOrFalse
-            //     if (currentType == null || !currentType.IsClass || !currentType.IsSubclassOf(typeof(Module))) {
-            //         continue;
-            //     }
-            //
-            //     Uri moduleUri = new Uri(GetFilePathFromAttribute(currentType));
-            //
-            //     if (moduleUri.IsBaseOf(locationUri)) {
-            //         return CreateRootModule(currentType);
-            //     }
-            //
-            // }
-
             return null;
-
         }
 
         private static string GetFilePathFromAttribute(Type moduleType) {
-
             RecordFilePathAttribute attr = moduleType.GetCustomAttribute<RecordFilePathAttribute>();
 
             if (attr == null) {
-                throw new Exception($"Modules must provide a [{nameof(RecordFilePathAttribute)}] attribute. {TypeNameGenerator.GetTypeName(moduleType)} is missing one.");
+                throw new ModuleLoadException($"Modules must provide a [{TypeNameGenerator.GetTypeName(typeof(RecordFilePathAttribute))}] attribute. {TypeNameGenerator.GetTypeName(moduleType)} is missing one.");
             }
 
             return attr.filePath;

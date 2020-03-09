@@ -1,12 +1,17 @@
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace Layout {
+
+    [RecordFilePath]
+    public class FlexHorizontalTestsModule : Module { }
 
     public class FlexHorizontalTests {
 

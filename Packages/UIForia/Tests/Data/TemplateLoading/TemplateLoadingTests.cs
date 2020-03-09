@@ -8,8 +8,16 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
+using UIForia.Util;
 
 namespace TemplateLoading {
+
+    [RecordFilePath]
+    public class TemplateBindingTestModule : Module {
+
+        public override void Configure() { }
+
+    }
 
     public class TemplateLoadingTests {
 
@@ -43,28 +51,30 @@ namespace TemplateLoading {
         public class DefaultPathElement : UIElement { }
 
 
-        [Test]
-        public void ResolveUsingDefaultPath() {
-            MockApplication app = MockApplication.Setup<DefaultPathElement>();
-            Assert.IsInstanceOf<DefaultPathElement>(app.RootElement);
-        }
-
-        public class DefaultPathElementNoAttr : UIElement { }
-
-        [Test]
-        public void ResolveUsingDefaultPathNoAttr() {
-            MockApplication app = MockApplication.Setup<DefaultPathElementNoAttr>();
-            Assert.IsInstanceOf<DefaultPathElementNoAttr>(app.RootElement);
-            UITextElement textElement = TestUtils.AssertInstanceOfAndReturn<UITextElement>(app.RootElement[0]);
-            Assert.AreEqual("Default Path! No Attr", textElement.text.Trim());
-        }
-
-        public class DefaultPathElementNoAttrNotFound : UIElement { }
-
-        [Test]
-        public void ThrowWhenDefaultNotFound() {
-            TemplateNotFoundException ex = Assert.Throws<TemplateNotFoundException>(() => { MockApplication.Setup<DefaultPathElementNoAttrNotFound>(); });
-        }
+        // [Test]
+        // public void ResolveUsingDefaultPath() {
+        //     MockApplication app = MockApplication.Setup<DefaultPathElement>();
+        //     Assert.IsInstanceOf<DefaultPathElement>(app.RootElement);
+        // }
+        //
+        // public class DefaultPathElementNoAttr : UIElement { }
+        //
+        // [Test]
+        // public void ResolveUsingDefaultPathNoAttr() {
+        //     MockApplication app = MockApplication.Setup<DefaultPathElementNoAttr>();
+        //     Assert.IsInstanceOf<DefaultPathElementNoAttr>(app.RootElement);
+        //     UITextElement textElement = TestUtils.AssertInstanceOfAndReturn<UITextElement>(app.RootElement[0]);
+        //     Assert.AreEqual("Default Path! No Attr", textElement.text.Trim());
+        // }
+        //
+        // public class DefaultPathElementNoAttrNotFound : UIElement { }
+        //
+        // [Test]
+        // public void ThrowWhenDefaultNotFound() {
+        //     TemplateNotFoundException ex = Assert.Throws<TemplateNotFoundException>(() => {
+        //         MockApplication.Setup<DefaultPathElementNoAttrNotFound>();
+        //     });
+        // }
 
         [Template("Data/TemplateLoading/TemplateLoadingTest_LoadGeneric.xml")]
         public class TemplateLoadingTest_LoadGenericOuter : UIElement { }

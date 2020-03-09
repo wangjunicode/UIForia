@@ -7,12 +7,20 @@ using UIForia.Attributes;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
-using UIForia.Parsing;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
 
 namespace TemplateBinding {
+
+    [RecordFilePath]
+    public class TemplateBindingTestModule : Module {
+
+        public override void Configure() {
+            
+        }
+
+    }
 
     public class TemplateBindingTests {
 
@@ -504,7 +512,7 @@ namespace TemplateBinding {
 
         [Test]
         public void LocalContextVariable() {
-            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<TemplateBindingTest_ContextVariableOutOfScope>(nameof(TemplateBindingTest_ContextVariableOutOfScope)); });
+            TemplateCompileException exception = Assert.Throws<TemplateCompileException>(() => { MockApplication.Setup<TemplateBindingTest_ContextVariableOutOfScope>(nameof(TemplateBindingTest_ContextVariableOutOfScope)); });
             Assert.IsTrue(exception.Message.Contains(TemplateCompileException.UnknownAlias("cvar0").Message));
         }
 
@@ -1333,7 +1341,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ThrowWhenMissingNamespace() {
-            CompileException exception = Assert.Throws<CompileException>(() => MockApplication.Setup<TemplateBindingTest_NamespaceOuter>());
+            TemplateCompileException exception = Assert.Throws<TemplateCompileException>(() => MockApplication.Setup<TemplateBindingTest_NamespaceOuter>());
             Assert.IsTrue(exception.Message.Contains("Unable to resolve type Color"));
         }
 

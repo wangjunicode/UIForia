@@ -5,15 +5,13 @@ namespace UIForia.Elements {
     [RecordFilePath]
     public class UIForiaElements : Module {
 
-        public override void Initialize() {
+        public override void Configure() {
 
             // can get assembly location to determine if in package mode or in project directly
 
             // SetDefaultRootType<T>();
             
             SetModuleName("Elements");
-            
-            SetFilePath(PathUtil.GetCallerFilePath());
             
             // <Using element="Module#ElementName"/>
             

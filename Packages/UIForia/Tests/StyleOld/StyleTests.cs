@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using JetBrains.Annotations;
 using NUnit.Framework;
 using Tests.Mocks;
 using TMPro;
@@ -11,10 +12,15 @@ using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 
+[RecordFilePath]
+[UsedImplicitly]
+public class StyleTestsModule : UIForia.Module { }
+
+
 [TestFixture]
 public class StyleTests {
 
-    [Template("StyleTests.xml")]
+    [Template("StyleOld/StyleTests.xml")]
     public class StyleSetTestThing : UIElement {
 
         public string marginStyle = "MyMargin";
@@ -509,7 +515,7 @@ public class StyleTests {
     }
 
 
-    [Template("StyleTests.xml#heading")]
+    [Template("StyleOld/StyleTests.xml#heading")]
     public class HeadingStyleElement : UIElement { }
 
     [Test]
@@ -520,7 +526,7 @@ public class StyleTests {
         Assert.AreEqual(new UIFixedLength(100), root.FindById("myHeading").style.TextFontSize);
     }
 
-    [Template("StyleTests.xml#inherited")]
+    [Template("StyleOld/StyleTests.xml#inherited")]
     public class InheritStyleElement : UIElement {
 
         public System.Collections.Generic.List<string> list;
@@ -539,7 +545,7 @@ public class StyleTests {
         Assert.AreEqual(100, fontSize.AsUIFixedLength.value);
     }
 
-    [Template("StyleTests.xml#inherited_enable")]
+    [Template("StyleOld/StyleTests.xml#inherited_enable")]
     public class InheritEnable : UIElement { }
 
     [Test]

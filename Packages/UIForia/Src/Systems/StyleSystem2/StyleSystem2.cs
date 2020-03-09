@@ -501,8 +501,7 @@ namespace UIForia.Style {
                 stack[size++] = application.views[i].RootElement;
             }
 
-            const int StylePropertyCount = (int) StylePropertyId.INVALID;
-            int* map = stackalloc int[StylePropertyCount];
+            int* map = stackalloc int[PropertyParsers.PropertyCount];
 
             for (int i = 0; i < changeSet.size; i++) {
                 StyleSet2 style = changeSet.array[i];
@@ -609,9 +608,9 @@ namespace UIForia.Style {
 
                 // check for changes
                 // new properties will have a positive value, removed will have a negative. 0 for unchanged
-                for (int i = 0; i < StylePropertyCount; i++) {
-                    if (map[i] != 0) { }
-                }
+                // for (int i = 0; i < StylePropertyCount; i++) {
+                //     if (map[i] != 0) { }
+                // }
 
                 // flush all property changes before running animation
 

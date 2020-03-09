@@ -4,7 +4,9 @@
     
     <Element id="DynamicElement">
         
-        <Field name="str" type="string"/>
+        <![CDATA[
+            string str;
+        ]]>
         
         <Template>
             Hello Same File {str}!

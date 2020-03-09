@@ -1,5 +1,7 @@
+using JetBrains.Annotations;
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Systems.Input;
@@ -8,6 +10,10 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace MouseEvents {
+
+    [RecordFilePath]
+    [UsedImplicitly]
+    public class MouseEventTestsModule : Module { }
 
     public class MouseEventTests {
 
@@ -594,7 +600,6 @@ namespace MouseEvents {
             testView.Update();
 
             Assert.AreEqual(new[] {"hover:child0", "hover:root"}, root.clickList.ToArray());
-
         }
 
     }

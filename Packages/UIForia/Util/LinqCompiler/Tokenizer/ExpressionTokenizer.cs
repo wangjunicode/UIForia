@@ -1,4 +1,5 @@
 using System;
+using UIForia.Exceptions;
 using UIForia.Util;
 using UnityEngine;
 
@@ -360,7 +361,7 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
                     int nextNewLine = input.IndexOf("\n", context.ptr + 1, input.Length - context.ptr - 1, StringComparison.Ordinal);
                     nextNewLine = Mathf.Clamp(nextNewLine, context.ptr + 1, input.Length - 1);
                     string errorLine = input.Substring(context.ptr, nextNewLine - context.ptr);
-                    throw new Exception($"Tokenizer failed at line {context.line}, column {context.column}.\n" +
+                    throw new ParseException($"Tokenizer failed at line {context.line}, column {context.column}.\n" +
                                              $" Processed {input.Substring(0, context.ptr)}\n" +
                                              $" ...but then got stuck on {errorLine}.\n");
                 }

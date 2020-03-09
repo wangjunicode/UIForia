@@ -1,12 +1,19 @@
+using JetBrains.Annotations;
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace Layout {
+
+    [RecordFilePath]
+    [UsedImplicitly]
+    public class FlexVerticalTestsModule : Module { }
 
     public class FlexVerticalTests {
 
@@ -182,11 +189,11 @@ namespace Layout {
 
             app.Update();
 
-            Assert.AreEqual(new Rect(0, 0,   100, 175), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 0, 100, 175), root[0].layoutResult.AllocatedRect);
             Assert.AreEqual(new Rect(0, 175, 100, 250), root[1].layoutResult.AllocatedRect);
             Assert.AreEqual(new Rect(0, 425, 100, 175), root[2].layoutResult.AllocatedRect);
         }
-        
+
         [Template("Data/Layout/FlexVertical/FlexVertical_ShrinkWithOverflow.xml")]
         public class FlexVertical_ShrinkWithOverflow : UIElement { }
 
@@ -197,7 +204,7 @@ namespace Layout {
 
             app.Update();
 
-            Assert.AreEqual(new Rect(0, 0,   100, 250), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 0, 100, 250), root[0].layoutResult.AllocatedRect);
             Assert.AreEqual(new Rect(0, 250, 100, 250), root[1].layoutResult.AllocatedRect);
             Assert.AreEqual(new Rect(0, 500, 100, 250), root[2].layoutResult.AllocatedRect);
         }

@@ -5,6 +5,7 @@ using System.IO;
 using Src.Systems;
 using UIForia;
 using UIForia.Animation;
+using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Routing;
 using UIForia.Style;
@@ -19,8 +20,8 @@ namespace Tests.Mocks {
         public static bool s_GenerateCode;
         public static bool s_UsePreCompiledTemplates;
 
-        protected MockApplication(bool isPreCompiled, TemplateSettings templateData, ResourceManager resourceManager, Action<UIElement> onRegister) 
-            : base(isPreCompiled, templateData, resourceManager, onRegister) { }
+        protected MockApplication(bool isPreCompiled, Module rootModule, TemplateSettings templateData, ResourceManager resourceManager, Action<UIElement> onRegister) 
+            : base(isPreCompiled, rootModule, templateData, resourceManager, onRegister) { }
 
         protected override void CreateSystems() {
             styleSystem = new StyleSystem();
@@ -36,18 +37,6 @@ namespace Tests.Mocks {
         public static void Generate(bool shouldGenerate = true) {
             s_GenerateCode = shouldGenerate;
             s_UsePreCompiledTemplates = shouldGenerate;
-        }
-        
-        public static TemplateSettings GetDefaultSettings(string appName) {
-            TemplateSettings settings = new TemplateSettings();
-            settings.applicationName = appName;
-            settings.templateRoot = "Data";
-            settings.assemblyName = typeof(MockApplication).Assembly.GetName().Name;
-            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
-            settings.codeFileExtension = "generated.xml.cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
-            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
-            return settings;
         }
 
         public static MockApplication Setup<T>(string appName = null, List<Type> dynamicTemplateTypes = null) where T : UIElement {
@@ -71,16 +60,21 @@ namespace Tests.Mocks {
                 TemplateCodeGenerator.Generate(typeof(T), settings);
             }
 
-            MockApplication app = new MockApplication(s_UsePreCompiledTemplates, settings, null, null);
-            app.Initialize();
-            return app;
-        }
+            
 
-         public static MockApplication Setup(TemplateSettings settings,  bool usePreCompiledTemplates = false) {
-            MockApplication app = new MockApplication(usePreCompiledTemplates, settings, null, null);
+            Type moduleType = Module.GetModuleFromElementType(settings.rootType);
+
+            if (moduleType == null) {
+                throw new Exception($"Cannot determine module for {TypeNameGenerator.GetTypeName(settings.rootType)}. Please be sure it lives in a module hierarchy.");
+            }
+
+            Module module = Module.CreateRootModule(moduleType);
+            
+            MockApplication app = new MockApplication(s_UsePreCompiledTemplates, module, settings, null, null);
             app.Initialize();
             return app;
         }
+        
          
         public new MockInputSystem InputSystem => (MockInputSystem) inputSystem;
         public UIElement RootElement => views[0].RootElement;

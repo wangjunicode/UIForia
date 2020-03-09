@@ -2,7 +2,6 @@ namespace UIForia.Rendering {
 
     public enum StylePropertyId : ushort {
 
-        None,
         OverflowX,
         OverflowY,
         ClipBehavior,
@@ -165,7 +164,6 @@ namespace UIForia.Rendering {
         DistributeExtraSpaceVertical,
         DistributeExtraSpaceHorizontal,
 
-        INVALID
     }
 
 }

@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using Tests.Mocks;
@@ -8,12 +6,14 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
-using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Util;
 using UnityEngine;
 using Application = UnityEngine.Application;
 
 namespace TemplateParsing_XML {
+
+    [RecordFilePath]
+    public class TemplateParsing_XMLTestsModule : Module { }
 
     public class TemplateParsing_XMLTests {
 
@@ -181,7 +181,6 @@ namespace TemplateParsing_XML {
             Assert.AreEqual("Hello Matt!", GetText(e[0][0]));
         }
 
-
         [Template("Data/XMLTemplateParsing/XMLTemplateParsing_UseDynamicElement.xml#generic_main")]
         public class XMLTemplateParsing_UseDynamicElement_Generic : UIElement {
 
@@ -221,25 +220,6 @@ namespace TemplateParsing_XML {
             Assert.AreEqual("Hello Same File 3!", GetText(e[2][0]));
             Assert.AreEqual("Hello Same File 4!", GetText(e[3][0]));
         }
-
-        [Test]
-        public void GenerateTypeSkeleton() {
-            ClassBuilder builder = new ClassBuilder();
-            Type type = builder.CreateRuntimeType("SkeletonTest", typeof(object),
-                new List<ReflectionUtil.FieldDefinition>() { },
-                new List<ReflectionUtil.MethodDefinition>() {
-                    new ReflectionUtil.MethodDefinition() {
-                        methodName = "InstanceMethod0",
-                        returnType = new TypeLookup(typeof(string)),
-                        arguments = new LambdaArgument[0],
-                        // body = 
-                    }
-                },
-                null);
-            
-            
-        }
-
 
         public static string GetText(UIElement element) {
             UITextElement textEl = element as UITextElement;

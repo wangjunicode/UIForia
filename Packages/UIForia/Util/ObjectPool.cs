@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia.Util {
 
@@ -41,6 +40,9 @@ namespace UIForia.Util {
         public void Release(T element) {
             if (element == null) return;
             m_ActionOnRelease?.Invoke(element);
+            if (m_Stack.Contains(element)) {
+                UnityEngine.Debug.Log("bad");
+            }
             m_Stack.Push(element);
         }
 

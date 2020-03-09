@@ -1,12 +1,19 @@
+using JetBrains.Annotations;
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace Layout {
+
+    [RecordFilePath]
+    [UsedImplicitly]
+    public class StackLayoutTestsModule : Module { }
 
     public class StackLayoutTests {
 

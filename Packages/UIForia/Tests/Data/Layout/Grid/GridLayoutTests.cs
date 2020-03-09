@@ -1,12 +1,19 @@
+using JetBrains.Annotations;
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
 namespace Layout {
+
+    [RecordFilePath]
+    [UsedImplicitly]
+    public class GridLayoutTestModule : Module { }
 
     public class GridLayoutTest {
 

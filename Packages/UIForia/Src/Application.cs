@@ -55,6 +55,7 @@ namespace UIForia {
         internal LinqBindingSystem linqBindingSystem;
         internal StyleSystem2 styleSystem2;
 
+        internal Module rootModule;
         private int elementIdGenerator;
 
         protected ResourceManager resourceManager;
@@ -121,7 +122,7 @@ namespace UIForia {
         private TemplateSettings templateSettings;
         private bool isPreCompiled;
 
-        protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
+        protected Application(bool isPreCompiled, Module rootModule, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
             this.isPreCompiled = isPreCompiled;
             this.templateSettings = templateSettings;
             this.onElementRegistered = onElementRegistered;
@@ -129,7 +130,8 @@ namespace UIForia {
             this.resourceManager = resourceManager ?? new ResourceManager();
             this.tagNameIndexMap = new Dictionary<int, TagNameIndex>();
             this.freeListIndex = new StructList<int>(128);
-            
+            this.elementMap = new LightList<UIElement>(128);
+            this.rootModule = rootModule;
             Applications.Add(this);
 #if UNITY_EDITOR
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnEditorReload;

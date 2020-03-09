@@ -6,9 +6,7 @@ namespace DemoExternal {
     [RecordFilePath]
     public class CompilerDemo : Module {
 
-        public override void Initialize() {
-            UseDefaultFilePath();
-        }
+        public override void Configure() { }
 
     }
 

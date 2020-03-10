@@ -187,6 +187,9 @@ namespace UIForia.Elements {
             char c = evt.character;
 
             if (evt.keyCode == KeyCode.Return) {
+                if (!InitKeyPress(evt)) {
+                    return;
+                }
                 HandleSubmit();
                 return;
             }

@@ -1,5 +1,6 @@
 using System;
 using UIForia.Elements;
+using UIForia.Rendering;
 using UnityEngine;
 
 namespace UIForia.UIInput {
@@ -10,6 +11,8 @@ namespace UIForia.UIInput {
         internal EventPropagator source;
         public UIElement origin { get; internal set; }
         public UIElement element { get; internal set; }
+        public bool lockCursor;
+        public CursorStyle cursor;
 
         protected DragEvent() {
             this.type = GetType();

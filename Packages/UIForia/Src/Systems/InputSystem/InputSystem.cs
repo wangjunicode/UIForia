@@ -463,6 +463,11 @@ namespace UIForia.Systems {
                 return;
             }
 
+            if (currentDragEvent.lockCursor && currentDragEvent.cursor != null) {
+                Cursor.SetCursor(currentDragEvent.cursor.texture, currentDragEvent.cursor.hotSpot, CursorMode.Auto);
+                currentCursor = currentDragEvent.cursor;
+            }
+
             currentDragEvent.MousePosition = MousePosition;
             currentDragEvent.Modifiers = m_KeyboardState.modifiersThisFrame;
 

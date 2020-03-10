@@ -10,7 +10,9 @@ using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Test.NamespaceTest.SomeNamespace;
+using UIForia.Util;
 using UnityEngine;
+using Module = UIForia.Module;
 
 
 // todo -- test bad enum values
@@ -34,6 +36,8 @@ using UnityEngine;
 // todo -- test elvis with methods call chains
 // todo -- expressions should not be null checked again unless assigned to after last null check
 
+[RecordFilePath]
+public class TestLinqCompilerModule : Module { }
 
 public class TestLinqCompiler {
 
@@ -218,9 +222,7 @@ public class TestLinqCompiler {
             }
 
             // todo -- can eliminate the if here if the assignment is to a simple field and no handlers are used
-            compiler.IfNotEqual(left, right, () => {
-                compiler.Assign(left, right);
-            });
+            compiler.IfNotEqual(left, right, () => { compiler.Assign(left, right); });
 
             // // compiler.Log();
             return compiler.BuildLambda();
@@ -232,7 +234,7 @@ public class TestLinqCompiler {
 
     }
 
-
+    [RecordFilePath]
     private class TestElement : UIElement { }
 
     [Test]
@@ -2803,8 +2805,8 @@ public class TestLinqCompiler {
             TestLinqCompiler.StaticThing.value++;
         }", compiler.Print());
     }
-    
-        [Test]
+
+    [Test]
     public void CompileStatement_PostDecrement() {
         LinqCompiler compiler = new LinqCompiler();
         compiler.SetSignature();

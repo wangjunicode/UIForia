@@ -6,6 +6,7 @@ using UIForia.Rendering;
 
 namespace UIForia.Elements.Routing {
 
+    [ContainerElement]
     [TemplateTagName("ChildRouter")]
     public class ChildRouterElement : RouteElement, IRouterElement {
 
@@ -24,7 +25,7 @@ namespace UIForia.Elements.Routing {
 
         // todo -- remove this allocation
         public override string FullPath => parentRoute.FullPath + path;
-        
+
         public override void OnCreate() {
             style.SetPreferredWidth(UIMeasurement.Parent100, StyleState.Normal);
             style.SetPreferredHeight(UIMeasurement.Parent100, StyleState.Normal);
@@ -63,11 +64,10 @@ namespace UIForia.Elements.Routing {
         }
 
         protected void HandleParentRouteUpdate() {
-
             bool wasMatched = IsRouteMatched;
-            
+
             match = RouteMatch.Match(FullPath, 0, new RouteMatch(parentRoute.CurrentMatch.url));
-            
+
             if (!wasMatched && match.IsMatch) {
                 Enter(match);
             }
@@ -75,7 +75,6 @@ namespace UIForia.Elements.Routing {
                 Exit();
             }
             else if (wasMatched && match.IsMatch) {
-
                 RouteMatch route = string.IsNullOrEmpty(path) ? parentRoute.CurrentMatch : CurrentMatch;
                 Update(route); // todo -- not sure about this
                 RouteElement[] routes = m_ChildRoutes.Array;

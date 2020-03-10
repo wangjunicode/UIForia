@@ -1,6 +1,5 @@
 using System;
 using UIForia.Elements;
-using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
@@ -12,15 +11,7 @@ namespace UIForia {
 
         public static Application CreateFromRuntimeTemplates(TemplateSettings templateSettings, Camera camera, Action<UIElement> onRegister) {
 
-            TypeResolver.Initialize();
-
-            Type rootModuleType = Module.GetModuleTypeFromElementType(templateSettings.rootType);
-
-            if (rootModuleType == null) {
-                throw new Exception("Unable to find module for type " + templateSettings.rootType);
-            }
-
-            Module module = Module.CreateRootModule(rootModuleType);
+            Module module = Module.LoadRootModule(templateSettings.rootType);
 
             ResourceManager resourceManager = new ResourceManager();
 
@@ -43,7 +34,7 @@ namespace UIForia {
 
             Type rootModuleType = Module.GetModuleTypeFromElementType(templateSettings.rootType);
 
-            Module module = Module.CreateRootModule(rootModuleType);
+            Module module = Module.LoadRootModule(rootModuleType);
             
             GameApplication retn = new GameApplication(true, module, templateSettings, resourceManager, onRegister);
 

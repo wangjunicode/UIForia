@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
-using UIForia.Elements;
 using UIForia.Layout;
+using UIForia.Rendering;
 using UIForia.Style;
 using UIForia.Util;
 using UnityEngine;
 
-namespace UIForia.Rendering {
+namespace UIForia.Elements {
 
+    [RecordFilePath]
     public class UIViewRootElement : UIElement, IPointerQueryHandler {
 
         public UIViewRootElement() {

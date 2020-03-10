@@ -13,7 +13,7 @@ namespace TemplateStructure {
 
     [RecordFilePath]
     public class TestTemplateStructureModule : UIForia.Module { }
-    
+
     public class TestTemplateStructure {
 
         [Template("Data/TemplateStructure/SlotOverride/TemplateStructure_SlotOverride_Main.xml")]
@@ -215,12 +215,14 @@ namespace TemplateStructure {
             Assert.AreEqual("fromRoot", GetText(root[0][0][0]));
         }
 
+        [ContainerElement]
+        public class GenericThing1<T> : UIElement { }
 
-        public class GenericThing1<T> : UIContainerElement { }
+        [ContainerElement]
+        public class GenericThing2<T, U> : UIElement { }
 
-        public class GenericThing2<T, U> : UIContainerElement { }
-
-        public class GenericThing3<T, U, V> : UIContainerElement { }
+        [ContainerElement]
+        public class GenericThing3<T, U, V> : UIElement { }
 
         [Template("Data/TemplateStructure/TestTemplateStructure_ResolveGeneric.xml")]
         public class ResolveGeneric : UIElement { }
@@ -327,7 +329,6 @@ namespace TemplateStructure {
             TestTemplateStructure_ModifySlot_RequireGenericThing<string> c0 = inner[0][0] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
             TestTemplateStructure_ModifySlot_RequireGenericThing<string> c1 = inner[0][1] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
             TestTemplateStructure_ModifySlot_RequireGenericThing<string> c2 = inner[0][2] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
-
         }
 
         public static string GetText(UIElement element) {
@@ -347,7 +348,8 @@ namespace TemplateStructure {
 
     }
 
-    public class TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing : UIContainerElement {
+    [ContainerElement]
+    public class TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing : UIElement {
 
         public int typedField;
 
@@ -358,7 +360,7 @@ namespace TemplateStructure {
         string Value { get; set; }
 
     }
-    
+
     [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#require_generic_main")]
     public class TestTemplateStructure_ModifySlot_RequireGenericMain : UIElement { }
 
@@ -369,7 +371,8 @@ namespace TemplateStructure {
 
     }
 
-    public class TestTemplateStructure_ModifySlot_RequireGenericThing<T> : UIContainerElement {
+    [ContainerElement]
+    public class TestTemplateStructure_ModifySlot_RequireGenericThing<T> : UIElement {
 
         public T field;
 

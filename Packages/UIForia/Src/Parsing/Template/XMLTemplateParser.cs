@@ -4,7 +4,6 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using JetBrains.Annotations;
-using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expressions;
@@ -50,6 +49,7 @@ namespace UIForia.Parsing {
             }
 
         }
+        internal static readonly XmlParserContext s_XmlParserContext = new XmlParserContext(null, new CustomNamespaceReader(new NameTable()), null, XmlSpace.None);
 
         public XMLTemplateParser(TemplateSettings settings) {
             this.parsedFiles = new Dictionary<string, TemplateShell>(37);
@@ -298,12 +298,12 @@ namespace UIForia.Parsing {
             processedType = ResolveTagName(tagName, namespacePath, templateRoot.templateShell);
 
             if (processedType == null) {
-                throw UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, namespacePath + ":" + tagName);
+                throw UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, tagName);
             }
 
             processedType.ValidateAttributes(attributes);
 
-            if (typeof(UIContainerElement).IsAssignableFrom(processedType.rawType)) {
+            if (processedType.IsContainerElement) {
                 node = new ContainerNode(templateRoot, parent, processedType, attributes, templateLineInfo);
             }
             else if (typeof(UITextElement).IsAssignableFrom(processedType.rawType)) {
@@ -717,6 +717,8 @@ namespace UIForia.Parsing {
             }
 
             string raw = string.Empty;
+            
+            // todo -- not threadsafe atm
             if (!string.IsNullOrEmpty(prefix)) {
                 TextUtil.StringBuilder.Append(prefix);
                 TextUtil.StringBuilder.Append(":");

@@ -6,13 +6,13 @@ using UIForia.Util;
 
 namespace UIForia.Elements {
 
+    [ContainerElement]
     [TemplateTagName("RouterLink")]
-    public class UIRouterLinkElement : UIContainerElement {
+    public class UIRouterLinkElement : UIElement {
 
         public string path;
 
-        public UIRouterLinkElement() {
-        }
+        public UIRouterLinkElement() { }
 
         [OnMouseClick]
         public void GoToPath() {
@@ -24,7 +24,7 @@ namespace UIForia.Elements {
                     throw new NotImplementedException();
                 }
             }
-            
+
             Router gameRouter = application.RoutingSystem.FindRouter("game");
             gameRouter.GoTo(path);
 
@@ -33,11 +33,11 @@ namespace UIForia.Elements {
 
     }
 
+    [ContainerElement]
     [TemplateTagName("RouterLinkBack")]
-    public class UIRouterLinkBackElement : UIContainerElement {
+    public class UIRouterLinkBackElement : UIElement {
 
-        public override void OnUpdate() {
-        }
+        public override void OnUpdate() { }
 
         [OnMouseClick]
         public void GoBack() {

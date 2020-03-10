@@ -98,6 +98,7 @@ namespace TemplateLoading {
 
         }
 
+        [RecordFilePath]
         public class TemplateLoadingTest_Generic3<T, U, V> : UIElement {
 
             [ResolveGenericTemplateArguments] public U value1;

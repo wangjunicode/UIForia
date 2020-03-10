@@ -1,11 +1,14 @@
-namespace UIForia.Elements {
+using UIForia.Util;
 
-    public class UISlotBase : UIContainerElement {
+namespace UIForia.Elements {
+    
+    public abstract class UISlotBase : UIElement {
 
         public string slotId;
 
     }
 
+    [RecordFilePath]
     public class UISlotDefinition : UISlotBase {
 
         public override string GetDisplayName() {

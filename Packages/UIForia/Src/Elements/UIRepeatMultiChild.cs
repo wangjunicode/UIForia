@@ -1,8 +1,10 @@
 using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Util;
 
 namespace UIForia.Elements {
 
+    [RecordFilePath]
     public sealed class RepeatMultiChildContainerElement : UIElement {
 
         public RepeatMultiChildContainerElement() {

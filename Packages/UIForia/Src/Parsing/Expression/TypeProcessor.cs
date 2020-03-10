@@ -8,9 +8,9 @@ using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
-
 #if UNITY_EDITOR
 using UnityEditor;
+
 #endif
 
 namespace UIForia.Parsing {
@@ -21,9 +21,9 @@ namespace UIForia.Parsing {
         internal static readonly Dictionary<string, Type> renderBoxTypeMap = new Dictionary<string, Type>();
         internal static readonly Dictionary<string, Type> layoutBoxTypeMap = new Dictionary<string, Type>();
         internal static readonly List<ProcessedType> dynamicTypes = new List<ProcessedType>();
-        
+
         private static bool initialized;
-        
+
         public static void Initialize() {
             if (initialized) return;
             initialized = true;
@@ -52,17 +52,19 @@ namespace UIForia.Parsing {
                 Type currentType = elements[i];
 
                 if (currentType.IsAbstract) continue;
-                
+
                 ProcessedType processedType = ProcessedType.CreateFromType(currentType);
 
                 if (string.IsNullOrEmpty(processedType.elementPath)) {
-                    Debug.LogError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} requires a location providing attribute." +
-                                   $" Please use {nameof(RecordFilePathAttribute)}, {nameof(TemplateAttribute)}, " +
-                                   $"{nameof(ImportStyleSheetAttribute)}, {nameof(StyleAttribute)}" +
-                                   $" or {nameof(TemplateTagNameAttribute)} on the class.");
-                    continue;
+                    if (processedType.rawType.Assembly != typeof(UIElement).Assembly) {
+                        Debug.LogError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} requires a location providing attribute." +
+                                       $" Please use [{nameof(RecordFilePathAttribute)}], [{nameof(TemplateAttribute)}], " +
+                                       $"[{nameof(ImportStyleSheetAttribute)}], [{nameof(StyleAttribute)}]" +
+                                       $" or [{nameof(TemplateTagNameAttribute)}] on the class. If you intend not to provide a template you can also use [{nameof(ContainerElementAttribute)}].");
+                        continue;
+                    }
                 }
-                
+
                 if (!Module.TryGetModule(processedType, out Module module)) {
                     Debug.LogError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} at {processedType.elementPath} was not inside a module hierarchy.");
                     continue;
@@ -70,6 +72,8 @@ namespace UIForia.Parsing {
 
                 // todo -- need to check that a reserved tag name was not taken!
 
+                processedType.module = module;
+                
                 try {
                     module.tagNameMap.Add(processedType.tagName, processedType);
                 }
@@ -116,6 +120,7 @@ namespace UIForia.Parsing {
 
         internal static ProcessedType GetProcessedType(Type type) {
             typeMap.TryGetValue(type, out ProcessedType retn);
+            // we dont really care about thread safety for this, just need it incremented, the value doesnt matter
             if (retn != null) {
                 retn.references++;
             }

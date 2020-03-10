@@ -68,7 +68,7 @@ namespace Tests.Mocks {
                 throw new Exception($"Cannot determine module for {TypeNameGenerator.GetTypeName(settings.rootType)}. Please be sure it lives in a module hierarchy.");
             }
 
-            Module module = Module.CreateRootModule(moduleType);
+            Module module = Module.LoadRootModule(moduleType);
             
             MockApplication app = new MockApplication(s_UsePreCompiledTemplates, module, settings, null, null);
             app.Initialize();

@@ -4,7 +4,8 @@ using UIForia.Attributes;
 namespace UIForia.Elements.Routing {
 
     [TemplateTagName("Route")]
-    public class RouteElement : UIContainerElement {
+    [ContainerElement]
+    public class RouteElement : UIElement {
 
         public string path;
         public event Action onRouteEnter;

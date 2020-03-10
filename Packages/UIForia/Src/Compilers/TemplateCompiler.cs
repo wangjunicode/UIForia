@@ -167,13 +167,14 @@ namespace UIForia.Compilers {
         }
 
         private CompiledTemplateData CompileRoot(Type appRootType, List<Type> dynamicallyCreatedTypes) {
-
             if (!typeof(UIElement).IsAssignableFrom(appRootType)) {
                 throw new ArgumentException($"You can only create elements which are subclasses of UIElement. {appRootType} does not inherit from UIElement");
             }
 
-            if (typeof(UIContainerElement).IsAssignableFrom(appRootType)) {
-                throw new ArgumentException($"You can only create elements which are subclasses of UIElement and are not subclasses of UITerminalElement, UITextElement or UIContainerElement. {appRootType} inherits from UIContainerElement");
+            ProcessedType appRoot = TypeProcessor.GetProcessedType(appRootType);
+
+            if (appRoot.IsContainerElement) {
+                throw new ArgumentException($"You can only create elements which are not declared as ContainerElements. {appRootType} is a container element.");
             }
 
             if (typeof(UITerminalElement).IsAssignableFrom(appRootType)) {
@@ -184,7 +185,6 @@ namespace UIForia.Compilers {
                 throw new ArgumentException($"You can only create elements which are subclasses of UIElement and are not subclasses of UITerminalElement, UITextElement or UIContainerElement. {appRootType} inherits from UITextElement");
             }
 
-            ProcessedType appRoot = TypeProcessor.GetProcessedType(appRootType);
 
             TemplateRootNode templateRootNode = templateCache.GetParsedTemplate(appRoot);
 

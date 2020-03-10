@@ -1,10 +1,12 @@
+using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UnityEngine;
 
 namespace Documentation.DocumentationElements {
 
-    public class WorldContainer : UIContainerElement {
+    [ContainerElement]
+    public class WorldContainer : UIElement {
         
         private UIElement element;
         

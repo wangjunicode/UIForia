@@ -65,6 +65,7 @@ namespace UIForia.Elements {
 
     }
 
+    [RecordFilePath]
     public sealed class UIRepeatCountElement : UIRepeatElement {
 
         public int count;
@@ -76,7 +77,7 @@ namespace UIForia.Elements {
                 int diff = count - prevCount;
                 for (int i = 0; i < diff; i++) {
                     UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
-                    
+
                     ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", prevCount + i);
 
                     child.bindingNode.CreateLocalContextVariable(indexVariable);
@@ -99,6 +100,7 @@ namespace UIForia.Elements {
 
     }
 
+    [RecordFilePath]
     public sealed class UIRepeatElement<T> : UIRepeatElement {
 
         public IList<T> list;
@@ -220,7 +222,7 @@ namespace UIForia.Elements {
                     for (int i = 0; i < diff; i++) {
                         UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
 
-                        
+
                         ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
                         ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);
 
@@ -241,9 +243,8 @@ namespace UIForia.Elements {
                 child.siblingIndex = i;
 
                 ContextVariable ptr = child.bindingNode.localVariable;
-                
+
                 while (ptr != null) {
-                    
                     if (ptr.id == itemVarId) {
                         ((ContextVariable<T>) ptr).value = list[rangeStart + i];
                     }
@@ -254,7 +255,6 @@ namespace UIForia.Elements {
 
                     ptr = ptr.next;
                 }
-                
             }
         }
 

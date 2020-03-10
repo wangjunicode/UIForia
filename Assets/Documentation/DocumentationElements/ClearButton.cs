@@ -3,7 +3,9 @@ using UIForia.Elements;
 using UnityEngine;
 
 namespace Documentation.DocumentationElements {
-    public class ClearButton : UIContainerElement {
+    
+    [ContainerElement]
+    public class ClearButton : UIElement {
 
         public int value;
         

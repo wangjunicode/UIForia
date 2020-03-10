@@ -3,8 +3,9 @@ using UIForia.UIInput;
 
 namespace UIForia.Elements {
 
+    [ContainerElement]
     [TemplateTagName("Group")]
-    public class UIGroupElement : UIContainerElement {
+    public class UIGroupElement : UIElement {
 
         public override string GetDisplayName() {
             return "Group";
@@ -12,8 +13,9 @@ namespace UIForia.Elements {
 
     }
 
+    [ContainerElement]
     [TemplateTagName("Panel")]
-    public class UIPanelElement : UIContainerElement {
+    public class UIPanelElement : UIElement {
 
         public override string GetDisplayName() {
             return "Panel";
@@ -21,8 +23,9 @@ namespace UIForia.Elements {
 
     }
 
+    [ContainerElement]
     [TemplateTagName("Section")]
-    public class UISectionElement : UIContainerElement {
+    public class UISectionElement : UIElement {
 
         public override string GetDisplayName() {
             return "Section";
@@ -30,8 +33,9 @@ namespace UIForia.Elements {
 
     }
 
+    [ContainerElement]
     [TemplateTagName("Div")]
-    public class UIDivElement : UIContainerElement {
+    public class UIDivElement : UIElement {
 
         public override string GetDisplayName() {
             return "Div";
@@ -39,8 +43,9 @@ namespace UIForia.Elements {
 
     }
 
+    [ContainerElement]
     [TemplateTagName("Header")]
-    public class UIHeaderElement : UIContainerElement {
+    public class UIHeaderElement : UIElement {
 
         public override string GetDisplayName() {
             return "Header";
@@ -48,8 +53,9 @@ namespace UIForia.Elements {
 
     }
 
+    [ContainerElement]
     [TemplateTagName("Footer")]
-    public class UIFooterElement : UIContainerElement {
+    public class UIFooterElement : UIElement {
 
         public override string GetDisplayName() {
             return "Footer";

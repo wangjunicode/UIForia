@@ -1,8 +1,9 @@
+using UIForia.Attributes;
 using UIForia.Elements;
 
 namespace Documentation.DocumentationElements {
-    
-    public class Button : UIContainerElement {
 
-    }
+    [ContainerElement]
+    public class Button : UIElement{ }
+    
 }

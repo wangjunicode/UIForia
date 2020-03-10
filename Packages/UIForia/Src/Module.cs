@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
@@ -11,7 +13,8 @@ using UIForia.Parsing;
 using UIForia.Style;
 using UIForia.Style2;
 using UIForia.Util;
-using UnityEditor;
+using Unity.Jobs;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia {
 
@@ -37,6 +40,7 @@ namespace UIForia {
         private Type defaultRootType;
         private readonly IList<Type> dynamicTypeReferences;
         private readonly IList<ModuleReference> dependencies;
+        private readonly Dictionary<string, TemplateSource> fileSources;
 
         private static readonly HashSet<Assembly> s_Assemblies = new HashSet<Assembly>();
         private static readonly Dictionary<Type, Module> s_ModuleInstances = new Dictionary<Type, Module>();
@@ -47,6 +51,26 @@ namespace UIForia {
         private static bool s_ConstructionAllowed;
 
         internal Dictionary<string, ProcessedType> tagNameMap;
+        private List<Diagnostic> diagnostics;
+
+        private object diagnosticLock = new object();
+
+        public struct Diagnostic {
+
+            public string message;
+            public string filePath;
+            public int lineNumber;
+            public int columnNumber;
+            public DiagnosticType diagnosticType;
+
+        }
+
+        public enum DiagnosticType {
+
+            ParseError,
+            ParseWarning
+
+        }
 
         protected Module() {
             if (!s_ConstructionAllowed) {
@@ -54,9 +78,23 @@ namespace UIForia {
             }
 
             this.tagNameMap = new Dictionary<string, ProcessedType>();
+            this.fileSources = new Dictionary<string, TemplateSource>();
             this.dependencies = new List<ModuleReference>();
             this.dynamicTypeReferences = new List<Type>();
             this.visitedMark = VisitMark.Alive;
+        }
+
+        internal void ReportParseError(string file, string message, int lineNumber, int col = -1) {
+            lock (diagnosticLock) {
+                diagnostics = diagnostics ?? new List<Diagnostic>();
+                diagnostics.Add(new Diagnostic() {
+                    filePath = file,
+                    message = message,
+                    lineNumber = lineNumber,
+                    columnNumber = col,
+                    diagnosticType = DiagnosticType.ParseError
+                });
+            }
         }
 
         internal Action zz__INTERNAL_DO_NOT_CALL; // use this for precompiled loading instead of doing type reflection to find caller type
@@ -119,8 +157,8 @@ namespace UIForia {
 
         public virtual void BuildCustomStyles(IStyleCodeGenerator generator) { }
 
-        public static T CreateRootModule<T>() where T : Module {
-            return CreateRootModule(typeof(T)) as T;
+        public static T LoadRootModule<T>() where T : Module {
+            return LoadRootModule(typeof(T)) as T;
         }
 
         internal static Module GetModuleInstance(Type moduleType) {
@@ -136,20 +174,24 @@ namespace UIForia {
             return instance;
         }
 
-        internal static Module CreateRootModule(Type moduleType) {
-            if (moduleType == null) {
-                throw new ModuleLoadException("Module type was null.");
+        internal static Module LoadRootModule(Type rootType) {
+            TypeProcessor.Initialize();
+
+            ProcessedType processedType = TypeProcessor.GetProcessedType(rootType);
+
+            if (processedType == null) {
+                throw new Exception("Unable to find concrete UIElement from " + rootType);
             }
 
-            if (moduleType.IsAbstract) {
-                throw new ModuleLoadException($"Module types cannot be abstract. {TypeNameGenerator.GetTypeName(moduleType)} is abstract!");
+            Module rootModule = processedType.module;
+
+            if (rootModule == null) {
+                throw new Exception("Unable to find module for type " + rootType);
             }
 
-            Module root = GetModuleInstance(moduleType);
+            GatherDependencies(rootModule);
 
-            GatherDependencies(root);
-
-            List<Module> dependencySort = DependencySort(root);
+            List<Module> dependencySort = DependencySort(rootModule);
 
             TypeProcessor.Initialize();
 
@@ -160,7 +202,102 @@ namespace UIForia {
                 }
             }
 
-            return root;
+            for (int i = 0; i < dependencySort.Count; i++) {
+                Module module = dependencySort[i];
+
+                IEnumerable<string> templateFiles = Directory.EnumerateFiles(module.location, "*.xml", SearchOption.AllDirectories);
+                IEnumerable<string> styleFiles = Directory.EnumerateFiles(module.location, "*.style", SearchOption.AllDirectories);
+
+                foreach (string file in templateFiles) {
+                    module.AddTemplateFile(file);
+                }
+
+                foreach (string file in styleFiles) {
+                    module.AddStyleFile(file);
+                }
+            }
+
+            Parse(dependencySort);
+
+            return rootModule;
+        }
+
+        private static void Parse(List<Module> modulesToParse) {
+            List<TemplateParseInfo> parseInfos = new List<TemplateParseInfo>(128);
+
+            for (int i = 0; i < modulesToParse.Count; i++) {
+                Module module = modulesToParse[i];
+
+                Dictionary<string, TemplateSource>.ValueCollection values = module.fileSources.Values;
+
+                // tag name resolve needs to happen in 2nd pass after all other modules were parsed
+                // or need to run in job with dependencies more likely
+
+                foreach (TemplateSource value in values) {
+                    TemplateParseInfo parseInfo = new TemplateParseInfo() {
+                        module = module,
+                        source = value.source,
+                        path = value.path
+                    };
+
+                    parseInfos.Add(parseInfo);
+                }
+            }
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            TemplateParseJob parseJob = new TemplateParseJob();
+            parseJob.handle = GCHandle.Alloc(parseInfos);
+            JobHandle x = parseJob.Schedule(); //parseInfos.Count, 1);
+            // JobHandle x = parseJob.Schedule(parseInfos.Count, 3);
+            x.Complete();
+            Debug.Log("Parsed in " + stopwatch.Elapsed.TotalMilliseconds.ToString("F3") + "ms.");
+            for (int i = 0; i < modulesToParse.Count; i++) {
+                List<Diagnostic> diagnostics = modulesToParse[i].diagnostics;
+                if (diagnostics == null) continue;
+                for (int j = 0; j < diagnostics.Count; j++) {
+                    Debug.LogError($"{diagnostics[j].filePath} at line {diagnostics[j].lineNumber}:{diagnostics[j].columnNumber} -> {diagnostics[j].message}");
+                }
+
+                diagnostics.Clear();
+            }
+        }
+
+        private struct TemplateSource {
+
+            public string source;
+            public DateTime lastReadTime;
+            public string path;
+
+        }
+
+        private void AddTemplateFile(string file) {
+            DateTime lastModified = File.GetLastWriteTime(file);
+            if (fileSources.TryGetValue(file, out TemplateSource source)) {
+                if (lastModified == source.lastReadTime) {
+                    return;
+                }
+            }
+
+            fileSources[file] = new TemplateSource() {
+                lastReadTime = lastModified,
+                path = file,
+                source = File.ReadAllText(file)
+            };
+        }
+
+        private void AddStyleFile(string file) {
+            DateTime lastModified = File.GetLastWriteTime(file);
+            if (fileSources.TryGetValue(file, out TemplateSource source)) {
+                if (lastModified == source.lastReadTime) {
+                    return;
+                }
+            }
+
+            fileSources[file] = new TemplateSource() {
+                lastReadTime = lastModified,
+                path = file,
+                source = File.ReadAllText(file)
+            };
         }
 
         protected internal void UpdateConditions(DisplayConfiguration displayConfiguration) {
@@ -294,9 +431,10 @@ namespace UIForia {
             module.visitedMark = VisitMark.Undead;
 
             sorted.Add(module);
-        } 
+        }
 
         private static Module[] modules;
+        private string assetPath;
 
         internal static void ValidateModulePaths() {
             modules = s_ModuleInstances.Values.ToArray();
@@ -306,7 +444,7 @@ namespace UIForia {
                     Module moduleI = modules[i];
                     Module moduleJ = modules[j];
                     if (moduleI == moduleJ) continue;
-                    
+
                     if (moduleI.location.StartsWith(moduleJ.location, StringComparison.Ordinal)) {
                         throw new ModuleLoadException("Nested Modules are not yet supported. " +
                                                       $"{TypeNameGenerator.GetTypeName(moduleI.GetType())} is a parent of " +
@@ -335,8 +473,9 @@ namespace UIForia {
                 throw new ModuleLoadException($"Cannot create a module for a type that is a subclass of {TypeNameGenerator.GetTypeName(typeof(UITextElement))}. Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
             }
 
-            if (type.IsSubclassOf(typeof(UIContainerElement))) {
-                throw new ModuleLoadException($"Cannot create a module for a type that is a subclass of {TypeNameGenerator.GetTypeName(typeof(UIContainerElement))}. Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
+            ProcessedType processedType = TypeProcessor.GetProcessedType(type);
+            if (processedType.IsContainerElement) {
+                throw new ModuleLoadException($"Cannot create a module for a type that is declared as a Container element. Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
             }
 
             if (type.IsSubclassOf(typeof(UIImageElement))) {
@@ -434,7 +573,7 @@ namespace UIForia {
                 module = default;
                 return false;
             }
-            
+
             for (int k = 0; k < modules.Length; k++) {
                 if (path.StartsWith(modules[k].location, StringComparison.Ordinal)) {
                     module = modules[k];
@@ -444,6 +583,15 @@ namespace UIForia {
 
             module = default;
             return false;
+        }
+
+        public struct TemplateParseInfo {
+
+            public Module module;
+            public string source;
+            public string path;
+            public object result;
+
         }
 
     }

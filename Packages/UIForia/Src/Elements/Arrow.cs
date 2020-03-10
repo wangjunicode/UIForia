@@ -18,7 +18,7 @@ namespace UIForia.Elements {
     /// arrow color and respects margins.
     /// </summary>
     [RecordFilePath]
-    public class Arrow : UIContainerElement, IElementBackgroundPainter {
+    public class Arrow : UIElement, IElementBackgroundPainter {
 
         /// <summary>
         /// Sets the direction in which the arrow points. Defaults to left.

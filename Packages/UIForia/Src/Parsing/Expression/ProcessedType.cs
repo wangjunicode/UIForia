@@ -18,7 +18,6 @@ namespace UIForia.Parsing {
 
         internal int id;
         internal int references;
-        internal Type moduleType;
 
         internal string tagName;
         internal string elementPath;
@@ -32,6 +31,7 @@ namespace UIForia.Parsing {
         private Flags flags;
         internal StructList<PropertyChangeHandlerDesc> methods;
         private static int currentTypeId = -1;
+        public Module module;
 
         [Flags]
         private enum Flags {
@@ -41,7 +41,8 @@ namespace UIForia.Parsing {
             RequiresOnEnable = 1 << 2,
             RequiresUpdateFn = 1 << 3,
             IsDynamic = 1 << 4,
-            IsUnresolvedGeneric = 1 << 5
+            IsUnresolvedGeneric = 1 << 5,
+            IsContainerElement = 1 << 6
 
         }
 
@@ -56,12 +57,15 @@ namespace UIForia.Parsing {
             this.importedStyleSheets = styleSheets;
             this.namespaceName = rawType.Namespace;
 
+            if (templatePath == null && templateId == null) {
+                IsContainerElement = true;
+            }
+
             // todo -- this is really expensive, consider deferring until we actually need it in the template compiler.
             this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
             this.requiresOnEnable = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnEnable), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
             this.requiresBeforePropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnBeforePropertyBindings), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
             this.requiresAfterPropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnAfterPropertyBindings), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
-
         }
 
         public bool requiresUpdateFn {
@@ -123,8 +127,8 @@ namespace UIForia.Parsing {
                 }
             }
         }
-        
-         public bool IsUnresolvedGeneric {
+
+        public bool IsUnresolvedGeneric {
             get { return (flags & Flags.IsUnresolvedGeneric) != 0; }
             set {
                 if (value) {
@@ -136,14 +140,24 @@ namespace UIForia.Parsing {
             }
         }
 
-        
+        public bool IsContainerElement {
+            get { return (flags & Flags.IsContainerElement) != 0; }
+            set {
+                if (value) {
+                    flags |= Flags.IsContainerElement;
+                }
+                else {
+                    flags &= ~Flags.IsContainerElement;
+                }
+            }
+        }
+
         public struct PropertyChangeHandlerDesc {
 
             public MethodInfo methodInfo;
             public string memberName;
 
         }
-
 
         public void GetChangeHandlers(string memberName, StructList<PropertyChangeHandlerDesc> retn) {
             if (methods == null) {
@@ -201,6 +215,9 @@ namespace UIForia.Parsing {
             string templatePath = null;
             string templateId = null;
 
+            bool templateProvided = false;
+            bool isContainer = false;
+
             foreach (Attribute attr in type.GetCustomAttributes()) {
                 if (attr is TemplateTagNameAttribute templateTagNameAttr) {
                     if (elementPath != null && elementPath != templateTagNameAttr.filePath) {
@@ -213,7 +230,7 @@ namespace UIForia.Parsing {
                 }
 
                 if (attr is TemplateAttribute templateAttribute) {
-                    if (elementPath != null && elementPath != templateAttribute.filePath) {
+                    if (elementPath != null && elementPath != templateAttribute.elementPath) {
                         throw new Exception($"File paths were different {elementPath}, {templateAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
                     }
 
@@ -224,6 +241,12 @@ namespace UIForia.Parsing {
                         templateId = templatePath.Substring(idx + 1);
                         templatePath = templatePath.Substring(0, idx);
                     }
+
+                    if (isContainer) {
+                        UnityEngine.Debug.LogError($"Element cannot be a container and provide a template. {TypeNameGenerator.GetTypeName(type)} is both.");
+                    }
+
+                    templateProvided = true;
 
                     continue;
                 }
@@ -253,14 +276,32 @@ namespace UIForia.Parsing {
                         throw new Exception($"File paths were different {elementPath}, {styleAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
                     }
 
+                    elementPath = styleAttribute.filePath;
                     implicitStyleNames = styleAttribute.styleNames;
                 }
-            }
 
+                if (attr is ContainerElementAttribute containerAttr) {
+                    if (elementPath != null && elementPath != containerAttr.filePath) {
+                        throw new Exception($"File paths were different {elementPath}, {containerAttr.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                    }
+
+                    if (templateProvided) {
+                        UnityEngine.Debug.LogError($"Element cannot be a container and provide a template. {TypeNameGenerator.GetTypeName(type)} is both.");
+                    }
+                    
+                    elementPath = containerAttr.filePath;
+                    isContainer = true;
+                }
+            }
 
             if (styles != null) {
                 styleSheets = styles.ToArray();
                 styles.Release();
+            }
+
+            if (isContainer) {
+                templatePath = null;
+                templateId = null;
             }
 
             return new ProcessedType(type, elementPath, templatePath, templateId, tagName, implicitStyleNames, styleSheets);

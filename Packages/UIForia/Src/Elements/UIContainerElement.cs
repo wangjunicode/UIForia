@@ -1,5 +1,5 @@
 namespace UIForia.Elements {
 
-    public abstract class UIContainerElement : UIElement {}
+    // public abstract class UIContainerElement : UIElement {}
 
 }

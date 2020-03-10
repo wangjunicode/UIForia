@@ -1,9 +1,5 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using UIForia.Attributes;
-using UIForia.Compilers;
 using UIForia.Exceptions;
 using UIForia.Util;
 using UnityEngine.Assertions;
@@ -58,13 +54,9 @@ namespace UIForia.Parsing {
             
             // TemplateAttribute templateAttr = processedType.templateAttr;
 
-            Assert.IsNotNull(processedType.moduleType);
+            Assert.IsNotNull(processedType.module);
 
-            if (!Module.TryGetInstance(processedType.moduleType, out Module module)) {
-                throw new ModuleLoadException($"Module {TypeNameGenerator.GetTypeName(processedType.moduleType)} was not loaded. Please add it to your dependencies");
-            }
-
-            string templatePath = module.GetTemplatePath(new Module.TemplateLookup(processedType.rawType, processedType.templatePath, processedType.elementPath));
+            string templatePath = processedType.module.GetTemplatePath(new Module.TemplateLookup(processedType.rawType, processedType.templatePath, processedType.elementPath));
             
             // if (templateAttr.fullPathId == null && templateAttr.templateType == TemplateType.DefaultFile) {
             //     templateAttr.filePath = ResolveDefaultFilePath(processedType);

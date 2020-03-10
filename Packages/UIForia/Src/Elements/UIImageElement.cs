@@ -4,8 +4,9 @@ using UnityEngine;
 
 namespace UIForia.Elements {
 
+    [ContainerElement]
     [TemplateTagName("Image")]
-    public class UIImageElement : UIContainerElement {
+    public class UIImageElement : UIElement {
 
         public string src;
         public Texture2D texture;

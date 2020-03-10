@@ -16,9 +16,7 @@ namespace TemplateBinding {
     [RecordFilePath]
     public class TemplateBindingTestModule : Module {
 
-        public override void Configure() {
-            
-        }
+        public override void Configure() { }
 
     }
 
@@ -133,7 +131,9 @@ namespace TemplateBinding {
 
         }
 
-        public class TemplateBindingTest_ThingWithMouseHandler : UIContainerElement {
+        [RecordFilePath]
+        [ContainerElement]
+        public class TemplateBindingTest_ThingWithMouseHandler : UIElement {
 
             public string downNoParam;
             public string downParam;
@@ -320,7 +320,8 @@ namespace TemplateBinding {
 
         }
 
-        public class TestTemplateBinding_EventBinding_MethodGroup : UIContainerElement {
+        [ContainerElement]
+        public class TestTemplateBinding_EventBinding_MethodGroup : UIElement {
 
             public event Action<bool> onSomethingHappened;
 
@@ -1012,9 +1013,9 @@ namespace TemplateBinding {
             }
 
         }
-
-
-        public class TemplateBindingTest_OnChange_Inner : UIContainerElement {
+        
+        [ContainerElement]
+        public class TemplateBindingTest_OnChange_Inner : UIElement {
 
             public string value;
 
@@ -1130,7 +1131,7 @@ namespace TemplateBinding {
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_ResolveGeneric.xml")]
-        public class TemplateBindingTest_ResolveGeneric_Inner1<TType0> : UIContainerElement {
+        public class TemplateBindingTest_ResolveGeneric_Inner1<TType0> : UIElement {
 
             public LightList<TType0> list;
 

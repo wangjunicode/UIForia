@@ -1,5 +1,5 @@
 namespace UIForia.Elements {
 
-    public class UITerminalElement : UIElement { }
+    public abstract class UITerminalElement : UIElement { }
 
 }

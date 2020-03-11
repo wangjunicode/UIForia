@@ -49,6 +49,9 @@ namespace UIForia {
         private static readonly HashSet<Type> s_TypeHashSet = new HashSet<Type>();
 
         private static bool s_ConstructionAllowed;
+        private static string[] s_BuiltInElementTags;
+
+        internal static Module s_BuiltInModule;
 
         internal Dictionary<string, ProcessedType> tagNameMap;
         private List<Diagnostic> diagnostics;
@@ -120,17 +123,17 @@ namespace UIForia {
         }
 
         private void ValidateDependencies(HashSet<string> stringHash, HashSet<Type> typeHash) {
-            if (GetType() != typeof(UIForiaElements)) {
+            if (GetType() != typeof(BuiltInElementsModule)) {
                 bool found = false;
                 for (int i = 0; i < dependencies.Count; i++) {
-                    if (dependencies[i].GetModuleType() == typeof(UIForiaElements)) {
+                    if (dependencies[i].GetModuleType() == typeof(BuiltInElementsModule)) {
                         found = true;
                         break;
                     }
                 }
 
                 if (!found) {
-                    dependencies.Add(new ModuleReference(typeof(UIForiaElements)));
+                    dependencies.Add(new ModuleReference(typeof(BuiltInElementsModule)));
                 }
             }
 
@@ -217,12 +220,18 @@ namespace UIForia {
                 }
             }
 
-            Parse(dependencySort);
+            if (!Parse(dependencySort)) {
+                return null;
+            }
 
+            if (!Compile(dependencySort)) {
+                return null;
+            }
+            
             return rootModule;
         }
 
-        private static void Parse(List<Module> modulesToParse) {
+        private static bool Parse(List<Module> modulesToParse) {
             List<TemplateParseInfo> parseInfos = new List<TemplateParseInfo>(128);
 
             for (int i = 0; i < modulesToParse.Count; i++) {
@@ -244,22 +253,35 @@ namespace UIForia {
                 }
             }
 
-            Stopwatch stopwatch = Stopwatch.StartNew();
             TemplateParseJob parseJob = new TemplateParseJob();
-            parseJob.handle = GCHandle.Alloc(parseInfos);
+            parseJob.handle = GCHandle.Alloc(parseInfos); 
             JobHandle x = parseJob.Schedule(); //parseInfos.Count, 1);
-            // JobHandle x = parseJob.Schedule(parseInfos.Count, 3);
+            //JobHandle x = parseJob.Schedule(parseInfos.Count, 4);
             x.Complete();
-            Debug.Log("Parsed in " + stopwatch.Elapsed.TotalMilliseconds.ToString("F3") + "ms.");
+
+            bool failedToParse = false;
+            
             for (int i = 0; i < modulesToParse.Count; i++) {
                 List<Diagnostic> diagnostics = modulesToParse[i].diagnostics;
                 if (diagnostics == null) continue;
+                failedToParse = true;
                 for (int j = 0; j < diagnostics.Count; j++) {
                     Debug.LogError($"{diagnostics[j].filePath} at line {diagnostics[j].lineNumber}:{diagnostics[j].columnNumber} -> {diagnostics[j].message}");
                 }
 
                 diagnostics.Clear();
             }
+
+
+            return !failedToParse;
+
+        }
+
+        private static bool Compile(List<Module> modulesToCompile) {
+            for (int i = 0; i < modulesToCompile.Count; i++) {
+                
+            }
+            return true;
         }
 
         private struct TemplateSource {
@@ -502,26 +524,11 @@ namespace UIForia {
                 throw new ModuleLoadException($"Modules must provide a [{TypeNameGenerator.GetTypeName(typeof(RecordFilePathAttribute))}] attribute. {TypeNameGenerator.GetTypeName(moduleType)} is missing one.");
             }
 
-
             return attr.filePath;
         }
 
         internal CompiledTemplateData LoadRuntimeTemplates(Type rootType) {
             return null;
-        }
-
-        internal struct DiscoveredModule {
-
-            public readonly Type moduleType;
-            public readonly string moduleLocation;
-
-
-            public DiscoveredModule(Type moduleType, string moduleLocation) {
-                this.moduleType = moduleType;
-                // todo -- maybe problem on unix, check for other slash if not present. might be compiled on windows and run on mac for example
-                this.moduleLocation = Path.GetDirectoryName(moduleLocation) + Path.DirectorySeparatorChar;
-            }
-
         }
 
         public static bool TryGetInstance(Type moduleType, out Module module) {
@@ -546,8 +553,33 @@ namespace UIForia {
             return Path.GetFullPath(Path.Combine(location, lookup.declaredTemplatePath));
         }
 
-        internal ProcessedType ResolveTagName(string tagName) {
-            throw new NotImplementedException();
+        internal ProcessedType ResolveTagName(string prefix, string tagName, StructList<UsingDeclaration> usings) {
+
+            if (usings != null && usings.size != 0) {
+                // todo -- solve using lookups     
+            }
+
+            if (string.IsNullOrEmpty(prefix)) {
+                int idx = Array.BinarySearch(s_BuiltInElementTags, 0, s_BuiltInElementTags.Length, tagName);
+                if (idx < 0) {
+                    // not found, search module's tags
+                    tagNameMap.TryGetValue(tagName, out ProcessedType retn);
+                    return retn;
+                }
+                else {
+                    s_BuiltInModule.tagNameMap.TryGetValue(tagName, out ProcessedType retn);
+                    return retn;
+                }
+            }
+            else {
+                for (int i = 0; i < dependencies.Count; i++) {
+                    if (dependencies[i].GetAlias() == prefix) {
+                        dependencies[i].GetModuleInstance().tagNameMap.TryGetValue(tagName, out ProcessedType retn);
+                        return retn;
+                    }
+                }
+                return null;
+            }
         }
 
         public static IList<ProcessedType> GetTemplateElements(Assembly assembly) {
@@ -592,6 +624,21 @@ namespace UIForia {
             public string path;
             public object result;
 
+        }
+
+        internal static void InitializeModules(IList<Type> moduleTypes) {
+            for (int i = 0; i < moduleTypes.Count; i++) {
+                Module instance = GetModuleInstance(moduleTypes[i]);
+                if (instance is BuiltInElementsModule) {
+                    s_BuiltInModule = instance;
+                }
+            }
+            ValidateModulePaths();
+        }
+
+        internal static void CreateBuiltInTypeArray() {
+            s_BuiltInElementTags = s_BuiltInModule.tagNameMap.Keys.ToArray();
+            Array.Sort(s_BuiltInElementTags);
         }
 
     }

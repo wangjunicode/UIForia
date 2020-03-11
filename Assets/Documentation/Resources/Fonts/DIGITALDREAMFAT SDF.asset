@@ -112,10 +112,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 71c1514a6bd24e1e882cebbe1904ce04, type: 3}
   m_Name: DIGITALDREAMFAT SDF
   m_EditorClassIdentifier: 
-  hashCode: 1968856775
+  hashCode: 2017831719
   material: {fileID: -526848335257786436}
   materialHashCode: -75906580
-  fontAssetType: 1
+  fontAssetType: 0
   m_fontInfo:
     Name: Digital dream Fat
     PointSize: 115
@@ -1111,6 +1111,7 @@ Texture2D:
   m_TextureFormat: 1
   m_MipCount: 1
   m_IsReadable: 0
+  m_IgnoreMasterTextureLimit: 0
   m_StreamingMipmaps: 0
   m_StreamingMipmapsPriority: 0
   m_AlphaIsTransparency: 0

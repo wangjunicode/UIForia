@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Linq;
@@ -22,7 +23,6 @@ namespace UIForia {
         private ErrorContext errorContext;
         private StructList<AttributeDefinition> attributes;
         private StructList<AttributeDefinition> injectedAttributes;
-
         public TemplateJobParser(Module.TemplateParseInfo info) {
             this.module = info.module;
             this.filePath = info.path;
@@ -33,7 +33,6 @@ namespace UIForia {
             this.injectedAttributes = new StructList<AttributeDefinition>();
         }
 
-
         internal struct ErrorContext {
 
             public int lineNumber;
@@ -42,10 +41,11 @@ namespace UIForia {
         }
 
         public void ParseTemplate() {
-            XElement root = null;
+            XElement root;
             try {
-                root = XElement.Load(new XmlTextReader(source, XmlNodeType.Element, XMLTemplateParser.s_XmlParserContext), LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);
+               root = XElement.Load(new XmlTextReader(source, XmlNodeType.Element, XMLTemplateParser.s_XmlParserContext), LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);
             }
+
             catch (Exception exception) {
                 ReportParseError(exception.Message);
                 return;
@@ -62,19 +62,20 @@ namespace UIForia {
             ParseUsings(root);
             ParseStyles(root);
             ParseContents(root);
+
         }
 
         private void ParseContents(XElement root) {
             IEnumerable<XElement> contentElements = root.GetChildren("Contents");
 
             foreach (XElement contentElement in contentElements) {
-                if (TryParseContents(contentElement, out object retn)) {
+                if (TryParseContents(contentElement, out TemplateRootNode retn)) {
                     // todo -- here
                 }
             }
         }
 
-        private bool TryParseContents(XElement contentRoot, out object retn) {
+        private bool TryParseContents(XElement contentRoot, out TemplateRootNode retn) {
             retn = default;
 
             SetErrorContext(contentRoot);
@@ -94,14 +95,14 @@ namespace UIForia {
             // maybe tag name should be root? We don't actually know what element we are parsing at this point
             ParseAttributes("Contents", contentRoot.Attributes(), attributes, injectedAttributes, out string genericTypeResolver, out string requireType);
 
-            TemplateRootNode templateRootNode = new TemplateRootNode(templateId ?? filePath, shell, null, null, default);
+            retn = new TemplateRootNode(templateId ?? filePath, shell, null, null, default);
 
-            templateRootNode.attributes = ValidateRootAttributes(contentRoot, attributes);
-            templateRootNode.lineInfo = new TemplateLineInfo(((IXmlLineInfo) contentRoot).LineNumber, ((IXmlLineInfo) contentRoot).LinePosition);
-            templateRootNode.genericTypeResolver = genericTypeResolver;
-            templateRootNode.requireType = requireType; // always null I think
+            retn.attributes = ValidateRootAttributes(contentRoot, attributes);
+            retn.lineInfo = new TemplateLineInfo(((IXmlLineInfo) contentRoot).LineNumber, ((IXmlLineInfo) contentRoot).LinePosition);
+            retn.genericTypeResolver = genericTypeResolver;
+            retn.requireType = requireType; // always null I think
 
-            ParseChildren(templateRootNode, templateRootNode, contentRoot.Nodes());
+            ParseChildren(retn, retn, contentRoot.Nodes());
 
             return true;
         }
@@ -137,10 +138,9 @@ namespace UIForia {
                         string tagName = element.Name.LocalName;
                         string namespaceName = element.Name.NamespaceName;
 
-
                         attributes.QuickClear();
                         injectedAttributes.QuickClear();
-                        
+
                         ParseAttributes(tagName, element.Attributes(), attributes, injectedAttributes, out string genericTypeResolver, out string requireType);
 
                         IXmlLineInfo lineInfo = element;
@@ -224,10 +224,7 @@ namespace UIForia {
                 return ReportParseError("<Children> tag is not supported. Please use an appropriate prefix `forward`, `override`, or `define`");
             }
 
-            // todo -- fix namespace resolution
-            if (namespacePath == "UIForia") namespacePath = "UIForia.Elements";
-
-            processedType = ResolveTagName(tagName, namespacePath, templateRoot.templateShell);
+            processedType = module.ResolveTagName(namespacePath, tagName, shell.usings);
 
             if (processedType == null) {
                 return ReportParseError($"Unable to resolve tag name: <{tagName}>");
@@ -298,7 +295,6 @@ namespace UIForia {
 
             // return TypeProcessor.ResolveTagName(tagName, namespacePath, templateShell.referencedNamespaces);
         }
-
 
         private static void CreateOrUpdateTextNode(TemplateRootNode templateRootRoot, TemplateNode parent, string textContent, in TemplateLineInfo templateLineInfo) {
             if (parent is TextNode textParent) {
@@ -635,7 +631,6 @@ namespace UIForia {
             }
         }
 
-
         private void SetErrorContext(XElement element) {
             errorContext.lineNumber = ((IXmlLineInfo) element).LineNumber;
             errorContext.colNumber = ((IXmlLineInfo) element).LinePosition;
@@ -702,9 +697,9 @@ namespace UIForia {
 
     }
 
-    public struct TemplateParseJob : IJob {
+    // public struct TemplateParseJob : IJob {
 
-        // public struct TemplateParseJob : IJobParallelFor {
+    public struct TemplateParseJob : IJobParallelFor, IJob {
 
         public GCHandle handle;
 

@@ -49,7 +49,8 @@ namespace UIForia.Parsing.Expressions {
         }
 
 
-        private static readonly StringBuilder s_Builder = new StringBuilder(512);
+        [ThreadStatic]
+        private static StringBuilder s_Builder;
 
         
         public static void ProcessTextExpressions(string input, StructList<TextExpression> outputList) {
@@ -57,6 +58,7 @@ namespace UIForia.Parsing.Expressions {
             int ptr = 0;
             int level = 0;
 
+            s_Builder = s_Builder ?? new StringBuilder(128);
             StringBuilder builder = s_Builder;
             builder.Clear();
 

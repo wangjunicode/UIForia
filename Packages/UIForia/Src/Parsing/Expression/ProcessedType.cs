@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Threading;
 using UIForia.Attributes;
 using UIForia.Compilers;
-using UIForia.Elements;
 using UIForia.Util;
 using UnityEngine.Assertions;
 
@@ -62,10 +61,10 @@ namespace UIForia.Parsing {
             }
 
             // todo -- this is really expensive, consider deferring until we actually need it in the template compiler.
-            this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
-            this.requiresOnEnable = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnEnable), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
-            this.requiresBeforePropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnBeforePropertyBindings), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
-            this.requiresAfterPropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnAfterPropertyBindings), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
+            // this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
+            // this.requiresOnEnable = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnEnable), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
+            // this.requiresBeforePropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnBeforePropertyBindings), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
+            // this.requiresAfterPropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnAfterPropertyBindings), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
         }
 
         public bool requiresUpdateFn {
@@ -218,6 +217,9 @@ namespace UIForia.Parsing {
             bool templateProvided = false;
             bool isContainer = false;
 
+            if (type.IsGenericTypeDefinition) {
+                tagName = tagName.Split('`')[0];
+            }
             foreach (Attribute attr in type.GetCustomAttributes()) {
                 if (attr is TemplateTagNameAttribute templateTagNameAttr) {
                     if (elementPath != null && elementPath != templateTagNameAttr.filePath) {

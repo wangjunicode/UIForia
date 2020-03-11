@@ -36,17 +36,13 @@ namespace UIForia.Parsing {
             IList<Type> painters;
             IList<Type> layouts;
 
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
             ScanFast(out moduleTypes, out elements, out layouts, out painters);
-#else
+        #else
             ScanSlow(out moduleTypes, out elements, out layouts, out painters);
-#endif
+        #endif
 
-            for (int i = 0; i < moduleTypes.Count; i++) {
-                Module.GetModuleInstance(moduleTypes[i]);
-            }
-
-            Module.ValidateModulePaths();
+            Module.InitializeModules(moduleTypes);
 
             for (int i = 0; i < elements.Count; i++) {
                 Type currentType = elements[i];
@@ -73,7 +69,7 @@ namespace UIForia.Parsing {
                 // todo -- need to check that a reserved tag name was not taken!
 
                 processedType.module = module;
-                
+
                 try {
                     module.tagNameMap.Add(processedType.tagName, processedType);
                 }
@@ -87,6 +83,8 @@ namespace UIForia.Parsing {
 
                 typeMap[currentType] = processedType;
             }
+
+            Module.CreateBuiltInTypeArray();
 
             for (int i = 0; i < painters.Count; i++) {
                 Type type = painters[i];
@@ -127,7 +125,6 @@ namespace UIForia.Parsing {
 
             return retn;
         }
-
 
         // Namespace resolution
         //    There can be only one tag name per module.

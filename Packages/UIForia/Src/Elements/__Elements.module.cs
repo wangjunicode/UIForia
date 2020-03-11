@@ -3,7 +3,7 @@ using UIForia.Util;
 namespace UIForia.Elements {
 
     [RecordFilePath]
-    public class UIForiaElements : Module {
+    public class BuiltInElementsModule : Module {
 
         public override void Configure() {
 

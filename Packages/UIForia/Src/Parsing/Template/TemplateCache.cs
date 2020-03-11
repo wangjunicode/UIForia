@@ -51,12 +51,10 @@ namespace UIForia.Parsing {
         }
 
         public TemplateRootNode GetParsedTemplate(ProcessedType processedType) {
-            
+            return null;
             // TemplateAttribute templateAttr = processedType.templateAttr;
 
-            Assert.IsNotNull(processedType.module);
-
-            string templatePath = processedType.module.GetTemplatePath(new Module.TemplateLookup(processedType.rawType, processedType.templatePath, processedType.elementPath));
+            // string templatePath = processedType.module.GetTemplatePath(new TemplateLookup(processedType.rawType, processedType.templatePath, processedType.elementPath));
             
             // if (templateAttr.fullPathId == null && templateAttr.templateType == TemplateType.DefaultFile) {
             //     templateAttr.filePath = ResolveDefaultFilePath(processedType);
@@ -67,37 +65,37 @@ namespace UIForia.Parsing {
             //
             // Debug.Assert(templateAttr.fullPathId != null, "templateAttr.fullPathId != null");
 
-            if (templateMap.TryGetValue(templatePath, out LightList<TemplateRootNode> list)) {
-                for (int i = 0; i < list.size; i++) {
-                    if (list.array[i].processedType.rawType == processedType.rawType) {
-                        return list.array[i];
-                    }
-                }
+            // if (templateMap.TryGetValue(templatePath, out LightList<TemplateRootNode> list)) {
+            //     for (int i = 0; i < list.size; i++) {
+            //         if (list.array[i].processedType.rawType == processedType.rawType) {
+            //             return list.array[i];
+            //         }
+            //     }
+            //
+            //     TemplateRootNode retn = list[0].Clone(processedType);
+            //     list.Add(retn);
+            //     return retn;
+            // }
 
-                TemplateRootNode retn = list[0].Clone(processedType);
-                list.Add(retn);
-                return retn;
-            }
-
-            list = new LightList<TemplateRootNode>(2);
-
-            templateMap[processedType.templatePath] = list;
-
-            TemplateDefinition templateDefinition = GetTemplateDefinition(processedType);
-
-            processedType.templateSource = templateDefinition.contents;
-
-            TemplateShell shell = xmlTemplateParser.GetOuterTemplateShell(processedType);
-
-            TemplateRootNode templateRootNode = new TemplateRootNode(processedType.templateId, shell, processedType, null, default) {
-                tagName = processedType.tagName
-            };
-
-            list.Add(templateRootNode);
-
-            xmlTemplateParser.Parse(templateRootNode, processedType);
-
-            return templateRootNode;
+            // list = new LightList<TemplateRootNode>(2);
+            //
+            // templateMap[processedType.templatePath] = list;
+            //
+            // TemplateDefinition templateDefinition = GetTemplateDefinition(processedType);
+            //
+            // processedType.templateSource = templateDefinition.contents;
+            //
+            // TemplateShell shell = xmlTemplateParser.GetOuterTemplateShell(processedType);
+            //
+            // TemplateRootNode templateRootNode = new TemplateRootNode(processedType.templateId, shell, processedType, null, default) {
+            //     tagName = processedType.tagName
+            // };
+            //
+            // list.Add(templateRootNode);
+            //
+            // xmlTemplateParser.Parse(templateRootNode, processedType);
+            //
+            // return templateRootNode;
         }
 
         // private string ResolveTemplateFilePath(TemplateType templateType, string filepath) {

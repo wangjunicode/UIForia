@@ -67,9 +67,7 @@ namespace UIForia.Parsing {
                 }
 
                 // todo -- need to check that a reserved tag name was not taken!
-
-                processedType.module = module;
-
+                
                 try {
                     module.tagNameMap.Add(processedType.tagName, processedType);
                 }

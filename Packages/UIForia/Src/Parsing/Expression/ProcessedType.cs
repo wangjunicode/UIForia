@@ -31,6 +31,8 @@ namespace UIForia.Parsing {
         internal StructList<PropertyChangeHandlerDesc> methods;
         private static int currentTypeId = -1;
         public Module module;
+        public TemplateRootNode templateRootNode;
+        public TemplateLocation? resolvedTemplateLocation;
 
         [Flags]
         private enum Flags {

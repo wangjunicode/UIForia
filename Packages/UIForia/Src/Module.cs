@@ -34,6 +34,7 @@ namespace UIForia {
         private List<bool> conditionResults;
         private IList<StyleCondition> styleConditions;
         private VisitMark visitedMark;
+        private Func<TemplateLookup, TemplateLocation?> templateResolver;
 
         private bool initialized;
         private string moduleName;
@@ -41,8 +42,8 @@ namespace UIForia {
         private readonly IList<Type> dynamicTypeReferences;
         private readonly IList<ModuleReference> dependencies;
         private readonly Dictionary<string, TemplateSource> fileSources;
+        private readonly LightList<ProcessedType> processedTypeList = new LightList<ProcessedType>(32);
 
-        private static readonly HashSet<Assembly> s_Assemblies = new HashSet<Assembly>();
         private static readonly Dictionary<Type, Module> s_ModuleInstances = new Dictionary<Type, Module>();
 
         private static readonly HashSet<string> s_StringHashSet = new HashSet<string>();
@@ -51,7 +52,7 @@ namespace UIForia {
         private static bool s_ConstructionAllowed;
         private static string[] s_BuiltInElementTags;
 
-        internal static Module s_BuiltInModule;
+        private static Module s_BuiltInModule;
 
         internal Dictionary<string, ProcessedType> tagNameMap;
         private List<Diagnostic> diagnostics;
@@ -100,7 +101,7 @@ namespace UIForia {
             }
         }
 
-        internal Action zz__INTERNAL_DO_NOT_CALL; // use this for precompiled loading instead of doing type reflection to find caller type
+        // internal Action zz__INTERNAL_DO_NOT_CALL; // use this for precompiled loading instead of doing type reflection to find caller type
 
         public string location { get; private set; }
 
@@ -224,23 +225,45 @@ namespace UIForia {
                 return null;
             }
 
+            // foreach module
+            //  foreach processedType
+            //     find template
+
+            for (int i = 0; i < dependencySort.Count; i++) {
+
+                Module module = dependencySort[i];
+
+            }
+
             if (!Compile(dependencySort)) {
                 return null;
             }
-            
+
             return rootModule;
+        }
+
+        protected void SetTemplateResolver(Func<TemplateLookup, TemplateLocation?> resolver) {
+            this.templateResolver = resolver;
+        }
+
+        private TemplateLocation? ResolveTemplatePath(TemplateLookup typeLookup) {
+            if (templateResolver != null) {
+                return templateResolver(typeLookup);
+            }
+
+            return new TemplateLocation(location + typeLookup.declaredTemplatePath, typeLookup.templateId);
         }
 
         private static bool Parse(List<Module> modulesToParse) {
             List<TemplateParseInfo> parseInfos = new List<TemplateParseInfo>(128);
 
+            Stopwatch w = Stopwatch.StartNew();
+            
             for (int i = 0; i < modulesToParse.Count; i++) {
+                
                 Module module = modulesToParse[i];
 
                 Dictionary<string, TemplateSource>.ValueCollection values = module.fileSources.Values;
-
-                // tag name resolve needs to happen in 2nd pass after all other modules were parsed
-                // or need to run in job with dependencies more likely
 
                 foreach (TemplateSource value in values) {
                     TemplateParseInfo parseInfo = new TemplateParseInfo() {
@@ -253,34 +276,82 @@ namespace UIForia {
                 }
             }
 
-            TemplateParseJob parseJob = new TemplateParseJob();
-            parseJob.handle = GCHandle.Alloc(parseInfos); 
-            JobHandle x = parseJob.Schedule(); //parseInfos.Count, 1);
-            //JobHandle x = parseJob.Schedule(parseInfos.Count, 4);
+            TemplateRootNode[] templateRootNodes = new TemplateRootNode[parseInfos.Count];
+
+            TemplateParseJob parseJob = new TemplateParseJob {
+                handle = GCHandle.Alloc(parseInfos)
+            };
+
+            //JobHandle x = parseJob.Schedule();
+            JobHandle x = parseJob.Schedule(parseInfos.Count, 1);
             x.Complete();
 
             bool failedToParse = false;
-            
+
             for (int i = 0; i < modulesToParse.Count; i++) {
+
                 List<Diagnostic> diagnostics = modulesToParse[i].diagnostics;
-                if (diagnostics == null) continue;
-                failedToParse = true;
-                for (int j = 0; j < diagnostics.Count; j++) {
-                    Debug.LogError($"{diagnostics[j].filePath} at line {diagnostics[j].lineNumber}:{diagnostics[j].columnNumber} -> {diagnostics[j].message}");
+
+                if (diagnostics != null) {
+
+                    failedToParse = true;
+                    for (int j = 0; j < diagnostics.Count; j++) {
+                        Debug.LogError($"{diagnostics[j].filePath} at line {diagnostics[j].lineNumber}:{diagnostics[j].columnNumber}| {diagnostics[j].message}");
+                    }
+
+                    diagnostics.Clear();
                 }
 
-                diagnostics.Clear();
+                Module module = modulesToParse[i];
+
+                // find range of parsed files for each module 
+                // for each item in range
+                // if null, do nothing
+                //    
+                // else
+                //     search remaining list of processed types looking for template match
+                // 
+
+                for (int j = 0; j < module.processedTypeList.size; j++) {
+
+                    ProcessedType current = module.processedTypeList.array[j];
+                    if (current.IsContainerElement) {
+                        continue;
+                    }
+
+                    if (current.rawType.IsSubclassOf(typeof(UITextElement))) {
+                        continue;
+                    }
+
+                    if (current.templateRootNode == null) {
+                        // resolve template
+                        // module.GetTemplateForElement();
+                        // look through module's template paths
+                        // determine template path for module
+                        TemplateLocation? templatePath = module.ResolveTemplatePath(new TemplateLookup(current));
+
+                        if (templatePath == null) {
+                            continue;
+                        }
+                        //
+                        // if (module.fileSources.TryGetValue(templatePath, out TemplateSource source)) {
+                        //     Debug.Log("found " + templatePath);
+                        // }
+                    }
+
+                }
+
             }
 
-
+            Debug.Log($"Parsed {parseInfos.Count} files in {w.Elapsed.TotalMilliseconds:F3}ms");
+            w.Stop();
             return !failedToParse;
 
         }
 
         private static bool Compile(List<Module> modulesToCompile) {
-            for (int i = 0; i < modulesToCompile.Count; i++) {
-                
-            }
+            for (int i = 0; i < modulesToCompile.Count; i++) { }
+
             return true;
         }
 
@@ -535,20 +606,6 @@ namespace UIForia {
             return s_ModuleInstances.TryGetValue(moduleType, out module);
         }
 
-        public struct TemplateLookup {
-
-            public readonly Type elementType;
-            public readonly string elementFilePath;
-            public readonly string declaredTemplatePath;
-
-            public TemplateLookup(Type elementType, string elementFilePath, string declaredTemplatePath) {
-                this.elementType = elementType;
-                this.elementFilePath = elementFilePath;
-                this.declaredTemplatePath = declaredTemplatePath;
-            }
-
-        }
-
         public virtual string GetTemplatePath(in TemplateLookup lookup) {
             return Path.GetFullPath(Path.Combine(location, lookup.declaredTemplatePath));
         }
@@ -578,6 +635,7 @@ namespace UIForia {
                         return retn;
                     }
                 }
+
                 return null;
             }
         }
@@ -601,14 +659,26 @@ namespace UIForia {
         public static bool TryGetModule(ProcessedType processedType, out Module module) {
             string path = processedType.elementPath;
 
+            if (processedType.module != null) {
+                module = processedType.module;
+                return true;
+            }
+
             if (string.IsNullOrEmpty(path)) {
                 module = default;
                 return false;
             }
 
-            for (int k = 0; k < modules.Length; k++) {
-                if (path.StartsWith(modules[k].location, StringComparison.Ordinal)) {
-                    module = modules[k];
+            for (int i = 0; i < modules.Length; i++) {
+                if (path.StartsWith(modules[i].location, StringComparison.Ordinal)) {
+                    module = modules[i];
+                    module.processedTypeList.Add(processedType);
+                    processedType.module = module;
+
+                    if (!processedType.IsContainerElement && !processedType.rawType.IsAbstract) {
+                        processedType.resolvedTemplateLocation = module.ResolveTemplatePath(new TemplateLookup(processedType));
+                    }
+
                     return true;
                 }
             }
@@ -622,7 +692,7 @@ namespace UIForia {
             public Module module;
             public string source;
             public string path;
-            public object result;
+            public TemplateRootNode parsedTemplate;
 
         }
 
@@ -633,12 +703,29 @@ namespace UIForia {
                     s_BuiltInModule = instance;
                 }
             }
+
             ValidateModulePaths();
         }
 
         internal static void CreateBuiltInTypeArray() {
             s_BuiltInElementTags = s_BuiltInModule.tagNameMap.Keys.ToArray();
             Array.Sort(s_BuiltInElementTags);
+        }
+
+    }
+
+    public struct TemplateLocation {
+
+        public readonly string filePath;
+        public readonly string templateId;
+
+        public TemplateLocation(string filePath, string templateId = null) {
+            this.filePath = filePath;
+            this.templateId = templateId;
+        }
+
+        public static implicit operator TemplateLocation(string value) {
+            return new TemplateLocation(value);
         }
 
     }

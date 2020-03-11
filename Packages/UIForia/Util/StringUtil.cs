@@ -9,6 +9,19 @@ namespace UIForia.Util {
 
         public static readonly char[] s_SplitComma = {','};
 
+        public static unsafe string InlineReplace(this string target, char oldValue, char newValue) {
+            if (target == null) return null;
+            fixed (char* charptr = target) {
+                for (int i = 0; i < target.Length; i++) {
+                    if (charptr[i] == oldValue) {
+                        charptr[i] = newValue;
+                    }
+                }
+            }
+
+            return target;
+        }
+
         public static int FindMatchingIndex(string input, char open, char close) {
             int start = -1;
 

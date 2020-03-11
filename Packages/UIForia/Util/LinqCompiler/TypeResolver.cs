@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using UIForia.Extensions;
@@ -42,6 +43,14 @@ namespace UIForia.Util {
         }
 
         private static void FilterAssemblies() {
+            // todo -- could be optimized by writing a tmp file with all non package/asset assemblies namespaces
+            
+            // string path = Path.GetTempPath();
+            //
+            // if (File.Exists(Path.Combine(Path.GetTempPath(), "uiforia_type-scan.txt"))) {
+            //     
+            // }
+            
             if (s_NamespaceMap != null) return;
 
             s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
@@ -100,7 +109,7 @@ namespace UIForia.Util {
                 }
             }
 
-            Debug.Log($"Scanned namespaces in {watch.ElapsedMilliseconds} ms from {cnt} assemblies");
+            Debug.Log($"Scanned namespaces in {watch.Elapsed.TotalMilliseconds:F3} ms from {cnt} assemblies");
             watch.Stop();
         }
 

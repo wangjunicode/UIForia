@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace UIForia.Elements {
 
-    [Template("Elements/ScrollView.xml")]
+    [Template("ScrollView.xml")]
     public class ScrollView : UIElement {
 
         public float fadeTarget;

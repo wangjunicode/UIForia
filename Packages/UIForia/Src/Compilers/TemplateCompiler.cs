@@ -36,7 +36,6 @@ namespace UIForia.Compilers {
 
         private readonly CompiledTemplateData templateData;
         private readonly Dictionary<Type, CompiledTemplate> templateMap;
-        private readonly TemplateCache templateCache;
 
         private int contextId = 1;
         private int NextContextId => contextId++;
@@ -136,7 +135,6 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_StringBuilder_AppendChar = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
 
         private TemplateCompiler(TemplateSettings settings) {
-            this.templateCache = new TemplateCache(settings);
             this.templateMap = new Dictionary<Type, CompiledTemplate>();
             this.templateData = new CompiledTemplateData(settings);
             this.updateCompiler = new UIForiaLinqCompiler();
@@ -178,17 +176,14 @@ namespace UIForia.Compilers {
             }
 
             if (typeof(UITerminalElement).IsAssignableFrom(appRootType)) {
-                throw new ArgumentException($"You can only create elements which are subclasses of UIElement and are not subclasses of UITerminalElement, UITextElement or UIContainerElement. {appRootType} inherits from UITerminalElement");
+                throw new ArgumentException($"You can only create elements which are subclasses of UIElement and are not subclasses of UITerminalElement or UITextElement. {appRootType} inherits from UITerminalElement");
             }
 
             if (typeof(UITextElement).IsAssignableFrom(appRootType)) {
-                throw new ArgumentException($"You can only create elements which are subclasses of UIElement and are not subclasses of UITerminalElement, UITextElement or UIContainerElement. {appRootType} inherits from UITextElement");
+                throw new ArgumentException($"You can only create elements which are subclasses of UIElement and are not subclasses of UITerminalElement or UITextElement. {appRootType} inherits from UITextElement");
             }
 
-
-            TemplateRootNode templateRootNode = templateCache.GetParsedTemplate(appRoot);
-
-            Compile(templateRootNode, true);
+            Compile(appRoot, true);
 
             if (dynamicallyCreatedTypes != null) {
                 for (int i = 0; i < dynamicallyCreatedTypes.Count; i++) {
@@ -215,13 +210,12 @@ namespace UIForia.Compilers {
         }
 
         private CompiledTemplate GetCompiledTemplate(ProcessedType processedType, bool isRoot = false) {
+
             if (templateMap.TryGetValue(processedType.rawType, out CompiledTemplate retn)) {
                 return retn;
             }
 
-            TemplateRootNode templateRootNode = templateCache.GetParsedTemplate(processedType);
-
-            CompiledTemplate compiledTemplate = Compile(templateRootNode, isRoot);
+            CompiledTemplate compiledTemplate = Compile(processedType, isRoot);
 
             return compiledTemplate;
         }
@@ -279,11 +273,12 @@ namespace UIForia.Compilers {
             return ctx;
         }
 
-        private CompiledTemplate Compile(TemplateRootNode templateRootNode, bool isRoot = false) {
+        private CompiledTemplate Compile(ProcessedType processedType, bool isRoot = false) {
+            
+            TemplateRootNode templateRootNode = processedType.templateRootNode;
+            
             CompilationContext ctx = CompileTemplateMetaData(templateRootNode);
             contextStack.Push(new LightStack<ContextVariableDefinition>());
-
-            ProcessedType processedType = templateRootNode.processedType;
 
             if (!processedType.rawType.IsNested && !processedType.rawType.IsPublic) {
                 throw new TemplateCompileException($"{processedType.rawType} is not public, but must be in order to be used in a template. {templateRootNode.TemplateNodeDebugData}");
@@ -422,7 +417,6 @@ namespace UIForia.Compilers {
             return nodeExpr;
         }
 
-
         private Expression CompileRepeatList(CompilationContext ctx, RepeatNode repeatNode) {
             ParameterExpression nodeExpr = ctx.ElementExpr;
 
@@ -543,11 +537,6 @@ namespace UIForia.Compilers {
             ctx.ContextExpr = rootParam;
             ctx.namespaces = parentContext.namespaces;
 
-            // if (compiledSlot.slotType == SlotType.Modify) {
-            //     ctx.Return(Expression.Default(slotNode.processedType.rawType));
-            //     compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
-            // }
-            // else {
             Expression createRootExpression = CreateElement(ctx, slotNode.processedType, parentParam, slotNode.ChildCount, CountRealAttributes(slotNode.attributes), parentContext.compiledTemplate.templateId);
 
             ctx.Assign(slotRootParam, Expression.Convert(createRootExpression, slotNode.processedType.rawType));
@@ -561,7 +550,6 @@ namespace UIForia.Compilers {
             ctx.Return(slotRootParam);
 
             compiledSlot.templateFn = Expression.Lambda(ctx.Finalize(typeof(UIElement)), rootParam, parentParam, scopeParam);
-            // }
 
             compiledSlot.requiredChildType = ResolveRequiredType(ctx.namespaces, slotNode.requireType, ctx.rootType.rawType);
 
@@ -574,10 +562,6 @@ namespace UIForia.Compilers {
         // might need to store context stack per level
         private CompiledSlot CompileSlotOverride(CompilationContext parentContext, SlotNode slotOverrideNode, CompiledSlot toOverride, Type type = null) {
             if (type == null) type = slotOverrideNode.processedType.rawType;
-
-            // if (slotOverrideNode.slotType == SlotType.Forward && toOverride.slotType == SlotType.Modify) {
-            //     throw new CompileException("Forwarding modified slots is not yet implemented");
-            // }
 
             CompiledSlot compiledSlot = templateData.CreateSlot(parentContext.compiledTemplate.filePath, parentContext.compiledTemplate.templateName, slotOverrideNode.slotName, slotOverrideNode.slotType);
 
@@ -645,16 +629,6 @@ namespace UIForia.Compilers {
                 }
             }
 
-            // if (toOverride.slotType == SlotType.Modify) {
-            //     // modify slots have no attributes, they push all attributes onto their children
-            //     for (int i = 0; i < node.ChildCount; i++) {
-            //         node[i].isModified = true;
-            //         node[i].attributes = AttributeMerger.MergeModifySlotAttributes(node[i].attributes, toOverride.originalAttributes);
-            //     }
-            //
-            //     VisitChildren(ctx, node, toOverride.requiredChildType);
-            // }
-            // else {
             StructList<ContextAliasActions> contextMods = CompileBindings(ctx, node, attributes, exposedVariableDataList).contextModifications;
 
             if (slotOverrideNode.slotType == SlotType.Override) {
@@ -664,7 +638,6 @@ namespace UIForia.Compilers {
             VisitChildren(ctx, node, toOverride.requiredChildType);
 
             UndoContextMods(contextMods);
-            // }
 
             ctx.Return(slotRootParam);
 
@@ -851,9 +824,10 @@ namespace UIForia.Compilers {
         }
 
         private Expression CompileExpandedNode(CompilationContext ctx, ExpandedTemplateNode expandedTemplateNode) {
+            
             ProcessedType templateType = expandedTemplateNode.processedType;
 
-            TemplateRootNode innerRoot = templateCache.GetParsedTemplate(templateType);
+            TemplateRootNode innerRoot = templateType.templateRootNode; 
 
             CompiledTemplate innerTemplate = GetCompiledTemplate(templateType);
 
@@ -1359,6 +1333,7 @@ namespace UIForia.Compilers {
             ctxStack.Push(variableDefinition);
 
             Type type = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), expressionType);
+            // todo -- not threadsafe 
             ReflectionUtil.TypeArray3[0] = typeof(int);
             ReflectionUtil.TypeArray3[1] = typeof(string);
             ReflectionUtil.TypeArray3[2] = expressionType;
@@ -1428,7 +1403,6 @@ namespace UIForia.Compilers {
 
         private void CompileStyleBindings(CompilationContext ctx, string tagName, StructList<AttributeDefinition> attributes) {
             LightList<StyleRefInfo> styleIds = LightList<StyleRefInfo>.Get();
-
 
             StyleSheetReference[] styleRefs = ctx.innerTemplate?.templateMetaData.styleReferences;
 
@@ -1584,7 +1558,6 @@ namespace UIForia.Compilers {
                 Expression templateContext = Expression.ArrayIndex(templateMetaDataExpr, Expression.Constant(styleExpression.templateMetaData.id));
                 for (int k = 0; k < expressionList.size; k++) {
                     TextExpression textExpression = expressionList.array[k];
-
 
                     if (textExpression.isExpression) {
                         Expression dynamicStyleList = updateCompiler.TypeWrapStatement(s_DynamicStyleListTypeWrapper, typeof(DynamicStyleList), textExpression.text);
@@ -2250,7 +2223,6 @@ namespace UIForia.Compilers {
                         closure.Release();
                         LightList<Parameter>.Release(ref parameters);
 
-
                         return;
                     }
                 }
@@ -2287,7 +2259,7 @@ namespace UIForia.Compilers {
             else if (astNode.type == ASTNodeType.AccessExpression) {
                 MemberAccessExpressionNode accessNode = (MemberAccessExpressionNode) astNode;
                 LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
-                string statement = string.Empty;
+                string statement;
 
                 if (accessNode.parts[accessNode.parts.size - 1] is InvokeNode) {
                     statement = attr.value;
@@ -2573,7 +2545,7 @@ namespace UIForia.Compilers {
             compiler.BeginIsolatedSection();
             compiler.SetupAttributeData(attr);
 
-            Expression right = null;
+            Expression right;
 
             //castElement.value = root.value
             SetImplicitContext(compiler, attr);
@@ -2656,7 +2628,6 @@ namespace UIForia.Compilers {
             MemberExpression valueField = Expression.Field(target, contextVarType.GetField(nameof(ContextVariable<object>.value)));
             updateCompiler.Assign(valueField, value);
         }
-
 
         private Expression ResolveAlias(string aliasName, LinqCompiler compiler) {
             if (aliasName == "oldValue") {
@@ -2755,9 +2726,11 @@ namespace UIForia.Compilers {
                         case '<':
                             depth++;
                             break;
+
                         case '>':
                             depth--;
                             break;
+
                         case ',': {
                             if (depth == 0) {
                                 strings.Add(replaceSpec.Substring(rangeStart, ptr));
@@ -2798,7 +2771,6 @@ namespace UIForia.Compilers {
                 Type createdType = ReflectionUtil.CreateGenericType(processedType.rawType, resolvedTypes);
                 return TypeProcessor.AddResolvedGenericElementType(createdType, processedType);
             }
-
 
             typeResolver.Reset();
             resolvingTypeOnly = true;
@@ -2868,23 +2840,6 @@ namespace UIForia.Compilers {
                 if (!inputType.ContainsGenericParameters) {
                     return;
                 }
-
-                // List<IOption<T>> options
-                // resolve T
-                // options = (<IList<IOption<string>>)someExpression();
-
-                // find out if we have a generic argument in our field
-                // either field type is generic 
-                // or field is a constructed generic type
-                // if constructed 
-                // recurse both sides
-                // class StringList : List<String> {} 
-                // have generic type defintion and expression
-                // solve for generic type defs by extracting 'T' arguments from expression
-
-                // dont care about type checking yet
-
-                // need to 'step into' constructed types until non constructed found
 
                 if (inputType.IsConstructedGenericType) {
                     if (ReflectionUtil.IsAction(inputType) || ReflectionUtil.IsFunc(inputType)) {

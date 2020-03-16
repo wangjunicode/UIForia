@@ -1,12 +1,15 @@
 {
-    "name": "com.klang.uiforia",
+    "name": "com.klang-games.uiforia",
     "displayName": "UIForia",
-    "version": "0.0.1",
-    "unity": "2018.3",
+    "version": "0.1.0",
+    "unity": "2019.2",
     "description": "",
     "keywords": ["UI"],
     "category": "UI",
     "dependencies": {
-      
+        "com.unity.textmeshpro": "1.3.0"
+    },
+    "publishConfig": {
+	"registry": "http://localhost:4873"
     }
 }

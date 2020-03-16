@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using UIForia.Elements;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace UIForia {
@@ -29,7 +32,12 @@ namespace UIForia {
             this.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
         }
         
-        private static readonly string s_InternalNonStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Src");
+        // todo -- remove this dirty hack!
+        static TemplateSettings() {
+            s_InternalNonStreamingPath = Path.Combine(PackageInfo.FindForAssembly(Assembly.GetAssembly(typeof(UIElement))).resolvedPath, "Src");
+        }
+
+        private static readonly string s_InternalNonStreamingPath;
 
         public string StrippedApplicationName => Regex.Replace(applicationName, @"\s", "" );
 

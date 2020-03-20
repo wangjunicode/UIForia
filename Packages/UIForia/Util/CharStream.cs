@@ -34,6 +34,17 @@ namespace UIForia.Util {
             this.dataEnd = (uint) data.Length;
             this.ptr = dataStart;
         }
+        
+        public CharStream(string data) {
+            fixed (char* dataptr = data) {
+                this.data = dataptr;
+            }
+
+            this.dataStart = 0;
+            this.dataEnd = (uint) data.Length;
+            this.ptr = dataStart;
+        }
+
 
         public CharStream(char[] source, ReflessCharSpan span) {
             fixed (char* dataptr = source) {
@@ -73,6 +84,7 @@ namespace UIForia.Util {
         public uint Ptr => ptr;
         public uint End => dataEnd;
         public int IntPtr => (int) ptr;
+        public char Last => data[dataEnd - 1];
 
         public char this[uint idx] {
             get => data[idx];
@@ -312,6 +324,44 @@ namespace UIForia.Util {
             return false;
         }
 
+        public bool TryGetStreamUntil(out CharStream stream, out char end, char c1, char c2 = '\0', char c3 = '\0') {
+            uint i = ptr;
+            while (i < dataEnd) {
+                char c = data[i];
+                if (c == c1 || c == c2 || c == c3) {
+                    end = c;
+                    stream = new CharStream(data, ptr, i);
+                    Advance(i - ptr + 1);
+                    return true;
+                }
+
+                i++;
+            }
+
+            end = default;
+            stream = default;
+            return false;
+        }
+        
+        public bool TryGetStreamUntilWithoutWhitespace(out CharStream stream, out char end, char c1, char c2 = '\0', char c3 = '\0') {
+            uint i = ptr;
+            while (i < dataEnd) {
+                char c = data[i];
+                if (c == c1 || c == c2 || c == c3 || char.IsWhiteSpace(c)) {
+                    end = c;
+                    stream = new CharStream(data, ptr, i);
+                    Advance(i - ptr + 1);
+                    return true;
+                }
+
+                i++;
+            }
+
+            end = default;
+            stream = default;
+            return false;
+        }
+        
         public int NextIndexOf(char c) {
             uint i = ptr;
             while (i < dataEnd) {
@@ -884,6 +934,13 @@ namespace UIForia.Util {
         public void Rewind(uint i) {
             ptr -= i;
             if (ptr < dataStart) ptr = dataStart;
+        }
+
+        public void RemoveLast() {
+            if (dataEnd <= dataStart) {
+                return;
+            }
+            dataEnd--;
         }
 
     }

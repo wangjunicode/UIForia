@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Linq;
@@ -23,6 +22,7 @@ namespace UIForia {
         private ErrorContext errorContext;
         private StructList<AttributeDefinition> attributes;
         private StructList<AttributeDefinition> injectedAttributes;
+        
         public TemplateJobParser(Module.TemplateParseInfo info) {
             this.module = info.module;
             this.filePath = info.path;

@@ -2,7 +2,7 @@ using UIForia.Attributes;
 
 namespace UI {
 
-    [Template("KlangWindow/ExtendedWindow")]
+    [Template("ExtendedWindow.xml")]
     public class ExtendedWindow : KlangWindow {
 
         

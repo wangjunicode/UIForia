@@ -4,7 +4,7 @@ using UIForia.UIInput;
 
 namespace UI {
 
-    [Template("KlangWindow/WindowTitleButton.xml")]
+    [Template("WindowTitleButton.xml")]
     public class WindowTitleButton : UIElement {
 
         [OnMouseEnter]

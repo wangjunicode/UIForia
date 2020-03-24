@@ -1,11 +1,14 @@
-using UIForia.Parsing.Expressions;
+using UIForia.Elements;
 using UIForia.Util;
 
 namespace UIForia.Parsing {
 
     public class RepeatNode : TemplateNode {
 
-        public RepeatNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) : base(root, parent, processedType, attributes, in templateLineInfo) { }
+        public RepeatNode(StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) : base(attributes, in templateLineInfo) {
+            // todo -- 1. cache, 2. what about repeat count? treat as slot-type template?
+            processedType = TypeProcessor.GetProcessedType(typeof(UIRepeatElement<>));
+        }
 
         public string GetItemVariableName() {
             if (attributes == null) {
@@ -39,6 +42,10 @@ namespace UIForia.Parsing {
             }
 
             return "index";
+        }
+
+        public override string GetTagName() {
+            return "Repeat";
         }
 
     }

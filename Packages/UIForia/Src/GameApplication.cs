@@ -1,5 +1,6 @@
 using System;
 using UIForia.Elements;
+using UIForia.Src;
 using UnityEngine;
 
 namespace UIForia {
@@ -11,7 +12,7 @@ namespace UIForia {
 
         public static Application CreateFromRuntimeTemplates(TemplateSettings templateSettings, Camera camera, Action<UIElement> onRegister) {
 
-            Module module = Module.LoadRootModule(templateSettings.rootType);
+            Module module = ModuleSystem.LoadRootModule(templateSettings.rootType);
 
             ResourceManager resourceManager = new ResourceManager();
 
@@ -32,9 +33,9 @@ namespace UIForia {
 
             templateSettings.resourceManager = resourceManager;
 
-            Type rootModuleType = Module.GetModuleTypeFromElementType(templateSettings.rootType);
+            Type rootModuleType = ModuleSystem.GetModuleTypeFromElementType(templateSettings.rootType);
 
-            Module module = Module.LoadRootModule(rootModuleType);
+            Module module = ModuleSystem.LoadRootModule(rootModuleType);
             
             GameApplication retn = new GameApplication(true, module, templateSettings, resourceManager, onRegister);
 

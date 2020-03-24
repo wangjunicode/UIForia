@@ -19,7 +19,7 @@ namespace LayoutSystem {
     
     public class LayoutSystemTests {
 
-        [Template("Data/Layout/System/LayoutSystemTest_General.xml")]
+        [Template("LayoutSystemTest_General.xml")]
         public class LayoutTestThing : UIElement {
 
             public UIGroupElement child0;
@@ -79,7 +79,7 @@ namespace LayoutSystem {
             Assert.AreEqual(100, root.child2.layoutResult.actualSize.height);
         }
 
-        [Template("Data/Layout/System/LayoutSystemTest_General.xml#content_sized")]
+        [Template("LayoutSystemTest_General.xml#content_sized")]
         public class LayoutSystemTest_Content : UIElement { }
 
         [Test]
@@ -90,7 +90,7 @@ namespace LayoutSystem {
             Assert.AreEqual(new Rect(0, 100, 300, 50), root[1].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/System/LayoutSystemTest_General.xml#max_size_changes")]
+        [Template("LayoutSystemTest_General.xml#max_size_changes")]
         public class LayoutSystemTest_MaxSizeChanges : UIElement { }
 
         [Test]
@@ -105,7 +105,7 @@ namespace LayoutSystem {
         }
 
 
-        [Template("Data/Layout/System/LayoutSystemTest_General.xml#width_changes_to_content")]
+        [Template("LayoutSystemTest_General.xml#width_changes_to_content")]
         public class LayoutSystemTest_WidthChangesToContent : UIElement { }
 
         [Test]
@@ -122,7 +122,7 @@ namespace LayoutSystem {
             Assert.AreEqual(new Rect(0, 100, 150, 50), root[1].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/System/LayoutSystemTest_General.xml#height_changes_to_maxcontent")]
+        [Template("LayoutSystemTest_General.xml#height_changes_to_maxcontent")]
         public class LayoutSystemTest_HeightChangesToMaxContent : UIElement { }
 
         [Test]
@@ -140,7 +140,7 @@ namespace LayoutSystem {
         }
 
 
-        [Template("Data/Layout/System/LayoutSystemTest_General.xml#height_changes_to_mincontent")]
+        [Template("LayoutSystemTest_General.xml#height_changes_to_mincontent")]
         public class LayoutSystemTest_HeightChangesToMinContent : UIElement { }
 
         [Test]
@@ -157,7 +157,7 @@ namespace LayoutSystem {
             Assert.AreEqual(new Rect(0, 100, 400, 500), root[1].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/System/LayoutSystemTest_General.xml#child_enabled")]
+        [Template("LayoutSystemTest_General.xml#child_enabled")]
         public class LayoutSystemTest_ChildEnabled : UIElement { }
 
         [Test]
@@ -174,7 +174,7 @@ namespace LayoutSystem {
             Assert.AreEqual(new Rect(0, 100, 300, 100), root[1].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/System/LayoutSystemTest_General.xml#child_disabled")]
+        [Template("LayoutSystemTest_General.xml#child_disabled")]
         public class LayoutSystemTest_ChildDisabled : UIElement { }
 
         [Test]
@@ -193,7 +193,7 @@ namespace LayoutSystem {
             Assert.AreEqual(new Rect(0, 100, 200, 50), root[1].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/System/LayoutSystemTest_General.xml#screen_pos_updated")]
+        [Template("LayoutSystemTest_General.xml#screen_pos_updated")]
         public class LayoutSystemTest_ScreenPositionUpdated : UIElement { }
 
         [Test]
@@ -349,7 +349,7 @@ namespace LayoutSystem {
             Assert.AreEqual(1920, blockUser.layoutBox.finalWidth);
         }
 
-        //     [Template("Data/Layout/System/LayoutSystemTest_Sorting.xml#sort_layers_ascending")]
+        //     [Template("LayoutSystemTest_Sorting.xml#sort_layers_ascending")]
         //     public class LayoutSystemTest_SortLayersAscending : UIElement { }
         //
         //     [Test]

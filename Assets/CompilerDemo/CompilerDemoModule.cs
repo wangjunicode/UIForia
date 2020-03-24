@@ -1,9 +1,5 @@
-using System.Xml.XPath;
 using UIForia;
-using UIForia.Elements;
-using UIForia.Style;
 using UIForia.Util;
-using UnityEngine;
 
 namespace DemoExternal {
 

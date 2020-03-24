@@ -13,7 +13,7 @@ namespace Documentation.DocumentationElements {
         public bool Visible;
     }
     
-    [Template("Documentation/DocumentationElements/PlayerDetail.xml")]
+    [Template("DocumentationElements/PlayerDetail.xml")]
     public class PlayerDetail : UIElement {
 
         public PlayerData player;

@@ -1,4 +1,5 @@
 using System;
+using System.Xml.Linq;
 using UIForia.Parsing.Expressions;
 using UIForia.Text;
 using UIForia.Util;
@@ -35,28 +36,25 @@ namespace UIForia.Parsing {
         
     public abstract class TemplateNode {
 
-        public StructList<AttributeDefinition> attributes;
+        // todo -- try make these lists into arrays
         public LightList<TemplateNode> children;
+        public StructList<AttributeDefinition> attributes;
         public TemplateRootNode root;
         public TemplateNode parent;
         public ProcessedType processedType;
         public string originalString;
-        public string tagName;
-        public string namespaceName;
         public TemplateLineInfo lineInfo;
         public string genericTypeResolver;
         public string requireType;
         public bool isModified;
 
-        protected TemplateNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
-            this.root = root;
-            this.parent = parent;
+        protected TemplateNode(StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
             this.attributes = attributes;
-            this.processedType = processedType;
             this.lineInfo = templateLineInfo;
         }
 
         public virtual void AddChild(TemplateNode child) {
+            child.parent = this;
             children = children ?? new LightList<TemplateNode>();
             children.Add(child);
         }
@@ -79,12 +77,17 @@ namespace UIForia.Parsing {
         public int ChildCount => children?.size ?? 0;
         public Type ElementType => processedType.rawType;
         
-        public TemplateNodeDebugData TemplateNodeDebugData => new TemplateNodeDebugData() {
+        public virtual TemplateNodeDebugData TemplateNodeDebugData => new TemplateNodeDebugData() {
             lineInfo = lineInfo,
-            tagName = tagName,
+            tagName = "",
             fileName = root != null ? root.templateShell.filePath : ((TemplateRootNode)this).templateShell.filePath
         };
 
+        public abstract string GetTagName();
+
+        public virtual void AddSlotOverride(SlotNode slotNode) {
+            throw new NotSupportedException($"Cannot add a <{slotNode.GetTagName()}> to <{GetTagName()}>");
+        }
 
     }
 

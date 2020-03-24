@@ -29,32 +29,27 @@ namespace UIForia.Editor {
             didEnable = true;
 
             Assembly assembly = target.GetType().Assembly;
-            
-                
+
             TypeCache.TypeCollection moduleTypes = TypeCache.GetTypesDerivedFrom<Module>();
-            
+
             for (int i = 0; i < moduleTypes.Count; i++) {
 
                 if (moduleTypes[i] == null) {
                     Debug.Log("Null");
                 }
-                
+
             }
-            
+
             TypeCache.TypeCollection elementTypes = TypeCache.GetTypesDerivedFrom<UIElement>();
-              for (int i = 0; i < elementTypes.Count; i++) {
+            for (int i = 0; i < elementTypes.Count; i++) {
 
                 if (elementTypes[i] == null) {
                     Debug.Log("Null");
                 }
-                
+
             }
-            
-            // for (int i = 0; i < modules.Count; i++) {
-                // Module.GetTemplateElements();
-            // }
-            
-            IList<ProcessedType> typeData = Module.GetTemplateElements(assembly);
+
+            IList<ProcessedType> typeData = TypeProcessor.GetTemplateElements();
 
             List<Type> validTypes = new List<Type>();
             for (int i = 0; i < typeData.Count; i++) {

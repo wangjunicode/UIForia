@@ -66,7 +66,7 @@ namespace UIForia.Parsing {
 
             root.MergeTextNodes();
 
-            TemplateShell retn = new TemplateShell(filePath);
+            TemplateShell retn = new TemplateShell(null, filePath);
 
             IEnumerable<XElement> styleElements = root.GetChildren("Style");
             IEnumerable<XElement> usingElements = root.GetChildren("Using");
@@ -94,16 +94,16 @@ namespace UIForia.Parsing {
                     templateId = attr.Value.Trim();
                 }
 
-                if (retn.HasContentNode(templateId)) {
-                    throw new ArgumentException("Multiple templates found with id: " + templateId);
-                }
-
-                retn.unprocessedContentNodes.Add(new RawTemplateContent() {
-                    templateId = templateId,
-                    type = ParsedTemplateType.FromCode,
-                    content = contentElement,
-                    elementDefinition = null,
-                });
+                // if (retn.HasContentNode(templateId)) {
+                //     throw new ArgumentException("Multiple templates found with id: " + templateId);
+                // }
+                //
+                // retn.unprocessedContentNodes.Add(new RawTemplateContent() {
+                //     templateId = templateId,
+                //     type = ParsedTemplateType.FromCode,
+                //     content = contentElement,
+                //     elementDefinition = null,
+                // });
             }
 
             foreach (XElement elementDef in elementDefElements) {
@@ -117,9 +117,9 @@ namespace UIForia.Parsing {
                         throw new ParseException($"Element definitions require an id attribute. `{templateId}` in file `{retn.filePath}` is not a valid identifier");
                     }
 
-                    if (!IsUniqueUsingIdentifier(retn.unprocessedContentNodes, templateId)) {
-                        throw new ParseException($"Element definitions require an id that is unique in its file. `{templateId}` was already registered in {retn.filePath}");
-                    }
+                    // if (!IsUniqueUsingIdentifier(retn.unprocessedContentNodes, templateId)) {
+                    //     throw new ParseException($"Element definitions require an id that is unique in its file. `{templateId}` was already registered in {retn.filePath}");
+                    // }
                 }
                 else {
                     int line = ((IXmlLineInfo) elementDef).LineNumber;
@@ -128,12 +128,12 @@ namespace UIForia.Parsing {
 
                 XElement template = elementDef.GetChild("Template");
 
-                retn.unprocessedContentNodes.Add(new RawTemplateContent() {
-                    templateId = templateId,
-                    type = ParsedTemplateType.Dynamic,
-                    content = template,
-                    elementDefinition = elementDef
-                });
+                // retn.unprocessedContentNodes.Add(new RawTemplateContent() {
+                //     templateId = templateId,
+                //     type = ParsedTemplateType.Dynamic,
+                //     content = template,
+                //     elementDefinition = elementDef
+                // });
             }
 
             return retn;
@@ -182,7 +182,7 @@ namespace UIForia.Parsing {
 
         // this might be getting called too many times since im not sure im caching the result
         private void ParseContentTemplate(TemplateRootNode templateRootNode, TemplateShell shell, ProcessedType processedType) {
-            XElement root = shell.GetElementTemplateContent(processedType.templateId);
+            XElement root = null;// shell.GetElementTemplateContent(processedType.templateId);
 
             if (root == null) {
                 throw new TemplateNotFoundException(processedType.templatePath, processedType.templateId);
@@ -247,102 +247,103 @@ namespace UIForia.Parsing {
         }
 
         private TemplateNode ParseElementTag(TemplateRootNode templateRoot, TemplateNode parent, string namespacePath, string tagName, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
-            ProcessedType processedType;
-            TemplateNode node = null;
-
-            string lowerNamespace = namespacePath.ToLower();
-
-            if (lowerNamespace == "define") {
-                processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
-                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Define);
-                templateRoot.AddSlot((SlotNode) node);
-                parent.AddChild(node);
-                return node;
-            }
-
-            if (lowerNamespace == "override") {
-                processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
-                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Override);
-                if (!(parent is ExpandedTemplateNode expanded)) {
-                    throw InvalidSlotOverride("override", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
-                }
-
-                expanded.AddSlotOverride((SlotNode) node);
-                return node;
-            }
-
-            if (lowerNamespace == "forward") {
-                processedType = TypeProcessor.GetProcessedType(typeof(UISlotForward));
-                node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Forward);
-                if (!(parent is ExpandedTemplateNode)) {
-                    throw InvalidSlotOverride("forward", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
-                }
-
-                templateRoot.AddSlot((SlotNode) node);
-                parent.AddChild(node);
-                return node;
-            }
-
-            if (string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
-                node = new RepeatNode(templateRoot, parent, null, attributes, templateLineInfo);
-                parent.AddChild(node);
-                return node;
-            }
-
-            if (string.IsNullOrEmpty(lowerNamespace) && string.Equals(tagName, "Children", StringComparison.Ordinal)) {
-                throw new ParseException($"Error parsing file {templateRoot.templateShell.filePath} on line {templateLineInfo}: <Children> tag is not supported. Please use an appropriate prefix `forward`, `override`, or `define`");
-            }
-
-            if (namespacePath == "UIForia") namespacePath = "UIForia.Elements";
-
-            processedType = ResolveTagName(tagName, namespacePath, templateRoot.templateShell);
-
-            if (processedType == null) {
-                throw UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, tagName);
-            }
-
-            processedType.ValidateAttributes(attributes);
-
-            if (processedType.IsContainerElement) {
-                node = new ContainerNode(templateRoot, parent, processedType, attributes, templateLineInfo);
-            }
-            else if (typeof(UITextElement).IsAssignableFrom(processedType.rawType)) {
-                node = new TextNode(templateRoot, parent, string.Empty, processedType, attributes, templateLineInfo);
-            }
-            else if (typeof(UITextSpanElement).IsAssignableFrom(processedType.rawType)) {
-                throw new NotImplementedException();
-            }
-            else if (typeof(UITerminalElement).IsAssignableFrom(processedType.rawType)) {
-                node = new TerminalNode(templateRoot, parent, processedType, attributes, templateLineInfo);
-            }
-            else if (typeof(UIElement).IsAssignableFrom(processedType.rawType)) {
-                node = new ExpandedTemplateNode(templateRoot, parent, processedType, attributes, templateLineInfo);
-            }
-
-            if (node == null) {
-                throw new ParseException("Unresolved tag name: " + tagName);
-            }
-
-            node.tagName = tagName;
-            node.namespaceName = namespacePath;
-
-            parent.AddChild(node);
-
-            return node;
+            throw new NotImplementedException();
+            // ProcessedType processedType;
+            // TemplateNode node = null;
+            //
+            // string lowerNamespace = namespacePath.ToLower();
+            //
+            // if (lowerNamespace == "define") {
+            //     processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+            //     node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Define);
+            //     templateRoot.AddSlot((SlotNode) node);
+            //     parent.AddChild(node);
+            //     return node;
+            // }
+            //
+            // if (lowerNamespace == "override") {
+            //     processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
+            //     node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Override);
+            //     if (!(parent is ExpandedTemplateNode expanded)) {
+            //         throw InvalidSlotOverride("override", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
+            //     }
+            //
+            //     expanded.AddSlotOverride((SlotNode) node);
+            //     return node;
+            // }
+            //
+            // if (lowerNamespace == "forward") {
+            //     processedType = TypeProcessor.GetProcessedType(typeof(UISlotForward));
+            //     node = new SlotNode(templateRoot, parent, processedType, attributes, templateLineInfo, tagName, SlotType.Forward);
+            //     if (!(parent is ExpandedTemplateNode)) {
+            //         throw InvalidSlotOverride("forward", parent.TemplateNodeDebugData, node.TemplateNodeDebugData);
+            //     }
+            //
+            //     templateRoot.AddSlot((SlotNode) node);
+            //     parent.AddChild(node);
+            //     return node;
+            // }
+            //
+            // if (string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
+            //     node = new RepeatNode(templateRoot, parent, null, attributes, templateLineInfo);
+            //     parent.AddChild(node);
+            //     return node;
+            // }
+            //
+            // if (string.IsNullOrEmpty(lowerNamespace) && string.Equals(tagName, "Children", StringComparison.Ordinal)) {
+            //     throw new ParseException($"Error parsing file {templateRoot.templateShell.filePath} on line {templateLineInfo}: <Children> tag is not supported. Please use an appropriate prefix `forward`, `override`, or `define`");
+            // }
+            //
+            // if (namespacePath == "UIForia") namespacePath = "UIForia.Elements";
+            //
+            // processedType = ResolveTagName(tagName, namespacePath, templateRoot.templateShell);
+            //
+            // if (processedType == null) {
+            //     throw UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, tagName);
+            // }
+            //
+            // processedType.ValidateAttributes(attributes);
+            //
+            // if (processedType.IsContainerElement) {
+            //     node = new ElementNode(templateRoot, parent, processedType, attributes, templateLineInfo);
+            // }
+            // else if (typeof(UITextElement).IsAssignableFrom(processedType.rawType)) {
+            //     node = new TextNode(templateRoot, parent, string.Empty, processedType, attributes, templateLineInfo);
+            // }
+            // else if (typeof(UITextSpanElement).IsAssignableFrom(processedType.rawType)) {
+            //     throw new NotImplementedException();
+            // }
+            // else if (typeof(UITerminalElement).IsAssignableFrom(processedType.rawType)) {
+            //     node = new TerminalNode(templateRoot, parent, processedType, attributes, templateLineInfo);
+            // }
+            // else if (typeof(UIElement).IsAssignableFrom(processedType.rawType)) {
+            //     node = new ExpandedTemplateNode(templateRoot, parent, processedType, attributes, templateLineInfo);
+            // }
+            //
+            // if (node == null) {
+            //     throw new ParseException("Unresolved tag name: " + tagName);
+            // }
+            //
+            // node.tagName = tagName;
+            // node.moduleName = namespacePath;
+            //
+            // parent.AddChild(node);
+            //
+            // return node;
         }
 
         private ProcessedType GetDynamicElementType(TemplateShell templateShell, string tagName) {
-            for (int i = 0; i < templateShell.unprocessedContentNodes.size; i++) {
-                ref RawTemplateContent node = ref templateShell.unprocessedContentNodes.array[i];
-
-                if (node.type != ParsedTemplateType.Dynamic || node.templateId != tagName) {
-                    continue;
-                }
-
-                node.processedType = node.processedType ?? CreateDynamicElementType(templateShell, node);
-
-                return node.processedType;
-            }
+            // for (int i = 0; i < templateShell.unprocessedContentNodes.size; i++) {
+            //     ref RawTemplateContent node = ref templateShell.unprocessedContentNodes.array[i];
+            //
+            //     if (node.type != ParsedTemplateType.Dynamic || node.templateId != tagName) {
+            //         continue;
+            //     }
+            //
+            //     node.processedType = node.processedType ?? CreateDynamicElementType(templateShell, node);
+            //
+            //     return node.processedType;
+            // }
 
             return null;
         }
@@ -482,21 +483,22 @@ namespace UIForia.Parsing {
         }
 
         private static void CreateOrUpdateTextNode(TemplateRootNode templateRootRoot, TemplateNode parent, string textContent, in TemplateLineInfo templateLineInfo) {
-            if (parent is TextNode textParent) {
-                if (parent.ChildCount == 0) {
-                    TextTemplateProcessor.ProcessTextExpressions(textContent, textParent.textExpressionList);
-                }
-                else {
-                    TextNode node = new TextNode(templateRootRoot, parent, textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), null, templateLineInfo);
-                    TextTemplateProcessor.ProcessTextExpressions(textContent, node.textExpressionList);
-                    parent.AddChild(node);
-                }
-            }
-            else {
-                TextNode node = new TextNode(templateRootRoot, parent, textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), null, templateLineInfo);
-                TextTemplateProcessor.ProcessTextExpressions(textContent, node.textExpressionList);
-                parent.AddChild(node);
-            }
+            throw new NotImplementedException();
+            // if (parent is TextNode textParent) {
+            //     if (parent.ChildCount == 0) {
+            //         TextTemplateProcessor.ProcessTextExpressions(textContent, textParent.textExpressionList);
+            //     }
+            //     else {
+            //         TextNode node = new TextNode(templateRootRoot, parent, textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), null, templateLineInfo);
+            //         TextTemplateProcessor.ProcessTextExpressions(textContent, node.textExpressionList);
+            //         parent.AddChild(node);
+            //     }
+            // }
+            // else {
+            //     TextNode node = new TextNode(templateRootRoot, parent, textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), null, templateLineInfo);
+            //     TextTemplateProcessor.ProcessTextExpressions(textContent, node.textExpressionList);
+            //     parent.AddChild(node);
+            // }
         }
 
         private void ParseChildren(TemplateRootNode templateRoot, TemplateNode parent, IEnumerable<XNode> nodes) {

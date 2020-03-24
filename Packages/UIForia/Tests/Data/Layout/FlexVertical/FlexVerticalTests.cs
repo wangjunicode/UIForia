@@ -17,7 +17,7 @@ namespace Layout {
 
     public class FlexVerticalTests {
 
-        [Template("Data/Layout/FlexVertical/FlexVertical_DistributeSpaceVertical.xml")]
+        [Template("FlexVertical_DistributeSpaceVertical.xml")]
         public class FlexVertical_DistributeSpaceVertical : UIElement { }
 
         [Test]
@@ -103,7 +103,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 500, 500, 100), root[2].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexVertical/FlexVertical_GrowUnconstrained.xml")]
+        [Template("FlexVertical_GrowUnconstrained.xml")]
         public class FlexVertical_GrowUnconstrained : UIElement { }
 
         [Test]
@@ -118,7 +118,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 600, 100, 200), root[2].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexVertical/FlexVertical_GrowConstrained.xml")]
+        [Template("FlexVertical_GrowConstrained.xml")]
         public class FlexVertical_GrowConstrained : UIElement { }
 
         [Test]
@@ -133,7 +133,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 550, 100, 350), root[2].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexVertical/FlexVertical_GrowWithExtraSpace.xml")]
+        [Template("FlexVertical_GrowWithExtraSpace.xml")]
         public class FlexVertical_GrowWithExtraSpace : UIElement { }
 
         [Test]
@@ -149,7 +149,7 @@ namespace Layout {
         }
 
 
-        [Template("Data/Layout/FlexVertical/FlexVertical_RespectMarginVertical.xml")]
+        [Template("FlexVertical_RespectMarginVertical.xml")]
         public class FlexVertical_RespectMarginVertical : UIElement { }
 
         [Test]
@@ -164,7 +164,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 1220, 100, 100), root[2].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexVertical/FlexVertical_ShrinkUnconstrained.xml")]
+        [Template("FlexVertical_ShrinkUnconstrained.xml")]
         public class FlexVertical_ShrinkUnconstrained : UIElement { }
 
         [Test]
@@ -179,7 +179,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 400, 100, 200), root[2].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexVertical/FlexVertical_ShrinkConstrained.xml")]
+        [Template("FlexVertical_ShrinkConstrained.xml")]
         public class FlexVertical_ShrinkConstrained : UIElement { }
 
         [Test]
@@ -194,7 +194,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 425, 100, 175), root[2].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexVertical/FlexVertical_ShrinkWithOverflow.xml")]
+        [Template("FlexVertical_ShrinkWithOverflow.xml")]
         public class FlexVertical_ShrinkWithOverflow : UIElement { }
 
         [Test]

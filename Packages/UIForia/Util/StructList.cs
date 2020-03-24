@@ -76,7 +76,7 @@ namespace UIForia.Util {
         }
 
         public void AddRange(IList<T> collection, int resizeFactor = 1) {
-            
+
             if (size + collection.Count >= array.Length) {
                 System.Array.Resize(ref array, size + collection.Count * resizeFactor);
             }
@@ -224,7 +224,6 @@ namespace UIForia.Util {
 //            IntroSort(array, start, length + start - 1, 2 * FloorLog2(length), comparison);
 //        }
 
-
         private class Cmp : IComparer<T> {
 
             public Comparison<T> cmp;
@@ -271,52 +270,52 @@ namespace UIForia.Util {
         }
 
         private static readonly LightList<StructList<T>> s_Pool = new LightList<StructList<T>>();
-
-        public static implicit operator StructList<T>(T[] array) {
-            return new StructList<T>(array);
-        }
+        private static readonly object poolLock = new object();
 
         public static StructList<T> Get() {
-            StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>();
-            retn.isInPool = false;
-            return retn;
+            lock (poolLock) {
+                StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>();
+                retn.isInPool = false;
+                return retn;
+            }
         }
 
         public static StructList<T> GetMinSize(int minCapacity) {
-            
-            if (minCapacity < 1) minCapacity = 4;
+            lock (poolLock) {
+                if (minCapacity < 1) minCapacity = 4;
 
-            if (s_Pool.size == 0) {
+                if (s_Pool.size == 0) {
+                    return new StructList<T>(minCapacity) {isInPool = false};
+                }
+
+                for (int i = 0; i < s_Pool.size; i++) {
+
+                    StructList<T> list = s_Pool.array[i];
+
+                    if (list.array.Length < minCapacity) {
+                        continue;
+                    }
+
+                    if (s_Pool.size == 1) {
+                        s_Pool.array[i] = null;
+                    }
+                    else {
+                        s_Pool.array[i] = s_Pool.array[s_Pool.size - 1];
+                        s_Pool.array[s_Pool.size - 1] = null;
+                    }
+
+                    s_Pool.size -= 1;
+
+                    list.isInPool = false;
+
+                    return list;
+                }
+
                 return new StructList<T>(minCapacity) {isInPool = false};
             }
-            
-            for (int i = 0; i < s_Pool.size; i++) {
-                    
-                StructList<T> list = s_Pool.array[i];
-                    
-                if (list.array.Length < minCapacity) {
-                    continue;
-                }
-                    
-                if (s_Pool.size == 1) {
-                    s_Pool.array[i] = null;    
-                }
-                else {
-                    s_Pool.array[i] = s_Pool.array[s_Pool.size - 1];
-                    s_Pool.array[s_Pool.size - 1] = null;    
-                }
 
-                s_Pool.size -= 1;
-                        
-                list.isInPool = false;
-                
-                return list;
-            }
-
-            return new StructList<T>(minCapacity) {isInPool = false};;
-            
         }
-        
+
         public static StructList<T> PreSize(int size) {
             StructList<T> list = GetMinSize(size);
             list.size = size;
@@ -338,7 +337,7 @@ namespace UIForia.Util {
             a[i] = a[j];
             a[j] = obj;
         }
-        
+
         public void QuickSort(IComparer<T> comparer) {
             QuickSort(array, 0, size - 1, comparer);
         }
@@ -351,7 +350,7 @@ namespace UIForia.Util {
                 startIndex++;
 
                 while (endIndex >= startIndex) {
-                    
+
                     int cmpStart_pivot = comparer.Compare(array[startIndex], array[pivot]);
                     int cmpEnd_pivot = comparer.Compare(array[endIndex], array[pivot]);
 
@@ -531,21 +530,27 @@ namespace UIForia.Util {
             size = 0;
             if (isInPool) return;
             isInPool = true;
-            s_Pool.Add(this);
+            lock (poolLock) {
+                s_Pool.Add(this);
+            }
         }
 
         public void Release() {
             Clear();
             if (isInPool) return;
             isInPool = true;
-            s_Pool.Add(this);
+            lock (poolLock) {
+                s_Pool.Add(this);
+            }
         }
 
         public static void Release(ref StructList<T> toPool) {
             toPool.Clear();
             if (toPool.isInPool) return;
             toPool.isInPool = true;
-            s_Pool.Add(toPool);
+            lock (poolLock) {
+                s_Pool.Add(toPool);
+            }
             toPool = null;
         }
 
@@ -578,7 +583,7 @@ namespace UIForia.Util {
             System.Array.Copy(array, index + 1, array, index, size - index);
             array[size] = default;
         }
-        
+
         public void RemoveAt(int index, out T retn) {
             --size;
             retn = array[index];

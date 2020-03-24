@@ -49,6 +49,8 @@ namespace UIForia.Util {
         }
 
         private static readonly List<LightList<T>> s_LightListPool = new List<LightList<T>>();
+        // ReSharper disable once StaticMemberInGenericType
+        private static readonly object poolLocker = new object();
 
         [DebuggerStepThrough]
         public LightList(int minCapacity = 8) {
@@ -101,8 +103,8 @@ namespace UIForia.Util {
             array[size] = item;
             size++;
         }
-        
-         public T AddReturn(T item) {
+
+        public T AddReturn(T item) {
             if (size + 1 > array.Length) {
                 System.Array.Resize(ref array, (size + 1) * 2);
             }
@@ -110,7 +112,7 @@ namespace UIForia.Util {
             array[size] = item;
             size++;
             return item;
-         }
+        }
 
         [DebuggerStepThrough]
         public void AddRange(IEnumerable<T> collection) {
@@ -343,7 +345,6 @@ namespace UIForia.Util {
             return false;
         }
 
-
         public int FindIndex<U>(U closureArg, Func<T, U, bool> fn) {
             for (int i = 0; i < size; i++) {
                 if (fn(array[i], closureArg)) {
@@ -483,23 +484,28 @@ namespace UIForia.Util {
         }
 
         public static LightList<T> Get() {
-            if (s_LightListPool.Count > 0) {
-                LightList<T> retn = s_LightListPool[s_LightListPool.Count - 1];
-                retn.isPooled = false;
-                s_LightListPool.RemoveAt(s_LightListPool.Count - 1);
-                return retn;
+            lock (poolLocker) {
+                if (s_LightListPool.Count > 0) {
+                    LightList<T> retn = s_LightListPool[s_LightListPool.Count - 1];
+                    retn.isPooled = false;
+                    s_LightListPool.RemoveAt(s_LightListPool.Count - 1);
+                    return retn;
+                }
             }
 
             return new LightList<T>();
         }
 
         public static LightList<T> GetMinSize(int minSize) {
-            for (int i = 0; i < s_LightListPool.Count; i++) {
-                if (s_LightListPool[i].array.Length >= minSize) {
-                    LightList<T> retn = s_LightListPool[i];
-                    s_LightListPool.RemoveAt(i);
-                    retn.isPooled = false;
-                    return retn;
+            lock (poolLocker) {
+
+                for (int i = 0; i < s_LightListPool.Count; i++) {
+                    if (s_LightListPool[i].array.Length >= minSize) {
+                        LightList<T> retn = s_LightListPool[i];
+                        s_LightListPool.RemoveAt(i);
+                        retn.isPooled = false;
+                        return retn;
+                    }
                 }
             }
 
@@ -519,7 +525,9 @@ namespace UIForia.Util {
 
             isPooled = true;
             Clear();
-            s_LightListPool.Add(this);
+            lock (poolLocker) {
+                s_LightListPool.Add(this);
+            }
         }
 
         public static void Release(ref LightList<T> toRelease) {
@@ -530,7 +538,9 @@ namespace UIForia.Util {
 
             toRelease.isPooled = true;
             toRelease.Clear();
-            s_LightListPool.Add(toRelease);
+            lock (poolLocker) {
+                s_LightListPool.Add(toRelease);
+            }
             toRelease = null;
         }
 

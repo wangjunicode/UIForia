@@ -1,4 +1,5 @@
-using UIForia.Parsing.Expressions;
+using System;
+using UIForia.Elements;
 using UIForia.Util;
 
 namespace UIForia.Parsing {
@@ -16,13 +17,33 @@ namespace UIForia.Parsing {
 
         public readonly string slotName;
         public readonly SlotType slotType;
+        
         public StructList<AttributeDefinition> injectedAttributes;
 
-        public SlotNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo, string slotName, SlotType slotType)
-            : base(root, parent, processedType, attributes, templateLineInfo) {
+        public SlotNode(string slotName, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo, SlotType slotType)
+            : base(attributes, templateLineInfo) {
             this.slotName = slotName;
             this.slotType = slotType;
-            this.tagName = slotName;
+            
+            switch (slotType) {
+                case SlotType.Define:
+                    processedType = TypeProcessor.GetProcessedType(typeof(UISlotDefinition));
+                    break;
+
+                case SlotType.Forward:
+                    processedType = TypeProcessor.GetProcessedType(typeof(UISlotForward));
+                    break;
+
+                case SlotType.Override:
+                    processedType = TypeProcessor.GetProcessedType(typeof(UISlotOverride));
+                    break;
+
+                case SlotType.Template:
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(slotType), slotType, null);
+            }
         }
 
         public AttributeDefinition[] GetAttributes(AttributeType expose) {
@@ -47,6 +68,21 @@ namespace UIForia.Parsing {
             }
 
             return retn;
+        }
+
+        public override string GetTagName() {
+            switch (slotType) {
+                case SlotType.Define:
+                    return "define:" + slotName;
+                case SlotType.Forward:
+                    return "forward:" + slotName;
+                case SlotType.Override:
+                    return "override:" + slotName;
+                case SlotType.Template:
+                    return "template:" + slotName;
+            }
+
+            return "slot:" + slotName;
         }
 
     }

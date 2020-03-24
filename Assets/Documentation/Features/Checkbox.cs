@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Documentation.Features {
 
-    [Template("Documentation/Features/Checkbox.xml")]
+    [Template("Features/Checkbox.xml")]
     public class Checkbox : UIElement {
 
         public bool isChecked;

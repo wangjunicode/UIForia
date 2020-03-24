@@ -6,14 +6,14 @@ namespace UIForia.Util {
 
         public string typeName;
         public string namespaceName;
-        public StructList<TypeLookup> generics;
+        public SizedArray<TypeLookup> generics;
         public bool isArray;
         public Type resolvedType;
 
         public TypeLookup(string typeName) {
             this.typeName = typeName;
             this.namespaceName = null;
-            this.generics = null;
+            this.generics = default;
             this.isArray = false;
             this.resolvedType = null;
         }
@@ -23,27 +23,22 @@ namespace UIForia.Util {
             this.resolvedType = type;
             this.typeName = null;
             this.namespaceName = null;
-            this.generics = null;
+            this.generics = default;
             this.isArray = false;
         }
 
         public void Release() {
             typeName = null;
             namespaceName = null;
-            if (generics != null) {
-                for (int i = 0; i < generics.Count; i++) {
-                    generics[i].Release();
-                }
-                StructList<TypeLookup>.Release(ref generics);
-            }
+            generics = default;
         }
 
         public string GetBaseTypeName() {
-            if (generics == null || generics.Count == 0) {
+            if (generics.array == null || generics.size == 0) {
                 return typeName;
             }
 
-            return typeName + "`" + generics.Count;
+            return typeName + "`" + generics.size;
         }
         
         public override string ToString() {
@@ -54,11 +49,11 @@ namespace UIForia.Util {
             }
 
             retn += typeName;
-            if (generics != null && generics.Count > 0) {
+            if (generics.array != null && generics.size > 0) {
                 retn += "[";
-                for (int i = 0; i < generics.Count; i++) {
+                for (int i = 0; i < generics.size; i++) {
                     retn += generics[i].ToString();
-                    if (i != generics.Count - 1) {
+                    if (i != generics.size - 1) {
                         retn += ",";
                     }
                 }

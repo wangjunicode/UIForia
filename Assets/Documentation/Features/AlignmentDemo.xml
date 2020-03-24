@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
-    <Style path="Documentation/Features/AlignmentDemo.style" />
+    <Style path="Features/AlignmentDemo.style" />
     <Style src="Documentation/Documentation.style" alias="theme" />
 
     <Using namespace="UIForia.Layout"/>

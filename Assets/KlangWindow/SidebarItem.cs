@@ -8,7 +8,7 @@ namespace UI {
         }
     }
 
-    [Template("KlangWindow/SidebarItem.xml")]
+    [Template("SidebarItem.xml")]
     public class SidebarItem : UIElement {
 
         public string icon;

@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Documentation.Features {
 
-    [Template("Documentation/DocumentationElements/NumberStepper.xml")]
+    [Template("DocumentationElements/NumberStepper.xml")]
     public class NumberStepper : BaseInputElement {
 
         public int min = Int32.MinValue;

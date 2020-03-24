@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    <Style path="Documentation/Features/StylePropertiesDemo.style"/>
+    <Style path="Features/StylePropertiesDemo.style"/>
     <Style src="Documentation/Documentation.style" alias="theme"/>
     <Using namespace="UIForia.Rendering"/>
 

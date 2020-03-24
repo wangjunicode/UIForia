@@ -197,8 +197,8 @@ namespace UIForia.Parsing {
             Assert.IsTrue(currentType.IsGenericTypeDefinition);
             throw new NotImplementedException();
         }
-
-        public static ProcessedType ResolveGeneric(Type newType, ProcessedType generic) {
+        
+        public static ProcessedType ResolveGeneric(Type resolvedType, ProcessedType generic) {
             throw new NotImplementedException();
         }
 
@@ -222,6 +222,7 @@ namespace UIForia.Parsing {
             if (type.IsGenericTypeDefinition) {
                 tagName = tagName.Split('`')[0];
             }
+            
             foreach (Attribute attr in type.GetCustomAttributes()) {
                 if (attr is TemplateTagNameAttribute templateTagNameAttr) {
                     if (elementPath != null && elementPath != templateTagNameAttr.filePath) {
@@ -235,7 +236,7 @@ namespace UIForia.Parsing {
 
                 if (attr is TemplateAttribute templateAttribute) {
                     if (elementPath != null && elementPath != templateAttribute.elementPath) {
-                        throw new Exception($"File paths were different {elementPath}, {templateAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        throw new Exception($"File paths were different {elementPath}, {templateAttribute.elementPath} for element type {TypeNameGenerator.GetTypeName(type)}");
                     }
 
                     elementPath = templateAttribute.elementPath;

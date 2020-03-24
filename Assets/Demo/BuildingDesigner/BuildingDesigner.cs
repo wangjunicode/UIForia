@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using JetBrains.Annotations;
 using UIForia.Attributes;
 using UIForia.Elements;
@@ -9,7 +8,7 @@ using UnityEngine;
 
 namespace Demo {
 
-    [Template("Demo/BuildingDesigner/BuildingDesigner")]
+    [Template("BuildingDesigner/BuildingDesigner.xml")]
     public class BuildingDesigner : UIElement {
 
         #region parameters

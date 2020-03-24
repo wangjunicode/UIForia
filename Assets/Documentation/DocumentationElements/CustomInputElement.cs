@@ -54,7 +54,7 @@ namespace Documentation.DocumentationElements {
 
     }
     
-    [Template("Documentation/DocumentationElements/CustomInputElement.xml")]
+    [Template("DocumentationElements/CustomInputElement.xml")]
     public class CustomInputElement : UIElement {
 
         public CustomInputData Value;

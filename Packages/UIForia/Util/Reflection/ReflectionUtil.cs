@@ -459,7 +459,6 @@ namespace UIForia.Util {
 
         public static Type CreateGenericType(Type baseType, params Type[] genericArguments) {
             return baseType.MakeGenericType(genericArguments);
-            ;
         }
 
         public static Type[] SetTempTypeArray(Type type, Type type1) {

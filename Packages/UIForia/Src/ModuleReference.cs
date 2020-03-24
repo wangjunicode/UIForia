@@ -18,7 +18,7 @@ namespace UIForia {
         }
 
         public string GetAlias() {
-            return alias;
+            return alias ?? module.GetModuleName();
         }
 
         public void ResolveModule(Module module) {

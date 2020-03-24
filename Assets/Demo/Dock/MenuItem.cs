@@ -4,7 +4,7 @@ using UIForia.UIInput;
 
 namespace Demo {
 
-    [Template("Demo/Dock/MenuItem.xml")]
+    [Template("Dock/MenuItem.xml")]
     public class MenuItem : UIElement {
 
         public string ImageUrl;

@@ -3,7 +3,7 @@ using UIForia.Elements;
 
 namespace Documentation.Features {
 
-    [Template("Documentation/Features/CheckboxDemo.xml")]
+    [Template("Features/CheckboxDemo.xml")]
     public class CheckboxDemo : UIElement {
 
         public bool value1Checked;

@@ -6,7 +6,7 @@ using UIForia.Util;
 
 namespace Documentation.Features {
     
-    [Template("Documentation/Features/RepeatExample.xml")]
+    [Template("Features/RepeatExample.xml")]
     public class RepeatExample : UIElement {
 
         public List<ValueTuple<string, string>> dictionary;

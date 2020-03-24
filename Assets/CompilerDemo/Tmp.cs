@@ -11,7 +11,7 @@ using UnityEngine;
 
 public class DemoMethod : Attribute { }
 
-[Template("CompilerDemo/Tmp.xml")]
+[Template("Tmp.xml")]
 public class Tmp : UIElement {
 
     public string output;

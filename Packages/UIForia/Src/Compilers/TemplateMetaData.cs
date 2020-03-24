@@ -279,27 +279,27 @@ namespace UIForia.Compilers {
         }
 
         private int BinarySearchStyle(string name) {
-            int num1 = 0;
-            int num2 = styleSearchMap.Length - 1;
+            int start = 0;
+            int end = styleSearchMap.Length - 1;
 
-            while (num1 <= num2) {
-                int index1 = num1 + (num2 - num1 >> 1);
+            while (start <= end) {
+                int index1 = start + (end - start >> 1);
 
-                int num3 = string.CompareOrdinal(styleSearchMap[index1].name, name);
+                int cmp = string.CompareOrdinal(styleSearchMap[index1].name, name);
 
-                if (num3 == 0) {
+                if (cmp == 0) {
                     return index1;
                 }
 
-                if (num3 < 0) {
-                    num1 = index1 + 1;
+                if (cmp < 0) {
+                    start = index1 + 1;
                 }
                 else {
-                    num2 = index1 - 1;
+                    end = index1 - 1;
                 }
             }
 
-            return ~num1;
+            return ~start;
         }
 
         private int BinarySearchStyle(char[] name) {

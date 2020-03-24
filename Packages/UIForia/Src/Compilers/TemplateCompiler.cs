@@ -274,9 +274,9 @@ namespace UIForia.Compilers {
         }
 
         private CompiledTemplate Compile(ProcessedType processedType, bool isRoot = false) {
-            
+
             TemplateRootNode templateRootNode = processedType.templateRootNode;
-            
+
             CompilationContext ctx = CompileTemplateMetaData(templateRootNode);
             contextStack.Push(new LightStack<ContextVariableDefinition>());
 
@@ -305,12 +305,15 @@ namespace UIForia.Compilers {
 
         private static Type ResolveRequiredType(IList<string> namespaces, string typeName, Type rootType) {
             if (typeName != null) {
-                Type requiredType = TypeResolver.Default.ResolveTypeExpression(rootType, namespaces, typeName);
+                string typeExpression = typeName.Replace("[", "<").Replace("]", ">"); // todo -- this needs to be removed probably. let the template parser do it since its a hack anyway
+
+                Type requiredType = TypeResolver.Default.ResolveTypeExpression(rootType, namespaces, typeExpression);
 
                 if (requiredType == null) {
                     throw new TemplateCompileException($"Unable to resolve required child type `{typeName}`");
                 }
-                else if (!requiredType.IsInterface && !typeof(UIElement).IsAssignableFrom(requiredType)) {
+                
+                if (!requiredType.IsInterface && !typeof(UIElement).IsAssignableFrom(requiredType)) {
                     throw new TemplateCompileException($"When requiring an explicit child type, that type must either be an interface or a subclass of UIElement. {requiredType} was neither");
                 }
 
@@ -354,17 +357,14 @@ namespace UIForia.Compilers {
                 case TextNode textNode:
                     return CompileTextNode(ctx, textNode);
 
-                case ContainerNode containerNode:
-                    return CompileContainerNode(ctx, containerNode);
+                case ElementNode elementNode:
+                    return elementNode.processedType.IsContainerElement 
+                        ? CompileContainerNode(ctx, elementNode)
+                        : CompileExpandedNode(ctx, elementNode);
 
                 case SlotNode slotNode:
                     return CompileSlotDefinition(ctx, slotNode);
 
-                case TerminalNode terminalNode:
-                    return CompileTerminalNode(ctx, terminalNode);
-
-                case ExpandedTemplateNode expandedTemplateNode:
-                    return CompileExpandedNode(ctx, expandedTemplateNode);
             }
 
             return null;
@@ -445,10 +445,6 @@ namespace UIForia.Compilers {
             ctx.Assign(itemVarIdField, Expression.Constant(itemVarId));
 
             return nodeExpr;
-        }
-
-        private Expression CompileTerminalNode(CompilationContext ctx, TerminalNode terminalNode) {
-            throw new NotImplementedException();
         }
 
         private ContextVariableDefinition[] CloneContextStack() {
@@ -796,15 +792,15 @@ namespace UIForia.Compilers {
             return null;
         }
 
-        private Expression CompileContainerNode(CompilationContext ctx, ContainerNode containerNode) {
+        private Expression CompileContainerNode(CompilationContext ctx, ElementNode elementNode) {
             ParameterExpression nodeExpr = ctx.ElementExpr;
-            ProcessedType processedType = containerNode.processedType;
+            ProcessedType processedType = elementNode.processedType;
 
             ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(processedType.rawType));
 
-            ctx.Assign(nodeExpr, CreateElement(ctx, processedType, ctx.ParentExpr, containerNode.ChildCount, CountRealAttributes(containerNode.attributes), ctx.compiledTemplate.templateId));
+            ctx.Assign(nodeExpr, CreateElement(ctx, processedType, ctx.ParentExpr, elementNode.ChildCount, CountRealAttributes(elementNode.attributes), ctx.compiledTemplate.templateId));
 
-            ProcessAttrsAndVisitChildren(ctx, containerNode);
+            ProcessAttrsAndVisitChildren(ctx, elementNode);
 
             return nodeExpr;
         }
@@ -823,22 +819,22 @@ namespace UIForia.Compilers {
             return count;
         }
 
-        private Expression CompileExpandedNode(CompilationContext ctx, ExpandedTemplateNode expandedTemplateNode) {
-            
-            ProcessedType templateType = expandedTemplateNode.processedType;
+        private Expression CompileExpandedNode(CompilationContext ctx, ElementNode elementNode) {
 
-            TemplateRootNode innerRoot = templateType.templateRootNode; 
+            ProcessedType templateType = elementNode.processedType;
+
+            TemplateRootNode innerRoot = templateType.templateRootNode;
 
             CompiledTemplate innerTemplate = GetCompiledTemplate(templateType);
 
             ParameterExpression nodeExpr = ctx.ElementExpr;
 
-            StructList<AttributeDefinition> attributes = AttributeMerger.MergeExpandedAttributes(innerRoot.attributes, expandedTemplateNode.attributes);
+            StructList<AttributeDefinition> attributes = AttributeMerger.MergeExpandedAttributes(innerRoot.attributes, elementNode.attributes);
 
-            ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(templateType.rawType) + " " + expandedTemplateNode.lineInfo);
-            ctx.Assign(nodeExpr, CreateElement(ctx, expandedTemplateNode.processedType, ctx.ParentExpr, innerRoot.ChildCount, CountRealAttributes(attributes), ctx.compiledTemplate.templateId));
+            ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(templateType.rawType) + " " + elementNode.lineInfo);
+            ctx.Assign(nodeExpr, CreateElement(ctx, elementNode.processedType, ctx.ParentExpr, innerRoot.ChildCount, CountRealAttributes(attributes), ctx.compiledTemplate.templateId));
 
-            bool hasForwardOrOverrides = expandedTemplateNode.slotOverrideNodes != null && expandedTemplateNode.slotOverrideNodes.size > 0;
+            bool hasForwardOrOverrides = elementNode.slotOverrideNodes != null && elementNode.slotOverrideNodes.size > 0;
 
             ParameterExpression hydrateScope = ctx.GetVariable<TemplateScope>("hydrateScope");
 
@@ -848,13 +844,13 @@ namespace UIForia.Compilers {
 
             ctx.innerTemplate = innerTemplate;
 
-            BindingOutput result = CompileBindings(ctx, expandedTemplateNode, attributes);
+            BindingOutput result = CompileBindings(ctx, elementNode, attributes);
 
             bool didOverride = false;
 
             if (hasForwardOrOverrides) {
-                for (int i = 0; i < expandedTemplateNode.slotOverrideNodes.size; i++) {
-                    SlotNode node = expandedTemplateNode.slotOverrideNodes.array[i];
+                for (int i = 0; i < elementNode.slotOverrideNodes.size; i++) {
+                    SlotNode node = elementNode.slotOverrideNodes.array[i];
 
                     CompiledSlot toOverride = innerTemplate.GetCompiledSlot(node.slotName);
 
@@ -1046,7 +1042,7 @@ namespace UIForia.Compilers {
 
                 CompileInstanceStyleBindings(attributes);
 
-                CompileStyleBindings(ctx, templateNode.tagName, attributes);
+                CompileStyleBindings(ctx, templateNode.processedType.tagName, attributes);
 
                 // CompileAfterStyleBindings();
 
@@ -2711,66 +2707,7 @@ namespace UIForia.Compilers {
             Type[] arguments = processedType.rawType.GetGenericArguments();
             Type[] resolvedTypes = new Type[arguments.Length];
 
-            if (templateNode.genericTypeResolver != null) {
-                string replaceSpec = templateNode.genericTypeResolver.Replace("[", "<").Replace("]", ">");
-
-                int ptr = 0;
-                int rangeStart = 0;
-                int depth = 0;
-
-                LightList<string> strings = LightList<string>.Get();
-
-                while (ptr != replaceSpec.Length) {
-                    char c = replaceSpec[ptr];
-                    switch (c) {
-                        case '<':
-                            depth++;
-                            break;
-
-                        case '>':
-                            depth--;
-                            break;
-
-                        case ',': {
-                            if (depth == 0) {
-                                strings.Add(replaceSpec.Substring(rangeStart, ptr));
-                                rangeStart = ptr;
-                            }
-
-                            break;
-                        }
-                    }
-
-                    ptr++;
-                }
-
-                if (rangeStart != ptr) {
-                    strings.Add(replaceSpec.Substring(rangeStart, ptr));
-                }
-
-                if (arguments.Length != strings.size) {
-                    throw new TemplateCompileException($"Unable to resolve generic type of tag <{templateNode.tagName}>. Expected {arguments.Length} arguments but was only provided {strings.size} {templateNode.genericTypeResolver}");
-                }
-
-                for (int i = 0; i < strings.size; i++) {
-                    if (ExpressionParser.TryParseTypeName(strings[i], out TypeLookup typeLookup)) {
-                        Type type = TypeResolver.Default.ResolveType(typeLookup, (IReadOnlyList<string>) namespaces);
-
-                        if (type == null) {
-                            throw TemplateCompileException.UnresolvedType(typeLookup, (IReadOnlyList<string>) namespaces);
-                        }
-
-                        resolvedTypes[i] = type;
-                    }
-                    else {
-                        throw new TemplateCompileException($"Unable to resolve generic type of tag <{templateNode.tagName}>. Failed to parse generic specifier {strings[i]}. Original expression = {templateNode.genericTypeResolver}");
-                    }
-                }
-
-                strings.Release();
-                Type createdType = ReflectionUtil.CreateGenericType(processedType.rawType, resolvedTypes);
-                return TypeProcessor.AddResolvedGenericElementType(createdType, processedType);
-            }
+            // note: removed call to TypeProcessor.ResolveGenericElementType() because this is now done when constructing the template AST.
 
             typeResolver.Reset();
             resolvingTypeOnly = true;
@@ -2865,7 +2802,7 @@ namespace UIForia.Compilers {
 
                         if (resolvedTypes[typeIndex] != null) {
                             if (resolvedTypes[typeIndex] != typeArgs[a]) {
-                                throw TemplateCompileException.DuplicateResolvedGenericArgument(templateNode.tagName, inputType.Name, resolvedTypes[typeIndex], typeArgs[a]);
+                                throw TemplateCompileException.DuplicateResolvedGenericArgument(templateNode.GetTagName(), inputType.Name, resolvedTypes[typeIndex], typeArgs[a]);
                             }
                         }
 
@@ -2880,7 +2817,7 @@ namespace UIForia.Compilers {
                     Type type = typeResolver.GetExpressionType(attr.value);
                     if (resolvedTypes[typeIndex] != null) {
                         if (resolvedTypes[typeIndex] != type) {
-                            throw TemplateCompileException.DuplicateResolvedGenericArgument(templateNode.tagName, inputType.Name, resolvedTypes[typeIndex], type);
+                            throw TemplateCompileException.DuplicateResolvedGenericArgument(templateNode.GetTagName(), inputType.Name, resolvedTypes[typeIndex], type);
                         }
                     }
 

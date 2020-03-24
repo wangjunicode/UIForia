@@ -6,7 +6,7 @@ using UIForia.Util;
 
 namespace Documentation.Features {
 
-    [Template("Documentation/Features/ScrollDemo.xml")]
+    [Template("Features/ScrollDemo.xml")]
     public class ScrollDemo : UIElement {
 
         public List<int> list;

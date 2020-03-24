@@ -36,19 +36,12 @@
                 </define:titlebarButtons>
             </Group>
 
-            <forward:Children />
+            <define:Children />
+            
         </Div>
 
     </Contents>
 
-    <Contents extends="path/to/template">
-        
-        <override:Children>
-            
-        </override:Children>
-        
-    </Contents>
-    
     <Contents>
         <KlangWindow>
             <Group>

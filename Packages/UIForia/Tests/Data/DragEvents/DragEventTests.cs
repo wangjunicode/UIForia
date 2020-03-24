@@ -34,7 +34,7 @@ namespace DragEventTests {
 
         }
 
-        [Template("Data/DragEvents/DragEventTest_Drag.xml#drag_create_method")]
+        [Template("DragEventTest_Drag.xml#drag_create_method")]
         public class DragTestThing_CreateMethod : UIElement {
 
             public DragEvent CreateDragFromChild(MouseInputEvent evt, int index) {
@@ -61,7 +61,7 @@ namespace DragEventTests {
             Assert.AreEqual("child0", As<TestDragEvent>(testView.InputSystem.CurrentDragEvent).sourceName);
         }
 
-        [Template("Data/DragEvents/DragEventTest_Drag.xml#drag_create_lambda")]
+        [Template("DragEventTest_Drag.xml#drag_create_lambda")]
         public class DragTestThing_CreateLambda : UIElement {
 
             public DragEvent CreateDragFromChild(MouseInputEvent evt, int index) {
@@ -88,7 +88,7 @@ namespace DragEventTests {
             Assert.AreEqual("child1", As<TestDragEvent>(testView.InputSystem.CurrentDragEvent).sourceName);
         }
 
-        [Template("Data/DragEvents/DragEventTest_Drag.xml#drag_create_lambda_arg")]
+        [Template("DragEventTest_Drag.xml#drag_create_lambda_arg")]
         public class DragTestThing_CreateLambdaArg : UIElement {
 
             public DragEvent CreateDragFromChild(MouseInputEvent evt, int index) {
@@ -115,7 +115,7 @@ namespace DragEventTests {
             Assert.AreEqual("child3", As<TestDragEvent>(testView.InputSystem.CurrentDragEvent).sourceName);
         }
 
-        [Template("Data/DragEvents/DragEventTest_Drag.xml#drag_create_lambda_arg_invalid_retn")]
+        [Template("DragEventTest_Drag.xml#drag_create_lambda_arg_invalid_retn")]
         public class DragTestThing_CreateLambdaArgInvalidRetn : UIElement {
 
             public void CreateDragFromChild(MouseInputEvent evt, int index) { }
@@ -128,7 +128,7 @@ namespace DragEventTests {
             Assert.IsTrue(exception.Message.Contains(@"drag:create=""(e) => CreateDragFromChild(e, 3)"""));
         }
 
-        [Template("Data/DragEvents/DragEventTest_Drag.xml#drag_create_annotation_param")]
+        [Template("DragEventTest_Drag.xml#drag_create_annotation_param")]
         public class DragTestThing_CreateAnnotationWithParameter : UIElement {
 
             [OnDragCreate]
@@ -156,7 +156,7 @@ namespace DragEventTests {
             Assert.AreEqual("from class: " + new Vector2(25, 20), As<TestDragEvent>(testView.InputSystem.CurrentDragEvent).sourceName);
         }
 
-        [Template("Data/DragEvents/DragEventTest_Drag.xml#drag_create_annotation_param")]
+        [Template("DragEventTest_Drag.xml#drag_create_annotation_param")]
         public class DragTestThing_CreateAnnotationNoParameter : UIElement {
 
             [OnDragCreate]
@@ -184,7 +184,7 @@ namespace DragEventTests {
             Assert.AreEqual("from class", As<TestDragEvent>(testView.InputSystem.CurrentDragEvent).sourceName);
         }
 
-        [Template("Data/DragEvents/DragEventTest_Drag.xml#drag_create_annotation_invalid_param")]
+        [Template("DragEventTest_Drag.xml#drag_create_annotation_invalid_param")]
         public class DragTestThing_CreateAnnotationInvalidParameter : UIElement {
 
             [OnDragCreate]
@@ -201,7 +201,7 @@ namespace DragEventTests {
                 exception.Message.Contains(TemplateCompileException.InvalidInputAnnotation("CreateDrag", typeof(DragTestThing_CreateAnnotationInvalidParameter), typeof(OnDragCreateAttribute), typeof(MouseInputEvent), typeof(int)).Message));
         }
 
-        [Template("Data/DragEvents/DragEventTest_Drag.xml#drag_create_annotation_invalid_param_count")]
+        [Template("DragEventTest_Drag.xml#drag_create_annotation_invalid_param_count")]
         public class DragTestThing_CreateAnnotationInvalidParameterCount : UIElement {
 
             [OnDragCreate]
@@ -219,7 +219,7 @@ namespace DragEventTests {
                 .Message));
         }
 
-        [Template("Data/DragEvents/DragEventTest_Drag.xml#drag_create_annotation_invalid_return")]
+        [Template("DragEventTest_Drag.xml#drag_create_annotation_invalid_return")]
         public class DragTestThing_CreateAnnotationInvalidReturn : UIElement {
 
             [OnDragCreate]
@@ -233,7 +233,7 @@ namespace DragEventTests {
             Assert.IsTrue(exception.Message.Contains(TemplateCompileException.InvalidDragCreatorAnnotationReturnType("CreateDrag", typeof(DragTestThing_CreateAnnotationInvalidReturn), typeof(void)).Message));
         }
 
-        [Template("Data/DragEvents/DragEventTest_Drag.xml#drag_create_annotation_null")]
+        [Template("DragEventTest_Drag.xml#drag_create_annotation_null")]
         public class DragTestThing_CreateAnnotationNull : UIElement {
 
             public bool wasCalled;
@@ -266,7 +266,7 @@ namespace DragEventTests {
             Assert.IsTrue(root.wasCalled);
         }
 
-        [Template("Data/DragEvents/DragEventTest_DragHierarchy.xml")]
+        [Template("DragEventTest_DragHierarchy.xml")]
         public class DragHandlerTestThing : UIElement {
 
             public LightList<string> dragList = new LightList<string>();
@@ -480,7 +480,7 @@ namespace DragEventTests {
             Assert.AreEqual(new[] {"enter:child0", "exit:child0", "enter:child1", "exit:child1", "enter:child0"}, root.dragList.ToArray());
         }
 
-        [Template("Data/DragEvents/DragEventTest_DragHierarchy.xml#move")]
+        [Template("DragEventTest_DragHierarchy.xml#move")]
         public class DragHandlerTestThing_Move : UIElement {
 
             public LightList<string> dragList = new LightList<string>();
@@ -565,7 +565,7 @@ namespace DragEventTests {
             Assert.AreEqual(new[] {"move:child0", "hover:child0"}, root.dragList.ToArray());
         }
 
-        [Template("Data/DragEvents/DragEventTest_DragHierarchy.xml#move_with_event")]
+        [Template("DragEventTest_DragHierarchy.xml#move_with_event")]
         public class DragHandlerTestThing_MoveWithDragEvent : UIElement {
 
             public LightList<string> dragList = new LightList<string>();

@@ -15,7 +15,7 @@ namespace Layout {
 
     public class FlexHorizontalTests {
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_DistributeSpaceHorizontal.xml")]
+        [Template("FlexHorizontal_DistributeSpaceHorizontal.xml")]
         public class FlexHorizontal_DistributeSpaceHorizontal : UIElement { }
 
         [Test]
@@ -102,7 +102,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(500, 0, 100, 500), root[2].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_GrowUnconstrained.xml")]
+        [Template("FlexHorizontal_GrowUnconstrained.xml")]
         public class FlexHorizontal_GrowUnconstrained : UIElement { }
 
         [Test]
@@ -117,7 +117,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(600, 0, 200, 100), root[2].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_GrowConstrained.xml")]
+        [Template("FlexHorizontal_GrowConstrained.xml")]
         public class FlexHorizontal_GrowConstrained : UIElement { }
 
         [Test]
@@ -132,7 +132,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(550, 0, 350, 100), root[2].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_GrowWithExtraSpace.xml")]
+        [Template("FlexHorizontal_GrowWithExtraSpace.xml")]
         public class FlexHorizontal_GrowWithExtraSpace : UIElement { }
 
         [Test]
@@ -148,7 +148,7 @@ namespace Layout {
         }
 
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_RespectMarginHorizontal.xml")]
+        [Template("FlexHorizontal_RespectMarginHorizontal.xml")]
         public class FlexHorizontal_RespectMarginHorizontal : UIElement { }
 
         [Test]
@@ -163,7 +163,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(1220, 0, 100, 100), root[2].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_ShrinkUnconstrained.xml")]
+        [Template("FlexHorizontal_ShrinkUnconstrained.xml")]
         public class FlexHorizontal_ShrinkUnconstrained : UIElement { }
 
         [Test]
@@ -178,7 +178,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(400, 0, 200, 100), root[2].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_ShrinkConstrained.xml")]
+        [Template("FlexHorizontal_ShrinkConstrained.xml")]
         public class FlexHorizontal_ShrinkConstrained : UIElement { }
 
         [Test]
@@ -193,7 +193,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(425, 0, 175, 100), root[2].layoutResult.AllocatedRect);
         }
         
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_ShrinkWithOverflow.xml")]
+        [Template("FlexHorizontal_ShrinkWithOverflow.xml")]
         public class FlexHorizontal_ShrinkWithOverflow : UIElement { }
 
         [Test]

@@ -6,7 +6,7 @@ using UIForia.Util;
 
 namespace UnityEngine {
     
-    [Template("Documentation/Features/RepeatALot.xml")]
+    [Template("Features/RepeatALot.xml")]
     public class RepeatALot : UIElement {
 
         public List<PlayerData> players;

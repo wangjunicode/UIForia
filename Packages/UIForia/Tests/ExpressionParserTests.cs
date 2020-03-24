@@ -551,7 +551,7 @@ public class ExpressionParserTests {
         Assert.AreEqual("Generic", AssertInstanceOfAndReturn<DotAccessNode>(node.parts[1]).propertyName);
         Assert.AreEqual("List", AssertInstanceOfAndReturn<DotAccessNode>(node.parts[2]).propertyName);
         GenericTypePathNode typeNode = AssertInstanceOfAndReturn<GenericTypePathNode>(node.parts[3]);
-        Assert.AreEqual(1, typeNode.genericPath.generics.Count);
+        Assert.AreEqual(1, typeNode.genericPath.generics.size);
         Assert.AreEqual(typeof(Tuple<int, System.Collections.Generic.List<string>>), TypeResolver.Default.ResolveType(typeNode.genericPath.generics[0]));
     }
 

@@ -4,7 +4,7 @@ using UIForia.Elements;
 
 namespace Demo {
 
-    [Template("Demo/Simple/Simple.xml")]
+    [Template("Simple/Simple.xml")]
     public class Simple : UIElement {
         
         public int boxClicks1;

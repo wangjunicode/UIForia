@@ -2,7 +2,7 @@
 <UITemplate>
 
     <Style src="Documentation/Documentation.style" alias="theme" />
-    <Style src="Documentation/Features/InputDemo.style" />
+    <Style src="Features/InputDemo.style" />
     
     <Contents style="input-container">
         

@@ -263,26 +263,6 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
             TryConsumeWhiteSpace(context);
         }
 
-        public enum ClassBodyTokenType {
-
-            Identifier,
-            Statement,
-            Block,
-            BlockBody,
-            Attribute,
-            SemiColon
-        
-        }
-
-        public struct ClassBodyToken {
-
-            public ClassBodyTokenType type;
-            public int charStart;
-            public int charEnd;
-
-        }
-
-       
         // todo take optional file / line number for error message
         public static StructList<ExpressionToken> Tokenize(string input, StructList<ExpressionToken> retn = null) {
             StructList<ExpressionToken> output = retn ?? new StructList<ExpressionToken>();

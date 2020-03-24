@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    <Style path="Documentation/Features/GridDemo.style"/>
+    <Style path="Features/GridDemo.style"/>
     <Using namespace="UnityEngine"/>
     <Using namespace="UIForia.Layout"/>
 

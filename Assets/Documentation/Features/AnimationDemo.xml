@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
-    <Style path="Documentation/Features/AnimationDemo.style"/>
+    <Style path="Features/AnimationDemo.style"/>
     <Style path="Documentation/Documentation.style" alias="util"/>
 
     <Using namespace="UIForia.Rendering"/>

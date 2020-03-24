@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Documentation {
     
-    [Template("Documentation/WorldRoot.xml")]
+    [Template("WorldRoot.xml")]
     public class WorldRoot : UIElement {
 
         public Vector3 position;

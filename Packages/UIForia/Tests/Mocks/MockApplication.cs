@@ -8,6 +8,7 @@ using UIForia.Animation;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Routing;
+using UIForia.Src;
 using UIForia.Style;
 using UIForia.Systems;
 using UnityEngine;
@@ -60,22 +61,19 @@ namespace Tests.Mocks {
                 TemplateCodeGenerator.Generate(typeof(T), settings);
             }
 
-            
-
-            Type moduleType = Module.GetModuleTypeFromElementType(settings.rootType);
+            Type moduleType = ModuleSystem.GetModuleTypeFromElementType(settings.rootType);
 
             if (moduleType == null) {
                 throw new Exception($"Cannot determine module for {TypeNameGenerator.GetTypeName(settings.rootType)}. Please be sure it lives in a module hierarchy.");
             }
 
-            Module module = Module.LoadRootModule(moduleType);
+            Module module = ModuleSystem.LoadRootModule(moduleType);
             
             MockApplication app = new MockApplication(s_UsePreCompiledTemplates, module, settings, null, null);
             app.Initialize();
             return app;
         }
         
-         
         public new MockInputSystem InputSystem => (MockInputSystem) inputSystem;
         public UIElement RootElement => views[0].RootElement;
 

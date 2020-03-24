@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+using UIForia.Compilers;
 
 namespace UIForia.Util {
 
@@ -78,6 +79,10 @@ namespace UIForia.Util {
 
         private static readonly CacheDict<MethodBase, ParameterInfo[]> _ParamInfoCache = new CacheDict<MethodBase, ParameterInfo[]>(75);
 
+        public static string GetTypeName(this Type type) {
+            return TypeNameGenerator.GetTypeName(type);
+        }
+        
         internal static Delegate CreateDelegate(
             this MethodInfo methodInfo,
             Type delegateType,

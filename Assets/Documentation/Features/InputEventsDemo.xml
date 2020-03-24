@@ -2,7 +2,7 @@
 <UITemplate>
 
     <Style src="Documentation/Documentation.style" alias="theme"/>
-    <Style src="Documentation/Features/InputEventsDemo.style"/>
+    <Style src="Features/InputEventsDemo.style"/>
 
     <Contents>
         <Heading1>Drag and Drop</Heading1>

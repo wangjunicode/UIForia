@@ -24,7 +24,7 @@ namespace Documentation.Features {
 
     }
 
-    [Template("Documentation/Features/AnimationDemo.xml")]
+    [Template("Features/AnimationDemo.xml")]
     public class AnimationDemo : UIElement {
 
         private UIElement animationTarget;

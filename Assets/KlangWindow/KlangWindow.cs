@@ -12,7 +12,7 @@ using UnityEngine;
 
 namespace UI {
 
-    [Template("KlangWindow/KlangWindow.xml")]
+    [Template("KlangWindow.xml")]
     public class KlangWindow : UIElement, IPointerQueryHandler {
 
         public bool isOpen;

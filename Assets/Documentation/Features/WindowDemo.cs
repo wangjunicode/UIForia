@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Documentation.Features {
 
-    [Template("Documentation/Features/WindowDemo.xml")]
+    [Template("Features/WindowDemo.xml")]
     public class WindowDemo : UIElement {
 
         private int windowCount;

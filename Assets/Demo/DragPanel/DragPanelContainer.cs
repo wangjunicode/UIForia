@@ -4,7 +4,7 @@ using UIForia.Elements;
 
 namespace Demo.DragPanel {
 
-    [Template("Demo/DragPanel/DragPanelContainer.xml")]
+    [Template("DragPanel/DragPanelContainer.xml")]
     public class DragPanelContainer : UIElement {
 
         public List<string> items = new List<string>() {

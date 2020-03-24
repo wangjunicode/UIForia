@@ -3,6 +3,7 @@ using UIForia;
 using UIForia.Exceptions;
 using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Src;
 using UIForia.Style;
 using UIForia.Style2;
 using UIForia.Util;
@@ -22,7 +23,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void UseLocalMixin() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
 
             StyleSheet2 sheet = StyleSheetParser.ParseString(module, @"
                 mixin swirl {
@@ -48,7 +49,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void ParseStyleBlockNormalNoConditions() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
 
             StyleSheet2 sheet = StyleSheetParser.ParseString(module, @"
                 style testStyle {
@@ -74,7 +75,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void ParseStyleShorthand_NoVariables() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
 
             StyleSheet2 sheet = StyleSheetParser.ParseString(module, @"
                 style testStyle {
@@ -98,7 +99,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void ParseStyleShorthand_TwoConstants() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
 
             StyleSheet2 sheet = StyleSheetParser.ParseString(module, @"
 
@@ -126,7 +127,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void ParseStyleBlockNormal_Constants() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
 
             StyleSheet2 sheet = StyleSheetParser.ParseString(module, @"
 
@@ -154,7 +155,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void ParseStyleBlock_Hover() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
 
             StyleSheet2 sheet = StyleSheetParser.ParseString(module, @"
 
@@ -190,7 +191,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void ThowForUndeclaredConstant() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
             ParseException ex = Assert.Throws<ParseException>(() => {
                 StyleSheet2 sheet = StyleSheetParser.ParseString(module, @"
                 style testStyle {
@@ -210,7 +211,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void ParseStyleBlock_HoverConditional() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
             module.RegisterDisplayCondition("one", (d) => d.screenWidth > 500);
             module.UpdateConditions(new DisplayConfiguration(1000, 1000, 1));
 
@@ -254,7 +255,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void ParseStyleBlockConditional() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
 
             module.RegisterDisplayCondition("one", (c) => c.screenWidth > 2000);
 
@@ -299,7 +300,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void ParseLocalConstantWithoutCondition() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
 
             StyleSheet2 sheet = StyleSheetParser.ParseString(module, @"const x = red;");
 
@@ -310,7 +311,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void ParseLocalConstantWithCondition() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
 
             module.RegisterDisplayCondition("one", (d) => d.screenWidth > 200 && d.screenWidth < 400);
             module.RegisterDisplayCondition("two", (d) => d.screenWidth >= 400);
@@ -345,7 +346,7 @@ namespace Tests.StyleParser {
 
         [Test]
         public void IgnoreComments() {
-            Module module = Module.LoadRootModule<StyleParserTestModule>();
+            Module module = ModuleSystem.GetModule<StyleParserTestModule>();
 
             module.RegisterDisplayCondition("one", (d) => d.screenWidth > 200 && d.screenWidth < 400);
             module.RegisterDisplayCondition("two", (d) => d.screenWidth >= 400);

@@ -44,13 +44,13 @@ namespace UIForia.Util {
 
         private static void FilterAssemblies() {
             // todo -- could be optimized by writing a tmp file with all non package/asset assemblies namespaces
-            
+
             // string path = Path.GetTempPath();
             //
             // if (File.Exists(Path.Combine(Path.GetTempPath(), "uiforia_type-scan.txt"))) {
             //     
             // }
-            
+
             if (s_NamespaceMap != null) return;
 
             s_NamespaceMap = new Dictionary<string, LightList<Assembly>>();
@@ -80,9 +80,9 @@ namespace UIForia.Util {
                 cnt++;
 
                 try {
-                    
+
                     Type[] types = assembly == current ? assembly.GetTypes() : assembly.GetExportedTypes();
-                    
+
                     for (int j = 0; j < types.Length; j++) {
                         Type currentType = types[j];
                         // can be null if assembly referenced is unavailable
@@ -103,9 +103,8 @@ namespace UIForia.Util {
                         }
                     }
                 }
-                catch (ReflectionTypeLoadException) {
-                    Debug.Log($"{assembly.FullName}");
-                    throw;
+                catch (ReflectionTypeLoadException e) {
+                    Debug.LogError($"{assembly.FullName} -> {e.Message}");
                 }
             }
 
@@ -114,8 +113,8 @@ namespace UIForia.Util {
         }
 
         public Type ResolveTypeExpression(Type invokingType, IList<string> namespaces, string typeExpression) {
-            typeExpression = typeExpression.Replace("[", "<").Replace("]", ">");
-            if (ExpressionParser.TryParseTypeName(typeExpression, out TypeLookup typeLookup)) {
+            
+            if (TryParseTypeName(typeExpression, out TypeLookup typeLookup)) {
                 return ResolveType(typeLookup, (IReadOnlyList<string>) namespaces, invokingType);
             }
 
@@ -147,6 +146,113 @@ namespace UIForia.Util {
             }
 
             return null;
+        }
+
+        public static bool TryParseTypeName(string typeName, out TypeLookup lookup) {
+            lookup = default;
+            CharStream stream = new CharStream(typeName);
+            return TryParseTypePath(ref stream, ref lookup);
+        }
+
+        public static bool TryParseTypeName(CharSpan typeName, out TypeLookup lookup) {
+            lookup = default;
+            CharStream stream = new CharStream(typeName);
+            return TryParseTypePath(ref stream, ref lookup);
+        }
+
+        private static bool TryParseTypePathHead(ref CharStream stream, ref TypeLookup lookup) {
+
+            if (!stream.TryParseMultiDottedIdentifier(out CharSpan identifier)) {
+                return false;
+            }
+
+            int idx = identifier.LastIndexOf('.');
+            if (idx == -1) {
+                lookup.typeName = identifier.ToString();
+            }
+            else {
+                unsafe {
+                    lookup.typeName = new CharSpan(identifier.data, idx + 1, identifier.rangeEnd).ToString();
+                    lookup.namespaceName = new CharSpan(identifier.data, identifier.rangeStart, idx).ToString();
+                }
+            }
+
+            return true;
+        }
+
+        private static bool TryParseTypePath(ref CharStream stream, ref TypeLookup retn) {
+
+            if (!TryParseTypePathHead(ref stream, ref retn)) {
+                return false;
+            }
+
+            stream.ConsumeWhiteSpaceAndComments();
+
+            if (!stream.HasMoreTokens) {
+                return true;
+            }
+
+            if (stream == '<' && !TryParseTypePathGenerics(ref stream, ref retn)) {
+                return false;
+            }
+
+            if (stream == '[' && stream.HasMoreTokens && stream[stream.Ptr + 1] == ']') {
+                retn.isArray = true;
+                stream.Advance(2);
+            }
+
+            stream.ConsumeWhiteSpaceAndComments();
+
+            return !stream.HasMoreTokens;
+
+        }
+
+        private static bool TryParseTypePathGenerics(ref CharStream stream, ref TypeLookup retn) {
+            if (stream != '<') return false;
+
+            if (!stream.TryGetSubStream('<', '>', out CharStream genericStream)) {
+                return false;
+            }
+
+            return TryParseTypePathGenericStep(ref genericStream, ref retn);
+
+        }
+
+        private static bool TryParseTypePathGenericStep(ref CharStream stream, ref TypeLookup lookup) {
+            TypeLookup arg = default;
+            while (stream.HasMoreTokens) {
+                uint start = stream.Ptr;
+                if (stream.TryParseIdentifier(out CharSpan _, false)) {
+                    stream.RewindTo(start);
+                    if (!TryParseTypePathHead(ref stream, ref arg)) {
+                        return false;
+                    }
+
+                    arg.generics = default;
+                    continue;
+                }
+
+                stream.RewindTo(start);
+                if (stream.TryParseCharacter(',')) {
+                    lookup.generics = lookup.generics.array != null ? lookup.generics : new SizedArray<TypeLookup>(4);
+                    lookup.generics.Add(arg);
+                    continue;
+                }
+
+                if (stream == '<') {
+                    if (TryParseTypePathGenerics(ref stream, ref arg)) {
+                        continue;
+                    }
+                }
+
+                return false;
+
+            }
+
+            lookup.generics = lookup.generics.array != null ? lookup.generics : new SizedArray<TypeLookup>(4);
+            lookup.generics.Add(arg);
+
+            return true;
         }
 
         private LightList<Type> ResolveGenericTypes(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null, Type scopeType = null) {
@@ -279,7 +385,7 @@ namespace UIForia.Util {
             // base type will valid or an exception will be thrown
             Type baseType = ResolveBaseTypePath(typeLookup, namespaces);
 
-            if (typeLookup.generics != null && typeLookup.generics.Count != 0) {
+            if (typeLookup.generics.array != null && typeLookup.generics.size != 0) {
                 if (!baseType.IsGenericTypeDefinition) {
                     throw new TypeResolutionException($"{baseType} is not a generic type definition but we are trying to resolve a generic type with it because generic arguments were provided");
                 }
@@ -305,7 +411,7 @@ namespace UIForia.Util {
                 throw new TypeResolutionException($"{baseType} is not a generic type definition but we are trying to resolve a generic type with it because generic arguments were provided");
             }
 
-            if (typeLookup.generics == null || typeLookup.generics.Count == 0) {
+            if (typeLookup.generics.array == null || typeLookup.generics.size == 0) {
                 throw new TypeResolutionException($"Tried to resolve generic types from {baseType} but no generic types were given in the {nameof(typeLookup)} argument");
             }
 

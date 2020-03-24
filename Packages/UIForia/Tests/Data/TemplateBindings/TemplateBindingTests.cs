@@ -22,10 +22,10 @@ namespace TemplateBinding {
 
     public class TemplateBindingTests {
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_BasicBinding.xml")]
+        [Template("TemplateBindingTest_BasicBinding.xml")]
         public class TemplateBindingTest_BasicBindingOuter : UIElement { }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_BasicBinding.xml#inner")]
+        [Template("TemplateBindingTest_BasicBinding.xml#inner")]
         public class TemplateBindingTest_BasicBindingInner : UIElement {
 
             public int intVal = 5;
@@ -41,7 +41,7 @@ namespace TemplateBinding {
             Assert.AreEqual(25, inner.intVal);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_CreatedBinding.xml")]
+        [Template("TemplateBindingTest_CreatedBinding.xml")]
         public class TemplateBindingTest_CreatedBindingOuter : UIElement {
 
             public int value = 15;
@@ -52,7 +52,7 @@ namespace TemplateBinding {
 
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_CreatedBinding.xml#inner")]
+        [Template("TemplateBindingTest_CreatedBinding.xml#inner")]
         public class TemplateBindingTest_CreatedBindingInner : UIElement {
 
             public int intVal;
@@ -75,7 +75,7 @@ namespace TemplateBinding {
             Assert.AreEqual(25, outer.GetValue());
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_AttributeBinding.xml")]
+        [Template("TemplateBindingTest_AttributeBinding.xml")]
         public class TemplateBindingTest_AttributeBinding : UIElement {
 
             public int intVal = 18;
@@ -98,7 +98,7 @@ namespace TemplateBinding {
             Assert.AreEqual("dynamic18", inner.GetAttribute("dynamicAttr"));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_MouseBinding.xml")]
+        [Template("TemplateBindingTest_MouseBinding.xml")]
         public class TemplateBindingTest_MouseBindingBinding : UIElement {
 
             public string output_NoParams;
@@ -205,7 +205,7 @@ namespace TemplateBinding {
             Assert.AreEqual(650, e.output_value);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_KeyboardInput.xml")]
+        [Template("TemplateBindingTest_KeyboardInput.xml")]
         public class TemplateBindingTest_KeyboardBinding : UIElement {
 
             public string output_NoParams;
@@ -288,7 +288,7 @@ namespace TemplateBinding {
             Assert.AreEqual('f', e.output_value2);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_ConditionalBinding.xml")]
+        [Template("TemplateBindingTest_ConditionalBinding.xml")]
         public class TemplateBindingTest_ConditionalBinding : UIElement {
 
             public bool condition;
@@ -309,7 +309,7 @@ namespace TemplateBinding {
 
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_EventBinding.xml#method_group")]
+        [Template("TemplateBindingTest_EventBinding.xml#method_group")]
         public class TestTemplateBinding_EventBinding_MethodGroup_Main : UIElement {
 
             public int called;
@@ -344,7 +344,7 @@ namespace TemplateBinding {
             Assert.AreEqual(1, e.called);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_EventBinding.xml#access_expr")]
+        [Template("TemplateBindingTest_EventBinding.xml#access_expr")]
         public class TestTemplateBinding_EventBinding_MethodGroup_AccessExpr : UIElement {
 
             public Thing thing;
@@ -384,7 +384,7 @@ namespace TemplateBinding {
             Assert.IsTrue(textElementTrue.isEnabled);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_StyleBinding.xml")]
+        [Template("TemplateBindingTest_StyleBinding.xml")]
         public class TemplateBindingTest_StyleBinding : UIElement { }
 
         [Test]
@@ -398,7 +398,7 @@ namespace TemplateBinding {
             Assert.AreEqual(new OffsetMeasurement(53, OffsetMeasurementUnit.ViewportWidth), e[0].style.Hover.TransformPositionX);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_DynamicStyleBinding.xml")]
+        [Template("TemplateBindingTest_DynamicStyleBinding.xml")]
         public class TemplateBindingTest_DynamicStyleBinding : UIElement {
 
             public bool useDynamic;
@@ -454,7 +454,7 @@ namespace TemplateBinding {
             Assert.AreEqual(e.templateMetaData.ResolveStyleByName("list-2"), d0Styles[3]);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_UnresolvedDynamicStyle.xml")]
+        [Template("TemplateBindingTest_UnresolvedDynamicStyle.xml")]
         public class TemplateBindingTest_UnresolvedDynamicStyle : UIElement {
 
             public int val;
@@ -484,10 +484,10 @@ namespace TemplateBinding {
             Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[0]);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_ContextVariable.xml")]
+        [Template("TemplateBindingTest_ContextVariable.xml")]
         public class TemplateBindingTest_ContextVariable : UIElement { }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_ContextVariable.xml#slotexposer")]
+        [Template("TemplateBindingTest_ContextVariable.xml#slotexposer")]
         public class TemplateBindingTest_ContextVariable_SlotExposer : UIElement { }
 
         [Test]
@@ -508,7 +508,7 @@ namespace TemplateBinding {
             Assert.AreEqual("slot answer is = 50", nestedTextEl.text.Trim());
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#out_of_scope")]
+        [Template("TemplateBindingTest_LocalContextVariable.xml#out_of_scope")]
         public class TemplateBindingTest_ContextVariableOutOfScope : UIElement { }
 
         [Test]
@@ -517,7 +517,7 @@ namespace TemplateBinding {
             Assert.IsTrue(exception.Message.Contains(TemplateCompileException.UnknownAlias("cvar0").Message));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#use_alias")]
+        [Template("TemplateBindingTest_LocalContextVariable.xml#use_alias")]
         public class TemplateBindingTest_ContextVariable_UseAlias : UIElement { }
 
         [Test]
@@ -531,7 +531,7 @@ namespace TemplateBinding {
             Assert.AreEqual("var 0", GetText(e["nested"][0]));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#use_alias_out_of_scope")]
+        [Template("TemplateBindingTest_LocalContextVariable.xml#use_alias_out_of_scope")]
         public class TemplateBindingTest_ContextVariable_UseAliasOutOfScope : UIElement { }
 
         [Test]
@@ -540,7 +540,7 @@ namespace TemplateBinding {
             Assert.IsTrue(exception.Message.Contains(TemplateCompileException.UnknownAlias("custom").Message));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#use_alias_on_own_context")]
+        [Template("TemplateBindingTest_LocalContextVariable.xml#use_alias_on_own_context")]
         public class TemplateBindingTest_ContextVariable_UseAliasOnOwnContext : UIElement { }
 
         [Test]
@@ -549,10 +549,10 @@ namespace TemplateBinding {
             Assert.IsTrue(exception.Message.Contains(TemplateCompileException.UnknownAlias("custom").Message));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#not_exposed_inner")]
+        [Template("TemplateBindingTest_LocalContextVariable.xml#not_exposed_inner")]
         public class TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Inner : UIElement { }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#not_exposed_outer")]
+        [Template("TemplateBindingTest_LocalContextVariable.xml#not_exposed_outer")]
         public class TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer : UIElement { }
 
         [Test]
@@ -561,14 +561,14 @@ namespace TemplateBinding {
             Assert.IsTrue(exception.Message.Contains(TemplateCompileException.UnknownAlias("thing").Message));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#expose_context_var_slotted_outer")]
+        [Template("TemplateBindingTest_LocalContextVariable.xml#expose_context_var_slotted_outer")]
         public class TemplateBindingTest_ContextVariable_Expose_Slotted_Outer : UIElement {
 
             public string value = "val";
 
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#expose_context_var_slotted_inner")]
+        [Template("TemplateBindingTest_LocalContextVariable.xml#expose_context_var_slotted_inner")]
         public class TemplateBindingTest_ContextVariable_Expose_Slotted_Inner : UIElement {
 
             public string variable0 = "var 0";
@@ -586,7 +586,7 @@ namespace TemplateBinding {
             Assert.AreEqual("var 0 + var 1hello", GetText(e["text"]));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#expose_context_out_of_scope")]
+        [Template("TemplateBindingTest_LocalContextVariable.xml#expose_context_out_of_scope")]
         public class TemplateBindingTest_ContextVariable_Expose_OutOfScope : UIElement {
 
             public string value = "val";
@@ -599,7 +599,7 @@ namespace TemplateBinding {
             Assert.IsTrue(exception.Message.Contains(TemplateCompileException.UnknownAlias("variable0").Message));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_count")]
+        [Template("TemplateBindingTest_RepeatTemplate.xml#repeat_count")]
         public class TemplateBindingTest_RepeatCount : UIElement {
 
             public int count;
@@ -658,7 +658,7 @@ namespace TemplateBinding {
             Assert.AreEqual(e1, e[0][1]);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_list")]
+        [Template("TemplateBindingTest_RepeatTemplate.xml#repeat_list")]
         public class TemplateBindingTest_RepeatList : UIElement {
 
             public IList<Vector3> data;
@@ -784,7 +784,7 @@ namespace TemplateBinding {
             Assert.AreEqual(0, e[0].children.size);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_list_key_fn")]
+        [Template("TemplateBindingTest_RepeatTemplate.xml#repeat_list_key_fn")]
         public class TemplateBindingTest_RepeatList_Key : UIElement {
 
             public IList<Vector3> data;
@@ -858,7 +858,7 @@ namespace TemplateBinding {
             Assert.AreEqual(c3, e[0][2]);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_multi_child")]
+        [Template("TemplateBindingTest_RepeatTemplate.xml#repeat_multi_child")]
         public class TemplateBindingTest_RepeatMultiChild : UIElement {
 
             public IList<Vector3> data;
@@ -880,14 +880,14 @@ namespace TemplateBinding {
             Assert.AreEqual("6", GetText(e[0][1][1][0]));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SyncBinding.xml#sync")]
+        [Template("TemplateBindingTest_SyncBinding.xml#sync")]
         public class TemplateBindingTest_SyncBinding_Sync : UIElement {
 
             public string syncedValue;
 
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SyncBinding.xml#sync_nested")]
+        [Template("TemplateBindingTest_SyncBinding.xml#sync_nested")]
         public class TemplateBindingTest_SyncBinding_SyncNested : UIElement {
 
             public struct Nested {
@@ -900,7 +900,7 @@ namespace TemplateBinding {
 
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SyncBinding.xml#fake_input")]
+        [Template("TemplateBindingTest_SyncBinding.xml#fake_input")]
         public class TemplateBindingTest_SyncBinding_FakeInput : UIElement {
 
             public string value;
@@ -940,11 +940,11 @@ namespace TemplateBinding {
         }
 
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_InnerContext.xml")]
+        [Template("TemplateBindingTest_InnerContext.xml")]
         public class TemplateBindingTest_InnerContext_Outer : UIElement { }
 
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_InnerContext.xml#dynamic_styled")]
+        [Template("TemplateBindingTest_InnerContext.xml#dynamic_styled")]
         public class TemplateBindingTest_InnerContext_Inner : UIElement {
 
             public string dynamicFromInner;
@@ -976,7 +976,7 @@ namespace TemplateBinding {
             Assert.AreEqual("from-outer", styles[1].name);
         }
 
-        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleNameOverload.xml")]
+        [Template("Style/TemplateBindingTest_StyleNameOverload.xml")]
         public class TemplateBindingTest_StyleNameOverload : UIElement { }
 
         [Test]
@@ -989,7 +989,7 @@ namespace TemplateBinding {
             Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
         }
 
-        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleNameAliased.xml")]
+        [Template("Style/TemplateBindingTest_StyleNameAliased.xml")]
         public class TemplateBindingTest_StyleNameAliased : UIElement { }
 
         [Test]
@@ -1002,7 +1002,7 @@ namespace TemplateBinding {
             Assert.AreEqual(Color.blue, e[0].style.BackgroundColor);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml")]
+        [Template("TemplateBindingTest_OnChange.xml")]
         public class TemplateBindingTest_OnChange_Outer : UIElement {
 
             public string myValue;
@@ -1038,7 +1038,7 @@ namespace TemplateBinding {
             Assert.AreEqual("baseVal changed", e.myValueAfterChange);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml#with_old_value")]
+        [Template("TemplateBindingTest_OnChange.xml#with_old_value")]
         public class TemplateBindingTest_OnChange_WithOldValue : UIElement {
 
             public string myValue;
@@ -1066,7 +1066,7 @@ namespace TemplateBinding {
         }
 
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml#with_new_value")]
+        [Template("TemplateBindingTest_OnChange.xml#with_new_value")]
         public class TemplateBindingTest_OnChange_WithNewValue : UIElement {
 
             public string myValue;
@@ -1092,7 +1092,7 @@ namespace TemplateBinding {
             Assert.AreEqual("baseVal__changed", e.newValue);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml#with_sync")]
+        [Template("TemplateBindingTest_OnChange.xml#with_sync")]
         public class TemplateBindingTest_OnChange_WithSync : UIElement {
 
             public string myValue;
@@ -1122,7 +1122,7 @@ namespace TemplateBinding {
             Assert.AreEqual("baseVal", e.oldValue);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveGenericType.xml")]
+        [Template("TemplateBindingTest_ResolveGenericType.xml")]
         public class TemplateBindingTest_ResolveGeneric_Outer : UIElement {
 
             public LightList<ISelectOption<string>> list;
@@ -1130,7 +1130,7 @@ namespace TemplateBinding {
 
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveGeneric.xml")]
+        [Template("TemplateBindingTest_ResolveGenericType.xml")]
         public class TemplateBindingTest_ResolveGeneric_Inner1<TType0> : UIElement {
 
             public LightList<TType0> list;
@@ -1150,21 +1150,21 @@ namespace TemplateBinding {
             Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<float>>(e[2]);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext.xml#level-2")]
+        [Template("TemplateBindingTest_SlotContext.xml#level-2")]
         public class TemplateBindingTest_ResolveSlotContext_2 : UIElement {
 
             public string ctx = "level 2";
 
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext.xml#level-1")]
+        [Template("TemplateBindingTest_SlotContext.xml#level-1")]
         public class TemplateBindingTest_ResolveSlotContext_1 : UIElement {
 
             public string ctx = "level 1";
 
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext.xml#level-0")]
+        [Template("TemplateBindingTest_SlotContext.xml#level-0")]
         public class TemplateBindingTest_ResolveSlotContext_0 : UIElement {
 
             public string ctx = "level 0";
@@ -1182,24 +1182,24 @@ namespace TemplateBinding {
             Assert.AreEqual("level 0", slotRoot.GetAttribute("level-0"));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext_Expose.xml#main")]
+        [Template("TemplateBindingTest_SlotContext_Expose.xml#main")]
         public class TemplateBindingTest_ExposeFromSlot_Main : UIElement { }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext_Expose.xml#level-2")]
+        [Template("TemplateBindingTest_SlotContext_Expose.xml#level-2")]
         public class TemplateBindingTest_ExposeFromSlot_2 : UIElement {
 
             public string fieldFrom2 = "data from field in 2";
 
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext_Expose.xml#level-1")]
+        [Template("TemplateBindingTest_SlotContext_Expose.xml#level-1")]
         public class TemplateBindingTest_ExposeFromSlot_1 : UIElement {
 
             public string fieldFrom1 = "data from field in 1";
 
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext_Expose.xml#level-0")]
+        [Template("TemplateBindingTest_SlotContext_Expose.xml#level-0")]
         public class TemplateBindingTest_ExposeFromSlot_0 : UIElement {
 
             public string fieldFrom0 = "data from field in 0";
@@ -1220,16 +1220,16 @@ namespace TemplateBinding {
             Assert.AreEqual("data from field in 2", GetText(slotRoot[2]));
         }
 
-        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleFromNestedSlots.xml")]
+        [Template("Style/TemplateBindingTest_StyleFromNestedSlots.xml")]
         public class TemplateBindingTest_StyleFromNestedSlots : UIElement { }
 
-        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleFromNestedSlots2.xml")]
+        [Template("Style/TemplateBindingTest_StyleFromNestedSlots2.xml")]
         public class TemplateBindingTest_StyleFromNestedSlots_2 : UIElement { }
 
-        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleFromNestedSlots1.xml")]
+        [Template("Style/TemplateBindingTest_StyleFromNestedSlots1.xml")]
         public class TemplateBindingTest_StyleFromNestedSlots_1 : UIElement { }
 
-        [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleFromNestedSlots0.xml")]
+        [Template("Style/TemplateBindingTest_StyleFromNestedSlots0.xml")]
         public class TemplateBindingTest_StyleFromNestedSlots_0 : UIElement { }
 
         [Test]
@@ -1247,16 +1247,16 @@ namespace TemplateBinding {
             Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingBottom);
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SlotInvalidUsage.xml#main")]
+        [Template("TemplateBindingTest_SlotInvalidUsage.xml#main")]
         public class TemplateBindingTest_InvalidForwardSlot_Main : UIElement { }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SlotInvalidUsage.xml#level-2")]
+        [Template("TemplateBindingTest_SlotInvalidUsage.xml#level-2")]
         public class TemplateBindingTest_InvalidForwardSlot_2 : UIElement { }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SlotInvalidUsage.xml#level-1")]
+        [Template("TemplateBindingTest_SlotInvalidUsage.xml#level-1")]
         public class TemplateBindingTest_InvalidForwardSlot_1 : UIElement { }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_SlotInvalidUsage.xml#level-0")]
+        [Template("TemplateBindingTest_SlotInvalidUsage.xml#level-0")]
         public class TemplateBindingTest_InvalidForwardSlot_0 : UIElement { }
 
         [Test]
@@ -1265,16 +1265,16 @@ namespace TemplateBinding {
             Assert.IsTrue(exception.Message.Contains("Slot overrides can only be defined as a direct child of an expanded template"));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_DefineSlotInsideOverride.xml#main")]
+        [Template("TemplateBindingTest_DefineSlotInsideOverride.xml#main")]
         public class TemplateBindingTest_DefineSlotInsideOverride_Main : UIElement { }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_DefineSlotInsideOverride.xml#level-2")]
+        [Template("TemplateBindingTest_DefineSlotInsideOverride.xml#level-2")]
         public class TemplateBindingTest_DefineSlotInsideOverride_2 : UIElement { }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_DefineSlotInsideOverride.xml#level-1")]
+        [Template("TemplateBindingTest_DefineSlotInsideOverride.xml#level-1")]
         public class TemplateBindingTest_DefineSlotInsideOverride_1 : UIElement { }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_DefineSlotInsideOverride.xml#level-0")]
+        [Template("TemplateBindingTest_DefineSlotInsideOverride.xml#level-0")]
         public class TemplateBindingTest_DefineSlotInsideOverride_0 : UIElement { }
 
         [Test]
@@ -1293,7 +1293,7 @@ namespace TemplateBinding {
             Assert.AreEqual("children go here", GetText(slotRoot2[0]));
         }
 
-        [Template("Data/TemplateBindings/TemplateBindingTest_NestedRepeat.xml")]
+        [Template("TemplateBindingTest_NestedRepeat.xml")]
         public class TemplateBindingTest_NestedRepeat : UIElement {
 
             public List<NestedRepeatData> data;
@@ -1326,14 +1326,14 @@ namespace TemplateBinding {
             Assert.AreEqual("three", GetText(repeat[2]));
         }
 
-        [Template("Data/TemplateBindings/Namespaces/TemplateBindingTest_Namespace_Outer.xml")]
+        [Template("Namespaces/TemplateBindingTest_Namespace_Outer.xml")]
         public class TemplateBindingTest_NamespaceOuter : UIElement {
 
             public LightList<string> list;
 
         }
 
-        [Template("Data/TemplateBindings/Namespaces/TemplateBindingTest_Namespace_Inner.xml")]
+        [Template("Namespaces/TemplateBindingTest_Namespace_Inner.xml")]
         public class TemplateBindingTest_NamespaceInner : UIElement {
 
             public Color color;
@@ -1346,14 +1346,14 @@ namespace TemplateBinding {
             Assert.IsTrue(exception.Message.Contains("Unable to resolve type Color"));
         }
 
-        [Template("Data/TemplateBindings/Namespaces/TemplateBindingTest_Namespace_Resolve_Outer.xml")]
+        [Template("Namespaces/TemplateBindingTest_Namespace_Resolve_Outer.xml")]
         public class TemplateBindingTest_Namespace_Resolve_Outer : UIElement {
 
             public LightList<string> list;
 
         }
 
-        [Template("Data/TemplateBindings/Namespaces/TemplateBindingTest_Namespace_Resolve_Inner.xml")]
+        [Template("Namespaces/TemplateBindingTest_Namespace_Resolve_Inner.xml")]
         public class TemplateBindingTest_Namespace_Resolve_Inner : UIElement {
 
             public NamespaceTest.Color color;

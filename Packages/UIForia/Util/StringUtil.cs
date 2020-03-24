@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace UIForia.Util {
 
@@ -139,6 +140,26 @@ namespace UIForia.Util {
             }
         }
 
+        public static string ListToString(string[] list, string separator = ", ") {
+            if (list == null || list.Length == 0) {
+                return string.Empty;
+            }
+
+            string retn = null;
+            s_CharStringBuilder.Clear();
+
+            for (int i = 0; i < list.Length; i++) {
+                s_CharStringBuilder.Append(list[i]);
+                if (i != list.Length - 1 && separator != null) {
+                    s_CharStringBuilder.Append(separator);
+                }
+            }
+
+            retn = s_CharStringBuilder.ToString();
+            s_CharStringBuilder.Clear();
+            return retn;
+        }
+        
         public static string ListToString(IReadOnlyList<string> list, string separator = ", ") {
             if (list == null || list.Count == 0) {
                 return string.Empty;
@@ -261,6 +282,13 @@ namespace UIForia.Util {
                 return length <= 0;
 
             }
+        }
+
+        [ThreadStatic] private static StringBuilder s_PerThreadStringBuilder;
+        
+        public static StringBuilder GetPerThreadStringBuilder() {
+            s_PerThreadStringBuilder = s_PerThreadStringBuilder ?? new StringBuilder(128);
+            return s_PerThreadStringBuilder;
         }
 
     }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
-    <Style path="Documentation/Features/ScrollDemo.style"/>
+    <Style path="Features/ScrollDemo.style"/>
     <Contents style="container">
 
         <ScrollView style="level-0">

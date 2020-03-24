@@ -1270,7 +1270,7 @@ namespace UIForia.Compilers {
             // we also need to be sure the generic argument count is equal
             if (start + 1 < parts.Count - 1 && parts[start + 1].type == PartType.Generic) {
                 start++;
-                targetName += "`" + parts[start].generic.genericPath.generics.Count;
+                targetName += "`" + parts[start].generic.genericPath.generics.size;
                 genericNode = parts[start].generic;
             }
 

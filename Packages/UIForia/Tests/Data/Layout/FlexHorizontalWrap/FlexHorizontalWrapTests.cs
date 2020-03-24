@@ -17,7 +17,7 @@ namespace Layout {
 
     public class FlexHorizontalWrapTests {
 
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_NoWrap.xml")]
+        [Template("FlexHorizontalWrap_NoWrap.xml")]
         public class FlexHorizontalWrap_NoWrap : UIElement { }
 
         [Test]
@@ -31,7 +31,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(200, 0, 200, 100), root[1].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_WrapWhenTrackFull.xml")]
+        [Template("FlexHorizontalWrap_WrapWhenTrackFull.xml")]
         public class FlexHorizontalWrap_WrapWhenTrackFull : UIElement { }
 
         [Test]
@@ -47,7 +47,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 100, 200, 100), root[3].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_WrapWhenItemTooBig.xml")]
+        [Template("FlexHorizontalWrap_WrapWhenItemTooBig.xml")]
         public class FlexHorizontalWrap_WrapWhenItemTooBig : UIElement { }
 
         [Test]
@@ -63,7 +63,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(200, 200, 200, 100), root[3].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_WrapWhenItemOverflows.xml")]
+        [Template("FlexHorizontalWrap_WrapWhenItemOverflows.xml")]
         public class FlexHorizontalWrap_WrapWhenItemOverflows : UIElement { }
 
         [Test]
@@ -79,7 +79,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(300, 100, 200, 100), root[3].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_GrowInTrack.xml")]
+        [Template("FlexHorizontalWrap_GrowInTrack.xml")]
         public class FlexHorizontalWrap_GrowInTrack : UIElement { }
 
         [Test]
@@ -96,7 +96,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 200, 200, 100), root[4].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_ShrinkInTrack.xml")]
+        [Template("FlexHorizontalWrap_ShrinkInTrack.xml")]
         public class FlexHorizontalWrap_ShrinkInTrack : UIElement { }
 
         [Test]
@@ -113,7 +113,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(300, 200, 300, 100), root[4].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWap_DistributeSpaceInTrack.xml")]
+        [Template("FlexHorizontalWap_DistributeSpaceInTrack.xml")]
         public class FlexHorizontalWrap_DistributeSpaceInTrack : UIElement { }
 
         [Test]
@@ -167,7 +167,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(200, 200, 200, 100), root[4].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWap_DistributeSpaceBetweenTracks.xml")]
+        [Template("FlexHorizontalWap_DistributeSpaceBetweenTracks.xml")]
         public class FlexHorizontalWap_DistributeSpaceBetweenTracks : UIElement { }
 
         [Test]

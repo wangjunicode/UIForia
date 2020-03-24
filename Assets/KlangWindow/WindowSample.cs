@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UI {
 
-    [Template("KlangWindow/WindowSample.xml")]
+    [Template("WindowSample.xml")]
     public class WindowSample : UIElement {
 
         public void SpawnWindow() {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
-    <Style path="Documentation/Features/SelectDemo.style"/>
+    <Style path="Features/SelectDemo.style"/>
 
     <Contents style="select-demo-root">
         <Group style="center">

@@ -8,8 +8,8 @@ namespace UIForia.Parsing {
         public readonly string rawTextContent;
         public readonly StructList<TextExpression> textExpressionList;
 
-        public TextNode(TemplateRootNode root, TemplateNode parent, string content, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
-            : base(root, parent, processedType, attributes, templateLineInfo) {
+        public TextNode(string content, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
+            : base(attributes, templateLineInfo) {
             this.textExpressionList = new StructList<TextExpression>(3);
             this.rawTextContent = content;
             this.attributes = attributes;
@@ -37,6 +37,10 @@ namespace UIForia.Parsing {
             }
 
             return retn;
+        }
+
+        public override string GetTagName() {
+            return "Text";
         }
 
     }

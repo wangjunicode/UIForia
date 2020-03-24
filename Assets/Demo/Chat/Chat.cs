@@ -5,7 +5,7 @@ using UIForia.Util;
 
 namespace Demo {
 
-    [Template("Demo/Chat/Chat.xml")]
+    [Template("Chat/Chat.xml")]
     public class Chat : UIElement {
 
         public RepeatableList<ChatMessage> messages;

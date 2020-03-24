@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace Demo.ColorPicker {
 
-    [Template("Demo/ColorPicker/ColorPicker.xml")]
+    [Template("ColorPicker/ColorPicker.xml")]
     public class ColorPicker : UIElement, IFocusable {
 
         public RepeatableList<Color> availableColors;

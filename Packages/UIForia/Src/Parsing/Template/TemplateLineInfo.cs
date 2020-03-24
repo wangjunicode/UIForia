@@ -2,8 +2,8 @@ namespace UIForia.Parsing {
 
     public struct TemplateLineInfo {
 
-        public int line;
-        public int column;
+        public readonly int line;
+        public readonly int column;
 
         public TemplateLineInfo(int line, int column) {
             this.line = line;

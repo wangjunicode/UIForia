@@ -13,7 +13,7 @@ namespace Demo {
         public int NotificationCount;
     }
 
-    [Template("Demo/Dock/Dock.xml")]
+    [Template("Dock/Dock.xml")]
     public class Dock : UIElement {
         
         public RepeatableList<MenuItemData> MenuItems;

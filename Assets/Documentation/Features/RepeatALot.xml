@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    <Style path="Documentation/Features/RepeatALot.style" />
+    <Style path="Features/RepeatALot.style" />
     <Style alias="temp">
         
         style transform-me {

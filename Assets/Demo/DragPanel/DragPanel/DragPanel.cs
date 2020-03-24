@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Demo.DragPanel.DragPanel {
 
-    [Template("Demo/DragPanel/DragPanel/DragPanel.xml")]
+    [Template("DragPanel/DragPanel/DragPanel.xml")]
     public class DragPanel<T> : UIElement {
 
         public List<T> items;

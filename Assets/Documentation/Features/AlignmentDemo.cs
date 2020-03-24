@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Documentation.Features {
 
-    [Template("Documentation/Features/AlignmentDemo.xml")]
+    [Template("Features/AlignmentDemo.xml")]
     public class AlignmentDemo : UIElement {
       
         public AlignmentTarget alignmentTarget;

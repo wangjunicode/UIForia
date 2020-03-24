@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Style src="Documentation/Documentation.style" alias="theme"/>
-    <Style path="Documentation/Features/BindingsDemo.style"/>
+    <Style path="Features/BindingsDemo.style"/>
     <Contents style="container">
         <NumberStepper sync:value="stepperValue" max="100" min="0"/>
         <ClearButton sync:value="stepperValue" />

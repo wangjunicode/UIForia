@@ -1,4 +1,3 @@
-using System;
 using UIForia.Animation;
 using UIForia.Elements;
 

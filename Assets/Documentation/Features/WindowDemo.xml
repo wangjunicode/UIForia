@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
-    <Style path="Documentation/Features/WindowDemo.style"/>
+    <Style path="Features/WindowDemo.style"/>
 
     <Contents style="window-demo-container">
 

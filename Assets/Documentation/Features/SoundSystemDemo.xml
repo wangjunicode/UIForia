@@ -1,5 +1,5 @@
 <UITemplate>
-    <Style path="Documentation/Features/SoundSystemDemo.style"/>
+    <Style path="Features/SoundSystemDemo.style"/>
     <Style src="Documentation/Documentation.style" alias="theme"/>
     <Contents style="container">
         <Heading1>Sound System Demo</Heading1>

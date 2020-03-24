@@ -3,7 +3,7 @@ using UIForia.Elements;
 
 namespace Demo {
 
-    [Template("Demo/Simple/ExposeSlot.xml")]
+    [Template("Simple/ExposeSlot.xml")]
     public class ExposeSlot : UIElement {}
 
 }

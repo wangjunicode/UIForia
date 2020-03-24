@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace TransclusionDemo {
 
-    [Template("Documentation/Features/TransclusionDemo.xml")]
+    [Template("Features/TransclusionDemo.xml")]
     public class TransclusionDemo : UIElement {
 
         public RepeatableList<Color> colors;

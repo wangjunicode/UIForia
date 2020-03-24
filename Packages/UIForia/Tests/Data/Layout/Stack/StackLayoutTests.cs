@@ -17,7 +17,7 @@ namespace Layout {
 
     public class StackLayoutTests {
 
-        [Template("Data/Layout/Stack/Stack_ComputeContentSize.xml")]
+        [Template("Stack_ComputeContentSize.xml")]
         public class Stack_ComputeContentSize : UIElement { }
 
         [Test]
@@ -37,7 +37,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 0, 50, 50), root[2].layoutResult.LocalRect);
         }
 
-        [Template("Data/Layout/Stack/Stack_AlignItems.xml")]
+        [Template("Stack_AlignItems.xml")]
         public class Stack_AlignItems : UIElement { }
 
         [Test]

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
-    <Style src="Documentation/Features/RepeatExample.style" />
+    <Style src="Features/RepeatExample.style" />
     <Contents style="container">
         <Group style="container">
             <Repeat list="dictionary" style="dict">

@@ -5,7 +5,7 @@ using UIForia.UIInput;
 
 namespace Klang.Seed.Client.UI.UIForia {
 
-    [Template("Demo/BasicElements/KlangButton/KlangButton.xml")]
+    [Template("BasicElements/KlangButton/KlangButton.xml")]
     public class KlangButton : UIElement {
 
         public string path;
@@ -13,7 +13,7 @@ namespace Klang.Seed.Client.UI.UIForia {
         public string label;
     }
 
-    [Template("Demo/BasicElements/KlangButton/KlangLinkButton.xml")]
+    [Template("BasicElements/KlangButton/KlangLinkButton.xml")]
     public class KlangLinkButton : KlangButton {
 
         [OnMouseClick]
@@ -31,7 +31,7 @@ namespace Klang.Seed.Client.UI.UIForia {
         }
     }
 
-    [Template("Demo/BasicElements/KlangButton/KlangLink.xml")]
+    [Template("BasicElements/KlangButton/KlangLink.xml")]
     public class KlangLink : KlangButton  {
 
         [OnMouseClick]
@@ -63,7 +63,7 @@ namespace Klang.Seed.Client.UI.UIForia {
        //  }
     }    
     
-    [Template("Demo/BasicElements/KlangButton/KlangLinkButton.xml")]
+    [Template("BasicElements/KlangButton/KlangLinkButton.xml")]
     public class KlangBackButton : KlangButton {
 
         [OnMouseClick]

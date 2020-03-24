@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Demo.BasicElements.Dialog {
     
-    [Template("Demo/BasicElements/Dialog/Dialog.xml")]
+    [Template("BasicElements/Dialog/Dialog.xml")]
     public class Dialog : UIElement {
 
         public Action onCancel;

@@ -4,7 +4,7 @@ using UIForia.Elements;
 
 namespace Demo {
 
-    [Template("Demo/UIForiaDemoRoot.xml")]
+    [Template("UIForiaDemoRoot.xml")]
     public class UIForiaDemoRoot : UIElement {
 
         public UIPanel currentPanel = UIPanel.Dock;

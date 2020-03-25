@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
+using JetBrains.Annotations;
 using UIForia.Elements;
 using UIForia.Parsing.Expressions;
 using UIForia.Templates;
 using UIForia.Util;
 
-namespace UIForia.Util {}
-
 namespace UIForia.Parsing {
 
+    [UsedImplicitly]
     [TemplateParser("xml")]
     public class TemplateParserXML : TemplateParser {
-        
+
         private TemplateShell shell;
         private StructList<AttributeDefinition> attributes;
         private StructList<AttributeDefinition> injectedAttributes;
@@ -26,7 +26,7 @@ namespace UIForia.Parsing {
 
         public override bool TryParse(string contents, TemplateShell templateShell) {
             this.shell = templateShell;
-            
+
             XElement root;
 
             try {
@@ -49,7 +49,7 @@ namespace UIForia.Parsing {
             IEnumerable<XElement> contentElements = root.GetChildren("Contents");
 
             shell.templateRootNodes = new SizedArray<TemplateRootNode>(contentElements.Count());
-            
+
             foreach (XElement contentElement in contentElements) {
                 if (TryParseContents(contentElement, out TemplateRootNode retn)) {
                     shell.templateRootNodes.Add(retn);
@@ -69,21 +69,19 @@ namespace UIForia.Parsing {
             if (attr != null) {
                 templateId = attr.Value.Trim();
             }
-
-            // if (shell.HasContentNode(templateId)) {
-            //     return ReportParseError("Multiple templates found with id: " + templateId);
-            // }
+            
+            attributes.QuickClear();
 
             // maybe tag name should be root? We don't actually know what element we are parsing at this point
             ParseAttributes("Contents", contentRoot.Attributes(), attributes, injectedAttributes, out string genericTypeResolver, out string requireType);
 
             TemplateLineInfo lineInfo = new TemplateLineInfo(((IXmlLineInfo) contentRoot).LineNumber, ((IXmlLineInfo) contentRoot).LinePosition);
-            
-            retn = new TemplateRootNode(templateId ?? shell.filePath, shell, ValidateRootAttributes(contentRoot, attributes), lineInfo) {
+
+            retn = new TemplateRootNode(templateId, shell, ValidateRootAttributes(contentRoot, attributes.Clone()), lineInfo) {
                 genericTypeResolver = genericTypeResolver,
                 requireType = requireType
             };
-            
+
             ParseChildren(retn, contentRoot.Nodes());
 
             return true;
@@ -125,33 +123,56 @@ namespace UIForia.Parsing {
 
                         ParseAttributes(tagName, element.Attributes(), attributes, injectedAttributes, out string genericTypeResolver, out string requireType);
 
-                        IXmlLineInfo lineInfo = element;
+                        ReadOnlySizedArray<AttributeDefinition> childAttributes = ReadOnlySizedArray<AttributeDefinition>.CopyFrom(attributes.array, attributes.size);
+                        ReadOnlySizedArray<AttributeDefinition> childInjectedAttributes = ReadOnlySizedArray<AttributeDefinition>.CopyFrom(injectedAttributes.array, injectedAttributes.size);
 
-                        if (!TryParseElementTag(namespaceName, tagName, attributes.Clone(), new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition), out TemplateNode p)) {
+                        TemplateNode templateNode;
+                      
+                        IXmlLineInfo xmlLineInfo = element;
+                        TemplateLineInfo lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
+
+                        if (namespaceName == "define") {
+                            parent.TryCreateSlotNode(tagName, childAttributes, childInjectedAttributes, lineInfo, SlotType.Define, out templateNode);
+                        }
+                        else if (namespaceName == "override") {
+                            parent.TryCreateSlotNode(tagName, childAttributes, childInjectedAttributes, lineInfo, SlotType.Override, out templateNode);
+                        }
+                        else if (namespaceName == "forward") {
+                            parent.TryCreateSlotNode(tagName, childAttributes, childInjectedAttributes, lineInfo, SlotType.Forward, out templateNode);
+                        }
+                        else if (string.IsNullOrEmpty(namespaceName) && string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
+                            parent.TryCreateRepeatNode(childAttributes, lineInfo, out templateNode);
+                        }
+                        else {
+                            parent.TryCreateElementNode(namespaceName, tagName, childAttributes, lineInfo, genericTypeResolver, requireType, out templateNode);
+                        }
+
+                        if (templateNode == null) {
                             continue;
                         }
 
-                        p.genericTypeResolver = genericTypeResolver;
-                        p.requireType = requireType;
+                        // todo the template compiler needs to implement the implicit <override:Children> feature now
+//
+                        // if (p is SlotNode slotNode) {
+                        //
+                        //     slotNode.injectedAttributes = injectedAttributes.Clone();
+                        //
+                        //     if (slotNode.slotType == SlotType.Forward || slotNode.slotType == SlotType.Override) {
+                        //         parent.AddSlotOverride(slotNode);
+                        //     }
+                        //     else {
+                        //         parent.AddChild(p);
+                        //     }
+                        // }
+                        // else if (injectedAttributes.size != 0) {
+                        //     ReportParseError("Only slot nodes can have injected attributes");
+                        //     injectedAttributes.QuickClear();
+                        // }
+                        // else {
+                        //     parent.AddChild(p);
+                        // }
 
-                        if (p is SlotNode slotNode) {
-                            
-                            slotNode.injectedAttributes = injectedAttributes.Clone();
-                            
-                            if (slotNode.slotType == SlotType.Forward || slotNode.slotType == SlotType.Override) {
-                                parent.AddSlotOverride(slotNode);
-                            }
-                            
-                        }
-                        else if (injectedAttributes.size != 0) {
-                            ReportParseError("Only slot nodes can have injected attributes");
-                            injectedAttributes.QuickClear();
-                        }
-                        else {
-                            parent.AddChild(p);
-                        }
-
-                        ParseChildren(p, element.Nodes());
+                        ParseChildren(templateNode, element.Nodes());
 
                         continue;
                     }
@@ -173,44 +194,32 @@ namespace UIForia.Parsing {
 
             string lowerNamespace = moduleName.ToLower();
 
-            if (lowerNamespace == "define") {
-                retn = new SlotNode(tagName, attributes, templateLineInfo, SlotType.Define);
-                return true;
-            }
-
-            if (lowerNamespace == "override") {
-                // todo -- move to validator
-                // if (!(parent is ExpandedTemplateNode expanded)) {
-                //     return ReportParseError(InvalidSlotOverride("override", parent.TemplateNodeDebugData, tagName));
-                // }
-
-                retn = new SlotNode(tagName, attributes, templateLineInfo, SlotType.Override);
-                // todo -- move to compiler
-                // expanded.AddSlotOverride((SlotNode) retn);
-                return true;
-            }
-
-            if (lowerNamespace == "forward") {
-                // todo -- move to validator
-
-                // if (!(parent is ExpandedTemplateNode)) {
-                    // return ReportParseError(InvalidSlotOverride("forward", parent.TemplateNodeDebugData, tagName));
-                // }
-
-                retn = new SlotNode(tagName, attributes, templateLineInfo, SlotType.Forward);
-                return true;
-            }
+            // if (lowerNamespace == "define") {
+            //     return parent.TryCreateSlotNode(tagName, attributes, templateLineInfo, SlotType.Define);
+            //     // retn = new SlotNode(tagName, attributes, templateLineInfo, SlotType.Define);
+            //     // return true;
+            // }
+            //
+            // if (lowerNamespace == "override") {
+            //     retn = new SlotNode(tagName, attributes, templateLineInfo, SlotType.Override);
+            //     return true;
+            // }
+            //
+            // if (lowerNamespace == "forward") {
+            //     retn = new SlotNode(tagName, attributes, templateLineInfo, SlotType.Forward);
+            //     return true;
+            // }
 
             if (string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
-                retn = new RepeatNode(attributes, templateLineInfo);
-                return true;
+                // retn = new RepeatNode(attributes, templateLineInfo);
+                // return true;
             }
 
-            if (string.IsNullOrEmpty(lowerNamespace) && string.Equals(tagName, "Children", StringComparison.Ordinal)) {
-                return ReportParseError("<Children> tag is not supported. Please use an appropriate prefix `forward`, `override`, or `define`");
-            }
+            // parent.TryCreateChildNode(moduleName, tagName, attributes, templateLineInfo, genericResolver, requireType);
 
-            retn = new ElementNode(tagName, moduleName, attributes, templateLineInfo);
+          //  retn = new ElementNode(moduleName, tagName, attributes, templateLineInfo);
+
+            return true;
 
             // processedType = module.ResolveTagName(namespacePath, tagName, shell.usings);
             //
@@ -240,7 +249,6 @@ namespace UIForia.Parsing {
             //     return ReportParseError($"Unable to resolve tag name: <{tagName}>");
             // }
 
-            return true;
         }
 
         private void SetErrorContext(XElement element) {
@@ -254,20 +262,20 @@ namespace UIForia.Parsing {
                     TextTemplateProcessor.ProcessTextExpressions(textContent, textParent.textExpressionList);
                 }
                 else {
-                    TextNode node = new TextNode(textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), null, templateLineInfo);
+                    TextNode node = new TextNode(textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), default, templateLineInfo);
                     TextTemplateProcessor.ProcessTextExpressions(textContent, node.textExpressionList);
                     parent.AddChild(node);
                 }
             }
             else {
-                TextNode node = new TextNode(textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), null, templateLineInfo);
+                TextNode node = new TextNode(textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), default, templateLineInfo);
                 TextTemplateProcessor.ProcessTextExpressions(textContent, node.textExpressionList);
                 parent.AddChild(node);
             }
         }
 
-        private StructList<AttributeDefinition> ValidateRootAttributes(XElement root, StructList<AttributeDefinition> attributes) {
-            if (attributes == null) return null;
+        private ReadOnlySizedArray<AttributeDefinition> ValidateRootAttributes(XElement root, StructList<AttributeDefinition> attributes) {
+            if (attributes == null) return default;
 
             SetErrorContext(root);
 
@@ -292,7 +300,7 @@ namespace UIForia.Parsing {
                 }
             }
 
-            return attributes;
+            return new ReadOnlySizedArray<AttributeDefinition>(attributes.size, attributes.array);
         }
 
         private void ParseAttributes(string tagName, IEnumerable<XAttribute> xmlAttributes, StructList<AttributeDefinition> attributes, StructList<AttributeDefinition> injectedAttributes, out string genericTypeResolver, out string requireType) {

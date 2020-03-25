@@ -5,7 +5,6 @@ using System.Reflection;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
-using UIForia.Parsing.Expressions;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
@@ -26,6 +25,7 @@ namespace UIForia.Parsing {
 
     public static class TypeProcessor {
 
+        internal static readonly Dictionary<Type, ProcessedType> genericTypeMap = new Dictionary<Type, ProcessedType>();
         internal static readonly Dictionary<Type, ProcessedType> typeMap = new Dictionary<Type, ProcessedType>();
         internal static readonly Dictionary<string, Type> renderBoxTypeMap = new Dictionary<string, Type>();
         internal static readonly Dictionary<string, Type> layoutBoxTypeMap = new Dictionary<string, Type>();
@@ -33,7 +33,6 @@ namespace UIForia.Parsing {
         internal static IList<TemplateParserDefinition> templateParserDefinitions;
 
         private static readonly object genericLock = new object();
-        private static readonly Dictionary<Type, ProcessedType> genericTypeMap;
 
         [ThreadStatic] private static List<CharSpan> strings;
         
@@ -43,15 +42,10 @@ namespace UIForia.Parsing {
         internal static IList<Type> layouts;
         private static Module[] modules;
         private static TemplateCache s_TemplateCache;
-
-        private static bool initialized;
-
-        public static void Initialize() {
-            if (initialized) return;
-            initialized = true;
+        
+        static TypeProcessor() {
 
             TypeResolver.Initialize();
-
 #if UNITY_EDITOR
             ScanFast(out moduleTypes, out elements, out layouts, out painters);
 #else
@@ -106,87 +100,24 @@ namespace UIForia.Parsing {
             return elements;
         }
 
-        // Namespace resolution
-        //    There can be only one tag name per module.
-        //    Built in elements reserve their tag names and can bes resolved from anywhere.
-        //    A template can 'static' include with a using statement to avoid module prefixing. If there is a name collision,
-        //    the current module wins over dependencies. If the conflict is between dependencies that are both statically included,
-        //    an error is thrown.
-        public static ProcessedType ResolveTagName(string tagName, string namespacePrefix, IReadOnlyList<string> namespaces) {
-            if (string.IsNullOrEmpty(namespacePrefix)) namespacePrefix = null;
-            if (string.IsNullOrWhiteSpace(namespacePrefix)) namespacePrefix = null;
-
-            // if (templateTypeMap.TryGetValue(tagName, out TypeList typeList)) {
-            //     // if this is null we resolve using just the tag name
-            //     if (namespacePrefix == null) {
-            //         // if only one type has this tag name we can safely return it
-            //         if (typeList.types == null) {
-            //             return typeList.mainType.Reference();
-            //         }
-            //
-            //         // if there are multiple tags with this name, we need to search our namespaces 
-            //         // if only one match is found, we can return it. If multiple are found, throw
-            //         // and ambiguous reference exception
-            //         LightList<ProcessedType> resultList = LightList<ProcessedType>.Get();
-            //         for (int i = 0; i < namespaces.Count; i++) {
-            //             for (int j = 0; j < typeList.types.Length; j++) {
-            //                 string namespaceName = namespaces[i];
-            //                 ProcessedType testType = typeList.types[j];
-            //                 if (namespaceName == testType.namespaceName) {
-            //                     resultList.Add(testType);
-            //                 }
-            //             }
-            //         }
-            //
-            //         if (resultList.size == 1) {
-            //             ProcessedType retn = resultList[0];
-            //             resultList.Release();
-            //             return retn.Reference();
-            //         }
-            //
-            //         List<string> list = resultList.Select((s) => s.namespaceName).ToList();
-            //         throw new ParseException("Ambiguous TagName reference: " + tagName + ". References found in namespaces " + StringUtil.ListToString(list, ", "));
-            //     }
-            //
-            //     if (typeList.types == null) {
-            //         if (namespacePrefix == typeList.mainType.namespaceName) {
-            //             return typeList.mainType.Reference();
-            //         }
-            //     }
-            //     else {
-            //         // if prefix is not null we can only return a match for that namespace
-            //         for (int j = 0; j < typeList.types.Length; j++) {
-            //             ProcessedType testType = typeList.types[j];
-            //             if (namespacePrefix == testType.namespaceName) {
-            //                 return testType.Reference();
-            //             }
-            //         }
-            //     }
-            //
-            //     return null;
-            // }
-            //
-            // if (s_GenericMap.TryGetValue(tagName, out ProcessedType processedType)) {
-            //     return processedType;
-            // }
-
-            return null;
-        }
-
         public static IList<ProcessedType> GetTemplateElements() {
             return typeMap.Values.ToList();
         }
 
         public static ProcessedType AddResolvedGenericElementType(Type newType, ProcessedType generic) {
-            if (!typeMap.TryGetValue(newType, out ProcessedType retn)) {
-                retn = ProcessedType.ResolveGeneric(newType, generic);
-                typeMap.Add(retn.rawType, retn);
+            ProcessedType retn;
+            lock (genericLock) {
+                if (!genericTypeMap.TryGetValue(newType, out retn)) {
+                    retn = ProcessedType.ResolveGeneric(newType, generic);
+                    genericTypeMap.Add(retn.rawType, retn);
+                }
             }
 
             if (retn != null) {
                 retn.references++;
+                retn.templateRootNode = generic.templateRootNode;
             }
-
+            
             return retn;
         }
 
@@ -310,9 +241,13 @@ namespace UIForia.Parsing {
 
             TemplateParser[] retn = new TemplateParser[templateParserDefinitions.Count];
 
-            for (int i = 0; i < retn.Length; i++) {
-                retn[i] = (TemplateParser) Activator.CreateInstance(templateParserDefinitions[i].type);
-                retn[i].extension = templateParserDefinitions[i].extension;
+            // some sort of weird recursive type definition detection 
+            // seems to be happening inside a managed job. lock to be sure we aren't racing.
+            lock (templateParserDefinitions) {
+                for (int i = 0; i < retn.Length; i++) {
+                    retn[i] = (TemplateParser) Activator.CreateInstance(templateParserDefinitions[i].type);
+                    retn[i].extension = templateParserDefinitions[i].extension;
+                }
             }
 
             return retn;

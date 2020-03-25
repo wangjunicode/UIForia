@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Compilers.Style;
@@ -155,7 +156,7 @@ namespace UIForia.Compilers {
         }
 
         public static CompiledTemplateData CompileTemplates(Type appRootType, TemplateSettings templateSettings) {
-            TypeProcessor.ClearDynamics();
+            TypeProcessor.ClearDynamics(); // todo -- wrong place for this
 
             TemplateCompiler instance = new TemplateCompiler(templateSettings);
 
@@ -220,8 +221,9 @@ namespace UIForia.Compilers {
             return compiledTemplate;
         }
 
-        private CompilationContext CompileTemplateMetaData(TemplateRootNode templateRootNode) {
-            CompiledTemplate compiledTemplate = templateData.CreateTemplate(templateRootNode.templateShell.filePath, templateRootNode.templateName);
+        private CompilationContext CompileTemplateMetaData(ProcessedType processedType, TemplateRootNode templateRootNode) {
+
+            CompiledTemplate compiledTemplate = templateData.CreateTemplate(templateRootNode);
 
             LightList<string> namespaces = new LightList<string>(4);
 
@@ -232,8 +234,6 @@ namespace UIForia.Compilers {
                     }
                 }
             }
-
-            ProcessedType processedType = templateRootNode.processedType;
 
             ParameterExpression rootParam = Expression.Parameter(typeof(UIElement), "root");
             ParameterExpression scopeParam = Expression.Parameter(typeof(TemplateScope), "scope");
@@ -254,19 +254,20 @@ namespace UIForia.Compilers {
 
             ctx.Initialize(rootParam);
 
-            for (int i = 0; i < templateRootNode.templateShell.styles.size; i++) {
-                ref StyleDefinition styleDef = ref templateRootNode.templateShell.styles.array[i];
-
-                StyleSheet sheet = templateData.ImportStyleSheet(styleDef);
-
-                if (sheet != null) {
-                    ctx.AddStyleSheet(styleDef.alias, sheet);
-                }
-            }
-
-            if (ctx.styleSheets != null && ctx.styleSheets.size > 0) {
-                compiledTemplate.templateMetaData.styleReferences = ctx.styleSheets.ToArray();
-            }
+            // todo -- styles need to be re-implemented
+            // for (int i = 0; i < templateRootNode.templateShell.styles.size; i++) {
+            //     ref StyleDefinition styleDef = ref templateRootNode.templateShell.styles.array[i];
+            //
+            //     StyleSheet sheet = templateData.ImportStyleSheet(styleDef);
+            //
+            //     if (sheet != null) {
+            //         ctx.AddStyleSheet(styleDef.alias, sheet);
+            //     }
+            // }
+            //
+            // if (ctx.styleSheets != null && ctx.styleSheets.size > 0) {
+            //     compiledTemplate.templateMetaData.styleReferences = ctx.styleSheets.ToArray();
+            // }
 
             templateMap[processedType.rawType] = compiledTemplate;
 
@@ -277,7 +278,8 @@ namespace UIForia.Compilers {
 
             TemplateRootNode templateRootNode = processedType.templateRootNode;
 
-            CompilationContext ctx = CompileTemplateMetaData(templateRootNode);
+            CompilationContext ctx = CompileTemplateMetaData(processedType, templateRootNode);
+
             contextStack.Push(new LightStack<ContextVariableDefinition>());
 
             if (!processedType.rawType.IsNested && !processedType.rawType.IsPublic) {
@@ -305,14 +307,14 @@ namespace UIForia.Compilers {
 
         private static Type ResolveRequiredType(IList<string> namespaces, string typeName, Type rootType) {
             if (typeName != null) {
-                string typeExpression = typeName.Replace("[", "<").Replace("]", ">"); // todo -- this needs to be removed probably. let the template parser do it since its a hack anyway
+                string typeExpression = typeName; //typeName.Replace("[", "<").Replace("]", ">"); // todo -- this needs to be removed probably. let the template parser do it since its a hack anyway that removes array type support
 
                 Type requiredType = TypeResolver.Default.ResolveTypeExpression(rootType, namespaces, typeExpression);
 
                 if (requiredType == null) {
                     throw new TemplateCompileException($"Unable to resolve required child type `{typeName}`");
                 }
-                
+
                 if (!requiredType.IsInterface && !typeof(UIElement).IsAssignableFrom(requiredType)) {
                     throw new TemplateCompileException($"When requiring an explicit child type, that type must either be an interface or a subclass of UIElement. {requiredType} was neither");
                 }
@@ -344,7 +346,7 @@ namespace UIForia.Compilers {
             }
 
             if (templateNode.processedType.IsUnresolvedGeneric) {
-                templateNode.processedType = ResolveGenericElementType(ctx.namespaces, ctx.templateRootNode.ElementType, templateNode);
+                templateNode.processedType = ResolveGenericElementType(ctx.namespaces, ctx.rootType.rawType, templateNode);
             }
 
             if (requiredType != null) {
@@ -353,12 +355,14 @@ namespace UIForia.Compilers {
                 }
             }
 
+            templateNode.processedType.Reference();
+
             switch (templateNode) {
                 case TextNode textNode:
                     return CompileTextNode(ctx, textNode);
 
                 case ElementNode elementNode:
-                    return elementNode.processedType.IsContainerElement 
+                    return elementNode.processedType.IsContainerElement
                         ? CompileContainerNode(ctx, elementNode)
                         : CompileExpandedNode(ctx, elementNode);
 
@@ -459,10 +463,10 @@ namespace UIForia.Compilers {
 
             parentContext.compiledTemplate.AddSlot(compiledSlot);
 
-            StructList<AttributeDefinition> attributes = new StructList<AttributeDefinition>();
+            SizedArray<AttributeDefinition> attributes = new SizedArray<AttributeDefinition>();
             StructList<AttributeDefinition> exposedAttributes = StructList<AttributeDefinition>.Get();
 
-            if (slotNode.attributes != null) {
+            if (slotNode.attributes.array != null) {
                 SlotAttributeData attrData = new SlotAttributeData();
                 attrData.slotDepth = 0;
                 attrData.slotContextType = parentContext.rootType;
@@ -480,7 +484,7 @@ namespace UIForia.Compilers {
                 }
             }
 
-            if (slotNode.injectedAttributes != null) {
+            if (slotNode.injectedAttributes.size != 0) {
                 SlotAttributeData attrData = new SlotAttributeData();
                 attrData.slotDepth = 0;
                 attrData.slotContextType = parentContext.rootType;
@@ -563,7 +567,7 @@ namespace UIForia.Compilers {
 
             compiledSlot.rootElementType = parentContext.rootType.rawType;
             compiledSlot.scopedVariables = CloneContextStack();
-            compiledSlot.exposedAttributes = slotOverrideNode.GetAttributes(AttributeType.Expose);
+            compiledSlot.exposedAttributes = slotOverrideNode.GetExposedAttributes(AttributeType.Expose);
             compiledSlot.overrideDepth = toOverride.overrideDepth + 1;
 
             parentContext.compiledTemplate.AddSlot(compiledSlot);
@@ -579,7 +583,7 @@ namespace UIForia.Compilers {
             slotAttributeData.contextStack = CloneContextStack();
             slotAttributeData.templateMetaData = parentContext.compiledTemplate.templateMetaData;
 
-            StructList<AttributeDefinition> attributes = AttributeMerger.MergeSlotAttributes(toOverride.originalAttributes, slotAttributeData, slotOverrideNode.attributes);
+            SizedArray<AttributeDefinition> attributes = AttributeMerger.MergeSlotAttributes(toOverride.originalAttributes, slotAttributeData, slotOverrideNode.attributes);
 
             compiledSlot.originalAttributes = attributes;
 
@@ -618,7 +622,7 @@ namespace UIForia.Compilers {
 
             SlotNode node = slotOverrideNode;
 
-            if (toOverride.injectedAttributes != null) {
+            if (toOverride.injectedAttributes.size != 0) {
                 for (int i = 0; i < node.ChildCount; i++) {
                     node[i].isModified = true;
                     node[i].attributes = AttributeMerger.MergeModifySlotAttributes(node[i].attributes, toOverride.injectedAttributes);
@@ -805,8 +809,8 @@ namespace UIForia.Compilers {
             return nodeExpr;
         }
 
-        private static int CountRealAttributes(StructList<AttributeDefinition> attributes) {
-            if (attributes == null) return 0;
+        private static int CountRealAttributes(ReadOnlySizedArray<AttributeDefinition> attributes) {
+            if (attributes.array == null) return 0;
 
             int count = 0;
 
@@ -829,7 +833,7 @@ namespace UIForia.Compilers {
 
             ParameterExpression nodeExpr = ctx.ElementExpr;
 
-            StructList<AttributeDefinition> attributes = AttributeMerger.MergeExpandedAttributes(innerRoot.attributes, elementNode.attributes);
+            SizedArray<AttributeDefinition> attributes = AttributeMerger.MergeExpandedAttributes(innerRoot.attributes, elementNode.attributes);
 
             ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(templateType.rawType) + " " + elementNode.lineInfo);
             ctx.Assign(nodeExpr, CreateElement(ctx, elementNode.processedType, ctx.ParentExpr, innerRoot.ChildCount, CountRealAttributes(attributes), ctx.compiledTemplate.templateId));
@@ -930,8 +934,7 @@ namespace UIForia.Compilers {
             lateCompiler.Setup(rootType, elementType, namespaces);
         }
 
-        private static void InitializeAttributes(CompilationContext ctx, StructList<AttributeDefinition> attributes) {
-            if (attributes == null) return;
+        private static void InitializeAttributes(CompilationContext ctx, ReadOnlySizedArray<AttributeDefinition> attributes) {
 
             int attrIdx = 0;
 
@@ -970,11 +973,8 @@ namespace UIForia.Compilers {
 
         }
 
-        private static void GatherChangeHandlers(StructList<AttributeDefinition> attributes, ref StructList<ChangeHandlerDefinition> handlers) {
-            if (attributes == null) {
-                return;
-            }
-
+        private static void GatherChangeHandlers(ReadOnlySizedArray<AttributeDefinition> attributes, ref StructList<ChangeHandlerDefinition> handlers) {
+            
             for (int i = 0; i < attributes.size; i++) {
                 ref AttributeDefinition attr = ref attributes.array[i];
                 if (attr.type == AttributeType.ChangeHandler) {
@@ -1003,7 +1003,7 @@ namespace UIForia.Compilers {
 
         }
 
-        private BindingOutput CompileBindings(CompilationContext ctx, TemplateNode templateNode, StructList<AttributeDefinition> attributes, LightList<ExposedVariableData> exposedVariableData = null) {
+        private BindingOutput CompileBindings(CompilationContext ctx, TemplateNode templateNode, ReadOnlySizedArray<AttributeDefinition> attributes, LightList<ExposedVariableData> exposedVariableData = null) {
             StructList<ContextAliasActions> contextModifications = null;
 
             StructList<ChangeHandlerDefinition> changeHandlerDefinitions = null;
@@ -1013,10 +1013,12 @@ namespace UIForia.Compilers {
             // for template roots (which are not the app root!) we dont want to generate bindings in their own template definition functions
             // instead we let the usage site do that for us. We still need to provide context variables to our template, probably in a dry-run fashion.
 
+            ProcessedType processedType = templateNode is TemplateRootNode ? ctx.rootType : templateNode.processedType;
+
             try {
                 GatherChangeHandlers(attributes, ref changeHandlerDefinitions);
 
-                InitializeCompilers(ctx.namespaces, ctx.templateRootNode.ElementType, templateNode.processedType.rawType);
+                InitializeCompilers(ctx.namespaces, ctx.rootType.rawType, processedType.rawType);
 
                 InitializeAttributes(ctx, attributes);
 
@@ -1024,29 +1026,29 @@ namespace UIForia.Compilers {
 
                 CompileConditionalBindings(templateNode, attributes);
 
-                CompileBeforePropertyUpdates(templateNode.processedType);
+                CompileBeforePropertyUpdates(processedType);
 
                 CompileAliases(attributes, ref contextModifications);
 
-                CompilePropertyBindingsAndContextVariables(ctx, templateNode.processedType, attributes, changeHandlerDefinitions, ref contextModifications);
+                CompilePropertyBindingsAndContextVariables(ctx, processedType, attributes, changeHandlerDefinitions, ref contextModifications);
 
                 CompileTextBinding(templateNode);
 
-                CompileRemainingChangeHandlerStores(templateNode.processedType.rawType, changeHandlerDefinitions);
+                CompileRemainingChangeHandlerStores(processedType.rawType, changeHandlerDefinitions);
 
-                CompileEnabledThisFrame(templateNode.processedType);
+                CompileEnabledThisFrame(processedType);
 
-                CompileAfterPropertyUpdates(templateNode.processedType);
+                CompileAfterPropertyUpdates(processedType);
 
                 CompileAttributeBindings(attributes);
 
                 CompileInstanceStyleBindings(attributes);
 
-                CompileStyleBindings(ctx, templateNode.processedType.tagName, attributes);
+                CompileStyleBindings(ctx, processedType.tagName, attributes);
 
                 // CompileAfterStyleBindings();
 
-                CompileInputHandlers(templateNode.processedType, attributes);
+                CompileInputHandlers(processedType, attributes);
 
                 CompileCheckChangeHandlers(changeHandlerDefinitions);
 
@@ -1190,10 +1192,7 @@ namespace UIForia.Compilers {
             }
         }
 
-        private void CompileConditionalBindings(TemplateNode templateNode, StructList<AttributeDefinition> attributes) {
-            if (attributes == null) {
-                return;
-            }
+        private void CompileConditionalBindings(TemplateNode templateNode, ReadOnlySizedArray<AttributeDefinition> attributes) {
 
             bool found = false;
             for (int i = 0; i < attributes.size; i++) {
@@ -1227,8 +1226,7 @@ namespace UIForia.Compilers {
             }
         }
 
-        private void CompileAliases(StructList<AttributeDefinition> attributes, ref StructList<ContextAliasActions> contextModifications) {
-            if (attributes == null) return;
+        private void CompileAliases(ReadOnlySizedArray<AttributeDefinition> attributes, ref StructList<ContextAliasActions> contextModifications) {
 
             for (int i = 0; i < attributes.size; i++) {
                 ref AttributeDefinition attr = ref attributes.array[i];
@@ -1267,9 +1265,8 @@ namespace UIForia.Compilers {
             }
         }
 
-        private void CompilePropertyBindingsAndContextVariables(CompilationContext ctx, ProcessedType processedType, StructList<AttributeDefinition> attributes, StructList<ChangeHandlerDefinition> changeHandlers,
+        private void CompilePropertyBindingsAndContextVariables(CompilationContext ctx, ProcessedType processedType, ReadOnlySizedArray<AttributeDefinition> attributes, StructList<ChangeHandlerDefinition> changeHandlers,
             ref StructList<ContextAliasActions> contextModifications) {
-            if (attributes == null) return;
 
             for (int i = 0; i < attributes.size; i++) {
                 ref AttributeDefinition attr = ref attributes.array[i];
@@ -1355,8 +1352,7 @@ namespace UIForia.Compilers {
             }
         }
 
-        private void CompileAttributeBindings(StructList<AttributeDefinition> attributes) {
-            if (attributes == null) return;
+        private void CompileAttributeBindings(ReadOnlySizedArray<AttributeDefinition> attributes) {
 
             for (int i = 0; i < attributes.size; i++) {
                 ref AttributeDefinition attr = ref attributes.array[i];
@@ -1377,8 +1373,7 @@ namespace UIForia.Compilers {
             }
         }
 
-        private void CompileInstanceStyleBindings(StructList<AttributeDefinition> attributes) {
-            if (attributes == null) return;
+        private void CompileInstanceStyleBindings(ReadOnlySizedArray<AttributeDefinition> attributes) {
 
             for (int i = 0; i < attributes.size; i++) {
                 ref AttributeDefinition attr = ref attributes.array[i];
@@ -1397,7 +1392,7 @@ namespace UIForia.Compilers {
 
         }
 
-        private void CompileStyleBindings(CompilationContext ctx, string tagName, StructList<AttributeDefinition> attributes) {
+        private void CompileStyleBindings(CompilationContext ctx, string tagName, ReadOnlySizedArray<AttributeDefinition> attributes) {
             LightList<StyleRefInfo> styleIds = LightList<StyleRefInfo>.Get();
 
             StyleSheetReference[] styleRefs = ctx.innerTemplate?.templateMetaData.styleReferences;
@@ -1425,36 +1420,34 @@ namespace UIForia.Compilers {
             StructList<TextExpression> list = StructList<TextExpression>.Get();
             StructList<StyleExpression> styleExpressions = StructList<StyleExpression>.Get();
 
-            if (attributes != null) {
-                for (int i = 0; i < attributes.size; i++) {
-                    ref AttributeDefinition attr = ref attributes.array[i];
+            for (int i = 0; i < attributes.size; i++) {
+                ref AttributeDefinition attr = ref attributes.array[i];
 
-                    if (attr.type != AttributeType.Style) {
-                        continue;
-                    }
-
-                    StyleExpression styleExpression = default;
-                    styleExpression.attribute = attr;
-
-                    if (attr.slotAttributeData != null) {
-                        styleExpression.templateMetaData = attr.slotAttributeData.templateMetaData;
-                    }
-
-                    else if ((attr.flags & AttributeFlags.InnerContext) != 0) {
-                        styleExpression.templateMetaData = ctx.innerTemplate.templateMetaData;
-                        styleExpression.fromInnerContext = true;
-                    }
-                    else {
-                        styleExpression.templateMetaData = ctx.compiledTemplate.templateMetaData;
-                    }
-
-                    styleExpression.expressions = StructList<TextExpression>.Get();
-
-                    TextTemplateProcessor.ProcessTextExpressions(attr.value, styleExpression.expressions);
-
-                    list.AddRange(styleExpression.expressions);
-                    styleExpressions.Add(styleExpression);
+                if (attr.type != AttributeType.Style) {
+                    continue;
                 }
+
+                StyleExpression styleExpression = default;
+                styleExpression.attribute = attr;
+
+                if (attr.slotAttributeData != null) {
+                    styleExpression.templateMetaData = attr.slotAttributeData.templateMetaData;
+                }
+
+                else if ((attr.flags & AttributeFlags.InnerContext) != 0) {
+                    styleExpression.templateMetaData = ctx.innerTemplate.templateMetaData;
+                    styleExpression.fromInnerContext = true;
+                }
+                else {
+                    styleExpression.templateMetaData = ctx.compiledTemplate.templateMetaData;
+                }
+
+                styleExpression.expressions = StructList<TextExpression>.Get();
+
+                TextTemplateProcessor.ProcessTextExpressions(attr.value, styleExpression.expressions);
+
+                list.AddRange(styleExpression.expressions);
+                styleExpressions.Add(styleExpression);
             }
 
             if (TextTemplateProcessor.TextExpressionIsConstant(list)) {
@@ -1726,7 +1719,7 @@ namespace UIForia.Compilers {
             parameters.Release();
         }
 
-        private void CompileInputHandlers(ProcessedType processedType, StructList<AttributeDefinition> attributes) {
+        private void CompileInputHandlers(ProcessedType processedType, ReadOnlySizedArray<AttributeDefinition> attributes) {
             StructList<InputHandler> handlers = InputCompiler.CompileInputAnnotations(processedType.rawType);
 
             const InputEventType k_KeyboardType = InputEventType.KeyDown | InputEventType.KeyUp | InputEventType.KeyHeldDown;
@@ -1757,7 +1750,7 @@ namespace UIForia.Compilers {
 
             const AttributeType k_InputType = AttributeType.Controller | AttributeType.Mouse | AttributeType.Key | AttributeType.Touch | AttributeType.Drag;
 
-            if (attributes != null) {
+            if (attributes.array != null) {
                 for (int i = 0; i < attributes.size; i++) {
                     ref AttributeDefinition attr = ref attributes.array[i];
                     if ((attr.type & k_InputType) == 0) {
@@ -2716,7 +2709,7 @@ namespace UIForia.Compilers {
             typeResolver.resolveAlias = ResolveAlias;
             typeResolver.Setup(rootType, null, (LightList<string>) namespaces);
 
-            if (templateNode.attributes == null) {
+            if (templateNode.attributes.array == null) {
                 throw TemplateCompileException.UnresolvedGenericElement(processedType, templateNode.TemplateNodeDebugData);
             }
 

@@ -7,6 +7,7 @@ using UIForia;
 using UIForia.Animation;
 using UIForia.Compilers;
 using UIForia.Elements;
+using UIForia.Parsing;
 using UIForia.Routing;
 using UIForia.Src;
 using UIForia.Style;
@@ -61,13 +62,7 @@ namespace Tests.Mocks {
                 TemplateCodeGenerator.Generate(typeof(T), settings);
             }
 
-            Type moduleType = ModuleSystem.GetModuleTypeFromElementType(settings.rootType);
-
-            if (moduleType == null) {
-                throw new Exception($"Cannot determine module for {TypeNameGenerator.GetTypeName(settings.rootType)}. Please be sure it lives in a module hierarchy.");
-            }
-
-            Module module = ModuleSystem.LoadRootModule(moduleType);
+            Module module = ModuleSystem.LoadRootModule(typeof(T));
             
             MockApplication app = new MockApplication(s_UsePreCompiledTemplates, module, settings, null, null);
             app.Initialize();

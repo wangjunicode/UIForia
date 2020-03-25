@@ -878,13 +878,6 @@ namespace UIForia {
             return retn;
         }
 
-        public struct TagNameEntry {
-
-            public int depth;
-            public UIElement element;
-
-        }
-
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
         public UIElement CreateElementFromPool(int typeId, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
             // children get assigned in the template function but we need to setup the list here

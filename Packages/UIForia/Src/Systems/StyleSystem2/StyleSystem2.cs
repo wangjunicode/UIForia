@@ -128,10 +128,10 @@ namespace UIForia.Style {
         private LightList<StyleSet2> changeSet;
         private StructList<StyleGroup> styleGroups;
 
-        private NativeList<RunCommand> runCommands;
-        private NativeList<Selector> selectorMap;
-        private NativeList<StyleGrouping> styleGroupings;
-        private NativeList<SelectorEffect> effects;
+        // private NativeList<RunCommand> runCommands;
+        // private NativeList<Selector> selectorMap;
+        // private NativeList<StyleGrouping> styleGroupings;
+        // private NativeList<SelectorEffect> effects;
         private NativeArray<StyleProperty2> persistentPropertyTable;
 
         internal NativeArray<int> persistentStringMap;
@@ -478,7 +478,7 @@ namespace UIForia.Style {
                 }
                 else if (change.changeType == SelectorChangeType.AddedToRunList) {
                     // todo -- what happens with duplicates?
-                    styleSet2.selectors.Add(selectorMap[change.selectorId]);
+                    //styleSet2.selectors.Add(selectorMap[change.selectorId]);
                 }
             }
         }

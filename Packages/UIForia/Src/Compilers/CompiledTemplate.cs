@@ -16,6 +16,7 @@ namespace UIForia.Compilers {
         public LightList<CompiledBinding> bindings;
         public LightList<CompiledSlot> slots;
         public LightList<string> namespaces;
+        public Module module;
 
         public void AddBinding(CompiledBinding binding) {
             bindings = bindings ?? new LightList<CompiledBinding>();

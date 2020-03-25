@@ -305,33 +305,34 @@ namespace UIForia {
         }
 
         private static string GenerateStyleCode(CompiledTemplateData compiledTemplateData) {
-            StyleSheet[] sheets = compiledTemplateData.styleImporter.GetImportedStyleSheets();
-
-            string styleFilePathArray = "";
-
-            if (sheets.Length > 0) {
-                string streamingAssetPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
-
-                if (Directory.Exists(streamingAssetPath)) {
-                    Directory.Delete(streamingAssetPath, true);
-                }
-
-                Directory.CreateDirectory(streamingAssetPath);
-
-                for (int i = 0; i < sheets.Length; i++) {
-                    string filepath = Path.Combine(streamingAssetPath, sheets[i].path);
-                    string directory = Path.GetDirectoryName(filepath);
-                    if (!Directory.Exists(directory)) {
-                        Directory.CreateDirectory(directory);
-                    }
-
-                    styleFilePathArray += s_Indent12 + "@\"" + sheets[i].path + "\",\n";
-
-                    File.WriteAllText(filepath, sheets[i].source);
-                }
-            }
-
-            return styleFilePathArray;
+            return "";
+            // StyleSheet[] sheets = compiledTemplateData.styleImporter.GetImportedStyleSheets();
+            //
+            // string styleFilePathArray = "";
+            //
+            // if (sheets.Length > 0) {
+            //     string streamingAssetPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
+            //
+            //     if (Directory.Exists(streamingAssetPath)) {
+            //         Directory.Delete(streamingAssetPath, true);
+            //     }
+            //
+            //     Directory.CreateDirectory(streamingAssetPath);
+            //
+            //     for (int i = 0; i < sheets.Length; i++) {
+            //         string filepath = Path.Combine(streamingAssetPath, sheets[i].path);
+            //         string directory = Path.GetDirectoryName(filepath);
+            //         if (!Directory.Exists(directory)) {
+            //             Directory.CreateDirectory(directory);
+            //         }
+            //
+            //         styleFilePathArray += s_Indent12 + "@\"" + sheets[i].path + "\",\n";
+            //
+            //         File.WriteAllText(filepath, sheets[i].source);
+            //     }
+            // }
+            //
+            // return styleFilePathArray;
         }
 
         private static string GenerateElementConstructors(CompiledTemplateData compiledTemplateData, out List<ProcessedType> dynamicElementTypes) {
@@ -340,6 +341,28 @@ namespace UIForia {
             dynamicElementTypes = new List<ProcessedType>();
 
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
+                if (kvp.Value.isDynamic) {
+                    dynamicElementTypes.Add(kvp.Value);
+                }
+
+                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0 || kvp.Value.IsUnresolvedGeneric) {
+                    continue;
+                }
+
+                builder.Append(s_Indent16);
+                builder.Append("case ");
+                builder.Append(kvp.Value.id);
+                builder.AppendLine(":");
+                builder.Append(s_Indent20);
+                builder.Append("return new ConstructedElement(");
+                builder.Append(compiledTemplateData.GetTagNameId(kvp.Value.tagName));
+                builder.Append(", new ");
+                TypeNameGenerator.GetTypeName(kvp.Key, builder);
+                builder.Append("());");
+                builder.AppendLine();
+            }
+            
+            foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.genericTypeMap) {
                 if (kvp.Value.isDynamic) {
                     dynamicElementTypes.Add(kvp.Value);
                 }
@@ -407,33 +430,22 @@ namespace UIForia {
             for (int i = 0; i < compiledTemplateData.compiledTemplates.size; i++) {
                 CompiledTemplate compiled = compiledTemplateData.compiledTemplates.array[i];
 
-                string file = compiled.filePath;
 
+                string moduleTypeName = compiled.module.GetType().GetTypeName();
+                
+                string fileName;
                 if (compiled.elementType.rawType.IsGenericType) {
-                    file = Path.ChangeExtension(file, "");
-                    file = file.Substring(0, file.Length - 1);
-
-                    if (!string.IsNullOrEmpty(compiled.templateName)) {
-                        file += "__" + compiled.templateName;
-                    }
-
-                    string typeName = compiled.elementType.rawType.ToString();
-                    int start = typeName.IndexOf('[');
-                    file += typeName.Substring(start);
-                    file = Path.Combine(path, file + extension);
+                    string typeName = compiled.elementType.rawType.GetTypeName();
+                    int idx = typeName.IndexOf('<');
+                    
+                    fileName = compiled.elementType.tagName + typeName.Substring(idx).InlineReplace('<', '(').InlineReplace('>', ')');
                 }
                 else {
-                    if (!string.IsNullOrEmpty(compiled.templateName)) {
-                        file = Path.ChangeExtension(file, "");
-                        file = file.Substring(0, file.Length - 1);
-                        file += "__" + compiled.templateName;
-                        file = Path.Combine(path, Path.ChangeExtension(file, extension));
-                    }
-                    else {
-                        file = Path.Combine(path, Path.ChangeExtension(file, extension));
-                    }
+                    fileName = compiled.elementType.tagName;
                 }
-
+                
+                string file = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated", "Modules", moduleTypeName, fileName + ".generated.cs");
+                
                 Directory.CreateDirectory(Path.GetDirectoryName(file));
 
                 string bindingCode = string.Empty;

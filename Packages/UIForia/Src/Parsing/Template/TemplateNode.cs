@@ -1,7 +1,5 @@
 using System;
-using System.Xml.Linq;
-using UIForia.Parsing.Expressions;
-using UIForia.Text;
+using UIForia.Elements;
 using UIForia.Util;
 
 namespace UIForia.Parsing {
@@ -31,14 +29,14 @@ namespace UIForia.Parsing {
             this.lineInfo = lineInfo;
             this.content = content;
         }
+
     }
-    
-        
+
     public abstract class TemplateNode {
 
         // todo -- try make these lists into arrays
         public LightList<TemplateNode> children;
-        public StructList<AttributeDefinition> attributes;
+        public ReadOnlySizedArray<AttributeDefinition> attributes;
         public TemplateRootNode root;
         public TemplateNode parent;
         public ProcessedType processedType;
@@ -47,20 +45,21 @@ namespace UIForia.Parsing {
         public string genericTypeResolver;
         public string requireType;
         public bool isModified;
+        public Type requiredChildType;
 
-        protected TemplateNode(StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
+        protected TemplateNode(ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
             this.attributes = attributes;
             this.lineInfo = templateLineInfo;
         }
 
-        public virtual void AddChild(TemplateNode child) {
+        public void AddChild(TemplateNode child) {
             child.parent = this;
+            child.root = root;
             children = children ?? new LightList<TemplateNode>();
             children.Add(child);
         }
 
         public bool HasProperty(string attr) {
-            if (attributes == null) return false;
             for (int i = 0; i < attributes.size; i++) {
                 if (attributes.array[i].type == AttributeType.Property) {
                     if (attributes.array[i].key == attr) {
@@ -76,17 +75,139 @@ namespace UIForia.Parsing {
 
         public int ChildCount => children?.size ?? 0;
         public Type ElementType => processedType.rawType;
-        
+
         public virtual TemplateNodeDebugData TemplateNodeDebugData => new TemplateNodeDebugData() {
             lineInfo = lineInfo,
             tagName = "",
-            fileName = root != null ? root.templateShell.filePath : ((TemplateRootNode)this).templateShell.filePath
+            fileName = root != null ? root.templateShell.filePath : ((TemplateRootNode) this).templateShell.filePath
         };
 
         public abstract string GetTagName();
 
         public virtual void AddSlotOverride(SlotNode slotNode) {
             throw new NotSupportedException($"Cannot add a <{slotNode.GetTagName()}> to <{GetTagName()}>");
+        }
+
+        public bool TryCreateElementNode(string moduleName, string tagName, ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo lineInfo, string genericTypeResolver, string requireChildTypeExpression, out TemplateNode templateNode) {
+
+            templateNode = null;
+
+            ProcessedType elementType = root.templateShell.module.ResolveTagName(moduleName, tagName, new TypeProcessor.DiagnosticWrapper()); // todo -- diagnostics
+
+            if (elementType == null) {
+                return false;
+            }
+
+            if (elementType.IsUnresolvedGeneric && !string.IsNullOrEmpty(genericTypeResolver)) {
+                elementType = TypeProcessor.ResolveGenericElementType(elementType, genericTypeResolver, root.templateShell.referencedNamespaces, new TypeProcessor.DiagnosticWrapper());
+                if (elementType == null) {
+                    return false;
+                }
+            }
+
+            Type requiredType = null;
+
+            if (!string.IsNullOrEmpty(requireChildTypeExpression)) {
+
+                requiredType = TypeResolver.Default.ResolveTypeExpression(root.processedType.rawType, root.templateShell.referencedNamespaces, requireType);
+
+                if (requiredType == null) {
+                    return root.templateShell.ReportError(lineInfo, $"Unable to resolve required child type `{requireType}`");
+                }
+
+                if (!requiredType.IsInterface && !typeof(UIElement).IsAssignableFrom(requiredType)) {
+                    return root.templateShell.ReportError(lineInfo, $"When requiring an explicit child type, that type must either be an interface or a subclass of UIElement. {requiredType} was neither");
+                }
+
+            }
+
+            if (typeof(UITextElement).IsAssignableFrom(elementType.rawType)) {
+                templateNode = new TextNode(string.Empty, elementType, attributes, lineInfo) {
+                    root = root,
+                    parent = this,
+                    requiredChildType = requiredType
+                };
+            }
+            else if (elementType.IsContainerElement) {
+                templateNode = new ContainerNode(moduleName, tagName, attributes, lineInfo) {
+                    root = root,
+                    parent = this,
+                    processedType = elementType,
+                    requiredChildType = requiredType
+                };
+            }
+            else {
+                templateNode = new ElementNode(moduleName, tagName, attributes, lineInfo) {
+                    root = root,
+                    parent = this,
+                    processedType = elementType,
+                    requiredChildType = requiredType
+                };
+            }
+
+            AddChild(templateNode);
+
+            return true;
+
+        }
+
+        public bool TryCreateSlotNode(string slotName, ReadOnlySizedArray<AttributeDefinition> attributes, ReadOnlySizedArray<AttributeDefinition> injectedAttributes, TemplateLineInfo templateLineInfo, SlotType slotType, out TemplateNode slot) {
+            slot = null;
+
+            switch (slotType) {
+
+                case SlotType.Define:
+                    slot = new SlotNode(slotName, attributes, injectedAttributes, templateLineInfo, SlotType.Define);
+                    root.AddSlot((SlotNode) slot);
+                    AddChild(slot);
+                    break;
+
+                case SlotType.Forward:
+
+                    if (!(this is ElementNode)) {
+                        return root.templateShell.ReportError(lineInfo, GetTagName() + " does not support forwarded slot nodes");
+                    }
+
+                    slot = new SlotNode(slotName, attributes, injectedAttributes, templateLineInfo, SlotType.Forward);
+                    AddChild(slot);
+                    root.AddSlot((SlotNode) slot);
+                    return true;
+
+                case SlotType.Override:
+
+                    if (!(this is ElementNode expanded)) {
+                        return root.templateShell.ReportError(lineInfo, GetTagName() + " does not support overriden slot nodes");
+                    }
+
+                    slot = new SlotNode(slotName, attributes, injectedAttributes, templateLineInfo, SlotType.Forward);
+                    slot.root = root;
+                    expanded.AddSlotOverride((SlotNode) slot);
+                    return true;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(slotType), slotType, null);
+            }
+
+            return false;
+        }
+
+        public bool TryCreateRepeatNode(ReadOnlySizedArray<AttributeDefinition> attributes, TemplateLineInfo templateLineInfo, out TemplateNode templateNode) {
+            templateNode = new RepeatNode(attributes, templateLineInfo);
+            AddChild(templateNode);
+            return true;
+        }
+
+        public virtual void DebugDump(IndentedStringBuilder stringBuilder) {
+            
+            stringBuilder.Append(GetTagName());
+            if (children != null) {
+                stringBuilder.Indent();
+                for (int i = 0; i < children.size; i++) {
+                    children[i].DebugDump(stringBuilder);
+                }
+                stringBuilder.Outdent();
+            }
+            stringBuilder.Append("\n");
         }
 
     }

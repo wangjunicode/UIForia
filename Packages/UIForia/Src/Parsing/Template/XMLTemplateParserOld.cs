@@ -158,15 +158,11 @@ namespace UIForia.Parsing {
                 return;
             }
 
-            TemplateShell shell = ParseOuterShell(filePath, processedType.templateSource);
-
-            parsedFiles.Add(filePath, shell);
-
-            ParseContentTemplate(templateRootNode, shell, processedType);
-        }
-
-        internal TemplateShell GetOuterTemplateShell(ProcessedType processedType) {
-            return GetOuterTemplateShell(processedType.templatePath, processedType.templateSource);
+            // TemplateShell shell = ParseOuterShell(filePath, processedType.templateSource);
+            //
+            // parsedFiles.Add(filePath, shell);
+            //
+            // ParseContentTemplate(templateRootNode, shell, processedType);
         }
 
         internal TemplateShell GetOuterTemplateShell(string filePath, string source) {
@@ -203,7 +199,7 @@ namespace UIForia.Parsing {
                 StructList<AttributeDefinition>.Release(ref injectedAttributes);
             }
 
-            templateRootNode.attributes = ValidateRootAttributes(shell.filePath, attributes);
+            //templateRootNode.attributes = ValidateRootAttributes(shell.filePath, attributes);
             templateRootNode.lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
             templateRootNode.genericTypeResolver = genericTypeResolver;
             templateRootNode.requireType = requireType; // always null I think
@@ -380,7 +376,7 @@ namespace UIForia.Parsing {
                 }
             }
 
-            return TypeProcessor.ResolveTagName(tagName, namespacePath, templateShell.referencedNamespaces);
+            return null;
         }
 
         private static ProcessedType CreateDynamicElementType(TemplateShell templateShell, RawTemplateContent node) {
@@ -457,7 +453,7 @@ namespace UIForia.Parsing {
             ProcessedType processedType = ProcessedType.CreateFromDynamicType(type, templateShell.filePath, node.templateId);
 
             if (generics == null) {
-                processedType.Reference();
+             //   processedType.Reference();
             }
 
             TypeProcessor.AddDynamicElementType(processedType);
@@ -549,7 +545,7 @@ namespace UIForia.Parsing {
                         p.requireType = requireType;
 
                         if (p is SlotNode slotNode) {
-                            slotNode.injectedAttributes = injectedAttributes;
+                        //    slotNode.injectedAttributes = injectedAttributes;
                         }
                         else if (injectedAttributes != null) {
                             throw new ParseException("Only slot nodes can have injected attributes");

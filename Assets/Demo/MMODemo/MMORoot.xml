@@ -13,19 +13,18 @@
 
         Hello, mighty {characterName}!
         
-<!--        <Group style="character">-->
-<!--            -->
-<!--            <Div style="slot head" drag:drop="DropItem(__evt)">{headSlot}</Div>-->
-<!--            <Div style="slot body" />-->
-<!--            <Div style="slot left-arm" />-->
-<!--            <Div style="slot right-arm" />-->
-<!--            <Div style="slot legs" />-->
-<!--            <Div style="slot shoes" />-->
-<!--            <Div style="slot accessories" />-->
-<!--            <Div style="slot quick" />-->
+        <Group style="character">
+            
+            <Div style="slot head" drag:drop="DropItem(__evt)">{headSlot}</Div>
+            <Div style="slot body" />
+            <Div style="slot left-arm" />
+            <Div style="slot right-arm" />
+            <Div style="slot legs" />
+            <Div style="slot shoes" />
+            <Div style="slot accessories" />
+            <Div style="slot quick" />
 
-<!--        </Group>-->
-        <Character/>
+        </Group>
         
         <Repeat list="inventoryItems" style="inventory">
             <Div style="slot inventory-item">

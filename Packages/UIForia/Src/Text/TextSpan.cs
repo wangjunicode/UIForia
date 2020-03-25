@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using SVGX;
 using TMPro;
 using UIForia.Util;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Text {
 
@@ -1167,6 +1169,7 @@ namespace UIForia.Text {
         }
 
         private void SetRawContentFromString(string input) {
+            if(input == null) Debugger.Break();
             if (rawContent.Length < input.Length) {
                 Array.Resize(ref rawContent, input.Length);
             }

@@ -43,7 +43,7 @@ namespace UIForia {
         public LightList<CompiledSlot> compiledSlots;
         public LightList<CompiledBinding> compiledBindings;
         public LightList<DynamicTemplate> dynamicTemplates;
-        public StyleSheetImporter styleImporter;
+        //public StyleSheetImporter styleImporter;
         public Func<int, ConstructedElement> constructElement;
         public Dictionary<string, int> tagNameIdMap;
 
@@ -61,19 +61,20 @@ namespace UIForia {
             this.compiledSlots = new LightList<CompiledSlot>();
             this.compiledTemplates = new LightList<CompiledTemplate>(128);
             this.compiledBindings = new LightList<CompiledBinding>(128);
-            this.styleImporter = new StyleSheetImporter(templateSettings.templateResolutionBasePath, templateSettings.resourceManager);
+            //this.styleImporter = new StyleSheetImporter(templateSettings.templateResolutionBasePath, templateSettings.resourceManager);
             this.tagNameIdMap = new Dictionary<string, int>();
             this.nextTagNameId = 1;
         }
 
-        public CompiledTemplate CreateTemplate(string filePath, string templateName) {
+        public CompiledTemplate CreateTemplate(TemplateRootNode templateRoot) {
             CompiledTemplate compiledTemplate = new CompiledTemplate();
-            compiledTemplate.filePath = filePath;
+            compiledTemplate.filePath = templateRoot.templateShell.filePath;
             compiledTemplate.guid = Guid.NewGuid().ToString().Replace('-', '_');
             compiledTemplate.templateId = compiledTemplates.size;
             compiledTemplates.Add(compiledTemplate);
-            compiledTemplate.templateMetaData = new TemplateMetaData(compiledTemplate.templateId, filePath, null, null);
-            compiledTemplate.templateName = templateName;
+            compiledTemplate.templateMetaData = new TemplateMetaData(compiledTemplate.templateId, compiledTemplate.filePath, null, null);
+            compiledTemplate.templateName = templateRoot.templateName;
+            compiledTemplate.module = templateRoot.templateShell.module;
             return compiledTemplate;
         }
 
@@ -103,7 +104,7 @@ namespace UIForia {
         }
 
         public StyleSheet ImportStyleSheet(in StyleDefinition styleDefinition) {
-            return styleImporter.Import(styleDefinition, true);
+            return null; //styleImporter.Import(styleDefinition, true);
         }
 
         public bool TryGetTemplate<T>(out DynamicTemplate retn) where T : UIElement {

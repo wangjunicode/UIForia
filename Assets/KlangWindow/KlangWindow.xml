@@ -41,20 +41,6 @@
         </Div>
 
     </Contents>
-
-    <Contents>
-        <KlangWindow>
-            <Group>
-                all the people online
-            </Group>
-            
-            <ScrollView>
-                chat messages here
-            </ScrollView>
-
-            <Input value="'your message'" />
-        </KlangWindow>
-    </Contents>
     
 </UITemplate>
 

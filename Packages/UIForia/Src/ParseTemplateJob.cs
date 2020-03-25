@@ -30,6 +30,11 @@ namespace UIForia.Src {
 
             DateTime lastWriteTime = File.GetLastWriteTime(templateFilePath);
 
+            // contents didnt change but still needs validation?
+            // module added as dependency
+            
+            // file add/remove/change elsewhere might impact the tag name resolution
+            
             if (lastWriteTime == fileInfo.lastWriteTime) {
                 return;
             }

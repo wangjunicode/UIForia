@@ -72,7 +72,7 @@ namespace UIForia {
             return ~start;
         }
 
-        private bool TryGetFileInfo(string path, out FileInfo fileInfo) {
+        internal bool TryGetFileInfo(string path, out FileInfo fileInfo) {
             int idx = BinarySearchForPath(path);
             if (idx >= 0) {
                 fileInfo = cache[idx];

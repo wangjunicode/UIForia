@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
@@ -62,7 +63,7 @@ namespace UIForia {
             this.moduleName = moduleName;
         }
 
-        protected void AddDependency<TDependency>(string alias) where TDependency : Module, new() {
+        protected void AddDependency<TDependency>(string alias = null) where TDependency : Module, new() {
             if (typeof(TDependency).IsAbstract) {
                 throw new InvalidArgumentException("Dependencies must be concrete classes. " + TypeNameGenerator.GetTypeName(typeof(TDependency)) + " is abstract");
             }
@@ -153,52 +154,36 @@ namespace UIForia {
             styleConditions.Add(new StyleCondition(styleConditions.Count, condition, fn));
         }
         
-        private static ProcessedType AttemptResolveGenericTag(ProcessedType generic, ElementNode elementNode, TemplateShell templateShell) {
-            if (!generic.IsUnresolvedGeneric) {
-                return generic;
-            }
-
-            if (!string.IsNullOrEmpty(elementNode.genericTypeResolver)) {
-                // todo -- diagnostics!!!
-                return TypeProcessor.ResolveGenericElementType(generic, elementNode.genericTypeResolver, templateShell.referencedNamespaces, new TypeProcessor.DiagnosticWrapper(templateShell));
-            }
-
-            // if we dont have a generic type resolver, we might still be able to compile this element but the template compiler needs to do it since it 
-            // is the only place in which the context to do so is available. 
-            return generic;
-        }
-
-      
-        internal ProcessedType ResolveTagName(ElementNode elementNode, TemplateShell templateShell) {
+        internal ProcessedType ResolveTagName(string moduleName, string tagName, TypeProcessor.DiagnosticWrapper diagnosticWrapper) {
 
             ProcessedType retn;
 
-            if (string.IsNullOrEmpty(elementNode.moduleName)) {
+            if (string.IsNullOrEmpty(moduleName)) {
                 // must be in this module or default.
                 if (!IsBuiltIn) {
-                    if (tagNameMap.TryGetValue(elementNode.tagName, out retn)) {
-                        return AttemptResolveGenericTag(retn, elementNode, templateShell);
+                    if (tagNameMap.TryGetValue(tagName, out retn)) {
+                        return retn;
                     }
                 }
                 
-                if (ModuleSystem.BuiltInModule.tagNameMap.TryGetValue(elementNode.tagName, out retn)) {
-                    return AttemptResolveGenericTag(retn, elementNode, templateShell);
-                }
+                return ModuleSystem.BuiltInModule.tagNameMap.TryGetValue(tagName, out retn) ? retn : null;
 
-                return null; // todo -- diagnostics instead?
-                
             }
 
-            Module module = GetDependency(elementNode.moduleName);
+            // todo -- if we support <Using module="x" as="y"/> do the resolution here
+            Module module = GetDependency(moduleName);
 
             if (module == null) {
-                return null; // todo -- diagnostics!
+                List<string> list = dependencies.Select(d => d.GetAlias()).ToList();
+                diagnosticWrapper.AddDiagnostic($"Unable to resolve module `{moduleName}`. Available module names from current module ({GetType().GetTypeName()}) are {StringUtil.ListToString(list)}");
+                return null;
             }
             
-            if (module.tagNameMap.TryGetValue(elementNode.tagName, out retn)) {
-                return AttemptResolveGenericTag(retn, elementNode, templateShell);
+            if (module.tagNameMap.TryGetValue(tagName, out retn)) {
+                return retn;
             }
             
+            diagnosticWrapper.AddDiagnostic($"Unable to resolve tag name `{tagName}` from module {moduleName}.");
             return null;
         }
 

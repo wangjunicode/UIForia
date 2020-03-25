@@ -15,24 +15,24 @@ namespace UIForia.Parsing {
 
         public readonly Type rawType;
 
-        internal int id;
+        public readonly int id;
         internal int references;
 
         internal string tagName;
         internal string elementPath;
-        internal string namespaceName;
         internal string templatePath;
         internal string templateId;
-        internal string templateSource;
         internal string implicitStyles;
         internal string[] importedStyleSheets;
 
         private Flags flags;
+        internal Module module;
+        internal TemplateRootNode templateRootNode;
+        internal TemplateLocation? resolvedTemplateLocation;
+        
         internal StructList<PropertyChangeHandlerDesc> methods;
+        
         private static int currentTypeId = -1;
-        public Module module;
-        public TemplateRootNode templateRootNode;
-        public TemplateLocation? resolvedTemplateLocation;
 
         [Flags]
         private enum Flags {
@@ -56,12 +56,13 @@ namespace UIForia.Parsing {
             this.templateId = templateId;
             this.implicitStyles = implicitStyles;
             this.importedStyleSheets = styleSheets;
-            this.namespaceName = rawType.Namespace;
 
             if (templatePath == null && templateId == null) {
                 IsContainerElement = true;
             }
 
+            this.IsUnresolvedGeneric = rawType.IsGenericTypeDefinition;
+            
             // todo -- this is really expensive, consider deferring until we actually need it in the template compiler.
             // this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
             // this.requiresOnEnable = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnEnable), BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null));
@@ -70,7 +71,7 @@ namespace UIForia.Parsing {
         }
 
         public bool requiresUpdateFn {
-            get { return (flags & Flags.RequiresUpdateFn) != 0; }
+            get => (flags & Flags.RequiresUpdateFn) != 0;
             private set {
                 if (value) {
                     flags |= Flags.RequiresUpdateFn;
@@ -82,7 +83,7 @@ namespace UIForia.Parsing {
         }
 
         public bool requiresOnEnable {
-            get { return (flags & Flags.RequiresOnEnable) != 0; }
+            get => (flags & Flags.RequiresOnEnable) != 0;
             private set {
                 if (value) {
                     flags |= Flags.RequiresOnEnable;
@@ -94,7 +95,7 @@ namespace UIForia.Parsing {
         }
 
         public bool requiresBeforePropertyUpdates {
-            get { return (flags & Flags.RequiresBeforePropertyUpdates) != 0; }
+            get => (flags & Flags.RequiresBeforePropertyUpdates) != 0;
             private set {
                 if (value) {
                     flags |= Flags.RequiresBeforePropertyUpdates;
@@ -106,7 +107,7 @@ namespace UIForia.Parsing {
         }
 
         public bool isDynamic {
-            get { return (flags & Flags.IsDynamic) != 0; }
+            get => (flags & Flags.IsDynamic) != 0;
             set {
                 if (value) {
                     flags |= Flags.IsDynamic;
@@ -118,7 +119,7 @@ namespace UIForia.Parsing {
         }
 
         public bool requiresAfterPropertyUpdates {
-            get { return (flags & Flags.RequiresAfterPropertyUpdates) != 0; }
+            get => (flags & Flags.RequiresAfterPropertyUpdates) != 0;
             set {
                 if (value) {
                     flags |= Flags.RequiresAfterPropertyUpdates;
@@ -130,7 +131,7 @@ namespace UIForia.Parsing {
         }
 
         public bool IsUnresolvedGeneric {
-            get { return (flags & Flags.IsUnresolvedGeneric) != 0; }
+            get => (flags & Flags.IsUnresolvedGeneric) != 0;
             set {
                 if (value) {
                     flags |= Flags.IsUnresolvedGeneric;
@@ -142,7 +143,7 @@ namespace UIForia.Parsing {
         }
 
         public bool IsContainerElement {
-            get { return (flags & Flags.IsContainerElement) != 0; }
+            get => (flags & Flags.IsContainerElement) != 0;
             set {
                 if (value) {
                     flags |= Flags.IsContainerElement;
@@ -185,9 +186,7 @@ namespace UIForia.Parsing {
                 }
             }
         }
-
-        public void ValidateAttributes(StructList<AttributeDefinition> attributes) { }
-
+        
         public ProcessedType Reference() {
             references++;
             return this;
@@ -199,7 +198,9 @@ namespace UIForia.Parsing {
         }
         
         public static ProcessedType ResolveGeneric(Type resolvedType, ProcessedType generic) {
-            throw new NotImplementedException();
+            ProcessedType retn = new ProcessedType(resolvedType, generic.elementPath, generic.templatePath, generic.templateId, generic.tagName, generic.implicitStyles, generic.importedStyleSheets);
+            retn.templateRootNode = generic.templateRootNode;
+            return retn;
         }
 
         public static ProcessedType CreateFromDynamicType(Type type, string templateShellFilePath, string nodeTemplateId) {
@@ -241,12 +242,8 @@ namespace UIForia.Parsing {
 
                     elementPath = templateAttribute.elementPath;
                     templatePath = templateAttribute.templatePath;
-                    int idx = templatePath.IndexOf('#');
-                    if (idx >= 0) {
-                        templateId = templatePath.Substring(idx + 1);
-                        templatePath = templatePath.Substring(0, idx);
-                    }
-
+                    templateId = templateAttribute.templateId;
+                    
                     if (isContainer) {
                         UnityEngine.Debug.LogError($"Element cannot be a container and provide a template. {TypeNameGenerator.GetTypeName(type)} is both.");
                     }

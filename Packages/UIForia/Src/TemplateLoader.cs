@@ -85,15 +85,15 @@ namespace UIForia.Compilers {
 
             LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
 
-            StyleSheet[] sheets = compiledTemplateData.styleImporter.GetImportedStyleSheets();
-
-            for (int i = 0; i < sheets.Length; i++) {
-                StyleSheet sheet = sheets[i];
-                styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
-                for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
-                    styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
-                }
-            }
+            // StyleSheet[] sheets = compiledTemplateData.styleImporter.GetImportedStyleSheets();
+            //
+            // for (int i = 0; i < sheets.Length; i++) {
+            //     StyleSheet sheet = sheets[i];
+            //     styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
+            //     for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+            //         styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
+            //     }
+            // }
 
             for (int i = 0; i < templateMetaData.Length; i++) {
                 templateMetaData[i] = compiledTemplateData.compiledTemplates[i].templateMetaData;
@@ -111,7 +111,23 @@ namespace UIForia.Compilers {
             // can convert the constructorFnMap to an array but would need a unique index for each type that is sequential
 
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
-                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
+                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0 || kvp.Key.IsGenericTypeDefinition) {
+                    continue;
+                }
+
+                ConstructorInfo ctor = kvp.Key.GetConstructor(Type.EmptyTypes);
+
+                if (ctor == null) {
+                    throw new TemplateCompileException(kvp.Key + " must provide a default constructor in order to be used in templates");
+                }
+
+                parameters[0] = Expression.Constant(compiledTemplateData.GetTagNameId(kvp.Value.tagName));
+                parameters[1] = Expression.New(ctor);
+                constructorFnMap[kvp.Value.id] = Expression.Lambda<Func<ConstructedElement>>(Expression.New(constructedTypeCtor, parameters)).Compile();
+            }
+
+            foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.genericTypeMap) {
+                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0 || kvp.Key.IsGenericTypeDefinition) {
                     continue;
                 }
 
@@ -140,50 +156,51 @@ namespace UIForia.Compilers {
         }
 
         public static CompiledTemplateData LoadPrecompiledTemplates(TemplateSettings templateSettings) {
-            Assembly assembly = AppDomain.CurrentDomain.GetAssemblyByName(templateSettings.assemblyName);
-            Type type = assembly.GetType("UIForia.Generated.UIForiaGeneratedTemplates_" + templateSettings.StrippedApplicationName);
-
-            if (type == null) {
-                throw new ArgumentException("Trying to use precompiled templates for " + templateSettings.StrippedApplicationName + " but couldn't find the type. Maybe you need to regenerate the code?");
-            }
-
-            CompiledTemplateData compiledTemplateData = new CompiledTemplateData(templateSettings);
-
-            compiledTemplateData.styleImporter.importResolutionPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
-
-            ITemplateLoader loader = (ITemplateLoader) Activator.CreateInstance(type);
-            string[] files = loader.StyleFilePaths;
-
-            compiledTemplateData.styleImporter.Reset(); // reset because in testing we will already have parsed files, nuke these
-
-            LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
-            Dictionary<string, StyleSheet> styleSheetMap = new Dictionary<string, StyleSheet>(128);
-
-            for (int i = 0; i < files.Length; i++) {
-                StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i]);
-                styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
-
-                for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
-                    styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
-                }
-                
-                styleSheetMap.Add(sheet.path, sheet);
-  
-            }
-
-            compiledTemplateData.templates = loader.LoadTemplates();
-            compiledTemplateData.slots = loader.LoadSlots();
-            compiledTemplateData.bindings = loader.LoadBindings();
-            compiledTemplateData.templateMetaData = loader.LoadTemplateMetaData(styleSheetMap, styleList.array);
-
-            for (int i = 0; i < compiledTemplateData.templateMetaData.Length; i++) {
-                compiledTemplateData.templateMetaData[i].compiledTemplateData = compiledTemplateData;
-            }
-
-            compiledTemplateData.constructElement = loader.ConstructElement;
-            compiledTemplateData.dynamicTemplates = loader.DynamicTemplates;
-
-            return compiledTemplateData;
+            throw new NotImplementedException();
+            // Assembly assembly = AppDomain.CurrentDomain.GetAssemblyByName(templateSettings.assemblyName);
+            // Type type = assembly.GetType("UIForia.Generated.UIForiaGeneratedTemplates_" + templateSettings.StrippedApplicationName);
+            //
+            // if (type == null) {
+            //     throw new ArgumentException("Trying to use precompiled templates for " + templateSettings.StrippedApplicationName + " but couldn't find the type. Maybe you need to regenerate the code?");
+            // }
+            //
+            // CompiledTemplateData compiledTemplateData = new CompiledTemplateData(templateSettings);
+            //
+            // compiledTemplateData.styleImporter.importResolutionPath = Path.Combine(UnityEngine.Application.streamingAssetsPath, "UIForia", compiledTemplateData.templateSettings.StrippedApplicationName);
+            //
+            // ITemplateLoader loader = (ITemplateLoader) Activator.CreateInstance(type);
+            // string[] files = loader.StyleFilePaths;
+            //
+            // compiledTemplateData.styleImporter.Reset(); // reset because in testing we will already have parsed files, nuke these
+            //
+            // LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
+            // Dictionary<string, StyleSheet> styleSheetMap = new Dictionary<string, StyleSheet>(128);
+            //
+            // for (int i = 0; i < files.Length; i++) {
+            //     StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i]);
+            //     styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
+            //
+            //     for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
+            //         styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
+            //     }
+            //     
+            //     styleSheetMap.Add(sheet.path, sheet);
+            //
+            // }
+            //
+            // compiledTemplateData.templates = loader.LoadTemplates();
+            // compiledTemplateData.slots = loader.LoadSlots();
+            // compiledTemplateData.bindings = loader.LoadBindings();
+            // compiledTemplateData.templateMetaData = loader.LoadTemplateMetaData(styleSheetMap, styleList.array);
+            //
+            // for (int i = 0; i < compiledTemplateData.templateMetaData.Length; i++) {
+            //     compiledTemplateData.templateMetaData[i].compiledTemplateData = compiledTemplateData;
+            // }
+            //
+            // compiledTemplateData.constructElement = loader.ConstructElement;
+            // compiledTemplateData.dynamicTemplates = loader.DynamicTemplates;
+            //
+            // return compiledTemplateData;
         }
 
     }

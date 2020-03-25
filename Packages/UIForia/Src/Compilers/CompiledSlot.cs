@@ -19,10 +19,12 @@ namespace UIForia.Compilers {
         public Type rootElementType;
         public ContextVariableDefinition[] scopedVariables;
         public AttributeDefinition[] exposedAttributes;
-        public StructList<AttributeDefinition> originalAttributes;
+        
+        public ReadOnlySizedArray<AttributeDefinition> originalAttributes;
+        public ReadOnlySizedArray<AttributeDefinition> injectedAttributes;
+        
         public LightList<ExposedVariableData> exposedVariableDataList;
         public Type requiredChildType;
-        public StructList<AttributeDefinition> injectedAttributes;
 
         public CompiledSlot() {
             this.slotId = -1;

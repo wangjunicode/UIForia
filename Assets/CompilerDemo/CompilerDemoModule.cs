@@ -4,7 +4,7 @@ using UIForia.Util;
 namespace DemoExternal {
 
     [RecordFilePath]
-    public class CompilerDemo : Module {
+    public class CompilerDemoModule : Module {
 
         public override void Configure() {
             // import x from y

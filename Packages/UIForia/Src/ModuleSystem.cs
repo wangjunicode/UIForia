@@ -26,9 +26,10 @@ namespace UIForia.Src {
         private static List<Diagnostic> diagnostics;
         private static readonly object diagnosticLock = new object();
         private static TemplateCache s_TemplateCache;
+        
+        public static Module BuiltInModule { get; private set; }
 
         static ModuleSystem() {
-            TypeProcessor.Initialize();
             s_TemplateSet = new HashSet<ResolvedTemplateLocation>();
             IList<Type> moduleTypes = TypeProcessor.GetModuleTypes();
             modules = new Module[moduleTypes.Count];
@@ -40,11 +41,11 @@ namespace UIForia.Src {
                 string moduleLocation = GetFilePathFromAttribute(moduleTypes[i]);
                 instance.location = Path.GetDirectoryName(moduleLocation) + Path.DirectorySeparatorChar;
                 modules[i] = instance;
-                
+
                 if (instance.IsBuiltIn) {
                     BuiltInModule = instance;
                 }
-                
+
                 try {
                     instance.Configure();
                 }
@@ -58,13 +59,10 @@ namespace UIForia.Src {
             ValidateModuleDependencies();
 
             AssignElementsToModules();
-            
-            Parse();
+
             Parse();
         }
-
-        public static Module BuiltInModule { get; private set; }
-
+        
         private static void AssignElementsToModules() {
 
             Stopwatch sw = Stopwatch.StartNew();
@@ -128,172 +126,74 @@ namespace UIForia.Src {
             //     }
             // }
 
-
             return rootModule;
         }
 
-        internal static class TemplateValidator {
-
-            public static bool Validate(TemplateShell templateShell) {
-                
-                // threading?
-                LightStack<TemplateNode> stack = LightStack<TemplateNode>.Get();
-
-                Module module = templateShell.module;
-                
-                for (int i = 0; i < templateShell.templateRootNodes.size; i++) {
-                    // try to resolve tag name. might fail due to generic. maybe here is when we can run resolution?
-                    // validate tag can live on parent
-                    
-                    stack.Push(templateShell.templateRootNodes.array[i]);
-
-                    while (stack.size != 0) {
-                        TemplateNode node = stack.Pop();
-                        
-                        if (node.processedType == null) {
-
-                            if (node is ElementNode elementNode) {
-                                ProcessedType processedType = module.ResolveTagName(elementNode, templateShell);
-                            }
-
-                        }
-                        
-                    }
-                    
-                }
-                
-                stack.Release();
-
-                return true;
-            }
-
-        }
-
         private static void Parse() {
-            
-            Stopwatch w = Stopwatch.StartNew();
-            
-            s_TemplateCache = new TemplateCache(s_TemplateSet, s_TemplateCache);
 
-            // generating types needs to be sync anyway so we can probably just do a 2nd pass to collect generated types and handle their templates
+            Stopwatch w = Stopwatch.StartNew();
+
+            s_TemplateCache = new TemplateCache(s_TemplateSet, s_TemplateCache);
 
             ParseTemplateJob job = new ParseTemplateJob(s_TemplateCache.cache);
 
-            JobHandle handle = job.Schedule(s_TemplateCache.cache.Length, 1);
+            // JobHandle handle = job.Schedule(s_TemplateCache.cache.Length, 1);
 
-            handle.Complete();
+            // todo -- some kind of race condition happening in parser when parallel
+            job.Run(s_TemplateCache.cache.Length);
+            // handle.Complete();
             job.handle.Free();
 
             w.Stop();
             Debug.Log($"Read {s_TemplateSet.Count} files in {w.Elapsed.TotalMilliseconds:F3} ms");
 
+            w.Reset();
+            w.Start();
+
             for (int i = 0; i < s_TemplateCache.cache.Length; i++) {
+
                 ref TemplateCache.FileInfo fileInfo = ref s_TemplateCache.cache[i];
-                
-                TemplateValidator.Validate(fileInfo.templateShell);
-                
-                TemplateShell templateShell = s_TemplateCache.cache[i].templateShell;
-                
+                TemplateShell templateShell = fileInfo.templateShell;
+                if(templateShell == null) continue;
+                // we always validate even if we didnt require a re-parse because 
+                // this is where tag names are resolved into ProcessedTypes and 
+                // its possible that an external change could change the resolved
+                // ProcessedType of a given tag. (ie if an external file is added/removed/changed)
+                // this is unlikely but this step takes less than 5ms and its good to be safe.
+                TemplateValidator.Validate(templateShell);
+
                 if (templateShell.styles != null) {
                     for (int s = 0; s < templateShell.styles.size; s++) {
                         StyleDefinition style = templateShell.styles[s];
+                        if (!string.IsNullOrEmpty(style.body)) { }
+                        else { }
                     }
                 }
-                
-            }
-            
-            // w.Reset();
-            // w.Start();
-            //
-            // List<TemplateParseInfo> parseInfos = new List<TemplateParseInfo>(128);
-            //
-            // for (int i = 0; i < modulesToParse.Count; i++) {
-            //
-            //     Module module = modulesToParse[i];
-            //
-            //     Dictionary<string, TemplateSource>.ValueCollection values = module.fileSources.Values;
-            //
-            //     foreach (TemplateSource value in values) {
-            //         TemplateParseInfo parseInfo = new TemplateParseInfo() {
-            //             module = module,
-            //             source = value.source,
-            //             path = value.path
-            //         };
-            //
-            //         parseInfos.Add(parseInfo);
-            //     }
-            // }
-            //
-            // TemplateParseJob parseJob = new TemplateParseJob {
-            //     handle = GCHandle.Alloc(parseInfos)
-            // };
-            //
-            // //JobHandle x = parseJob.Schedule();
-            // JobHandle x = parseJob.Schedule(parseInfos.Count, 1);
-            // x.Complete();
-            //
-            // bool failedToParse = false;
-            //
-            // for (int i = 0; i < modulesToParse.Count; i++) {
-            //
-            //     List<Diagnostic> diagnostics = modulesToParse[i].diagnostics;
-            //
-            //     if (diagnostics != null) {
-            //
-            //         failedToParse = true;
-            //         for (int j = 0; j < diagnostics.Count; j++) {
-            //             Debug.LogError($"{diagnostics[j].filePath} at line {diagnostics[j].lineNumber}:{diagnostics[j].columnNumber}| {diagnostics[j].message}");
-            //         }
-            //
-            //         diagnostics.Clear();
-            //     }
-            //
-            //     Module module = modulesToParse[i];
-            //
-            //     // find range of parsed files for each module 
-            //     // for each item in range
-            //     // if null, do nothing
-            //     //    
-            //     // else
-            //     //     search remaining list of processed types looking for template match
-            //     // 
-            //
-            //     //     for (int j = 0; j < module.processedTypeList.size; j++) {
-            //     //
-            //     //         ProcessedType current = module.processedTypeList.array[j];
-            //     //         if (current.IsContainerElement) {
-            //     //             continue;
-            //     //         }
-            //     //
-            //     //         if (current.rawType.IsSubclassOf(typeof(UITextElement))) {
-            //     //             continue;
-            //     //         }
-            //     //
-            //     //         if (current.templateRootNode == null) {
-            //     //             // resolve template
-            //     //             // module.GetTemplateForElement();
-            //     //             // look through module's template paths
-            //     //             // determine template path for module
-            //     //             TemplateLocation? templatePath = module.ResolveTemplatePath(new TemplateLookup(current));
-            //     //
-            //     //             if (templatePath == null) {
-            //     //                 continue;
-            //     //             }
-            //     //
-            //     //             //
-            //     //             // if (module.fileSources.TryGetValue(templatePath, out TemplateSource source)) {
-            //     //             //     Debug.Log("found " + templatePath);
-            //     //             // }
-            //     //         }
-            //     //
-            //     //     }
-            //     //
-            // }
-            //
-            // Debug.Log($"Parsed {parseInfos.Count} files in {w.Elapsed.TotalMilliseconds:F3}ms");
-            // w.Stop();
-            // return !failedToParse;
 
+            }
+
+            foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
+                ProcessedType processedType = kvp.Value;
+
+                if (processedType.resolvedTemplateLocation == null || processedType.IsContainerElement) {
+                    continue;
+                }
+
+                if (s_TemplateCache.TryGetFileInfo(processedType.resolvedTemplateLocation.Value.filePath, out TemplateCache.FileInfo info)) {
+
+                    if(info.templateShell == null) continue;
+                    
+                    processedType.templateRootNode = info.templateShell.GetTemplateRoot(processedType.resolvedTemplateLocation.Value.templateId);
+
+                    // templateRootNode processedType MUST be null so that we can associate multiple types with the same template source
+                    // this is currently used for generics but could be a general feature that allows template swapping between types
+                    // as long as the template compiles for that type.
+                    
+                }
+
+            }
+
+            Debug.Log($"Validated {s_TemplateSet.Count} files in {w.Elapsed.TotalMilliseconds:F3} ms");
         }
 
         private static bool TryAssignModule(ProcessedType processedType) {
@@ -352,36 +252,36 @@ namespace UIForia.Src {
             return attr.filePath;
         }
 
-        internal static Type GetModuleTypeFromElementType(Type type) {
-            if (!type.IsSubclassOf(typeof(UIElement))) {
-                throw new ModuleLoadException($"Cannot create a module for a type that is not a subclass of {TypeNameGenerator.GetTypeName(typeof(UIElement))}.");
-            }
-
-            if (type.IsAbstract) {
-                throw new ModuleLoadException($"Cannot create a module for a type that is abstract. Tried to create module for {TypeNameGenerator.GetTypeName(typeof(UIElement))} but it was abstract.");
-            }
-
-            if (type.IsSubclassOf(typeof(UITextElement))) {
-                throw new ModuleLoadException($"Cannot create a module for a type that is a subclass of {TypeNameGenerator.GetTypeName(typeof(UITextElement))}. Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
-            }
-
-            ProcessedType processedType = TypeProcessor.GetProcessedType(type);
-            if (processedType.IsContainerElement) {
-                throw new ModuleLoadException($"Cannot create a module for a type that is declared as a Container element. Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
-            }
-
-            if (type.IsSubclassOf(typeof(UIImageElement))) {
-                throw new ModuleLoadException($"Cannot create a module for a type that is a subclass of {TypeNameGenerator.GetTypeName(typeof(UIImageElement))}.Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
-            }
-
-            TemplateAttribute attribute = type.GetCustomAttribute<TemplateAttribute>();
-
-            if (attribute == null) {
-                throw new ModuleLoadException($"Can only create an application when the root element is annotated with [{nameof(TemplateAttribute)}]. {TypeNameGenerator.GetTypeName(type)} is missing one.");
-            }
-
-            return null;
-        }
+        // internal static Type GetModuleTypeFromElementType(Type type) {
+        //     if (!type.IsSubclassOf(typeof(UIElement))) {
+        //         throw new ModuleLoadException($"Cannot create a module for a type that is not a subclass of {TypeNameGenerator.GetTypeName(typeof(UIElement))}.");
+        //     }
+        //
+        //     if (type.IsAbstract) {
+        //         throw new ModuleLoadException($"Cannot create a module for a type that is abstract. Tried to create module for {TypeNameGenerator.GetTypeName(typeof(UIElement))} but it was abstract.");
+        //     }
+        //
+        //     if (type.IsSubclassOf(typeof(UITextElement))) {
+        //         throw new ModuleLoadException($"Cannot create a module for a type that is a subclass of {TypeNameGenerator.GetTypeName(typeof(UITextElement))}. Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
+        //     }
+        //
+        //     ProcessedType processedType = TypeProcessor.GetProcessedType(type);
+        //     if (processedType.IsContainerElement) {
+        //         throw new ModuleLoadException($"Cannot create a module for a type that is declared as a Container element. Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
+        //     }
+        //
+        //     if (type.IsSubclassOf(typeof(UIImageElement))) {
+        //         throw new ModuleLoadException($"Cannot create a module for a type that is a subclass of {TypeNameGenerator.GetTypeName(typeof(UIImageElement))}.Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
+        //     }
+        //
+        //     TemplateAttribute attribute = type.GetCustomAttribute<TemplateAttribute>();
+        //
+        //     if (attribute == null) {
+        //         throw new ModuleLoadException($"Can only create an application when the root element is annotated with [{nameof(TemplateAttribute)}]. {TypeNameGenerator.GetTypeName(type)} is missing one.");
+        //     }
+        //
+        //     return processedType;
+        // }
 
         private static void ValidateModulePaths() {
 
@@ -442,7 +342,7 @@ namespace UIForia.Src {
 
             Assert.AreEqual(module, stack.Peek());
             sorted.Add(stack.Pop());
-            
+
         }
 
         private static Module GetModuleInstance(Type moduleType) {
@@ -514,6 +414,10 @@ namespace UIForia.Src {
 
         public static Module GetModule<T>() {
             return GetModuleInstance(typeof(T));
+        }
+
+        public static IList<ProcessedType> GetTemplateElements() {
+            return TypeProcessor.GetTemplateElements();
         }
 
     }

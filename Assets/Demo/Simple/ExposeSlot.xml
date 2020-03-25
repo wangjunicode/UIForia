@@ -3,9 +3,9 @@
 
         <Panel>
             Next child is a slot
-            <DefineSlot:slot0>
+            <define:slot0>
                 I am default exposed content
-            </DefineSlot:slot0>
+            </define:slot0>
         </Panel>
         
     </Contents>

@@ -5,10 +5,10 @@
     <Style path="Demo/Theme.style" alias="theme" />
 
     <Contents>
-        <KlangWindow style="chat-window" hideSideBar="true" onClose="onClose">
-            <SlotContent name="KlangWindow.Titlebar">
+        <KlangWindowModule:KlangWindow style="chat-window" hideSideBar="true" onClose="onClose">
+            <override:KlangWindow.Titlebar>
                 Chat
-            </SlotContent>
+            </override:KlangWindow.Titlebar>
             <Group style="chat-body">
                 <Div style="chat-nav">
                     <Group style="chat-nav-header">
@@ -64,7 +64,7 @@
                     </Group>
                 </Div>
             </Group>
-        </KlangWindow>
+        </KlangWindowModule:KlangWindow>
     </Contents>
 
 </UITemplate>

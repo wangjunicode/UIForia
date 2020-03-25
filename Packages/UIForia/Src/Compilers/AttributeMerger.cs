@@ -5,20 +5,20 @@ namespace UIForia.Compilers {
 
     public static class AttributeMerger {
 
-        public static StructList<AttributeDefinition> MergeSlotAttributes(StructList<AttributeDefinition> innerAttributes, SlotAttributeData slotAttributeData, StructList<AttributeDefinition> outerAttributes) {
-            StructList<AttributeDefinition> retn = new StructList<AttributeDefinition>();
+        public static SizedArray<AttributeDefinition> MergeSlotAttributes(ReadOnlySizedArray<AttributeDefinition> innerAttributes, SlotAttributeData slotAttributeData, ReadOnlySizedArray<AttributeDefinition> outerAttributes) {
+            SizedArray<AttributeDefinition> retn = new SizedArray<AttributeDefinition>();
 
-            if (innerAttributes == null && outerAttributes == null) {
-                retn = new StructList<AttributeDefinition>();
+            if (innerAttributes.array == null && outerAttributes.array == null) {
+                retn = new SizedArray<AttributeDefinition>(0);
             }
 
-            if (innerAttributes != null) {
+            if (innerAttributes.array != null) {
                 retn.AddRange(innerAttributes);
             }
 
-            if (outerAttributes != null) {
+            if (outerAttributes.array != null) {
                 for (int i = 0; i < outerAttributes.size; i++) {
-                    AttributeDefinition attrCopy = outerAttributes[i];
+                    AttributeDefinition attrCopy = outerAttributes.array[i];
                     attrCopy.slotAttributeData = slotAttributeData;
                     retn.Add(attrCopy);
                 }
@@ -26,23 +26,18 @@ namespace UIForia.Compilers {
 
             return retn;
         }
-        
-        public static StructList<AttributeDefinition> MergeModifySlotAttributes(StructList<AttributeDefinition> innerAttributes, StructList<AttributeDefinition> outerAttributes) {
-            StructList<AttributeDefinition> retn = new StructList<AttributeDefinition>();
 
-            if (innerAttributes == null && outerAttributes == null) {
-                retn = new StructList<AttributeDefinition>();
-            }
+        public static SizedArray<AttributeDefinition> MergeModifySlotAttributes(ReadOnlySizedArray<AttributeDefinition> innerAttributes, ReadOnlySizedArray<AttributeDefinition> outerAttributes) {
 
-            if (innerAttributes != null) {
+            SizedArray<AttributeDefinition> retn = new SizedArray<AttributeDefinition>(innerAttributes.size + outerAttributes.size);
+
+            if (innerAttributes.size != 0) {
                 retn.AddRange(innerAttributes);
             }
 
-            if (outerAttributes != null) {
-                for (int i = 0; i < outerAttributes.size; i++) {
-                    AttributeDefinition attrCopy = outerAttributes[i];
-                    retn.Add(attrCopy);
-                }
+            for (int i = 0; i < outerAttributes.size; i++) {
+                AttributeDefinition attrCopy = outerAttributes.array[i];
+                retn.Add(attrCopy);
             }
 
             return retn;
@@ -58,41 +53,46 @@ namespace UIForia.Compilers {
         // - Input handler declarations are ok
         // - Context variables are ok
 
-        public static StructList<AttributeDefinition> MergeExpandedAttributes(StructList<AttributeDefinition> innerAttributes, StructList<AttributeDefinition> outerAttributes) {
-            StructList<AttributeDefinition> output = null;
+        public static SizedArray<AttributeDefinition> MergeExpandedAttributes(ReadOnlySizedArray<AttributeDefinition> innerAttributes, ReadOnlySizedArray<AttributeDefinition> outerAttributes) {
+            SizedArray<AttributeDefinition> output = default;
 
-            if (innerAttributes == null) {
-                if (outerAttributes == null) {
-                    return null;
+            if (innerAttributes.size == 0) {
+                if (outerAttributes.size == 0) {
+                    return default;
                 }
 
-                output = new StructList<AttributeDefinition>(outerAttributes.size);
+                output = new SizedArray<AttributeDefinition>(outerAttributes.size);
                 for (int i = 0; i < outerAttributes.size; i++) {
                     AttributeDefinition attr = outerAttributes.array[i];
-                    output.AddUnsafe(attr);
+                    output.array[i] = attr;
                 }
 
+                output.size = outerAttributes.size;
+                
                 return output;
             }
 
-            if (outerAttributes == null) {
-                output = new StructList<AttributeDefinition>(innerAttributes.size);
+            if (outerAttributes.size == 0) {
+                output = new SizedArray<AttributeDefinition>(innerAttributes.size);
                 for (int i = 0; i < innerAttributes.size; i++) {
                     AttributeDefinition attr = innerAttributes.array[i];
                     attr.flags |= AttributeFlags.InnerContext;
-                    output.AddUnsafe(attr);
+                    output.array[i] = attr;
                 }
+                output.size = innerAttributes.size;
 
                 return output;
             }
 
-            output = new StructList<AttributeDefinition>(innerAttributes.size + outerAttributes.size);
+            output = new SizedArray<AttributeDefinition>(innerAttributes.size + outerAttributes.size);
 
             for (int i = 0; i < innerAttributes.size; i++) {
                 AttributeDefinition attr = innerAttributes.array[i];
                 attr.flags |= AttributeFlags.InnerContext;
-                output.AddUnsafe(attr);
+                output.array[i] = attr;
             }
+
+            output.size = innerAttributes.size;
 
             const AttributeType replacedType = AttributeType.Attribute | AttributeType.InstanceStyle;
 
@@ -102,7 +102,7 @@ namespace UIForia.Compilers {
                 int idx = ContainsAttr(attr, output);
 
                 if (idx == -1) {
-                    output.AddUnsafe(attr);
+                    output.Add(attr);
                     continue;
                 }
 
@@ -110,14 +110,14 @@ namespace UIForia.Compilers {
                     output.array[idx] = attr;
                 }
                 else {
-                    output.AddUnsafe(attr);
+                    output.Add(attr);
                 }
             }
 
             return output;
         }
 
-        private static int ContainsAttr(in AttributeDefinition a, StructList<AttributeDefinition> list) {
+        private static int ContainsAttr(in AttributeDefinition a, ReadOnlySizedArray<AttributeDefinition> list) {
             for (int i = 0; i < list.size; i++) {
                 ref AttributeDefinition b = ref list.array[i];
                 if (a.type == b.type && a.key == b.key) {

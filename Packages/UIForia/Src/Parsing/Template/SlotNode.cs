@@ -6,10 +6,10 @@ namespace UIForia.Parsing {
 
     public enum SlotType {
 
-        Define,
-        Forward,
-        Override,
-        Template
+        Define = 1,
+        Forward = 2, 
+        Override = 3,
+        Template = 4
 
     }
 
@@ -18,12 +18,13 @@ namespace UIForia.Parsing {
         public readonly string slotName;
         public readonly SlotType slotType;
         
-        public StructList<AttributeDefinition> injectedAttributes;
+        public ReadOnlySizedArray<AttributeDefinition> injectedAttributes;
 
-        public SlotNode(string slotName, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo, SlotType slotType)
+        public SlotNode(string slotName, ReadOnlySizedArray<AttributeDefinition> attributes, ReadOnlySizedArray<AttributeDefinition> injectedAttributes, in TemplateLineInfo templateLineInfo, SlotType slotType)
             : base(attributes, templateLineInfo) {
             this.slotName = slotName;
             this.slotType = slotType;
+            this.injectedAttributes = injectedAttributes;
             
             switch (slotType) {
                 case SlotType.Define:
@@ -46,10 +47,7 @@ namespace UIForia.Parsing {
             }
         }
 
-        public AttributeDefinition[] GetAttributes(AttributeType expose) {
-            if (attributes == null) {
-                return null;
-            }
+        public AttributeDefinition[] GetExposedAttributes(AttributeType expose) {
 
             int cnt = 0;
             for (int i = 0; i < attributes.size; i++) {
@@ -83,6 +81,11 @@ namespace UIForia.Parsing {
             }
 
             return "slot:" + slotName;
+        }
+        
+
+        internal void SetChildren(LightList<TemplateNode> children) {
+            this.children = children;
         }
 
     }

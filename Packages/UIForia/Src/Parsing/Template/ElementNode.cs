@@ -1,3 +1,4 @@
+using System;
 using UIForia.Exceptions;
 using UIForia.Util;
 
@@ -8,8 +9,8 @@ namespace UIForia.Parsing {
         public readonly string moduleName;
         public readonly string tagName;
         public LightList<SlotNode> slotOverrideNodes;
-        
-        public ElementNode(string moduleName, string tagName, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
+
+        public ElementNode(string moduleName, string tagName, ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
             : base(attributes, templateLineInfo) {
             this.moduleName = moduleName;
             this.tagName = tagName;
@@ -26,10 +27,20 @@ namespace UIForia.Parsing {
         // }
 
         public override string GetTagName() {
-            return moduleName + ":" + tagName;
+            if (!string.IsNullOrEmpty(moduleName)) {
+                return moduleName + ":" + tagName;
+            }
+
+            return tagName;
         }
 
-        private SlotNode FindOrCreateChildrenSlotOverride() {
+        internal LightList<TemplateNode> OrphanChildren() {
+            LightList<TemplateNode> retn = children;
+            children = null;
+            return retn;
+        }
+
+        internal SlotNode FindOrCreateChildrenSlotOverride() {
             if (slotOverrideNodes == null) {
                 slotOverrideNodes = new LightList<SlotNode>(1);
             }
@@ -40,10 +51,13 @@ namespace UIForia.Parsing {
                 }
             }
 
-            SlotNode slot = new SlotNode("Children", null, lineInfo, SlotType.Override);
+            SlotNode slot = new SlotNode("Children", default, default, lineInfo, SlotType.Override) {
+                root = root,
+                parent = this
+            };
 
             slotOverrideNodes.Add(slot);
-            
+
             return slot;
         }
 

@@ -1,6 +1,7 @@
 using System.Xml.Linq;
 using UIForia.Templates;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Parsing {
 
@@ -25,11 +26,11 @@ namespace UIForia.Parsing {
 
         public readonly Module module;
         public readonly string filePath;
+        public readonly StructList<UsingDeclaration> usings;
+        public readonly StructList<StyleDefinition> styles;
+        public readonly LightList<string> referencedNamespaces;
         
-        public StructList<UsingDeclaration> usings;
-        public StructList<StyleDefinition> styles;
         public SizedArray<TemplateRootNode> templateRootNodes;
-        public LightList<string> referencedNamespaces;
 
         public TemplateShell(Module module, string filePath) {
             this.module = module;
@@ -37,6 +38,28 @@ namespace UIForia.Parsing {
             this.usings = new StructList<UsingDeclaration>(2);
             this.styles = new StructList<StyleDefinition>(2);
             this.referencedNamespaces = new LightList<string>(4);
+        }
+
+        public void ReportError(ElementNode elementNode, string error) {
+            // UIForia.ErrorLog.ReportError("Parsing");
+        }
+        
+        public bool ReportError(TemplateLineInfo lineInfo, string error) {
+            Debug.LogError(filePath + "line " + lineInfo + ": " + error);
+            return false;
+        }
+        
+        public TemplateRootNode GetTemplateRoot(string templateId) {
+            
+            if (templateRootNodes.array == null) return null;
+            
+            for (int i = 0; i < templateRootNodes.size; i++) {
+                if (templateRootNodes.array[i].templateName == templateId) {
+                    return templateRootNodes.array[i];
+                }
+            }
+
+            return null;
         }
 
     }

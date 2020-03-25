@@ -13,6 +13,11 @@ namespace UIForia.Editor {
         private static void UIForiaInspector() {
             EditorWindow.GetWindow<UIForiaInspectorWindow>("UIForia Inspector");
         }
+        
+        [MenuItem("Window/UIForia/UIForia Diagnostics")]
+        private static void UIForiaDiagnostics() {
+            EditorWindow.GetWindow<UIForiaDiagnosticWindow>("UIForia Diagnostics");
+        }
 
         [MenuItem("UIForia/Refresh UI Templates %g")]
         public static void Refresh() {

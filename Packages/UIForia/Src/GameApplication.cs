@@ -33,9 +33,8 @@ namespace UIForia {
 
             templateSettings.resourceManager = resourceManager;
 
-            Type rootModuleType = ModuleSystem.GetModuleTypeFromElementType(templateSettings.rootType);
-
-            Module module = ModuleSystem.LoadRootModule(rootModuleType);
+            // Type rootModuleType = TypeProcessor>ModuleSystem.GetModuleTypeFromElementType(templateSettings.rootType);
+            Module module = ModuleSystem.LoadRootModule(templateSettings.rootType);
             
             GameApplication retn = new GameApplication(true, module, templateSettings, resourceManager, onRegister);
 

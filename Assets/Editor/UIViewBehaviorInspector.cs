@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using UIForia.Elements;
 using UIForia.Parsing;
-using UIForia.Util;
+using UIForia.Src;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEditor.SceneManagement;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia.Editor {
 
@@ -26,30 +22,9 @@ namespace UIForia.Editor {
         }
 
         public void OnEnable() {
-            didEnable = true;
-
-            Assembly assembly = target.GetType().Assembly;
-
-            TypeCache.TypeCollection moduleTypes = TypeCache.GetTypesDerivedFrom<Module>();
-
-            for (int i = 0; i < moduleTypes.Count; i++) {
-
-                if (moduleTypes[i] == null) {
-                    Debug.Log("Null");
-                }
-
-            }
-
-            TypeCache.TypeCollection elementTypes = TypeCache.GetTypesDerivedFrom<UIElement>();
-            for (int i = 0; i < elementTypes.Count; i++) {
-
-                if (elementTypes[i] == null) {
-                    Debug.Log("Null");
-                }
-
-            }
-
-            IList<ProcessedType> typeData = TypeProcessor.GetTemplateElements();
+            didEnable = true;//
+            
+            IList<ProcessedType> typeData = ModuleSystem.GetTemplateElements();
 
             List<Type> validTypes = new List<Type>();
             for (int i = 0; i < typeData.Count; i++) {

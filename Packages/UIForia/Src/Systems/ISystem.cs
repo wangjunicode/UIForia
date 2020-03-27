@@ -1,5 +1,6 @@
 ﻿using UIForia.Elements;
 using UIForia.Rendering;
+using UIForia.Windows;
 
 namespace UIForia.Systems {
 
@@ -9,8 +10,6 @@ namespace UIForia.Systems {
         void OnUpdate();
         void OnDestroy();
 
-        void OnViewAdded(UIView view);
-        void OnViewRemoved(UIView view);
         void OnElementEnabled(UIElement element);
         void OnElementDisabled(UIElement element);
         void OnElementDestroyed(UIElement element);

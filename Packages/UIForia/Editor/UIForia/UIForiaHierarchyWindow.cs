@@ -98,10 +98,6 @@ namespace UIForia.Editor {
         private void Refresh(UIElement element) {
             needsReload = true;
         }
-        
-        private void Refresh(UIView view) {
-            needsReload = true;
-        }
 
         public void OnRefresh() {
             s_SelectedElementId = -1;
@@ -116,7 +112,7 @@ namespace UIForia.Editor {
             }
 
             app.RenderSystem.DrawDebugOverlay2 += DrawDebugOverlay;
-            treeView = new HierarchyView(app.GetViews(), state);
+            treeView = new HierarchyView(app, state);
             treeView.onSelectionChanged += OnElementSelectionChanged;
 //            treeView.view = app.GetView(0);
         }
@@ -169,7 +165,7 @@ namespace UIForia.Editor {
             if (app != null) {
                 needsReload = true;
 
-                treeView = new HierarchyView(app.GetViews(), state);
+                treeView = new HierarchyView(app, state);
                 treeView.onSelectionChanged += OnElementSelectionChanged;
 
                 app.onElementDestroyed += Refresh;
@@ -260,7 +256,6 @@ namespace UIForia.Editor {
             }
             if (needsReload) {
                 needsReload = false;
-                treeView.views = s_SelectedApplication.GetViews();
                 treeView.Reload();
                 treeView.ExpandAll();
             }

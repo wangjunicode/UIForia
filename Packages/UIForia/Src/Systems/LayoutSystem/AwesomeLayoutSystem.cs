@@ -4,6 +4,7 @@ using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
+using UIForia.Windows;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -23,13 +24,15 @@ namespace UIForia.Systems {
             //     runners.Add(new AwesomeLayoutRunner(this, application.views[i].dummyRoot));
             // }
 
-            application.onViewsSorted += uiViews => {
+            application.windowManager.onWindowsSorted += uiViews => {
                 runners.Sort((a, b) =>
-                    Array.IndexOf(uiViews, b.rootElement.View) - Array.IndexOf(uiViews, a.rootElement.View));
+                    Array.IndexOf(uiViews, b.rootElement.window) - Array.IndexOf(uiViews, a.rootElement.window));
             };
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
             // application.StyleSystem.onStylePropertyAnimated += HandleStylepropertyAnimated;
+            application.windowManager.onWindowAdded += OnWindowAdded;
+            application.windowManager.onWindowRemoved += OnWindowRemoved;
         }
 
         internal void CreateLayoutBox(UIElement currentElement) {
@@ -298,13 +301,13 @@ namespace UIForia.Systems {
 
         public void OnDestroy() { }
 
-        public void OnViewAdded(UIView view) {
-            runners.Add(new AwesomeLayoutRunner(this, view.dummyRoot));
+        public void OnWindowAdded(UIWindow window) {
+            runners.Add(new AwesomeLayoutRunner(this, window.dummyRoot));
         }
 
-        public void OnViewRemoved(UIView view) {
+        public void OnWindowRemoved(UIWindow window) {
             for (int i = 0; i < runners.size; i++) {
-                if (runners[i].rootElement == view.dummyRoot) {
+                if (runners[i].rootElement == window.dummyRoot) {
                     runners.RemoveAt(i);
                     return;
                 }

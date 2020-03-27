@@ -418,8 +418,8 @@ namespace UIForia.Rendering {
 
             int val = BitUtil.SetHighLowBits((int) ShapeType.RoundedRect, (int) colorMode);
 
-            float viewWidth = element.View.Viewport.width;
-            float viewHeight = element.View.Viewport.height;
+            float viewWidth = element.window.Viewport.width;
+            float viewHeight = element.window.Viewport.height;
             float emSize = element.style.GetResolvedFontSize();
             float resolvedCornerBevelTopLeft = UIFixedLength.Resolve(cornerBevelTopLeft, halfMin, emSize, viewWidth, viewHeight);
             float resolvedCornerBevelTopRight = UIFixedLength.Resolve(cornerBevelTopRight, halfMin, emSize, viewWidth, viewHeight);
@@ -477,8 +477,8 @@ namespace UIForia.Rendering {
 
                 float packedBorderRadii = VertigoUtil.BytesToFloat(b0, b1, b2, b3);
 
-                float viewWidth = element.View.Viewport.width;
-                float viewHeight = element.View.Viewport.height;
+                float viewWidth = element.window.Viewport.width;
+                float viewHeight = element.window.Viewport.height;
 
                 UIStyleSet style = element.style;
                 shadowGeometry = shadowGeometry ?? new UIForiaGeometry();

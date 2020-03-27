@@ -270,10 +270,6 @@ namespace UIForia.Animation {
 
         public void OnDestroy() { }
 
-        public void OnViewAdded(UIView view) { }
-
-        public void OnViewRemoved(UIView view) { }
-
         public void OnElementCreated(UIElement element) { }
 
         public void OnElementEnabled(UIElement element) {

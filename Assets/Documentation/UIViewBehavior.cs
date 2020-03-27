@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using UIForia.Elements;
+using UIForia.Windows;
 using UnityEngine;
 
 namespace UIForia {
@@ -45,11 +46,10 @@ namespace UIForia {
         }
 
         private void Update() {
-            if (type == null) return;
-            application?.Update();
-            application?.GetView(0).SetSize((int)application.Width, (int)application.Height);
+            if (type == null || application == null) return;
+            application.Update();
+            application.windowManager.GetDefaultWindow().SetSize((int)application.Width, (int)application.Height);
         }
-
     }
 
 }

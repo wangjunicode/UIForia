@@ -309,7 +309,7 @@ namespace UIForia.Systems {
 
             // todo -- bug!
             queryResults.Sort((a, b) => {
-                int viewDepthComparison = b.View.Depth - a.View.Depth;
+                int viewDepthComparison = b.window.Depth - a.window.Depth;
                 if (viewDepthComparison != 0) return viewDepthComparison;
                 if (b.layoutBox.zIndex != a.layoutBox.zIndex) {
                     return b.layoutBox.zIndex - a.layoutBox.zIndex;
@@ -664,10 +664,6 @@ namespace UIForia.Systems {
 
         public void OnDestroy() { }
 
-        public void OnViewAdded(UIView view) { }
-
-        public void OnViewRemoved(UIView view) { }
-
         public void OnElementEnabled(UIElement element) { }
 
         public void OnElementDisabled(UIElement element) {
@@ -877,7 +873,7 @@ namespace UIForia.Systems {
             if (mouseState.isLeftMouseDownThisFrame || mouseState.isRightMouseDownThisFrame || mouseState.isMiddleMouseDownThisFrame) {
                 HandleBlur();
 
-                if (m_ElementsThisFrame.Count > 0 && m_ElementsThisFrame[0].View.RequestFocus()) {
+                if (m_ElementsThisFrame.Count > 0 && m_ElementsThisFrame[0].application.windowManager.BringToFront(m_ElementsThisFrame[0].window)) {
                     // todo let's see if we have to process the mouse event again
                 }
 

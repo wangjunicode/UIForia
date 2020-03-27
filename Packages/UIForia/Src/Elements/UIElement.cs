@@ -9,6 +9,7 @@ using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.UIInput;
 using UIForia.Util;
+using UIForia.Windows;
 
 namespace UIForia.Elements {
 
@@ -98,7 +99,7 @@ namespace UIForia.Elements {
         public StructList<ElementAttribute> attributes;
         public TemplateMetaData templateMetaData; // todo - internal / private / whatever
 
-        public UIView View { get; internal set; }
+        public UIWindow window { get; internal set; }
         public Application application { get; internal set; }
         public int hierarchyDepth { get; internal set; }
         private int _siblingIndex;
@@ -116,7 +117,7 @@ namespace UIForia.Elements {
         // not actually used since we get elements from the pool as uninitialized
         protected internal UIElement() { }
 
-        public IInputProvider Input => View.application.InputSystem; // todo -- remove
+        public IInputProvider Input => window.application.InputSystem; // todo -- remove
 
         public int ChildCount => children?.Count ?? 0;
 
@@ -150,7 +151,7 @@ namespace UIForia.Elements {
         public virtual void OnDestroy() { }
 
         public void Destroy() {
-            View.application.DoDestroyElement(this);
+            window.application.DoDestroyElement(this);
         }
 
         public UIElement InsertChild(uint idx, UIElement element) {
@@ -179,9 +180,9 @@ namespace UIForia.Elements {
                 return null;
             }
 
-            if (View == null) {
+            if (window == null) {
                 element.parent = this;
-                element.View = null;
+                element.window = null;
                 element.siblingIndex = children.Count;
                 element.hierarchyDepth = hierarchyDepth + 1;
                 children.Add(element);

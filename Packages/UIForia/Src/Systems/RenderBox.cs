@@ -130,9 +130,9 @@ namespace UIForia.Rendering {
                 case UIFixedUnit.Em:
                     return element.style.GetResolvedFontSize() * length.value;
                 case UIFixedUnit.ViewportWidth:
-                    return element.View.Viewport.width * length.value;
+                    return element.window.Viewport.width * length.value;
                 case UIFixedUnit.ViewportHeight:
-                    return element.View.Viewport.height * length.value;
+                    return element.window.Viewport.height * length.value;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

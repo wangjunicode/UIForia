@@ -5,8 +5,10 @@ using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
+using UIForia.Windows;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
+using Application = UIForia.Application;
 
 public class HierarchyView : TreeView {
 
@@ -16,9 +18,9 @@ public class HierarchyView : TreeView {
 
     }
 
-    public UIView[] views;
-
     private readonly IntMap<ViewState> m_ViewState;
+
+    private readonly WindowManager windowManager;
 
     public bool needsReload;
     public event Action<UIElement> onSelectionChanged;
@@ -41,8 +43,8 @@ public class HierarchyView : TreeView {
         s_ElementNameStyle.normal = elementNameNormal;
     }
 
-    public HierarchyView(UIView[] views, TreeViewState state) : base(state) {
-        this.views = views;
+    public HierarchyView(Application application, TreeViewState state) : base(state) {
+        windowManager = application.windowManager;
         m_ViewState = new IntMap<ViewState>();
         needsReload = true;
     }
@@ -58,12 +60,12 @@ public class HierarchyView : TreeView {
 
         TreeViewItem root = new TreeViewItem(-9999, -1);
 
-        foreach (UIView uiView in views) {
-            if (uiView.RootElement == null) continue;
-            if (uiView.RootElement.isDisabled && !showDisabled) continue;
+        foreach (UIWindow window in windowManager.windows) {
+            if (window.RootElement == null) continue;
+            if (window.RootElement.isDisabled && !showDisabled) continue;
 
-            ElementTreeItem firstChild = new ElementTreeItem(uiView.RootElement);
-            firstChild.displayName = uiView.RootElement.ToString();
+            ElementTreeItem firstChild = new ElementTreeItem(window.RootElement);
+            firstChild.displayName = window.RootElement.ToString();
             stack.Push(firstChild);
 
             while (stack.Count > 0) {

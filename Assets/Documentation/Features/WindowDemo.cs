@@ -1,8 +1,5 @@
-using UI;
 using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.Layout;
-using UIForia.Rendering;
 using UnityEngine;
 
 namespace Documentation.Features {
@@ -17,13 +14,13 @@ namespace Documentation.Features {
             Vector2 position = layoutResult.screenPosition;
             
             windowCount++;
-            UIView view = application.CreateView<KlangWindow>("Window " + windowCount, new Size(application.Width, application.Height));
-            view.focusOnMouseDown = true;
-
-            ((KlangWindow) view.RootElement.GetChild(0)).onClose += () => {
-                windowCount--;
-                view.Destroy();
-            };
+            // UIWindow window = application.CreateView<KlangWindow>("Window " + windowCount, new Size(application.Width, application.Height));
+            // view.focusOnMouseDown = true;
+            //
+            // ((KlangWindow) view.RootElement.GetChild(0)).onClose += () => {
+            //     windowCount--;
+            //     view.Destroy();
+            // };
         }
     }
 }

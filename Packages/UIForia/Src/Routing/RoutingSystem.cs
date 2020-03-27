@@ -4,6 +4,7 @@ using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
+using UIForia.Windows;
 
 namespace UIForia.Routing {
 
@@ -27,10 +28,6 @@ namespace UIForia.Routing {
         }
 
         public void OnDestroy() {}
-
-        public void OnViewAdded(UIView view) {}
-
-        public void OnViewRemoved(UIView view) {}
 
         public void OnElementEnabled(UIElement element) {}
 

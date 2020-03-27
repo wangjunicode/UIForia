@@ -281,10 +281,10 @@ namespace UIForia.Systems {
                     return element.style.GetResolvedFontSize() * cellSize.value;
 
                 case GridTemplateUnit.ViewportWidth:
-                    return element.View.Viewport.width * cellSize.value;
+                    return element.window.Viewport.width * cellSize.value;
 
                 case GridTemplateUnit.ViewportHeight:
-                    return element.View.Viewport.height * cellSize.value;
+                    return element.window.Viewport.height * cellSize.value;
 
                 case GridTemplateUnit.Percent: {
                     if ((flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
@@ -320,10 +320,10 @@ namespace UIForia.Systems {
                     return element.style.GetResolvedFontSize() * cellSize.value;
 
                 case GridTemplateUnit.ViewportWidth:
-                    return element.View.Viewport.width * cellSize.value;
+                    return element.window.Viewport.width * cellSize.value;
 
                 case GridTemplateUnit.ViewportHeight:
-                    return element.View.Viewport.height * cellSize.value;
+                    return element.window.Viewport.height * cellSize.value;
 
                 case GridTemplateUnit.Percent: {
                     // if we have a fixed height and the unit is a percentage of our height, then we can safely return a fixed pixel value 

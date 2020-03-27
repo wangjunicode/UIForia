@@ -18,7 +18,7 @@ namespace Tests.Mocks {
         public static bool s_GenerateCode;
         public static bool s_UsePreCompiledTemplates;
 
-        protected MockApplication(bool isPreCompiled, TemplateSettings templateData, ResourceManager resourceManager, Action<UIElement> onRegister) : base(isPreCompiled, templateData, resourceManager, onRegister) { }
+        protected MockApplication(UISettings settings) : base(settings) { }
 
         protected override void CreateSystems() {
             styleSystem = new StyleSystem();
@@ -68,22 +68,28 @@ namespace Tests.Mocks {
                 TemplateCodeGenerator.Generate(typeof(T), settings);
             }
 
-            MockApplication app = new MockApplication(s_UsePreCompiledTemplates, settings, null, null);
+            MockApplication app = new MockApplication(new UISettings {
+                templateSettings = settings, 
+                isPreCompiled = s_UsePreCompiledTemplates
+            });
             app.Initialize();
             return app;
         }
 
          public static MockApplication Setup(TemplateSettings settings,  bool usePreCompiledTemplates = false) {
-            MockApplication app = new MockApplication(usePreCompiledTemplates, settings, null, null);
+            MockApplication app = new MockApplication(new UISettings {
+                templateSettings = settings, 
+                isPreCompiled = usePreCompiledTemplates
+            });
             app.Initialize();
             return app;
         }
          
         public new MockInputSystem InputSystem => (MockInputSystem) inputSystem;
-        public UIElement RootElement => views[0].RootElement;
+        public UIElement RootElement => windowManager.windows[0].RootElement;
 
         public void SetViewportRect(Rect rect) {
-            views[0].Viewport = rect;
+            windowManager.windows[0].Viewport = rect;
         }
 
     }

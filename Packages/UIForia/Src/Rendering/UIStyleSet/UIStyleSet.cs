@@ -951,10 +951,10 @@ namespace UIForia.Rendering {
                     return DefaultStyleValues_Generated.TextFontSize.value * fontSize.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return element.View.Viewport.width * fontSize.value;
+                    return element.window.Viewport.width * fontSize.value;
 
                 case UIFixedUnit.ViewportHeight:
-                    return element.View.Viewport.height * fontSize.value;
+                    return element.window.Viewport.height * fontSize.value;
 
                 default:
                     throw new ArgumentOutOfRangeException();

@@ -4,6 +4,7 @@ using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
+using UIForia.Windows;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 
@@ -11,18 +12,18 @@ namespace Src.Systems {
 
     public class RenderOwner {
 
-        internal UIView view;
+        internal UIWindow window;
         internal readonly RenderBoxPool painterPool;
         private readonly StructStack<ElemRef> elemRefStack;
         private readonly StructList<RenderOperationWrapper> wrapperList;
 
         private static readonly DepthComparer2 s_RenderComparer = new DepthComparer2();
 
-        public RenderOwner(UIView view, Camera camera) {
-            this.view = view;
+        public RenderOwner(UIWindow window, Camera camera) {
+            this.window = window;
             this.painterPool = new RenderBoxPool();
-            this.view.dummyRoot.renderBox = new RootRenderBox();
-            this.view.dummyRoot.renderBox.element = view.dummyRoot;
+            this.window.dummyRoot.renderBox = new RootRenderBox();
+            this.window.dummyRoot.renderBox.element = window.dummyRoot;
             this.elemRefStack = new StructStack<ElemRef>(32);
             this.wrapperList = new StructList<RenderOperationWrapper>(32);
         }
@@ -38,7 +39,7 @@ namespace Src.Systems {
         }
 
         private void DrawClipShapes(RenderContext ctx) {
-            LightList<ClipData> clippers = view.application.LayoutSystem.GetLayoutRunner(view.dummyRoot).clipperList;
+            LightList<ClipData> clippers = window.application.LayoutSystem.GetLayoutRunner(window.dummyRoot).clipperList;
             for (int i = 0; i < clippers.size; i++) {
                 ClipData clipData = clippers.array[i];
                 if (!clipData.isCulled && clipData.visibleBoxCount > 0) {
@@ -111,7 +112,7 @@ namespace Src.Systems {
 
         // this is intended to be run while layout is running (ie in parallel)
         public void GatherBoxDataParallel() {
-            UIElement root = view.dummyRoot;
+            UIElement root = window.dummyRoot;
 
             int frameId = root.application.frameId;
 

@@ -3,6 +3,7 @@ using SVGX;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
+using UIForia.Windows;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Vertigo;
@@ -47,9 +48,12 @@ namespace Src.Systems {
             }
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
-            application.onViewsSorted += uiViews => {
-                renderOwners.Sort((o1, o2) => o1.view.Depth.CompareTo(o2.view.Depth));
+            application.windowManager.onWindowsSorted += uiViews => {
+                renderOwners.Sort((o1, o2) => o1.window.Depth.CompareTo(o2.window.Depth));
             };
+
+            application.windowManager.onWindowAdded += OnWindowAdded;
+            application.windowManager.onWindowRemoved += OnWindowRemoved;
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> propertyList) {
@@ -89,11 +93,6 @@ namespace Src.Systems {
         public virtual void OnUpdate() {
             renderContext.Clear();
 
-            // todo
-            // views can have their own cameras.
-            // if they do they are not batchable with other views. 
-            // for now we can make batching not cross view boundaries, eventually that would be cool though
-
             camera.orthographicSize = Screen.height * 0.5f;
 
             for (int i = 0; i < renderOwners.size; i++) {
@@ -110,13 +109,13 @@ namespace Src.Systems {
             renderContext.Destroy();
         }
 
-        public void OnViewAdded(UIView view) {
-            renderOwners.Add(new RenderOwner(view, camera));
+        public void OnWindowAdded(UIWindow window) {
+            renderOwners.Add(new RenderOwner(window, camera));
         }
 
-        public void OnViewRemoved(UIView view) {
+        public void OnWindowRemoved(UIWindow window) {
             for (int i = 0; i < renderOwners.size; i++) {
-                if (renderOwners.array[i].view == view) {
+                if (renderOwners.array[i].window == window) {
                     renderOwners.RemoveAt(i);
                     return;
                 }

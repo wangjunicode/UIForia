@@ -6,6 +6,7 @@ using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.UIInput;
 using UIForia.Util;
+using UIForia.Windows;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Debug = System.Diagnostics.Debug;
@@ -564,11 +565,11 @@ namespace UIForia.Systems {
         }
 
         private void ApplyHorizontalAlignments() {
-            float viewportWidth = rootElement.View.Viewport.width;
-            float viewportHeight = rootElement.View.Viewport.height;
-            UIView view = rootElement.View;
-            InputSystem inputSystem = view.application.InputSystem;
-            float screenWidth = view.application.Width;
+            float viewportWidth = rootElement.window.Viewport.width;
+            float viewportHeight = rootElement.window.Viewport.height;
+            UIWindow window = rootElement.window;
+            InputSystem inputSystem = window.application.InputSystem;
+            float screenWidth = window.application.Width;
 
             for (int i = 0; i < alignHorizontalList.size; i++) {
                 UIElement element = alignHorizontalList.array[i];
@@ -585,7 +586,7 @@ namespace UIForia.Systems {
                 AlignmentTarget alignmentTargetX = element.style.AlignmentTargetX;
                 AlignmentBoundary alignmentBoundaryX = element.style.AlignmentBoundaryX;
 
-                float originBase = MeasurementUtil.ResolveOriginBaseX(result, view.position.x, alignmentTargetX, direction, inputSystem);
+                float originBase = MeasurementUtil.ResolveOriginBaseX(result, window.position.x, alignmentTargetX, direction, inputSystem);
                 float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(result, viewportWidth, alignmentTargetX);
                 float originOffset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, originX, originSize);
                 float offset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, offsetX, box.finalWidth);
@@ -676,11 +677,11 @@ namespace UIForia.Systems {
         }
 
         private void ApplyVerticalAlignments() {
-            float viewportWidth = rootElement.View.Viewport.width;
-            float viewportHeight = rootElement.View.Viewport.height;
-            UIView view = rootElement.View;
+            float viewportWidth = rootElement.window.Viewport.width;
+            float viewportHeight = rootElement.window.Viewport.height;
+            UIWindow window = rootElement.window;
             float screenHeight = rootElement.application.Height;
-            InputSystem inputSystem = view.application.InputSystem;
+            InputSystem inputSystem = window.application.InputSystem;
 
             for (int i = 0; i < alignVerticalList.size; i++) {
                 UIElement element = alignVerticalList.array[i];
@@ -694,7 +695,7 @@ namespace UIForia.Systems {
                 AlignmentTarget alignmentTargetY = element.style.AlignmentTargetY;
                 AlignmentBoundary alignmentBoundaryY = element.style.AlignmentBoundaryY;
 
-                float originBase = MeasurementUtil.ResolveOriginBaseY(result, view.position.y, alignmentTargetY, direction, inputSystem);
+                float originBase = MeasurementUtil.ResolveOriginBaseY(result, window.position.y, alignmentTargetY, direction, inputSystem);
                 float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(result, viewportHeight, alignmentTargetY);
                 float originOffset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, originY, originSize);
                 float offset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, offsetY, box.finalHeight);
@@ -823,8 +824,8 @@ namespace UIForia.Systems {
         }
 
         private void PerformLayoutStepVertical(AwesomeLayoutBox rootBox) {
-            float viewWidth = rootBox.element.View.Viewport.width;
-            float viewHeight = rootBox.element.View.Viewport.height;
+            float viewWidth = rootBox.element.window.Viewport.width;
+            float viewHeight = rootBox.element.window.Viewport.height;
 
             boxRefStack.Push(new BoxRef() {box = rootBox});
 
@@ -910,8 +911,8 @@ namespace UIForia.Systems {
             int size = matrixUpdateList.size;
             UIElement[] array = matrixUpdateList.array;
 
-            float viewWidth = rootElement.View.Viewport.width;
-            float viewHeight = rootElement.View.Viewport.height;
+            float viewWidth = rootElement.window.Viewport.width;
+            float viewHeight = rootElement.window.Viewport.height;
 
             SVGXMatrix identity = SVGXMatrix.identity;
 

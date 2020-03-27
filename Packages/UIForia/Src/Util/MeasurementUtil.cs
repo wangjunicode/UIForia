@@ -205,7 +205,7 @@ namespace UIForia.Util {
         }
 
         public static float GetXDistanceToView(LayoutResult result) {
-            LayoutResult view = result.element.View.RootElement.layoutResult;
+            LayoutResult view = result.element.window.RootElement.layoutResult;
 
             float output = 0;
 
@@ -224,7 +224,7 @@ namespace UIForia.Util {
         }
 
         public static float GetYDistanceToView(LayoutResult result) {
-            LayoutResult view = result.element.View.RootElement.layoutResult;
+            LayoutResult view = result.element.window.RootElement.layoutResult;
 
             float output = 0;
 

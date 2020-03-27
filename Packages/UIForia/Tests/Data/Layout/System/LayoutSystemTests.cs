@@ -333,7 +333,7 @@ namespace LayoutSystem {
             UIElement contentSize = blockProvider[2];
             UIElement blockUser = contentSize[0];
 
-            app.GetView(0).SetSize(1920, 1080);
+            app.windowManager.windows[0].SetSize(1920, 1080);
 
             blockProvider.style.SetPreferredWidth(new UIMeasurement(1f, UIMeasurementUnit.Content), StyleState.Normal);
 

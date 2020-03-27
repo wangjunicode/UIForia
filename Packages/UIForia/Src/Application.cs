@@ -14,6 +14,7 @@ using UIForia.Sound;
 using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Util;
+using UIForia.Windows;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Debug = UnityEngine.Debug;
@@ -62,14 +63,11 @@ namespace UIForia {
         public event Action<UIElement> onElementRegistered;
         public event Action<UIElement> onElementDestroyed;
         public event Action<UIElement> onElementEnabled;
-        public event Action<UIView[]> onViewsSorted;
-        public event Action<UIView> onViewRemoved;
         public event Action onRefresh;
 
         internal CompiledTemplateData templateData;
 
         internal int frameId;
-        protected internal List<UIView> views;
 
         internal static readonly Dictionary<string, Type> s_CustomPainters;
 
@@ -77,6 +75,8 @@ namespace UIForia {
         private UITaskSystem m_AfterUpdateTaskSystem;
 
         public static readonly UIForiaSettings Settings;
+
+        public readonly WindowManager windowManager;
 
         static Application() {
             ArrayPool<UIElement>.SetMaxPoolSize(64);
@@ -96,12 +96,13 @@ namespace UIForia {
         private TemplateSettings templateSettings;
         private bool isPreCompiled;
 
-        protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
-            this.isPreCompiled = isPreCompiled;
-            this.templateSettings = templateSettings;
-            this.onElementRegistered = onElementRegistered;
+        protected Application(UISettings settings) {
+            this.isPreCompiled = settings.isPreCompiled;
+            this.templateSettings = settings.templateSettings;
+            this.onElementRegistered = settings.onElementRegistered;
             this.id = templateSettings.applicationName;
-            this.resourceManager = resourceManager ?? new ResourceManager();
+            this.resourceManager = settings.resourceManager ?? new ResourceManager();
+            this.windowManager = new WindowManager(settings.defaultWindowSpawner, this);
 
             Applications.Add(this);
 #if UNITY_EDITOR
@@ -130,7 +131,6 @@ namespace UIForia {
 
         internal void Initialize() {
             systems = new List<ISystem>();
-            views = new List<UIView>();
 
             CreateSystems();
 
@@ -144,9 +144,7 @@ namespace UIForia {
 
             m_BeforeUpdateTaskSystem = new UITaskSystem();
             m_AfterUpdateTaskSystem = new UITaskSystem();
-
-            UIView view = null;
-
+            
             // Stopwatch timer = Stopwatch.StartNew();
 
             if (isPreCompiled) {
@@ -157,40 +155,10 @@ namespace UIForia {
             }
 
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this));
-
-            view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Width, Height));
-
-            views.Add(view);
-
-            for (int i = 0; i < systems.Count; i++) {
-                systems[i].OnViewAdded(view);
-            }
+            windowManager.SpawnDefaultWindow(rootElement);
 
             //timer.Stop();
             //Debug.Log("Initialized UIForia application in " + timer.Elapsed.TotalSeconds.ToString("F2") + " seconds");
-        }
-
-        public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
-            if (templateData.TryGetTemplate<T>(out DynamicTemplate dynamicTemplate)) {
-                UIElement element = templateData.templates[dynamicTemplate.templateId].Invoke(null, new TemplateScope(this));
-
-                UIView view = new UIView(this, name, element, matrix, size);
-
-                view.Depth = views.Count;
-                views.Add(view);
-
-                for (int i = 0; i < systems.Count; i++) {
-                    systems[i].OnViewAdded(view);
-                }
-
-                return view;
-            }
-
-            throw new TemplateNotFoundException($"Unable to find a template for {typeof(T)}. This is probably because you are trying to load this template dynamically and did include the type in the {nameof(TemplateSettings.dynamicallyCreatedTypes)} list.");
-        }
-
-        public UIView CreateView<T>(string name, Size size) where T : UIElement {
-            return CreateView<T>(name, size, Matrix4x4.identity);
         }
 
         internal static void ProcessClassAttributes(Type type, Attribute[] attrs) {
@@ -237,24 +205,8 @@ namespace UIForia {
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
 
-            if (views.Count > 0) {
-                views[0].Viewport = new Rect(0, 0, Width, Height);
-            }
-
             Camera = camera;
             RenderSystem.SetCamera(camera);
-        }
-
-        public UIView RemoveView(UIView view) {
-            if (!views.Remove(view)) return null;
-
-            for (int i = 0; i < systems.Count; i++) {
-                systems[i].OnViewRemoved(view);
-            }
-
-            DestroyElement(view.dummyRoot);
-            onViewRemoved?.Invoke(view);
-            return view;
         }
 
         public void Refresh() {
@@ -269,9 +221,7 @@ namespace UIForia {
                 system.OnDestroy();
             }
 
-            for (int i = views.Count - 1; i >= 0; i--) {
-                views[i].Destroy();
-            }
+            windowManager.Destroy();
 
             resourceManager.Reset();
 
@@ -299,9 +249,7 @@ namespace UIForia {
                 system.OnDestroy();
             }
 
-            for (int i = views.Count - 1; i >= 0; i--) {
-                views[i].Destroy();
-            }
+            windowManager.Destroy();
 
             onElementEnabled = null;
             onElementDestroyed = null;
@@ -309,7 +257,7 @@ namespace UIForia {
         }
 
         public static void DestroyElement(UIElement element) {
-            element.View.application.DoDestroyElement(element);
+            element.window.application.DoDestroyElement(element);
         }
 
         internal void DoDestroyElement(UIElement element, bool removingChildren = false) {
@@ -369,9 +317,6 @@ namespace UIForia {
             onElementDestroyed?.Invoke(element);
         }
 
-        private LightList<UIElement> activeBuffer = new LightList<UIElement>(32);
-        private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
-
         public void Update() {
             // input queries against last frame layout
             inputSystem.Read();
@@ -389,52 +334,17 @@ namespace UIForia {
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
 
-            for (int i = 0; i < views.Count; i++) {
-                views[i].Viewport = new Rect(0, 0, Width, Height);
-            }
-
-
             inputSystem.OnUpdate();
             m_BeforeUpdateTaskSystem.OnUpdate();
-
-            activeBuffer.Clear();
-
-            for (int i = 0; i < views.Count; i++) {
-                activeBuffer.Add(views[i].RootElement);
-            }
 
             linqBindingSystem.BeginFrame();
             bindingTimer.Reset();
             bindingTimer.Start();
 
             // right now, out of order elements wont get bindings until next frame. this miiight be ok but probably will cause weirdness. likely want this to change
-            for (int i = 0; i < views.Count; i++) {
-                linqBindingSystem.NewUpdateFn(views[i].RootElement);
-            }
-
-            // bool loop = true;
-
-            // while (loop) {
-            //     
-            //     for (int i = 0; i < activeBuffer.size; i++) {
-            //         linqBindingSystem.NewUpdateFn(views[i].RootElement);
-            //     }
-            //
-            //     if (queuedBuffer.size == 0) {
-            //         break;
-            //     }
-            //
-            //     LightList<UIElement> tmp = activeBuffer;
-            //     activeBuffer = queuedBuffer;
-            //     queuedBuffer = tmp;
-            //     activeBuffer.Clear();
-            //     // sort queued buffer by depth?
-            // }
+            windowManager.UpdateBindings(linqBindingSystem);
 
             bindingTimer.Stop();
-
-            // style & attribute bindings (no user code here)
-            // linqBindingSystem.UpdateStylesAndAttributes();
 
             animationSystem.OnUpdate();
 
@@ -485,10 +395,6 @@ namespace UIForia {
             // if element is not enabled (ie has a disabled ancestor or is not alive), no-op 
             if ((element.flags & UIElementFlags.SelfAndAncestorEnabled) != UIElementFlags.SelfAndAncestorEnabled) {
                 return;
-            }
-
-            if (queued) {
-                queuedBuffer.Add(element);
             }
 
             StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
@@ -635,8 +541,8 @@ namespace UIForia {
         public UIElement GetElement(int elementId) {
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
 
-            for (int i = 0; i < views.Count; i++) {
-                stack.Push(views[i].RootElement);
+            for (int i = 0; i < windowManager.windows.Count; i++) {
+                stack.Push(windowManager.windows[i].RootElement);
 
                 while (stack.size > 0) {
                     UIElement element = stack.PopUnchecked();
@@ -675,22 +581,6 @@ namespace UIForia {
             }
         }
 
-        public UIView GetView(int i) {
-            if (i < 0 || i >= views.Count) return null;
-            return views[i];
-        }
-
-        public UIView GetView(string name) {
-            for (int i = 0; i < views.Count; i++) {
-                UIView v = views[i];
-                if (v.name == name) {
-                    return v;
-                }
-            }
-
-            return null;
-        }
-
         public static Application Find(string appId) {
             return Applications.Find((app) => app.id == appId);
         }
@@ -699,14 +589,10 @@ namespace UIForia {
             return s_CustomPainters.ContainsKey(name);
         }
 
-        public UIView[] GetViews() {
-            return views.ToArray();
-        }
-
         private void InitializeElement(UIElement child) {
             bool parentEnabled = child.parent.isEnabled;
 
-            UIView view = child.parent.View;
+            UIWindow window = child.parent.window;
 
             StructStack<ElemRef> elemRefStack = StructStack<ElemRef>.Get();
             elemRefStack.Push(new ElemRef() {element = child});
@@ -716,7 +602,7 @@ namespace UIForia {
 
                 current.hierarchyDepth = current.parent.hierarchyDepth + 1;
 
-                current.View = view;
+                current.window = window;
 
                 if (current.parent.isEnabled) {
                     current.flags |= UIElementFlags.AncestorEnabled;
@@ -764,7 +650,7 @@ namespace UIForia {
 
             bool parentEnabled = parent.isEnabled;
 
-            UIView view = parent.View;
+            UIWindow window = parent.window;
 
             StructStack<ElemRef> elemRefStack = StructStack<ElemRef>.Get();
             elemRefStack.Push(new ElemRef() {element = child});
@@ -774,7 +660,7 @@ namespace UIForia {
 
                 current.hierarchyDepth = current.parent.hierarchyDepth + 1;
 
-                current.View = view;
+                current.window = window;
 
                 if (current.parent.isEnabled) {
                     current.flags |= UIElementFlags.AncestorEnabled;
@@ -796,7 +682,7 @@ namespace UIForia {
                     } catch (Exception e){
                         Debug.Log(e);
                     }
-                    view.ElementRegistered(current);
+                    window.ElementRegistered(current);
                 }
 
                 UIElement[] children = current.children.array;
@@ -821,28 +707,13 @@ namespace UIForia {
             StructStack<ElemRef>.Release(ref elemRefStack);
         }
 
-        public void SortViews() {
-            // let's bubble sort the views since only once view is out of place
-            for (int i = (views.Count - 1); i > 0; i--) {
-                for (int j = 1; j <= i; j++) {
-                    if (views[j - 1].Depth > views[j].Depth) {
-                        UIView tempView = views[j - 1];
-                        views[j - 1] = views[j];
-                        views[j] = tempView;
-                    }
-                }
-            }
-
-            onViewsSorted?.Invoke(views.ToArray());
-        }
-
         internal void GetElementCount(out int totalElementCount, out int enabledElementCount, out int disabledElementCount) {
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
             totalElementCount = 0;
             enabledElementCount = 0;
 
-            for (int i = 0; i < views.Count; i++) {
-                stack.Push(views[i].RootElement);
+            for (int i = 0; i < windowManager.windows.Count; i++) {
+                stack.Push(windowManager.windows[i].RootElement);
 
                 while (stack.size > 0) {
                     totalElementCount++;
@@ -878,7 +749,7 @@ namespace UIForia {
             // for each override with same name add to reference array at index?
             // will have to be careful with names but can change to unique ids when we need alias support and match on that
             UIElement retn = templateData.slots[slotId](contextRoot, parent, scope);
-            retn.View = parent.View;
+            retn.window = parent.window;
             return retn;
         }
 
@@ -888,13 +759,6 @@ namespace UIForia {
             InitializeElement(retn);
 
             return retn;
-        }
-
-        public struct TagNameEntry {
-
-            public int depth;
-            public UIElement element;
-
         }
 
         internal Dictionary<int, TagNameIndex> tagNameIndexMap = new Dictionary<int, TagNameIndex>();

@@ -68,10 +68,6 @@ namespace UIForia.Systems {
 
         public void OnDestroy() { }
 
-        public void OnViewAdded(UIView view) { }
-
-        public void OnViewRemoved(UIView view) { }
-
         public void OnElementEnabled(UIElement element) { }
 
         public void OnElementDisabled(UIElement element) {

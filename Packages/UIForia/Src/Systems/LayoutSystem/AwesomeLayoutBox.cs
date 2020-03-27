@@ -102,7 +102,7 @@ namespace UIForia.Systems {
 
         public void UpdateContentAreaWidth() {
             flags &= ~LayoutBoxFlags.ContentAreaWidthChanged;
-            Vector2 viewSize = element.View.Viewport.size;
+            Vector2 viewSize = element.window.Viewport.size;
             float emSize = element.style.GetResolvedFontSize();
             float paddingLeft = MeasurementUtil.ResolveFixedSize(finalWidth, viewSize.x, viewSize.y, emSize, element.style.PaddingLeft);
             float paddingRight = MeasurementUtil.ResolveFixedSize(finalWidth, viewSize.x, viewSize.y, emSize, element.style.PaddingRight);
@@ -124,7 +124,7 @@ namespace UIForia.Systems {
 
         public void UpdateContentAreaHeight() {
             flags &= ~LayoutBoxFlags.ContentAreaHeightChanged;
-            Vector2 viewSize = element.View.Viewport.size;
+            Vector2 viewSize = element.window.Viewport.size;
             float emSize = element.style.GetResolvedFontSize();
             LayoutResult layoutResult = element.layoutResult;
 
@@ -355,7 +355,7 @@ namespace UIForia.Systems {
             float baseVal = width;
             // todo -- try not to fuck with style here
             // todo -- view and em size
-            Vector2 viewSize = element.View.Viewport.size;
+            Vector2 viewSize = element.window.Viewport.size;
             float emSize = element.style.GetResolvedFontSize();
             baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.PaddingLeft);
             baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.PaddingRight);
@@ -396,7 +396,7 @@ namespace UIForia.Systems {
             float baseVal = height;
             // todo -- try not to fuck with style here
             // todo -- view and em size
-            Vector2 viewSize = element.View.Viewport.size;
+            Vector2 viewSize = element.window.Viewport.size;
             float emSize = element.style.GetResolvedFontSize();
             baseVal += MeasurementUtil.ResolveFixedSize(height, viewSize.x, viewSize.y, emSize, element.style.PaddingTop);
             baseVal += MeasurementUtil.ResolveFixedSize(height, viewSize.x, viewSize.y, emSize, element.style.PaddingBottom);
@@ -432,10 +432,10 @@ namespace UIForia.Systems {
                     return element.style.GetResolvedFontSize() * value;
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return element.View.Viewport.width * value;
+                    return element.window.Viewport.width * value;
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return element.View.Viewport.height * value;
+                    return element.window.Viewport.height * value;
 
                 case UIMeasurementUnit.IntrinsicMinimum:
                     return 0; //GetIntrinsicMinWidth();
@@ -472,7 +472,7 @@ namespace UIForia.Systems {
             float baseVal = width;
             // todo -- try not to fuck with style here
             // todo -- view and em size
-            Vector2 viewSize = element.View.Viewport.size;
+            Vector2 viewSize = element.window.Viewport.size;
             float emSize = element.style.GetResolvedFontSize();
 
             baseVal += MeasurementUtil.ResolveFixedSize(width, viewSize.x, viewSize.y, emSize, element.style.PaddingLeft);
@@ -515,7 +515,7 @@ namespace UIForia.Systems {
                 ptr = ptr.parent;
             }
 
-            return Math.Max(0, (element.View.Viewport.width - paddingBorder) * value);
+            return Math.Max(0, (element.window.Viewport.width - paddingBorder) * value);
         }
 
         internal float ComputeBlockWidth(float value) {
@@ -539,7 +539,7 @@ namespace UIForia.Systems {
                 ptr = ptr.parent;
             }
 
-            return Math.Max(0, element.View.Viewport.width * value);
+            return Math.Max(0, element.window.Viewport.width * value);
         }
 
         public virtual bool CanProvideHorizontalBlockSize(AwesomeLayoutBox child, out float blockSize) {
@@ -580,7 +580,7 @@ namespace UIForia.Systems {
                 ptr = ptr.parent;
             }
 
-            return Math.Max(0, (element.View.Viewport.height - paddingBorder) * value);
+            return Math.Max(0, (element.window.Viewport.height - paddingBorder) * value);
         }
 
         internal float ComputeBlockHeight(float value) {
@@ -606,7 +606,7 @@ namespace UIForia.Systems {
                 ptr = ptr.parent;
             }
 
-            return Math.Max(0, element.View.Viewport.height * value);
+            return Math.Max(0, element.window.Viewport.height * value);
         }
 
         public float ResolveHeight(in UIMeasurement measurement) {
@@ -626,10 +626,10 @@ namespace UIForia.Systems {
                     return element.style.GetResolvedFontSize() * value;
 
                 case UIMeasurementUnit.ViewportWidth:
-                    return element.View.Viewport.width * value;
+                    return element.window.Viewport.width * value;
 
                 case UIMeasurementUnit.ViewportHeight:
-                    return element.View.Viewport.height * value;
+                    return element.window.Viewport.height * value;
 
                 case UIMeasurementUnit.IntrinsicMinimum: {
                     throw new NotImplementedException();
@@ -672,7 +672,7 @@ namespace UIForia.Systems {
             
             size.minimum = ResolveWidth(element.style.MinWidth);
             size.maximum = ResolveWidth(element.style.MaxWidth);
-            Vector2 viewSize = element.View.Viewport.size;
+            Vector2 viewSize = element.window.Viewport.size;
             float emSize = element.style.GetResolvedFontSize();
             size.marginStart = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginLeft);
             size.marginEnd = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginRight);
@@ -685,7 +685,7 @@ namespace UIForia.Systems {
             size.preferred = ResolveHeight(element.style.PreferredHeight);
             size.minimum = ResolveHeight(element.style.MinHeight);
             size.maximum = ResolveHeight(element.style.MaxHeight);
-            Vector2 viewSize = element.View.Viewport.size;
+            Vector2 viewSize = element.window.Viewport.size;
             float emSize = element.style.GetResolvedFontSize();
             size.marginStart = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginTop);
             size.marginEnd = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginBottom);
@@ -948,7 +948,7 @@ namespace UIForia.Systems {
                 ptr = ptr.parent;
             }
 
-            return element.View.RootElement;
+            return element.window.RootElement;
         }
 
         internal UIElement GetBlockHeightProvider() {
@@ -971,7 +971,7 @@ namespace UIForia.Systems {
                 ptr = ptr.parent;
             }
 
-            return element.View.RootElement;
+            return element.window.RootElement;
         }
 
         public void Invalidate() {

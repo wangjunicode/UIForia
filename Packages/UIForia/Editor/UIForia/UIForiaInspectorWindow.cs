@@ -225,8 +225,8 @@ namespace UIForia.Editor {
             DrawLabel("Enabled", selectedElement.isEnabled.ToString());
             if (selectedElement.isEnabled) {
                 DrawLabel("Culled", selectedElement.layoutResult.isCulled.ToString());
-                DrawLabel("View", selectedElement.View.name);
-                DrawLabel("Viewport", $"X: {selectedElement.View.Viewport.x}, Y: {selectedElement.View.Viewport.y}, W: {selectedElement.View.Viewport.width}, H: {selectedElement.View.Viewport.height}");
+                DrawLabel("View", selectedElement.window.name);
+                DrawLabel("Viewport", $"X: {selectedElement.window.Viewport.x}, Y: {selectedElement.window.Viewport.y}, W: {selectedElement.window.Viewport.width}, H: {selectedElement.window.Viewport.height}");
                 DrawVector2Value("Local Position", layoutResult.localPosition);
                 DrawVector2Value("Screen Position", layoutResult.screenPosition);
                 DrawVector2Value("Scale", layoutResult.scale);

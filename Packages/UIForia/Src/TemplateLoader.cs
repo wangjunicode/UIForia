@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Mono.Linq.Expressions;
 using UIForia.Compilers.Style;
@@ -110,20 +112,21 @@ namespace UIForia.Compilers {
             // todo -- this can be improved, cannot currently parallelize because the write target (constructorFnMap) is a dictionary which is not threadsafe
             // can convert the constructorFnMap to an array but would need a unique index for each type that is sequential
 
+            ParameterExpression[] empty = new ParameterExpression[0];
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
-                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
+                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0 || kvp.Key.IsGenericTypeDefinition) {
                     continue;
                 }
-
                 ConstructorInfo ctor = kvp.Key.GetConstructor(Type.EmptyTypes);
-
                 if (ctor == null) {
-                    throw new CompileException(kvp.Key + " must provide a default constructor in order to be used in templates");
+                    UnityEngine.Debug.LogError(kvp.Key + " must provide a default constructor in order to be used in templates");
+                    continue;
                 }
-
                 parameters[0] = Expression.Constant(compiledTemplateData.GetTagNameId(kvp.Value.tagName));
                 parameters[1] = Expression.New(ctor);
-                constructorFnMap[kvp.Value.id] = Expression.Lambda<Func<ConstructedElement>>(Expression.New(constructedTypeCtor, parameters)).Compile();
+                Func<ConstructedElement> fn = Expression.Lambda<Func<ConstructedElement>>(Expression.New(constructedTypeCtor, parameters), "Create: " + TypeNameGenerator.GetTypeName(kvp.Value.rawType), false, empty).Compile();
+                GCHandle.Alloc(fn);
+                constructorFnMap[kvp.Value.id] = fn;
             }
 
             compiledTemplateData.bindings = bindings;

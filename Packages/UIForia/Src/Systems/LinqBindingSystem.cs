@@ -1,38 +1,19 @@
-using System;
 using UIForia.Elements;
-using UIForia.Rendering;
-using UIForia.Util;
-using UnityEngine;
 
 namespace UIForia.Systems {
 
     public class LinqBindingSystem : ISystem {
 
-        private readonly LightList<UIElement> rootNodes;
         private UIElement currentElement;
         private int iteratorIndex;
         private uint iterationId;
         private uint currentFrameId;
-
-        public LinqBindingSystem() {
-            this.rootNodes = new LightList<UIElement>();
-        }
 
         public void OnReset() { }
         
         public void OnUpdate() { }
         
         public void OnDestroy() { }
-
-        public void OnViewAdded(UIView view) {
-//            // todo -- need keep this sorted or just iterate application views
-            rootNodes.Add(view.dummyRoot);
-        }
-
-        public void OnViewRemoved(UIView view) {
-            rootNodes.Remove(view.dummyRoot);
-            // todo -- if currently iterating this view, need to bail out
-        }
 
         public void OnElementCreated(UIElement element) {
             // if creating something higher in the tree than current, need to reset

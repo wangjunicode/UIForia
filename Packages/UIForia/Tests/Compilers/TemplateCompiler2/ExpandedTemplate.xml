@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Contents>
+        <Text>this is inside the template</Text>    
+        <define:title>
+            Goodbye
+        </define:title>
+    </Contents>
+    
+</UITemplate>

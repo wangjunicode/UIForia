@@ -43,18 +43,33 @@ namespace Mono.Linq.Expressions {
             VisitLambdaBody(expression);
             Dedent();
             Dedent();
-            WriteToken(";");
         }
 
-        private void VisitTemplateSignature(LambdaExpression node) {
+        public void WriteTemplateBodyOnly(LambdaExpression expression, int indentLevel = 0) {
+            for (int i = 0; i < indentLevel; i++) {
+                Indent();
+            }
+
+            VisitTemplateSignature(expression, false);
+            Indent();
+            VisitTemplateBody(expression);
+            Dedent();
+            for (int i = 0; i < indentLevel; i++) {
+                Dedent();
+            }
+        }
+
+        private void VisitTemplateSignature(LambdaExpression node, bool newLine = true) {
             VisitParameters(node);
             WriteSpace();
-            WriteToken("=>");
-            WriteLine();
+            WriteToken("=> ");
+            if (newLine) {
+                WriteLine();
+            }
         }
 
     }
-    
+
     public static class CSharp {
 
         public static string ToCSharpCode(this Expression self) {
@@ -81,6 +96,14 @@ namespace Mono.Linq.Expressions {
             return ToLambda(writer => writer.Write(self));
         }
 
+        public static string ToTemplateBody(this LambdaExpression self, int indentLevel = 0) {
+            if (self == null) {
+                throw new ArgumentNullException(nameof(self));
+            }
+
+            return ToLambda(writer => writer.WriteTemplateBodyOnly(self, indentLevel));
+        }
+
         static string ToLambda(Action<TemplateWriter> writer) {
             StringWriter @string = new StringWriter();
             TemplateWriter csharp = new TemplateWriter(new TextFormatter(@string));
@@ -89,7 +112,7 @@ namespace Mono.Linq.Expressions {
 
             return @string.ToString();
         }
-        
+
         static string ToCode(Action<CSharpWriter> writer) {
             StringWriter @string = new StringWriter();
             CSharpWriter csharp = new CSharpWriter(new TextFormatter(@string));

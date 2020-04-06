@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -106,6 +107,10 @@ namespace Mono.Linq.Expressions {
                 VisitSingleExpressionBody(node);
             else
                 VisitBlockExpressionBody(node);
+        }
+
+        protected void VisitTemplateBody(LambdaExpression node) {
+            VisitBlockExpression((BlockExpression) node.Body);
         }
 
         void VisitBlockExpressionBody(LambdaExpression node) {
@@ -263,14 +268,15 @@ namespace Mono.Linq.Expressions {
                             WriteToken("<");
                             for (int c = 0; c < genericArguments.Length; c++) {
                                 VisitType(genericArguments[c]);
-                        
+
                                 if (c != genericArguments.Length - 1) {
                                     WriteToken(", ");
                                 }
                             }
-                        
+
                             WriteToken(">");
                         }
+
                         return;
                     }
 
@@ -1129,7 +1135,7 @@ namespace Mono.Linq.Expressions {
                 lastWasComment = true;
                 return null;
             }
-            
+
             if (method == s_InlineComment) {
                 ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
                 string comment = commentValue.Value as string;
@@ -1138,7 +1144,7 @@ namespace Mono.Linq.Expressions {
                 WriteToken("// " + comment);
                 return null;
             }
-            
+
             if (method == s_CommentNewLineBefore) {
                 ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
                 string comment = commentValue.Value as string;
@@ -1147,7 +1153,7 @@ namespace Mono.Linq.Expressions {
                 lastWasComment = true;
                 return null;
             }
-            
+
             if (method == s_CommentNewLineAfter) {
                 ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
                 string comment = commentValue.Value as string;
@@ -1156,7 +1162,7 @@ namespace Mono.Linq.Expressions {
                 lastWasComment = true;
                 return null;
             }
-            
+
             if (method == s_SubscribeEvent) {
                 // when generating code we can use the event subscription syntax (evt += xxx) 
                 // however when using Linq we don't have access to this and must use reflection
@@ -1164,7 +1170,7 @@ namespace Mono.Linq.Expressions {
                 string targetName = ((ParameterExpression) node.Arguments[0]).Name;
                 string eventName = ((ConstantExpression) node.Arguments[1]).Value.ToString();
                 string handlerName = null;
-                
+
                 if (node.Arguments[2] is ParameterExpression parameterExpression) {
                     handlerName = parameterExpression.Name;
                 }
@@ -1210,19 +1216,24 @@ namespace Mono.Linq.Expressions {
 
             WriteToken("(");
 
-            for (int i = 0; i < node.Arguments.Count; i++) {
-                if (i > 0) {
-                    WriteToken(",");
-                    WriteSpace();
-                }
+            try {
+                for (int i = 0; i < node.Arguments.Count; i++) {
+                    if (i > 0) {
+                        WriteToken(",");
+                        WriteSpace();
+                    }
 
-                if (parameterInfos[i].IsOut) {
-                    WriteToken("out ");
-                    Visit(node.Arguments[i]);
+                    if (parameterInfos[i].IsOut) {
+                        WriteToken("out ");
+                        Visit(node.Arguments[i]);
+                    }
+                    else {
+                        Visit(node.Arguments[i]);
+                    }
                 }
-                else {
-                    Visit(node.Arguments[i]);
-                }
+            }
+            catch (Exception e) {
+                Debugger.Break();
             }
 
             WriteToken(")");

@@ -21,14 +21,85 @@ namespace UIForia.Compilers {
             return GetAssignmentFactory().Invoke(target, src);
         }
 
+        public static NewExpression New(ConstructorInfo constructorInfo) {
+            return Expression.New(constructorInfo);
+        }
+
+        [ThreadStatic] private static Expression[] s_Array1;
+        [ThreadStatic] private static Expression[] s_Array2;
+        [ThreadStatic] private static Expression[] s_Array3;
+        [ThreadStatic] private static Expression[] s_Array4;
+
+        public static NewExpression New(ConstructorInfo constructorInfo, Expression p0) {
+            s_Array1 = s_Array1 ?? new Expression[1];
+            s_Array1[0] = p0;
+            NewExpression retn = Expression.New(constructorInfo, s_Array1);
+            s_Array1[0] = null;
+            return retn;
+        }
+
+        public static NewExpression New(ConstructorInfo constructorInfo, Expression p0, Expression p1) {
+            s_Array2 = s_Array2 ?? new Expression[2];
+            s_Array2[0] = p0;
+            s_Array2[1] = p1;
+            NewExpression retn = Expression.New(constructorInfo, s_Array2);
+            s_Array2[0] = null;
+            s_Array2[1] = null;
+            return retn;
+        }
+
+        public static NewExpression New(ConstructorInfo constructorInfo, Expression p0, Expression p1, Expression p2) {
+            s_Array3 = s_Array3 ?? new Expression[3];
+            s_Array3[0] = p0;
+            s_Array3[1] = p1;
+            s_Array3[2] = p2;
+            NewExpression retn = Expression.New(constructorInfo, s_Array3);
+            s_Array3[0] = null;
+            s_Array3[1] = null;
+            s_Array3[2] = null;
+            return retn;
+        }
+        
+        public static NewExpression New(ConstructorInfo constructorInfo, Expression p0, Expression p1, Expression p2, Expression p3) {
+            s_Array4 = s_Array4 ?? new Expression[4];
+            s_Array4[0] = p0;
+            s_Array4[1] = p1;
+            s_Array4[2] = p2;
+            s_Array4[3] = p3;
+            NewExpression retn = Expression.New(constructorInfo, s_Array4);
+            s_Array4[0] = null;
+            s_Array4[1] = null;
+            s_Array4[2] = null;
+            s_Array4[3] = null;
+            return retn;
+        }
+
+        // todo -- use the non list allocating versions
         public static MethodCallExpression CallInstanceUnchecked(Expression target, MethodInfo method, params Expression[] arguments) {
-            if(method == null) throw new NullReferenceException();
+            if (method == null) throw new NullReferenceException();
             return GetInstanceCall0Factory().Invoke(method, target, new ReadOnlyCollection<Expression>(arguments));
         }
 
+        // todo -- better support for 
         public static Expression CallStaticUnchecked(MethodInfo method, params Expression[] arguments) {
-            if(method == null) throw new NullReferenceException();
+            if (method == null) throw new NullReferenceException();
             return GetStaticCallFactory().Invoke(method, new ReadOnlyCollection<Expression>(arguments));
+        }
+
+        // todo -- reduce allocations
+        public static Expression CallStaticUnchecked(MethodInfo method, Expression arg0) {
+            if (method == null) throw new NullReferenceException();
+            return GetStaticCallFactory().Invoke(method, new ReadOnlyCollection<Expression>(new[] {arg0}));
+        }
+
+        public static Expression CallStaticUnchecked(MethodInfo method, Expression arg0, Expression arg1) {
+            if (method == null) throw new NullReferenceException();
+            return GetStaticCallFactory().Invoke(method, new ReadOnlyCollection<Expression>(new[] {arg0, arg1}));
+        }
+
+        public static Expression CallStaticUnchecked(MethodInfo method, Expression arg0, Expression arg1, Expression arg2) {
+            if (method == null) throw new NullReferenceException();
+            return GetStaticCallFactory().Invoke(method, new ReadOnlyCollection<Expression>(new[] {arg0, arg1, arg2}));
         }
 
         private static Func<Expression, Type, MethodInfo, UnaryExpression> GetConversionFactory() {

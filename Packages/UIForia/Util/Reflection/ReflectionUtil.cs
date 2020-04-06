@@ -479,6 +479,23 @@ namespace UIForia.Util {
             }
         }
 
+        [ThreadStatic] private static Type[] ThreadSafeTypeArray1;
+        [ThreadStatic] private static Type[] ThreadSafeTypeArray2;
+        [ThreadStatic] private static Type[] ThreadSafeTypeArray3;
+        
+        public static Type[] GetTempTypeArray(Type type) {
+            ThreadSafeTypeArray1 = ThreadSafeTypeArray1 ?? new Type[1];
+            ThreadSafeTypeArray1[0] = type;
+            return ThreadSafeTypeArray1;
+        }
+        
+        public static Type[] GetTempTypeArray(Type type0, Type type1) {
+            ThreadSafeTypeArray2 = ThreadSafeTypeArray2 ?? new Type[1];
+            ThreadSafeTypeArray2[0] = type0;
+            ThreadSafeTypeArray2[1] = type1;
+            return ThreadSafeTypeArray2;
+        }
+
         public static void ReleaseTempTypeArray(ref Type[] array) { }
 
         public static Type CreateNestedGenericType(Type containingType, Type nestedType, IList<Type> genericArguments) {

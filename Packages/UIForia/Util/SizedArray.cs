@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
 
 namespace UIForia.Util {
 
@@ -22,18 +24,20 @@ namespace UIForia.Util {
         }
 
         public static ReadOnlySizedArray<T> CopyFrom(T[] source, int size = -1) {
-            
+
             if (source == null || size == 0) {
                 return default;
             }
-            
+
             if (size < 0) {
                 size = source.Length;
             }
+
             T[] array = new T[size];
             for (int i = 0; i < size; i++) {
                 array[i] = source[i];
             }
+
             return new ReadOnlySizedArray<T>(size, array);
         }
 
@@ -61,7 +65,7 @@ namespace UIForia.Util {
 
         public T Add(in T item) {
             if (array == null) {
-                array = new T[8];
+                array = new T[4];
             }
             else if (size + 1 >= array.Length) {
                 Array.Resize(ref array, size + array.Length * 2);
@@ -72,9 +76,33 @@ namespace UIForia.Util {
             return item;
         }
 
+        public SizedArray<T> Clone(int threshold = -1) {
+            if (array == null) return default;
+            if (threshold <= 0) {
+                T[] a = new T[size];
+                Array.Copy(a, 0, array, size, size);
+                return new SizedArray<T>(a);
+            }
+            else {
+                int diff = size - array.Length;
+                T[] a;
+                if (diff <= threshold) {
+                    a = new T[array.Length + threshold];
+                }
+                else {
+                    a = new T[array.Length];
+                }
+                Array.Copy(a, 0, array, size, size);
+                return new SizedArray<T>() {
+                    array = a,
+                    size = size
+                };
+            }
+        }
+
         public void AddRange(SizedArray<T> collection) {
             if (size + collection.size >= array.Length) {
-                System.Array.Resize(ref array, size + collection.size * 2);
+                Array.Resize(ref array, size + collection.size * 2);
             }
 
             const int HandCopyThreshold = 5;
@@ -85,7 +113,7 @@ namespace UIForia.Util {
                 }
             }
             else {
-                System.Array.Copy(collection.array, 0, array, size, collection.size);
+                Array.Copy(collection.array, 0, array, size, collection.size);
             }
 
             size += collection.size;
@@ -93,7 +121,7 @@ namespace UIForia.Util {
 
         public void AddRange(ReadOnlySizedArray<T> collection) {
             if (size + collection.size >= array.Length) {
-                System.Array.Resize(ref array, size + collection.size * 2);
+                Array.Resize(ref array, size + collection.size * 2);
             }
 
             const int HandCopyThreshold = 5;
@@ -104,10 +132,27 @@ namespace UIForia.Util {
                 }
             }
             else {
-                System.Array.Copy(collection.array, 0, array, size, collection.size);
+                Array.Copy(collection.array, 0, array, size, collection.size);
             }
 
             size += collection.size;
+        }
+
+        public T[] CloneArray() {
+            T[] retn = new T[size];
+            for (int i = 0; i < size; i++) {
+                retn[i] = array[i];
+            }
+
+            return retn;
+        }
+
+        public void Clear() {
+            size = 0;
+            if (array == null) {
+                return;
+            }
+            Array.Clear(array, 0, array.Length);
         }
 
     }

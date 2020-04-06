@@ -31,7 +31,7 @@ namespace UIForia.Generated {
             // new UIForia.Elements.ScrollView 162:10
             targetElement_1 = scope.application.CreateElementFromPoolWithType(214, root, 5, 1, 1);
             hydrateScope = new UIForia.Compilers.TemplateScope(scope.application);
-            targetElement_1.attributes.array[0] = new UIForia.Elements.ElementAttribute(@"id", @"option-list");
+            //targetElement_1.attributes.array[0] = new UIForia.Elements.ElementAttribute(@"id", @"option-list");
             UIForia.Systems.LinqBindingNode.Get(scope.application, root, targetElement_1, root, 11, -1, 12, -1);
             scope.application.HydrateTemplate(2, targetElement_1, hydrateScope);
             return root;

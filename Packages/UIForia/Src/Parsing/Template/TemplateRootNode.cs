@@ -7,17 +7,17 @@ namespace UIForia.Parsing {
         public readonly string templateName;
         public readonly TemplateShell templateShell;
 
-        internal LightList<SlotNode> slotDefinitionNodes;
+        private SizedArray<SlotNode> slotDefinitionNodes;
 
         public TemplateRootNode(string templateName, TemplateShell templateShell, ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
             : base(attributes, in templateLineInfo) {
             this.templateName = templateName;
             this.templateShell = templateShell;
             this.root = this;
+            this.slotDefinitionNodes = default;
         }
 
         internal void AddSlot(SlotNode slotNode) {
-            slotDefinitionNodes = slotDefinitionNodes ?? new LightList<SlotNode>(4);
             slotDefinitionNodes.Add(slotNode);
         }
 
@@ -27,10 +27,7 @@ namespace UIForia.Parsing {
 
         public string DebugDump() {
 
-            if (children == null) {
-                return $"{GetTagName()}";
-            }
-
+            
             IndentedStringBuilder stringBuilder = new IndentedStringBuilder(512);
         
             stringBuilder.Append(GetTagName());
@@ -45,6 +42,18 @@ namespace UIForia.Parsing {
 
             return stringBuilder.ToString();
 
+        }
+
+        public bool TryGetSlotNode(string slotName, out SlotNode slotNode) {
+            for (int i = 0; i < slotDefinitionNodes.size; i++) {
+                if (slotName == slotDefinitionNodes.array[i].slotName) {
+                    slotNode = slotDefinitionNodes.array[i];
+                    return true;
+                }
+            }
+
+            slotNode = null;
+            return false;
         }
 
     }

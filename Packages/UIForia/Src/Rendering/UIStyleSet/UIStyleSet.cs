@@ -291,7 +291,7 @@ namespace UIForia.Rendering {
             }
 
             LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
-            IStyleSystem styleSystem = element.application.styleSystem;
+            //IStyleSystem styleSystem = element.application.styleSystem;
             
             StyleEntry[] styleEntries = availableStyles.Array;
             for (int i = 0; i < availableStyles.Count; i++) {
@@ -668,7 +668,7 @@ namespace UIForia.Rendering {
 
             style.SetProperty(property);
 
-            IStyleSystem styleSystem = element.application.styleSystem;
+            StyleSystem styleSystem = null; //element.application.styleSystem;
             
             StyleProperty currentValue;
             if (TryGetPropertyValueInState(property.propertyId, currentState, out currentValue)) {
@@ -765,7 +765,7 @@ namespace UIForia.Rendering {
 
         private void UpdatePropertyMap(LightList<StylePropertyId> toUpdate) {
             StylePropertyId[] propertyIdArray = toUpdate.Array;
-            IStyleSystem styleSystem = element.application.styleSystem;
+            StyleSystem styleSystem = null; //element.application.styleSystem;
 
             for (int i = 0; i < toUpdate.Count; i++) {
                 StylePropertyId propertyId = propertyIdArray[i];

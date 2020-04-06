@@ -1,31 +1,13 @@
-using UIForia.Exceptions;
-using UIForia.Parsing;
 using UIForia.Util;
-using Debug = UnityEngine.Debug;
+using UnityEngine;
 
-namespace UIForia.Src {
-
-    public class UIForiaLogger {
-
-        public void Log() { }
-
-    }
-
-    public class DiagnosticProvider {
-
-        private readonly object locker = new object();
-
-        public void SetContext(string fileName, int lineNumber, int columnNumber) { }
-
-    }
+namespace UIForia.Parsing {
 
     internal static class TemplateValidator {
 
         public static void Validate(TemplateShell templateShell) {
 
             LightStack<TemplateNode> stack = LightStack<TemplateNode>.Get();
-
-            Module module = templateShell.module;
             
             for (int i = 0; i < templateShell.templateRootNodes.size; i++) {
                 string templateId = templateShell.templateRootNodes.array[i].templateName;
@@ -63,12 +45,8 @@ namespace UIForia.Src {
                             continue;
                         }
 
-                        if (elementNode.processedType.IsContainerElement) {
-                            if (elementNode.slotOverrideNodes != null && elementNode.slotOverrideNodes.size != 0) {
-                                Debug.LogError($"Container element <{elementNode.GetTagName()}> in file {rootNode.templateShell.filePath} cannot contain slot overrides");
-                                continue;
-                            }
-                        }
+                        // todo -- track dependencies by tag name
+                  
 
                     }
                     else if (node is SlotNode slotNode) {
@@ -78,7 +56,7 @@ namespace UIForia.Src {
                             case SlotType.Forward: {
 
                                 if (!(slotNode.parent is ElementNode expanded && !expanded.processedType.IsContainerElement)) {
-                                    Debug.LogError(InvalidSlotOverride("forward", slotNode.parent.TemplateNodeDebugData, slotNode.TemplateNodeDebugData));
+                                    // Debug.LogError(InvalidSlotOverride("forward", slotNode.parent.TemplateNodeDebugData, slotNode.TemplateNodeDebugData));
                                     continue;
                                 }
 

@@ -1,0 +1,18 @@
+<UITemplate>
+    <Contents attr:x="x" attr:y="y">
+        <Div>
+            <Panel>
+                <ExpandedTemplate>
+                    <override:title attr:x="expandedTempate.GetX()">
+                        Hello
+                    </override:title>
+                </ExpandedTemplate>
+            </Panel>
+        </Div>
+        <Panel/>
+        <Group/>
+        <define:someslot>
+            <Text>Hello</Text>
+        </define:someslot>
+    </Contents>
+</UITemplate>

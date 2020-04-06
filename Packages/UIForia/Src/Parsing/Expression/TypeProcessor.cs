@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
@@ -35,19 +36,21 @@ namespace UIForia.Parsing {
         private static readonly object genericLock = new object();
 
         [ThreadStatic] private static List<CharSpan> strings;
-        
+
         internal static IList<Type> moduleTypes;
         internal static IList<Type> elements;
         internal static IList<Type> painters;
         internal static IList<Type> layouts;
         private static Module[] modules;
         private static TemplateCache s_TemplateCache;
-        
+#if UNITY_EDITOR
+        internal static IList<MethodInfo> changeHandlers;
+#endif
         static TypeProcessor() {
 
             TypeResolver.Initialize();
 #if UNITY_EDITOR
-            ScanFast(out moduleTypes, out elements, out layouts, out painters);
+            ScanFast(out moduleTypes, out elements, out layouts, out painters, out changeHandlers);
 #else
             ScanSlow(out moduleTypes, out elements, out layouts, out painters);
 #endif
@@ -117,7 +120,7 @@ namespace UIForia.Parsing {
                 retn.references++;
                 retn.templateRootNode = generic.templateRootNode;
             }
-            
+
             return retn;
         }
 
@@ -133,12 +136,14 @@ namespace UIForia.Parsing {
             }
         }
 
-        private static void ScanFast(out IList<Type> moduleTypes, out IList<Type> elementTypes, out IList<Type> layoutTypes, out IList<Type> renderTypes) {
+        private static void ScanFast(out IList<Type> moduleTypes, out IList<Type> elementTypes, out IList<Type> layoutTypes, out IList<Type> renderTypes, out IList<MethodInfo> changeHandlers) {
             moduleTypes = TypeCache.GetTypesDerivedFrom<Module>();
             elementTypes = TypeCache.GetTypesDerivedFrom<UIElement>();
             layoutTypes = TypeCache.GetTypesDerivedFrom<AwesomeLayoutBox>();
             renderTypes = TypeCache.GetTypesDerivedFrom<RenderBox>();
             TypeCache.TypeCollection templateParsers = TypeCache.GetTypesWithAttribute(typeof(TemplateParserAttribute));
+
+            changeHandlers = TypeCache.GetMethodsWithAttribute<OnPropertyChanged>();
 
             templateParserDefinitions = new List<TemplateParserDefinition>(templateParsers.Count);
 
@@ -270,7 +275,7 @@ namespace UIForia.Parsing {
 
             public void AddDiagnostic(string message, int lineNumber = -1, int column = -1) {
                 if (provider == null) return;
-                
+
             }
 
         }
@@ -338,7 +343,7 @@ namespace UIForia.Parsing {
                     return null;
                 }
             }
-            
+
             return AddResolvedGenericElementType(generic, resolvedTypes);
         }
 
@@ -359,6 +364,52 @@ namespace UIForia.Parsing {
 
                 return retn;
             }
+        }
+
+        public static ReadOnlySizedArray<PropertyChangeHandlerDesc> GetChangeHandlers(Type type) {
+
+#if UNITY_EDITOR
+
+            // todo -- use typecache
+
+#else
+#endif
+
+            SizedArray<PropertyChangeHandlerDesc> retn = default;
+
+            MethodInfo[] candidates = type.GetMethods(BindingFlags.Instance);
+
+            for (int i = 0; i < candidates.Length; i++) {
+
+                IEnumerable<OnPropertyChanged> attrs = candidates[i].GetCustomAttributes<OnPropertyChanged>();
+
+                if (!attrs.Any()) continue;
+
+                if (!candidates[i].IsPublic) {
+                    // todo -- diagnostic
+                    Debug.Log($"Unable to invoke method {type.GetTypeName()}.{candidates[i].Name} as a PropertyChangeHandler because it is not marked as public");
+                }
+
+                ParameterInfo[] parameters = candidates[i].GetParameters();
+
+                if (parameters.Length > 2) {
+                    // todo -- diagnostic
+                    Debug.Log($"Unable to invoke method {type.GetTypeName()}.{candidates[i].Name} as a PropertyChangeHandler because it is not marked as public");
+                }
+
+                foreach (OnPropertyChanged a in attrs) {
+
+                    retn.Add(new PropertyChangeHandlerDesc() {
+                        methodInfo = candidates[i],
+                        parameterInfos = parameters,
+                        memberName = a.propertyName,
+                    });
+                }
+
+            }
+
+            return retn;
+
         }
 
     }

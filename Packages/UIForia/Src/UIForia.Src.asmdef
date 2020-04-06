@@ -4,8 +4,8 @@
         "Unity.TextMeshPro",
         "Unity.Mathematics",
         "Unity.Burst",
-        "Unity.Collections",
-        "UIForia.Util"
+        "UIForia.Util",
+        "UIForia.ThirdParty"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

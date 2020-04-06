@@ -50,9 +50,9 @@ namespace UIForia {
             // we can go from template path to module
             // how do we bootstrap this bitch?
             
-            application = usePreCompiledTemplates
-                ? GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection)
-                : GameApplication.CreateFromRuntimeTemplates(settings, camera, DoDependencyInjection);
+            // application = usePreCompiledTemplates
+            //     ? GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection)
+            //     : GameApplication.CreateFromRuntimeTemplates(settings, camera, DoDependencyInjection);
 
         }
 

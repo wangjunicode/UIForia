@@ -35,7 +35,7 @@ namespace UIForia.Parsing {
     public abstract class TemplateNode {
 
         // todo -- try make these lists into arrays
-        public LightList<TemplateNode> children;
+        public SizedArray<TemplateNode> children;
         public ReadOnlySizedArray<AttributeDefinition> attributes;
         public TemplateRootNode root;
         public TemplateNode parent;
@@ -55,7 +55,6 @@ namespace UIForia.Parsing {
         public void AddChild(TemplateNode child) {
             child.parent = this;
             child.root = root;
-            children = children ?? new LightList<TemplateNode>();
             children.Add(child);
         }
 
@@ -71,9 +70,9 @@ namespace UIForia.Parsing {
             return false;
         }
 
-        public TemplateNode this[int i] => children?.array[i];
+        public TemplateNode this[int i] => children.array != null ? children.array[i] : null;
 
-        public int ChildCount => children?.size ?? 0;
+        public int ChildCount => children.size;
         public Type ElementType => processedType.rawType;
 
         public virtual TemplateNodeDebugData TemplateNodeDebugData => new TemplateNodeDebugData() {
@@ -81,6 +80,16 @@ namespace UIForia.Parsing {
             tagName = "",
             fileName = root != null ? root.templateShell.filePath : ((TemplateRootNode) this).templateShell.filePath
         };
+
+        public int CountRealAttributes() {
+            int count = 0;
+            for (int i = 0; i < attributes.size; i++) {
+                if (attributes.array[i].type == AttributeType.Attribute) {
+                    count++;
+                }
+            }
+            return count;
+        }
 
         public abstract string GetTagName();
 
@@ -137,7 +146,7 @@ namespace UIForia.Parsing {
                 };
             }
             else {
-                templateNode = new ElementNode(moduleName, tagName, attributes, lineInfo) {
+                templateNode = new ExpandedNode(moduleName, tagName, attributes, lineInfo) {
                     root = root,
                     parent = this,
                     processedType = elementType,
@@ -198,15 +207,14 @@ namespace UIForia.Parsing {
         }
 
         public virtual void DebugDump(IndentedStringBuilder stringBuilder) {
-            
+
             stringBuilder.Append(GetTagName());
-            if (children != null) {
-                stringBuilder.Indent();
-                for (int i = 0; i < children.size; i++) {
-                    children[i].DebugDump(stringBuilder);
-                }
-                stringBuilder.Outdent();
+            stringBuilder.Indent();
+            for (int i = 0; i < children.size; i++) {
+                children[i].DebugDump(stringBuilder);
             }
+
+            stringBuilder.Outdent();
             stringBuilder.Append("\n");
         }
 

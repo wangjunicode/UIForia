@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading;
 using UIForia.Attributes;
 using UIForia.Compilers;
+using UIForia.Elements;
 using UIForia.Util;
 using UnityEngine.Assertions;
 
@@ -24,16 +25,25 @@ namespace UIForia.Parsing {
         internal string templateId;
         internal string implicitStyles;
         internal string[] importedStyleSheets;
+        private bool gotReflection;
 
+        public MethodInfo updateMethod;
+        public MethodInfo createMethod;
+        
         private Flags flags;
         internal Module module;
         internal TemplateRootNode templateRootNode;
         internal TemplateLocation? resolvedTemplateLocation;
         
-        internal StructList<PropertyChangeHandlerDesc> methods;
+        internal StructList<PropertyChangeHandlerDesc> methods; // todo -- remove
+        private ConstructorInfo ctor;
+        
+        private ReadOnlySizedArray<PropertyChangeHandlerDesc> changeHandlers;
         
         private static int currentTypeId = -1;
-
+        
+        internal DateTime lastTemplateParseTime;
+        
         [Flags]
         private enum Flags {
 
@@ -43,7 +53,8 @@ namespace UIForia.Parsing {
             RequiresUpdateFn = 1 << 3,
             IsDynamic = 1 << 4,
             IsUnresolvedGeneric = 1 << 5,
-            IsContainerElement = 1 << 6
+            IsContainerElement = 1 << 6,
+            IsTextElement = 1 << 7
 
         }
 
@@ -59,6 +70,10 @@ namespace UIForia.Parsing {
 
             if (templatePath == null && templateId == null) {
                 IsContainerElement = true;
+            }
+
+            if (typeof(UITextElement).IsAssignableFrom(rawType)) {
+                flags |= Flags.IsTextElement;
             }
 
             this.IsUnresolvedGeneric = rawType.IsGenericTypeDefinition;
@@ -154,11 +169,12 @@ namespace UIForia.Parsing {
             }
         }
 
-        public struct PropertyChangeHandlerDesc {
+        public bool IsTextElement {
+            get => (flags & Flags.IsTextElement) != 0;
+        }
 
-            public MethodInfo methodInfo;
-            public string memberName;
-
+        public bool DeclaresTemplate {
+            get => templatePath != null;
         }
 
         public void GetChangeHandlers(string memberName, StructList<PropertyChangeHandlerDesc> retn) {
@@ -308,6 +324,31 @@ namespace UIForia.Parsing {
 
             return new ProcessedType(type, elementPath, templatePath, templateId, tagName, implicitStyleNames, styleSheets);
         }
+        
+        public ConstructorInfo GetConstructor() {
+            if (ctor == null) {
+                ctor = rawType.GetConstructor(Type.EmptyTypes);
+            }
+            return ctor;
+        }
+
+        public void EnsureReflectionData() {
+            if (gotReflection) return;
+            gotReflection = true;
+            // threadsafe in that we dont care about duplicating the work since its always the same result if run twice
+            updateMethod = rawType.GetMethod(nameof(UIElement.OnUpdate), Type.EmptyTypes);
+            createMethod = rawType.GetMethod(nameof(UIElement.OnCreate), Type.EmptyTypes);
+            requiresUpdateFn = ReflectionUtil.IsOverride(updateMethod);
+            changeHandlers = TypeProcessor.GetChangeHandlers(rawType);
+        }
+
+    }
+
+    public struct PropertyChangeHandlerDesc {
+
+        public MethodInfo methodInfo;
+        public ParameterInfo[] parameterInfos;
+        public string memberName;
 
     }
 

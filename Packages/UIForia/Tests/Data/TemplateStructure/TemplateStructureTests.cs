@@ -178,7 +178,6 @@ namespace TemplateStructure {
             Assert.AreEqual("from override slot", GetText(root[0][0][0]));
         }
 
-
         [Template("TestTemplateStructure_SlotDefine.xml#use_default_children_outer")]
         public class UseDefaultChildrenOuter : UIElement { }
 

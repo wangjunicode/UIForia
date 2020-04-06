@@ -378,6 +378,23 @@ namespace UIForia.Parsing {
 
             return null;
         }
+        
+        public enum ParsedTemplateType {
+
+            FromCode,
+            Dynamic
+
+        }
+    
+        public struct RawTemplateContent {
+
+            public string templateId;
+            public XElement content;
+            public XElement elementDefinition;
+            public ParsedTemplateType type;
+            public ProcessedType processedType;
+
+        }
 
         private static ProcessedType CreateDynamicElementType(TemplateShell templateShell, RawTemplateContent node) {
             XElement rootNode = node.elementDefinition;

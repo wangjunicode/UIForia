@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Style;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -15,7 +16,7 @@ namespace UIForia.Systems {
         private LightList<AwesomeLayoutRunner> runners;
         internal int traversalIndex;
 
-        public AwesomeLayoutSystem(Application application) {
+        public AwesomeLayoutSystem(Application application, StyleSystem2 styleSystem) {
             this.application = application;
             this.runners = new LightList<AwesomeLayoutRunner>();
 
@@ -28,7 +29,8 @@ namespace UIForia.Systems {
                     Array.IndexOf(uiViews, b.rootElement.View) - Array.IndexOf(uiViews, a.rootElement.View));
             };
 
-            application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+            // todo -- this will likely change
+            styleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
             // application.StyleSystem.onStylePropertyAnimated += HandleStylepropertyAnimated;
         }
 
@@ -311,13 +313,8 @@ namespace UIForia.Systems {
             }
         }
 
-        public void OnElementEnabled(UIElement element) { }
-
-        public void OnElementDisabled(UIElement element) {
-            // disable / destroy layout box?
-        }
-
         public void OnElementDestroyed(UIElement element) {
+            // todo -- need to traverse and recycle boxes
             if (element.layoutBox != null) {
                 element.layoutBox.Destroy();
                 element.layoutBox = null;

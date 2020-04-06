@@ -10,7 +10,7 @@ namespace UIForia {
         public static void CreateOptionsObject() {
          
             UIForiaSettings asset = ScriptableObject.CreateInstance<UIForiaSettings>();
-            Material svgxMaterial = new Material(Shader.Find("UIForia/BatchedTransparent"));
+            // Material svgxMaterial = new Material(Shader.Find("UIForia/BatchedTransparent"));
             Material uiforiaStdMaterial = new Material(Shader.Find("UIForia/Standard"));
             Material sdfPathMaterial = new Material(Shader.Find("UIForia/UIForiaPathSDF"));
             Material spriteAtlasMaterial = new Material(Shader.Find("UIForia/UIForiaSpriteAtlas"));
@@ -18,8 +18,8 @@ namespace UIForia {
             Material clipCountMaterial = new Material(Shader.Find("UIForia/UIForiaClipCount"));
             Material clipBlitMaterial = new Material(Shader.Find("UIForia/UIForiaClipBlit"));
 
-            AssetDatabase.CreateAsset(svgxMaterial, "Assets/Resources/UIForiaSVGXMaterial.mat");
-            asset.svgxMaterial = svgxMaterial;
+            // AssetDatabase.CreateAsset(svgxMaterial, "Assets/Resources/UIForiaSVGXMaterial.mat");
+            // asset.svgxMaterial = svgxMaterial;
 
             AssetDatabase.CreateAsset(uiforiaStdMaterial, "Assets/Resources/UIForiaStandardMaterial.mat");
             asset.batchedMaterial = uiforiaStdMaterial;
@@ -64,7 +64,7 @@ namespace UIForia {
 
             foreach (string file in files) {
                 string newPath = file.Replace(UnityEngine.Application.dataPath, userPath);
-                Directory.CreateDirectory(new FileInfo(newPath).Directory.FullName);
+                Directory.CreateDirectory(new System.IO.FileInfo(newPath).Directory.FullName);
                 File.Copy(file, newPath, true);
             }
 
@@ -72,7 +72,7 @@ namespace UIForia {
             
             foreach (string file in files) {
                 string newPath = file.Replace(UnityEngine.Application.dataPath, userPath);
-                Directory.CreateDirectory(new FileInfo(newPath).Directory.FullName);
+                Directory.CreateDirectory(new System.IO.FileInfo(newPath).Directory.FullName);
                 File.Copy(file, newPath, true);
             }
             
@@ -80,7 +80,7 @@ namespace UIForia {
 
             foreach (string file in files) {
                 string newPath = file.Replace(internalSourcePath, internalDestPath);
-                Directory.CreateDirectory(new FileInfo(newPath).Directory.FullName);
+                Directory.CreateDirectory(new System.IO.FileInfo(newPath).Directory.FullName);
                 File.Copy(file, newPath, true);
             }
 

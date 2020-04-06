@@ -41,7 +41,7 @@ namespace Documentation {
         }
 
         public void Start() {
-            application = GameApplication.CreateFromRuntimeTemplates( GetTemplateSettings(typeof(WorldRoot)), camera, null);
+            // application = GameApplication.CreateFromRuntimeTemplates( GetTemplateSettings(typeof(WorldRoot)), camera, null);
         }
 
         void Update() {

@@ -4,11 +4,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Parsing;
-using UIForia.Templates;
 using UIForia.Util;
 using Unity.Jobs;
 using UnityEngine.Assertions;
@@ -26,7 +26,7 @@ namespace UIForia.Src {
         private static List<Diagnostic> diagnostics;
         private static readonly object diagnosticLock = new object();
         private static TemplateCache s_TemplateCache;
-        
+
         public static Module BuiltInModule { get; private set; }
 
         static ModuleSystem() {
@@ -60,9 +60,8 @@ namespace UIForia.Src {
 
             AssignElementsToModules();
 
-            Parse();
         }
-        
+
         private static void AssignElementsToModules() {
 
             Stopwatch sw = Stopwatch.StartNew();
@@ -94,7 +93,7 @@ namespace UIForia.Src {
             }
 
             sw.Stop();
-            Debug.Log($"Assigned elements to modules in {sw.Elapsed.TotalMilliseconds:F3}ms with {elements.Count} element types");
+//            Debug.Log($"Assigned elements to modules in {sw.Elapsed.TotalMilliseconds:F3}ms with {elements.Count} element types");
         }
 
         internal static Module LoadRootModule(Type rootType) {
@@ -111,89 +110,7 @@ namespace UIForia.Src {
                 throw new Exception("Unable to find module for type " + rootType);
             }
 
-            // for (int i = 0; i < dependencySort.Count; i++) {
-            //     Module module = dependencySort[i];
-            //
-            //     // IEnumerable<string> templateFiles = Directory.EnumerateFiles(module.location, "*.xml", SearchOption.AllDirectories);
-            //     IEnumerable<string> styleFiles = Directory.EnumerateFiles(module.location, "*.style", SearchOption.AllDirectories);
-            //
-            //     // foreach (string file in templateFiles) {
-            //     //     module.AddTemplateFile(file);
-            //     // }
-            //
-            //     foreach (string file in styleFiles) {
-            //         //  module.AddStyleFile(file);
-            //     }
-            // }
-
             return rootModule;
-        }
-
-        private static void Parse() {
-
-            Stopwatch w = Stopwatch.StartNew();
-
-            s_TemplateCache = new TemplateCache(s_TemplateSet, s_TemplateCache);
-
-            ParseTemplateJob job = new ParseTemplateJob(s_TemplateCache.cache);
-
-            // JobHandle handle = job.Schedule(s_TemplateCache.cache.Length, 1);
-
-            // todo -- some kind of race condition happening in parser when parallel
-            job.Run(s_TemplateCache.cache.Length);
-            // handle.Complete();
-            job.handle.Free();
-
-            w.Stop();
-            Debug.Log($"Read {s_TemplateSet.Count} files in {w.Elapsed.TotalMilliseconds:F3} ms");
-
-            w.Reset();
-            w.Start();
-
-            for (int i = 0; i < s_TemplateCache.cache.Length; i++) {
-
-                ref TemplateCache.FileInfo fileInfo = ref s_TemplateCache.cache[i];
-                TemplateShell templateShell = fileInfo.templateShell;
-                if(templateShell == null) continue;
-                // we always validate even if we didnt require a re-parse because 
-                // this is where tag names are resolved into ProcessedTypes and 
-                // its possible that an external change could change the resolved
-                // ProcessedType of a given tag. (ie if an external file is added/removed/changed)
-                // this is unlikely but this step takes less than 5ms and its good to be safe.
-                TemplateValidator.Validate(templateShell);
-
-                if (templateShell.styles != null) {
-                    for (int s = 0; s < templateShell.styles.size; s++) {
-                        StyleDefinition style = templateShell.styles[s];
-                        if (!string.IsNullOrEmpty(style.body)) { }
-                        else { }
-                    }
-                }
-
-            }
-
-            foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
-                ProcessedType processedType = kvp.Value;
-
-                if (processedType.resolvedTemplateLocation == null || processedType.IsContainerElement) {
-                    continue;
-                }
-
-                if (s_TemplateCache.TryGetFileInfo(processedType.resolvedTemplateLocation.Value.filePath, out TemplateCache.FileInfo info)) {
-
-                    if(info.templateShell == null) continue;
-                    
-                    processedType.templateRootNode = info.templateShell.GetTemplateRoot(processedType.resolvedTemplateLocation.Value.templateId);
-
-                    // templateRootNode processedType MUST be null so that we can associate multiple types with the same template source
-                    // this is currently used for generics but could be a general feature that allows template swapping between types
-                    // as long as the template compiles for that type.
-                    
-                }
-
-            }
-
-            Debug.Log($"Validated {s_TemplateSet.Count} files in {w.Elapsed.TotalMilliseconds:F3} ms");
         }
 
         private static bool TryAssignModule(ProcessedType processedType) {
@@ -210,7 +127,8 @@ namespace UIForia.Src {
             for (int i = 0; i < modules.Length; i++) {
                 Module module = modules[i];
                 if (path.StartsWith(module.location, StringComparison.Ordinal)) {
-                    module.elementTypes.Add(processedType);
+                    
+                    module.AddElementType(processedType);
 
                     try {
                         module.tagNameMap.Add(processedType.tagName, processedType);
@@ -224,6 +142,8 @@ namespace UIForia.Src {
                     }
 
                     processedType.module = module;
+
+                    // todo -- maybe run this as part of template gather in case something changed
 
                     if (!processedType.IsContainerElement && !processedType.rawType.IsAbstract) {
                         processedType.resolvedTemplateLocation = module.ResolveTemplatePath(new TemplateLookup(processedType));
@@ -251,37 +171,6 @@ namespace UIForia.Src {
 
             return attr.filePath;
         }
-
-        // internal static Type GetModuleTypeFromElementType(Type type) {
-        //     if (!type.IsSubclassOf(typeof(UIElement))) {
-        //         throw new ModuleLoadException($"Cannot create a module for a type that is not a subclass of {TypeNameGenerator.GetTypeName(typeof(UIElement))}.");
-        //     }
-        //
-        //     if (type.IsAbstract) {
-        //         throw new ModuleLoadException($"Cannot create a module for a type that is abstract. Tried to create module for {TypeNameGenerator.GetTypeName(typeof(UIElement))} but it was abstract.");
-        //     }
-        //
-        //     if (type.IsSubclassOf(typeof(UITextElement))) {
-        //         throw new ModuleLoadException($"Cannot create a module for a type that is a subclass of {TypeNameGenerator.GetTypeName(typeof(UITextElement))}. Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
-        //     }
-        //
-        //     ProcessedType processedType = TypeProcessor.GetProcessedType(type);
-        //     if (processedType.IsContainerElement) {
-        //         throw new ModuleLoadException($"Cannot create a module for a type that is declared as a Container element. Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
-        //     }
-        //
-        //     if (type.IsSubclassOf(typeof(UIImageElement))) {
-        //         throw new ModuleLoadException($"Cannot create a module for a type that is a subclass of {TypeNameGenerator.GetTypeName(typeof(UIImageElement))}.Tried to create module for {TypeNameGenerator.GetTypeName(type)}");
-        //     }
-        //
-        //     TemplateAttribute attribute = type.GetCustomAttribute<TemplateAttribute>();
-        //
-        //     if (attribute == null) {
-        //         throw new ModuleLoadException($"Can only create an application when the root element is annotated with [{nameof(TemplateAttribute)}]. {TypeNameGenerator.GetTypeName(type)} is missing one.");
-        //     }
-        //
-        //     return processedType;
-        // }
 
         private static void ValidateModulePaths() {
 
@@ -320,6 +209,7 @@ namespace UIForia.Src {
         }
 
         private static void Visit(Module module, LightStack<Module> stack, LightList<Module> sorted) {
+
 
             if (sorted.Contains(module)) {
                 return;
@@ -418,6 +308,236 @@ namespace UIForia.Src {
 
         public static IList<ProcessedType> GetTemplateElements() {
             return TypeProcessor.GetTemplateElements();
+        }
+
+        private static Module GetModuleFromEntryPointType(Type entryType) {
+            // todo -- if not element or abstract fail
+            ProcessedType type = TypeProcessor.GetProcessedType(entryType);
+
+            return type.module;
+        }
+
+        private static readonly SourceCache sourceCache = new SourceCache();
+
+        internal static ProcessedType[] GetTemplateTypes(Type entryType, IList<Type> dynamicTypes = null) {
+            if (!typeof(UIElement).IsAssignableFrom(entryType)) {
+                return null;
+            }
+
+            List<Module> modulesToCompile = new List<Module>() {
+                GetModuleFromEntryPointType(entryType)
+            };
+
+            if (dynamicTypes != null) {
+                for (int i = 0; i < dynamicTypes.Count; i++) {
+                    modulesToCompile.Add(GetModuleFromEntryPointType(dynamicTypes[i]));
+                }
+            }
+
+            Module[] list = FlattenDependencyTree(modulesToCompile);
+
+            LightList<TemplateShell> parseList = new LightList<TemplateShell>();
+
+            for (int i = 0; i < list.Length; i++) {
+                Module module = list[i];
+
+                ReadOnlySizedArray<TemplateShell> sources = module.GetTemplateShells();
+
+                for (int j = 0; j < sources.size; j++) {
+
+                    TemplateShell source = sources.array[j];
+
+                    sourceCache.Ensure(source.filePath);
+
+                    parseList.Add(source);
+
+                }
+
+            }
+
+            Parse(parseList);
+
+            MatchElementTypesToTemplateNodes(list);
+
+            // ParseStyles(templateTypes);
+            
+            return GatherTypesToCompile(entryType);
+            
+        }
+
+        private static ProcessedType[] GatherTypesToCompile(Type entryType) {
+
+            ProcessedType entry = TypeProcessor.GetProcessedType(entryType);
+            
+            HashSet<ProcessedType> toCompile = new HashSet<ProcessedType>();
+            HashSet<ProcessedType> searched = new HashSet<ProcessedType>();
+            
+            LightStack<TemplateNode> stack = new LightStack<TemplateNode>();
+            LightStack<ProcessedType> toSearchStack = new LightStack<ProcessedType>();
+
+            toCompile.Add(entry);
+            
+            toSearchStack.Push(entry);
+
+            while (toSearchStack.size != 0) {
+                
+                ProcessedType checkType = toSearchStack.Pop();
+                
+                stack.Push(checkType.templateRootNode);
+                
+                while (stack.size != 0) {
+                    TemplateNode current = stack.Pop();
+
+                    // dont want to add unresolved generics but do want to search them
+                
+                    if (current.processedType != null && current.processedType.DeclaresTemplate) {
+                    
+                        toCompile.Add(current.processedType);
+
+                        if (searched.Add(current.processedType)) {
+                            
+                            toSearchStack.Push(current.processedType);
+                            
+                        }
+                    
+                    }
+                
+                    for (int i = 0; i < current.children.size; i++) {
+                        stack.Push(current.children.array[i]);
+                    }
+                
+                }
+                
+            }
+                       
+            return toCompile.ToArray();
+        }
+
+        private static void MatchElementTypesToTemplateNodes(Module[] list) {
+
+            for (int i = 0; i < list.Length; i++) {
+                list[i].MatchElementTypesToTemplateNodes();
+            }
+
+        }
+
+        private struct ParseJob : IJobParallelFor, IJob {
+
+            public GCHandle handle;
+
+            public void Execute(int i) {
+                
+                LightList<TemplateShell> parseList = (LightList<TemplateShell>) handle.Target;
+                
+                TemplateShell templateShell = parseList.array[i];
+
+                FileInfo fileInfo = sourceCache.Get(parseList.array[i].filePath);
+
+                if (fileInfo.missing) {
+                    Debug.Log($"Cannot resolve file {fileInfo} referenced from {parseList.array[i].module.type.GetTypeName()}");
+                    return;
+                }
+
+                if (templateShell.lastParseVersion == fileInfo.lastWriteTime) {
+                    return;
+                }
+
+                templateShell.Reset();
+
+                TemplateParser parser = TemplateParser.GetParserForFileType("xml");
+
+                parser.OnSetup();
+
+                if (parser.TryParse(fileInfo.contents, templateShell)) {
+                    templateShell.lastParseVersion = fileInfo.lastWriteTime;
+                }
+                else {
+                    templateShell.lastParseVersion = default;
+                }
+
+                parser.OnReset();
+
+                TemplateValidator.Validate(templateShell); // separate job?
+
+            }
+
+            public void Execute() {
+
+                LightList<TemplateShell> parseList = (LightList<TemplateShell>) handle.Target;
+
+                for (int i = 0; i < parseList.size; i++) {
+                    Execute(i);
+                }
+
+            }
+
+        }
+
+        private static void Parse(LightList<TemplateShell> parseList) {
+
+            // todo -- jobify this stuff and connect with previous job for flushing pending updates
+            sourceCache.FlushPendingUpdates();
+
+            ParseJob parseJob = new ParseJob() {
+                handle = GCHandle.Alloc(parseList)
+            };
+            
+            parseJob.Run();
+            
+            parseJob.handle.Free();
+
+        }
+
+        private static void CompileTemplates(ProcessedType[] typesToCompile) {
+
+            // parallel eventually but likely need to make LinqCompiler threadsafe
+            // could fake parallel by enqueing real compile jobs when build is finished
+            
+            // todo -- either use a producer / consumer to compile functions 
+            // or jobify
+            // or flat out do in parallel (need linq compiler to be thread safe first)
+            TemplateCompiler2 compiler = new TemplateCompiler2();
+
+            for (int i = 0; i < typesToCompile.Length; i++) {
+
+                // todo -- get template
+                // if no dependencies changed since last compile
+                // we can most likely re-use the data from last time
+
+                TemplateExpressionSet templateData = compiler.CompileTemplate(typesToCompile[i]);
+            
+                // probably can't be parallel, will need to buffer and set later
+                // typesToCompile[i].module.SetTemplateData(typesToCompile[i].rawType, templateData);
+
+            }
+            
+            // output += templateData.ToCSharpCode(new IndentedStringBuilder(512));
+            // File.WriteAllText(UnityEngine.Application.dataPath + "/tmp.txt", output);
+
+        }
+
+        private static Module[] FlattenDependencyTree(IList<Module> modules) {
+            HashSet<Module> set = new HashSet<Module>();
+
+            LightStack<Module> stack = new LightStack<Module>();
+
+            for (int i = 0; i < modules.Count; i++) {
+                stack.Push(modules[i]);
+            }
+
+            while (stack.size != 0) {
+                Module m = stack.Pop();
+
+                set.Add(m);
+
+                for (int i = 0; i < m.dependencies.Count; i++) {
+                    stack.Push(m.dependencies[i].GetModuleInstance());
+                }
+
+            }
+
+            return set.ToArray();
+
         }
 
     }

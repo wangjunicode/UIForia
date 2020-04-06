@@ -60,21 +60,19 @@ namespace UIForia.Elements {
         public bool focusOnMouseDown;
         public bool sizeChanged;
 
-        internal UIView(Application application, string name, UIElement element, Matrix4x4 matrix, Size size) {
+        internal UIView(Application application, string name, Size size) {
             this.name = name;
             this.application = application;
-            this.matrix = matrix;
             this.Viewport = new Rect(0, 0, size.width, size.height);
             this.visibleElements = new LightList<UIElement>(32);
             this.dummyRoot = new UIViewRootElement();
             this.dummyRoot.application = application;
             this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
             this.dummyRoot.style = new UIStyleSet(dummyRoot);
-            this.dummyRoot.styleSet2 = new StyleSet2(application.styleSystem2, dummyRoot);
+            this.dummyRoot.styleSet2 = new StyleSet2(application.styleSystem, dummyRoot);
             this.dummyRoot.layoutResult = new LayoutResult(dummyRoot);
             this.dummyRoot.View = this;
             this.dummyRoot.children = new LightList<UIElement>(1);
-            this.dummyRoot.AddChild(element);
             this.sizeChanged = true;
         }
 

@@ -1,26 +1,9 @@
-using System.Xml.Linq;
+using System;
 using UIForia.Templates;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Parsing {
-
-    public enum ParsedTemplateType {
-
-        FromCode,
-        Dynamic
-
-    }
-    
-    public struct RawTemplateContent {
-
-        public string templateId;
-        public XElement content;
-        public XElement elementDefinition;
-        public ParsedTemplateType type;
-        public ProcessedType processedType;
-
-    }
 
     public class TemplateShell {
 
@@ -29,8 +12,9 @@ namespace UIForia.Parsing {
         public readonly StructList<UsingDeclaration> usings;
         public readonly StructList<StyleDefinition> styles;
         public readonly LightList<string> referencedNamespaces;
-        
         public SizedArray<TemplateRootNode> templateRootNodes;
+        
+        internal DateTime lastParseVersion;
 
         public TemplateShell(Module module, string filePath) {
             this.module = module;
@@ -39,12 +23,9 @@ namespace UIForia.Parsing {
             this.styles = new StructList<StyleDefinition>(2);
             this.referencedNamespaces = new LightList<string>(4);
         }
-
-        public void ReportError(ElementNode elementNode, string error) {
-            // UIForia.ErrorLog.ReportError("Parsing");
-        }
         
         public bool ReportError(TemplateLineInfo lineInfo, string error) {
+            // todo -- diagnostics
             Debug.LogError(filePath + "line " + lineInfo + ": " + error);
             return false;
         }
@@ -60,6 +41,13 @@ namespace UIForia.Parsing {
             }
 
             return null;
+        }
+
+        public void Reset() {
+            usings.Clear();
+            styles.Clear();
+            referencedNamespaces.Clear();
+            templateRootNodes.Clear();
         }
 
     }

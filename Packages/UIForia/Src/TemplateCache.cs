@@ -1,56 +1,47 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Parsing;
+using UIForia.Util;
 
 namespace UIForia {
 
     internal struct TemplateCache {
 
-        internal struct FileInfo {
+        internal SizedArray<FileInfo> cache;
 
-            public string path;
-            public string contents;
-            public TemplateShell templateShell;
-            public DateTime lastWriteTime;
-            public Module module;
-
-        }
-
-        internal readonly FileInfo[] cache;
-
-        public TemplateCache(HashSet<ResolvedTemplateLocation> resolvedLocations, TemplateCache oldCache) {
-            cache = new FileInfo[resolvedLocations.Count];
-
-            int idx = 0;
-            if (oldCache.cache == null) {
-                foreach (ResolvedTemplateLocation location in resolvedLocations) {
-                    cache[idx++] = new FileInfo() {
-                        path = location.filePath,
-                        module = location.module,
-                        lastWriteTime = default
-                    };
-                }
-            }
-            else {
-                foreach (ResolvedTemplateLocation location in resolvedLocations) {
-
-                    if (oldCache.TryGetFileInfo(location.filePath, out FileInfo fileInfo)) {
-                        cache[idx++] = fileInfo;
-                    }
-                    else {
-                        cache[idx++] = new FileInfo() {
-                            path = location.filePath
-                        };
-                    }
-                }
-            }
-
-            Array.Sort(cache, (a, b) => string.CompareOrdinal(a.path, b.path));
-        }
+        // public TemplateCache(HashSet<ResolvedTemplateLocation> resolvedLocations, TemplateCache oldCache) {
+        //     cache = new FileInfo[resolvedLocations.Count];
+        //
+        //     int idx = 0;
+        //     if (oldCache.cache == null) {
+        //         foreach (ResolvedTemplateLocation location in resolvedLocations) {
+        //             cache[idx++] = new FileInfo() {
+        //                 path = location.filePath,
+        //                 module = location.module,
+        //                 lastWriteTime = default
+        //             };
+        //         }
+        //     }
+        //     else {
+        //         foreach (ResolvedTemplateLocation location in resolvedLocations) {
+        //
+        //             if (oldCache.TryGetFileInfo(location.filePath, out FileInfo fileInfo)) {
+        //                 cache[idx++] = fileInfo;
+        //             }
+        //             else {
+        //                 cache[idx++] = new FileInfo() {
+        //                     path = location.filePath
+        //                 };
+        //             }
+        //         }
+        //     }
+        //
+        //     Array.Sort(cache, (a, b) => string.CompareOrdinal(a.path, b.path));
+        // }
 
         private int BinarySearchForPath(string path) {
             int start = 0;
-            int end = cache.Length - 1;
+            int end = cache.size - 1;
 
             while (start <= end) {
                 int index1 = start + (end - start >> 1);
@@ -111,6 +102,27 @@ namespace UIForia {
             //     data = data
             // };
         }
+
+        public void AddFiles(HashSet<string> fileInfoSet) {
+            
+            foreach (string location in fileInfoSet) {
+                cache[cache.size++] = new FileInfo() {
+                    path = location,
+                    lastWriteTime = default
+                };
+            }
+            
+            // Array.Sort(cache.array, 0, cache.size, (a, b) => string.CompareOrdinal(a.path, b.path));
+        }
+
+    }
+
+    internal struct FileInfo {
+
+        public string path;
+        public string contents;
+        public DateTime lastWriteTime;
+        public bool missing;
 
     }
 

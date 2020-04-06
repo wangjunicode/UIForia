@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Elements;
-using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
 
@@ -31,10 +30,6 @@ namespace UIForia.Routing {
         public void OnViewAdded(UIView view) {}
 
         public void OnViewRemoved(UIView view) {}
-
-        public void OnElementEnabled(UIElement element) {}
-
-        public void OnElementDisabled(UIElement element) {}
 
         public void OnElementDestroyed(UIElement element) {}
 

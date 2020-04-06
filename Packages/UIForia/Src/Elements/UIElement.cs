@@ -82,7 +82,7 @@ namespace UIForia.Elements {
 
         public InputHandlerGroup inputHandlers; // todo -- internal with accessor
 
-        public LightList<UIElement> children; // todo -- replace w/ linked list & child count
+        public LightList<UIElement> children; // todo -- change to SizedList
 
         internal UIElementFlags flags;
         internal UIElement parent;
@@ -96,7 +96,7 @@ namespace UIForia.Elements {
         public LinqBindingNode bindingNode; // todo -- make internal with accessor
 
         internal int enableStateChangedFrameId;
-        public StructList<ElementAttribute> attributes;
+        internal StructList<ElementAttribute> attributes; // todo -- change to SizedList
         public TemplateMetaData templateMetaData; // todo - internal / private / whatever
 
         public UIView View { get; internal set; }

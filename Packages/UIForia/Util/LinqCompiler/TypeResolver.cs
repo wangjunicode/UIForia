@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using UIForia.Extensions;
-using UIForia.Parsing.Expressions;
 using Debug = UnityEngine.Debug;
 
 namespace UIForia.Util {
@@ -108,8 +106,7 @@ namespace UIForia.Util {
                 }
             }
 
-            Debug.Log($"Scanned namespaces in {watch.Elapsed.TotalMilliseconds:F3} ms from {cnt} assemblies");
-            watch.Stop();
+//            Debug.Log($"Scanned namespaces in {watch.Elapsed.TotalMilliseconds:F3} ms from {cnt} assemblies");
         }
 
         public Type ResolveTypeExpression(Type invokingType, IList<string> namespaces, string typeExpression) {

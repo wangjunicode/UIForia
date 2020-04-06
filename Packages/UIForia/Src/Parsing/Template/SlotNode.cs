@@ -83,11 +83,6 @@ namespace UIForia.Parsing {
             return "slot:" + slotName;
         }
         
-
-        internal void SetChildren(LightList<TemplateNode> children) {
-            this.children = children;
-        }
-
     }
 
 }

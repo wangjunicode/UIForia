@@ -14,7 +14,7 @@ namespace UIForia.Animation {
 
     }
 
-    public class AnimationSystem : ISystem {
+    public class AnimationSystem {
 
         private LightList<AnimationTask> thisFrame;
         private LightList<AnimationTask> nextFrame;
@@ -145,9 +145,7 @@ namespace UIForia.Animation {
             options.pathPrefix = data.options.pathPrefix;
             return options;
         }
-
-        public void OnReset() { }
-
+        
         public void OnUpdate() {
             
             for (int i = 0; i < thisFrame.size; i++) {
@@ -267,35 +265,7 @@ namespace UIForia.Animation {
             thisFrame = swap;
             nextFrame.QuickClear();
         }
-
-        public void OnDestroy() { }
-
-        public void OnViewAdded(UIView view) { }
-
-        public void OnViewRemoved(UIView view) { }
-
-        public void OnElementCreated(UIElement element) { }
-
-        public void OnElementEnabled(UIElement element) {
-            // restore animations as needed
-        }
-
-        public void OnElementDisabled(UIElement element) {
-//            animatedElements.FindIndex(element);
-            // traverse children
-            // find any with active animations
-            // pause animations as needed
-        }
-
-        public void OnElementDestroyed(UIElement element) {
-            // animatedElements.FindIndex(element);
-            // traverse children
-            // find any with active animations
-            // stop animations as needed, no callbacks
-        }
-
-        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
-
+        
     }
 
 }

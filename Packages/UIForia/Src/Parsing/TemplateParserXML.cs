@@ -16,6 +16,7 @@ namespace UIForia.Parsing {
     public class TemplateParserXML : TemplateParser {
 
         private TemplateShell shell;
+        private string contents;
         private StructList<AttributeDefinition> attributes;
         private StructList<AttributeDefinition> injectedAttributes;
 
@@ -26,6 +27,7 @@ namespace UIForia.Parsing {
 
         public override bool TryParse(string contents, TemplateShell templateShell) {
             this.shell = templateShell;
+            this.contents = contents;
 
             XElement root;
 

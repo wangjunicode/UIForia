@@ -1,7 +1,9 @@
 using System;
 using SVGX;
+using UIForia;
 using UIForia.Elements;
 using UIForia.Rendering;
+using UIForia.Style;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -33,12 +35,22 @@ namespace Src.Systems {
         private Camera camera;
         private CommandBuffer commandBuffer;
         private RenderContext renderContext;
+        private bool noop;
+        
         internal LightList<RenderOwner> renderOwners;
 
-        public VertigoRenderSystem(Camera camera, Application application) {
+        private UIForiaSettings settings;
+        public VertigoRenderSystem(Camera camera, Application application, StyleSystem2 styleSystem) {
+            this.noop = application.IsTestApplication;
+            if (this.noop) return;
+            this.settings = application.settings;
             this.camera = camera;
-            this.commandBuffer = new CommandBuffer(); // todo -- per view
-            this.commandBuffer.name = "UIForia Main Command Buffer";
+            // todo -- per window & combine 
+            // or if they cannot be combined via unity record + combine myself
+            this.commandBuffer = new CommandBuffer() {
+                name = "UIForia Main Command Buffer"
+            };
+            
             this.renderContext = new RenderContext(application.settings);
             this.renderOwners = new LightList<RenderOwner>();
 
@@ -46,7 +58,8 @@ namespace Src.Systems {
                 this.camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
             }
 
-            application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+                
+            styleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
             application.onViewsSorted += uiViews => {
                 renderOwners.Sort((o1, o2) => o1.view.Depth.CompareTo(o2.view.Depth));
             };
@@ -83,10 +96,13 @@ namespace Src.Systems {
             }
             renderOwners.QuickClear();
             renderContext.clipContext.Destroy();
-            renderContext.clipContext = new ClipContext(Application.Settings);
+            renderContext.clipContext = new ClipContext(settings);
         }
 
-        public virtual void OnUpdate() {
+        public void OnUpdate() {
+            
+            if (noop) return;
+            
             renderContext.Clear();
 
             // todo
@@ -122,10 +138,6 @@ namespace Src.Systems {
                 }
             }
         }
-
-        public void OnElementEnabled(UIElement element) { }
-
-        public void OnElementDisabled(UIElement element) { }
 
         public void OnElementDestroyed(UIElement element) { }
 

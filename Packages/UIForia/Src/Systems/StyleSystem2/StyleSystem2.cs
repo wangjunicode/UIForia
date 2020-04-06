@@ -12,6 +12,8 @@ using UnityEngine;
 
 namespace UIForia.Style {
 
+    public class UIStyleTemp { }
+
     [BurstCompile]
     public struct SetupSelectorDataJob : IJob {
 
@@ -137,6 +139,8 @@ namespace UIForia.Style {
         internal NativeArray<int> persistentStringMap;
         internal Dictionary<string, int> persistentMapReverseLookup;
 
+        public event Action<UIElement, StructList<StyleProperty>> onStylePropertyChanged;
+        
         public StyleSystem2(Application application) {
             this.application = application;
             this.stack = new UIElement[32];
@@ -669,6 +673,10 @@ namespace UIForia.Style {
         public static int GetStringId(string data) {
             throw new NotImplementedException();
         }
+
+        public void OnUpdate() {
+        }
+
 
     }
 

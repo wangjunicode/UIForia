@@ -838,7 +838,7 @@ namespace UIForia.Compilers {
             ctx.CommentNewLineBefore("new " + TypeNameGenerator.GetTypeName(templateType.rawType) + " " + elementNode.lineInfo);
             ctx.Assign(nodeExpr, CreateElement(ctx, elementNode.processedType, ctx.ParentExpr, innerRoot.ChildCount, CountRealAttributes(attributes), ctx.compiledTemplate.templateId));
 
-            bool hasForwardOrOverrides = elementNode.slotOverrideNodes != null && elementNode.slotOverrideNodes.size > 0;
+            bool hasForwardOrOverrides = false; //elementNode.slotOverrideNodes != null && elementNode.slotOverrideNodes.size > 0;
 
             ParameterExpression hydrateScope = ctx.GetVariable<TemplateScope>("hydrateScope");
 
@@ -853,52 +853,52 @@ namespace UIForia.Compilers {
             bool didOverride = false;
 
             if (hasForwardOrOverrides) {
-                for (int i = 0; i < elementNode.slotOverrideNodes.size; i++) {
-                    SlotNode node = elementNode.slotOverrideNodes.array[i];
-
-                    CompiledSlot toOverride = innerTemplate.GetCompiledSlot(node.slotName);
-
-                    if (toOverride == null) {
-                        throw new TemplateCompileException($"Error compiling {node.TemplateNodeDebugData}: No slot called {node.slotName} was found in template for {innerTemplate.elementType.tagName} to {node.slotType}");
-                    }
-
-                    Assert.IsNotNull(toOverride, "toOverride != null");
-
-                    CompiledSlot compiledSlot = CompileSlotOverride(ctx, node, toOverride);
-
-                    switch (node.slotType) {
-                        case SlotType.Define:
-                            // technically this can't happen, should be part of implicit <override:Children/> where it is legal.
-                            break;
-
-                        case SlotType.Forward: {
-                            ctx.AddStatement(Expression.Call(
-                                hydrateScope,
-                                s_TemplateScope_AddSlotForward,
-                                ctx.templateScope,
-                                Expression.Constant(compiledSlot.slotName), // todo -- alias as needed
-                                ctx.rootParam,
-                                Expression.Constant(compiledSlot.slotId))
-                            );
-                            break;
-                        }
-
-                        case SlotType.Override: {
-                            didOverride = true;
-                            ctx.AddStatement(Expression.Call(
-                                hydrateScope,
-                                s_TemplateScope_AddSlotOverride,
-                                Expression.Constant(compiledSlot.slotName), // todo -- alias as needed
-                                ctx.rootParam,
-                                Expression.Constant(compiledSlot.slotId))
-                            );
-                            break;
-                        }
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                }
+                // for (int i = 0; i < elementNode.slotOverrideNodes.size; i++) {
+                //     SlotNode node = elementNode.slotOverrideNodes.array[i];
+                //
+                //     CompiledSlot toOverride = innerTemplate.GetCompiledSlot(node.slotName);
+                //
+                //     if (toOverride == null) {
+                //         throw new TemplateCompileException($"Error compiling {node.TemplateNodeDebugData}: No slot called {node.slotName} was found in template for {innerTemplate.elementType.tagName} to {node.slotType}");
+                //     }
+                //
+                //     Assert.IsNotNull(toOverride, "toOverride != null");
+                //
+                //     CompiledSlot compiledSlot = CompileSlotOverride(ctx, node, toOverride);
+                //
+                //     switch (node.slotType) {
+                //         case SlotType.Define:
+                //             // technically this can't happen, should be part of implicit <override:Children/> where it is legal.
+                //             break;
+                //
+                //         case SlotType.Forward: {
+                //             ctx.AddStatement(Expression.Call(
+                //                 hydrateScope,
+                //                 s_TemplateScope_AddSlotForward,
+                //                 ctx.templateScope,
+                //                 Expression.Constant(compiledSlot.slotName), // todo -- alias as needed
+                //                 ctx.rootParam,
+                //                 Expression.Constant(compiledSlot.slotId))
+                //             );
+                //             break;
+                //         }
+                //
+                //         case SlotType.Override: {
+                //             didOverride = true;
+                //             ctx.AddStatement(Expression.Call(
+                //                 hydrateScope,
+                //                 s_TemplateScope_AddSlotOverride,
+                //                 Expression.Constant(compiledSlot.slotName), // todo -- alias as needed
+                //                 ctx.rootParam,
+                //                 Expression.Constant(compiledSlot.slotId))
+                //             );
+                //             break;
+                //         }
+                //
+                //         default:
+                //             throw new ArgumentOutOfRangeException();
+                //     }
+                // }
             }
 
             if (didOverride) {
@@ -2461,7 +2461,7 @@ namespace UIForia.Compilers {
             CompileChangeHandlerPropertyBindingStore(processedType.rawType, attr, changeHandlerAttrs, right);
 
             if ((attr.flags & AttributeFlags.Const) == 0) {
-                StructList<ProcessedType.PropertyChangeHandlerDesc> changeHandlers = StructList<ProcessedType.PropertyChangeHandlerDesc>.Get();
+                StructList<PropertyChangeHandlerDesc> changeHandlers = StructList<PropertyChangeHandlerDesc>.Get();
                 processedType.GetChangeHandlers(attr.key, changeHandlers);
 
                 bool isProperty = ReflectionUtil.IsProperty(castElement.Type, attr.key);

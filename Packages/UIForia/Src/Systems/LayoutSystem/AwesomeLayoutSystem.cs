@@ -20,17 +20,12 @@ namespace UIForia.Systems {
             this.application = application;
             this.runners = new LightList<AwesomeLayoutRunner>();
 
-            // for (int i = 0; i < application.views.Count; i++) {
-            //     runners.Add(new AwesomeLayoutRunner(this, application.views[i].dummyRoot));
-            // }
-
-            application.windowManager.onWindowsSorted += uiViews => {
+            application.windowManager.onWindowsSorted += windows => {
                 runners.Sort((a, b) =>
-                    Array.IndexOf(uiViews, b.rootElement.window) - Array.IndexOf(uiViews, a.rootElement.window));
+                    Array.IndexOf(windows, b.rootElement.window) - Array.IndexOf(windows, a.rootElement.window));
             };
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
-            // application.StyleSystem.onStylePropertyAnimated += HandleStylepropertyAnimated;
             application.windowManager.onWindowAdded += OnWindowAdded;
             application.windowManager.onWindowRemoved += OnWindowRemoved;
         }
@@ -302,12 +297,12 @@ namespace UIForia.Systems {
         public void OnDestroy() { }
 
         public void OnWindowAdded(UIWindow window) {
-            runners.Add(new AwesomeLayoutRunner(this, window.dummyRoot));
+            runners.Add(new AwesomeLayoutRunner(this, window));
         }
 
         public void OnWindowRemoved(UIWindow window) {
             for (int i = 0; i < runners.size; i++) {
-                if (runners[i].rootElement == window.dummyRoot) {
+                if (runners[i].rootElement == window) {
                     runners.RemoveAt(i);
                     return;
                 }

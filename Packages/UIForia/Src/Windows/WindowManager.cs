@@ -41,10 +41,12 @@ namespace UIForia.Windows {
             return spawner;
         }
 
-        internal void SpawnDefaultWindow(UIElement rootElement) {
-            UIWindow rootWindow = new UIWindow(defaultWindowId, defaultSpawner, application, rootElement, new Size(application.Width, application.Height));
-            windows.Add(rootWindow);
-            onWindowAdded?.Invoke(rootWindow);
+        internal void SpawnDefaultWindow(UIWindow window) {
+            window.InitUIWindow(defaultWindowId, defaultSpawner, new Size(application.Width, application.Height));
+            window.application = application;
+
+            windows.Add(window);
+            onWindowAdded?.Invoke(window);
         }
 
         // Retrieve a window spawner by id.
@@ -70,9 +72,11 @@ namespace UIForia.Windows {
             }
 
             if (application.templateData.TryGetTemplate<TWindowType>(out DynamicTemplate dynamicTemplate)) {
-                UIElement element = application.templateData.templates[dynamicTemplate.templateId].Invoke(null, new TemplateScope(application));
-                UIWindow window = new UIWindow(windowId, spawner ?? defaultSpawner, application, element, new Size(application.Width, application.Height));
+                UIWindow window = (UIWindow) application.templateData.templates[dynamicTemplate.templateId].Invoke(null, new TemplateScope(application));
+                window.application = application;
 
+                window.InitUIWindow(windowId, spawner ?? defaultSpawner, new Size(application.Width, application.Height));
+                
                 windows.Add(window);
                 onWindowAdded?.Invoke(window);
                 return window;
@@ -85,7 +89,7 @@ namespace UIForia.Windows {
         public UIWindow Hide<TWindowType>(TWindowType window, Action<TWindowType> afterHide = null) where TWindowType : UIWindow {
 
             for (int i = 0; i < windows.Count; i++) {
-                if (windows[i].RootElement == window) {
+                if (windows[i] == window) {
                     window.SetEnabled(false);
                     afterHide?.Invoke(window);
                     return window;

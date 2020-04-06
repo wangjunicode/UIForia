@@ -155,7 +155,12 @@ namespace UIForia {
             }
 
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this));
-            windowManager.SpawnDefaultWindow(rootElement);
+            if (rootElement is UIWindow rootWindow) {
+                windowManager.SpawnDefaultWindow(rootWindow);
+            }
+            else {
+                throw new Exception($"{rootElement} is not a UIWindow");
+            }
 
             //timer.Stop();
             //Debug.Log("Initialized UIForia application in " + timer.Elapsed.TotalSeconds.ToString("F2") + " seconds");
@@ -542,7 +547,7 @@ namespace UIForia {
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
 
             for (int i = 0; i < windowManager.windows.Count; i++) {
-                stack.Push(windowManager.windows[i].RootElement);
+                stack.Push(windowManager.windows[i]);
 
                 while (stack.size > 0) {
                     UIElement element = stack.PopUnchecked();
@@ -713,7 +718,7 @@ namespace UIForia {
             enabledElementCount = 0;
 
             for (int i = 0; i < windowManager.windows.Count; i++) {
-                stack.Push(windowManager.windows[i].RootElement);
+                stack.Push(windowManager.windows[i]);
 
                 while (stack.size > 0) {
                     totalElementCount++;

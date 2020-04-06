@@ -61,11 +61,11 @@ public class HierarchyView : TreeView {
         TreeViewItem root = new TreeViewItem(-9999, -1);
 
         foreach (UIWindow window in windowManager.windows) {
-            if (window.RootElement == null) continue;
-            if (window.RootElement.isDisabled && !showDisabled) continue;
+            if (window == null) continue;
+            if (window.isDisabled && !showDisabled) continue;
 
-            ElementTreeItem firstChild = new ElementTreeItem(window.RootElement);
-            firstChild.displayName = window.RootElement.ToString();
+            ElementTreeItem firstChild = new ElementTreeItem(window);
+            firstChild.displayName = window.ToString();
             stack.Push(firstChild);
 
             while (stack.Count > 0) {

@@ -14,13 +14,13 @@ namespace UIForia.Windows {
         private Vector2 lastWindowLocation;
 
         public bool Show(UIWindow window, Action<UIWindow> afterShow) {
-            window.RootElement.SetEnabled(true);
+            window.SetEnabled(true);
             lastWindowLocation = window.position;
             return true;
         }
 
         public bool Hide(UIWindow window, Action<UIWindow> afterHide) {
-            window.RootElement.SetEnabled(false);
+            window.SetEnabled(false);
             return true;
         }
 

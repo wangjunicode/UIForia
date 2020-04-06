@@ -86,7 +86,7 @@ namespace Tests.Mocks {
         }
          
         public new MockInputSystem InputSystem => (MockInputSystem) inputSystem;
-        public UIElement RootElement => windowManager.windows[0].RootElement;
+        public UIElement RootElement => windowManager.windows[0];
 
         public void SetViewportRect(Rect rect) {
             windowManager.windows[0].Viewport = rect;

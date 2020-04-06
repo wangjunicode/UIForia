@@ -948,7 +948,7 @@ namespace UIForia.Systems {
                 ptr = ptr.parent;
             }
 
-            return element.window.RootElement;
+            return element.window;
         }
 
         internal UIElement GetBlockHeightProvider() {
@@ -971,7 +971,7 @@ namespace UIForia.Systems {
                 ptr = ptr.parent;
             }
 
-            return element.window.RootElement;
+            return element.window;
         }
 
         public void Invalidate() {

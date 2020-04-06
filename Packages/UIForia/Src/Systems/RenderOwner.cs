@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Elements;
+using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
@@ -12,6 +13,7 @@ namespace Src.Systems {
 
     public class RenderOwner {
 
+        internal UIWindowRootElement dummyRoot;
         internal UIWindow window;
         internal readonly RenderBoxPool painterPool;
         private readonly StructStack<ElemRef> elemRefStack;
@@ -21,9 +23,19 @@ namespace Src.Systems {
 
         public RenderOwner(UIWindow window, Camera camera) {
             this.window = window;
+            
+            this.dummyRoot = new UIWindowRootElement();
+            this.dummyRoot.application = window.application;
+            this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
+            this.dummyRoot.style = new UIStyleSet(dummyRoot);
+            this.dummyRoot.layoutResult = new LayoutResult(dummyRoot);
+            this.dummyRoot.window = window;
+            this.dummyRoot.children = new LightList<UIElement>(1);
+            this.dummyRoot.AddChild(window);
+            
             this.painterPool = new RenderBoxPool();
-            this.window.dummyRoot.renderBox = new RootRenderBox();
-            this.window.dummyRoot.renderBox.element = window.dummyRoot;
+            this.dummyRoot.renderBox = new RootRenderBox();
+            this.dummyRoot.renderBox.element = window;
             this.elemRefStack = new StructStack<ElemRef>(32);
             this.wrapperList = new StructList<RenderOperationWrapper>(32);
         }
@@ -39,7 +51,7 @@ namespace Src.Systems {
         }
 
         private void DrawClipShapes(RenderContext ctx) {
-            LightList<ClipData> clippers = window.application.LayoutSystem.GetLayoutRunner(window.dummyRoot).clipperList;
+            LightList<ClipData> clippers = window.application.LayoutSystem.GetLayoutRunner(dummyRoot).clipperList;
             for (int i = 0; i < clippers.size; i++) {
                 ClipData clipData = clippers.array[i];
                 if (!clipData.isCulled && clipData.visibleBoxCount > 0) {
@@ -112,7 +124,7 @@ namespace Src.Systems {
 
         // this is intended to be run while layout is running (ie in parallel)
         public void GatherBoxDataParallel() {
-            UIElement root = window.dummyRoot;
+            UIElement root = dummyRoot;
 
             int frameId = root.application.frameId;
 

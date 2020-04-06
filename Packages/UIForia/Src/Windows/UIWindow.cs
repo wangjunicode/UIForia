@@ -1,8 +1,6 @@
 ﻿using System;
 using UIForia.Elements;
 using UIForia.Layout;
-using UIForia.Rendering;
-using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Windows {
@@ -21,7 +19,7 @@ namespace UIForia.Windows {
     
     public class UIWindow : UIElement {
 
-        public readonly string windowId;
+        public string windowId;
         
         private bool isDestroyed;
         private bool isShown;
@@ -44,53 +42,19 @@ namespace UIForia.Windows {
 
         public Rect Viewport { get; set; }
 
-        public UIElement RootElement {
-            get { return dummyRoot[0]; }
-        }
-
         internal Vector3 position;
 
-        public readonly Application application;
-        
         public readonly string name;
-
-        internal UIWindowRootElement dummyRoot;
-
+        
         public bool focusOnMouseDown;
         public bool sizeChanged;
         
-        internal UIWindow(string windowId, IWindowSpawner spawner, Application application, UIElement element, Size size) {
+        internal void InitUIWindow(string windowId, IWindowSpawner spawner, Size size) {
             this.windowId = windowId;
             this.spawner = spawner;
-            this.application = application;
             this.Viewport = new Rect(0, 0, size.width, size.height);
-            this.dummyRoot = new UIWindowRootElement();
-            this.dummyRoot.application = application;
-            this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
-            this.dummyRoot.style = new UIStyleSet(dummyRoot);
-            this.dummyRoot.layoutResult = new LayoutResult(dummyRoot);
-            this.dummyRoot.window = this;
-            this.dummyRoot.children = new LightList<UIElement>(1);
-            this.dummyRoot.AddChild(element);
+
             this.sizeChanged = true;
-        }
-
-        // Show a window of Type TWindowType with the given id and set its host to this window. Use the default spawner for that type.
-        public UIWindow ShowNested<TWindowType>(string id = null) where TWindowType : UIWindow {
-            if (isDestroyed) {
-                return null;
-            }
-
-            return windowManager.Show<TWindowType>(id, null, this, null);
-        }
-
-        // Show a window of Type TWindowType with the given id and given spawner and set its host to this window. Also call `setup` action before first Enable()
-        public UIWindow ShowNested<TWindowType>(string id, IWindowSpawner spawner, Action<TWindowType> setup = null) where TWindowType : UIWindow {
-            if (isDestroyed) {
-                return null;
-            }
-
-            return windowManager.Show<TWindowType>(id, spawner, this, setup);
         }
 
         public bool Show(Action<UIWindow> afterShow = null) {

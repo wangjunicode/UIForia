@@ -1,0 +1,31 @@
+<UITemplate>
+
+    <Style>
+        style one {
+            PreferredSize = 300px;
+            BackgroundColor = red;
+        }
+
+        style two {
+            PreferredSize = 300px;
+            BackgroundColor = green;
+        }
+
+        style container {
+            BackgroundColor = magenta;
+            PreferredSize = 1000px;
+        }
+
+    </Style>
+    
+    <!-- Change the screen height to see the flicker -->
+    <!-- The shader is in UIForiaStandard.shader and UIForiaSDFUtil.cginc-->
+    <!-- Pixel snapping with the camera is in RenderContext.cs in the method ProcessDrawCommands -->
+    <!-- Feel free to bother me whenever, happy to explain whatever doesn't make sense -->
+    
+    <Contents style="container">
+        <Div style="one"/>
+        <Div style="two"/>
+    </Contents>
+    
+</UITemplate>

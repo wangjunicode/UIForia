@@ -94,7 +94,7 @@ Shader "UIForia/Standard"
                 float4 objectInfo = _ObjectData[objectIndex];
                 float4x4 transform = _TransformData[objectIndex];
                 
-                uint shapeType = ((uint) objectInfo.x >> 16) & (1 << 16) - 1;
+                uint shapeType = ((uint) objectInfo.x >> 16) & (1 << 16) - 1; // maps to ShapeType defines 
                 uint colorMode = ((uint) objectInfo.x) & 0xffff;
                 
                 half2 size = UnpackSize(Vert_PackedSize);
@@ -107,11 +107,9 @@ Shader "UIForia/Standard"
                 
                 // this only works for 'flower' configuration meshes, not for quads. use a flag for the quad
                 o.texCoord4 = float4(lerp(0, 1, v.texCoord0.x == 0.5 && v.texCoord0.y == 0.5), screenPos.xyw);
-             
                 
                 if(shapeType != ShapeType_Text) {
                     o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
-                    //o.vertex = UnityPixelSnap(o.vertex); // pixel snap is bad for text rendering
                     o.texCoord1 = float4(size.x, size.y, Vert_BorderRadii, objectIndex);
                     o.texCoord2 = float4(shapeType, colorMode, 0, 0);
                     o.texCoord3 = _MiscData[objectIndex];
@@ -226,7 +224,7 @@ Shader "UIForia/Standard"
                         return mainColor;
                     }
                     
-                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs, _DPIScale);
+                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, i.vertex.xy * _DPIScale, clipRect, clipUvs);
                     mainColor.rgb *= mainColor.a;
                     return mainColor;
                 }
@@ -262,8 +260,7 @@ Shader "UIForia/Standard"
                 float d = tex2D(_FontTexture, i.texCoord0.zw + i.texCoord3.xy).a * underlayScale;
                 underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
                 faceColor = lerp(faceColor, underlayColor, hasUnderlay);
-           //     faceColor.rgb *= faceColor.a;
-                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs, _DPIScale);
+                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, i.vertex.xy * _DPIScale, clipRect, clipUvs);
                 return faceColor;               
 
             }

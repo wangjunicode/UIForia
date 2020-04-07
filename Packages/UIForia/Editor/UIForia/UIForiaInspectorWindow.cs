@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
+using UIForiaTMPro;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Layout;

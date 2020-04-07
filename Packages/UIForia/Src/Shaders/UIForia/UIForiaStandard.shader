@@ -224,7 +224,7 @@ Shader "UIForia/Standard"
                         return mainColor;
                     }
                     
-                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs, _DPIScale);
+                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, i.vertex.xy * _DPIScale, clipRect, clipUvs);
                     mainColor.rgb *= mainColor.a;
                     return mainColor;
                 }
@@ -260,7 +260,7 @@ Shader "UIForia/Standard"
                 float d = tex2D(_FontTexture, i.texCoord0.zw + i.texCoord3.xy).a * underlayScale;
                 underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
                 faceColor = lerp(faceColor, underlayColor, hasUnderlay);
-                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs, _DPIScale);
+                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, i.vertex.xy * _DPIScale, clipRect, clipUvs);
                 return faceColor;               
 
             }

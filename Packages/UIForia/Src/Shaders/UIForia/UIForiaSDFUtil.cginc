@@ -241,7 +241,7 @@ inline float2 UnpackSize(float packedSize) {
     uint input = asuint(packedSize);
     uint high = (input >> 16) & (1 << 16) - 1;
     uint low =  input & 0xffff;
-    return float2(high, low);
+    return float2(high / 10, low / 10);
 }
 
 float3x3 TRS2D(float2 position, float2 scale, float rotation) {

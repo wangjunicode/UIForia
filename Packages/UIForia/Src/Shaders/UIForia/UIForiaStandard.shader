@@ -184,7 +184,7 @@ Shader "UIForia/Standard"
             
             fixed4 frag (v2f i) : SV_Target {           
                 
-                float2 screenUV = i.texCoord4.yz / i.texCoord4.w;
+                float2 clipPos = float2(i.vertex.x, (_ScreenParams.y - i.vertex.y)) * _DPIScale;
                 float4 clipRect = _ClipRects[(uint)i.texCoord1.w];
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];           
                 float opacity = _ObjectData[(uint)i.texCoord1.w].w;              
@@ -224,7 +224,7 @@ Shader "UIForia/Standard"
                         return mainColor;
                     }
                     
-                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, i.vertex.xy * _DPIScale, clipRect, clipUvs);
+                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, clipPos, clipRect, clipUvs);
                     mainColor.rgb *= mainColor.a;
                     return mainColor;
                 }
@@ -260,7 +260,7 @@ Shader "UIForia/Standard"
                 float d = tex2D(_FontTexture, i.texCoord0.zw + i.texCoord3.xy).a * underlayScale;
                 underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
                 faceColor = lerp(faceColor, underlayColor, hasUnderlay);
-                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, i.vertex.xy * _DPIScale, clipRect, clipUvs);
+                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, clipPos, clipRect, clipUvs);
                 return faceColor;               
 
             }

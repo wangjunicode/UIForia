@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using SVGX;
-using TMPro;
+using UIForiaTMPro;
 using UIForia.Util;
 using UnityEngine;
 

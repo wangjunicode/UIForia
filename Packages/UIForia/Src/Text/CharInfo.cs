@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using TMPro;
+using UIForiaTMPro;
 using UnityEngine;
 
 namespace UIForia.Text {

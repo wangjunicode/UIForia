@@ -466,17 +466,17 @@ namespace UIForia {
                         }
 
                     }
-
-                    string templateBody = compiledTemplate.templateFn.ToTemplateBodyFunction();
-                    string template = TemplateConstants.TemplateSource;
-                    template = template.Replace("::TEMPLATE_COMMENT::", compiledTemplate.templateMetaData.filePath);
-                    template = template.Replace("::GUID::", compiledTemplate.guid);
-                    template = template.Replace("::CODE::", templateBody);
-                    template = template.Replace("::BINDINGS::", bindingCode);
-                    template = template.Replace("::SLOTS::", slotCode);
-                    template = template.Replace("::APPNAME::", templateSettings.StrippedApplicationName);
-                    File.WriteAllText(file, template);
                 }
+
+                string templateBody = compiledTemplate.templateFn.ToTemplateBodyFunction();
+                string template = TemplateConstants.TemplateSource;
+                template = template.Replace("::TEMPLATE_COMMENT::", compiledTemplate.templateMetaData.filePath);
+                template = template.Replace("::GUID::", compiledTemplate.guid);
+                template = template.Replace("::CODE::", templateBody);
+                template = template.Replace("::BINDINGS::", bindingCode);
+                template = template.Replace("::SLOTS::", slotCode);
+                template = template.Replace("::APPNAME::", templateSettings.StrippedApplicationName);
+                File.WriteAllText(file, template);
             }
 
         }

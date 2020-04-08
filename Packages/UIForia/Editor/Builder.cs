@@ -10,17 +10,13 @@ namespace UIForia {
         public static void CreateOptionsObject() {
          
             UIForiaSettings asset = ScriptableObject.CreateInstance<UIForiaSettings>();
-            Material svgxMaterial = new Material(Shader.Find("UIForia/BatchedTransparent"));
             Material uiforiaStdMaterial = new Material(Shader.Find("UIForia/Standard"));
             Material sdfPathMaterial = new Material(Shader.Find("UIForia/UIForiaPathSDF"));
             Material spriteAtlasMaterial = new Material(Shader.Find("UIForia/UIForiaSpriteAtlas"));
             Material clearClipRegionsMaterial = new Material(Shader.Find("UIForia/UIForiaClearClipRegions"));
             Material clipCountMaterial = new Material(Shader.Find("UIForia/UIForiaClipCount"));
             Material clipBlitMaterial = new Material(Shader.Find("UIForia/UIForiaClipBlit"));
-
-            AssetDatabase.CreateAsset(svgxMaterial, "Assets/Resources/UIForiaSVGXMaterial.mat");
-            asset.svgxMaterial = svgxMaterial;
-
+            
             AssetDatabase.CreateAsset(uiforiaStdMaterial, "Assets/Resources/UIForiaStandardMaterial.mat");
             asset.batchedMaterial = uiforiaStdMaterial;
 

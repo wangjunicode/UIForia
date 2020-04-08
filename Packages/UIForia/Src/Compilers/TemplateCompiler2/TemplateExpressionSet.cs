@@ -2,6 +2,7 @@ using System;
 using System.Linq.Expressions;
 using Mono.Linq.Expressions;
 using UIForia.Parsing;
+using UIForia.Systems;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
@@ -22,6 +23,7 @@ namespace UIForia.Compilers {
         public TemplateOutput[] elementTemplates;
 
         private static readonly string s_ElementFnTypeName = typeof(Action<ElementSystem>[]).GetTypeName();
+        private static readonly string s_BindingFnTypeName = typeof(Action<LinqBindingNode>[]).GetTypeName();
 
         public IndentedStringBuilder ToCSharpCode(IndentedStringBuilder stringBuilder) {
             // if (!string.IsNullOrEmpty(processedType.templateId)) {
@@ -68,16 +70,32 @@ namespace UIForia.Compilers {
                 }
             }
 
+            stringBuilder.Outdent();
+
+            stringBuilder.NewLine();
+            stringBuilder.Append("},");
+            
+            stringBuilder.NewLine();
+            
+            stringBuilder.Append(nameof(TemplateData.bindings));
+            stringBuilder.AppendInline(" = new ");
+            stringBuilder.AppendInline(s_BindingFnTypeName);
+            stringBuilder.AppendInline(" {\n");
+            stringBuilder.Indent();
+
             for (int i = 0; i < bindings.Length; i++) {
+                stringBuilder.Append("// ");
+                stringBuilder.AppendInline(i.ToString());
+                stringBuilder.NewLine();
                 stringBuilder.Append(bindings[i].ToTemplateBody(3));
                 if (i != bindings.Length - 1) {
                     stringBuilder.AppendInline(",\n");
                 }
             }
-            
             stringBuilder.NewLine();
             stringBuilder.Outdent();
             stringBuilder.Append("}");
+            
             stringBuilder.NewLine();
             stringBuilder.Outdent();
             stringBuilder.Append("};");

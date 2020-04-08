@@ -38,7 +38,7 @@ namespace UIForia.Compilers {
 
         public TemplateExpressionSet Build(ProcessedType processedType) {
             return new TemplateExpressionSet() {
-                bindings = null,
+                bindings = bindingFns.ToArray(),
                 processedType = processedType,
                 entryPoint = entryPoint,
                 hydratePoint = hydrate,
@@ -58,6 +58,7 @@ namespace UIForia.Compilers {
             entryPoint = null;
             hydrate = null;
             elementFns.Clear();
+            bindingFns.Clear();
             templateIndex = 0;
             bindingIndex = 0;
         }

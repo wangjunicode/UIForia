@@ -30,9 +30,10 @@ namespace UIForia.Compilers {
 
     public enum AttributeSetType {
 
+        Slot,
         Standard,
         Expanded,
-        Slot
+        EntryPoint
 
     }
 
@@ -40,9 +41,9 @@ namespace UIForia.Compilers {
 
         public readonly AttributeSetType attributeSetType;
         public readonly ReadOnlySizedArray<AttrInfo> attributes;
-        public readonly ReadOnlySizedArray<Type> contextTypes;
+        public readonly ReadOnlySizedArray<TemplateContextReference> contextTypes;
 
-        public AttributeSet(ReadOnlySizedArray<AttrInfo> attributes, AttributeSetType attributeSetType, ReadOnlySizedArray<Type> contextTypes) {
+        public AttributeSet(ReadOnlySizedArray<AttrInfo> attributes, AttributeSetType attributeSetType, ReadOnlySizedArray<TemplateContextReference> contextTypes) {
             this.attributes = attributes;
             this.attributeSetType = attributeSetType;
             this.contextTypes = contextTypes;

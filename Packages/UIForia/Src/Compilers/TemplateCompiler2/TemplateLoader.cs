@@ -118,6 +118,7 @@ namespace UIForia.Compilers {
 $@"using UIForia.Compilers;
 using System;
 using System.Collections.Generic;
+// ReSharper disable PossibleNullReferenceException
 
 namespace UIForia.Generated {{
 
@@ -141,6 +142,7 @@ namespace UIForia.Generated {{
         public static string TemplateFile(string appName, string templateName, string templateInfo) {
             return
 $@"using UIForia.Compilers;
+// ReSharper disable PossibleNullReferenceException
 
 namespace UIForia.Generated {{
 

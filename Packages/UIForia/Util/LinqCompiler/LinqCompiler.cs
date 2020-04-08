@@ -341,7 +341,7 @@ namespace UIForia.Compilers {
             return variable;
         }
 
-        public void SetImplicitContext(ParameterExpression parameterExpression, ParameterFlags flags = 0) {
+        public void SetImplicitContext(ParameterExpression parameterExpression, ParameterFlags flags = ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds) {
             if (parameterExpression == null) {
                 implicitContext = null;
                 return;

@@ -17,10 +17,11 @@ namespace UIForia.Compilers {
         public readonly TemplateDataBuilder templateDataBuilder;
 
         private ProcessedType rootProcessedType;
+        private TemplateRootNode templateRootNode;
         private readonly AttributeCompiler attributeCompiler;
         private SizedArray<DeferredCompilationData> deferredData;
         private SizedArray<AttrInfo> scratchAttributes;
-        private SizedArray<Type> scratchTypes;
+        private SizedArray<TemplateContextReference> scratchContextReferences;
 
         private static readonly Dictionary<Type, MethodInfo> s_SyncMethodCache = new Dictionary<Type, MethodInfo>();
 
@@ -30,7 +31,7 @@ namespace UIForia.Compilers {
             this.templateDataBuilder = new TemplateDataBuilder();
             this.attributeCompiler = new AttributeCompiler();
             this.scratchAttributes = new SizedArray<AttrInfo>(16);
-            this.scratchTypes = new SizedArray<Type>(8);
+            this.scratchContextReferences = new SizedArray<TemplateContextReference>(8);
         }
 
         public TemplateExpressionSet CompileTemplate(ProcessedType processedType) {
@@ -143,7 +144,7 @@ namespace UIForia.Compilers {
 
             context.Setup<UIElement>();
 
-            TemplateRootNode templateRootNode = processedType.templateRootNode;
+            templateRootNode = processedType.templateRootNode;
 
             ParameterExpression systemParam = context.AddParameter<ElementSystem>("system");
             ParameterExpression elementParam = context.GetVariable(processedType.rawType, "element");
@@ -157,6 +158,11 @@ namespace UIForia.Compilers {
             AttributeMerger.ConvertAttributeDefinitions(templateRootNode.attributes, ref scratchAttributes);
             InitializeElementAttributes(systemParam, scratchAttributes);
 
+            scratchContextReferences.Clear();
+            scratchContextReferences.Add(new TemplateContextReference(processedType, templateRootNode));
+
+            CompileBindings(AttributeSetType.EntryPoint, systemParam, processedType, templateRootNode, scratchContextReferences);
+            
             context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_HydrateEntryPoint));
 
             context.AddStatement(elementParam);
@@ -251,40 +257,48 @@ namespace UIForia.Compilers {
             // now I need to know the context stack at compile time...which we dont have atm
             // need to traverse down the slot hierarchy until we the <define> for the slot case
 
-            scratchTypes.Clear();
-            scratchTypes.Add(rootProcessedType.rawType);
-            scratchTypes.Add(expandedNode.processedType.rawType);
+            scratchContextReferences.Clear();
+            scratchContextReferences.Add(new TemplateContextReference(rootProcessedType, templateRootNode));
+            scratchContextReferences.Add(new TemplateContextReference(expandedNode.processedType, expandedNode));
 
-            AttributeSet attributeSet = new AttributeSet(scratchAttributes, AttributeSetType.Expanded, scratchTypes);
-
-            BindingResult bindingResult = new BindingResult();
-
-            bindingResult.syncData = new SizedArray<SyncPropertyData>(8); // todo -- cache + clear
-
-            attributeCompiler.CompileAttributes(processedType, expandedNode, attributeSet, ref bindingResult);
-
-            for (int i = 0; i < bindingResult.syncData.size; i++) {
-                MethodInfo info = GetSyncVarMethod(bindingResult.syncData.array[i].type);
-                context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, info, ExpressionUtil.GetIntConstant(i), ExpressionUtil.GetStringConstant("")));
-            }
-
-            BindingIndices bindingIds = templateDataBuilder.AddBindings(bindingResult);
-
-
-            // todo -- only if has bindings
-            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_SetBindings, 
-                ExpressionUtil.GetIntConstant(bindingIds.updateIndex),
-                ExpressionUtil.GetIntConstant(bindingIds.lateUpdateIndex)
-                // ExpressionUtil.GetIntConstant(0)
-                )
-            );
-            
+            CompileBindings(AttributeSetType.Expanded, systemParam, processedType, expandedNode, scratchContextReferences);
+         
             context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_HydrateElement, Expression.Constant(processedType.rawType)));
 
             templateDataBuilder.SetElementTemplate(expandedNode, templateId, context.Build(expandedNode.GetTagName()));
 
         }
 
+        private void CompileBindings(AttributeSetType attributeSetType, Expression systemParam, ProcessedType processedType, TemplateNode node, ReadOnlySizedArray<TemplateContextReference> contextReferences) {
+            AttributeSet attributeSet = new AttributeSet(scratchAttributes, attributeSetType, contextReferences);
+
+            BindingResult bindingResult = new BindingResult();
+
+            bindingResult.syncData = new SizedArray<SyncPropertyData>(8); // todo -- cache + clear
+           
+            attributeCompiler.CompileAttributes(processedType, node, attributeSet, ref bindingResult);
+
+            if (!bindingResult.HasValue) {
+                return;
+            }
+
+            for (int i = 0; i < bindingResult.syncData.size; i++) {
+                MethodInfo info = GetSyncVarMethod(bindingResult.syncData.array[i].type);
+                context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, info, ExpressionUtil.GetIntConstant(i), ExpressionUtil.GetStringConstant(""))); // todo -- add ebug name
+            }
+
+            BindingIndices bindingIds = templateDataBuilder.AddBindings(bindingResult);
+
+            // todo -- only if has bindings
+            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_SetBindings,
+                    ExpressionUtil.GetIntConstant(bindingIds.updateIndex),
+                    ExpressionUtil.GetIntConstant(bindingIds.lateUpdateIndex)
+                    // ExpressionUtil.GetIntConstant(0)
+                )
+            );
+
+        }
+        
         private static MethodInfo GetSyncVarMethod(Type type) {
             if (s_SyncMethodCache.TryGetValue(type, out MethodInfo generic)) {
                 return generic;

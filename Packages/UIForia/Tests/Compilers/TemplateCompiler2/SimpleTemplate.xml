@@ -2,7 +2,7 @@
     <Contents attr:x="x" attr:y="y">
         <Div>
             <Panel>
-                <ExpandedTemplate if="GetAttribute('x') == 'x'" value="GetAttribute('x')">
+                <ExpandedTemplate if="GetAttribute('x') == 'x'" sync:value="parentVal" onchange:value="ValueChanged()">
                     <override:title attr:x="expandedTempate.GetX()">
                         Hello
                     </override:title>

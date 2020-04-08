@@ -348,7 +348,20 @@ namespace UIForia.Parsing {
             requiresUpdateFn = ReflectionUtil.IsOverride(updateMethod);
             changeHandlers = TypeProcessor.GetChangeHandlers(rawType);
         }
-        
+
+        public bool TryGetChangeHandlers(string key, PropertyChangedType changeType, StructList<PropertyChangeHandlerDesc> results) {
+            EnsureReflectionData();
+            results.size = 0;
+            
+            for (int i = 0; i < changeHandlers.size; i++) {
+                ref PropertyChangeHandlerDesc handler = ref changeHandlers.array[i];
+                if ((handler.changeType & changeType) != 0 && handler.memberName == key) {
+                    results.Add(handler);
+                }
+            }
+
+            return results.size != 0;
+        }
 
     }
 
@@ -357,6 +370,7 @@ namespace UIForia.Parsing {
         public MethodInfo methodInfo;
         public ParameterInfo[] parameterInfos;
         public string memberName;
+        public PropertyChangedType changeType;
 
     }
 

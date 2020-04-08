@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Elements;
@@ -73,6 +74,18 @@ namespace UIForia.Systems {
 
         internal ContextVariable localVariable;
         internal LinqBindingNode parent;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetSyncVar<T>(int idx, T value) {
+            // ReSharper disable once PossibleNullReferenceException
+            (syncStorage[idx] as SyncVariable<T>).value = value;
+        }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public T GetSyncVar<T>(int idx) {
+            // ReSharper disable once PossibleNullReferenceException
+            return (syncStorage[idx] as SyncVariable<T>).value;
+        }
         
         public void InitializeContextArray(string slotName, TemplateScope templateScope, int size) {
             referencedContexts = new UIElement[size + 1];

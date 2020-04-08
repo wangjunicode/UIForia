@@ -377,7 +377,7 @@ namespace UIForia.Parsing {
 
             SizedArray<PropertyChangeHandlerDesc> retn = default;
 
-            MethodInfo[] candidates = type.GetMethods(BindingFlags.Instance);
+            MethodInfo[] candidates = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
             for (int i = 0; i < candidates.Length; i++) {
 
@@ -394,7 +394,7 @@ namespace UIForia.Parsing {
 
                 if (parameters.Length > 2) {
                     // todo -- diagnostic
-                    Debug.Log($"Unable to invoke method {type.GetTypeName()}.{candidates[i].Name} as a PropertyChangeHandler because it has too many arguments (max 1)");
+                    Debug.Log($"Unable to invoke method {type.GetTypeName()}.{candidates[i].Name} as a PropertyChangeHandler because it has too many arguments (max 2)");
                 }
 
                 foreach (OnPropertyChanged a in attrs) {
@@ -403,6 +403,7 @@ namespace UIForia.Parsing {
                         methodInfo = candidates[i],
                         parameterInfos = parameters,
                         memberName = a.propertyName,
+                        changeType = a.changedType
                     });
                 }
 

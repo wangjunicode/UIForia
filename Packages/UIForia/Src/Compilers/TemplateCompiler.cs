@@ -17,6 +17,17 @@ using UnityEngine.Assertions;
 
 namespace UIForia.Compilers {
 
+    
+    // Binding order
+    // - conditional
+    // - BeforePropertyUpdates() -- if declared
+    // - properties & context vars, in declared order 
+    // - AfterPropertyUpdates() -- currently called Update()
+    // - attributes
+    // - styles
+    // - AfterBindings()
+    // - sync & change
+    
     public class TemplateCompiler {
 
         internal const string k_InputEventParameterName = "__evt";
@@ -984,15 +995,6 @@ namespace UIForia.Compilers {
             }
         }
 
-        // Binding order
-        // - conditional
-        // - BeforePropertyUpdates() -- if declared
-        // - properties & context vars, in declared order 
-        // - AfterPropertyUpdates() -- currently called Update()
-        // - attributes
-        // - styles
-        // - AfterBindings()
-        // - sync & change
 
         private struct BindingOutput {
 

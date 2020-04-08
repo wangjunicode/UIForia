@@ -1,12 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
-using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 
@@ -22,10 +23,12 @@ namespace UIForia.Compilers {
         internal static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
         internal static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
         internal static readonly RepeatKeyFnTypeWrapper s_RepeatKeyFnTypeWrapper = new RepeatKeyFnTypeWrapper();
+        private static readonly Dictionary<Type, MethodInfo> s_SyncGetterCache = new Dictionary<Type, MethodInfo>();
+        private static readonly Dictionary<Type, MethodInfo> s_SyncSetterCache = new Dictionary<Type, MethodInfo>();
 
         private readonly StructList<PropertyChangeHandlerDesc> changeHandlers;
         private readonly StructList<SyncPropertyData> syncData;
-        
+
         private int contextId = 1;
         private int NextContextId => contextId++;
         private int syncCount = 0;
@@ -54,7 +57,9 @@ namespace UIForia.Compilers {
         }
 
         private void InitializeCompilers(Type elementType, AttributeSet attributeSet) {
+            // todo -- namespaces
             updateCompiler.Init(elementType, attributeSet.contextTypes);
+            lateCompiler.Init(elementType, attributeSet.contextTypes);
         }
 
         public void CompileAttributes(ProcessedType processedType, TemplateNode node, AttributeSet attributeSet, ref BindingResult bindingResult) {
@@ -62,12 +67,6 @@ namespace UIForia.Compilers {
             processedType.EnsureReflectionData();
 
             StructList<ContextAliasActions> contextModifications = null;
-
-            // CompileUpdateAttributes();
-            // CompileSyncAttributes();
-            // CompileOnceAttributes();
-            // CompileCreateAttributes();
-            // CompileEnableAttributes();
 
             // [InvokeWhenDisabled]
             // Update() { } 
@@ -85,9 +84,7 @@ namespace UIForia.Compilers {
 
                 ASTNode ast = ExpressionParser.Parse(attr.value);
 
-                bool isConst = IsConstantExpression(ast);
-
-                TemplateLinqCompiler compiler = GetCompiler(isConst, attr);
+                TemplateLinqCompiler compiler = GetCompiler(IsConstantExpression(ast), attr);
 
                 switch (attr.type) {
 
@@ -104,7 +101,7 @@ namespace UIForia.Compilers {
 
                     case AttributeType.Property: {
 
-                        SyncPropertyData syncPropertyData = CompilePropertyBinding(compiler, ast, processedType, attr);
+                        CompilePropertyBinding(compiler, ast, processedType, attr);
 
                         break;
                     }
@@ -112,7 +109,7 @@ namespace UIForia.Compilers {
                 }
 
             }
-            //
+
             // if (processedType.requiresUpdateFn) {
             //     // always uses root context
             //     updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetElement(), processedType.updateMethod));
@@ -131,7 +128,7 @@ namespace UIForia.Compilers {
             if (!compiler.HasStatements) {
                 return;
             }
-            
+
             try {
                 lambdaExpression = compiler.BuildLambda();
             }
@@ -141,48 +138,24 @@ namespace UIForia.Compilers {
             }
         }
 
-        private static bool IsConstantExpression(ASTNode n) {
-            while (true) {
-                switch (n) {
-                    case LiteralNode _:
-                        return true;
-
-                    //not sure about this one 
-                    case ParenNode parenNode:
-                        return parenNode.accessExpression == null && IsConstantExpression(parenNode.expression);
-
-                    //not sure about this one 
-                    case UnaryExpressionNode unary:
-                        n = unary.expression;
-                        continue;
-
-                    case OperatorNode binaryExpression:
-                        return IsConstantExpression(binaryExpression.left) && IsConstantExpression(binaryExpression.right);
-                }
-
-                return false;
-
-            }
-        }
-
-        private SyncPropertyData CompilePropertyBinding(TemplateLinqCompiler compiler, ASTNode expr, ProcessedType processedType, in AttrInfo attr) {
+        private void CompilePropertyBinding(TemplateLinqCompiler compiler, ASTNode expr, ProcessedType processedType, in AttrInfo attr) {
 
             LHSStatementChain left;
             Expression right = null;
 
-            ParameterExpression castElement = compiler.GetElement();
-            ParameterExpression rootElement = compiler.GetRoot();
+            ParameterExpression element = compiler.GetElement();
+            ParameterExpression root = compiler.GetRoot();
+            compiler.SetImplicitContext(element);
 
             try {
-                compiler.SetImplicitContext(castElement);
                 left = compiler.AssignableStatement(attr.key);
             }
             catch (Exception e) {
                 Debug.LogError(e); // todo -- diagnostic, unroll compiler changes 
-                return default;
+                return;
             }
 
-            compiler.SetImplicitContext(rootElement);
+            compiler.SetImplicitContext(root);
 
             // todo -- action / delegate support
             if (ReflectionUtil.IsFunc(left.targetExpression.Type)) {
@@ -205,81 +178,93 @@ namespace UIForia.Compilers {
                 }
             }
 
-            changeHandlers.Clear();
-
-            // todo -- handled dotted accessors like <Element property:someArray[i].value="4"/>, likely needs parser support
-            processedType.GetChangeHandlers(attr.key, changeHandlers);
-
             // if there is a change handler we need to check for changes
             // otherwise field values can be assigned w/o checking
-            if (changeHandlers.size <= 0) {
-                compiler.Assign(left, right);
-            }
-            else {
+
+            // todo -- handled dotted accessors like <Element property:someArray[i].value="4"/>, likely needs parser support
+            if (processedType.TryGetChangeHandlers(attr.key, PropertyChangedType.BindingRead, changeHandlers)) {
 
                 ParameterExpression old = compiler.AddVariable(left.targetExpression.Type, "__oldVal");
 
                 compiler.RawExpression(Expression.Assign(old, left.targetExpression));
 
-                // todo -- try to remove closure here
                 compiler.IfNotEqual(left, right, () => {
 
                     compiler.Assign(left, right);
 
-                    for (int j = 0; j < changeHandlers.size; j++) {
+                    CompilePropertyChangeHandlers(compiler, PropertyChangeSource.BindingRead, element, right, old);
 
-                        MethodInfo methodInfo = changeHandlers.array[j].methodInfo;
-                        ParameterInfo[] parameters = changeHandlers.array[j].parameterInfos;
-
-                        if (parameters.Length == 0) {
-                            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo));
-                            continue;
-                        }
-
-                        if (parameters.Length == 1 && parameters[0].ParameterType == right.Type) {
-                            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo, old));
-                            continue;
-                        }
-
-                        // should never hit this
-                        // todo -- diagnostic
-                        throw TemplateCompileException.UnresolvedPropertyChangeHandler(methodInfo.Name, right.Type); // todo -- better error message
-                    }
                 });
+            }
+            else {
+                compiler.Assign(left, right);
             }
 
             if ((attr.flags & AttributeFlags.Sync) != 0) {
                 int syncIdx = syncCount++;
-                
-                Expression accessExpr = Expression.ArrayAccess(compiler.GetBindingNode(), ExpressionUtil.GetIntConstant(syncIdx));
-                
-                compiler.RawExpression(Expression.Assign(accessExpr, right));
+
+                MethodInfo setSyncVar = GetSyncSetter(left.targetExpression.Type);
+
+                compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(compiler.GetBindingNode(), setSyncVar, ExpressionUtil.GetIntConstant(syncIdx), right));
 
                 // todo -- assert is update
-               // CompilePropertyBindingSync(syncIdx, accessExpr, attr);
 
-                return new SyncPropertyData() {
-                    index = syncIdx,
-                    type = right.Type,
-                    syncArrayAccessExpr = accessExpr,
-                    leftSideAssign = left
-                };
+                CompilePropertyBindingSync(syncIdx, attr, right.Type);
+
             }
-
-            return default;
 
         }
 
-        private void CompilePropertyBindingSync(in SyncPropertyData syncPropertyData, in AttrInfo attr) {
-            
+        private void CompilePropertyChangeHandlers(TemplateLinqCompiler compiler, PropertyChangeSource changeSource, ParameterExpression element, Expression right, Expression prevValue) {
+            for (int j = 0; j < changeHandlers.size; j++) {
+
+                MethodInfo methodInfo = changeHandlers.array[j].methodInfo;
+                ParameterInfo[] parameters = changeHandlers.array[j].parameterInfos;
+
+                // todo -- support PropertyChangeSource (binding read vs sync)
+
+                if (parameters.Length == 0) {
+                    compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, methodInfo));
+                    continue;
+                }
+
+                if (parameters.Length == 1 && parameters[0].ParameterType == right.Type) {
+                    compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, methodInfo, prevValue));
+                    continue;
+                }
+
+                if (parameters.Length == 1 && parameters[0].ParameterType == typeof(PropertyChangeSource)) {
+                    compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, methodInfo, Expression.Constant(changeSource)));
+                    continue;
+                }
+
+                if (parameters.Length == 2 && parameters[0].ParameterType == typeof(PropertyChangeSource) && parameters[1].ParameterType == right.Type) {
+                    compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, methodInfo, Expression.Constant(changeSource), prevValue));
+                    continue;
+                }
+
+                if (parameters.Length == 2 && parameters[0].ParameterType == right.Type && parameters[1].ParameterType == typeof(PropertyChangeSource)) {
+                    compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, methodInfo, prevValue, Expression.Constant(changeSource)));
+                    continue;
+                }
+
+                // todo -- diagnostic
+                throw TemplateCompileException.UnresolvedPropertyChangeHandler(methodInfo.Name, right.Type); // todo -- better error message
+            }
+        }
+
+        private void CompilePropertyBindingSync(int syncIdx, in AttrInfo attr, Type syncVarType) {
+
             lateCompiler.Setup(attr);
             Expression right;
 
             ParameterExpression element = lateCompiler.GetElement();
             ParameterExpression root = lateCompiler.GetRoot();
-            
+
+            lateCompiler.SetImplicitContext(root);
+
             LHSStatementChain assignableStatement = lateCompiler.AssignableStatement(attr.value);
-            
+
             Expression accessor = lateCompiler.AccessorStatement(assignableStatement.targetExpression.Type, attr.value);
 
             if (accessor is ConstantExpression) {
@@ -289,18 +274,24 @@ namespace UIForia.Compilers {
                 right = lateCompiler.AddVariable(assignableStatement.targetExpression.Type, "__right");
                 lateCompiler.Assign(right, accessor);
             }
-            
+
             lateCompiler.SetImplicitContext(root);
-            
-            Expression expr = Expression.TypeAs(syncPropertyData.syncArrayAccessExpr, syncPropertyData.type);
-            
+
+            Expression expr = ExpressionFactory.CallInstanceUnchecked(lateCompiler.GetBindingNode(), GetSyncGetter(syncVarType), ExpressionUtil.GetIntConstant(syncIdx));
+
             lateCompiler.SetImplicitContext(element);
-            
+
             string key = attr.key;
-            
+            string val = attr.value;
+
             lateCompiler.IfEqual(expr, right, () => {
                 // todo -- currently only supports fields, properties should also work
                 lateCompiler.Assign(assignableStatement, Expression.MakeMemberAccess(element, element.Type.GetField(key)));
+
+                if (lateCompiler.GetContextProcessedType().TryGetChangeHandlers(val, PropertyChangedType.Synchronized, changeHandlers)) {
+                    CompilePropertyChangeHandlers(lateCompiler, PropertyChangeSource.Synchronized, root, right, right);
+                }
+
             });
         }
 
@@ -420,6 +411,52 @@ namespace UIForia.Compilers {
             return false;
         }
 
+        private static MethodInfo GetSyncSetter(Type type) {
+            if (s_SyncSetterCache.TryGetValue(type, out MethodInfo setter)) {
+                return setter;
+            }
+
+            ReflectionUtil.TypeArray1[0] = type;
+            setter = MemberData.BindingNode_SetSyncVar.MakeGenericMethod(ReflectionUtil.TypeArray1);
+            s_SyncSetterCache.Add(type, setter);
+            return setter;
+        }
+
+        private static MethodInfo GetSyncGetter(Type type) {
+            if (s_SyncGetterCache.TryGetValue(type, out MethodInfo getter)) {
+                return getter;
+            }
+
+            ReflectionUtil.TypeArray1[0] = type;
+            getter = MemberData.BindingNode_GetSyncVar.MakeGenericMethod(ReflectionUtil.TypeArray1);
+            s_SyncGetterCache.Add(type, getter);
+            return getter;
+        }
+
+        private static bool IsConstantExpression(ASTNode n) {
+            while (true) {
+                switch (n) {
+                    case LiteralNode _:
+                        return true;
+
+                    //not sure about this one 
+                    case ParenNode parenNode:
+                        return parenNode.accessExpression == null && IsConstantExpression(parenNode.expression);
+
+                    //not sure about this one 
+                    case UnaryExpressionNode unary:
+                        n = unary.expression;
+                        continue;
+
+                    case OperatorNode binaryExpression:
+                        return IsConstantExpression(binaryExpression.left) && IsConstantExpression(binaryExpression.right);
+                }
+
+                return false;
+
+            }
+        }
+
         public enum ModType {
 
             Alias,
@@ -442,6 +479,10 @@ namespace UIForia.Compilers {
         public LambdaExpression updateLambda;
         public LambdaExpression constEnableLambda;
         public SizedArray<SyncPropertyData> syncData;
+
+        public bool HasValue {
+            get => lateLambda != null || updateLambda != null || constEnableLambda != null;
+        }
 
     }
 

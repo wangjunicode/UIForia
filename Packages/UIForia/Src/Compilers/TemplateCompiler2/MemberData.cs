@@ -30,6 +30,9 @@ namespace UIForia.Compilers {
 
         public static readonly FieldInfo BindingNode_Element = typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.element));
         public static readonly FieldInfo BindingNode_Root = typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.root));
+        public static readonly FieldInfo BindingNode_SyncVariables = typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.syncStorage));
+        public static readonly MethodInfo BindingNode_SetSyncVar = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.SetSyncVar));
+        public static readonly MethodInfo BindingNode_GetSyncVar = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetSyncVar));
 
         public static readonly FieldInfo TextElement_Text = typeof(UITextElement).GetField(nameof(UITextElement.text), BindingFlags.Instance | BindingFlags.Public);
         public static readonly MethodInfo TextElement_SetText = typeof(UITextElement).GetMethod(nameof(UITextElement.SetText), BindingFlags.Instance | BindingFlags.Public);
@@ -48,7 +51,7 @@ namespace UIForia.Compilers {
         public static readonly MethodInfo StringBuilder_AppendSByte = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(sbyte)});
         public static readonly MethodInfo StringBuilder_AppendBool = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(bool)});
         public static readonly MethodInfo StringBuilder_AppendChar = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
-
+        
     }
 
 }

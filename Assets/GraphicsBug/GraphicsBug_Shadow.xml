@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style>
+        
+        // if you change styles you can press ctrl-g to refresh the app without exiting playmode
+        
+        style shadow-container {
+            PreferredSize = 1pca;        // be as big the parent (the window in the case, so be full screen)
+            BackgroundColor = white;
+        }
+        
+        style shadow-caster {
+            PreferredSize = 300px;
+            BackgroundColor = yellow;
+            AlignX = Center Parent;
+            AlignY = Center Parent;
+            BorderRadiusTopLeft = 25%;
+            ShadowColor = Black;
+            ShadowSizeX = 32; // size of shadow compared to box element width
+            ShadowSizeY = 32; // size of shadow compared to box element height
+            ShadowOffsetX = 20;
+            ShadowOffsetY = 20;
+            ShadowIntensity = 100; // crispness of shadow, 1 is solid
+            ShadowOpacity = 0.7; // 0 - 1 opacity value
+        }
+        
+    </Style>
+    
+    <Contents style="shadow-container">
+        <Div style="shadow-caster"/>
+    </Contents>
+    
+</UITemplate>

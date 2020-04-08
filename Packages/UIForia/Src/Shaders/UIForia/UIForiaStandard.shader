@@ -100,7 +100,7 @@ Shader "UIForia/Standard"
                 half2 size = UnpackSize(Vert_PackedSize);
                 v.vertex = mul(transform, float4(v.vertex.xyz, 1));
                 
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex = float4(UnityObjectToViewPos(v.vertex) / float3(0.5 * _ScreenParams.x, _ProjectionParams.x * 0.5 * _ScreenParams.y, 1.0), 1.0);
                 float4 screenPos = ComputeScreenPos(o.vertex);
                 o.texCoord0 = v.texCoord0;
                 o.color = _ColorData[objectIndex];
@@ -184,7 +184,7 @@ Shader "UIForia/Standard"
             
             fixed4 frag (v2f i) : SV_Target {           
                 
-                float2 clipPos = float2(i.vertex.x, (_ScreenParams.y - i.vertex.y)) * _DPIScale;
+                float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y) * _DPIScale;
                 float4 clipRect = _ClipRects[(uint)i.texCoord1.w];
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];           
                 float opacity = _ObjectData[(uint)i.texCoord1.w].w;              

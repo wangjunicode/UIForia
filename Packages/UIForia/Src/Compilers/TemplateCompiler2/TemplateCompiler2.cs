@@ -5,8 +5,8 @@ using System.Reflection;
 using UIForia.Elements;
 using UIForia.Parsing;
 using UIForia.Util;
-using UnityEditor.Graphs;
 using UnityEngine;
+using UnityEngine.Assertions;
 using SlotType = UIForia.Parsing.SlotType;
 
 namespace UIForia.Compilers {
@@ -15,19 +15,26 @@ namespace UIForia.Compilers {
 
         public readonly CompilationContext2 context;
         public readonly TemplateDataBuilder templateDataBuilder;
-        private SizedArray<DeferredCompilationData> deferredData;
 
-        [ThreadStatic] private static Dictionary<int, Expression> s_IntExpression;
-        [ThreadStatic] private static Dictionary<Type, Expression> s_DefaultExpressions;
-        [ThreadStatic] private static Dictionary<string, Expression> s_StringExpression;
+        private ProcessedType rootProcessedType;
+        private readonly AttributeCompiler attributeCompiler;
+        private SizedArray<DeferredCompilationData> deferredData;
+        private SizedArray<AttrInfo> scratchAttributes;
+        private SizedArray<Type> scratchTypes;
+
+        private static readonly Dictionary<Type, MethodInfo> s_SyncMethodCache = new Dictionary<Type, MethodInfo>();
 
         public TemplateCompiler2() {
             this.deferredData = new SizedArray<DeferredCompilationData>(8);
             this.context = new CompilationContext2();
             this.templateDataBuilder = new TemplateDataBuilder();
+            this.attributeCompiler = new AttributeCompiler();
+            this.scratchAttributes = new SizedArray<AttrInfo>(16);
+            this.scratchTypes = new SizedArray<Type>(8);
         }
 
         public TemplateExpressionSet CompileTemplate(ProcessedType processedType) {
+            rootProcessedType = processedType;
 
             templateDataBuilder.Clear();
             deferredData.Clear();
@@ -59,9 +66,9 @@ namespace UIForia.Compilers {
                     CompileExpandedNode(expandedNode, data.index);
                     break;
 
-                // case SlotNode slotNode:
-                //     CompileSlotNode(slotNode, data.index);
-                //     break;
+                case SlotNode slotNode:
+                    CompileSlotNode(slotNode, data.index);
+                    break;
 
                 case RepeatNode repeatNode:
                 default:
@@ -101,12 +108,14 @@ namespace UIForia.Compilers {
             int childCount = slotNode.children.size;
             int styleCount = 0; // todo
 
-            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeElement, GetIntConstant(attrCount), GetIntConstant(childCount)));
+            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeElement, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
 
-            InitializeElementAttributes(systemParam, slotNode.attributes);
+            AttributeMerger.ConvertAttributeDefinitions(slotNode.attributes, ref scratchAttributes);
+            InitializeElementAttributes(systemParam, scratchAttributes);
+
             SetupChildren(systemParam, slotNode.children);
 
-            templateDataBuilder.SetSlotTemplate(slotNode, slotId, context.Build(slotNode.GetTagName()));
+            templateDataBuilder.SetElementTemplate(slotNode, slotId, context.Build(slotNode.GetTagName()));
 
         }
 
@@ -119,12 +128,13 @@ namespace UIForia.Compilers {
             int childCount = slotNode.children.size;
             int styleCount = 0; // todo
 
-            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeElement, GetIntConstant(attrCount), GetIntConstant(childCount)));
+            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeElement, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
+            AttributeMerger.ConvertAttributeDefinitions(slotNode.attributes, ref scratchAttributes);
 
-            InitializeElementAttributes(systemParam, slotNode.attributes);
+            InitializeElementAttributes(systemParam, scratchAttributes);
             SetupChildren(systemParam, slotNode.children);
 
-            templateDataBuilder.SetSlotTemplate(slotNode, slotId, context.Build(slotNode.GetTagName()));
+            templateDataBuilder.SetElementTemplate(slotNode, slotId, context.Build(slotNode.GetTagName()));
         }
 
         private void CompileSlotForward(SlotNode slotNode, int slotId) { }
@@ -137,15 +147,15 @@ namespace UIForia.Compilers {
 
             ParameterExpression systemParam = context.AddParameter<ElementSystem>("system");
             ParameterExpression elementParam = context.GetVariable(processedType.rawType, "element");
-            
+
             context.Assign(elementParam, ExpressionFactory.New(processedType.GetConstructor()));
 
             int attrCount = templateRootNode.CountRealAttributes();
             int childCount = templateRootNode.ChildCount;
 
-            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeEntryPoint, elementParam, GetIntConstant(attrCount), GetIntConstant(childCount)));
-
-            InitializeElementAttributes(systemParam, templateRootNode.attributes);
+            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeEntryPoint, elementParam, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
+            AttributeMerger.ConvertAttributeDefinitions(templateRootNode.attributes, ref scratchAttributes);
+            InitializeElementAttributes(systemParam, scratchAttributes);
 
             context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_HydrateEntryPoint));
 
@@ -175,6 +185,17 @@ namespace UIForia.Compilers {
 
         }
 
+        private static int CountRealAttributes(ReadOnlySizedArray<AttrInfo> attributes) {
+            int count = 0;
+            for (int i = 0; i < attributes.size; i++) {
+                if (attributes.array[i].type == AttributeType.Attribute) {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
         private void CompileExpandedNode(ExpandedNode expandedNode, int templateId) {
             context.Setup();
 
@@ -182,15 +203,16 @@ namespace UIForia.Compilers {
 
             ParameterExpression systemParam = context.AddParameter<ElementSystem>("system");
 
-            int attrCount = expandedNode.CountRealAttributes();
-            int childCount = expandedNode.children.size;
-            int styleCount = 0; // todo
-
-            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeElement, GetIntConstant(attrCount), GetIntConstant(childCount)));
-
             TemplateRootNode toExpand = processedType.templateRootNode;
 
-            SizedArray<AttributeDefinition> attributes = AttributeMerger.MergeExpandedAttributes(toExpand.attributes, expandedNode.attributes);
+            AttributeMerger.MergeExpandedAttributes2(expandedNode.attributes, toExpand.attributes, ref scratchAttributes);
+
+            int attrCount = CountRealAttributes(scratchAttributes);
+
+            int childCount = toExpand.children.size;
+            int styleCount = 0; // todo
+
+            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeElement, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
 
             // setup slot overrides
 
@@ -204,13 +226,13 @@ namespace UIForia.Compilers {
                     continue;
                 }
 
-                deferredData.Add(new DeferredCompilationData(overrider, templateDataBuilder.GetSlotIndex(overrider.slotName)));
+                deferredData.Add(new DeferredCompilationData(overrider, templateDataBuilder.GetNextTemplateIndex()));
 
                 if (overrider.slotType == SlotType.Override) {
-                    context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_OverrideSlot, GetStringConstant(overrider.slotName), GetIntConstant(i)));
+                    context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_OverrideSlot, ExpressionUtil.GetStringConstant(overrider.slotName), ExpressionUtil.GetIntConstant(i)));
                 }
                 else if (overrider.slotType == SlotType.Forward) {
-                    context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_ForwardSlot, GetStringConstant(overrider.slotName), GetIntConstant(i)));
+                    context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_ForwardSlot, ExpressionUtil.GetStringConstant(overrider.slotName), ExpressionUtil.GetIntConstant(i)));
                 }
                 else {
                     // todo -- diagnostics
@@ -219,12 +241,59 @@ namespace UIForia.Compilers {
 
             }
 
-            InitializeElementAttributes(systemParam, attributes);
+            InitializeElementAttributes(systemParam, scratchAttributes);
 
+            // for each attribute I need to know where it came from, both the type and possibly index in context array
+            // for container and text elements depth is always 1 and points to the root context
+            // for expanded elements depth is always 2 and points to root and 'self'
+            // for slot elements depth is n (at least 2) and points to the last n contexts were n == forward levels + 2
+
+            // now I need to know the context stack at compile time...which we dont have atm
+            // need to traverse down the slot hierarchy until we the <define> for the slot case
+
+            scratchTypes.Clear();
+            scratchTypes.Add(rootProcessedType.rawType);
+            scratchTypes.Add(expandedNode.processedType.rawType);
+
+            AttributeSet attributeSet = new AttributeSet(scratchAttributes, AttributeSetType.Expanded, scratchTypes);
+
+            BindingResult bindingResult = new BindingResult();
+
+            bindingResult.syncData = new SizedArray<SyncPropertyData>(8); // todo -- cache + clear
+
+            attributeCompiler.CompileAttributes(processedType, expandedNode, attributeSet, ref bindingResult);
+
+            for (int i = 0; i < bindingResult.syncData.size; i++) {
+                MethodInfo info = GetSyncVarMethod(bindingResult.syncData.array[i].type);
+                context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, info, ExpressionUtil.GetIntConstant(i), ExpressionUtil.GetStringConstant("")));
+            }
+
+            BindingIndices bindingIds = templateDataBuilder.AddBindings(bindingResult);
+
+
+            // todo -- only if has bindings
+            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_SetBindings, 
+                ExpressionUtil.GetIntConstant(bindingIds.updateIndex),
+                ExpressionUtil.GetIntConstant(bindingIds.lateUpdateIndex)
+                // ExpressionUtil.GetIntConstant(0)
+                )
+            );
+            
             context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_HydrateElement, Expression.Constant(processedType.rawType)));
 
             templateDataBuilder.SetElementTemplate(expandedNode, templateId, context.Build(expandedNode.GetTagName()));
 
+        }
+
+        private static MethodInfo GetSyncVarMethod(Type type) {
+            if (s_SyncMethodCache.TryGetValue(type, out MethodInfo generic)) {
+                return generic;
+            }
+
+            generic = MemberData.ElementSystem_AddSyncVariable.MakeGenericMethod(type);
+
+            s_SyncMethodCache.Add(type, generic);
+            return generic;
         }
 
         private void CompileContainerElement(ContainerNode containerNode, int templateId) {
@@ -238,9 +307,11 @@ namespace UIForia.Compilers {
             int childCount = containerNode.children.size;
             int styleCount = 0; // todo
 
-            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeElement, GetIntConstant(attrCount), GetIntConstant(childCount)));
+            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeElement, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
 
-            InitializeElementAttributes(systemParam, containerNode.attributes);
+            AttributeMerger.ConvertAttributeDefinitions(containerNode.attributes, ref scratchAttributes);
+
+            InitializeElementAttributes(systemParam, scratchAttributes);
 
             SetupChildren(systemParam, containerNode.children);
 
@@ -259,9 +330,16 @@ namespace UIForia.Compilers {
             int childCount = textNode.children.size;
             int styleCount = 0; // todo
 
-            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeElement, GetIntConstant(attrCount), GetIntConstant(childCount)));
+            context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_InitializeElement, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
 
-            InitializeElementAttributes(systemParam, textNode.attributes);
+            AttributeMerger.ConvertAttributeDefinitions(textNode.attributes, ref scratchAttributes);
+
+            InitializeElementAttributes(systemParam, scratchAttributes);
+
+            if (textNode.IsTextConstant()) {
+                context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_SetText, Expression.Constant(textNode.GetStringContent())));
+            }
+
             SetupChildren(systemParam, textNode.children);
 
             templateDataBuilder.SetElementTemplate(textNode, templateId, context.Build(textNode.GetTagName()));
@@ -278,20 +356,15 @@ namespace UIForia.Compilers {
 
                 switch (child) {
                     case SlotNode slotNode: {
-                        DeferredCompilationData data = deferredData.Add(new DeferredCompilationData(child, templateDataBuilder.GetSlotIndex(slotNode.slotName)));
-                        context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_AddSlotChild, childNew, GetStringConstant(slotNode.slotName), GetIntConstant(data.index)));
-                        break;
-                    }
-
-                    case ExpandedNode _: {
-                        DeferredCompilationData data = deferredData.Add(new DeferredCompilationData(child, templateDataBuilder.GetTemplateIndex(child.processedType)));
-                        context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_AddHydratedChild, childNew, GetIntConstant(data.index)));
+                        Assert.IsTrue(slotNode.slotType == SlotType.Define);
+                        DeferredCompilationData data = deferredData.Add(new DeferredCompilationData(child, templateDataBuilder.GetNextTemplateIndex()));
+                        context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_AddSlotChild, childNew, ExpressionUtil.GetStringConstant(slotNode.slotName), ExpressionUtil.GetIntConstant(data.index)));
                         break;
                     }
 
                     default: {
-                        DeferredCompilationData data = deferredData.Add(new DeferredCompilationData(child, templateDataBuilder.GetTemplateIndex(child.processedType)));
-                        context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_AddChild, childNew, GetIntConstant(data.index)));
+                        DeferredCompilationData data = deferredData.Add(new DeferredCompilationData(child, templateDataBuilder.GetNextTemplateIndex()));
+                        context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_AddChild, childNew, ExpressionUtil.GetIntConstant(data.index)));
                         break;
                     }
 
@@ -300,18 +373,18 @@ namespace UIForia.Compilers {
 
         }
 
-        private void InitializeElementAttributes(Expression system, ReadOnlySizedArray<AttributeDefinition> attributes) {
+        private void InitializeElementAttributes(Expression system, ReadOnlySizedArray<AttrInfo> attributes) {
 
             for (int i = 0; i < attributes.size; i++) {
-                ref AttributeDefinition attr = ref attributes.array[i];
+                ref AttrInfo attr = ref attributes.array[i];
 
                 if (attr.type != AttributeType.Attribute) {
                     continue;
                 }
 
                 context.AddStatement((attr.flags & AttributeFlags.Const) != 0
-                    ? ExpressionFactory.CallInstanceUnchecked(system, MemberData.ElementSystem_InitializeStaticAttribute, GetStringConstant(attr.key), GetStringConstant(attr.value))
-                    : ExpressionFactory.CallInstanceUnchecked(system, MemberData.ElementSystem_InitializeDynamicAttribute, GetStringConstant(attr.key)));
+                    ? ExpressionFactory.CallInstanceUnchecked(system, MemberData.ElementSystem_InitializeStaticAttribute, ExpressionUtil.GetStringConstant(attr.key), ExpressionUtil.GetStringConstant(attr.value))
+                    : ExpressionFactory.CallInstanceUnchecked(system, MemberData.ElementSystem_InitializeDynamicAttribute, ExpressionUtil.GetStringConstant(attr.key)));
             }
 
         }
@@ -331,39 +404,6 @@ namespace UIForia.Compilers {
                 this.contextStack = contextStack;
             }
 
-        }
-
-        public static Expression GetIntConstant(int value) {
-            s_IntExpression = s_IntExpression ?? new Dictionary<int, Expression>();
-            if (s_IntExpression.TryGetValue(value, out Expression retn)) {
-                return retn;
-            }
-
-            retn = Expression.Constant(value);
-            s_IntExpression[value] = retn;
-            return retn;
-        }
-
-        public static Expression GetStringConstant(string value) {
-            s_StringExpression = s_StringExpression ?? new Dictionary<string, Expression>();
-            if (s_StringExpression.TryGetValue(value, out Expression retn)) {
-                return retn;
-            }
-
-            retn = Expression.Constant(value);
-            s_StringExpression[value] = retn;
-            return retn;
-        }
-
-        public static Expression GetDefaultExpression(Type type) {
-            s_DefaultExpressions = s_DefaultExpressions ?? new Dictionary<Type, Expression>();
-            if (s_DefaultExpressions.TryGetValue(type, out Expression retn)) {
-                return retn;
-            }
-
-            retn = Expression.Default(type);
-            s_DefaultExpressions[type] = retn;
-            return retn;
         }
 
     }

@@ -4,6 +4,7 @@ using Tests.Mocks;
 using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.Generated;
 
 namespace TemplateCompiler2Test {
 
@@ -13,7 +14,11 @@ namespace TemplateCompiler2Test {
         public class SimpleTemplate : UIElement { }
 
         [Template("ExpandedTemplate.xml")]
-        public class ExpandedTemplate : UIElement { }
+        public class ExpandedTemplate : UIElement {
+
+            public string value;
+
+        }
 
         [Test]
         public void Works() {
@@ -21,8 +26,8 @@ namespace TemplateCompiler2Test {
             string path = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGeneratedNew"));
             
             MockApplication.PreCompile<SimpleTemplate>(path);
-            
-            // Application app = MockApplication.Create<SimpleTemplate>();
+
+            // Application app = MockApplication.Create(new Generated_TestApp());
             
         }
 

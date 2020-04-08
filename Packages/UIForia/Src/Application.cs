@@ -19,6 +19,9 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Debug = UnityEngine.Debug;
 
+// used implicitly by generated code. leave this here
+namespace UIForia.Generated {}
+
 namespace UIForia {
 
     public class ApplicationData {
@@ -152,7 +155,7 @@ namespace UIForia {
             this.elementMap = new LightList<UIElement>(128);
             this.views = new List<UIView>();
 
-            this.elementSystem = new ElementSystem();
+            this.elementSystem = new ElementSystem(templateLoader.templateDataMap);
             this.routingSystem = new RoutingSystem();
             this.animationSystem = new AnimationSystem();
             this.linqBindingSystem = new LinqBindingSystem();
@@ -200,13 +203,8 @@ namespace UIForia {
                 
                 Application app = new Application(config);
                 
-                // UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this));
-                //
-                // UIView view = new UIView(app, "Default", rootElement, Matrix4x4.identity, new Size(app.Width, app.Height));
-                //
-                // app.views.Add(view);
-                
                 Applications.Add(app);
+                
                 return app;
             }
             catch (Exception e) {

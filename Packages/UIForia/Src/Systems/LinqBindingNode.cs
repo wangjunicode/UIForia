@@ -6,6 +6,22 @@ using UIForia.Elements;
 
 namespace UIForia.Systems {
 
+    public abstract class SyncVariable {
+
+        public string debugName;
+
+    }
+
+    public class SyncVariable<T> : SyncVariable {
+
+        public T value;
+
+        public SyncVariable(string debugName) {
+            this.debugName = debugName;
+        }
+
+    }
+
     public abstract class ContextVariable {
 
         public int id;
@@ -47,11 +63,9 @@ namespace UIForia.Systems {
 
         public UIElement root;
         public UIElement element;
-        public UIElement innerContext;
-
-        internal uint lastBeforeUpdateFrame;
-        internal uint lastAfterUpdateFrame;
-
+        public UIElement[] referencedContexts;
+        public SyncVariable[] syncStorage;
+        
         internal Action<UIElement, UIElement> createdBinding;
         internal Action<UIElement, UIElement> enabledBinding;
         internal Action<UIElement, UIElement> updateBindings;
@@ -59,8 +73,7 @@ namespace UIForia.Systems {
 
         internal ContextVariable localVariable;
         internal LinqBindingNode parent;
-        public UIElement[] referencedContexts;
-
+        
         public void InitializeContextArray(string slotName, TemplateScope templateScope, int size) {
             referencedContexts = new UIElement[size + 1];
 
@@ -135,7 +148,6 @@ namespace UIForia.Systems {
             LinqBindingNode node = new LinqBindingNode(); // todo -- pool
             node.root = rootElement;
             node.element = element;
-            node.innerContext = innerContext;
             element.bindingNode = node;
 
             // todo -- profile this against skip tree
@@ -160,7 +172,6 @@ namespace UIForia.Systems {
             LinqBindingNode node = new LinqBindingNode(); // todo -- pool
             node.root = rootElement;
             node.element = element;
-            node.innerContext = innerContext;
             element.bindingNode = node;
 
             // todo -- profile this against skip tree
@@ -211,7 +222,6 @@ namespace UIForia.Systems {
             LinqBindingNode node = new LinqBindingNode(); // todo -- pool
             node.root = rootElement;
             node.element = element;
-            node.innerContext = innerContext;
             element.bindingNode = node;
 
             // todo -- profile this against skip tree

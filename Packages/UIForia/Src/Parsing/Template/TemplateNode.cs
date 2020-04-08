@@ -131,7 +131,7 @@ namespace UIForia.Parsing {
             }
 
             if (typeof(UITextElement).IsAssignableFrom(elementType.rawType)) {
-                templateNode = new TextNode(string.Empty, elementType, attributes, lineInfo) {
+                templateNode = new TextNode(elementType, attributes, lineInfo) {
                     root = root,
                     parent = this,
                     requiredChildType = requiredType
@@ -188,7 +188,7 @@ namespace UIForia.Parsing {
                         return root.templateShell.ReportError(lineInfo, GetTagName() + " does not support overriden slot nodes");
                     }
 
-                    slot = new SlotNode(slotName, attributes, injectedAttributes, templateLineInfo, SlotType.Forward);
+                    slot = new SlotNode(slotName, attributes, injectedAttributes, templateLineInfo, SlotType.Override);
                     slot.root = root;
                     expanded.AddSlotOverride((SlotNode) slot);
                     return true;

@@ -34,7 +34,6 @@ namespace UIForia.Parsing.Expressions.AstNodes {
             }
         }
 
-
         public int line;
         public int column;
 

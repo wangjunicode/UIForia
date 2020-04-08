@@ -1,7 +1,6 @@
 using System;
 using System.Linq.Expressions;
 using Mono.Linq.Expressions;
-using UIForia.Elements;
 using UIForia.Parsing;
 using UIForia.Util;
 
@@ -21,31 +20,34 @@ namespace UIForia.Compilers {
         public LambdaExpression hydratePoint;
         public LambdaExpression[] bindings;
         public TemplateOutput[] elementTemplates;
-        public LambdaExpression[] slotTemplates;
 
-        private static readonly string s_TypeName = typeof(TemplateData).GetTypeName();
         private static readonly string s_ElementFnTypeName = typeof(Action<ElementSystem>[]).GetTypeName();
 
         public IndentedStringBuilder ToCSharpCode(IndentedStringBuilder stringBuilder) {
-            if (!string.IsNullOrEmpty(processedType.templateId)) {
-                stringBuilder.AppendInline(" templateId = ");
-                stringBuilder.AppendInline(processedType.templateId);
-            }
+            // if (!string.IsNullOrEmpty(processedType.templateId)) {
+            //     stringBuilder.AppendInline(" templateId = ");
+            //     stringBuilder.AppendInline(processedType.templateId);
+            // }
 
-            stringBuilder.NewLine();
-            stringBuilder.Append("new ");
-            stringBuilder.AppendInline(s_TypeName);
+            stringBuilder.AppendInline("new ");
+            stringBuilder.AppendInline(nameof(TemplateData));
             stringBuilder.AppendInline(" (");
             stringBuilder.AppendInline("\"");
             stringBuilder.AppendInline(processedType.tagName);
             stringBuilder.AppendInline("\"");
-            stringBuilder.AppendInline(") {\n");
+            stringBuilder.AppendInline(") {");
+            stringBuilder.NewLine();
+            stringBuilder.Indent();
+            stringBuilder.Indent();
+
             BuildEntryPoint(stringBuilder);
-            stringBuilder.AppendInline("\n");
+            stringBuilder.NewLine();
+
             BuildHydratePoint(stringBuilder);
 
             stringBuilder.NewLine();
             stringBuilder.Indent();
+
             stringBuilder.Append(nameof(TemplateData.elements));
             stringBuilder.AppendInline(" = new ");
             stringBuilder.AppendInline(s_ElementFnTypeName);
@@ -60,18 +62,25 @@ namespace UIForia.Compilers {
                 stringBuilder.AppendInline("> line ");
                 stringBuilder.AppendInline(elementTemplates[i].templateNode.lineInfo.ToString());
                 stringBuilder.NewLine();
-                stringBuilder.Append(elementTemplates[i].expression.ToTemplateBody(4));
+                stringBuilder.Append(elementTemplates[i].expression.ToTemplateBody(3));
                 if (i != elementTemplates.Length - 1) {
                     stringBuilder.AppendInline(",\n");
                 }
             }
 
+            for (int i = 0; i < bindings.Length; i++) {
+                stringBuilder.Append(bindings[i].ToTemplateBody(3));
+                if (i != bindings.Length - 1) {
+                    stringBuilder.AppendInline(",\n");
+                }
+            }
+            
             stringBuilder.NewLine();
             stringBuilder.Outdent();
             stringBuilder.Append("}");
             stringBuilder.NewLine();
             stringBuilder.Outdent();
-            stringBuilder.Append("};\n");
+            stringBuilder.Append("};");
             return stringBuilder;
         }
 
@@ -79,7 +88,7 @@ namespace UIForia.Compilers {
             stringBuilder.Indent();
             stringBuilder.Append(nameof(TemplateData.entry));
             stringBuilder.AppendInline(" = ");
-            stringBuilder.AppendInline(entryPoint.ToTemplateBody(3));
+            stringBuilder.AppendInline(entryPoint.ToTemplateBody(2));
             stringBuilder.AppendInline(",");
             stringBuilder.Outdent();
         }
@@ -88,7 +97,7 @@ namespace UIForia.Compilers {
             stringBuilder.Indent();
             stringBuilder.Append(nameof(TemplateData.hydrate));
             stringBuilder.AppendInline(" = ");
-            stringBuilder.AppendInline(hydratePoint.ToTemplateBody(3));
+            stringBuilder.AppendInline(hydratePoint.ToTemplateBody(2));
             stringBuilder.AppendInline(",");
             stringBuilder.Outdent();
         }

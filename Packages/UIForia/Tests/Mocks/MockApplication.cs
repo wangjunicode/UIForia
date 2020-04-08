@@ -50,7 +50,17 @@ namespace Tests.Mocks {
             
         }
 
+        public static Application Create(TemplateLoader loader) {
+            
+            ApplicationConfig config = new ApplicationConfig() {
+                applicationType = ApplicationType.Test,
+                templateLoader = loader,
+            };
+            
+            return Create(config);
 
+        }
+        
         public static MockApplication Setup<T>(string appName = null, List<Type> dynamicTemplateTypes = null) where T : UIElement {
             throw new NotImplementedException();
             // if (appName == null) {

@@ -8,9 +8,46 @@ namespace UIForia.Compilers {
 
     public static class ExpressionUtil {
 
+        [ThreadStatic] private static Dictionary<int, Expression> s_IntExpression;
+        [ThreadStatic] private static Dictionary<Type, Expression> s_DefaultExpressions;
+        [ThreadStatic] private static Dictionary<string, Expression> s_StringExpression;
+        
+        public static Expression GetDefaultExpression(Type type) {
+            s_DefaultExpressions = s_DefaultExpressions ?? new Dictionary<Type, Expression>();
+            if (s_DefaultExpressions.TryGetValue(type, out Expression retn)) {
+                return retn;
+            }
+
+            retn = Expression.Default(type);
+            s_DefaultExpressions[type] = retn;
+            return retn;
+        }
+
+        public static Expression GetIntConstant(int value) {
+            s_IntExpression = s_IntExpression ?? new Dictionary<int, Expression>();
+            if (s_IntExpression.TryGetValue(value, out Expression retn)) {
+                return retn;
+            }
+
+            retn = Expression.Constant(value);
+            s_IntExpression[value] = retn;
+            return retn;
+        }
+
+        public static Expression GetStringConstant(string value) {
+            s_StringExpression = s_StringExpression ?? new Dictionary<string, Expression>();
+            if (s_StringExpression.TryGetValue(value, out Expression retn)) {
+                return retn;
+            }
+
+            retn = Expression.Constant(value);
+            s_StringExpression[value] = retn;
+            return retn;
+        }
+
         // used in expressions to output comments in compiled functions
         public static void Comment(string comment) { }
-        
+
         public static void InlineComment(string comment) { }
 
         // used in expressions to output comments in compiled functions
@@ -25,18 +62,18 @@ namespace UIForia.Compilers {
                     case DefaultExpression _:
                     case ConstantExpression _:
                         return true;
-        
+
                     case ConditionalExpression conditionalExpression:
                         return IsConstant(conditionalExpression.Test) && IsConstant(conditionalExpression.IfTrue) && IsConstant(conditionalExpression.IfFalse);
-        
+
                     case UnaryExpression unary:
                         n = unary.Operand;
                         continue;
-        
+
                     case BinaryExpression binaryExpression:
                         return IsConstant(binaryExpression.Left) && IsConstant(binaryExpression.Right);
                 }
-        
+
                 return false;
             }
         }

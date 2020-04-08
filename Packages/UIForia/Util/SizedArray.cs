@@ -155,6 +155,12 @@ namespace UIForia.Util {
             Array.Clear(array, 0, array.Length);
         }
 
+        public void EnsureCapacity(int count) {
+            if (count > 0 && size + count >= array.Length) {
+                Array.Resize(ref array, size + count * 2);
+            }
+        }
+
     }
 
 }

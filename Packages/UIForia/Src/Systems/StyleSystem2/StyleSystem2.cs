@@ -14,14 +14,14 @@ namespace UIForia.Style {
 
     public class UIStyleTemp { }
 
-    [BurstCompile]
+    // [BurstCompile]
     public struct SetupSelectorDataJob : IJob {
 
         public void Execute() { }
 
     }
 
-    [BurstCompile]
+    // [BurstCompile]
     public struct RunSelectorJob : IJob {
 
         public NativeArray<StyleSystem2.SelectorChange> selectorChanges;
@@ -34,14 +34,14 @@ namespace UIForia.Style {
 
     }
 
-    [BurstCompile]
+    // [BurstCompile]
     public struct SetupJob : IJob {
 
         public void Execute() { }
 
     }
 
-    [BurstCompile]
+    // [BurstCompile]
     public struct ApplyStyleJob : IJob {
 
         public void Execute() { }

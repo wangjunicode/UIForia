@@ -13,17 +13,11 @@ namespace UIForia.Compilers {
 
     public class TemplateLoader {
 
-        private LightList<TemplateExpressionSet> expressionSets;
-        private TemplateData[] templateData;
+        public TemplateData[] templateData;
+        public Dictionary<Type, TemplateData> templateDataMap;
         
-        public void Load() {
-                    
-        }
-
-        public static TemplateLoader FromPrecompiled(Type module) {
-            return new TemplateLoader();
-        }
-
+        private LightList<TemplateExpressionSet> expressionSets;
+        
         public static TemplateLoader RuntimeCompileModule(Module module, IEnumerable<Type> dynamicRoots = null) {
             return new TemplateLoader();
         }
@@ -118,41 +112,75 @@ namespace UIForia.Compilers {
 
             return loader;
         }
+        
+        public static string InitTemplate(string appName, string templates, string templateMap) {
+            return 
+$@"using UIForia.Compilers;
+using System;
+using System.Collections.Generic;
 
-        private static readonly string TemplateDataTypeName = typeof(TemplateData).GetTypeName();
+namespace UIForia.Generated {{
+
+    public partial class Generated_{appName} : TemplateLoader {{
+
+        public Generated_{appName}() {{
+            templateData = new[] {{
+{templates}
+            }};
+
+            templateDataMap = new Dictionary<Type, TemplateData>() {{
+{templateMap}
+            }};
+        }}
+
+    }}
+
+}}";
+        }
+
+        public static string TemplateFile(string appName, string templateName, string templateInfo) {
+            return
+$@"using UIForia.Compilers;
+
+namespace UIForia.Generated {{
+
+    public partial class Generated_{appName} : TemplateLoader {{
+    
+        public static readonly {nameof(TemplateData)} {templateName} = {templateInfo}
+
+    }}
+
+}}";
+        }
+
+        private struct TemplatePair {
+
+            public Type type;
+            public string templateName;
+
+        }
 
         public static void PreCompile(string outputPath, string appName, Type rootType) {
 
             TemplateLoader loader = CreateLoader(rootType);
 
             IndentedStringBuilder builder = new IndentedStringBuilder(1024);
-            
+           
+            TemplatePair[] templateNames = new TemplatePair[loader.expressionSets.size];
             for (int i = 0; i < loader.expressionSets.size; i++) {
                 builder.Clear();
-                
-                ProcessedType processedType = loader.expressionSets[i].processedType;
-                
-                builder.Append("namespace UIForia.GeneratedApplication {");
-                builder.NewLine();
-                builder.NewLine();
-                builder.Indent();
-                builder.Append("public partial class ");
-                builder.AppendInline("Generated_");
-                builder.AppendInline(appName);
-                builder.AppendInline(" {");
-                
-                builder.Indent();
-                builder.NewLine();
-                builder.NewLine();
-                // stringBuilder.Append("// " + processedType.templatePath);
-                builder.Append("public static readonly ");
-                builder.AppendInline(TemplateDataTypeName);
-                builder.AppendInline(" template_");
-                builder.AppendInline(Guid.NewGuid().ToString().Replace("-", "_"));
-                builder.AppendInline(" = ");
-                builder.NewLine();
-                builder.Indent();
 
+                ProcessedType processedType = loader.expressionSets[i].processedType;
+                string templateName = "template_" + Guid.NewGuid().ToString().Replace("-", "_");
+                templateNames[i] = new TemplatePair() {
+                    type = processedType.rawType,
+                    templateName = templateName
+                };
+                
+                loader.expressionSets[i].ToCSharpCode(builder);
+
+                string data = TemplateFile(appName, templateName, builder.ToString());
+                
                 string fileName;
                 
                 loader.expressionSets[i].ToCSharpCode(builder);
@@ -168,22 +196,56 @@ namespace UIForia.Compilers {
                     fileName = processedType.tagName;
                 }
                 
-                string file = Path.Combine(outputPath, "Modules", moduleTypeName, fileName + ".generated.cs");
+                string file = Path.Combine(outputPath, "Modules", moduleTypeName, fileName + "_generated.cs");
                 
                 Directory.CreateDirectory(Path.GetDirectoryName(file));
-                builder.NewLine();
-                builder.Outdent();
-                builder.Outdent();
 
-                builder.Append("}");
-                builder.NewLine();
-                builder.NewLine();
-                builder.Outdent();
-                builder.Append("}");
-                File.WriteAllText(file, builder.ToString());
+                File.WriteAllText(file, data);
+            }
+            
+            builder.Clear();
+            builder.Indent();
+            builder.Indent();
+            builder.Indent();
+            builder.Indent();
+            
+            
+            for (int i = 0; i < templateNames.Length; i++) {
+                builder.Append(templateNames[i].templateName);
+                if (i != templateNames.Length - 1) {
+                    builder.AppendInline(",\n");
+                }
             }
 
+            string templateArray = builder.ToString();
+            builder.Clear();
+            builder.Indent();
+            builder.Indent();
+            builder.Indent();
+            builder.Indent();
+            
+            for (int i = 0; i < templateNames.Length; i++) {
+                builder.Append("{ typeof(");
+                builder.AppendInline(templateNames[i].type.GetTypeName());
+                builder.AppendInline("), ");
+                builder.AppendInline(templateNames[i].templateName);
+                builder.AppendInline("}");
+                if (i != templateNames.Length - 1) {
+                    builder.AppendInline(",\n");
+                }
+            }
+
+            File.WriteAllText(Path.Combine(outputPath, "init_generated.cs"), InitTemplate(appName, templateArray, builder.ToString()));
+
         }
+
+
+    }
+    
+    
+    public interface ITemplateLoader2 {
+
+        void Load();
 
     }
 

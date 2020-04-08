@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Compilers.Style;
@@ -11,11 +10,10 @@ using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Rendering;
 using UIForia.Systems;
-using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
+using UnityEngine;
 using UnityEngine.Assertions;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia.Compilers {
 
@@ -2506,12 +2504,15 @@ namespace UIForia.Compilers {
             }
 
             ContextVariableDefinition ctxVar = null;
+            
             if ((attr.flags & AttributeFlags.Sync) != 0) {
-                ctxVar = new ContextVariableDefinition();
-                ctxVar.id = NextContextId;
-                ctxVar.name = "sync_" + attr.key;
-                ctxVar.type = left.targetExpression.Type;
-                ctxVar.variableType = AliasResolverType.ContextVariable;
+                
+                ctxVar = new ContextVariableDefinition {
+                    id = NextContextId, 
+                    name = "sync_" + attr.key,
+                    type = left.targetExpression.Type,
+                    variableType = AliasResolverType.ContextVariable
+                };
 
                 MethodCallExpression createVariable = CreateLocalContextVariableExpression(ctxVar, out Type contextVarType);
 

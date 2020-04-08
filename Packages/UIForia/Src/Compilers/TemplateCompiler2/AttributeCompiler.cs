@@ -5,6 +5,8 @@ using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
+using UIForia.Parsing.Expressions.AstNodes;
+using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 
@@ -12,6 +14,7 @@ namespace UIForia.Compilers {
 
     public class AttributeCompiler {
 
+        private TemplateLinqCompiler constCompiler;
         private TemplateLinqCompiler updateCompiler;
         private TemplateLinqCompiler lateCompiler;
 
@@ -20,109 +23,149 @@ namespace UIForia.Compilers {
         internal static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
         internal static readonly RepeatKeyFnTypeWrapper s_RepeatKeyFnTypeWrapper = new RepeatKeyFnTypeWrapper();
 
+        private readonly StructList<PropertyChangeHandlerDesc> changeHandlers;
+        private readonly StructList<SyncPropertyData> syncData;
+        
+        private int contextId = 1;
+        private int NextContextId => contextId++;
+        private int syncCount = 0;
+
         public AttributeCompiler() {
             this.updateCompiler = new TemplateLinqCompiler();
             this.lateCompiler = new TemplateLinqCompiler();
+            this.constCompiler = new TemplateLinqCompiler();
+            this.changeHandlers = new StructList<PropertyChangeHandlerDesc>(16);
+            this.syncData = new StructList<SyncPropertyData>();
         }
 
-        public void CompileAttributes(ProcessedType processedType, TemplateNode node, AttributeSet attributeSet) {
+        private static bool IsAttrBeforeUpdate(in AttrInfo attrInfo) {
+            return (attrInfo.type == AttributeType.Conditional || attrInfo.type == AttributeType.Property || attrInfo.type == AttributeType.Alias);
+        }
 
+        private TemplateLinqCompiler GetCompiler(bool isConst, in AttrInfo attrInfo) {
+            // if (isConst || (attrInfo.flags & AttributeFlags.Const) != 0) {
+            //     constCompiler.Setup(attrInfo);
+            //     return constCompiler;
+            // }
+
+            // todo if const + or once or isConst + sync -> probably throw an error?
+            updateCompiler.Setup(attrInfo);
+            return updateCompiler;
+        }
+
+        private void InitializeCompilers(Type elementType, AttributeSet attributeSet) {
+            updateCompiler.Init(elementType, attributeSet.contextTypes);
+        }
+
+        public void CompileAttributes(ProcessedType processedType, TemplateNode node, AttributeSet attributeSet, ref BindingResult bindingResult) {
+            syncCount = 0;
             processedType.EnsureReflectionData();
 
             StructList<ContextAliasActions> contextModifications = null;
 
-            for (int i = 0; i < attributeSet.size; i++) {
+            // CompileUpdateAttributes();
+            // CompileSyncAttributes();
+            // CompileOnceAttributes();
+            // CompileCreateAttributes();
+            // CompileEnableAttributes();
 
-                AttributeContext attrContext = new AttributeContext();
+            // [InvokeWhenDisabled]
+            // Update() { } 
+            // const + once bindings and unmarked bindings that are constant
 
-                SetupCompilers();
+            InitializeCompilers(processedType.rawType, attributeSet);
 
-                CompileConditionalBindings(node, attrContext.attributes);
+            for (int i = 0; i < attributeSet.attributes.size; i++) {
 
-                CompilePropertiesAndContextVariables(processedType, attrContext.attributes, ref contextModifications);
+                ref AttrInfo attr = ref attributeSet.attributes.array[i];
 
-            }
-
-            if (processedType.requiresUpdateFn) {
-                // always uses root context
-                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetElement(), processedType.updateMethod));
-            }
-
-            // always uses root context
-            CompileTextBinding(node as TextNode);
-
-        }
-
-        private void CompileConditionalBindings(TemplateNode templateNode, ReadOnlySizedArray<AttributeDefinition> attributes) {
-
-            for (int i = 0; i < attributes.size; i++) {
-                ref AttributeDefinition attr = ref attributes.array[i];
-
-                if (attr.type != AttributeType.Conditional) {
+                if (!IsAttrBeforeUpdate(attr)) {
                     continue;
                 }
 
-                if ((attr.flags & AttributeFlags.Const) != 0) {
-                    // CompileConditionalBinding(createdCompiler, attr);
-                }
-                else if ((attr.flags & AttributeFlags.EnableOnly) != 0) {
-                    //  CompileConditionalBinding(enabledCompiler, attr);
-                }
-                else {
-                    CompileConditionalBinding(updateCompiler, attr);
-                }
+                ASTNode ast = ExpressionParser.Parse(attr.value);
 
-            }
-        }
+                bool isConst = IsConstantExpression(ast);
 
-        private static void CompileConditionalBinding(TemplateLinqCompiler compiler, in AttributeDefinition attr) {
-
-            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(
-                compiler.GetElement(),
-                MemberData.Element_SetEnabledInternal,
-                compiler.Value(attr.value))
-            );
-
-        }
-
-        private void CompilePropertiesAndContextVariables(ProcessedType processedType, ReadOnlySizedArray<AttributeDefinition> attributes, ref StructList<ContextAliasActions> contextModifications) {
-
-            for (int i = 0; i < attributes.size; i++) {
-                ref AttributeDefinition attr = ref attributes.array[i];
+                TemplateLinqCompiler compiler = GetCompiler(isConst, attr);
 
                 switch (attr.type) {
-                    case AttributeType.Context:
-                        // CompileContextVariable(attr, ref contextModifications);
+
+                    case AttributeType.Conditional: {
+                        compiler.SetImplicitContext(compiler.GetRoot(), ParameterFlags.NeverNull);
+                        compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(
+                                compiler.GetElement(),
+                                MemberData.Element_SetEnabledInternal,
+                                compiler.Value(ast)
+                            )
+                        );
                         break;
+                    }
 
                     case AttributeType.Property: {
-                        if (ReflectionUtil.IsEvent(processedType.rawType, attr.key, out EventInfo eventInfo)) {
-                            // CompileEventBinding(createdCompiler, attr, eventInfo);
-                            continue;
-                        }
 
-                        if ((attr.flags & AttributeFlags.Sync) != 0) {
-                            // ContextVariableDefinition ctxVar = CompilePropertyBinding(updateCompiler, processedType, attr, changeHandlers);
-                            // CompilePropertyBindingSync(lateCompiler, attr, ctxVar);
-                        }
-                        else if ((attr.flags & AttributeFlags.Const) != 0) {
-                            //CompilePropertyBinding(createdCompiler, processedType, attr, changeHandlers);
-                        }
-                        else if ((attr.flags & AttributeFlags.EnableOnly) != 0) {
-                            //CompilePropertyBinding(enabledCompiler, processedType, attr, changeHandlers);
-                        }
-                        else {
-                            CompilePropertyBinding(updateCompiler, processedType, attr);
-                        }
+                        SyncPropertyData syncPropertyData = CompilePropertyBinding(compiler, ast, processedType, attr);
 
                         break;
                     }
+
                 }
+
             }
+            //
+            // if (processedType.requiresUpdateFn) {
+            //     // always uses root context
+            //     updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetElement(), processedType.updateMethod));
+            // }
+            //
+            // // always uses root context
+            // CompileTextBinding(node as TextNode);
+
+            BuildLambda(updateCompiler, ref bindingResult.updateLambda);
+            BuildLambda(lateCompiler, ref bindingResult.lateLambda);
+            // BuildLambda(updateCompiler, ref retn.constEnableLambda);
 
         }
 
-        private ContextVariableDefinition CompilePropertyBinding(TemplateLinqCompiler compiler, ProcessedType processedType, in AttributeDefinition attr) {
+        private static void BuildLambda(TemplateLinqCompiler compiler, ref LambdaExpression lambdaExpression) {
+            if (!compiler.HasStatements) {
+                return;
+            }
+            
+            try {
+                lambdaExpression = compiler.BuildLambda();
+            }
+            catch (Exception e) {
+                // todo -- diagnostic
+                Debug.Log(e);
+            }
+        }
+
+        private static bool IsConstantExpression(ASTNode n) {
+            while (true) {
+                switch (n) {
+                    case LiteralNode _:
+                        return true;
+
+                    //not sure about this one 
+                    case ParenNode parenNode:
+                        return parenNode.accessExpression == null && IsConstantExpression(parenNode.expression);
+
+                    //not sure about this one 
+                    case UnaryExpressionNode unary:
+                        n = unary.expression;
+                        continue;
+
+                    case OperatorNode binaryExpression:
+                        return IsConstantExpression(binaryExpression.left) && IsConstantExpression(binaryExpression.right);
+                }
+
+                return false;
+
+            }
+        }
+
+        private SyncPropertyData CompilePropertyBinding(TemplateLinqCompiler compiler, ASTNode expr, ProcessedType processedType, in AttrInfo attr) {
 
             LHSStatementChain left;
             Expression right = null;
@@ -135,112 +178,130 @@ namespace UIForia.Compilers {
                 left = compiler.AssignableStatement(attr.key);
             }
             catch (Exception e) {
-                compiler.EndIsolatedSection();
-                Debug.LogError(e); // todo -- diagnostic
-                return null;
+                Debug.LogError(e); // todo -- diagnostic, unroll compiler changes 
+                return default;
             }
 
             compiler.SetImplicitContext(rootElement);
 
+            // todo -- action / delegate support
             if (ReflectionUtil.IsFunc(left.targetExpression.Type)) {
                 Type[] generics = left.targetExpression.Type.GetGenericArguments();
                 Type target = generics[generics.Length - 1];
                 if (HasTypeWrapper(target, out ITypeWrapper wrapper)) {
-                    right = compiler.TypeWrapStatement(wrapper, left.targetExpression.Type, attr.value);
+                    right = compiler.TypeWrapStatement(wrapper, left.targetExpression.Type, expr);
                 }
             }
 
             if (right == null) {
-                Expression accessor = compiler.AccessorStatement(left.targetExpression.Type, attr.value);
+                Expression accessor = compiler.AccessorStatement(left.targetExpression.Type, expr);
 
                 if (accessor is ConstantExpression) {
                     right = accessor;
                 }
                 else {
-                    right = compiler.AddVariable(left.targetExpression.Type, "__right");
+                    right = compiler.AddVariable(left.targetExpression.Type, "__value");
                     compiler.Assign(right, accessor);
                 }
             }
 
-            // todo -- I can figure out if a value is constant using IsConstant(expr), use this information to push the expression onto the const compiler
-            if (ExpressionUtil.IsConstant(right)) {
-                Debug.Log("expression is always constant");
-            }
+            changeHandlers.Clear();
 
-            // todo -- clean up this mess
-            if ((attr.flags & AttributeFlags.Const) != 0) {
+            // todo -- handled dotted accessors like <Element property:someArray[i].value="4"/>, likely needs parser support
+            processedType.GetChangeHandlers(attr.key, changeHandlers);
+
+            // if there is a change handler we need to check for changes
+            // otherwise field values can be assigned w/o checking
+            if (changeHandlers.size <= 0) {
                 compiler.Assign(left, right);
             }
             else {
-                StructList<PropertyChangeHandlerDesc> changeHandlers = StructList<PropertyChangeHandlerDesc>.Get();
-                processedType.GetChangeHandlers(attr.key, changeHandlers);
 
-                bool isProperty = ReflectionUtil.IsProperty(castElement.Type, attr.key);
+                ParameterExpression old = compiler.AddVariable(left.targetExpression.Type, "__oldVal");
 
-                // if there is a change handler or the member is a property we need to check for changes
-                // otherwise field values can be assigned w/o checking
-                if (changeHandlers.size > 0 || isProperty) {
-                    ParameterExpression old = compiler.AddVariable(left.targetExpression.Type, "__oldVal");
-                    compiler.RawExpression(Expression.Assign(old, left.targetExpression));
-                    // todo -- try to remove closure here
-                    compiler.IfNotEqual(left, right, () => {
-                        compiler.Assign(left, right);
-                        for (int j = 0; j < changeHandlers.size; j++) {
-                            MethodInfo methodInfo = changeHandlers.array[j].methodInfo;
-                            ParameterInfo[] parameters = methodInfo.GetParameters();
+                compiler.RawExpression(Expression.Assign(old, left.targetExpression));
 
-                            if (!methodInfo.IsPublic) {
-                                // todo -- diagnostic
-                                throw TemplateCompileException.NonPublicPropertyChangeHandler(methodInfo.Name, right.Type);
-                            }
+                // todo -- try to remove closure here
+                compiler.IfNotEqual(left, right, () => {
 
-                            if (parameters.Length == 0) {
-                                compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo));
-                                continue;
-                            }
-
-                            if (parameters.Length == 1 && parameters[0].ParameterType == right.Type) {
-                                compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo, old));
-                                continue;
-                            }
-
-                            // todo -- diagnostic
-                            throw TemplateCompileException.UnresolvedPropertyChangeHandler(methodInfo.Name, right.Type); // todo -- better error message
-                        }
-                    });
-                }
-                else {
                     compiler.Assign(left, right);
-                }
 
-                changeHandlers.Release();
+                    for (int j = 0; j < changeHandlers.size; j++) {
+
+                        MethodInfo methodInfo = changeHandlers.array[j].methodInfo;
+                        ParameterInfo[] parameters = changeHandlers.array[j].parameterInfos;
+
+                        if (parameters.Length == 0) {
+                            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo));
+                            continue;
+                        }
+
+                        if (parameters.Length == 1 && parameters[0].ParameterType == right.Type) {
+                            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo, old));
+                            continue;
+                        }
+
+                        // should never hit this
+                        // todo -- diagnostic
+                        throw TemplateCompileException.UnresolvedPropertyChangeHandler(methodInfo.Name, right.Type); // todo -- better error message
+                    }
+                });
             }
 
-            ContextVariableDefinition ctxVar = null;
-            // todo -- context var
+            if ((attr.flags & AttributeFlags.Sync) != 0) {
+                int syncIdx = syncCount++;
+                
+                Expression accessExpr = Expression.ArrayAccess(compiler.GetBindingNode(), ExpressionUtil.GetIntConstant(syncIdx));
+                
+                compiler.RawExpression(Expression.Assign(accessExpr, right));
 
-            // if ((attr.flags & AttributeFlags.Sync) != 0) {
-            //     ctxVar = new ContextVariableDefinition();
-            //     ctxVar.id = NextContextId;
-            //     ctxVar.name = "sync_" + attr.key;
-            //     ctxVar.type = left.targetExpression.Type;
-            //     ctxVar.variableType = AliasResolverType.ContextVariable;
-            //
-            //     MethodCallExpression createVariable = CreateLocalContextVariableExpression(ctxVar, out Type contextVarType);
-            //
-            //     createdCompiler.RawExpression(createVariable);
-            //
-            //     ctxVar.contextVarType = contextVarType;
-            //
-            //     CompileAssignContextVariable(compiler, attr, ctxVar.contextVarType, ctxVar.id, "sync_", right);
-            // }
+                // todo -- assert is update
+               // CompilePropertyBindingSync(syncIdx, accessExpr, attr);
 
-            return ctxVar;
+                return new SyncPropertyData() {
+                    index = syncIdx,
+                    type = right.Type,
+                    syncArrayAccessExpr = accessExpr,
+                    leftSideAssign = left
+                };
+            }
+
+            return default;
 
         }
 
-        private void SetupCompilers() {
-            updateCompiler.Reset();
+        private void CompilePropertyBindingSync(in SyncPropertyData syncPropertyData, in AttrInfo attr) {
+            
+            lateCompiler.Setup(attr);
+            Expression right;
+
+            ParameterExpression element = lateCompiler.GetElement();
+            ParameterExpression root = lateCompiler.GetRoot();
+            
+            LHSStatementChain assignableStatement = lateCompiler.AssignableStatement(attr.value);
+            
+            Expression accessor = lateCompiler.AccessorStatement(assignableStatement.targetExpression.Type, attr.value);
+
+            if (accessor is ConstantExpression) {
+                right = accessor;
+            }
+            else {
+                right = lateCompiler.AddVariable(assignableStatement.targetExpression.Type, "__right");
+                lateCompiler.Assign(right, accessor);
+            }
+            
+            lateCompiler.SetImplicitContext(root);
+            
+            Expression expr = Expression.TypeAs(syncPropertyData.syncArrayAccessExpr, syncPropertyData.type);
+            
+            lateCompiler.SetImplicitContext(element);
+            
+            string key = attr.key;
+            
+            lateCompiler.IfEqual(expr, right, () => {
+                // todo -- currently only supports fields, properties should also work
+                lateCompiler.Assign(assignableStatement, Expression.MakeMemberAccess(element, element.Type.GetField(key)));
+            });
         }
 
         private void CompileTextBinding(TextNode textNode) {
@@ -372,6 +433,24 @@ namespace UIForia.Compilers {
             public string name;
 
         }
+
+    }
+
+    public struct BindingResult {
+
+        public LambdaExpression lateLambda;
+        public LambdaExpression updateLambda;
+        public LambdaExpression constEnableLambda;
+        public SizedArray<SyncPropertyData> syncData;
+
+    }
+
+    public struct SyncPropertyData {
+
+        public int index;
+        public Type type;
+        public Expression syncArrayAccessExpr;
+        public LHSStatementChain leftSideAssign;
 
     }
 

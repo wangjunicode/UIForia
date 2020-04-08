@@ -1118,12 +1118,17 @@ namespace UIForia.Util {
                 return true;
             }
 
-            Type generic = null;
+        
+            Type generic;
+            
             if (type.IsGenericTypeDefinition) {
                 generic = type;
             }
             else if (type.IsGenericType) {
                 generic = type.GetGenericTypeDefinition();
+            }
+            else {
+                return false;
             }
 
             if (generic == typeof(Action<>)) return true;
@@ -1133,18 +1138,28 @@ namespace UIForia.Util {
             if (generic == typeof(Action<,,,,>)) return true;
             if (generic == typeof(Action<,,,,,>)) return true;
             if (generic == typeof(Action<,,,,,,>)) return true;
-            return false;
+            if (generic == typeof(Action<,,,,,,,>)) return true;
+            if (generic == typeof(Action<,,,,,,,,>)) return true;
+            if (generic == typeof(Action<,,,,,,,,,>)) return true;
+            if (generic == typeof(Action<,,,,,,,,,,>)) return true;
+            if (generic == typeof(Action<,,,,,,,,,,,>)) return true;
+            if (generic == typeof(Action<,,,,,,,,,,,,>)) return true;
+            if (generic == typeof(Action<,,,,,,,,,,,,,>)) return true;
+            if (generic == typeof(Action<,,,,,,,,,,,,,,>)) return true;
+            return generic == typeof(Action<,,,,,,,,,,,,,,,>);
         }
 
         public static bool IsFunc(Type type) {
-            if (!type.IsGenericType) return false;
 
-            Type generic = null;
+            Type generic;
             if (type.IsGenericTypeDefinition) {
                 generic = type;
             }
             else if (type.IsGenericType) {
                 generic = type.GetGenericTypeDefinition();
+            }
+            else {
+                return false;
             }
 
             if (generic == typeof(Func<>)) return true;
@@ -1154,7 +1169,16 @@ namespace UIForia.Util {
             if (generic == typeof(Func<,,,,>)) return true;
             if (generic == typeof(Func<,,,,,>)) return true;
             if (generic == typeof(Func<,,,,,,>)) return true;
-            return false;
+            if (generic == typeof(Func<,,,,,,,>)) return true;
+            if (generic == typeof(Func<,,,,,,,,>)) return true;
+            if (generic == typeof(Func<,,,,,,,,,>)) return true;
+            if (generic == typeof(Func<,,,,,,,,,,>)) return true;
+            if (generic == typeof(Func<,,,,,,,,,,,>)) return true;
+            if (generic == typeof(Func<,,,,,,,,,,,,>)) return true;
+            if (generic == typeof(Func<,,,,,,,,,,,,,>)) return true;
+            if (generic == typeof(Func<,,,,,,,,,,,,,,>)) return true;
+            if (generic == typeof(Func<,,,,,,,,,,,,,,,>)) return true;
+            return generic == typeof(Func<,,,,,,,,,,,,,,,,>);
         }
 
 //        public static MethodInfo GetImplicitConversion(Type targetType, Type inputType) {

@@ -264,13 +264,13 @@ namespace UIForia.Parsing {
                     TextTemplateProcessor.ProcessTextExpressions(textContent, textParent.textExpressionList);
                 }
                 else {
-                    TextNode node = new TextNode(textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), default, templateLineInfo);
+                    TextNode node = new TextNode(TypeProcessor.GetProcessedType(typeof(UITextElement)), default, templateLineInfo);
                     TextTemplateProcessor.ProcessTextExpressions(textContent, node.textExpressionList);
                     parent.AddChild(node);
                 }
             }
             else {
-                TextNode node = new TextNode(textContent, TypeProcessor.GetProcessedType(typeof(UITextElement)), default, templateLineInfo);
+                TextNode node = new TextNode(TypeProcessor.GetProcessedType(typeof(UITextElement)), default, templateLineInfo);
                 TextTemplateProcessor.ProcessTextExpressions(textContent, node.textExpressionList);
                 parent.AddChild(node);
             }

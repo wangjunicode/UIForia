@@ -502,6 +502,8 @@ namespace UIForia.Elements {
             flags |= UIElementFlags.NeedsUpdate;
         }
 
+        public virtual void OnReady() { }
+
     }
 
 }

@@ -16,12 +16,13 @@ namespace UIForia.Compilers {
         public static readonly MethodInfo ElementSystem_InitializeDynamicAttribute = typeof(ElementSystem).GetMethod(nameof(ElementSystem.InitializeDynamicAttribute));
         public static readonly MethodInfo ElementSystem_AddChild = typeof(ElementSystem).GetMethod(nameof(ElementSystem.AddChild));
         public static readonly MethodInfo ElementSystem_AddSlotChild = typeof(ElementSystem).GetMethod(nameof(ElementSystem.AddSlotChild));
-        public static readonly MethodInfo ElementSystem_AddHydratedChild = typeof(ElementSystem).GetMethod(nameof(ElementSystem.AddHydratedChild));
-        public static readonly MethodInfo ElementSystem_GetTemplateData = typeof(ElementSystem).GetMethod(nameof(ElementSystem.GetTemplateData));
         public static readonly MethodInfo ElementSystem_HydrateElement = typeof(ElementSystem).GetMethod(nameof(ElementSystem.HydrateElement));
         public static readonly MethodInfo ElementSystem_HydrateEntryPoint = typeof(ElementSystem).GetMethod(nameof(ElementSystem.HydrateEntryPoint));
         public static readonly MethodInfo ElementSystem_OverrideSlot = typeof(ElementSystem).GetMethod(nameof(ElementSystem.OverrideSlot));
         public static readonly MethodInfo ElementSystem_ForwardSlot = typeof(ElementSystem).GetMethod(nameof(ElementSystem.ForwardSlot));
+        public static readonly MethodInfo ElementSystem_SetText = typeof(ElementSystem).GetMethod(nameof(ElementSystem.SetText));
+        public static readonly MethodInfo ElementSystem_SetBindings = typeof(ElementSystem).GetMethod(nameof(ElementSystem.SetBindings));
+        public static readonly MethodInfo ElementSystem_AddSyncVariable = typeof(ElementSystem).GetMethod(nameof(ElementSystem.AddSyncVariable));
 
         public static readonly FieldInfo Element_InputHandlers = typeof(UIElement).GetField(nameof(UIElement.inputHandlers));
         

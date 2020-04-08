@@ -2,7 +2,7 @@
     <Contents attr:x="x" attr:y="y">
         <Div>
             <Panel>
-                <ExpandedTemplate>
+                <ExpandedTemplate if="GetAttribute('x') == 'x'" value="GetAttribute('x')">
                     <override:title attr:x="expandedTempate.GetX()">
                         Hello
                     </override:title>
@@ -10,9 +10,9 @@
             </Panel>
         </Div>
         <Panel/>
-        <Group/>
-        <define:someslot>
-            <Text>Hello</Text>
-        </define:someslot>
+<!--        <Group/>-->
+<!--        <define:someslot>-->
+<!--            <Text>Hello</Text>-->
+<!--        </define:someslot>-->
     </Contents>
 </UITemplate>

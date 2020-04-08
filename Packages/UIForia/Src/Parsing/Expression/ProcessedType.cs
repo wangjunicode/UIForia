@@ -178,29 +178,36 @@ namespace UIForia.Parsing {
         }
 
         public void GetChangeHandlers(string memberName, StructList<PropertyChangeHandlerDesc> retn) {
-            if (methods == null) {
-                MethodInfo[] candidates = ReflectionUtil.GetInstanceMethods(rawType);
-                for (int i = 0; i < candidates.Length; i++) {
-                    IEnumerable<OnPropertyChanged> attrs = candidates[i].GetCustomAttributes<OnPropertyChanged>();
-                    methods = methods ?? new StructList<PropertyChangeHandlerDesc>();
-                    foreach (OnPropertyChanged a in attrs) {
-                        methods.Add(new PropertyChangeHandlerDesc() {
-                            methodInfo = candidates[i],
-                            memberName = a.propertyName
-                        });
-                    }
+            // if (methods == null) {
+            //     MethodInfo[] candidates = ReflectionUtil.GetInstanceMethods(rawType);
+            //     for (int i = 0; i < candidates.Length; i++) {
+            //         IEnumerable<OnPropertyChanged> attrs = candidates[i].GetCustomAttributes<OnPropertyChanged>();
+            //         methods = methods ?? new StructList<PropertyChangeHandlerDesc>();
+            //         foreach (OnPropertyChanged a in attrs) {
+            //             methods.Add(new PropertyChangeHandlerDesc() {
+            //                 methodInfo = candidates[i],
+            //                 memberName = a.propertyName
+            //             });
+            //         }
+            //     }
+            // }
+            //
+            // if (methods == null) {
+            //     return;
+            // }
+            //
+            // for (int i = 0; i < methods.size; i++) {
+            //     if (methods.array[i].memberName == memberName) {
+            //         retn.Add(methods[i]);
+            //     }
+            // }
+
+            for (int i = 0; i < changeHandlers.size; i++) {
+                if (changeHandlers.array[i].memberName == memberName) {
+                    retn.Add(changeHandlers.array[i]);
                 }
             }
-
-            if (methods == null) {
-                return;
-            }
-
-            for (int i = 0; i < methods.size; i++) {
-                if (methods.array[i].memberName == memberName) {
-                    retn.Add(methods[i]);
-                }
-            }
+            
         }
         
         public ProcessedType Reference() {
@@ -341,6 +348,7 @@ namespace UIForia.Parsing {
             requiresUpdateFn = ReflectionUtil.IsOverride(updateMethod);
             changeHandlers = TypeProcessor.GetChangeHandlers(rawType);
         }
+        
 
     }
 

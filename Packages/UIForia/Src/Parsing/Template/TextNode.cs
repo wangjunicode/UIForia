@@ -1,3 +1,4 @@
+using System.Text;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
@@ -5,13 +6,11 @@ namespace UIForia.Parsing {
 
     public class TextNode : TemplateNode {
 
-        public readonly string rawTextContent;
         public readonly StructList<TextExpression> textExpressionList;
 
-        public TextNode(string content, ProcessedType processedType, ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
+        public TextNode(ProcessedType processedType, ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
             : base(attributes, templateLineInfo) {
             this.textExpressionList = new StructList<TextExpression>(3);
-            this.rawTextContent = content;
             this.attributes = attributes;
             this.processedType = processedType;
         }
@@ -29,14 +28,16 @@ namespace UIForia.Parsing {
         }
 
         public string GetStringContent() {
-            string retn = "";
-            if (textExpressionList == null) return retn;
+            if (textExpressionList == null) return string.Empty;
+            StringBuilder builder = StringUtil.GetPerThreadStringBuilder();
+            
+            builder.Clear();
 
             for (int i = 0; i < textExpressionList.Count; i++) {
-                retn += textExpressionList[i].text;
+                builder.Append(textExpressionList[i].text);
             }
 
-            return retn;
+            return builder.ToString();
         }
 
         public override string GetTagName() {

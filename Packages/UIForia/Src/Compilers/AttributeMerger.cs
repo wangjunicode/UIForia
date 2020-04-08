@@ -1,3 +1,5 @@
+using System;
+using System.Diagnostics;
 using UIForia.Parsing;
 using UIForia.Util;
 
@@ -53,6 +55,50 @@ namespace UIForia.Compilers {
         // - Input handler declarations are ok
         // - Context variables are ok
 
+        public static void ConvertAttributeDefinitions(ReadOnlySizedArray<AttributeDefinition> attrDefs, ref SizedArray<AttrInfo> output) {
+            output.size = 0;
+            output.EnsureCapacity(attrDefs.size);
+
+            for (int i = 0; i < attrDefs.size; i++) {
+                output.array[i] = new AttrInfo(0, attrDefs.array[i]);
+            }
+
+            output.size = attrDefs.size;
+
+        }
+
+        public static void MergeExpandedAttributes2(ReadOnlySizedArray<AttributeDefinition> outerAttributes, ReadOnlySizedArray<AttributeDefinition> innerAttributes, ref SizedArray<AttrInfo> output) {
+
+            const AttributeType replacedType = AttributeType.Attribute | AttributeType.InstanceStyle;
+
+            output.EnsureCapacity(innerAttributes.size + outerAttributes.size);
+
+            int attrIdx = 0;
+
+            for (int i = 0; i < innerAttributes.size; i++) {
+                output.array[attrIdx++] = new AttrInfo(1, innerAttributes.array[i]);
+            }
+
+            for (int i = 0; i < outerAttributes.size; i++) {
+                ref AttributeDefinition attr = ref outerAttributes.array[i];
+
+                int idx = ContainsAttr(attr, output);
+
+                if (idx == -1) {
+                    output.array[attrIdx++] = new AttrInfo(0, attr);
+                }
+                else if ((attr.type & replacedType) != 0) {
+                    output.array[idx] = new AttrInfo(0, attr);
+                }
+                else {
+                    output.array[attrIdx++] = new AttrInfo(1, attr);
+                }
+            }
+
+            output.size = attrIdx;
+
+        }
+
         public static SizedArray<AttributeDefinition> MergeExpandedAttributes(ReadOnlySizedArray<AttributeDefinition> innerAttributes, ReadOnlySizedArray<AttributeDefinition> outerAttributes) {
             SizedArray<AttributeDefinition> output = default;
 
@@ -68,7 +114,7 @@ namespace UIForia.Compilers {
                 }
 
                 output.size = outerAttributes.size;
-                
+
                 return output;
             }
 
@@ -79,6 +125,7 @@ namespace UIForia.Compilers {
                     attr.flags |= AttributeFlags.InnerContext;
                     output.array[i] = attr;
                 }
+
                 output.size = innerAttributes.size;
 
                 return output;
@@ -115,6 +162,17 @@ namespace UIForia.Compilers {
             }
 
             return output;
+        }
+
+        private static int ContainsAttr(in AttributeDefinition a, ReadOnlySizedArray<AttrInfo> list) {
+            for (int i = 0; i < list.size; i++) {
+                ref AttrInfo b = ref list.array[i];
+                if (a.type == b.type && a.key == b.key) {
+                    return i;
+                }
+            }
+
+            return -1;
         }
 
         private static int ContainsAttr(in AttributeDefinition a, ReadOnlySizedArray<AttributeDefinition> list) {

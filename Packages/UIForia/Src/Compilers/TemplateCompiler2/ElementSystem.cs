@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Compilers;
 using UIForia.Elements;
+using UIForia.Layout;
 using UIForia.Systems;
 using UIForia.Util;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace UIForia {
@@ -12,72 +15,48 @@ namespace UIForia {
         private int idGenerator;
 
         private LightStack<ContextEntry> contextStack;
-        private LightStack<UIElement> elementStack;
-        
+
+        private UIElement root;
         private UIElement parent;
         private UIElement element;
         private TemplateData currentTemplateData;
-        private UIElement root;
+        private Dictionary<Type, TemplateData> templateDataMap;
+        private Action<UIElement> onElementRegistered;
+        internal readonly StructList<int> freeListIndex;
+        internal readonly LightList<UIElement> elementMap;
+        private int indexGenerator;
 
-        public struct ContextEntry {
-
-            public UIElement contextRoot;
-            public TemplateData templateData;
-            public StructList<SlotOverride> overrides;
-
+        public void AddSyncVariable<T>(int idx, string debugName) {
+            element.bindingNode.syncStorage[idx] = new SyncVariable<T>(debugName);
         }
 
-        internal ElementSystem() {
+        internal ElementSystem(Dictionary<Type, TemplateData> templateDataMap) {
+            this.templateDataMap = templateDataMap;
             this.contextStack = new LightStack<ContextEntry>(16);
-            this.elementStack = new LightStack<UIElement>(32);
+            this.freeListIndex = new StructList<int>(64);
+            this.elementMap = new LightList<UIElement>(64);
         }
 
         internal UIElement CreateEntryPoint<T>() where T : UIElement, new() {
-            return null;
+            throw new NotImplementedException();
         }
-        
+
         internal UIElement CreateEntryPoint(UIView window, TemplateData data) {
             currentTemplateData = data;
-            
+
             UIElement retn = data.entry(this);
 
             window.dummyRoot.children.Add(retn);
-            
+
             return retn;
         }
 
         internal UIElement CreateAndInsertChild() {
-            return null;
+            throw new NotImplementedException();
         }
 
         internal UIElement CreateAndAppendChild() {
-            return null;
-        }
-
-        public void InitializeHydratedElement(UIElement element, int slotCount, int referenceArraySize) {
-
-            if (slotCount > 0) {
-                contextStack.Push(new ContextEntry() {
-                    contextRoot = element
-                });
-            }
-            else {
-
-                // todo -- maybe off by 1
-                element.bindingNode.referencedContexts = new UIElement[referenceArraySize];
-
-                int idx = 0;
-                for (int i = contextStack.size - referenceArraySize; i < contextStack.size; i++) {
-                    element.bindingNode.referencedContexts[idx++] = contextStack.array[i].contextRoot;
-                }
-
-                contextStack.Push(new ContextEntry() {
-                    contextRoot = element,
-                    overrides = StructList<SlotOverride>.Get()
-                });
-
-            }
-
+            throw new NotImplementedException();
         }
 
         public void HydrateEntryPoint() {
@@ -87,9 +66,9 @@ namespace UIForia {
                 templateData = currentTemplateData
             };
 
-            elementStack.Push(element);
+            parent = element;
             currentTemplateData.hydrate(this);
-            elementStack.Pop();
+            parent = null;
 
             Assert.IsTrue(contextStack.size == 1);
 
@@ -99,16 +78,31 @@ namespace UIForia {
 
         public void HydrateElement(Type type) {
 
-            GetTemplateData(type).hydrate(this);
+            TemplateData oldTemplateData = currentTemplateData;
 
-            ContextEntry entry = contextStack.PopUnchecked();
-            if (entry.overrides != null) {
-                StructList<SlotOverride>.Release(ref entry.overrides);
-            }
+            templateDataMap.TryGetValue(type, out currentTemplateData);
+
+            // ReSharper disable once PossibleNullReferenceException
+            currentTemplateData.hydrate(this);
+
+            currentTemplateData = oldTemplateData;
+
+            // ContextEntry entry = contextStack.PopUnchecked();
+            // if (entry.overrides != null) {
+            // StructList<SlotOverride>.Release(ref entry.overrides);
+            // }
         }
 
-        public void OverrideSlot(string slotName, int slotIndex, int slotTemplateId) {
-            contextStack.array[contextStack.size - 1].overrides.array[slotIndex] = new SlotOverride(slotName, currentTemplateData.slots[slotTemplateId]);
+        public void SetText(string value) {
+            ((UITextElement) element).SetText(value);
+        }
+
+        public void SetBindings(int updateBindingId, int lateUpdateBindingId) {
+            
+        }
+
+        public void OverrideSlot(string slotName, int slotTemplateId) {
+            // contextStack.array[contextStack.size - 1].overrides.array[slotIndex] = new SlotOverride(slotName, currentTemplateData.slots[slotTemplateId]);
         }
 
         public void ForwardSlot(string slotName, int slotTemplateId) {
@@ -126,51 +120,43 @@ namespace UIForia {
 
         }
 
-        public TemplateData GetTemplateData(Type type) {
-            throw new NotImplementedException();
-        }
-
-
         public void AddChild(UIElement child, int templateIndex) {
-            // might want to do do this after the child runs so any child query for parent data returns 0 children consistently
-            parent.children[parent.children.size++] = child;
-            elementStack.Push(child);
-            UIElement lastElement = element;
-            UIElement lastParent = parent;
-            parent = element;
-            element = child;
-            currentTemplateData.elements[templateIndex](this); // might not need the child argument, not using the return value
-            parent = lastParent;
-            element = lastElement;
-            elementStack.PopUnchecked();
-        }
-
-        public void AddHydratedChild(UIElement child, int templateIndex) {
-            // might want to do do this after the child runs so any child query for parent data returns 0 children consistently
-            parent.children[parent.children.size++] = child;
-            elementStack.Push(child); // maybe don't need element stack? maybe only for debug
             UIElement lastElement = element;
             UIElement lastParent = parent;
             parent = element;
             element = child;
             currentTemplateData.elements[templateIndex](this);
+            parent.children[parent.children.size++] = child;
             parent = lastParent;
             element = lastElement;
-            elementStack.PopUnchecked();
         }
 
-        public void AddSlotChild(UIElement element, string slotName, int slotIndex) {
+        public void AddSlotChild(UIElement child, string slotName, int slotIndex) {
             ContextEntry entry = contextStack.array[contextStack.size - 1];
+            UIElement lastElement = element;
+            UIElement lastParent = parent;
+            parent = element;
+            element = child;
+
+            parent.children[parent.children.size++] = child;
+
+            bool found = false;
             for (int i = 0; i < entry.overrides.size; i++) {
                 ref SlotOverride slotOverride = ref entry.overrides.array[i];
                 if (slotOverride.slotName == slotName) {
-                    // todo -- might be wrong scope here
-                    element.children.array[element.children.size++] = slotOverride.template(this, element);
-                    return;
+                    found = true;
+                    slotOverride.template(this);
+                    break;
                 }
             }
 
-            element.children.array[element.children.size++] = currentTemplateData.slots[slotIndex](this, element);
+            if (!found) {
+                currentTemplateData.elements[slotIndex](this);
+            }
+
+            parent = lastParent;
+            element = lastElement;
+
         }
 
         public void InitializeEntryPoint(UIElement entry, int attrCount, int childCount) {
@@ -181,25 +167,62 @@ namespace UIForia {
             element.bindingNode.root = element;
             element.bindingNode.parent = null;
         }
-
-        // todo -- add style init
-        // todo -- finish this
+        
         public void InitializeElement(int attrCount, int childCount) {
             element.parent = parent;
+            element.id = idGenerator++;
+            element.index = freeListIndex.size > 0 ? freeListIndex.array[--freeListIndex.size] : indexGenerator++;
+            element.attributes = new StructList<ElementAttribute>(attrCount); // todo to sized array
+            element.children = new LightList<UIElement>(childCount);          // todo to sized array
+            element.layoutResult = new LayoutResult(element);
             element.bindingNode = new LinqBindingNode();
             element.bindingNode.root = root;
-            element.id = idGenerator++;
-            element.attributes = new StructList<ElementAttribute>(attrCount);
-            element.children = new LightList<UIElement>(childCount);
+            
+            // todo -- template origin info / id
+            if (element.index >= elementMap.array.Length) {
+                elementMap.EnsureAdditionalCapacity(32);
+            }
+            
+            elementMap.array[element.index] = element;
+            
+            onElementRegistered?.Invoke(element);
+            
+            if((parent.flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet)) {
+                element.flags |= UIElementFlags.AncestorEnabled;
+            }
+            else {
+                element.flags &= ~UIElementFlags.AncestorEnabled;
+            }
+            
+            element.hierarchyDepth = parent.hierarchyDepth + 1;
+
         }
 
-        public void InitializeSlot(int attrCount, int childCount) {
-            element.parent = parent;
-            element.bindingNode = new LinqBindingNode();
-            // element.bindingNode.root = scope.rootRef;
-            element.id = idGenerator++;
-            element.attributes = new StructList<ElementAttribute>(attrCount);
-            element.children = new LightList<UIElement>(childCount);
+        public void InvokeOnCreate() {
+            try {
+                element.OnCreate();
+            }
+            catch (Exception e) {
+                Debug.Log(e); // todo -- diagnostics
+            }  
+        }
+        
+        public void InvokeOnReady() {
+            try {
+                element.OnReady();
+            }
+            catch (Exception e) {
+                Debug.Log(e); // todo -- diagnostics
+            }  
+        }
+
+        public void InvokeOnEnable() {
+            try {
+                element.OnEnable();
+            }
+            catch (Exception e) {
+                Debug.Log(e); // todo -- diagnostics
+            }  
         }
 
         public void InitializeStaticAttribute(string key, string value) {
@@ -209,6 +232,14 @@ namespace UIForia {
         // might do work for selector indexing later
         public void InitializeDynamicAttribute(string key) {
             element.attributes[element.attributes.size++] = new ElementAttribute(key, string.Empty);
+        }
+        
+        private struct ContextEntry {
+
+            public UIElement contextRoot;
+            public TemplateData templateData;
+            public SizedArray<SlotOverride> overrides;
+
         }
 
     }

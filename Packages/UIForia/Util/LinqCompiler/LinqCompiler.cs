@@ -33,7 +33,9 @@ namespace UIForia.Compilers {
         // todo -- delegate invocation
         // todo -- don't re-access properties that are not auto fields, might be expensive
         // todo    null checking needs to be scope aware, not global since multiple code paths can be checked. also need positive & negative ie != null && == null
-
+        // todo -- pool parameters / variables 
+        // todo -- try to compile with FastExpression if no lambdas
+        
         private static readonly ObjectPool<LinqCompiler> s_CompilerPool = new ObjectPool<LinqCompiler>(null, (c) => c.Reset());
         private static readonly ObjectPool<BlockDefinition2> s_BlockPool = new ObjectPool<BlockDefinition2>((b) => b.Spawn(), (b) => b.Release());
 
@@ -90,8 +92,13 @@ namespace UIForia.Compilers {
             [DebuggerStepThrough] get => blockStack.PeekUnchecked();
         }
 
-        public bool HasStatements => blockStack.PeekAtUnchecked(0).HasStatements;
-        public int StatementCount => blockStack.PeekAtUnchecked(0).StatementCount;
+        public bool HasStatements {
+            get => blockStack.PeekAtUnchecked(0).HasStatements;
+        }
+
+        public int StatementCount {
+            get => blockStack.PeekAtUnchecked(0).StatementCount;
+        }
 
         internal string GetUniqueVariableName(string name) {
             if (parent != null) {
@@ -299,6 +306,10 @@ namespace UIForia.Compilers {
         public Expression AccessorStatement(Type targetType, string input) {
             return Visit(targetType, ExpressionParser.Parse(input));
         }
+        
+        public Expression AccessorStatement(Type targetType, ASTNode node) {
+            return Visit(targetType, node);
+        }
 
         public ParameterExpression AddVariable(Parameter parameter, string value) {
             ParameterExpression variable = currentBlock.AddUserVariable(parameter);
@@ -459,6 +470,10 @@ namespace UIForia.Compilers {
 
         public Expression Value(string input) {
             return Visit(ExpressionParser.Parse(input));
+        }
+        
+        public Expression Value(ASTNode astNode) {
+            return Visit(astNode);
         }
 
         public Expression TypedValue(Type targetType, string input) {
@@ -882,6 +897,7 @@ namespace UIForia.Compilers {
 
         private bool TryResolveInstanceOrStaticMemberAccess(Expression head, string fieldOrPropertyName, out Expression accessExpression) {
             if (ReflectionUtil.IsField(head.Type, fieldOrPropertyName, out FieldInfo fieldInfo)) {
+                // todo -- allow this to be ignored via setting
                 if (!fieldInfo.IsPublic) {
                     throw CompileException.AccessNonReadableField(head.Type, fieldInfo);
                 }
@@ -897,6 +913,7 @@ namespace UIForia.Compilers {
             }
 
             if (ReflectionUtil.IsProperty(head.Type, fieldOrPropertyName, out PropertyInfo propertyInfo)) {
+                // todo -- allow this to be ignored via setting
                 if (!propertyInfo.CanRead || !propertyInfo.GetMethod.IsPublic) {
                     throw CompileException.AccessNonReadableProperty(head.Type, propertyInfo);
                 }

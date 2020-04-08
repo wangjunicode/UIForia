@@ -394,7 +394,7 @@ namespace UIForia.Parsing {
 
                 if (parameters.Length > 2) {
                     // todo -- diagnostic
-                    Debug.Log($"Unable to invoke method {type.GetTypeName()}.{candidates[i].Name} as a PropertyChangeHandler because it is not marked as public");
+                    Debug.Log($"Unable to invoke method {type.GetTypeName()}.{candidates[i].Name} as a PropertyChangeHandler because it has too many arguments (max 1)");
                 }
 
                 foreach (OnPropertyChanged a in attrs) {

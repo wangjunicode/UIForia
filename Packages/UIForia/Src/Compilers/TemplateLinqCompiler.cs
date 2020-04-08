@@ -1,70 +1,91 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using UIForia.Systems;
+using UIForia.Util;
 
 namespace UIForia.Compilers {
 
     public class TemplateLinqCompiler : LinqCompiler {
+
+        private struct RootContext {
+
+            public Type type;
+            public ParameterExpression expression;
+            public IList<string> namespaces;
+
+        }
 
         [ThreadStatic] private static ParameterExpression elementParam;
 
         private Expression castExpression;
         private ParameterExpression elementExpression;
 
-        private AttributeContext attributeContext;
         private readonly Parameter parameter;
         private int depth;
-        private int depthLevels;
-        private Type contextType;
         public Type elementType;
-        
+        private LightList<RootContext> rootVariables;
+        private bool slotSetup;
+
         public TemplateLinqCompiler() {
             this.parameter = new Parameter(typeof(LinqBindingNode), "bindingNode", ParameterFlags.NeverNull);
         }
-        
-        public void Setup(AttributeContext context, int depth) {
-            this.depth = depth;
-            this.depthLevels = context.size;
 
-            contextType = depth == 0 
-                ? context.rootType 
-                : context.referencedTypes[depth - 1];
-
+        public void Init(Type elementType, ReadOnlySizedArray<Type> contexts) {
             Reset();
             SetSignature(parameter);
-            SetNamespaces(context.GetNamespaces(depth));
+            rootVariables = rootVariables ?? new LightList<RootContext>();
+            rootVariables.Clear();
+            for (int i = 0; i < contexts.size; i++) {
+                rootVariables.Add(new RootContext() {
+                    type = contexts.array[i],
+                    namespaces = default, // todo
+                });
+            }
+
+            this.elementType = elementType;
+            this.elementExpression = null;
+        }
+
+        public void Setup(in AttrInfo attrInfo) {
+            depth = attrInfo.depth;
+            SetNamespaces(rootVariables.array[depth].namespaces);
         }
 
         public ParameterExpression GetRoot() {
-            // attribute set is a grouping of attributes with their context data.
-            // we loop through each set of attributes and call setup on the compilers
-            // depending on the depth of the current setup, GetRoot()
-            // will return one of: 
-            // the highest template
-            // the lowest template
-            // slotContexts[depth]
-            // and cast appropriately.
-            
-            if (depth == 0) {
-                RawExpression(Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Root), contextType));
+            ref RootContext ctx = ref rootVariables.array[depth];
+            if (slotSetup) {
+                if (ctx.expression == null) {
+                    // ctx.expression = Expression.Parameter()
+                    throw new NotImplementedException();
+                }
+            }
+            else {
+                if (ctx.expression == null) {
+                    ctx.expression = AddVariable(ctx.type, "context_" + depth, ParameterFlags.NeverNull);
+                    Assign(ctx.expression, Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Root), ctx.type));
+                }
             }
 
-            return null;
-
+            return ctx.expression;
         }
-        
+
         public ParameterExpression GetElement() {
-            
+
             if (elementExpression == null) {
                 elementExpression = AddVariable(elementType, "element", ParameterFlags.NeverNull);
                 Assign(elementExpression, Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Element), elementType));
             }
-            
+
             return elementExpression;
         }
 
         public void RestoreImplicitContext() {
             SetImplicitContext(GetRoot());
+        }
+
+        public Expression GetBindingNode() {
+            return parameter.expression;
         }
 
     }

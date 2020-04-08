@@ -12,7 +12,7 @@ namespace UIForia {
         public new Camera camera;
         public Application application;
         public bool usePreCompiledTemplates;
-        
+
         [HideInInspector] public string applicationName = "Game App 2";
 
         public TemplateSettings GetTemplateSettings(Type type) {
@@ -33,9 +33,13 @@ namespace UIForia {
 
             TemplateSettings settings = GetTemplateSettings(type);
 
+#if UNITY_EDITOR
             application = usePreCompiledTemplates
                 ? GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection)
                 : GameApplication.CreateFromRuntimeTemplates(settings, camera, DoDependencyInjection);
+#else
+            application = GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection);
+#endif
 
         }
 
@@ -47,7 +51,7 @@ namespace UIForia {
         private void Update() {
             if (type == null) return;
             application?.Update();
-            application?.GetView(0).SetSize((int)application.Width, (int)application.Height);
+            application?.GetView(0).SetSize((int) application.Width, (int) application.Height);
         }
 
     }

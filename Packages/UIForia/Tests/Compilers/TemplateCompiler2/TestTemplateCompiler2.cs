@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using NUnit.Framework;
 using Tests.Mocks;
-using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 
@@ -14,6 +13,8 @@ namespace TemplateCompiler2Test {
         public class SimpleTemplate : UIElement {
 
             public string parentVal;
+
+            public override void OnUpdate() { }
 
             [OnPropertyChanged(nameof(parentVal), PropertyChangedType.All)] // BindingRead or Synchronized
             public void ValueChanged(string oldValue, PropertyChangeSource changeSource) {

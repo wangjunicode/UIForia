@@ -22,7 +22,7 @@ namespace UIForia.Compilers {
         public static readonly MethodInfo ElementSystem_ForwardSlot = typeof(ElementSystem).GetMethod(nameof(ElementSystem.ForwardSlot));
         public static readonly MethodInfo ElementSystem_SetText = typeof(ElementSystem).GetMethod(nameof(ElementSystem.SetText));
         public static readonly MethodInfo ElementSystem_SetBindings = typeof(ElementSystem).GetMethod(nameof(ElementSystem.SetBindings));
-        public static readonly MethodInfo ElementSystem_AddSyncVariable = typeof(ElementSystem).GetMethod(nameof(ElementSystem.AddSyncVariable));
+        public static readonly MethodInfo ElementSystem_CreateBindingVariable = typeof(ElementSystem).GetMethod(nameof(ElementSystem.CreateBindingVariable));
 
         public static readonly FieldInfo Element_InputHandlers = typeof(UIElement).GetField(nameof(UIElement.inputHandlers));
         
@@ -30,9 +30,9 @@ namespace UIForia.Compilers {
 
         public static readonly FieldInfo BindingNode_Element = typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.element));
         public static readonly FieldInfo BindingNode_Root = typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.root));
-        public static readonly FieldInfo BindingNode_SyncVariables = typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.syncStorage));
-        public static readonly MethodInfo BindingNode_SetSyncVar = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.SetSyncVar));
-        public static readonly MethodInfo BindingNode_GetSyncVar = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetSyncVar));
+        public static readonly MethodInfo BindingNode_SetBindingVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.SetBindingVariable));
+        public static readonly MethodInfo BindingNode_GetBindingVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetBindingVariable));
+        public static readonly MethodInfo BindingNode_InvokeUpdate = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.InvokeUpdate));
 
         public static readonly FieldInfo TextElement_Text = typeof(UITextElement).GetField(nameof(UITextElement.text), BindingFlags.Instance | BindingFlags.Public);
         public static readonly MethodInfo TextElement_SetText = typeof(UITextElement).GetMethod(nameof(UITextElement.SetText), BindingFlags.Instance | BindingFlags.Public);
@@ -51,7 +51,8 @@ namespace UIForia.Compilers {
         public static readonly MethodInfo StringBuilder_AppendSByte = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(sbyte)});
         public static readonly MethodInfo StringBuilder_AppendBool = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(bool)});
         public static readonly MethodInfo StringBuilder_AppendChar = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
-        
+        public static readonly MethodInfo EventUtil_Subscribe = typeof(EventUtil).GetMethod(nameof(EventUtil.Subscribe));
+
     }
 
 }

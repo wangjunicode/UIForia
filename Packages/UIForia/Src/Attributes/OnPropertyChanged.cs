@@ -19,7 +19,14 @@ namespace UIForia.Attributes {
     }
     
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public sealed class OnPropertyChanged : Attribute {
+    public class OnPropertySynchronized : OnPropertyChanged {
+
+        public OnPropertySynchronized(string propertyName) : base(propertyName, PropertyChangedType.Synchronized) { }
+
+    }    
+    
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+    public class OnPropertyChanged : Attribute {
 
         public readonly string propertyName;
         public readonly PropertyChangedType changedType;

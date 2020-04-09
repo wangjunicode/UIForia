@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Layout;
@@ -26,8 +27,9 @@ namespace UIForia {
         internal readonly LightList<UIElement> elementMap;
         private int indexGenerator;
 
-        public void AddSyncVariable<T>(int idx, string debugName) {
-            element.bindingNode.syncStorage[idx] = new SyncVariable<T>(debugName);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CreateBindingVariable<T>(int idx, string name) {
+            element.bindingNode.variables[idx] = new BindingVariable<T>(name);
         }
 
         internal ElementSystem(Dictionary<Type, TemplateData> templateDataMap) {
@@ -97,8 +99,8 @@ namespace UIForia {
             ((UITextElement) element).SetText(value);
         }
 
-        public void SetBindings(int updateBindingId, int lateUpdateBindingId) {
-            
+        public void SetBindings(int updateBindingId, int lateUpdateBindingId, int bindingVariableCount) {
+            element.bindingNode.variables = bindingVariableCount != 0 ? new BindingVariable[bindingVariableCount] : default;
         }
 
         public void OverrideSlot(string slotName, int slotTemplateId) {
@@ -240,6 +242,11 @@ namespace UIForia {
             public TemplateData templateData;
             public SizedArray<SlotOverride> overrides;
 
+        }
+
+        public void ReferenceBindingVariable(int i, string name) {
+            // search current template scope's context stack for variable with 'name'
+            element.bindingNode.variables[i] = null;
         }
 
     }

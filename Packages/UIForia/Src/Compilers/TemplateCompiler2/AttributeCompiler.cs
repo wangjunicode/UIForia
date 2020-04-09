@@ -8,11 +8,21 @@ using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Parsing.Expressions.AstNodes;
+using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Compilers {
 
+    public struct AttributeCompilationContext {
+
+        public BindingType mode;
+        public ProcessedType elementType;
+        public TemplateNode currentNode;
+        public LightStack<LightList<ContextVariableDefinition>> contextStack;
+
+    }
+    
     public class AttributeCompiler {
 
         private TemplateLinqCompiler constCompiler;
@@ -23,26 +33,34 @@ namespace UIForia.Compilers {
         internal static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
         internal static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
         internal static readonly RepeatKeyFnTypeWrapper s_RepeatKeyFnTypeWrapper = new RepeatKeyFnTypeWrapper();
-        private static readonly Dictionary<Type, MethodInfo> s_SyncGetterCache = new Dictionary<Type, MethodInfo>();
-        private static readonly Dictionary<Type, MethodInfo> s_SyncSetterCache = new Dictionary<Type, MethodInfo>();
+        private static readonly Dictionary<Type, MethodInfo> s_BindingVariableGetterCache = new Dictionary<Type, MethodInfo>();
+        private static readonly Dictionary<Type, MethodInfo> s_BindingVariableSetterCache = new Dictionary<Type, MethodInfo>();
+        private static readonly Dictionary<Type, Type> s_ContextVarTypeCache = new Dictionary<Type, Type>();
 
         private readonly StructList<PropertyChangeHandlerDesc> changeHandlers;
-        private readonly StructList<SyncPropertyData> syncData;
+        private StructList<BindingVariableDesc> localVariables;
 
         private int contextId = 1;
         private int NextContextId => contextId++;
-        private int syncCount = 0;
+        private int localBindingVariableCount = 0;
 
+        private TemplateLinqCompilerContext compilerContext;
+        
         public AttributeCompiler() {
-            this.updateCompiler = new TemplateLinqCompiler();
-            this.lateCompiler = new TemplateLinqCompiler();
-            this.constCompiler = new TemplateLinqCompiler();
+            this.compilerContext = new TemplateLinqCompilerContext();
+            this.updateCompiler = new TemplateLinqCompiler(compilerContext);
+            this.lateCompiler = new TemplateLinqCompiler(compilerContext);
+            this.constCompiler = new TemplateLinqCompiler(compilerContext);
             this.changeHandlers = new StructList<PropertyChangeHandlerDesc>(16);
-            this.syncData = new StructList<SyncPropertyData>();
         }
 
+       
         private static bool IsAttrBeforeUpdate(in AttrInfo attrInfo) {
-            return (attrInfo.type == AttributeType.Conditional || attrInfo.type == AttributeType.Property || attrInfo.type == AttributeType.Alias);
+            const AttributeType beforeUpdateTypes = AttributeType.Alias 
+                                                    | AttributeType.Conditional 
+                                                    | AttributeType.Context
+                                                    | AttributeType.Property;
+            return (attrInfo.type & beforeUpdateTypes) != 0;
         }
 
         private TemplateLinqCompiler GetCompiler(bool isConst, in AttrInfo attrInfo) {
@@ -52,28 +70,34 @@ namespace UIForia.Compilers {
             // }
 
             // todo if const + or once or isConst + sync -> probably throw an error?
-            updateCompiler.Setup(attrInfo);
             return updateCompiler;
         }
 
-        private void InitializeCompilers(Type elementType, AttributeSet attributeSet) {
-            // todo -- namespaces
-            updateCompiler.Init(elementType, attributeSet.contextTypes);
-            lateCompiler.Init(elementType, attributeSet.contextTypes);
+        private void SetupCompilers(in AttrInfo attr) {
+            compilerContext.Setup(attr);
+            updateCompiler.Setup();
+            lateCompiler.Setup();
+            constCompiler.Setup();
         }
-
-        public void CompileAttributes(ProcessedType processedType, TemplateNode node, AttributeSet attributeSet, ref BindingResult bindingResult) {
-            syncCount = 0;
+        
+        public void CompileAttributes(ProcessedType processedType, TemplateNode node, AttributeSet attributeSet, ref BindingResult bindingResult, LightStack<StructList<BindingVariableDesc>> variableStack) {
+            localBindingVariableCount = 0;
             processedType.EnsureReflectionData();
-
-            StructList<ContextAliasActions> contextModifications = null;
-
+            localVariables = bindingResult.localVariables;
+            
             // [InvokeWhenDisabled]
             // Update() { } 
             // const + once bindings and unmarked bindings that are constant
 
-            InitializeCompilers(processedType.rawType, attributeSet);
-
+            // todo -- parent type
+            
+            compilerContext.Init(attributeSet.bindingType, processedType.rawType, null, attributeSet.contextTypes, variableStack);
+            
+            // todo -- only if needed
+            updateCompiler.Init();
+            lateCompiler.Init();
+            constCompiler.Init();
+            
             for (int i = 0; i < attributeSet.attributes.size; i++) {
 
                 ref AttrInfo attr = ref attributeSet.attributes.array[i];
@@ -81,7 +105,9 @@ namespace UIForia.Compilers {
                 if (!IsAttrBeforeUpdate(attr)) {
                     continue;
                 }
-
+                
+                SetupCompilers(attr);
+                
                 ASTNode ast = ExpressionParser.Parse(attr.value);
 
                 TemplateLinqCompiler compiler = GetCompiler(IsConstantExpression(ast), attr);
@@ -100,9 +126,16 @@ namespace UIForia.Compilers {
                     }
 
                     case AttributeType.Property: {
-
                         CompilePropertyBinding(compiler, ast, processedType, attr);
+                        break;
+                    }
 
+                    case AttributeType.Alias: {
+                        break;
+                    }
+
+                    case AttributeType.Context: {
+                        CompileContextVariable(compiler, ast, attr);
                         break;
                     }
 
@@ -110,18 +143,46 @@ namespace UIForia.Compilers {
 
             }
 
-            // if (processedType.requiresUpdateFn) {
-            //     // always uses root context
-            //     updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetElement(), processedType.updateMethod));
-            // }
-            //
-            // // always uses root context
-            // CompileTextBinding(node as TextNode);
+            // when resolving aliases, if alias was a context variable, determine if it is local or not
+            
+            if (processedType.requiresUpdateFn) {
+                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetBindingNode(), MemberData.BindingNode_InvokeUpdate));
+            }
+
+            
+            CompileTextBinding(node as TextNode);
 
             BuildLambda(updateCompiler, ref bindingResult.updateLambda);
             BuildLambda(lateCompiler, ref bindingResult.lateLambda);
             // BuildLambda(updateCompiler, ref retn.constEnableLambda);
 
+        }
+
+        private void CompileContextVariable(TemplateLinqCompiler compiler, ASTNode astNode, in AttrInfo attr) {
+
+            compiler.SetImplicitContext(compiler.GetRoot());
+            Expression value = compiler.Value(astNode);
+            int index = localVariables.size;
+            
+            BindingVariableDesc variableDefinition = new BindingVariableDesc {
+                index = index,
+                variableName = attr.key,
+                originTemplateType = null,
+                variableType = value.Type,
+                // todo -- is template local or some flag
+                // variableType = AliasResolverType.ContextVariable
+            };
+            
+            localVariables.Add(variableDefinition);
+
+            // bindingNode.SetBindingVariable<T>(index, value);
+            MethodInfo setContextVariable = GetBindingVariableSetter(value.Type);
+            
+            // todo dont use id, needs to be by type or type + id where id is scoped to template type
+            Expression indexExpr = ExpressionUtil.GetIntConstant(index);
+            
+            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(compiler.GetBindingNode(), setContextVariable, indexExpr, value));
+         
         }
 
         private static void BuildLambda(TemplateLinqCompiler compiler, ref LambdaExpression lambdaExpression) {
@@ -139,6 +200,11 @@ namespace UIForia.Compilers {
         }
 
         private void CompilePropertyBinding(TemplateLinqCompiler compiler, ASTNode expr, ProcessedType processedType, in AttrInfo attr) {
+
+            if (ReflectionUtil.IsEvent(processedType.rawType, attr.key, out EventInfo eventInfo)) {
+                CompileEventBinding(compiler, attr, eventInfo, expr);
+                return;
+            }
 
             LHSStatementChain left;
             Expression right = null;
@@ -201,18 +267,179 @@ namespace UIForia.Compilers {
             }
 
             if ((attr.flags & AttributeFlags.Sync) != 0) {
-                int syncIdx = syncCount++;
 
-                MethodInfo setSyncVar = GetSyncSetter(left.targetExpression.Type);
+                int index = localVariables.size;
+                
+                localVariables.Add(new BindingVariableDesc() {
+                    index = index,
+                    variableName = "sync:" + attr.key,
+                    originTemplateType = null,
+                    variableType = left.targetExpression.Type
+                });
 
-                compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(compiler.GetBindingNode(), setSyncVar, ExpressionUtil.GetIntConstant(syncIdx), right));
+                Expression indexExpression = ExpressionUtil.GetIntConstant(index);
+                MethodInfo setSyncVar = GetBindingVariableSetter(left.targetExpression.Type);
+
+                compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(compiler.GetBindingNode(), setSyncVar, indexExpression, right));
 
                 // todo -- assert is update
 
-                CompilePropertyBindingSync(syncIdx, attr, right.Type);
-
+                CompilePropertyBindingSync(indexExpression, attr, right.Type);
+                
             }
 
+        }
+
+        private static void CompileEventBinding(TemplateLinqCompiler compiler, in AttrInfo attr, EventInfo eventInfo, ASTNode astNode) {
+            bool hasReturnType = ReflectionUtil.IsFunc(eventInfo.EventHandlerType);
+            Type[] eventHandlerTypes = eventInfo.EventHandlerType.GetGenericArguments();
+            Type returnType = hasReturnType ? eventHandlerTypes[eventHandlerTypes.Length - 1] : null;
+
+            int parameterCount = eventHandlerTypes.Length;
+            if (hasReturnType) {
+                parameterCount--;
+            }
+            
+            LightList<Parameter> parameters = LightList<Parameter>.Get();
+
+            IEnumerable<AliasGenericParameterAttribute> attrNameAliases = eventInfo.GetCustomAttributes<AliasGenericParameterAttribute>();
+            for (int i = 0; i < parameterCount; i++) {
+                string argName = "arg" + i;
+                foreach (AliasGenericParameterAttribute a in attrNameAliases) {
+                    if (a.parameterIndex == i) {
+                        argName = a.aliasName;
+                        break;
+                    }
+                }
+
+                parameters.Add(new Parameter(eventHandlerTypes[i], argName));
+            }
+
+            if (astNode.type == ASTNodeType.Identifier) {
+                IdentifierNode idNode = (IdentifierNode) astNode;
+
+                if (ReflectionUtil.IsField(compiler.GetRoot().Type, idNode.name, out FieldInfo fieldInfo)) {
+                    if (eventInfo.EventHandlerType.IsAssignableFrom(fieldInfo.FieldType)) {
+
+                        LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
+
+                        string statement = fieldInfo.Name + "(";
+
+                        for (int i = 0; i < parameters.size; i++) {
+                            statement += parameters.array[i].name;
+                            if (i != parameters.size - 1) {
+                                statement += ", ";
+                            }
+                        }
+
+                        statement += ")";
+                        closure.Statement(statement);
+                        LambdaExpression lambda = closure.BuildLambda();
+                        ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
+                        compiler.Assign(evtFn, lambda);
+                        compiler.CallStatic(MemberData.EventUtil_Subscribe, compiler.GetElement(), Expression.Constant(attr.key), evtFn);
+                        closure.Release();
+                        LightList<Parameter>.Release(ref parameters);
+
+                        return;
+                    }
+                }
+
+                if (ReflectionUtil.IsProperty(compiler.GetRoot().Type, idNode.name, out PropertyInfo propertyInfo)) {
+                    if (eventInfo.EventHandlerType.IsAssignableFrom(propertyInfo.PropertyType)) {
+                        LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
+                        string statement = propertyInfo.Name + "(";
+
+                        for (int i = 0; i < parameters.size; i++) {
+                            statement += parameters.array[i].name;
+                            if (i != parameters.size - 1) {
+                                statement += ", ";
+                            }
+                        }
+
+                        statement += ")";
+                        closure.Statement(statement);
+                        LambdaExpression lambda = closure.BuildLambda();
+                        ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
+                        compiler.Assign(evtFn, lambda);
+                        compiler.CallStatic(MemberData.EventUtil_Subscribe, compiler.GetElement(), Expression.Constant(attr.key), evtFn);
+                        closure.Release();
+                        LightList<Parameter>.Release(ref parameters);
+
+                        return;
+                    }
+                }
+
+                if (ReflectionUtil.IsMethod(compiler.GetRoot().Type, idNode.name, out MethodInfo methodInfo)) {
+                    LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
+
+                    string statement = idNode.name + "(";
+
+                    for (int i = 0; i < parameters.size; i++) {
+                        statement += parameters.array[i].name;
+                        if (i != parameters.size - 1) {
+                            statement += ", ";
+                        }
+                    }
+
+                    statement += ")";
+                    closure.Statement(statement);
+                    LambdaExpression lambda = closure.BuildLambda();
+                    ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
+                    compiler.Assign(evtFn, lambda);
+                    compiler.CallStatic(MemberData.EventUtil_Subscribe, compiler.GetElement(), Expression.Constant(attr.key), evtFn);
+                    closure.Release();
+                    LightList<Parameter>.Release(ref parameters);
+
+                    return;
+                }
+
+                LightList<Parameter>.Release(ref parameters);
+
+                throw new TemplateCompileException($"Error compiling event handler {attr.key}={attr.value}. {idNode.name} is not assignable to type {eventInfo.EventHandlerType}");
+            }
+
+            else if (astNode.type == ASTNodeType.AccessExpression) {
+                MemberAccessExpressionNode accessNode = (MemberAccessExpressionNode) astNode;
+                LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
+                string statement;
+
+                if (accessNode.parts[accessNode.parts.size - 1] is InvokeNode) {
+                    statement = attr.value;
+                }
+                else {
+                    statement = attr.value + "(";
+
+                    for (int i = 0; i < parameters.size; i++) {
+                        statement += parameters.array[i].name;
+                        if (i != parameters.size - 1) {
+                            statement += ", ";
+                        }
+                    }
+
+                    statement += ")";
+                }
+
+                closure.Statement(statement);
+                LambdaExpression lambda = closure.BuildLambda();
+                ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
+                compiler.Assign(evtFn, lambda);
+                compiler.CallStatic(MemberData.EventUtil_Subscribe, compiler.GetElement(), Expression.Constant(attr.key), evtFn);
+                closure.Release();
+                LightList<Parameter>.Release(ref parameters);
+            }
+            else {
+                LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
+
+                closure.Statement(astNode);
+                LambdaExpression lambda = closure.BuildLambda();
+                ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
+                compiler.Assign(evtFn, lambda);
+                compiler.CallStatic(MemberData.EventUtil_Subscribe, compiler.GetElement(), Expression.Constant(attr.key), evtFn);
+                closure.Release();
+            }
+
+            LightList<Parameter>.Release(ref parameters);
         }
 
         private void CompilePropertyChangeHandlers(TemplateLinqCompiler compiler, PropertyChangeSource changeSource, ParameterExpression element, Expression right, Expression prevValue) {
@@ -253,9 +480,8 @@ namespace UIForia.Compilers {
             }
         }
 
-        private void CompilePropertyBindingSync(int syncIdx, in AttrInfo attr, Type syncVarType) {
+        private void CompilePropertyBindingSync(Expression indexExpression, in AttrInfo attr, Type syncVarType) {
 
-            lateCompiler.Setup(attr);
             Expression right;
 
             ParameterExpression element = lateCompiler.GetElement();
@@ -277,7 +503,7 @@ namespace UIForia.Compilers {
 
             lateCompiler.SetImplicitContext(root);
 
-            Expression expr = ExpressionFactory.CallInstanceUnchecked(lateCompiler.GetBindingNode(), GetSyncGetter(syncVarType), ExpressionUtil.GetIntConstant(syncIdx));
+            Expression expr = ExpressionFactory.CallInstanceUnchecked(lateCompiler.GetBindingNode(), GetBindingVariableGetter(syncVarType), indexExpression);
 
             lateCompiler.SetImplicitContext(element);
 
@@ -411,25 +637,35 @@ namespace UIForia.Compilers {
             return false;
         }
 
-        private static MethodInfo GetSyncSetter(Type type) {
-            if (s_SyncSetterCache.TryGetValue(type, out MethodInfo setter)) {
+        private static Type GetContextVariableType(Type generic) {
+            if (s_ContextVarTypeCache.TryGetValue(generic, out Type variableType)) {
+                return variableType;
+            }
+
+            variableType = typeof(ContextVariable<>).MakeGenericType(ReflectionUtil.GetTempTypeArray(generic));
+            s_ContextVarTypeCache[generic] = variableType;
+            return variableType;
+        }
+
+        private static MethodInfo GetBindingVariableSetter(Type type) {
+            if (s_BindingVariableSetterCache.TryGetValue(type, out MethodInfo setter)) {
                 return setter;
             }
 
             ReflectionUtil.TypeArray1[0] = type;
-            setter = MemberData.BindingNode_SetSyncVar.MakeGenericMethod(ReflectionUtil.TypeArray1);
-            s_SyncSetterCache.Add(type, setter);
+            setter = MemberData.BindingNode_SetBindingVariable.MakeGenericMethod(ReflectionUtil.TypeArray1);
+            s_BindingVariableSetterCache.Add(type, setter);
             return setter;
         }
 
-        private static MethodInfo GetSyncGetter(Type type) {
-            if (s_SyncGetterCache.TryGetValue(type, out MethodInfo getter)) {
+        private static MethodInfo GetBindingVariableGetter(Type type) {
+            if (s_BindingVariableGetterCache.TryGetValue(type, out MethodInfo getter)) {
                 return getter;
             }
 
             ReflectionUtil.TypeArray1[0] = type;
-            getter = MemberData.BindingNode_GetSyncVar.MakeGenericMethod(ReflectionUtil.TypeArray1);
-            s_SyncGetterCache.Add(type, getter);
+            getter = MemberData.BindingNode_GetBindingVariable.MakeGenericMethod(ReflectionUtil.TypeArray1);
+            s_BindingVariableGetterCache.Add(type, getter);
             return getter;
         }
 
@@ -457,20 +693,6 @@ namespace UIForia.Compilers {
             }
         }
 
-        public enum ModType {
-
-            Alias,
-            Context
-
-        }
-
-        public struct ContextAliasActions {
-
-            public ModType modType;
-            public string name;
-
-        }
-
     }
 
     public struct BindingResult {
@@ -479,6 +701,7 @@ namespace UIForia.Compilers {
         public LambdaExpression updateLambda;
         public LambdaExpression constEnableLambda;
         public SizedArray<SyncPropertyData> syncData;
+        public StructList<BindingVariableDesc> localVariables;
 
         public bool HasValue {
             get => lateLambda != null || updateLambda != null || constEnableLambda != null;
@@ -486,6 +709,15 @@ namespace UIForia.Compilers {
 
     }
 
+    public struct BindingVariableDesc {
+
+        public Type variableType;
+        public Type originTemplateType;
+        public string variableName;
+        public int index;
+
+    }
+    
     public struct SyncPropertyData {
 
         public int index;

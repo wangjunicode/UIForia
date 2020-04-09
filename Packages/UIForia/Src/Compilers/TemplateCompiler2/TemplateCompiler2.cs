@@ -13,62 +13,132 @@ namespace UIForia.Compilers {
 
     public class TemplateCompiler2 {
 
-        public readonly CompilationContext2 context;
-        public readonly TemplateDataBuilder templateDataBuilder;
+        private State state;
 
-        private ProcessedType rootProcessedType;
-        private TemplateRootNode templateRootNode;
-        private readonly AttributeCompiler attributeCompiler;
-        private SizedArray<DeferredCompilationData> deferredData;
         private SizedArray<AttrInfo> scratchAttributes;
+        private readonly AttributeCompiler attributeCompiler;
+        private StructList<BindingVariableDesc> localVariableList;
+
         private SizedArray<TemplateContextReference> scratchContextReferences;
+        private readonly Dictionary<ProcessedType, TemplateExpressionSet> compiledTemplates;
+
+        public event Action<TemplateExpressionSet> onTemplateCompiled;
 
         private static readonly Dictionary<Type, MethodInfo> s_SyncMethodCache = new Dictionary<Type, MethodInfo>();
 
+        private readonly LightList<State> statePool;
+        private readonly StructStack<State> stateStack;
+
         public TemplateCompiler2() {
-            this.deferredData = new SizedArray<DeferredCompilationData>(8);
-            this.context = new CompilationContext2();
-            this.templateDataBuilder = new TemplateDataBuilder();
+            this.statePool = new LightList<State>();
+            this.stateStack = new StructStack<State>();
             this.attributeCompiler = new AttributeCompiler();
             this.scratchAttributes = new SizedArray<AttrInfo>(16);
             this.scratchContextReferences = new SizedArray<TemplateContextReference>(8);
+            this.compiledTemplates = new Dictionary<ProcessedType, TemplateExpressionSet>();
+            this.localVariableList = new StructList<BindingVariableDesc>(16);
+        }
+        
+        private CompilationContext2 context {
+            get => state.context;
+        }
+
+        private TemplateDataBuilder templateDataBuilder {
+            get => state.templateDataBuilder;
+        }
+
+        private ProcessedType rootProcessedType {
+            get => state.rootProcessedType;
+        }
+
+        private TemplateRootNode templateRootNode {
+            get => state.templateRootNode;
+        }
+        
+        private struct State {
+
+            public CompilationContext2 context;
+            public TemplateDataBuilder templateDataBuilder;
+            public ProcessedType rootProcessedType;
+            public TemplateRootNode templateRootNode;
+            public LightStack<StructList<BindingVariableDesc>> variableStack;
+
+        }
+
+        private void PushState(ProcessedType processedType, TemplateRootNode rootNode) {
+            if (state.context == null) {
+                state = GetState(processedType, rootNode);
+            }
+            else {
+                stateStack.Push(state);
+                state = GetState(processedType, rootNode);
+            }
+        }
+
+        private State GetState(ProcessedType processedType, TemplateRootNode rootNode) {
+            if (statePool.size == 0) {
+                return new State() {
+                    context = new CompilationContext2(),
+                    templateDataBuilder = new TemplateDataBuilder(),
+                    rootProcessedType = processedType,
+                    templateRootNode = rootNode,
+                    variableStack = new LightStack<StructList<BindingVariableDesc>>()
+                };
+            }
+
+            State retn = statePool.RemoveLast();
+            retn.rootProcessedType = processedType;
+            retn.templateRootNode = rootNode;
+            return retn;
+        }
+
+        private void PopState() {
+            statePool.Add(state);
+            state = stateStack.size == 0
+                ? default
+                : stateStack.Pop();
         }
 
         public TemplateExpressionSet CompileTemplate(ProcessedType processedType) {
-            rootProcessedType = processedType;
 
-            templateDataBuilder.Clear();
-            deferredData.Clear();
+            if (compiledTemplates.TryGetValue(processedType, out TemplateExpressionSet retn)) {
+                return retn;
+            }
 
+            PushState(processedType, processedType.templateRootNode);
+            
             CompileEntryPoint(processedType);
 
             CompileHydratePoint(processedType.templateRootNode);
+            
+            retn = templateDataBuilder.Build(processedType);
 
-            // // size will expand as we compile the elements
-            for (int i = 0; i < deferredData.size; i++) {
-                CompileNode(deferredData.array[i]);
-            }
+            compiledTemplates[processedType] = retn;
+            
+            PopState();
 
-            return templateDataBuilder.Build(processedType);
+            onTemplateCompiled?.Invoke(retn);
+
+            return retn;
 
         }
 
-        private void CompileNode(in DeferredCompilationData data) {
-            switch (data.target) {
+        private void CompileNode(TemplateNode target, int index) {
+            switch (target) {
                 case ContainerNode containerNode:
-                    CompileContainerElement(containerNode, data.index);
+                    CompileContainerElement(containerNode, index);
                     break;
 
                 case TextNode textNode:
-                    CompileTextElement(textNode, data.index);
+                    CompileTextElement(textNode, index);
                     break;
 
                 case ExpandedNode expandedNode:
-                    CompileExpandedNode(expandedNode, data.index);
+                    CompileExpandedNode(expandedNode, index);
                     break;
 
                 case SlotNode slotNode:
-                    CompileSlotNode(slotNode, data.index);
+                    CompileSlotNode(slotNode, index);
                     break;
 
                 case RepeatNode repeatNode:
@@ -144,8 +214,6 @@ namespace UIForia.Compilers {
 
             context.Setup<UIElement>();
 
-            templateRootNode = processedType.templateRootNode;
-
             ParameterExpression systemParam = context.AddParameter<ElementSystem>("system");
             ParameterExpression elementParam = context.GetVariable(processedType.rawType, "element");
 
@@ -161,8 +229,8 @@ namespace UIForia.Compilers {
             scratchContextReferences.Clear();
             scratchContextReferences.Add(new TemplateContextReference(processedType, templateRootNode));
 
-            CompileBindings(AttributeSetType.EntryPoint, systemParam, processedType, templateRootNode, scratchContextReferences);
-            
+            CompileBindings(BindingType.EntryPoint, systemParam, processedType, templateRootNode, scratchContextReferences);
+
             context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_HydrateEntryPoint));
 
             context.AddStatement(elementParam);
@@ -172,14 +240,36 @@ namespace UIForia.Compilers {
         }
 
         private void CompileHydratePoint(TemplateRootNode templateRootNode) {
+
             context.Setup();
 
             ParameterExpression systemParam = context.AddParameter<ElementSystem>("system");
 
-            SetupChildren(systemParam, templateRootNode.children);
+            int startIdx = SetupChildren(systemParam, templateRootNode.children);
 
             templateDataBuilder.SetHydratePoint(context.Build(templateRootNode.GetType().GetTypeName()));
 
+            CompileChildren(startIdx, templateRootNode.children);
+
+        }
+
+        private void CompileChildren(int templateStartIndex, SizedArray<TemplateNode> children) {
+
+            bool needsPop = localVariableList.size != 0;
+
+            if (needsPop) {
+                state.variableStack.Push(localVariableList);
+                localVariableList = StructList<BindingVariableDesc>.Get();
+            }
+            
+            for (int i = 0; i < children.size; i++) {
+                CompileNode(children.array[i], templateStartIndex + i);
+            }
+
+            if (needsPop) {
+                StructList<BindingVariableDesc> list = state.variableStack.Pop();
+                list.Release();
+            }
         }
 
         private ProcessedType ResolveProcessedType(TemplateNode templateNode) {
@@ -203,9 +293,12 @@ namespace UIForia.Compilers {
         }
 
         private void CompileExpandedNode(ExpandedNode expandedNode, int templateId) {
-            context.Setup();
 
             ProcessedType processedType = ResolveProcessedType(expandedNode);
+            
+            TemplateExpressionSet innerTemplate = CompileTemplate(processedType);
+                
+            context.Setup();
 
             ParameterExpression systemParam = context.AddParameter<ElementSystem>("system");
 
@@ -232,7 +325,7 @@ namespace UIForia.Compilers {
                     continue;
                 }
 
-                deferredData.Add(new DeferredCompilationData(overrider, templateDataBuilder.GetNextTemplateIndex()));
+                // deferredData.Add(new DeferredCompilationData(overrider, templateDataBuilder.GetNextTemplateIndex()));
 
                 if (overrider.slotType == SlotType.Override) {
                     context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_OverrideSlot, ExpressionUtil.GetStringConstant(overrider.slotName), ExpressionUtil.GetIntConstant(i)));
@@ -261,50 +354,57 @@ namespace UIForia.Compilers {
             scratchContextReferences.Add(new TemplateContextReference(rootProcessedType, templateRootNode));
             scratchContextReferences.Add(new TemplateContextReference(expandedNode.processedType, expandedNode));
 
-            CompileBindings(AttributeSetType.Expanded, systemParam, processedType, expandedNode, scratchContextReferences);
-         
+            CompileBindings(BindingType.Expanded, systemParam, processedType, expandedNode, scratchContextReferences);
+
             context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_HydrateElement, Expression.Constant(processedType.rawType)));
 
             templateDataBuilder.SetElementTemplate(expandedNode, templateId, context.Build(expandedNode.GetTagName()));
 
         }
 
-        private void CompileBindings(AttributeSetType attributeSetType, Expression systemParam, ProcessedType processedType, TemplateNode node, ReadOnlySizedArray<TemplateContextReference> contextReferences) {
-            AttributeSet attributeSet = new AttributeSet(scratchAttributes, attributeSetType, contextReferences);
-
+        private void CompileBindings(BindingType bindingType, Expression systemParam, ProcessedType processedType, TemplateNode node, ReadOnlySizedArray<TemplateContextReference> contextReferences) {
+            AttributeSet attributeSet = new AttributeSet(scratchAttributes, bindingType, contextReferences);
+            
             BindingResult bindingResult = new BindingResult();
 
-            bindingResult.syncData = new SizedArray<SyncPropertyData>(8); // todo -- cache + clear
-           
-            attributeCompiler.CompileAttributes(processedType, node, attributeSet, ref bindingResult);
-
+            localVariableList.size = 0;
+            bindingResult.localVariables = localVariableList;
+            
+            attributeCompiler.CompileAttributes(processedType, node, attributeSet, ref bindingResult, state.variableStack);
+            
             if (!bindingResult.HasValue) {
                 return;
             }
-
-            for (int i = 0; i < bindingResult.syncData.size; i++) {
-                MethodInfo info = GetSyncVarMethod(bindingResult.syncData.array[i].type);
-                context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, info, ExpressionUtil.GetIntConstant(i), ExpressionUtil.GetStringConstant(""))); // todo -- add ebug name
-            }
-
+            
             BindingIndices bindingIds = templateDataBuilder.AddBindings(bindingResult);
-
-            // todo -- only if has bindings
+            
             context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_SetBindings,
                     ExpressionUtil.GetIntConstant(bindingIds.updateIndex),
-                    ExpressionUtil.GetIntConstant(bindingIds.lateUpdateIndex)
-                    // ExpressionUtil.GetIntConstant(0)
+                    ExpressionUtil.GetIntConstant(bindingIds.lateUpdateIndex),
+                    ExpressionUtil.GetIntConstant(localVariableList.size)
                 )
             );
 
+            if (localVariableList.size == 0) return;
+
+            for (int i = 0; i < localVariableList.size; i++) {
+                ref BindingVariableDesc localVariable = ref localVariableList.array[i];
+                context.AddStatement(ExpressionFactory.CallInstanceUnchecked(
+                    systemParam, 
+                    GetSyncVarMethod(localVariable.variableType), 
+                    ExpressionUtil.GetIntConstant(localVariable.index),
+                    ExpressionUtil.GetStringConstant(localVariable.variableName))
+                );
+            }
+            
         }
-        
+
         private static MethodInfo GetSyncVarMethod(Type type) {
             if (s_SyncMethodCache.TryGetValue(type, out MethodInfo generic)) {
                 return generic;
             }
 
-            generic = MemberData.ElementSystem_AddSyncVariable.MakeGenericMethod(type);
+            generic = MemberData.ElementSystem_CreateBindingVariable.MakeGenericMethod(type);
 
             s_SyncMethodCache.Add(type, generic);
             return generic;
@@ -327,16 +427,25 @@ namespace UIForia.Compilers {
 
             InitializeElementAttributes(systemParam, scratchAttributes);
 
-            SetupChildren(systemParam, containerNode.children);
+            int startIdx = SetupChildren(systemParam, containerNode.children);
 
+            scratchContextReferences.Clear();
+            scratchContextReferences.Add(new TemplateContextReference(rootProcessedType, templateRootNode));
+            scratchContextReferences.Add(new TemplateContextReference(containerNode.processedType, containerNode));
+
+            CompileBindings(BindingType.Expanded, systemParam, processedType, containerNode, scratchContextReferences);
+            
             templateDataBuilder.SetElementTemplate(containerNode, templateId, context.Build(containerNode.GetTagName()));
-
+            
+            CompileChildren(startIdx, containerNode.children);
+            
         }
 
         private void CompileTextElement(TextNode textNode, int templateId) {
+            
             context.Setup();
 
-            // ProcessedType processedType = ResolveProcessedType(textNode);
+            ProcessedType processedType = ResolveProcessedType(textNode);
 
             ParameterExpression systemParam = context.AddParameter<ElementSystem>("system");
 
@@ -354,37 +463,47 @@ namespace UIForia.Compilers {
                 context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_SetText, Expression.Constant(textNode.GetStringContent())));
             }
 
-            SetupChildren(systemParam, textNode.children);
+            int startIdx = SetupChildren(systemParam, textNode.children);
+            
+            scratchContextReferences.Clear();
+            scratchContextReferences.Add(new TemplateContextReference(rootProcessedType, templateRootNode));
+            scratchContextReferences.Add(new TemplateContextReference(textNode.processedType, textNode));
 
+            CompileBindings(BindingType.Expanded, systemParam, processedType, textNode, scratchContextReferences);
+            
             templateDataBuilder.SetElementTemplate(textNode, templateId, context.Build(textNode.GetTagName()));
 
+            CompileChildren(startIdx, textNode.children);
         }
 
-        private void SetupChildren(Expression systemParam, ReadOnlySizedArray<TemplateNode> children) {
+        private int SetupChildren(Expression systemParam, ReadOnlySizedArray<TemplateNode> children) {
+
+            int startIdx = templateDataBuilder.templateIndex;
 
             for (int i = 0; i < children.size; i++) {
 
                 TemplateNode child = children.array[i];
 
-                Expression childNew = ExpressionFactory.New(child.processedType.GetConstructor());
+                Expression childNew = child.processedType.GetConstructorExpression();
+
+                int idx = templateDataBuilder.GetNextTemplateIndex();
 
                 switch (child) {
                     case SlotNode slotNode: {
                         Assert.IsTrue(slotNode.slotType == SlotType.Define);
-                        DeferredCompilationData data = deferredData.Add(new DeferredCompilationData(child, templateDataBuilder.GetNextTemplateIndex()));
-                        context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_AddSlotChild, childNew, ExpressionUtil.GetStringConstant(slotNode.slotName), ExpressionUtil.GetIntConstant(data.index)));
+                        context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_AddSlotChild, childNew, ExpressionUtil.GetStringConstant(slotNode.slotName), ExpressionUtil.GetIntConstant(idx)));
                         break;
                     }
 
                     default: {
-                        DeferredCompilationData data = deferredData.Add(new DeferredCompilationData(child, templateDataBuilder.GetNextTemplateIndex()));
-                        context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_AddChild, childNew, ExpressionUtil.GetIntConstant(data.index)));
+                        context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_AddChild, childNew, ExpressionUtil.GetIntConstant(idx)));
                         break;
                     }
 
                 }
             }
 
+            return startIdx;
         }
 
         private void InitializeElementAttributes(Expression system, ReadOnlySizedArray<AttrInfo> attributes) {
@@ -402,23 +521,7 @@ namespace UIForia.Compilers {
             }
 
         }
-
-        // context vars can be determined from parse results within the template because the are only exposed via expose: which is only valid on slots
-        // injected ones are only available for slot overrides and we should know which slot we override at parse time
-
-        public struct DeferredCompilationData {
-
-            public readonly int index;
-            public readonly TemplateNode target;
-            public readonly SizedArray<ContextVariableDefinition> contextStack;
-
-            public DeferredCompilationData(TemplateNode target, int index, SizedArray<ContextVariableDefinition> contextStack = default) {
-                this.target = target;
-                this.index = index;
-                this.contextStack = contextStack;
-            }
-
-        }
+        
 
     }
 

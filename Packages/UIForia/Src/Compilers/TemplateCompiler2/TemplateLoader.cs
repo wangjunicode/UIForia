@@ -32,6 +32,10 @@ namespace UIForia.Compilers {
                 expressionSets = new LightList<TemplateExpressionSet>(typesToCompile.Length + 16)
             };
 
+            Action<TemplateExpressionSet> callback = EnqueueTemplate;
+            
+            compiler.onTemplateCompiled += callback;
+            
             string output = "";
             
             for (int i = 0; i < typesToCompile.Length; i++) {
@@ -44,6 +48,8 @@ namespace UIForia.Compilers {
                 output += expressionSet.ToCSharpCode(new IndentedStringBuilder(512));
 
             }
+
+            compiler.onTemplateCompiled -= callback;
             
             File.WriteAllText(UnityEngine.Application.dataPath + "/tmp.txt", output);
             
@@ -84,6 +90,10 @@ namespace UIForia.Compilers {
             
         }
 
+        private static void EnqueueTemplate(TemplateExpressionSet expressionSet) {
+            Debug.Log("Compiled " + expressionSet.processedType.rawType.GetTypeName());
+        }
+
         public void LoadRoot(Application application, UIView rootView) {
             application.elementSystem.CreateEntryPoint(rootView, templateData[0]);
         }
@@ -101,6 +111,10 @@ namespace UIForia.Compilers {
                 expressionSets = new LightList<TemplateExpressionSet>(typesToCompile.Length + 16)
             };
             
+            // caching fixes performance issue?
+            // don't recompile if parse result didnt change
+            // only compile templates we actually want
+            // 
             for (int i = 0; i < typesToCompile.Length; i++) {
                 
                 // todo -- handle discovered generics

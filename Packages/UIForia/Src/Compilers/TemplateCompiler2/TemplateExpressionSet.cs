@@ -26,10 +26,6 @@ namespace UIForia.Compilers {
         private static readonly string s_BindingFnTypeName = typeof(Action<LinqBindingNode>[]).GetTypeName();
 
         public IndentedStringBuilder ToCSharpCode(IndentedStringBuilder stringBuilder) {
-            // if (!string.IsNullOrEmpty(processedType.templateId)) {
-            //     stringBuilder.AppendInline(" templateId = ");
-            //     stringBuilder.AppendInline(processedType.templateId);
-            // }
 
             stringBuilder.AppendInline("new ");
             stringBuilder.AppendInline(nameof(TemplateData));

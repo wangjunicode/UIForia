@@ -6,19 +6,19 @@ using UIForia.Compilers;
 using UIForia.Elements;
 
 namespace UIForia.Systems {
+    
+    public abstract class BindingVariable {
 
-    public abstract class SyncVariable {
-
-        public string debugName;
+        public string name;
 
     }
 
-    public class SyncVariable<T> : SyncVariable {
+    public class BindingVariable<T> : BindingVariable {
 
         public T value;
 
-        public SyncVariable(string debugName) {
-            this.debugName = debugName;
+        public BindingVariable(string name) {
+            this.name = name;
         }
 
     }
@@ -65,8 +65,7 @@ namespace UIForia.Systems {
         public UIElement root;
         public UIElement element;
         public UIElement[] referencedContexts;
-        public SyncVariable[] syncStorage;
-        
+
         internal Action<UIElement, UIElement> createdBinding;
         internal Action<UIElement, UIElement> enabledBinding;
         internal Action<UIElement, UIElement> updateBindings;
@@ -74,19 +73,25 @@ namespace UIForia.Systems {
 
         internal ContextVariable localVariable;
         internal LinqBindingNode parent;
+        internal BindingVariable[] variables;
+
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // public void SetContextVariable<T>(int id, T value) {
+        //     throw new NotImplementedException();
+        // }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetSyncVar<T>(int idx, T value) {
+        public void SetBindingVariable<T>(int idx, T value) {
             // ReSharper disable once PossibleNullReferenceException
-            (syncStorage[idx] as SyncVariable<T>).value = value;
+            (variables[idx] as BindingVariable<T>).value = value;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public T GetSyncVar<T>(int idx) {
+        public T GetBindingVariable<T>(int idx) {
             // ReSharper disable once PossibleNullReferenceException
-            return (syncStorage[idx] as SyncVariable<T>).value;
+            return (variables[idx] as BindingVariable<T>).value;
         }
-        
+
         public void InitializeContextArray(string slotName, TemplateScope templateScope, int size) {
             referencedContexts = new UIElement[size + 1];
 
@@ -120,6 +125,14 @@ namespace UIForia.Systems {
         }
 
         public ContextVariable GetContextVariable(int id) {
+            // todo store as struct with id / reference pair so we dont do pointer chasing to find the right variable
+            // non local variables should be at later ids
+            // search should happen only once then store ref locally
+            // sync var can be the same as context var
+            // locally defined context vars / sync vars are accessed by index
+            // parent ones are searched by id starting at localSize
+            // should know at compile time how many context variables are referenced, can pre-size an array as an optimization
+            
             ContextVariable ptr = localVariable;
             while (ptr != null) {
                 if (ptr.id == id) {
@@ -204,6 +217,15 @@ namespace UIForia.Systems {
             node.SetBindings(application, rootElement, createdId, enabledId, updatedId, lateId);
 
             return node;
+        }
+
+        public void InvokeUpdate() {
+            try {
+                element.OnUpdate();
+            }
+            catch (Exception e) {
+                UnityEngine.Debug.Log(e); // todo -- diagnostic
+            }
         }
 
         private void SetBindings(Application application, UIElement rootElement, int createdId, int enabledId, int updatedId, int lateId) {

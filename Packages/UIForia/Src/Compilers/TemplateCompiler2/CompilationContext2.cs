@@ -2,70 +2,31 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using UIForia.Elements;
 using UIForia.Exceptions;
-using UIForia.Parsing;
 using UIForia.Util;
-using UnityEngine.Assertions;
 
 namespace UIForia.Compilers {
 
     public class CompilationContext2 {
 
-        public bool outputComments;
-
-        public ProcessedType rootType;
-        public CompiledTemplate2 result;
-
-        public readonly ParameterExpression systemParam;
-        public ParameterExpression parentParam;
-        public ParameterExpression elementParam;
-        public ParameterExpression rootParam;
-        public ParameterExpression dataParam;
-
+        
         private static readonly MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_InlineComment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.InlineComment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineBefore = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineBefore), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_CommentNewLineAfter = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.CommentNewLineAfter), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
-        private static readonly char[] s_SplitChar = {'.'};
-        public TemplateRootNode templateRootNode;
-        public LightList<string> namespaces;
-        private SizedArray<ParameterExpression> variables;
-        private readonly LightStack<LightList<Expression>> statementStacks;
-        private readonly LightStack<ParameterExpression> hierarchyStack;
-        private int currentDepth;
-        private int maxDepth;
-
-        public SizedArray<ContextVariableDefinition> contextStack;
         
+        public bool outputComments;
+        private SizedArray<ParameterExpression> variables;
+        private readonly LightList<Expression> statements;
+        private List<ParameterExpression> parameters;
+        private Type returnType;
+
+        [ThreadStatic] private static List<ParameterExpression> parameterPool;
+
         public CompilationContext2() {
             outputComments = true;
-            systemParam = Expression.Parameter(typeof(ElementSystem), "system");
             variables = new SizedArray<ParameterExpression>();
-            statementStacks = new LightStack<LightList<Expression>>();
-            statementStacks.Push(new LightList<Expression>());
-        }
-
-        public void PushScope() {
-            currentDepth++;
-
-            if (currentDepth > maxDepth) {
-                maxDepth = currentDepth;
-                ParameterExpression variable = Expression.Parameter(typeof(UIElement), "targetElement_" + currentDepth);
-                variables.Add(variable);
-                hierarchyStack.Push(variable);
-            }
-            else {
-                string targetName = "targetElement_" + currentDepth;
-                for (int i = 0; i < variables.size; i++) {
-                    if (variables[i].Type == typeof(UIElement) && variables[i].Name == targetName) {
-                        hierarchyStack.Push(variables[i]);
-                        return;
-                    }
-                }
-
-                throw new ArgumentOutOfRangeException();
-            }
+            statements = new LightList<Expression>();
         }
 
         // todo -- pool variables where possible
@@ -80,52 +41,13 @@ namespace UIForia.Compilers {
                 }
             }
 
-            ParameterExpression param = Expression.Parameter(type, name);
+            ParameterExpression param = GetParameter(type, name);
             variables.Add(param);
             return param;
         }
-
-        public ParameterExpression GetVariable<T>(string name) {
-            for (int i = 0; i < variables.size; i++) {
-                if (variables[i].Name == name) {
-                    if (variables[i].Type != typeof(T)) {
-                        throw new TemplateCompileException("Variable already taken: " + name);
-                    }
-
-                    return variables[i];
-                }
-            }
-
-            ParameterExpression param = Expression.Parameter(typeof(T), name);
-            variables.Add(param);
-            return param;
-        }
-
-        public void PopScope() {
-            currentDepth--;
-            hierarchyStack.Pop();
-        }
-
-        public void PushBlock() {
-            statementStacks.Push(LightList<Expression>.Get());
-        }
-
-        public BlockExpression PopBlock() {
-            LightList<Expression> statements = statementStacks.Pop();
-            Expression[] array = statements.ToArray();
-            LightList<Expression>.Release(ref statements);
-            return Expression.Block(typeof(void), array);
-        }
-
-        public LambdaExpression Finalize(Type type) {
-            LightList<Expression> statements = statementStacks.Pop();
-            Expression[] array = statements.ToArray();
-            LightList<Expression>.Release(ref statements);
-            return Expression.Lambda(Expression.Block(type, variables.CloneArray(), array), systemParam, rootParam, parentParam, elementParam, dataParam);
-        }
-
+        
         public void AddStatement(Expression expression) {
-            this.statementStacks.PeekUnchecked().Add(expression);
+            statements.Add(expression);
         }
 
         public void Assign(Expression target, Expression value) {
@@ -164,40 +86,22 @@ namespace UIForia.Compilers {
             }
         }
 
-        public void Clear() {
-            statementStacks.Clear();
-            variables.Clear();
-        }
-
-        public void SetupHydrate() {
-            throw new NotImplementedException();
-        }
-
         public void Setup<T>() {
             returnType = typeof(T);
             parameters?.Clear();
             variables.Clear();
+            statements.Clear();
         }
         
         public void Setup() {
             returnType = typeof(void);
             parameters?.Clear();
             variables.Clear();
+            statements.Clear();
         }
 
-        private List<ParameterExpression> parameters;
-        private Type returnType;
-
-        [ThreadStatic] private static List<ParameterExpression> parameterPool;
-
         public LambdaExpression Build(string fnName) {
-            
-            Assert.IsTrue(statementStacks.size == 1);
-            
-            LightList<Expression> statements = statementStacks.array[0];
-            Expression[] array = statements.ToArray();
-            statements.Clear();
-            return Expression.Lambda(Expression.Block(returnType, variables.CloneArray(), array), fnName, false, parameters);
+            return Expression.Lambda(Expression.Block(returnType, variables.CloneArray(), statements.ToArray()), fnName, false, parameters);
         }
         
         private static ParameterExpression GetParameter(Type type, string name) {

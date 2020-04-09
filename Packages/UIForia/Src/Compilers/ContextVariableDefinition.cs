@@ -1,9 +1,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using UIForia.Elements;
 using UIForia.Systems;
-using UIForia.UIInput;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
@@ -38,6 +36,9 @@ namespace UIForia.Compilers {
             switch (variableType) {
               
                 case AliasResolverType.ContextVariable: {
+                    // if this is the first time we are resolving this variable we need to track that and add to context.bindingVariables
+                    // if this is not a context variable local to the template (ie exposed, etc) we need to find its origination template id
+                    // and then search by name.
                     ParameterExpression el = compiler.GetElement();
                     Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_UIElement_BindingNode);
                     Expression call = ExpressionFactory.CallInstanceUnchecked(access, TemplateCompiler.s_LinqBindingNode_GetContextVariable, Expression.Constant(id));

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using UIForia.Attributes;
@@ -29,7 +30,8 @@ namespace UIForia.Parsing {
 
         public MethodInfo updateMethod;
         public MethodInfo createMethod;
-        
+        private Expression ctorExpr;
+
         private Flags flags;
         internal Module module;
         internal TemplateRootNode templateRootNode;
@@ -361,6 +363,15 @@ namespace UIForia.Parsing {
             }
 
             return results.size != 0;
+        }
+
+        
+        public Expression GetConstructorExpression() {
+            if (ctorExpr == null) {
+                ctorExpr = ExpressionFactory.New(GetConstructor());
+            }
+
+            return ctorExpr;
         }
 
     }

@@ -1,15 +1,15 @@
 <UITemplate>
     <Contents attr:x="x" attr:y="y">
         <Div>
-            <Panel>
-                <ExpandedTemplate if="GetAttribute('x') == 'x'" sync:value="parentVal" onchange:value="ValueChanged()">
+            <Panel ctx:someContextValue="GetAttribute('y')">
+                <ExpandedTemplate if="GetAttribute('x') == $someContextValue" sync:value="parentVal" onchange:value="ValueChanged()">
                     <override:title attr:x="expandedTempate.GetX()">
                         Hello
                     </override:title>
                 </ExpandedTemplate>
             </Panel>
         </Div>
-        <Panel/>
+        <Group/>
 <!--        <Group/>-->
 <!--        <define:someslot>-->
 <!--            <Text>Hello</Text>-->

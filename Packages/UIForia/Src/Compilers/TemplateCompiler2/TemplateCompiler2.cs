@@ -24,7 +24,8 @@ namespace UIForia.Compilers {
 
         public event Action<TemplateExpressionSet> onTemplateCompiled;
 
-        private static readonly Dictionary<Type, MethodInfo> s_SyncMethodCache = new Dictionary<Type, MethodInfo>();
+        private static readonly Dictionary<Type, MethodInfo> s_CreateVariableMethodCache = new Dictionary<Type, MethodInfo>();
+        private static readonly Dictionary<Type, MethodInfo> s_ReferenceVariableMethodCache = new Dictionary<Type, MethodInfo>();
 
         private readonly LightList<State> statePool;
         private readonly StructStack<State> stateStack;
@@ -38,7 +39,7 @@ namespace UIForia.Compilers {
             this.compiledTemplates = new Dictionary<ProcessedType, TemplateExpressionSet>();
             this.localVariableList = new StructList<BindingVariableDesc>(16);
         }
-        
+
         private CompilationContext2 context {
             get => state.context;
         }
@@ -54,7 +55,7 @@ namespace UIForia.Compilers {
         private TemplateRootNode templateRootNode {
             get => state.templateRootNode;
         }
-        
+
         private struct State {
 
             public CompilationContext2 context;
@@ -106,15 +107,15 @@ namespace UIForia.Compilers {
             }
 
             PushState(processedType, processedType.templateRootNode);
-            
+
             CompileEntryPoint(processedType);
 
             CompileHydratePoint(processedType.templateRootNode);
-            
+
             retn = templateDataBuilder.Build(processedType);
 
             compiledTemplates[processedType] = retn;
-            
+
             PopState();
 
             onTemplateCompiled?.Invoke(retn);
@@ -229,7 +230,7 @@ namespace UIForia.Compilers {
             scratchContextReferences.Clear();
             scratchContextReferences.Add(new TemplateContextReference(processedType, templateRootNode));
 
-            CompileBindings(BindingType.EntryPoint, systemParam, processedType, templateRootNode, scratchContextReferences);
+            CompileBindings(ElementBindingType.EntryPoint, systemParam, processedType, templateRootNode, scratchContextReferences);
 
             context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_HydrateEntryPoint));
 
@@ -261,7 +262,7 @@ namespace UIForia.Compilers {
                 state.variableStack.Push(localVariableList);
                 localVariableList = StructList<BindingVariableDesc>.Get();
             }
-            
+
             for (int i = 0; i < children.size; i++) {
                 CompileNode(children.array[i], templateStartIndex + i);
             }
@@ -295,9 +296,9 @@ namespace UIForia.Compilers {
         private void CompileExpandedNode(ExpandedNode expandedNode, int templateId) {
 
             ProcessedType processedType = ResolveProcessedType(expandedNode);
-            
+
             TemplateExpressionSet innerTemplate = CompileTemplate(processedType);
-                
+
             context.Setup();
 
             ParameterExpression systemParam = context.AddParameter<ElementSystem>("system");
@@ -324,8 +325,6 @@ namespace UIForia.Compilers {
                     Debug.LogError("Cannot find to slot to override with name : " + overrider.slotName);
                     continue;
                 }
-
-                // deferredData.Add(new DeferredCompilationData(overrider, templateDataBuilder.GetNextTemplateIndex()));
 
                 if (overrider.slotType == SlotType.Override) {
                     context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_OverrideSlot, ExpressionUtil.GetStringConstant(overrider.slotName), ExpressionUtil.GetIntConstant(i)));
@@ -354,7 +353,7 @@ namespace UIForia.Compilers {
             scratchContextReferences.Add(new TemplateContextReference(rootProcessedType, templateRootNode));
             scratchContextReferences.Add(new TemplateContextReference(expandedNode.processedType, expandedNode));
 
-            CompileBindings(BindingType.Expanded, systemParam, processedType, expandedNode, scratchContextReferences);
+            CompileBindings(ElementBindingType.Expanded, systemParam, processedType, expandedNode, scratchContextReferences);
 
             context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_HydrateElement, Expression.Constant(processedType.rawType)));
 
@@ -362,25 +361,27 @@ namespace UIForia.Compilers {
 
         }
 
-        private void CompileBindings(BindingType bindingType, Expression systemParam, ProcessedType processedType, TemplateNode node, ReadOnlySizedArray<TemplateContextReference> contextReferences) {
-            AttributeSet attributeSet = new AttributeSet(scratchAttributes, bindingType, contextReferences);
-            
+        private void CompileBindings(ElementBindingType elementBindingType, Expression systemParam, ProcessedType processedType, TemplateNode node, ReadOnlySizedArray<TemplateContextReference> contextReferences) {
+            AttributeSet attributeSet = new AttributeSet(scratchAttributes, elementBindingType, contextReferences);
+
             BindingResult bindingResult = new BindingResult();
 
             localVariableList.size = 0;
             bindingResult.localVariables = localVariableList;
-            
+
             attributeCompiler.CompileAttributes(processedType, node, attributeSet, ref bindingResult, state.variableStack);
-            
+
             if (!bindingResult.HasValue) {
                 return;
             }
-            
-            BindingIndices bindingIds = templateDataBuilder.AddBindings(bindingResult);
-            
+
+            BindingIndices bindingIds = templateDataBuilder.AddBindings(node, bindingResult);
+
             context.AddStatement(ExpressionFactory.CallInstanceUnchecked(systemParam, MemberData.ElementSystem_SetBindings,
                     ExpressionUtil.GetIntConstant(bindingIds.updateIndex),
                     ExpressionUtil.GetIntConstant(bindingIds.lateUpdateIndex),
+                    ExpressionUtil.GetIntConstant(bindingIds.constIndex),
+                    ExpressionUtil.GetIntConstant(bindingIds.enableIndex),
                     ExpressionUtil.GetIntConstant(localVariableList.size)
                 )
             );
@@ -389,24 +390,47 @@ namespace UIForia.Compilers {
 
             for (int i = 0; i < localVariableList.size; i++) {
                 ref BindingVariableDesc localVariable = ref localVariableList.array[i];
-                context.AddStatement(ExpressionFactory.CallInstanceUnchecked(
-                    systemParam, 
-                    GetSyncVarMethod(localVariable.variableType), 
-                    ExpressionUtil.GetIntConstant(localVariable.index),
-                    ExpressionUtil.GetStringConstant(localVariable.variableName))
-                );
+                if (localVariable.kind == BindingVariableKind.Local) {
+
+                    context.AddStatement(ExpressionFactory.CallInstanceUnchecked(
+                        systemParam,
+                        GetCreateVariableMethod(localVariable.variableType),
+                        ExpressionUtil.GetIntConstant(localVariable.index),
+                        ExpressionUtil.GetStringConstant(localVariable.variableName))
+                    );
+                    
+                }
+                else if (localVariable.kind == BindingVariableKind.Reference) {
+                    context.AddStatement(ExpressionFactory.CallInstanceUnchecked(
+                        systemParam,
+                        GetReferenceVariableMethod(localVariable.variableType),
+                        ExpressionUtil.GetIntConstant(localVariable.index),
+                        ExpressionUtil.GetStringConstant(localVariable.variableName))
+                    );
+                }
             }
-            
+
         }
 
-        private static MethodInfo GetSyncVarMethod(Type type) {
-            if (s_SyncMethodCache.TryGetValue(type, out MethodInfo generic)) {
+        private static MethodInfo GetCreateVariableMethod(Type type) {
+            if (s_CreateVariableMethodCache.TryGetValue(type, out MethodInfo generic)) {
                 return generic;
             }
 
             generic = MemberData.ElementSystem_CreateBindingVariable.MakeGenericMethod(type);
 
-            s_SyncMethodCache.Add(type, generic);
+            s_CreateVariableMethodCache.Add(type, generic);
+            return generic;
+        }
+        
+        private static MethodInfo GetReferenceVariableMethod(Type type) {
+            if (s_ReferenceVariableMethodCache.TryGetValue(type, out MethodInfo generic)) {
+                return generic;
+            }
+
+            generic = MemberData.ElementSystem_ReferenceBindingVariable.MakeGenericMethod(type);
+
+            s_ReferenceVariableMethodCache.Add(type, generic);
             return generic;
         }
 
@@ -433,16 +457,16 @@ namespace UIForia.Compilers {
             scratchContextReferences.Add(new TemplateContextReference(rootProcessedType, templateRootNode));
             scratchContextReferences.Add(new TemplateContextReference(containerNode.processedType, containerNode));
 
-            CompileBindings(BindingType.Expanded, systemParam, processedType, containerNode, scratchContextReferences);
-            
+            CompileBindings(ElementBindingType.Expanded, systemParam, processedType, containerNode, scratchContextReferences);
+
             templateDataBuilder.SetElementTemplate(containerNode, templateId, context.Build(containerNode.GetTagName()));
-            
+
             CompileChildren(startIdx, containerNode.children);
-            
+
         }
 
         private void CompileTextElement(TextNode textNode, int templateId) {
-            
+
             context.Setup();
 
             ProcessedType processedType = ResolveProcessedType(textNode);
@@ -464,13 +488,13 @@ namespace UIForia.Compilers {
             }
 
             int startIdx = SetupChildren(systemParam, textNode.children);
-            
+
             scratchContextReferences.Clear();
             scratchContextReferences.Add(new TemplateContextReference(rootProcessedType, templateRootNode));
             scratchContextReferences.Add(new TemplateContextReference(textNode.processedType, textNode));
 
-            CompileBindings(BindingType.Expanded, systemParam, processedType, textNode, scratchContextReferences);
-            
+            CompileBindings(ElementBindingType.Expanded, systemParam, processedType, textNode, scratchContextReferences);
+
             templateDataBuilder.SetElementTemplate(textNode, templateId, context.Build(textNode.GetTagName()));
 
             CompileChildren(startIdx, textNode.children);
@@ -521,7 +545,13 @@ namespace UIForia.Compilers {
             }
 
         }
-        
+
+    }
+
+    public enum BindingVariableKind {
+
+        Local,
+        Reference
 
     }
 

@@ -9,23 +9,23 @@ namespace UIForia.Compilers {
         internal LambdaExpression entryPoint;
         internal LambdaExpression hydrate;
         internal LightList<TemplateOutput> elementFns;
-        internal LightList<LambdaExpression> bindingFns;
+        internal LightList<BindingOutput> bindingFns;
 
         internal int bindingIndex;
         internal int templateIndex;
-        
+
         public TemplateDataBuilder() {
             elementFns = new LightList<TemplateOutput>();
-            bindingFns = new LightList<LambdaExpression>();
+            bindingFns = new LightList<BindingOutput>();
         }
 
         public int GetNextTemplateIndex() {
             return templateIndex++;
         }
-        
+
         public void SetElementTemplate(TemplateNode templateNode, int elementSlotId, LambdaExpression expression) {
             elementFns.EnsureCapacity(elementSlotId);
-            
+
             if (elementFns.size <= elementSlotId) {
                 elementFns.size = elementSlotId + 1;
             }
@@ -63,20 +63,49 @@ namespace UIForia.Compilers {
             bindingIndex = 0;
         }
 
-        public BindingIndices AddBindings(BindingResult bindingResult) {
+        public BindingIndices AddBindings(TemplateNode templateNode, BindingResult bindingResult) {
             BindingIndices retn = default;
 
             retn.updateIndex = -1;
             retn.lateUpdateIndex = -1;
-            
+            retn.constIndex = -1;
+            retn.enableIndex = -1;
+
             if (bindingResult.updateLambda != null) {
                 retn.updateIndex = bindingFns.size;
-                bindingFns.Add(bindingResult.updateLambda);
+                bindingFns.Add(new BindingOutput() {
+                    templateNode = templateNode,
+                    expression = bindingResult.updateLambda,
+                    bindingType = BindingType.Update
+                });
+
             }
 
             if (bindingResult.lateLambda != null) {
                 retn.lateUpdateIndex = bindingFns.size;
-                bindingFns.Add(bindingResult.lateLambda);
+                bindingFns.Add(new BindingOutput() {
+                    templateNode = templateNode,
+                    expression = bindingResult.lateLambda,
+                    bindingType = BindingType.LateUpdate
+                });
+            }
+
+            if (bindingResult.constLambda != null) {
+                retn.constIndex = bindingFns.size;
+                bindingFns.Add(new BindingOutput() {
+                    templateNode = templateNode,
+                    expression = bindingResult.constLambda,
+                    bindingType = BindingType.Const
+                });
+            }
+            
+            if (bindingResult.enableLambda != null) {
+                retn.enableIndex = bindingFns.size;
+                bindingFns.Add(new BindingOutput() {
+                    templateNode = templateNode,
+                    expression = bindingResult.enableLambda,
+                    bindingType = BindingType.Enable
+                });
             }
 
             return retn;
@@ -88,6 +117,8 @@ namespace UIForia.Compilers {
 
         public int updateIndex;
         public int lateUpdateIndex;
+        public int constIndex;
+        public int enableIndex;
 
     }
 

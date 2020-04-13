@@ -31,6 +31,11 @@ namespace UIForia {
         public void CreateBindingVariable<T>(int idx, string name) {
             element.bindingNode.variables[idx] = new BindingVariable<T>(name);
         }
+        
+        public void ReferenceBindingVariable<T>(int idx, string name) {
+            element.bindingNode.variables[idx] = null; //new BindingVariable<T>(name);
+            throw new NotImplementedException();
+        }
 
         internal ElementSystem(Dictionary<Type, TemplateData> templateDataMap) {
             this.templateDataMap = templateDataMap;
@@ -84,9 +89,13 @@ namespace UIForia {
 
             templateDataMap.TryGetValue(type, out currentTemplateData);
 
+            UIElement oldRoot = root;
+            root = element;
+            
             // ReSharper disable once PossibleNullReferenceException
             currentTemplateData.hydrate(this);
 
+            root = oldRoot;
             currentTemplateData = oldTemplateData;
 
             // ContextEntry entry = contextStack.PopUnchecked();
@@ -99,8 +108,15 @@ namespace UIForia {
             ((UITextElement) element).SetText(value);
         }
 
-        public void SetBindings(int updateBindingId, int lateUpdateBindingId, int bindingVariableCount) {
+        public void SetBindings(int updateBindingId, int lateUpdateBindingId, int constBindingId, int enableBindingId, int bindingVariableCount) {
             element.bindingNode.variables = bindingVariableCount != 0 ? new BindingVariable[bindingVariableCount] : default;
+            if (updateBindingId != -1) {
+                element.bindingNode.updateBindings = currentTemplateData.bindings[updateBindingId];
+            }
+
+            if (constBindingId != -1) {
+                currentTemplateData.bindings[constBindingId].Invoke(element.bindingNode);
+            }
         }
 
         public void OverrideSlot(string slotName, int slotTemplateId) {
@@ -163,11 +179,13 @@ namespace UIForia {
 
         public void InitializeEntryPoint(UIElement entry, int attrCount, int childCount) {
             element = entry;
+            root = entry;
             element.attributes = new StructList<ElementAttribute>(attrCount);
             element.children = new LightList<UIElement>(childCount);
             element.bindingNode = new LinqBindingNode();
             element.bindingNode.root = element;
             element.bindingNode.parent = null;
+            element.bindingNode.element = entry;
         }
         
         public void InitializeElement(int attrCount, int childCount) {
@@ -178,6 +196,7 @@ namespace UIForia {
             element.children = new LightList<UIElement>(childCount);          // todo to sized array
             element.layoutResult = new LayoutResult(element);
             element.bindingNode = new LinqBindingNode();
+            element.bindingNode.element = element;
             element.bindingNode.root = root;
             
             // todo -- template origin info / id
@@ -242,11 +261,6 @@ namespace UIForia {
             public TemplateData templateData;
             public SizedArray<SlotOverride> overrides;
 
-        }
-
-        public void ReferenceBindingVariable(int i, string name) {
-            // search current template scope's context stack for variable with 'name'
-            element.bindingNode.variables[i] = null;
         }
 
     }

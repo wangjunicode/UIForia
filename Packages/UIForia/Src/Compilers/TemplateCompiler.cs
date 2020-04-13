@@ -2069,7 +2069,7 @@ namespace UIForia.Compilers {
                     }
                 }
                 else if (n.signature.size > 1) {
-                    throw TemplateCompileException.InvalidInputHandlerLambda(attr, n.signature.size);
+                    throw TemplateCompileException.InvalidInputHandlerLambda(attr.value, n.signature.size);
                 }
 
                 astNode = n.body;

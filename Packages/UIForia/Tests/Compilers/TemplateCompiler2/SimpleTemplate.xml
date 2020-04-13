@@ -1,6 +1,6 @@
 <UITemplate>
-    <Contents attr:x="x" attr:y="y">
-        <Div>
+    <Contents attr:x="x" attr:y="y" attr:z="{5 * 5}">
+        <Div mouse:down="HandleMouseDown($evt)">
             <Panel ctx:someContextValue="GetAttribute('y')">
                 <ExpandedTemplate if="GetAttribute('x') == $someContextValue" sync:value="parentVal" onchange:value="ValueChanged()">
                     <override:title attr:x="expandedTempate.GetX()">

@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.UIInput;
 
 namespace TemplateCompiler2Test {
 
@@ -15,6 +16,8 @@ namespace TemplateCompiler2Test {
             public string parentVal;
 
             public override void OnUpdate() { }
+
+            public void HandleMouseDown(MouseInputEvent evt) { }
 
             [OnPropertyChanged(nameof(parentVal), PropertyChangedType.All)] // BindingRead or Synchronized
             public void ValueChanged(string oldValue, PropertyChangeSource changeSource) {
@@ -45,10 +48,8 @@ namespace TemplateCompiler2Test {
 
         [Test]
         public void Works() {
-
-            string path = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGeneratedNew"));
             
-            MockApplication.PreCompile<SimpleTemplate>(path);
+            MockApplication.PreCompile<SimpleTemplate>(nameof(Works));
 
             // Application app = MockApplication.Create(new Generated_TestApp());
             

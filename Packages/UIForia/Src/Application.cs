@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using JetBrains.Annotations;
 using UIForia.Selectors;
 using Src.Systems;
 using UIForia.Animation;
@@ -19,20 +20,14 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Debug = UnityEngine.Debug;
 
-// used implicitly by generated code. leave this here
-namespace UIForia.Generated {}
+namespace UIForia.Generated {
+
+    [UsedImplicitly]
+    public class DummyType { }
+
+}
 
 namespace UIForia {
-
-    public class ApplicationData {
-
-        public Dictionary<string, TemplateData> templates;
-
-        public ApplicationData() {
-            templates = new Dictionary<string, TemplateData>();
-        }
-
-    }
 
     public abstract class WindowManager { }
 
@@ -108,7 +103,6 @@ namespace UIForia {
         internal StyleSystem2 styleSystem;
 
         internal readonly ElementSystem elementSystem;
-        private readonly TemplateLoader templateLoader;
 
         private ApplicationConfig config;
 
@@ -140,6 +134,8 @@ namespace UIForia {
 
         private static UIForiaSettings Settings;
 
+        public UIElement RootElement; // todo this sucks
+
         public TemplateMetaData[] zz_Internal_TemplateMetaData => templateData.templateMetaData;
 
         static Application() {
@@ -148,14 +144,14 @@ namespace UIForia {
         }
 
         protected Application(in ApplicationConfig config) {
-            this.templateLoader = config.templateLoader;
+            this.config = config;
             this.resourceManager = config.resourceManager ?? new ResourceManager();
             this.tagNameIndexMap = new Dictionary<int, TagNameIndex>();
             this.freeListIndex = new StructList<int>(128);
             this.elementMap = new LightList<UIElement>(128);
             this.views = new List<UIView>();
 
-            this.elementSystem = new ElementSystem(templateLoader.templateDataMap);
+            this.elementSystem = new ElementSystem(config.templateLoader.templateDataMap);
             this.routingSystem = new RoutingSystem();
             this.animationSystem = new AnimationSystem();
             this.linqBindingSystem = new LinqBindingSystem();
@@ -187,7 +183,7 @@ namespace UIForia {
             
             UIView rootView = new UIView(this, "Root", new Size(Width, Height));
 
-            templateLoader.LoadRoot(this, rootView);
+            RootElement = config.templateLoader.LoadRoot(this, rootView, config.templateLoader.mainEntryPoint);
 
         }
 
@@ -455,7 +451,7 @@ namespace UIForia {
             }
 
             inputSystem.OnUpdate();
-            m_BeforeUpdateTaskSystem.OnUpdate();
+          //  m_BeforeUpdateTaskSystem.OnUpdate();
 
             bindingTimer.Reset();
             bindingTimer.Start();
@@ -484,7 +480,7 @@ namespace UIForia {
             renderSystem.OnUpdate();
             renderTimer.Stop();
 
-            m_AfterUpdateTaskSystem.OnUpdate();
+          //  m_AfterUpdateTaskSystem.OnUpdate();
 
             frameId++;
             loopTimer.Stop();

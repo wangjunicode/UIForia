@@ -7,6 +7,23 @@ using UIForia.Util;
 
 namespace UIForia.Compilers {
 
+    public enum BindingType {
+
+        Update,
+        LateUpdate,
+        Const,
+        Enable
+
+    }
+
+    public struct BindingOutput {
+
+        public BindingType bindingType;
+        public LambdaExpression expression;
+        public TemplateNode templateNode;
+
+    }
+
     public struct TemplateOutput {
 
         public TemplateNode templateNode;
@@ -19,11 +36,21 @@ namespace UIForia.Compilers {
         public ProcessedType processedType;
         public LambdaExpression entryPoint;
         public LambdaExpression hydratePoint;
-        public LambdaExpression[] bindings;
+        public BindingOutput[] bindings;
         public TemplateOutput[] elementTemplates;
 
         private static readonly string s_ElementFnTypeName = typeof(Action<ElementSystem>[]).GetTypeName();
         private static readonly string s_BindingFnTypeName = typeof(Action<LinqBindingNode>[]).GetTypeName();
+
+        private string guid;
+
+        public string GetGUID() {
+            if (guid == null) {
+                guid = Guid.NewGuid().ToString().Replace("-", "_");
+            }
+
+            return guid;
+        }
 
         public IndentedStringBuilder ToCSharpCode(IndentedStringBuilder stringBuilder) {
 
@@ -70,9 +97,9 @@ namespace UIForia.Compilers {
 
             stringBuilder.NewLine();
             stringBuilder.Append("},");
-            
+
             stringBuilder.NewLine();
-            
+
             stringBuilder.Append(nameof(TemplateData.bindings));
             stringBuilder.AppendInline(" = new ");
             stringBuilder.AppendInline(s_BindingFnTypeName);
@@ -82,20 +109,47 @@ namespace UIForia.Compilers {
             for (int i = 0; i < bindings.Length; i++) {
                 stringBuilder.Append("// ");
                 stringBuilder.AppendInline(i.ToString());
+                stringBuilder.AppendInline(" ");
+                stringBuilder.AppendInline(GetBindingType(bindings[i].bindingType));
+                stringBuilder.AppendInline(" <");
+                stringBuilder.AppendInline(bindings[i].templateNode.GetTagName());
+                stringBuilder.AppendInline("> line ");
+                stringBuilder.AppendInline(bindings[i].templateNode.lineInfo.ToString());
                 stringBuilder.NewLine();
-                stringBuilder.Append(bindings[i].ToTemplateBody(3));
+                stringBuilder.Append(bindings[i].expression.ToTemplateBody(3));
                 if (i != bindings.Length - 1) {
                     stringBuilder.AppendInline(",\n");
                 }
             }
+
             stringBuilder.NewLine();
             stringBuilder.Outdent();
             stringBuilder.Append("}");
-            
+
             stringBuilder.NewLine();
             stringBuilder.Outdent();
             stringBuilder.Append("};");
             return stringBuilder;
+        }
+
+        private string GetBindingType(BindingType bindingType) {
+            switch (bindingType) {
+
+                case BindingType.Update:
+                    return "Update Binding";
+
+                case BindingType.LateUpdate:
+                    return "Late Update Binding";
+
+                case BindingType.Const:
+                    return "Const Binding";
+
+                case BindingType.Enable:
+                    return "Enable Binding";
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(bindingType), bindingType, null);
+            }
         }
 
         private void BuildEntryPoint(IndentedStringBuilder stringBuilder) {

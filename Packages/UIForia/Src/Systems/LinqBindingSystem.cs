@@ -8,7 +8,7 @@ namespace UIForia.Systems {
         public void NewUpdateFn(UIElement element) {
             // Debug.Log($"{new string(' ', element.hierarchyDepth * 4)}Before {element.GetDisplayName()}");
 
-            element.bindingNode?.updateBindings?.Invoke(element.bindingNode.root, element);
+            element.bindingNode?.updateBindings?.Invoke(element.bindingNode);
 
             if (element.isEnabled) {
                 

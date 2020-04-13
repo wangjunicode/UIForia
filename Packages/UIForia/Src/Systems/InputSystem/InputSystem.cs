@@ -196,7 +196,7 @@ namespace UIForia.Systems {
             
             for (int i = tmp.size - 1; i >= 0; i--) {
                 LinqBindingNode bindingNode = tmp[i].bindingNode;
-                bindingNode?.updateBindings?.Invoke(bindingNode.root, bindingNode.element);
+                bindingNode?.updateBindings?.Invoke(bindingNode);
                 // UnityEngine.Debug.Log($"{new string(' ', bindingNode.element.hierarchyDepth * 4)}pre-binding" + bindingNode.element.GetDisplayName());
             }
             

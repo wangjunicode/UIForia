@@ -498,7 +498,7 @@ namespace UIForia.Elements {
 
         public void RunBindings() {
             flags &= ~UIElementFlags.NeedsUpdate;
-            bindingNode.updateBindings?.Invoke(bindingNode.root, this);
+            bindingNode.updateBindings?.Invoke(bindingNode);
             flags |= UIElementFlags.NeedsUpdate;
         }
 

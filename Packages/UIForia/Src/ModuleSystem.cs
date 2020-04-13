@@ -319,7 +319,7 @@ namespace UIForia.Src {
 
         private static readonly SourceCache sourceCache = new SourceCache();
 
-        internal static ProcessedType[] GetTemplateTypes(Type entryType, IList<Type> dynamicTypes = null) {
+        internal static ProcessedType[] ParseTemplates(Type entryType, IList<Type> dynamicTypes = null) {
             if (!typeof(UIElement).IsAssignableFrom(entryType)) {
                 return null;
             }

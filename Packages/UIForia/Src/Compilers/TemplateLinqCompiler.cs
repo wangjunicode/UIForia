@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using UIForia.Exceptions;
 using UIForia.Parsing;
@@ -18,7 +17,7 @@ namespace UIForia.Compilers {
         }
 
     }
-    
+
     public class TemplateLinqCompiler : LinqCompiler {
 
         [ThreadStatic] private static ParameterExpression elementParam;
@@ -52,13 +51,13 @@ namespace UIForia.Compilers {
 
         public ParameterExpression GetRoot() {
             ref TemplateContextReference ctx = ref context.rootVariables.array[context.depth];
-            switch (context.bindingType) {
+            switch (context.elementBindingType) {
 
-                case BindingType.Slot:
+                case ElementBindingType.Slot:
                     throw new NotImplementedException();
                     break;
 
-                case BindingType.Standard:
+                case ElementBindingType.Standard:
                     if (contextExpression == null) {
                         contextExpression = AddVariable(ctx.processedType.rawType, "context_" + context.depth, ParameterFlags.NeverNull);
                         Assign(contextExpression, Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Root), ctx.processedType.rawType));
@@ -66,7 +65,7 @@ namespace UIForia.Compilers {
 
                     break;
 
-                case BindingType.Expanded:
+                case ElementBindingType.Expanded:
                     if (contextExpression == null) {
                         contextExpression = AddVariable(ctx.processedType.rawType, "context_" + context.depth, ParameterFlags.NeverNull);
                         Assign(contextExpression, Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Root), ctx.processedType.rawType));
@@ -74,7 +73,7 @@ namespace UIForia.Compilers {
 
                     break;
 
-                case BindingType.EntryPoint:
+                case ElementBindingType.EntryPoint:
                     return GetElement();
 
                 default:
@@ -109,7 +108,7 @@ namespace UIForia.Compilers {
         }
 
         private Expression ResolveAlias(string aliasName, LinqCompiler _) {
-            
+
             if (aliasName == "oldValue") {
                 if (context.changeHandlerPreviousValue == null) {
                     throw new TemplateCompileException("Invalid use of $oldValue, this alias is only available when used inside of an onChange handler");
@@ -155,13 +154,14 @@ namespace UIForia.Compilers {
                 return GetRoot();
             }
 
-            if (context.TryGetLocalBindingVariable(aliasName, out BindingVariableDesc variable)) {
-                
+            if (context.TryGetBindingVariable(aliasName, out BindingVariableDesc variable)) {
+                return ExpressionFactory.CallInstanceUnchecked(
+                    GetBindingNode(),
+                    AttributeCompiler.GetBindingVariableGetter(variable.variableType),
+                    ExpressionUtil.GetIntConstant(variable.index)
+                );
             }
-            else if (context.TryGetParentBindingVariable(aliasName, out variable)) {
-                // need to reference locally if not already referenced
-                
-            }
+
             // ContextVariableDefinition contextVar = FindContextByName(aliasName);
             //
             // if (contextVar != null) {

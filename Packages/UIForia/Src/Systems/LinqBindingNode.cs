@@ -68,7 +68,7 @@ namespace UIForia.Systems {
 
         internal Action<UIElement, UIElement> createdBinding;
         internal Action<UIElement, UIElement> enabledBinding;
-        internal Action<UIElement, UIElement> updateBindings;
+        internal Action<LinqBindingNode> updateBindings;
         internal Action<UIElement, UIElement> lateBindings;
 
         internal ContextVariable localVariable;
@@ -244,7 +244,7 @@ namespace UIForia.Systems {
             }
 
             if (updatedId != -1) {
-                updateBindings = application.templateData.bindings[updatedId];
+            //    updateBindings = application.templateData.bindings[updatedId];
             }
 
             if (lateId != -1) {

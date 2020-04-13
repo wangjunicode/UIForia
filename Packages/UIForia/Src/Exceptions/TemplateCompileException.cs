@@ -229,8 +229,8 @@ namespace UIForia.Exceptions {
             return new TemplateCompileException($"Unable to find a matching slot with the name {slotName} in template {path}");
         }
 
-        public static TemplateCompileException InvalidInputHandlerLambda(in AttributeDefinition attr, int signatureSize) {
-            return new TemplateCompileException($"Input handler lambda is invalid. Expected 0 or 1 arguments for handler {attr.value} but found {signatureSize}");
+        public static TemplateCompileException InvalidInputHandlerLambda(string value, int signatureSize) {
+            return new TemplateCompileException($"Input handler lambda is invalid. Expected 0 or 1 arguments for handler {value} but found {signatureSize}");
         }
 
         public static TemplateCompileException UnknownStyleState(in AttributeNodeDebugData data, string s) {

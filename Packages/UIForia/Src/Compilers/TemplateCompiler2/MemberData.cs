@@ -9,6 +9,10 @@ namespace UIForia.Compilers {
     public static class MemberData {
         
         public static readonly ConstructorInfo InputHandlerGroup_Ctor = typeof(InputHandlerGroup).GetConstructor(Type.EmptyTypes);
+        public static readonly MethodInfo InputHandlerGroup_AddMouseEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddMouseEvent));
+        public static readonly MethodInfo InputHandlerGroup_AddKeyboardEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddKeyboardEvent));
+        public static readonly MethodInfo InputHandlerGroup_AddDragCreator = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddDragCreator));
+        public static readonly MethodInfo InputHandlerGroup_AddDragEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddDragEvent));
 
         public static readonly MethodInfo ElementSystem_InitializeElement = typeof(ElementSystem).GetMethod(nameof(ElementSystem.InitializeElement));
         public static readonly MethodInfo ElementSystem_InitializeEntryPoint = typeof(ElementSystem).GetMethod(nameof(ElementSystem.InitializeEntryPoint));
@@ -23,9 +27,10 @@ namespace UIForia.Compilers {
         public static readonly MethodInfo ElementSystem_SetText = typeof(ElementSystem).GetMethod(nameof(ElementSystem.SetText));
         public static readonly MethodInfo ElementSystem_SetBindings = typeof(ElementSystem).GetMethod(nameof(ElementSystem.SetBindings));
         public static readonly MethodInfo ElementSystem_CreateBindingVariable = typeof(ElementSystem).GetMethod(nameof(ElementSystem.CreateBindingVariable));
+        public static readonly MethodInfo ElementSystem_ReferenceBindingVariable = typeof(ElementSystem).GetMethod(nameof(ElementSystem.ReferenceBindingVariable));
 
         public static readonly FieldInfo Element_InputHandlers = typeof(UIElement).GetField(nameof(UIElement.inputHandlers));
-        
+        public static readonly MethodInfo Element_SetAttribute = typeof(UIElement).GetMethod(nameof(UIElement.SetAttribute));
         public static readonly MethodInfo Element_SetEnabledInternal = typeof(UIElement).GetMethod(nameof(UIElement.internal__dontcallmeplease_SetEnabledIfBinding));
 
         public static readonly FieldInfo BindingNode_Element = typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.element));

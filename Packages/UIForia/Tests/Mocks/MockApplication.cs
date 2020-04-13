@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UIForia;
 using UIForia.Compilers;
 using UIForia.Elements;
@@ -21,20 +22,19 @@ namespace Tests.Mocks {
             s_UsePreCompiledTemplates = shouldGenerate;
         }
 
+        public static Application Create<T>(TemplateLoader loader) where T : UIElement {
+       
+            ApplicationConfig config = new ApplicationConfig() {
+                applicationType = ApplicationType.Test,
+                templateLoader = loader
+            };
+            
+            return Create(config);
+            
+        }
+        
         public static Application Create<T>() where T : UIElement {
-            
-            // setup module data
-            
-            // module.Refresh()
-            // -> re-parse all dependencies. if content didnt change then just re-validate the tags
-            // -> re-gather used templates
-            // -> compile those templates. we'll have to see about template re-use.
-            
-            // application 
-            //  -> entry points (root element + window types + dynamic types)
-            //  -> styles
-
-            
+       
             ApplicationConfig config = new ApplicationConfig() {
                 applicationType = ApplicationType.Test,
                 templateLoader = TemplateLoader.RuntimeCompile(typeof(T))
@@ -44,9 +44,9 @@ namespace Tests.Mocks {
             
         }
         
-        public static void PreCompile<T>(string outputPath) where T: UIElement, new() {
-            
-            TemplateLoader.PreCompile(outputPath, "TestApp", typeof(T));
+        public static void PreCompile<T>(string appName) where T: UIElement, new() {
+            string path = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGeneratedNew", appName));
+            TemplateLoader.PreCompile(path, appName, typeof(T));
             
         }
 

@@ -11,7 +11,38 @@ namespace UIForia.Compilers {
         [ThreadStatic] private static Dictionary<int, Expression> s_IntExpression;
         [ThreadStatic] private static Dictionary<Type, Expression> s_DefaultExpressions;
         [ThreadStatic] private static Dictionary<string, Expression> s_StringExpression;
+
+        private static readonly Expression s_TrueConst = Expression.Constant(true);
+        private static readonly Expression s_FalseConst = Expression.Constant(false);
         
+        private struct EnumCache<U> where U : Enum {
+
+            // ReSharper disable once StaticMemberInGenericType
+            [ThreadStatic] private static Dictionary<int, Expression> s_Cache;
+
+            public static Expression Get(int value) {
+                s_Cache = s_Cache ?? new Dictionary<int, Expression>();
+                if (s_Cache.TryGetValue(value, out Expression retn)) {
+                    return retn;
+                }
+
+                retn = Expression.Constant((U) (object)value);
+                s_Cache[value] = retn;
+                return retn;
+            }
+
+        }
+
+        public static Expression GetBoolConstant(bool value) {
+            return value
+                ? s_TrueConst
+                : s_FalseConst;
+        }
+        
+        public static Expression GetEnumConstant<T>(int value) where T : Enum {
+            return EnumCache<T>.Get(value);
+        }
+
         public static Expression GetDefaultExpression(Type type) {
             s_DefaultExpressions = s_DefaultExpressions ?? new Dictionary<Type, Expression>();
             if (s_DefaultExpressions.TryGetValue(type, out Expression retn)) {

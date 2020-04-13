@@ -1,4 +1,11 @@
-new TemplateData ("TemplateBindingTest_BasicBindingOuter") {
+using UIForia.Compilers;
+// ReSharper disable PossibleNullReferenceException
+
+namespace UIForia.Generated {
+
+    public partial class Generated_SimpleBinding : TemplateLoader {
+    
+        public static readonly TemplateData template_e4be5b4b_fe4a_4242_8e16_84fa63d84cc7 = new TemplateData ("TemplateBindingTest_BasicBindingOuter") {
             entry = (UIForia.ElementSystem system) => {
                 TemplateBinding.TemplateBindingTests.TemplateBindingTest_BasicBindingOuter element;
 
@@ -31,21 +38,8 @@ new TemplateData ("TemplateBindingTest_BasicBindingOuter") {
                     element.intVal = __value;
                 }
             }
-        };new TemplateData ("TemplateBindingTest_BasicBindingInner") {
-            entry = (UIForia.ElementSystem system) => {
-                TemplateBinding.TemplateBindingTests.TemplateBindingTest_BasicBindingInner element;
-
-                element = new TemplateBinding.TemplateBindingTests.TemplateBindingTest_BasicBindingInner();
-                system.InitializeEntryPoint(element, 0, 0);
-                system.HydrateEntryPoint();
-                return element;
-            },
-            hydrate = (UIForia.ElementSystem system) => {
-            },
-            elements = new System.Action<UIForia.ElementSystem>[] {
-
-            },
-            bindings = new System.Action<UIForia.Systems.LinqBindingNode>[] {
-
-            }
         };
+
+    }
+
+}

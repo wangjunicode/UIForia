@@ -23,6 +23,16 @@ namespace UIForia.Compilers {
             this.flags = attr.flags;
             this.rawValue = attr.rawValue;
         }
+        
+        public string StrippedValue {
+            get {
+                if (value[0] == '{' && value[value.Length -1] == '}') {
+                    return value.Substring(1, value.Length - 2);
+                }
+
+                return value;
+            }
+        }
 
     }
 

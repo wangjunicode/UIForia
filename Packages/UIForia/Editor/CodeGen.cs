@@ -195,13 +195,11 @@ namespace UIForia.Editor {
 
             // Shadow
 //            new PropertyGenerator<UnderlayType>(StylePropertyId.ShadowType, UnderlayType.Unset),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.ShadowColor, ColorUtil.UnsetValue), 
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.ShadowTint, ColorUtil.UnsetValue), 
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.ShadowColor, ColorUtil.UnsetValue),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.ShadowOffsetX, 0),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.ShadowOffsetY, 0),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSizeX, 0f),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSizeY, 0f),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowIntensity, 10),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowSpread, 0f),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowBlur, 0f),
             new AnimatedPropertyGenerator<float>(StylePropertyId.ShadowOpacity, 1f),
         };
 

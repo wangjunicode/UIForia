@@ -127,11 +127,9 @@ namespace UIForia.Rendering {
         //ShadowType ,
         ShadowOffsetX,
         ShadowOffsetY,
-        ShadowSizeX,
-        ShadowSizeY,
-        ShadowIntensity,
+        ShadowSpread,
+        ShadowBlur,
         ShadowColor,
-        ShadowTint,
         ShadowOpacity,
 
         AlignmentDirectionX,

@@ -530,10 +530,9 @@ namespace UIForia.Editor {
                 case StylePropertyId.BackgroundImageOffsetY:
                 case StylePropertyId.BackgroundImageScaleX:
                 case StylePropertyId.BackgroundImageScaleY:
-                case StylePropertyId.ShadowIntensity:
+                case StylePropertyId.ShadowBlur:
                 case StylePropertyId.ShadowOpacity:
-                case StylePropertyId.ShadowSizeX:
-                case StylePropertyId.ShadowSizeY:
+                case StylePropertyId.ShadowSpread:
                 case StylePropertyId.BackgroundImageRotation:
                 case StylePropertyId.BackgroundImageTileX:
                 case StylePropertyId.BackgroundImageTileY:
@@ -627,7 +626,6 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.TextColor:
                 case StylePropertyId.ShadowColor:
-                case StylePropertyId.ShadowTint:
                     return DrawColor(property, isEditable);
 
                 case StylePropertyId.TextFontAsset:

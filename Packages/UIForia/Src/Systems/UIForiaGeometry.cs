@@ -173,7 +173,7 @@ namespace UIForia.Rendering {
             texCoordList1.size += 9;
         }
 
-        public void FillRect(float width, float height, in Vector2 position = default) {
+        public void FillRect(float width, float height, float spread = default, float blur = default, Vector2 position = default) {
             Vector3[] positions = positionList.array;
             Vector4[] texCoord0 = texCoordList0.array;
             int[] triangles = triangleList.array;
@@ -196,16 +196,16 @@ namespace UIForia.Rendering {
             p0.z = 0;
 
 
-            p1.x = position.x + width;
+            p1.x = position.x + width + spread * 2.0f + blur * 2.0f;
             p1.y = -position.y;
             p1.z = 0;
 
-            p2.x = position.x + width;
-            p2.y = -(position.y + height);
+            p2.x = position.x + width + spread * 2.0f + blur * 2.0f;
+            p2.y = -(position.y + height + spread * 2.0f + blur * 2.0f);
             p2.z = 0;
 
             p3.x = position.x;
-            p3.y = -(position.y + height);
+            p3.y = -(position.y + height + spread * 2.0f + blur * 2.0f);
             p3.z = 0;
             
 //            p0 -= new Vector3(100, -100, 0);
@@ -213,25 +213,31 @@ namespace UIForia.Rendering {
 //            p2 -= new Vector3(100, -100, 0);
 //            p3 -= new Vector3(100, -100, 0);
 
-            uv0.x = 0;
-            uv0.y = 1;
-            uv0.z = 0;
-            uv0.w = 1;
+            var blurScale = Mathf.Max(1.0f, blur / Mathf.Max(1.0f, Math.Abs(spread)));
+            var minU = 0 - Math.Abs(spread) / width * blurScale;    
+            var maxU = 1 + Math.Abs(spread) / width * blurScale;      
+            var minV = 0 - Math.Abs(spread) / height * blurScale;     
+            var maxV = 1 + Math.Abs(spread) / height * blurScale;
 
-            uv1.x = 1;
-            uv1.y = 1;
-            uv1.z = 1;
-            uv1.w = 1;
+            uv0.x = 0;    
+            uv0.y = 1;    
+            uv0.z = minU;
+            uv0.w = maxV;
 
-            uv2.x = 1;
-            uv2.y = 0;
-            uv2.z = 1;
-            uv2.w = 0;
-
-            uv3.x = 0;
-            uv3.y = 0;
-            uv3.z = 0;
-            uv3.w = 0;
+            uv1.x = 1;    
+            uv1.y = 1;    
+            uv1.z = maxU;
+            uv1.w = maxV;
+            
+            uv2.x = 1; 
+            uv2.y = 0; 
+            uv2.z = maxU;
+            uv2.w = minV;
+            
+            uv3.x = 0; 
+            uv3.y = 0; 
+            uv3.z = minU;
+            uv3.w = minV;
 
             triangles[startTriangle + 0] = startVert + 0;
             triangles[startTriangle + 1] = startVert + 1;

@@ -500,13 +500,12 @@ namespace UIForia.Rendering {
 
         private void GenerateShadowFillGeometry(ref ShapeDef shape, in SVGXFillStyle fillStyle) {
             ObjectData objectData = new ObjectData();
-            objectData.colorData = new Vector4(VertigoUtil.ColorToFloat(fillStyle.shadowColor), VertigoUtil.ColorToFloat(fillStyle.shadowTint), fillStyle.shadowOpacity, fillStyle.shadowIntensity);
+            objectData.colorData = new Vector4(VertigoUtil.ColorToFloat(fillStyle.shadowColor), Mathf.Clamp01(fillStyle.shadowSpread), fillStyle.shadowOpacity,  Mathf.Abs(fillStyle.shadowBlur));
 
-            int paintMode = (int) ((fillStyle.shadowTint.a > 0) ? (PaintMode.Shadow | PaintMode.ShadowTint) : PaintMode.Shadow);
+            int paintMode = (int) PaintMode.Shadow;
             Vector2 position = shape.bounds.position;
-            Vector2 size = shape.bounds.size + new Vector2(fillStyle.shadowSizeX, fillStyle.shadowSizeY) + new Vector2(fillStyle.shadowIntensity, fillStyle.shadowIntensity);
-            position -= new Vector2(fillStyle.shadowSizeX, fillStyle.shadowSizeY) * 0.5f;
-            position -= new Vector2(fillStyle.shadowIntensity, fillStyle.shadowIntensity) * 0.5f;
+            Vector2 size = shape.bounds.size + new Vector2(fillStyle.shadowSpread, fillStyle.shadowSpread);
+            position -= new Vector2(fillStyle.shadowSpread, fillStyle.shadowSpread) * 0.5f;
             position += new Vector2(fillStyle.shadowOffsetX, fillStyle.shadowOffsetY);
 
             switch (shape.shapeType) {
@@ -621,10 +620,6 @@ namespace UIForia.Rendering {
             currentFillStyle.shadowColor = shadowColor;
         }
 
-        public void SetShadowTint(Color color) {
-            currentFillStyle.shadowTint = color;
-        }
-
         public void SetShadowOffset(Vector2 shadowOffset) {
             currentFillStyle.shadowOffsetX = shadowOffset.x;
             currentFillStyle.shadowOffsetY = shadowOffset.y;
@@ -635,19 +630,13 @@ namespace UIForia.Rendering {
             currentFillStyle.shadowOffsetY = y;
         }
 
-        public void SetShadowSize(float x, float y) {
-            currentFillStyle.shadowSizeX = x;
-            currentFillStyle.shadowSizeY = y;
+        public void SetShadowSpread(float x) {
+            currentFillStyle.shadowSpread = x;
         }
 
-        public void SetShadowSize(Vector2 size) {
-            currentFillStyle.shadowSizeX = size.x;
-            currentFillStyle.shadowSizeY = size.y;
-        }
-
-        public void SetShadowIntensity(float shadowIntensity) {
-            if (shadowIntensity < 0) shadowIntensity = 0;
-            currentFillStyle.shadowIntensity = shadowIntensity;
+        public void SetShadowBlur(float shadowBlur) {
+            if (shadowBlur < 0) shadowBlur = 0;
+            currentFillStyle.shadowBlur = shadowBlur;
         }
 
         public void SetShadowOpacity(float shadowOpacity) {

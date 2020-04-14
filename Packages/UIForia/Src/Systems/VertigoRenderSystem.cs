@@ -157,12 +157,10 @@ namespace Src.Systems {
         public float encodedTint;
         public int gradientId;
         public Color32 shadowColor;
-        public float shadowIntensity;
+        public float shadowBlur;
         public float shadowOffsetX;
         public float shadowOffsetY;
-        public float shadowSizeX;
-        public float shadowSizeY;
-        public Color32 shadowTint;
+        public float shadowSpread;
         public float shadowOpacity;
 
         public static SVGXFillStyle Default => new SVGXFillStyle() {

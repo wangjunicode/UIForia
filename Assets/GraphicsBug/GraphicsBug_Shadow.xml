@@ -17,11 +17,10 @@
             AlignY = Center Parent;
             BorderRadiusTopLeft = 25%;
             ShadowColor = Black;
-            ShadowSizeX = 32; // size of shadow compared to box element width
-            ShadowSizeY = 32; // size of shadow compared to box element height
-            ShadowOffsetX = 20;
-            ShadowOffsetY = 20;
-            ShadowIntensity = 100; // crispness of shadow, 1 is solid
+            ShadowSpread = 16;
+            ShadowBlur = 0;
+            ShadowOffsetX = 0;
+            ShadowOffsetY = 0;
             ShadowOpacity = 0.7; // 0 - 1 opacity value
         }
         

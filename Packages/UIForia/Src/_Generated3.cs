@@ -408,18 +408,14 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.Layer, 0);
 				case StylePropertyId.ShadowColor:
 					 return new StyleProperty(StylePropertyId.ShadowColor, new Color(-1f, -1f, -1f, -1f));
-				case StylePropertyId.ShadowTint:
-					 return new StyleProperty(StylePropertyId.ShadowTint, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.ShadowOffsetX:
 					 return new StyleProperty(StylePropertyId.ShadowOffsetX, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
 				case StylePropertyId.ShadowOffsetY:
 					 return new StyleProperty(StylePropertyId.ShadowOffsetY, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
-				case StylePropertyId.ShadowSizeX:
-					 return new StyleProperty(StylePropertyId.ShadowSizeX, 0f);
-				case StylePropertyId.ShadowSizeY:
-					 return new StyleProperty(StylePropertyId.ShadowSizeY, 0f);
-				case StylePropertyId.ShadowIntensity:
-					 return new StyleProperty(StylePropertyId.ShadowIntensity, 10f);
+				case StylePropertyId.ShadowSpread:
+					 return new StyleProperty(StylePropertyId.ShadowSpread, 0f);
+				case StylePropertyId.ShadowBlur:
+					 return new StyleProperty(StylePropertyId.ShadowBlur, 10f);
 				case StylePropertyId.ShadowOpacity:
 					 return new StyleProperty(StylePropertyId.ShadowOpacity, 1f);
 				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);

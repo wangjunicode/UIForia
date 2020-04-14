@@ -178,10 +178,9 @@ namespace UIForia.Animation {
                     case StylePropertyId.TextGlowPower:
                     case StylePropertyId.TextOutlineSoftness:
                     case StylePropertyId.TextOutlineWidth:
-
-                    case StylePropertyId.ShadowIntensity:
-                    case StylePropertyId.ShadowSizeX:
-                    case StylePropertyId.ShadowSizeY:
+                        
+                    case StylePropertyId.ShadowSpread:
+                    case StylePropertyId.ShadowBlur:
                     case StylePropertyId.TransformScaleX:
                     case StylePropertyId.TransformScaleY:
                     case StylePropertyId.TransformRotation:
@@ -258,7 +257,6 @@ namespace UIForia.Animation {
                     case StylePropertyId.BackgroundColor:
                     case StylePropertyId.BackgroundTint:
                     case StylePropertyId.ShadowColor:
-                    case StylePropertyId.ShadowTint:
                     case StylePropertyId.TextColor: {
                         Color c0 = prev.value.styleProperty.AsColor;
                         Color c1 = next.value.styleProperty.AsColor;

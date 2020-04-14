@@ -270,11 +270,9 @@ namespace UIForia.Compilers.Style {
                 //    {"shadowtype", (targetStyle, property, context) => targetStyle.ShadowType = MapEnum<UnderlayType>(property.children[0], context)},
                 {"shadowoffsetx", (targetStyle, property, context) => targetStyle.ShadowOffsetX = MapNumber(property.children[0], context)},
                 {"shadowoffsety", (targetStyle, property, context) => targetStyle.ShadowOffsetY = MapNumber(property.children[0], context)},
-                {"shadowsizex", (targetStyle, property, context) => targetStyle.ShadowSizeX = MapNumber(property.children[0], context)},
-                {"shadowsizey", (targetStyle, property, context) => targetStyle.ShadowSizeY = MapNumber(property.children[0], context)},
-                {"shadowintensity", (targetStyle, property, context) => targetStyle.ShadowIntensity = MapNumber(property.children[0], context)},
+                {"shadowspread", (targetStyle, property, context) => targetStyle.ShadowSpread = MapNumber(property.children[0], context)},
+                {"shadowblur", (targetStyle, property, context) => targetStyle.ShadowBlur = Mathf.Abs(MapNumber(property.children[0], context))},
                 {"shadowcolor", (targetStyle, property, context) => targetStyle.ShadowColor = MapColor(property.children[0], context)},
-                {"shadowtint", (targetStyle, property, context) => targetStyle.ShadowTint = MapColor(property.children[0], context)},
                 {"shadowopacity", (targetStyle, property, context) => targetStyle.ShadowOpacity = MapNumber(property.children[0], context)},
             };
 

@@ -80,7 +80,7 @@ Shader "UIForia/Standard"
             #define Frag_SDFSize i.texCoord1.xy
             #define Frag_SDFBorderRadii i.texCoord1.z
             #define Frag_SDFStrokeWidth i.texCoord1.w
-            #define Frag_SDFCoords i.texCoord0.zw
+            #define Frag_SDFCoords i.texCoord0.xy
             #define Frag_ShapeType i.texCoord2.x
             #define Frag_BorderColors i.texCoord3
             #define Frag_BorderSize i.color.zw
@@ -189,17 +189,19 @@ Shader "UIForia/Standard"
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];           
                 float opacity = _ObjectData[(uint)i.texCoord1.w].w;              
                 float4 cornerBevels = _CornerData[(uint)i.texCoord1.w];
+                float shadowSpread = i.color.g;
+                float shadowBlur = i.color.b;
                 
                 // todo -- returns cause branching here
                 // get rid of text and we can get rid of branching
                 
-                fixed4 mainColor = ComputeColor(i.color.r, i.color.g, Frag_ColorMode, i.texCoord0.xy, _MainTexture);
+                fixed4 mainColor = ComputeColor(i.color.r, i.color.g, Frag_ColorMode, i.texCoord0.zw, _MainTexture);
                 
                 if(Frag_ShapeType != ShapeType_Text) {
-                    float bevel = GetCornerBevel(i.texCoord0.zw, cornerBevels);
+                    float bevel = GetCornerBevel(Frag_SDFCoords, cornerBevels);
                     BorderData borderData = GetBorderData(Frag_SDFCoords, Frag_SDFSize, Frag_BorderColors, Frag_BorderSize, Frag_SDFBorderRadii, mainColor);
                     SDFData sdfData;
-                    sdfData.uv = Frag_SDFCoords;
+                    sdfData.uv = lerp(i.texCoord0.xy, i.texCoord0.zw, saturate(shadowBlur / shadowSpread));
                     sdfData.size = Frag_SDFSize;
                     sdfData.strokeWidth = borderData.size;
                     sdfData.radius = borderData.radius;
@@ -207,17 +209,11 @@ Shader "UIForia/Standard"
                     mainColor.a *= opacity;
                     
                     // todo -- this causes bad branching
-                    if(Frag_ColorMode == PaintMode_Shadow || Frag_ColorMode == PaintMode_ShadowTint) {
-                        float intensity = i.color.b;
-                        sdfData.strokeWidth = 3;
-                        float n = smoothstep(-intensity, 2, SDFShadow(sdfData, intensity, bevel));
+                    if(Frag_ColorMode == PaintMode_Shadow || Frag_ColorMode == PaintMode_ShadowTint) {           
+                        float n = saturate(SDFShadow(sdfData, bevel) / (shadowSpread * max(0.001, shadowBlur / max(0.001, shadowSpread))));
                         fixed4 shadowColor = fixed4(UnpackColor(asuint(i.color.r)).rgb, 1);
-                        fixed4 shadowTint = fixed4(UnpackColor(asuint(i.color.g)).rgb, 1);
-                        fixed4 shadowRetn = lerp(fixed4(shadowColor.rgb, 1 - n), shadowColor, (1 - n));                
-                        fixed4 tintedShadowColor = lerp(fixed4(shadowTint.rgb, 1 - n), shadowColor,  (1 - n));
-                        tintedShadowColor = lerp(shadowRetn, tintedShadowColor, n);
+                        fixed4 shadowRetn = lerp(fixed4(shadowColor.rgb, 1 - n), shadowColor, (1 - n));
                         
-                        shadowRetn = lerp(shadowRetn, tintedShadowColor, Frag_ColorMode == PaintMode_ShadowTint);
                         shadowRetn.a *= i.color.a;
                         mainColor = shadowRetn;
                         mainColor.rgb *= mainColor.a;
@@ -257,7 +253,7 @@ Shader "UIForia/Standard"
                 
                 int hasUnderlay = 0;//underlayColor.a > 0;
                 // todo -- pull underlay into a seperate shader
-                float d = tex2D(_FontTexture, i.texCoord0.zw + i.texCoord3.xy).a * underlayScale;
+                float d = tex2D(_FontTexture, Frag_SDFCoords + i.texCoord3.xy).a * underlayScale;
                 underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
                 faceColor = lerp(faceColor, underlayColor, hasUnderlay);
                 faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, clipPos, clipRect, clipUvs);

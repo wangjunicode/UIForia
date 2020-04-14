@@ -187,12 +187,10 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageTileY:
                     case StylePropertyId.BackgroundImageOffsetX:
                     case StylePropertyId.BackgroundImageOffsetY:
-                    case StylePropertyId.ShadowTint:
                     case StylePropertyId.ShadowOffsetX:
                     case StylePropertyId.ShadowOffsetY:
-                    case StylePropertyId.ShadowSizeX:
-                    case StylePropertyId.ShadowSizeY:
-                    case StylePropertyId.ShadowIntensity:
+                    case StylePropertyId.ShadowSpread:
+                    case StylePropertyId.ShadowBlur:
                         dataNeedsUpdate = true;
                         break;
 //                        shadowNeedsUpdate = true;
@@ -241,10 +239,10 @@ namespace UIForia.Rendering {
 //                    bottomLeftX = bevelBottomLeft,
 //                    bottomLeftY = bevelBottomLeft,
 //                });
-                geometry.FillRect(size.width, size.height, pivotOffset);
+                geometry.FillRect(size.width, size.height,0, 0, pivotOffset);
             }
             else {
-                geometry.FillRect(size.width, size.height, pivotOffset);
+                geometry.FillRect(size.width, size.height, 0, 0, pivotOffset);
             }
 
             if (!ReferenceEquals(backgroundImage, null)) {
@@ -483,11 +481,9 @@ namespace UIForia.Rendering {
                 UIStyleSet style = element.style;
                 shadowGeometry = shadowGeometry ?? new UIForiaGeometry();
                 shadowGeometry.Clear();
-                int paintMode = (int) ((style.ShadowTint.a > 0) ? PaintMode.ShadowTint : PaintMode.Shadow);
+                int paintMode = (int) PaintMode.Shadow;
                 Vector2 position = Vector2.zero;
-                Vector2 size = element.layoutResult.actualSize + new Vector2(style.ShadowSizeX, style.ShadowSizeY) + new Vector2(style.ShadowIntensity, style.ShadowIntensity);
-                position -= new Vector2(style.ShadowSizeX, style.ShadowSizeY) * 0.5f;
-                position -= new Vector2(style.ShadowIntensity, style.ShadowIntensity) * 0.5f;
+                position -= new Vector2(style.ShadowSpread + style.ShadowBlur, style.ShadowSpread + style.ShadowBlur);
                 float x = MeasurementUtil.ResolveOffsetMeasurement(element, viewWidth, viewHeight, style.ShadowOffsetX, element.layoutResult.actualSize.width);
                 float y = MeasurementUtil.ResolveOffsetMeasurement(element, viewWidth, viewHeight, style.ShadowOffsetY, element.layoutResult.actualSize.height);
                 position.x += x;
@@ -496,18 +492,18 @@ namespace UIForia.Rendering {
                 int val = BitUtil.SetHighLowBits((int) ShapeType.RoundedRect, paintMode);
                 shadowGeometry.objectData = geometry.objectData;
                 shadowGeometry.objectData.x = val;
-                shadowGeometry.objectData.y = VertigoUtil.PackSizeVector(size);
+                shadowGeometry.objectData.y = VertigoUtil.PackSizeVector(element.layoutResult.actualSize);
                 shadowGeometry.objectData.z = packedBorderRadii;
 
                 Vector4 v = default;
 
                 unsafe {
                     Vector4* vp = &v;
-                    Color32* b = stackalloc Color32[2];
+                    Color32* b = stackalloc Color32[1];
                     b[0] = style.ShadowColor;
-                    b[1] = style.ShadowTint;
-                    UnsafeUtility.MemCpy(vp, b, sizeof(Color32) * 2);
-                    v.z = style.ShadowIntensity;
+                    UnsafeUtility.MemCpy(vp, b, sizeof(Color32) * 1);
+                    v.y = Mathf.Abs(style.ShadowSpread);
+                    v.z = style.ShadowBlur;
                     v.w = style.ShadowOpacity;
                 }
 
@@ -520,7 +516,7 @@ namespace UIForia.Rendering {
                 shadowGeometry.cornerData = new Vector4(resolvedCornerBevelTopLeft, resolvedCornerBevelTopRight, resolvedCornerBevelBottomRight, resolvedCornerBevelBottomLeft);
                 shadowGeometry.packedColors = v;
                 Vector2 pivotOffset = default; // todo -- this! new Vector2(-element.layoutBox.pivotX * s.width, -element.layoutBox.pivotY * s.height);
-                shadowGeometry.FillRect(size.x, size.y, pivotOffset + position);
+                shadowGeometry.FillRect(element.layoutResult.actualSize.width, element.layoutResult.actualSize.height,  style.ShadowSpread, style.ShadowBlur,pivotOffset + position);
                 ctx.DrawBatchedGeometry(shadowGeometry, new GeometryRange(shadowGeometry.positionList.size, shadowGeometry.triangleList.size), element.layoutResult.matrix.ToMatrix4x4(), clipper);
             }
 

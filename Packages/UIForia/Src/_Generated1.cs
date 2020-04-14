@@ -900,14 +900,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowColor, value), state); }
         }
-        
-        public UnityEngine.Color ShadowTint {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowTint, state).AsColor; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowTint, value), state); }
-        }
-        
+
         public UIForia.OffsetMeasurement ShadowOffsetX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowOffsetX, state).AsOffsetMeasurement; }
@@ -922,25 +915,18 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetY, value), state); }
         }
         
-        public float ShadowSizeX {
+        public float ShadowSpread {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowSizeX, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowSpread, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowSizeX, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowSpread, value), state); }
         }
-        
-        public float ShadowSizeY {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowSizeY, state).AsFloat; }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowSizeY, value), state); }
-        }
-        
+
         public float ShadowIntensity {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowIntensity, state).AsFloat; }
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ShadowBlur, state).AsFloat; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowIntensity, value), state); }
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ShadowBlur, value), state); }
         }
         
         public float ShadowOpacity {
@@ -1850,14 +1836,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowColor, value)); }
         }
-            
-        public UnityEngine.Color ShadowTint {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindColorProperty(StylePropertyId.ShadowTint); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ShadowTint, value)); }
-        }
-            
+
         public UIForia.OffsetMeasurement ShadowOffsetX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindOffsetMeasurementProperty(StylePropertyId.ShadowOffsetX); }
@@ -1872,25 +1851,18 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetY, value)); }
         }
             
-        public float ShadowSizeX {
+        public float ShadowSpread {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ShadowSizeX); }
+            get { return FindFloatProperty(StylePropertyId.ShadowSpread); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ShadowSizeX, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowSpread, value)); }
         }
-            
-        public float ShadowSizeY {
+
+        public float ShadowBlur {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ShadowSizeY); }
+            get { return FindFloatProperty(StylePropertyId.ShadowBlur); }
             [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ShadowSizeY, value)); }
-        }
-            
-        public float ShadowIntensity {
-            [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.ShadowIntensity); }
-            [System.Diagnostics.DebuggerStepThrough]
-            set { SetProperty(new StyleProperty(StylePropertyId.ShadowIntensity, value)); }
+            set { SetProperty(new StyleProperty(StylePropertyId.ShadowBlur, value)); }
         }
             
         public float ShadowOpacity {
@@ -3090,15 +3062,6 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UnityEngine.Color ShadowTint { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowTint, out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.ShadowTint;
-                }
-            }
-
             public UIForia.OffsetMeasurement ShadowOffsetX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -3117,29 +3080,20 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public float ShadowSizeX { 
+            public float ShadowSpread { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowSizeX, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowSpread, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ShadowSizeX;
                 }
             }
 
-            public float ShadowSizeY { 
+            public float ShadowBlur { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowSizeY, out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.ShadowSizeY;
-                }
-            }
-
-            public float ShadowIntensity { 
-                [System.Diagnostics.DebuggerStepThrough]
-                get { 
-                    StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowIntensity, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ShadowBlur, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.ShadowIntensity;
                 }
             }
@@ -4177,15 +4131,7 @@ namespace UIForia.Rendering {
         public UnityEngine.Color GetShadowColor(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.ShadowColor, state).AsColor;
         }
-        
-        public void SetShadowTint(in UnityEngine.Color? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ShadowTint, value), state);
-        }
 
-        public UnityEngine.Color GetShadowTint(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ShadowTint, state).AsColor;
-        }
-        
         public void SetShadowOffsetX(in UIForia.OffsetMeasurement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ShadowOffsetX, value), state);
         }
@@ -4202,28 +4148,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ShadowOffsetY, state).AsOffsetMeasurement;
         }
         
-        public void SetShadowSizeX(in float? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ShadowSizeX, value), state);
+        public void SetShadowSpread(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowSpread, value), state);
         }
 
-        public float GetShadowSizeX(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ShadowSizeX, state).AsFloat;
-        }
-        
-        public void SetShadowSizeY(in float? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ShadowSizeY, value), state);
+        public float GetShadowSpread(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ShadowSpread, state).AsFloat;
         }
 
-        public float GetShadowSizeY(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ShadowSizeY, state).AsFloat;
-        }
-        
-        public void SetShadowIntensity(in float? value, StyleState state) {
-            SetProperty(new StyleProperty(StylePropertyId.ShadowIntensity, value), state);
+        public void SetShadowBlur(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ShadowBlur, value), state);
         }
 
         public float GetShadowIntensity(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.ShadowIntensity, state).AsFloat;
+            return GetPropertyValueInState(StylePropertyId.ShadowBlur, state).AsFloat;
         }
         
         public void SetShadowOpacity(in float? value, StyleState state) {
@@ -4493,18 +4431,14 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.Layer, Layer);
 				case StylePropertyId.ShadowColor:
 					 return new StyleProperty(StylePropertyId.ShadowColor, ShadowColor);
-				case StylePropertyId.ShadowTint:
-					 return new StyleProperty(StylePropertyId.ShadowTint, ShadowTint);
-				case StylePropertyId.ShadowOffsetX:
+                case StylePropertyId.ShadowOffsetX:
 					 return new StyleProperty(StylePropertyId.ShadowOffsetX, ShadowOffsetX);
 				case StylePropertyId.ShadowOffsetY:
 					 return new StyleProperty(StylePropertyId.ShadowOffsetY, ShadowOffsetY);
-				case StylePropertyId.ShadowSizeX:
-					 return new StyleProperty(StylePropertyId.ShadowSizeX, ShadowSizeX);
-				case StylePropertyId.ShadowSizeY:
-					 return new StyleProperty(StylePropertyId.ShadowSizeY, ShadowSizeY);
-				case StylePropertyId.ShadowIntensity:
-					 return new StyleProperty(StylePropertyId.ShadowIntensity, ShadowIntensity);
+				case StylePropertyId.ShadowSpread:
+					 return new StyleProperty(StylePropertyId.ShadowSpread, ShadowSpread);
+                case StylePropertyId.ShadowBlur:
+					 return new StyleProperty(StylePropertyId.ShadowBlur, ShadowBlur);
 				case StylePropertyId.ShadowOpacity:
 					 return new StyleProperty(StylePropertyId.ShadowOpacity, ShadowOpacity);
 				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
@@ -4646,12 +4580,10 @@ namespace UIForia.Rendering {
                     case StylePropertyId.RenderLayer: return typeof(UIForia.Rendering.RenderLayer);
                     case StylePropertyId.Layer: return typeof(System.Int32);
                     case StylePropertyId.ShadowColor: return typeof(UnityEngine.Color);
-                    case StylePropertyId.ShadowTint: return typeof(UnityEngine.Color);
                     case StylePropertyId.ShadowOffsetX: return typeof(UIForia.OffsetMeasurement);
                     case StylePropertyId.ShadowOffsetY: return typeof(UIForia.OffsetMeasurement);
-                    case StylePropertyId.ShadowSizeX: return typeof(System.Single);
-                    case StylePropertyId.ShadowSizeY: return typeof(System.Single);
-                    case StylePropertyId.ShadowIntensity: return typeof(System.Single);
+                    case StylePropertyId.ShadowSpread: return typeof(System.Single);
+                    case StylePropertyId.ShadowBlur: return typeof(System.Single);
                     case StylePropertyId.ShadowOpacity: return typeof(System.Single);
 
             }
@@ -4745,12 +4677,10 @@ namespace UIForia.Rendering {
                     case StylePropertyId.RenderLayer: return true;
                     case StylePropertyId.Layer: return true;
                     case StylePropertyId.ShadowColor: return true;
-                    case StylePropertyId.ShadowTint: return true;
                     case StylePropertyId.ShadowOffsetX: return true;
                     case StylePropertyId.ShadowOffsetY: return true;
-                    case StylePropertyId.ShadowSizeX: return true;
-                    case StylePropertyId.ShadowSizeY: return true;
-                    case StylePropertyId.ShadowIntensity: return true;
+                    case StylePropertyId.ShadowSpread: return true;
+                    case StylePropertyId.ShadowBlur: return true;
                     case StylePropertyId.ShadowOpacity: return true;
 
                 }

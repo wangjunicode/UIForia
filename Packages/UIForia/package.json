@@ -1,13 +1,13 @@
 {
-    "name": "@klanggames/uiforia",
+    "name": "@klanggames/com.klang-games.uiforia",
     "displayName": "UIForia",
-    "version": "0.1.2-alpha1",
+    "version": "0.1.2-alpha6",
     "unity": "2019.2",
     "description": "",
     "keywords": ["UI", "UIForia"],
-    "category": "UI",
+    "category": "UI",   
     "repository": "git://github.com/klanggames/uiforia.git",
     "publishConfig": {
-	"registry": "https://npm.pkg.github.com/"
+        "registry": "https://npm.pkg.github.com/@klanggames"
     }
 }

@@ -1,9 +1,9 @@
 {
   "scopedRegistries": [{
     "name": "Klang-Games registry",
-    "url": "https://npm.pkg.github.com/klanggames",
+    "url": "https://npm.pkg.github.com/@klanggames",
     "scopes": [
-      "@klanggames"
+      "com.klang-games"
     ]
   }],
   "dependencies": {

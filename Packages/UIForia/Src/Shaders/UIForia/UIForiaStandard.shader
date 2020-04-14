@@ -198,10 +198,10 @@ Shader "UIForia/Standard"
                 fixed4 mainColor = ComputeColor(i.color.r, i.color.g, Frag_ColorMode, i.texCoord0.zw, _MainTexture);
                 
                 if(Frag_ShapeType != ShapeType_Text) {
-                    float bevel = GetCornerBevel(Frag_SDFCoords, cornerBevels);
-                    BorderData borderData = GetBorderData(Frag_SDFCoords, Frag_SDFSize, Frag_BorderColors, Frag_BorderSize, Frag_SDFBorderRadii, mainColor);
                     SDFData sdfData;
                     sdfData.uv = lerp(i.texCoord0.xy, i.texCoord0.zw, saturate(shadowBlur / shadowSpread));
+                    float bevel = GetCornerBevel(sdfData.uv, cornerBevels);
+                    BorderData borderData = GetBorderData(sdfData.uv, Frag_SDFSize, Frag_BorderColors, shadowBlur, Frag_SDFBorderRadii, mainColor);
                     sdfData.size = Frag_SDFSize;
                     sdfData.strokeWidth = borderData.size;
                     sdfData.radius = borderData.radius;

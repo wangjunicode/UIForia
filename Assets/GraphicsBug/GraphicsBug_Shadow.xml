@@ -16,9 +16,11 @@
             AlignX = Center Parent;
             AlignY = Center Parent;
             BorderRadiusTopLeft = 25%;
+            CornerBevelBottomLeft = 50%;
+            CornerBevelBottomRight = 50%;
             ShadowColor = Black;
-            ShadowSpread = 16;
-            ShadowBlur = 0;
+            ShadowSpread = -16;
+            ShadowBlur = 64;
             ShadowOffsetX = 0;
             ShadowOffsetY = 0;
             ShadowOpacity = 0.7; // 0 - 1 opacity value

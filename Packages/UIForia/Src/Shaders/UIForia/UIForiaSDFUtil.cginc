@@ -374,7 +374,7 @@ inline half DistToLine(half2 pt1, half2 pt2, half2 testPt) {
   return abs(dot(normalize(perpDir), dirToPt1));
 }
 
-BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, float2 packedBorderSizes, float packedRadii, fixed4 contentColor) {
+BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, float borderSize, float packedRadii, fixed4 contentColor) {
     float left = step(coords.x, 0.5); // 1 if left
     float bottom = step(coords.y, 0.5); // 1 if bottom
     
@@ -403,13 +403,14 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     r += (bottom * right) * radii.w;
     retn.radius = (r * 2) / 1000; // radius comes in as a byte representing 0 to 50 of our width, remap 0 - 250 to 0 - 0.5
     
-    half2 topLeftBorderSize = UnpackSize(packedBorderSizes.x);
-    half2 bottomRightBorderSize = UnpackSize(packedBorderSizes.y);
+    float topLeftBorderSize = borderSize;
+    float bottomRightBorderSize = borderSize;
     
-    #define borderTop topLeftBorderSize.y
-    #define borderLeft topLeftBorderSize.x
-    #define borderBottom bottomRightBorderSize.y
-    #define borderRight bottomRightBorderSize.x
+    // TODO: Remove this border logic.
+    #define borderTop topLeftBorderSize
+    #define borderLeft topLeftBorderSize
+    #define borderBottom bottomRightBorderSize
+    #define borderRight bottomRightBorderSize
     
     half x = coords.x * size.x;
     half y = (1 - coords.y) * size.y;
@@ -569,21 +570,22 @@ float SDFCornerBevel(float2 uv, float2 size, float cutX, float cutY) {
     return sdTriangle(center, p0, p1, p2);
 }
 
-float SDFShadow(SDFData sdfData, float cut) {
+float SDFShadow(SDFData sdfData, float cornerBevel) {
     float halfStrokeWidth = sdfData.strokeWidth * 0.5;
+    
     float2 size = sdfData.size;
     float minSize = min(size.x, size.y);
     float radius = clamp(minSize * sdfData.radius, 0, minSize);
     
-    if(cut != 0) {
-        radius = 0.2 * minSize;
+    if(cornerBevel != 0) {
+        radius = 0.375 * minSize;
     }
     
     float2 center = ((sdfData.uv.xy - 0.5) * size);
     
     float sdf = RectSDF(center, (size * 0.5) - halfStrokeWidth, radius - halfStrokeWidth);
-    float tri = SDFCornerBevel(sdfData.uv, size, cut, cut);
-    sdf = lerp(sdf, subtractSDF(sdf, tri), cut > 0);
+    float tri = SDFCornerBevel(sdfData.uv, size, cornerBevel, cornerBevel);
+    sdf = lerp(sdf, subtractSDF(sdf, tri), cornerBevel > 0);
     return sdf - halfStrokeWidth;
 }
 

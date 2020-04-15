@@ -20,6 +20,9 @@ namespace TemplateCompiler2Test {
 
             public void HandleMouseDown(MouseInputEvent evt) { }
             
+            [OnMouseDown]
+            public void HandleMouseDown2(MouseInputEvent evt) { }
+            
             public void HandleKeyDown(KeyboardInputEvent evt) { }
 
             [OnPropertyChanged(nameof(parentVal), PropertyChangedType.All)] // BindingRead or Synchronized

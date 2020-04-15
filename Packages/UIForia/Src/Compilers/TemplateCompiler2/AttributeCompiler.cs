@@ -73,6 +73,9 @@ namespace UIForia.Compilers {
 
         public void CompileAttributes(SizedArray<AttrInfo> attributes, AttributeCompilerContext compilerContext) {
             compilerContext.elementType.EnsureReflectionData();
+
+            CompileInputHandlers(compilerContext.elementType);
+            
             // [InvokeWhenDisabled]
             // Update() { } 
             // const + once bindings and unmarked bindings that are constant
@@ -240,7 +243,7 @@ namespace UIForia.Compilers {
         }
 
         private void CompileDragCreateBinding(in AttrInfo attr, in InputHandlerDescriptor descriptor) {
-            
+
             LambdaExpression lambda = BuildInputTemplateBinding(MemberData.InputEventHolder_MouseInputEvent, attr, MemberData.InputEventHolder_DragCreateResult);
 
             compilerContext.AddInputBinding(InputEventClass.DragCreate, descriptor, lambda);
@@ -248,7 +251,7 @@ namespace UIForia.Compilers {
 
         private void CompileDragEventBinding(in AttrInfo attr, in InputHandlerDescriptor descriptor) {
             LambdaExpression lambda = BuildInputTemplateBinding(MemberData.InputEventHolder_DragEvent, attr);
-            
+
             compilerContext.AddInputBinding(InputEventClass.Drag, descriptor, lambda);
         }
 
@@ -270,6 +273,99 @@ namespace UIForia.Compilers {
 
             compilerContext.AddInputBinding(InputEventClass.Keyboard, descriptor, lambda);
 
+        }
+
+        private void CompileMouseHandlerFromMethodAttribute(in InputAttributeData attributeData) {
+
+            LambdaExpression lambda = BuildInputMethodAttributeBinding(attributeData, MemberData.InputEventHolder_MouseInputEvent);
+
+            compilerContext.AddInputBinding(InputEventClass.Mouse, attributeData.descriptor, lambda);
+        }
+
+        private void CompileKeyboardHandlerFromMethodAttribute(in InputAttributeData attributeData) {
+
+            LambdaExpression lambda = BuildInputMethodAttributeBinding(attributeData, MemberData.InputEventHolder_KeyboardInputEvent);
+
+            compilerContext.AddInputBinding(InputEventClass.Keyboard, attributeData.descriptor, lambda);
+        }
+
+        private void CompileDragHandlerFromAttribute(in InputAttributeData attributeData) {
+
+            LambdaExpression lambda = BuildInputMethodAttributeBinding(attributeData, MemberData.InputEventHolder_DragEvent);
+
+            compilerContext.AddInputBinding(InputEventClass.Drag, attributeData.descriptor, lambda);
+        }
+
+        private void CompileDragCreateFromAttribute(in InputAttributeData attributeData) {
+
+            LambdaExpression lambda = BuildInputMethodAttributeBinding(attributeData, MemberData.InputEventHolder_MouseInputEvent, MemberData.InputEventHolder_DragCreateResult);
+
+            compilerContext.AddInputBinding(InputEventClass.Drag, attributeData.descriptor, lambda);
+        }
+
+        private void CompileInputHandlers(ProcessedType processedType) {
+            StructList<InputAttributeData> handlers = InputCompiler.CompileInputAnnotations(processedType.rawType);
+
+            const InputEventType k_KeyboardType = InputEventType.KeyDown | InputEventType.KeyUp | InputEventType.KeyHeldDown;
+            const InputEventType k_DragType = InputEventType.DragCancel | InputEventType.DragDrop | InputEventType.DragEnter | InputEventType.DragEnter | InputEventType.DragExit | InputEventType.DragHover | InputEventType.DragMove;
+
+            if (handlers != null) {
+
+                for (int i = 0; i < handlers.size; i++) {
+                    ref InputAttributeData attributeData = ref handlers.array[i];
+
+                    if (attributeData.descriptor.handlerType == InputEventType.DragCreate) {
+                        CompileDragCreateFromAttribute(attributeData);
+                    }
+                    else if ((attributeData.descriptor.handlerType & k_DragType) != 0) {
+                        CompileDragHandlerFromAttribute(attributeData);
+                    }
+                    else if ((attributeData.descriptor.handlerType & k_KeyboardType) != 0) {
+                        CompileKeyboardHandlerFromMethodAttribute(attributeData);
+                    }
+                    else {
+                        CompileMouseHandlerFromMethodAttribute(attributeData);
+                    }
+                }
+            }
+        }
+
+        private LambdaExpression BuildInputMethodAttributeBinding(in InputAttributeData attributeData, FieldInfo evtAccessor, FieldInfo assignmentTarget = null) {
+
+            if (!attributeData.methodInfo.IsPublic) {
+                // todo -- diagnostic
+                throw new TemplateCompileException($"{attributeData.methodInfo.DeclaringType}.{attributeData.methodInfo} must be marked as public in order to be referenced in a template expression");
+            }
+
+            inputHandlerCompiler.Init();
+            inputHandlerCompiler.Setup();
+
+            // todo -- seems like we could cache this somehow
+            inputHandlerCompiler.SetSignature(new Parameter(typeof(LinqBindingNode), "bindingNode"), new Parameter(typeof(InputEventHolder), "__eventHolder"));
+
+            Expression methodCall = null;
+            if (attributeData.useEventParameter) {
+                // todo -- seems like we could cache this somehow
+                Expression field = Expression.Field(inputHandlerCompiler.GetParameterAtIndex(1), evtAccessor);
+                if (attributeData.parameterType != field.Type) {
+                    field = Expression.TypeAs(field, attributeData.parameterType);
+                }
+
+                methodCall = ExpressionFactory.CallInstance(inputHandlerCompiler.GetElement(), attributeData.methodInfo, field);
+            }
+            else {
+                methodCall = ExpressionFactory.CallInstance(inputHandlerCompiler.GetElement(), attributeData.methodInfo);
+            }
+
+            if (assignmentTarget != null) {
+                MemberExpression assign = Expression.Field(inputHandlerCompiler.GetParameterAtIndex(1), assignmentTarget);
+                inputHandlerCompiler.Assign(assign, methodCall);
+            }
+            else {
+                inputHandlerCompiler.RawExpression(methodCall);
+            }
+
+            return inputHandlerCompiler.BuildLambda();
         }
 
         private LambdaExpression BuildInputTemplateBinding(FieldInfo evtAccessor, in AttrInfo attr, FieldInfo assignmentTarget = null) {
@@ -315,6 +411,7 @@ namespace UIForia.Compilers {
                     if (!typeof(DragEvent).IsAssignableFrom(value.Type)) {
                         // todo -- diagnostic
                     }
+
                     inputHandlerCompiler.Assign(field, value);
                 }
             }

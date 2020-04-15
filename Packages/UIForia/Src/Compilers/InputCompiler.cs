@@ -19,7 +19,7 @@ namespace UIForia.Compilers {
 
     }
 
-    public struct InputHandler {
+    public struct InputAttributeData {
 
         public InputHandlerDescriptor descriptor;
         public MethodInfo methodInfo;
@@ -32,7 +32,7 @@ namespace UIForia.Compilers {
 
     public static class InputCompiler {
 
-        private static readonly Dictionary<Type, StructList<InputHandler>> s_Cache = new Dictionary<Type, StructList<InputHandler>>();
+        private static readonly Dictionary<Type, StructList<InputAttributeData>> s_Cache = new Dictionary<Type, StructList<InputAttributeData>>();
 
         private static readonly char[] s_SplitDot = {'.'};
 
@@ -167,12 +167,12 @@ namespace UIForia.Compilers {
         }
 
 
-        public static StructList<InputHandler> CompileInputAnnotations(Type targetType) {
-            if (s_Cache.TryGetValue(targetType, out StructList<InputHandler> handlers)) {
+        public static StructList<InputAttributeData> CompileInputAnnotations(Type targetType) {
+            if (s_Cache.TryGetValue(targetType, out StructList<InputAttributeData> handlers)) {
                 return handlers;
             }
 
-            handlers = StructList<InputHandler>.Get();
+            handlers = StructList<InputAttributeData>.Get();
 
             MethodInfo[] methods = ReflectionUtil.GetInstanceMethods(targetType);
 
@@ -207,7 +207,7 @@ namespace UIForia.Compilers {
             return handlers;
         }
 
-        private static void GetDragCreators(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
+        private static void GetDragCreators(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputAttributeData> handlers) {
             for (int i = 0; i < customAttributes.Length; i++) {
                 OnDragCreateAttribute attr = customAttributes[i] as OnDragCreateAttribute;
 
@@ -234,7 +234,7 @@ namespace UIForia.Compilers {
                     throw new TemplateCompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as a drag creator");
                 }
 
-                handlers.Add(new InputHandler() {
+                handlers.Add(new InputAttributeData() {
                     descriptor = new InputHandlerDescriptor() {
                         eventPhase = attr.phase,
                         modifiers = attr.modifiers,
@@ -248,7 +248,7 @@ namespace UIForia.Compilers {
             }
         }
 
-        private static void GetKeyboardEventHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
+        private static void GetKeyboardEventHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputAttributeData> handlers) {
             for (int i = 0; i < customAttributes.Length; i++) {
                 KeyboardInputBindingAttribute attr = customAttributes[i] as KeyboardInputBindingAttribute;
 
@@ -265,7 +265,7 @@ namespace UIForia.Compilers {
                     throw new TemplateCompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
                 }
 
-                handlers.Add(new InputHandler() {
+                handlers.Add(new InputAttributeData() {
                     descriptor = new InputHandlerDescriptor() {
                         eventPhase = attr.keyEventPhase,
                         modifiers = attr.modifiers,
@@ -275,12 +275,13 @@ namespace UIForia.Compilers {
                     keyCode = attr.key,
                     character = attr.character,
                     methodInfo = methodInfo,
+                    parameterType = parameters.Length > 0 ? parameters[0].ParameterType : null,
                     useEventParameter = parameters.Length == 1
                 });
             }
         }
 
-        private static void GetDragHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
+        private static void GetDragHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputAttributeData> handlers) {
             for (int i = 0; i < customAttributes.Length; i++) {
                 DragEventHandlerAttribute attr = customAttributes[i] as DragEventHandlerAttribute;
 
@@ -291,13 +292,12 @@ namespace UIForia.Compilers {
                 if (parameters.Length > 1 || (parameters.Length > 1 && parameters[0].ParameterType != typeof(DragEvent))) {
                     throw new Exception("Method with attribute " + customAttributes.GetType().Name + " must take 0 arguments or 1 argument of type " + nameof(DragEvent));
                 }
-
-
+                
                 if (!methodInfo.IsPublic || methodInfo.IsStatic) {
                     throw new TemplateCompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
                 }
 
-                handlers.Add(new InputHandler() {
+                handlers.Add(new InputAttributeData() {
                     descriptor = new InputHandlerDescriptor() {
                         eventPhase = attr.phase,
                         modifiers = attr.modifiers,
@@ -305,12 +305,13 @@ namespace UIForia.Compilers {
                         handlerType = attr.eventType
                     },
                     methodInfo = methodInfo,
+                    parameterType = parameters.Length > 0 ? parameters[0].ParameterType : null,
                     useEventParameter = parameters.Length == 1
                 });
             }
         }
 
-        private static void GetMouseEventHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputHandler> handlers) {
+        private static void GetMouseEventHandlers(MethodInfo methodInfo, ParameterInfo[] parameters, object[] customAttributes, StructList<InputAttributeData> handlers) {
             for (int i = 0; i < customAttributes.Length; i++) {
                 MouseEventHandlerAttribute attr = customAttributes[i] as MouseEventHandlerAttribute;
 
@@ -326,13 +327,14 @@ namespace UIForia.Compilers {
                     throw new TemplateCompileException($"{methodInfo.DeclaringType}.{methodInfo} must be an instance method and marked as public in order to be used as an input handler");
                 }
 
-                handlers.Add(new InputHandler() {
+                handlers.Add(new InputAttributeData() {
                     descriptor = new InputHandlerDescriptor() {
                         eventPhase = attr.phase,
                         modifiers = attr.modifiers,
                         requiresFocus = false,
-                        handlerType = attr.eventType
+                        handlerType = attr.eventType,
                     },
+                    parameterType = parameters.Length > 0 ? parameters[0].ParameterType : null,
                     methodInfo = methodInfo,
                     useEventParameter = parameters.Length == 1
                 });

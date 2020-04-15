@@ -521,6 +521,8 @@ namespace UIForia.Compilers {
                     )
                 );
             }
+            
+            
 
             if (attrCompilerContext.bindingResult.inputHandlers.size > 0) {
                 bool hasKeyboardEvent = false;

@@ -5,7 +5,7 @@ namespace UIForia.Generated {
 
     public partial class Generated_Works : TemplateLoader {
     
-        public static readonly TemplateData template_3413db6c_8e0e_47b2_9017_0008681cffab = new TemplateData ("SimpleTemplate") {
+        public static readonly TemplateData template_031fd822_5926_4993_9519_0f9adb568161 = new TemplateData ("SimpleTemplate") {
             entry = (UIForia.ElementSystem system) => {
                 TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate element;
 
@@ -15,6 +15,7 @@ namespace UIForia.Generated {
                 system.InitializeStaticAttribute(@"y", @"y");
                 system.InitializeDynamicAttribute(@"z");
                 system.SetBindings(0, -1, 1, -1, 0);
+                system.AddMouseEventHandler(UIForia.UIInput.InputEventType.MouseDown, UIForia.UIInput.KeyboardModifiers.None, false, UIForia.UIInput.EventPhase.Bubble, 0);
                 system.HydrateEntryPoint();
                 return element;
             },
@@ -27,9 +28,9 @@ namespace UIForia.Generated {
                 (UIForia.ElementSystem system) => {
                     system.InitializeElement(0, 1);
                     system.AddChild(new UIForia.Elements.UIPanelElement(), 2);
-                    system.AddDragCreateHandler(UIForia.UIInput.KeyboardModifiers.None, false, UIForia.UIInput.EventPhase.Bubble, 0);
-                    system.AddMouseEventHandler(UIForia.UIInput.InputEventType.MouseDown, UIForia.UIInput.KeyboardModifiers.None, false, UIForia.UIInput.EventPhase.Bubble, 1);
-                    system.AddKeyboardEventHandler(UIForia.UIInput.InputEventType.KeyDown, UIForia.UIInput.KeyboardModifiers.None, false, UIForia.UIInput.EventPhase.Bubble, ((UnityEngine.KeyCode)2147483647), '\0', 2);
+                    system.AddDragCreateHandler(UIForia.UIInput.KeyboardModifiers.None, false, UIForia.UIInput.EventPhase.Bubble, 1);
+                    system.AddMouseEventHandler(UIForia.UIInput.InputEventType.MouseDown, UIForia.UIInput.KeyboardModifiers.None, false, UIForia.UIInput.EventPhase.Bubble, 2);
+                    system.AddKeyboardEventHandler(UIForia.UIInput.InputEventType.KeyDown, UIForia.UIInput.KeyboardModifiers.None, false, UIForia.UIInput.EventPhase.Bubble, ((UnityEngine.KeyCode)2147483647), '\0', 3);
                     system.RegisterForKeyboardEvents();
                 },
                 //1 <Group> line 13:10
@@ -41,7 +42,7 @@ namespace UIForia.Generated {
                     system.InitializeElement(0, 1);
                     system.AddChild(new TemplateCompiler2Test.TestTemplateCompiler2.ExpandedTemplate(), 3);
                     system.SetBindings(2, -1, -1, -1, 1);
-                    system.AddDragEventHandler(UIForia.UIInput.InputEventType.DragDrop, UIForia.UIInput.KeyboardModifiers.None, false, UIForia.UIInput.EventPhase.Bubble, 3);
+                    system.AddDragEventHandler(UIForia.UIInput.InputEventType.DragDrop, UIForia.UIInput.KeyboardModifiers.None, false, UIForia.UIInput.EventPhase.Bubble, 4);
                     system.CreateBindingVariable<string>(0, @"someContextValue");
                 },
                 //3 <ExpandedTemplate> line 6:18
@@ -105,12 +106,10 @@ namespace UIForia.Generated {
             inputEventHandlers = new System.Action<UIForia.Systems.LinqBindingNode, UIForia.Systems.InputEventHolder>[] {
                 // 0
                 (UIForia.Systems.LinqBindingNode bindingNode, UIForia.Systems.InputEventHolder __eventHolder) => {
-                    TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate context_0;
-                    UIForia.UIInput.MouseInputEvent __evt;
+                    TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate element;
 
-                    context_0 = bindingNode.root as TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate;
-                    __evt = __eventHolder.mouseEvent;
-                    __eventHolder.dragCreateResult = new TemplateCompiler2Test.TestDragEvent();
+                    element = bindingNode.element as TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate;
+                    element.HandleMouseDown2(__eventHolder.mouseEvent);
                 },
                 // 1
                 (UIForia.Systems.LinqBindingNode bindingNode, UIForia.Systems.InputEventHolder __eventHolder) => {
@@ -119,9 +118,18 @@ namespace UIForia.Generated {
 
                     context_0 = bindingNode.root as TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate;
                     __evt = __eventHolder.mouseEvent;
-                    context_0.HandleMouseDown(__evt);
+                    __eventHolder.dragCreateResult = new TemplateCompiler2Test.TestDragEvent();
                 },
                 // 2
+                (UIForia.Systems.LinqBindingNode bindingNode, UIForia.Systems.InputEventHolder __eventHolder) => {
+                    TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate context_0;
+                    UIForia.UIInput.MouseInputEvent __evt;
+
+                    context_0 = bindingNode.root as TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate;
+                    __evt = __eventHolder.mouseEvent;
+                    context_0.HandleMouseDown(__evt);
+                },
+                // 3
                 (UIForia.Systems.LinqBindingNode bindingNode, UIForia.Systems.InputEventHolder __eventHolder) => {
                     TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate context_0;
                     UIForia.UIInput.KeyboardInputEvent __evt;
@@ -130,7 +138,7 @@ namespace UIForia.Generated {
                     __evt = __eventHolder.keyEvent;
                     context_0.parentVal = @"set";
                 },
-                // 3
+                // 4
                 (UIForia.Systems.LinqBindingNode bindingNode, UIForia.Systems.InputEventHolder __eventHolder) => {
                     TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate context_0;
                     UIForia.UIInput.DragEvent __evt;

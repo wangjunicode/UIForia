@@ -1585,9 +1585,9 @@ namespace UIForia.Compilers {
             updateCompiler.SetNullCheckingEnabled(true);
         }
 
-        private void CompileMouseHandlerFromAttribute(in InputHandler handler) {
-            if (!handler.methodInfo.IsPublic) {
-                throw new TemplateCompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+        private void CompileMouseHandlerFromAttribute(in InputAttributeData attributeData) {
+            if (!attributeData.methodInfo.IsPublic) {
+                throw new TemplateCompileException($"{attributeData.methodInfo.DeclaringType}.{attributeData.methodInfo} must be marked as public in order to be referenced in a template expression");
             }
 
             LightList<Parameter> parameters = LightList<Parameter>.Get();
@@ -1597,20 +1597,20 @@ namespace UIForia.Compilers {
 
             currentEvent = parameters[0];
 
-            if (handler.useEventParameter) {
-                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo, currentEvent));
+            if (attributeData.useEventParameter) {
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), attributeData.methodInfo, currentEvent));
             }
             else {
-                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), attributeData.methodInfo));
             }
 
             LambdaExpression lambda = closure.BuildLambda();
 
             MethodCallExpression expression = ExpressionFactory.CallInstance(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddMouseEvent,
-                Expression.Constant(handler.descriptor.handlerType),
-                Expression.Constant(handler.descriptor.modifiers),
-                Expression.Constant(handler.descriptor.requiresFocus),
-                Expression.Constant(handler.descriptor.eventPhase),
+                Expression.Constant(attributeData.descriptor.handlerType),
+                Expression.Constant(attributeData.descriptor.modifiers),
+                Expression.Constant(attributeData.descriptor.requiresFocus),
+                Expression.Constant(attributeData.descriptor.eventPhase),
                 lambda
             );
 
@@ -1619,9 +1619,9 @@ namespace UIForia.Compilers {
             parameters.Release();
         }
 
-        private void CompileKeyboardHandlerFromAttribute(in InputHandler handler) {
-            if (!handler.methodInfo.IsPublic) {
-                throw new TemplateCompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+        private void CompileKeyboardHandlerFromAttribute(in InputAttributeData attributeData) {
+            if (!attributeData.methodInfo.IsPublic) {
+                throw new TemplateCompileException($"{attributeData.methodInfo.DeclaringType}.{attributeData.methodInfo} must be marked as public in order to be referenced in a template expression");
             }
 
             LightList<Parameter> parameters = LightList<Parameter>.Get();
@@ -1629,22 +1629,22 @@ namespace UIForia.Compilers {
             parameters.Add(new Parameter<KeyboardInputEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
             LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(void));
 
-            if (handler.useEventParameter) {
-                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0]));
+            if (attributeData.useEventParameter) {
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), attributeData.methodInfo, parameters[0]));
             }
             else {
-                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), attributeData.methodInfo));
             }
 
             LambdaExpression lambda = closure.BuildLambda();
 
             MethodCallExpression expression = ExpressionFactory.CallInstance(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddKeyboardEvent,
-                Expression.Constant(handler.descriptor.handlerType),
-                Expression.Constant(handler.descriptor.modifiers),
-                Expression.Constant(handler.descriptor.requiresFocus),
-                Expression.Constant(handler.descriptor.eventPhase),
-                Expression.Constant(handler.keyCode),
-                Expression.Constant(handler.character),
+                Expression.Constant(attributeData.descriptor.handlerType),
+                Expression.Constant(attributeData.descriptor.modifiers),
+                Expression.Constant(attributeData.descriptor.requiresFocus),
+                Expression.Constant(attributeData.descriptor.eventPhase),
+                Expression.Constant(attributeData.keyCode),
+                Expression.Constant(attributeData.character),
                 lambda
             );
 
@@ -1653,9 +1653,9 @@ namespace UIForia.Compilers {
             parameters.Release();
         }
 
-        private void CompileDragHandlerFromAttribute(in InputHandler handler) {
-            if (!handler.methodInfo.IsPublic) {
-                throw new TemplateCompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+        private void CompileDragHandlerFromAttribute(in InputAttributeData attributeData) {
+            if (!attributeData.methodInfo.IsPublic) {
+                throw new TemplateCompileException($"{attributeData.methodInfo.DeclaringType}.{attributeData.methodInfo} must be marked as public in order to be referenced in a template expression");
             }
 
             LightList<Parameter> parameters = LightList<Parameter>.Get();
@@ -1663,20 +1663,20 @@ namespace UIForia.Compilers {
             parameters.Add(new Parameter<DragEvent>(k_InputEventParameterName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds));
             LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(void));
 
-            if (handler.useEventParameter) {
-                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0].expression));
+            if (attributeData.useEventParameter) {
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), attributeData.methodInfo, parameters[0].expression));
             }
             else {
-                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), attributeData.methodInfo));
             }
 
             LambdaExpression lambda = closure.BuildLambda();
 
             MethodCallExpression expression = ExpressionFactory.CallInstance(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragEvent,
-                Expression.Constant(handler.descriptor.handlerType),
-                Expression.Constant(handler.descriptor.modifiers),
-                Expression.Constant(handler.descriptor.requiresFocus),
-                Expression.Constant(handler.descriptor.eventPhase),
+                Expression.Constant(attributeData.descriptor.handlerType),
+                Expression.Constant(attributeData.descriptor.modifiers),
+                Expression.Constant(attributeData.descriptor.requiresFocus),
+                Expression.Constant(attributeData.descriptor.eventPhase),
                 lambda
             );
 
@@ -1685,9 +1685,9 @@ namespace UIForia.Compilers {
             parameters.Release();
         }
 
-        private void CompileDragCreateFromAttribute(in InputHandler handler) {
-            if (!handler.methodInfo.IsPublic) {
-                throw new TemplateCompileException($"{handler.methodInfo.DeclaringType}.{handler.methodInfo} must be marked as public in order to be referenced in a template expression");
+        private void CompileDragCreateFromAttribute(in InputAttributeData attributeData) {
+            if (!attributeData.methodInfo.IsPublic) {
+                throw new TemplateCompileException($"{attributeData.methodInfo.DeclaringType}.{attributeData.methodInfo} must be marked as public in order to be referenced in a template expression");
             }
 
             LightList<Parameter> parameters = LightList<Parameter>.Get();
@@ -1696,19 +1696,19 @@ namespace UIForia.Compilers {
 
             LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(DragEvent));
 
-            if (handler.useEventParameter) {
-                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0].expression));
+            if (attributeData.useEventParameter) {
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), attributeData.methodInfo, parameters[0].expression));
             }
             else {
-                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), attributeData.methodInfo));
             }
 
             LambdaExpression lambda = closure.BuildLambda();
 
             MethodCallExpression expression = ExpressionFactory.CallInstance(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragCreator,
-                Expression.Constant(handler.descriptor.modifiers),
-                Expression.Constant(handler.descriptor.requiresFocus),
-                Expression.Constant(handler.descriptor.eventPhase),
+                Expression.Constant(attributeData.descriptor.modifiers),
+                Expression.Constant(attributeData.descriptor.requiresFocus),
+                Expression.Constant(attributeData.descriptor.eventPhase),
                 lambda
             );
 
@@ -1718,7 +1718,7 @@ namespace UIForia.Compilers {
         }
 
         private void CompileInputHandlers(ProcessedType processedType, ReadOnlySizedArray<AttributeDefinition> attributes) {
-            StructList<InputHandler> handlers = InputCompiler.CompileInputAnnotations(processedType.rawType);
+            StructList<InputAttributeData> handlers = InputCompiler.CompileInputAnnotations(processedType.rawType);
 
             const InputEventType k_KeyboardType = InputEventType.KeyDown | InputEventType.KeyUp | InputEventType.KeyHeldDown;
             const InputEventType k_DragType = InputEventType.DragCancel | InputEventType.DragDrop | InputEventType.DragEnter | InputEventType.DragEnter | InputEventType.DragExit | InputEventType.DragHover | InputEventType.DragMove;
@@ -1729,19 +1729,19 @@ namespace UIForia.Compilers {
                 hasHandlers = true;
 
                 for (int i = 0; i < handlers.size; i++) {
-                    ref InputHandler handler = ref handlers.array[i];
+                    ref InputAttributeData attributeData = ref handlers.array[i];
 
-                    if (handler.descriptor.handlerType == InputEventType.DragCreate) {
-                        CompileDragCreateFromAttribute(handler);
+                    if (attributeData.descriptor.handlerType == InputEventType.DragCreate) {
+                        CompileDragCreateFromAttribute(attributeData);
                     }
-                    else if ((handler.descriptor.handlerType & k_DragType) != 0) {
-                        CompileDragHandlerFromAttribute(handler);
+                    else if ((attributeData.descriptor.handlerType & k_DragType) != 0) {
+                        CompileDragHandlerFromAttribute(attributeData);
                     }
-                    else if ((handler.descriptor.handlerType & k_KeyboardType) != 0) {
-                        CompileKeyboardHandlerFromAttribute(handler);
+                    else if ((attributeData.descriptor.handlerType & k_KeyboardType) != 0) {
+                        CompileKeyboardHandlerFromAttribute(attributeData);
                     }
                     else {
-                        CompileMouseHandlerFromAttribute(handler);
+                        CompileMouseHandlerFromAttribute(attributeData);
                     }
                 }
             }

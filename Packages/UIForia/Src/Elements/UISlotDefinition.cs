@@ -1,3 +1,4 @@
+using UIForia.Parsing;
 using UIForia.Util;
 
 namespace UIForia.Elements {
@@ -11,6 +12,8 @@ namespace UIForia.Elements {
     [RecordFilePath]
     public class UISlotDefinition : UISlotBase {
 
+        internal SlotType slotType;
+        
         public override string GetDisplayName() {
             return "define:" + slotId;
         }

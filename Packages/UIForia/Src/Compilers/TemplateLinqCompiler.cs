@@ -1,8 +1,10 @@
 using System;
 using System.Linq.Expressions;
+using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
 using UIForia.Systems;
+using UIForia.Util;
 
 namespace UIForia.Compilers {
 
@@ -25,19 +27,22 @@ namespace UIForia.Compilers {
         private Expression castExpression;
         private ParameterExpression elementExpression;
         private ParameterExpression parentExpression;
-        private ParameterExpression contextExpression;
+        private LightList<ParameterExpression> contextExpressionList;
 
         private readonly Parameter parameter;
-        private TemplateLinqCompilerContext context;
+        private AttributeCompilerContext context;
+        private AttrInfo currentAttribute;
 
-        public TemplateLinqCompiler(TemplateLinqCompilerContext context) {
+        public TemplateLinqCompiler(AttributeCompilerContext context) {
             this.context = context;
             this.resolveAlias = ResolveAlias;
+            this.contextExpressionList = new LightList<ParameterExpression>();
             this.parameter = new Parameter(typeof(LinqBindingNode), "bindingNode", ParameterFlags.NeverNull);
         }
 
         public void Setup() {
             SetNamespaces(context.namespaces);
+            contextExpressionList.EnsureCapacity(context.rootVariables.size);
         }
 
         public void Init() {
@@ -46,48 +51,68 @@ namespace UIForia.Compilers {
 
             this.elementExpression = null;
             this.parentExpression = null;
-            this.contextExpression = null;
+            this.contextExpressionList.Clear();
         }
 
         public ParameterExpression GetRoot() {
+
+            if (context.currentAttribute.isInjected) {
+                if (context.parentType.rawType == typeof(UISlotDefinition)) {
+                    // bindingNode.GetParentContext<T>(index);
+                    // ContextData parentContextData = context.parentBindingResult.GetContextData(context.currentAttribute.depth);
+                    // contextExpression = AddVariable(parentContextData.type, parentContextData.index);
+                }
+
+                throw new NotImplementedException();
+            }
+
             ref TemplateContextReference ctx = ref context.rootVariables.array[context.depth];
-            switch (context.elementBindingType) {
+            switch (context.templateNodeType) {
 
-                case ElementBindingType.Slot:
-                    throw new NotImplementedException();
+                case TemplateNodeType.SlotOverride: {
+                    if (contextExpressionList.array[context.depth] == null) {
+                        // reference array is inverted from attr depth, ie depth = level slot was defined on, level contexts.size -1 == level slot was overridden on. forwards are between 0 and 1
+                        int diff = context.rootVariables.size - 1 - context.depth;
+                        contextExpressionList.array[context.depth] = AddVariable(context.rootVariables.array[diff].processedType.rawType, "refContext_" + diff, ParameterFlags.NeverNull);
+                        IndexExpression array = Expression.ArrayAccess(Expression.Field(parameter.expression, MemberData.BindingNode_ReferencedContexts), ExpressionUtil.GetIntConstant(diff));
+                        Assign(contextExpressionList.array[context.depth], Expression.TypeAs(array, context.rootVariables.array[diff].processedType.rawType));
+                    }
+
                     break;
+                }
 
-                case ElementBindingType.Standard:
-                    if (contextExpression == null) {
-                        contextExpression = AddVariable(ctx.processedType.rawType, "context_" + context.depth, ParameterFlags.NeverNull);
-                        Assign(contextExpression, Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Root), ctx.processedType.rawType));
+                case TemplateNodeType.SlotDefine:
+                case TemplateNodeType.Standard:
+                    if (contextExpressionList.array[context.depth] == null) {
+                        contextExpressionList.array[context.depth] = AddVariable(ctx.processedType.rawType, "context_" + context.depth, ParameterFlags.NeverNull);
+                        Assign(contextExpressionList.array[context.depth], Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Root), ctx.processedType.rawType));
                     }
 
                     break;
 
-                case ElementBindingType.Expanded:
-                    if (contextExpression == null) {
-                        contextExpression = AddVariable(ctx.processedType.rawType, "context_" + context.depth, ParameterFlags.NeverNull);
-                        Assign(contextExpression, Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Root), ctx.processedType.rawType));
+                case TemplateNodeType.Expanded:
+                    if (contextExpressionList.array[context.depth] == null) {
+                        contextExpressionList.array[context.depth] = AddVariable(ctx.processedType.rawType, "context_" + context.depth, ParameterFlags.NeverNull);
+                        Assign(contextExpressionList.array[context.depth], Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Root), ctx.processedType.rawType));
                     }
 
                     break;
 
-                case ElementBindingType.EntryPoint:
+                case TemplateNodeType.EntryPoint:
                     return GetElement();
 
                 default:
                     throw new ArgumentOutOfRangeException();
             }
 
-            return contextExpression;
+            return contextExpressionList.array[context.depth];
         }
 
         public ParameterExpression GetElement() {
 
             if (elementExpression == null) {
-                elementExpression = AddVariable(context.elementType, "element", ParameterFlags.NeverNull);
-                Assign(elementExpression, Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Element), context.elementType));
+                elementExpression = AddVariable(context.elementType.rawType, "element", ParameterFlags.NeverNull);
+                Assign(elementExpression, Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Element), context.elementType.rawType));
             }
 
             return elementExpression;
@@ -155,7 +180,7 @@ namespace UIForia.Compilers {
             }
 
             if (context.TryGetBindingVariable(aliasName, out BindingVariableDesc variable)) {
-                return ExpressionFactory.CallInstanceUnchecked(
+                return ExpressionFactory.CallInstance(
                     GetBindingNode(),
                     AttributeCompiler.GetBindingVariableGetter(variable.variableType),
                     ExpressionUtil.GetIntConstant(variable.index)

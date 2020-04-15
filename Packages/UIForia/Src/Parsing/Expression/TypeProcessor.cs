@@ -87,11 +87,6 @@ namespace UIForia.Parsing {
 
         internal static ProcessedType GetProcessedType(Type type) {
             typeMap.TryGetValue(type, out ProcessedType retn);
-            // we dont really care about thread safety for this, just need it incremented, the value doesnt matter
-            if (retn != null) {
-                retn.references++;
-            }
-
             return retn;
         }
 
@@ -115,12 +110,7 @@ namespace UIForia.Parsing {
                     genericTypeMap.Add(retn.rawType, retn);
                 }
             }
-
-            if (retn != null) {
-                retn.references++;
-                retn.templateRootNode = generic.templateRootNode;
-            }
-
+            
             return retn;
         }
 
@@ -356,10 +346,6 @@ namespace UIForia.Parsing {
                 if (!genericTypeMap.TryGetValue(createdType, out ProcessedType retn)) {
                     retn = ProcessedType.ResolveGeneric(createdType, openType);
                     genericTypeMap.Add(retn.rawType, retn);
-                }
-
-                if (retn != null) {
-                    retn.references++;
                 }
 
                 return retn;

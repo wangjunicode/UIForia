@@ -127,8 +127,8 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_DynamicStyleList_Flatten = typeof(DynamicStyleList).GetMethod(nameof(DynamicStyleList.Flatten));
 
         internal static readonly Expression s_StringBuilderExpr = Expression.Field(null, typeof(StringUtil), nameof(StringUtil.s_CharStringBuilder));
-        internal static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
-        internal static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
+        internal static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstance(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
+        internal static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstance(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
         internal static readonly MethodInfo s_StringBuilder_AppendString = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(string)});
         internal static readonly MethodInfo s_StringBuilder_AppendInt16 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(short)});
         internal static readonly MethodInfo s_StringBuilder_AppendInt32 = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(int)});
@@ -364,8 +364,6 @@ namespace UIForia.Compilers {
                 }
             }
 
-            templateNode.processedType.Reference();
-
             switch (templateNode) {
                 case TextNode textNode:
                     return CompileTextNode(ctx, textNode);
@@ -424,7 +422,7 @@ namespace UIForia.Compilers {
 
             ctx.Assign(templateSpawnIdField, Expression.Constant(spawnId));
             ctx.Assign(templateRootContext, ctx.rootParam);
-            ctx.Assign(scopeVar, ExpressionFactory.CallInstanceUnchecked(ctx.templateScope, s_TemplateScope_Clone));
+            ctx.Assign(scopeVar, ExpressionFactory.CallInstance(ctx.templateScope, s_TemplateScope_Clone));
             ctx.Assign(indexVarIdField, Expression.Constant(indexVarId));
 
             return nodeExpr;
@@ -453,7 +451,7 @@ namespace UIForia.Compilers {
 
             ctx.Assign(templateSpawnIdField, Expression.Constant(spawnId));
             ctx.Assign(templateRootContext, ctx.rootParam);
-            ctx.Assign(scopeVar, ExpressionFactory.CallInstanceUnchecked(ctx.templateScope, s_TemplateScope_Clone));
+            ctx.Assign(scopeVar, ExpressionFactory.CallInstance(ctx.templateScope, s_TemplateScope_Clone));
             ctx.Assign(indexVarIdField, Expression.Constant(indexVarId));
             ctx.Assign(itemVarIdField, Expression.Constant(itemVarId));
 
@@ -641,7 +639,7 @@ namespace UIForia.Compilers {
             StructList<ContextAliasActions> contextMods = CompileBindings(ctx, node, attributes, exposedVariableDataList).contextModifications;
 
             if (slotOverrideNode.slotType == SlotType.Override) {
-                ctx.Assign(ctx.templateScope, ExpressionFactory.CallInstanceUnchecked(ctx.templateScope, s_TemplateScope_GetOverrideScope));
+                ctx.Assign(ctx.templateScope, ExpressionFactory.CallInstance(ctx.templateScope, s_TemplateScope_GetOverrideScope));
             }
 
             VisitChildren(ctx, node, toOverride.requiredChildType);
@@ -911,10 +909,10 @@ namespace UIForia.Compilers {
             }
 
             if (didOverride) {
-                ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(hydrateScope, s_TemplateScope_SetParentScopeList, ctx.templateScope));
+                ctx.AddStatement(ExpressionFactory.CallInstance(hydrateScope, s_TemplateScope_SetParentScopeList, ctx.templateScope));
             }
 
-            ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_Application_HydrateTemplate, Expression.Constant(innerTemplate.templateId), nodeExpr, hydrateScope));
+            ctx.AddStatement(ExpressionFactory.CallInstance(ctx.applicationExpr, s_Application_HydrateTemplate, Expression.Constant(innerTemplate.templateId), nodeExpr, hydrateScope));
 
             UndoContextMods(result.contextModifications);
 
@@ -1105,7 +1103,7 @@ namespace UIForia.Compilers {
 
             // late update reads from context variable and compares
             Expression access = Expression.MakeMemberAccess(lateCompiler.GetCastElement(), s_UIElement_BindingNode);
-            Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(variableDefinition.id));
+            Expression call = ExpressionFactory.CallInstance(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(variableDefinition.id));
             lateCompiler.Comment(attr.key);
             Expression cast = Expression.Convert(call, variableDefinition.contextVarType);
             Expression target = lateCompiler.AddVariable(variableDefinition.contextVarType, "changeHandler_" + attr.key);
@@ -1222,7 +1220,7 @@ namespace UIForia.Compilers {
 
         private void CompileBeforePropertyUpdates(ProcessedType processedType) {
             if (processedType.requiresBeforePropertyUpdates) {
-                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetCastElement(), s_UIElement_OnBeforePropertyBindings));
+                updateCompiler.RawExpression(ExpressionFactory.CallInstance(updateCompiler.GetCastElement(), s_UIElement_OnBeforePropertyBindings));
             }
         }
 
@@ -1255,13 +1253,13 @@ namespace UIForia.Compilers {
             if (processedType.requiresAfterPropertyUpdates) {
                 ParameterExpression element = updateCompiler.GetCastElement();
 
-                updateCompiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabledAndNeedsUpdate), Expression.Constant(true), () => { updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetCastElement(), s_UIElement_OnAfterPropertyBindings)); });
+                updateCompiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabledAndNeedsUpdate), Expression.Constant(true), () => { updateCompiler.RawExpression(ExpressionFactory.CallInstance(updateCompiler.GetCastElement(), s_UIElement_OnAfterPropertyBindings)); });
             }
 
             if (processedType.requiresUpdateFn) {
                 ParameterExpression element = updateCompiler.GetCastElement();
 
-                updateCompiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabledAndNeedsUpdate), Expression.Constant(true), () => { updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetCastElement(), s_UIElement_OnUpdate)); });
+                updateCompiler.IfEqual(Expression.MakeMemberAccess(element, s_Element_IsEnabledAndNeedsUpdate), Expression.Constant(true), () => { updateCompiler.RawExpression(ExpressionFactory.CallInstance(updateCompiler.GetCastElement(), s_UIElement_OnUpdate)); });
             }
         }
 
@@ -1334,7 +1332,7 @@ namespace UIForia.Compilers {
 
             Expression contextVariable = Expression.New(ctor, Expression.Constant(variableDefinition.id), Expression.Constant(attr.key), Expression.Default(expressionType));
             Expression access = Expression.MakeMemberAccess(createdCompiler.GetCastElement(), s_UIElement_BindingNode);
-            Expression createVariable = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_CreateLocalContextVariable, contextVariable);
+            Expression createVariable = ExpressionFactory.CallInstance(access, s_LinqBindingNode_CreateLocalContextVariable, contextVariable);
 
             createdCompiler.RawExpression(createVariable);
 
@@ -1494,15 +1492,15 @@ namespace UIForia.Compilers {
                     MethodInfo method = typeof(Application).GetMethod(nameof(Application.GetTemplateMetaData));
                     int metaDataId = styleRefInfo.templateMetaData.id;
 
-                    MethodCallExpression call = ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, method, Expression.Constant(metaDataId));
-                    MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(call, s_TemplateMetaData_GetStyleById, Expression.Constant(styleRefInfo.styleId));
+                    MethodCallExpression call = ExpressionFactory.CallInstance(ctx.applicationExpr, method, Expression.Constant(metaDataId));
+                    MethodCallExpression expr = ExpressionFactory.CallInstance(call, s_TemplateMetaData_GetStyleById, Expression.Constant(styleRefInfo.styleId));
 
-                    ctx.AddStatement(ExpressionFactory.CallInstanceUnchecked(styleSet, s_StyleSet_AddBaseStyle, expr));
+                    ctx.AddStatement(ExpressionFactory.CallInstance(styleSet, s_StyleSet_AddBaseStyle, expr));
                     ctx.InlineComment(styleRefInfo.styleName + " -> from template " + styleRefInfo.templateMetaData.filePath);
                 }
 
                 MemberExpression style = Expression.Field(ctx.ElementExpr, s_UIElement_StyleSet);
-                MethodCallExpression initStyle = ExpressionFactory.CallInstanceUnchecked(style, s_StyleSet_InternalInitialize);
+                MethodCallExpression initStyle = ExpressionFactory.CallInstance(style, s_StyleSet_InternalInitialize);
                 ctx.AddStatement(initStyle);
             }
 
@@ -1522,9 +1520,9 @@ namespace UIForia.Compilers {
             for (int i = 0; i < styleIds.size; i++) {
                 ref StyleRefInfo styleRefInfo = ref styleIds.array[i];
 
-                Expression target = ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_Application_GetTemplateMetaData, Expression.Constant(styleRefInfo.templateMetaData.id));
-                MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(target, s_TemplateMetaData_GetStyleById, Expression.Constant(styleRefInfo.styleId));
-                MethodCallExpression addCall = ExpressionFactory.CallInstanceUnchecked(styleList, s_LightList_UIStyleGroupContainer_Add, expr);
+                Expression target = ExpressionFactory.CallInstance(ctx.applicationExpr, s_Application_GetTemplateMetaData, Expression.Constant(styleRefInfo.templateMetaData.id));
+                MethodCallExpression expr = ExpressionFactory.CallInstance(target, s_TemplateMetaData_GetStyleById, Expression.Constant(styleRefInfo.styleId));
+                MethodCallExpression addCall = ExpressionFactory.CallInstance(styleList, s_LightList_UIStyleGroupContainer_Add, expr);
 
                 ctx.AddStatement(addCall);
                 ctx.InlineComment(styleRefInfo.styleName + " -> from template " + styleRefInfo.templateMetaData.filePath);
@@ -1551,7 +1549,7 @@ namespace UIForia.Compilers {
                     if (textExpression.isExpression) {
                         Expression dynamicStyleList = updateCompiler.TypeWrapStatement(s_DynamicStyleListTypeWrapper, typeof(DynamicStyleList), textExpression.text);
 
-                        updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(dynamicStyleList, s_DynamicStyleList_Flatten, templateContext, updateStyleList));
+                        updateCompiler.RawExpression(ExpressionFactory.CallInstance(dynamicStyleList, s_DynamicStyleList_Flatten, templateContext, updateStyleList));
                     }
 
                     else {
@@ -1564,8 +1562,8 @@ namespace UIForia.Compilers {
                             int styleId = styleExpression.templateMetaData.ResolveStyleNameSlow(styleName);
 
                             if (styleId >= 0) {
-                                MethodCallExpression expr = ExpressionFactory.CallInstanceUnchecked(templateContext, s_TemplateMetaData_GetStyleById, Expression.Constant(styleId));
-                                MethodCallExpression addCall = ExpressionFactory.CallInstanceUnchecked(updateStyleList, s_LightList_UIStyleGroupContainer_Add, expr);
+                                MethodCallExpression expr = ExpressionFactory.CallInstance(templateContext, s_TemplateMetaData_GetStyleById, Expression.Constant(styleId));
+                                MethodCallExpression addCall = ExpressionFactory.CallInstance(updateStyleList, s_LightList_UIStyleGroupContainer_Add, expr);
                                 updateCompiler.RawExpression(addCall);
                                 ctx.InlineComment(styleName + " -> from template " + styleExpression.templateMetaData.filePath);
                             }
@@ -1575,13 +1573,13 @@ namespace UIForia.Compilers {
             }
 
             MemberExpression styleSet = Expression.Field(updateCompiler.GetElement(), s_UIElement_StyleSet);
-            MethodCallExpression setBaseStyles = ExpressionFactory.CallInstanceUnchecked(styleSet, s_StyleSet_SetBaseStyles, updateStyleList);
+            MethodCallExpression setBaseStyles = ExpressionFactory.CallInstance(styleSet, s_StyleSet_SetBaseStyles, updateStyleList);
 
             updateCompiler.RawExpression(setBaseStyles);
-            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateStyleList, s_LightList_UIStyleGroupContainer_Release));
+            updateCompiler.RawExpression(ExpressionFactory.CallInstance(updateStyleList, s_LightList_UIStyleGroupContainer_Release));
 
             MemberExpression style = Expression.Field(ctx.ElementExpr, s_UIElement_StyleSet);
-            MethodCallExpression initStyle = ExpressionFactory.CallInstanceUnchecked(style, s_StyleSet_InternalInitialize);
+            MethodCallExpression initStyle = ExpressionFactory.CallInstance(style, s_StyleSet_InternalInitialize);
             ctx.AddStatement(initStyle);
             styleIds.Release();
             updateCompiler.SetNullCheckingEnabled(true);
@@ -1600,15 +1598,15 @@ namespace UIForia.Compilers {
             currentEvent = parameters[0];
 
             if (handler.useEventParameter) {
-                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, currentEvent));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo, currentEvent));
             }
             else {
-                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo));
             }
 
             LambdaExpression lambda = closure.BuildLambda();
 
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddMouseEvent,
+            MethodCallExpression expression = ExpressionFactory.CallInstance(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddMouseEvent,
                 Expression.Constant(handler.descriptor.handlerType),
                 Expression.Constant(handler.descriptor.modifiers),
                 Expression.Constant(handler.descriptor.requiresFocus),
@@ -1632,15 +1630,15 @@ namespace UIForia.Compilers {
             LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(void));
 
             if (handler.useEventParameter) {
-                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0]));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0]));
             }
             else {
-                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo));
             }
 
             LambdaExpression lambda = closure.BuildLambda();
 
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddKeyboardEvent,
+            MethodCallExpression expression = ExpressionFactory.CallInstance(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddKeyboardEvent,
                 Expression.Constant(handler.descriptor.handlerType),
                 Expression.Constant(handler.descriptor.modifiers),
                 Expression.Constant(handler.descriptor.requiresFocus),
@@ -1666,15 +1664,15 @@ namespace UIForia.Compilers {
             LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(void));
 
             if (handler.useEventParameter) {
-                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0].expression));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0].expression));
             }
             else {
-                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo));
             }
 
             LambdaExpression lambda = closure.BuildLambda();
 
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragEvent,
+            MethodCallExpression expression = ExpressionFactory.CallInstance(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragEvent,
                 Expression.Constant(handler.descriptor.handlerType),
                 Expression.Constant(handler.descriptor.modifiers),
                 Expression.Constant(handler.descriptor.requiresFocus),
@@ -1699,15 +1697,15 @@ namespace UIForia.Compilers {
             LinqCompiler closure = createdCompiler.CreateClosure(parameters, typeof(DragEvent));
 
             if (handler.useEventParameter) {
-                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0].expression));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo, parameters[0].expression));
             }
             else {
-                closure.RawExpression(ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetCastElement(), handler.methodInfo));
+                closure.RawExpression(ExpressionFactory.CallInstance(createdCompiler.GetCastElement(), handler.methodInfo));
             }
 
             LambdaExpression lambda = closure.BuildLambda();
 
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragCreator,
+            MethodCallExpression expression = ExpressionFactory.CallInstance(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragCreator,
                 Expression.Constant(handler.descriptor.modifiers),
                 Expression.Constant(handler.descriptor.requiresFocus),
                 Expression.Constant(handler.descriptor.eventPhase),
@@ -1784,7 +1782,7 @@ namespace UIForia.Compilers {
             MemberExpression app = Expression.Property(elementVar, typeof(UIElement).GetProperty(nameof(UIElement.application)));
             MemberExpression inputSystem = Expression.Property(app, typeof(Application).GetProperty(nameof(Application.InputSystem)));
             MethodInfo method = typeof(InputSystem).GetMethod(nameof(InputSystem.RegisterKeyboardHandler));
-            createdCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(inputSystem, method, elementVar));
+            createdCompiler.RawExpression(ExpressionFactory.CallInstance(inputSystem, method, elementVar));
         }
 
         private bool BuildBindings(CompilationContext ctx, TemplateNode templateNode, int slotContextSize) {
@@ -1880,7 +1878,7 @@ namespace UIForia.Compilers {
             Expression access = Expression.MakeMemberAccess(createdCompiler.GetElement(), s_UIElement_BindingNode);
             contextVarType = type;
             definition.contextVarType = type;
-            return ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_CreateLocalContextVariable, contextVariable);
+            return ExpressionFactory.CallInstance(access, s_LinqBindingNode_CreateLocalContextVariable, contextVariable);
         }
 
         private void CompileTextBinding(TemplateNode templateNode) {
@@ -1904,84 +1902,84 @@ namespace UIForia.Compilers {
 
                         Expression val = updateCompiler.Value(expressionParts[i].text);
                         if (val.Type.IsEnum) {
-                            MethodCallExpression toString = ExpressionFactory.CallInstanceUnchecked(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, toString));
+                            MethodCallExpression toString = ExpressionFactory.CallInstance(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendString, toString));
                             continue;
                         }
 
                         switch (Type.GetTypeCode(val.Type)) {
                             case TypeCode.Boolean:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendBool, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendBool, val));
                                 break;
 
                             case TypeCode.Byte:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendByte, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendByte, val));
                                 break;
 
                             case TypeCode.Char:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendChar, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendChar, val));
                                 break;
 
                             case TypeCode.Decimal:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendDecimal, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendDecimal, val));
                                 break;
 
                             case TypeCode.Double:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendDouble, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendDouble, val));
                                 break;
 
                             case TypeCode.Int16:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendInt16, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendInt16, val));
                                 break;
 
                             case TypeCode.Int32:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendInt32, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendInt32, val));
                                 break;
 
                             case TypeCode.Int64:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendInt64, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendInt64, val));
                                 break;
 
                             case TypeCode.SByte:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendSByte, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendSByte, val));
                                 break;
 
                             case TypeCode.Single:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendFloat, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendFloat, val));
                                 break;
 
                             case TypeCode.String:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendString, val));
                                 break;
 
                             case TypeCode.UInt16:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendUInt16, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendUInt16, val));
                                 break;
 
                             case TypeCode.UInt32:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendUInt32, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendUInt32, val));
                                 break;
 
                             case TypeCode.UInt64:
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendUInt64, val));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendUInt64, val));
                                 break;
 
                             default:
-                                MethodCallExpression toString = ExpressionFactory.CallInstanceUnchecked(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
-                                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, toString));
+                                MethodCallExpression toString = ExpressionFactory.CallInstance(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
+                                updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendString, toString));
                                 break;
                         }
                     }
                     else {
-                        updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, Expression.Constant(expressionParts[i].text)));
+                        updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, s_StringBuilder_AppendString, Expression.Constant(expressionParts[i].text)));
                     }
                 }
 
                 // todo -- this needs to check the TextInfo for equality or whitespace mutations will be ignored and we will return false from equal!!!
                 Expression e = updateCompiler.GetCastElement();
-                Expression condition = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.EqualsString), new[] {typeof(string)}), textValueExpr);
+                Expression condition = ExpressionFactory.CallInstance(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.EqualsString), new[] {typeof(string)}), textValueExpr);
                 condition = Expression.Equal(condition, Expression.Constant(false));
-                ConditionalExpression ifCheck = Expression.IfThen(condition, Expression.Block(ExpressionFactory.CallInstanceUnchecked(e, s_TextElement_SetText, s_StringBuilderToString)));
+                ConditionalExpression ifCheck = Expression.IfThen(condition, Expression.Block(ExpressionFactory.CallInstance(e, s_TextElement_SetText, s_StringBuilderToString)));
 
                 updateCompiler.RawExpression(ifCheck);
                 updateCompiler.RawExpression(s_StringBuilderClear);
@@ -1992,7 +1990,7 @@ namespace UIForia.Compilers {
             //ContextVariable<T> ctxVar = (ContextVariable<T>)__castElement.bindingNode.GetContextVariable(id);
             //ctxVar.value = expression;
             Expression access = Expression.MakeMemberAccess(compiler.GetElement(), s_UIElement_BindingNode);
-            Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(varId));
+            Expression call = ExpressionFactory.CallInstance(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(varId));
             compiler.Comment(attr.key);
             Expression cast = Expression.Convert(call, contextVarType);
             ParameterExpression target = compiler.AddVariable(contextVarType, (varPrefix ?? "ctxVar_") + attr.key);
@@ -2006,7 +2004,7 @@ namespace UIForia.Compilers {
 
             InputHandlerDescriptor descriptor = InputCompiler.ParseKeyboardDescriptor(attr.key);
 
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(compiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddKeyboardEvent,
+            MethodCallExpression expression = ExpressionFactory.CallInstance(compiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddKeyboardEvent,
                 Expression.Constant(descriptor.handlerType),
                 Expression.Constant(descriptor.modifiers),
                 Expression.Constant(descriptor.requiresFocus),
@@ -2032,7 +2030,7 @@ namespace UIForia.Compilers {
         private void CompileDragEventBinding(in AttributeDefinition attr, in InputHandlerDescriptor descriptor) {
             LambdaExpression lambda = BuildInputTemplateBinding<DragEvent>(createdCompiler, attr);
 
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragEvent,
+            MethodCallExpression expression = ExpressionFactory.CallInstance(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragEvent,
                 Expression.Constant(descriptor.handlerType),
                 Expression.Constant(descriptor.modifiers),
                 Expression.Constant(descriptor.requiresFocus),
@@ -2109,7 +2107,7 @@ namespace UIForia.Compilers {
 
             InputHandlerDescriptor descriptor = InputCompiler.ParseMouseDescriptor(attr.key);
 
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(compiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddMouseEvent,
+            MethodCallExpression expression = ExpressionFactory.CallInstance(compiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddMouseEvent,
                 Expression.Constant(descriptor.handlerType),
                 Expression.Constant(descriptor.modifiers),
                 Expression.Constant(descriptor.requiresFocus),
@@ -2123,7 +2121,7 @@ namespace UIForia.Compilers {
         private void CompileDragCreateBinding(in AttributeDefinition attr, in InputHandlerDescriptor descriptor) {
             LambdaExpression lambda = BuildInputTemplateBinding<MouseInputEvent>(createdCompiler, attr, typeof(DragEvent));
 
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragCreator,
+            MethodCallExpression expression = ExpressionFactory.CallInstance(createdCompiler.GetInputHandlerGroup(), s_InputHandlerGroup_AddDragCreator,
                 Expression.Constant(descriptor.modifiers),
                 Expression.Constant(descriptor.requiresFocus),
                 Expression.Constant(descriptor.eventPhase),
@@ -2300,7 +2298,7 @@ namespace UIForia.Compilers {
                 SetImplicitContext(compiler, attr);
 
                 compiler.CommentNewLineBefore($"if=\"{attr.value}\"");
-                MethodCallExpression setEnabled = ExpressionFactory.CallInstanceUnchecked(element, s_UIElement_SetEnabled, compiler.Value(attr.value));
+                MethodCallExpression setEnabled = ExpressionFactory.CallInstance(element, s_UIElement_SetEnabled, compiler.Value(attr.value));
                 compiler.RawExpression(setEnabled);
 
                 // if(!element.isEnabled) return
@@ -2325,10 +2323,10 @@ namespace UIForia.Compilers {
             Expression value = compiler.TypedValue(typeof(string), attr.StrippedValue);
 
             if (value.Type != typeof(string)) {
-                value = ExpressionFactory.CallInstanceUnchecked(value, value.Type.GetMethod("ToString", Type.EmptyTypes));
+                value = ExpressionFactory.CallInstance(value, value.Type.GetMethod("ToString", Type.EmptyTypes));
             }
 
-            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, s_UIElement_SetAttribute, Expression.Constant(attr.key), value));
+            compiler.RawExpression(ExpressionFactory.CallInstance(element, s_UIElement_SetAttribute, Expression.Constant(attr.key), value));
         }
 
         private void CompileInstanceStyleBinding(UIForiaLinqCompiler compiler, in AttributeDefinition attr) {
@@ -2405,7 +2403,7 @@ namespace UIForia.Compilers {
         private Expression GetContextVariableValue(UIForiaLinqCompiler compiler, ContextVariableDefinition ctxVar, string prefix) {
             ParameterExpression el = compiler.GetElement();
             Expression access = Expression.MakeMemberAccess(el, s_UIElement_BindingNode);
-            Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(ctxVar.id));
+            Expression call = ExpressionFactory.CallInstance(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(ctxVar.id));
             Type varType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), ctxVar.type);
 
             UnaryExpression convert = Expression.Convert(call, varType);
@@ -2482,12 +2480,12 @@ namespace UIForia.Compilers {
                             }
 
                             if (parameters.Length == 0) {
-                                compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo));
+                                compiler.RawExpression(ExpressionFactory.CallInstance(castElement, methodInfo));
                                 continue;
                             }
 
                             if (parameters.Length == 1 && parameters[0].ParameterType == right.Type) {
-                                compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(castElement, methodInfo, old));
+                                compiler.RawExpression(ExpressionFactory.CallInstance(castElement, methodInfo, old));
                                 continue;
                             }
 
@@ -2612,7 +2610,7 @@ namespace UIForia.Compilers {
             createdCompiler.RawExpression(createVariable);
 
             Expression access = Expression.MakeMemberAccess(updateCompiler.GetCastElement(), s_UIElement_BindingNode);
-            Expression call = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(variableDefinition.id));
+            Expression call = ExpressionFactory.CallInstance(access, s_LinqBindingNode_GetContextVariable, Expression.Constant(variableDefinition.id));
             updateCompiler.Comment(attr.key);
             Expression cast = Expression.Convert(call, contextVarType);
             ParameterExpression target = updateCompiler.AddVariable(contextVarType, "changeHandler_" + attr.key);
@@ -2687,7 +2685,7 @@ namespace UIForia.Compilers {
         }
 
         private Expression CreateElement(CompilationContext ctx, ProcessedType processedType, Expression parentExpression, int childCount, int attrCount, int templateId) {
-            return ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
+            return ExpressionFactory.CallInstance(ctx.applicationExpr, s_CreateFromPool,
                 Expression.Constant(processedType.id),
                 parentExpression,
                 Expression.Constant(childCount),

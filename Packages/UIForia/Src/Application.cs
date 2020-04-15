@@ -121,8 +121,6 @@ namespace UIForia {
         internal CompiledTemplateData templateData;
 
         internal int frameId;
-        private int indexGenerator;
-        private int IndexGenerator => indexGenerator++;
         protected internal List<UIView> views;
 
         internal static readonly Dictionary<string, Type> s_CustomPainters;
@@ -184,6 +182,8 @@ namespace UIForia {
             UIView rootView = new UIView(this, "Root", new Size(Width, Height));
 
             RootElement = config.templateLoader.LoadRoot(this, rootView, config.templateLoader.mainEntryPoint);
+            
+            views.Add(rootView);
 
         }
 
@@ -916,38 +916,39 @@ namespace UIForia {
 
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
         public UIElement CreateElementFromPool(int typeId, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
+            throw new NotImplementedException();
             // children get assigned in the template function but we need to setup the list here
-            ConstructedElement retn = templateData.ConstructElement(typeId);
-            UIElement element = retn.element;
-
-            if (!tagNameIndexMap.TryGetValue(retn.tagNameId, out TagNameIndex index)) {
-                index = new TagNameIndex();
-                tagNameIndexMap[retn.tagNameId] = index;
-            }
-
-            element.tagNameIndex = index;
-
-            element.application = this;
-            element.templateMetaData = templateData.templateMetaData[originTemplateId];
-            element.id = NextElementId;
-            element.index = freeListIndex.size > 0 ? freeListIndex.array[--freeListIndex.size] : indexGenerator++;
-            element.style = new UIStyleSet(element);
-            element.styleSet2 = new StyleSet2(styleSystem, element);
-            element.layoutResult = new LayoutResult(element);
-            element.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
-
-            element.children = LightList<UIElement>.GetMinSize(childCount);
-
-            if (attributeCount > 0) {
-                element.attributes = new StructList<ElementAttribute>(attributeCount);
-                element.attributes.size = attributeCount;
-            }
-
-            element.parent = parent;
-
-            parent?.children.Add(element);
-
-            return element;
+            // ConstructedElement retn = templateData.ConstructElement(typeId);
+            // UIElement element = retn.element;
+            //
+            // if (!tagNameIndexMap.TryGetValue(retn.tagNameId, out TagNameIndex index)) {
+            //     index = new TagNameIndex();
+            //     tagNameIndexMap[retn.tagNameId] = index;
+            // }
+            //
+            // element.tagNameIndex = index;
+            //
+            // element.application = this;
+            // element.templateMetaData = templateData.templateMetaData[originTemplateId];
+            // element.id = NextElementId;
+            // element.index = freeListIndex.size > 0 ? freeListIndex.array[--freeListIndex.size] : indexGenerator++;
+            // element.style = new UIStyleSet(element);
+            // element.styleSet2 = new StyleSet2(styleSystem, element);
+            // element.layoutResult = new LayoutResult(element);
+            // element.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
+            //
+            // element.children = LightList<UIElement>.GetMinSize(childCount);
+            //
+            // if (attributeCount > 0) {
+            //     element.attributes = new StructList<ElementAttribute>(attributeCount);
+            //     element.attributes.size = attributeCount;
+            // }
+            //
+            // element.parent = parent;
+            //
+            // parent?.children.Add(element);
+            //
+            // return element;
         }
 
         public TemplateMetaData GetTemplateMetaData(int metaDataId) {

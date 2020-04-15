@@ -4,6 +4,8 @@ using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Elements;
+using UIForia.UIInput;
+using UIForia.Util;
 
 namespace UIForia.Systems {
     

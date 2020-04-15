@@ -50,7 +50,12 @@ namespace UIForia.Util {
 
         public SizedArray(int capacity) {
             this.size = 0;
-            this.array = new T[capacity];
+            if (capacity > 0) {
+                this.array = new T[capacity];
+            }
+            else {
+                this.array = default;
+            }
         }
 
         public SizedArray(T[] data) {
@@ -159,6 +164,15 @@ namespace UIForia.Util {
             if (count > 0 && size + count >= array.Length) {
                 Array.Resize(ref array, size + count * 2);
             }
+        }
+
+        public T[] ToArray() {
+            T[] retn = new T[size];
+            for (int i = 0; i < size; i++) {
+                retn[i] = array[i];
+            }
+
+            return retn;
         }
 
     }

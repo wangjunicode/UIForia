@@ -5,6 +5,7 @@ using UIForia.Selectors;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Layout;
+using UIForia.Parsing;
 using UIForia.Rendering;
 using UIForia.Style;
 using UIForia.Systems;
@@ -96,7 +97,7 @@ namespace UIForia.Elements {
         public LinqBindingNode bindingNode; // todo -- make internal with accessor
 
         internal int enableStateChangedFrameId;
-        internal StructList<ElementAttribute> attributes; // todo -- change to SizedList
+        internal SizedArray<ElementAttribute> attributes; // todo -- change to SizedList
         public TemplateMetaData templateMetaData; // todo - internal / private / whatever
 
         public UIView View { get; internal set; }
@@ -105,7 +106,7 @@ namespace UIForia.Elements {
         private int _siblingIndex;
         public StyleSet2 styleSet2;
         internal int index;
-        
+
         public ElementReference reference => isDestroyed ? default : new ElementReference(id, index);
 
         public static implicit operator ElementReference(UIElement element) {
@@ -122,9 +123,7 @@ namespace UIForia.Elements {
             }
         }
 
-//        
-        // not actually used since we get elements from the pool as uninitialized
-        protected internal UIElement() { }
+        // protected internal UIElement() { }
 
         public IInputProvider Input => View.application.InputSystem; // todo -- remove
 
@@ -330,7 +329,7 @@ namespace UIForia.Elements {
 
         public List<ElementAttribute> GetAttributes(List<ElementAttribute> retn = null) {
             retn = retn ?? new List<ElementAttribute>();
-            if (attributes == null || attributes.size == 0) {
+            if (attributes.size == 0) {
                 return retn;
             }
 
@@ -342,9 +341,6 @@ namespace UIForia.Elements {
         }
 
         public void SetAttribute(string name, string value) {
-            if (attributes == null) {
-                attributes = StructList<ElementAttribute>.Get();
-            }
 
             ElementAttribute[] attrs = attributes.array;
             int attrCount = attributes.size;
@@ -357,28 +353,21 @@ namespace UIForia.Elements {
                     else {
                         string oldValue = attrs[i].value;
                         attrs[i] = new ElementAttribute(name, value);
-                        application.OnAttributeSet(this, name, value, oldValue);
+                        // application.OnAttributeSet(this, name, value, oldValue);
                         return;
                     }
                 }
             }
 
             attributes.Add(new ElementAttribute(name, value));
-            application.OnAttributeSet(this, name, value, null);
+            // application.OnAttributeSet(this, name, value, null);
         }
 
         public bool TryGetAttribute(string key, out string value) {
-            if (attributes == null) {
-                value = null;
-                return false;
-            }
-
-            ElementAttribute[] attrs = attributes.array;
-            int attrCount = attributes.size;
-
-            for (int i = 0; i < attrCount; i++) {
-                if (attrs[i].name == key) {
-                    value = attrs[i].value;
+           
+            for (int i = 0; i < attributes.size; i++) {
+                if (attributes.array[i].name == key) {
+                    value = attributes.array[i].value;
                     return true;
                 }
             }
@@ -388,16 +377,9 @@ namespace UIForia.Elements {
         }
 
         public string GetAttribute(string attr) {
-            if (attributes == null) {
-                return null;
-            }
-
-            ElementAttribute[] attrs = attributes.array;
-            int attrCount = attributes.size;
-
-            for (int i = 0; i < attrCount; i++) {
-                if (attrs[i].name == attr) {
-                    return attrs[i].value;
+            for (int i = 0; i < attributes.size; i++) {
+                if (attributes.array[i].name == attr) {
+                    return attributes.array[i].value;
                 }
             }
 

@@ -12,7 +12,7 @@ namespace Tests.Compilers.TemplateCompiler {
 
         public static void AssertElementHierarchy(ElementAssertion assertion, UIElement element, UIElement parent = null) {
             Assert.AreEqual(assertion.type, element.GetType());
-            AssertAttributesEqual(assertion.attributes, element.attributes?.ToArray());
+            AssertAttributesEqual(assertion.attributes, element.attributes.ToArray());
             if (element is UITextElement textElement) {
                 Assert.AreEqual(assertion.textContent, textElement.text);
             }

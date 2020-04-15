@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Attributes;
@@ -7,8 +6,10 @@ using UIForia.Elements;
 using UIForia.UIInput;
 
 namespace TemplateCompiler2Test {
+    public class TestDragEvent : DragEvent { }
 
     public class TestTemplateCompiler2 {
+
 
         [Template("SimpleTemplate.xml")]
         public class SimpleTemplate : UIElement {
@@ -18,6 +19,8 @@ namespace TemplateCompiler2Test {
             public override void OnUpdate() { }
 
             public void HandleMouseDown(MouseInputEvent evt) { }
+            
+            public void HandleKeyDown(KeyboardInputEvent evt) { }
 
             [OnPropertyChanged(nameof(parentVal), PropertyChangedType.All)] // BindingRead or Synchronized
             public void ValueChanged(string oldValue, PropertyChangeSource changeSource) {
@@ -51,7 +54,7 @@ namespace TemplateCompiler2Test {
             
             MockApplication.PreCompile<SimpleTemplate>(nameof(Works));
 
-            // Application app = MockApplication.Create(new Generated_TestApp());
+            // Application app = MockApplication.Create(new Generated_Works());
             
         }
 

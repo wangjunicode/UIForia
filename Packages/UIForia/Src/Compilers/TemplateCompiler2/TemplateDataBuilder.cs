@@ -10,21 +10,35 @@ namespace UIForia.Compilers {
         internal LambdaExpression hydrate;
         internal LightList<TemplateOutput> elementFns;
         internal LightList<BindingOutput> bindingFns;
+        internal LightList<InputEventHandlerOutput> inputHandlerFns;
+        internal LightList<SlotOverrideChain> slotOverrideChains;
+        private static readonly SlotOverrideInfo[] s_EmptySlotOverrideInfo = { };
 
-        internal int bindingIndex;
-        internal int templateIndex;
+        private int dragCreatorIndex;
+        private int templateIndex;
+        private int eventHandlerIndex;
 
         public TemplateDataBuilder() {
+            inputHandlerFns = new LightList<InputEventHandlerOutput>();
             elementFns = new LightList<TemplateOutput>();
             bindingFns = new LightList<BindingOutput>();
+            slotOverrideChains = new LightList<SlotOverrideChain>();
         }
 
+        public int GetNextDragCreateIndex() {
+            return dragCreatorIndex++;
+        }
+        
         public int GetNextTemplateIndex() {
             return templateIndex++;
         }
+        
+        public int GetNextInputHandlerIndex() {
+            return eventHandlerIndex++;
+        }
 
         public void SetElementTemplate(TemplateNode templateNode, int elementSlotId, LambdaExpression expression) {
-            elementFns.EnsureCapacity(elementSlotId);
+            elementFns.EnsureCapacity(elementSlotId + 1);
 
             if (elementFns.size <= elementSlotId) {
                 elementFns.size = elementSlotId + 1;
@@ -36,6 +50,18 @@ namespace UIForia.Compilers {
             };
         }
 
+        public void SetInputHandlerFn(int index, InputHandlerResult handler) {
+            inputHandlerFns.EnsureCapacity(index + 1);
+
+            if (inputHandlerFns.size <= index) {
+                inputHandlerFns.size = index + 1;
+            }
+
+            inputHandlerFns.array[index] = new InputEventHandlerOutput() {
+                expression = handler.lambdaExpression,
+            };
+        }
+
         public TemplateExpressionSet Build(ProcessedType processedType) {
             return new TemplateExpressionSet() {
                 bindings = bindingFns.ToArray(),
@@ -43,6 +69,8 @@ namespace UIForia.Compilers {
                 entryPoint = entryPoint,
                 hydratePoint = hydrate,
                 elementTemplates = elementFns.ToArray(),
+                slotOverrideChains = slotOverrideChains?.ToArray(),
+                inputEventHandlers = inputHandlerFns.ToArray()
             };
         }
 
@@ -59,8 +87,10 @@ namespace UIForia.Compilers {
             hydrate = null;
             elementFns.Clear();
             bindingFns.Clear();
+            slotOverrideChains.Clear();
             templateIndex = 0;
-            bindingIndex = 0;
+            dragCreatorIndex = 0;
+            eventHandlerIndex = 0;
         }
 
         public BindingIndices AddBindings(TemplateNode templateNode, BindingResult bindingResult) {
@@ -98,7 +128,7 @@ namespace UIForia.Compilers {
                     bindingType = BindingType.Const
                 });
             }
-            
+
             if (bindingResult.enableLambda != null) {
                 retn.enableIndex = bindingFns.size;
                 bindingFns.Add(new BindingOutput() {
@@ -110,6 +140,38 @@ namespace UIForia.Compilers {
 
             return retn;
         }
+
+        public SlotOverrideChain CreateSlotOverrideChain(ProcessedType rootType, SlotNode slotNode, SizedArray<AttrInfo> attributes, SlotOverrideInfo[] extendChain) {
+
+            if (extendChain == null) extendChain = s_EmptySlotOverrideInfo;
+
+            SlotOverrideInfo[] list = new SlotOverrideInfo[extendChain.Length + 1];
+
+            for (int i = 0; i < extendChain.Length; i++) {
+                list[i] = extendChain[i];
+            }
+
+            list[list.Length - 1] = new SlotOverrideInfo() {
+                rootType = rootType,
+                slotNode = slotNode,
+                attributes = attributes.ToArray()
+            };
+
+            SlotOverrideChain chain = new SlotOverrideChain(slotNode.slotName, list);
+            slotOverrideChains.Add(chain);
+            return chain;
+        }
+
+        public SlotOverrideChain GetSlotOverrideChain(string slotName) {
+            for (int i = 0; i < slotOverrideChains.size; i++) {
+                if (slotOverrideChains.array[i].slotName == slotName) {
+                    return slotOverrideChains[i];
+                }
+            }
+
+            return null;
+        }
+
 
     }
 

@@ -41,7 +41,7 @@ namespace UIForia.Compilers {
                     // and then search by name.
                     ParameterExpression el = compiler.GetElement();
                     Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_UIElement_BindingNode);
-                    Expression call = ExpressionFactory.CallInstanceUnchecked(access, TemplateCompiler.s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
+                    Expression call = ExpressionFactory.CallInstance(access, TemplateCompiler.s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
                     Type varType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
 
                     UnaryExpression convert = Expression.Convert(call, varType);
@@ -58,7 +58,7 @@ namespace UIForia.Compilers {
 
                     ReflectionUtil.TypeArray1[0] = type;
                     MethodInfo getItem = TemplateCompiler.s_LinqBindingNode_GetRepeatItem.MakeGenericMethod(ReflectionUtil.TypeArray1);
-                    Expression call = ExpressionFactory.CallInstanceUnchecked(access, getItem, Expression.Constant(id));
+                    Expression call = ExpressionFactory.CallInstance(access, getItem, Expression.Constant(id));
                     Type varType = ReflectionUtil.CreateGenericType(typeof(ContextVariable<>), type);
 
                     ParameterExpression variable = compiler.AddVariable(type, "repeat_item_" + GetName());
@@ -69,7 +69,7 @@ namespace UIForia.Compilers {
                 case AliasResolverType.RepeatIndex: {
                     ParameterExpression el = compiler.GetElement();
                     Expression access = Expression.MakeMemberAccess(el, TemplateCompiler.s_UIElement_BindingNode);
-                    Expression call = ExpressionFactory.CallInstanceUnchecked(access, TemplateCompiler.s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
+                    Expression call = ExpressionFactory.CallInstance(access, TemplateCompiler.s_LinqBindingNode_GetContextVariable, Expression.Constant(id));
 
                     UnaryExpression convert = Expression.Convert(call, typeof(ContextVariable<int>));
                     ParameterExpression variable = compiler.AddVariable(type, "repeat_index_" + GetName());

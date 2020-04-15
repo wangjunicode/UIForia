@@ -13,15 +13,12 @@ namespace UIForia.Compilers {
             this.tagName = tagName;
         }
         
-        public Action<LinqBindingNode>[] bindings;
-
-        // retn, system, root, parent, this, data
-        public Action<ElementSystem>[] elements;
-        public Func<ElementSystem, UIElement, UIElement>[] slots;
-
-        // retn, system, parent, data
         public Func<ElementSystem, UIElement> entry;
+        
         public Action<ElementSystem> hydrate;
+        public Action<LinqBindingNode>[] bindings;
+        public Action<ElementSystem>[] elements;
+        public Action<LinqBindingNode, InputEventHolder>[] inputEventHandlers;
 
     }
 

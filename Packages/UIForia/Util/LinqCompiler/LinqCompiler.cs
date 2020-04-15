@@ -2193,7 +2193,7 @@ namespace UIForia.Compilers {
 
                     if (targetType == typeof(string)) {
                         // null check?
-                        return ExpressionFactory.CallInstanceUnchecked(retn, retn.Type.GetMethod("ToString", Type.EmptyTypes));
+                        return ExpressionFactory.CallInstance(retn, retn.Type.GetMethod("ToString", Type.EmptyTypes));
                     }
 
                     throw CompileException.InvalidTargetType(targetType, retn.Type);
@@ -2790,7 +2790,7 @@ namespace UIForia.Compilers {
 
         private static Expression VisitNumericLiteral(Type targetType, LiteralNode literalNode) {
             if (targetType == null) {
-                string value = literalNode.rawValue.Trim();
+                string value = literalNode.rawValue; //.Trim();
                 char lastChar = char.ToLower(value[value.Length - 1]);
                 if (value.Length > 1) {
                     if (lastChar == 'f') {

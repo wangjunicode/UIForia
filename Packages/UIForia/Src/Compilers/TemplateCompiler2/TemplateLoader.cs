@@ -47,11 +47,13 @@ namespace UIForia.Compilers {
             
             return loader;
 
+            // ideally this is just enqueued on worker thread and done via producer / consumer
             void CompileResult(TemplateExpressionSet set) {
                 // todo -- generic w/ tag name might need to be unique
                 TemplateData templateData = new TemplateData(set.processedType.tagName);
 
                 try {
+                    // could skip entry point to save time if not wanted (usually only 1 entry fn is used)
                     templateData.entry = set.entryPoint.TryCompileWithoutClosure<Func<ElementSystem, UIElement>>();
 
                     BlockExpression block = (BlockExpression) set.hydratePoint.Body;
@@ -64,13 +66,20 @@ namespace UIForia.Compilers {
 
                     templateData.elements = new Action<ElementSystem>[set.elementTemplates.Length];
                     templateData.bindings = new Action<LinqBindingNode>[set.bindings.Length];
+                    templateData.inputEventHandlers = new Action<LinqBindingNode, InputEventHolder>[set.inputEventHandlers.Length];
 
                     for (int j = 0; j < set.elementTemplates.Length; j++) {
                         templateData.elements[j] = set.elementTemplates[j].expression.TryCompileWithoutClosure<Action<ElementSystem>>();
                     }
 
                     for (int j = 0; j < set.bindings.Length; j++) {
+                        // could try to fast compile first then do slow if failed. currently slow because dont know if user did something crazy and slow is safer
                         templateData.bindings[j] = (Action<LinqBindingNode>) set.bindings[j].expression.Compile();
+                    }
+                    
+                    for (int j = 0; j < set.inputEventHandlers.Length; j++) {
+                        // could try to fast compile first then do slow if failed. currently slow because dont know if user did something crazy and slow is safer
+                        templateData.inputEventHandlers[j] = (Action<LinqBindingNode, InputEventHolder>) set.inputEventHandlers[j].expression.Compile();
                     }
 
                     GCHandle.Alloc(templateData); // unity issue where unreferenced type gets gc'd causing crash when they re-scan types
@@ -84,10 +93,6 @@ namespace UIForia.Compilers {
             }
 
             
-        }
-
-        private static void EnqueueTemplate(TemplateExpressionSet expressionSet) {
-            Debug.Log("Compiled " + expressionSet.processedType.rawType.GetTypeName());
         }
 
         public UIElement LoadRoot(Application application, UIView rootView, TemplateData templateData) {
@@ -217,11 +222,5 @@ namespace UIForia.Generated {{
 
     }
     
-    
-    public interface ITemplateLoader2 {
-
-        void Load();
-
-    }
 
 }

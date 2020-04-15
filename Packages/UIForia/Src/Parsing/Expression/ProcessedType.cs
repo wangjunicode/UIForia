@@ -18,7 +18,6 @@ namespace UIForia.Parsing {
         public readonly Type rawType;
 
         public readonly int id;
-        internal int references;
 
         internal string tagName;
         internal string elementPath;
@@ -212,11 +211,6 @@ namespace UIForia.Parsing {
             
         }
         
-        public ProcessedType Reference() {
-            references++;
-            return this;
-        }
-
         public static ProcessedType CreateFromGenericDefinition(Type currentType) {
             Assert.IsTrue(currentType.IsGenericTypeDefinition);
             throw new NotImplementedException();
@@ -225,6 +219,7 @@ namespace UIForia.Parsing {
         public static ProcessedType ResolveGeneric(Type resolvedType, ProcessedType generic) {
             ProcessedType retn = new ProcessedType(resolvedType, generic.elementPath, generic.templatePath, generic.templateId, generic.tagName, generic.implicitStyles, generic.importedStyleSheets);
             retn.templateRootNode = generic.templateRootNode;
+            retn.module = generic.module;
             return retn;
         }
 

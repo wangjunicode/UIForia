@@ -1,9 +1,10 @@
 <UITemplate>
+    <Using namespace="TemplateCompiler2Test"/>
     <Contents attr:x="x" attr:y="y" attr:z="{5 * 5}">
-        <Div mouse:down="HandleMouseDown($evt)">
-            <Panel ctx:someContextValue="GetAttribute('y')">
+        <Div drag:create="() => new TestDragEvent()" mouse:down="HandleMouseDown($evt)" key:down="parentVal = 'set'">
+            <Panel drag:drop="parentVal='dropped'" ctx:someContextValue="GetAttribute('y')">
                 <ExpandedTemplate if="GetAttribute('x') == $someContextValue" sync:value="parentVal" onchange:value="ValueChanged()">
-                    <override:title attr:x="expandedTempate.GetX()">
+                    <override:title attr:x="{GetAttribute('z')}">
                         Hello
                     </override:title>
                 </ExpandedTemplate>

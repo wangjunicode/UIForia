@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 using UIForia.Exceptions;
+using UIForia.Parsing;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
 
-    public class CompilationContext2 {
-
+    public class TemplateCompilerContext {
         
         private static readonly MethodInfo s_Comment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.Comment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
         private static readonly MethodInfo s_InlineComment = typeof(ExpressionUtil).GetMethod(nameof(ExpressionUtil.InlineComment), BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
@@ -23,7 +23,7 @@ namespace UIForia.Compilers {
 
         [ThreadStatic] private static List<ParameterExpression> parameterPool;
 
-        public CompilationContext2() {
+        public TemplateCompilerContext() {
             outputComments = true;
             variables = new SizedArray<ParameterExpression>();
             statements = new LightList<Expression>();
@@ -135,6 +135,11 @@ namespace UIForia.Compilers {
                 return null;
             }
         }
+
+        public void AddReference(ProcessedType slotNodeProcessedType, SlotNode slotNode) {
+            throw new NotImplementedException();
+        }
+
     }
 
 }

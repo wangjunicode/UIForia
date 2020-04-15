@@ -10,6 +10,15 @@ using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Systems {
 
+    public class InputEventHolder {
+
+        public MouseInputEvent mouseEvent;
+        public DragEvent dragEvent;
+        public KeyboardInputEvent keyEvent;
+        public DragEvent dragCreateResult;
+
+    }
+
     public abstract class InputSystem : IInputSystem {
 
         public event Action<IFocusable> onFocusChanged;
@@ -47,7 +56,7 @@ namespace UIForia.Systems {
         private readonly LightList<UIElement> hoveredElements;
 
         private readonly EventPropagator m_EventPropagator;
-        private readonly List<ValueTuple<object, UIElement>> m_MouseEventCaptureList;
+        private readonly List<ValueTuple<Action<LinqBindingNode, InputEventHolder>, UIElement>> m_MouseEventCaptureList;
 
         public KeyboardModifiers KeyboardModifiers => m_KeyboardState.modifiersThisFrame;
 
@@ -75,7 +84,7 @@ namespace UIForia.Systems {
             this.m_KeyboardEventTree = new SkipTree<UIElement>();
             this.keyboardInputManager = keyboardInputManager ?? new KeyboardInputManager();
             this.m_EventPropagator = new EventPropagator();
-            this.m_MouseEventCaptureList = new List<ValueTuple<object, UIElement>>();
+            this.m_MouseEventCaptureList = new List<(Action<LinqBindingNode, InputEventHolder>, UIElement)>();
             // this.m_DragEventCaptureList = new List<ValueTuple<DragEventHandler, UIElement>>();
             this.m_FocusedElement = null;
             this.focusables = new List<IFocusable>();
@@ -519,7 +528,9 @@ namespace UIForia.Systems {
                 for (int creatorIndex = 0; creatorIndex < element.inputHandlers.dragCreators.size; creatorIndex++) {
                     InputHandlerGroup.DragCreatorData data = element.inputHandlers.dragCreators.array[creatorIndex];
 
-                    currentDragEvent = data.handler.Invoke( new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, m_KeyboardState.modifiersThisFrame, false, element));
+                    eventHolder.mouseEvent = new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, m_KeyboardState.modifiersThisFrame, false, element);
+                    data.handler.Invoke(element.bindingNode, eventHolder);
+                    currentDragEvent = eventHolder.dragCreateResult;
 
                     if (currentDragEvent != null) {
                         currentDragEvent.StartTime = Time.realtimeSinceStartup;
@@ -570,6 +581,8 @@ namespace UIForia.Systems {
             currentDragEvent = null;
         }
 
+        private readonly InputEventHolder eventHolder = new InputEventHolder();
+        
         private void RunDragEvent(List<UIElement> elements, InputEventType eventType) {
             if (currentDragEvent.IsCanceled && eventType != InputEventType.DragCancel) {
                 return;
@@ -580,7 +593,8 @@ namespace UIForia.Systems {
             
             m_EventPropagator.Reset(mouseState);
 
-            LightList<Action<DragEvent>> captureList = LightList<Action<DragEvent>>.Get();
+            throw new NotImplementedException(); // todo -- need to now also hold the element or its binding node in this capture list
+            LightList<Action<LinqBindingNode, InputEventHolder>> captureList = LightList<Action<LinqBindingNode, InputEventHolder>>.Get();
 
             for (int i = 0; i < elements.Count; i++) {
                 UIElement element = elements[i];
@@ -604,15 +618,14 @@ namespace UIForia.Systems {
                         continue;
                     }
 
-                    Action<DragEvent> castHandler = (Action<DragEvent>) handler.handlerFn;
-
                     if (handler.eventPhase != EventPhase.Bubble) {
-                        captureList.Add(castHandler);
+                        captureList.Add(handler.handlerFn);
                         continue;
                     }
 
                     CurrentDragEvent.element = element;
-                    castHandler.Invoke(currentDragEvent);
+                    eventHolder.dragEvent = currentDragEvent;
+                    handler.handlerFn.Invoke(element.bindingNode, eventHolder);
 
                     if (currentDragEvent.IsCanceled || m_EventPropagator.shouldStopPropagation) {
                         break;
@@ -630,7 +643,7 @@ namespace UIForia.Systems {
                     break;
                 }
 
-                captureList.array[i].Invoke(currentDragEvent);
+                // captureList.array[i].Invoke(currentDragEvent);
             }
 
             captureList.Release();
@@ -723,6 +736,9 @@ namespace UIForia.Systems {
         protected void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
             // GenericInputEvent keyEvent = new GenericInputEvent(eventType, modifiers, m_EventPropagator, character, keyCode, m_FocusedElement != null);
             KeyboardInputEvent keyInputEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, m_FocusedElement != null);
+
+            eventHolder.keyEvent = keyInputEvent;
+
             if (m_FocusedElement == null) {
                 m_KeyboardEventTree.ConditionalTraversePreOrder(keyInputEvent, (item, evt) => {
                     if (evt.stopPropagation) return false;
@@ -746,9 +762,8 @@ namespace UIForia.Systems {
                             ran = true;
                             RunBindings(element);
                         }
-                        Action<KeyboardInputEvent> keyHandler = handler.handlerFn as Action<KeyboardInputEvent>;
-                        Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
-                        keyHandler.Invoke(evt);
+
+                        handler.handlerFn.Invoke(element.bindingNode, eventHolder);
                     }
 
                     if (ran) {
@@ -775,9 +790,7 @@ namespace UIForia.Systems {
                         continue;
                     }
 
-                    Action<KeyboardInputEvent> keyHandler = evtHandlerGroup.eventHandlers[i].handlerFn as Action<KeyboardInputEvent>;
-                    Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
-                    keyHandler.Invoke(keyInputEvent);
+                    evtHandlerGroup.eventHandlers[i].handlerFn.Invoke(element.bindingNode, eventHolder);
                 }
 
                 RunWriteBindings(element);
@@ -830,9 +843,8 @@ namespace UIForia.Systems {
                     }
 
                     if ((handlerData.modifiers & m_KeyboardState.modifiersThisFrame) == handlerData.modifiers) {
-                        Action<MouseInputEvent> handler = handlerData.handlerFn as Action<MouseInputEvent>;
-                        Debug.Assert(handler != null, nameof(handler) + " != null");
-                        handler.Invoke(new MouseInputEvent(m_EventPropagator, eventType, m_KeyboardState.modifiersThisFrame, element == m_FocusedElement, element));
+                        eventHolder.mouseEvent = new MouseInputEvent(m_EventPropagator, eventType, m_KeyboardState.modifiersThisFrame, element == m_FocusedElement, element);
+                        handlerData.handlerFn.Invoke(element.bindingNode, eventHolder);
                     }
 
                     if (m_EventPropagator.shouldStopPropagation) {
@@ -847,10 +859,12 @@ namespace UIForia.Systems {
             }
 
             for (int i = 0; i < m_MouseEventCaptureList.Count; i++) {
-                Action<MouseInputEvent> handler = (Action<MouseInputEvent>) m_MouseEventCaptureList[i].Item1;
+                Action<LinqBindingNode, InputEventHolder> handler = m_MouseEventCaptureList[i].Item1;
                 UIElement element = m_MouseEventCaptureList[i].Item2;
 
-                handler.Invoke(new MouseInputEvent(m_EventPropagator, eventType, m_KeyboardState.modifiersThisFrame, element == m_FocusedElement, element));
+                eventHolder.mouseEvent = new MouseInputEvent(m_EventPropagator, eventType, m_KeyboardState.modifiersThisFrame, element == m_FocusedElement, element);
+                
+                handler.Invoke(element.bindingNode, eventHolder);
 
                 if (m_EventPropagator.shouldStopPropagation) {
                     m_MouseEventCaptureList.Clear();

@@ -1,3 +1,4 @@
+using System;
 using UIForia.Parsing;
 using UIForia.Util;
 
@@ -182,6 +183,46 @@ namespace UIForia.Compilers {
             }
 
             return -1;
+        }
+
+        public static void InjectAttributes(ref SizedArray<AttrInfo> output, StructList<AttrInfo> injectedAttributes) {
+            if (injectedAttributes == null || injectedAttributes.size == 0) return;
+            // todo -- maybe injected attributes should actually come first?
+            output.EnsureCapacity(output.size + injectedAttributes.size);
+            for (int i = 0; i < injectedAttributes.size; i++) {
+                // depth should be max depth, do we know this?
+                output.Add(new AttrInfo(int.MaxValue, injectedAttributes.array[i], true));
+            }
+
+        }
+
+        public static void MergeSlotAttributes2(ref SizedArray<AttrInfo> scratchAttributes, SlotOverrideChain overrideChain) {
+            scratchAttributes.size = 0;
+
+            // we want to dedup these or weird stuff can happen
+
+            for (int i = overrideChain.chain.Length - 1; i >= 0; i--) {
+                SlotOverrideInfo slotInfo = overrideChain.chain[i];
+                for (int j = 0; j < slotInfo.attributes.Length; j++) {
+
+                    ref AttrInfo candidate = ref slotInfo.attributes[j];
+                    
+                    bool replaced = false;
+                    
+                    for (int k = 0; k < scratchAttributes.size; k++) {
+                        ref AttrInfo info = ref scratchAttributes.array[k];
+                        if (info.type == candidate.type && info.key == candidate.key) {
+                            replaced = true;
+                            scratchAttributes.array[k] = new AttrInfo(i, candidate);
+                            break;
+                        }
+                    }
+
+                    if (!replaced) {
+                        scratchAttributes.Add(new AttrInfo(i, slotInfo.attributes[j]));
+                    }
+                }
+            }
         }
 
     }

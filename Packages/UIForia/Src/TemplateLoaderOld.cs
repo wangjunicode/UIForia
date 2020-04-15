@@ -111,7 +111,7 @@ namespace UIForia.Compilers {
             // can convert the constructorFnMap to an array but would need a unique index for each type that is sequential
 
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
-                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0 || kvp.Key.IsGenericTypeDefinition) {
+                if (kvp.Key.IsAbstract || kvp.Value.id < 0 || kvp.Key.IsGenericTypeDefinition) {
                     continue;
                 }
 
@@ -128,7 +128,7 @@ namespace UIForia.Compilers {
 
             ParameterExpression[] empty = new ParameterExpression[0];
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.genericTypeMap) {
-                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0 || kvp.Key.IsGenericTypeDefinition) {
+                if (kvp.Key.IsAbstract || kvp.Value.id < 0 || kvp.Key.IsGenericTypeDefinition) {
                     continue;
                 }
 

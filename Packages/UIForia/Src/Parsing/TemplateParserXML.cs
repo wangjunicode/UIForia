@@ -8,6 +8,7 @@ using UIForia.Elements;
 using UIForia.Parsing.Expressions;
 using UIForia.Templates;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Parsing {
 
@@ -16,7 +17,6 @@ namespace UIForia.Parsing {
     public class TemplateParserXML : TemplateParser {
 
         private TemplateShell shell;
-        private string contents;
         private StructList<AttributeDefinition> attributes;
         private StructList<AttributeDefinition> injectedAttributes;
 
@@ -27,7 +27,6 @@ namespace UIForia.Parsing {
 
         public override bool TryParse(string contents, TemplateShell templateShell) {
             this.shell = templateShell;
-            this.contents = contents;
 
             XElement root;
 
@@ -35,6 +34,7 @@ namespace UIForia.Parsing {
                 root = XElement.Load(new XmlTextReader(contents, XmlNodeType.Element, XMLTemplateParser.s_XmlParserContext), LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);
             }
             catch (Exception exception) {
+                Debug.Log(exception);
                 return ReportParseError(exception.Message);
             }
 
@@ -134,45 +134,31 @@ namespace UIForia.Parsing {
                         TemplateLineInfo lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
 
                         if (namespaceName == "define") {
-                            parent.TryCreateSlotNode(tagName, childAttributes, childInjectedAttributes, lineInfo, SlotType.Define, out templateNode);
+                            parent.TryCreateSlotNode(tagName, childAttributes, childInjectedAttributes, lineInfo, SlotType.Define, requireType, out templateNode);
                         }
                         else if (namespaceName == "override") {
-                            parent.TryCreateSlotNode(tagName, childAttributes, childInjectedAttributes, lineInfo, SlotType.Override, out templateNode);
+                            parent.TryCreateSlotNode(tagName, childAttributes, childInjectedAttributes, lineInfo, SlotType.Override, requireType, out templateNode);
                         }
                         else if (namespaceName == "forward") {
-                            parent.TryCreateSlotNode(tagName, childAttributes, childInjectedAttributes, lineInfo, SlotType.Forward, out templateNode);
+                            parent.TryCreateSlotNode(tagName, childAttributes, childInjectedAttributes, lineInfo, SlotType.Forward, requireType, out templateNode);
                         }
                         else if (string.IsNullOrEmpty(namespaceName) && string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
                             parent.TryCreateRepeatNode(childAttributes, lineInfo, out templateNode);
                         }
                         else {
-                            parent.TryCreateElementNode(namespaceName, tagName, childAttributes, lineInfo, genericTypeResolver, requireType, out templateNode);
+                            if (!string.IsNullOrEmpty(genericTypeResolver)) {
+                                genericTypeResolver.InlineReplace('[', '<').InlineReplace(']', '>');
+                            }
+
+                            if (!parent.TryCreateElementNode(namespaceName, tagName, childAttributes, lineInfo, genericTypeResolver, requireType, out templateNode)) {
+                                // todo -- diagnostic
+                                Debug.Log("Unable to create element " + tagName);
+                            }
                         }
 
                         if (templateNode == null) {
                             continue;
                         }
-
-                        // todo the template compiler needs to implement the implicit <override:Children> feature now
-//
-                        // if (p is SlotNode slotNode) {
-                        //
-                        //     slotNode.injectedAttributes = injectedAttributes.Clone();
-                        //
-                        //     if (slotNode.slotType == SlotType.Forward || slotNode.slotType == SlotType.Override) {
-                        //         parent.AddSlotOverride(slotNode);
-                        //     }
-                        //     else {
-                        //         parent.AddChild(p);
-                        //     }
-                        // }
-                        // else if (injectedAttributes.size != 0) {
-                        //     ReportParseError("Only slot nodes can have injected attributes");
-                        //     injectedAttributes.QuickClear();
-                        // }
-                        // else {
-                        //     parent.AddChild(p);
-                        // }
 
                         ParseChildren(templateNode, element.Nodes());
 
@@ -190,69 +176,7 @@ namespace UIForia.Parsing {
                 CreateOrUpdateTextNode(parent, textContext, parent.lineInfo); // todo -- line info probably wrong
             }
         }
-
-        private bool TryParseElementTag(string moduleName, string tagName, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo, out TemplateNode retn) {
-            retn = null;
-
-            string lowerNamespace = moduleName.ToLower();
-
-            // if (lowerNamespace == "define") {
-            //     return parent.TryCreateSlotNode(tagName, attributes, templateLineInfo, SlotType.Define);
-            //     // retn = new SlotNode(tagName, attributes, templateLineInfo, SlotType.Define);
-            //     // return true;
-            // }
-            //
-            // if (lowerNamespace == "override") {
-            //     retn = new SlotNode(tagName, attributes, templateLineInfo, SlotType.Override);
-            //     return true;
-            // }
-            //
-            // if (lowerNamespace == "forward") {
-            //     retn = new SlotNode(tagName, attributes, templateLineInfo, SlotType.Forward);
-            //     return true;
-            // }
-
-            if (string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
-                // retn = new RepeatNode(attributes, templateLineInfo);
-                // return true;
-            }
-
-            // parent.TryCreateChildNode(moduleName, tagName, attributes, templateLineInfo, genericResolver, requireType);
-
-          //  retn = new ElementNode(moduleName, tagName, attributes, templateLineInfo);
-
-            return true;
-
-            // processedType = module.ResolveTagName(namespacePath, tagName, shell.usings);
-            //
-            // if (processedType == null) {
-            //     return ReportParseError($"Unable to resolve tag name: <{tagName}>");
-            // }
-            //
-            // processedType.ValidateAttributes(attributes);
-            //
-            // if (processedType.IsContainerElement) {
-            //     retn = new ContainerNode(templateRoot, parent, processedType, attributes, templateLineInfo);
-            // }
-            // else if (typeof(UITextElement).IsAssignableFrom(processedType.rawType)) {
-            //     retn = new TextNode(templateRoot, parent, string.Empty, processedType, attributes, templateLineInfo);
-            // }
-            // else if (typeof(UITextSpanElement).IsAssignableFrom(processedType.rawType)) {
-            //     throw new NotImplementedException();
-            // }
-            // else if (typeof(UITerminalElement).IsAssignableFrom(processedType.rawType)) {
-            //     retn = new TerminalNode(templateRoot, parent, processedType, attributes, templateLineInfo);
-            // }
-            // else if (typeof(UIElement).IsAssignableFrom(processedType.rawType)) {
-            //     retn = new ExpandedTemplateNode(templateRoot, parent, processedType, attributes, templateLineInfo);
-            // }
-            //
-            // if (retn == null) {
-            //     return ReportParseError($"Unable to resolve tag name: <{tagName}>");
-            // }
-
-        }
-
+        
         private void SetErrorContext(XElement element) {
             IXmlLineInfo info = element;
             SetErrorContext(info.LineNumber, info.LinePosition);

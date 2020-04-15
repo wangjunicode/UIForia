@@ -3,7 +3,7 @@
     
     <Contents>
         <Text>this is inside the template</Text>    
-        <define:title>
+        <define:title attr:x="{GetAttribute('y')}">
             Goodbye
         </define:title>
     </Contents>

@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
+using UIForia.Generated;
+using UIForia.Parsing;
 using UIForia.Util;
 
 // ReSharper disable ClassNeverInstantiated.Global
@@ -24,10 +27,12 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_UseOverride() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Main>();
+            Application app = MockApplication.Create<TemplateStructure_SlotOverride_Main>();
 
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Expand>(app.RootElement[0]);
-            Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0]);
+            Assert.IsInstanceOf<UISlotDefinition>(app.RootElement[0][0]);
+            UISlotDefinition slot = app.RootElement[0][0] as UISlotDefinition;
+            Assert.AreEqual(slot.slotType, SlotType.Override);
             Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0]);
             UITextElement textElement = (UITextElement) app.RootElement[0][0][0];
             Assert.AreEqual("Override successful", textElement.GetText().Trim());
@@ -41,7 +46,7 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_UseDefault() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverrideDefault_Main>();
+            Application app = MockApplication.Create<TemplateStructure_SlotOverrideDefault_Main>();
             Assert.IsInstanceOf<TemplateStructure_SlotOverrideDefault_Expand>(app.RootElement[0]);
             Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0]);
             UITextElement textElement = (UITextElement) app.RootElement[0][0][0];
@@ -59,10 +64,12 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverrideExtern_OuterOverride() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverrideExternOuterOverride_Main>();
+            Application app = MockApplication.Create<TemplateStructure_SlotOverrideExternOuterOverride_Main>();
             Assert.IsInstanceOf<TemplateStructure_SlotOverrideExternOuterOverride_Exposer>(app.RootElement[0]);
             Assert.IsInstanceOf<TemplateStructure_SlotOverrideExternOuterOverride_Definer>(app.RootElement[0][0]);
-            Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0][0]);
+            Assert.IsInstanceOf<UISlotDefinition>(app.RootElement[0][0][0]);
+            UISlotDefinition slot = app.RootElement[0][0][0] as UISlotDefinition;
+            Assert.AreEqual(slot.slotType, SlotType.Override);
             Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0][0]);
             UITextElement textElement = (UITextElement) app.RootElement[0][0][0][0];
             Assert.AreEqual("Override from outer layer", textElement.GetText().Trim());
@@ -79,10 +86,12 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_Extern_ExternDefault() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Extern_ExternDefault_Main>();
+            Application app = MockApplication.Create<TemplateStructure_SlotOverride_Extern_ExternDefault_Main>();
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_ExternDefault_Exposer>(app.RootElement[0]);
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_ExternDefault_Definer>(app.RootElement[0][0]);
-            Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0][0]);
+            Assert.IsInstanceOf<UISlotDefinition>(app.RootElement[0][0][0]);
+            UISlotDefinition slot = app.RootElement[0][0][0] as UISlotDefinition;
+            Assert.AreEqual(slot.slotType, SlotType.Forward);
             Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0][0]);
             UITextElement textElement = (UITextElement) app.RootElement[0][0][0][0];
             Assert.AreEqual("Override from exposer layer", textElement.GetText().Trim());
@@ -99,10 +108,12 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_Extern_DefinerDefault() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Extern_DefinerDefault_Main>();
+            Application app = MockApplication.Create<TemplateStructure_SlotOverride_Extern_DefinerDefault_Main>();
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_DefinerDefault_Exposer>(app.RootElement[0]);
             Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_DefinerDefault_Definer>(app.RootElement[0][0]);
             Assert.IsInstanceOf<UISlotDefinition>(app.RootElement[0][0][0]);
+            UISlotDefinition slot = app.RootElement[0][0][0] as UISlotDefinition;
+            Assert.AreEqual(slot.slotType, SlotType.Define);
             Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0][0]);
             UITextElement textElement = (UITextElement) app.RootElement[0][0][0][0];
             Assert.AreEqual("Not overridden", textElement.GetText().Trim());
@@ -132,7 +143,7 @@ namespace TemplateStructure {
 
         [Test]
         public void SlotOverrideContext() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_RadioButtonTest>();
+            Application app = MockApplication.Create<TemplateStructure_RadioButtonTest>();
         }
 
         [Template("AliasStyles.xml")]
@@ -140,7 +151,7 @@ namespace TemplateStructure {
 
         [Test]
         public void AliasStyles() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_AliasStyles>();
+            Application app = MockApplication.Create<TemplateStructure_AliasStyles>();
             TemplateStructure_AliasStyles root = (TemplateStructure_AliasStyles) app.RootElement;
         }
 
@@ -154,10 +165,9 @@ namespace TemplateStructure {
 
         }
 
-
         [Test]
         public void UseDefaultSlotContent() {
-            MockApplication app = MockApplication.Setup<TestTemplateStructure_UseDefaultSlotContent_Outer>();
+            Application app = MockApplication.Create<TestTemplateStructure_UseDefaultSlotContent_Outer>();
             TestTemplateStructure_UseDefaultSlotContent_Outer root = (TestTemplateStructure_UseDefaultSlotContent_Outer) app.RootElement;
 
             app.Update();
@@ -170,7 +180,7 @@ namespace TemplateStructure {
 
         [Test]
         public void OverrideSlotContent() {
-            MockApplication app = MockApplication.Setup<TestTemplateStructure_UseDefaultSlotContent_OuterOverride>();
+            Application app = MockApplication.Create<TestTemplateStructure_UseDefaultSlotContent_OuterOverride>();
             TestTemplateStructure_UseDefaultSlotContent_OuterOverride root = (TestTemplateStructure_UseDefaultSlotContent_OuterOverride) app.RootElement;
 
             app.Update();
@@ -186,7 +196,7 @@ namespace TemplateStructure {
 
         [Test]
         public void UseDefaultChildren() {
-            MockApplication app = MockApplication.Setup<UseDefaultChildrenOuter>();
+            Application app = MockApplication.Create<UseDefaultChildrenOuter>();
             UseDefaultChildrenOuter root = (UseDefaultChildrenOuter) app.RootElement;
 
             app.Update();
@@ -206,7 +216,8 @@ namespace TemplateStructure {
 
         [Test]
         public void OverrideDefaultChildren() {
-            MockApplication app = MockApplication.Setup<OverrideChildrenOuter>();
+            // MockApplication.PreCompile<OverrideChildrenOuter>("OverrideDefaultChildren");
+            Application app = MockApplication.Create<OverrideChildrenOuter>();
             OverrideChildrenOuter root = (OverrideChildrenOuter) app.RootElement;
             root.overrideBinding = "fromRoot";
             app.Update();
@@ -228,7 +239,7 @@ namespace TemplateStructure {
 
         [Test]
         public void ResolveGenericType() {
-            MockApplication app = MockApplication.Setup<ResolveGeneric>();
+            Application app = MockApplication.Create<ResolveGeneric>();
             ResolveGeneric root = (ResolveGeneric) app.RootElement;
 
             app.Update();
@@ -248,7 +259,7 @@ namespace TemplateStructure {
 
         [Test]
         public void ModifySlotRequireChildrenOfElementType() {
-            Assert.DoesNotThrow(() => { MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireTypeMain>(); });
+            Assert.DoesNotThrow(() => { MockApplication.Create<TestTemplateStructure_ModifySlot_RequireTypeMain>(); });
         }
 
         [Template("TestTemplateStructure_ModifySlot.xml#require_type_main_invalid")]
@@ -256,7 +267,7 @@ namespace TemplateStructure {
 
         [Test]
         public void ModifySlotRequireChildrenOfElementTypeInvalid() {
-            TemplateCompileException exception = Assert.Throws<TemplateCompileException>(() => { MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireTypeMainInvalid>(); });
+            TemplateCompileException exception = Assert.Throws<TemplateCompileException>(() => { MockApplication.Create<TestTemplateStructure_ModifySlot_RequireTypeMainInvalid>(); });
             Assert.IsTrue(exception.Message.Contains($"Expected element that can be assigned to {typeof(UIDivElement)} but {typeof(UITextElement)} (<Text>) is not."));
         }
 
@@ -271,8 +282,8 @@ namespace TemplateStructure {
         }
 
         [Test]
-        public void ModifySlot_WithAttr() {
-            MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain>();
+        public void ModifySlot_InjectAttr() {
+            Application app = MockApplication.Create<TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain>();
             TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain root = (TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain) app.RootElement;
             TestTemplateStructure_ModifySlot_RadioGroupWithAttr child = (TestTemplateStructure_ModifySlot_RadioGroupWithAttr) root[0];
 
@@ -292,7 +303,7 @@ namespace TemplateStructure {
 
         [Test]
         public void ModifySlot_TypedWithField() {
-            MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_TypedWithFieldMain>();
+            Application app = MockApplication.Create<TestTemplateStructure_ModifySlot_TypedWithFieldMain>();
             TestTemplateStructure_ModifySlot_TypedWithFieldMain root = (TestTemplateStructure_ModifySlot_TypedWithFieldMain) app.RootElement;
 
             TestTemplateStructure_ModifySlot_TypedWithFieldInner inner = (TestTemplateStructure_ModifySlot_TypedWithFieldInner) root[0];
@@ -320,7 +331,7 @@ namespace TemplateStructure {
 
         [Test]
         public void ModifySlot_RequireGeneric() {
-            MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireGenericMain>();
+            Application app = MockApplication.Create<TestTemplateStructure_ModifySlot_RequireGenericMain>();
             TestTemplateStructure_ModifySlot_RequireGenericMain root = (TestTemplateStructure_ModifySlot_RequireGenericMain) app.RootElement;
 
             TestTemplateStructure_ModifySlot_RequireGenericInner<string> inner = (TestTemplateStructure_ModifySlot_RequireGenericInner<string>) root[0];

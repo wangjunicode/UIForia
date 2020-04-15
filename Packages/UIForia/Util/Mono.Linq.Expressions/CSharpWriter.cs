@@ -1069,8 +1069,10 @@ namespace Mono.Linq.Expressions {
             Type type = value.GetType();
             if (Enum.IsDefined(type, value))
                 return GetPrintableTypeName(type) + "." + Enum.GetName(type, value);
-
-            throw new NotSupportedException();
+            else {
+                string v = ((int) value).ToString();
+                return "((" + GetPrintableTypeName(type) + ")" + v + ")";
+            }
         }
 
         protected override Expression VisitLabel(LabelExpression node) {

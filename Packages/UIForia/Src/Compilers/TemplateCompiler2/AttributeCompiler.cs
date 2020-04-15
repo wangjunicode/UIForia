@@ -14,18 +14,19 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Compilers {
-    
+
     public class AttributeCompiler {
 
         private readonly TemplateLinqCompiler constCompiler;
         private readonly TemplateLinqCompiler enableCompiler;
         private readonly TemplateLinqCompiler updateCompiler;
         private readonly TemplateLinqCompiler lateCompiler;
+        private readonly TemplateLinqCompiler inputHandlerCompiler;
 
         private static readonly string k_InputEventParameterName = "__evt";
         private static readonly Expression s_StringBuilderExpr = Expression.Field(null, typeof(StringUtil), nameof(StringUtil.s_CharStringBuilder));
-        private static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
-        private static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
+        private static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstance(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
+        private static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstance(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
         private static readonly RepeatKeyFnTypeWrapper s_RepeatKeyFnTypeWrapper = new RepeatKeyFnTypeWrapper();
         private static readonly Dictionary<Type, MethodInfo> s_BindingVariableGetterCache = new Dictionary<Type, MethodInfo>();
         private static readonly Dictionary<Type, MethodInfo> s_BindingVariableSetterCache = new Dictionary<Type, MethodInfo>();
@@ -34,22 +35,22 @@ namespace UIForia.Compilers {
         private readonly StructList<PropertyChangeHandlerDesc> changeHandlers;
         private StructList<BindingVariableDesc> localVariables;
 
-        private readonly TemplateLinqCompilerContext compilerContext;
+        private readonly AttributeCompilerContext compilerContext;
 
-        public AttributeCompiler() {
-            this.compilerContext = new TemplateLinqCompilerContext();
+        public AttributeCompiler(AttributeCompilerContext compilerContext) {
+            this.compilerContext = compilerContext;
+            // this.compilerContext = new TemplateLinqCompilerContext();
             this.updateCompiler = new TemplateLinqCompiler(compilerContext);
             this.lateCompiler = new TemplateLinqCompiler(compilerContext);
             this.constCompiler = new TemplateLinqCompiler(compilerContext);
             this.enableCompiler = new TemplateLinqCompiler(compilerContext);
+            this.inputHandlerCompiler = new TemplateLinqCompiler(compilerContext);
             this.changeHandlers = new StructList<PropertyChangeHandlerDesc>(16);
         }
 
+        const AttributeType beforeUpdateTypes = AttributeType.Alias | AttributeType.Conditional | AttributeType.Context | AttributeType.Property;
+
         private static bool IsAttrBeforeUpdate(in AttrInfo attrInfo) {
-            const AttributeType beforeUpdateTypes = AttributeType.Alias
-                                                    | AttributeType.Conditional
-                                                    | AttributeType.Context
-                                                    | AttributeType.Property;
             return (attrInfo.type & beforeUpdateTypes) != 0;
         }
 
@@ -70,17 +71,11 @@ namespace UIForia.Compilers {
             enableCompiler.Setup();
         }
 
-        public void CompileAttributes(ProcessedType processedType, TemplateNode node, AttributeSet attributeSet, ref BindingResult bindingResult, LightStack<StructList<BindingVariableDesc>> variableStack) {
-            processedType.EnsureReflectionData();
-            localVariables = bindingResult.localVariables;
-
+        public void CompileAttributes(SizedArray<AttrInfo> attributes, AttributeCompilerContext compilerContext) {
+            compilerContext.elementType.EnsureReflectionData();
             // [InvokeWhenDisabled]
             // Update() { } 
             // const + once bindings and unmarked bindings that are constant
-
-            // todo -- parent type
-
-            compilerContext.Init(attributeSet.elementBindingType, processedType.rawType, null, attributeSet.contextTypes, bindingResult.localVariables, variableStack);
 
             // todo -- only if needed
             updateCompiler.Init();
@@ -88,9 +83,9 @@ namespace UIForia.Compilers {
             constCompiler.Init();
             enableCompiler.Init();
 
-            for (int i = 0; i < attributeSet.attributes.size; i++) {
+            for (int i = 0; i < attributes.size; i++) {
 
-                ref AttrInfo attr = ref attributeSet.attributes.array[i];
+                ref AttrInfo attr = ref attributes.array[i];
 
                 if (!IsAttrBeforeUpdate(attr)) {
                     continue;
@@ -106,7 +101,7 @@ namespace UIForia.Compilers {
 
                     case AttributeType.Conditional: {
                         compiler.SetImplicitContext(compiler.GetRoot(), ParameterFlags.NeverNull);
-                        compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(
+                        compiler.RawExpression(ExpressionFactory.CallInstance(
                                 compiler.GetElement(),
                                 MemberData.Element_SetEnabledInternal,
                                 compiler.Value(ast)
@@ -116,7 +111,7 @@ namespace UIForia.Compilers {
                     }
 
                     case AttributeType.Property: {
-                        CompilePropertyBinding(compiler, ast, processedType, attr);
+                        CompilePropertyBinding(compiler, ast, attr);
                         break;
                     }
 
@@ -136,15 +131,15 @@ namespace UIForia.Compilers {
 
             // when resolving aliases, if alias was a context variable, determine if it is local or not
 
-            CompileTextBinding(node as TextNode);
+            CompileTextBinding(compilerContext.templateNode as TextNode);
 
-            if (processedType.requiresUpdateFn) {
-                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(updateCompiler.GetBindingNode(), MemberData.BindingNode_InvokeUpdate));
+            if (compilerContext.elementType.requiresUpdateFn) {
+                updateCompiler.RawExpression(ExpressionFactory.CallInstance(updateCompiler.GetBindingNode(), MemberData.BindingNode_InvokeUpdate));
             }
 
-            for (int i = 0; i < attributeSet.attributes.size; i++) {
+            for (int i = 0; i < attributes.size; i++) {
 
-                ref AttrInfo attr = ref attributeSet.attributes.array[i];
+                ref AttrInfo attr = ref attributes.array[i];
 
                 if (IsAttrBeforeUpdate(attr)) {
                     continue;
@@ -184,16 +179,16 @@ namespace UIForia.Compilers {
             }
 
             // todo -- do this once per processed type, use result
-            CompileInputHandlers(processedType);
-            
-            BuildLambda(updateCompiler, ref bindingResult.updateLambda);
-            BuildLambda(lateCompiler, ref bindingResult.lateLambda);
-            BuildLambda(enableCompiler, ref bindingResult.enableLambda);
-            BuildLambda(constCompiler, ref bindingResult.constLambda);
+            CompileInputHandlers();
+
+            BuildLambda(updateCompiler, ref compilerContext.bindingResult.updateLambda);
+            BuildLambda(lateCompiler, ref compilerContext.bindingResult.lateLambda);
+            BuildLambda(enableCompiler, ref compilerContext.bindingResult.enableLambda);
+            BuildLambda(constCompiler, ref compilerContext.bindingResult.constLambda);
 
         }
 
-        private void CompileInputHandlers(ProcessedType processedType) {
+        private void CompileInputHandlers() {
             // StructList<InputHandler> handlers = InputCompiler.CompileInputAnnotations(processedType.rawType);
             //
             // const InputEventType k_KeyboardType = InputEventType.KeyDown | InputEventType.KeyUp | InputEventType.KeyHeldDown;
@@ -245,82 +240,41 @@ namespace UIForia.Compilers {
         }
 
         private void CompileDragCreateBinding(in AttrInfo attr, in InputHandlerDescriptor descriptor) {
-            LambdaExpression lambda = BuildInputTemplateBinding<MouseInputEvent>(attr, typeof(DragEvent));
+            
+            LambdaExpression lambda = BuildInputTemplateBinding(MemberData.InputEventHolder_MouseInputEvent, attr, MemberData.InputEventHolder_DragCreateResult);
 
-            // todo -- use an api wrapper so that this isn't exposed to user api
-            MemberExpression handlers = Expression.Field(constCompiler.GetElement(), MemberData.Element_InputHandlers);
-
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(handlers, MemberData.InputHandlerGroup_AddDragCreator,
-                ExpressionUtil.GetEnumConstant<KeyboardModifiers>((int)descriptor.modifiers),
-                ExpressionUtil.GetBoolConstant(descriptor.requiresFocus),
-                ExpressionUtil.GetEnumConstant<EventPhase>((int)descriptor.eventPhase),
-                lambda
-            );
-
-            constCompiler.RawExpression(expression);
+            compilerContext.AddInputBinding(InputEventClass.DragCreate, descriptor, lambda);
         }
 
         private void CompileDragEventBinding(in AttrInfo attr, in InputHandlerDescriptor descriptor) {
-            LambdaExpression lambda = BuildInputTemplateBinding<DragEvent>(attr);
-
-            // todo -- use an api wrapper so that this isn't exposed to user api
-            MemberExpression handlers = Expression.Field(constCompiler.GetElement(), MemberData.Element_InputHandlers);
-
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(handlers, MemberData.InputHandlerGroup_AddDragEvent,
-                ExpressionUtil.GetEnumConstant<InputEventType>((int)descriptor.handlerType),
-                ExpressionUtil.GetEnumConstant<KeyboardModifiers>((int)descriptor.modifiers),
-                ExpressionUtil.GetBoolConstant(descriptor.requiresFocus),
-                ExpressionUtil.GetEnumConstant<EventPhase>((int)descriptor.eventPhase),
-                lambda
-            );
-
-            constCompiler.RawExpression(expression);
+            LambdaExpression lambda = BuildInputTemplateBinding(MemberData.InputEventHolder_DragEvent, attr);
+            
+            compilerContext.AddInputBinding(InputEventClass.Drag, descriptor, lambda);
         }
 
         private void CompileMouseInputBinding(in AttrInfo attr) {
-            // todo -- eliminate generated closure by passing in template root and element from input system and doing casting as normal in the callback
 
-            LambdaExpression lambda = BuildInputTemplateBinding<MouseInputEvent>(attr);
+            LambdaExpression lambda = BuildInputTemplateBinding(MemberData.InputEventHolder_MouseInputEvent, attr);
 
             InputHandlerDescriptor descriptor = InputCompiler.ParseMouseDescriptor(attr.key);
-            
-            // todo -- use an api wrapper so that this isn't exposed to user api
-            MemberExpression handlers = Expression.Field(constCompiler.GetElement(), MemberData.Element_InputHandlers);
 
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(handlers, MemberData.InputHandlerGroup_AddMouseEvent,
-                ExpressionUtil.GetEnumConstant<InputEventType>((int)descriptor.handlerType),
-                ExpressionUtil.GetEnumConstant<KeyboardModifiers>((int)descriptor.modifiers),
-                ExpressionUtil.GetBoolConstant(descriptor.requiresFocus),
-                ExpressionUtil.GetEnumConstant<EventPhase>((int)descriptor.eventPhase),
-                lambda
-            );
+            compilerContext.AddInputBinding(InputEventClass.Mouse, descriptor, lambda);
 
-            constCompiler.RawExpression(expression);
         }
 
         private void CompileKeyboardInputBinding(in AttrInfo attr) {
-            LambdaExpression lambda = BuildInputTemplateBinding<KeyboardInputEvent>(attr);
+
+            LambdaExpression lambda = BuildInputTemplateBinding(MemberData.InputEventHolder_KeyboardInputEvent, attr);
 
             InputHandlerDescriptor descriptor = InputCompiler.ParseKeyboardDescriptor(attr.key);
 
-            // todo -- use an api wrapper so that this isn't exposed to user api
-            MemberExpression handlers = Expression.Field(constCompiler.GetElement(), MemberData.Element_InputHandlers);
+            compilerContext.AddInputBinding(InputEventClass.Keyboard, descriptor, lambda);
 
-            MethodCallExpression expression = ExpressionFactory.CallInstanceUnchecked(handlers, MemberData.InputHandlerGroup_AddKeyboardEvent,
-                ExpressionUtil.GetEnumConstant<InputEventType>((int)descriptor.handlerType),
-                ExpressionUtil.GetEnumConstant<KeyboardModifiers>((int)descriptor.modifiers),
-                ExpressionUtil.GetBoolConstant(descriptor.requiresFocus),
-                ExpressionUtil.GetEnumConstant<EventPhase>((int)descriptor.eventPhase),
-                ExpressionUtil.GetEnumConstant<KeyCode>((int)KeyCodeUtil.AnyKey),
-                Expression.Constant('\0'),
-                lambda
-            );
-
-            constCompiler.RawExpression(expression);
         }
 
-        private LambdaExpression BuildInputTemplateBinding<T>(in AttrInfo attr, Type returnType = null) {
-            constCompiler.SetImplicitContext(constCompiler.GetRoot());
+        private LambdaExpression BuildInputTemplateBinding(FieldInfo evtAccessor, in AttrInfo attr, FieldInfo assignmentTarget = null) {
+            inputHandlerCompiler.Init();
+            inputHandlerCompiler.Setup();
 
             ASTNode astNode = ExpressionParser.Parse(attr.value);
             string eventName = k_InputEventParameterName;
@@ -342,16 +296,26 @@ namespace UIForia.Compilers {
                 astNode = n.body;
             }
 
-            LinqCompiler closure = constCompiler.CreateClosure(new Parameter<T>(eventName, ParameterFlags.NeverNull | ParameterFlags.NeverOutOfBounds), returnType ?? typeof(void));
+            inputHandlerCompiler.SetImplicitContext(inputHandlerCompiler.GetRoot());
+            inputHandlerCompiler.SetSignature(new Parameter(typeof(LinqBindingNode), "bindingNode"), new Parameter(typeof(InputEventHolder), "__eventHolder"));
 
-            compilerContext.currentEvent = closure.GetParameterAtIndex(0);
+            ParameterExpression variable = inputHandlerCompiler.AddVariable(evtAccessor.FieldType, eventName);
+
+            inputHandlerCompiler.Assign(variable, Expression.MakeMemberAccess(inputHandlerCompiler.GetParameterAtIndex(1), evtAccessor));
+
+            compilerContext.currentEvent = variable;
 
             try {
-                if (returnType == null) {
-                    closure.Statement(astNode);
+                if (assignmentTarget == null) {
+                    inputHandlerCompiler.Statement(astNode);
                 }
                 else {
-                    closure.Return(astNode);
+                    MemberExpression field = Expression.Field(inputHandlerCompiler.GetParameterAtIndex(1), assignmentTarget);
+                    Expression value = inputHandlerCompiler.Value(astNode);
+                    if (!typeof(DragEvent).IsAssignableFrom(value.Type)) {
+                        // todo -- diagnostic
+                    }
+                    inputHandlerCompiler.Assign(field, value);
                 }
             }
             catch (CompileException exception) {
@@ -361,10 +325,10 @@ namespace UIForia.Compilers {
 
             compilerContext.currentEvent = null;
 
-            LambdaExpression lambda = closure.BuildLambda();
-            closure.Release();
+            LambdaExpression lambda = inputHandlerCompiler.BuildLambda();
 
             return lambda;
+
         }
 
         private void CompileAttributeBinding(TemplateLinqCompiler compiler, in AttrInfo attr) {
@@ -375,36 +339,28 @@ namespace UIForia.Compilers {
             Expression value = compiler.TypedValue(typeof(string), attr.StrippedValue);
 
             if (value.Type != typeof(string)) {
-                value = ExpressionFactory.CallInstanceUnchecked(value, value.Type.GetMethod("ToString", Type.EmptyTypes));
+                value = ExpressionFactory.CallInstance(value, value.Type.GetMethod("ToString", Type.EmptyTypes));
             }
 
-            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, MemberData.Element_SetAttribute, ExpressionUtil.GetStringConstant(attr.key), value));
+            compiler.RawExpression(ExpressionFactory.CallInstance(element, MemberData.Element_SetAttribute, ExpressionUtil.GetStringConstant(attr.key), value));
         }
 
         private void CompileContextVariable(TemplateLinqCompiler compiler, ASTNode astNode, in AttrInfo attr) {
 
             compiler.SetImplicitContext(compiler.GetRoot());
             Expression value = compiler.Value(astNode);
-            int index = localVariables.size;
 
-            BindingVariableDesc variableDefinition = new BindingVariableDesc {
-                index = index,
-                variableName = attr.key,
-                originTemplateType = null,
-                variableType = value.Type,
-                // todo -- is template local or some flag
-                // variableType = AliasResolverType.ContextVariable
-            };
-
-            localVariables.Add(variableDefinition);
+            if (!compilerContext.TryAddLocalVariable(attr.key, null, value.Type, out BindingVariableDesc variable)) {
+                // todo -- diagnostic
+                return;
+            }
 
             // bindingNode.SetBindingVariable<T>(index, value);
             MethodInfo setContextVariable = GetBindingVariableSetter(value.Type);
 
-            // todo dont use id, needs to be by type or type + id where id is scoped to template type
-            Expression indexExpr = ExpressionUtil.GetIntConstant(index);
+            Expression indexExpr = ExpressionUtil.GetIntConstant(variable.index);
 
-            compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(compiler.GetBindingNode(), setContextVariable, indexExpr, value));
+            compiler.RawExpression(ExpressionFactory.CallInstance(compiler.GetBindingNode(), setContextVariable, indexExpr, value));
 
         }
 
@@ -422,9 +378,9 @@ namespace UIForia.Compilers {
             }
         }
 
-        private void CompilePropertyBinding(TemplateLinqCompiler compiler, ASTNode expr, ProcessedType processedType, in AttrInfo attr) {
+        private void CompilePropertyBinding(TemplateLinqCompiler compiler, ASTNode expr, in AttrInfo attr) {
 
-            if (ReflectionUtil.IsEvent(processedType.rawType, attr.key, out EventInfo eventInfo)) {
+            if (ReflectionUtil.IsEvent(compilerContext.elementType.rawType, attr.key, out EventInfo eventInfo)) {
                 CompileEventBinding(compiler, attr, eventInfo, expr);
                 return;
             }
@@ -471,7 +427,7 @@ namespace UIForia.Compilers {
             // otherwise field values can be assigned w/o checking
 
             // todo -- handled dotted accessors like <Element property:someArray[i].value="4"/>, likely needs parser support
-            if (processedType.TryGetChangeHandlers(attr.key, PropertyChangedType.BindingRead, changeHandlers)) {
+            if (compilerContext.elementType.TryGetChangeHandlers(attr.key, PropertyChangedType.BindingRead, changeHandlers)) {
 
                 ParameterExpression old = compiler.AddVariable(left.targetExpression.Type, "__oldVal");
 
@@ -498,7 +454,7 @@ namespace UIForia.Compilers {
                 Expression indexExpression = ExpressionUtil.GetIntConstant(variable.index);
                 MethodInfo setSyncVar = GetBindingVariableSetter(variable.variableType);
 
-                compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(compiler.GetBindingNode(), setSyncVar, indexExpression, right));
+                compiler.RawExpression(ExpressionFactory.CallInstance(compiler.GetBindingNode(), setSyncVar, indexExpression, right));
 
                 // todo -- assert is update
 
@@ -669,27 +625,27 @@ namespace UIForia.Compilers {
                 // todo -- support PropertyChangeSource (binding read vs sync)
 
                 if (parameters.Length == 0) {
-                    compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, methodInfo));
+                    compiler.RawExpression(ExpressionFactory.CallInstance(element, methodInfo));
                     continue;
                 }
 
                 if (parameters.Length == 1 && parameters[0].ParameterType == right.Type) {
-                    compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, methodInfo, prevValue));
+                    compiler.RawExpression(ExpressionFactory.CallInstance(element, methodInfo, prevValue));
                     continue;
                 }
 
                 if (parameters.Length == 1 && parameters[0].ParameterType == typeof(PropertyChangeSource)) {
-                    compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, methodInfo, Expression.Constant(changeSource)));
+                    compiler.RawExpression(ExpressionFactory.CallInstance(element, methodInfo, Expression.Constant(changeSource)));
                     continue;
                 }
 
                 if (parameters.Length == 2 && parameters[0].ParameterType == typeof(PropertyChangeSource) && parameters[1].ParameterType == right.Type) {
-                    compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, methodInfo, Expression.Constant(changeSource), prevValue));
+                    compiler.RawExpression(ExpressionFactory.CallInstance(element, methodInfo, Expression.Constant(changeSource), prevValue));
                     continue;
                 }
 
                 if (parameters.Length == 2 && parameters[0].ParameterType == right.Type && parameters[1].ParameterType == typeof(PropertyChangeSource)) {
-                    compiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(element, methodInfo, prevValue, Expression.Constant(changeSource)));
+                    compiler.RawExpression(ExpressionFactory.CallInstance(element, methodInfo, prevValue, Expression.Constant(changeSource)));
                     continue;
                 }
 
@@ -721,7 +677,7 @@ namespace UIForia.Compilers {
 
             lateCompiler.SetImplicitContext(root);
 
-            Expression expr = ExpressionFactory.CallInstanceUnchecked(lateCompiler.GetBindingNode(), GetBindingVariableGetter(syncVarType), indexExpression);
+            Expression expr = ExpressionFactory.CallInstance(lateCompiler.GetBindingNode(), GetBindingVariableGetter(syncVarType), indexExpression);
 
             lateCompiler.SetImplicitContext(element);
 
@@ -745,14 +701,31 @@ namespace UIForia.Compilers {
                 return;
             }
 
-            // todo -- remove namespaces? do we even need them?
-            updateCompiler.AddNamespace("UIForia.Util");
-            updateCompiler.AddNamespace("UIForia.Text");
-
             StructList<TextExpression> expressionParts = textNode.textExpressionList;
 
             MemberExpression textValueExpr = Expression.Field(updateCompiler.GetElement(), MemberData.TextElement_Text);
 
+            updateCompiler.SetImplicitContext(updateCompiler.GetRoot());
+
+            if (expressionParts.size == 1) {
+
+                Expression valueExpression = updateCompiler.Value(expressionParts[0].text);
+
+                if (valueExpression.Type == typeof(string)) {
+                    updateCompiler.RawExpression(
+                        Expression.IfThen(
+                            Expression.NotEqual(textValueExpr, valueExpression),
+                            Expression.Block(ExpressionFactory.CallInstance(updateCompiler.GetElement(), MemberData.TextElement_SetText, valueExpression))
+                        )
+                    );
+                    return;
+                }
+
+            }
+
+            // todo -- remove namespaces? do we even need them?
+            updateCompiler.AddNamespace("UIForia.Util");
+            updateCompiler.AddNamespace("UIForia.Text");
             updateCompiler.RawExpression(s_StringBuilderClear);
 
             for (int i = 0; i < expressionParts.size; i++) {
@@ -760,86 +733,86 @@ namespace UIForia.Compilers {
 
                     Expression val = updateCompiler.Value(expressionParts[i].text);
                     if (val.Type.IsEnum) {
-                        MethodCallExpression toString = ExpressionFactory.CallInstanceUnchecked(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
-                        updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendString, toString));
+                        MethodCallExpression toString = ExpressionFactory.CallInstance(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
+                        updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendString, toString));
                         continue;
                     }
 
                     switch (Type.GetTypeCode(val.Type)) {
                         case TypeCode.Boolean:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendBool, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendBool, val));
                             break;
 
                         case TypeCode.Byte:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendByte, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendByte, val));
                             break;
 
                         case TypeCode.Char:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendChar, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendChar, val));
                             break;
 
                         case TypeCode.Decimal:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendDecimal, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendDecimal, val));
                             break;
 
                         case TypeCode.Double:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendDouble, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendDouble, val));
                             break;
 
                         case TypeCode.Int16:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendInt16, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendInt16, val));
                             break;
 
                         case TypeCode.Int32:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendInt32, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendInt32, val));
                             break;
 
                         case TypeCode.Int64:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendInt64, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendInt64, val));
                             break;
 
                         case TypeCode.SByte:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendSByte, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendSByte, val));
                             break;
 
                         case TypeCode.Single:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendFloat, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendFloat, val));
                             break;
 
                         case TypeCode.String:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendString, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendString, val));
                             break;
 
                         case TypeCode.UInt16:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendUInt16, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendUInt16, val));
                             break;
 
                         case TypeCode.UInt32:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendUInt32, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendUInt32, val));
                             break;
 
                         case TypeCode.UInt64:
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendUInt64, val));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendUInt64, val));
                             break;
 
                         default:
                             // todo -- search for a ToString(CharStringBuilder) implementation and use that if possible
                             // maybe implement special cases for common unity types
-                            MethodCallExpression toString = ExpressionFactory.CallInstanceUnchecked(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
-                            updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendString, toString));
+                            MethodCallExpression toString = ExpressionFactory.CallInstance(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
+                            updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendString, toString));
                             break;
                     }
                 }
                 else {
-                    updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, MemberData.StringBuilder_AppendString, Expression.Constant(expressionParts[i].text)));
+                    updateCompiler.RawExpression(ExpressionFactory.CallInstance(s_StringBuilderExpr, MemberData.StringBuilder_AppendString, Expression.Constant(expressionParts[i].text)));
                 }
             }
 
             // todo -- this needs to check the TextInfo for equality or whitespace mutations will be ignored and we will return false from equal!!!
             Expression e = updateCompiler.GetElement();
-            Expression condition = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.EqualsString), new[] {typeof(string)}), textValueExpr);
+            Expression condition = ExpressionFactory.CallInstance(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.EqualsString), new[] {typeof(string)}), textValueExpr);
             condition = Expression.Equal(condition, Expression.Constant(false));
-            ConditionalExpression ifCheck = Expression.IfThen(condition, Expression.Block(ExpressionFactory.CallInstanceUnchecked(e, MemberData.TextElement_SetText, s_StringBuilderToString)));
+            ConditionalExpression ifCheck = Expression.IfThen(condition, Expression.Block(ExpressionFactory.CallInstance(e, MemberData.TextElement_SetText, s_StringBuilderToString)));
 
             updateCompiler.RawExpression(ifCheck);
             updateCompiler.RawExpression(s_StringBuilderClear);
@@ -909,20 +882,6 @@ namespace UIForia.Compilers {
                 return false;
 
             }
-        }
-
-    }
-
-    public struct BindingResult {
-
-        public LambdaExpression lateLambda;
-        public LambdaExpression updateLambda;
-        public LambdaExpression enableLambda;
-        public LambdaExpression constLambda;
-        public StructList<BindingVariableDesc> localVariables;
-
-        public bool HasValue {
-            get => lateLambda != null || updateLambda != null || constLambda != null || enableLambda != null;
         }
 
     }

@@ -4,7 +4,10 @@ using System.Runtime.CompilerServices;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Layout;
+using UIForia.Parsing;
+using UIForia.Rendering;
 using UIForia.Systems;
+using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -27,16 +30,40 @@ namespace UIForia {
         internal readonly LightList<UIElement> elementMap;
         private int indexGenerator;
 
+        public void AddMouseEventHandler(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, int index) {
+            element.inputHandlers = element.inputHandlers ?? new InputHandlerGroup();
+            element.inputHandlers.AddMouseEvent(eventType, modifiers, requiresFocus, phase, currentTemplateData.inputEventHandlers[index]);
+        }
+        
+        public void AddKeyboardEventHandler(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, KeyCode keyCode, char character, int index) {
+            element.inputHandlers = element.inputHandlers ?? new InputHandlerGroup();
+            element.inputHandlers.AddKeyboardEvent(eventType, modifiers, requiresFocus, phase, keyCode, character, currentTemplateData.inputEventHandlers[index]);
+        }
+        
+        public void AddDragEventHandler(InputEventType eventType, KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, int index) {
+            element.inputHandlers = element.inputHandlers ?? new InputHandlerGroup();
+            element.inputHandlers.AddDragEvent(eventType, modifiers, requiresFocus, phase, currentTemplateData.inputEventHandlers[index]);
+        }
+        
+        public void AddDragCreateHandler(KeyboardModifiers modifiers, bool requiresFocus, EventPhase phase, int index) {
+            element.inputHandlers = element.inputHandlers ?? new InputHandlerGroup();
+            element.inputHandlers.AddDragCreator(modifiers, requiresFocus, phase, currentTemplateData.inputEventHandlers[index]);
+        }
+        
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CreateBindingVariable<T>(int idx, string name) {
             element.bindingNode.variables[idx] = new BindingVariable<T>(name);
         }
-        
+
         public void ReferenceBindingVariable<T>(int idx, string name) {
             element.bindingNode.variables[idx] = null; //new BindingVariable<T>(name);
             throw new NotImplementedException();
         }
 
+        public void RegisterForKeyboardEvents() {
+            // todo! application.InputSystem.RegisterKeyboardEvents(element);
+        }
+        
         internal ElementSystem(Dictionary<Type, TemplateData> templateDataMap) {
             this.templateDataMap = templateDataMap;
             this.contextStack = new LightStack<ContextEntry>(16);
@@ -85,6 +112,10 @@ namespace UIForia {
 
         public void HydrateElement(Type type) {
 
+          
+            
+            ref ContextEntry entry = ref contextStack.array[contextStack.size - 1];
+            
             TemplateData oldTemplateData = currentTemplateData;
 
             templateDataMap.TryGetValue(type, out currentTemplateData);
@@ -97,11 +128,10 @@ namespace UIForia {
 
             root = oldRoot;
             currentTemplateData = oldTemplateData;
-
-            // ContextEntry entry = contextStack.PopUnchecked();
-            // if (entry.overrides != null) {
-            // StructList<SlotOverride>.Release(ref entry.overrides);
-            // }
+            
+            entry.overrides?.Release();
+            entry = default;
+            contextStack.size--;
         }
 
         public void SetText(string value) {
@@ -120,22 +150,15 @@ namespace UIForia {
         }
 
         public void OverrideSlot(string slotName, int slotTemplateId) {
-            // contextStack.array[contextStack.size - 1].overrides.array[slotIndex] = new SlotOverride(slotName, currentTemplateData.slots[slotTemplateId]);
+            ref ContextEntry entry = ref contextStack.array[contextStack.size - 1];
+            entry.overrides = entry.overrides ?? StructList<SlotOverride>.Get();
+            entry.overrides.Add(new SlotOverride(slotName, root, currentTemplateData, slotTemplateId, SlotType.Override));
         }
 
         public void ForwardSlot(string slotName, int slotTemplateId) {
-            // technically I shouldn't have to null or index check here since the code that is generated is always valid 
-            // StructList<SlotOverride> parentOverrides = contextStack.array[contextStack.size - 2].overrides;
-            //
-            // for (int i = 0; i < parentOverrides.size; i++) {
-            //     if (parentOverrides.array[i].slotName == slotName) {
-            //         contextStack.array[contextStack.size - 1].overrides.array[slotIndex] = parentOverrides.array[i];
-            //         return;
-            //     }
-            // }
-            //
-            // contextStack.array[contextStack.size - 1].overrides.array[slotIndex] = new SlotOverride(slotName, data.slots[slotTemplateId]);
-
+            ref ContextEntry entry = ref contextStack.array[contextStack.size - 1];
+            entry.overrides = entry.overrides ?? StructList<SlotOverride>.Get();
+            entry.overrides.Add(new SlotOverride(slotName, root, currentTemplateData, slotTemplateId, SlotType.Forward));
         }
 
         public void AddChild(UIElement child, int templateIndex) {
@@ -150,7 +173,7 @@ namespace UIForia {
         }
 
         public void AddSlotChild(UIElement child, string slotName, int slotIndex) {
-            ContextEntry entry = contextStack.array[contextStack.size - 1];
+            ref ContextEntry entry = ref contextStack.array[contextStack.size - 1];
             UIElement lastElement = element;
             UIElement lastParent = parent;
             parent = element;
@@ -159,17 +182,29 @@ namespace UIForia {
             parent.children[parent.children.size++] = child;
 
             bool found = false;
-            for (int i = 0; i < entry.overrides.size; i++) {
-                ref SlotOverride slotOverride = ref entry.overrides.array[i];
-                if (slotOverride.slotName == slotName) {
+            if (entry.overrides != null) {
+                for (int i = 0; i < entry.overrides.size; i++) {
+                    ref SlotOverride slotOverride = ref entry.overrides.array[i];
+                    if (slotOverride.slotName != slotName) {
+                        continue;
+                    }
+
                     found = true;
-                    slotOverride.template(this);
+                    UIElement oldRoot = root;
+                    TemplateData oldTemplateData = currentTemplateData;
+                    currentTemplateData = slotOverride.templateData;
+                    root = slotOverride.root;
+                    ((UISlotDefinition) child).slotType = slotOverride.slotType;
+                    currentTemplateData.elements[slotOverride.templateId](this);
+                    root = oldRoot;
+                    currentTemplateData = oldTemplateData;
                     break;
                 }
             }
 
             if (!found) {
                 currentTemplateData.elements[slotIndex](this);
+                ((UISlotDefinition) child).slotType = SlotType.Define;
             }
 
             parent = lastParent;
@@ -180,43 +215,66 @@ namespace UIForia {
         public void InitializeEntryPoint(UIElement entry, int attrCount, int childCount) {
             element = entry;
             root = entry;
-            element.attributes = new StructList<ElementAttribute>(attrCount);
+            element.attributes = new SizedArray<ElementAttribute>(attrCount);
             element.children = new LightList<UIElement>(childCount);
             element.bindingNode = new LinqBindingNode();
             element.bindingNode.root = element;
             element.bindingNode.parent = null;
             element.bindingNode.element = entry;
+            element.flags = UIElementFlags.Alive | UIElementFlags.Enabled | UIElementFlags.AncestorEnabled;
+            element.style = new UIStyleSet(element); // todo -- remove
         }
-        
+
+        // todo -- template origin info / id
+        public void InitializeHydratedElement(int attrCount, int childCount) {
+            element.flags |= UIElementFlags.TemplateRoot;
+            InitializeElement(attrCount, childCount);
+            
+            contextStack.Push(new ContextEntry() {
+                contextRoot = element,
+                templateData = currentTemplateData
+            });
+            
+        }
+
         public void InitializeElement(int attrCount, int childCount) {
             element.parent = parent;
             element.id = idGenerator++;
+            element.flags |= UIElementFlags.Alive;
             element.index = freeListIndex.size > 0 ? freeListIndex.array[--freeListIndex.size] : indexGenerator++;
-            element.attributes = new StructList<ElementAttribute>(attrCount); // todo to sized array
-            element.children = new LightList<UIElement>(childCount);          // todo to sized array
+            element.attributes = new SizedArray<ElementAttribute>(attrCount);
+            element.children = new LightList<UIElement>(childCount); // todo to sized array
             element.layoutResult = new LayoutResult(element);
             element.bindingNode = new LinqBindingNode();
             element.bindingNode.element = element;
             element.bindingNode.root = root;
-            
-            // todo -- template origin info / id
+            element.style = new UIStyleSet(element); // todo -- remove!
+
             if (element.index >= elementMap.array.Length) {
                 elementMap.EnsureAdditionalCapacity(32);
             }
-            
+
             elementMap.array[element.index] = element;
-            
+
             onElementRegistered?.Invoke(element);
-            
-            if((parent.flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet)) {
-                element.flags |= UIElementFlags.AncestorEnabled;
+
+            if ((parent.flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet)) {
+                element.flags |= UIElementFlags.Enabled | UIElementFlags.AncestorEnabled;
             }
-            else {
-                element.flags &= ~UIElementFlags.AncestorEnabled;
-            }
-            
+
             element.hierarchyDepth = parent.hierarchyDepth + 1;
 
+        }
+
+        public void InitializeSlotElement(int attrCount, int childCount, int contextDepth) {
+            InitializeElement(attrCount, childCount);
+            element.bindingNode.referencedContexts = new UIElement[contextDepth];
+            UIElement ptr = root;
+            // inverted?
+            for (int i = 0; i < contextDepth; i++) {
+                element.bindingNode.referencedContexts[i] = ptr;
+                ptr = ptr.bindingNode.root;
+            }
         }
 
         public void InvokeOnCreate() {
@@ -225,16 +283,16 @@ namespace UIForia {
             }
             catch (Exception e) {
                 Debug.Log(e); // todo -- diagnostics
-            }  
+            }
         }
-        
+
         public void InvokeOnReady() {
             try {
                 element.OnReady();
             }
             catch (Exception e) {
                 Debug.Log(e); // todo -- diagnostics
-            }  
+            }
         }
 
         public void InvokeOnEnable() {
@@ -243,7 +301,7 @@ namespace UIForia {
             }
             catch (Exception e) {
                 Debug.Log(e); // todo -- diagnostics
-            }  
+            }
         }
 
         public void InitializeStaticAttribute(string key, string value) {
@@ -254,12 +312,12 @@ namespace UIForia {
         public void InitializeDynamicAttribute(string key) {
             element.attributes[element.attributes.size++] = new ElementAttribute(key, string.Empty);
         }
-        
+
         private struct ContextEntry {
 
             public UIElement contextRoot;
             public TemplateData templateData;
-            public SizedArray<SlotOverride> overrides;
+            public StructList<SlotOverride> overrides;
 
         }
 

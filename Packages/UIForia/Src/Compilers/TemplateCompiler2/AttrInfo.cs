@@ -12,6 +12,7 @@ namespace UIForia.Compilers {
         public readonly int column;
         public readonly AttributeType type;
         public readonly AttributeFlags flags;
+        public readonly bool isInjected;
 
         public AttrInfo(int depth, in AttributeDefinition attr) {
             this.depth = depth;
@@ -22,6 +23,19 @@ namespace UIForia.Compilers {
             this.type = attr.type;
             this.flags = attr.flags;
             this.rawValue = attr.rawValue;
+            this.isInjected = false;
+        }
+        
+        public AttrInfo(int depth, in AttrInfo attr, bool isInjected = false) {
+            this.depth = depth;
+            this.key = attr.key;
+            this.value = attr.value;
+            this.line = attr.line;
+            this.column = attr.column;
+            this.type = attr.type;
+            this.flags = attr.flags;
+            this.rawValue = attr.rawValue;
+            this.isInjected = isInjected;
         }
         
         public string StrippedValue {

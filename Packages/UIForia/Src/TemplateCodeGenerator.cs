@@ -345,7 +345,7 @@ namespace UIForia {
                     dynamicElementTypes.Add(kvp.Value);
                 }
 
-                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0 || kvp.Value.IsUnresolvedGeneric) {
+                if (kvp.Key.IsAbstract || kvp.Value.id < 0 || kvp.Value.IsUnresolvedGeneric) {
                     continue;
                 }
 
@@ -367,7 +367,7 @@ namespace UIForia {
                     dynamicElementTypes.Add(kvp.Value);
                 }
 
-                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
+                if (kvp.Key.IsAbstract || kvp.Value.id < 0) {
                     continue;
                 }
 

@@ -1,6 +1,7 @@
 using System;
 using UIForia.Elements;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Parsing {
 
@@ -34,7 +35,6 @@ namespace UIForia.Parsing {
 
     public abstract class TemplateNode {
 
-        // todo -- try make these lists into arrays
         public SizedArray<TemplateNode> children;
         public ReadOnlySizedArray<AttributeDefinition> attributes;
         public TemplateRootNode root;
@@ -94,7 +94,8 @@ namespace UIForia.Parsing {
         public abstract string GetTagName();
 
         public virtual void AddSlotOverride(SlotNode slotNode) {
-            throw new NotSupportedException($"Cannot add a <{slotNode.GetTagName()}> to <{GetTagName()}>");
+            // todo -- diagnostic
+            Debug.Log($"Cannot add a <{slotNode.GetTagName()}> to <{GetTagName()}>");
         }
 
         public bool TryCreateElementNode(string moduleName, string tagName, ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo lineInfo, string genericTypeResolver, string requireChildTypeExpression, out TemplateNode templateNode) {
@@ -160,38 +161,44 @@ namespace UIForia.Parsing {
 
         }
 
-        public bool TryCreateSlotNode(string slotName, ReadOnlySizedArray<AttributeDefinition> attributes, ReadOnlySizedArray<AttributeDefinition> injectedAttributes, TemplateLineInfo templateLineInfo, SlotType slotType, out TemplateNode slot) {
+        public bool TryCreateSlotNode(string slotName, ReadOnlySizedArray<AttributeDefinition> attributes, ReadOnlySizedArray<AttributeDefinition> injectedAttributes, TemplateLineInfo templateLineInfo, SlotType slotType, string requiredChildType, out TemplateNode slot) {
             slot = null;
-
+            
             switch (slotType) {
 
                 case SlotType.Define:
                     slot = new SlotNode(slotName, attributes, injectedAttributes, templateLineInfo, SlotType.Define);
+                    slot.requireType = requiredChildType;
                     root.AddSlot((SlotNode) slot);
                     AddChild(slot);
                     break;
 
-                case SlotType.Forward:
+                case SlotType.Forward: {
 
-                    if (!(this is ElementNode)) {
+                    if (!(this is ElementNode expanded)) {
                         return root.templateShell.ReportError(lineInfo, GetTagName() + " does not support forwarded slot nodes");
                     }
 
                     slot = new SlotNode(slotName, attributes, injectedAttributes, templateLineInfo, SlotType.Forward);
-                    AddChild(slot);
+                    slot.requireType = requiredChildType;
+                    // AddChild(slot);
+                    expanded.AddSlotOverride((SlotNode) slot);
                     root.AddSlot((SlotNode) slot);
                     return true;
+                }
 
-                case SlotType.Override:
+                case SlotType.Override: {
 
                     if (!(this is ElementNode expanded)) {
                         return root.templateShell.ReportError(lineInfo, GetTagName() + " does not support overriden slot nodes");
                     }
 
                     slot = new SlotNode(slotName, attributes, injectedAttributes, templateLineInfo, SlotType.Override);
+                    slot.requireType = requiredChildType;
                     slot.root = root;
                     expanded.AddSlotOverride((SlotNode) slot);
                     return true;
+                }
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(slotType), slotType, null);

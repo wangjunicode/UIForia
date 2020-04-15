@@ -1,8 +1,10 @@
 using System;
+using System.Collections;
 using System.Linq.Expressions;
 using Mono.Linq.Expressions;
 using UIForia.Parsing;
 using UIForia.Systems;
+using UIForia.UIInput;
 using UIForia.Util;
 
 namespace UIForia.Compilers {
@@ -31,6 +33,12 @@ namespace UIForia.Compilers {
 
     }
 
+    public struct InputEventHandlerOutput {
+
+        public LambdaExpression expression;
+
+    }
+
     public class TemplateExpressionSet {
 
         public ProcessedType processedType;
@@ -38,9 +46,12 @@ namespace UIForia.Compilers {
         public LambdaExpression hydratePoint;
         public BindingOutput[] bindings;
         public TemplateOutput[] elementTemplates;
+        public InputEventHandlerOutput[] inputEventHandlers;
+        public LightList<SlotOverrideChain> slotOverrideChains;
 
         private static readonly string s_ElementFnTypeName = typeof(Action<ElementSystem>[]).GetTypeName();
         private static readonly string s_BindingFnTypeName = typeof(Action<LinqBindingNode>[]).GetTypeName();
+        private static readonly string s_InputEventHandlerTypeName = typeof(Action<LinqBindingNode, InputEventHolder>[]).GetTypeName();
 
         private string guid;
 
@@ -121,6 +132,31 @@ namespace UIForia.Compilers {
                     stringBuilder.AppendInline(",\n");
                 }
             }
+            stringBuilder.NewLine();
+            stringBuilder.Outdent();
+            stringBuilder.Append("},");
+            stringBuilder.NewLine();
+            stringBuilder.Append(nameof(TemplateData.inputEventHandlers));
+            stringBuilder.AppendInline(" = new ");
+            stringBuilder.AppendInline(s_InputEventHandlerTypeName);
+            stringBuilder.AppendInline(" {\n");
+            stringBuilder.Indent();
+
+            for (int i = 0; i < inputEventHandlers.Length; i++) {
+                stringBuilder.Append("// ");
+                stringBuilder.AppendInline(i.ToString());
+                // stringBuilder.AppendInline(" ");
+                // stringBuilder.AppendInline(GetBindingType(inputEventHandlers[i].bindingType));
+                // stringBuilder.AppendInline(" <");
+                // stringBuilder.AppendInline(inputEventHandlers[i].templateNode.GetTagName());
+                // stringBuilder.AppendInline("> line ");
+                // stringBuilder.AppendInline(inputEventHandlers[i].templateNode.lineInfo.ToString());
+                stringBuilder.NewLine();
+                stringBuilder.Append(inputEventHandlers[i].expression.ToTemplateBody(3));
+                if (i != inputEventHandlers.Length - 1) {
+                    stringBuilder.AppendInline(",\n");
+                }
+            }
 
             stringBuilder.NewLine();
             stringBuilder.Outdent();
@@ -168,6 +204,38 @@ namespace UIForia.Compilers {
             stringBuilder.AppendInline(hydratePoint.ToTemplateBody(2));
             stringBuilder.AppendInline(",");
             stringBuilder.Outdent();
+        }
+
+        public SlotOverrideInfo[] GetSlotOverrideChain(string slotName) {
+            if (slotOverrideChains == null) return null;
+
+            for (int i = 0; i < slotOverrideChains.size; i++) {
+                if (slotOverrideChains.array[i].slotName == slotName) {
+                    return slotOverrideChains[i].chain;
+                }
+            }
+
+            return null;
+        }
+
+    }
+
+    public struct SlotOverrideInfo {
+
+        public ProcessedType rootType;
+        public AttrInfo[] attributes;
+        public TemplateNode slotNode;
+
+    }
+
+    public class SlotOverrideChain {
+
+        public string slotName;
+        public SlotOverrideInfo[] chain;
+
+        public SlotOverrideChain(string slotName, SlotOverrideInfo[] chain) {
+            this.slotName = slotName;
+            this.chain = chain;
         }
 
     }

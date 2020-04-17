@@ -9,7 +9,8 @@ namespace UIForia.Style {
     }
     
     public interface IStyleShorthandParser {
-
+        
+        // shorthand parser needs to return 'default' properties when not setting them in order to remove previously set ones
         bool TryParse(CharStream stream, StructList<StyleProperty2> output);
 
     }

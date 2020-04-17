@@ -69,7 +69,7 @@ namespace UIForia.Elements {
             this.dummyRoot.application = application;
             this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
             this.dummyRoot.style = new UIStyleSet(dummyRoot);
-            this.dummyRoot.styleSet2 = new StyleSet2(application.styleSystem, dummyRoot);
+            // this.dummyRoot.styleSet2 = new StyleSet2(application.styleSystem, dummyRoot);
             this.dummyRoot.layoutResult = new LayoutResult(dummyRoot);
             this.dummyRoot.View = this;
             this.dummyRoot.children = new LightList<UIElement>(1);

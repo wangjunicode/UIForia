@@ -159,7 +159,7 @@ namespace UIForia.Util {
             s_CharStringBuilder.Clear();
             return retn;
         }
-        
+
         public static string ListToString(IReadOnlyList<string> list, string separator = ", ") {
             if (list == null || list.Count == 0) {
                 return string.Empty;
@@ -244,11 +244,11 @@ namespace UIForia.Util {
         }
 
         public static unsafe bool EqualsRangeUnsafe(string str, char* b, int bStart, int length) {
-            
+
             if (str == null) {
                 return length != 0;
             }
-            
+
             if (str.Length != length) {
                 return false;
             }
@@ -284,11 +284,51 @@ namespace UIForia.Util {
             }
         }
 
-        [ThreadStatic] private static StringBuilder s_PerThreadStringBuilder;
-        
+        // [ThreadStatic] private static StringBuilder s_PerThreadStringBuilder;
+        [ThreadStatic] private static StructList<PoolItem> s_PerThreadStringBuilderPool;
+
+        private struct PoolItem {
+
+            public StringBuilder builder;
+            public bool active;
+
+        }
+
         public static StringBuilder GetPerThreadStringBuilder() {
-            s_PerThreadStringBuilder = s_PerThreadStringBuilder ?? new StringBuilder(128);
-            return s_PerThreadStringBuilder;
+            s_PerThreadStringBuilderPool = s_PerThreadStringBuilderPool ?? new StructList<PoolItem>();
+            if (s_PerThreadStringBuilderPool.Count == 0) {
+                s_PerThreadStringBuilderPool.Add(new PoolItem() {
+                    active = false,
+                    builder = new StringBuilder(128)
+                });
+            }
+
+            for (int i = 0; i < s_PerThreadStringBuilderPool.size; i++) {
+                if (s_PerThreadStringBuilderPool.array[i].active == false) {
+                    s_PerThreadStringBuilderPool.array[i].active = true;
+                    return s_PerThreadStringBuilderPool.array[i].builder;
+                }
+            }
+
+            PoolItem retn = new PoolItem() {
+                active = true,
+                builder = new StringBuilder(128)
+            };
+
+            s_PerThreadStringBuilderPool.Add(retn);
+            return retn.builder;
+
+        }
+
+        public static void ReleasePerThreadStringBuilder(StringBuilder builder) {
+            if (s_PerThreadStringBuilderPool == null) return;
+            for (int i = 0; i < s_PerThreadStringBuilderPool.size; i++) {
+                if (s_PerThreadStringBuilderPool.array[i].builder == builder) {
+                    builder.Clear();
+                    s_PerThreadStringBuilderPool.array[i].active = false;
+                    return;
+                }
+            }
         }
 
     }

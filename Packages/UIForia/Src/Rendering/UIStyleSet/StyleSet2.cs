@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using JetBrains.Annotations;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Selectors;
@@ -108,7 +107,6 @@ namespace UIForia.Style {
         }
 
         public static StylePriorityComparer s_StylePriorityComparer = new StylePriorityComparer();
-
 
         public class StylePriorityComparer : IComparer<StyleUsage> {
 

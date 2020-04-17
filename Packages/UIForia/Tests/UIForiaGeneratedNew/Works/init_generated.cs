@@ -10,11 +10,11 @@ namespace UIForia.Generated {
         public Generated_Works() {
 
             templateDataMap = new Dictionary<Type, TemplateData>() {
-                { typeof(TemplateCompiler2Test.TestTemplateCompiler2.ExpandedTemplate), template_dc19de8a_2f09_40d7_b72b_df6ae7547964},
-                { typeof(TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate), template_031fd822_5926_4993_9519_0f9adb568161}
+                { typeof(TemplateCompiler2Test.TestTemplateCompiler2.ExpandedTemplate), template_e60bf40d_9cd1_42ff_a67f_e90f991fda8d},
+                { typeof(TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate), template_a04fd272_ed38_4743_ab50_e8921c5d2165}
             };
 
-            mainEntryPoint = template_031fd822_5926_4993_9519_0f9adb568161;
+            mainEntryPoint = template_a04fd272_ed38_4743_ab50_e8921c5d2165;
         }
 
     }

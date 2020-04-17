@@ -722,19 +722,24 @@ namespace UIForia.Parsing.Expressions {
                 }
 
                 builder.Append(lastString);
-                builder.Append(".");
+                
+                if (tokenStream.NextTokenIs(ExpressionTokenType.Dot)) {
+                    builder.Append(".");
+                }
+                
                 lastString = tokenStream.Current.value;
 
                 tokenStream.Advance();
             }
 
-            if (builder.Length > 1) {
-                builder.Remove(builder.Length - 1, 1);
-            }
+            
+            // if (builder.Length > 1) {
+                // builder.Remove(builder.Length - 1, 1);
+            // }
 
             retn.namespaceName = builder.ToString();
             retn.typeName = lastString;
-            builder.Clear();
+            StringUtil.ReleasePerThreadStringBuilder(builder);
             return true;
         }
 

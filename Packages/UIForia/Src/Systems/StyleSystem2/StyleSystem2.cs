@@ -148,83 +148,7 @@ namespace UIForia.Style {
             // this.selectorMap = new NativeList<Selector>(64, Allocator.Persistent);
             // this.persistentStringMap = new NativeArray<int>(2048, Allocator.Persistent);
         }
-
-        public void ConvertStyleSheet(StyleSheet sheet) {
-
-            int propertyCount = 0;
-            for (int i = 0; i < sheet.styleGroupContainers.Length; i++) {
-                UIStyleGroupContainer container = sheet.styleGroupContainers[i];
-
-                for (int j = 0; j < container.groups.Length; j++) {
-                    UIStyleGroup group = container.groups[j];
-
-                    if (group.normal.style != null) {
-                        propertyCount += group.normal.style.PropertyCount;
-                    }
-
-                    if (group.hover.style != null) {
-                        propertyCount += group.hover.style.PropertyCount;
-                    }
-
-                    if (group.active.style != null) {
-                        propertyCount += group.active.style.PropertyCount;
-                    }
-
-                    if (group.focused.style != null) {
-                        propertyCount += group.focused.style.PropertyCount;
-                    }
-
-                }
-
-            }
-            
-            StructList<StyleProperty2> propertyChunk = new StructList<StyleProperty2>(propertyCount);
-            
-            for (int i = 0; i < sheet.styleGroupContainers.Length; i++) {
-                
-                UIStyleGroupContainer container = sheet.styleGroupContainers[i];
-
-                for (int j = 0; j < container.groups.Length; j++) {
-                    UIStyleGroup group = container.groups[j];
-
-                    if (group.normal.style != null) {
-                        for (int k = 0; k < group.normal.style.PropertyCount; k++) {
-                            propertyChunk.Add(new StyleProperty2() {
-                            });
-                        }
-                        
-                    }
-                    
-                    propertyCount += group.normal.style.PropertyCount;
-                    if (group.hover.style != null) {
-                        propertyCount += group.hover.style.PropertyCount;
-                    }
-
-                    if (group.active.style != null) {
-                        propertyCount += group.active.style.PropertyCount;
-                    }
-
-                    if (group.focused.style != null) {
-                        propertyCount += group.focused.style.PropertyCount;
-                    }
-
-                }
-
-            }
-            
-
-        }
-
-        public void TransformStyleData() {
-
-            StyleGrouping grouping = new StyleGrouping();
-
-            grouping.normal.start = 0;
-            grouping.normal.length = 1;
-            grouping.active.start = 1;
-            grouping.active.length = 1;
-        }
-
+        
         public void Run() {
 
             SetupJob setupJob = new SetupJob(); // handle all things initialized this frame or with dynamic style changes
@@ -471,13 +395,13 @@ namespace UIForia.Style {
                         if (target == null) {
                             continue;
                         }
-
-                        if (target.styleSet2.changeSet == null) {
-                            target.styleSet2.changeSet = new ChangeSet(); // todo -- pool
-                            changeSet.Add(target.styleSet2);
-                        }
-
-                        target.styleSet2.changeSet.selectorChanges.Add(new SelectorChange(SelectorChangeType.RemovedFromEffectList, change.selectorId, reference));
+                        //
+                        // if (target.styleSet2.changeSet == null) {
+                        //     target.styleSet2.changeSet = new ChangeSet(); // todo -- pool
+                        //     changeSet.Add(target.styleSet2);
+                        // }
+                        //
+                        // target.styleSet2.changeSet.selectorChanges.Add(new SelectorChange(SelectorChangeType.RemovedFromEffectList, change.selectorId, reference));
                     }
                 }
                 else if (change.changeType == SelectorChangeType.AddedToRunList) {
@@ -533,9 +457,9 @@ namespace UIForia.Style {
                 if ((current.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
                     continue;
                 }
-
-                StyleSet2 styleSet2 = current.styleSet2;
-                styleSet2.traversalIndex = traversalIndex++;
+                //
+                // StyleSet2 styleSet2 = current.styleSet2;
+                // styleSet2.traversalIndex = traversalIndex++;
 
                 // if we have a state change or we have a new set of style groups to add
                 // for each active selector that we provide to our children or self
@@ -552,59 +476,59 @@ namespace UIForia.Style {
                 // if was not affected by this selector in the last frame
                 // add to reference count
 
-                if (styleSet2.changeSet != null) {
-                    ChangeSet changeSet = styleSet2.changeSet;
-
-                    StructList<StyleGroup> dynamicGroups = styleSet2.dynamicGroups;
-
-                    int diff = dynamicGroups.size - changeSet.groupChanges.size;
-
-                    if (diff == 0) {
-                        int index = 0;
-                        for (int i = 0; i < dynamicGroups.size; i++) {
-                            if (dynamicGroups.array[i].id != changeSet.groupChanges.array[i].id) {
-                                index = i;
-                                break;
-                            }
-                        }
-
-                        // remove all groups from our array
-                        for (int i = index; i < dynamicGroups.size; i++) {
-                            ref StyleGroup group = ref dynamicGroups.array[i];
-                            for (int j = 0; j < styleSet2.usageCount; j++) {
-                                ref StyleUsage usage = ref styleSet2.styleUsages[j];
-                                if (usage.sourceId.id == group.id) {
-                                    StyleUsage swap = styleSet2.styleUsages[styleSet2.usageCount - 1];
-                                    usage = swap;
-                                    styleSet2.usageCount--;
-                                }
-                            }
-                        }
-                    }
-
-                    // flush instance & shared changes
-                    // add new selectors
-                    // remove old ones
-                    // when removing need to also track all affected elements by this instance of the selector
-                    // todo -- pool change sets
-                    styleSet2.changeSet = null;
-                }
-
-                for (int i = 0; i < styleSet2.selectors.size; i++) {
-                    // run selector    
-                    if ((styleSet2.selectors[i].state & styleSet2.activeStates) != 0) {
-                        //   styleSet2.selectors[i].Run(resultSet);
-                    }
-
-                    // need to write 
-                }
-
-                // if changed
-
-                for (int i = 0; i < styleSet2.splitIndex; i++) {
-                    ref StyleUsage usage = ref styleSet2.styleUsages[i];
-                    map[(int) usage.property.propertyId] = 1;
-                }
+                // if (styleSet2.changeSet != null) {
+                //     ChangeSet changeSet = styleSet2.changeSet;
+                //
+                //     StructList<StyleGroup> dynamicGroups = styleSet2.dynamicGroups;
+                //
+                //     int diff = dynamicGroups.size - changeSet.groupChanges.size;
+                //
+                //     if (diff == 0) {
+                //         int index = 0;
+                //         for (int i = 0; i < dynamicGroups.size; i++) {
+                //             if (dynamicGroups.array[i].id != changeSet.groupChanges.array[i].id) {
+                //                 index = i;
+                //                 break;
+                //             }
+                //         }
+                //
+                //         // remove all groups from our array
+                //         for (int i = index; i < dynamicGroups.size; i++) {
+                //             ref StyleGroup group = ref dynamicGroups.array[i];
+                //             for (int j = 0; j < styleSet2.usageCount; j++) {
+                //                 ref StyleUsage usage = ref styleSet2.styleUsages[j];
+                //                 if (usage.sourceId.id == group.id) {
+                //                     StyleUsage swap = styleSet2.styleUsages[styleSet2.usageCount - 1];
+                //                     usage = swap;
+                //                     styleSet2.usageCount--;
+                //                 }
+                //             }
+                //         }
+                //     }
+                //
+                //     // flush instance & shared changes
+                //     // add new selectors
+                //     // remove old ones
+                //     // when removing need to also track all affected elements by this instance of the selector
+                //     // todo -- pool change sets
+                //     styleSet2.changeSet = null;
+                // }
+                //
+                // for (int i = 0; i < styleSet2.selectors.size; i++) {
+                //     // run selector    
+                //     if ((styleSet2.selectors[i].state & styleSet2.activeStates) != 0) {
+                //         //   styleSet2.selectors[i].Run(resultSet);
+                //     }
+                //
+                //     // need to write 
+                // }
+                //
+                // // if changed
+                //
+                // for (int i = 0; i < styleSet2.splitIndex; i++) {
+                //     ref StyleUsage usage = ref styleSet2.styleUsages[i];
+                //     map[(int) usage.property.propertyId] = 1;
+                // }
 
                 // dont really need a sort actually just need to shuffle the high priority actives to the front and everything else can be in unsorted in the back
                 // for each property keep a score in the map

@@ -77,6 +77,12 @@ namespace UIForia.Util {
             return true;
         }
 
+        public void Clear() {
+            for (int i = 0; i < size; i++) {
+                map[i] = 0;
+            }
+        }
+
     }
 
     public unsafe struct IntBoolMap128 {

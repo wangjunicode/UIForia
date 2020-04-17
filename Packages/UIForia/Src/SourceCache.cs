@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using UIForia.Util;
 using Unity.Jobs;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Src {
 
@@ -69,9 +70,8 @@ namespace UIForia.Src {
             SourceCacheJob job = new SourceCacheJob() {
                 handle = GCHandle.Alloc(sourceCache)
             };
-
-            job.Schedule(sourceCache.size, 1).Complete();
             
+            job.Schedule(sourceCache.size, 1).Complete();
             job.handle.Free();
             
         }

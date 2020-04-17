@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
@@ -10,7 +11,7 @@ using UIForia.Parsing;
 using UIForia.Src;
 using UIForia.Systems;
 using UIForia.Util;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Compilers {
 
@@ -79,7 +80,12 @@ namespace UIForia.Compilers {
                     
                     for (int j = 0; j < set.inputEventHandlers.Length; j++) {
                         // could try to fast compile first then do slow if failed. currently slow because dont know if user did something crazy and slow is safer
-                        templateData.inputEventHandlers[j] = (Action<LinqBindingNode, InputEventHolder>) set.inputEventHandlers[j].expression.Compile();
+                        try {
+                            templateData.inputEventHandlers[j] = (Action<LinqBindingNode, InputEventHolder>) set.inputEventHandlers[j].expression.Compile();
+                        }
+                        catch (Exception e) {
+                            Debugger.Break();
+                        }
                     }
 
                     GCHandle.Alloc(templateData); // unity issue where unreferenced type gets gc'd causing crash when they re-scan types

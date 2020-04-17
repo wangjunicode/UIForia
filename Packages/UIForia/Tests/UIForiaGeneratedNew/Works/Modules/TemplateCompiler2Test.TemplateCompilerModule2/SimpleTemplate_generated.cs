@@ -5,7 +5,7 @@ namespace UIForia.Generated {
 
     public partial class Generated_Works : TemplateLoader {
     
-        public static readonly TemplateData template_031fd822_5926_4993_9519_0f9adb568161 = new TemplateData ("SimpleTemplate") {
+        public static readonly TemplateData template_a04fd272_ed38_4743_ab50_e8921c5d2165 = new TemplateData ("SimpleTemplate") {
             entry = (UIForia.ElementSystem system) => {
                 TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate element;
 

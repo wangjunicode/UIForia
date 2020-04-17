@@ -37,7 +37,9 @@ namespace UIForia.Parsing {
                 builder.Append(textExpressionList[i].text);
             }
 
-            return builder.ToString();
+            string retn = builder.ToString();
+            StringUtil.ReleasePerThreadStringBuilder(builder);
+            return retn;
         }
 
         public override string GetTagName() {

@@ -3,7 +3,10 @@ using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Attributes;
 using UIForia.Elements;
+using UIForia.Rendering;
 using UIForia.UIInput;
+using UnityEngine;
+using Application = UIForia.Application;
 
 namespace TemplateCompiler2Test {
     public class TestDragEvent : DragEvent { }
@@ -55,9 +58,9 @@ namespace TemplateCompiler2Test {
         [Test]
         public void Works() {
             
-            MockApplication.PreCompile<SimpleTemplate>(nameof(Works));
-
-            // Application app = MockApplication.Create(new Generated_Works());
+            // MockApplication.PreCompile<SimpleTemplate>(nameof(Works));
+            Debug.Log(Enum.GetNames(typeof(StylePropertyId)).Length);
+            Application app = MockApplication.Create<SimpleTemplate>();//new Generated_Works());
             
         }
 

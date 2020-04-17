@@ -337,35 +337,38 @@ namespace UIForia.Compilers {
                 throw new TemplateCompileException($"{attributeData.methodInfo.DeclaringType}.{attributeData.methodInfo} must be marked as public in order to be referenced in a template expression");
             }
 
-            inputHandlerCompiler.Init();
-            inputHandlerCompiler.Setup();
+            ParameterExpression bindingNodeParam  = Expression.Parameter(typeof(LinqBindingNode), "bindingNode");
+            ParameterExpression evtHolderParam = Expression.Parameter(typeof(InputEventHolder), "__eventHolder");
 
-            // todo -- seems like we could cache this somehow
-            inputHandlerCompiler.SetSignature(new Parameter(typeof(LinqBindingNode), "bindingNode"), new Parameter(typeof(InputEventHolder), "__eventHolder"));
-
-            Expression methodCall = null;
+            Expression methodCall;
+            Expression elementExpr = Expression.Field(bindingNodeParam, MemberData.BindingNode_Element);
+            
             if (attributeData.useEventParameter) {
                 // todo -- seems like we could cache this somehow
-                Expression field = Expression.Field(inputHandlerCompiler.GetParameterAtIndex(1), evtAccessor);
+                Expression field = Expression.Field(evtHolderParam, evtAccessor);
                 if (attributeData.parameterType != field.Type) {
                     field = Expression.TypeAs(field, attributeData.parameterType);
                 }
 
-                methodCall = ExpressionFactory.CallInstance(inputHandlerCompiler.GetElement(), attributeData.methodInfo, field);
+                methodCall = ExpressionFactory.CallInstance(elementExpr, attributeData.methodInfo, field);
             }
             else {
-                methodCall = ExpressionFactory.CallInstance(inputHandlerCompiler.GetElement(), attributeData.methodInfo);
+                methodCall = ExpressionFactory.CallInstance(elementExpr, attributeData.methodInfo);
             }
 
             if (assignmentTarget != null) {
-                MemberExpression assign = Expression.Field(inputHandlerCompiler.GetParameterAtIndex(1), assignmentTarget);
-                inputHandlerCompiler.Assign(assign, methodCall);
-            }
-            else {
-                inputHandlerCompiler.RawExpression(methodCall);
+                MemberExpression assign = Expression.Field(bindingNodeParam, assignmentTarget);
+                return Expression.Lambda(Expression.Block(Expression.Assign(assign, methodCall)),
+                    bindingNodeParam, 
+                    evtHolderParam
+                );
             }
 
-            return inputHandlerCompiler.BuildLambda();
+            return Expression.Lambda(Expression.Block(methodCall),
+                bindingNodeParam, 
+                evtHolderParam
+            );
+
         }
 
         private LambdaExpression BuildInputTemplateBinding(FieldInfo evtAccessor, in AttrInfo attr, FieldInfo assignmentTarget = null) {
@@ -392,8 +395,8 @@ namespace UIForia.Compilers {
                 astNode = n.body;
             }
 
-            inputHandlerCompiler.SetImplicitContext(inputHandlerCompiler.GetRoot());
             inputHandlerCompiler.SetSignature(new Parameter(typeof(LinqBindingNode), "bindingNode"), new Parameter(typeof(InputEventHolder), "__eventHolder"));
+            inputHandlerCompiler.SetImplicitContext(inputHandlerCompiler.GetRoot());
 
             ParameterExpression variable = inputHandlerCompiler.AddVariable(evtAccessor.FieldType, eventName);
 

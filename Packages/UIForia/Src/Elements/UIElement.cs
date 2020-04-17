@@ -104,7 +104,7 @@ namespace UIForia.Elements {
         public Application application { get; internal set; }
         public int hierarchyDepth { get; internal set; }
         private int _siblingIndex;
-        public StyleSet2 styleSet2;
+        public StyleSet styleSet2;
         internal int index;
 
         public ElementReference reference => isDestroyed ? default : new ElementReference(id, index);
@@ -485,6 +485,11 @@ namespace UIForia.Elements {
         }
 
         public virtual void OnReady() { }
+
+        // todo -- probably want to move this
+        internal TemplateDatabase GetTemplateDatabase() {
+            throw new NotImplementedException();
+        }
 
     }
 

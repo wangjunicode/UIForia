@@ -439,7 +439,7 @@ namespace UIForia.Src {
                 }
 
                 if (templateShell.lastParseVersion == fileInfo.lastWriteTime) {
-                    return;
+                    return; // todo -- still want to validate probably
                 }
 
                 templateShell.Reset();
@@ -474,46 +474,23 @@ namespace UIForia.Src {
         }
 
         private static void Parse(LightList<TemplateShell> parseList) {
-
-            // todo -- jobify this stuff and connect with previous job for flushing pending updates
+            
             sourceCache.FlushPendingUpdates();
 
             ParseJob parseJob = new ParseJob() {
                 handle = GCHandle.Alloc(parseList)
             };
             
+            // note: there is a somewhat high startup cost to running this job for the first time
+            // for this job in particular we get a ~2x speed up with parallel (without caching of parse results)
+            // warmup time with parallel is ~30ms for 1 use case, then runs are ~0.5ms. just calling Run()
+            // on main thread is around 1ms with bad xml parser, probably half of that with a faster one
+            
             parseJob.Run();
+            // JobHandle handle = parseJob.Schedule(parseList.size, 1);
+            // handle.Complete();
             
             parseJob.handle.Free();
-
-        }
-
-        private static void CompileTemplates(ProcessedType[] typesToCompile) {
-
-            // parallel eventually but likely need to make LinqCompiler threadsafe
-            // could fake parallel by enqueing real compile jobs when build is finished
-            
-            // todo -- either use a producer / consumer to compile functions 
-            // or jobify
-            // or flat out do in parallel (need linq compiler to be thread safe first)
-            TemplateCompiler2 compiler = new TemplateCompiler2();
-
-            for (int i = 0; i < typesToCompile.Length; i++) {
-
-                // todo -- get template
-                // if no dependencies changed since last compile
-                // we can most likely re-use the data from last time
-
-                TemplateExpressionSet templateData = compiler.CompileTemplate(typesToCompile[i]);
-            
-                // probably can't be parallel, will need to buffer and set later
-                // typesToCompile[i].module.SetTemplateData(typesToCompile[i].rawType, templateData);
-
-            }
-            
-            // output += templateData.ToCSharpCode(new IndentedStringBuilder(512));
-            // File.WriteAllText(UnityEngine.Application.dataPath + "/tmp.txt", output);
-
         }
 
         private static Module[] FlattenDependencyTree(IList<Module> modules) {

@@ -21,7 +21,7 @@ namespace UIForia.Style {
         internal StructList<int> affectedSelectorIds;
         internal StyleState activeStates;
         internal LightList<Selector> selectors;
-        internal StructList<SelectorEffect> selectorEffects;
+        internal StructList<GucciSystem.SelectorEffect> selectorEffects;
 
         internal int baseStyleId;
 

@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
 
 namespace UIForia.Util {
 
@@ -97,6 +95,7 @@ namespace UIForia.Util {
                 else {
                     a = new T[array.Length];
                 }
+
                 Array.Copy(a, 0, array, size, size);
                 return new SizedArray<T>() {
                     array = a,
@@ -157,6 +156,7 @@ namespace UIForia.Util {
             if (array == null) {
                 return;
             }
+
             Array.Clear(array, 0, array.Length);
         }
 

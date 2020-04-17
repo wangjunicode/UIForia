@@ -387,14 +387,14 @@ namespace UIForia.Style {
 
                     // find all targets that were effected by this selector and remove them. if target was 'this' element, just mark in own change set
                     for (int j = 0; j < styleSet2.selectorEffects.size; j++) {
-                        ref SelectorEffect effect = ref styleSet2.selectorEffects.array[i];
-
-                        UIElement target = application.ResolveElementReference(effect.elementReference);
-
-                        // if we were effecting a destroyed element, continue
-                        if (target == null) {
-                            continue;
-                        }
+                        // ref SelectorEffect effect = ref styleSet2.selectorEffects.array[i];
+                        //
+                        // UIElement target = application.ResolveElementReference(effect.elementReference);
+                        //
+                        // // if we were effecting a destroyed element, continue
+                        // if (target == null) {
+                        //     continue;
+                        // }
                         //
                         // if (target.styleSet2.changeSet == null) {
                         //     target.styleSet2.changeSet = new ChangeSet(); // todo -- pool

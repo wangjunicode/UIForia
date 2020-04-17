@@ -6,13 +6,6 @@ using UIForia.Util;
 
 namespace UIForia.Selectors {
 
-    public struct SelectorEffect {
-
-        public int selectorId;
-        public ElementReference elementReference;
-
-    }
-
     public struct SelectorUsage {
 
         public int id;
@@ -49,9 +42,11 @@ namespace UIForia.Selectors {
 
     public struct Selector {
 
-        public int id;
+        public int id;             // this might be an index actually
+        public int styleId;
+        
         // public SelectorQuery rootQuery;
-        public StyleState state;
+        public StyleState state; // maybe don't even need this, computed based on id + ranges
         public FromTarget fromTarget;
         
         public void Run(UIElement origin) {
@@ -93,7 +88,7 @@ namespace UIForia.Selectors {
             }                
         }
         
-        public void GatherTargets(UIElement element, LightList<UIElement> targets) {
+        public void Run(UIElement element, LightList<UIElement> targets) {
             switch (fromTarget) {
                 case FromTarget.Children:
                     
@@ -124,6 +119,10 @@ namespace UIForia.Selectors {
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        public void Run(UIElement element, int computedSelectorId, StructList<GucciSystem.SelectorEffect> targets) {
+            throw new NotImplementedException();
         }
 
     }

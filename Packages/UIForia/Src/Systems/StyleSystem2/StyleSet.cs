@@ -8,6 +8,7 @@ namespace UIForia {
 
     public class StyleSet {
 
+        internal ushort stateAndSharedStyleChangeSetId;
         internal int changeSetId;
         internal UIElement element;
         internal StyleState state;

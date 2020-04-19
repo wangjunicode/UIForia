@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using System.Threading;
 using UIForia.Elements;
-using UIForia.Rendering;
 using UIForia.Selectors;
 using UIForia.Style;
 using UIForia.Util;
@@ -14,6 +12,36 @@ using UnityEngine;
 
 namespace UIForia {
 
+    [Flags]
+    public enum StyleState2 {
+        // note: order here is really important since other flag types use it
+        Normal = 1 << 0,
+        Hover = 1 << 1,
+        Focused = 1 << 2,
+        Active = 1 << 3
+
+    }
+    
+    [Flags]
+    public enum StyleState2UShort : ushort {
+        // note: order here is really important since other flag types use it
+        Normal = 1 << 0,
+        Hover = 1 << 1,
+        Focused = 1 << 2,
+        Active = 1 << 3
+
+    }
+    
+    [Flags]
+    public enum StyleState2Byte : byte {
+        // note: order here is really important since other flag types use it
+        Normal = 1 << 0,
+        Hover = 1 << 1,
+        Focused = 1 << 2,
+        Active = 1 << 3
+
+    }
+    
     internal struct SelectorTarget {
 
         public int selectorId;
@@ -23,7 +51,7 @@ namespace UIForia {
 
     internal struct StylePropertyUpdate {
 
-        public StyleState state;
+        public StyleState2 state;
         public StyleProperty2 property;
 
     }
@@ -148,9 +176,9 @@ namespace UIForia {
         private struct OldStyleIndex {
 
             public int index;
-            public int styleId;
+            public StyleId styleId;
 
-            public OldStyleIndex(int index, int styleId) {
+            public OldStyleIndex(int index, StyleId styleId) {
                 this.index = index;
                 this.styleId = styleId;
             }
@@ -227,7 +255,7 @@ namespace UIForia {
         //     for every element with style changes or selector effect updates
         //        run transitions if needed
 
-        private void Phase1() {
+        private unsafe void Phase1() {
 
             int totalChangeSets = nextChangeSetId;
 
@@ -241,16 +269,12 @@ namespace UIForia {
 
             NativeArray<JobHandle> handles = new NativeArray<JobHandle>(1, Allocator.Temp);
 
-            GCHandle changeSetHandle = GCHandle.Alloc(changeSets);
-
             int batchSize = 1;
             int lastSize = 0;
 
             for (int i = 0; i < jobCount; i += batchSize) {
                 jobs.array[i] = new ProcessSharedStyleUpdatesJob() {
-                    startIndex = lastSize,
-                    endIndex = lastSize + batchSize,
-                    changeSetHandle = changeSetHandle,
+                    changeSets = new UnsafeSpan<SharedStyleChangeSet>(0, sharedStyleChangeSets.size, sharedStyleChangeSets.array),
                     addedList = new UnsafeList<StyleUpdate>(128, Allocator.TempJob),
                     removedList = new UnsafeList<StyleUpdate>(128, Allocator.TempJob),
                 };
@@ -261,14 +285,263 @@ namespace UIForia {
                 handles[i] = jobs.array[i].Schedule();
             }
 
-            JobHandle mergeJobHandle = new MergeUpdateJob().Schedule(JobHandle.CombineDependencies(handles));
-
-            new RemoveDeadSelectorsJob().Schedule(mergeJobHandle);
-
             for (int i = 0; i < jobCount; i++) {
-                jobs.array[i].changeSetHandle.Free();
                 jobs.array[i].addedList.Dispose();
                 jobs.array[i].removedList.Dispose();
+            }
+
+        }
+
+        // have list of added / removed styles for elements (already per-job data, should need to sort/merge for this)
+        // now need to figure out based on state which stategroups to add / remove
+        // where are the shared styles stored? I think on the element is fine
+        // maybe it would be better to allocate a block and then sub-allocate out of that
+        // can add that later though 
+
+        public struct StyleStateGroup {
+
+            public readonly int index;
+            public readonly StyleId styleId;
+            public readonly StyleState2 state;
+
+            public StyleStateGroup(int index, StyleState2 state, StyleId styleId) {
+                this.index = index;
+                this.state = state;
+                this.styleId = styleId;
+            }
+
+        }
+
+        public unsafe struct HandleStyleStateGroupUpdateJob : IJob {
+
+            public IntPtr listPointer;
+            public UnsafeList<StyleStateGroup> previousStateGroups;
+            public UnsafeList<StyleStateGroup> newStateGroups;
+            public UnsafeList<int> rebuildList;
+
+            public void Execute() {
+
+                // cache persistent and resuse, 32 is huge for this
+                previousStateGroups = new UnsafeList<StyleStateGroup>(32, Allocator.TempJob);
+
+                UnsafeSpan<SharedStyleChangeSet> styleChangeSets = default;
+
+                for (int i = 0; i < styleChangeSets.size; i++) {
+                    SharedStyleChangeSet changeSet = styleChangeSets.array[i];
+
+                    if (changeSet.newState == changeSet.originalState) { }
+
+                }
+
+            }
+
+            private static void MaybeAddStyleGroup(ref UnsafeList<StyleStateGroup> list, StyleState2 checkState, StyleState2 targetState, StyleId styleId) {
+                if ((checkState & targetState) != 0 && styleId.DefinesState(targetState)) {
+                    list.array[list.size++] = new StyleStateGroup(list.size, targetState, styleId);
+                }
+            }
+
+            // if style group exists -> styleId encodes which states it has?
+
+            private unsafe void Run(in SharedStyleChangeSet changeSet) {
+
+                previousStateGroups.EnsureAdditionalCapacity(4 * changeSet.oldStyleCount);
+
+                for (int i = 0; i < changeSet.oldStyleCount; i++) {
+                    StyleId styleId = changeSet.styles[i];
+                    MaybeAddStyleGroup(ref previousStateGroups, changeSet.originalState, StyleState2.Active, styleId);
+                    MaybeAddStyleGroup(ref previousStateGroups, changeSet.originalState, StyleState2.Focused, styleId);
+                    MaybeAddStyleGroup(ref previousStateGroups, changeSet.originalState, StyleState2.Hover, styleId);
+                    MaybeAddStyleGroup(ref previousStateGroups, changeSet.originalState, StyleState2.Normal, styleId);
+                }
+
+                for (int i = changeSet.oldStyleCount; i < changeSet.newStyleCount; i++) {
+                    StyleId styleId = changeSet.styles[i];
+                    MaybeAddStyleGroup(ref newStateGroups, changeSet.newState, StyleState2.Active, styleId);
+                    MaybeAddStyleGroup(ref newStateGroups, changeSet.newState, StyleState2.Focused, styleId);
+                    MaybeAddStyleGroup(ref newStateGroups, changeSet.newState, StyleState2.Hover, styleId);
+                    MaybeAddStyleGroup(ref newStateGroups, changeSet.newState, StyleState2.Normal, styleId);
+                }
+
+                for (int i = 0; i < newStateGroups.size; i++) {
+
+                    StyleStateGroup newGroup = newStateGroups[i];
+
+                    bool wasPresent = false;
+
+                    for (int j = 0; j < previousStateGroups.size; j++) {
+                        StyleStateGroup group = previousStateGroups.array[i];
+                        if (group.state == newGroup.state && group.styleId == newGroup.styleId) {
+                            previousStateGroups.SwapRemoveAt(i);
+                            wasPresent = true;
+                            break;
+                        }
+                    }
+
+                    if (wasPresent) { }
+
+                }
+
+                // output = list of added groups for element & list of removed groups for element
+                // order doesn't matter. could be that a state change causes no updates
+
+                // if added is empty and removed is empty and no indices changed -> no op
+
+                // otherwise we need to mark this element for changing. 
+                // should be threadsafe to use same changeset assuming dependencies are correctly setup
+                // is that the right way?
+                // hold a different changeset array for this? maybe doesn't matter
+
+                // instance styles also need to be processed somehow -> maybe its only a change flag though and do the data changing at binding update time 
+
+                rebuildList.Add(changeSet.elementId); // at this point its guaranteed not to contain duplicates, this is not true in the selector phase
+
+                UnsafeList<StyleStateGroup> removedGroups = default;
+                UnsafeList<ActiveSelector> activeSelectors = default;
+                UnsafeList<int> freeIndices = default;
+                UnsafeList<int> selectorTargetedElements = default;
+                UnsafeList<ElementData> elementData = default;
+
+                for (int i = 0; i < removedGroups.size; i++) {
+                    StyleStateGroup stateGroup = removedGroups[i];
+                    if (stateGroup.styleId.HasSelectorsInState(stateGroup.state)) {
+
+                        int index = FindActiveSelectorIndex(activeSelectors, new SelectorReference());
+
+                        if (index == -1) {
+                            continue;
+                        }
+
+                        activeSelectors.array[index].isActive = false;
+                        freeIndices.Add(index);
+                        int start = activeSelectors.array[index].effectedElementRange.start;
+                        int end = activeSelectors.array[index].effectedElementRange.end;
+
+                        for (int j = start; j < end; j++) {
+                            int elementId = selectorTargetedElements[i];
+                            if (Interlocked.Add(ref elementData.array[0].dirtyFlag, 1) == 1) {
+                                // add to dirty list    
+                            }
+                        }
+                        
+                        // mark as inactive
+                        // mark all effected elements as no longer effected
+                        // retain id for added groups to get shoved into (will sort later anyway but this way there isn't a removal while multiple threads might be reading out of this array)
+
+                    }
+                }
+
+            }
+
+        }
+
+        public struct ElementData {
+
+            public int dirtyFlag;
+
+        }
+        public struct SelectorReference {
+
+            public int elementId;
+            public StyleId styleId; // style id not needed if selector id is globally unique (which i think it should be)
+            public int selectorId;
+
+        }
+
+        public struct ActiveSelector {
+
+            public int elementId;
+            public StyleId styleId; // style id not needed if selector id is globally unique (which i think it should be)
+            public int selectorId;
+            public bool isActive;
+            public RangeInt effectedElementRange;
+
+        }
+
+        /// <param name="activeSelectors">list of active selectors sorted by elementId from which the selector originates</param>
+        /// <param name="selectorReference">the selector we are trying to find the index of</param>
+        /// <returns>index in activeSelectors the target selector reference is located at</returns>
+        public static unsafe int FindActiveSelectorIndex(in UnsafeList<ActiveSelector> activeSelectors, in SelectorReference selectorReference) {
+            int start = 0;
+            int end = activeSelectors.size - 1;
+            ActiveSelector* array = activeSelectors.array;
+
+            while (start <= end) {
+                int index = start + (end - start >> 1);
+
+                int cmp = array[index].elementId - selectorReference.elementId;
+
+                if (cmp == 0) {
+                    // look to start if not the same selector id
+                    if (selectorReference.selectorId == array[index].selectorId) {
+                        return index;
+                    }
+
+                    // if not found look forward until found or element id is different
+                    for (int i = index + 1; i < activeSelectors.size; i++) {
+                        if (array[i].elementId != selectorReference.elementId) {
+                            break;
+                        }
+
+                        if (array[i].selectorId == selectorReference.selectorId) {
+                            return i;
+                        }
+                    }
+
+                    // look backwards until found or element id is different
+                    for (int i = index - 1; i >= 0; i--) {
+                        if (array[i].elementId != selectorReference.elementId) {
+                            break;
+                        }
+
+                        if (array[i].selectorId == selectorReference.selectorId) {
+                            return i;
+                        }
+                    }
+
+                    // if not found it ain't there
+                    return -1;
+                }
+
+                if (cmp < 0) {
+                    start = index + 1;
+                }
+                else {
+                    end = index - 1;
+                }
+            }
+
+            return -1;
+        }
+
+        private struct RemoveInactiveSelectorsJob : IJob {
+
+            public UnsafeList<SelectorReference> selectorsToRemove;
+
+            public void Execute() { }
+
+        }
+
+        // build a 2nd change set -> still job maybe?
+        // trade off is latency for worker to pick up work
+        private struct RemoveStateGroupJob : IJob {
+
+            // mark for style rebuild -> static lookup table for each element? list that allows duplicates + sort/merge?
+            // if any removed style had selectors -> remove them -> still need to figure out what this means exactly
+            // if any removed style had exit hooks -> run them
+            public void Execute() {
+                // for each selector in last frame active list
+                //    if no longer active -> because element disabled or selector removed
+                //        swap remove that selector (can mutate list sections here safely at this point, compress at the end & maybe stitch up pointers if needed)
+                //        for each effected element -> if element active/alive
+                //            mark element for rebuild
+                //            invoke exit hook if present
+                //    if still active
+                //        run it
+                //        for each affected element
+                //            if was affected last frame -> do nothing
+                //            if was not affected last frame -> call enter hook if present
+                //                                           -> mark element for rebuild
             }
 
         }
@@ -457,23 +730,14 @@ namespace UIForia {
 
         // global list / array of styles by id? likely makes sense then a style is really just the global id
 
-        public unsafe struct RawBufferList<T> where T : struct, IDisposable {
-
-            public NativeArray<T> array;
-            public int size;
-
-            public void EnsureAdditionalCapacity(int extraCapacity) {
-                // if()
-            }
-
-        }
-
         public struct StyleUpdate {
 
             public int elementId;
-            public int styleId;
+            public StyleId styleId;
+            private int padding;
 
-            public StyleUpdate(int elementId, int styleId) {
+            public StyleUpdate(int elementId, StyleId styleId) {
+                this.padding = 0;
                 this.elementId = elementId;
                 this.styleId = styleId;
             }
@@ -482,23 +746,17 @@ namespace UIForia {
 
         private unsafe struct ProcessSharedStyleUpdatesJob : IJob {
 
-            public int startIndex;
-            public int endIndex;
-
-            public GCHandle changeSetHandle;
-
-            private NativeArray<OldStyleIndex> searchList;
             public UnsafeList<StyleUpdate> addedList;
             public UnsafeList<StyleUpdate> removedList;
-            
+            public UnsafeSpan<SharedStyleChangeSet> changeSets;
+            private NativeArray<OldStyleIndex> searchList;
+
             public void Execute() {
 
-                searchList = new NativeArray<OldStyleIndex>(32, Allocator.TempJob);
+                searchList = new NativeArray<OldStyleIndex>(32, Allocator.TempJob); // maybe make persistent
 
-                SharedStyleChangeSet* changeSets = default;
-
-                for (int i = startIndex; i < endIndex; i++) {
-                    Run(changeSets[i]);
+                for (int i = 0; i < changeSets.size; i++) {
+                    Run(changeSets.array[i]);
                 }
 
                 searchList.Dispose();
@@ -521,7 +779,7 @@ namespace UIForia {
                 if (changeSet.styles == default || changeSet.newStyleCount == 0) {
                     return;
                 }
-                
+
                 for (int i = 0; i < changeSet.oldStyleCount; i++) {
                     searchList[i] = new OldStyleIndex(i, changeSet.styles[i]);
                 }
@@ -531,13 +789,13 @@ namespace UIForia {
                 int elementId = changeSet.elementId;
 
                 addedList.EnsureAdditionalCapacity(changeSet.newStyleCount);
-                
+
                 for (int i = changeSet.oldStyleCount; i < totalStyleCount; i++) {
 
-                    int targetId = changeSet.styles[i];
-                    
-                    int previousIndex = IndexOf(searchList, targetId, ref searchListSize );
-                    
+                    StyleId targetId = changeSet.styles[i];
+
+                    int previousIndex = IndexOf(searchList, targetId, ref searchListSize);
+
                     if (previousIndex == -1) {
                         addedList[addedList.size++] = new StyleUpdate(elementId, targetId);
                     }
@@ -552,7 +810,7 @@ namespace UIForia {
                 }
 
                 removedList.EnsureAdditionalCapacity(searchListSize);
-                
+
                 // anything still in searchList was removed
                 for (int i = 0; i < searchListSize; i++) {
                     removedList.array[removedList.size++] = new StyleUpdate(elementId, searchList[i].styleId);
@@ -560,7 +818,7 @@ namespace UIForia {
 
             }
 
-            private static int IndexOf(NativeArray<OldStyleIndex> searchList, int targetId, ref int searchListSize) {
+            private static int IndexOf(NativeArray<OldStyleIndex> searchList, StyleId targetId, ref int searchListSize) {
                 for (int i = 0; i < searchListSize; i++) {
                     if (searchList[i].styleId == targetId) {
                         int idx = searchList[i].index;
@@ -587,59 +845,8 @@ namespace UIForia {
         // sort so selector list is binary searchable
         // or keep map of selectorId -> array index but maybe thats dumb
 
-        // if this is done single threaded wny not do it at bind time? no user access anyway, or just over-write result if called twice
-        private void RebuildStyleGroupsWithoutStateChange(in ChangeSet changeSet) {
-
-            StructList<StyleGroup2> sharedStyles = changeSet.sharedStyles;
-            SizedArray<int> previousStyles = changeSet.styleSet.sharedStyles;
-
-            StructList<OldStyleIndex> searchList = StructList<OldStyleIndex>.Get();
-            StructList<StyleGroupUpdate> groupUpdates = StructList<StyleGroupUpdate>.Get();
-
-            groupUpdates.EnsureCapacity(sharedStyles.size + previousStyles.size);
-
-            for (int i = 0; i < previousStyles.size; i++) {
-                ref OldStyleIndex old = ref searchList.array[i];
-                old.index = i;
-                old.styleId = previousStyles.array[i];
-            }
-
-            for (int i = 0; i < sharedStyles.size; i++) {
-                ref StyleGroup2 group = ref sharedStyles.array[i];
-
-                int previousIndex = IndexOf(group.id, searchList);
-
-                if (previousIndex == -1) {
-                    // added
-                    groupUpdates.array[groupUpdates.size++] = new StyleGroupUpdate(UpdateType.Added, i);
-                }
-                else if (previousIndex == i) {
-                    // unchanged
-                }
-                else {
-                    // index changed
-                    groupUpdates.array[groupUpdates.size++] = new StyleGroupUpdate(UpdateType.IndexChanged, i);
-                }
-
-            }
-
-            // anything still in searchList was removed
-            for (int i = 0; i < searchList.size; i++) {
-                groupUpdates.array[groupUpdates.size++] = new StyleGroupUpdate(UpdateType.Removed, i);
-            }
-
-            HandleRemovedStyleGroups(changeSet, groupUpdates);
-            HandleAddedStyleGroups(changeSet, groupUpdates);
-
-            // each job enqueues a list of work to do
-            // can probably run selectors in any order
-            // just need to find a place to store the result properly in a threadsafe way
-            // selector changes -> 1 list per thread
-            // just enqueue a pair of selectorId (the computed one) -> elementId
-        }
-
         private void HandleAddedStyleGroups(in ChangeSet changeSet, StructList<StyleGroupUpdate> groupUpdates) {
-            StyleState state = changeSet.styleSet.state;
+            StyleState2 state = changeSet.styleSet.state;
             UIElement element = changeSet.styleSet.element;
             StructList<StyleGroup2> sharedStyles = changeSet.sharedStyles;
 
@@ -660,10 +867,10 @@ namespace UIForia {
                 for (int j = 0; j < group.selectorDefinitions.Length; j++) {
                     ref SelectorDefinition selectorDefinition = ref group.selectorDefinitions[j];
 
-                    if ((selectorDefinition.selector.state & state) != 0) {
-                        // enqueue selector / element to run
-                        // output.Add(new SelectorAction(Action.Remove, element.id, selectorDefinition.selector.id, group.id));
-                    }
+                    //if ((selectorDefinition.selector.state & state) != 0) {
+                    // enqueue selector / element to run
+                    // output.Add(new SelectorAction(Action.Remove, element.id, selectorDefinition.selector.id, group.id));
+                    //}
 
                 }
             }
@@ -808,7 +1015,7 @@ namespace UIForia {
 
             StructList<StyleProperty2> properties = StructList<StyleProperty2>.Get();
 
-            StyleState state = changeSet.state;
+            StyleState2 state = changeSet.state;
 
             changeSet.styleSet.state = state; // maybe dont need to set this? just track original state
 
@@ -840,32 +1047,32 @@ namespace UIForia {
                     sources.Add(new StyleGroupSource() {
                         priority = 1,
                         properties = groups.normalProperties,
-                        state = StyleState.Normal
+                        state = StyleState2.Normal
                     });
                 }
 
-                if (groups.hoverProperties != null && groups.hoverProperties.Length != 0 && (state & StyleState.Hover) != 0) {
+                if (groups.hoverProperties != null && groups.hoverProperties.Length != 0 && (state & StyleState2.Hover) != 0) {
                     sources.Add(new StyleGroupSource() {
                         priority = 1,
                         properties = groups.hoverProperties,
-                        state = StyleState.Hover
+                        state = StyleState2.Hover
                     });
 
                 }
 
-                if (groups.activeProperties != null && groups.activeProperties.Length != 0 && (state & StyleState.Active) != 0) {
+                if (groups.activeProperties != null && groups.activeProperties.Length != 0 && (state & StyleState2.Active) != 0) {
                     sources.Add(new StyleGroupSource() {
                         priority = 1,
                         properties = groups.activeProperties,
-                        state = StyleState.Active
+                        state = StyleState2.Active
                     });
                 }
 
-                if (groups.focusProperties != null && groups.focusProperties.Length != 0 && (state & StyleState.Focused) != 0) {
+                if (groups.focusProperties != null && groups.focusProperties.Length != 0 && (state & StyleState2.Focused) != 0) {
                     sources.Add(new StyleGroupSource() {
                         priority = 1,
                         properties = groups.focusProperties,
-                        state = StyleState.Focused
+                        state = StyleState2.Focused
                     });
                 }
 
@@ -961,7 +1168,7 @@ namespace UIForia {
 
             public int priority;
             public int size; // this will wrap a style group and instance properties (stored in growable list) so we want to reference both sets of data in a uniform way
-            public StyleState state;
+            public StyleState2 state;
             public StyleProperty2[] properties;
 
         }
@@ -971,21 +1178,23 @@ namespace UIForia {
             // the first {oldStyleCount} elements in *styles are old, the rest are new
             public ushort newStyleCount;
             public ushort oldStyleCount;
-            public ushort state;
-            public int* styles;
+            public StyleState2 newState;
+            public StyleState2 originalState;
+            public StyleId* styles;
             public int elementId;
 
         }
 
-        internal SizedArray<SharedStyleChangeSet> sharedStyleChangeSets;
+        internal UnsafeList<SharedStyleChangeSet> sharedStyleChangeSets;
 
         // assumes at least 1 of the groups changed or order was altered in some way
         public unsafe void SetSharedStyleGroups(StyleSet styleSet, StructList<StyleGroup2> newStyles) {
 
             if (styleSet.stateAndSharedStyleChangeSetId == ushort.MaxValue) {
                 styleSet.stateAndSharedStyleChangeSetId = (ushort) nextChangeSetId++;
+                sharedStyleChangeSets.EnsureAdditionalCapacity(1);
                 sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].elementId = styleSet.element.id;
-                sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].state = (ushort) styleSet.state;
+                sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].newState = styleSet.state;
             }
 
             ref SharedStyleChangeSet changeSet = ref sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId];
@@ -996,7 +1205,7 @@ namespace UIForia {
 
             // todo -- hold own persistent int buffer for this instead of using malloc for every allocation / free
             long size = sizeof(int) * (newStyles.size + styleSet.sharedStyles.size);
-            changeSet.styles = (int*) UnsafeUtility.Malloc(size, 4, Allocator.Temp);
+            changeSet.styles = (StyleId*) UnsafeUtility.Malloc(size, 4, Allocator.Temp);
             changeSet.newStyleCount = (ushort) newStyles.size;
             changeSet.oldStyleCount = (ushort) styleSet.sharedStyles.size;
 
@@ -1026,34 +1235,35 @@ namespace UIForia {
             nextChangeSetId = 0;
         }
 
-        public void EnterState(StyleSet styleSet, StyleState state) {
+        public unsafe void EnterState(StyleSet styleSet, StyleState2 state) {
 
             if (styleSet.stateAndSharedStyleChangeSetId == ushort.MaxValue) {
                 styleSet.stateAndSharedStyleChangeSetId = (ushort) nextChangeSetId++;
+                sharedStyleChangeSets.EnsureAdditionalCapacity(1);
                 sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].elementId = styleSet.element.id;
-                sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].state = (ushort) styleSet.state;
+                sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].newState = styleSet.state;
             }
 
-            sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].state |= (ushort) state;
+            sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].newState |= state;
 
         }
 
-        public void ExitState(StyleSet styleSet, StyleState state) {
+        public unsafe void ExitState(StyleSet styleSet, StyleState2 state) {
             if (styleSet.stateAndSharedStyleChangeSetId == ushort.MaxValue) {
                 styleSet.stateAndSharedStyleChangeSetId = (ushort) nextChangeSetId++;
                 sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].elementId = styleSet.element.id;
-                sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].state = (ushort) styleSet.state;
+                sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].newState = styleSet.state;
             }
 
-            sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].state &= (ushort) ~state;
+            sharedStyleChangeSets.array[styleSet.stateAndSharedStyleChangeSetId].newState &= ~state;
         }
 
         // assumes value changed from previous instance value, regardless if active or not
-        public void SetProperty(StyleSet styleSet, in StyleProperty2 property, StyleState state) {
+        public void SetProperty(StyleSet styleSet, in StyleProperty2 property, StyleState2 state) {
 
             ref ChangeSet changeSet = ref GetChangeSet(styleSet);
 
-            changeSet.SetInstanceProperty(property, state);
+            // changeSet.SetInstanceProperty(property, state);
 
             // this code is probably handled when flushing since we care about output properties that changed, not intermediate ones
             // if ((property.propertyId.flags & PropertyFlags.Inherited) != 0) {
@@ -1068,16 +1278,16 @@ namespace UIForia {
         }
 
         private ref ChangeSet GetChangeSet(StyleSet styleSet) {
-            if (styleSet.changeSetId == -1) {
-                int id = nextChangeSetId++;
-                styleSet.changeSetId = id;
-                if (id >= changeSets.array.Length - 1) {
-                    Array.Resize(ref changeSets.array, changeSets.array.Length * 2);
-                }
-
-                changeSets.array[id].state = styleSet.state;
-                changeSets.array[id].styleSet = styleSet;
-            }
+            // if (styleSet.changeSetId == -1) {
+            //     int id = nextChangeSetId++;
+            //     styleSet.changeSetId = id;
+            //     if (id >= changeSets.array.Length - 1) {
+            //         Array.Resize(ref changeSets.array, changeSets.array.Length * 2);
+            //     }
+            //
+            //     changeSets.array[id].state = styleSet.state;
+            //     changeSets.array[id].styleSet = styleSet;
+            // }
 
             return ref changeSets.array[styleSet.changeSetId];
         }

@@ -4,7 +4,7 @@ namespace UIForia {
 
     public struct StyleGroup2 {
 
-        public int id;
+        public StyleId id;
         public int styleSheetId;
         
         public int normalRange;

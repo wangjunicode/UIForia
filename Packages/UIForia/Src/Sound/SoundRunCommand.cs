@@ -3,6 +3,7 @@ using UIForia.Elements;
 using UIForia.Rendering;
 
 namespace UIForia.Sound {
+
     public class SoundRunCommand : IRunCommand {
 
         public UISoundData soundData;
@@ -17,23 +18,28 @@ namespace UIForia.Sound {
                 case RunAction.Run:
                     element.application.SoundSystem.PlaySound(element, soundData);
                     break;
+
                 case RunAction.Pause:
                     element.application.SoundSystem.PauseSound(element, soundData);
                     break;
+
                 case RunAction.Resume:
                     element.application.SoundSystem.SoundResumed(element, soundData);
                     break;
+
                 case RunAction.Stop:
                     element.application.SoundSystem.StopSound(element, soundData);
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
         public bool IsExit { get; }
-        
+
         public RunAction RunAction { get; }
 
     }
+
 }

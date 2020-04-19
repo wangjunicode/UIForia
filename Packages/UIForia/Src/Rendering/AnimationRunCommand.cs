@@ -3,6 +3,7 @@ using UIForia.Animation;
 using UIForia.Elements;
 
 namespace UIForia.Rendering {
+
     public class AnimationRunCommand : IRunCommand {
 
         public AnimationData animationData;
@@ -17,23 +18,28 @@ namespace UIForia.Rendering {
                 case RunAction.Run:
                     element.Animator.PlayAnimation(animationData);
                     break;
+
                 case RunAction.Pause:
                     element.Animator.PauseAnimation(animationData);
                     break;
+
                 case RunAction.Resume:
                     element.Animator.ResumeAnimation(animationData);
                     break;
+
                 case RunAction.Stop:
                     element.Animator.StopAnimation(animationData);
                     break;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
         public bool IsExit { get; }
-        
+
         public RunAction RunAction { get; }
 
     }
+
 }

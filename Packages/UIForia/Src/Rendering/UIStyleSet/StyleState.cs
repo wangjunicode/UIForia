@@ -12,5 +12,5 @@ namespace UIForia.Rendering {
         Focused = 1 << 3,
 
     }
-
+    
 }

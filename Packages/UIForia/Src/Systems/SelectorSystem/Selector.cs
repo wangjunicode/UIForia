@@ -6,23 +6,6 @@ using UIForia.Util;
 
 namespace UIForia.Selectors {
 
-    public struct SelectorUsage {
-
-        public int id;
-        public Selector selector;
-        public LightList<StyleSet2> resultSet;
-
-    }
-
-    public struct SelectionTarget {
-
-        // condense into int makes sense here, can keep a map of int value for pairs
-        public string tagName;
-        public string moduleName;
-
-        
-    }
-
     public enum FromTarget {
 
         Children,
@@ -88,6 +71,10 @@ namespace UIForia.Selectors {
             }                
         }
         
+        // for the descendent cases there is probably some advantage to running top down and 
+        // some how storing traversal results in a sorted way that lets a child who also
+        // has a selector exploit the descendent list the parent already gathered.
+        // maybe with a depth + traversal index check?
         public void Run(UIElement element, LightList<UIElement> targets) {
             switch (fromTarget) {
                 case FromTarget.Children:

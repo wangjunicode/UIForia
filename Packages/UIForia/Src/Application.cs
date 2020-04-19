@@ -100,7 +100,7 @@ namespace UIForia {
         internal AnimationSystem animationSystem;
         internal UISoundSystem soundSystem;
         internal LinqBindingSystem linqBindingSystem;
-        internal StyleSystem2 styleSystem;
+        internal VertigoStyleSystem styleSystem;
 
         internal readonly ElementSystem elementSystem;
 
@@ -154,7 +154,7 @@ namespace UIForia {
             this.animationSystem = new AnimationSystem();
             this.linqBindingSystem = new LinqBindingSystem();
             this.soundSystem = new UISoundSystem();
-            this.styleSystem = new StyleSystem2(this);
+            this.styleSystem = new VertigoStyleSystem();
             this.layoutSystem = new AwesomeLayoutSystem(this, styleSystem);
             
             switch (config.applicationType) {

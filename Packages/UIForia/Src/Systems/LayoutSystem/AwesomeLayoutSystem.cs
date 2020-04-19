@@ -16,7 +16,7 @@ namespace UIForia.Systems {
         private LightList<AwesomeLayoutRunner> runners;
         internal int traversalIndex;
 
-        public AwesomeLayoutSystem(Application application, StyleSystem2 styleSystem) {
+        public AwesomeLayoutSystem(Application application, VertigoStyleSystem styleSystem) {
             this.application = application;
             this.runners = new LightList<AwesomeLayoutRunner>();
 
@@ -30,7 +30,7 @@ namespace UIForia.Systems {
             };
 
             // todo -- this will likely change
-            styleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+           // styleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
             // application.StyleSystem.onStylePropertyAnimated += HandleStylepropertyAnimated;
         }
 

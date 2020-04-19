@@ -161,6 +161,12 @@ namespace UIForia.Util {
         }
 
         public void EnsureCapacity(int count) {
+            if (count > 0 && count >= array.Length) {
+                Array.Resize(ref array, size + count * 2);
+            }
+        }
+        
+        public void EnsureAdditionalCapacity(int count) {
             if (count > 0 && size + count >= array.Length) {
                 Array.Resize(ref array, size + count * 2);
             }
@@ -175,6 +181,7 @@ namespace UIForia.Util {
             return retn;
         }
 
+     
     }
 
 }

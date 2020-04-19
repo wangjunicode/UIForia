@@ -99,7 +99,6 @@ namespace UIForia.Style {
 
     public struct RunCommand {
 
-        public RunCommandType type;
         public RunCommandState state;
         public RunCommandAction action;
         public NativeArray<char> cmd;
@@ -119,16 +118,6 @@ namespace UIForia.Style {
 
         Enter,
         Exit
-
-    }
-
-    public enum RunCommandType {
-
-        Sound,
-        Event,
-        Animation,
-        Transition,
-        Selector
 
     }
 

@@ -16,11 +16,11 @@ namespace Src.Systems {
 
         // todo -- this doesn't actually pool right now
         public RenderBox GetCustomPainter(string painterId) {
-            
+
             if (painterId == "self") {
                 return new SelfPaintedRenderBox();
             }
-            
+
             if (Application.s_CustomPainters.TryGetValue(painterId, out Type boxType)) {
                 return (RenderBox) Activator.CreateInstance(boxType);
             }
@@ -36,11 +36,12 @@ namespace Src.Systems {
         private CommandBuffer commandBuffer;
         private RenderContext renderContext;
         private bool noop;
-        
+
         internal LightList<RenderOwner> renderOwners;
 
         private UIForiaSettings settings;
-        public VertigoRenderSystem(Camera camera, Application application, StyleSystem2 styleSystem) {
+
+        public VertigoRenderSystem(Camera camera, Application application, VertigoStyleSystem styleSystem) {
             this.noop = application.IsTestApplication;
             if (this.noop) return;
             this.settings = application.settings;
@@ -50,7 +51,7 @@ namespace Src.Systems {
             this.commandBuffer = new CommandBuffer() {
                 name = "UIForia Main Command Buffer"
             };
-            
+
             this.renderContext = new RenderContext(application.settings);
             this.renderOwners = new LightList<RenderOwner>();
 
@@ -58,11 +59,8 @@ namespace Src.Systems {
                 this.camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
             }
 
-                
-            styleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
-            application.onViewsSorted += uiViews => {
-                renderOwners.Sort((o1, o2) => o1.view.Depth.CompareTo(o2.view.Depth));
-            };
+            // styleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
+            application.onViewsSorted += uiViews => { renderOwners.Sort((o1, o2) => o1.view.Depth.CompareTo(o2.view.Depth)); };
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> propertyList) {
@@ -94,15 +92,16 @@ namespace Src.Systems {
             for (int i = 0; i < renderOwners.size; i++) {
                 renderOwners[i].Destroy();
             }
+
             renderOwners.QuickClear();
             renderContext.clipContext.Destroy();
             renderContext.clipContext = new ClipContext(settings);
         }
 
         public void OnUpdate() {
-            
+
             if (noop) return;
-            
+
             renderContext.Clear();
 
             // todo
@@ -189,7 +188,7 @@ namespace Src.Systems {
         };
 
     }
-    
+
     internal struct SVGXStrokeStyle {
 
         public PaintMode paintMode;
@@ -203,7 +202,7 @@ namespace Src.Systems {
         public Vertigo.LineJoin lineJoin;
         public Vertigo.LineCap lineCap;
         public float miterLimit;
-        
+
         public static SVGXStrokeStyle Default => new SVGXStrokeStyle() {
             paintMode = PaintMode.Color,
             encodedColor = VertigoUtil.ColorToFloat(Color.black),

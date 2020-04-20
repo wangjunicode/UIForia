@@ -453,7 +453,7 @@ namespace UIForia.Rendering {
                 dataNeedsUpdate = false;
             }
 
-            if (shadowColor.a > 0) {
+            if (shadowColor.a > 0 && opacity > 0) {
                 float min = math.min(element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
 
                 if (min <= 0) min = 0.0001f;

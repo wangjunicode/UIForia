@@ -8,12 +8,12 @@
             LayoutType = Stack;
             AlignItemsVertical = Center Parent;
             BackgroundColor = white;
-            MinSize = 48px 32px;
+            MinSize = 32px 24px;
             BorderRadius = 8px;
-            Border = 2px;
+            Border = 1px;
             BorderColor = #B2B2B2;
-            PaddingRight = 32px;
-            PaddingLeft = 16px;
+            PaddingRight = 24px;
+            PaddingLeft = 12px;
         
             [hover] {
                 BorderColor = #00B5D9;
@@ -44,7 +44,7 @@
         }
 
         style select-label {
-            PaddingLeft = 30px;
+            PaddingLeft = 20px;
             LayoutFitHorizontal = Grow;
             [hover] {
                 MinWidth = 1cnt;
@@ -52,14 +52,14 @@
         }
 
         style selected-element-icon {
-        PreferredSize = 18px;
-        LayoutBehavior = Ignored;
-        BackgroundTint = black;
-        AlignY = 50% Parent;
-        AlignX = 4px Parent;
-        [hover] {
-        BackgroundTint = white;
-        }
+            PreferredSize = 12px;
+            LayoutBehavior = Ignored;
+            BackgroundTint = black;
+            AlignY = 50% Parent;
+            AlignX = 4px Parent;
+            [hover] {
+                BackgroundTint = white;
+            }
         }
 
 
@@ -77,10 +77,9 @@
             AlignmentTargetX = Parent;
             AlignX = 100%;
             BackgroundColor = #00b5d0;
-            PreferredSize = 32px 1psz;
+            PreferredSize = 24px 1psz;
             BorderColor = #006d82;
             BorderRadius = 0 8px 8px 0;
-            //Border = 2px;
             DistributeExtraSpaceVertical = CenterContent;
             DistributeExtraSpaceHorizontal = CenterContent;
             PaddingTop = 4px;
@@ -93,14 +92,14 @@
         }
 
         style chevron-down {
-            PreferredSize = 10px 6px;
+            PreferredSize = 8px 5px;
             BackgroundImage = url("UIForia/icons/ui_selectbox_down_chevron@2x");
         }
 
         style chevron-up {
             MarginTop = 1px;
-            MarginBottom = 4px;
-            PreferredSize = 10px 6px;
+            MarginBottom = 3px;
+            PreferredSize = 8px 5px;
             BackgroundImage = url("UIForia/icons/ui_selectbox_up_chevron@2x");
         }
 
@@ -113,7 +112,7 @@
             BorderRadius = 4px;
             BorderColor = black;
             Border = 1px;
-            MaxHeight = 400px;
+            MaxHeight = 312px;
             Padding = 8px 0;
             ZIndex = 20;
             ClipBehavior = Never;
@@ -124,7 +123,7 @@
         
         style select-display {
             TextColor = black;
-            MarginRight = 16px;
+            MarginRight = 12px;
             [attr:disabled] {
                 TextColor = rgba(0, 0, 0, 102);
             }

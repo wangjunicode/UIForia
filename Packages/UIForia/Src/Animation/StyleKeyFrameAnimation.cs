@@ -167,6 +167,7 @@ namespace UIForia.Animation {
                     }
 
                     case StylePropertyId.Opacity:
+                    case StylePropertyId.ShadowOpacity:
                     case StylePropertyId.TextUnderlayDilate:
                     case StylePropertyId.TextUnderlaySoftness:
                     case StylePropertyId.TextUnderlayX:

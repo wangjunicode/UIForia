@@ -85,7 +85,7 @@ namespace UIForia.Systems {
             float y = inset + size.marginStart;
             float originBase = y;
             float originOffset = contentAreaHeight * scrollOffsetPercentage;
-            float alignedPosition = contentAreaHeight > contentHeight ? 0 : originBase + originOffset + (contentHeight * -scrollOffsetPercentage);
+            float alignedPosition = contentAreaHeight > contentHeight ? originBase : originBase + originOffset + (contentHeight * -scrollOffsetPercentage);
             firstChild.ApplyLayoutVerticalExplicit(alignedPosition, contentHeight, frameId);
             firstChild.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
 

@@ -84,7 +84,7 @@ namespace Tests {
                     changeSets = styleSystem.sharedStyleChangeSets.GetSpan(0, styleSystem.sharedStyleChangeSets.size)
                 }.Run();
                 new AssignUpdatedStyleGroupsJob() {
-                    dataMap = styleSystem.styleDataMap,
+                    //dataMap = styleSystem.styleDataMap,
                     changeSets = styleSystem.sharedStyleChangeSets.GetSpan(0, styleSystem.sharedStyleChangeSets.size)
                 }.Run();
             }

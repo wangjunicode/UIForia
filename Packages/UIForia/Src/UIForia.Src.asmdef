@@ -6,7 +6,8 @@
         "Unity.Burst",
         "UIForia.Util",
         "UIForia.ThirdParty",
-        "Unity.Collections"
+        "Unity.Collections",
+        "Unity.Jobs"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -15,5 +16,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }

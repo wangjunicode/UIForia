@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using UIForia.Elements;
 using UIForia.Style;
 using UIForia.Util;
@@ -6,11 +7,66 @@ using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Jobs.LowLevel.Unsafe;
+using Unity.Mathematics;
+using UnityEditor.VersionControl;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace UIForia {
-    
+
+    public unsafe struct BatchRangeJobData {
+
+        public readonly int index;
+        public readonly int maxJobCount;
+        public readonly int minBatchSize;
+
+        public BatchRangeJobData(int index, int minBatchSize, int maxJobCount = -1) {
+            this.index = index;
+            this.minBatchSize = minBatchSize < 1 ? 1 : minBatchSize;
+            this.maxJobCount = (maxJobCount <= 0) ? 8 : maxJobCount;
+        }
+
+        public bool TryGetJobBatchRange(int workItemCount, out RangeInt range) {
+            range = default;
+            if (workItemCount <= 0) {
+                return false;
+            }
+
+            int jobCount = math.clamp((workItemCount / minBatchSize), 1, maxJobCount);
+
+            if (index >= jobCount) {
+                return false;
+            }
+
+            int rangeSize = (workItemCount / jobCount);
+            int remaining = workItemCount - (rangeSize * jobCount);
+
+            int* sizes = stackalloc int[jobCount];
+
+            for (int i = 0; i < jobCount; i++) {
+                sizes[i] = rangeSize;
+            }
+
+            int idx = 0;
+            while (remaining > 0) {
+                sizes[idx]++;
+                remaining--;
+                idx++;
+                if (idx == jobCount) idx = 0;
+            }
+
+            int start = 0;
+            for (int i = 0; i < index; i++) {
+                start += sizes[i];
+            }
+
+            range = new RangeInt(start, sizes[index]);
+            return true;
+        }
+
+    }
+
     public class VertigoStyleSystem {
 
         internal static LightList<VertigoStyleSheet> s_DebugSheets;
@@ -22,14 +78,14 @@ namespace UIForia {
         internal readonly LightList<VertigoStyleSheet> styleSheets;
 
         internal LightList<string> styleNameTable; // todo -- make this dev only since allocation scheme sucks
-        internal UnsafePagedList<StyleProperty2> propertyTable;
-        internal UnsafePagedList<VertigoStyle> styleTable;
-        internal UnsafePagedList<VertigoSelector> selectorTable;
+        internal UnmangedPagedList<StyleProperty2> propertyTable;
+        internal UnmangedPagedList<VertigoStyle> styleTable;
+        internal UnmangedPagedList<VertigoSelector> selectorTable;
 
-        internal UnsafeList<SharedStyleChangeSet> sharedStyleChangeSets; // stack based buffer allocator, clear on frame end
-        internal UnsafeList<StyleSetData> styleDataMap;
-        internal UnsafeList<StyleSetInstanceData> instanceDataMap;
-        internal UnsafeList<InstanceStyleChangeSet> instanceChanges;
+        internal Util.Unsafe.UnmanagedList<SharedStyleChangeSet> sharedStyleChangeSets; // stack based buffer allocator, clear on frame end
+        internal Util.Unsafe.UnmanagedList<StyleSetData> styleDataMap;
+        internal Util.Unsafe.UnmanagedList<StyleSetInstanceData> instanceDataMap;
+        internal Util.Unsafe.UnmanagedList<InstanceStyleChangeSet> instanceChanges;
 
         public VertigoStyleSystem() {
 
@@ -37,13 +93,13 @@ namespace UIForia {
             AssertSize.AssertSizes();
 #endif
             styleNameTable = new LightList<string>(128);
-            propertyTable = new UnsafePagedList<StyleProperty2>(256, Allocator.Persistent);
-            styleTable = new UnsafePagedList<VertigoStyle>(128, Allocator.Persistent);
-            selectorTable = new UnsafePagedList<VertigoSelector>(64, Allocator.Persistent);
-            styleDataMap = new UnsafeList<StyleSetData>(32, Allocator.Persistent); // todo this should be an UnsafeChunkedList I think
-            instanceDataMap = new UnsafeList<StyleSetInstanceData>(16, Allocator.Persistent); // todo this should be an UnsafeChunkedList I think
-            instanceChanges = new UnsafeList<InstanceStyleChangeSet>(32, Allocator.Persistent);
-            sharedStyleChangeSets = new UnsafeList<SharedStyleChangeSet>(32, Allocator.Persistent);
+            propertyTable = new UnmangedPagedList<StyleProperty2>(256, Allocator.Persistent);
+            styleTable = new UnmangedPagedList<VertigoStyle>(128, Allocator.Persistent);
+            selectorTable = new UnmangedPagedList<VertigoSelector>(64, Allocator.Persistent);
+            styleDataMap = new Util.Unsafe.UnmanagedList<StyleSetData>(32, Allocator.Persistent); // todo this should be an UnsafeChunkedList I think
+            instanceDataMap = new Util.Unsafe.UnmanagedList<StyleSetInstanceData>(16, Allocator.Persistent); // todo this should be an UnsafeChunkedList I think
+            instanceChanges = new Util.Unsafe.UnmanagedList<InstanceStyleChangeSet>(32, Allocator.Persistent);
+            sharedStyleChangeSets = new Util.Unsafe.UnmanagedList<SharedStyleChangeSet>(32, Allocator.Persistent);
             styleSheets = new LightList<VertigoStyleSheet>();
             s_DebugSheets = styleSheets;
 
@@ -101,34 +157,286 @@ namespace UIForia {
 
         }
 
+        private static readonly int s_ProcessorCount = SystemInfo.processorCount;
+
+        private static unsafe int GetJobParameters(int workItemCount, int minBatchSize, int* output) {
+            if (workItemCount <= 0) return 0;
+            if (minBatchSize <= 0) minBatchSize = 4;
+
+            int jobCount = Mathf.Clamp((workItemCount / minBatchSize), 1, s_ProcessorCount);
+
+            int rangeSize = (workItemCount / jobCount);
+            int remaining = workItemCount - (rangeSize * jobCount);
+
+            for (int i = 0; i < jobCount; i++) {
+                output[i] = rangeSize;
+            }
+
+            int idx = 0;
+            while (remaining > 0) {
+                output[idx]++;
+                remaining--;
+                idx++;
+                if (idx == jobCount) idx = 0;
+            }
+
+            return jobCount;
+        }
+
+        [AssertSize(16)]
+        public unsafe struct PropertyChangeRange {
+
+            public int styleSetId;
+            public int count;
+            public StyleProperty2* properties;
+
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public unsafe struct RebuildStyleJob : IJob {
+
+            public BatchRangeJobData rangeJobData;
+
+            [ReadOnly] public NativeList<int> rebuildList;
+
+            public UnmangedPagedList<StyleProperty2>.PerThread perThreadPagedStyleList;
+            public UnmangedPagedList<PropertyChangeRange>.PerThread perThreadPagedChangeRangeList;
+            
+            public UnmangedPagedList<VertigoStyle> styleTable;
+            public UnmangedPagedList<StyleProperty2> stylePropertyTable;
+
+            [NativeSetThreadIndex] private int threadIndex;
+
+            public void Execute() {
+
+                if (!rangeJobData.TryGetJobBatchRange(rebuildList.Length, out RangeInt range)) {
+                    return;
+                }
+
+                UnmangedPagedList<StyleProperty2> outputPropertyList = perThreadPagedStyleList.GetListForThread(threadIndex);
+                UnmangedPagedList<PropertyChangeRange> changeRanges = perThreadPagedChangeRangeList.GetListForThread(threadIndex);
+                UnmanagedList<StyleProperty2> buffer = new UnmanagedList<StyleProperty2>(135, Allocator.TempJob);
+
+                for (int index = range.start; index < range.end; index++) {
+                    buffer.size = 0;
+                    // need a list to output properties to
+                    // probably best to fill a scratch list and copy into destination
+                    // paged lists aren't a bad idea here I think
+
+                    // stylePropertyList.AddRangeToSamePage(items, )
+
+                    BitBuffer256 buffer256 = default;
+                    IntBoolMap activeMap = new IntBoolMap(buffer256.data, 8);
+
+                    StyleSetData styleData = default;
+
+                    StyleState2 state = (StyleState2) styleData.state;
+
+                    // store currently active style set
+                    // would then store all inherited properties as well
+
+                    // should i store a style list per element?
+                    // easy to check values
+                    // much more memory usage
+                    // cache method to opt in makes a lot more sense to me
+                    // when setting a property i still need to see if it would apply 
+                    // if properties set but not for an active state -> no-op
+
+                    // build list of instance properties first
+                    if (styleData.instanceDataId != -1) {
+                        StyleSetInstanceData instanceData = default;
+                        // sort and only add states we want
+                        for (int i = 0; i < instanceData.propertyCount; i++) {
+                            ref StyleProperty2 property = ref instanceData.properties[i];
+                            if (activeMap.TrySetIndex(property.propertyId.index)) {
+                                buffer.Add(property);
+                            }
+                        }
+                    }
+
+                    // now add selectors
+                    if (styleData.selectorDataId != -1) {
+                        SelectorEffectData selectorEffectData = default;
+                        for (int i = 0; i < selectorEffectData.count; i++) {
+                            ref StyleProperty2 property = ref selectorEffectData.properties[i];
+                            if (activeMap.TrySetIndex(property.propertyId.index)) {
+                                buffer.Add(property);
+                            }
+                        }
+                    }
+
+                    // todo -- for style properties that are 'compiled' statically we can re-arrange the buffer to read 
+                    // property Id's up front and skip t
+                    for (int sharedStyleIndex = 0; sharedStyleIndex < styleData.sharedStyleCount; sharedStyleIndex++) {
+                        StyleId styleId = styleData.sharedStyles[sharedStyleIndex];
+                        VertigoStyle style = styleTable[styleId.index];
+
+                        if ((style.propertyOffset == ushort.MaxValue)) {
+                            continue;
+                        }
+
+                        StyleProperty2* properties = stylePropertyTable.GetPointer(style.propertyOffset);
+
+                        if ((state & StyleState2.Active) != 0) {
+                            for (int i = 0; i < style.activeCount; i++) {
+                                ref StyleProperty2 property = ref properties[i];
+                                if (activeMap.TrySetIndex(property.propertyId.index)) {
+                                    buffer.Add(property);
+                                }
+                            }
+                        }
+
+                        properties += style.activeCount;
+
+                        if ((state & StyleState2.Focused) != 0) {
+                            for (int i = 0; i < style.focusCount; i++) {
+                                ref StyleProperty2 property = ref properties[i];
+                                if (activeMap.TrySetIndex(property.propertyId.index)) {
+                                    buffer.Add(property);
+                                }
+                            }
+                        }
+
+                        properties += style.focusCount;
+
+                        if ((state & StyleState2.Hover) != 0) {
+                            for (int i = 0; i < style.focusCount; i++) {
+                                ref StyleProperty2 property = ref properties[i];
+                                if (activeMap.TrySetIndex(property.propertyId.index)) {
+                                    buffer.Add(property);
+                                }
+                            }
+                        }
+
+                        properties += style.hoverCount;
+
+                        for (int i = 0; i < style.focusCount; i++) {
+                            ref StyleProperty2 property = ref properties[i];
+                            if (activeMap.TrySetIndex(property.propertyId.index)) {
+                                buffer.Add(property);
+                            }
+                        }
+
+                        RangeInt propertyRange = outputPropertyList.AddRangeToSamePage(buffer.array, buffer.size);
+                        changeRanges.Add(new PropertyChangeRange());
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        public unsafe struct StyleChangeSet {
+
+            public StyleProperty2* currentStyles;
+            public BitBuffer256 trackedProperties;
+
+            public void TrackProperty(PropertyId propertyId) {
+                new IntBoolMap((uint*) UnsafeUtility.AddressOf(ref trackedProperties), 8).SetIndex(propertyId.index);
+            }
+
+            public void UntrackProperty(PropertyId propertyId) {
+                new IntBoolMap((uint*) UnsafeUtility.AddressOf(ref trackedProperties), 8).UnsetIndex(propertyId.index);
+            }
+
+            public void UpdatePropertyValue(StyleProperty2 property) {
+                
+            }
+
+        }
+
+        public unsafe struct UpdateChangeListJobs : IJobParallelForDeferBatched {
+
+            public UnmanagedList<PropertyChangeRange> propertyChangeRanges;
+            public UnmangedPagedList<StyleProperty2> propertyTables;
+            public UnmangedPagedList<StyleSetData> styleSetDataTable;
+            
+            public void Execute(int start, int end) {
+            
+                for (int i = start; i < end; i++) {
+                    PropertyChangeRange changeRange = propertyChangeRanges[i];
+                    StyleSetData data = styleSetDataTable[changeRange.styleSetId];
+                    
+                    if (data.hasChangeDetector) {
+                        StyleChangeSet changeSet = default;
+                        IntBoolMap map = new IntBoolMap((uint*)UnsafeUtility.AddressOf(ref changeSet.trackedProperties), 8);
+                        for (int j = 0; j < changeRange.count; j++) {
+                            ref StyleProperty2 property = ref changeRange.properties[j];
+                            if (map[property.propertyId.index]) {
+                                // buffer change and append/re-allocate in 1 step if we need to
+                                
+                            }
+                        }
+                    }
+                    
+                }
+                
+                
+                
+            }
+
+        }
+
         public unsafe void OnUpdate() {
 
             int changeCount = sharedStyleChangeSets.size;
-            int batchSize = 1;
-            int changeProcessBatchCount = 1;
 
-            LightList<SharedStyleJobData> data = new LightList<SharedStyleJobData>(changeProcessBatchCount);
-            NativeArray<JobHandle> sharedStyleUpdateHandles = new NativeArray<JobHandle>(changeProcessBatchCount, Allocator.TempJob);
+            int* sizes = stackalloc int[s_ProcessorCount];
 
-            for (int i = 0; i < changeProcessBatchCount; i++) {
+            int jobCount = GetJobParameters(changeCount, 16, sizes);
+
+            LightList<SharedStyleJobData> data = new LightList<SharedStyleJobData>(jobCount);
+            NativeArray<JobHandle> sharedStyleUpdateHandles = new NativeArray<JobHandle>(jobCount, Allocator.TempJob);
+
+            int lastRange = 0;
+
+            for (int i = 0; i < jobCount; i++) {
 
                 SharedStyleJobData jobData = new SharedStyleJobData {
-                    addedList = new NativeList<StyleStateGroup>(32, Allocator.TempJob),
-                    removedList = new NativeList<StyleStateGroup>(32, Allocator.TempJob),
-                    rebuildList = new NativeList<int>(changeCount, Allocator.TempJob) // todo -- proper size
+                    addedList = new NativeList<StyleStateGroup>(sizes[i] * 4, Allocator.TempJob),
+                    removedList = new NativeList<StyleStateGroup>(sizes[i] * 4, Allocator.TempJob),
+                    rebuildList = new NativeList<int>(sizes[i], Allocator.TempJob)
                 };
 
                 ProcessSharedStyleUpdatesJob job = new ProcessSharedStyleUpdatesJob() {
                     addedList = jobData.addedList,
                     removedList = jobData.removedList,
                     rebuildList = jobData.rebuildList,
-                    changeSets = new UnsafeSpan<SharedStyleChangeSet>(0, changeCount, sharedStyleChangeSets.array)
+                    changeSets = new UnsafeSpan<SharedStyleChangeSet>(lastRange, sizes[i], sharedStyleChangeSets.array)
                 };
+
+                // defer batch rebuild job
+                // write output into each change set i guess since we don't have a way to know ranges ahead of time.
+                // could create fixed buffers of style property count for each rebuilt element
+                // kinda of a lot of memory though
+
+                // defer but give me 1 - 4 jobs and let me know their indices?
+
+                // schedule n jobs 
+                // early out if no work waiting for them
+                // use some metric to know they should pick up work or not
+                // if each one computes a range
+                // and knows it index
+                // it should know if it has data or not to work with
+
+                lastRange += sizes[i];
 
                 data.Add(jobData);
 
                 sharedStyleUpdateHandles[i] = job.Schedule();
             }
+
+            JobHandle handle = JobHandle.CombineDependencies(sharedStyleUpdateHandles);
+
+            NativeList<int> rebuildList = new NativeList<int>(32, Allocator.TempJob);
+
+            // RebuildParallelJob().Schedule(rebuild);
+
+            // rebuild in parallel somehow
+            // need update lists
+            // basically need parallel writes
 
             JobHandle.CompleteAll(sharedStyleUpdateHandles);
 
@@ -205,6 +513,11 @@ namespace UIForia {
             }
 
         }
+
+        // would be great to do this in bulk for elements
+        // not sure how to create n elements from compiled templates though
+        // repeat is probably the issue
+        // technically a given entry point knows how many elements it will create though
 
         public unsafe int CreatesStyleData(int elementId) {
 
@@ -352,7 +665,7 @@ namespace UIForia {
 
         internal int CreatesStyle(string styleName) {
             styleNameTable.Add(styleName);
-            int nameIdx = styleNameTable.size - 1; 
+            int nameIdx = styleNameTable.size - 1;
             int styleIdx = styleTable.Add(new VertigoStyle());
             Assert.AreEqual(nameIdx, styleIdx);
             return styleIdx;

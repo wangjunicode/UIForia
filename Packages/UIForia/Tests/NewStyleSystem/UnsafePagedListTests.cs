@@ -1,15 +1,16 @@
 using NUnit.Framework;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
+using UnityEngine;
 
 namespace Tests {
 
     public class UnsafePagedListTests {
-
+        
         [Test]
         public unsafe void FitAlignedRangesToListPage() {
 
-            UnsafePagedList<int> list = new UnsafePagedList<int>(16, Allocator.TempJob);
+            UnmangedPagedList<int> list = new UnmangedPagedList<int>(16, Allocator.TempJob);
 
             int val = 0;
             int* ints = stackalloc int[8];
@@ -35,7 +36,7 @@ namespace Tests {
         [Test]
         public unsafe void FitUnalignedRangesToListPage() {
 
-            UnsafePagedList<long> list = new UnsafePagedList<long>(16, Allocator.TempJob);
+            UnmangedPagedList<long> list = new UnmangedPagedList<long>(16, Allocator.TempJob);
 
             long val = 0;
             long* longs = stackalloc long[5];

@@ -34,6 +34,7 @@ namespace UIForia {
         public StyleState2Byte state;           
         public byte sharedStyleCount;       
         public fixed int sharedStyles[StyleSet.k_MaxSharedStyles];
+        public bool hasChangeDetector;
 
     }
 

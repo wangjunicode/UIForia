@@ -72,7 +72,7 @@ namespace UIForia.Util {
                 return BitUtil.CountSetBits(map, 4);
             }
         }
-        
+
     }
 
     public unsafe struct BitBuffer64 {
@@ -90,7 +90,7 @@ namespace UIForia.Util {
         public void Clear() {
             this = default;
         }
-        
+
         public int CountSetBits() {
             fixed (uint* map = data) {
                 return BitUtil.CountSetBits(map, 2);
@@ -170,7 +170,7 @@ namespace UIForia.Util {
         }
 
         public bool TrySetIndex(int index) {
-            
+
             int mapIdx = index >> 5; // divide by 32
             int shift = (index - (mapIdx << 5)); // multiply by 32
 
@@ -196,6 +196,18 @@ namespace UIForia.Util {
         }
 
         public void Remove(int idx) {
+            int mapIdx = idx >> 5;
+            int shift = (idx - (mapIdx << 5));
+            map[mapIdx] &= ~(1u << shift);
+        }
+
+        public void SetIndex(ushort idx) {
+            int mapIdx = idx >> 5;
+            int shift = (idx - (mapIdx << 5));
+            map[mapIdx] |= (1u << shift);
+        }
+        
+        public void UnsetIndex(ushort idx) {
             int mapIdx = idx >> 5;
             int shift = (idx - (mapIdx << 5));
             map[mapIdx] &= ~(1u << shift);

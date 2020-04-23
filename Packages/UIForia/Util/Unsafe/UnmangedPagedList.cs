@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace UIForia.Util.Unsafe {
@@ -16,8 +17,9 @@ namespace UIForia.Util.Unsafe {
 
     }
 
+    [AssertSize(32)]
     [StructLayout(LayoutKind.Sequential)]
-    internal unsafe struct PagedListState {
+    public unsafe struct PagedListState : IDisposable {
 
         internal UntypedPagedListPage* pages;
         internal int pageCapacity;
@@ -25,6 +27,32 @@ namespace UIForia.Util.Unsafe {
         internal int pageSize;
         internal int pageSizeIndex;
         internal Allocator allocator;
+
+        public static PagedListState* Create<T>(uint pageSize, Allocator allocator) where T : unmanaged {
+            pageSize = BitUtil.EnsurePowerOfTwo(pageSize < 8 ? 8 : pageSize);
+            PagedListState* state = (PagedListState*) UnsafeUtility.Malloc(UnsafeUtility.SizeOf<PagedListState>(), UnsafeUtility.AlignOf<PagedListState>(), allocator);
+            state->pageCapacity = 4;
+            state->pages = (UntypedPagedListPage*) UnsafeUtility.Malloc(UnsafeUtility.SizeOf<UntypedPagedListPage>() * state->pageCapacity, UnsafeUtility.AlignOf<PagedListState>(), allocator);
+            state->pageSize = (int) pageSize;
+            state->pageCount = 0;
+            state->pageSizeIndex = BitUtil.GetPowerOfTwoBitIndex(pageSize);
+            state->allocator = allocator;
+            return state;
+        }
+
+        public void Dispose() {
+            for (int i = 0; i < pageCount; i++) {
+                UnsafeUtility.Free(pages[i].data, allocator);
+            }
+
+            if (pageCount > 0) {
+                UnsafeUtility.Free(pages, allocator);
+            }
+
+            pages = default;
+            pageCapacity = 0;
+            pageCount = 0;
+        }
 
     }
 
@@ -36,7 +64,7 @@ namespace UIForia.Util.Unsafe {
 
         public PageDebugView[] pages;
 
-        public UnsafePagedListDebugView(UnsafePagedList<T> target) {
+        public UnsafePagedListDebugView(UnmangedPagedList<T> target) {
             pageCount = target.state->pageCount;
             pageSize = target.state->pageSize;
             pageSizeIndex = target.state->pageSizeIndex;
@@ -68,7 +96,7 @@ namespace UIForia.Util.Unsafe {
 
     // Note: Does not support removal, intended to be add only
     [DebuggerTypeProxy(typeof(UnsafePagedListDebugView<>))]
-    public unsafe struct UnsafePagedList<T> : IDisposable where T : unmanaged {
+    public unsafe struct UnmangedPagedList<T> : IDisposable where T : unmanaged {
 
         [NativeDisableUnsafePtrRestriction] internal PagedListState* state;
 
@@ -80,15 +108,12 @@ namespace UIForia.Util.Unsafe {
             get => state->pageSize;
         }
 
-        public UnsafePagedList(uint pageSize, Allocator allocator) {
-            pageSize = BitUtil.EnsurePowerOfTwo(pageSize < 8 ? 8 : pageSize);
-            state = (PagedListState*) UnsafeUtility.Malloc(UnsafeUtility.SizeOf<PagedListState>(), UnsafeUtility.AlignOf<PagedListState>(), allocator);
-            state->pageCapacity = 4;
-            state->pages = (UntypedPagedListPage*) UnsafeUtility.Malloc(UnsafeUtility.SizeOf<UntypedPagedListPage>() * state->pageCapacity, UnsafeUtility.AlignOf<PagedListState>(), allocator);
-            state->pageSize = (int) pageSize;
-            state->pageCount = 0;
-            state->pageSizeIndex = BitUtil.GetPowerOfTwoBitIndex(pageSize);
-            state->allocator = allocator;
+        internal UnmangedPagedList(PagedListState* state) {
+            this.state = state;
+        }
+
+        public UnmangedPagedList(uint pageSize, Allocator allocator) {
+            state = PagedListState.Create<T>(pageSize, allocator);
         }
 
         public RangeInt AddRangeToSamePage(T* items, int itemCount) {
@@ -102,7 +127,7 @@ namespace UIForia.Util.Unsafe {
                     T* ptr = (T*) page->data;
                     ptr += page->size;
                     UnsafeUtility.MemCpy(ptr, items, sizeof(T) * itemCount);
-                    RangeInt retn = new RangeInt(page-> size, itemCount);
+                    RangeInt retn = new RangeInt(page->size, itemCount);
                     page->size += itemCount;
                     return retn;
                 }
@@ -147,11 +172,7 @@ namespace UIForia.Util.Unsafe {
         }
 
         public void Dispose() {
-            for (int i = 0; i < state->pageCount; i++) {
-                UnsafeUtility.Free(state->pages[i].data, state->allocator);
-            }
-
-            UnsafeUtility.Free(state->pages, state->allocator);
+            state->Dispose();
             UnsafeUtility.Free(state, state->allocator);
             state = null;
         }
@@ -229,6 +250,113 @@ namespace UIForia.Util.Unsafe {
             T* data = (T*) state->pages[pageIndex].data;
             return data + pageArrayIndex;
         }
+
+        // this is so shitty, Unity might spawn up to 128 threads and in order to be promised some safety I need to make pointer space for each thread to have its own data
+        // even though I'll likely never use more than about 12 of them outside of crazy threadripper.
+        public struct PerThread : IDisposable {
+
+            private readonly int pageSize;
+            private readonly Allocator allocator;
+            private PagedListState** perThreadData;
+
+            public PerThread(int pageSize, Allocator allocator) {
+                this.allocator = allocator;
+                this.pageSize = pageSize;
+                int size = sizeof(PagedListState*) * JobsUtility.MaxJobThreadCount;
+                this.perThreadData = (PagedListState**) UnsafeUtility.Malloc(size, UnsafeUtility.AlignOf<long>(), allocator);
+                UnsafeUtility.MemClear(perThreadData, size);
+            }
+
+            public UnmangedPagedList<T> GetListForThread(int threadIndex) {
+                if (threadIndex < 0 || threadIndex > JobsUtility.MaxJobThreadCount) {
+                    return default;
+                }
+
+                PagedListState* state = perThreadData[threadIndex];
+
+                if (state == null) {
+                    state = PagedListState.Create<T>((uint) pageSize, allocator);
+                    perThreadData[threadIndex] = state;
+                }
+
+                return new UnmangedPagedList<T>(state);
+            }
+
+            public void Dispose() {
+                if (perThreadData == null) return;
+                for (int i = 0; i < JobsUtility.MaxJobThreadCount; i++) {
+
+                    if (perThreadData[i] != null) {
+                        perThreadData[i]->Dispose();
+                    }
+
+                }
+
+                UnsafeUtility.Free(perThreadData, allocator);
+                perThreadData = null;
+            }
+
+        }
+
+        public struct PerThreadBatchData {
+
+            private BatchData* data;
+            private int totalBatches;
+            private Allocator allocator;
+            private readonly uint pageSize;
+
+            public PerThreadBatchData(int pageSize, int maxJobs, Allocator allocator) {
+                this.allocator = allocator;
+                this.totalBatches = maxJobs;
+                this.pageSize = (uint)pageSize;
+                int size = sizeof(BatchData) * maxJobs;
+                this.data = (BatchData*) UnsafeUtility.Malloc(size, UnsafeUtility.AlignOf<BatchData>(), allocator);
+                UnsafeUtility.MemClear(data, size);
+            }
+            
+            public PerThreadBatchData(int pageSize, Allocator allocator) : this() {
+                this.allocator = allocator;
+                this.pageSize = (uint)pageSize;
+            }
+
+            public void SetTotalBatchCount(int maxJobs) {
+                this.totalBatches = maxJobs;
+                int size = sizeof(BatchData) * maxJobs;
+                this.data = (BatchData*) UnsafeUtility.Malloc(size, UnsafeUtility.AlignOf<BatchData>(), allocator);
+                UnsafeUtility.MemClear(data, size);
+            }
+
+            // 1 entry per batch
+            // thread search for their id in the list
+            // if not found, write into batch entry 
+            // this way instead of the JobUtility.MaxJobThreadCount method we allocate only 1 slot per
+            // job that we positive will be used. Some indices might be unused because a thread
+            // had previously processed a different batch and is now handling another, but this is
+            // much less waste then before at the expense of a small search
+
+            public UnmangedPagedList<T> GetPerBatchData(int batchIndex, int threadId) {
+                for (int i = 0; i < totalBatches; i++) {
+
+                    if (data[i].threadId == threadId) {
+                        return new UnmangedPagedList<T>((PagedListState*) data + i);
+                    }
+
+                }
+
+                data[batchIndex].data = PagedListState.Create<T>(pageSize, allocator);
+                data[batchIndex].threadId = threadId;
+                return new UnmangedPagedList<T>((PagedListState*) data[batchIndex].data);
+            }
+            
+
+        }
+
+    }
+
+    internal unsafe struct BatchData {
+
+        public long threadId;
+        public void* data;
 
     }
 

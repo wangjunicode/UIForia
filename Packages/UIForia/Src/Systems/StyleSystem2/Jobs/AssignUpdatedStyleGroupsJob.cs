@@ -8,7 +8,7 @@ namespace UIForia {
     // [BurstCompile]
     public unsafe struct AssignUpdatedStyleGroupsJob : IJob {
 
-        [ReadOnly] public UnsafeList<StyleSetData> dataMap;
+        [ReadOnly] public UnmanagedList<StyleSetData> dataMap;
         [ReadOnly] public UnsafeSpan<SharedStyleChangeSet> changeSets;
 
         public void Execute() { // todo -- maybe better as ParallelBatchedRange

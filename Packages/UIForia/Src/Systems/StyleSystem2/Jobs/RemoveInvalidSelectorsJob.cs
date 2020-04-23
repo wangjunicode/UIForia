@@ -1,9 +1,6 @@
-using System;
 using System.Runtime.InteropServices;
 using UIForia.Elements;
-using UIForia.Selectors;
 using UIForia.Style;
-using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Jobs;
@@ -23,7 +20,7 @@ namespace UIForia {
 
     public unsafe struct AddNewSelectorsJob : IJob { // ranged batched job
 
-        public UnsafeList<VertigoStyle> styles;
+        public UnmanagedList<VertigoStyle> styles;
         public NativeList<int> freeList;
         public NativeList<StyleStateGroup> addedList;
         public NativeList<StyleStateGroup> appendList;
@@ -32,7 +29,7 @@ namespace UIForia {
 
         public void Execute() {
 
-            UnsafeList<StyleStateGroup> temp = new UnsafeList<StyleStateGroup>(addedList.Length, Allocator.TempJob);
+            UnmanagedList<StyleStateGroup> temp = new UnmanagedList<StyleStateGroup>(addedList.Length, Allocator.TempJob);
 
             for (int addedIndex = 0; addedIndex < addedList.Length; addedIndex++) {
 
@@ -136,60 +133,6 @@ namespace UIForia {
     }
 
     // todo -- can optimize this later on 
-    public unsafe struct RunSelectorsJob : IJob {
-
-        public GCHandle filterFnHandle;
-
-        public NativeList<SelectorKey> output;
-        public NativeList<SelectorResultRange> resultRanges;
-
-        public void Execute() {
-            // if selector.isOnce -> 
-            // if selector.fromTarget == Self
-            // if selector.filter == null
-
-            LightList<TraversalInfo> traversalData = new LightList<TraversalInfo>();
-            LightList<SelectorRunData> selectors = new LightList<SelectorRunData>();
-
-            // if any are descendent selectors, get all descendents in template and save that list for later
-            int elementIndex = 10;
-
-            for (int i = 0; i < selectors.size; i++) {
-                if (selectors.array[i].query.targetGroup == FromTarget.Descendents) {
-                    //   GetTraversal(elementIndex, traversalData);
-                }
-            }
-
-            Func<UIElement, bool> filter = (Func<UIElement, bool>) filterFnHandle.Target;
-
-            //int traversalIndex = elementData[elementIndex].traversalIndex;
-
-            // element.template.GetActiveHierarchy();
-
-            RangeInt range = new RangeInt(output.Length, 0);
-            for (int i = 0; i < traversalData.size; i++) {
-                if (traversalData[i].isEnabled && filter(traversalData[i].element)) {
-                    // output.Add(new SelectorKey(elementId, selectors[i].selectorId));
-                }
-            }
-
-            range.length = output.Length - range.start;
-            output.Add(new SelectorKey());
-
-            // selector output
-            // selectorId + elementId & range
-            // append to element id list
-
-            // output.Sort();
-
-        }
-
-        public static void GetTraversal(int elementIndex, ref LightList<TraversalInfo> traversalData) {
-            // ElementInfo info = traversalData[elementIndex];
-
-        }
-
-    }
 
     public struct SelectorInfo {
 
@@ -226,9 +169,9 @@ namespace UIForia {
     // and 1 for elements -> selectors effected
     public unsafe struct RemoveInvalidSelectorsJob : IJob { // ranged batched job
 
-        public readonly UnsafeList<VertigoStyle> styles;
-        public readonly UnsafeList<VertigoSelector> selectors;
-        public readonly UnsafeList<SelectorInfo> sortedActiveSelectors;
+        public readonly UnmangedPagedList<VertigoStyle> styles;
+        public readonly UnmangedPagedList<VertigoSelector> selectors;
+        public readonly UnmanagedList<SelectorInfo> sortedActiveSelectors;
 
         [ReadOnly] public NativeList<StyleStateGroup> removedList;
         [WriteOnly] public NativeList<SelectorRemovalData> deadSelectors;
@@ -246,7 +189,7 @@ namespace UIForia {
 
         public void Execute() {
 
-            UnsafeList<StyleStateGroup> temp = new UnsafeList<StyleStateGroup>(removedList.Length, Allocator.TempJob);
+            UnmanagedList<StyleStateGroup> temp = new UnmanagedList<StyleStateGroup>(removedList.Length, Allocator.TempJob);
 
             for (int removedIdx = 0; removedIdx < removedList.Length; removedIdx++) {
 
@@ -264,7 +207,7 @@ namespace UIForia {
 
                 StyleStateGroup toRemove = temp.array[removedIdx];
                 VertigoStyle style = styles[toRemove.styleId.index];
-                VertigoSelector* selectorPtr = selectors.array + style.selectorOffset;
+                VertigoSelector* selectorPtr = default; //selectors.array + style.selectorOffset;
 
                 for (int i = 0; i < style.selectorCount; i++) {
                     ref VertigoSelector selector = ref selectorPtr[i];
@@ -295,7 +238,7 @@ namespace UIForia {
 
         }
 
-        private static int FindIndex(SelectorKey key, UnsafeList<SelectorInfo> sortedSearchList) {
+        private static int FindIndex(SelectorKey key, UnmanagedList<SelectorInfo> sortedSearchList) {
             int start = 0;
             int end = sortedSearchList.size - 1;
 

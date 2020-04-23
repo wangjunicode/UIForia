@@ -3,7 +3,6 @@ using UIForia.Style;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 
@@ -38,7 +37,7 @@ namespace UIForia {
 
         public PropertyListAllocator allocator;
         public NativeSlice<InstanceStyleChangeSet> changeSetSlice;
-        public UnsafeList<StyleSetInstanceData> instanceDataMap;
+        public UnmanagedList<StyleSetInstanceData> instanceDataMap;
 
         public void Execute() {
 
@@ -165,11 +164,11 @@ namespace UIForia {
 
         private const int k_MaxStyleStateSize = StyleSet.k_MaxSharedStyles * 4; // max styles each with max 4 states
 
-        public UnsafeList<InstanceStyleChangeSet> instanceChangeSetMap;
-        public UnsafePagedList<StyleProperty2> stylePropertyTable;
+        public UnmanagedList<InstanceStyleChangeSet> instanceChangeSetMap;
+        public UnmangedPagedList<StyleProperty2> stylePropertyTable;
 
         [ReadOnly]
-        public UnsafePagedList<VertigoStyle> styleTable;
+        public UnmangedPagedList<VertigoStyle> styleTable;
         // new StyleCache(properties);
         // cache.Update(propertyList);
         // if cache.Changed(property) {
@@ -177,7 +176,6 @@ namespace UIForia {
         // }
 
         public void Execute() {
-
             int changeSetCount = 1;
 
             for (int changeSetIdx = 0; changeSetIdx < changeSetCount; changeSetIdx++) {
@@ -187,15 +185,8 @@ namespace UIForia {
                 StyleSetData styleData = default;
 
                 StyleState2 state = (StyleState2) styleData.state;
-
-                UnsafeList<StyleProperty2> lastFrameProperties = new UnsafeList<StyleProperty2>(256, Allocator.Temp);
-                UnsafeList<StyleProperty2> thisFrameProperties = new UnsafeList<StyleProperty2>(256, Allocator.Temp);
-
-                UnsafeList<StyleProperty2> oldStyles = new UnsafeList<StyleProperty2>();
-                UnsafeList<StyleProperty2> newStyles = new UnsafeList<StyleProperty2>();
-
-                // does storing property ids up front make sense for performance since im always checking id then going to next?
-                // probably does!
+                
+                UnmanagedList<StyleProperty2> outputStyles = new UnmanagedList<StyleProperty2>();
 
                 // store currently active style set
                 // would then store all inherited properties as well
@@ -207,29 +198,31 @@ namespace UIForia {
                 // when setting a property i still need to see if it would apply 
                 // if properties set but not for an active state -> no-op
 
-                // build list of old properties first
+                // build list of instance properties first
                 if (styleData.instanceDataId != -1) {
                     StyleSetInstanceData instanceData = default;
                     // old one is already sorted
                     for (int i = 0; i < instanceData.propertyCount; i++) {
                         ref StyleProperty2 property = ref instanceData.properties[i];
                         if (activeMap.TrySetIndex(property.propertyId.index)) {
-                            oldStyles.Add(property);
+                            outputStyles.Add(property);
                         }
                     }
                 }
 
-                // now add old selectors
+                // now add selectors
                 if (styleData.selectorDataId != -1) {
                     SelectorEffectData selectorEffectData = default;
                     for (int i = 0; i < selectorEffectData.count; i++) {
                         ref StyleProperty2 property = ref selectorEffectData.properties[i];
                         if (activeMap.TrySetIndex(property.propertyId.index)) {
-                            oldStyles.Add(property);
+                            outputStyles.Add(property);
                         }
                     }
                 }
 
+                // todo -- for style properties that are 'compiled' statically we can re-arrange the buffer to read 
+                // property Id's up front and skip t
                 for (int sharedStyleIndex = 0; sharedStyleIndex < styleData.sharedStyleCount; sharedStyleIndex++) {
                     StyleId styleId = styleData.sharedStyles[sharedStyleIndex];
                     VertigoStyle style = styleTable[styleId.index];
@@ -244,7 +237,7 @@ namespace UIForia {
                         for (int i = 0; i < style.activeCount; i++) {
                             ref StyleProperty2 property = ref properties[i];
                             if (activeMap.TrySetIndex(property.propertyId.index)) {
-                                oldStyles.Add(property);
+                                outputStyles.Add(property);
                             }
                         }
                     }
@@ -255,7 +248,7 @@ namespace UIForia {
                         for (int i = 0; i < style.focusCount; i++) {
                             ref StyleProperty2 property = ref properties[i];
                             if (activeMap.TrySetIndex(property.propertyId.index)) {
-                                oldStyles.Add(property);
+                                outputStyles.Add(property);
                             }
                         }
                     }
@@ -266,7 +259,7 @@ namespace UIForia {
                         for (int i = 0; i < style.focusCount; i++) {
                             ref StyleProperty2 property = ref properties[i];
                             if (activeMap.TrySetIndex(property.propertyId.index)) {
-                                oldStyles.Add(property);
+                                outputStyles.Add(property);
                             }
                         }
                     }
@@ -276,22 +269,10 @@ namespace UIForia {
                     for (int i = 0; i < style.focusCount; i++) {
                         ref StyleProperty2 property = ref properties[i];
                         if (activeMap.TrySetIndex(property.propertyId.index)) {
-                            oldStyles.Add(property);
+                            outputStyles.Add(property);
                         }
                     }
 
-                    // StyleId styleId = styleData.sharedStyles[i];
-                    // var propertyData = styleSheetData[styleId.styleSheetId.index];
-                    // // static property groups have 2 optimizations
-                    // // sorted by property id
-                    // // first n elements in buffer are just the property ids
-                    // // last n elements in buffer is the data
-                    // for (int j = 0; j < propertyData.count; j++) {
-                    //     ref StyleProperty2 property = ref propertyData.properties[i];
-                    //     if (activeMap.TrySetIndex(property.propertyId.index)) {
-                    //         oldStyles.Add(property);
-                    //     }
-                    // }
                 }
 
                 // output = per element rebuild list 
@@ -426,7 +407,7 @@ namespace UIForia {
 
         }
 
-        private void BuildStyles(UnsafeList<StyleProperty2> oldStyles, StyleProperty2* oldInstanceList, long* oldStyleList, object oldSelectorList) {
+        private void BuildStyles(UnmanagedList<StyleProperty2> oldStyles, StyleProperty2* oldInstanceList, long* oldStyleList, object oldSelectorList) {
             // instance styles
             // selectors (need to be sorted)
             // shared styles (already sorted)

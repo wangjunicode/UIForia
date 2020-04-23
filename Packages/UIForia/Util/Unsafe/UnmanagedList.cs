@@ -45,17 +45,17 @@ namespace UIForia.Util.Unsafe {
             list = (ListPointer*) UnsafeUtility.Malloc(sizeof(ListPointer), 4, allocator);
             list->allocator = allocator;
             list->createdList = true;
-            SetList(new UnsafeList<T>(initialCapacity, allocator));
+            SetList(new UnmanagedList<T>(initialCapacity, allocator));
         }
 
-        public SharedListPointer(UnsafeList<T> initialList, Allocator allocator) {
+        public SharedListPointer(UnmanagedList<T> initialList, Allocator allocator) {
             list = (ListPointer*) UnsafeUtility.Malloc(sizeof(ListPointer), 4, allocator);
             list->allocator = allocator;
             SetList(initialList);
         }
 
-        public UnsafeList<T> GetList() {
-            UnsafeList<T> retn = default;
+        public UnmanagedList<T> GetList() {
+            UnmanagedList<T> retn = default;
             retn.size = list->data->size;
             retn.capacity = list->data->capacity;
             retn.array = (T*) list->data->ptr;
@@ -63,7 +63,7 @@ namespace UIForia.Util.Unsafe {
             return retn;
         }
 
-        public void SetList(UnsafeList<T> newList) {
+        public void SetList(UnmanagedList<T> newList) {
             list->data->allocator = newList.allocator;
             list->data->capacity = newList.capacity;
             list->data->ptr = newList.array;
@@ -80,7 +80,7 @@ namespace UIForia.Util.Unsafe {
 
     }
 
-    public unsafe struct UnsafeList<T> : IDisposable where T : unmanaged {
+    public unsafe struct UnmanagedList<T> : IDisposable where T : unmanaged {
 
         public int size;
         [NativeDisableUnsafePtrRestriction] public T* array;
@@ -90,7 +90,7 @@ namespace UIForia.Util.Unsafe {
 
         private const int k_MinCapacity = 4;
 
-        public UnsafeList(int initialCapacity, Allocator allocator) {
+        public UnmanagedList(int initialCapacity, Allocator allocator) {
             this.allocator = allocator;
             this.size = 0;
             this.capacity = 0;
@@ -105,7 +105,7 @@ namespace UIForia.Util.Unsafe {
 
         }
 
-        public UnsafeList(Allocator allocator) {
+        public UnmanagedList(Allocator allocator) {
             this.allocator = allocator;
             this.size = 0;
             this.capacity = 0;
@@ -209,10 +209,14 @@ namespace UIForia.Util.Unsafe {
         [BurstDiscard]
         private static void AssertSize() {
             if (BitUtil.CountSetBits((uint) sizeof(T)) != 1) {
-                Debug.Log("Cannot use " + typeof(T) + " in " + nameof(UnsafeList<T>) + " because it is not power of 2 aligned (size was " + sizeof(T) + ")");
+                Debug.Log("Cannot use " + typeof(T) + " in " + nameof(UnmanagedList<T>) + " because it is not power of 2 aligned (size was " + sizeof(T) + ")");
             }
         }
 
+        public T* GetRawPointer() {
+            return array;
+        }
+        
         public T* GetSlicePointer(int sliceSize) {
             EnsureAdditionalCapacity(sliceSize);
             T* value = array + size;
@@ -232,7 +236,7 @@ namespace UIForia.Util.Unsafe {
             return ref array[idx];
         }
 
-        public void CopyFrom(UnsafeList<T> other) {
+        public void CopyFrom(UnmanagedList<T> other) {
             UnsafeUtility.MemCpy(array, other.array, sizeof(T) * other.size);
             size = other.size;
         }

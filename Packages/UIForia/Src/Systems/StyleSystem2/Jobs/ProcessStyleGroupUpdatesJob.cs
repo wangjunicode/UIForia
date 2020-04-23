@@ -30,6 +30,8 @@ namespace UIForia {
 
                 SharedStyleChangeSet changeSet = changeSets.array[changeSetIdx];
 
+                // todo -- if state and shared styles didn't change, no-op out of here 
+                
                 StyleId* oldStyles = changeSet.oldStyles;
                 StyleId* newStyles = changeSet.newStyles;
 

@@ -71,7 +71,7 @@ namespace UIForia {
         internal int frameId;
         protected internal List<UIView> views;
 
-        internal static readonly Dictionary<string, Type> s_CustomPainters;
+        internal static Dictionary<string, Type> s_CustomPainters;
 
         private UITaskSystem m_BeforeUpdateTaskSystem;
         private UITaskSystem m_AfterUpdateTaskSystem;
@@ -962,6 +962,10 @@ namespace UIForia {
         public void HydrateTemplate(int templateId, UIElement root, TemplateScope scope) {
             templateData.templates[templateId](root, scope);
             scope.Release();
+        }
+
+        public static void SetCustomPainters(Dictionary<string, Type> dictionary) {
+            s_CustomPainters = dictionary;
         }
 
     }

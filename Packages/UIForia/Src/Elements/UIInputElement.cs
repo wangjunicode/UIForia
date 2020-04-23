@@ -401,7 +401,7 @@ namespace UIForia.Elements {
         }
 
         [CustomPainter("UIForia::Input")]
-        internal class InputElementPainter : StandardRenderBox {
+        public class InputElementPainter : StandardRenderBox {
 
             public Path2D path = new Path2D();
 

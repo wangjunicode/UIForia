@@ -63,6 +63,7 @@ namespace UIForia {
             template = template.Replace("::ELEMENT_CONSTRUCTORS::", GenerateElementConstructors(compiledTemplateData, out List<ProcessedType> dynamicElementTypes));
             template = template.Replace("::TAGNAME_ID_MAP::", GenerateTagNameIdMap(compiledTemplateData));
             template = template.Replace("::DYNAMIC_TEMPLATES::", GenerateDynamicTemplates(compiledTemplateData));
+            template = template.Replace("::CUSTOM_PAINTER_TYPES::", GenerateCustomPainterTypes());
 
             string initPath = Path.Combine(path, "__init" + extension);
             Directory.CreateDirectory(Path.GetDirectoryName(initPath));
@@ -74,6 +75,17 @@ namespace UIForia {
             File.WriteAllText(initPath, template);
 
             GenerateDynamicTypes(path, dynamicElementTypes);
+        }
+
+        private static string GenerateCustomPainterTypes() {
+            #if UNITY_EDITOR
+            string retn = "";
+            foreach (Type painterType in UnityEditor.TypeCache.GetTypesWithAttribute<CustomPainterAttribute>()) {
+                CustomPainterAttribute attr = painterType.GetCustomAttribute<CustomPainterAttribute>();
+                retn += $"                {{ \"{attr.name}\", typeof({TypeNameGenerator.GetTypeName(painterType)}) }},\n";
+            }
+            #endif
+            return retn;
         }
 
         public static string PrintDynamicTypeOutput(Type type) {

@@ -53,6 +53,12 @@ namespace UIForia.Generated {
 ::TAGNAME_ID_MAP::
         };
 
+        public UIForiaGeneratedTemplates_::APPNAME::() {
+            Application.SetCustomPainters(new Dictionary<string, Type>() {
+::CUSTOM_PAINTER_TYPES::
+            });
+        }
+
     }
 #pragma warning restore 0164
 

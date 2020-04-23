@@ -29,7 +29,7 @@ namespace UIForia.Selectors {
         public int styleId;
         
         // public SelectorQuery rootQuery;
-        public StyleState state; // maybe don't even need this, computed based on id + ranges
+        public StyleState2 state; // maybe don't even need this, computed based on id + ranges
         public FromTarget fromTarget;
         
         public void Run(UIElement origin) {
@@ -107,10 +107,7 @@ namespace UIForia.Selectors {
                     throw new ArgumentOutOfRangeException();
             }
         }
-
-        public void Run(UIElement element, int computedSelectorId, StructList<GucciSystem.SelectorEffect> targets) {
-            throw new NotImplementedException();
-        }
+        
 
     }
 

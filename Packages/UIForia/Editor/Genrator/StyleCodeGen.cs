@@ -110,8 +110,8 @@ namespace UIForia.Editor {
             });
             
 
-            AddStyleProperty("Opacity", typeof(float), "1f", PropertyFlags.Inherited | PropertyFlags.Animated);
-            AddStyleProperty("Visibility", typeof(Visibility), "Visibility.Visible", PropertyFlags.Inherited);
+            AddStyleProperty("Opacity", typeof(float), "1f", PropertyTypeFlags.Inherited | PropertyTypeFlags.Animated);
+            AddStyleProperty("Visibility", typeof(Visibility), "Visibility.Visible", PropertyTypeFlags.Inherited);
             AddStyleProperty("Cursor", typeof(CursorStyle), "null");
             AddStyleProperty("Painter", typeof(string), "null");
             AddStyleProperty("OverflowX", typeof(Overflow), "Overflow.Visible");
@@ -121,51 +121,51 @@ namespace UIForia.Editor {
             AddStyleProperty("PointerEvents", typeof(PointerEvents), "PointerEvents.Normal");
 
             // Background
-            AddStyleProperty("BackgroundColor", typeof(Color32), "default", PropertyFlags.Animated);
-            AddStyleProperty("BackgroundTint", typeof(Color32), "default", PropertyFlags.Animated);
-            AddStyleProperty("BackgroundImageOffsetX", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("BackgroundImageOffsetY", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("BackgroundImageScaleX", typeof(float), "1f", PropertyFlags.Animated);
-            AddStyleProperty("BackgroundImageScaleY", typeof(float), "1f", PropertyFlags.Animated);
-            AddStyleProperty("BackgroundImageTileX", typeof(float), "1f", PropertyFlags.Animated);
-            AddStyleProperty("BackgroundImageTileY", typeof(float), "1f", PropertyFlags.Animated);
-            AddStyleProperty("BackgroundImageRotation", typeof(float), "0f", PropertyFlags.Animated);
+            AddStyleProperty("BackgroundColor", typeof(Color32), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BackgroundTint", typeof(Color32), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BackgroundImageOffsetX", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BackgroundImageOffsetY", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BackgroundImageScaleX", typeof(float), "1f", PropertyTypeFlags.Animated);
+            AddStyleProperty("BackgroundImageScaleY", typeof(float), "1f", PropertyTypeFlags.Animated);
+            AddStyleProperty("BackgroundImageTileX", typeof(float), "1f", PropertyTypeFlags.Animated);
+            AddStyleProperty("BackgroundImageTileY", typeof(float), "1f", PropertyTypeFlags.Animated);
+            AddStyleProperty("BackgroundImageRotation", typeof(float), "0f", PropertyTypeFlags.Animated);
             AddStyleProperty("BackgroundImage", typeof(Texture2D), "null");
             AddStyleProperty("BackgroundFit", typeof(BackgroundFit), "BackgroundFit.Fill");
 
             // Border
-            AddStyleProperty("BorderColorTop", typeof(Color32), "default", PropertyFlags.Animated);
-            AddStyleProperty("BorderColorRight", typeof(Color32), "default", PropertyFlags.Animated);
-            AddStyleProperty("BorderColorBottom", typeof(Color32), "default", PropertyFlags.Animated);
-            AddStyleProperty("BorderColorLeft", typeof(Color32), "default", PropertyFlags.Animated);
-            AddStyleProperty("BorderTop", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("BorderRight", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("BorderBottom", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("BorderLeft", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("BorderRadiusTopLeft", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("BorderRadiusTopRight", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("BorderRadiusBottomRight", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("BorderRadiusBottomLeft", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("BorderColorTop", typeof(Color32), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BorderColorRight", typeof(Color32), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BorderColorBottom", typeof(Color32), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BorderColorLeft", typeof(Color32), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BorderTop", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BorderRight", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BorderBottom", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BorderLeft", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BorderRadiusTopLeft", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BorderRadiusTopRight", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BorderRadiusBottomRight", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("BorderRadiusBottomLeft", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
 
             // Padding
-            AddStyleProperty("PaddingTop", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("PaddingRight", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("PaddingBottom", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("PaddingLeft", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("PaddingTop", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("PaddingRight", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("PaddingBottom", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("PaddingLeft", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
 
             // Margin
-            AddStyleProperty("MarginTop", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("MarginRight", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("MarginBottom", typeof(UIFixedLength), "default", PropertyFlags.Animated);
-            AddStyleProperty("MarginLeft", typeof(UIFixedLength), "default", PropertyFlags.Animated);
+            AddStyleProperty("MarginTop", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("MarginRight", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("MarginBottom", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("MarginLeft", typeof(UIFixedLength), "default", PropertyTypeFlags.Animated);
 
             // Size
-            AddStyleProperty("MinWidth", typeof(UIMeasurement), "default", PropertyFlags.Animated);
-            AddStyleProperty("MaxWidth", typeof(UIMeasurement), "new UIMeasurement(float.MaxValue)", PropertyFlags.Animated);
-            AddStyleProperty("MinHeight", typeof(UIMeasurement), "default", PropertyFlags.Animated);
-            AddStyleProperty("MaxHeight", typeof(UIMeasurement), "new UIMeasurement(float.MaxValue)", PropertyFlags.Animated);
-            AddStyleProperty("PreferredWidth", typeof(UIMeasurement), "new UIMeasurement(1, UIMeasurementUnit.Content)", PropertyFlags.Animated);
-            AddStyleProperty("PreferredHeight", typeof(UIMeasurement), "new UIMeasurement(1, UIMeasurementUnit.Content)", PropertyFlags.Animated);
+            AddStyleProperty("MinWidth", typeof(UIMeasurement), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("MaxWidth", typeof(UIMeasurement), "new UIMeasurement(float.MaxValue)", PropertyTypeFlags.Animated);
+            AddStyleProperty("MinHeight", typeof(UIMeasurement), "default", PropertyTypeFlags.Animated);
+            AddStyleProperty("MaxHeight", typeof(UIMeasurement), "new UIMeasurement(float.MaxValue)", PropertyTypeFlags.Animated);
+            AddStyleProperty("PreferredWidth", typeof(UIMeasurement), "new UIMeasurement(1, UIMeasurementUnit.Content)", PropertyTypeFlags.Animated);
+            AddStyleProperty("PreferredHeight", typeof(UIMeasurement), "new UIMeasurement(1, UIMeasurementUnit.Content)", PropertyTypeFlags.Animated);
 
             AddStyleShorthand<MinSizeParser>("MinSize");
             AddStyleShorthand<MaxSizeParser>("MaxSize");
@@ -390,34 +390,34 @@ namespace UIForia.Editor {
 
             builder.Clear();
             for (ushort i = 0; i < stylePropertyDescriptions.Count; i++) {
-                propertyIds.Add(new PropertyId(i, stylePropertyDescriptions[i].flags));
-                stylePropertyDescriptions[i].propertyId = new PropertyId(i, stylePropertyDescriptions[i].flags);
+                propertyIds.Add(new PropertyId(i, stylePropertyDescriptions[i].typeFlags));
+                stylePropertyDescriptions[i].propertyId = new PropertyId(i, stylePropertyDescriptions[i].typeFlags);
                 builder.Append("        public static readonly PropertyId ");
                 builder.Append(stylePropertyDescriptions[i].name);
                 builder.Append(" = new PropertyId(");
                 builder.Append(propertyIds[i].index);
                 builder.Append(", ");
-                if (propertyIds[i].flags == 0) {
+                if (propertyIds[i].typeFlags == 0) {
                     builder.Append("PropertyFlags.None");
                 }
                 else {
                     tmp.Clear();
 
-                    PropertyFlags flags = propertyIds[i].flags;
+                    PropertyTypeFlags typeFlags = propertyIds[i].typeFlags;
 
-                    if ((flags & PropertyFlags.BuiltIn) != 0) {
+                    if ((typeFlags & PropertyTypeFlags.BuiltIn) != 0) {
                         tmp.Add("PropertyFlags.BuiltIn");
                     }
 
-                    if ((flags & PropertyFlags.Inherited) != 0) {
+                    if ((typeFlags & PropertyTypeFlags.Inherited) != 0) {
                         tmp.Add("PropertyFlags.Inherited");
                     }
 
-                    if ((flags & PropertyFlags.Animated) != 0) {
+                    if ((typeFlags & PropertyTypeFlags.Animated) != 0) {
                         tmp.Add("PropertyFlags.Animated");
                     }
 
-                    if ((flags & PropertyFlags.RequireDestruction) != 0) {
+                    if ((typeFlags & PropertyTypeFlags.RequireDestruction) != 0) {
                         tmp.Add("PropertyFlags.RequireDestruction");
                     }
 
@@ -570,12 +570,12 @@ namespace UIForia.Editor {
                 .Trim();
         }
 
-        public void AddStyleProperty(string name, Type type, string defaultValue, PropertyFlags flags = 0) {
+        public void AddStyleProperty(string name, Type type, string defaultValue, PropertyTypeFlags typeFlags = 0) {
             if (builtInPhase) {
-                flags |= PropertyFlags.BuiltIn;
+                typeFlags |= PropertyTypeFlags.BuiltIn;
             }
 
-            stylePropertyDescriptions.Add(new StylePropertyDescription(name, type, defaultValue, flags));
+            stylePropertyDescriptions.Add(new StylePropertyDescription(name, type, defaultValue, typeFlags));
         }
 
         public void AddStyleShorthand<TParserType>(string shorthandName) where TParserType : IStyleShorthandParser, new() {

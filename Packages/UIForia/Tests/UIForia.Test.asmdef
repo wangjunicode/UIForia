@@ -6,7 +6,8 @@
         "Unity.TextMeshPro",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "UIForia.Util"
+        "UIForia.Util",
+        "Unity.Collections"
     ],
     "includePlatforms": [
         "Editor"

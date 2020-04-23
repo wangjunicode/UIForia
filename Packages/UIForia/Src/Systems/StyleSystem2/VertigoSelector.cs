@@ -2,6 +2,7 @@ using UIForia.Selectors;
 
 namespace UIForia {
    
+    [AssertSize(32)]
     public struct VertigoSelector {
 
         // currently sizeof(VertigoSelector) == 32 

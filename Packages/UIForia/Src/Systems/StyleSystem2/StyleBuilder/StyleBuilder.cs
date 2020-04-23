@@ -65,63 +65,63 @@ namespace UIForia {
 
         }
 
-        internal void Build(VertigoStyleSheet styleSheet) {
-
-            StyleState2 definedStates = default;
-            StyleState2 hasSelectorsPerState = default;
-
-            ushort styleIndex = (ushort) styleSheet.styles.size;
-            
-            int normalCount = HandleGroup(normalGroup, StyleState2.Normal, ref definedStates, ref hasSelectorsPerState);
-            int hoverCount = HandleGroup(hoverGroup, StyleState2.Hover, ref definedStates, ref hasSelectorsPerState);
-            int focusCount = HandleGroup(focusGroup, StyleState2.Focused, ref definedStates, ref hasSelectorsPerState);
-            int activeCount = HandleGroup(activeGroup, StyleState2.Active, ref definedStates, ref hasSelectorsPerState);
-            
-            styleSheet.propertyList.EnsureAdditionalCapacity(normalCount + hoverCount + focusCount + activeCount);
-
-            int selectorCount = 0;
-            int eventCount = 0;
-            
-            int selectorOffset = styleSheet.selectors.size;
-            int eventOffset = styleSheet.eventList.size;
-            
-            HandleSelectors(styleSheet, styleIndex, normalGroup, ref selectorCount, ref eventCount);
-            HandleSelectors(styleSheet, styleIndex, hoverGroup, ref selectorCount, ref eventCount);
-            HandleSelectors(styleSheet, styleIndex, focusGroup, ref selectorCount, ref eventCount);
-            HandleSelectors(styleSheet, styleIndex, activeGroup, ref selectorCount, ref eventCount);
-
-            if (selectorCount == 0) selectorOffset = 0;
-            if (eventCount == 0) eventCount = 0;
-            
-            VertigoStyle style = new VertigoStyle(
-                new StyleId(styleSheet.id, new LocalStyleId(styleIndex, definedStates, hasSelectorsPerState)),
-                (ushort)styleSheet.propertyList.size,
-                (ushort)normalCount,
-                (ushort)hoverCount,
-                (ushort)focusCount,
-                (ushort)activeCount,
-                (ushort)selectorOffset,
-                (ushort)selectorCount,
-                (ushort)eventOffset,
-                (ushort)eventCount
-            );
-            
-            WriteProperties(styleSheet.propertyList, normalGroup);
-            WriteProperties(styleSheet.propertyList, hoverGroup);
-            WriteProperties(styleSheet.propertyList, focusGroup);
-            WriteProperties(styleSheet.propertyList, activeGroup);
-
-            WriteEventHooks(ref styleSheet.eventList, normalGroup);
-            WriteEventHooks(ref styleSheet.eventList, hoverGroup);
-            WriteEventHooks(ref styleSheet.eventList, focusGroup);
-            WriteEventHooks(ref styleSheet.eventList, activeGroup);
-
-            normalGroup?.Clear();
-            hoverGroup?.Clear();
-            focusGroup?.Clear();
-            activeGroup?.Clear();
-
-            styleSheet.styles.Add(style);
+        internal void Build(int styleIndex, VertigoStyleSystem styleSystem) {
+            //
+            // StyleState2 definedStates = default;
+            // StyleState2 hasSelectorsPerState = default;
+            //
+            // ushort styleIndex = (ushort) styleSheet.styles.size;
+            //
+            // int normalCount = HandleGroup(normalGroup, StyleState2.Normal, ref definedStates, ref hasSelectorsPerState);
+            // int hoverCount = HandleGroup(hoverGroup, StyleState2.Hover, ref definedStates, ref hasSelectorsPerState);
+            // int focusCount = HandleGroup(focusGroup, StyleState2.Focused, ref definedStates, ref hasSelectorsPerState);
+            // int activeCount = HandleGroup(activeGroup, StyleState2.Active, ref definedStates, ref hasSelectorsPerState);
+            //
+            // styleSheet.propertyList.EnsureAdditionalCapacity(normalCount + hoverCount + focusCount + activeCount);
+            //
+            // int selectorCount = 0;
+            // int eventCount = 0;
+            //
+            // int selectorOffset = styleSheet.selectors.size;
+            // int eventOffset = styleSheet.eventList.size;
+            //
+            // HandleSelectors(styleSheet, styleIndex, normalGroup, ref selectorCount, ref eventCount);
+            // HandleSelectors(styleSheet, styleIndex, hoverGroup, ref selectorCount, ref eventCount);
+            // HandleSelectors(styleSheet, styleIndex, focusGroup, ref selectorCount, ref eventCount);
+            // HandleSelectors(styleSheet, styleIndex, activeGroup, ref selectorCount, ref eventCount);
+            //
+            // if (selectorCount == 0) selectorOffset = 0;
+            // if (eventCount == 0) eventCount = 0;
+            //
+            // VertigoStyle style = new VertigoStyle(
+            //     new StyleId(styleIndex, definedStates, hasSelectorsPerState),
+            //     (ushort)styleSheet.propertyList.size,
+            //     (ushort)normalCount,
+            //     (ushort)hoverCount,
+            //     (ushort)focusCount,
+            //     (ushort)activeCount,
+            //     (ushort)selectorOffset,
+            //     (ushort)selectorCount,
+            //     (ushort)eventOffset,
+            //     (ushort)eventCount
+            // );
+            //
+            // WriteProperties(styleSheet.propertyList, normalGroup);
+            // WriteProperties(styleSheet.propertyList, hoverGroup);
+            // WriteProperties(styleSheet.propertyList, focusGroup);
+            // WriteProperties(styleSheet.propertyList, activeGroup);
+            //
+            // WriteEventHooks(ref styleSheet.eventList, normalGroup);
+            // WriteEventHooks(ref styleSheet.eventList, hoverGroup);
+            // WriteEventHooks(ref styleSheet.eventList, focusGroup);
+            // WriteEventHooks(ref styleSheet.eventList, activeGroup);
+            //
+            // normalGroup?.Clear();
+            // hoverGroup?.Clear();
+            // focusGroup?.Clear();
+            // activeGroup?.Clear();
+            //
+            // styleSheet.styles.Add(style);
             
         }
 
@@ -139,9 +139,9 @@ namespace UIForia {
                 StyleEventFlags styleEventFlags = currentSelector.selectorFlags;
 
                 VertigoSelector selector = new VertigoSelector {
-                    id = new SelectorId(styleSheet.id.index, styleIndex, (ushort) styleSheet.selectors.size, builder.state, styleEventFlags), 
-                    queryId = styleSheet.selectorQueries.size, 
-                    target = currentSelector.target
+                    // id = new SelectorId(styleIndex, (ushort) styleSheet.selectors.size, builder.state, styleEventFlags), 
+                    // queryId = styleSheet.selectorQueries.size, 
+                    // target = currentSelector.target
                 };
 
                 if (currentSelector.properties != null && currentSelector.properties.size != 0) {

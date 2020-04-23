@@ -9,18 +9,26 @@ namespace UIForia.Style {
 
         [FieldOffset(0)] public readonly int id;
         [FieldOffset(0)] public readonly ushort index;
-        [FieldOffset(2)] public readonly PropertyFlags flags;
+        [FieldOffset(2)] public readonly PropertyTypeFlags typeFlags;
 
-        public PropertyId(ushort id, PropertyFlags flags) {
+        public PropertyId(ushort id, PropertyTypeFlags typeFlags) {
             this.id = 0;
             this.index = id;
-            this.flags = flags;
+            this.typeFlags = typeFlags;
         }
 
         private PropertyId(int id) {
             this.index = 0;
-            this.flags = 0;
+            this.typeFlags = 0;
             this.id = id;
+        }
+
+        public static bool operator ==(PropertyId self, PropertyId other) {
+            return self.index == other.index;
+        }
+
+        public static bool operator !=(PropertyId self, PropertyId other) {
+            return self.index != other.index;
         }
 
         public static implicit operator int(PropertyId property) {

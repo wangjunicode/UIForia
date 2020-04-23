@@ -60,8 +60,32 @@ namespace UIForia.Util {
             return v;
         }
 
+        public static int NextMultipleOf128(int n) {
+            return (n >> 7) + 1 << 7;
+        }
+
+        public static int NextMultipleOf64(int n) {
+            return (n >> 6) + 1 << 6;
+        }
+
         public static int NextMultipleOf32(int n) {
             return (n >> 5) + 1 << 5;
+        }
+
+        public static int NextMultipleOf16(int n) {
+            return (n >> 4) + 1 << 4;
+        }
+
+        public static int NextMultipleOf8(int n) {
+            return (n >> 3) + 1 << 3;
+        }
+
+        public static int NextMultipleOf4(int n) {
+            return (n >> 2) + 1 << 2;
+        }
+
+        public static bool IsPowerOfTwo(uint x) {
+            return ((x != 0) && ((x & (~x + 1)) == x));
         }
 
         // https://stackoverflow.com/questions/109023/how-to-count-the-number-of-set-bits-in-a-32-bit-integer
@@ -70,6 +94,19 @@ namespace UIForia.Util {
             i -= ((i >> 1) & 0x55555555);
             i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
             return (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+        }
+
+        public static unsafe int CountSetBits(uint* map, int size) {
+            uint count = 0;
+            for (int x = 0; x < size; x++) {
+                uint i = map[x];
+
+                i -= ((i >> 1) & 0x55555555);
+                i = (i & 0x33333333) + ((i >> 2) & 0x33333333);
+                count += (((i + (i >> 4)) & 0x0F0F0F0F) * 0x01010101) >> 24;
+            }
+
+            return (int) count;
         }
 
         public static uint SetByte0(uint value, int i) {
@@ -107,6 +144,54 @@ namespace UIForia.Util {
             b.byte2 = (byte) byte2;
             b.byte3 = (byte) byte3;
             return b.intVal;
+        }
+
+        public static uint EnsurePowerOfTwo(uint size) {
+            if (IsPowerOfTwo(size)) {
+                return size;
+            }
+
+            return NextPowerOfTwo(size);
+        }
+
+        public static int GetPowerOfTwoBitIndex(uint value) {
+            switch (value) {
+                case 0: return 0;
+                case 2: return 1;
+                case 4: return 2;
+                case 8: return 3; 
+                case 16: return 4; 
+                case 32: return 5; 
+                case 64: return 6; 
+                case 128: return 7; 
+                case 256: return 8; 
+                case 512: return 9; 
+                case 1024: return 10; 
+                case 2048: return 11; 
+                case 4096: return 12; 
+                case 8192: return 13; 
+                case 16384: return 14; 
+                case 32768: return 15; 
+                case 65536: return 16; 
+                case 131072: return 17; 
+                case 262144: return 18; 
+                case 524288: return 19; 
+                case 1048576: return 20; 
+                case 2097152: return 21; 
+                case 4194304: return 22; 
+                case 8388608: return 23; 
+                case 16777216: return 24; 
+                case 33554432: return 25; 
+                case 67108864: return 26; 
+                case 134217728: return 27; 
+                case 268435456: return 28; 
+                case 536870912: return 29; 
+                case 1073741824: return 30; 
+                case 2147483648: return 31; 
+                // case 4294967296: return 32; 
+            }
+
+            return -1;
         }
 
     }

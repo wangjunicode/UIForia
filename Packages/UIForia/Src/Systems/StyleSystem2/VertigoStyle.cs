@@ -28,7 +28,7 @@ namespace UIForia {
         }
 
         public int index {
-            get => id.localStyleId.index;
+            get => id.index;
         }
         
         public int GetPropertyStart(StyleState2 state) {

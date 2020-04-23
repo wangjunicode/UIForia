@@ -17,6 +17,8 @@ namespace UIForia.Systems {
 
         public event Action<UIElement, StructList<StyleProperty>> onStylePropertyChanged;
 
+
+        
         private static readonly Stack<UIElement> s_ElementStack = new Stack<UIElement>();
 
         private readonly IntMap<ChangeSet> m_ChangeSets;

@@ -10,7 +10,7 @@ namespace UIForia.Util.Unsafe {
     // if base list is resized this will break!
     public unsafe struct UnsafeSpan<T> where T : unmanaged {
 
-        public readonly T* array;
+        [NativeDisableUnsafePtrRestriction] public readonly T* array;
         public readonly int size;
 
         public UnsafeSpan(int rangeStart, int rangeEnd, T* array) {
@@ -40,6 +40,13 @@ namespace UIForia.Util.Unsafe {
     public unsafe struct SharedListPointer<T> where T : unmanaged {
 
         public ListPointer* list;
+
+        public SharedListPointer(int initialCapacity, Allocator allocator) {
+            list = (ListPointer*) UnsafeUtility.Malloc(sizeof(ListPointer), 4, allocator);
+            list->allocator = allocator;
+            list->createdList = true;
+            SetList(new UnsafeList<T>(initialCapacity, allocator));
+        }
 
         public SharedListPointer(UnsafeList<T> initialList, Allocator allocator) {
             list = (ListPointer*) UnsafeUtility.Malloc(sizeof(ListPointer), 4, allocator);
@@ -76,7 +83,7 @@ namespace UIForia.Util.Unsafe {
     public unsafe struct UnsafeList<T> : IDisposable where T : unmanaged {
 
         public int size;
-        public T* array;
+        [NativeDisableUnsafePtrRestriction] public T* array;
         public int capacity;
 
         public Allocator allocator { get; internal set; }
@@ -213,6 +220,24 @@ namespace UIForia.Util.Unsafe {
             return value;
         }
 
+        public UnsafeSpan<T> GetSpan(int rangeStart, int rangeEnd) {
+            return new UnsafeSpan<T>(rangeStart, rangeEnd, array);
+        }
+
+        public ref T GetChecked(int idx) {
+            if (idx < 0 || idx >= size) {
+                throw new IndexOutOfRangeException();
+            }
+
+            return ref array[idx];
+        }
+
+        public void CopyFrom(UnsafeList<T> other) {
+            UnsafeUtility.MemCpy(array, other.array, sizeof(T) * other.size);
+            size = other.size;
+        }
+
+     
     }
 
 }

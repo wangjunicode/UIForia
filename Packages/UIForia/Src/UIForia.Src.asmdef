@@ -5,7 +5,8 @@
         "Unity.Mathematics",
         "Unity.Burst",
         "UIForia.Util",
-        "UIForia.ThirdParty"
+        "UIForia.ThirdParty",
+        "Unity.Collections"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

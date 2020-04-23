@@ -6,6 +6,7 @@ using UIForia.Style;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
+using UnityEngine;
 
 namespace UIForia {
 
@@ -20,7 +21,7 @@ namespace UIForia {
         public StyleStateGroup active;
 
         public VertigoStyleDebugProxy(VertigoStyle style) {
-            VertigoStyleSheet sheet = VertigoStyleSystem.s_DebugSheets[style.index];
+            VertigoStyleSheet sheet = VertigoStyleSystem.GetSheetForStyle(style.index);
             this.styleName = sheet.styleNames[style.index];
             this.normal = new StyleStateGroup(style, sheet, StyleState2.Normal);
             this.hover = new StyleStateGroup(style, sheet, StyleState2.Hover);
@@ -97,6 +98,42 @@ namespace UIForia {
 
     }
 
+    public class StyleSheetBuilder {
+
+        internal VertigoStyleSystem styleSystem;
+        private StyleBuilder builder;
+
+        internal StyleSheetBuilder(VertigoStyleSystem styleSystem) {
+            this.styleSystem = styleSystem;
+        }
+
+        public void AddAnimation() { }
+
+        public void AddSpriteSheet() { }
+
+        public void AddSound() { }
+
+        public void AddCursor() { }
+
+        public void AddConstant() { }
+
+        public void AddStyle(string styleName, Action<StyleBuilder> action) {
+
+            int idx = styleSystem.CreatesStyle(styleName);
+            
+            builder = builder ?? new StyleBuilder();
+            
+            action?.Invoke(builder);
+
+            ref VertigoStyle style = ref styleSystem.styleTable.GetReference(idx);
+            
+            // styleSystem.propertyTable.AddRangeToSamePage();
+            // builder.activeGroup.properties
+
+        }
+
+    }
+
     [DebuggerTypeProxy(typeof(VertigoStyleSheetDebugView))]
     public class VertigoStyleSheet {
 
@@ -117,6 +154,7 @@ namespace UIForia {
         internal SizedArray<Func<UIElement, bool>> selectorFilters; // todo -- should accept a QueryWrapper not an element
 
         private StyleBuilder builder;
+        public RangeInt styleRange;
 
         internal VertigoStyleSheet(string name, StyleSheetId id) {
             this.name = name;
@@ -145,13 +183,13 @@ namespace UIForia {
 
         public void AddStyle(string styleName, Action<StyleBuilder> action) {
 
-            styleNames.Add(styleName);
-
-            builder = builder ?? new StyleBuilder();
-
-            action?.Invoke(builder);
-
-            builder.Build(this);
+            // styleNames.Add(styleName);
+            //
+            // builder = builder ?? new StyleBuilder();
+            //
+            // action?.Invoke(builder);
+            //
+            // builder.Build(this);
 
         }
 

@@ -25,7 +25,7 @@ namespace UIForia {
 
         public void Set(StyleProperty2 property) {
             for (int i = 0; i < properties.size; i++) {
-                if (properties.array[i].propertyId.id == property.propertyId.id) {
+                if (properties.array[i].propertyId.index == property.propertyId.index) {
                     properties.array[i] = property;
                     return;
                 }

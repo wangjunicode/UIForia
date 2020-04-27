@@ -6,6 +6,7 @@ using UIForia.Style;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace UIForia {
@@ -145,8 +146,8 @@ namespace UIForia {
 
         internal LightList<string> styleNames;
 
-        internal UnsafeList<VertigoStyle> styles;
-        internal UnsafeList<VertigoSelector> selectors;
+        internal UnmanagedList<VertigoStyle> styles;
+        internal UnmanagedList<VertigoSelector> selectors;
 
         internal SizedArray<EventHook> eventList;
         internal StructList<StyleProperty2> propertyList;
@@ -160,8 +161,8 @@ namespace UIForia {
             this.name = name;
             this.id = id;
             this.styleNames = new LightList<string>();
-            this.styles = new UnsafeList<VertigoStyle>(Allocator.Persistent);
-            this.selectors = new UnsafeList<VertigoSelector>(Allocator.Persistent);
+            this.styles = new UnmanagedList<VertigoStyle>(Allocator.Persistent);
+            this.selectors = new UnmanagedList<VertigoSelector>(Allocator.Persistent);
             this.eventList = new SizedArray<EventHook>();
             this.propertyList = new StructList<StyleProperty2>(64);
         }

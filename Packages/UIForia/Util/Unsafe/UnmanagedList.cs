@@ -168,6 +168,23 @@ namespace UIForia.Util.Unsafe {
                 array = (T*) newPointer;
             }
         }
+        
+        public void SetCapacity(int desiredCapacity) {
+            if (capacity <= desiredCapacity) {
+                AssertSize();
+                capacity =desiredCapacity < 4 ? 4 : desiredCapacity;
+                int bytesToMalloc = sizeof(T) * capacity;
+                void* newPointer = UnsafeUtility.Malloc(bytesToMalloc, 4, allocator);
+
+                if (array != default) {
+                    int bytesToCopy = size * sizeof(T);
+                    UnsafeUtility.MemCpy(newPointer, array, bytesToCopy);
+                    UnsafeUtility.Free(array, allocator);
+                }
+
+                array = (T*) newPointer;
+            }
+        }
 
         public void EnsureAdditionalCapacity(int additional) {
             int desiredCapacity = size + additional;
@@ -216,7 +233,7 @@ namespace UIForia.Util.Unsafe {
         public T* GetRawPointer() {
             return array;
         }
-        
+
         public T* GetSlicePointer(int sliceSize) {
             EnsureAdditionalCapacity(sliceSize);
             T* value = array + size;
@@ -241,7 +258,14 @@ namespace UIForia.Util.Unsafe {
             size = other.size;
         }
 
-     
+        public void Sort() {
+            throw new NotImplementedException();
+        }
+
+        public struct PerThreadBatch {
+
+        }
+
     }
 
 }

@@ -1,10 +1,12 @@
 using System;
+using System.Runtime.InteropServices;
 using NUnit.Framework;
 using UIForia;
 using UIForia.Elements;
 using UIForia.Selectors;
 using UIForia.Style;
 using UIForia.Util;
+using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
@@ -32,6 +34,79 @@ namespace Tests {
                 styleSheet.AddStyle("style2", (style) => { style.Set(StyleProperty2.PreferredWidth(100)); });
 
             });
+        }
+
+        [Test]
+        public void BuildTraversalTree() {
+            VertigoStyleSystem styleSystem = new VertigoStyleSystem();
+            MockElement tree = MockElement.CreateTree(styleSystem, root => {
+                root.name = "a";
+                root.AddChild("b", (b) => { b.AddChild("c"); });
+                root.AddChild("d", (d) => {
+                    d.AddChild("e", (e) => { e.AddChild("f"); });
+                    d.AddChild("g", (g) => { g.AddChild("h"); });
+                    d.AddChild("i", (i) => { i.AddChild("j"); });
+                });
+            });
+
+            UnmanagedList<ElementTraversalInfo> traversalInfo = new UnmanagedList<ElementTraversalInfo>(32, Allocator.TempJob);
+
+            BuildElementInfo(tree, traversalInfo);
+            
+            Assert.AreEqual(0, tree.GetDescendentByName("a").ftbIndex);
+            Assert.AreEqual(1, tree.GetDescendentByName("b").ftbIndex);
+            Assert.AreEqual(2, tree.GetDescendentByName("c").ftbIndex);
+            Assert.AreEqual(3, tree.GetDescendentByName("d").ftbIndex);
+            Assert.AreEqual(4, tree.GetDescendentByName("e").ftbIndex);
+            Assert.AreEqual(5, tree.GetDescendentByName("f").ftbIndex);
+            Assert.AreEqual(6, tree.GetDescendentByName("g").ftbIndex);
+            Assert.AreEqual(7, tree.GetDescendentByName("h").ftbIndex);
+            Assert.AreEqual(8, tree.GetDescendentByName("i").ftbIndex);
+            Assert.AreEqual(9, tree.GetDescendentByName("j").ftbIndex);
+
+            Assert.AreEqual(0, tree.GetDescendentByName("a").btfIndex);
+            Assert.AreEqual(8, tree.GetDescendentByName("b").btfIndex);
+            Assert.AreEqual(9, tree.GetDescendentByName("c").btfIndex);
+            Assert.AreEqual(1, tree.GetDescendentByName("d").btfIndex);
+            Assert.AreEqual(6, tree.GetDescendentByName("e").btfIndex);
+            Assert.AreEqual(7, tree.GetDescendentByName("f").btfIndex);
+            Assert.AreEqual(4, tree.GetDescendentByName("g").btfIndex);
+            Assert.AreEqual(5, tree.GetDescendentByName("h").btfIndex);
+            Assert.AreEqual(2, tree.GetDescendentByName("i").btfIndex);
+            Assert.AreEqual(3, tree.GetDescendentByName("j").btfIndex);
+
+            Assert.IsFalse(tree.GetDescendentByName("e").IsDescendentOf(tree.GetDescendentByName("b")));
+            Assert.IsTrue(tree.GetDescendentByName("e").IsDescendentOf(tree.GetDescendentByName("d")));
+            Assert.IsTrue(tree.GetDescendentByName("e").IsDescendentOf(tree.GetDescendentByName("a")));
+            
+            Assert.IsTrue(tree.GetDescendentByName("f").IsDescendentOf(tree.GetDescendentByName("a")));
+            Assert.IsTrue(tree.GetDescendentByName("f").IsDescendentOf(tree.GetDescendentByName("d")));
+            Assert.IsTrue(tree.GetDescendentByName("f").IsDescendentOf(tree.GetDescendentByName("e")));
+            
+            Assert.IsTrue(tree.GetDescendentByName("a").IsAncestorOf(tree.GetDescendentByName("f")));
+            Assert.IsTrue(tree.GetDescendentByName("d").IsAncestorOf(tree.GetDescendentByName("f")));
+            Assert.IsTrue(tree.GetDescendentByName("e").IsAncestorOf(tree.GetDescendentByName("f")));
+            
+            Assert.IsFalse(tree.GetDescendentByName("a").IsDescendentOf(tree.GetDescendentByName("f")));
+            Assert.IsFalse(tree.GetDescendentByName("d").IsDescendentOf(tree.GetDescendentByName("f")));
+            Assert.IsFalse(tree.GetDescendentByName("e").IsDescendentOf(tree.GetDescendentByName("f")));
+            
+            Assert.IsFalse(tree.GetDescendentByName("f").IsDescendentOf(tree.GetDescendentByName("b")));
+            Assert.IsFalse(tree.GetDescendentByName("f").IsDescendentOf(tree.GetDescendentByName("c")));
+            Assert.IsFalse(tree.GetDescendentByName("f").IsDescendentOf(tree.GetDescendentByName("g")));
+            Assert.IsFalse(tree.GetDescendentByName("f").IsDescendentOf(tree.GetDescendentByName("h")));
+            
+            Assert.IsFalse(tree.GetDescendentByName("g").IsAncestorOf(tree.GetDescendentByName("j")));
+            
+            traversalInfo.Dispose();
+        }
+
+        void BuildElementInfo(UIElement element, UnmanagedList<ElementTraversalInfo> traversalInfo) {
+            new TraversalIndexJob_Managed() {
+                rootElementHandle = GCHandle.Alloc(element),
+                traversalInfo = traversalInfo
+            }.Run();
+            
         }
 
         [Test]
@@ -77,7 +152,7 @@ namespace Tests {
             styleSystem.Destroy();
 
             void RunJob() {
-                new ProcessSharedStyleUpdatesJob() {
+                new ComputeStyleStateDiff() {
                     addedList = addedList,
                     removedList = removedList,
                     rebuildList = rebuildList,
@@ -152,6 +227,18 @@ namespace Tests {
                 this.flags = UIElementFlags.EnabledFlagSet;
             }
 
+            public bool IsDescendentOf(in MockElement info) {
+                return ftbIndex > info.ftbIndex && btfIndex > info.btfIndex;
+            }
+        
+            public bool IsAncestorOf(in MockElement info) {
+                return ftbIndex < info.ftbIndex && btfIndex < info.btfIndex;
+            }
+
+            public bool IsParentOf(in MockElement info) {
+                return depth == info.depth + 1 && ftbIndex < info.ftbIndex && btfIndex < info.btfIndex;
+            }
+            
             public MockElement AddChild(string name, Action<MockElement> action = null) {
                 MockElement child = new MockElement(context, this);
                 child.name = name;
@@ -180,6 +267,7 @@ namespace Tests {
                 public int idGenerator;
                 public VertigoStyleSystem styleSystem;
                 public MockElement root;
+                public UnmanagedList<ElementInfo2> elementInfo;
 
             }
 
@@ -223,6 +311,20 @@ namespace Tests {
 
             public MockElement SetInstanceStyle(StyleProperty2 property2, StyleState2 state = StyleState2.Normal) {
                 return this;
+            }
+
+            public MockElement GetDescendentByName(string s) {
+                if (name == s) return this;
+                if (children == null) return null;
+                for (int i = 0; i < children.size; i++) {
+                    MockElement c = (MockElement)children[i];
+                    MockElement x = c.GetDescendentByName(s);
+                    if (x != null) {
+                        return x;
+                    }
+                }
+
+                return null;
             }
 
         }

@@ -89,6 +89,10 @@ namespace UIForia.Elements {
         internal UIElement parent;
         internal TagNameIndex tagNameIndex;
 
+        // todo-- temp
+        public uint ftbIndex;
+        public uint btfIndex;
+        
         // todo -- maybe move a lot of this data to an internal representation of UIElement
         public LayoutResult layoutResult;
         internal AwesomeLayoutBox layoutBox;
@@ -160,26 +164,6 @@ namespace UIForia.Elements {
 
         public void Destroy() {
             View.application.DoDestroyElement(this);
-        }
-
-        public UIElement InsertChild(uint idx, UIElement element) {
-            throw new NotImplementedException();
-            // if (element == null || element == this || element.isDestroyed) {
-            //     return null;
-            // }
-            //
-            // if (View == null) {
-            //     element.parent = this;
-            //     element.View = null;
-            //     element.siblingIndex = children.Count;
-            //     element.depth = depth + 1;
-            //     children.Insert((int) idx, element);
-            // }
-            // else {
-            //     Application.InsertChild(this, element, (uint) children.Count);
-            // }
-            //
-            // return element;
         }
 
         internal UIElement AddChild(UIElement element) {

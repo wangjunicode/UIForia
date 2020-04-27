@@ -5,17 +5,9 @@ using Unity.Collections;
 
 namespace UIForia.Style {
 
-    public enum PropertyInfoFlags : ushort {
-        Remove,
-        State
-    }
-    
-    internal struct StylePropertyInfo {
+    public struct PropertyData {
 
-        public ushort id;
-        public PropertyTypeFlags typeFlags;
-        public PropertyInfoFlags infoFlags;
-        public ushort padding;
+        public long longVal;
 
     }
     
@@ -26,15 +18,12 @@ namespace UIForia.Style {
 
         // important! do not change these fields outside of constructors
         [FieldOffset(0)] public readonly PropertyId propertyId;
-        [FieldOffset(4)] internal StyleState2Byte state;
-        [FieldOffset(5)] internal bool remove;
-        [FieldOffset(6)] internal byte padding0;
-        [FieldOffset(7)] internal byte padding1;
-        [FieldOffset(8)] internal readonly int int0;
-        [FieldOffset(8)] internal readonly float float0;
-        [FieldOffset(8)] internal readonly IntPtr ptr;
-        [FieldOffset(12)] internal readonly int int1;
-        [FieldOffset(12)] internal readonly float float1;
+        [FieldOffset(4)] internal readonly long longVal;
+        [FieldOffset(4)] internal readonly int int0;
+        [FieldOffset(4)] internal readonly float float0;
+        [FieldOffset(4)] internal readonly IntPtr ptr;
+        [FieldOffset(8)] internal readonly int int1;
+        [FieldOffset(8)] internal readonly float float1;
         
         // still have 4 free bytes that are implicitly padding!
 
@@ -65,6 +54,11 @@ namespace UIForia.Style {
             this.int1 = val1;
         }
 
+        public StyleProperty2(PropertyId propertyId, long data) : this() {
+            this.propertyId = propertyId;
+            this.longVal = data;
+        }
+        
         public StyleProperty2(PropertyId propertyId, float val0, int val1 = 0) : this() {
             this.propertyId = propertyId;
             this.float0 = val0;

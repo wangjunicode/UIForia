@@ -7,47 +7,8 @@ using Unity.Jobs;
 using UnityEngine;
 
 namespace UIForia {
-
-    public struct SelectorHook {
-
-        public long selectorId;
-        public int hookIndex;
-        public RangeInt targetRange;
-
-    }
-
-    // todo -- convert [enter] etc to just be self matching selectors
-
-    public unsafe struct AddNewSelectorsJob : IJob { // ranged batched job
-
-        public UnmanagedList<VertigoStyle> styles;
-        public NativeList<int> freeList;
-        public NativeList<StyleStateGroup> addedList;
-        public NativeList<StyleStateGroup> appendList;
-        public NativeList<SelectorId> activeSelectorList; // todo -- type is wrong 
-        public NativeList<SelectorHook> enterHooks;
-
-        public void Execute() {
-
-            UnmanagedList<StyleStateGroup> temp = new UnmanagedList<StyleStateGroup>(addedList.Length, Allocator.TempJob);
-
-            for (int addedIndex = 0; addedIndex < addedList.Length; addedIndex++) {
-
-                if (freeList.Length > 0) { }
-
-                StyleStateGroup added = addedList[addedIndex];
-
-                if (added.styleId.HasSelectorsInState(added.state)) {
-                    temp.AddUnchecked(added);
-                }
-
-            }
-
-            temp.Dispose();
-
-        }
-
-    }
+    
+    
 
     public unsafe struct SelectorRunData {
 
@@ -57,57 +18,6 @@ namespace UIForia {
 
     }
 
-    public unsafe struct TraversalInfo {
-
-        public bool isEnabled;
-        public UIElement element;
-        public int descendentStartIndex;
-        public int descendentEndIndex;
-
-    }
-
-    public unsafe struct BuildTraversalJob : IJob {
-
-        public ElementInfo root;
-        //  public UnsafeList<TraversalInfo> output;
-
-        public void Execute() {
-
-            // int idx = output.size;
-            // // this won't tell me what elements are in the same template
-            // // but will narrow the tree a lot. will have to compare the
-            // // template ids to find same-template descendents
-            // // for slots will also have to check (isTemplateRoot && hasSlotOverrides) before continuing
-            // output.array[idx].descendentStartIndex = output.size;
-            //
-            // for (int i = 0; i < root.childCount; i++) {
-            //     // breadth first makes a lot of sense here
-            //     // so i have a range for children and a range for descendents
-            //     // otherwise we need to track 'next sibling' indices, which is also maybe ok
-            //     // most checks are likely to be 'does my parent have x' so keeping children and parent close is nice
-            //     // int childIdx = Traverse(root.children[i]);
-            //     
-            // }
-            //
-            // output.array[idx].descendentEndIndex = output.size;
-        }
-
-    }
-
-    public unsafe struct ElementInfo {
-
-        public int id;
-        public int tableIndex; // index into elementTable, like Id but re-used across dead elements
-        public int version;
-        public int depth;
-        public int templateId;
-        public bool isTemplateRoot;
-        public int traversalIndex;
-        public ElementInfo* children;
-        public int childCount;
-        public bool isEnabled;
-
-    }
 
     [StructLayout(LayoutKind.Explicit)]
     public struct SelectorKey {
@@ -169,8 +79,8 @@ namespace UIForia {
     // and 1 for elements -> selectors effected
     public unsafe struct RemoveInvalidSelectorsJob : IJob { // ranged batched job
 
-        public readonly UnmangedPagedList<VertigoStyle> styles;
-        public readonly UnmangedPagedList<VertigoSelector> selectors;
+        public readonly UnmanagedPagedList<VertigoStyle> styles;
+        public readonly UnmanagedPagedList<VertigoSelector> selectors;
         public readonly UnmanagedList<SelectorInfo> sortedActiveSelectors;
 
         [ReadOnly] public NativeList<StyleStateGroup> removedList;

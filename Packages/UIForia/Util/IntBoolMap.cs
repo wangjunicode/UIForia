@@ -30,7 +30,8 @@ namespace UIForia.Util {
     public unsafe struct BitBuffer256 {
 
         public fixed uint data[8];
-
+        public int bitCount => 256;
+        
         public uint* ptr {
             get {
                 fixed (uint* p = data) {
@@ -105,9 +106,9 @@ namespace UIForia.Util {
         public readonly uint* map;
         public readonly int size;
 
-        public IntBoolMap(uint* map, int size) {
+        public IntBoolMap(uint* map, int bitCount) {
             this.map = map;
-            this.size = size;
+            this.size = bitCount >> 4;
         }
 
         public static bool Get(uint* ptr, int idx) {

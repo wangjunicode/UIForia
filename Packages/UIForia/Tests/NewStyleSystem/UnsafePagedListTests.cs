@@ -10,7 +10,7 @@ namespace Tests {
         [Test]
         public unsafe void FitAlignedRangesToListPage() {
 
-            UnmangedPagedList<int> list = new UnmangedPagedList<int>(16, Allocator.TempJob);
+            UnmanagedPagedList<int> list = new UnmanagedPagedList<int>(16, Allocator.TempJob);
 
             int val = 0;
             int* ints = stackalloc int[8];
@@ -19,7 +19,7 @@ namespace Tests {
                     ints[j] = val++;
                 }
 
-                list.AddRangeToSamePage(ints, 8);
+                list.AddRangeCompact(ints, 8);
 
             }
 
@@ -36,7 +36,7 @@ namespace Tests {
         [Test]
         public unsafe void FitUnalignedRangesToListPage() {
 
-            UnmangedPagedList<long> list = new UnmangedPagedList<long>(16, Allocator.TempJob);
+            UnmanagedPagedList<long> list = new UnmanagedPagedList<long>(16, Allocator.TempJob);
 
             long val = 0;
             long* longs = stackalloc long[5];
@@ -45,7 +45,7 @@ namespace Tests {
                     longs[j] = val++;
                 }
 
-                list.AddRangeToSamePage(longs, 5);
+                list.AddRangeCompact(longs, 5);
 
             }
             Assert.AreEqual(15, list.GetPage(0).size);

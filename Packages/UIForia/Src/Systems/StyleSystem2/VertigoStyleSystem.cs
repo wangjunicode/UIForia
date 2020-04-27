@@ -7,63 +7,13 @@ using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using Unity.Jobs.LowLevel.Unsafe;
-using Unity.Mathematics;
-using UnityEditor.VersionControl;
-using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace UIForia {
 
-    public unsafe struct BatchRangeJobData {
+    public unsafe struct RebuildInfo {
 
-        public readonly int index;
-        public readonly int maxJobCount;
-        public readonly int minBatchSize;
-
-        public BatchRangeJobData(int index, int minBatchSize, int maxJobCount = -1) {
-            this.index = index;
-            this.minBatchSize = minBatchSize < 1 ? 1 : minBatchSize;
-            this.maxJobCount = (maxJobCount <= 0) ? 8 : maxJobCount;
-        }
-
-        public bool TryGetJobBatchRange(int workItemCount, out RangeInt range) {
-            range = default;
-            if (workItemCount <= 0) {
-                return false;
-            }
-
-            int jobCount = math.clamp((workItemCount / minBatchSize), 1, maxJobCount);
-
-            if (index >= jobCount) {
-                return false;
-            }
-
-            int rangeSize = (workItemCount / jobCount);
-            int remaining = workItemCount - (rangeSize * jobCount);
-
-            int* sizes = stackalloc int[jobCount];
-
-            for (int i = 0; i < jobCount; i++) {
-                sizes[i] = rangeSize;
-            }
-
-            int idx = 0;
-            while (remaining > 0) {
-                sizes[idx]++;
-                remaining--;
-                idx++;
-                if (idx == jobCount) idx = 0;
-            }
-
-            int start = 0;
-            for (int i = 0; i < index; i++) {
-                start += sizes[i];
-            }
-
-            range = new RangeInt(start, sizes[index]);
-            return true;
-        }
+        public SharedStyleRebuildInfo sharedStyles;
 
     }
 
@@ -71,35 +21,27 @@ namespace UIForia {
 
         internal static LightList<VertigoStyleSheet> s_DebugSheets;
 
-        internal const ushort k_ImplicitModuleId = 0;
-
-        public UIElement rootElement;
-
         internal readonly LightList<VertigoStyleSheet> styleSheets;
 
         internal LightList<string> styleNameTable; // todo -- make this dev only since allocation scheme sucks
-        internal UnmangedPagedList<StyleProperty2> propertyTable;
-        internal UnmangedPagedList<VertigoStyle> styleTable;
-        internal UnmangedPagedList<VertigoSelector> selectorTable;
+        internal PagedSplitBufferList<PropertyId, long> sharedPropertyTable;
+        internal UnmanagedPagedList<VertigoStyle> styleTable;
+        internal UnmanagedPagedList<VertigoSelector> selectorTable;
+        internal UnmanagedList<RebuildInfo> rebuildTable;
 
-        internal Util.Unsafe.UnmanagedList<SharedStyleChangeSet> sharedStyleChangeSets; // stack based buffer allocator, clear on frame end
-        internal Util.Unsafe.UnmanagedList<StyleSetData> styleDataMap;
-        internal Util.Unsafe.UnmanagedList<StyleSetInstanceData> instanceDataMap;
-        internal Util.Unsafe.UnmanagedList<InstanceStyleChangeSet> instanceChanges;
+        internal UnmanagedList<SharedStyleChangeSet> sharedStyleChangeSets; // stack based buffer allocator, clear on frame end
+        internal UnmanagedList<StyleSetData> styleDataMap;
+        internal UnmanagedList<StyleSetInstanceData> instanceDataMap;
 
         public VertigoStyleSystem() {
 
-#if UNITY_EDITOR
-            AssertSize.AssertSizes();
-#endif
             styleNameTable = new LightList<string>(128);
-            propertyTable = new UnmangedPagedList<StyleProperty2>(256, Allocator.Persistent);
-            styleTable = new UnmangedPagedList<VertigoStyle>(128, Allocator.Persistent);
-            selectorTable = new UnmangedPagedList<VertigoSelector>(64, Allocator.Persistent);
-            styleDataMap = new Util.Unsafe.UnmanagedList<StyleSetData>(32, Allocator.Persistent); // todo this should be an UnsafeChunkedList I think
-            instanceDataMap = new Util.Unsafe.UnmanagedList<StyleSetInstanceData>(16, Allocator.Persistent); // todo this should be an UnsafeChunkedList I think
-            instanceChanges = new Util.Unsafe.UnmanagedList<InstanceStyleChangeSet>(32, Allocator.Persistent);
-            sharedStyleChangeSets = new Util.Unsafe.UnmanagedList<SharedStyleChangeSet>(32, Allocator.Persistent);
+            sharedPropertyTable = new PagedSplitBufferList<PropertyId, long>(1024, Allocator.Persistent);
+            styleTable = new UnmanagedPagedList<VertigoStyle>(128, Allocator.Persistent);
+            selectorTable = new UnmanagedPagedList<VertigoSelector>(64, Allocator.Persistent);
+            styleDataMap = new UnmanagedList<StyleSetData>(32, Allocator.Persistent); // todo this should be an UnsafeChunkedList I think
+            instanceDataMap = new UnmanagedList<StyleSetInstanceData>(16, Allocator.Persistent); // todo this should be an UnsafeChunkedList I think
+            sharedStyleChangeSets = new UnmanagedList<SharedStyleChangeSet>(32, Allocator.Persistent);
             styleSheets = new LightList<VertigoStyleSheet>();
             s_DebugSheets = styleSheets;
 
@@ -122,7 +64,7 @@ namespace UIForia {
             }
 
             styleTable.Dispose();
-            propertyTable.Dispose();
+            sharedPropertyTable.Dispose();
             styleDataMap.Dispose();
             selectorTable.Dispose();
             sharedStyleChangeSets.Dispose();
@@ -141,322 +83,151 @@ namespace UIForia {
             // styleSheets.Add(sheet);
         }
 
-        public void AddStyleSheet(Action<StyleSheetBuilder> sheetAction) {
-            AddStyleSheet(string.Empty, sheetAction);
-        }
+        internal UIElement rootElement;
 
-        internal void AddStyleSheet(VertigoStyleSheet[] styleSheets) {
-            // this is the compile case where we want to batch add these
-        }
+        public unsafe struct ConstructPreAnimationStyles : IJob {
 
-        public struct SharedStyleJobData {
+            // input = instance, shared, selector, animator, transition
 
-            public NativeList<int> rebuildList;
-            public NativeList<StyleStateGroup> addedList;
-            public NativeList<StyleStateGroup> removedList;
+            public void Execute() { }
 
         }
 
-        private static readonly int s_ProcessorCount = SystemInfo.processorCount;
+        // the more i can do all these operations efficiently in isolation, the better the whole system gets
+        // just combine the results at the end and use that as our output. memory shouldn't be a huge concern
+        // focus on cache locality where it makes a difference but lean more on parallel than cache coherence 
+        // for our main performance boost.
 
-        private static unsafe int GetJobParameters(int workItemCount, int minBatchSize, int* output) {
-            if (workItemCount <= 0) return 0;
-            if (minBatchSize <= 0) minBatchSize = 4;
+        public unsafe struct AssembleRebuildList : IJob {
 
-            int jobCount = Mathf.Clamp((workItemCount / minBatchSize), 1, s_ProcessorCount);
-
-            int rangeSize = (workItemCount / jobCount);
-            int remaining = workItemCount - (rangeSize * jobCount);
-
-            for (int i = 0; i < jobCount; i++) {
-                output[i] = rangeSize;
-            }
-
-            int idx = 0;
-            while (remaining > 0) {
-                output[idx]++;
-                remaining--;
-                idx++;
-                if (idx == jobCount) idx = 0;
-            }
-
-            return jobCount;
-        }
-
-        [AssertSize(16)]
-        public unsafe struct PropertyChangeRange {
-
-            public int styleSetId;
-            public int count;
-            public StyleProperty2* properties;
-
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public unsafe struct RebuildStyleJob : IJob {
-
-            public BatchRangeJobData rangeJobData;
-
-            [ReadOnly] public NativeList<int> rebuildList;
-
-            public UnmangedPagedList<StyleProperty2>.PerThread perThreadPagedStyleList;
-            public UnmangedPagedList<PropertyChangeRange>.PerThread perThreadPagedChangeRangeList;
-            
-            public UnmangedPagedList<VertigoStyle> styleTable;
-            public UnmangedPagedList<StyleProperty2> stylePropertyTable;
-
-            [NativeSetThreadIndex] private int threadIndex;
+            public UnmanagedList<StyleSetData> table;
+            public UnmanagedList<StyleSetData> rebuildList;
 
             public void Execute() {
 
-                if (!rangeJobData.TryGetJobBatchRange(rebuildList.Length, out RangeInt range)) {
-                    return;
-                }
+                for (int i = 0; i < table.size; i++) {
 
-                UnmangedPagedList<StyleProperty2> outputPropertyList = perThreadPagedStyleList.GetListForThread(threadIndex);
-                UnmangedPagedList<PropertyChangeRange> changeRanges = perThreadPagedChangeRangeList.GetListForThread(threadIndex);
-                UnmanagedList<StyleProperty2> buffer = new UnmanagedList<StyleProperty2>(135, Allocator.TempJob);
-
-                for (int index = range.start; index < range.end; index++) {
-                    buffer.size = 0;
-                    // need a list to output properties to
-                    // probably best to fill a scratch list and copy into destination
-                    // paged lists aren't a bad idea here I think
-
-                    // stylePropertyList.AddRangeToSamePage(items, )
-
-                    BitBuffer256 buffer256 = default;
-                    IntBoolMap activeMap = new IntBoolMap(buffer256.data, 8);
-
-                    StyleSetData styleData = default;
-
-                    StyleState2 state = (StyleState2) styleData.state;
-
-                    // store currently active style set
-                    // would then store all inherited properties as well
-
-                    // should i store a style list per element?
-                    // easy to check values
-                    // much more memory usage
-                    // cache method to opt in makes a lot more sense to me
-                    // when setting a property i still need to see if it would apply 
-                    // if properties set but not for an active state -> no-op
-
-                    // build list of instance properties first
-                    if (styleData.instanceDataId != -1) {
-                        StyleSetInstanceData instanceData = default;
-                        // sort and only add states we want
-                        for (int i = 0; i < instanceData.propertyCount; i++) {
-                            ref StyleProperty2 property = ref instanceData.properties[i];
-                            if (activeMap.TrySetIndex(property.propertyId.index)) {
-                                buffer.Add(property);
-                            }
-                        }
+                    if (table.array[i].needsRebuild) {
+                        rebuildList.Add(table.array[i]);
                     }
 
-                    // now add selectors
-                    if (styleData.selectorDataId != -1) {
-                        SelectorEffectData selectorEffectData = default;
-                        for (int i = 0; i < selectorEffectData.count; i++) {
-                            ref StyleProperty2 property = ref selectorEffectData.properties[i];
-                            if (activeMap.TrySetIndex(property.propertyId.index)) {
-                                buffer.Add(property);
-                            }
-                        }
-                    }
-
-                    // todo -- for style properties that are 'compiled' statically we can re-arrange the buffer to read 
-                    // property Id's up front and skip t
-                    for (int sharedStyleIndex = 0; sharedStyleIndex < styleData.sharedStyleCount; sharedStyleIndex++) {
-                        StyleId styleId = styleData.sharedStyles[sharedStyleIndex];
-                        VertigoStyle style = styleTable[styleId.index];
-
-                        if ((style.propertyOffset == ushort.MaxValue)) {
-                            continue;
-                        }
-
-                        StyleProperty2* properties = stylePropertyTable.GetPointer(style.propertyOffset);
-
-                        if ((state & StyleState2.Active) != 0) {
-                            for (int i = 0; i < style.activeCount; i++) {
-                                ref StyleProperty2 property = ref properties[i];
-                                if (activeMap.TrySetIndex(property.propertyId.index)) {
-                                    buffer.Add(property);
-                                }
-                            }
-                        }
-
-                        properties += style.activeCount;
-
-                        if ((state & StyleState2.Focused) != 0) {
-                            for (int i = 0; i < style.focusCount; i++) {
-                                ref StyleProperty2 property = ref properties[i];
-                                if (activeMap.TrySetIndex(property.propertyId.index)) {
-                                    buffer.Add(property);
-                                }
-                            }
-                        }
-
-                        properties += style.focusCount;
-
-                        if ((state & StyleState2.Hover) != 0) {
-                            for (int i = 0; i < style.focusCount; i++) {
-                                ref StyleProperty2 property = ref properties[i];
-                                if (activeMap.TrySetIndex(property.propertyId.index)) {
-                                    buffer.Add(property);
-                                }
-                            }
-                        }
-
-                        properties += style.hoverCount;
-
-                        for (int i = 0; i < style.focusCount; i++) {
-                            ref StyleProperty2 property = ref properties[i];
-                            if (activeMap.TrySetIndex(property.propertyId.index)) {
-                                buffer.Add(property);
-                            }
-                        }
-
-                        RangeInt propertyRange = outputPropertyList.AddRangeToSamePage(buffer.array, buffer.size);
-                        changeRanges.Add(new PropertyChangeRange());
-
-                    }
-
+                    table.array[i].needsRebuild = false;
+                    table.array[i].changeSetId = ushort.MaxValue;
                 }
 
             }
 
         }
 
-        public unsafe struct StyleChangeSet {
-
-            public StyleProperty2* currentStyles;
-            public BitBuffer256 trackedProperties;
-
-            public void TrackProperty(PropertyId propertyId) {
-                new IntBoolMap((uint*) UnsafeUtility.AddressOf(ref trackedProperties), 8).SetIndex(propertyId.index);
-            }
-
-            public void UntrackProperty(PropertyId propertyId) {
-                new IntBoolMap((uint*) UnsafeUtility.AddressOf(ref trackedProperties), 8).UnsetIndex(propertyId.index);
-            }
-
-            public void UpdatePropertyValue(StyleProperty2 property) {
-                
-            }
-
-        }
-
-        public unsafe struct UpdateChangeListJobs : IJobParallelForDeferBatched {
-
-            public UnmanagedList<PropertyChangeRange> propertyChangeRanges;
-            public UnmangedPagedList<StyleProperty2> propertyTables;
-            public UnmangedPagedList<StyleSetData> styleSetDataTable;
-            
-            public void Execute(int start, int end) {
-            
-                for (int i = start; i < end; i++) {
-                    PropertyChangeRange changeRange = propertyChangeRanges[i];
-                    StyleSetData data = styleSetDataTable[changeRange.styleSetId];
-                    
-                    if (data.hasChangeDetector) {
-                        StyleChangeSet changeSet = default;
-                        IntBoolMap map = new IntBoolMap((uint*)UnsafeUtility.AddressOf(ref changeSet.trackedProperties), 8);
-                        for (int j = 0; j < changeRange.count; j++) {
-                            ref StyleProperty2 property = ref changeRange.properties[j];
-                            if (map[property.propertyId.index]) {
-                                // buffer change and append/re-allocate in 1 step if we need to
-                                
-                            }
-                        }
-                    }
-                    
-                }
-                
-                
-                
-            }
-
-        }
+        public UnmanagedPagedList<VertigoStylePropertyInfo> styleInfoTable;
 
         public unsafe void OnUpdate() {
 
-            int changeCount = sharedStyleChangeSets.size;
+            int totalEnabledCount = 100; // don't know this without a traversal
 
-            int* sizes = stackalloc int[s_ProcessorCount];
+            // rebuild map = new UnmanagedList<bool>(highestElementId, Allocator.TempJob); // this or a per thread rebuild me list
 
-            int jobCount = GetJobParameters(changeCount, 16, sizes);
+            // per-thread allocators for data
+            // combine changes into persistent buffer at the end of frame when we know all the data
+            // this means allocating intermediate buffers for all properties we want to handle
+            // which is good for locality anyway
+            // with a decent block allocator in style root this can be pretty fast
+            // gc old pointers, assign new. new pointers found in rebuild data
+            // memcpy in bulk should be fine
+            // must be done single threaded but can happen in parallel with layout or rendering
 
-            LightList<SharedStyleJobData> data = new LightList<SharedStyleJobData>(jobCount);
-            NativeArray<JobHandle> sharedStyleUpdateHandles = new NativeArray<JobHandle>(jobCount, Allocator.TempJob);
+            UnmanagedList<ElementTraversalInfo> traversalInfo = new UnmanagedList<ElementTraversalInfo>(totalEnabledCount, Allocator.TempJob);
 
-            int lastRange = 0;
+            UnmanagedPagedList<StyleStateGroup>.PerThread addedStyleStateGroups = new UnmanagedPagedList<StyleStateGroup>.PerThread(64, Allocator.TempJob);
+            UnmanagedPagedList<StyleStateGroup>.PerThread removedStyleStateGroups = new UnmanagedPagedList<StyleStateGroup>.PerThread(64, Allocator.TempJob);
 
-            for (int i = 0; i < jobCount; i++) {
+            UnmanagedList<StyleStateGroup> mergedAddedStyleStateGroups = new UnmanagedList<StyleStateGroup>(Allocator.TempJob);
+            UnmanagedList<StyleStateGroup> mergedRemovedStyleStateGroups = new UnmanagedList<StyleStateGroup>(Allocator.TempJob);
 
-                SharedStyleJobData jobData = new SharedStyleJobData {
-                    addedList = new NativeList<StyleStateGroup>(sizes[i] * 4, Allocator.TempJob),
-                    removedList = new NativeList<StyleStateGroup>(sizes[i] * 4, Allocator.TempJob),
-                    rebuildList = new NativeList<int>(sizes[i], Allocator.TempJob)
-                };
+            PagedSplitBufferList<PropertyId, long>.PerThread perThreadSharedStyleOutput = new PagedSplitBufferList<PropertyId, long>.PerThread(256, Allocator.TempJob);
+            // selectors and animation and shared styles all depend on computed style state diff
 
-                ProcessSharedStyleUpdatesJob job = new ProcessSharedStyleUpdatesJob() {
-                    addedList = jobData.addedList,
-                    removedList = jobData.removedList,
-                    rebuildList = jobData.rebuildList,
-                    changeSets = new UnsafeSpan<SharedStyleChangeSet>(lastRange, sizes[i], sharedStyleChangeSets.array)
-                };
+            JobHandle traversalIndex = new TraversalIndexJob_Managed() {
+                rootElementHandle = GCHandle.Alloc(rootElement),
+                traversalInfo = traversalInfo
+            }.Schedule();
 
-                // defer batch rebuild job
-                // write output into each change set i guess since we don't have a way to know ranges ahead of time.
-                // could create fixed buffers of style property count for each rebuilt element
-                // kinda of a lot of memory though
+            JobHandle styleStateDiff = VertigoScheduler.ParallelForRange(sharedStyleChangeSets.size, 10, new ComputeStyleStateDiff() {
+                    changeSets = sharedStyleChangeSets,
+                    addedStyleStateGroups = addedStyleStateGroups,
+                    removedStyleStateGroups = removedStyleStateGroups
+                })
+                .Then(
+                    new MergePerThreadPageLists<StyleStateGroup>() {
+                        perThreadLists = addedStyleStateGroups,
+                        outputList = mergedAddedStyleStateGroups
+                    },
+                    new MergePerThreadPageLists<StyleStateGroup>() {
+                        perThreadLists = removedStyleStateGroups,
+                        outputList = mergedRemovedStyleStateGroups
+                    }
+                );
 
-                // defer but give me 1 - 4 jobs and let me know their indices?
+            JobHandle buildSharedStylesHandle = VertigoScheduler.Await(styleStateDiff)
+                .ThenParallelForRange(sharedStyleChangeSets.size, 10, new BuildSharedStyles() {
+                    rebuildTable = rebuildTable,
+                    changedSharedStyles = default, // todo -- this list needs to be created somewhere 
+                    styleTable = styleInfoTable,
+                    perThreadStyleOutput = perThreadSharedStyleOutput, // todo -- job to copy these styles to persistent location
+                    stylePropertyTable = sharedPropertyTable
+                });
 
-                // schedule n jobs 
-                // early out if no work waiting for them
-                // use some metric to know they should pick up work or not
-                // if each one computes a range
-                // and knows it index
-                // it should know if it has data or not to work with
+            JobHandle selectors = RunSelectors(styleStateDiff, traversalIndex);
 
-                lastRange += sizes[i];
+            JobHandle sharedStyleAnimations = RunSharedStyleAnimations(styleStateDiff);
 
-                data.Add(jobData);
+            VertigoScheduler.Await(buildSharedStylesHandle, selectors).Then(new AssembleRebuildList() {
+                table = styleDataMap,
 
-                sharedStyleUpdateHandles[i] = job.Schedule();
-            }
+            });
 
-            JobHandle handle = JobHandle.CombineDependencies(sharedStyleUpdateHandles);
+            ConstructPreAnimationStyles preAnimationStyles = new ConstructPreAnimationStyles() { };
 
-            NativeList<int> rebuildList = new NativeList<int>(32, Allocator.TempJob);
+            JobHandle selectorAnimations = RunSelectorAnimations(selectors);
 
-            // RebuildParallelJob().Schedule(rebuild);
+            JobHandle finalStyles = VertigoScheduler.Await(sharedStyleAnimations, selectorAnimations);
 
-            // rebuild in parallel somehow
-            // need update lists
-            // basically need parallel writes
+            finalStyles.Complete();
 
-            JobHandle.CompleteAll(sharedStyleUpdateHandles);
+            addedStyleStateGroups.Dispose();
+            mergedAddedStyleStateGroups.Dispose();
+            removedStyleStateGroups.Dispose();
+            mergedRemovedStyleStateGroups.Dispose();
+            perThreadSharedStyleOutput.Dispose();
+            traversalInfo.Dispose();
+            // style.computed.PropertyX;
+            // style.animated.PropertyY;
 
-            for (int i = 0; i < data.size; i++) {
-                data[i].addedList.Dispose();
-                data[i].removedList.Dispose();
-                data[i].rebuildList.Dispose();
-            }
+            // output?
+            // list of rebuilt elements
+            // list of rebuild elements with dirty?
+            // rebuild element + up to date style list per element?
+            // at least for testing I think it makes sense to compute up to date style info for elements
 
-            sharedStyleUpdateHandles.Dispose();
+            // probably have a base value + animated snapshot value for each property
+            // this lets me ask "are you animating? and if yes give me a formula I can plug my data into" to resolve final values in layout system
 
             EndFrame();
         }
 
-        internal unsafe void EndFrame() {
-            for (int i = 0; i < sharedStyleChangeSets.size; i++) {
-                // can be parallel but probably doesn't need to be
-                // sharedStyleChangeSets.array[i].ch = ushort.MaxValue;
-            }
+        private JobHandle RunSharedStyleAnimations(JobHandle styleStateDiff) {
+            return new JobHandle();
+        }
 
+        private JobHandle RunSelectorAnimations(JobHandle selectorDep) {
+            return new JobHandle();
+        }
+
+        private JobHandle RunSelectors(JobHandle styleStateDiff, JobHandle traversalIndexJob) {
+            return new JobHandle();
+        }
+
+        internal unsafe void EndFrame() {
             sharedStyleChangeSets.size = 0;
         }
 
@@ -481,7 +252,7 @@ namespace UIForia {
 
             ref SharedStyleChangeSet changeSetData = ref sharedStyleChangeSets.array[styleSetData.changeSetId];
 
-            changeSetData.newState = StyleState2Byte.Normal;
+            changeSetData.newState = styleSetData.state | StyleState2Byte.Normal;
             changeSetData.originalState = styleSetData.state | StyleState2Byte.Normal;
             changeSetData.styleDataId = (ushort) styleDataId;
             changeSetData.newStyleCount = 0;
@@ -508,10 +279,6 @@ namespace UIForia {
             StyleId* newStyles = changeSetData.newStyles;
             changeSetData.newStyleCount = (byte) newStyleBuffer.size;
 
-            for (int i = 0; i < newStyleBuffer.size; i++) {
-                // newStyles[i] = newStyleBuffer.array[i];
-            }
-
         }
 
         // would be great to do this in bulk for elements
@@ -519,7 +286,7 @@ namespace UIForia {
         // repeat is probably the issue
         // technically a given entry point knows how many elements it will create though
 
-        public unsafe int CreatesStyleData(int elementId) {
+        public unsafe int CreatesStyleData() {
 
             // todo -- this needs lovin. don't always add, keep free list index for removal
             // probably add via chunked list instead of regular list
@@ -529,13 +296,9 @@ namespace UIForia {
             data.state = StyleState2Byte.Normal;
             data.changeSetId = ushort.MaxValue;
             data.sharedStyleCount = 0;
+            data.instanceData = null;
 
             return styleDataMap.size - 1;
-        }
-
-        internal void OnElementDestroyed() {
-            // styleDataFreeList.Add(elementId);
-
         }
 
         public StyleState2 GetState(int styleDataId) {
@@ -546,110 +309,121 @@ namespace UIForia {
             return (StyleState2) styleDataMap[styleDataId].state;
         }
 
-        internal unsafe void SetInstanceStyle(StyleSet styleSet, in StyleProperty2 property, StyleState2Byte state) {
+        // default to having space for 8 properties
+        // todo -- would be awesome to use a better allocator here and not the Unity one so we can ensure some degree of locality
+        private unsafe InstanceStyleData* CreateInstanceStyleData(int capacity = 8) {
+            void* rawData = UnsafeUtility.Malloc(sizeof(InstanceStyleData) + (capacity * sizeof(PropertyId)) + (capacity * sizeof(long)), 4, Allocator.Persistent);
+            PropertyId* keyStart = (PropertyId*) ((long*) rawData + sizeof(InstanceStyleData));
+            long* dataStart = (long*) (keyStart + (capacity * sizeof(PropertyId)));
 
-            // search instance properties for property
+            InstanceStyleData* data = (InstanceStyleData*) rawData;
+            data->keys = keyStart;
+            data->data = dataStart;
+            data->capacity = capacity;
 
-            StyleSetData data = styleDataMap[styleSet.styleDataId];
+            data->totalStyleCount = 0;
+            data->usedStyleCount = 0;
+            return data;
+        }
 
-            StyleSetInstanceData instance = instanceDataMap[data.instanceDataId];
+        // todo -- would be awesome to use a better allocator here and not the Unity one so we can ensure some degree of locality
+        private unsafe InstanceStyleData* ResizeInstanceStyleData(InstanceStyleData* current, int size) {
+            InstanceStyleData* newptr = CreateInstanceStyleData(size + 8);
+            newptr->totalStyleCount = current->totalStyleCount;
+            newptr->usedStyleCount = current->usedStyleCount;
+            UnsafeUtility.MemCpy(newptr->keys, current->keys, sizeof(PropertyId) * current->usedStyleCount);
+            UnsafeUtility.MemCpy(newptr->data, current->data, sizeof(long) * current->usedStyleCount);
+            UnsafeUtility.Free(current, Allocator.Persistent);
+            return newptr;
+        }
 
-            StyleProperty2* ptr = instance.properties;
+        // note: if data is a pointer type we assume the handle has already been allocated at this point
+        private unsafe void AddOrUpdateInstanceStyle(StyleSetData data, PropertyId propertyId, long styleData, StyleState2Byte state) {
 
-            for (int i = 0; i < instance.propertyCount; i++) {
+            data.instanceData = data.instanceData != null
+                ? data.instanceData
+                : CreateInstanceStyleData();
 
-                ref StyleProperty2 p = ref ptr[i];
+            int idx = -1;
+            InstanceStyleData* instanceStyleData = data.instanceData;
 
-                if (p.state == state && p.propertyId == property.propertyId) {
-                    if (p == property) {
+            for (int i = 0; i < instanceStyleData->totalStyleCount; i++) {
+                if (instanceStyleData->keys[i] == propertyId) {
+                    idx = i;
+
+                    if (instanceStyleData->data[i] == styleData) {
                         return;
                     }
 
+                    instanceStyleData->data[i] = styleData;
                     break;
                 }
-
             }
 
-            // get a copy and set the state flag appropriately
-            StyleProperty2 update = property;
-            update.state = state;
+            if (idx == -1) {
 
-            if (data.changeSetId == -1) {
-                CreateStyleChangeSet(styleSet.styleDataId, ref data);
+                if (instanceStyleData->totalStyleCount + 1 >= instanceStyleData->capacity) {
+                    data.instanceData = ResizeInstanceStyleData(data.instanceData, instanceStyleData->totalStyleCount + 1);
+                    instanceStyleData = data.instanceData;
+                }
+
+                instanceStyleData->keys[instanceStyleData->totalStyleCount] = propertyId;
+                instanceStyleData->data[instanceStyleData->totalStyleCount] = styleData;
+                instanceStyleData->totalStyleCount++;
             }
 
-            SharedStyleChangeSet changeSet = sharedStyleChangeSets.array[data.changeSetId];
-
-            // if (changeSet.instanceChangeId == -1) {
-            //     // create it
-            //     data.instanceDataId = (ushort) instanceDataMap.size;
-            //     InstanceStyleChangeSet instanceStyleChangeSet = new InstanceStyleChangeSet();
-            //     instanceStyleChangeSet.propertyCount = 1;
-            //     instanceStyleChangeSet.properties = AllocateTempPropertyList();
-            //     instanceChanges.array[changeSet.instanceChangeId] = instanceStyleChangeSet;
-            // }
-            // else {
-            //     ref InstanceStyleChangeSet instanceChangeSet = ref instanceChanges.array[changeSet.instanceChangeId];
-            //
-            //     ptr = instanceChangeSet.properties;
-            //
-            //     // if this property id + state combo is already in the list, replace it with new value
-            //     // if not, allocate a new slot and resize list if needed
-            //     for (int i = 0; i < instanceChangeSet.propertyCount; i++) {
-            //
-            //         ref StyleProperty2 p = ref ptr[i];
-            //
-            //         // re-organize layout of property id to make this 1 check maybe
-            //         if (p.state != state || p.propertyId != property.propertyId) {
-            //             continue;
-            //         }
-            //
-            //         if (p == property) {
-            //             return;
-            //         }
-            //
-            //         if (BitUtil.NextMultipleOf16(instance.propertyCount) != BitUtil.NextMultipleOf16(instance.propertyCount + 1)) {
-            //             ResizeTempPropertyList(ref instanceChangeSet.properties, instanceChangeSet.propertyCount, instanceChangeSet.propertyCount + 1);
-            //         }
-            //
-            //         instanceChangeSet.properties[instanceChangeSet.propertyCount++] = update;
-            //
-            //         return;
-            //
-            //     }
-            //
-            // }
-
-        }
-
-        private unsafe int ResizeTempPropertyList(ref StyleProperty2* properties, int oldSize, int size) {
-            StyleProperty2* oldptr = properties;
-            int newSize = BitUtil.NextMultipleOf16(size);
-            properties = (StyleProperty2*) UnsafeUtility.Malloc(sizeof(StyleProperty2) * newSize, 4, Allocator.TempJob);
-            UnsafeUtility.MemCpy(properties, oldptr, oldSize * sizeof(StyleProperty2));
-            UnsafeUtility.Free(oldptr, Allocator.TempJob);
-            return newSize;
-        }
-
-        private unsafe StyleProperty2* AllocateTempPropertyList(int count = 8) {
-            return (StyleProperty2*) UnsafeUtility.Malloc(sizeof(StyleProperty2) * BitUtil.NextMultipleOf16(count), 4, Allocator.TempJob);
-        }
-
-        private unsafe void ReleaseTempPropertyList(StyleProperty2* list) {
-            UnsafeUtility.Free(list, Allocator.TempJob);
-        }
-
-        private unsafe bool TryGetInstanceProperty(StyleProperty2* instanceDataProperties, ushort propertyCount, StyleProperty2 property, out StyleProperty2 styleProperty2) {
-            styleProperty2 = default;
-            return default;
-            if (propertyCount != 0) {
-                // StyleProperty2* properties = instanceData.properties;
-                // for (int i = 0; i < instanceData.normal; i++) {
-                //     if (properties[i].propertyId.index == property.propertyId.index) {
-                //         properties[i] = property;
-                //     }
-                // }
+            if ((state & data.state) != 0) {
+                // rebuild if not already rebuilding
+                // 
             }
+
+        }
+
+        private unsafe void RemoveInstanceStyle(StyleSetData data, PropertyId propertyId, StyleState2Byte state) {
+
+            if (data.instanceData == null) {
+                return;
+            }
+
+            InstanceStyleData* instanceStyleData = data.instanceData;
+
+            int idx = -1;
+            for (int i = 0; i < instanceStyleData->totalStyleCount; i++) {
+                if (instanceStyleData->keys[i] == propertyId) {
+                    idx = i;
+                    break;
+                }
+            }
+
+            if (idx == -1) return;
+
+            if ((propertyId.typeFlags & PropertyTypeFlags.RequireDestruction) != 0) {
+                long currentValue = instanceStyleData->data[idx];
+                if (currentValue != 0) {
+                    IntPtr ptr = (IntPtr) currentValue;
+                    if (ptr != IntPtr.Zero) {
+                        GCHandle.FromIntPtr(ptr).Free();
+                    }
+                }
+            }
+
+            if ((state & data.state) != 0) {
+                // rebuild if not already rebuilding
+            }
+        }
+
+        internal void SetInstanceStyle(StyleSet styleSet, PropertyId propertyId, long? styleData, StyleState2Byte state) {
+            StyleSetData data = styleDataMap[styleSet.styleDataId];
+
+            propertyId.state = state;
+
+            if (styleData.HasValue) {
+                AddOrUpdateInstanceStyle(data, propertyId, styleData.Value, state);
+            }
+            else {
+                RemoveInstanceStyle(data, propertyId, state);
+            }
+
         }
 
         public static VertigoStyleSheet GetSheetForStyle(int id) {
@@ -663,6 +437,7 @@ namespace UIForia {
             return null;
         }
 
+        // todo -- create in bulk where possible
         internal int CreatesStyle(string styleName) {
             styleNameTable.Add(styleName);
             int nameIdx = styleNameTable.size - 1;
@@ -670,6 +445,54 @@ namespace UIForia {
             Assert.AreEqual(nameIdx, styleIdx);
             return styleIdx;
         }
+
+        internal unsafe void EnterState(StyleSet styleSet, StyleState2 state) {
+            StyleSetData data = styleDataMap[styleSet.styleDataId];
+            if (data.changeSetId != ushort.MaxValue) {
+                bool hasStateStyles = false;
+                for (int i = 0; i < data.sharedStyleCount; i++) {
+                    StyleId styleId = data.sharedStyles[i];
+                    if (styleId.DefinesState(state)) {
+                        hasStateStyles = true;
+                    }
+                }
+
+                if (hasStateStyles) {
+                    CreateStyleChangeSet(styleSet.styleDataId, ref data);
+                    ref SharedStyleChangeSet changeSetData = ref sharedStyleChangeSets.array[data.changeSetId];
+                    changeSetData.newState |= (StyleState2Byte) (state);
+                }
+            }
+        }
+
+        internal unsafe void ExitState(StyleSet styleSet, StyleState2 state) {
+            StyleSetData data = styleDataMap[styleSet.styleDataId];
+            if (data.changeSetId != ushort.MaxValue) {
+                bool hasStateStyles = false;
+                for (int i = 0; i < data.sharedStyleCount; i++) {
+                    StyleId styleId = data.sharedStyles[i];
+                    if (styleId.DefinesState(state)) {
+                        hasStateStyles = true;
+                    }
+                }
+
+                if (hasStateStyles) {
+                    CreateStyleChangeSet(styleSet.styleDataId, ref data);
+                    ref SharedStyleChangeSet changeSetData = ref sharedStyleChangeSets.array[data.changeSetId];
+                    changeSetData.newState &= (StyleState2Byte) (~state);
+                }
+            }
+        }
+
+    }
+
+    public unsafe struct InstanceStyleData {
+
+        public int capacity;
+        public int totalStyleCount;
+        public int usedStyleCount;
+        public PropertyId* keys;
+        public long* data;
 
     }
 

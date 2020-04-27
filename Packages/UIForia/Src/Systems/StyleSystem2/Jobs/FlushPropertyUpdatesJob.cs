@@ -165,10 +165,10 @@ namespace UIForia {
         private const int k_MaxStyleStateSize = StyleSet.k_MaxSharedStyles * 4; // max styles each with max 4 states
 
         public UnmanagedList<InstanceStyleChangeSet> instanceChangeSetMap;
-        public UnmangedPagedList<StyleProperty2> stylePropertyTable;
+        public UnmanagedPagedList<StyleProperty2> stylePropertyTable;
 
         [ReadOnly]
-        public UnmangedPagedList<VertigoStyle> styleTable;
+        public UnmanagedPagedList<VertigoStyle> styleTable;
         // new StyleCache(properties);
         // cache.Update(propertyList);
         // if cache.Changed(property) {
@@ -199,7 +199,7 @@ namespace UIForia {
                 // if properties set but not for an active state -> no-op
 
                 // build list of instance properties first
-                if (styleData.instanceDataId != -1) {
+                if (styleData.instanceData != null) {
                     StyleSetInstanceData instanceData = default;
                     // old one is already sorted
                     for (int i = 0; i < instanceData.propertyCount; i++) {

@@ -1,64 +1,65 @@
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 
 namespace UIForia {
 
     [BurstCompile]
-    public unsafe struct ProcessSharedStyleUpdatesJob : IJob {
+    public unsafe struct ComputeStyleStateDiff : IJobParallelForBatch {
 
-        public NativeList<int> rebuildList;
-        public NativeList<StyleStateGroup> addedList;
-        public NativeList<StyleStateGroup> removedList;
-        public UnsafeSpan<SharedStyleChangeSet> changeSets;
+        [NativeSetThreadIndex] public int threadIndex;
+
+        public UnmanagedList<SharedStyleChangeSet> changeSets;
+        public UnmanagedPagedList<StyleStateGroup>.PerThread addedStyleStateGroups;
+        public UnmanagedPagedList<StyleStateGroup>.PerThread removedStyleStateGroups;
 
         private const int k_MaxStyleStateSize = StyleSet.k_MaxSharedStyles * 4; // max styles each with max 4 states
 
-        public void Execute() {
+        public void Execute(int startIndex, int count) {
+      
+            UnmanagedList<StyleStateGroup> addBuffer = new UnmanagedList<StyleStateGroup>(k_MaxStyleStateSize, Allocator.TempJob);
+            UnmanagedList<StyleStateGroup> oldStyleStates = new UnmanagedList<StyleStateGroup>(k_MaxStyleStateSize, Allocator.Temp);
+            UnmanagedList<StyleStateGroup> newStyleStates = new UnmanagedList<StyleStateGroup>(k_MaxStyleStateSize, Allocator.Temp);
 
-            NativeArray<StyleStateGroup> oldStyleStateList = new NativeArray<StyleStateGroup>(k_MaxStyleStateSize, Allocator.Temp);
-            NativeArray<StyleStateGroup> newStyleStateList = new NativeArray<StyleStateGroup>(k_MaxStyleStateSize, Allocator.Temp);
+            UnmanagedPagedList<StyleStateGroup> addedList = addedStyleStateGroups.GetListForThread(threadIndex);
+            UnmanagedPagedList<StyleStateGroup> removedList = removedStyleStateGroups.GetListForThread(threadIndex);
 
-            UnsafeSizedBuffer<StyleStateGroup> oldStyleStates = new UnsafeSizedBuffer<StyleStateGroup>(oldStyleStateList);
-            UnsafeSizedBuffer<StyleStateGroup> newStyleStates = new UnsafeSizedBuffer<StyleStateGroup>(newStyleStateList);
+            int endIndex = startIndex + count;
 
-            for (int changeSetIdx = 0; changeSetIdx < changeSets.size; changeSetIdx++) {
+            for (int changeSetIdx = startIndex; changeSetIdx < endIndex; changeSetIdx++) {
 
                 oldStyleStates.size = 0;
                 newStyleStates.size = 0;
 
                 SharedStyleChangeSet changeSet = changeSets.array[changeSetIdx];
 
-                // todo -- if state and shared styles didn't change, no-op out of here 
-                
                 StyleId* oldStyles = changeSet.oldStyles;
                 StyleId* newStyles = changeSet.newStyles;
 
-                StyleState2 originalState = (StyleState2)(int)changeSet.originalState;
-                StyleState2 newState = (StyleState2)(int)changeSet.newState;
-                
-                bool needsRebuild = false;
+                StyleState2 originalState = (StyleState2) (int) changeSet.originalState;
+                StyleState2 newState = (StyleState2) (int) changeSet.newState;
 
                 int oldStyleCount = changeSet.oldStyleCount;
                 int newStyleCount = changeSet.newStyleCount;
-                
+
                 for (int i = 0; i < oldStyleCount; i++) {
                     StyleId styleId = oldStyles[i];
                     // order is important!
-                    MaybeAddStyleGroup(ref oldStyleStates, originalState, StyleState2.Normal, styleId, changeSet.styleDataId);
-                    MaybeAddStyleGroup(ref oldStyleStates, originalState, StyleState2.Hover, styleId, changeSet.styleDataId);
-                    MaybeAddStyleGroup(ref oldStyleStates, originalState, StyleState2.Focused, styleId, changeSet.styleDataId);
                     MaybeAddStyleGroup(ref oldStyleStates, originalState, StyleState2.Active, styleId, changeSet.styleDataId);
+                    MaybeAddStyleGroup(ref oldStyleStates, originalState, StyleState2.Focused, styleId, changeSet.styleDataId);
+                    MaybeAddStyleGroup(ref oldStyleStates, originalState, StyleState2.Hover, styleId, changeSet.styleDataId);
+                    MaybeAddStyleGroup(ref oldStyleStates, originalState, StyleState2.Normal, styleId, changeSet.styleDataId);
                 }
 
                 for (int i = 0; i < newStyleCount; i++) {
                     StyleId styleId = newStyles[i];
                     // order is important!
-                    MaybeAddStyleGroup(ref newStyleStates, newState, StyleState2.Normal, styleId, changeSet.styleDataId);
-                    MaybeAddStyleGroup(ref newStyleStates, newState, StyleState2.Hover, styleId, changeSet.styleDataId);
-                    MaybeAddStyleGroup(ref newStyleStates, newState, StyleState2.Focused, styleId, changeSet.styleDataId);
                     MaybeAddStyleGroup(ref newStyleStates, newState, StyleState2.Active, styleId, changeSet.styleDataId);
+                    MaybeAddStyleGroup(ref newStyleStates, newState, StyleState2.Focused, styleId, changeSet.styleDataId);
+                    MaybeAddStyleGroup(ref newStyleStates, newState, StyleState2.Hover, styleId, changeSet.styleDataId);
+                    MaybeAddStyleGroup(ref newStyleStates, newState, StyleState2.Normal, styleId, changeSet.styleDataId);
 
                 }
 
@@ -79,31 +80,24 @@ namespace UIForia {
 
                     if (idx == -1) {
                         // this is a new combination
-                        addedList.Add(newGroup);
-                        needsRebuild = true;
+                        addBuffer.Add(newGroup); 
                     }
                     else if (idx != i) { // index changed
-                        needsRebuild = true;
                     }
 
                 }
 
-                for (int i = 0; i < oldStyleStates.size; i++) {
-                    needsRebuild = true;
-                    removedList.Add(oldStyleStates.array[i]);
-                }
-
-                if (needsRebuild) {
-                    rebuildList.Add(changeSet.styleDataId);
-                }
+                addedList.AddRange(addBuffer.array, addBuffer.size);
+                removedList.AddRange(oldStyleStates.array, oldStyleStates.size);
 
             }
 
-            oldStyleStateList.Dispose();
-            newStyleStateList.Dispose();
+            addBuffer.Dispose();
+            oldStyleStates.Dispose();
+            newStyleStates.Dispose();
         }
-
-        private static void MaybeAddStyleGroup(ref UnsafeSizedBuffer<StyleStateGroup> list, StyleState2 checkState, StyleState2 targetState, StyleId styleId, int styleSetId) {
+        
+        private static void MaybeAddStyleGroup(ref  UnmanagedList<StyleStateGroup> list, StyleState2 checkState, StyleState2 targetState, StyleId styleId, int styleSetId) {
             if ((checkState & targetState) != 0 && styleId.DefinesState(targetState)) {
                 int idx = list.size;
                 list.array[list.size++] = new StyleStateGroup(idx, targetState, styleId, styleSetId);

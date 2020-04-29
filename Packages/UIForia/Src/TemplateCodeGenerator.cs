@@ -78,8 +78,8 @@ namespace UIForia {
         }
 
         private static string GenerateCustomPainterTypes() {
-            #if UNITY_EDITOR
             string retn = "";
+            #if UNITY_EDITOR
             foreach (Type painterType in UnityEditor.TypeCache.GetTypesWithAttribute<CustomPainterAttribute>()) {
                 CustomPainterAttribute attr = painterType.GetCustomAttribute<CustomPainterAttribute>();
                 retn += $"                {{ \"{attr.name}\", typeof({TypeNameGenerator.GetTypeName(painterType)}) }},\n";

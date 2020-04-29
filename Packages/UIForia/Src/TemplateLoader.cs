@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Mono.Linq.Expressions;
 using UIForia.Compilers.Style;
@@ -123,7 +124,9 @@ namespace UIForia.Compilers {
 
                 parameters[0] = Expression.Constant(compiledTemplateData.GetTagNameId(kvp.Value.tagName));
                 parameters[1] = Expression.New(ctor);
-                constructorFnMap[kvp.Value.id] = Expression.Lambda<Func<ConstructedElement>>(Expression.New(constructedTypeCtor, parameters)).Compile();
+                Func<ConstructedElement> constructorFn = Expression.Lambda<Func<ConstructedElement>>(Expression.New(constructedTypeCtor, parameters)).Compile();
+                constructorFnMap[kvp.Value.id] = constructorFn;
+                GCHandle.Alloc(constructorFn);
             }
 
             compiledTemplateData.bindings = bindings;

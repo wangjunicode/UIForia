@@ -816,7 +816,7 @@ namespace UIForia.Systems {
                 // no need to size check the stack, same size as element stack which was already sized
                 AwesomeLayoutBox ptr = layoutBox.firstChild;
                 while (ptr != null) {
-                    boxRefStack.array[boxRefStack.size++].box = ptr;
+                    boxRefStack.Push(new BoxRef { box = ptr });
                     ptr = ptr.nextSibling;
                 }
             }
@@ -861,7 +861,7 @@ namespace UIForia.Systems {
 
                 AwesomeLayoutBox ptr = layoutBox.firstChild;
                 while (ptr != null) {
-                    boxRefStack.array[boxRefStack.size++].box = ptr;
+                    boxRefStack.Push(new BoxRef { box = ptr });
                     ptr = ptr.nextSibling;
                 }
             }
@@ -892,6 +892,7 @@ namespace UIForia.Systems {
 
         private void PerformLayout() {
             // save size checks later while traversing
+            // todo find the real number of elements (huge repeats) to use the inlined boxRefStack.Push variant during layout again
             boxRefStack.EnsureCapacity(elemRefStack.array.Length * 4);
 
             PerformLayoutStep(rootElement.layoutBox);

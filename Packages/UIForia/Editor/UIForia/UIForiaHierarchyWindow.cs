@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using SVGX;
 using UIForia.Elements;
@@ -486,7 +487,77 @@ namespace UIForia.Editor {
                 int totalElements = 0;
                 int enabledElements = 0;
                 int disableElements = 0;
-                s_SelectedApplication.GetElementCount(out totalElements, out enabledElements, out disableElements);
+                List<int> styleCount;
+                List<int> instanceStyleCount;
+                
+                s_SelectedApplication.GetElementCount(out totalElements, out enabledElements, out disableElements,
+                    out styleCount, out instanceStyleCount);
+                
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Style count average: ");
+                EditorGUILayout.LabelField(styleCount.Average().ToString());
+                EditorGUILayout.EndHorizontal();
+                
+                styleCount.Sort();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Style count median: ");
+                EditorGUILayout.LabelField(styleCount[styleCount.Count / 2].ToString());
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Style count 95th: ");
+                EditorGUILayout.LabelField(styleCount[(int) (styleCount.Count * 0.95f)].ToString());
+                EditorGUILayout.EndHorizontal();
+                
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Style count max: ");
+                EditorGUILayout.LabelField(styleCount[styleCount.Count - 1].ToString());
+                EditorGUILayout.EndHorizontal();
+                
+                int mode = styleCount.GroupBy(n=> n).
+                    OrderByDescending(g=> g.Count()).
+                    Select(g => g.Key).FirstOrDefault();
+                
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Style mode: ");
+                EditorGUILayout.LabelField(mode.ToString());
+                EditorGUILayout.EndHorizontal();
+                               
+                // instance style 
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Instance Style count average: ");
+                EditorGUILayout.LabelField(instanceStyleCount.Average().ToString());
+                EditorGUILayout.EndHorizontal();
+                
+                instanceStyleCount.Sort();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Instance Style count median: ");
+                EditorGUILayout.LabelField(instanceStyleCount[instanceStyleCount.Count / 2].ToString());
+                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Instance Style count 95th: ");
+                EditorGUILayout.LabelField(instanceStyleCount[(int) (instanceStyleCount.Count * 0.95f)].ToString());
+                EditorGUILayout.EndHorizontal();
+                
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Instance Style count max: ");
+                EditorGUILayout.LabelField(instanceStyleCount[instanceStyleCount.Count - 1].ToString());
+                EditorGUILayout.EndHorizontal();
+                
+                int instanceMode = instanceStyleCount.GroupBy(n=> n).
+                    OrderByDescending(g=> g.Count()).
+                    Select(g => g.Key).FirstOrDefault();
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.PrefixLabel("Instance Style mode: ");
+                EditorGUILayout.LabelField(instanceMode.ToString());
+                EditorGUILayout.EndHorizontal();
+                
+                // done
                 
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PrefixLabel("Element count: ");

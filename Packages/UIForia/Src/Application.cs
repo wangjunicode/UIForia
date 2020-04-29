@@ -836,17 +836,47 @@ namespace UIForia {
             onViewsSorted?.Invoke(views.ToArray());
         }
 
-        internal void GetElementCount(out int totalElementCount, out int enabledElementCount, out int disabledElementCount) {
+        internal void GetElementCount(out int totalElementCount, out int enabledElementCount, out int disabledElementCount,
+            out List<int> styleCount, out List<int> instanceStyleCount) {
+
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
+            styleCount = new List<int>();
+            instanceStyleCount = new List<int>();
             totalElementCount = 0;
             enabledElementCount = 0;
 
+            KeyValuePair<int,StyleProperty>[] valuePairs = new KeyValuePair<int, StyleProperty>[256];
+            
             for (int i = 0; i < views.Count; i++) {
                 stack.Push(views[i].RootElement);
 
                 while (stack.size > 0) {
                     totalElementCount++;
                     UIElement element = stack.PopUnchecked();
+                    IntMap<StyleProperty> propertyMap = element.style.propertyMap;
+                    propertyMap.CopyKeyValuesToArray(ref valuePairs);
+                    int output = 0;
+                    for (int index = 0; index < propertyMap.Count; index++) {
+                        if (valuePairs[index].Key < ushort.MaxValue) {
+                            output++;
+                        }
+                    }
+                    
+                    UIStyleGroup instance = element.style.GetInstanceStyle();
+                    int cnt = 0;
+                    if (instance != null) {
+                        cnt += instance.active.style?.PropertyCount ?? 0;
+                        cnt += instance.focused.style?.PropertyCount ?? 0;
+                        cnt += instance.hover.style?.PropertyCount ?? 0;
+                        cnt += instance.normal.style?.PropertyCount ?? 0;
+                        if (cnt > 0) {
+                            instanceStyleCount.Add(cnt);
+                        }
+                    }
+
+                    if (output > 0) {
+                        styleCount.Add(output);
+                    }
 
                     if (element.isEnabled) {
                         enabledElementCount++;

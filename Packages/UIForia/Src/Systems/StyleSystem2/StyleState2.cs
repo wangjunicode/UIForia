@@ -9,8 +9,8 @@ namespace UIForia {
         Normal = 1 << 0,
         Hover = 1 << 1,
         Focused = 1 << 2,
-        Active = 1 << 3
-
+        Active = 1 << 3,
+        
     }
 
     [Flags]

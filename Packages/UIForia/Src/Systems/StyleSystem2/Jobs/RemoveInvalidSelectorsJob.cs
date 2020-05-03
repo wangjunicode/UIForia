@@ -4,11 +4,10 @@ using UIForia.Style;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace UIForia {
-    
-    
 
     public unsafe struct SelectorRunData {
 
@@ -47,7 +46,6 @@ namespace UIForia {
     public struct SelectorInfo {
 
         public SelectorKey key;
-        public RangeInt results;
 
     }
 
@@ -81,9 +79,9 @@ namespace UIForia {
 
         public readonly UnmanagedPagedList<VertigoStyle> styles;
         public readonly UnmanagedPagedList<VertigoSelector> selectors;
-        public readonly UnmanagedList<SelectorInfo> sortedActiveSelectors;
+        public readonly BufferList<SelectorKey> sortedActiveSelectors;
 
-        [ReadOnly] public NativeList<StyleStateGroup> removedList;
+        [ReadOnly] public NativeList<StyleStatePair> removedList;
         [WriteOnly] public NativeList<SelectorRemovalData> deadSelectors;
 
         // 3 approaches ->
@@ -99,15 +97,15 @@ namespace UIForia {
 
         public void Execute() {
 
-            UnmanagedList<StyleStateGroup> temp = new UnmanagedList<StyleStateGroup>(removedList.Length, Allocator.TempJob);
+            BufferList<StyleStatePair> temp = new BufferList<StyleStatePair>(removedList.Length, Allocator.TempJob);
 
             for (int removedIdx = 0; removedIdx < removedList.Length; removedIdx++) {
 
-                StyleStateGroup removed = removedList[removedIdx];
+                StyleStatePair removed = removedList[removedIdx];
 
-                if (removed.styleId.HasSelectorsInState(removed.state)) {
-                    temp.AddUnchecked(removed);
-                }
+                // if (removed.styleId.HasSelectorsInState(removed.state)) {
+                //     temp.AddUnchecked(removed);
+                // }
 
             }
 
@@ -115,50 +113,61 @@ namespace UIForia {
 
             for (int removedIdx = 0; removedIdx < temp.size; removedIdx++) {
 
-                StyleStateGroup toRemove = temp.array[removedIdx];
+                StyleStatePair toRemove = temp.array[removedIdx];
                 VertigoStyle style = styles[toRemove.styleId.index];
                 VertigoSelector* selectorPtr = default; //selectors.array + style.selectorOffset;
 
                 for (int i = 0; i < style.selectorCount; i++) {
                     ref VertigoSelector selector = ref selectorPtr[i];
+                    //
+                    // if (selector.id.state != toRemove.state) {
+                    //     continue;
+                    // }
 
-                    if (selector.id.state != toRemove.state) {
-                        continue;
-                    }
-
-                    SelectorKey key = new SelectorKey(toRemove.styleSetId, selector.id); // todo -- make styleId not contain StyleSheet data -> this is really debug data that is easily backtracked
-                    deadSelectors.Add(new SelectorRemovalData() {
-                        index = FindIndex(key, sortedActiveSelectors),
-                        eventRange = new RangeInt(selector.eventOffset, selector.eventCount)
-                    });
+                    // SelectorKey key = new SelectorKey(toRemove.styleSetId, selector.id); // todo -- make styleId not contain StyleSheet data -> this is really debug data that is easily backtracked
+                    // deadSelectors.Add(new SelectorRemovalData() {
+                    //     index = FindIndex(key, sortedActiveSelectors),
+                    //     eventRange = new RangeInt(selector.eventOffset, selector.eventCount)
+                    // });
                 }
 
             }
-
-            // learnings --> 1 level of style lookup is better than two
-            // can still trace back to origin sheet via index
-            // nice to have properties all together as well
-            // 1 big table might be implemented as pages but addressable and single entity
-
-            // to remove effect on element we need to rebuild the element
-            // since i dont store which styles were applied to elements and shouldn't
-            // if stored effects per element id need to 
 
             temp.Dispose();
 
         }
 
-        private static int FindIndex(SelectorKey key, UnmanagedList<SelectorInfo> sortedSearchList) {
-            int start = 0;
+        // keys in one array
+        // data in another 
+        private static int FindIndex(SelectorKey key, BufferList<SelectorKey> sortedSearchList) {
+            int elementsPerCacheLine =  JobsUtility.CacheLineSize / sizeof(SelectorKey);
+            int start = elementsPerCacheLine;
             int end = sortedSearchList.size - 1;
+            
+            // this literally free since array start is already in cache, no miss here
+            for (int i = 0; i < elementsPerCacheLine; i++) {
+                if (sortedSearchList.array[i].longVal == key.longVal) {
+                    return i;
+                }
+            }
 
+            // first hit of binary search will look at the middle element, which will load that cache line anyway
+            // we can just linearly search here for free since this cache line will definitely get loaded
+            int mid = end >> 1;
+            for (int i = mid; i < mid + elementsPerCacheLine; i++) {
+                if (sortedSearchList.array[i].longVal == key.longVal) {
+                    return i;
+                }
+            }
+            
+            // this is normal binary search from here on out but we've reduced the hop count (probably) because of above checks
             while (start <= end) {
                 int index = start + (end - start >> 1);
 
-                if (sortedSearchList.array[index].key.longVal < key.longVal) {
+                if (sortedSearchList.array[index].longVal < key.longVal) {
                     start = index + 1;
                 }
-                else if (sortedSearchList.array[index].key.longVal > key.longVal) {
+                else if (sortedSearchList.array[index].longVal > key.longVal) {
                     end = index - 1;
                 }
                 else {
@@ -167,7 +176,7 @@ namespace UIForia {
 
             }
 
-            return ~start; // should never hit
+            return ~start; // should never hit this because I know the target is in the search list
         }
 
     }

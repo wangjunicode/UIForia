@@ -22,12 +22,13 @@ namespace UIForia {
         public StyleStateGroup active;
 
         public VertigoStyleDebugProxy(VertigoStyle style) {
-            VertigoStyleSheet sheet = VertigoStyleSystem.GetSheetForStyle(style.index);
-            this.styleName = sheet.styleNames[style.index];
-            this.normal = new StyleStateGroup(style, sheet, StyleState2.Normal);
-            this.hover = new StyleStateGroup(style, sheet, StyleState2.Hover);
-            this.focus = new StyleStateGroup(style, sheet, StyleState2.Focused);
-            this.active = new StyleStateGroup(style, sheet, StyleState2.Active);
+            // VertigoStyleSheet sheet = VertigoStyleSystem.GetSheetForStyle(style.index);
+            // this.styleName = sheet.styleNames[style.index];
+            // this.normal = new StyleStateGroup(style, sheet, StyleState2.Normal);
+            // this.hover = new StyleStateGroup(style, sheet, StyleState2.Hover);
+            // this.focus = new StyleStateGroup(style, sheet, StyleState2.Focused);
+            // this.active = new StyleStateGroup(style, sheet, StyleState2.Active);
+            this = default;
         }
 
         [DebuggerDisplay("property count = {properties?.Length ?? 0}")]
@@ -99,42 +100,6 @@ namespace UIForia {
 
     }
 
-    public class StyleSheetBuilder {
-
-        internal VertigoStyleSystem styleSystem;
-        private StyleBuilder builder;
-
-        internal StyleSheetBuilder(VertigoStyleSystem styleSystem) {
-            this.styleSystem = styleSystem;
-        }
-
-        public void AddAnimation() { }
-
-        public void AddSpriteSheet() { }
-
-        public void AddSound() { }
-
-        public void AddCursor() { }
-
-        public void AddConstant() { }
-
-        public void AddStyle(string styleName, Action<StyleBuilder> action) {
-
-            int idx = styleSystem.CreatesStyle(styleName);
-            
-            builder = builder ?? new StyleBuilder();
-            
-            action?.Invoke(builder);
-
-            ref VertigoStyle style = ref styleSystem.styleTable.GetReference(idx);
-            
-            // styleSystem.propertyTable.AddRangeToSamePage();
-            // builder.activeGroup.properties
-
-        }
-
-    }
-
     [DebuggerTypeProxy(typeof(VertigoStyleSheetDebugView))]
     public class VertigoStyleSheet {
 
@@ -146,8 +111,8 @@ namespace UIForia {
 
         internal LightList<string> styleNames;
 
-        internal UnmanagedList<VertigoStyle> styles;
-        internal UnmanagedList<VertigoSelector> selectors;
+        internal BufferList<VertigoStyle> styles;
+        internal BufferList<VertigoSelector> selectors;
 
         internal SizedArray<EventHook> eventList;
         internal StructList<StyleProperty2> propertyList;
@@ -161,8 +126,8 @@ namespace UIForia {
             this.name = name;
             this.id = id;
             this.styleNames = new LightList<string>();
-            this.styles = new UnmanagedList<VertigoStyle>(Allocator.Persistent);
-            this.selectors = new UnmanagedList<VertigoSelector>(Allocator.Persistent);
+            this.styles = new BufferList<VertigoStyle>(Allocator.Persistent);
+            this.selectors = new BufferList<VertigoSelector>(Allocator.Persistent);
             this.eventList = new SizedArray<EventHook>();
             this.propertyList = new StructList<StyleProperty2>(64);
         }

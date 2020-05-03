@@ -16,7 +16,7 @@ namespace UIForia {
         /// <summary>
         /// output list, expects to already have proper size
         /// </summary>
-        public UnmanagedList<ElementTraversalInfo> traversalInfo;
+        public BufferList<ElementTraversalInfo> traversalInfo;
         
         public void Execute() {
 

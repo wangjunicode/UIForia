@@ -1,122 +1,118 @@
 using UIForia.Style;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEngine;
 
 namespace UIForia {
 
-    public unsafe struct BuildSharedStyles : IJobParallelForBatch {
-
-        // Inputs
-        public UnmanagedList<RebuildInfo> rebuildTable;
-        public UnmanagedList<SharedStyleChange> changedSharedStyles;
-        public UnmanagedPagedList<VertigoStylePropertyInfo> styleTable;
-        
-        public PagedSplitBufferList<PropertyId, long>.PerThread perThreadStyleOutput;
-        public PagedSplitBufferList<PropertyId, long> stylePropertyTable;
+    [BurstCompile]
+    public unsafe struct BuildSharedStyles : IJobParallelForBatch, IJob {
 
         [NativeSetThreadIndex] public int threadIndex;
 
-        // todo -- profile doing all gathers then all property lookups, cache locality should be better at the expense of memory usage
-        
+        [NativeDisableUnsafePtrRestriction]
+        public byte* staticStyleBuffer;
+        public UnmanagedList<ModuleCondition> table_ModuleConditions;
+        public UnmanagedList<ConvertedStyleId> convertedStyleList;
+        public UnmanagedList<StaticStyleInfo> table_StyleInfo;
+        public PerThread<StyleRebuildResultList> perThread_RebuiltResult;
+
+        public void Execute() {
+            Run(0, convertedStyleList.size);
+        }
+
         public void Execute(int startIndex, int count) {
-            // this job will gather all the properties for each updated shared style set
+            Run(startIndex, count);
+        }
 
-            PagedSplitBufferList<PropertyId, long> propertyOutputList = perThreadStyleOutput.GetListForThread(threadIndex);
+        private void Run(int startIndex, int itemCount) {
 
-            UnmanagedList<RangeInt> ranges = new UnmanagedList<RangeInt>(7 * 4, Allocator.TempJob);
-            UnmanagedList<PropertyId> idBuffer = new UnmanagedList<PropertyId>(256, Allocator.TempJob); // todo - use real style count
-            UnmanagedList<long> dataBuffer = new UnmanagedList<long>(256, Allocator.TempJob);
+            ref StyleRebuildResultList resultList = ref perThread_RebuiltResult.GetForThread(threadIndex);
             
-            VertigoStylePropertyInfo* buffer = stackalloc VertigoStylePropertyInfo[7]; // max shared style count is currently 7 (without crunching)
+            int end = startIndex + itemCount;
 
-            int endIndex = startIndex + count;
+            byte* buffer = (byte*)UnsafeUtility.Malloc((sizeof(PropertyId) + sizeof(PropertyData)) * VertigoStyleSystem.k_MaxStyleProperties, 4, Allocator.TempJob);
 
-            for (int i = startIndex; i < endIndex; i++) {
+            PropertyId* idbuffer = (PropertyId*) buffer;
+            PropertyData* valueBuffer = (PropertyData*) (idbuffer + VertigoStyleSystem.k_MaxStyleProperties);
+            
+            for ( int buildIndex = startIndex; buildIndex < end; buildIndex++) {
 
-                BitBuffer256 bitBuffer = new BitBuffer256();
-                IntBoolMap map = new IntBoolMap(bitBuffer.ptr, bitBuffer.bitCount);
-
-                ranges.size = 0;
+                int size = 0;
                 
-                SharedStyleChange current = changedSharedStyles[startIndex + i];
+                IntBoolMap map = new IntBoolMap(new BitBuffer256().ptr, 256);
 
-                // do all the de-referencing up front and store results in buffer
-                for (int j = 0; j < current.count; j++) {
-                    buffer[j] = styleTable[current.sharedStyles[j]];
-                }
+                ConvertedStyleId converted = convertedStyleList[buildIndex];
 
-                if ((current.state & StyleState2.Active) != 0) {
-                    for (int j = 0; j < current.count; j++) {
-                        ref VertigoStylePropertyInfo styleInfo = ref buffer[j];
-                        if (styleInfo.activeCount > 0) {
-                            ranges.Add(new RangeInt(styleInfo.propertyOffset, styleInfo.activeCount));
+                StyleStatePair* stylePairs = converted.pNewStyles;
+
+                for (int styleIndex = 0; styleIndex < converted.newStyleCount; styleIndex++) {
+                    ref StyleStatePair stylePair = ref stylePairs[styleIndex];
+
+                    // this might be looked up multiple times for same style id but in that case
+                    // its almost certainly in cache so don't worry about it
+                    StaticStyleInfo staticStyle = table_StyleInfo[stylePair.styleId.index];
+                    ModuleCondition conditionMask = staticStyle.conditionMask; //table_ModuleConditions[stylePair.styleId.index];
+                    
+                    int offset = 0;
+                    int count = 0;
+
+                    switch (stylePair.state) {
+                        case StyleState2.Normal:
+                            offset = staticStyle.normalOffset;
+                            count = staticStyle.normalCount;
+                            break;
+
+                        case StyleState2.Hover:
+                            offset = staticStyle.hoverOffset;
+                            count = staticStyle.hoverCount;
+                            break;
+
+                        case StyleState2.Focused:
+                            offset = staticStyle.focusOffset;
+                            count = staticStyle.focusCount;
+                            break;
+
+                        case StyleState2.Active:
+                            offset = staticStyle.activeOffset;
+                            count = staticStyle.activeCount;
+                            break;
+                    }
+
+                    // could also used paged list for property data but would then need compute page index and lookup that pointer
+                    // since we're going for speed > memory waste here I'm not resorting to that yet.
+                    StaticPropertyId* keys = (StaticPropertyId*) (staticStyleBuffer + staticStyle.propertyOffsetInBytes + offset);
+                    PropertyData* data = (PropertyData*) (keys + staticStyle.totalPropertyCount);
+
+                    for (int k = 0; k < count; k++) {
+
+                        ref StaticPropertyId key = ref keys[k];
+
+                        // todo -- might be backwards, check it out
+                        // if ((key.conditionRequirement & conditionMask) == key.conditionRequirement) {
+                        //     continue;
+                        // }
+
+                        if (map.TrySetIndex(key.propertyId.index)) {
+                            idbuffer[size] = key.propertyId;
+                            valueBuffer[size] = data[k];
+                            size++;
+                            // propertyIdBuffer.array[propertyIdBuffer.size++] = key.propertyId;
+                            // propertyDataBuffer.array[propertyDataBuffer.size++] = data[k];
                         }
-                    }
-                }
 
-                if ((current.state & StyleState2.Focused) != 0) {
-                    for (int j = 0; j < current.count; j++) {
-                        ref VertigoStylePropertyInfo styleInfo = ref buffer[j];
-                        if (styleInfo.focusCount > 0) {
-                            ranges.Add(new RangeInt(styleInfo.propertyOffset + styleInfo.activeCount, styleInfo.focusCount));
-                        }
-                    }
-                }
-
-                if ((current.state & StyleState2.Hover) != 0) {
-                    for (int j = 0; j < current.count; j++) {
-                        ref VertigoStylePropertyInfo styleInfo = ref buffer[j];
-                        if (styleInfo.hoverCount > 0) {
-                            ranges.Add(new RangeInt(styleInfo.propertyOffset + styleInfo.activeCount + styleInfo.focusCount, styleInfo.hoverCount));
-                        }
-                    }
-                }
-
-                for (int j = 0; j < current.count; j++) {
-                    ref VertigoStylePropertyInfo styleInfo = ref buffer[j];
-                    if (styleInfo.normalCount > 0) {
-                        ranges.Add(new RangeInt(styleInfo.propertyOffset + styleInfo.activeCount + styleInfo.focusCount + styleInfo.hoverCount, styleInfo.normalCount));
-                    }
-                }
-
-                
-
-                // once all ranges are gathered we walk through them in priority order (active -> focus -> hover -> normal) and apply styles if they haven't been set before
-                
-                int idx = 0;
-                
-                for (int j = 0; j < ranges.size; j++) {
-
-                    RangeInt range = ranges[j];
-
-                    stylePropertyTable.GetPointers(range.start, out PropertyId* keyPtr, out long* dataPtr);
-
-                    for (int k = 0; k < range.length; k++) {
-                        if (map.TrySetIndex(keyPtr[k].index)) {
-                            idBuffer.array[idx] = keyPtr[k];
-                            dataBuffer[idx] = dataPtr[k];
-                            idx++;
-                        }
                     }
 
                 }
 
-                // fill the rebuild table with the data we just gathered. then write the output to the thread's property buffer.
-                // this will be copied to a permanent location later, before the frame ends. This happens so we can keep the data
-                // as local as we can for cache coherence. 
-                
-                ref SharedStyleRebuildInfo rebuildInfo = ref rebuildTable.array[current.styleSetId].sharedStyles;
-                rebuildInfo.splitBufferBase = propertyOutputList.GetRawPointer();
-                rebuildInfo.location = propertyOutputList.AddRange(idBuffer.array, dataBuffer.array, idx);;
+                resultList.Add(converted.styleSetId, size, idbuffer, valueBuffer);
+
             }
 
-            ranges.Dispose();
-            idBuffer.Dispose();
-            dataBuffer.Dispose();
+            UnsafeUtility.Free(buffer, Allocator.TempJob);
 
         }
 

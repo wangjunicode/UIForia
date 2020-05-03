@@ -50,7 +50,7 @@ namespace UIForia.Util.Unsafe {
         [BurstDiscard]
         private static void AssertSize() {
             if (!BitUtil.IsPowerOfTwo((uint) sizeof(T))) {
-                Debug.Log("Cannot use " + typeof(T) + " in " + nameof(UnmanagedList<T>) + " because it is not power of 2 aligned (size was " + sizeof(T) + ")");
+                Debug.Log("Cannot use " + typeof(T) + " in " + nameof(BufferList<T>) + " because it is not power of 2 aligned (size was " + sizeof(T) + ")");
             }
         }
 

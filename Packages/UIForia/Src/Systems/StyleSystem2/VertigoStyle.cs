@@ -1,19 +1,4 @@
-using System.Runtime.InteropServices;
-
 namespace UIForia {
-
-    [AssertSize(16)]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct VertigoStylePropertyInfo {
-
-        public int propertyOffset; // could be pointer and remove padding
-        public ushort activeCount;
-        public ushort focusCount;
-        public ushort normalCount;
-        public ushort hoverCount;
-        public int __padding;
-
-    }
     
     public struct VertigoStyle {
 

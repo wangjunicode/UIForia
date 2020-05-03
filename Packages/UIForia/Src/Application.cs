@@ -872,6 +872,8 @@ namespace UIForia {
                     totalElementCount++;
                     UIElement element = stack.PopUnchecked();
 
+                 
+    
                     if (element.isEnabled) {
                         enabledElementCount++;
                     }

@@ -7,7 +7,7 @@ namespace UIForia {
 
     public unsafe struct MergePerThreadPageLists<T> : IJob where T : unmanaged {
 
-        public UnmanagedList<T> outputList;
+        public BufferList<T> outputList;
         public UnmanagedPagedList<T>.PerThread perThreadLists;
         public bool disposeOnCompletion;
 
@@ -20,9 +20,24 @@ namespace UIForia {
 
     }
 
+    public unsafe struct MergePerThreadPageSplitBuffers<T, U> : IJob where T : unmanaged where U : unmanaged {
+
+        public SplitBuffer<T, U> outputList;
+        public PagedSplitBufferList<T, U>.PerThread perThreadLists;
+        public bool disposeOnCompletion;
+
+        public void Execute() {
+            perThreadLists.ToSplitBuffer(outputList);
+            if (disposeOnCompletion) {
+                perThreadLists.Dispose();
+            }
+        }
+
+    }
+
     public class VertigoScheduler {
 
-        public struct SchedulerStep {
+        public unsafe struct SchedulerStep {
 
             private readonly JobHandle handle;
 
@@ -39,11 +54,15 @@ namespace UIForia {
             }
 
             public SchedulerStep ThenParallelForRange<T>(int arrayLength, int minBatchSize, T job) where T : struct, IJobParallelForBatch {
-                return new SchedulerStep(job.ScheduleBatch(arrayLength, minBatchSize));
+                return new SchedulerStep(job.ScheduleBatch(arrayLength, minBatchSize, handle));
             }
 
             public static implicit operator JobHandle(SchedulerStep schedulerStep) {
                 return schedulerStep.handle;
+            }
+
+            public SchedulerStep ThenParallelForRangeDefer<T>(int* size, int minBatchCount, T job) where T : struct, IJobParallelForDeferBatched {
+                return new SchedulerStep(job.Schedule(size, minBatchCount, handle));
             }
 
         }
@@ -59,7 +78,7 @@ namespace UIForia {
         public static SchedulerStep Await(JobHandle handle) {
             return new SchedulerStep(handle);
         }
-        
+
         public static SchedulerStep Await(JobHandle handle0, JobHandle handle1) {
             return new SchedulerStep(JobHandle.CombineDependencies(handle0, handle1));
         }
@@ -67,7 +86,7 @@ namespace UIForia {
         public static SchedulerStep Await(JobHandle handle0, JobHandle handle1, JobHandle handle2) {
             return new SchedulerStep(JobHandle.CombineDependencies(handle0, handle1));
         }
-        
+
         public static SchedulerStep Await(JobHandle handle0, JobHandle handle1, JobHandle handle2, JobHandle handle3, JobHandle handle4) {
             NativeArray<JobHandle> array = new NativeArray<JobHandle>(5, Allocator.Temp);
             array[0] = handle0;
@@ -79,7 +98,7 @@ namespace UIForia {
             array.Dispose();
             return retn;
         }
-        
+
         public static SchedulerStep Await(JobHandle handle0, JobHandle handle1, JobHandle handle2, JobHandle handle3) {
             NativeArray<JobHandle> array = new NativeArray<JobHandle>(4, Allocator.Temp);
             array[0] = handle0;
@@ -90,11 +109,10 @@ namespace UIForia {
             array.Dispose();
             return retn;
         }
-        
+
         public static SchedulerStep Await<T>(T job) where T : struct, IJob {
             return new SchedulerStep(job.Schedule());
         }
-        
 
     }
 

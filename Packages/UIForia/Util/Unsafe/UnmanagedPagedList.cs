@@ -7,41 +7,6 @@ using UnityEngine;
 
 namespace UIForia.Util.Unsafe {
 
-    public unsafe struct SplitBuffer<TKey, TData> where TKey : unmanaged where TData : unmanaged {
-
-        public SplitBuffer(RawSplitBuffer computed) { }
-
-        // public static SplitBuffer<TKey, TData> Create(int preambleSize, int capacity) {
-        //     void* rawData = UnsafeUtility.Malloc(preambleSize + (capacity * sizeof(TKey)) + (capacity * sizeof(TData)), 4, Allocator.Persistent);
-        //     TKey* keyStart = (TKey*) ((long*) rawData + preambleSize);
-        //     long* dataStart = (long*) (keyStart + (capacity * sizeof(TKey)));
-        //
-        //     RawSplitBuffer* rawSplitBuffer = (RawSplitBuffer*) (rawData + preambleSize);
-        //     InstanceStyleData* data = (InstanceStyleData*) rawData;
-        //     data->keys = keyStart;
-        //     data->data = dataStart;
-        //     data->capacity = capacity;
-        //
-        //     data->totalStyleCount = 0;
-        //     data->usedStyleCount = 0;
-        //     return new SplitBuffer<TKey, TData>();    
-        // }
-
-        public RawSplitBuffer GetRawBuffer() {
-            return default;
-        }
-
-    }
-
-    public unsafe struct RawSplitBuffer {
-
-        public void* keys;
-        public void* data;
-        public int size;
-        public int capacity;
-
-    }
-
     public unsafe struct UntypedPagedListPage {
 
         internal void* data;
@@ -50,7 +15,7 @@ namespace UIForia.Util.Unsafe {
     }
 
     // Note: Does not support removal, intended to be add only
-    [DebuggerTypeProxy(typeof(UnsafePagedListDebugView<>))]
+    [DebuggerTypeProxy(typeof(UnmanagedPagedListDebugView<>))]
     public unsafe struct UnmanagedPagedList<T> : IDisposable where T : unmanaged {
 
         [NativeDisableUnsafePtrRestriction] internal PagedListState* state;
@@ -60,10 +25,14 @@ namespace UIForia.Util.Unsafe {
         }
 
         public int pageSize {
-            get => state->pageSize;
+            get => state->pageSizeLimit;
         }
 
-        internal UnmanagedPagedList(PagedListState* state) {
+        public int totalItemCount {
+            get => state->totalItemCount;
+        }
+        
+        public UnmanagedPagedList(PagedListState* state) {
             this.state = state;
         }
 
@@ -73,66 +42,49 @@ namespace UIForia.Util.Unsafe {
 
         // finds the first page that can contain itemCount. checks all pages (currently dereferences pointers to do so
         public RangeInt AddRangeCompact(T* items, int itemCount) {
-            int localPageSize = state->pageSize;
+            int localPageSize = state->pageSizeLimit;
 
-            for (int i = 0; i < state->pageCount; i++) {
+            for (int i = 0; i < state->pageCount - 1; i++) {
 
                 UntypedPagedListPage* page = state->pages + i;
 
                 if (page->size + itemCount <= localPageSize) {
-                    T* ptr = (T*) page->data;
-                    ptr += page->size;
-                    UnsafeUtility.MemCpy(ptr, items, sizeof(T) * itemCount);
-                    RangeInt retn = new RangeInt(page->size, itemCount);
+                    T* ptr = ((T*) page->data) + page->size;
+                    TypedUnsafe.MemCpy(ptr, items, itemCount);
+                    int start = (i * state->pageSizeLimit) + page->size;
                     page->size += itemCount;
-                    return retn;
+                    return new RangeInt(start, itemCount);
                 }
 
             }
 
-            if (state->pageCount + 1 >= state->pageCapacity) {
-                CreateNewPage();
-            }
-
-            UntypedPagedListPage* newPage = state->pages + state->pageCount;
-            int rangeStart = state->pageCount * state->pageSize;
-            state->pageCount++;
-            newPage->data = (T*) UnsafeUtility.Malloc(pageSize * sizeof(T), UnsafeUtility.AlignOf<PagedListState>(), state->allocator);
-            newPage->size = itemCount;
-            UnsafeUtility.MemCpy(newPage->data, items, sizeof(T) * itemCount);
-            return new RangeInt(rangeStart, itemCount);
+            return AddRange(items, itemCount);
         }
 
+        /// <summary>
+        /// Adds itemCount items from items to the end of the list, ensuring all items sit on the same page
+        /// </summary>
+        /// <param name="items"></param>
+        /// <param name="itemCount"></param>
+        /// <returns>Index range of where items were placed. default if input was invalid</returns>
         public RangeInt AddRange(T* items, int itemCount) {
 
-            if (state->pageCount == 0) {
-                CreateNewPage();
+            if (items == null || itemCount > state->pageSizeLimit) {
+                return default;
             }
 
-            if (state->pages[state->pageCount - 1].size + itemCount >= state->pageCapacity) {
-                CreateNewPage();
+            if (state->pages[state->pageCount - 1].size + itemCount > state->pageSizeLimit) {
+                state->AddNewPage();
             }
 
             UntypedPagedListPage* page = state->pages + (state->pageCount - 1);
 
-            T* ptr = (T*) page->data;
-            ptr += page->size;
-            UnsafeUtility.MemCpy(ptr, items, sizeof(T) * itemCount);
-            RangeInt retn = new RangeInt(page->size, itemCount);
+            T* ptr = (T*) page->data + page->size;
+
+            TypedUnsafe.MemCpy(ptr, items, itemCount);
+            int start = ((state->pageCount - 1) * state->pageSizeLimit) + page->size;
             page->size += itemCount;
-            return retn;
-
-        }
-
-        private void CreateNewPage() {
-            state->pageCapacity *= 2;
-            UntypedPagedListPage* ptr = (UntypedPagedListPage*) UnsafeUtility.Malloc(state->pageCapacity * sizeof(UntypedPagedListPage), UnsafeUtility.AlignOf<PagedListState>(), state->allocator);
-            if (state->pages != null) {
-                UnsafeUtility.MemCpy(ptr, state->pages, sizeof(UntypedPagedListPage) * state->pageCount);
-                UnsafeUtility.Free(state->pages, state->allocator);
-            }
-
-            state->pages = ptr;
+            return new RangeInt(start, itemCount);
 
         }
 
@@ -140,110 +92,71 @@ namespace UIForia.Util.Unsafe {
             get {
                 // sizes are always power of 2 so we can compute index with shift instead of divide & mod
                 int pageIndex = index >> state->pageSizeIndex;
-                int pageArrayIndex = index - (pageIndex * state->pageSize);
+                int pageArrayIndex = index - (pageIndex * state->pageSizeLimit);
                 return UnsafeUtility.ReadArrayElement<T>(state->pages[pageIndex].data, pageArrayIndex);
             }
             set {
                 // sizes are always power of 2 so we can compute index with shift instead of divide & mod
                 int pageIndex = index >> state->pageSizeIndex;
-                int pageArrayIndex = index - (pageIndex * state->pageSize);
+                int pageArrayIndex = index - (pageIndex * state->pageSizeLimit);
                 UnsafeUtility.WriteArrayElement(state->pages[pageIndex].data, pageArrayIndex, value);
             }
         }
 
         public void Dispose() {
+            Allocator allocator = state->allocator;
             state->Dispose();
-            UnsafeUtility.Free(state, state->allocator);
-            state = null;
+            UnsafeUtility.Free(state, allocator);
+            this = default;
         }
 
         public PagedListPage<T> GetPage(int index) {
-            if (index >= 0 && index < state->pageCount) {
-                return new PagedListPage<T>(state->pages[index]);
-            }
-
-            return default;
+            return index >= 0 && index < state->pageCount
+                ? new PagedListPage<T>(state->pages[index])
+                : default;
         }
 
         public int Add(T item) {
-
-            if (state->pageCount == 0 || state->pages[state->pageCount - 1].size >= pageSize) {
-                CreateNewPage();
-            }
-
-            int lastPageIndex = state->pageCount - 1;
-
-            UntypedPagedListPage* page = state->pages + lastPageIndex;
-
-            int index = (lastPageIndex * state->pageSize) + page->size;
-
-            T* array = (T*) page->data;
-            array[page->size] = item;
-            page->size++;
-
-            return index;
-
+            return AddRange(&item, 1).start;
         }
 
         public int AddCompactly(T item) {
-
-            int localPageSize = state->pageSize;
-
-            int pageIdx = -1;
-
-            for (int i = 0; i < state->pageCount; i++) {
-
-                if ((state->pages + i)->size + 1 <= localPageSize) {
-                    pageIdx = i;
-                    break;
-                }
-
-            }
-
-            if (pageIdx == -1) {
-                CreateNewPage();
-                pageIdx = state->pageCount - 1;
-            }
-
-            UntypedPagedListPage* page = state->pages + pageIdx;
-
-            int index = (pageIdx * state->pageSize) + localPageSize;
-
-            T* array = (T*) page->data;
-            array[page->size] = item;
-            page->size++;
-
-            return index;
-
+            return AddRangeCompact(&item, 1).start;
         }
 
         public T* Reserve(int itemCount) {
-            if (state->pageCount == 0) {
-                CreateNewPage();
+
+            if (itemCount > state->pageSizeLimit) {
+                return default;
             }
 
-            if (state->pages[state->pageCount - 1].size + itemCount >= state->pageCapacity) {
-                CreateNewPage();
+            if (state->pages[state->pageCount - 1].size + itemCount > state->pageSizeLimit) {
+                state->AddNewPage();
             }
 
             UntypedPagedListPage* page = state->pages + (state->pageCount - 1);
 
-            T* ptr = (T*) page->data;
-            ptr += page->size;
+            T* ptr = (T*) page->data + page->size;
             page->size += itemCount;
+            return ptr;
+        }
+
+        public T* ReserveCleared(int itemCount) {
+            T* ptr = Reserve(itemCount);
+            TypedUnsafe.MemClear(ptr, itemCount);
             return ptr;
         }
 
         public ref T GetReference(int index) {
             int pageIndex = index >> state->pageSizeIndex;
-            int pageArrayIndex = index - (pageIndex * state->pageSize);
+            int pageArrayIndex = index - (pageIndex * state->pageSizeLimit);
             T* data = (T*) state->pages[pageIndex].data;
             return ref data[pageArrayIndex];
         }
 
         public T* GetPointer(int index) {
             int pageIndex = index >> state->pageSizeIndex;
-            int pageArrayIndex = index - (pageIndex * state->pageSize);
+            int pageArrayIndex = index - (pageIndex * state->pageSizeLimit);
             T* data = (T*) state->pages[pageIndex].data;
             return data + pageArrayIndex;
         }
@@ -258,7 +171,7 @@ namespace UIForia.Util.Unsafe {
 
             public PerThread(int pageSize, Allocator allocator) {
                 this.allocator = allocator;
-                this.pageSize = (uint)pageSize;
+                this.pageSize = (uint) pageSize;
                 PerThreadPagedListUtil.Create(out perThreadData, allocator);
             }
 
@@ -274,7 +187,7 @@ namespace UIForia.Util.Unsafe {
                 PerThreadPagedListUtil.Dispose(ref perThreadData, allocator);
             }
 
-            public void ToUnmanagedList(UnmanagedList<T> outputList) {
+            public void ToUnmanagedList(BufferList<T> outputList) {
                 int count = CountElements();
                 outputList.SetCapacity(count);
                 outputList.size = 0;
@@ -284,8 +197,11 @@ namespace UIForia.Util.Unsafe {
                     if (pagedListState != null) {
 
                         for (int j = 0; j < pagedListState->pageCount; j++) {
-                            UnsafeUtility.MemCpy(outputList.array + outputList.size, pagedListState->pages[j].data, pagedListState->pages[j].size);
-                            outputList.size += pagedListState->pages[j].size;
+                            T* dst = outputList.array + outputList.size;
+                            T* src = (T*) pagedListState->pages[j].data;
+                            int itemCount = pagedListState->pages[j].size;
+                            TypedUnsafe.MemCpy(dst, src, itemCount);
+                            outputList.size += itemCount;
                         }
 
                     }
@@ -344,6 +260,18 @@ namespace UIForia.Util.Unsafe {
                 return new UnmanagedPagedList<T>((PagedListState*) data[batchIndex].data);
             }
 
+        }
+
+        public PagedListState* GetStatePointer() {
+            return state;
+        }
+
+        public void Clear() {
+            state->Clear();
+        }
+
+        public void FlattenToList(UnmanagedList<T> output) {
+            state->FlattenToList<T>(output);
         }
 
     }

@@ -477,9 +477,11 @@ namespace UIForia.Style2 {
                     case BodyPartType.ConditionBlock: {
                         Part_ConditionBlock conditionBlock = part.conditionBlock;
 
-                        if (!module.GetDisplayConditions()[conditionBlock.conditionId]) {
-                            index = conditionBlock.rangeStart;
-                        }
+                        // todo -- fix this, limit module to defining 32 conditions.
+                        // condtions cannot be cross module, each is a bit flag
+                        //if (!module.GetDisplayConditions()[conditionBlock.conditionId]) {
+                        //    index = conditionBlock.rangeStart;
+                        //}
 
                         index--; // need to -1 even if we hit the jump condition above
 
@@ -505,7 +507,8 @@ namespace UIForia.Style2 {
         private void BuildLocalConstants() {
             if (constants == null) return;
 
-            List<bool> moduleConditions = module.GetDisplayConditions();
+            // todo -- fix this using condition mask
+            List<bool> moduleConditions = null; // module.GetDisplayConditions();
 
             for (int i = 0; i < constants.Length; i++) {
                 ref PendingConstant constant = ref constants[i];

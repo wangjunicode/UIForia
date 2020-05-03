@@ -1,9 +1,6 @@
-using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using UIForia.Elements;
 using UIForia.Style;
-using UIForia.Util;
 
 namespace UIForia {
 
@@ -14,45 +11,17 @@ namespace UIForia {
 
     }
 
-    [AssertSize(16)]
-    public unsafe struct StyleSetInstanceData {
+    public unsafe struct StackIntBuffer7 {
 
-        public int changeSetId;
-        public int propertyCount;
-        public StyleProperty2* properties;
+        public int size;
+        public fixed int array[7];
 
     }
 
-    [AssertSize(16)]
-    public unsafe struct SharedStyleData {
-
-        public int count;
-        public int capacity;
-        public StyleProperty2 * properties;
-
-    }
-    
-    [AssertSize(64)]
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct StyleSetData {
-
-        public ushort changeSetId;
-        public InstanceStyleData* instanceData;
-        public SharedStyleData* shareStyleData;
-        public int selectorDataId;
-        public StyleState2Byte state;
-        internal RawSplitBuffer computed;
-        public byte sharedStyleCount;
-        public fixed int sharedStyles[StyleSet.k_MaxSharedStyles];
-
-        public SplitBuffer<PropertyId, long> Computed => new SplitBuffer<PropertyId, long>(computed);
-
-    }
-
+    // todo shouldn't be class. struct wrapping element with an id lookup should be enough
     public unsafe class StyleSet {
 
         // could denormalize `state` to be always up to do date here and just handle style application separately
-
         internal UIElement element;
         public const int k_MaxSharedStyles = 7;
 
@@ -84,8 +53,8 @@ namespace UIForia {
             }
 
             // todo -- int buffer now
-            StackLongBuffer8 buffer = new StackLongBuffer8();
-            
+            StackIntBuffer7 buffer = new StackIntBuffer7();
+
             for (int i = 0; i < styles.Count; i++) {
                 buffer.array[buffer.size++] = styles[i];
             }
@@ -94,7 +63,7 @@ namespace UIForia {
 
         }
 
-        internal unsafe void SetSharedStyles(ref StackLongBuffer8 styles) {
+        internal unsafe void SetSharedStyles(ref StackIntBuffer7 styles) {
             // I'm not sure what the right way to handle duplicates is
             // honestly its probably best to just apply them twice and assume user error
             // might play animations twice or something but should be ok in most use cases

@@ -103,8 +103,8 @@ namespace UIForia {
             }
         }
 
-        public List<bool> GetDisplayConditions() {
-            return conditionResults;
+        public ModuleCondition GetDisplayConditions() {
+            return default;
         }
 
         public int GetDisplayConditionId(CharSpan conditionSpan) {

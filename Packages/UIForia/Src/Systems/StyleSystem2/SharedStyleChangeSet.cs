@@ -1,71 +1,100 @@
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using UIForia.Style;
+using System;
+using System.Collections.Generic;
+using UIForia.Util.Unsafe;
+using Unity.Collections;
 
 namespace UIForia {
 
-    [AssertSize(16)]
-    public unsafe struct InstanceStyleChangeSet {
+    public unsafe struct SharedStyleChangeSet : IDisposable {
 
-        public int styleDataId;
-        public int propertyCount;
-        public StyleProperty2* properties;
+        public UnmanagedPagedList<StyleId> styleIds;
+        public UnmanagedList<SharedStyleChangeEntry> entries;
 
-    }
-
-    public unsafe struct SharedStyleChangeSetDebugView {
-
-        public StyleState2 newState;
-        public StyleState2 originalState;
-
-        public StyleId[] oldStyles;
-        public StyleId[] newStyles;
-
-        public SharedStyleChangeSetDebugView(SharedStyleChangeSet target) {
-            this.newState = (StyleState2)target.newState;
-            this.originalState = (StyleState2)target.originalState;
-            this.newStyles = new StyleId[target.newStyleCount];
-            for (int i = 0; i < target.newStyleCount; i++) {
-                newStyles[i] = target.newStyles[i];
-            }
-
-            this.oldStyles = new StyleId[target.oldStyleCount];
-            for (int i = 0; i < target.oldStyleCount; i++) {
-                oldStyles[i] = target.oldStyles[i];
-            }
+        public SharedStyleChangeSet(uint idPageSize, int changeSetDefaultSize, Allocator allocator) {
+            this.entries = new UnmanagedList<SharedStyleChangeEntry>(changeSetDefaultSize, allocator);
+            this.styleIds = new UnmanagedPagedList<StyleId>(idPageSize, allocator);
         }
 
-    }
-
-    [AssertSize(128)]
-    [StructLayout(LayoutKind.Sequential)]
-    [DebuggerTypeProxy(typeof(SharedStyleChangeSetDebugView))]
-    public unsafe struct SharedStyleChangeSet {
-
-        // the first {oldStyleCount} elements in *styles are old, the rest are new
-        public int styleDataId; // can be ushort probably
-        public int propertyCount;
-        public StyleProperty2* properties;
-        public StyleState2Byte newState;
-        public StyleState2Byte originalState; 
-        public byte oldStyleCount; 
-        public byte newStyleCount; 
-        private fixed long styles[StyleSet.k_MaxSharedStyles * 2]; // 7 old styles, 7 new ones
-
-        public StyleId* oldStyles {
-            get {
-                fixed (long* p = styles) {
-                    return (StyleId*) p;
-                }
-            }
+        public int Size {
+            get => entries.size;
         }
 
-        public StyleId* newStyles {
-            get {
-                fixed (long* p = styles) {
-                    return (StyleId*) (p + oldStyleCount);
-                }
+        public void InitializeSharedStyles(int styleDataId, StyleState2 state, params StyleId[] newStyles) {
+            fixed (StyleId* styles = newStyles) {
+                InitializeSharedStyles(styleDataId, styles, newStyles.Length, state);
             }
+
+        }
+
+        public void InitializeSharedStyles(int styleDataId, StyleId* newStyleBuffer, int newStyleCount, StyleState2 state) {
+            state |= StyleState2.Normal;
+
+            StyleId* ptr = styleIds.Reserve(newStyleCount);
+
+            SharedStyleChangeEntry changeSetData = new SharedStyleChangeEntry(styleDataId, (StyleState2Byte) state) {
+                oldStyleCount = 0,
+                newStyleCount = (byte) newStyleCount,
+                pStyles = ptr
+            };
+
+            for (int i = 0; i < newStyleCount; i++) {
+                ptr[i] = newStyleBuffer[i];
+            }
+
+            entries.Add(changeSetData);
+
+        }
+
+        // this is just for testing
+        public void SetSharedStyles(int styleDataId, ref StyleSetData styleData, params StyleId[] newStyles) {
+            StyleId* styles = stackalloc StyleId[newStyles.Length];
+            for (int i = 0; i < newStyles.Length; i++) {
+                styles[i] = newStyles[i];
+            }
+
+            SetSharedStyles(styleDataId, ref styleData, styles, newStyles.Length);
+        }
+
+        public void SetSharedStyles(int styleDataId, ref StyleSetData styleData, IList<StyleId> newStyles) {
+            StyleId* styles = stackalloc StyleId[newStyles.Count];
+            for (int i = 0; i < newStyles.Count; i++) {
+                styles[i] = newStyles[i];
+            }
+
+            SetSharedStyles(styleDataId, ref styleData, styles, newStyles.Count);
+        }
+
+        public void SetSharedStyles(int styleDataId, ref StyleSetData styleData, StyleId* newStyleBuffer, int newStyleCount) {
+
+            if (styleData.changeSetId == ushort.MaxValue) {
+                styleData.changeSetId = (ushort) entries.size;
+                entries.Add(new SharedStyleChangeEntry(styleDataId, styleData.state));
+            }
+
+            ref SharedStyleChangeEntry changeSetData = ref entries.GetReference(styleData.changeSetId);
+            changeSetData.oldStyleCount = (byte) styleData.styleIds.size;
+            changeSetData.newStyleCount = (byte) newStyleCount;
+
+            StyleId* ptr = styleIds.Reserve(newStyleCount + styleData.styleIds.size);
+            changeSetData.pStyles = ptr;
+
+            ptr += TypedUnsafe.MemCpyAdvance(ptr, styleData.styleIds.pData, styleData.styleIds.size);
+
+            for (int i = 0; i < newStyleCount; i++) {
+                ptr[i] = newStyleBuffer[i];
+            }
+
+        }
+
+        public void Clear() {
+            entries.size = 0;
+            styleIds.Clear();
+        }
+
+        public void Dispose() {
+            styleIds.Dispose();
+            entries.Dispose();
+            this = default;
         }
 
     }

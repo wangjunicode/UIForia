@@ -1,160 +1,122 @@
 using System;
-using System.Runtime.CompilerServices;
-using Unity.Burst;
+using System.Diagnostics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
-using UnityEngine;
 
 namespace UIForia.Util.Unsafe {
 
-    // if base list is resized this will break!
-    public unsafe struct UnsafeSpan<T> where T : unmanaged {
+    public interface IUnmanagedList<T> where T : unmanaged {
 
-        [NativeDisableUnsafePtrRestriction] public readonly T* array;
-        public readonly int size;
+        void Add(in T item);
 
-        public UnsafeSpan(int rangeStart, int rangeEnd, T* array) {
-            this.size = rangeEnd - rangeStart;
-            this.array = array + rangeStart;
-        }
+        unsafe void AddRange(T* items, int itemCount);
 
-    }
+        void EnsureCapacity(int itemCount);
 
-    public unsafe struct RawListData {
-
-        public int size;
-        public void* ptr;
-        public int capacity;
-        public Allocator allocator;
+        void EnsureAdditionalCapacity(int additionalItemCount);
 
     }
 
-    public unsafe struct ListPointer {
+    [DebuggerTypeProxy(typeof(UnmanagedListDebugView<>))]
+    public unsafe struct UnmanagedList<T> : IDisposable, IUnmanagedList<T> where T : unmanaged {
 
-        public RawListData* data;
-        public Allocator allocator;
-        public bool createdList;
+        [NativeDisableUnsafePtrRestriction] private UnmanagedListState* state;
 
-    }
-
-    public unsafe struct SharedListPointer<T> where T : unmanaged {
-
-        public ListPointer* list;
-
-        public SharedListPointer(int initialCapacity, Allocator allocator) {
-            list = (ListPointer*) UnsafeUtility.Malloc(sizeof(ListPointer), 4, allocator);
-            list->allocator = allocator;
-            list->createdList = true;
-            SetList(new UnmanagedList<T>(initialCapacity, allocator));
-        }
-
-        public SharedListPointer(UnmanagedList<T> initialList, Allocator allocator) {
-            list = (ListPointer*) UnsafeUtility.Malloc(sizeof(ListPointer), 4, allocator);
-            list->allocator = allocator;
-            SetList(initialList);
-        }
-
-        public UnmanagedList<T> GetList() {
-            UnmanagedList<T> retn = default;
-            retn.size = list->data->size;
-            retn.capacity = list->data->capacity;
-            retn.array = (T*) list->data->ptr;
-            retn.allocator = list->data->allocator;
-            return retn;
-        }
-
-        public void SetList(UnmanagedList<T> newList) {
-            list->data->allocator = newList.allocator;
-            list->data->capacity = newList.capacity;
-            list->data->ptr = newList.array;
-            list->data->size = newList.size;
-        }
-
-        public void Dispose() {
-            if (list->createdList) {
-                UnsafeUtility.Free(list->data->ptr, list->allocator);
-            }
-
-            UnsafeUtility.Free(list, list->allocator);
-        }
-
-    }
-
-    public unsafe struct UnmanagedList<T> : IDisposable where T : unmanaged {
-
-        public int size;
-        [NativeDisableUnsafePtrRestriction] public T* array;
-        public int capacity;
-
-        public Allocator allocator { get; internal set; }
-
-        private const int k_MinCapacity = 4;
-
-        public UnmanagedList(int initialCapacity, Allocator allocator) {
-            this.allocator = allocator;
-            this.size = 0;
-            this.capacity = 0;
-            this.array = default;
-
-            AssertSize();
-
-            if (initialCapacity > 0) {
-                this.capacity = CeilPow2(initialCapacity > k_MinCapacity ? initialCapacity : k_MinCapacity);
-                this.array = (T*) UnsafeUtility.Malloc(UnsafeUtility.SizeOf<T>() * capacity, UnsafeUtility.AlignOf<T>(), allocator);
-            }
-
+        public UnmanagedList(int initialSize, Allocator allocator) {
+            state = UnmanagedListState.Create<T>(initialSize, allocator);
         }
 
         public UnmanagedList(Allocator allocator) {
-            this.allocator = allocator;
-            this.size = 0;
-            this.capacity = 0;
-            this.array = default;
-            AssertSize();
+            state = UnmanagedListState.Create<T>(0, allocator);
         }
 
-        public T this[int index] {
-            get => array[index];
-            set => array[index] = value;
+        public int size {
+            get => state->size;
+            set => state->size = value;
         }
 
         public void Add(in T item) {
+            state->Add<T>(item);
+        }
+
+        public void AddRange(T* items, int count) {
+            state->AddRange<T>(items, count);
+        }
+
+        public T this[int idx] {
+            get => UnsafeUtility.ReadArrayElement<T>(state->array, idx);
+            set => UnsafeUtility.WriteArrayElement(state->array, idx, value);
+        }
+
+        public void Dispose() {
+            if (state != null) {
+                state->Dispose();
+            }
+
+            this = default;
+        }
+
+        public void EnsureCapacity(int capacity) {
+            state->EnsureCapacity<T>(capacity);
+        }
+
+        public void EnsureAdditionalCapacity(int additional) {
+            state->EnsureAdditionalCapacity<T>(additional);
+        }
+
+        public T* GetBuffer() {
+            return (T*) state->array;
+        }
+
+        public T * GetPointer(int index) {
+            T* typedStateArray = (T*) state->array;
+            return typedStateArray + index;
+        }
+
+        public ref T GetReference(int index) {
+            return ref state->GetReference<T>(index);
+        }
+
+        public UnmanagedListState* GetStatePointer() {
+            return state;
+        }
+
+    }
+
+    public unsafe struct UnmanagedListState {
+
+        public void* array;
+        public int size;
+        public int capacity;
+        public Allocator allocator;
+
+        public T Get<T>(int idx) where T : unmanaged {
+            return UnsafeUtility.ReadArrayElement<T>(array, idx);
+        }
+
+        public void Add<T>(in T item) where T : unmanaged {
             if (size + 1 >= capacity) {
-                EnsureCapacity(size + 1);
+                EnsureCapacity<T>(size + 1);
             }
 
-            array[size++] = item;
+            T* typedArray = (T*) array;
+            typedArray[size++] = item;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void AddUnchecked(in T item) {
-            array[size++] = item;
-        }
+        public void AddRange<T>(T* items, int itemCount) where T : unmanaged {
+            int desiredCapacity = size + itemCount;
 
-        public void SwapRemoveAt(int index) {
-            array[index] = array[size - 1];
-            array[size--] = default;
-        }
-
-        public void Clear() {
-            if (array != default) {
-                UnsafeUtility.MemClear(array, (long) capacity * sizeof(T));
-            }
-
-            size = 0;
-        }
-
-        public void QuickClear() {
-            if (array != default) {
-                UnsafeUtility.MemClear(array, (long) size * sizeof(T));
-            }
-
-            size = 0;
-        }
-
-        public void EnsureCapacity(int desiredCapacity) {
             if (capacity <= desiredCapacity) {
-                AssertSize();
+                GrowToUnchecked<T>(size + itemCount);
+            }
+
+            T* typedArray = (T*) array;
+            TypedUnsafe.MemCpy(typedArray + size, items, itemCount);
+            size += itemCount;
+        }
+
+        public void EnsureCapacity<T>(int desiredCapacity) where T : unmanaged {
+            if (capacity <= desiredCapacity) {
                 capacity = CeilPow2(desiredCapacity < 4 ? 4 : desiredCapacity);
                 int bytesToMalloc = sizeof(T) * capacity;
                 void* newPointer = UnsafeUtility.Malloc(bytesToMalloc, 4, allocator);
@@ -168,11 +130,10 @@ namespace UIForia.Util.Unsafe {
                 array = (T*) newPointer;
             }
         }
-        
-        public void SetCapacity(int desiredCapacity) {
+
+        public void SetCapacity<T>(int desiredCapacity) where T : unmanaged {
             if (capacity <= desiredCapacity) {
-                AssertSize();
-                capacity =desiredCapacity < 4 ? 4 : desiredCapacity;
+                capacity = desiredCapacity < 4 ? 4 : desiredCapacity;
                 int bytesToMalloc = sizeof(T) * capacity;
                 void* newPointer = UnsafeUtility.Malloc(bytesToMalloc, 4, allocator);
 
@@ -186,10 +147,9 @@ namespace UIForia.Util.Unsafe {
             }
         }
 
-        public void EnsureAdditionalCapacity(int additional) {
+        public void EnsureAdditionalCapacity<T>(int additional) where T : unmanaged {
             int desiredCapacity = size + additional;
             if (capacity <= desiredCapacity) {
-                AssertSize();
                 capacity = CeilPow2(desiredCapacity < 4 ? 4 : desiredCapacity);
                 int bytesToMalloc = sizeof(T) * capacity;
                 void* newPointer = UnsafeUtility.Malloc(bytesToMalloc, UnsafeUtility.AlignOf<T>(), allocator);
@@ -204,12 +164,19 @@ namespace UIForia.Util.Unsafe {
             }
         }
 
-        public void Dispose() {
-            size = 0;
-            capacity = 0;
-            if (array != default) {
-                UnsafeUtility.Free(array, allocator);
-            }
+        public ref T GetReference<T>(int index) where T : unmanaged {
+            T* typedArray = (T*) array;
+            return ref typedArray[index];
+        }
+
+        private void GrowToUnchecked<T>(int desiredCapacity) where T : unmanaged {
+            desiredCapacity = CeilPow2(desiredCapacity < 4 ? 4 : desiredCapacity);
+
+            T* newptr = (T*) array;
+
+            TypedUnsafe.Resize(ref newptr, capacity, desiredCapacity, allocator);
+            capacity = desiredCapacity;
+            array = newptr;
 
         }
 
@@ -223,47 +190,28 @@ namespace UIForia.Util.Unsafe {
             return i + 1;
         }
 
-        [BurstDiscard]
-        private static void AssertSize() {
-            if (BitUtil.CountSetBits((uint) sizeof(T)) != 1) {
-                Debug.Log("Cannot use " + typeof(T) + " in " + nameof(UnmanagedList<T>) + " because it is not power of 2 aligned (size was " + sizeof(T) + ")");
-            }
-        }
+        public static UnmanagedListState* Create<T>(int initialSize, Allocator allocator) where T : unmanaged {
+            UnmanagedListState* state = TypedUnsafe.Malloc<UnmanagedListState>(1, allocator);
+            state->allocator = allocator;
+            state->array = null;
+            state->capacity = 0;
+            state->size = 0;
 
-        public T* GetRawPointer() {
-            return array;
-        }
-
-        public T* GetSlicePointer(int sliceSize) {
-            EnsureAdditionalCapacity(sliceSize);
-            T* value = array + size;
-            size += sliceSize;
-            return value;
-        }
-
-        public UnsafeSpan<T> GetSpan(int rangeStart, int rangeEnd) {
-            return new UnsafeSpan<T>(rangeStart, rangeEnd, array);
-        }
-
-        public ref T GetChecked(int idx) {
-            if (idx < 0 || idx >= size) {
-                throw new IndexOutOfRangeException();
+            if (initialSize > 0) {
+                state->capacity = CeilPow2(initialSize);
+                state->array = TypedUnsafe.MallocDefault<T>(state->capacity, allocator);
             }
 
-            return ref array[idx];
+            return state;
+
         }
 
-        public void CopyFrom(UnmanagedList<T> other) {
-            UnsafeUtility.MemCpy(array, other.array, sizeof(T) * other.size);
-            size = other.size;
-        }
+        public void Dispose() {
+            if (array != null) {
+                UnsafeUtility.Free(array, allocator);
+            }
 
-        public void Sort() {
-            throw new NotImplementedException();
-        }
-
-        public struct PerThreadBatch {
-
+            this = default;
         }
 
     }

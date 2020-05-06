@@ -6,11 +6,19 @@ style big-child {
 }
 
 style level-0 {
-    PreferredSize = 400px;
+    PreferredSize = 600px 400px;
     BackgroundColor = red;
     FlexLayoutDirection = Horizontal;
-    AlignX = 20px View;
+    AlignX = 20px ParentContentArea;
     AlignY = 20px View;
+}
+
+style level-0-a {
+    PreferredSize = 400px;
+    BackgroundColor = rgba(200, 100, 0, 200);
+    FlexLayoutDirection = Horizontal;
+    AlignX = 0% 20px ParentContentArea;
+    AlignY = 0% 20px ParentContentArea;
 }
 
 style <Text> {

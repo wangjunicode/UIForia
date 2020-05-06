@@ -121,7 +121,7 @@ namespace UIForia.Animation {
                     case StylePropertyId.MarginLeft:
                     case StylePropertyId.MarginRight: {
                         float v0 = ResolveFixedWidth(target, viewport, prev.value.styleProperty.AsUIFixedLength);
-
+    
                         float v1 = ResolveFixedWidth(target, viewport, next.value.styleProperty.AsUIFixedLength);
                         target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
                         break;

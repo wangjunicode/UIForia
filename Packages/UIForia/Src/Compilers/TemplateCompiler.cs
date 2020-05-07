@@ -1342,6 +1342,8 @@ namespace UIForia.Compilers {
         }
 
         private void CompileContextVariable(in AttributeDefinition attr, ref StructList<ContextAliasActions> contextModifications) {
+           
+            createdCompiler.SetupAttributeData(attr);
             SetImplicitContext(createdCompiler, attr);
 
             Type expressionType = createdCompiler.GetExpressionType(attr.value);

@@ -26,7 +26,7 @@ namespace UIForia.Util.Unsafe {
 
         public PageDebugView[] pages;
 
-        public UnmanagedPagedListDebugView(UnmanagedPagedList<T> target) {
+        public UnmanagedPagedListDebugView(PagedList<T> target) {
             pageCount = target.state->pageCount;
             pageSize = target.state->pageSizeLimit;
             pageSizeIndex = target.state->pageSizeIndex;

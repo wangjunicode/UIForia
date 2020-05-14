@@ -18,7 +18,7 @@ public class HierarchyView : TreeView {
 
     public UIView[] views;
 
-    private readonly IntMap<ViewState> m_ViewState;
+    private readonly ManagedIntMap<ViewState> m_ViewState;
 
     public bool needsReload;
     public event Action<UIElement> onSelectionChanged;
@@ -43,7 +43,7 @@ public class HierarchyView : TreeView {
 
     public HierarchyView(UIView[] views, TreeViewState state) : base(state) {
         this.views = views;
-        m_ViewState = new IntMap<ViewState>();
+        m_ViewState = new ManagedIntMap<ViewState>();
         needsReload = true;
     }
 
@@ -211,7 +211,7 @@ public class HierarchyView : TreeView {
         }
 
         ViewState viewState;
-        m_ViewState.TryGetValue(item.element.id, out viewState);
+        m_ViewState.TryGetValue((int)item.element.id, out viewState);
 
         r.x = rowWidth - 16;
         r.width = 16;
@@ -221,7 +221,7 @@ public class HierarchyView : TreeView {
         if (Event.current.type == EventType.MouseDown) {
             if (r.Contains(Event.current.mousePosition)) {
                 viewState.showTemplateContents = !viewState.showTemplateContents;
-                m_ViewState[item.element.id] = viewState;
+                m_ViewState[(int)item.element.id] = viewState;
                 needsReload = true;
             }
         }

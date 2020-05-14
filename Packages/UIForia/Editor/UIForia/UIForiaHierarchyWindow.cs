@@ -88,7 +88,7 @@ namespace UIForia.Editor {
 
         private void OnElementSelectionChanged(UIElement element) {
             if (element != null) {
-                s_SelectedElementId = element.id;
+                s_SelectedElementId = (int)element.id;
             }
             else {
                 s_SelectedElementId = -1;
@@ -131,12 +131,12 @@ namespace UIForia.Editor {
                     treeView.selectMode = false;
                 }
                 else {
-                    s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count - 1].id;
+                    s_SelectedElementId = (int)s_SelectedApplication.InputSystem.DebugElementsThisFrame[s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count - 1].id;
                     IList<int> selectedIds = new List<int>(s_SelectedApplication.InputSystem.DebugElementsThisFrame.Count);
 
                     int selectIdx = 0;
 
-                    s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[selectIdx].id;
+                    s_SelectedElementId = (int)s_SelectedApplication.InputSystem.DebugElementsThisFrame[selectIdx].id;
                     selectedIds.Add(s_SelectedElementId);
                     treeView.SetSelection(selectedIds);
                     if (selectedIds.Count > 0) {

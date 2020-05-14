@@ -1,5 +1,9 @@
+using System;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using UIForia.Util.Unsafe;
+using Unity.Collections;
 
 namespace UIForia.Util {
 
@@ -12,6 +16,7 @@ namespace UIForia.Util {
 // #define Toggle(data)   (data =~data )         /** Toggle Data value     **/
 
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int SetHighLowBits(int high, int low) {
             return (high << 16) | (low & 0xffff);
         }
@@ -169,18 +174,18 @@ namespace UIForia.Util {
         public static ulong MergeUint3ToLong(uint input1, uint input2, uint input3) {
             ulong l = 0;
             l |= (input1 & 0xfffff);
-            l |= (ulong)(input2 & 0xfffff) << 21;
-            l |= (ulong)(input3 & 0xfffff) << 42;
+            l |= (ulong) (input2 & 0xfffff) << 21;
+            l |= (ulong) (input3 & 0xfffff) << 42;
             return l;
         }
-        
+
         public static int EnsurePowerOfTwo(int size) {
             uint uintSize = (uint) size;
             if (IsPowerOfTwo(uintSize)) {
-                return (int)uintSize;
+                return (int) uintSize;
             }
 
-            return (int)NextPowerOfTwo(uintSize);
+            return (int) NextPowerOfTwo(uintSize);
         }
 
         public static int GetPowerOfTwoBitIndex(uint value) {
@@ -223,6 +228,7 @@ namespace UIForia.Util {
             return -1;
         }
 
+     
     }
 
 }

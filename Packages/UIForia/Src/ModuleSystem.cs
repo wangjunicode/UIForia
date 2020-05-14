@@ -306,6 +306,10 @@ namespace UIForia.Src {
             return GetModuleInstance(typeof(T));
         }
 
+        public static IList<Module> GetModuleList() {
+            return new List<Module>(modules);
+        }
+        
         public static IList<ProcessedType> GetTemplateElements() {
             return TypeProcessor.GetTemplateElements();
         }

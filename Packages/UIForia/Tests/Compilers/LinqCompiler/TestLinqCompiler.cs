@@ -811,13 +811,13 @@ public class TestLinqCompiler {
 
         compiler.SetSignature<Func<float, int, int>>(new Parameter<UIElement>("root"));
 
-        compiler.Return("(intVal, intVal2) => (intVal + root.id) + intVal2");
+        compiler.Return("(intVal, intVal2) => (intVal + (int)root.id) + intVal2");
 
         Func<UIElement, Func<float, int, int>> fn = compiler.Compile<Func<UIElement, Func<float, int, int>>>();
 
         TestElement element = new TestElement();
 
-        Assert.AreEqual(15f + element.id + 5, fn(element)(15f, 5));
+        Assert.AreEqual(15f + (int)element.id + 5, fn(element)(15f, 5));
     }
 
     [Test]

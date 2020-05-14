@@ -15,18 +15,23 @@ namespace UIForia {
             normalGroup.Set(property);
         }
 
+        public void Selector(string selectorName, Action<SelectorBuilder> action) {
+            normalGroup = normalGroup ?? new StyleGroupBuilder();
+            normalGroup.Selector(selectorName, action);
+        }
+
         public void Active(Action<StyleGroupBuilder> builder) {
             if (builder == null) return;
             activeGroup = activeGroup ?? new StyleGroupBuilder();
             builder.Invoke(activeGroup);
         }
-        
+
         public void Focus(Action<StyleGroupBuilder> builder) {
             if (builder == null) return;
             focusGroup = focusGroup ?? new StyleGroupBuilder();
             builder.Invoke(focusGroup);
         }
-        
+
         public void Hover(Action<StyleGroupBuilder> builder) {
             if (builder == null) return;
             hoverGroup = hoverGroup ?? new StyleGroupBuilder();

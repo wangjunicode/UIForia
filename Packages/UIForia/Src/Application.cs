@@ -2,17 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using JetBrains.Annotations;
-using UIForia.Selectors;
 using Src.Systems;
 using UIForia.Animation;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
-using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Sound;
-using UIForia.Style;
 using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Util;
@@ -102,14 +99,15 @@ namespace UIForia {
         internal LinqBindingSystem linqBindingSystem;
         internal VertigoStyleSystem styleSystem;
 
-        internal readonly ElementSystem elementSystem;
+        internal ElementSystem elementSystem;
+
+        internal readonly TemplateSystem templateSystem;
 
         private ApplicationConfig config;
 
         private int elementIdGenerator;
 
         internal ResourceManager resourceManager;
-        internal Dictionary<int, TagNameIndex> tagNameIndexMap;
 
         public event Action<UIElement> onElementRegistered;
         public event Action<UIElement> onElementDestroyed;
@@ -125,8 +123,6 @@ namespace UIForia {
 
         internal static readonly Dictionary<string, Type> s_CustomPainters;
 
-        internal readonly StructList<int> freeListIndex;
-        internal readonly LightList<UIElement> elementMap;
         private UITaskSystem m_BeforeUpdateTaskSystem;
         private UITaskSystem m_AfterUpdateTaskSystem;
 
@@ -144,19 +140,16 @@ namespace UIForia {
         protected Application(in ApplicationConfig config) {
             this.config = config;
             this.resourceManager = config.resourceManager ?? new ResourceManager();
-            this.tagNameIndexMap = new Dictionary<int, TagNameIndex>();
-            this.freeListIndex = new StructList<int>(128);
-            this.elementMap = new LightList<UIElement>(128);
             this.views = new List<UIView>();
 
-            this.elementSystem = new ElementSystem(config.templateLoader.templateDataMap);
+            this.templateSystem = new TemplateSystem(config.templateLoader.templateDataMap);
             this.routingSystem = new RoutingSystem();
             this.animationSystem = new AnimationSystem();
             this.linqBindingSystem = new LinqBindingSystem();
             this.soundSystem = new UISoundSystem();
             this.styleSystem = new VertigoStyleSystem();
             this.layoutSystem = new AwesomeLayoutSystem(this, styleSystem);
-            
+
             switch (config.applicationType) {
                 case ApplicationType.Runtime:
                     inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
@@ -178,29 +171,29 @@ namespace UIForia {
                 default:
                     throw new ArgumentOutOfRangeException(nameof(config.applicationType), config.applicationType, null);
             }
-            
+
             UIView rootView = new UIView(this, "Root", new Size(Width, Height));
 
             RootElement = config.templateLoader.LoadRoot(this, rootView, config.templateLoader.mainEntryPoint);
-            
+
             views.Add(rootView);
 
         }
 
         public static Application Create(in ApplicationConfig config) {
-            
+
             Settings = Settings ? Settings : Resources.Load<UIForiaSettings>("UIForiaSettings");
-            
+
             if (Settings == null) {
                 throw new Exception("UIForiaSettings are missing. Use the UIForia/Create UIForia Settings to create it");
             }
 
             try {
-                
+
                 Application app = new Application(config);
-                
+
                 Applications.Add(app);
-                
+
                 return app;
             }
             catch (Exception e) {
@@ -209,29 +202,11 @@ namespace UIForia {
             }
         }
 
-        public ElementReference CreateElementReference(UIElement element) {
-            return element.isDestroyed ? default : new ElementReference(element.id, element.index);
-        }
-
-        public UIElement ResolveElementReference(in ElementReference reference) {
-            UIElement element = elementMap.array[reference.index];
-            if (element == null) return null;
-            if (element.id != reference.elementId) return null;
-            return element;
-        }
-
-        public T ResolveElementReference<T>(in ElementReference reference) where T : UIElement {
-            UIElement element = elementMap.array[reference.index];
-            if (element == null) return null;
-            if (element.id != reference.elementId) return null;
-            return element as T;
-        }
-
         public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
             if (templateData.TryGetTemplate<T>(out DynamicTemplate dynamicTemplate)) {
                 UIElement element = templateData.templates[dynamicTemplate.templateId].Invoke(null, new TemplateScope(this));
 
-                UIView view = default;//new UIView(this, name, element, matrix, size);
+                UIView view = default; //new UIView(this, name, element, matrix, size);
 
                 view.Depth = views.Count;
                 views.Add(view);
@@ -426,7 +401,7 @@ namespace UIForia {
             LightStack<UIElement>.Release(ref stack);
 
             onElementDestroyed?.Invoke(element);
-            freeListIndex.Add(element.index);
+            // freeListIndex.Add(element.index);
         }
 
         public void Update() {
@@ -451,7 +426,7 @@ namespace UIForia {
             }
 
             inputSystem.OnUpdate();
-          //  m_BeforeUpdateTaskSystem.OnUpdate();
+            //  m_BeforeUpdateTaskSystem.OnUpdate();
 
             bindingTimer.Reset();
             bindingTimer.Start();
@@ -480,7 +455,7 @@ namespace UIForia {
             renderSystem.OnUpdate();
             renderTimer.Stop();
 
-          //  m_AfterUpdateTaskSystem.OnUpdate();
+            //  m_AfterUpdateTaskSystem.OnUpdate();
 
             frameId++;
             loopTimer.Stop();
@@ -553,7 +528,7 @@ namespace UIForia {
                 // only continue if calling enable didn't re-disable the element
                 if ((child.flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled) {
                     child.enableStateChangedFrameId = frameId;
-                    child.tagNameIndex.Add(child);
+                  //  child.tagNameIndex.Add(child);
                     UIElement[] children = child.children.array;
                     int childCount = child.children.size;
                     if (stack.size + childCount >= stack.array.Length) {
@@ -676,18 +651,7 @@ namespace UIForia {
             return null;
         }
 
-        private Dictionary<string, int> attrNameToId = new Dictionary<string, int>();
-
-        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) {
-            if (attrNameToId.TryGetValue(attributeName, out int id)) { }
-            //
-            // for (int i = 0; i < systems.Count; i++) {
-            //     systems[i].OnAttributeSet(element, attributeName, currentValue, previousValue);
-            // }
-
-            // if had previous value. get index for previous. remove
-            // get index for new, add
-        }
+        
 
         public static void RefreshAll() {
             for (int i = 0; i < Applications.Count; i++) {
@@ -872,8 +836,6 @@ namespace UIForia {
                     totalElementCount++;
                     UIElement element = stack.PopUnchecked();
 
-                 
-    
                     if (element.isEnabled) {
                         enabledElementCount++;
                     }
@@ -984,6 +946,10 @@ namespace UIForia {
             scope.Release();
         }
 
+       
+
+
     }
 
+   
 }

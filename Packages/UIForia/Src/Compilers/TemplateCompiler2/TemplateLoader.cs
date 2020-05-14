@@ -55,22 +55,22 @@ namespace UIForia.Compilers {
 
                 try {
                     // could skip entry point to save time if not wanted (usually only 1 entry fn is used)
-                    templateData.entry = set.entryPoint.TryCompileWithoutClosure<Func<ElementSystem, UIElement>>();
+                    templateData.entry = set.entryPoint.TryCompileWithoutClosure<Func<TemplateSystem, UIElement>>();
 
                     BlockExpression block = (BlockExpression) set.hydratePoint.Body;
                     if (block.Expressions.Count == 0) {
                         templateData.hydrate = (system) => { };
                     }
                     else {
-                        templateData.hydrate = set.hydratePoint.TryCompileWithoutClosure<Action<ElementSystem>>();
+                        templateData.hydrate = set.hydratePoint.TryCompileWithoutClosure<Action<TemplateSystem>>();
                     }
 
-                    templateData.elements = new Action<ElementSystem>[set.elementTemplates.Length];
+                    templateData.elements = new Action<TemplateSystem>[set.elementTemplates.Length];
                     templateData.bindings = new Action<LinqBindingNode>[set.bindings.Length];
                     templateData.inputEventHandlers = new Action<LinqBindingNode, InputEventHolder>[set.inputEventHandlers.Length];
 
                     for (int j = 0; j < set.elementTemplates.Length; j++) {
-                        templateData.elements[j] = set.elementTemplates[j].expression.TryCompileWithoutClosure<Action<ElementSystem>>();
+                        templateData.elements[j] = set.elementTemplates[j].expression.TryCompileWithoutClosure<Action<TemplateSystem>>();
                     }
 
                     for (int j = 0; j < set.bindings.Length; j++) {
@@ -102,7 +102,7 @@ namespace UIForia.Compilers {
         }
 
         public UIElement LoadRoot(Application application, UIView rootView, TemplateData templateData) {
-            return application.elementSystem.CreateEntryPoint(rootView, templateData);
+            return application.templateSystem.CreateEntryPoint(rootView, templateData);
         }
 
         public static string InitTemplate(string appName, string templateMap, string mainEntryPoint) {

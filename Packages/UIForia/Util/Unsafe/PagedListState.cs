@@ -53,6 +53,24 @@ namespace UIForia.Util.Unsafe {
 
         }
 
+        public T* Reserve<T>(int itemCount) where T : unmanaged {
+            if (itemCount > pageSizeLimit) {
+                return default;
+            }
+
+            if (pages[pageCount - 1].size + itemCount > pageSizeLimit) {
+                AddNewPage();
+            }
+
+            UntypedPagedListPage* page = pages + (pageCount - 1);
+
+            T* ptr = (T*) page->data + page->size;
+
+            page->size += itemCount;
+            totalItemCount += itemCount;
+            return ptr;
+        }
+
         public T* AddItem<T>(T item) where T : unmanaged {
             return AddItem(item, out int _);
         }

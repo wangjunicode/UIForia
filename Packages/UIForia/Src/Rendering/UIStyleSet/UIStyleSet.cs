@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UIForia.Selectors;
 using SVGX;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -26,7 +25,7 @@ namespace UIForia.Rendering {
         private UIStyleGroup instanceStyle;
         internal readonly StructList<StyleEntry> availableStyles;
         internal readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
-        internal readonly IntMap<StyleProperty> propertyMap;
+        internal readonly ManagedIntMap<StyleProperty> propertyMap;
 
         // idea -- for styles are inactive, sort them to the back of the available styles list,
         // then we have to look though less of an array (also track a count for how many styles are active)
@@ -41,7 +40,7 @@ namespace UIForia.Rendering {
             this.containedStates = StyleState.Normal;
             this.availableStyles = new StructList<StyleEntry>(4);
             this.styleGroupContainers = new LightList<UIStyleGroupContainer>(3);
-            this.propertyMap = new IntMap<StyleProperty>();
+            this.propertyMap = new ManagedIntMap<StyleProperty>();
             this.hasAttributeStyles = false;
         }
 

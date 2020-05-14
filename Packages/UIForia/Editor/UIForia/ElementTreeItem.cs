@@ -5,7 +5,7 @@ public class ElementTreeItem : TreeViewItem {
 
     public readonly UIElement element;
 
-    public ElementTreeItem(UIElement element) : base(element.id, element.hierarchyDepth) {
+    public ElementTreeItem(UIElement element) : base((int)element.id, element.hierarchyDepth) {
         this.element = element;
     }
 

@@ -13,11 +13,11 @@ namespace UIForia.Compilers {
             this.tagName = tagName;
         }
         
-        public Func<ElementSystem, UIElement> entry;
+        public Func<TemplateSystem, UIElement> entry;
         
-        public Action<ElementSystem> hydrate;
+        public Action<TemplateSystem> hydrate;
         public Action<LinqBindingNode>[] bindings;
-        public Action<ElementSystem>[] elements;
+        public Action<TemplateSystem>[] elements;
         public Action<LinqBindingNode, InputEventHolder>[] inputEventHandlers;
 
     }

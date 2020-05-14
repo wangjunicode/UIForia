@@ -7,11 +7,12 @@ namespace UIForia.Util.Unsafe {
 
     public interface IPerThreadCompatible : IDisposable {
 
-        bool IsInitialized { get; }
-
         void InitializeForThread(Allocator allocator);
 
+        bool IsInitialized { get; }
+
     }
+
 
     public interface IPerThread<T> : IDisposable where T : unmanaged, IPerThreadCompatible {
 
@@ -50,9 +51,10 @@ namespace UIForia.Util.Unsafe {
 
     public unsafe struct PerThread<T> : IPerThread<T>, IDisposable where T : unmanaged, IPerThreadCompatible {
 
-        [NativeDisableUnsafePtrRestriction] private T* perThreadData;
         public readonly Allocator allocator;
+        
         private readonly int itemCount;
+        [NativeDisableUnsafePtrRestriction] private T* perThreadData;
 
         private PerThread(int count, Allocator allocator) {
             this.allocator = allocator;

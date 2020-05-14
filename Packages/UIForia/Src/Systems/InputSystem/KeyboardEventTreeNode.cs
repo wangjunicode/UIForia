@@ -11,7 +11,7 @@ namespace UIForia.Systems.UIForia.Systems.Input {
             this.element = element;
         }
         
-        public int UniqueId => element.id;
+        public int UniqueId => (int)element.id;
         public IHierarchical Element => element;
         public IHierarchical Parent => element.parent;
     }

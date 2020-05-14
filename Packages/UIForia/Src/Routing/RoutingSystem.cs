@@ -47,7 +47,7 @@ namespace UIForia.Routing {
             if (TryGetAttribute("router", m_ScratchAttrList, out ElementAttribute routerAttr)) {
                 TryGetAttribute("defaultRoute", m_ScratchAttrList, out ElementAttribute defaultRouteAttr);
 
-                Router router = new Router(element.id, routerAttr.value, defaultRouteAttr.value);
+                Router router = new Router((int)element.id, routerAttr.value, defaultRouteAttr.value);
 
                 for (int i = 0; i < m_Routers.Count; i++) {
                     if (m_Routers[i].name == router.name) {

@@ -172,7 +172,7 @@ namespace UIForia.Compilers {
             TemplateExpressionSet innerTemplate = default;
 
             TemplateNodeType nodeType = GetNodeType(templateNode);
-            state.systemParam = context.AddParameter<ElementSystem>("system");
+            state.systemParam = context.AddParameter<TemplateSystem>("system");
 
             scratchAttributes.size = 0;
 
@@ -239,17 +239,17 @@ namespace UIForia.Compilers {
 
             if (nodeType == TemplateNodeType.Expanded) {
                 // replace with call init hydrated? can setup template root context pointers
-                context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.ElementSystem_InitializeHydratedElement, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
+                context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_InitializeHydratedElement, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
                 InitializeElementAttributes(scratchAttributes); // todo -- bad dont use scratch here without initializing
 
                 SetupSlotChildren(templateNode as ExpandedNode, innerTemplate, setupChildren);
-                context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.ElementSystem_HydrateElement, Expression.Constant(elementType.rawType)));
+                context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_HydrateElement, Expression.Constant(elementType.rawType)));
 
             }
             else if (nodeType == TemplateNodeType.SlotOverride) {
                 context.AddStatement(ExpressionFactory.CallInstance(
                     system,
-                    MemberData.ElementSystem_InitializeSlotElement,
+                    MemberData.TemplateSystem_InitializeSlotElement,
                     ExpressionUtil.GetIntConstant(attrCount),
                     ExpressionUtil.GetIntConstant(childCount),
                     ExpressionUtil.GetIntConstant(attrCompilerContext.rootVariables.size)
@@ -260,10 +260,10 @@ namespace UIForia.Compilers {
 
             }
             else {
-                context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.ElementSystem_InitializeElement, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
+                context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_InitializeElement, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
 
                 if (templateNode is TextNode textNode && textNode.IsTextConstant()) {
-                    context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.ElementSystem_SetText, Expression.Constant(textNode.GetStringContent())));
+                    context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_SetText, Expression.Constant(textNode.GetStringContent())));
                 }
 
                 InitializeElementAttributes(scratchAttributes); // todo -- bad dont use scratch here without initializing
@@ -317,7 +317,7 @@ namespace UIForia.Compilers {
                     setupChildren.Add(new ConstructedChildData(implicitOverride.processedType, implicitOverride, idx));
                     context.AddStatement(ExpressionFactory.CallInstance(
                             system,
-                            MemberData.ElementSystem_OverrideSlot,
+                            MemberData.TemplateSystem_OverrideSlot,
                             ExpressionUtil.GetStringConstant("Children"),
                             ExpressionUtil.GetIntConstant(idx)
                         )
@@ -348,10 +348,10 @@ namespace UIForia.Compilers {
                 setupChildren.Add(new ConstructedChildData(overrider.processedType, overrider, idx));
 
                 if (overrider.slotType == SlotType.Override) {
-                    context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.ElementSystem_OverrideSlot, ExpressionUtil.GetStringConstant(overrider.slotName), ExpressionUtil.GetIntConstant(idx)));
+                    context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_OverrideSlot, ExpressionUtil.GetStringConstant(overrider.slotName), ExpressionUtil.GetIntConstant(idx)));
                 }
                 else if (overrider.slotType == SlotType.Forward) {
-                    context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.ElementSystem_ForwardSlot, ExpressionUtil.GetStringConstant(overrider.slotName), ExpressionUtil.GetIntConstant(idx)));
+                    context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_ForwardSlot, ExpressionUtil.GetStringConstant(overrider.slotName), ExpressionUtil.GetIntConstant(idx)));
                 }
                 else {
                     // todo -- diagnostics
@@ -385,9 +385,14 @@ namespace UIForia.Compilers {
 
         private void CompileEntryPoint(ProcessedType processedType) {
 
+            // would be great if this just took in an array and wrote to the indices to 'create' elements
+            // would still need to new up the actual class type (but maybe not for primitives like div/text? could those be structs or pooled somehow?)
+            // then we have less of a tree to traverse with templates and more of a flat list? 
+            // code size goes way up but maybe its much faster to create new elements then
+            // at a minimum it would be cool to pre-create all the data that hangs off of elements in bulk, style sets, layout data, attributes
             context.Setup<UIElement>();
 
-            state.systemParam = context.AddParameter<ElementSystem>("system");
+            state.systemParam = context.AddParameter<TemplateSystem>("system");
             ParameterExpression elementParam = context.GetVariable(processedType.rawType, "element");
 
             context.Assign(elementParam, ExpressionFactory.New(processedType.GetConstructor()));
@@ -395,7 +400,7 @@ namespace UIForia.Compilers {
             int attrCount = templateRootNode.CountRealAttributes();
             int childCount = templateRootNode.ChildCount;
 
-            context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.ElementSystem_InitializeEntryPoint, elementParam, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
+            context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_InitializeEntryPoint, elementParam, ExpressionUtil.GetIntConstant(attrCount), ExpressionUtil.GetIntConstant(childCount)));
 
             AttributeMerger.ConvertAttributeDefinitions(templateRootNode.attributes, ref scratchAttributes);
 
@@ -406,7 +411,7 @@ namespace UIForia.Compilers {
 
             bool needPop = CompileBindings(templateRootNode);
 
-            context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.ElementSystem_HydrateEntryPoint));
+            context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_HydrateEntryPoint));
 
             context.AddStatement(elementParam);
 
@@ -424,7 +429,7 @@ namespace UIForia.Compilers {
 
             context.Setup();
 
-            ParameterExpression systemParam = context.AddParameter<ElementSystem>("system");
+            ParameterExpression systemParam = context.AddParameter<TemplateSystem>("system");
 
             StructList<ConstructedChildData> childrenSetup = StructList<ConstructedChildData>.Get();
 
@@ -474,12 +479,12 @@ namespace UIForia.Compilers {
                 switch (child) {
                     case SlotNode slotNode: {
                         Assert.IsTrue(slotNode.slotType == SlotType.Define);
-                        context.AddStatement(ExpressionFactory.CallInstance(systemParam, MemberData.ElementSystem_AddSlotChild, childNew, ExpressionUtil.GetStringConstant(slotNode.slotName), ExpressionUtil.GetIntConstant(idx)));
+                        context.AddStatement(ExpressionFactory.CallInstance(systemParam, MemberData.TemplateSystem_AddSlotChild, childNew, ExpressionUtil.GetStringConstant(slotNode.slotName), ExpressionUtil.GetIntConstant(idx)));
                         break;
                     }
 
                     default: {
-                        context.AddStatement(ExpressionFactory.CallInstance(systemParam, MemberData.ElementSystem_AddChild, childNew, ExpressionUtil.GetIntConstant(idx)));
+                        context.AddStatement(ExpressionFactory.CallInstance(systemParam, MemberData.TemplateSystem_AddChild, childNew, ExpressionUtil.GetIntConstant(idx)));
                         break;
                     }
 
@@ -498,8 +503,8 @@ namespace UIForia.Compilers {
                 }
 
                 context.AddStatement((attr.flags & AttributeFlags.Const) != 0
-                    ? ExpressionFactory.CallInstance(system, MemberData.ElementSystem_InitializeStaticAttribute, ExpressionUtil.GetStringConstant(attr.key), ExpressionUtil.GetStringConstant(attr.value))
-                    : ExpressionFactory.CallInstance(system, MemberData.ElementSystem_InitializeDynamicAttribute, ExpressionUtil.GetStringConstant(attr.key)));
+                    ? ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_InitializeStaticAttribute, ExpressionUtil.GetStringConstant(attr.key), ExpressionUtil.GetStringConstant(attr.value))
+                    : ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_InitializeDynamicAttribute, ExpressionUtil.GetStringConstant(attr.key)));
             }
 
         }
@@ -512,7 +517,7 @@ namespace UIForia.Compilers {
 
                 BindingIndices bindingIds = templateDataBuilder.AddBindings(node, attrCompilerContext.bindingResult);
 
-                context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.ElementSystem_SetBindings,
+                context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_SetBindings,
                         ExpressionUtil.GetIntConstant(bindingIds.updateIndex),
                         ExpressionUtil.GetIntConstant(bindingIds.lateUpdateIndex),
                         ExpressionUtil.GetIntConstant(bindingIds.constIndex),
@@ -536,7 +541,7 @@ namespace UIForia.Compilers {
                     switch (handler.eventClass) {
 
                         case InputEventClass.Mouse: {
-                            MethodCallExpression expression = ExpressionFactory.CallInstance(system, MemberData.ElementSystem_AddMouseHandler,
+                            MethodCallExpression expression = ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_AddMouseHandler,
                                 ExpressionUtil.GetEnumConstant<InputEventType>((int) handler.descriptor.handlerType),
                                 ExpressionUtil.GetEnumConstant<KeyboardModifiers>((int) handler.descriptor.modifiers),
                                 ExpressionUtil.GetBoolConstant(handler.descriptor.requiresFocus),
@@ -549,7 +554,7 @@ namespace UIForia.Compilers {
 
                         case InputEventClass.Keyboard: {
                             hasKeyboardEvent = true;
-                            MethodCallExpression expression = ExpressionFactory.CallInstance(system, MemberData.ElementSystem_AddKeyboardHandler,
+                            MethodCallExpression expression = ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_AddKeyboardHandler,
                                 ExpressionUtil.GetEnumConstant<InputEventType>((int) handler.descriptor.handlerType),
                                 ExpressionUtil.GetEnumConstant<KeyboardModifiers>((int) handler.descriptor.modifiers),
                                 ExpressionUtil.GetBoolConstant(handler.descriptor.requiresFocus),
@@ -563,7 +568,7 @@ namespace UIForia.Compilers {
                         }
 
                         case InputEventClass.Drag: {
-                            MethodCallExpression expression = ExpressionFactory.CallInstance(system, MemberData.ElementSystem_AddDragEventHandler,
+                            MethodCallExpression expression = ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_AddDragEventHandler,
                                 ExpressionUtil.GetEnumConstant<InputEventType>((int) handler.descriptor.handlerType),
                                 ExpressionUtil.GetEnumConstant<KeyboardModifiers>((int) handler.descriptor.modifiers),
                                 ExpressionUtil.GetBoolConstant(handler.descriptor.requiresFocus),
@@ -575,7 +580,7 @@ namespace UIForia.Compilers {
                         }
 
                         case InputEventClass.DragCreate: {
-                            MethodCallExpression expression = ExpressionFactory.CallInstance(system, MemberData.ElementSystem_AddDragCreateHandler,
+                            MethodCallExpression expression = ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_AddDragCreateHandler,
                                 ExpressionUtil.GetEnumConstant<KeyboardModifiers>((int) handler.descriptor.modifiers),
                                 ExpressionUtil.GetBoolConstant(handler.descriptor.requiresFocus),
                                 ExpressionUtil.GetEnumConstant<EventPhase>((int) handler.descriptor.eventPhase),
@@ -592,7 +597,7 @@ namespace UIForia.Compilers {
                 }
 
                 if (hasKeyboardEvent) {
-                    context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.ElementSystem_RegisterForKeyboardEvents));
+                    context.AddStatement(ExpressionFactory.CallInstance(system, MemberData.TemplateSystem_RegisterForKeyboardEvents));
                 }
             }
 
@@ -632,7 +637,7 @@ namespace UIForia.Compilers {
                 return generic;
             }
 
-            generic = MemberData.ElementSystem_CreateBindingVariable.MakeGenericMethod(type);
+            generic = MemberData.TemplateSystem_CreateBindingVariable.MakeGenericMethod(type);
 
             s_CreateVariableMethodCache.Add(type, generic);
             return generic;
@@ -643,7 +648,7 @@ namespace UIForia.Compilers {
                 return generic;
             }
 
-            generic = MemberData.ElementSystem_ReferenceBindingVariable.MakeGenericMethod(type);
+            generic = MemberData.TemplateSystem_ReferenceBindingVariable.MakeGenericMethod(type);
 
             s_ReferenceVariableMethodCache.Add(type, generic);
             return generic;

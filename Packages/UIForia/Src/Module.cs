@@ -260,13 +260,7 @@ namespace UIForia {
 
             return new ReadOnlySizedArray<TemplateShell>(templateShells.size, templateShells.array);
         }
-
-        internal void SetTemplateData(Type type, TemplateData templateData) {
-            // if moduleData == null
-            // moduleData = new ModuleData();
-            // moduleData.SetTemplateData(type, templateData);
-        }
-
+        
         public void MatchElementTypesToTemplateNodes() {
             ListPage<ProcessedType> ptr = elementTypes.head;
 
@@ -297,57 +291,68 @@ namespace UIForia {
         public void AddElementType(ProcessedType processedType) {
             elementTypes.Add(processedType);
         }
-
-    }
-
-    internal class TemplateDataComparer : IComparer<TemplateData> {
-
-        public static readonly TemplateDataComparer Instance = new TemplateDataComparer();
-
-        public int Compare(TemplateData x, TemplateData y) {
-            return string.CompareOrdinal(x.templateId, y.templateId);
-        }
-
-    }
-
-    public class ModuleData<T> where T : Module {
-
-        private static bool sorted;
-        private static SizedArray<TemplateData> templateDataList;
-
-        public static TemplateData GetTemplateData(string templateId) {
-
-            if (!sorted) {
-                sorted = true;
-                Array.Sort(templateDataList.array, 0, templateDataList.size, TemplateDataComparer.Instance);
-            }
-
-            int start = 0;
-            int end = templateDataList.size - 1;
-
-            TemplateData[] array = templateDataList.array;
-
-            while (start <= end) {
-                int index = start + (end - start >> 1);
-
-                int cmp = string.CompareOrdinal(array[index].templateId, templateId);
-
-                if (cmp == 0) {
-                    return array[index];
-                }
-
-                if (cmp < 0) {
-                    start = index + 1;
-                }
-                else {
-                    end = index - 1;
+        
+        
+        public Module ResolveModuleName(string moduleName) {
+            for (int i = 0; i < dependencies.Count; i++) {
+                if (dependencies[i].GetAlias() == moduleName) {
+                    return dependencies[i].GetModuleInstance();
                 }
             }
 
             return null;
-
         }
 
     }
+
+    // internal class TemplateDataComparer : IComparer<TemplateData> {
+    //
+    //     public static readonly TemplateDataComparer Instance = new TemplateDataComparer();
+    //
+    //     public int Compare(TemplateData x, TemplateData y) {
+    //         return string.CompareOrdinal(x.templateId, y.templateId);
+    //     }
+    //
+    // }
+
+    // public class ModuleData<T> where T : Module {
+    //
+    //     private static bool sorted;
+    //     private static SizedArray<TemplateData> templateDataList;
+    //
+    //     public static TemplateData GetTemplateData(string templateId) {
+    //
+    //         if (!sorted) {
+    //             sorted = true;
+    //             Array.Sort(templateDataList.array, 0, templateDataList.size, TemplateDataComparer.Instance);
+    //         }
+    //
+    //         int start = 0;
+    //         int end = templateDataList.size - 1;
+    //
+    //         TemplateData[] array = templateDataList.array;
+    //
+    //         while (start <= end) {
+    //             int index = start + (end - start >> 1);
+    //
+    //             int cmp = string.CompareOrdinal(array[index].templateId, templateId);
+    //
+    //             if (cmp == 0) {
+    //                 return array[index];
+    //             }
+    //
+    //             if (cmp < 0) {
+    //                 start = index + 1;
+    //             }
+    //             else {
+    //                 end = index - 1;
+    //             }
+    //         }
+    //
+    //         return null;
+    //
+    //     }
+    //
+    // }
 
 }

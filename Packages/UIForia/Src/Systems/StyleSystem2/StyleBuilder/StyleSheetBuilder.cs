@@ -1,25 +1,6 @@
 using System;
 
 namespace UIForia {
-    
-    public struct ModuleBuilder {
-
-        private readonly int moduleIndex;
-        private readonly int moduleNameHash;
-        private readonly StyleDatabase database;
-        
-        internal ModuleBuilder(StyleDatabase database, int moduleNameHash, int moduleIndex) {
-            this.database = database;
-            this.moduleIndex = moduleIndex;
-            this.moduleNameHash = moduleNameHash;
-        }
-
-        public void AddStyleSheet(string styleSheetName, Action<StyleSheetBuilder> action) {
-            if (action == null) return;
-            database.AddStyleSheet(styleSheetName, moduleNameHash, moduleIndex, action);
-        }
-
-    }
 
     public struct StyleSheetBuilder {
 
@@ -55,7 +36,7 @@ namespace UIForia {
 
         public void AddStyle(string styleName, Action<StyleBuilder> action) {
             if (action == null) return;
-            database.AddStyle(styleName, moduleIndex, styleSheetIndex, action);
+            database.AddStyleFromBuilder(styleName, moduleIndex, styleSheetIndex, action);
         }
 
     }

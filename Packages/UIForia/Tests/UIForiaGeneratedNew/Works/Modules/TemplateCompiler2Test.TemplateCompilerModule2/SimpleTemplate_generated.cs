@@ -6,7 +6,7 @@ namespace UIForia.Generated {
     public partial class Generated_Works : TemplateLoader {
     
         public static readonly TemplateData template_a04fd272_ed38_4743_ab50_e8921c5d2165 = new TemplateData ("SimpleTemplate") {
-            entry = (UIForia.ElementSystem system) => {
+            entry = (UIForia.TemplateSystem system) => {
                 TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate element;
 
                 element = new TemplateCompiler2Test.TestTemplateCompiler2.SimpleTemplate();
@@ -19,13 +19,13 @@ namespace UIForia.Generated {
                 system.HydrateEntryPoint();
                 return element;
             },
-            hydrate = (UIForia.ElementSystem system) => {
+            hydrate = (UIForia.TemplateSystem system) => {
                 system.AddChild(new UIForia.Elements.UIDivElement(), 0);
                 system.AddChild(new UIForia.Elements.UIGroupElement(), 1);
             },
-            elements = new System.Action<UIForia.ElementSystem>[] {
+            elements = new System.Action<UIForia.TemplateSystem>[] {
                 //0 <Div> line 4:10
-                (UIForia.ElementSystem system) => {
+                (UIForia.TemplateSystem system) => {
                     system.InitializeElement(0, 1);
                     system.AddChild(new UIForia.Elements.UIPanelElement(), 2);
                     system.AddDragCreateHandler(UIForia.UIInput.KeyboardModifiers.None, false, UIForia.UIInput.EventPhase.Bubble, 1);
@@ -34,11 +34,11 @@ namespace UIForia.Generated {
                     system.RegisterForKeyboardEvents();
                 },
                 //1 <Group> line 13:10
-                (UIForia.ElementSystem system) => {
+                (UIForia.TemplateSystem system) => {
                     system.InitializeElement(0, 0);
                 },
                 //2 <Panel> line 5:14
-                (UIForia.ElementSystem system) => {
+                (UIForia.TemplateSystem system) => {
                     system.InitializeElement(0, 1);
                     system.AddChild(new TemplateCompiler2Test.TestTemplateCompiler2.ExpandedTemplate(), 3);
                     system.SetBindings(2, -1, -1, -1, 1);
@@ -46,21 +46,21 @@ namespace UIForia.Generated {
                     system.CreateBindingVariable<string>(0, @"someContextValue");
                 },
                 //3 <ExpandedTemplate> line 6:18
-                (UIForia.ElementSystem system) => {
+                (UIForia.TemplateSystem system) => {
                     system.InitializeHydratedElement(0, 0);
                     system.OverrideSlot(@"title", 4);
                     system.HydrateElement(typeof(TemplateCompiler2Test.TestTemplateCompiler2.ExpandedTemplate));
                     system.SetBindings(3, -1, -1, -1, 0);
                 },
                 //4 <override:title> line 7:22
-                (UIForia.ElementSystem system) => {
+                (UIForia.TemplateSystem system) => {
                     system.InitializeSlotElement(1, 1, 2);
                     system.InitializeDynamicAttribute(@"x");
                     system.AddChild(new UIForia.Elements.UITextElement(), 5);
                     system.SetBindings(4, -1, -1, -1, 0);
                 },
                 //5 <Text> line 7:22
-                (UIForia.ElementSystem system) => {
+                (UIForia.TemplateSystem system) => {
                     system.InitializeElement(0, 0);
                     system.SetText(@"Hello");
                 }

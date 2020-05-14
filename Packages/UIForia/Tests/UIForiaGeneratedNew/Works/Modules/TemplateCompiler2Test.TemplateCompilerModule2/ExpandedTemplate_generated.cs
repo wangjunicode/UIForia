@@ -6,7 +6,7 @@ namespace UIForia.Generated {
     public partial class Generated_Works : TemplateLoader {
     
         public static readonly TemplateData template_e60bf40d_9cd1_42ff_a67f_e90f991fda8d = new TemplateData ("ExpandedTemplate") {
-            entry = (UIForia.ElementSystem system) => {
+            entry = (UIForia.TemplateSystem system) => {
                 TemplateCompiler2Test.TestTemplateCompiler2.ExpandedTemplate element;
 
                 element = new TemplateCompiler2Test.TestTemplateCompiler2.ExpandedTemplate();
@@ -14,25 +14,25 @@ namespace UIForia.Generated {
                 system.HydrateEntryPoint();
                 return element;
             },
-            hydrate = (UIForia.ElementSystem system) => {
+            hydrate = (UIForia.TemplateSystem system) => {
                 system.AddChild(new UIForia.Elements.UITextElement(), 0);
                 system.AddSlotChild(new UIForia.Elements.UISlotDefinition(), @"title", 1);
             },
-            elements = new System.Action<UIForia.ElementSystem>[] {
+            elements = new System.Action<UIForia.TemplateSystem>[] {
                 //0 <Text> line 5:10
-                (UIForia.ElementSystem system) => {
+                (UIForia.TemplateSystem system) => {
                     system.InitializeElement(0, 0);
                     system.SetText(@"this is inside the template");
                 },
                 //1 <define:title> line 6:10
-                (UIForia.ElementSystem system) => {
+                (UIForia.TemplateSystem system) => {
                     system.InitializeElement(1, 1);
                     system.InitializeDynamicAttribute(@"x");
                     system.AddChild(new UIForia.Elements.UITextElement(), 2);
                     system.SetBindings(0, -1, -1, -1, 0);
                 },
                 //2 <Text> line 6:10
-                (UIForia.ElementSystem system) => {
+                (UIForia.TemplateSystem system) => {
                     system.InitializeElement(0, 0);
                     system.SetText(@"Goodbye");
                 }

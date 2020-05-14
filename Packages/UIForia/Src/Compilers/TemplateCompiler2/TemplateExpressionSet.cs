@@ -49,7 +49,7 @@ namespace UIForia.Compilers {
         public InputEventHandlerOutput[] inputEventHandlers;
         public LightList<SlotOverrideChain> slotOverrideChains;
 
-        private static readonly string s_ElementFnTypeName = typeof(Action<ElementSystem>[]).GetTypeName();
+        private static readonly string s_ElementFnTypeName = typeof(Action<TemplateSystem>[]).GetTypeName();
         private static readonly string s_BindingFnTypeName = typeof(Action<LinqBindingNode>[]).GetTypeName();
         private static readonly string s_InputEventHandlerTypeName = typeof(Action<LinqBindingNode, InputEventHolder>[]).GetTypeName();
 

@@ -10,7 +10,7 @@ namespace Tests {
         [Test]
         public unsafe void FitAlignedRangesToListPage() {
 
-            UnmanagedPagedList<int> list = new UnmanagedPagedList<int>(16, Allocator.TempJob);
+            PagedList<int> list = new PagedList<int>(16, Allocator.TempJob);
 
             int val = 0;
             int* ints = stackalloc int[8];
@@ -36,7 +36,7 @@ namespace Tests {
         [Test]
         public unsafe void FitUnalignedRangesToListPage() {
 
-            UnmanagedPagedList<long> list = new UnmanagedPagedList<long>(16, Allocator.TempJob);
+            PagedList<long> list = new PagedList<long>(16, Allocator.TempJob);
 
             long val = 0;
             long* longs = stackalloc long[5];

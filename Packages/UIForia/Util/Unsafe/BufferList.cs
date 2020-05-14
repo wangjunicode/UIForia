@@ -7,7 +7,8 @@ using UnityEngine;
 
 namespace UIForia.Util.Unsafe {
 
-    // if base list is resized this will break!
+
+// if base list is resized this will break!
     public unsafe struct UnsafeSpan<T> where T : unmanaged {
 
         [NativeDisableUnsafePtrRestriction] public readonly T* array;
@@ -19,8 +20,6 @@ namespace UIForia.Util.Unsafe {
         }
 
     }
-
-
 
     public unsafe struct BufferList<T> : IDisposable, IUnmanagedList<T> where T : unmanaged {
 

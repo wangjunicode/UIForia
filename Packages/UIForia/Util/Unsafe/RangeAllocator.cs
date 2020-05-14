@@ -99,7 +99,7 @@ namespace UIForia.Util.Unsafe {
         public PagedAllocatorHandle Allocate(int size) {
             void* memory = UnsafeUtility.Malloc(size, 4, Allocator.Persistent);
             int blockCount = size >> 3; // divide by 8
-            UnmanagedPagedList<long> list = new UnmanagedPagedList<long>(listState);
+            PagedList<long> list = new PagedList<long>(listState);
             list.Add((long) memory);
             return new PagedAllocatorHandle(memory, blockCount);
             // size = BitUtil.NextMultipleOf8(math.min(8, size) - 1);

@@ -1,3 +1,5 @@
+using System;
+
 namespace Packages.UIForia.Util.Unsafe {
 
     public static class MurmurHash3 {
@@ -34,13 +36,10 @@ namespace Packages.UIForia.Util.Unsafe {
             }
 
             // handle remainder
-            k1 = 0;
             int remainder = length - end * sizeof(uint);
+
             if (remainder > 0) {
-                for (int i = 0; i < remainder; i++) {
-                    // k1 = k1 << 8;
-                    k1 = pData[i];
-                }
+                k1 = pData[remainder - 1];
 
                 k1 *= c1;
                 // k1 = Rotl32(k1, 15);

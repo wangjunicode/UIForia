@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using UIForia.Selectors;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -16,15 +15,14 @@ namespace UIForia.Systems {
     public class StyleSystem : IStyleSystem {
 
         public event Action<UIElement, StructList<StyleProperty>> onStylePropertyChanged;
-
-
+        
         
         private static readonly Stack<UIElement> s_ElementStack = new Stack<UIElement>();
 
-        private readonly IntMap<ChangeSet> m_ChangeSets;
+        private readonly ManagedIntMap<ChangeSet> m_ChangeSets;
 
         public StyleSystem() {
-            this.m_ChangeSets = new IntMap<ChangeSet>();
+            this.m_ChangeSets = new ManagedIntMap<ChangeSet>();
         }
 
         public void OnReset() { }
@@ -77,12 +75,12 @@ namespace UIForia.Systems {
         public void OnElementEnabled(UIElement element) { }
 
         public void OnElementDisabled(UIElement element) {
-            m_ChangeSets.Remove(element.id);
+            // m_ChangeSets.Remove(element.id);
         }
 
         public void OnElementDestroyed(UIElement element) {
             element.style = null;
-            m_ChangeSets.Remove(element.id);
+            // m_ChangeSets.Remove(element.id);
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
@@ -90,9 +88,9 @@ namespace UIForia.Systems {
         }
 
         private void AddToChangeSet(UIElement element, StyleProperty property) {
-            if (!m_ChangeSets.TryGetValue(element.id, out ChangeSet changeSet)) {
+            if (!m_ChangeSets.TryGetValue((int)element.id, out ChangeSet changeSet)) {
                 changeSet = new ChangeSet(element, StructList<StyleProperty>.Get());
-                m_ChangeSets[element.id] = changeSet;
+                m_ChangeSets[(int)element.id] = changeSet;
             }
 
             changeSet.changes.Add(property);

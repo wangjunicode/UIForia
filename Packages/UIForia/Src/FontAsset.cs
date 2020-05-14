@@ -18,8 +18,8 @@ namespace UIForia {
         public readonly TMP_FontWeights[] weights;
         public readonly float boldSpacing;
         public readonly FaceInfo faceInfo;
-        public readonly IntMap<TextKerningPair> kerningDictionary;
-        public readonly IntMap<TextGlyph> characterDictionary;
+        public readonly ManagedIntMap<TextKerningPair> kerningDictionary;
+        public readonly ManagedIntMap<TextGlyph> characterDictionary;
         public readonly float boldStyle;
         public readonly float normalStyle;
         public readonly float normalSpacingOffset;
@@ -49,8 +49,8 @@ namespace UIForia {
             this.weightBold = tmpFontAsset.boldStyle;
         }
 
-        private static IntMap<TextKerningPair> ConvertKerning(Dictionary<int, KerningPair> tmpKerning) {
-            IntMap<TextKerningPair> retn = new IntMap<TextKerningPair>(tmpKerning.Count);
+        private static ManagedIntMap<TextKerningPair> ConvertKerning(Dictionary<int, KerningPair> tmpKerning) {
+            ManagedIntMap<TextKerningPair> retn = new ManagedIntMap<TextKerningPair>(tmpKerning.Count);
 
             foreach (KeyValuePair<int, KerningPair> pair in tmpKerning) {
                 TextKerningPair tkp = new TextKerningPair();
@@ -64,8 +64,8 @@ namespace UIForia {
             return retn;
         }
 
-        private static IntMap<TextGlyph> ConvertCharacters(Dictionary<int, TMP_Glyph> tmpGlyphs) {
-            IntMap<TextGlyph> retn = new IntMap<TextGlyph>(tmpGlyphs.Count);
+        private static ManagedIntMap<TextGlyph> ConvertCharacters(Dictionary<int, TMP_Glyph> tmpGlyphs) {
+            ManagedIntMap<TextGlyph> retn = new ManagedIntMap<TextGlyph>(tmpGlyphs.Count);
             foreach (KeyValuePair<int, TMP_Glyph> pair in tmpGlyphs) {
                 TMP_Glyph tmpGlyph = pair.Value;
                 TextGlyph glyph = new TextGlyph();

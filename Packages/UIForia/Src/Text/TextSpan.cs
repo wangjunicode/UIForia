@@ -556,7 +556,7 @@ namespace UIForia.Text {
         }
 
         private static void FindGlyphs(FontAsset fontAsset, CharInfo[] charInfos, int count) {
-            IntMap<TextGlyph> fontAssetCharacterDictionary = fontAsset.characterDictionary;
+            ManagedIntMap<TextGlyph> fontAssetCharacterDictionary = fontAsset.characterDictionary;
             // todo make a better struct based dictionary or make text glyph a class
             for (int i = 0; i < count; i++) {
                 charInfos[i].glyph = fontAssetCharacterDictionary.GetOrDefault(charInfos[i].character);
@@ -564,7 +564,7 @@ namespace UIForia.Text {
         }
 
         private static void FindKerningInfo(FontAsset fontAsset, CharInfo[] charInfos, int count) {
-            IntMap<TextKerningPair> kerningDictionary = fontAsset.kerningDictionary;
+            ManagedIntMap<TextKerningPair> kerningDictionary = fontAsset.kerningDictionary;
             if (count < 2) {
                 return;
             }

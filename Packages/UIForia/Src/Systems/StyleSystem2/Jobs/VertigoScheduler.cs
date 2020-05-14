@@ -8,7 +8,7 @@ namespace UIForia {
     public unsafe struct MergePerThreadPageLists<T> : IJob where T : unmanaged {
 
         public BufferList<T> outputList;
-        public UnmanagedPagedList<T>.PerThread perThreadLists;
+        public PagedList<T>.PerThread perThreadLists;
         public bool disposeOnCompletion;
 
         public void Execute() {
@@ -35,6 +35,42 @@ namespace UIForia {
 
     }
 
+    public struct ParallelParams {
+
+        public readonly int itemCount;
+        public readonly int minBatchSize;
+
+        public ParallelParams(int itemCount, int minBatchSize) {
+            this.itemCount = itemCount;
+            this.minBatchSize = minBatchSize;
+        }
+
+        public unsafe struct Deferred {
+
+            public readonly int* itemCount;
+            public readonly int minBatchSize;
+
+            public Deferred(int* itemCount, int minBatchSize) {
+                this.itemCount = itemCount;
+                this.minBatchSize = minBatchSize;
+            }
+
+        }
+
+    }
+
+    public interface IVertigoParallelDeferred : IJob, IJobParallelForDeferBatched {
+
+        ParallelParams.Deferred defer { get; }
+
+    }
+
+    public interface IVertigoParallel : IJob, IJobParallelForBatch {
+
+        ParallelParams parallel { get; }
+
+    }
+
     public class VertigoScheduler {
 
         public unsafe struct SchedulerStep {
@@ -45,10 +81,37 @@ namespace UIForia {
                 this.handle = handle;
             }
 
+            public SchedulerStep Then<T>(out JobHandle outHandle, T job) where T : struct, IJob {
+                outHandle = job.Schedule(handle);
+                return new SchedulerStep(outHandle);
+            }
+
             public SchedulerStep Then<T>(T job) where T : struct, IJob {
                 return new SchedulerStep(job.Schedule(handle));
             }
 
+            public SchedulerStep ThenParallel<T>(T job) where T : struct, IVertigoParallel {
+                ParallelParams par = job.parallel;
+            
+                if (par.itemCount <= 0) {
+                    return new SchedulerStep(handle);
+                }
+
+                int minBatchSize = par.minBatchSize < 1 ? 1 : par.minBatchSize;
+            
+                if (par.itemCount <= minBatchSize) {
+                    return new SchedulerStep(job.Schedule(handle));    
+                }
+            
+                return new SchedulerStep(job.ScheduleBatch(par.itemCount, minBatchSize, handle));
+            }
+            
+            public SchedulerStep ThenDeferParallel<T>(T job) where T : struct, IVertigoParallelDeferred {
+                ParallelParams.Deferred par = job.defer;
+                int minBatchSize = par.minBatchSize < 1 ? 1 : par.minBatchSize;
+                return new SchedulerStep(job.Schedule(par.itemCount, minBatchSize, handle));
+            }
+            
             public SchedulerStep Then<T, U>(T job, U job2) where T : struct, IJob where U : struct, IJob {
                 return new SchedulerStep(JobHandle.CombineDependencies(job.Schedule(handle), job2.Schedule(handle)));
             }
@@ -109,6 +172,39 @@ namespace UIForia {
             array.Dispose();
             return retn;
         }
+
+      
+        public static SchedulerStep Parallel<T>(T job) where T : struct, IJob, IJobParallelForBatch, IVertigoParallel {
+            ParallelParams par = job.parallel;
+            
+            if (par.itemCount <= 0) {
+                return new SchedulerStep();
+            }
+
+            int minBatchSize = par.minBatchSize < 1 ? 1 : par.minBatchSize;
+            
+            if (par.itemCount <= minBatchSize) {
+                return new SchedulerStep(job.Schedule());    
+            }
+            
+            return new SchedulerStep(job.ScheduleBatch(par.itemCount, minBatchSize));
+        }
+        
+        // public static SchedulerStep AwaitParallel<T>(T job) where T : struct, IJob, IJobParallelForBatch, IVertigoParallel {
+        //     ParallelParams par = job.parallel;
+        //     
+        //     if (par.itemCount <= 0) {
+        //         return new SchedulerStep();
+        //     }
+        //
+        //     par.minBatchSize = par.minBatchSize < 1 ? 1 : par.minBatchSize;
+        //     
+        //     if (par.itemCount <= par.minBatchSize) {
+        //         return new SchedulerStep(job.Schedule());    
+        //     }
+        //     
+        //     return new SchedulerStep(job.ScheduleBatch(par.itemCount, par.minBatchSize));
+        // }
 
         public static SchedulerStep Await<T>(T job) where T : struct, IJob {
             return new SchedulerStep(job.Schedule());

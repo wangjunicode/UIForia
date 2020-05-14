@@ -3,6 +3,16 @@
 namespace UIForia.Elements {
 
     [Flags]
+    public enum UIElementFlags2 : ushort {
+
+        Enabled = 1 << 1,
+        AncestorEnabled = 1 << 2,
+
+        EnabledFlagSet = Enabled | AncestorEnabled,
+
+    }
+    
+    [Flags]
     internal enum UIElementFlags {
 
         // Element Flags

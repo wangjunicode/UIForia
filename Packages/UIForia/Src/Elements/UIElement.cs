@@ -1,85 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UIForia.Selectors;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Layout;
-using UIForia.Parsing;
 using UIForia.Rendering;
-using UIForia.Style;
 using UIForia.Systems;
 using UIForia.UIInput;
 using UIForia.Util;
 
 namespace UIForia.Elements {
-
-    // public struct UIElementRef {
-    //
-    //     private readonly int id;
-    //     private UIElement element;
-    //
-    //     public UIElementRef(UIElement element) {
-    //         this.id = element?.id ?? -1;
-    //         this.element = element;
-    //     }
-    //
-    //     public UIElement Element {
-    //         get {
-    //             if (id != element.id) {
-    //                 element = null;
-    //                 return null;
-    //             }
-    //
-    //             return element;
-    //         }
-    //     }
-    //
-    //     public static implicit operator UIElement(UIElementRef elementRef) {
-    //         return elementRef.Element;
-    //     }
-    //
-    // }
-    //
-    // public struct UIElementRef<T> where T : UIElement {
-    //
-    //     private readonly int id;
-    //     private T element;
-    //
-    //     public UIElementRef(T element) {
-    //         this.id = element?.id ?? -1;
-    //         this.element = element;
-    //     }
-    //
-    //     public T Element {
-    //         get {
-    //             if (id != element.id) {
-    //                 element = null;
-    //                 return null;
-    //             }
-    //
-    //             return element;
-    //         }
-    //     }
-    //
-    //     public static implicit operator UIElementRef(UIElementRef<T> elementRef) {
-    //         return new UIElementRef(elementRef.Element);
-    //     }
-    //
-    //     public static implicit operator UIElement(UIElementRef<T> elementRef) {
-    //         return elementRef.Element;
-    //     }
-    //
-    //     public static implicit operator T(UIElementRef<T> elementRef) {
-    //         return elementRef.Element;
-    //     }
-    //
-    // }
-
+    
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public abstract class UIElement : IHierarchical {
 
-        public int id; // todo -- internal with accessor
+        public ElementId id; // todo -- internal with accessor
 
         public InputHandlerGroup inputHandlers; // todo -- internal with accessor
 
@@ -87,12 +22,11 @@ namespace UIForia.Elements {
 
         internal UIElementFlags flags;
         internal UIElement parent;
-        internal TagNameIndex tagNameIndex;
 
         // todo-- temp
         public uint ftbIndex;
         public uint btfIndex;
-        
+
         // todo -- maybe move a lot of this data to an internal representation of UIElement
         public LayoutResult layoutResult;
         internal AwesomeLayoutBox layoutBox;
@@ -109,32 +43,27 @@ namespace UIForia.Elements {
         public int hierarchyDepth { get; internal set; }
         private int _siblingIndex;
         public StyleSet styleSet2;
-        internal int index;
 
-        public ElementReference reference => isDestroyed ? default : new ElementReference(id, index);
-
-        public static implicit operator ElementReference(UIElement element) {
-            if (element.isDestroyed) return default;
-            return new ElementReference(element.id, element.index);    
-        }
-        
         public int siblingIndex {
             get => _siblingIndex;
             internal set {
                 if (_siblingIndex == value) return;
-                _siblingIndex = value;
-                flags |= UIElementFlags.IndexChanged;
+                _siblingIndex = application.elementSystem.SetSiblingIndex(id, value);
             }
         }
 
         // protected internal UIElement() { }
 
+        internal int index {
+            get => id.index;
+        }
+        
         public IInputProvider Input => View.application.InputSystem; // todo -- remove
 
         public int ChildCount => children?.Count ?? 0;
 
-        public bool __internal_isEnabledAndNeedsUpdate => (flags & UIElementFlags.EnabledFlagSetWithUpdate ) == (UIElementFlags.EnabledFlagSetWithUpdate);
-        
+        public bool __internal_isEnabledAndNeedsUpdate => (flags & UIElementFlags.EnabledFlagSetWithUpdate) == (UIElementFlags.EnabledFlagSetWithUpdate);
+
         public bool isSelfEnabled => (flags & UIElementFlags.Enabled) != 0;
 
         public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
@@ -151,9 +80,9 @@ namespace UIForia.Elements {
         public virtual void OnCreate() { }
 
         public virtual void OnUpdate() { }
-        
+
         public virtual void OnBeforePropertyBindings() { }
-        
+
         public virtual void OnAfterPropertyBindings() { }
 
         public virtual void OnEnable() { }
@@ -236,10 +165,10 @@ namespace UIForia.Elements {
 
                     // todo -- need to figure out if we should descend into children. probably want to scrap this whole method and do something better with selectors
                     // if (child.templateMetaData == element.templateMetaData) {
-                        if (child is T castChild && child.GetAttribute("id") == elementId) {
-                            LightStack<UIElement>.Release(ref elementStack);
-                            return castChild;
-                        }
+                    if (child is T castChild && child.GetAttribute("id") == elementId) {
+                        LightStack<UIElement>.Release(ref elementStack);
+                        return castChild;
+                    }
                     // }
 
                     elementStack.array[elementStack.size++] = child;
@@ -325,30 +254,13 @@ namespace UIForia.Elements {
         }
 
         public void SetAttribute(string name, string value) {
-
-            ElementAttribute[] attrs = attributes.array;
-            int attrCount = attributes.size;
-
-            for (int i = 0; i < attrCount; i++) {
-                if (attrs[i].name == name) {
-                    if (attrs[i].value == value) {
-                        return;
-                    }
-                    else {
-                        string oldValue = attrs[i].value;
-                        attrs[i] = new ElementAttribute(name, value);
-                        // application.OnAttributeSet(this, name, value, oldValue);
-                        return;
-                    }
-                }
-            }
-
-            attributes.Add(new ElementAttribute(name, value));
-            // application.OnAttributeSet(this, name, value, null);
+            
+            // application.SetAttribute(id, name, value);
+            throw new NotImplementedException();
         }
 
         public bool TryGetAttribute(string key, out string value) {
-           
+
             for (int i = 0; i < attributes.size; i++) {
                 if (attributes.array[i].name == key) {
                     value = attributes.array[i].value;
@@ -374,7 +286,7 @@ namespace UIForia.Elements {
             return GetAttribute(name) != null;
         }
 
-        public int UniqueId => id;
+        public int UniqueId => (int)id;
         public IHierarchical Element => this;
         public IHierarchical Parent => parent;
 
@@ -434,7 +346,7 @@ namespace UIForia.Elements {
 
             float crawlPositionX = layoutResult.localPosition.x;
             float crawlPositionY = layoutResult.localPosition.y;
-            
+
             while (ptr != null) {
 
                 if (ptr is ScrollView scrollView) {
@@ -444,12 +356,12 @@ namespace UIForia.Elements {
 
                 crawlPositionX += ptr.layoutResult.localPosition.x;
                 crawlPositionY += ptr.layoutResult.localPosition.y;
-                
+
                 ptr = ptr.parent;
             }
         }
 
-        public T FindParent<T>() where T : UIElement{
+        public T FindParent<T>() where T : UIElement {
             UIElement ptr = parent;
             while (ptr != null) {
                 if (ptr is T retn) {
@@ -471,10 +383,7 @@ namespace UIForia.Elements {
         public virtual void OnReady() { }
 
         // todo -- probably want to move this
-        internal TemplateDatabase GetTemplateDatabase() {
-            throw new NotImplementedException();
-        }
-
+    
     }
 
 }

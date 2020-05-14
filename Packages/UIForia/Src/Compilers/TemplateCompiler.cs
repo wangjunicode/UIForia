@@ -1302,7 +1302,8 @@ namespace UIForia.Compilers {
 
         private void CompileContextVariable(in AttributeDefinition attr, ref StructList<ContextAliasActions> contextModifications) {
             SetImplicitContext(createdCompiler, attr);
-
+            createdCompiler.SetupAttributeData(attr);
+            createdCompiler.SetImplicitContext(createdCompiler.GetCastElement());
             Type expressionType = createdCompiler.GetExpressionType(attr.value);
 
             contextModifications = contextModifications ?? StructList<ContextAliasActions>.Get();
@@ -2298,7 +2299,7 @@ namespace UIForia.Compilers {
                 SetImplicitContext(compiler, attr);
 
                 compiler.CommentNewLineBefore($"if=\"{attr.value}\"");
-                MethodCallExpression setEnabled = ExpressionFactory.CallInstance(element, s_UIElement_SetEnabled, compiler.Value(attr.value));
+                MethodCallExpression setEnabled = ExpressionFactory.CallInstance(element, s_UIElement_SetEnabled, compiler.TypedValue(typeof(bool), attr.value));
                 compiler.RawExpression(setEnabled);
 
                 // if(!element.isEnabled) return

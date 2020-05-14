@@ -5,8 +5,6 @@ using Unity.Jobs;
 
 namespace UIForia {
 
-
-
     /// <summary>
     /// Convert a change set of StyleIds into lists of StyleStatePair, ignoring combinations that do not exist
     /// such as an element being hovered but a style not defining any hover state
@@ -19,13 +17,13 @@ namespace UIForia {
         public PerThread<ConvertedStyleList> perThreadOutput;
 
         public void Execute() {
-            Run(0, sharedStyleChangeSet.Size);    
+            Run(0, sharedStyleChangeSet.Size);
         }
 
         public void Execute(int idx) {
             Run(idx, 1);
         }
-        
+
         public void Execute(int start, int count) {
             Run(start, count);
         }
@@ -41,6 +39,7 @@ namespace UIForia {
             for (int changeIndex = start; changeIndex < end; changeIndex++) {
                 SharedStyleChangeEntry c = sharedStyleChangeSet.entries[changeIndex];
 
+                buffer.size = 0;
                 buffer.EnsureCapacity((c.oldStyleCount * 4) + (c.newStyleCount * 4));
 
                 int oldCount = 0;
@@ -101,7 +100,7 @@ namespace UIForia {
                     continue;
                 }
 
-                output.Add(c.styleDataId, buffer.array, oldCount, newCount);
+                output.Add(c.elementId, buffer.array, oldCount, newCount);
 
             }
 

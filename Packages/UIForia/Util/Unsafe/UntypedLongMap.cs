@@ -380,6 +380,11 @@ namespace UIForia.Util.Unsafe {
         public bool Remove<T>(long key) where T : unmanaged {
             return TryRemove(key, out T _);
         }
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Remove<T>(long key, out T value) where T : unmanaged {
+            return TryRemove(key, out value);
+        }
 
         private void ShiftKeys<T>(uint pos) where T : unmanaged {
             // Shift entries with the same hash.

@@ -18,16 +18,16 @@ namespace UIForia {
         }
 
         // todo -- add cursors / animations / maybe style sheets
-        private readonly IntMap<AssetEntry<Texture2D>> s_TextureMap;
-        private readonly IntMap<AssetEntry<SpriteAtlas>> s_SpriteAtlasMap;
+        private readonly ManagedIntMap<AssetEntry<Texture2D>> s_TextureMap;
+        private readonly ManagedIntMap<AssetEntry<SpriteAtlas>> s_SpriteAtlasMap;
         private readonly Dictionary<string, FontAsset> s_FontMap;
-        private readonly IntMap<AssetEntry<AudioClip>> s_AudioMap;
+        private readonly ManagedIntMap<AssetEntry<AudioClip>> s_AudioMap;
 
         public ResourceManager() {
-            s_TextureMap = new IntMap<AssetEntry<Texture2D>>();
-            s_SpriteAtlasMap = new IntMap<AssetEntry<SpriteAtlas>>();
+            s_TextureMap = new ManagedIntMap<AssetEntry<Texture2D>>();
+            s_SpriteAtlasMap = new ManagedIntMap<AssetEntry<SpriteAtlas>>();
             s_FontMap = new Dictionary<string, FontAsset>();
-            s_AudioMap = new IntMap<AssetEntry<AudioClip>>();
+            s_AudioMap = new ManagedIntMap<AssetEntry<AudioClip>>();
         }
 
         public void Reset() {
@@ -101,7 +101,7 @@ namespace UIForia {
             return GetResource(path, s_AudioMap);
         }
 
-        private T AddResource<T>(string path, T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private T AddResource<T>(string path, T resource, ManagedIntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             if (resource == null || path == null) {
                 return null;
             }
@@ -127,7 +127,7 @@ namespace UIForia {
             return resource;
         }
 
-        private T AddResource<T>(T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private T AddResource<T>(T resource, ManagedIntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             int id = resource.GetHashCode();
             AssetEntry<T> entry;
             if (map.TryGetValue(id, out entry)) {
@@ -141,13 +141,13 @@ namespace UIForia {
             return resource;
         }
 
-        private T GetResource<T>(int id, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private T GetResource<T>(int id, ManagedIntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             AssetEntry<T> entry;
             map.TryGetValue(id, out entry);
             return entry.asset;
         }
 
-        private T GetResource<T>(string path, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private T GetResource<T>(string path, ManagedIntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             T resource;
             if (path == null) {
                 return null;
@@ -183,7 +183,7 @@ namespace UIForia {
             return resource;
         }
 
-        private void RemoveResource<T>(T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private void RemoveResource<T>(T resource, ManagedIntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             if (resource == null) return;
             int id = resource.GetHashCode();
             AssetEntry<T> entry;
@@ -193,7 +193,7 @@ namespace UIForia {
             }
         }
 
-        private void RemoveResource<T>(string path, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private void RemoveResource<T>(string path, ManagedIntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
             if (string.IsNullOrEmpty(path)) {
                 return;
             }

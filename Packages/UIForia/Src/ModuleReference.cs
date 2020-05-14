@@ -24,7 +24,7 @@ namespace UIForia {
         public void ResolveModule(Module module) {
             this.module = module;
             if (string.IsNullOrEmpty(alias)) {
-                // alias = module.GetModuleName();
+                 // alias = module.GetModuleName();
             }
         }
 

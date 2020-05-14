@@ -9,7 +9,7 @@ namespace Tests.DataStructures {
 
         [Test]
         public unsafe void AddRange() {
-            UnmanagedPagedList<Vector4> list = new UnmanagedPagedList<Vector4>(4, Allocator.TempJob);
+            PagedList<Vector4> list = new PagedList<Vector4>(4, Allocator.TempJob);
 
             Vector4* v = stackalloc Vector4[13];
             
@@ -72,7 +72,7 @@ namespace Tests.DataStructures {
         
            [Test]
         public unsafe void AddRangeCompact() {
-            UnmanagedPagedList<Vector4> list = new UnmanagedPagedList<Vector4>(4, Allocator.TempJob);
+            PagedList<Vector4> list = new PagedList<Vector4>(4, Allocator.TempJob);
 
             Assert.AreEqual(4, list.pageSize);
 

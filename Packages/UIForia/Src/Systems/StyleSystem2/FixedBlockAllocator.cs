@@ -45,19 +45,22 @@ namespace UIForia.Util.Unsafe {
         }
 
         public T* Allocate<T>() where T : unmanaged {
+            return (T*) (Allocate());
+        }
+        
+        public void* Allocate() {
             if (freeList != null) {
                 Block* retn = freeList;
                 freeList = freeList->next;
-                return (T*) retn;
+                return retn;
             }
             else {
                 AllocatePage();
                 Block* retn = freeList;
                 freeList = freeList->next;
-                return (T*) retn;
+                return retn;
             }
         }
-
      
         private void AllocatePage() {
 
@@ -74,6 +77,8 @@ namespace UIForia.Util.Unsafe {
 
             // setup the chain of next pointers in the page we just allocated
             
+            // if the block map is null we are not using memory tracking
+            // when not using memory tracking, skip the cost of adding to the map
             if (blockMap != null) {
                 for (int i = 0; i < blocksPerPage - 1; i++) {
                     ptr->next = (Block*) (pageBase + ((i + 1) * blockSize));

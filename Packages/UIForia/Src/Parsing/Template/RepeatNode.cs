@@ -5,7 +5,7 @@ namespace UIForia.Parsing {
 
     public class RepeatNode : TemplateNode {
 
-        public RepeatNode(ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) : base(attributes, in templateLineInfo) {
+        public RepeatNode(ReadOnlySizedArray<AttributeDefinition> attributes, in LineInfo lineInfo) : base(attributes, in lineInfo) {
             // todo -- 1. cache, 2. what about repeat count? treat as slot-type template?
             processedType = TypeProcessor.GetProcessedType(typeof(UIRepeatElement<>));
         }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using UIForia.Util;
@@ -34,7 +33,7 @@ namespace UIForia.Src {
             while (start <= end) {
                 int index1 = start + (end - start >> 1);
 
-                int cmp = String.CompareOrdinal(sourceCache.array[index1].path, path);
+                int cmp = string.CompareOrdinal(sourceCache.array[index1].path, path);
 
                 if (cmp == 0) {
                     return sourceCache.array[index1];

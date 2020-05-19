@@ -41,7 +41,7 @@ namespace UIForia {
                 metaTable = elementSystem.metaTable,
                 sharedChangeSets = styleSystem.sharedChangeSets
             }.Run();
-
+            
             JobHandle styleDiff = VertigoScheduler.Parallel(new DiffStyles() {
                 parallel = new ParallelParams(styleSystem.sharedChangeSets.size, 32),
                 sharedChangeSets = styleSystem.sharedChangeSets,

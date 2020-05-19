@@ -32,14 +32,6 @@ namespace UIForia {
 
     public abstract class PerformanceManager { }
 
-    public enum ApplicationType {
-
-        Runtime = 0,
-        Editor = 1,
-        Test = 2
-
-    }
-
     public struct ApplicationConfig {
 
         public Camera camera;
@@ -151,7 +143,7 @@ namespace UIForia {
             this.layoutSystem = new AwesomeLayoutSystem(this, styleSystem);
 
             switch (config.applicationType) {
-                case ApplicationType.Runtime:
+                case ApplicationType.Game:
                     inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
                     renderSystem = new VertigoRenderSystem(Camera ? Camera : Camera.current, this, styleSystem);
                     break;

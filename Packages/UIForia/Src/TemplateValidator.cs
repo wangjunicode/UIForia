@@ -5,7 +5,7 @@ namespace UIForia.Parsing {
 
     internal static class TemplateValidator {
 
-        public static void Validate(TemplateShell templateShell) {
+        public static void Validate(TemplateShell_Deprecated templateShell) {
 
             LightStack<TemplateNode> stack = LightStack<TemplateNode>.Get();
             

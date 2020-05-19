@@ -34,21 +34,22 @@ namespace UIForia.Compilers {
 
         private readonly StructList<PropertyChangeHandlerDesc> changeHandlers;
         private StructList<BindingVariableDesc> localVariables;
+        private StructList<TextExpression> expressionParts;
 
         private readonly AttributeCompilerContext compilerContext;
 
         public AttributeCompiler(AttributeCompilerContext compilerContext) {
             this.compilerContext = compilerContext;
-            // this.compilerContext = new TemplateLinqCompilerContext();
             this.updateCompiler = new TemplateLinqCompiler(compilerContext);
             this.lateCompiler = new TemplateLinqCompiler(compilerContext);
             this.constCompiler = new TemplateLinqCompiler(compilerContext);
             this.enableCompiler = new TemplateLinqCompiler(compilerContext);
             this.inputHandlerCompiler = new TemplateLinqCompiler(compilerContext);
+            this.expressionParts = new StructList<TextExpression>(16);
             this.changeHandlers = new StructList<PropertyChangeHandlerDesc>(16);
         }
 
-        const AttributeType beforeUpdateTypes = AttributeType.Alias | AttributeType.Conditional | AttributeType.Context | AttributeType.Property;
+        private const AttributeType beforeUpdateTypes = AttributeType.Alias | AttributeType.Conditional | AttributeType.Context | AttributeType.Property;
 
         private static bool IsAttrBeforeUpdate(in AttrInfo attrInfo) {
             return (attrInfo.type & beforeUpdateTypes) != 0;
@@ -71,14 +72,22 @@ namespace UIForia.Compilers {
             enableCompiler.Setup();
         }
 
+        // <Element mix:router="Router" mix.router.value=""/>
+
         public void CompileAttributes(SizedArray<AttrInfo> attributes, AttributeCompilerContext compilerContext) {
             compilerContext.elementType.EnsureReflectionData();
 
             CompileInputHandlers(compilerContext.elementType);
-            
-            // [InvokeWhenDisabled]
-            // Update() { } 
+
+            // aliases
+            // exposed variables (be sure exposed works as alias on same level)
+            // change handlers
+            // style bindings
+            // instance style bindings
+            // animation events (later)
+            // mixins (later)
             // const + once bindings and unmarked bindings that are constant
+            // change check handlers
 
             // todo -- only if needed
             updateCompiler.Init();
@@ -130,11 +139,13 @@ namespace UIForia.Compilers {
 
                 }
 
+                ast.Release();
+
             }
 
             // when resolving aliases, if alias was a context variable, determine if it is local or not
 
-            CompileTextBinding(compilerContext.templateNode as TextNode);
+            CompileTextBinding();
 
             if (compilerContext.elementType.requiresUpdateFn) {
                 updateCompiler.RawExpression(ExpressionFactory.CallInstance(updateCompiler.GetBindingNode(), MemberData.BindingNode_InvokeUpdate));
@@ -181,55 +192,11 @@ namespace UIForia.Compilers {
 
             }
 
-            // todo -- do this once per processed type, use result
-            CompileInputHandlers();
-
             BuildLambda(updateCompiler, ref compilerContext.bindingResult.updateLambda);
             BuildLambda(lateCompiler, ref compilerContext.bindingResult.lateLambda);
             BuildLambda(enableCompiler, ref compilerContext.bindingResult.enableLambda);
             BuildLambda(constCompiler, ref compilerContext.bindingResult.constLambda);
 
-        }
-
-        private void CompileInputHandlers() {
-            // StructList<InputHandler> handlers = InputCompiler.CompileInputAnnotations(processedType.rawType);
-            //
-            // const InputEventType k_KeyboardType = InputEventType.KeyDown | InputEventType.KeyUp | InputEventType.KeyHeldDown;
-            // const InputEventType k_DragType = InputEventType.DragCancel | InputEventType.DragDrop | InputEventType.DragEnter | InputEventType.DragEnter | InputEventType.DragExit | InputEventType.DragHover | InputEventType.DragMove;
-            //
-            // bool hasHandlers = false;
-            //
-            // if (handlers != null) {
-            //     hasHandlers = true;
-            //
-            //     for (int i = 0; i < handlers.size; i++) {
-            //         ref InputHandler handler = ref handlers.array[i];
-            //
-            //         if (handler.descriptor.handlerType == InputEventType.DragCreate) {
-            //             CompileDragCreateFromAttribute(handler);
-            //         }
-            //         else if ((handler.descriptor.handlerType & k_DragType) != 0) {
-            //             CompileDragHandlerFromAttribute(handler);
-            //         }
-            //         else if ((handler.descriptor.handlerType & k_KeyboardType) != 0) {
-            //             CompileKeyboardHandlerFromAttribute(handler);
-            //         }
-            //         else {
-            //             CompileMouseHandlerFromAttribute(handler);
-            //         }
-            //     }
-            // }
-            //
-            // if (!hasHandlers) {
-            //     return;
-            // }
-            //
-            // // Application.InputSystem.RegisterKeyboardHandler(element);
-            // ParameterExpression elementVar = constCompiler.GetElement();
-            // MemberExpression app = Expression.Property(elementVar, typeof(UIElement).GetProperty(nameof(UIElement.application)));
-            // MemberExpression inputSystem = Expression.Property(app, typeof(Application).GetProperty(nameof(Application.InputSystem)));
-            // MethodInfo method = typeof(InputSystem).GetMethod(nameof(InputSystem.RegisterKeyboardHandler));
-            // constCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(inputSystem, method, elementVar));
         }
 
         private void CompileDragBinding(in AttrInfo attr) {
@@ -337,12 +304,12 @@ namespace UIForia.Compilers {
                 throw new TemplateCompileException($"{attributeData.methodInfo.DeclaringType}.{attributeData.methodInfo} must be marked as public in order to be referenced in a template expression");
             }
 
-            ParameterExpression bindingNodeParam  = Expression.Parameter(typeof(LinqBindingNode), "bindingNode");
+            ParameterExpression bindingNodeParam = Expression.Parameter(typeof(LinqBindingNode), "bindingNode");
             ParameterExpression evtHolderParam = Expression.Parameter(typeof(InputEventHolder), "__eventHolder");
 
             Expression methodCall;
             Expression elementExpr = Expression.Field(bindingNodeParam, MemberData.BindingNode_Element);
-            
+
             if (attributeData.useEventParameter) {
                 // todo -- seems like we could cache this somehow
                 Expression field = Expression.Field(evtHolderParam, evtAccessor);
@@ -359,13 +326,13 @@ namespace UIForia.Compilers {
             if (assignmentTarget != null) {
                 MemberExpression assign = Expression.Field(bindingNodeParam, assignmentTarget);
                 return Expression.Lambda(Expression.Block(Expression.Assign(assign, methodCall)),
-                    bindingNodeParam, 
+                    bindingNodeParam,
                     evtHolderParam
                 );
             }
 
             return Expression.Lambda(Expression.Block(methodCall),
-                bindingNodeParam, 
+                bindingNodeParam,
                 evtHolderParam
             );
 
@@ -419,7 +386,7 @@ namespace UIForia.Compilers {
                 }
             }
             catch (CompileException exception) {
-                exception.SetExpression(attr.rawValue + " at " + attr.line + ": " + attr.column);
+                exception.SetExpression(attr.key + " = " + attr.value + " at " + attr.line + ": " + attr.column);
                 throw new TemplateCompileException(exception.Message);
             }
 
@@ -795,13 +762,21 @@ namespace UIForia.Compilers {
             });
         }
 
-        private void CompileTextBinding(TextNode textNode) {
+        private void CompileTextBinding() {
+            if (!compilerContext.elementType.IsTextElement) return;
 
-            if (textNode?.textExpressionList == null || textNode.textExpressionList.size <= 0 || textNode.IsTextConstant()) {
+            if (!compilerContext.fileShell.TryGetTextContent(compilerContext.templateNodeId, out RangeInt textContent)) {
                 return;
             }
 
-            StructList<TextExpression> expressionParts = textNode.textExpressionList;
+            if (textContent.length == 0 || compilerContext.fileShell.IsTextConstant(compilerContext.templateNodeId)) {
+                return;
+            }
+
+            expressionParts.size = 0;
+            for (int i = textContent.start; i < textContent.end; i++) {
+                expressionParts.Add(compilerContext.fileShell.textExpressions[i]);
+            }
 
             MemberExpression textValueExpr = Expression.Field(updateCompiler.GetElement(), MemberData.TextElement_Text);
 

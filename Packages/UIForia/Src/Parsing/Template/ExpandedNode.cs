@@ -7,8 +7,8 @@ namespace UIForia.Parsing {
 
         internal SizedArray<SlotNode> slotOverrideNodes;
 
-        public ExpandedNode(string moduleName, string tagName, ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
-            : base(moduleName, tagName, attributes, in templateLineInfo) { }
+        public ExpandedNode(string moduleName, string tagName, ReadOnlySizedArray<AttributeDefinition> attributes, in LineInfo lineInfo)
+            : base(moduleName, tagName, attributes, in lineInfo) { }
 
         internal SlotNode FindOrCreateChildrenSlotOverride() {
             for (int i = 0; i < slotOverrideNodes.size; i++) {

@@ -20,8 +20,8 @@ namespace UIForia.Parsing {
         
         public ReadOnlySizedArray<AttributeDefinition> injectedAttributes;
 
-        public SlotNode(string slotName, ReadOnlySizedArray<AttributeDefinition> attributes, ReadOnlySizedArray<AttributeDefinition> injectedAttributes, in TemplateLineInfo templateLineInfo, SlotType slotType)
-            : base(attributes, templateLineInfo) {
+        public SlotNode(string slotName, ReadOnlySizedArray<AttributeDefinition> attributes, ReadOnlySizedArray<AttributeDefinition> injectedAttributes, in LineInfo lineInfo, SlotType slotType)
+            : base(attributes, lineInfo) {
             this.slotName = slotName;
             this.slotType = slotType;
             this.injectedAttributes = injectedAttributes;

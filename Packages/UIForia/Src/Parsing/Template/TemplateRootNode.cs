@@ -5,12 +5,12 @@ namespace UIForia.Parsing {
     public class TemplateRootNode : TemplateNode {
 
         public readonly string templateName;
-        public readonly TemplateShell templateShell;
+        public readonly TemplateShell_Deprecated templateShell;
 
         private SizedArray<SlotNode> slotDefinitionNodes;
 
-        public TemplateRootNode(string templateName, TemplateShell templateShell, ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
-            : base(attributes, in templateLineInfo) {
+        public TemplateRootNode(string templateName, TemplateShell_Deprecated templateShell, ReadOnlySizedArray<AttributeDefinition> attributes, in LineInfo lineInfo)
+            : base(attributes, in lineInfo) {
             this.templateName = templateName;
             this.templateShell = templateShell;
             this.root = this;

@@ -37,7 +37,7 @@ namespace UIForia.Parsing {
     public class XMLTemplateParser {
 
         private readonly XmlParserContext parserContext;
-        private readonly Dictionary<string, TemplateShell> parsedFiles;
+        private readonly Dictionary<string, TemplateShell_Deprecated> parsedFiles;
         private TemplateSettings settings;
 
         private class CustomNamespaceReader : XmlNamespaceManager {
@@ -52,7 +52,7 @@ namespace UIForia.Parsing {
         internal static readonly XmlParserContext s_XmlParserContext = new XmlParserContext(null, new CustomNamespaceReader(new NameTable()), null, XmlSpace.None);
 
         public XMLTemplateParser(TemplateSettings settings) {
-            this.parsedFiles = new Dictionary<string, TemplateShell>(37);
+            this.parsedFiles = new Dictionary<string, TemplateShell_Deprecated>(37);
             XmlNamespaceManager nameSpaceManager = new CustomNamespaceReader(new NameTable());
             this.parserContext = new XmlParserContext(null, nameSpaceManager, null, XmlSpace.None);
             this.settings = settings;
@@ -61,12 +61,12 @@ namespace UIForia.Parsing {
         // first time we get a file parse request we need to create the shell 
         // then, as more templates from that shell are requested, return them bit by bit
 
-        private TemplateShell ParseOuterShell(string filePath, string source) {
+        private TemplateShell_Deprecated ParseOuterShell(string filePath, string source) {
             XElement root = XElement.Load(new XmlTextReader(source, XmlNodeType.Element, parserContext), LoadOptions.SetLineInfo | LoadOptions.PreserveWhitespace);
 
             root.MergeTextNodes();
 
-            TemplateShell retn = new TemplateShell(null, filePath);
+            TemplateShell_Deprecated retn = new TemplateShell_Deprecated(null, filePath);
 
             IEnumerable<XElement> styleElements = root.GetChildren("Style");
             IEnumerable<XElement> usingElements = root.GetChildren("Using");
@@ -153,7 +153,7 @@ namespace UIForia.Parsing {
 
             string filePath = processedType.templatePath;
 
-            if (parsedFiles.TryGetValue(filePath, out TemplateShell rootNode)) {
+            if (parsedFiles.TryGetValue(filePath, out TemplateShell_Deprecated rootNode)) {
                 ParseContentTemplate(templateRootNode, rootNode, processedType);
                 return;
             }
@@ -165,19 +165,19 @@ namespace UIForia.Parsing {
             // ParseContentTemplate(templateRootNode, shell, processedType);
         }
 
-        internal TemplateShell GetOuterTemplateShell(string filePath, string source) {
-            if (parsedFiles.TryGetValue(filePath, out TemplateShell rootNode)) {
+        internal TemplateShell_Deprecated GetOuterTemplateShell(string filePath, string source) {
+            if (parsedFiles.TryGetValue(filePath, out TemplateShell_Deprecated rootNode)) {
                 return rootNode;
             }
 
             source = source ?? settings.TryReadFile(settings.GetTemplatePath(filePath));
-            TemplateShell shell = ParseOuterShell(filePath, source);
+            TemplateShell_Deprecated shell = ParseOuterShell(filePath, source);
             parsedFiles.Add(filePath, shell);
             return shell;
         }
 
         // this might be getting called too many times since im not sure im caching the result
-        private void ParseContentTemplate(TemplateRootNode templateRootNode, TemplateShell shell, ProcessedType processedType) {
+        private void ParseContentTemplate(TemplateRootNode templateRootNode, TemplateShell_Deprecated shell, ProcessedType processedType) {
             XElement root = null;// shell.GetElementTemplateContent(processedType.templateId);
 
             if (root == null) {
@@ -200,7 +200,7 @@ namespace UIForia.Parsing {
             }
 
             //templateRootNode.attributes = ValidateRootAttributes(shell.filePath, attributes);
-            templateRootNode.lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
+            templateRootNode.lineInfo = new LineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
             templateRootNode.genericTypeResolver = genericTypeResolver;
             templateRootNode.requireType = requireType; // always null I think
             ParseChildren(templateRootNode, templateRootNode, root.Nodes());
@@ -242,7 +242,7 @@ namespace UIForia.Parsing {
             }
         }
 
-        private TemplateNode ParseElementTag(TemplateRootNode templateRoot, TemplateNode parent, string namespacePath, string tagName, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
+        private TemplateNode ParseElementTag(TemplateRootNode templateRoot, TemplateNode parent, string namespacePath, string tagName, StructList<AttributeDefinition> attributes, in LineInfo lineInfo) {
             throw new NotImplementedException();
             // ProcessedType processedType;
             // TemplateNode node = null;
@@ -328,7 +328,7 @@ namespace UIForia.Parsing {
             // return node;
         }
 
-        private ProcessedType GetDynamicElementType(TemplateShell templateShell, string tagName) {
+        private ProcessedType GetDynamicElementType(TemplateShell_Deprecated templateShell, string tagName) {
             // for (int i = 0; i < templateShell.unprocessedContentNodes.size; i++) {
             //     ref RawTemplateContent node = ref templateShell.unprocessedContentNodes.array[i];
             //
@@ -344,7 +344,7 @@ namespace UIForia.Parsing {
             return null;
         }
 
-        private ProcessedType ResolveTagName(string tagName, string namespacePath, TemplateShell templateShell) {
+        private ProcessedType ResolveTagName(string tagName, string namespacePath, TemplateShell_Deprecated templateShell) {
             ProcessedType retn = GetDynamicElementType(templateShell, tagName);
 
             if (retn != null) {
@@ -358,7 +358,7 @@ namespace UIForia.Parsing {
                     if (index != -1) {
                         string path = usingDef.pathName.Substring(0, index);
                         string id = usingDef.pathName.Substring(index + 1);
-                        TemplateShell shell = GetOuterTemplateShell(path, null);
+                        TemplateShell_Deprecated shell = GetOuterTemplateShell(path, null);
                         if (shell == null) {
                             throw new ParseException($"Error in file {templateShell.filePath} line {usingDef.lineNumber}. Unable to find template file at path `{path}`");
                         }
@@ -366,7 +366,7 @@ namespace UIForia.Parsing {
                         return GetDynamicElementType(shell, id);
                     }
                     else {
-                        TemplateShell shell = GetOuterTemplateShell(usingDef.pathName, null);
+                        TemplateShell_Deprecated shell = GetOuterTemplateShell(usingDef.pathName, null);
                         if (shell == null) {
                             throw new ParseException($"Error in file {templateShell.filePath} line {usingDef.lineNumber}. Unable to find template file at path `{usingDef.pathName}`");
                         }
@@ -396,7 +396,7 @@ namespace UIForia.Parsing {
 
         }
 
-        private static ProcessedType CreateDynamicElementType(TemplateShell templateShell, RawTemplateContent node) {
+        private static ProcessedType CreateDynamicElementType(TemplateShell_Deprecated templateShell, RawTemplateContent node) {
             XElement rootNode = node.elementDefinition;
 
             if (!IsValidIdentifier(node.templateId)) {
@@ -495,7 +495,7 @@ namespace UIForia.Parsing {
             return true;
         }
 
-        private static void CreateOrUpdateTextNode(TemplateRootNode templateRootRoot, TemplateNode parent, string textContent, in TemplateLineInfo templateLineInfo) {
+        private static void CreateOrUpdateTextNode(TemplateRootNode templateRootRoot, TemplateNode parent, string textContent, in LineInfo lineInfo) {
             throw new NotImplementedException();
             // if (parent is TextNode textParent) {
             //     if (parent.ChildCount == 0) {
@@ -535,7 +535,7 @@ namespace UIForia.Parsing {
 
                         if (textContext.Length > 0) {
                             IXmlLineInfo textLineInfo = element.PreviousNode;
-                            CreateOrUpdateTextNode(templateRoot, parent, textContext, new TemplateLineInfo(textLineInfo.LineNumber, textLineInfo.LinePosition));
+                            CreateOrUpdateTextNode(templateRoot, parent, textContext, new LineInfo(textLineInfo.LineNumber, textLineInfo.LinePosition));
                             textContext = string.Empty;
                         }
 
@@ -556,7 +556,7 @@ namespace UIForia.Parsing {
                         }
 
                         IXmlLineInfo lineInfo = element;
-                        TemplateNode p = ParseElementTag(templateRoot, parent, namespaceName, tagName, attributes, new TemplateLineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
+                        TemplateNode p = ParseElementTag(templateRoot, parent, namespaceName, tagName, attributes, new LineInfo(lineInfo.LineNumber, lineInfo.LinePosition));
 
                         p.genericTypeResolver = genericTypeResolver;
                         p.requireType = requireType;
@@ -585,7 +585,7 @@ namespace UIForia.Parsing {
             }
         }
 
-        private static void HandleAttribute(TemplateShell templateShell, string tagName, string prefix, string name, int line, int column, string value, StructList<AttributeDefinition> attributes) {
+        private static void HandleAttribute(TemplateShell_Deprecated templateShell, string tagName, string prefix, string name, int line, int column, string value, StructList<AttributeDefinition> attributes) {
             AttributeType attributeType = AttributeType.Property;
             AttributeFlags flags = 0;
 
@@ -676,7 +676,7 @@ namespace UIForia.Parsing {
                                 name = name.Substring("active.".Length);
                             }
                             else {
-                                throw TemplateCompileException.UnknownStyleState(new AttributeNodeDebugData(templateShell.filePath, tagName, new TemplateLineInfo(line, column), value), name.Split('.')[0]);
+                                throw TemplateCompileException.UnknownStyleState(new AttributeNodeDebugData(templateShell.filePath, tagName, new LineInfo(line, column), value), name.Split('.')[0]);
                             }
                         }
 
@@ -756,7 +756,7 @@ namespace UIForia.Parsing {
             attributes.Add(new AttributeDefinition(raw, attributeType, flags, name, value, templateShell, line, column));
         }
 
-        private static void ParseAttributes(TemplateShell templateShell, string tagName, IEnumerable<XAttribute> xmlAttributes, StructList<AttributeDefinition> attributes, StructList<AttributeDefinition> injectedAttributes, out string genericTypeResolver, out string requireType) {
+        private static void ParseAttributes(TemplateShell_Deprecated templateShell, string tagName, IEnumerable<XAttribute> xmlAttributes, StructList<AttributeDefinition> attributes, StructList<AttributeDefinition> injectedAttributes, out string genericTypeResolver, out string requireType) {
             genericTypeResolver = null;
             requireType = null;
 
@@ -881,20 +881,20 @@ namespace UIForia.Parsing {
             return new ParseException($"Slot with name {nodeSlotName} was overridden multiple times, which is invalid");
         }
         
-        public static ParseException UnnamedSlotOverride(string fileName, in TemplateLineInfo templateLineInfo) {
-            return new ParseException(fileName + " -> Invalid slot override at line: " + templateLineInfo + " a slot:name attribute is required");
+        public static ParseException UnnamedSlotOverride(string fileName, in LineInfo lineInfo) {
+            return new ParseException(fileName + " -> Invalid slot override at line: " + lineInfo + " a slot:name attribute is required");
         }
         
-        public static ParseException SlotNotFound(string fileName, string slotName, TemplateLineInfo templateLineInfo) {
-            return new ParseException(fileName + $" -> A slot with the name {slotName} does not exist to override at line: " + templateLineInfo);
+        public static ParseException SlotNotFound(string fileName, string slotName, LineInfo lineInfo) {
+            return new ParseException(fileName + $" -> A slot with the name {slotName} does not exist to override at line: " + lineInfo);
         }
         
         public static ParseException DefaultFilePathNotFound(ProcessedType processedType, string xmlPath) {
             return new ParseException($"Unable to find default template for type {processedType.rawType}. Searched using default resolver at paths: \n[{xmlPath}]");
         }
         
-        public static ParseException UnresolvedTagName(string fileName, in TemplateLineInfo templateLineInfo, string unresolvedTagName) {
-            return new ParseException($"Error parsing {fileName} -> Unable to resolve tag name: <{unresolvedTagName}> at line {templateLineInfo}");
+        public static ParseException UnresolvedTagName(string fileName, in LineInfo lineInfo, string unresolvedTagName) {
+            return new ParseException($"Error parsing {fileName} -> Unable to resolve tag name: <{unresolvedTagName}> at line {lineInfo}");
         }
 
     }

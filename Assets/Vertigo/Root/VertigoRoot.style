@@ -1,0 +1,7 @@
+
+style vertigo-root {
+    
+    PreferredSize = 300px;
+    BackgroundColor = red;
+    
+}

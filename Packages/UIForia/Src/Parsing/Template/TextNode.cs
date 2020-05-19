@@ -8,8 +8,8 @@ namespace UIForia.Parsing {
 
         public readonly StructList<TextExpression> textExpressionList;
 
-        public TextNode(ProcessedType processedType, ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
-            : base(attributes, templateLineInfo) {
+        public TextNode(ProcessedType processedType, ReadOnlySizedArray<AttributeDefinition> attributes, in LineInfo lineInfo)
+            : base(attributes, lineInfo) {
             this.textExpressionList = new StructList<TextExpression>(3);
             this.attributes = attributes;
             this.processedType = processedType;

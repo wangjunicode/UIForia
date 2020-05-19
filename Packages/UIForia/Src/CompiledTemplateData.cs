@@ -103,7 +103,7 @@ namespace UIForia {
             return binding;
         }
 
-        public StyleSheet ImportStyleSheet(in StyleDefinition styleDefinition) {
+        public StyleSheet ImportStyleSheet(in StyleDefinition pendingStyleDefinition) {
             return null; //styleImporter.Import(styleDefinition, true);
         }
 

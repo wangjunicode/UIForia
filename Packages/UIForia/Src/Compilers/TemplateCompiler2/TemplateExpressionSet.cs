@@ -30,6 +30,8 @@ namespace UIForia.Compilers {
 
         public TemplateNode templateNode;
         public LambdaExpression expression;
+        public string tagName;
+        public LineInfo lineInfo;
 
     }
 
@@ -94,9 +96,9 @@ namespace UIForia.Compilers {
                 stringBuilder.Append("//");
                 stringBuilder.AppendInline(i.ToString());
                 stringBuilder.AppendInline(" <");
-                stringBuilder.AppendInline(elementTemplates[i].templateNode.GetTagName());
+                stringBuilder.AppendInline(elementTemplates[i].tagName);
                 stringBuilder.AppendInline("> line ");
-                stringBuilder.AppendInline(elementTemplates[i].templateNode.lineInfo.ToString());
+                stringBuilder.AppendInline(elementTemplates[i].lineInfo.ToString());
                 stringBuilder.NewLine();
                 stringBuilder.Append(elementTemplates[i].expression.ToTemplateBody(3));
                 if (i != elementTemplates.Length - 1) {
@@ -224,7 +226,7 @@ namespace UIForia.Compilers {
 
         public ProcessedType rootType;
         public AttrInfo[] attributes;
-        public TemplateNode slotNode;
+        public TemplateNodeReference slotNodeRef;
 
     }
 

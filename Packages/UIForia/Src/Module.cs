@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UIForia.Compilers;
 using UIForia.Elements;
@@ -19,12 +20,13 @@ namespace UIForia {
 
     }
 
-    public abstract class Module : TypeProcessor.IDiagnosticProvider {
+    public abstract class Module {
 
         public readonly Type type;
         public readonly bool IsBuiltIn;
 
         private LightList<StyleSheet2> styleSheets;
+        private Diagnostics diagnostics;
 
         private List<bool> conditionResults;
         private IList<StyleCondition> styleConditions;
@@ -33,9 +35,9 @@ namespace UIForia {
         internal readonly IList<ModuleReference> dependencies;
         internal readonly PagedLightList<ProcessedType> elementTypes;
         internal readonly Dictionary<string, ProcessedType> tagNameMap;
-        internal readonly Dictionary<string, TemplateShell> shellMap;
 
-        private readonly LightList<TemplateShell> templateShells;
+        internal readonly LightList<TemplateFileShell> templateShells;
+        private Module[] flattenedDependencyTree;
 
         private string assetPath;
         private string moduleName;
@@ -51,11 +53,11 @@ namespace UIForia {
             this.type = GetType();
             this.moduleName = type.Name;
             this.dependencies = new List<ModuleReference>();
-            this.templateShells = new LightList<TemplateShell>();
+            this.templateShells = new LightList<TemplateFileShell>();
             this.IsBuiltIn = type == typeof(BuiltInElementsModule);
-            this.shellMap = new Dictionary<string, TemplateShell>();
             this.elementTypes = new PagedLightList<ProcessedType>(32);
             this.tagNameMap = new Dictionary<string, ProcessedType>(31);
+            this.diagnostics = new Diagnostics();
         }
 
         // internal Action zz__INTERNAL_DO_NOT_CALL; // use this for precompiled loading instead of doing type reflection to find caller type
@@ -161,7 +163,13 @@ namespace UIForia {
             styleConditions.Add(new StyleCondition(styleConditions.Count, condition, fn));
         }
 
-        internal ProcessedType ResolveTagName(string moduleName, string tagName, TypeProcessor.DiagnosticWrapper diagnosticWrapper) {
+        public bool TryResolveTagName(string moduleName, string tagName, Diagnostics diagnostics, out ProcessedType processedType) {
+            processedType = ResolveTagName(moduleName, tagName, diagnostics);
+            return processedType != null;
+        }
+
+        // this is called from multiple threads!
+        internal ProcessedType ResolveTagName(string moduleName, string tagName, Diagnostics diagnostics) {
 
             ProcessedType retn;
 
@@ -173,6 +181,9 @@ namespace UIForia {
                     }
                 }
 
+                if (tagName == null) {
+                    Debugger.Break();
+                }
                 return ModuleSystem.BuiltInModule.tagNameMap.TryGetValue(tagName, out retn) ? retn : null;
 
             }
@@ -182,7 +193,7 @@ namespace UIForia {
 
             if (module == null) {
                 List<string> list = dependencies.Select(d => d.GetAlias()).ToList();
-                diagnosticWrapper.AddDiagnostic($"Unable to resolve module `{moduleName}`. Available module names from current module ({GetType().GetTypeName()}) are {StringUtil.ListToString(list)}");
+                diagnostics?.LogError($"Unable to resolve module `{moduleName}`. Available module names from current module ({GetType().GetTypeName()}) are {StringUtil.ListToString(list)}");
                 return null;
             }
 
@@ -190,7 +201,7 @@ namespace UIForia {
                 return retn;
             }
 
-            diagnosticWrapper.AddDiagnostic($"Unable to resolve tag name `{tagName}` from module {moduleName}.");
+            diagnostics?.LogError($"Unable to resolve tag name `{tagName}` from module {moduleName}.");
             return null;
         }
 
@@ -204,7 +215,7 @@ namespace UIForia {
         internal ReadOnlySizedArray<ProcessedType> GetTemplateElements() {
 
             ListPage<ProcessedType> ptr = elementTypes.head;
-            
+
             // todo cache this?
             SizedArray<ProcessedType> retn = new SizedArray<ProcessedType>(elementTypes.size / 2);
 
@@ -228,71 +239,10 @@ namespace UIForia {
 
         }
 
-        internal ReadOnlySizedArray<TemplateShell> GetTemplateShells() {
-
-            // todo -- maybe include a setting that won't cache these 
-            // UseTemplateResolveCache(false);
-            if (templateShells.Count != 0) {
-                return new ReadOnlySizedArray<TemplateShell>(templateShells.size, templateShells.array);
-            }
-
-            ListPage<ProcessedType> ptr = elementTypes.head;
-
-            while (ptr != null) {
-
-                for (int j = 0; j < ptr.size; j++) {
-                    ProcessedType t = ptr.data[j];
-
-                    if (t.resolvedTemplateLocation != null) {
-
-                        if (!shellMap.TryGetValue(t.resolvedTemplateLocation.Value.filePath, out TemplateShell shell)) {
-                            shell = new TemplateShell(this, t.resolvedTemplateLocation.Value.filePath);
-                            templateShells.Add(shell);
-                            shellMap[t.resolvedTemplateLocation.Value.filePath] = shell;
-                        }
-
-                    }
-
-                }
-
-                ptr = ptr.next;
-            }
-
-            return new ReadOnlySizedArray<TemplateShell>(templateShells.size, templateShells.array);
-        }
-        
-        public void MatchElementTypesToTemplateNodes() {
-            ListPage<ProcessedType> ptr = elementTypes.head;
-
-            while (ptr != null) {
-
-                for (int j = 0; j < ptr.size; j++) {
-                    ProcessedType t = ptr.data[j];
-
-                    // todo -- are generics a problem here?
-                    if (t.resolvedTemplateLocation != null) {
-
-                        if (shellMap.TryGetValue(t.resolvedTemplateLocation.Value.filePath, out TemplateShell templateShell)) {
-                            t.templateRootNode = templateShell.GetTemplateRoot(t.resolvedTemplateLocation.Value.templateId);
-                        }
-                        else {
-                            t.templateRootNode = null;
-                            Debug.Log($"Unable to find template for {t.rawType}");
-                        }
-
-                    }
-
-                }
-
-                ptr = ptr.next;
-            }
-        }
-
         public void AddElementType(ProcessedType processedType) {
             elementTypes.Add(processedType);
         }
-        
-        
+
         public Module ResolveModuleName(string moduleName) {
             for (int i = 0; i < dependencies.Count; i++) {
                 if (dependencies[i].GetAlias() == moduleName) {
@@ -303,10 +253,59 @@ namespace UIForia {
             return null;
         }
 
+        internal Module[] GetFlattenedDependencyTree() {
+
+            if (flattenedDependencyTree != null) {
+                return flattenedDependencyTree;
+            }
+
+            LightList<Module> dependencyList = LightList<Module>.Get();
+            LightStack<Module> stack = LightStack<Module>.Get();
+
+            stack.Push(this);
+
+            while (stack.size != 0) {
+
+                Module module = stack.Pop();
+
+                bool found = false;
+                for (int i = 0; i < dependencyList.size; i++) {
+                    if (dependencyList.array[i] == module) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found) {
+                    continue;
+                }
+
+                dependencyList.Add(module);
+                for (int i = 0; i < module.dependencies.Count; i++) {
+                    stack.Push(module.dependencies[i].GetModuleInstance());
+                }
+
+            }
+
+            flattenedDependencyTree = dependencyList.ToArray();
+            dependencyList.Release();
+            stack.Release();
+            return flattenedDependencyTree;
+        }
+
+        public Diagnostics GetDiagnostics() {
+            return diagnostics;
+        }
+
+        internal void ClearDiagnostics() {
+            diagnostics.Clear();
+        }
+
+
     }
 
     // internal class TemplateDataComparer : IComparer<TemplateData> {
-    //
+
     //     public static readonly TemplateDataComparer Instance = new TemplateDataComparer();
     //
     //     public int Compare(TemplateData x, TemplateData y) {

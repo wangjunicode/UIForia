@@ -226,8 +226,15 @@ namespace UIForia {
             // would be REALLY nice to do this in bulk when we have all the data, explore this!
             // could do 2 passes, 1 to generate data, relationships and sizes, and a second one to fill with data?
             // element.attributes = new SizedArray<ElementAttribute>(attrCount);
-            element.children = new LightList<UIElement>(childCount); // todo to sized array or block allocated range list
-            element.layoutResult = new LayoutResult(element);
+            
+            // todo to sized array or block allocated range list
+            // sized array at miniumum reduces allocation by a lot
+            // this becomes a linked list, which I already have with the hierarchy info array
+            // just need instances also stored & indexed by elementId then this is basically free!
+            element.children = new LightList<UIElement>(childCount);
+            
+            // element.layoutResult = new LayoutResult(element); // implicitly created now :)
+            
             element.bindingNode = new LinqBindingNode();
             element.bindingNode.element = element;
             element.bindingNode.root = root;
@@ -235,6 +242,9 @@ namespace UIForia {
 
             onElementRegistered?.Invoke(element); // do this later in batches maybe? depends on when it must be called
 
+            // element.FindChildAt(i); // more clear that this isnt a cheap operation
+            // element.GetChildren(list); 
+            
             element.hierarchyDepth = parent.hierarchyDepth + 1;
 
         }
@@ -244,6 +254,8 @@ namespace UIForia {
             element.bindingNode.referencedContexts = new UIElement[contextDepth];
             UIElement ptr = root;
             // inverted?
+            
+            // assign context by walking back up the root hierarchies
             for (int i = 0; i < contextDepth; i++) {
                 element.bindingNode.referencedContexts[i] = ptr;
                 ptr = ptr.bindingNode.root;

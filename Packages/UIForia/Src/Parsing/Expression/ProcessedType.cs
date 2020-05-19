@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -7,6 +6,7 @@ using System.Threading;
 using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
+using UIForia.Src;
 using UIForia.Util;
 using UnityEngine.Assertions;
 
@@ -36,7 +36,6 @@ namespace UIForia.Parsing {
         internal TemplateRootNode templateRootNode;
         internal TemplateLocation? resolvedTemplateLocation;
         
-        internal StructList<PropertyChangeHandlerDesc> methods; // todo -- remove
         private ConstructorInfo ctor;
         
         private ReadOnlySizedArray<PropertyChangeHandlerDesc> changeHandlers;
@@ -44,7 +43,8 @@ namespace UIForia.Parsing {
         private static int currentTypeId = -1;
         
         internal DateTime lastTemplateParseTime;
-        
+        public TemplateFileShell templateFileShell;
+
         [Flags]
         private enum Flags {
 
@@ -227,7 +227,7 @@ namespace UIForia.Parsing {
             throw new NotImplementedException();
         }
 
-        public static ProcessedType CreateFromType(Type type) {
+        internal static ProcessedType CreateFromType(Type type) {
             LightList<string> styles = null;
             string[] styleSheets = null;
 
@@ -244,86 +244,88 @@ namespace UIForia.Parsing {
                 tagName = tagName.Split('`')[0];
             }
             
+            // this could probably be done the other way around, use type cache to get all types with attributes and blast through each one
+            
             foreach (Attribute attr in type.GetCustomAttributes()) {
-                if (attr is TemplateTagNameAttribute templateTagNameAttr) {
-                    if (elementPath != null && elementPath != templateTagNameAttr.filePath) {
-                        throw new Exception($"File paths were different {elementPath}, {templateTagNameAttr.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
-                    }
-
-                    tagName = templateTagNameAttr.tagName;
-                    elementPath = templateTagNameAttr.filePath;
-                    continue;
-                }
-
-                if (attr is TemplateAttribute templateAttribute) {
-                    if (elementPath != null && elementPath != templateAttribute.elementPath) {
-                        throw new Exception($"File paths were different {elementPath}, {templateAttribute.elementPath} for element type {TypeNameGenerator.GetTypeName(type)}");
-                    }
-
-                    elementPath = templateAttribute.elementPath;
-                    templatePath = templateAttribute.templatePath;
-                    templateId = templateAttribute.templateId;
+                
+                switch (attr) {
                     
-                    if (isContainer) {
-                        UnityEngine.Debug.LogError($"Element cannot be a container and provide a template. {TypeNameGenerator.GetTypeName(type)} is both.");
-                    }
+                    case TemplateTagNameAttribute templateTagNameAttr when elementPath != null && elementPath != templateTagNameAttr.filePath:
+                        ModuleSystem.LogDiagnosticError($"File paths were different {elementPath}, {templateTagNameAttr.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        return null;
 
-                    templateProvided = true;
+                    case TemplateTagNameAttribute templateTagNameAttr:
+                        tagName = templateTagNameAttr.tagName;
+                        elementPath = templateTagNameAttr.filePath;
+                        continue;
 
-                    continue;
-                }
+                    case TemplateAttribute templateAttribute when elementPath != null && elementPath != templateAttribute.elementPath:
+                        ModuleSystem.LogDiagnosticError($"File paths were different {elementPath}, {templateAttribute.elementPath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        return null;
 
-                if (attr is RecordFilePathAttribute recordFilePathAttribute) {
-                    if (elementPath != null && elementPath != recordFilePathAttribute.filePath) {
-                        throw new Exception($"File paths were different {elementPath}, {recordFilePathAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
-                    }
-
-                    elementPath = recordFilePathAttribute.filePath;
-                    continue;
-                }
-
-                if (attr is ImportStyleSheetAttribute importStyleSheetAttribute) {
-                    if (elementPath != null && elementPath != importStyleSheetAttribute.filePath) {
-                        throw new Exception($"File paths were different {elementPath}, {importStyleSheetAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
-                    }
-
-                    styles = styles ?? LightList<string>.Get();
-                    styles.Add(importStyleSheetAttribute.styleSheet);
-                    elementPath = importStyleSheetAttribute.filePath;
-                    continue;
-                }
-
-                if (attr is StyleAttribute styleAttribute) {
-                    if (elementPath != null && elementPath != styleAttribute.filePath) {
-                        throw new Exception($"File paths were different {elementPath}, {styleAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
-                    }
-
-                    elementPath = styleAttribute.filePath;
-                    implicitStyleNames = styleAttribute.styleNames;
-                }
-
-                if (attr is ContainerElementAttribute containerAttr) {
-                    if (elementPath != null && elementPath != containerAttr.filePath) {
-                        throw new Exception($"File paths were different {elementPath}, {containerAttr.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
-                    }
-
-                    if (templateProvided) {
-                        UnityEngine.Debug.LogError($"Element cannot be a container and provide a template. {TypeNameGenerator.GetTypeName(type)} is both.");
-                    }
+                    case TemplateAttribute templateAttribute: {
+                        elementPath = templateAttribute.elementPath;
+                        templatePath = templateAttribute.templatePath;
+                        templateId = templateAttribute.templateId;
                     
-                    elementPath = containerAttr.filePath;
-                    isContainer = true;
+                        if (isContainer) {
+                            ModuleSystem.LogDiagnosticError($"Element cannot be a container and provide a template. {TypeNameGenerator.GetTypeName(type)} is both.");
+                            return null;
+                        }
+
+                        templateProvided = true;
+
+                        continue;
+                    }
+
+                    case RecordFilePathAttribute recordFilePathAttribute when elementPath != null && elementPath != recordFilePathAttribute.filePath:
+                        ModuleSystem.LogDiagnosticError($"File paths were different {elementPath}, {recordFilePathAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        return null;
+
+                    case RecordFilePathAttribute recordFilePathAttribute:
+                        elementPath = recordFilePathAttribute.filePath;
+                        continue;
+
+                    case ImportStyleSheetAttribute importStyleSheetAttribute when elementPath != null && elementPath != importStyleSheetAttribute.filePath:
+                        ModuleSystem.LogDiagnosticError($"File paths were different {elementPath}, {importStyleSheetAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        return null;
+
+                    case ImportStyleSheetAttribute importStyleSheetAttribute:
+                        styles = styles ?? LightList<string>.Get();
+                        styles.Add(importStyleSheetAttribute.styleSheet);
+                        elementPath = importStyleSheetAttribute.filePath;
+                        continue;
+
+                    case StyleAttribute styleAttribute when elementPath != null && elementPath != styleAttribute.filePath:
+                        ModuleSystem.LogDiagnosticError($"File paths were different {elementPath}, {styleAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        return null;
+
+                    case StyleAttribute styleAttribute:
+                        elementPath = styleAttribute.filePath;
+                        implicitStyleNames = styleAttribute.styleNames;
+                        break;
+
+                    case ContainerElementAttribute containerAttr when elementPath != null && elementPath != containerAttr.filePath:
+                        ModuleSystem.LogDiagnosticError($"File paths were different {elementPath}, {containerAttr.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        return null;
+
+                    case ContainerElementAttribute containerAttr: {
+                        if (templateProvided) {
+                            ModuleSystem.LogDiagnosticError($"Element cannot be a container and provide a template. {TypeNameGenerator.GetTypeName(type)} is both.");
+                            return null;
+                        }
+                    
+                        elementPath = containerAttr.filePath;
+                        isContainer = true;
+                        break;
+                    }
                 }
+
             }
 
             if (styles != null) {
                 styleSheets = styles.ToArray();
                 styles.Release();
-            }
-
-            if (isContainer) {
-                templatePath = null;
-                templateId = null;
             }
 
             return new ProcessedType(type, elementPath, templatePath, templateId, tagName, implicitStyleNames, styleSheets);

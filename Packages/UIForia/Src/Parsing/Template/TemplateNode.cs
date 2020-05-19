@@ -9,7 +9,7 @@ namespace UIForia.Parsing {
 
         public string fileName;
         public string tagName;
-        public TemplateLineInfo lineInfo;
+        public LineInfo lineInfo;
 
         public override string ToString() {
             return $"<{tagName}> @({fileName} line {lineInfo})";
@@ -22,9 +22,9 @@ namespace UIForia.Parsing {
         public string fileName;
         public string tagName;
         public string content;
-        public TemplateLineInfo lineInfo;
+        public LineInfo lineInfo;
 
-        public AttributeNodeDebugData(string fileName, string tagName, TemplateLineInfo lineInfo, string content) {
+        public AttributeNodeDebugData(string fileName, string tagName, LineInfo lineInfo, string content) {
             this.fileName = fileName;
             this.tagName = tagName;
             this.lineInfo = lineInfo;
@@ -41,15 +41,15 @@ namespace UIForia.Parsing {
         public TemplateNode parent;
         public ProcessedType processedType;
         public string originalString;
-        public TemplateLineInfo lineInfo;
+        public LineInfo lineInfo;
         public string genericTypeResolver;
         public string requireType;
         public bool isModified;
         public Type requiredChildType;
 
-        protected TemplateNode(ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) {
+        protected TemplateNode(ReadOnlySizedArray<AttributeDefinition> attributes, in LineInfo lineInfo) {
             this.attributes = attributes;
-            this.lineInfo = templateLineInfo;
+            this.lineInfo = lineInfo;
         }
 
         public void AddChild(TemplateNode child) {
@@ -98,18 +98,18 @@ namespace UIForia.Parsing {
             Debug.Log($"Cannot add a <{slotNode.GetTagName()}> to <{GetTagName()}>");
         }
 
-        public bool TryCreateElementNode(string moduleName, string tagName, ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo lineInfo, string genericTypeResolver, string requireChildTypeExpression, out TemplateNode templateNode) {
+        public bool TryCreateElementNode(string moduleName, string tagName, ReadOnlySizedArray<AttributeDefinition> attributes, in LineInfo lineInfo, string genericTypeResolver, string requireChildTypeExpression, out TemplateNode templateNode) {
 
             templateNode = null;
 
-            ProcessedType elementType = root.templateShell.module.ResolveTagName(moduleName, tagName, new TypeProcessor.DiagnosticWrapper()); // todo -- diagnostics
+            ProcessedType elementType = default; //root.templateShell.module.ResolveTagName(moduleName, tagName, default); // todo -- diagnostics
 
             if (elementType == null) {
                 return false;
             }
 
             if (elementType.IsUnresolvedGeneric && !string.IsNullOrEmpty(genericTypeResolver)) {
-                elementType = TypeProcessor.ResolveGenericElementType(elementType, genericTypeResolver, root.templateShell.referencedNamespaces, new TypeProcessor.DiagnosticWrapper());
+            //    elementType = TypeProcessor.ResolveGenericElementType(elementType, genericTypeResolver, root.templateShell.referencedNamespaces, new TypeProcessor.DiagnosticWrapper());
                 if (elementType == null) {
                     return false;
                 }
@@ -161,13 +161,13 @@ namespace UIForia.Parsing {
 
         }
 
-        public bool TryCreateSlotNode(string slotName, ReadOnlySizedArray<AttributeDefinition> attributes, ReadOnlySizedArray<AttributeDefinition> injectedAttributes, TemplateLineInfo templateLineInfo, SlotType slotType, string requiredChildType, out TemplateNode slot) {
+        public bool TryCreateSlotNode(string slotName, ReadOnlySizedArray<AttributeDefinition> attributes, ReadOnlySizedArray<AttributeDefinition> injectedAttributes, LineInfo lineInfo, SlotType slotType, string requiredChildType, out TemplateNode slot) {
             slot = null;
             
             switch (slotType) {
 
                 case SlotType.Define:
-                    slot = new SlotNode(slotName, attributes, injectedAttributes, templateLineInfo, SlotType.Define);
+                    slot = new SlotNode(slotName, attributes, injectedAttributes, lineInfo, SlotType.Define);
                     slot.requireType = requiredChildType;
                     root.AddSlot((SlotNode) slot);
                     AddChild(slot);
@@ -176,10 +176,10 @@ namespace UIForia.Parsing {
                 case SlotType.Forward: {
 
                     if (!(this is ElementNode expanded)) {
-                        return root.templateShell.ReportError(lineInfo, GetTagName() + " does not support forwarded slot nodes");
+                        return root.templateShell.ReportError(this.lineInfo, GetTagName() + " does not support forwarded slot nodes");
                     }
 
-                    slot = new SlotNode(slotName, attributes, injectedAttributes, templateLineInfo, SlotType.Forward);
+                    slot = new SlotNode(slotName, attributes, injectedAttributes, lineInfo, SlotType.Forward);
                     slot.requireType = requiredChildType;
                     // AddChild(slot);
                     expanded.AddSlotOverride((SlotNode) slot);
@@ -190,10 +190,10 @@ namespace UIForia.Parsing {
                 case SlotType.Override: {
 
                     if (!(this is ElementNode expanded)) {
-                        return root.templateShell.ReportError(lineInfo, GetTagName() + " does not support overriden slot nodes");
+                        return root.templateShell.ReportError(this.lineInfo, GetTagName() + " does not support overriden slot nodes");
                     }
 
-                    slot = new SlotNode(slotName, attributes, injectedAttributes, templateLineInfo, SlotType.Override);
+                    slot = new SlotNode(slotName, attributes, injectedAttributes, lineInfo, SlotType.Override);
                     slot.requireType = requiredChildType;
                     slot.root = root;
                     expanded.AddSlotOverride((SlotNode) slot);
@@ -207,8 +207,8 @@ namespace UIForia.Parsing {
             return false;
         }
 
-        public bool TryCreateRepeatNode(ReadOnlySizedArray<AttributeDefinition> attributes, TemplateLineInfo templateLineInfo, out TemplateNode templateNode) {
-            templateNode = new RepeatNode(attributes, templateLineInfo);
+        public bool TryCreateRepeatNode(ReadOnlySizedArray<AttributeDefinition> attributes, LineInfo lineInfo, out TemplateNode templateNode) {
+            templateNode = new RepeatNode(attributes, lineInfo);
             AddChild(templateNode);
             return true;
         }

@@ -51,7 +51,6 @@ namespace UIForia.Parsing.Expressions {
 
         [ThreadStatic]
         private static StringBuilder s_Builder;
-
         
         public static void ProcessTextExpressions(string input, StructList<TextExpression> outputList) {
             //input = input.Trim(); // todo -- let style handle this 

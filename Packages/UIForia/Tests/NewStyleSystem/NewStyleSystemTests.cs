@@ -28,13 +28,15 @@ namespace Tests {
         public AttributeSystem attributeSystem;
         public SelectorSystem selectorSystem;
         public StringInternSystem internSystem;
+        public StyleDatabase styleDatabase;
 
         public UIForiaSystems(int initialElementCount = 32) {
+            this.styleDatabase = new StyleDatabase(ModuleSystem.GetModule<StyleSystemTestModule>());
             this.elementSystem = new ElementSystem(initialElementCount);
-            this.styleSystem = new StyleSystem2(initialElementCount);
-            // this.templateSystem = new TemplateSystem(null);
-            // this.selectorSystem = new SelectorSystem();
-            // this.attributeSystem = new AttributeSystem(internSystem, elementSystem);
+            this.styleSystem = new StyleSystem2(initialElementCount, styleDatabase);
+            this.templateSystem = new TemplateSystem(null);
+            this.selectorSystem = new SelectorSystem();
+            this.attributeSystem = new AttributeSystem(internSystem, elementSystem);
         }
 
         public void Dispose() {
@@ -114,17 +116,17 @@ namespace Tests {
             }
         }
 
-        void BuildElementInfo(UIElement element, BufferList<ElementTraversalInfo> traversalInfo) {
-
-        }
+        void BuildElementInfo(UIElement element, BufferList<ElementTraversalInfo> traversalInfo) { }
 
         [Test]
         public void MakeDummyElements() {
-            UIForiaSystems systems = new UIForiaSystems();
-            // using () {
+            
+            using (UIForiaSystems systems = new UIForiaSystems()) {
+
                 MockElement tree = MockElement.CreateTree(systems, root => {
                     root.name = "a";
-                    root.AddChild("b", (b) => { b.AddChild("c"); });
+                    root.AddChild("b", (b) => { b.AddChild("c"); })
+                        .SetSharedStyles();
                     root.AddChild("d", (d) => {
                         d.AddChild("e", (e) => { e.AddChild("f"); });
                         d.AddChild("g", (g) => { g.AddChild("h"); });
@@ -132,17 +134,42 @@ namespace Tests {
                     });
                 });
 
+                // what do I want to test?
+                // can I reduce my problem scope?
+                // can I get to a point where I can run a real scene again? !!!!!!!
+                //     start from loading a root module and end at something rendered on screen
+                //     i have 6 weeks to do all this
+                //     where does testing come in? where can I re-use existing tests?
+                //    lets get the minimum up and running and then add back features on top of that
+                //        -- parse & compile templates + style
+                //        -- Run an application
+                //        -- flex + text layout (nothing complicated)
+                //        -- render (no clipping)
+                //        -- focus on making editor work too (finally)
+                // what needs testing exactly?
+                // i have a lot in flight right now that needs verification in a real world way
+                //    template compiler
+                //    template parser
+                //    style parser
+                //    style compiler
+                //    module system
+                //    style system
+                
+                // how can i track memory usage and find leaks?
+                // how can i get an overview of the memory used by my allocators
+                // how many allocators do I have?
+                // what is each one used for?
+                
                 new UpdateTraversalTable() {
                     rootId = tree.id,
                     hierarchyTable = systems.elementSystem.hierarchyTable,
                     traversalTable = systems.elementSystem.traversalTable,
                     metaTable = systems.elementSystem.metaTable,
                 }.Run();
-                
-            // }
+
+            }
         }
 
-        
         public static StyleSetData CreateStyleSetData(StyleState2 state, StyleId[] styles) {
             unsafe {
                 fixed (StyleId* s = styles) {

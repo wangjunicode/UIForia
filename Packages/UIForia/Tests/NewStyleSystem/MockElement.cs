@@ -80,8 +80,6 @@ namespace Tests {
 
         public MockElement SetSharedStyles(params string[] styleNames) {
 
-        
-
             return this;
 
         }

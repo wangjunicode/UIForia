@@ -19,7 +19,9 @@ namespace UIForia {
 
         public DataList<StyleStateUpdate>.Shared stateUpdates;
         public DataList<SharedStyleUpdate>.Shared sharedChangeSets;
+        public DataList<ElementId>.Shared instanceChangeSets;
 
+        public IntMap<List_InstanceStyleProperty> instanceMap;
         public IntMap<List_ElementId> styleIndex;
 
         public StyleDatabase styleDatabase;
@@ -39,14 +41,16 @@ namespace UIForia {
         private byte* backingStore;
         public Pow2AllocatorSet stylePropertyListAllocator;
 
-        public StyleSystem2(int initialElementCount) {
+        public StyleSystem2(int initialElementCount, StyleDatabase styleDatabase) {
 
+            this.styleDatabase = styleDatabase;
             initialElementCount = initialElementCount < 256 ? 256 : initialElementCount;
 
             this.styleIdAllocator = CreateStyleIdListAllocator();
             this.styleIndex = new IntMap<List_ElementId>(64, Allocator.Persistent);
 
             this.sharedChangeSets = new DataList<SharedStyleUpdate>.Shared(32, Allocator.Persistent);
+            this.instanceChangeSets = new DataList<ElementId>.Shared(32, Allocator.Persistent);
             this.stateUpdates = new DataList<StyleStateUpdate>.Shared(32, Allocator.Persistent);
             this.updatedStyleIdBuffer = new PagedList<StyleId>(512, Allocator.Persistent);
 
@@ -77,6 +81,11 @@ namespace UIForia {
                 styleSets[stateUpdates[i].elementId].stateChangeIndex = 0;
             }
 
+            for (int i = 1; i < instanceChangeSets.size; i++) {
+                styleSets[instanceChangeSets[i]].instanceChangeIndex = 0;
+            }
+
+            instanceChangeSets.size = 1;
             sharedChangeSets.size = 1;
             stateUpdates.size = 1;
 
@@ -247,11 +256,79 @@ namespace UIForia {
 
         }
 
+        public void UnsetInstanceStyle(ElementId elementId, PropertyId propertyId, StyleState2 state) {
+            // if (ElementSystem.IsDead(elementId)) return;
+
+            if (!instanceMap.TryGetPointer((int)elementId, out List_InstanceStyleProperty* listptr)) {
+                return;
+            }
+
+            ref List_InstanceStyleProperty list = ref *listptr;
+
+            for (int i = 0; i < list.size; i++) {
+
+                if (list.array[i].propertyId == propertyId && list.array[i].state == state) {
+                    
+                    ListAllocator<InstanceStyleProperty>.Create(stylePropertyListAllocator).Remove(ref list, i);
+                    EnsureInstanceChangeSet(elementId);
+                    
+                    if (list.size == 0) {
+                        instanceMap.Remove((int)elementId);
+                    }
+                    
+                    return;
+                }
+
+            }
+           
+        }
+
+        public void SetInstanceStyle(ElementId elementId, PropertyId propertyId, PropertyData propertyData, StyleState2 state) {
+            // if (ElementSystem.IsDead(elementId)) return;
+
+            ref List_InstanceStyleProperty list = ref instanceMap.GetOrCreateReference((int)elementId);
+
+            for (int i = 0; i < list.size; i++) {
+
+                if (list.array[i].propertyId == propertyId && list.array[i].state == state) {
+                    if (list.array[i].data.value == propertyData.value) {
+                        return;
+                    }
+
+                    list.array[i].data = propertyData;
+                    EnsureInstanceChangeSet(elementId);
+                    return;
+                }
+
+            }
+
+            ListAllocator<InstanceStyleProperty>.Create(stylePropertyListAllocator).Add(ref list, new InstanceStyleProperty() {
+                data = propertyData,
+                state = state,
+                propertyId = propertyId
+            });
+
+            EnsureInstanceChangeSet(elementId);
+
+        }
+
+        private void EnsureInstanceChangeSet(ElementId elementId) {
+            ref StyleSetData styleSet = ref styleSets[elementId];
+            if (styleSet.instanceChangeIndex == 0) {
+                styleSet.instanceChangeIndex = instanceChangeSets.size;
+                instanceChangeSets.Add(elementId);
+            }
+        }
+
         // destroy should be given a list of element indices sorted lowest-> highest
         // called every frame before frame start or maybe as a job(s) that run after frame but before next ui tick starts
 
         public void DestroyElement(ElementId elementId) {
 
+            if(instanceMap.TryRemove((int)elementId, out List_InstanceStyleProperty list)) {
+                ListAllocator<List_InstanceStyleProperty>.Create(stylePropertyListAllocator).Free(ref list);
+            }
+            
             if (sharedResults[elementId].properties != null) {
                 // free
             }
@@ -325,7 +402,7 @@ namespace UIForia {
 
             styleIdAllocator.Dispose();
             stylePropertyListAllocator.Dispose();
-            
+
             if (backingStore != null) {
                 UnsafeUtility.Free(backingStore, Allocator.Persistent);
                 backingStore = null;
@@ -345,7 +422,7 @@ namespace UIForia {
         }
 
         private void ResizeBackingBuffer(int newCapacity) {
-            
+
             backingStore = TypedUnsafe.ResizeSplitBuffer(
                 ref styleSets.array,
                 ref instanceResults.array,
@@ -394,6 +471,14 @@ namespace UIForia {
             public fixed int ids[16];
 
         }
+
+    }
+
+    public struct InstanceStyleProperty {
+
+        public PropertyId propertyId;
+        public StyleState2 state;
+        public PropertyData data;
 
     }
 

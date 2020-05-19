@@ -111,6 +111,7 @@ namespace UIForia.Util {
                 }
 
                 // todo -- doesnt handle nested comment case
+                // 7 for <!-- --> length
                 if (ptr + 7 < dataEnd) {
 
                     if (!(data[ptr + 0] == '<' && data[ptr + 1] == '!' && data[ptr + 2] == '-' && data[ptr + 3] == '-')) {
@@ -138,11 +139,13 @@ namespace UIForia.Util {
         private uint dataStart;
         private uint dataEnd;
         private uint ptr;
-
+        public int lineNumber;
+        public int colNumber;
+        
         [ThreadStatic] private static string s_ScratchBuffer;
         [ThreadStatic] private static List<EnumNameEntry> s_EnumNameEntryList;
 
-        public CharStream(char[] data, uint dataStart, uint dataEnd) {
+        public CharStream(char[] data, uint dataStart, uint dataEnd) : this() {
             fixed (char* dataptr = data) {
                 this.data = dataptr;
             }
@@ -152,44 +155,14 @@ namespace UIForia.Util {
             this.ptr = dataStart;
         }
 
-        public CharStream(char[] data) {
-            fixed (char* dataptr = data) {
-                this.data = dataptr;
-            }
-
-            this.dataStart = 0;
-            this.dataEnd = (uint) data.Length;
-            this.ptr = dataStart;
-        }
-
-        public CharStream(string data) {
-            fixed (char* dataptr = data) {
-                this.data = dataptr;
-            }
-
-            this.dataStart = 0;
-            this.dataEnd = (uint) data.Length;
-            this.ptr = dataStart;
-        }
-
-        public CharStream(char[] source, ReflessCharSpan span) {
-            fixed (char* dataptr = source) {
-                this.data = dataptr;
-            }
-
-            this.dataStart = span.rangeStart;
-            this.dataEnd = span.rangeEnd;
-            this.ptr = dataStart;
-        }
-
-        public CharStream(CharSpan span) {
+        public CharStream(CharSpan span) : this() {
             this.data = span.data;
             this.dataStart = span.rangeStart;
             this.dataEnd = span.rangeEnd;
             this.ptr = dataStart;
         }
 
-        public CharStream(char* source, uint start, uint end) {
+        public CharStream(char* source, uint start, uint end) : this() {
             this.data = source;
             this.dataStart = start;
             this.dataEnd = end;
@@ -197,7 +170,7 @@ namespace UIForia.Util {
         }
 
         // copy from current pointer position
-        public CharStream(CharStream propertyStream) {
+        public CharStream(CharStream propertyStream) : this() {
             this.data = propertyStream.data;
             this.dataStart = propertyStream.ptr;
             this.dataEnd = propertyStream.dataEnd;
@@ -1136,6 +1109,7 @@ namespace UIForia.Util {
         public readonly ushort rangeEnd;
 
         public int Length => rangeEnd - rangeStart;
+        public bool HasValue => Length > 0;
 
         public ReflessCharSpan(int rangeStart, int rangeEnd) {
             this.rangeStart = (ushort) rangeStart;

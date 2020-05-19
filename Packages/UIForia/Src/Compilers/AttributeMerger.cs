@@ -54,6 +54,21 @@ namespace UIForia.Compilers {
         // - Input handler declarations are ok
         // - Context variables are ok
 
+        public static void ConvertAttributeDefinitions(TemplateFileShell fileShell, int templateNodeId, ref SizedArray<AttrInfo> output) {
+            ref TemplateASTNode templateAstNode = ref fileShell.templateNodes[templateNodeId];
+            int start = templateAstNode.attributeRangeStart;
+            int end = templateAstNode.attributeRangeEnd;
+            int count = end - start;
+            
+            output.EnsureCapacity(count);
+            output.size = count;
+
+            for (int i = 0; i < count; i++) {
+                output.array[i] = new AttrInfo(0, fileShell.attributeList[i]);
+            }
+
+        }
+
         public static void ConvertAttributeDefinitions(ReadOnlySizedArray<AttributeDefinition> attrDefs, ref SizedArray<AttrInfo> output) {
             output.size = 0;
             output.EnsureCapacity(attrDefs.size);
@@ -64,6 +79,36 @@ namespace UIForia.Compilers {
 
             output.size = attrDefs.size;
 
+        }
+
+        public static void MergeExpandedAttributes2(ReadOnlySizedArray<AttributeDefinition2> outerAttributes, ReadOnlySizedArray<AttributeDefinition2> innerAttributes, ref SizedArray<AttrInfo> output) {
+            const AttributeType replacedType = AttributeType.Attribute | AttributeType.InstanceStyle;
+
+            output.EnsureCapacity(innerAttributes.size + outerAttributes.size);
+
+            int attrIdx = 0;
+
+            for (int i = 0; i < innerAttributes.size; i++) {
+                output.array[attrIdx++] = new AttrInfo(1, innerAttributes.array[i]);
+            }
+
+            for (int i = 0; i < outerAttributes.size; i++) {
+                ref AttributeDefinition2 attr = ref outerAttributes.array[i];
+
+                int idx = ContainsAttr(attr, output);
+
+                if (idx == -1) {
+                    output.array[attrIdx++] = new AttrInfo(0, attr);
+                }
+                else if ((attr.type & replacedType) != 0) {
+                    output.array[idx] = new AttrInfo(0, attr);
+                }
+                else {
+                    output.array[attrIdx++] = new AttrInfo(1, attr);
+                }
+            }
+
+            output.size = attrIdx;
         }
 
         public static void MergeExpandedAttributes2(ReadOnlySizedArray<AttributeDefinition> outerAttributes, ReadOnlySizedArray<AttributeDefinition> innerAttributes, ref SizedArray<AttrInfo> output) {
@@ -164,6 +209,17 @@ namespace UIForia.Compilers {
         }
 
         private static int ContainsAttr(in AttributeDefinition a, ReadOnlySizedArray<AttrInfo> list) {
+            for (int i = 0; i < list.size; i++) {
+                ref AttrInfo b = ref list.array[i];
+                if (a.type == b.type && a.key == b.key) {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+        
+        private static int ContainsAttr(in AttributeDefinition2 a, ReadOnlySizedArray<AttrInfo> list) {
             for (int i = 0; i < list.size; i++) {
                 ref AttrInfo b = ref list.array[i];
                 if (a.type == b.type && a.key == b.key) {

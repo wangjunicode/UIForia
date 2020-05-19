@@ -18,27 +18,95 @@ namespace UIForia.Src {
 
     public static class ModuleSystem {
 
-        private static readonly Module[] modules;
-        private static readonly HashSet<ResolvedTemplateLocation> s_TemplateSet;
+        private static Module[] modules;
 
-        internal static readonly bool s_ConstructionAllowed;
+        internal static bool s_ConstructionAllowed;
 
         private static List<Diagnostic> diagnostics;
         private static readonly object diagnosticLock = new object();
         private static TemplateCache s_TemplateCache;
 
         public static Module BuiltInModule { get; private set; }
+        public static bool FailedToLoad { get; internal set; }
+        public static bool IsLoading { get; internal set; }
+        public static bool IsInitialized { get; private set; }
 
-        static ModuleSystem() {
-            s_TemplateSet = new HashSet<ResolvedTemplateLocation>();
+        private static List<Diagnostic> diagnosticLog = new List<Diagnostic>();
+        internal static Dictionary<string, TemplateFileShell> s_TemplateShells;
+
+        public struct Stats {
+
+            public int elementCount;
+            public int moduleCount;
+            public double totalModuleLoadTime;
+            public double getModuleTypesTime;
+            public double createModulesTime;
+            public double validateModulePathsTime;
+            public double validateModuleDependenciesTime;
+            public double assignElementsToModulesTime;
+            public TypeResolver.Stats typeResolverStats;
+
+        }
+
+        internal static Stats stats;
+
+        public static Stats GetStats() {
+            return stats;
+        }
+
+        public static List<Diagnostic> GetDiagnosticLogs() {
+            return diagnosticLog;
+        }
+
+        public static void Initialize() {
+            // if (IsInitialized) return;
+            // IsInitialized = true;
+            IsLoading = true;
+            s_TemplateShells = new Dictionary<string, TemplateFileShell>();
+            TypeResolver.Initialize();
+            stats.typeResolverStats = TypeResolver.GetLoadStats();
+
+            Stopwatch watch = Stopwatch.StartNew();
+            Stopwatch total = Stopwatch.StartNew();
+
+            // todo -- this likely needs to be generated per app when precompiling since I dont want the type processor included in builds
+
             IList<Type> moduleTypes = TypeProcessor.GetModuleTypes();
+            stats.getModuleTypesTime = watch.Elapsed.TotalMilliseconds;
+
             modules = new Module[moduleTypes.Count];
+
+            watch.Restart();
 
             for (int i = 0; i < moduleTypes.Count; i++) {
                 s_ConstructionAllowed = true;
-                Module instance = (Module) Activator.CreateInstance(moduleTypes[i]);
+                Module instance = null;
+
+                if (moduleTypes[i].IsAbstract) {
+                    FailedToLoad = true;
+                    LogDiagnosticInfo("Modules cannot be abstract but found " + moduleTypes[i].GetTypeName() + " which was");
+                    continue;
+                }
+
+                try {
+                    instance = (Module) Activator.CreateInstance(moduleTypes[i]);
+                }
+                catch (Exception e) {
+                    LogDiagnosticException("Exception while creating module instance of type " + moduleTypes[i].GetTypeName(), e);
+                    continue;
+                }
+
                 s_ConstructionAllowed = false;
-                string moduleLocation = GetFilePathFromAttribute(moduleTypes[i]);
+
+                RecordFilePathAttribute attr = moduleTypes[i].GetCustomAttribute<RecordFilePathAttribute>();
+
+                if (attr == null) {
+                    LogDiagnosticError($"Modules must provide a [{TypeNameGenerator.GetTypeName(typeof(RecordFilePathAttribute))}] attribute. {TypeNameGenerator.GetTypeName(moduleTypes[i])} is missing one.");
+                    continue;
+                }
+
+                string moduleLocation = attr.filePath;
+
                 instance.location = Path.GetDirectoryName(moduleLocation) + Path.DirectorySeparatorChar;
                 modules[i] = instance;
 
@@ -50,21 +118,79 @@ namespace UIForia.Src {
                     instance.Configure();
                 }
                 catch (Exception e) {
-                    Debug.LogError(e);
+                    LogDiagnosticError(e.Message);
                 }
             }
 
+            stats.moduleCount = moduleTypes.Count;
+            stats.createModulesTime = watch.Elapsed.TotalMilliseconds;
+
+            if (FailedToLoad) {
+                IsLoading = false;
+                return;
+            }
+
+            watch.Restart();
             ValidateModulePaths();
+            stats.validateModulePathsTime = watch.Elapsed.TotalMilliseconds;
 
+            if (FailedToLoad) {
+                IsLoading = false;
+                return;
+            }
+
+            watch.Restart();
             ValidateModuleDependencies();
+            stats.validateModuleDependenciesTime = watch.Elapsed.TotalMilliseconds;
 
+            if (FailedToLoad) {
+                IsLoading = false;
+                return;
+            }
+
+            watch.Restart();
             AssignElementsToModules();
+            stats.assignElementsToModulesTime = watch.Elapsed.TotalMilliseconds;
 
+            IsLoading = false;
+            stats.totalModuleLoadTime = total.Elapsed.TotalMilliseconds;
         }
 
-        private static void AssignElementsToModules() {
 
-            Stopwatch sw = Stopwatch.StartNew();
+        static ModuleSystem() {
+            Initialize();
+        }
+
+        internal static void LogDiagnosticException(string message, Exception e) {
+            diagnosticLog.Add(new Diagnostic() {
+                exception = e,
+                message = message,
+                diagnosticType = DiagnosticType.ModuleException
+            });
+            Debug.LogError(message + "\n" + e.Message);
+            Debug.LogError(e.StackTrace);
+            FailedToLoad = true;
+        }
+
+        internal static void LogDiagnosticError(string message) {
+            diagnosticLog.Add(new Diagnostic() {
+                message = message,
+                diagnosticType = DiagnosticType.ModuleError
+            });
+            Debug.LogError(message);
+            FailedToLoad = true;
+        }
+
+        internal static void LogDiagnosticInfo(string message) {
+            diagnosticLog.Add(new Diagnostic() {
+                message = message,
+                diagnosticType = DiagnosticType.ModuleInfo
+            });
+            Debug.Log(message);
+        }
+
+        // cannot be mulithreaded without significant work
+        private static void AssignElementsToModules() {
 
             IList<Type> elements = TypeProcessor.GetElementTypes();
 
@@ -74,26 +200,29 @@ namespace UIForia.Src {
                 if (currentType.IsAbstract) continue;
 
                 ProcessedType processedType = ProcessedType.CreateFromType(currentType);
-                TypeProcessor.typeMap[processedType.rawType] = processedType;
+
+                // CreateFromType handles logging diagnostics, can just move on if we failed
+                if (processedType == null) {
+                    continue;
+                }
 
                 if (string.IsNullOrEmpty(processedType.elementPath)) {
                     if (processedType.rawType.Assembly != typeof(UIElement).Assembly) {
-                        Debug.LogError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} requires a location providing attribute." +
-                                       $" Please use [{nameof(RecordFilePathAttribute)}], [{nameof(TemplateAttribute)}], " +
-                                       $"[{nameof(ImportStyleSheetAttribute)}], [{nameof(StyleAttribute)}]" +
-                                       $" or [{nameof(TemplateTagNameAttribute)}] on the class. If you intend not to provide a template you can also use [{nameof(ContainerElementAttribute)}].");
+                        LogDiagnosticError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} requires a location providing attribute." +
+                                           $" Please use [{nameof(RecordFilePathAttribute)}], [{nameof(TemplateAttribute)}], " +
+                                           $"[{nameof(ImportStyleSheetAttribute)}], [{nameof(StyleAttribute)}]" +
+                                           $" or [{nameof(TemplateTagNameAttribute)}] on the class. If you intend not to provide a template you can also use [{nameof(ContainerElementAttribute)}].");
                         continue;
                     }
                 }
 
-                if (!TryAssignModule(processedType)) {
-                    Debug.LogError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} at {processedType.elementPath} was not inside a module hierarchy.");
-                }
+                TypeProcessor.typeMap[processedType.rawType] = processedType;
+
+                TryAssignModule(processedType);
 
             }
 
-            sw.Stop();
-//            Debug.Log($"Assigned elements to modules in {sw.Elapsed.TotalMilliseconds:F3}ms with {elements.Count} element types");
+            stats.elementCount = elements.Count;
         }
 
         internal static Module LoadRootModule(Type rootType) {
@@ -113,63 +242,73 @@ namespace UIForia.Src {
             return rootModule;
         }
 
-        private static bool TryAssignModule(ProcessedType processedType) {
+        private static void TryAssignModule(ProcessedType processedType) {
             string path = processedType.elementPath;
 
             if (processedType.module != null) {
-                return true;
+                return;
             }
 
-            if (string.IsNullOrEmpty(path)) {
-                return false;
+            if (processedType.rawType.IsAbstract) {
+                return;
             }
 
             for (int i = 0; i < modules.Length; i++) {
                 Module module = modules[i];
-                if (path.StartsWith(module.location, StringComparison.Ordinal)) {
-                    
-                    module.AddElementType(processedType);
 
-                    try {
-                        module.tagNameMap.Add(processedType.tagName, processedType);
-                    }
-                    catch (ArgumentException) {
-                        Debug.LogError($"UIForia does not support multiple elements with the same tag name within the same module. Tried to register type {TypeNameGenerator.GetTypeName(processedType.rawType)} for `{processedType.tagName}` " +
+                if (!path.StartsWith(module.location, StringComparison.Ordinal)) {
+                    continue;
+                }
+
+                module.AddElementType(processedType);
+
+                try {
+                    module.tagNameMap.Add(processedType.tagName, processedType);
+                }
+                catch (ArgumentException) {
+                    LogDiagnosticError($"UIForia does not support multiple elements with the same tag name within the same module. Tried to register type {TypeNameGenerator.GetTypeName(processedType.rawType)} for `{processedType.tagName}` " +
                                        $" in module {TypeNameGenerator.GetTypeName(module.GetType())} at {module.location} " +
                                        $"but this tag name was already taken by type {TypeNameGenerator.GetTypeName(module.tagNameMap[processedType.tagName].rawType)}. " +
                                        "For generic overload types with multiple arguments you need to supply a unique [TagName] attribute");
-                        continue;
-                    }
-
-                    processedType.module = module;
-
-                    // todo -- maybe run this as part of template gather in case something changed
-
-                    if (!processedType.IsContainerElement && !processedType.rawType.IsAbstract) {
-                        processedType.resolvedTemplateLocation = module.ResolveTemplatePath(new TemplateLookup(processedType));
-                        if (processedType.resolvedTemplateLocation == null) {
-                            Debug.LogError($"Unable to locate template for {TypeNameGenerator.GetTypeName(processedType.rawType)}.");
-                        }
-                        else {
-                            s_TemplateSet.Add(new ResolvedTemplateLocation(module, processedType.resolvedTemplateLocation.Value.filePath));
-                        }
-                    }
-
-                    return true;
+                    return;
                 }
+
+                processedType.module = module;
+
+                if (processedType.IsContainerElement) {
+                    return;
+                }
+                
+                try {
+                    processedType.resolvedTemplateLocation = module.ResolveTemplatePath(new TemplateLookup(processedType));
+                }
+                catch (Exception e) {
+                    LogDiagnosticException($"Unable to resolve template location for {processedType.rawType.GetTypeName()}", e);
+                    return;
+                }
+
+                if (processedType.resolvedTemplateLocation == null) {
+                    LogDiagnosticError($"Unable to locate template for {TypeNameGenerator.GetTypeName(processedType.rawType)}.");
+                    return;
+                }
+
+                string templateLocation = processedType.resolvedTemplateLocation.Value.filePath;
+
+                if (!s_TemplateShells.TryGetValue(templateLocation, out TemplateFileShell shell)) {
+                    shell = new TemplateFileShell(templateLocation);
+                    module.templateShells.Add(shell);
+                    processedType.templateFileShell = shell;
+                    s_TemplateShells.Add(templateLocation, shell);
+                }
+                else {
+                    processedType.templateFileShell = shell;
+                }
+
+                return;
             }
 
-            return false;
-        }
+            LogDiagnosticError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} at {processedType.elementPath} was not inside a module hierarchy.");
 
-        private static string GetFilePathFromAttribute(Type moduleType) {
-            RecordFilePathAttribute attr = moduleType.GetCustomAttribute<RecordFilePathAttribute>();
-
-            if (attr == null) {
-                throw new ModuleLoadException($"Modules must provide a [{TypeNameGenerator.GetTypeName(typeof(RecordFilePathAttribute))}] attribute. {TypeNameGenerator.GetTypeName(moduleType)} is missing one.");
-            }
-
-            return attr.filePath;
         }
 
         private static void ValidateModulePaths() {
@@ -181,15 +320,16 @@ namespace UIForia.Src {
                     if (moduleI == moduleJ) continue;
 
                     if (moduleI.location.StartsWith(moduleJ.location, StringComparison.Ordinal)) {
-                        throw new ModuleLoadException("Nested Modules are not yet supported. " +
-                                                      $"{TypeNameGenerator.GetTypeName(moduleI.GetType())} is a parent of " +
-                                                      $"{TypeNameGenerator.GetTypeName(moduleJ.GetType())}. ({moduleJ.location})");
+                        LogDiagnosticError("Nested Modules are not yet supported. " +
+                                           $"{TypeNameGenerator.GetTypeName(moduleI.GetType())} is a parent of " +
+                                           $"{TypeNameGenerator.GetTypeName(moduleJ.GetType())}. ({moduleJ.location})");
+                        continue;
                     }
 
                     if (moduleJ.location.StartsWith(moduleI.location, StringComparison.Ordinal)) {
-                        throw new ModuleLoadException("Nested Modules are not yet supported. " +
-                                                      $"{TypeNameGenerator.GetTypeName(moduleJ.GetType())} is a parent of " +
-                                                      $"{TypeNameGenerator.GetTypeName(moduleI.GetType())}. ({moduleI.location})");
+                        LogDiagnosticError("Nested Modules are not yet supported. " +
+                                           $"{TypeNameGenerator.GetTypeName(moduleJ.GetType())} is a parent of " +
+                                           $"{TypeNameGenerator.GetTypeName(moduleI.GetType())}. ({moduleI.location})");
                     }
                 }
             }
@@ -208,18 +348,18 @@ namespace UIForia.Src {
             }
         }
 
-        private static void Visit(Module module, LightStack<Module> stack, LightList<Module> sorted) {
-
+        private static bool Visit(Module module, LightStack<Module> stack, LightList<Module> sorted) {
 
             if (sorted.Contains(module)) {
-                return;
+                return true;
             }
 
             if (stack.Contains(module)) {
 
                 string error = StringUtil.ListToString(stack.array.Select(m => m.GetType().GetTypeName()).ToArray(), " -> ");
 
-                throw new ModuleLoadException($"Cyclic dependency found while loading modules: {error}");
+                LogDiagnosticError($"Cyclic dependency found while loading modules: {error}");
+                return false;
             }
 
             stack.Push(module);
@@ -227,12 +367,14 @@ namespace UIForia.Src {
             IList<ModuleReference> dependencies = module.dependencies;
 
             for (int i = 0; i < dependencies.Count; i++) {
-                Visit(dependencies[i].GetModuleInstance(), stack, sorted);
+                if (!Visit(dependencies[i].GetModuleInstance(), stack, sorted)) {
+                    return false;
+                }
             }
 
             Assert.AreEqual(module, stack.Peek());
             sorted.Add(stack.Pop());
-
+            return true;
         }
 
         private static Module GetModuleInstance(Type moduleType) {
@@ -247,7 +389,7 @@ namespace UIForia.Src {
 
         private static void ValidateModuleDependencies() {
 
-            HashSet<string> stringHash = new HashSet<string>();
+            Dictionary<string, Type> stringHash = new Dictionary<string, Type>();
             HashSet<Type> typeHash = new HashSet<Type>();
 
             for (int m = 0; m < modules.Length; m++) {
@@ -281,17 +423,23 @@ namespace UIForia.Src {
                     Type dependencyType = dependencies[i].GetModuleType();
                     string alias = dependencies[i].GetAlias();
 
-                    if (stringHash.Contains(alias)) {
-                        throw new ModuleLoadException($"Duplicate alias or module name {alias}");
+                    if (stringHash.TryGetValue(alias, out Type otherModule)) {
+                        LogDiagnosticError($"Duplicate alias or module name found in module {instance.GetType().GetTypeName()}. Both {dependencyType.GetTypeName()} and {otherModule.GetTypeName()} are registered as {alias}");
+                        break;
                     }
 
                     if (typeHash.Contains(dependencyType)) {
-                        throw new ModuleLoadException($"Duplicate dependency of type {TypeNameGenerator.GetTypeName(dependencyType)} in module {instance.GetType().GetTypeName()}");
+                        LogDiagnosticError($"Duplicate dependency of type {TypeNameGenerator.GetTypeName(dependencyType)} in module {instance.GetType().GetTypeName()}");
+                        break;
                     }
 
-                    stringHash.Add(alias);
+                    stringHash.Add(alias, dependencyType);
                     typeHash.Add(dependencyType);
                 }
+            }
+
+            if (FailedToLoad) {
+                return;
             }
 
             LightList<Module> sorted = new LightList<Module>(modules.Length);
@@ -309,7 +457,7 @@ namespace UIForia.Src {
         public static IList<Module> GetModuleList() {
             return new List<Module>(modules);
         }
-        
+
         public static IList<ProcessedType> GetTemplateElements() {
             return TypeProcessor.GetTemplateElements();
         }
@@ -338,91 +486,83 @@ namespace UIForia.Src {
                 }
             }
 
+            // maybe keep this flattened list on each module already?
+            // then just join them all 
             Module[] list = FlattenDependencyTree(modulesToCompile);
 
-            LightList<TemplateShell> parseList = new LightList<TemplateShell>();
+            LightList<TemplateShell_Deprecated> parseList = new LightList<TemplateShell_Deprecated>();
 
             for (int i = 0; i < list.Length; i++) {
                 Module module = list[i];
 
-                ReadOnlySizedArray<TemplateShell> sources = module.GetTemplateShells();
-
-                for (int j = 0; j < sources.size; j++) {
-
-                    TemplateShell source = sources.array[j];
-
-                    sourceCache.Ensure(source.filePath);
-
-                    parseList.Add(source);
-
-                }
+                // ReadOnlySizedArray<TemplateShell> sources = module.GetTemplateShells();
+                //
+                // for (int j = 0; j < sources.size; j++) {
+                //
+                //     TemplateShell source = sources.array[j];
+                //
+                //     sourceCache.Ensure(source.filePath);
+                //
+                //     parseList.Add(source);
+                //
+                // }
 
             }
 
             Parse(parseList);
 
-            MatchElementTypesToTemplateNodes(list);
-
             // ParseStyles(templateTypes);
-            
+
             return GatherTypesToCompile(entryType);
-            
+
         }
 
         private static ProcessedType[] GatherTypesToCompile(Type entryType) {
 
             ProcessedType entry = TypeProcessor.GetProcessedType(entryType);
-            
+
             HashSet<ProcessedType> toCompile = new HashSet<ProcessedType>();
             HashSet<ProcessedType> searched = new HashSet<ProcessedType>();
-            
+
             LightStack<TemplateNode> stack = new LightStack<TemplateNode>();
             LightStack<ProcessedType> toSearchStack = new LightStack<ProcessedType>();
 
             toCompile.Add(entry);
-            
+
             toSearchStack.Push(entry);
 
             while (toSearchStack.size != 0) {
-                
+
                 ProcessedType checkType = toSearchStack.Pop();
-                
+
                 stack.Push(checkType.templateRootNode);
-                
+
                 while (stack.size != 0) {
                     TemplateNode current = stack.Pop();
 
                     // dont want to add unresolved generics but do want to search them
-                
+
                     if (current.processedType != null && current.processedType.DeclaresTemplate) {
-                    
+
                         toCompile.Add(current.processedType);
 
                         if (searched.Add(current.processedType)) {
-                            
+
                             toSearchStack.Push(current.processedType);
-                            
+
                         }
-                    
+
                     }
-                
+
                     for (int i = 0; i < current.children.size; i++) {
                         stack.Push(current.children.array[i]);
                     }
-                
+
                 }
-                
+
             }
-                       
+
             return toCompile.ToArray();
-        }
-
-        private static void MatchElementTypesToTemplateNodes(Module[] list) {
-
-            for (int i = 0; i < list.Length; i++) {
-                list[i].MatchElementTypesToTemplateNodes();
-            }
-
         }
 
         private struct ParseJob : IJobParallelFor, IJob {
@@ -430,10 +570,10 @@ namespace UIForia.Src {
             public GCHandle handle;
 
             public void Execute(int i) {
-                
-                LightList<TemplateShell> parseList = (LightList<TemplateShell>) handle.Target;
-                
-                TemplateShell templateShell = parseList.array[i];
+
+                LightList<TemplateShell_Deprecated> parseList = (LightList<TemplateShell_Deprecated>) handle.Target;
+
+                TemplateShell_Deprecated templateShell = parseList.array[i];
 
                 FileInfo fileInfo = sourceCache.Get(parseList.array[i].filePath);
 
@@ -448,18 +588,18 @@ namespace UIForia.Src {
 
                 templateShell.Reset();
 
-                TemplateParser parser = TemplateParser.GetParserForFileType("xml");
+                TemplateParser_Deprecated parserDeprecated = TemplateParser_Deprecated.GetParserForFileType("xml");
 
-                parser.OnSetup();
+                parserDeprecated.OnSetup();
 
-                if (parser.TryParse(fileInfo.contents, templateShell)) {
+                if (parserDeprecated.TryParse(fileInfo.contents, templateShell)) {
                     templateShell.lastParseVersion = fileInfo.lastWriteTime;
                 }
                 else {
                     templateShell.lastParseVersion = default;
                 }
 
-                parser.OnReset();
+                parserDeprecated.OnReset();
 
                 TemplateValidator.Validate(templateShell); // separate job?
 
@@ -467,7 +607,7 @@ namespace UIForia.Src {
 
             public void Execute() {
 
-                LightList<TemplateShell> parseList = (LightList<TemplateShell>) handle.Target;
+                LightList<TemplateShell_Deprecated> parseList = (LightList<TemplateShell_Deprecated>) handle.Target;
 
                 for (int i = 0; i < parseList.size; i++) {
                     Execute(i);
@@ -477,23 +617,23 @@ namespace UIForia.Src {
 
         }
 
-        private static void Parse(LightList<TemplateShell> parseList) {
-            
+        private static void Parse(LightList<TemplateShell_Deprecated> parseList) {
+
             sourceCache.FlushPendingUpdates();
 
             ParseJob parseJob = new ParseJob() {
                 handle = GCHandle.Alloc(parseList)
             };
-            
+
             // note: there is a somewhat high startup cost to running this job for the first time
             // for this job in particular we get a ~2x speed up with parallel (without caching of parse results)
             // warmup time with parallel is ~30ms for 1 use case, then runs are ~0.5ms. just calling Run()
             // on main thread is around 1ms with bad xml parser, probably half of that with a faster one
-            
+
             parseJob.Run();
             // JobHandle handle = parseJob.Schedule(parseList.size, 1);
             // handle.Complete();
-            
+
             parseJob.handle.Free();
         }
 

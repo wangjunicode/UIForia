@@ -1,23 +1,12 @@
+using System;
+
 namespace UIForia {
-
-    public class DiagnosticLog {
-
-        public virtual void ReportCompileError() { }
-
-        public virtual void ReportTemplateParseError() { }
-
-        public virtual void ReportExpressionParseError() { }
-
-        public virtual void ReportStyleParseError() { }
-
-        public virtual void ReportRuntimeError() { }
-        
-    }
-
+    
     public struct Diagnostic {
     
         public string message;
         public string filePath;
+        public Exception exception;
         public int lineNumber;
         public int columnNumber;
         public DiagnosticType diagnosticType;
@@ -35,9 +24,14 @@ namespace UIForia {
     
     public enum DiagnosticType : ushort {
     
+        ModuleLog,
+        ModuleError,
+        ModuleException,
         ParseError,
-        ParseWarning
-    
+        ParseWarning,
+
+        ModuleInfo
+
     }
 
 }

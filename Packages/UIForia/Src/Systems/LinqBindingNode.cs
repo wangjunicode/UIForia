@@ -8,7 +8,7 @@ using UIForia.UIInput;
 using UIForia.Util;
 
 namespace UIForia.Systems {
-    
+
     public abstract class BindingVariable {
 
         public string name;
@@ -58,6 +58,32 @@ namespace UIForia.Systems {
 
         public override ContextVariable CreateReference() {
             return new ContextVariable<T>((ContextVariable<T>) reference ?? this);
+        }
+
+    }
+
+    public struct BindingInfo {
+
+        public UIElement root;
+        public UIElement element;
+        public UIElement[] referencedContexts;
+        public BindingVariable[] variables;
+
+        internal Action<UIElement, UIElement> createdBinding;
+        internal Action<UIElement, UIElement> enabledBinding;
+        internal Action<LinqBindingNode> updateBindings;
+        internal Action<UIElement, UIElement> lateBindings;
+
+        // goal -> greatly reduce allocations, keep performance on par
+        
+        // other than maybe savings on pointer size, is there a reason not to include the actions directly?
+        // one argument might be to keep the struct unmanaged
+        // but i have tricks for this
+        
+        // not walking the tree recursively would also net perf gains
+        
+        public void RunBinding(ElementSystem elementSystem) {
+            
         }
 
     }
@@ -134,7 +160,7 @@ namespace UIForia.Systems {
             // locally defined context vars / sync vars are accessed by index
             // parent ones are searched by id starting at localSize
             // should know at compile time how many context variables are referenced, can pre-size an array as an optimization
-            
+
             ContextVariable ptr = localVariable;
             while (ptr != null) {
                 if (ptr.id == id) {
@@ -246,7 +272,7 @@ namespace UIForia.Systems {
             }
 
             if (updatedId != -1) {
-            //    updateBindings = application.templateData.bindings[updatedId];
+                //    updateBindings = application.templateData.bindings[updatedId];
             }
 
             if (lateId != -1) {

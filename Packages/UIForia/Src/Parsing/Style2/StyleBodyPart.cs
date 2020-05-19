@@ -7,7 +7,7 @@ using UIForia.Util;
 namespace UIForia.Style2 {
 
     // todo the size of this struct is 32 bytes. can get it down to 24 or so by not including a the char * pointer and switch to ReflessCharSpan
-    // but then we need a way to get the data to hookup the references, which is annoyoing
+    // but then we need a way to get the data to hookup the references, which is annoying
 
     [DebuggerDisplay("{" + nameof(DebuggerDisplay) + "(), nq}")]
     [StructLayout(LayoutKind.Explicit)]

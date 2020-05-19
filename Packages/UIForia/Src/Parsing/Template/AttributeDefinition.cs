@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using UIForia.Compilers;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Parsing {
 
@@ -39,7 +40,9 @@ namespace UIForia.Parsing {
 
         StyleStateHover = 1 << 6,
         StyleStateFocus = 1 << 7,
-        StyleStateActive = 1 << 8
+        StyleStateActive = 1 << 8,
+
+        Injected
 
     }
 
@@ -55,6 +58,27 @@ namespace UIForia.Parsing {
     }
 
     [DebuggerDisplay("type={type} {key}={value}")]
+    public struct AttributeDefinition2 {
+
+        public readonly string key;
+        public readonly string value;
+        public int line;
+        public int column;
+        public AttributeType type;
+        public AttributeFlags flags;
+
+        public AttributeDefinition2(AttributeType type, AttributeFlags flags, string key, string value, int line = -1, int column = -1) {
+            this.type = type;
+            this.flags = flags;
+            this.key = key;
+            this.value = value;
+            this.line = line;
+            this.column = column;
+        }
+
+    }
+
+    [DebuggerDisplay("type={type} {key}={value}")]
     public struct AttributeDefinition {
 
         public readonly string key;
@@ -65,9 +89,9 @@ namespace UIForia.Parsing {
         public AttributeType type;
         public AttributeFlags flags;
         public SlotAttributeData slotAttributeData;
-        public TemplateShell templateShell;
+        public TemplateShell_Deprecated templateShell;
         
-        public AttributeDefinition(string rawValue, AttributeType type, AttributeFlags flags,  string key, string value, TemplateShell templateShell, int line = -1, int column = -1) {
+        public AttributeDefinition(string rawValue, AttributeType type, AttributeFlags flags,  string key, string value, TemplateShell_Deprecated templateShell, int line = -1, int column = -1) {
             this.rawValue = rawValue;
             this.type = type;
             this.flags = flags;
@@ -82,7 +106,7 @@ namespace UIForia.Parsing {
         public AttributeNodeDebugData DebugData => new AttributeNodeDebugData() {
             content = rawValue,
             fileName = templateShell.filePath,
-            lineInfo = new TemplateLineInfo(line, column),
+            lineInfo = new LineInfo(line, column),
             tagName = ""
         };
         

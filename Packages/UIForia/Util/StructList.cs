@@ -270,49 +270,44 @@ namespace UIForia.Util {
         }
 
         private static readonly LightList<StructList<T>> s_Pool = new LightList<StructList<T>>();
-        private static readonly object poolLock = new object();
 
         public static StructList<T> Get() {
-            lock (poolLock) {
-                StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>();
-                retn.isInPool = false;
-                return retn;
-            }
+            StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>();
+            retn.isInPool = false;
+            return retn;
         }
 
         public static StructList<T> GetMinSize(int minCapacity) {
-            lock (poolLock) {
-                if (minCapacity < 1) minCapacity = 4;
+            if (minCapacity < 1) minCapacity = 4;
 
-                if (s_Pool.size == 0) {
-                    return new StructList<T>(minCapacity) {isInPool = false};
-                }
-
-                for (int i = 0; i < s_Pool.size; i++) {
-
-                    StructList<T> list = s_Pool.array[i];
-
-                    if (list.array.Length < minCapacity) {
-                        continue;
-                    }
-
-                    if (s_Pool.size == 1) {
-                        s_Pool.array[i] = null;
-                    }
-                    else {
-                        s_Pool.array[i] = s_Pool.array[s_Pool.size - 1];
-                        s_Pool.array[s_Pool.size - 1] = null;
-                    }
-
-                    s_Pool.size -= 1;
-
-                    list.isInPool = false;
-
-                    return list;
-                }
-
+            if (s_Pool.size == 0) {
                 return new StructList<T>(minCapacity) {isInPool = false};
             }
+
+            for (int i = 0; i < s_Pool.size; i++) {
+
+                StructList<T> list = s_Pool.array[i];
+
+                if (list.array.Length < minCapacity) {
+                    continue;
+                }
+
+                if (s_Pool.size == 1) {
+                    s_Pool.array[i] = null;
+                }
+                else {
+                    s_Pool.array[i] = s_Pool.array[s_Pool.size - 1];
+                    s_Pool.array[s_Pool.size - 1] = null;
+                }
+
+                s_Pool.size -= 1;
+
+                list.isInPool = false;
+
+                return list;
+            }
+
+            return new StructList<T>(minCapacity) {isInPool = false};
 
         }
 
@@ -530,27 +525,21 @@ namespace UIForia.Util {
             size = 0;
             if (isInPool) return;
             isInPool = true;
-            lock (poolLock) {
-                s_Pool.Add(this);
-            }
+            s_Pool.Add(this);
         }
 
         public void Release() {
             Clear();
             if (isInPool) return;
             isInPool = true;
-            lock (poolLock) {
-                s_Pool.Add(this);
-            }
+            s_Pool.Add(this);
         }
 
         public static void Release(ref StructList<T> toPool) {
             toPool.Clear();
             if (toPool.isInPool) return;
             toPool.isInPool = true;
-            lock (poolLock) {
-                s_Pool.Add(toPool);
-            }
+            s_Pool.Add(toPool);
             toPool = null;
         }
 

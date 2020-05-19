@@ -42,7 +42,7 @@ namespace UIForia.Compilers {
 
         public void Setup() {
             SetNamespaces(context.namespaces);
-            contextExpressionList.EnsureCapacity(context.rootVariables.size);
+            contextExpressionList.EnsureCapacity(context.references.size);
         }
 
         public void Init() {
@@ -66,23 +66,23 @@ namespace UIForia.Compilers {
                 throw new NotImplementedException();
             }
 
-            ref TemplateContextReference ctx = ref context.rootVariables.array[context.depth];
+            ref TemplateContextReference ctx = ref context.references.array[context.depth];
             switch (context.templateNodeType) {
 
                 case TemplateNodeType.SlotOverride: {
                     if (contextExpressionList.array[context.depth] == null) {
                         // reference array is inverted from attr depth, ie depth = level slot was defined on, level contexts.size -1 == level slot was overridden on. forwards are between 0 and 1
-                        int diff = context.rootVariables.size - 1 - context.depth;
-                        contextExpressionList.array[context.depth] = AddVariable(context.rootVariables.array[diff].processedType.rawType, "refContext_" + diff, ParameterFlags.NeverNull);
+                        int diff = context.references.size - 1 - context.depth;
+                        contextExpressionList.array[context.depth] = AddVariable(context.references.array[diff].processedType.rawType, "refContext_" + diff, ParameterFlags.NeverNull);
                         IndexExpression array = Expression.ArrayAccess(Expression.Field(parameter.expression, MemberData.BindingNode_ReferencedContexts), ExpressionUtil.GetIntConstant(diff));
-                        Assign(contextExpressionList.array[context.depth], Expression.TypeAs(array, context.rootVariables.array[diff].processedType.rawType));
+                        Assign(contextExpressionList.array[context.depth], Expression.TypeAs(array, context.references.array[diff].processedType.rawType));
                     }
 
                     break;
                 }
 
                 case TemplateNodeType.SlotDefine:
-                case TemplateNodeType.Standard:
+                case TemplateNodeType.Container:
                     if (contextExpressionList.array[context.depth] == null) {
                         contextExpressionList.array[context.depth] = AddVariable(ctx.processedType.rawType, "context_" + context.depth, ParameterFlags.NeverNull);
                         Assign(contextExpressionList.array[context.depth], Expression.TypeAs(Expression.Field(parameter.expression, MemberData.BindingNode_Root), ctx.processedType.rawType));
@@ -98,7 +98,7 @@ namespace UIForia.Compilers {
 
                     break;
 
-                case TemplateNodeType.EntryPoint:
+                case TemplateNodeType.Root:
                     return GetElement();
 
                 default:
@@ -123,7 +123,7 @@ namespace UIForia.Compilers {
         }
 
         public ProcessedType GetContextProcessedType() {
-            return context.rootVariables.array[context.depth].processedType;
+            return context.references.array[context.depth].processedType;
         }
 
         public Expression GetParent() {
@@ -186,16 +186,6 @@ namespace UIForia.Compilers {
                     ExpressionUtil.GetIntConstant(variable.index)
                 );
             }
-
-            // ContextVariableDefinition contextVar = FindContextByName(aliasName);
-            //
-            // if (contextVar != null) {
-            //     if (resolvingTypeOnly) {
-            //         return contextVar.ResolveType(compiler);
-            //     }
-            //
-            //     return contextVar.Resolve(compiler);
-            // }
 
             throw TemplateCompileException.UnknownAlias(aliasName);
         }

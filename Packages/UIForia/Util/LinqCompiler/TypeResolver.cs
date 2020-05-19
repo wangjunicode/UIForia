@@ -18,6 +18,21 @@ namespace UIForia.Util {
 
         private static Assembly[] s_AllAssemblies;
 
+        private static Stats stats;
+
+        public struct Stats {
+
+            public int namespaceCount;
+            public int assemblyCount;
+            public int typeCount;
+            public double namespaceScanTime;
+
+        }
+
+        public static Stats GetLoadStats() {
+            return stats;
+        }
+
         public TypeResolver() {
             Initialize();
         }
@@ -42,7 +57,7 @@ namespace UIForia.Util {
 
         private static void FilterAssemblies() {
             // todo -- could be optimized by writing a tmp file with all non package/asset assemblies namespaces
-
+            // easily done with JSON serializer or similar
             // string path = Path.GetTempPath();
             //
             // if (File.Exists(Path.Combine(Path.GetTempPath(), "uiforia_type-scan.txt"))) {
@@ -57,8 +72,7 @@ namespace UIForia.Util {
 
             // Note, I tried to do this in parallel but assembly.GetTypes() must be locked or something since
             // the performance of doing this in parallel was worse than doing it single threaded
-
-            int cnt = 0;
+            // this can be improved if we gather all types single threaded and scan namespaces multi threaded
 
             Assembly[] a = new Assembly[1];
             a[0] = typeof(List<>).Assembly;
@@ -68,6 +82,8 @@ namespace UIForia.Util {
 
             Assembly current = Assembly.GetExecutingAssembly();
 
+            stats.assemblyCount = s_AllAssemblies.Length;
+
             for (int i = 0; i < s_AllAssemblies.Length; i++) {
                 Assembly assembly = s_AllAssemblies[i];
 
@@ -75,7 +91,7 @@ namespace UIForia.Util {
                     continue;
                 }
 
-                cnt++;
+                stats.assemblyCount++;
 
                 try {
 
@@ -91,9 +107,12 @@ namespace UIForia.Util {
                             continue;
                         }
 
+                        stats.typeCount++;
+
                         if (!s_NamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> list)) {
                             list = new LightList<Assembly>(4);
                             s_NamespaceMap.Add(currentType.Namespace ?? "null", list);
+                            stats.namespaceCount++;
                         }
 
                         if (!list.Contains(assembly)) {
@@ -106,11 +125,11 @@ namespace UIForia.Util {
                 }
             }
 
-//            Debug.Log($"Scanned namespaces in {watch.Elapsed.TotalMilliseconds:F3} ms from {cnt} assemblies");
+            stats.namespaceScanTime = watch.Elapsed.TotalMilliseconds;
         }
 
         public Type ResolveTypeExpression(Type invokingType, IList<string> namespaces, string typeExpression) {
-            
+
             if (TryParseTypeName(typeExpression, out TypeLookup typeLookup)) {
                 return ResolveType(typeLookup, (IReadOnlyList<string>) namespaces, invokingType);
             }
@@ -145,10 +164,12 @@ namespace UIForia.Util {
             return null;
         }
 
-        public static bool TryParseTypeName(string typeName, out TypeLookup lookup) {
+        public static unsafe bool TryParseTypeName(string typeName, out TypeLookup lookup) {
             lookup = default;
-            CharStream stream = new CharStream(typeName);
-            return TryParseTypePath(ref stream, ref lookup);
+            fixed (char* charptr = typeName) {
+                CharStream stream = new CharStream(charptr, 0, (uint) typeName.Length);
+                return TryParseTypePath(ref stream, ref lookup);
+            }
         }
 
         public static bool TryParseTypeName(CharSpan typeName, out TypeLookup lookup) {

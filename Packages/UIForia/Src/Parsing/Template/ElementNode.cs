@@ -7,8 +7,8 @@ namespace UIForia.Parsing {
         public readonly string moduleName;
         public readonly string tagName;
 
-        protected ElementNode(string moduleName, string tagName, ReadOnlySizedArray<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
-            : base(attributes, templateLineInfo) {
+        protected ElementNode(string moduleName, string tagName, ReadOnlySizedArray<AttributeDefinition> attributes, in LineInfo lineInfo)
+            : base(attributes, lineInfo) {
             this.moduleName = moduleName;
             this.tagName = tagName;
         }

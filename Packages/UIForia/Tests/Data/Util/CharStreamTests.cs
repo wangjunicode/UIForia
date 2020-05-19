@@ -8,72 +8,75 @@ namespace Util {
     public class CharStreamTests {
 
         [Test]
-        public void ParseInt() {
-            CharStream stream = new CharStream(new[] {'1', '2', '3'});
+        public unsafe void ParseInt() {
+            fixed (char* ptr = "123") {
+                CharStream stream = new CharStream(ptr, 0, 3);
+                stream.TryParseInt(out int val);
+                Assert.AreEqual(123, val);
+            }
 
-            stream.TryParseInt(out int val);
+            fixed (char* ptr = "-123") {
+                CharStream stream = new CharStream(ptr, 0, 4);
+                stream.TryParseInt(out int val2);
+                Assert.AreEqual(-123, val2);
+            }
 
-            Assert.AreEqual(123, val);
+            fixed (char* ptr = "-123f") {
+                CharStream stream = new CharStream(ptr, 0, 5);
+                stream.TryParseInt(out int val3);
+                Assert.AreEqual(-123, val3);
+            }
 
-            stream = new CharStream(new[] {'-', '1', '2', '3'});
+            fixed (char* ptr = "1-3f") {
+                CharStream stream = new CharStream(ptr, 0, 4);
+                stream.TryParseInt(out int val4);
+                Assert.AreEqual(1, val4);
+            }
 
-            stream.TryParseInt(out int val2);
+            fixed (char* ptr = "a123f") {
+                CharStream stream = new CharStream(ptr, 0, 4);
+                Assert.IsFalse(stream.TryParseInt(out int val5));
 
-            Assert.AreEqual(-123, val2);
-
-            stream = new CharStream(new[] {'-', '1', '2', '3', 'f'});
-
-            stream.TryParseInt(out int val3);
-
-            Assert.AreEqual(-123, val3);
-
-            stream = new CharStream(new[] {'1', '-', '3', 'f'});
-
-            stream.TryParseInt(out int val4);
-
-            Assert.AreEqual(1, val4);
-
-            stream = new CharStream(new[] {'a', '1', '3', 'f'});
-
-            Assert.IsFalse(stream.TryParseInt(out int val5));
-
-        }
-
-        [Test]
-        public void ParseFloat() {
-            CharStream stream = new CharStream(new[] {'1', '2', '3'});
-
-            stream.TryParseFloat(out float val);
-
-            Assert.AreEqual(123f, val);
-
-            stream = new CharStream(new[] {'1', '2', '3', 'f'});
-
-            stream.TryParseFloat(out val);
-
-            Assert.AreEqual(123f, val);
-
-            stream = new CharStream(new[] {'-', '1', '2', '3', 'f'});
-
-            stream.TryParseFloat(out val);
-
-            Assert.AreEqual(-123f, val);
-
-            stream = new CharStream("-1235.456f".ToCharArray());
-
-            stream.TryParseFloat(out val);
-
-            Assert.AreEqual(-1235.456f, val);
+            }
 
         }
 
         [Test]
-        public void ParseEnum() {
-            CharStream stream = new CharStream("Horizontal".ToCharArray());
+        public unsafe void ParseFloat() {
+            fixed (char* charptr = "123") {
+                CharStream stream = new CharStream(charptr, 0, 3);
+                stream.TryParseFloat(out float val);
+                Assert.AreEqual(123f, val);
+            }
 
-            stream.TryParseEnum<LayoutDirection>(out int d);
-            
-            Assert.AreEqual(LayoutDirection.Horizontal, (LayoutDirection)d);
+            fixed (char* charptr = "123f") {
+                CharStream stream = new CharStream(charptr, 0, 4);
+                stream.TryParseFloat(out float val);
+                Assert.AreEqual(123f, val);
+            }
+
+            fixed (char* charptr = "-123f") {
+                CharStream stream = new CharStream(charptr, 0, 5);
+                stream.TryParseFloat(out float val);
+                Assert.AreEqual(-123f, val);
+            }
+
+            fixed (char* charptr = "-1235.456f") {
+                CharStream stream = new CharStream(charptr, 0, (uint) "-1235.456f".Length);
+                stream.TryParseFloat(out float val);
+                Assert.AreEqual(-1235.456f, val);
+            }
+
+        }
+
+        [Test]
+        public unsafe void ParseEnum() {
+
+            fixed (char* charptr = "Horizontal") {
+                CharStream stream = new CharStream(charptr, 0, (uint) "Horizontal".Length);
+                stream.TryParseEnum<LayoutDirection>(out int d);
+                Assert.AreEqual(LayoutDirection.Horizontal, (LayoutDirection) d);
+            }
 
         }
 

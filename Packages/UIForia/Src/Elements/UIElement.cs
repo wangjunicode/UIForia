@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using JetBrains.Annotations;
+using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Layout;
 using UIForia.Rendering;
@@ -10,7 +12,49 @@ using UIForia.UIInput;
 using UIForia.Util;
 
 namespace UIForia.Elements {
+
+    public struct ChildListSpan {
+
+        public int start;
+        public int end;
+
+        public int count => end - start;
+
+    }
     
+    // some data can be held in a struct. can pin the struct to update it / recycle an element
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct ElementData {
+
+        public ElementId elementId;
+        public ushort depth;
+        public ushort siblingIndex;
+        public ChildListSpan childListSpan;
+        public UIElementFlags2 flags;
+
+    }
+
+    // [TemplateTagName("Element")]
+    // public class VertigoUIElement {
+    //
+    //     internal ElementData elementData;
+    //     internal VertigoApplication application;
+    //
+    //     public int siblingIndex {
+    //         get { return elementData.siblingIndex; }
+    //     }
+    //     
+    //     internal ref ElementData GetPinnableReference() {
+    //         return ref elementData;
+    //     }
+    //     
+    //     public virtual string GetDisplayName() {
+    //         return GetType().Name;
+    //     }
+    //     
+    // }
+
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public abstract class UIElement : IHierarchical {
 

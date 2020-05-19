@@ -284,7 +284,6 @@ namespace UIForia.Systems {
             }
         }
 
-
         private void GrowHorizontal(ref Track track) {
             int pieces = 0;
 

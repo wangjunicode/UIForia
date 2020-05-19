@@ -42,7 +42,6 @@ namespace UIForia.Parsing {
         internal static IList<Type> painters;
         internal static IList<Type> layouts;
         private static Module[] modules;
-        private static TemplateCache s_TemplateCache;
 #if UNITY_EDITOR
         internal static IList<MethodInfo> changeHandlers;
 #endif
@@ -110,7 +109,7 @@ namespace UIForia.Parsing {
                     genericTypeMap.Add(retn.rawType, retn);
                 }
             }
-            
+
             return retn;
         }
 
@@ -207,7 +206,7 @@ namespace UIForia.Parsing {
                         layoutTypes.Add(currentType);
                     }
 
-                    if (currentType.IsSubclassOf(typeof(TemplateParser))) {
+                    if (currentType.IsSubclassOf(typeof(TemplateParser_Deprecated))) {
 
                         TemplateParserAttribute attr = currentType.GetCustomAttribute<TemplateParserAttribute>();
 
@@ -236,41 +235,16 @@ namespace UIForia.Parsing {
 
             TemplateParser[] retn = new TemplateParser[templateParserDefinitions.Count];
 
-            // some sort of weird recursive type definition detection 
-            // seems to be happening inside a managed job. lock to be sure we aren't racing.
-            lock (templateParserDefinitions) {
-                for (int i = 0; i < retn.Length; i++) {
-                    retn[i] = (TemplateParser) Activator.CreateInstance(templateParserDefinitions[i].type);
-                    retn[i].extension = templateParserDefinitions[i].extension;
-                }
+            for (int i = 0; i < retn.Length; i++) {
+                retn[i] = (TemplateParser) Activator.CreateInstance(templateParserDefinitions[i].type);
+                retn[i].extension = templateParserDefinitions[i].extension;
             }
 
             return retn;
 
         }
 
-        public interface IDiagnosticProvider {
-
-            void AddDiagnostic(string message);
-
-        }
-
-        public struct DiagnosticWrapper {
-
-            private IDiagnosticProvider provider;
-
-            public DiagnosticWrapper(TemplateShell templateShell) {
-                this.provider = null; // todo !
-            }
-
-            public void AddDiagnostic(string message, int lineNumber = -1, int column = -1) {
-                if (provider == null) return;
-
-            }
-
-        }
-
-        internal static ProcessedType ResolveGenericElementType(ProcessedType generic, string genericTypeResolver, IReadOnlyList<string> referencedNamespaces, DiagnosticWrapper diagnostics) {
+        internal static ProcessedType ResolveGenericElementType(ProcessedType generic, string genericTypeResolver, IReadOnlyList<string> referencedNamespaces, Diagnostics diagnostics) {
 
             Type[] arguments = generic.rawType.GetGenericArguments();
             Type[] resolvedTypes = new Type[arguments.Length];
@@ -313,7 +287,7 @@ namespace UIForia.Parsing {
             }
 
             if (arguments.Length != strings.Count) {
-                diagnostics.AddDiagnostic($"Expected {arguments.Length} arguments but was only provided {strings.Count} {genericTypeResolver}");
+                diagnostics?.LogError($"Expected {arguments.Length} arguments but was only provided {strings.Count} {genericTypeResolver}");
                 return null;
             }
 
@@ -322,14 +296,14 @@ namespace UIForia.Parsing {
                     Type type = TypeResolver.Default.ResolveType(typeLookup, referencedNamespaces);
 
                     if (type == null) {
-                        diagnostics.AddDiagnostic(TemplateCompileException.UnresolvedType(typeLookup, referencedNamespaces).Message);
+                        diagnostics?.LogError(TemplateCompileException.UnresolvedType(typeLookup, referencedNamespaces).Message);
                         return null;
                     }
 
                     resolvedTypes[i] = type;
                 }
                 else {
-                    diagnostics.AddDiagnostic($"Failed to parse generic specifier {strings[i]}. Original expression = {genericTypeResolver}");
+                    diagnostics?.LogError($"Failed to parse generic specifier {strings[i]}. Original expression = {genericTypeResolver}");
                     return null;
                 }
             }

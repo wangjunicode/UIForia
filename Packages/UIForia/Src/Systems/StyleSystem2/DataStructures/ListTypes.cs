@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using UIForia.Style;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace UIForia {
@@ -68,6 +69,26 @@ namespace UIForia {
 
     }
 
+    [AssertSize(16)]
+    [StructLayout(LayoutKind.Explicit)]
+    [DebuggerTypeProxy(typeof(ListDebugView<InstanceStyleProperty>))]
+    public unsafe struct List_InstanceStyleProperty : IListInterface {
+
+        [FieldOffset(0)] public InstanceStyleProperty* array;
+        [FieldOffset(8)] public int size;
+        [FieldOffset(12)] public int capacity;
+
+        public ref ListInterface GetListInterface() {
+            void* x = UnsafeUtility.AddressOf(ref this);
+            return ref UnsafeUtilityEx.AsRef<ListInterface>(x);
+        }
+
+        public int ItemSize {
+            get => sizeof(InstanceStyleProperty);
+        }
+
+    }
+    
     [AssertSize(16)]
     [StructLayout(LayoutKind.Explicit)]
     [DebuggerTypeProxy(typeof(ListDebugView<StyleIndexUpdate>))]

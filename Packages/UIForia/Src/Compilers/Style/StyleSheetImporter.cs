@@ -26,8 +26,8 @@ namespace UIForia.Compilers.Style {
 
         public int NextStyleGroupId => importedStyleGroupCount++;
 
-        public StyleSheet Import(in StyleDefinition styleDefinition, bool storeContents = false) {
-            string path = Path.Combine(importResolutionPath ?? basePath, styleDefinition.importPath);
+        public StyleSheet Import(in StyleDefinition pendingStyleDefinition, bool storeContents = false) {
+            string path = Path.Combine(importResolutionPath ?? basePath, pendingStyleDefinition.importPath);
 
             if (cachedStyleSheets.TryGetValue(path, out StyleSheet retn)) {
                 return retn;
@@ -37,8 +37,8 @@ namespace UIForia.Compilers.Style {
 
             string contents = null;
 
-            if (styleDefinition.body != null) {
-                contents = styleDefinition.body;
+            if (pendingStyleDefinition.body != null) {
+                contents = pendingStyleDefinition.body;
             }
             else if (File.Exists(path)) {
                 contents = File.ReadAllText(path);
@@ -50,7 +50,7 @@ namespace UIForia.Compilers.Style {
             try {
                 sheet = compiler.Compile(path, StyleParser.Parse(contents));
                 if (sheet != null) {
-                    sheet.path = styleDefinition.importPath;
+                    sheet.path = pendingStyleDefinition.importPath;
                     sheet.source = storeContents ? contents : null;
                     cachedStyleSheets.Add(path, sheet);
                 }

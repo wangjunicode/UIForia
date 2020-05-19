@@ -23,9 +23,29 @@ style grid-cell {
     LayoutFit = Fill;
 } 
 
+condition array [
+    int moduleid
+    int conditionId
+]
+
+
 style align-left-top {
-    AlignX = 20px 0px Parent Start;
-    AlignY = 20px 0px Parent Start;
+    propertyid
+    condititionBits (2 bytes depth, 2 bytes for index into condition array)
+    value
+    AlignX = 20px 0px Parent Start; 0 
+    AlignY = 20px 0px Parent Start; 0
+    #mobile { // which module it came from, store location. whats the id of the condition? (mobile) -> unique integer
+        AlignY = 20px 0px Parent Start; 1
+        AlignY = 20px 0px Parent Start; 1
+
+        #widescreen {
+            AlignY = 20px 0px Parent Start; 2
+            AlignY = 20px 0px Parent Start; 2
+            AlignY = 20px 0px Parent Start; 2
+
+        }
+    }
 }
 
 style align-left-center {

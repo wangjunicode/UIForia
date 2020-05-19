@@ -68,7 +68,7 @@ namespace UIForia.Util.Unsafe {
                 blockSize *= 2;
                 blocksPerPage /= 2;
                 if (blocksPerPage < 4) blocksPerPage = 4;
-                if (count >= 3) initialPageCount = 1;
+                if (count < 2) initialPageCount = 1;
             }
 
             return new Pow2AllocatorSet(blocks, count);
@@ -84,8 +84,8 @@ namespace UIForia.Util.Unsafe {
             this.allocator = allocator;
             this.overflowThresholdShift = BitUtil.GetPowerOfTwoBitIndex((uint) BitUtil.EnsurePowerOfTwo(overflowThreshold));
             this.minAllocationSizeShift = BitUtil.GetPowerOfTwoBitIndex((uint) BitUtil.EnsurePowerOfTwo(minAllocationSize));
-            this.overflowAllocations = new ListHandle(4, UnsafeUtility.Malloc(4 * sizeof(IntPtr), 4, allocator), 0);
-            this.fixedAllocators = TypedUnsafe.Malloc<FixedBlockAllocator>(overflowThresholdShift - minAllocationSizeShift, allocator);
+            this.overflowAllocations = default;
+            this.fixedAllocators = TypedUnsafe.Malloc<FixedBlockAllocator>(count, allocator);
 
             for (int i = 0; i < count; i++) {
                 fixedAllocators[i] = new FixedBlockAllocator(desc[i].blockSize, desc[i].blocksPerPage, desc[i].initialPageCount, desc[i].memoryTracking);
@@ -94,16 +94,15 @@ namespace UIForia.Util.Unsafe {
         }
 
         public int fixedAllocatorCount {
-            get => overflowThresholdShift - minAllocationSizeShift;
-        }
-
-        public AllocatorId CapacityToAllocatorId(int byteSize) {
-            return GetAllocatorIndex(byteSize);
+            get => (overflowThresholdShift - minAllocationSizeShift) + 1;
         }
 
         public AllocatorId AllocateBlock(int requiredByteCount, out void* ptr) {
             int allocatorIndex = GetAllocatorIndex(requiredByteCount);
             if (allocatorIndex == -1) {
+                if (overflowAllocations.array == null) {
+                    this.overflowAllocations = new ListHandle(4, UnsafeUtility.Malloc(4 * sizeof(IntPtr), 4, allocator), 0);
+                }
                 ptr = UnsafeUtility.Malloc(requiredByteCount, 4, allocator);
                 UntypedListUtil.Add(ref overflowAllocations, (IntPtr) ptr, allocator);
                 return requiredByteCount;
@@ -116,6 +115,9 @@ namespace UIForia.Util.Unsafe {
         public ByteCapacity Allocate(int requiredByteCount, out void* ptr) {
             int allocatorIndex = GetAllocatorIndex(requiredByteCount);
             if (allocatorIndex == -1) {
+                if (overflowAllocations.array == null) {
+                    this.overflowAllocations = new ListHandle(4, UnsafeUtility.Malloc(4 * sizeof(IntPtr), 4, allocator), 0);
+                }
                 ptr = UnsafeUtility.Malloc(requiredByteCount, 4, allocator);
                 UntypedListUtil.Add(ref overflowAllocations, (IntPtr) ptr, allocator);
                 return requiredByteCount;
@@ -129,6 +131,7 @@ namespace UIForia.Util.Unsafe {
             int allocatorIndex = GetAllocatorIndex(capacity);
 
             if (allocatorIndex == -1) {
+                if (overflowAllocations.array == null) return;
                 IntPtr* list = (IntPtr*) overflowAllocations.array;
                 IntPtr castPtr = (IntPtr) ptr;
                 for (int i = 0; i < overflowAllocations.size; i++) {

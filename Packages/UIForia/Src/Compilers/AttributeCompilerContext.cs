@@ -18,33 +18,33 @@ namespace UIForia.Compilers {
         public Expression changeHandlerCurrentValue;
         public Expression changeHandlerPreviousValue;
         
-        public StructList<TemplateContextReference> rootVariables;
+        public StructList<TemplateContextReference> references;
         public LightStack<StructList<BindingVariableDesc>> variableStack;
-        
-        public TemplateNode templateNode;
         
         public BindingResult bindingResult;
         public AttrInfo currentAttribute;
+        public TemplateFileShell fileShell;
+        public int templateNodeId;
 
         public AttributeCompilerContext() {
             bindingResult = new BindingResult();
-            rootVariables = new StructList<TemplateContextReference>();
+            references = new StructList<TemplateContextReference>();
         }
         
-        public void Init(TemplateNode templateNode, TemplateNodeType templateNodeType, ProcessedType elementType, ProcessedType parentType, LightStack<StructList<BindingVariableDesc>> variableStack) {
-            this.templateNode = templateNode;
+        public void Init(TemplateFileShell fileShell, int templateNodeId, ProcessedType elementType, ProcessedType parentType, LightStack<StructList<BindingVariableDesc>> variableStack) {
             this.variableStack = variableStack;
-            this.templateNodeType = templateNodeType;
+            this.fileShell = fileShell;
+            this.templateNodeId = templateNodeId;
             this.elementType = elementType;
             this.parentType = parentType;
             this.bindingResult.Clear();
-            this.rootVariables.Clear();
+            this.references.Clear();
         }
 
         public void Setup(in AttrInfo attrInfo) {
             currentAttribute = attrInfo;
             depth = attrInfo.depth;
-            namespaces = rootVariables.array[depth].templateNode.root.templateShell.referencedNamespaces;
+            namespaces = references.array[depth].templateNode.root.templateShell.referencedNamespaces;
             currentEvent = null;
             changeHandlerCurrentValue = null;
             changeHandlerPreviousValue = null;
@@ -112,7 +112,7 @@ namespace UIForia.Compilers {
         }
 
         public void AddContextReference(ProcessedType processedType, TemplateNode templateNode) {
-            rootVariables.Add(new TemplateContextReference(processedType, templateNode));
+            references.Add(new TemplateContextReference(processedType, templateNode));
         }
 
         public void AddInputBinding(InputEventClass eventClass, InputHandlerDescriptor descriptor, LambdaExpression lambda) {

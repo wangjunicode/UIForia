@@ -37,7 +37,7 @@ namespace UIForia.Compilers {
             return eventHandlerIndex++;
         }
 
-        public void SetElementTemplate(TemplateNode templateNode, int elementSlotId, LambdaExpression expression) {
+        public void SetElementTemplate(string tagName, LineInfo lineInfo, int elementSlotId, LambdaExpression expression) {
             elementFns.EnsureCapacity(elementSlotId + 1);
 
             if (elementFns.size <= elementSlotId) {
@@ -46,7 +46,8 @@ namespace UIForia.Compilers {
 
             elementFns.array[elementSlotId] = new TemplateOutput() {
                 expression = expression,
-                templateNode = templateNode
+                tagName = tagName,
+                lineInfo = lineInfo
             };
         }
 
@@ -141,7 +142,7 @@ namespace UIForia.Compilers {
             return retn;
         }
 
-        public SlotOverrideChain CreateSlotOverrideChain(ProcessedType rootType, SlotNode slotNode, SizedArray<AttrInfo> attributes, SlotOverrideInfo[] extendChain) {
+        public SlotOverrideChain CreateSlotOverrideChain(ProcessedType rootType, TemplateNodeReference slotNodeRef, SizedArray<AttrInfo> attributes, SlotOverrideInfo[] extendChain) {
 
             if (extendChain == null) extendChain = s_EmptySlotOverrideInfo;
 
@@ -153,11 +154,11 @@ namespace UIForia.Compilers {
 
             list[list.Length - 1] = new SlotOverrideInfo() {
                 rootType = rootType,
-                slotNode = slotNode,
+                slotNodeRef = slotNodeRef,
                 attributes = attributes.ToArray()
             };
 
-            SlotOverrideChain chain = new SlotOverrideChain(slotNode.slotName, list);
+            SlotOverrideChain chain = new SlotOverrideChain(slotNodeRef.fileShell.GetSlotName(slotNodeRef.templateNodeId), list);
             slotOverrideChains.Add(chain);
             return chain;
         }

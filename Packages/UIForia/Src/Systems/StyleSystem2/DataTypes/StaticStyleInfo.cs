@@ -12,13 +12,13 @@ namespace UIForia {
         public ModuleId moduleId;
         public ushort activeOffset;
         public ushort activeCount;
-        public ushort totalPropertyCount;
         public ushort normalOffset;
         public ushort normalCount;
         public ushort hoverOffset;
         public ushort hoverCount;
         public ushort focusOffset;
         public ushort focusCount;
+        public ushort totalPropertyCount;
         public int propertyOffsetInBytes;
 
         public ushort dataBaseId;

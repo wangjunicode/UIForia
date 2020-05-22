@@ -1,0 +1,22 @@
+style transform-me {
+    TransformRotation = 0;
+    LayoutBehavior = Ignored;
+    AlignX = Center Parent;
+    AlignY = Center Screen;
+    run animation(rot);
+}
+
+animation rot {
+    [options] {
+        iterations = infinite;
+        duration = 5000;
+    }
+    [keyframes] {
+        0%{
+            TransformRotation = 0;
+        }
+        100% {
+            TransformRotation = 360;
+        }
+    }
+}

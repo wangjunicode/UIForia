@@ -1,29 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Style src="Documentation/Features/RepeatExample.style" />
-    <Contents style="container">
-        <Group style="container">
-            <Repeat list="dictionary" style="dict">
-                
-                <Heading1>Here we see a Repeat that has children with a dynamic style binding:</Heading1>
-                
-                <Div style="entry {GetAStyle()}">
-                    <Text>{$item.Item1}</Text>
-                    <Text>{$item.Item2}</Text>
-                    
-                    <Group style="next-section">
-                        <Heading1>Well let`s loop over the same list again but INSIDE this Repeat element!</Heading1>
-                        
-                        <Repeat list="dictionary" var:innerItem="item">
-                            
-                            <Div>
-                                <Text>{$innerItem.Item1}</Text>
-                                <Text>{$innerItem.Item2}</Text>
-                            </Div>
-                        </Repeat>
-                    </Group>
-                </Div>
-            </Repeat>
-        </Group>
+    <Style path="Documentation/Documentation.style" alias="theme"/>
+
+    <Contents>
+        <Input style="input" sync:value="newWord" />
+        <Div style="button" mouse:click="AddWord()">Add word</Div>
+
+        <Repeat list="wordList">
+            <Div style="entry">
+                {$index + 1}: {$item}
+            </Div>
+        </Repeat>
     </Contents>
 </UITemplate>

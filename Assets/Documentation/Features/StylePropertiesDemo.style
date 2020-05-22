@@ -23,6 +23,10 @@ style simple-border {
     DistributeExtraSpace = CenterContent;
 }
 
+style simple-border-nested {
+    PreferredSize = 1pca;
+}
+
 style bevel-demo {
     CornerBevelBottomLeft = 10px;
     CornerBevelBottomRight = 20px;
@@ -43,11 +47,66 @@ style pointer-demo {
 }
 
 style pointer-none {
-    PreferredSize = 1cnt 50px;
     Padding = 20px;
     PointerEvents = None;
     BackgroundColor = yellow;
     [hover] {
         BackgroundColor = white;
     }
+}
+
+style child-of-pointer-demo {
+    Border = 1px;
+    BorderColor = red;
+    Padding = 3px;
+    [hover] {
+        BackgroundColor = white;
+    }
+}
+
+style fit-item {
+    BackgroundColor = plum;
+    Padding = 4px 8px;
+    Border = 1px;
+    BorderColor = steelblue;
+}
+
+style fit-horizontal-container {
+    PreferredWidth = 400px;
+    Padding = 20px;
+    Margin = 10px 0;
+    BackgroundColor = powderblue;
+}
+
+style fit-vertical-container {
+    FlexLayoutDirection = Horizontal;
+    PreferredHeight = 200px;
+    Padding = 20px;
+    Margin = 10px 0;
+    BackgroundColor = lightseagreen;
+}
+
+style fit-horizontal {
+    LayoutFitHorizontal = Fill;
+}
+
+style fit-vertical {
+    LayoutFitVertical = Fill;
+}
+
+style fit-items-horizontal {
+    PreferredWidth = 400px;
+    Padding = 20px;
+    Margin = 10px 0;
+    FitItemsHorizontal = Fill;
+    BackgroundColor = powderblue;
+}
+
+style fit-items-vertical {
+    FlexLayoutDirection = Horizontal;
+    PreferredHeight = 200px;
+    Padding = 20px;
+    Margin = 10px 0;
+    FitItemsVertical = Fill;
+    BackgroundColor = lightseagreen;
 }

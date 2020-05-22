@@ -16,7 +16,6 @@ style constrain {
 
 style flex-demo {
     FlexLayoutDirection = Vertical;
-    TextFontSize = 32;
     TextColor = black;
     MarginBottom = 1em;
 }
@@ -36,7 +35,7 @@ style flex-demo-content {
 style flex-demo-content-child1 {
     PreferredWidth = 190px;
     BackgroundColor = yellow;
-    PreferredHeight = 600px;
+    PreferredHeight = 300px;
     [hover] {
         PreferredWidth = 490px;
         FlexItemGrow = 3;
@@ -181,7 +180,7 @@ style special-text {
 //}
 
 style flex-parent {
-    PreferredSize = 600px;
+    PreferredSize = 1cnt 300px;
     FlexLayoutDirection = Horizontal;
     BackgroundColor = green;
 }
@@ -221,7 +220,7 @@ style no-clip {
 style demo-container {
     FlexLayoutDirection = Horizontal;
     FlexLayoutWrap = WrapHorizontal;
-    PreferredSize = 1pca 500px;
+    PreferredSize = 1pca 300px;
 }
 
 style <Heading1> {
@@ -269,7 +268,6 @@ style color4 { BackgroundColor = rgb(20, 140, 120); }
 
 style stack-vertical {
     FlexLayoutDirection = Vertical;
-    FlexLayoutCrossAxisAlignment = Stretch;
     BackgroundColor = white;
     PreferredSize = 150px 500px;
     Padding = 20px;
@@ -280,7 +278,6 @@ style stack-vertical {
 
 style stack-horizontal {
     FlexLayoutDirection = Horizontal;
-    FlexLayoutCrossAxisAlignment = Center;
     BackgroundColor = white;
     PreferredSize = 500px 150px;
 }

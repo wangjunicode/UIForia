@@ -27,6 +27,10 @@ namespace UIForia.Elements {
 
     }
 
+    public class EnumSelectOption<T> : SelectOption<T> where T : struct {
+        public EnumSelectOption(T value) : base (value.ToString(), value) { }
+    }
+
     [Template(TemplateType.Internal, "Elements/Select.xml")]
     public class Select<T> : UIElement, IFocusable {
 

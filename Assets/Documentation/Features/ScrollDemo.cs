@@ -17,23 +17,6 @@ namespace Documentation.Features {
                 list.Add(i);
             }
         }
-
-        public void ScrollUp(MouseInputEvent evt) {
-          //  evt.Origin.TriggerEvent(new UIScrollEvent(-1, 0));
-        }
-
-        public void ScrollRight(MouseInputEvent evt) {
-           // evt.Origin.TriggerEvent(new UIScrollEvent(1, -1));
-        }
-
-        public void ScrollDown(MouseInputEvent evt) {
-          //  evt.Origin.TriggerEvent(new UIScrollEvent(-1, 1));
-        }
-
-        public void ScrollLeft(MouseInputEvent evt) {
-           // evt.Origin.TriggerEvent(new UIScrollEvent(0, -1));
-        }
-
     }
 
 }

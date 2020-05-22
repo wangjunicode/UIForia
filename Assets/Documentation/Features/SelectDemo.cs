@@ -12,24 +12,24 @@ namespace Documentation.Features {
     [Template("Documentation/Features/SelectDemo.xml")]
     public class SelectDemo : UIElement {
 
-        public RepeatableList<ISelectOption<int>> intList;
-        public RepeatableList<ISelectOption<string>>[] translations;
-        public RepeatableList<ISelectOption<string>> languages;
+        public List<ISelectOption<int>> intList;
+        public List<ISelectOption<string>>[] translations;
+        public List<ISelectOption<string>> languages;
 
-        public RepeatableList<Language> selectedLanguage;
+        public List<Language> selectedLanguage;
 
-        public RepeatableList<string> words;
+        public List<string> words;
         
         public override void OnCreate() {
-            intList = new RepeatableList<ISelectOption<int>>();
+            intList = new List<ISelectOption<int>>();
             
-            translations = new RepeatableList<ISelectOption<string>>[] {
-                    new RepeatableList<ISelectOption<string>>() {
+            translations = new List<ISelectOption<string>>[] {
+                    new List<ISelectOption<string>>() {
                             new SelectOption<string>("Hello", "en"),
                             new SelectOption<string>("Hallo", "de")
                     },
                     
-                    new RepeatableList<ISelectOption<string>>() {
+                    new List<ISelectOption<string>>() {
                             new SelectOption<string>("World", "en"),
                             new SelectOption<string>("Welt", "de"),
                             new SelectOption<string>("supercalifragilisticexpialidocious", "en"),
@@ -77,17 +77,17 @@ namespace Documentation.Features {
                     },
             };
             
-            languages = new RepeatableList<ISelectOption<string>>() {
+            languages = new List<ISelectOption<string>>() {
                     new SelectOption<string>("English", "en"), 
                     new SelectOption<string>("German", "de"),
             };
             
-            words = new RepeatableList<string>() {
+            words = new List<string>() {
                     "hello",
                     "world"
             };
             
-            selectedLanguage = new RepeatableList<Language>() {
+            selectedLanguage = new List<Language>() {
                     new Language() { Name = "de"}, 
                     new Language() { Name = "de"}
             };
@@ -98,7 +98,7 @@ namespace Documentation.Features {
         }
         
         public void ClearTranslations(int index) {
-            RepeatableList<ISelectOption<string>> options = translations[index];
+            List<ISelectOption<string>> options = translations[index];
             
             List<ISelectOption<string>> temp = new List<ISelectOption<string>>();
             foreach (var option in options) {

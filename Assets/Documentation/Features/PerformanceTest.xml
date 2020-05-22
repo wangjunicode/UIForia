@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    <Style path="Documentation/Features/PerformanceTest.style" />
+    <Style path="Documentation/Documentation.style" alias="theme"/>
+
+    <Contents>
+        <Heading1>Performance Test Screen</Heading1>
+        <Paragraph>
+            This section is just a performance test. Nothing to see or learn here, move along!
+        </Paragraph>
+        <Group style="transform-me">
+            <Text>I am transformed!</Text>
+        </Group>
+        <Repeat list="players">
+            <PlayerDetail player="$item" />
+        </Repeat>
+    </Contents>
+</UITemplate>

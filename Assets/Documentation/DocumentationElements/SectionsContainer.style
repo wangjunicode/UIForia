@@ -1,0 +1,31 @@
+﻿import "Documentation/Documentation.style" as theme;
+
+style sections-container {
+    FlexLayoutDirection = Horizontal;
+    LayoutFitHorizontal = Fill;
+}
+
+style section-nav {
+    MarginRight = 20px;
+    AlignY = 20px View;
+}
+
+style section-link {
+    TextFontSize = 15px;
+    Padding = 8px 16px;
+    BackgroundColor = rgba(200, 210, 210, 255);
+    LayoutFitHorizontal = Fill;
+    MarginBottom = 1px;
+    [hover] {
+        BackgroundColor = rgba(220, 230, 230, 255);
+        Cursor = @theme.cursorHand;
+    }
+    [active] {
+        TextColor = rgb(30, 30, 30);
+        BackgroundColor = rgba(210, 210, 220, 255);
+    }
+}
+
+style sections {
+    FlexItemShrink = 1;
+}

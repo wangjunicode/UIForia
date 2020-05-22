@@ -2,131 +2,46 @@
 <UITemplate>
 
     <Style path="Documentation/Features/ScrollDemo.style"/>
-    <Contents style="container">
+    <Style src="Documentation/Documentation.style" alias="theme"/>
 
-        <ScrollView style="level-0">
-            <ScrollView style="level-0-a">
+    <Contents style="scroll-demo">
+        <Heading1>Scrolling with ScrollViews</Heading1>
+        <Paragraph>
+            The setup for scroll views is quite simple. Wrap your 
+            content in a ScrollView element, give the ScrollView
+            any desired size, but make sure it's not just content
+            sized. Now any overflowing content within the ScrollView
+            will make the scroll bars appear.
+        </Paragraph>
+        <Paragraph>
+            You can use the scroll bars to scroll, your mouse wheel
+            or hold the middle mouse button pressed and move the 
+            mouse to pan.
+        </Paragraph>
+        <Paragraph>
+            Every UIElement has a method called 'ScrollIntoView()'
+            that will automatically scroll the ScrollView so that
+            the element is visible.
+        </Paragraph>
 
-                <Div style="level-1">
+        <Button style="button" mouse:click="FindById('hiddenElement').ScrollIntoView()">
+            Scroll hidden element into view
+        </Button>
 
-                    <Group>
-
-                        <Text style="p">
-                            Officiis corporis est sed perspiciatis minus odio qui. Ea
-                            quia porro aut aliquam voluptas. Ullam vero qui voluptatibus
-                            consectetur voluptatem id.
-                        </Text>
-
-                        <Text style="p">
-                            Accusamus est est rerum dolor vel ipsam nihil voluptatem.
-                            Rerum sit autem quis et et et voluptatum et. Quam explicabo
-                            qui rerum consequatur fugit. Unde a porro qui.
-                        </Text>
-
-                    </Group>
-                    <Div style="level-2-a"/>
-
-                    <Div style="level-2-b"/>
-
-                </Div>
-
-                <Div style="level-1">
-
-                    <Div style="level-2-a"/>
-
-                    <Div style="level-2-b d"/>
-
-                    <Div style="level-2-c">
-                        <Div style="level-2-ignored"/>
-                    </Div>
-
-                </Div>
-
-                <Div style="level-2-ignored"/>
-            </ScrollView>
-            <Div style="level-1">
-
-                <Group>
-                    <Div style="button" mouse:click="ScrollUp($event)">Scroll up</Div>
-                    <Div style="button" mouse:click="ScrollRight($event)">Scroll right</Div>
-                    <Div style="button" mouse:click="ScrollDown($event)">Scroll down</Div>
-                    <Div style="button" mouse:click="ScrollLeft($event)">Scroll left</Div>
-
-                    <Text style="p">
-                        Autem in dolorum culpa rerum. Consequatur voluptate dignissimos sed recusandae qui omnis possimus id. Officia excepturi id omnis ut laboriosam blanditiis
-                        mollitia.
-                    </Text>
-
-                    <Group style="p">
-                        Est rem et culpa. Amet iste ullam ducimus itaque magnam est
-                        id adipisci. Id repellendus necessitatibus necessitatibus et
-                        in assumenda. Nesciunt doloremque laboriosam a sit sed. Deleniti
-                        maxime iusto sit adipisci quisquam cumque et.
-                    </Group>
-
-                    <Text style="p">
-                        Temporibus soluta dolore ut totam inventore dicta aut ab.
-                        Necessitatibus sunt facilis aut. Quo voluptas aut quisquam
-                        quisquam in. Officia voluptatum ut animi dolorem magni vel voluptatum.
-                    </Text>
-
-                    <Text style="p">
-                        Officiis corporis est sed perspiciatis minus odio qui. Ea
-                        quia porro aut aliquam voluptas. Ullam vero qui voluptatibus
-                        consectetur voluptatem id.
-                    </Text>
-
-                    <Text style="p">
-                        Accusamus est est rerum dolor vel ipsam nihil voluptatem.
-                        Rerum sit autem quis et et et voluptatum et. Quam explicabo
-                        qui rerum consequatur fugit. Unde a porro qui.
-                    </Text>
-
-                </Group>
-                <Div style="level-2-a"/>
-
-                <Div style="level-2-b"/>
-
+        <ScrollView style="scroll scroll-1">
+            <Image src="'Images/seed_01'" />
+            <Div attr:id="hiddenElement" style="hidden-element">
+                I can be scrolled into view
             </Div>
-
-            <Div style="level-1">
-
-                <Div style="level-2-a"/>
-
-                <Div style="level-2-b d"/>
-
-                <Div style="level-2-c">
-                    <Div style="level-2-ignored"/>
-                </Div>
-
-            </Div>
-
-            <Div style="level-2-ignored"/>
         </ScrollView>
 
-
-        
-        
-        <Group style="big">
-            <Group style="big-child">
-
-                <Div style="button" mouse:click="ScrollUp($event)">Scroll up</Div>
-                <Div style="button" mouse:click="ScrollRight($event)">Scroll right</Div>
-                <Div style="button" mouse:click="ScrollDown($event)">Scroll down</Div>
-                <Div style="button" mouse:click="ScrollLeft($event)">Scroll left</Div>
-
-            </Group>
-        </Group>
-
-        <ScrollView>
-
-            <Repeat style="scroll-container" list="list">
-                <Text>This is content {$index}</Text>
-            </Repeat>
-
+        <ScrollView style="scroll scroll-2">
+            <Image src="'Images/seed_02'" />
         </ScrollView>
 
-        content
+        <ScrollView style="scroll scroll-3">
+            <Image src="'Images/seed_03'" />
+        </ScrollView>
 
     </Contents>
 </UITemplate>

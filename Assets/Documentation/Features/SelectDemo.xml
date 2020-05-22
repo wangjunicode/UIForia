@@ -7,37 +7,6 @@
         <Group style="center">
             <Select style="select" selectedValue="selectedLanguage[0].Name" options="translations[1]" disableOverflowX="true" disabled="false"/>
         </Group>
-        <!--        <Repeat list="words" style="repeat">-->
-        <!--            -->
-        <!--            <Heading1>Select your favourite translation for the word: {$item}</Heading1>-->
-        <!--            <Select&#45;&#45;string style="select" selectedValue.read.write="selectedLanguage[$index].Name" options="translations[$index]" disableOverflowX="true">-->
-        <!--                <SlotContent name="select-placeholder">Select your word</SlotContent>-->
-        <!--                <Group>this is a template {$option.Label}</Group>-->
-        <!--            </Select&#45;&#45;string>-->
-
-        <!--            <Group style="button" mouse:click="ClearTranslations($index)">-->
-        <!--                Reset List-->
-        <!--            </Group>-->
-        <!--            -->
-        <!--        </Repeat>-->
-        <!--        -->
-        <!--                <Select&#45;&#45;string style="select" selectedValue.read.write="selectedLanguage[0].Name" options="translations[0]" disableOverflowX="true" disabled="false" />-->
-        <!---->
-
-        <!--        <Group style="button-group">-->
-        <!--            <Group style="button" mouse:click="ClearWords()">-->
-        <!--                Clear-->
-        <!--            </Group>-->
-
-        <!--            <Group style="button" mouse:click="AddWords()">-->
-        <!--                Add words-->
-        <!--            </Group>-->
-        <!--        </Group>-->
-        <!--        -->
-        <!--          <Group style="button" mouse:click="AddWords()">-->
-        <!--                Add words-->
-        <!--            </Group>-->
-
     </Contents>
 
 </UITemplate>

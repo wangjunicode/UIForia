@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
     <Style path="Documentation/Features/FlexDemo.style"/>
+    <Style src="Documentation/Documentation.style" alias="theme"/>
 
     <Contents style="container">
 

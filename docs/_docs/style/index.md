@@ -32,8 +32,8 @@ Keyword           | Description
 There aren't any IDE plugins yet, but we created a Rider file type configuration file that gives you at
 least some syntax highlighting and autocomplete for all the keywords, although, of course, no syntax checking.
 
-[Download the file here](/assets/UIForiaStyle.xml) and copy it into your Rider's `config/filetypes` directory. The `.style` extension 
-should be mapped accordingly after a restart.
+[Download the file here](/assets/settings.zip) and use Rider's import settings feature via `File > Import Settings`. 
+The `.style` extension should be mapped accordingly after a restart.
 
 ## Create an element style
   

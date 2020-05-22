@@ -96,6 +96,7 @@ LightmapSettings:
     m_PVRFilteringAtrousPositionSigmaAO: 1
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
+    m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
   m_UseShadowmask: 1
 --- !u!196 &4
@@ -223,7 +224,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35f2b5d632fd4d64b9acedec5215cda2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  typeName: BrokenUI.GraphicsBug, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+  typeName: Documentation.DocumentationRoot, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
     PublicKeyToken=null
   camera: {fileID: 534669904}
   usePreCompiledTemplates: 0

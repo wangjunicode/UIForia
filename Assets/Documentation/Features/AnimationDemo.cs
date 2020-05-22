@@ -64,7 +64,7 @@ namespace Documentation.Features {
 
         public void ChangeAnimation(string animation) {
             
-            if (!Animator.TryGetAnimationData(animation, out animationData)) {
+            if (!animationTarget.Animator.TryGetAnimationData(animation, out animationData)) {
                  return;   
             }
 

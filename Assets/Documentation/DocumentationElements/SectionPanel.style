@@ -1,0 +1,11 @@
+﻿style section-panel {
+    LayoutFitHorizontal = Fill; 
+}
+
+style section-panel-content {
+    PaddingBottom = 10px;
+    MarginBottom = 30px;
+    BorderBottom = 1px;
+    BorderColor = gray;
+    LayoutFitHorizontal = Fill;
+}

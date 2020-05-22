@@ -1,9 +1,7 @@
-using System;
+using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.UIInput;
-using UIForia.Util;
-using UnityEngine;
 
 namespace Documentation {
     
@@ -33,21 +31,13 @@ namespace Documentation {
         public string rwValue;
 
         public string regularValue;
-        public Action<FocusEvent> FocusedMe => (evt) => Debug.Log("Focused");
 
-        public RepeatableList<string> autocompleteList;
+        public List<string> autocompleteList;
 
         public override void OnCreate() {
-            autocompleteList = new RepeatableList<string>();
+            autocompleteList = new List<string>();
             Autocomplete(default);
         }
-
-        // public override void HandleUIEvent(UIEvent evt) {
-        //     if (evt is SubmitEvent && autocompleteList.Count > 0) {
-        //         rwValue = autocompleteList[0];
-        //         evt.StopPropagation();
-        //     }
-        // }
 
         public void Autocomplete(KeyboardInputEvent evt) {
             autocompleteList.Clear();

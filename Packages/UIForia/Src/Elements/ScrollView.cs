@@ -79,10 +79,10 @@ namespace UIForia.Elements {
                 isOverflowingY = false;
             }
             else {
-                Size currentChildrenSize = new Size(children[0].layoutResult.allocatedSize.width, children[0].layoutResult.allocatedSize.height);
+                Size currentChildrenSize = new Size(children[0].layoutResult.actualSize.width, children[0].layoutResult.allocatedSize.height);
 
-                isOverflowingX = currentChildrenSize.width > layoutResult.allocatedSize.width;
-                isOverflowingY = currentChildrenSize.height > layoutResult.allocatedSize.height;
+                isOverflowingX = currentChildrenSize.width > layoutResult.actualSize.width;
+                isOverflowingY = currentChildrenSize.height > layoutResult.actualSize.height;
 
                 if (!disableAutoScroll && currentChildrenSize != previousChildrenSize) {
                     ScrollToHorizontalPercent(0);
@@ -113,9 +113,11 @@ namespace UIForia.Elements {
                 fromScrollY = scrollPercentageY;
                 if (scrollDeltaY != 0) {
                     toScrollY = Mathf.Clamp01(fromScrollY + scrollDeltaY);
-                    elapsedTotalTime = 0;
-                    isScrollingY = true;
-                    evt.StopPropagation();
+                    if (fromScrollY != toScrollY) {
+                        evt.StopPropagation();
+                        elapsedTotalTime = 0;
+                        isScrollingY = true;
+                    }
                 }
             }
 
@@ -132,9 +134,11 @@ namespace UIForia.Elements {
                 if (scrollDeltaX != 0) {
                     fromScrollX = scrollPercentageX;
                     toScrollX = Mathf.Clamp01(fromScrollX + scrollDeltaX);
-                    elapsedTotalTime = 0;
-                    isScrollingX = true;
-                    evt.StopPropagation();
+                    if (fromScrollX != toScrollX) {
+                        evt.StopPropagation();
+                        elapsedTotalTime = 0;
+                        isScrollingX = true;
+                    }
                 }
             }
         }
@@ -245,7 +249,7 @@ namespace UIForia.Elements {
             public override void Update() {
                 if ((orientation & ScrollbarOrientation.Vertical) != 0) {
                     float height = scrollView.layoutResult.ContentAreaHeight;
-
+    
                     height -= scrollView.verticalHandle.layoutResult.actualSize.height;
 
                     float y = Mathf.Clamp(MousePosition.y - (scrollView.layoutResult.screenPosition.y + scrollView.layoutResult.VerticalPaddingBorderStart) - baseOffset.y, 0, height);
@@ -263,13 +267,13 @@ namespace UIForia.Elements {
 
                     width -= scrollView.horizontalHandle.layoutResult.actualSize.width;
 
-                    float y = Mathf.Clamp(MousePosition.x - (scrollView.layoutResult.screenPosition.x  + scrollView.layoutResult.HorizontalPaddingBorderStart) - baseOffset.x, 0, width);
+                    float x = Mathf.Clamp(MousePosition.x - (scrollView.layoutResult.screenPosition.x  + scrollView.layoutResult.HorizontalPaddingBorderStart) - baseOffset.x, 0, width);
 
                     if (width == 0) {
                         scrollView.ScrollToHorizontalPercent(0);
                     }
                     else {
-                        scrollView.ScrollToHorizontalPercent(y / width);
+                        scrollView.ScrollToHorizontalPercent(x / width);
                     }
                 }
             }

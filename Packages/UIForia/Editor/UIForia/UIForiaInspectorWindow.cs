@@ -377,7 +377,7 @@ namespace UIForia.Editor {
                     s_Content.text = "isExit";
                     GUILayout.BeginHorizontal();
                     EditorGUILayout.LabelField(s_Content);
-                    EditorGUILayout.TextField(animationRunCommand.IsExit ? "yes" : "no");
+                    // EditorGUILayout.TextField(animationRunCommand.IsExit ? "yes" : "no");
                     GUILayout.EndHorizontal();
                     EditorGUI.indentLevel--;
                 }
@@ -492,6 +492,9 @@ namespace UIForia.Editor {
                 case StylePropertyId.Layer:
                     return DrawInt(property, isEditable);
 
+                case StylePropertyId.Material:
+                    return DrawMaterial(property);
+                
                 case StylePropertyId.TextOutlineColor:
                 case StylePropertyId.TextGlowColor:
                 case StylePropertyId.TextUnderlayColor:
@@ -705,6 +708,23 @@ namespace UIForia.Editor {
                     Debug.Log(property.propertyId.ToString() + " has no inspector");
                     return StyleProperty.Unset(property.propertyId);
             }
+        }
+
+        private static StyleProperty DrawMaterial(in StyleProperty property) {
+            if (property.AsMaterialId.id == 0) {
+                s_Content.text = "Material";
+                GUI.enabled = false;
+                EditorGUILayout.TextField(s_Content, "None");
+                GUI.enabled = true;
+                return property;
+            }
+
+            if (UIForiaHierarchyWindow.s_SelectedApplication.materialDatabase.TryGetMaterial(property.AsMaterialId, out MaterialInfo info)) {
+                
+            }
+
+            return property;
+
         }
 
         private static StyleProperty DrawCursor(StyleProperty property, bool isEditable) {

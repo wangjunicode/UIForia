@@ -42,7 +42,7 @@ namespace UIForia.Elements {
             if (Height > 0) {
                 style.SetPreferredWidth(Height * texture.width / texture.height, StyleState.Normal);
                 style.SetPreferredHeight(Height, StyleState.Normal);
-            }
+            } 
         }
 
         public override string GetDisplayName() {

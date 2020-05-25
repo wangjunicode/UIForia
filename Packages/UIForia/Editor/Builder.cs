@@ -16,7 +16,9 @@ namespace UIForia {
             Material clearClipRegionsMaterial = new Material(Shader.Find("UIForia/UIForiaClearClipRegions"));
             Material clipCountMaterial = new Material(Shader.Find("UIForia/UIForiaClipCount"));
             Material clipBlitMaterial = new Material(Shader.Find("UIForia/UIForiaClipBlit"));
-            
+
+            Directory.CreateDirectory(Path.Combine(UnityEngine.Application.dataPath, "Resources"));
+
             AssetDatabase.CreateAsset(uiforiaStdMaterial, "Assets/Resources/UIForiaStandardMaterial.mat");
             asset.batchedMaterial = uiforiaStdMaterial;
 

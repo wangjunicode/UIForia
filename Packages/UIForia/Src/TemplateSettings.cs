@@ -38,6 +38,7 @@ namespace UIForia {
         }
 
         private static readonly string s_InternalNonStreamingPath;
+        public MaterialReference[] materialAssets;
 
         public string StrippedApplicationName => Regex.Replace(applicationName, @"\s", "" );
 

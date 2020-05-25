@@ -33,6 +33,41 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Painter, value), state); }
         }
         
+        public UIForia.Rendering.MaterialId Material {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.Material, state).AsMaterialId; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.Material, value), state); }
+        }
+        
+        public UIForia.Rendering.MeshType MeshType {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MeshType, state).AsMeshType; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MeshType, (int)value), state); }
+        }
+        
+        public UIForia.Rendering.MeshFillDirection MeshFillDirection {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MeshFillDirection, state).AsMeshFillDirection; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MeshFillDirection, (int)value), state); }
+        }
+        
+        public UIForia.Rendering.MeshFillOrigin MeshFillOrigin {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MeshFillOrigin, state).AsMeshFillOrigin; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MeshFillOrigin, (int)value), state); }
+        }
+        
+        public float MeshFillAmount {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.MeshFillAmount, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.MeshFillAmount, value), state); }
+        }
+        
         public UIForia.Rendering.Overflow OverflowX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.OverflowX, state).AsOverflow; }
@@ -981,6 +1016,41 @@ namespace UIForia.Rendering {
             get { return GetProperty(StylePropertyId.Painter).AsString; }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.Painter, value)); }
+        }
+            
+        public UIForia.Rendering.MaterialId Material {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindMaterialIdProperty(StylePropertyId.Material); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.Material, value)); }
+        }
+            
+        public UIForia.Rendering.MeshType MeshType {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.MeshType)FindEnumProperty(StylePropertyId.MeshType); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.MeshType, (int)value)); }
+        }
+            
+        public UIForia.Rendering.MeshFillDirection MeshFillDirection {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.MeshFillDirection)FindEnumProperty(StylePropertyId.MeshFillDirection); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.MeshFillDirection, (int)value)); }
+        }
+            
+        public UIForia.Rendering.MeshFillOrigin MeshFillOrigin {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.MeshFillOrigin)FindEnumProperty(StylePropertyId.MeshFillOrigin); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.MeshFillOrigin, (int)value)); }
+        }
+            
+        public float MeshFillAmount {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.MeshFillAmount); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.MeshFillAmount, value)); }
         }
             
         public UIForia.Rendering.Overflow OverflowX {
@@ -1942,6 +2012,51 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Painter, out property)) return property.AsString;
                     return DefaultStyleValues_Generated.Painter;
+                }
+            }
+
+            public UIForia.Rendering.MaterialId Material { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Material, out property)) return property.AsMaterialId;
+                    return DefaultStyleValues_Generated.Material;
+                }
+            }
+
+            public UIForia.Rendering.MeshType MeshType { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshType, out property)) return property.AsMeshType;
+                    return DefaultStyleValues_Generated.MeshType;
+                }
+            }
+
+            public UIForia.Rendering.MeshFillDirection MeshFillDirection { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillDirection, out property)) return property.AsMeshFillDirection;
+                    return DefaultStyleValues_Generated.MeshFillDirection;
+                }
+            }
+
+            public UIForia.Rendering.MeshFillOrigin MeshFillOrigin { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillOrigin, out property)) return property.AsMeshFillOrigin;
+                    return DefaultStyleValues_Generated.MeshFillOrigin;
+                }
+            }
+
+            public float MeshFillAmount { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillAmount, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.MeshFillAmount;
                 }
             }
 
@@ -3186,6 +3301,46 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.Painter, state).AsString;
         }
         
+        public void SetMaterial(in UIForia.Rendering.MaterialId? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.Material, value), state);
+        }
+
+        public UIForia.Rendering.MaterialId GetMaterial(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.Material, state).AsMaterialId;
+        }
+        
+        public void SetMeshType(in UIForia.Rendering.MeshType? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.MeshType, (int)value), state);
+        }
+
+        public UIForia.Rendering.MeshType GetMeshType(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MeshType, state).AsMeshType;
+        }
+        
+        public void SetMeshFillDirection(in UIForia.Rendering.MeshFillDirection? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.MeshFillDirection, (int)value), state);
+        }
+
+        public UIForia.Rendering.MeshFillDirection GetMeshFillDirection(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MeshFillDirection, state).AsMeshFillDirection;
+        }
+        
+        public void SetMeshFillOrigin(in UIForia.Rendering.MeshFillOrigin? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.MeshFillOrigin, (int)value), state);
+        }
+
+        public UIForia.Rendering.MeshFillOrigin GetMeshFillOrigin(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MeshFillOrigin, state).AsMeshFillOrigin;
+        }
+        
+        public void SetMeshFillAmount(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.MeshFillAmount, value), state);
+        }
+
+        public float GetMeshFillAmount(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MeshFillAmount, state).AsFloat;
+        }
+        
         public void SetOverflowX(in UIForia.Rendering.Overflow? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.OverflowX, (int)value), state);
         }
@@ -4245,6 +4400,16 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.Cursor, Cursor);
 				case StylePropertyId.Painter:
 					 return new StyleProperty(StylePropertyId.Painter, Painter);
+				case StylePropertyId.Material:
+					 return new StyleProperty(StylePropertyId.Material, Material);
+				case StylePropertyId.MeshType:
+					 return new StyleProperty(StylePropertyId.MeshType, (int)MeshType);
+				case StylePropertyId.MeshFillDirection:
+					 return new StyleProperty(StylePropertyId.MeshFillDirection, (int)MeshFillDirection);
+				case StylePropertyId.MeshFillOrigin:
+					 return new StyleProperty(StylePropertyId.MeshFillOrigin, (int)MeshFillOrigin);
+				case StylePropertyId.MeshFillAmount:
+					 return new StyleProperty(StylePropertyId.MeshFillAmount, MeshFillAmount);
 				case StylePropertyId.OverflowX:
 					 return new StyleProperty(StylePropertyId.OverflowX, (int)OverflowX);
 				case StylePropertyId.OverflowY:
@@ -4522,6 +4687,11 @@ namespace UIForia.Rendering {
                     case StylePropertyId.Opacity: return typeof(System.Single);
                     case StylePropertyId.Cursor: return typeof(UIForia.Rendering.CursorStyle);
                     case StylePropertyId.Painter: return typeof(System.String);
+                    case StylePropertyId.Material: return typeof(UIForia.Rendering.MaterialId);
+                    case StylePropertyId.MeshType: return typeof(UIForia.Rendering.MeshType);
+                    case StylePropertyId.MeshFillDirection: return typeof(UIForia.Rendering.MeshFillDirection);
+                    case StylePropertyId.MeshFillOrigin: return typeof(UIForia.Rendering.MeshFillOrigin);
+                    case StylePropertyId.MeshFillAmount: return typeof(System.Single);
                     case StylePropertyId.OverflowX: return typeof(UIForia.Rendering.Overflow);
                     case StylePropertyId.OverflowY: return typeof(UIForia.Rendering.Overflow);
                     case StylePropertyId.ClipBehavior: return typeof(UIForia.Layout.ClipBehavior);
@@ -4664,6 +4834,8 @@ namespace UIForia.Rendering {
                 switch (propertyId) {
     
                     case StylePropertyId.Opacity: return true;
+                    case StylePropertyId.Material: return true;
+                    case StylePropertyId.MeshFillAmount: return true;
                     case StylePropertyId.BackgroundColor: return true;
                     case StylePropertyId.BackgroundTint: return true;
                     case StylePropertyId.BackgroundImageOffsetX: return true;

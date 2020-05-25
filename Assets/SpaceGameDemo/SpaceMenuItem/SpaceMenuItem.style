@@ -1,0 +1,143 @@
+﻿import "SpaceGameDemo/Theme.style" as theme;
+
+style menu-entry {
+    PreferredSize = 300px 32px;
+    Padding = 8px 24px;
+    TextFontSize = 16px;
+    TextColor = white;
+    TextFontAsset = @theme.orbitron;
+    TextTransform = UpperCase;
+    MarginBottom = 8px;
+    
+    [hover] {
+        [enter] run animation(menu-text-hover);
+        [exit] run animation(menu-text-hover-exit);
+    }
+}
+
+style menu-text {
+    AlignY = Center ParentContentArea;
+}
+
+style menu-sidetab {
+    LayoutBehavior = Ignored;
+    BackgroundColor = orange;
+    PreferredHeight = 1psz;
+    PreferredWidth = 0;
+    Opacity = 1;
+}
+
+style menu-sidetab-hover {
+    [enter] run animation(sidetab-enter);
+    [exit] run animation(sidetab-exit);
+}
+
+style menu-hightlight-active {
+    [enter] run animation(hightlight-enter);
+    [exit] run animation(hightlight-exit);
+}
+
+style menu-background {
+    LayoutBehavior = Ignored;
+    PreferredWidth = 1pca;
+    BackgroundColor = rgba(255, 255, 255, 20);
+    AlignY = End Parent;
+    PreferredHeight = 2px;
+}
+
+style menu-background-hover {
+    [enter] run animation(bg-hover);
+    [exit] run animation(bg-hover-exit);
+}
+
+animation menu-text-hover {
+    [options] {
+        Duration = 100ms;
+        TimingFunction = QuadraticEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { PaddingBottom = 10px; }
+    }
+}
+
+animation menu-text-hover-exit {
+    [options] {
+        Duration = 100ms;
+        TimingFunction = QuadraticEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { PaddingBottom = 8px; }
+    }
+}
+
+animation sidetab-enter {
+    [options] {
+        Duration = 100ms;
+        TimingFunction = QuadraticEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { PreferredWidth = 8px; }
+    }
+}
+
+animation sidetab-exit {
+    [options] {
+        Duration = 100ms;
+        TimingFunction = QuadraticEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { PreferredWidth = 0; }
+    }
+}
+
+animation hightlight-enter {
+    [options] {
+        Duration = 200ms;
+        TimingFunction = QuadraticEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { PreferredWidth = 1pca; Opacity = 0.2; }
+    }
+}
+
+animation hightlight-exit {
+    [options] {
+        Duration = 200ms;
+        TimingFunction = QuadraticEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { PreferredWidth = 0; Opacity = 1;  }
+    }
+}
+
+animation bg-hover-exit {
+    [options] {
+        Duration = 100ms;
+        TimingFunction = QuadraticEaseInOut;
+    }
+    
+    [keyframes] {
+        100% { PreferredHeight = 2px; }
+    }
+}
+
+animation bg-hover {
+    [options] {
+        Duration = 100ms;
+        TimingFunction = QuadraticEaseInOut;
+    }
+    
+    [keyframes] {
+        
+        100% { 
+            BackgroundColor = rgba(255, 255, 255, 7);
+            PreferredHeight = 1psz;
+        }
+    }
+}

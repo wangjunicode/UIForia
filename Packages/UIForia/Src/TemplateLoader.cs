@@ -19,6 +19,7 @@ namespace UIForia.Compilers {
     public static class TemplateLoader {
 
         public static CompiledTemplateData LoadRuntimeTemplates(Type type, TemplateSettings templateSettings) {
+
             CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
 
             // Stopwatch stopwatch = Stopwatch.StartNew();
@@ -162,16 +163,18 @@ namespace UIForia.Compilers {
             LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
             Dictionary<string, StyleSheet> styleSheetMap = new Dictionary<string, StyleSheet>(128);
 
+            MaterialDatabase materialDatabase = loader.GetMaterialDatabase();
+            
             for (int i = 0; i < files.Length; i++) {
-                StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i]);
+                StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i], materialDatabase);
                 styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
 
                 for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {
                     styleList.array[styleList.size++] = sheet.styleGroupContainers[j];
                 }
-                
+
                 styleSheetMap.Add(sheet.path, sheet);
-  
+
             }
 
             compiledTemplateData.templates = loader.LoadTemplates();

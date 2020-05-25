@@ -9,7 +9,8 @@ namespace UIForia.Animation {
         public string name;
         public string fileName;
         public AnimationOptions options;
-        public IList<AnimationKeyFrame> frames;
+        public IList<StyleAnimationKeyFrame> frames;
+        public IList<MaterialAnimationKeyFrame> materialFrames;
         public IList<AnimationTrigger> triggers;
 
         public Action<StyleAnimationEvent> onStart;
@@ -18,7 +19,7 @@ namespace UIForia.Animation {
         public Action<StyleAnimationEvent> onCompleted;
         public Action<StyleAnimationEvent> onTick;
 
-        public AnimationData(AnimationOptions options, IList<AnimationKeyFrame> frames = null, IList<AnimationTrigger> triggers = null, AnimationType animationType = AnimationType.KeyFrame) {
+        public AnimationData(AnimationOptions options, IList<StyleAnimationKeyFrame> frames = null, IList<AnimationTrigger> triggers = null, AnimationType animationType = AnimationType.KeyFrame) {
             this.animationType = animationType;
             this.options = options;
             this.triggers = null;
@@ -31,6 +32,7 @@ namespace UIForia.Animation {
             this.triggers = triggers;
             this.name = null;
             this.fileName = null;
+            this.materialFrames = null;
         }
 
     }

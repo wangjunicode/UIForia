@@ -87,5 +87,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
         Pause,
         Stop,
 
+        EnterExit
+
     }
 }

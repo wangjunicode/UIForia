@@ -1,11 +1,14 @@
+using System;
 using System.Diagnostics;
 using SVGX;
 using UIForia.Layout;
+using UIForia.Rendering.Vertigo;
 using UIForia.Systems;
 using UIForia.Util;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UI;
 using Vertigo;
 
 namespace UIForia.Rendering {
@@ -38,6 +41,49 @@ namespace UIForia.Rendering {
 
     }
 
+    public enum MeshType {
+
+        Simple,
+        FillRadial90,
+        FillRadial180,
+        FillRadial360,
+        FillHorizontal,
+        FillVertical,
+
+    }
+
+    public enum MeshFillOrigin {
+
+        Origin360_Bottom = 0,
+        Origin360_Right = 1,
+        Origin360_Top = 2,
+        Origin360_Left = 3,
+
+        Origin180_Bottom = 0,
+        Origin180_Left = 1,
+        Origin180_Top = 2,
+        Origin180_Right = 3,
+
+        Origin90_BottomLeft = 0,
+        Origin90_TopLeft = 1,
+        Origin90_TopRight = 2,
+        Origin90_BottomRight = 3,
+
+        OriginVertical_Bottom = 0,
+        OriginVertical_Top = 1,
+
+        OriginHorizontal_Left = 0,
+        OriginHorizontal_Right = 1
+
+    }
+
+    public enum MeshFillDirection {
+
+        Clockwise,
+        CounterClockwise
+
+    }
+
     [DebuggerDisplay("{element.ToString()}")]
     public class StandardRenderBox : RenderBox {
 
@@ -66,6 +112,13 @@ namespace UIForia.Rendering {
         protected UIFixedLength cornerBevelTopRight;
         protected UIFixedLength cornerBevelBottomLeft;
         protected UIFixedLength cornerBevelBottomRight;
+
+        protected MeshType meshType;
+        protected float meshFillAmount;
+        protected MeshFillOrigin meshFillOrigin;
+        protected MeshFillDirection meshFillDirection;
+
+        public MaterialId materialId;
 
         public StandardRenderBox() {
             this.uniqueId = "UIForia::StandardRenderBox";
@@ -97,7 +150,14 @@ namespace UIForia.Rendering {
             cornerBevelBottomRight = element.style.CornerBevelBottomRight;
             cornerBevelBottomLeft = element.style.CornerBevelBottomLeft;
             shadowColor = element.style.ShadowColor;
+            materialId = element.style.Material;
             opacity = element.style.Opacity;
+
+            meshType = element.style.MeshType;
+            meshFillAmount = element.style.MeshFillAmount;
+            meshFillDirection = element.style.MeshFillDirection;
+            meshFillOrigin = element.style.MeshFillOrigin;
+
         }
 
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
@@ -105,80 +165,120 @@ namespace UIForia.Rendering {
             int count = propertyList.size;
 
             base.OnStylePropertyChanged(propertyList);
-            
+
             for (int i = 0; i < count; i++) {
                 ref StyleProperty property = ref properties[i];
 
                 switch (property.propertyId) {
+                    case StylePropertyId.MeshFillAmount:
+                        meshFillAmount = property.AsFloat;
+                        geometryNeedsUpdate = true;
+                        break;
+
+                    case StylePropertyId.MeshType:
+                        meshType = property.AsMeshType;
+                        geometryNeedsUpdate = true;
+                        break;
+
+                    case StylePropertyId.MeshFillDirection:
+                        meshFillDirection = property.AsMeshFillDirection;
+                        geometryNeedsUpdate = true;
+                        break;
+
+                    case StylePropertyId.MeshFillOrigin:
+                        meshFillOrigin = property.AsMeshFillOrigin;
+                        geometryNeedsUpdate = true;
+                        break;
+
+                    case StylePropertyId.Material:
+                        materialId = property.AsMaterialId;
+                        break;
+
                     case StylePropertyId.BackgroundTint:
                         backgroundTint = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BackgroundColor:
                         backgroundColor = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderColorTop:
                         borderColorTop = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderColorRight:
                         borderColorRight = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderColorBottom:
                         borderColorBottom = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderColorLeft:
                         borderColorLeft = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BackgroundImage:
                         backgroundImage = property.AsTexture;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderRadiusBottomLeft:
                         borderRadiusBottomLeft = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderRadiusBottomRight:
                         borderRadiusBottomRight = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderRadiusTopLeft:
                         borderRadiusTopLeft = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderRadiusTopRight:
                         borderRadiusTopRight = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.Opacity:
                         opacity = property.AsFloat;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.CornerBevelTopLeft:
                         cornerBevelTopLeft = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.CornerBevelTopRight:
                         cornerBevelTopRight = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.CornerBevelBottomRight:
                         cornerBevelBottomRight = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.CornerBevelBottomLeft:
                         cornerBevelBottomLeft = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.ShadowColor:
                         shadowColor = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
-                    
+
                     case StylePropertyId.BackgroundFit:
                     case StylePropertyId.BackgroundImageScaleX:
                     case StylePropertyId.BackgroundImageScaleY:
@@ -195,6 +295,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.ShadowIntensity:
                         dataNeedsUpdate = true;
                         break;
+
 //                        shadowNeedsUpdate = true;
 //                        break;
                 }
@@ -210,41 +311,25 @@ namespace UIForia.Rendering {
             float height = size.height;
             float min = Mathf.Min(width, height);
 
-            float bevelTopLeft = ResolveFixedSize(element, min, cornerBevelTopLeft);
-            float bevelTopRight = ResolveFixedSize(element, min, cornerBevelTopRight);
-            float bevelBottomRight = ResolveFixedSize(element, min, cornerBevelBottomRight);
-            float bevelBottomLeft = ResolveFixedSize(element, min, cornerBevelBottomLeft);
-
-            float radiusTopLeft = ResolveFixedSize(element, min, borderRadiusTopLeft);
-            float radiusTopRight = ResolveFixedSize(element, min, borderRadiusTopRight);
-            float radiusBottomRight = ResolveFixedSize(element, min, borderRadiusBottomRight);
-            float radiusBottomLeft = ResolveFixedSize(element, min, borderRadiusBottomLeft);
-
             Vector2 pivotOffset = element.layoutResult.pivotOffset;
             //new Vector2(-element.layoutBox.pivotX * size.width, -element.layoutBox.pivotY * size.height);
 
-            if (radiusBottomLeft > 0 ||
-                radiusBottomRight > 0 ||
-                radiusTopLeft > 0 ||
-                radiusTopRight > 0 ||
-                bevelTopRight > 0 ||
-                bevelTopLeft > 0 ||
-                bevelBottomLeft > 0 ||
-                bevelBottomRight > 0) {
-//                geometry.ClipCornerRect(size, new CornerDefinition() {
-//                    topLeftX = bevelTopLeft,
-//                    topLeftY = bevelTopLeft,
-//                    topRightX = bevelTopRight,
-//                    topRightY = bevelTopRight,
-//                    bottomRightX = bevelBottomRight,
-//                    bottomRightY = bevelBottomRight,
-//                    bottomLeftX = bevelBottomLeft,
-//                    bottomLeftY = bevelBottomLeft,
-//                });
-                geometry.FillRect(size.width, size.height, pivotOffset);
-            }
-            else {
-                geometry.FillRect(size.width, size.height, pivotOffset);
+            switch (meshType) {
+
+                case MeshType.Simple:
+                    geometry.FillRect(size.width, size.height, pivotOffset);
+                    break;
+
+                case MeshType.FillRadial180:
+                case MeshType.FillRadial90:
+                case MeshType.FillRadial360:
+                case MeshType.FillHorizontal:
+                case MeshType.FillVertical:
+                    geometry.FillMeshType(new Rect(0, 0, size.width, size.height), meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
             if (!ReferenceEquals(backgroundImage, null)) {
@@ -277,7 +362,6 @@ namespace UIForia.Rendering {
                 // Now calculate the X,Y position of the upper-left corner (one of these will always be zero)
                 int posX = (int) ((width - (originalWidth * ratio)) / 2);
                 int posY = (int) ((height - (originalHeight * ratio)) / 2);
-
 
                 switch (element.style.BackgroundFit) {
                     case BackgroundFit.Fill:
@@ -436,9 +520,14 @@ namespace UIForia.Rendering {
             if (test > max) return max;
             return test;
         }
-        
+
         public override void PaintBackground(RenderContext ctx) {
-            
+
+            if (materialId.id != 0) {
+                RenderFromMaterial(ctx);
+                return;
+            }
+
             Size newSize = element.layoutResult.actualSize;
 
             if (geometryNeedsUpdate || (newSize != lastSize) || element.layoutResult.rebuildGeometry) {
@@ -531,6 +620,51 @@ namespace UIForia.Rendering {
             Matrix4x4 matrix = default;
             element.layoutResult.matrix.GetMatrix4x4(ref matrix);
             ctx.DrawBatchedGeometry(geometry, range, matrix, clipper);
+        }
+
+        private PooledMesh mesh;
+        private MaterialPropertyBlock propertyBlock;
+        private static readonly int s_Main = Shader.PropertyToID("_MainTex");
+
+        private float percent;
+
+        public void RenderFromMaterial(RenderContext ctx) {
+
+            if (!element.application.materialDatabase.TryGetMaterial(materialId, out MaterialInfo info)) {
+                //     return;
+            }
+
+            if (ReferenceEquals(mesh, null)) {
+                mesh = new PooledMesh(null);
+            }
+
+            Size size = element.layoutResult.actualSize;
+
+            // Image's dimensions used for drawing. X = left, Y = bottom, Z = right, W = top.
+            // VertexHelper vh = new VertexHelper();
+            // percent += 0.001f;
+            // if (percent > 1f) percent = 0;
+            // // Image.Origin360
+            // // GenerateFilledSprite(new Vector4(0, -size.height, size.width, 0), vh, Image.FillMethod.Radial360, (int) Image.Origin360.Bottom, percent, false, Color.red);
+            //
+            // vh.FillMesh(mesh.mesh);
+            // info.material.mainTexture = backgroundImage;
+            // info.material.SetTexture("_NoiseTex", Resources.Load<Texture2D>("Noise"));
+            propertyBlock = propertyBlock ?? new MaterialPropertyBlock();
+            
+            if (!ReferenceEquals(backgroundImage, null)) {
+                propertyBlock.SetTexture(s_Main, backgroundImage);
+            }
+            
+            element.application.materialDatabase.GetInstanceProperties(element.id, materialId, propertyBlock);
+            geometry.Clear();
+            geometry.FillRect(size.width, size.height);
+            geometry.ToMesh(mesh);
+
+            Matrix4x4 matrix = default;
+            element.layoutResult.matrix.GetMatrix4x4(ref matrix);
+            ctx.DrawMesh(mesh.mesh, info.material, propertyBlock, matrix);
+
         }
 
     }

@@ -7,6 +7,7 @@ using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Sound;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Compilers.Style {
 
@@ -15,7 +16,7 @@ namespace UIForia.Compilers.Style {
         private StyleCompileContext context;
         private readonly StyleSheetImporter styleSheetImporter;
         private ResourceManager resourceManager;
-        
+
         private LightList<UIStyleGroup> scratchGroupList;
 
         private static readonly UIStyle s_ScratchStyle = new UIStyle();
@@ -26,16 +27,16 @@ namespace UIForia.Compilers.Style {
             this.scratchGroupList = new LightList<UIStyleGroup>(32);
         }
 
-        public StyleSheet Compile(string filePath, string contents) {
-            return Compile(filePath, StyleParser.Parse(contents));
-        }
+        // public StyleSheet Compile(string filePath, string contents) {
+        //     return Compile(filePath, StyleParser.Parse(contents));
+        // }
 
         // todo -- deprecate, use other method
-        public StyleSheet Compile(string filePath, LightList<StyleASTNode> rootNodes) {
+        public StyleSheet Compile(string filePath, LightList<StyleASTNode> rootNodes, MaterialDatabase materialDatabase = default) {
             try {
-                context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
+                context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes, materialDatabase);
                 context.resourceManager = resourceManager;
-                
+
                 //       context = new StyleCompileContext(); // todo resolve constants. should be done a per file level, should store all used constants without needing to later reference other files
                 // StyleCompileContext.Create(styleSheetImporter) //new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
             }
@@ -63,10 +64,12 @@ namespace UIForia.Compilers.Style {
                     case StyleRootNode _:
                         containerCount++;
                         break;
+
                     case AnimationRootNode _:
                     case SpriteSheetNode _:
                         animationCount++;
                         break;
+
                     case SoundRootNode _:
                         soundCount++;
                         break;
@@ -98,14 +101,17 @@ namespace UIForia.Compilers.Style {
                         styleSheet.animations[animationIndex] = CompileSpriteSheetAnimation(spriteSheetNode, styleSheet.animations, styleSheet.sounds);
                         animationIndex++;
                         break;
+
                     case AnimationRootNode animNode:
                         styleSheet.animations[animationIndex] = CompileAnimation(animNode, styleSheet.animations, styleSheet.sounds);
                         animationIndex++;
                         break;
+
                     case SoundRootNode soundRootNode:
                         styleSheet.sounds[soundIndex] = CompileSound(soundRootNode);
                         soundIndex++;
                         break;
+
                     case StyleRootNode styleRoot:
                         styleSheet.styleGroupContainers[containerIndex] = CompileStyleGroup(styleRoot, styleSheet.animations, styleSheet.sounds);
                         styleSheet.styleGroupContainers[containerIndex].styleSheet = styleSheet;
@@ -144,51 +150,95 @@ namespace UIForia.Compilers.Style {
             return data;
         }
 
-        private AnimationKeyFrame[] CompileKeyFrames(AnimationRootNode animNode, AnimationData[] styleSheetAnimations, UISoundData[] uiSoundData) {
+        private unsafe StyleAnimationKeyFrame[] CompileKeyFrames(AnimationRootNode animNode, AnimationData[] styleSheetAnimations, UISoundData[] uiSoundData) {
             if (animNode.keyframeNodes == null) {
                 // todo throw error or log warning?
-                return new AnimationKeyFrame[0];
+                return new StyleAnimationKeyFrame[0];
             }
 
             int keyframeCount = 0;
+
             for (int i = 0; i < animNode.keyframeNodes.Count; i++) {
                 keyframeCount += animNode.keyframeNodes[i].keyframes.Count;
             }
 
-            AnimationKeyFrame[] frames = new AnimationKeyFrame[keyframeCount];
+            StyleAnimationKeyFrame[] frames = new StyleAnimationKeyFrame[keyframeCount];
+
             int nextKeyframeIndex = 0;
+
             for (int i = 0; i < animNode.keyframeNodes.Count; i++) {
                 KeyFrameNode keyFrameNode = animNode.keyframeNodes[i];
 
+                // todo -- this is madness and not working, fix it!!!!!!!
                 for (int j = 0; j < keyFrameNode.children.Count; j++) {
                     StyleASTNode keyFrameProperty = keyFrameNode.children[j];
                     if (keyFrameProperty is PropertyNode propertyNode) {
                         StylePropertyMappers.MapProperty(s_ScratchStyle, propertyNode, context);
                     }
-                    else if (keyFrameProperty is RunNode runNode) {
-                        //
-                        // if (runNode.command is AnimationCommandNode animationCommandNode) {
-                        //     MapAnimationRunCommand(styleSheetAnimations, animationCommandNode);
-                        // } else if (runNode.command is SoundCommandNode soundCommandNode) {
-                        //     MapSoundRunCommand(uiSoundData, soundCommandNode);
-                        // }
-                        // break;
+                    else if (keyFrameProperty is MaterialPropertyNode materialPropertyNode) {
+
+                        string materialName = materialPropertyNode.materialName;
+
+                        if (context.materialDatabase.TryGetBaseMaterialId(materialName, out MaterialId materialId)) {
+
+                            if (context.materialDatabase.TryGetMaterialProperty(materialId, materialPropertyNode.identifier, out MaterialPropertyInfo propertyInfo)) {
+
+                                fixed (char* charptr = materialPropertyNode.value) {
+
+                                    CharStream stream = new CharStream(charptr, 0, (uint) materialPropertyNode.value.Length);
+                                    MaterialKeyFrameValue kfv = default;
+                                    switch (propertyInfo.propertyType) {
+
+                                        case MaterialPropertyType.Color:
+                                            
+                                            if (stream.TryParseColorProperty(out Color32 color)) {
+                                                kfv = new MaterialKeyFrameValue(materialId, propertyInfo.propertyId, new MaterialPropertyValue2() {colorValue = color});
+                                            }
+
+                                            break;
+
+                                        case MaterialPropertyType.Float:
+                                            if (stream.TryParseFloat(out float floatVal)) {
+                                                kfv = new MaterialKeyFrameValue(materialId, propertyInfo.propertyId, new MaterialPropertyValue2() {floatValue = floatVal});
+                                            }
+                                            break;
+
+                                        case MaterialPropertyType.Vector:
+                                            break;
+
+                                        case MaterialPropertyType.Range:
+                                            break;
+
+                                        case MaterialPropertyType.Texture:
+                                            break;
+
+                                        default:
+                                            throw new ArgumentOutOfRangeException();
+                                    }
+
+                                }
+                            }
+
+                        }
+
                     }
                 }
 
-                int count = s_ScratchStyle.PropertyCount;
-                StructList<StyleKeyFrameValue> keyValues = new StructList<StyleKeyFrameValue>(count);
+                StructList<StyleKeyFrameValue> styleKeyValues = new StructList<StyleKeyFrameValue>(s_ScratchStyle.PropertyCount);
 
-                for (int j = 0; j < count; j++) {
-                    keyValues[j] = new StyleKeyFrameValue(s_ScratchStyle[j]);
+                for (int j = 0; j < s_ScratchStyle.PropertyCount; j++) {
+                    styleKeyValues[j] = new StyleKeyFrameValue(s_ScratchStyle[j]);
                 }
 
-                keyValues.size = count;
+                styleKeyValues.size = s_ScratchStyle.PropertyCount;
 
                 for (int keyframeIndex = 0; keyframeIndex < keyFrameNode.keyframes.Count; keyframeIndex++) {
                     float time = keyFrameNode.keyframes[keyframeIndex] / 100f;
-                    frames[nextKeyframeIndex] = new AnimationKeyFrame(time);
-                    frames[nextKeyframeIndex].properties = keyValues;
+
+                    frames[nextKeyframeIndex] = new StyleAnimationKeyFrame(time) {
+                        properties = styleKeyValues
+                    };
+
                     nextKeyframeIndex++;
                 }
 
@@ -218,30 +268,39 @@ namespace UIForia.Compilers.Style {
                     case "duration":
                         options.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
                         break;
+
                     case "iterations":
                         options.iterations = (int) StylePropertyMappers.MapNumberOrInfinite(value, context);
                         break;
+
                     case "looptime":
                         options.loopTime = StylePropertyMappers.MapNumber(value, context);
                         break;
+
                     case "delay":
                         options.delay = StylePropertyMappers.MapUITimeMeasurement(value, context);
                         break;
+
                     case "direction":
                         options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
                         break;
+
                     case "looptype":
                         options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
                         break;
+
                     case "forwardstartdelay":
                         options.forwardStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                         break;
+
                     case "reversestartdelay":
                         options.reverseStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                         break;
+
                     case "timingfunction":
                         options.timingFunction = StylePropertyMappers.MapEnum<EasingFunction>(value, context);
                         break;
+
                     default:
                         throw new CompileException(optionNodes[i], "Invalid option argument for animation");
                 }
@@ -267,33 +326,43 @@ namespace UIForia.Compilers.Style {
                         case "iterations":
                             options.iterations = (int) StylePropertyMappers.MapNumberOrInfinite(value, context);
                             break;
+
                         case "delay":
                             options.delay = StylePropertyMappers.MapUITimeMeasurement(value, context);
                             break;
+
                         case "duration":
                             options.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
                             break;
+
                         case "looptype":
                             options.loopType = StylePropertyMappers.MapEnum<AnimationLoopType>(value, context);
                             break;
+
                         case "direction":
                             options.direction = StylePropertyMappers.MapEnum<AnimationDirection>(value, context);
                             break;
+
                         case "forwardstartdelay":
                             options.forwardStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
+
                         case "reversestartdelay":
                             options.reverseStartDelay = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
+
                         case "fps":
                             options.fps = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
+
                         case "startframe":
                             options.startFrame = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
+
                         case "endframe":
                             options.endFrame = (int) StylePropertyMappers.MapNumber(value, context);
                             break;
+
                         case "pathprefix":
                             options.pathPrefix = StylePropertyMappers.MapString(value, context);
                             break;
@@ -326,24 +395,31 @@ namespace UIForia.Compilers.Style {
                         case "asset":
                             soundData.asset = StylePropertyMappers.MapString(value, context);
                             break;
+
                         case "duration":
                             soundData.duration = StylePropertyMappers.MapUITimeMeasurement(value, context);
                             break;
+
                         case "iterations":
                             soundData.iterations = (int) StylePropertyMappers.MapNumberOrInfinite(value, context);
                             break;
+
                         case "pitch":
                             soundData.pitch = StylePropertyMappers.MapNumber(value, context);
                             break;
+
                         case "pitchrange":
                             soundData.pitchRange = StylePropertyMappers.MapFloatRange(value, context);
                             break;
-                        case "tempo": 
+
+                        case "tempo":
                             soundData.tempo = StylePropertyMappers.MapNumber(value, context);
                             break;
+
                         case "volume":
                             soundData.volume = StylePropertyMappers.MapNumber(value, context);
                             break;
+
                         case "mixergroup":
                             soundData.mixerGroup = StylePropertyMappers.MapString(value, context);
                             break;
@@ -378,10 +454,12 @@ namespace UIForia.Compilers.Style {
                 switch (node) {
                     case SelectNode selectNode:
                         break;
+
                     case PropertyNode propertyNode:
                         // add to normal ui style set
                         StylePropertyMappers.MapProperty(targetGroup.normal.style, propertyNode, context);
                         break;
+
                     case AttributeNodeContainer attribute:
                         if (root is AttributeNodeContainer) {
                             throw new CompileException(attribute, "You cannot nest attribute group definitions.");
@@ -396,6 +474,7 @@ namespace UIForia.Compilers.Style {
                         CompileStyleGroups(attribute, styleType, groups, attributeGroup, styleSheetAnimations, uiSoundData);
 
                         break;
+
                     case RunNode runNode:
                         UIStyleRunCommand cmd = new UIStyleRunCommand() {
                             style = targetGroup.normal.style,
@@ -411,6 +490,7 @@ namespace UIForia.Compilers.Style {
 
                         targetGroup.normal = cmd;
                         break;
+
                     case StyleStateContainer styleContainer:
                         if (styleContainer.identifier == "hover") {
                             UIStyleRunCommand uiStyleRunCommand = targetGroup.hover;
@@ -433,6 +513,7 @@ namespace UIForia.Compilers.Style {
                         else throw new CompileException(styleContainer, $"Unknown style state '{styleContainer.identifier}'. Please use [hover], [focus] or [active] instead.");
 
                         break;
+
                     default:
                         throw new CompileException(node, $"You cannot have a {node} at this level.");
                 }
@@ -444,7 +525,7 @@ namespace UIForia.Compilers.Style {
         }
 
         private AnimationRunCommand MapAnimationRunCommand(AnimationData[] styleSheetAnimations, AnimationCommandNode animationCommandNode) {
-            return new AnimationRunCommand(animationCommandNode.isExit, animationCommandNode.runAction) {
+            return new AnimationRunCommand(animationCommandNode.cmdType, animationCommandNode.runAction) {
                 animationData = FindAnimationData(styleSheetAnimations, animationCommandNode.animationName),
             };
         }
@@ -454,7 +535,7 @@ namespace UIForia.Compilers.Style {
         }
 
         private SoundRunCommand MapSoundRunCommand(UISoundData[] soundData, SoundCommandNode soundCommandNode) {
-            return new SoundRunCommand(soundCommandNode.isExit, soundCommandNode.runAction) {
+            return new SoundRunCommand(soundCommandNode.cmdType, soundCommandNode.runAction) {
                 soundData = FindSoundData(soundData, soundCommandNode.name),
             };
         }
@@ -501,6 +582,7 @@ namespace UIForia.Compilers.Style {
                         // add to normal ui style set
                         StylePropertyMappers.MapProperty(targetStyle.style, propertyNode, context);
                         break;
+
                     case RunNode runNode:
                         targetStyle.runCommands = targetStyle.runCommands ?? new LightList<IRunCommand>(4);
                         if (runNode.command is AnimationCommandNode animationCommandNode) {
@@ -511,6 +593,7 @@ namespace UIForia.Compilers.Style {
                         }
 
                         break;
+
                     default:
                         throw new CompileException(node, $"You cannot have a {node} at this level.");
                 }
@@ -518,13 +601,13 @@ namespace UIForia.Compilers.Style {
         }
 
         private UIStyleRule MapAttributeContainerToRule(ChainableNodeContainer nodeContainer) {
-            
+
             if (nodeContainer == null) return null;
 
             if (nodeContainer is AttributeNodeContainer attribute) {
                 return new UIStyleRule(attribute.invert, attribute.identifier, attribute.value, MapAttributeContainerToRule(attribute.next));
             }
-            
+
             throw new NotImplementedException("Sorry this feature experiences a slight delay.");
         }
 

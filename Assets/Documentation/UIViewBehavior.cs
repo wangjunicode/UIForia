@@ -4,7 +4,7 @@ using UIForia.Elements;
 using UnityEngine;
 
 namespace UIForia {
-
+    
     public class UIViewBehavior : MonoBehaviour {
 
         public Type type;
@@ -12,7 +12,7 @@ namespace UIForia {
         public new Camera camera;
         public Application application;
         public bool usePreCompiledTemplates;
-
+        
         [HideInInspector] public string applicationName = "Game App 2";
 
         public TemplateSettings GetTemplateSettings(Type type) {
@@ -24,6 +24,7 @@ namespace UIForia {
             settings.codeFileExtension = "generated.cs";
             settings.preCompiledTemplatePath = "Assets/UIForia_Generated2/" + applicationName;
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
+            
             return settings;
         }
 
@@ -32,7 +33,8 @@ namespace UIForia {
             if (type == null) return;
 
             TemplateSettings settings = GetTemplateSettings(type);
-
+            settings.materialAssets = GetComponent<UIForiaAssets>()?.materialReferences;
+            
 #if UNITY_EDITOR
             application = usePreCompiledTemplates
                 ? GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection)

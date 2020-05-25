@@ -55,21 +55,22 @@ namespace UIForia.Compilers.Style {
                 {"alignx", (targetStyle, property, context) => MapAlignmentX(targetStyle, property, context)},
                 {"aligny", (targetStyle, property, context) => MapAlignmentY(targetStyle, property, context)},
                 {"alignmentboundaryx", (targetStyle, property, context) => targetStyle.AlignmentBoundaryX = MapEnum<AlignmentBoundary>(property.children[0], context)},
-                {"alignmentboundaryy", (targetStyle, property, context) => targetStyle.AlignmentBoundaryY = MapEnum<AlignmentBoundary>(property.children[0], context)},
-                
-                {"alignmentboundary", (targetStyle, property, context) => {
+                {"alignmentboundaryy", (targetStyle, property, context) => targetStyle.AlignmentBoundaryY = MapEnum<AlignmentBoundary>(property.children[0], context)}, {
+                    "alignmentboundary", (targetStyle, property, context) => {
                         if (property.children.size == 1) {
                             AlignmentBoundary value = MapEnum<AlignmentBoundary>(property.children[0], context);
                             targetStyle.AlignmentBoundaryX = value;
                             targetStyle.AlignmentBoundaryY = value;
                         }
                         else {
-                            targetStyle.AlignmentBoundaryX = MapEnum<AlignmentBoundary>(property.children[0], context);;
-                            targetStyle.AlignmentBoundaryY = MapEnum<AlignmentBoundary>(property.children[1], context);;
+                            targetStyle.AlignmentBoundaryX = MapEnum<AlignmentBoundary>(property.children[0], context);
+                            ;
+                            targetStyle.AlignmentBoundaryY = MapEnum<AlignmentBoundary>(property.children[1], context);
+                            ;
                         }
                     }
                 },
-                
+
                 {"layoutfit", (targetStyle, property, context) => MapLayoutFit(targetStyle, property, context)},
                 {"layoutfithorizontal", (targetStyle, property, context) => targetStyle.LayoutFitHorizontal = MapEnum<LayoutFit>(property.children[0], context)},
                 {"layoutfitvertical", (targetStyle, property, context) => targetStyle.LayoutFitVertical = MapEnum<LayoutFit>(property.children[0], context)},
@@ -275,8 +276,130 @@ namespace UIForia.Compilers.Style {
                 {"shadowintensity", (targetStyle, property, context) => targetStyle.ShadowIntensity = MapNumber(property.children[0], context)},
                 {"shadowcolor", (targetStyle, property, context) => targetStyle.ShadowColor = MapColor(property.children[0], context)},
                 {"shadowtint", (targetStyle, property, context) => targetStyle.ShadowTint = MapColor(property.children[0], context)},
-                {"shadowopacity", (targetStyle, property, context) => targetStyle.ShadowOpacity = MapNumber(property.children[0], context)},
+                {"shadowopacity", (targetStyle, property, context) => targetStyle.ShadowOpacity = MapNumber(property, context)},
+
+                {"material", (targetStyle, property, context) => targetStyle.Material = MapMaterial(property, context)},
+                
+                {"meshtype", (targetStyle, property, context) => targetStyle.MeshType = MapEnum<MeshType>(property.children[0], context) },
+                {"meshfilldirection", (targetStyle, property, context) => targetStyle.MeshFillDirection = MapEnum<MeshFillDirection>(property.children[0], context) },
+                {"meshfillorigin", (targetStyle, property, context) => targetStyle.MeshFillOrigin = MapEnum<MeshFillOrigin>(property.children[0], context) },
+                {"meshfillamount", (targetStyle, property, context) => targetStyle.MeshFillAmount = MapNumber(property.children[0], context) },
+                
+
             };
+
+        // "materialName" { [type] [identifier] = [value] }
+        // when using style database, we need to know per-module what the materials are already. should be easy
+        private static unsafe MaterialId MapMaterial(PropertyNode node, StyleCompileContext context) {
+
+            if (!(node.children[0] is StyleLiteralNode literalNode) || literalNode.type != StyleASTNodeType.StringLiteral) {
+                return default;
+            }
+
+            fixed (char* charptr = literalNode.rawValue) {
+                CharStream stream = new CharStream(charptr, 0, (uint) literalNode.rawValue.Length);
+                stream.TryParseCharacter('"');
+
+                if (!stream.TryParseIdentifier(out CharSpan idSpan)) {
+                    throw new Exception($"Expected a valid identifier for material style value. Found: " + literalNode.rawValue);
+                }
+
+                if (!context.materialDatabase.TryGetBaseMaterialId(idSpan, out MaterialId materialId)) {
+                    throw new Exception($"Cannot find a material registered by name {idSpan}.");
+                }
+
+                stream.TryParseCharacter('"');
+
+                stream.ConsumeWhiteSpaceAndComments();
+
+                if (!stream.HasMoreTokens) {
+                    return materialId;
+                }
+
+                if (!stream.TryGetSubStream('{', '}', out CharStream propertyStream)) {
+                    return default;
+                }
+
+                LightList<MaterialValueOverride> valueList = LightList<MaterialValueOverride>.Get();
+
+                context.materialDatabase.TryGetMaterial(materialId, out MaterialInfo materialInfo);
+
+                while (propertyStream.HasMoreTokens) {
+                    propertyStream.ConsumeWhiteSpaceAndComments();
+                    // property = value
+                    bool isValid = true;
+
+                    if (!propertyStream.TryParseIdentifier(out CharSpan propertySpan)) {
+                        throw new Exception($"Expected to find a valid property name identifier in material style property {idSpan}");
+                    }
+
+                    // if (!materialInfo.material.HasProperty(propertySpan.ToString())) {
+                    //     Debug.Log($"material does not define property with the name '{propertySpan}'");
+                    //     isValid = false;
+                    // }
+
+                    if (!propertyStream.TryParseCharacter('=')) {
+                        throw new Exception($"Expected to find an = sign after material property {propertySpan}");
+                    }
+
+                    if (!context.materialDatabase.TryGetMaterialProperty(materialId, propertySpan, out MaterialPropertyInfo info)) {
+                        Debug.Log($"material {idSpan} doesn't define property {propertySpan}");
+                        isValid = false;
+                    }
+
+                    if (!propertyStream.TryGetDelimitedSubstream(';', out CharStream valueStream)) {
+                        return default;
+                    }
+
+                    switch (info.propertyType) {
+
+                        case MaterialPropertyType.Color:
+
+                            if (valueStream.TryParseColorProperty(out Color32 color) && isValid) {
+                                valueList.Add(new MaterialValueOverride() {
+                                    propertyId = info.propertyId,
+                                    propertyType = MaterialPropertyType.Color,
+                                    value = new MaterialPropertyValue2() {colorValue = color}
+                                });
+                            }
+
+                            break;
+
+                        case MaterialPropertyType.Float:
+
+                            if (valueStream.TryParseFloat(out float value) && isValid) {
+                                valueList.Add(new MaterialValueOverride() {
+                                    propertyId = info.propertyId,
+                                    propertyType = MaterialPropertyType.Float,
+                                    value = new MaterialPropertyValue2() {floatValue = value}
+                                });
+                            }
+
+                            break;
+
+                        case MaterialPropertyType.Vector:
+                            break;
+
+                        case MaterialPropertyType.Range:
+                            break;
+
+                        case MaterialPropertyType.Texture:
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                }
+
+                materialId = context.materialDatabase.CreateStaticMaterialOverride(materialId, valueList);
+
+                valueList.Release();
+
+                return materialId;
+
+            }
+        }
 
         private static void MapLayoutFit(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
             if (property.children.Count == 1) {
@@ -301,8 +424,10 @@ namespace UIForia.Compilers.Style {
                 switch (identifierNode.name.ToLower()) {
                     case "start":
                         return 0;
+
                     case "center":
                         return 0.5f;
+
                     case "end":
                         return 1f;
                 }
@@ -442,14 +567,17 @@ namespace UIForia.Compilers.Style {
                     targetStyle.AlignmentOriginX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Percent);
                     targetStyle.AlignmentOffsetX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Percent);
                     break;
+
                 case "center":
                     targetStyle.AlignmentOriginX = new OffsetMeasurement(0.5f, OffsetMeasurementUnit.Percent);
                     targetStyle.AlignmentOffsetX = new OffsetMeasurement(-0.5f, OffsetMeasurementUnit.Percent);
                     break;
+
                 case "end":
                     targetStyle.AlignmentOriginX = new OffsetMeasurement(1f, OffsetMeasurementUnit.Percent);
                     targetStyle.AlignmentOffsetX = new OffsetMeasurement(-1f, OffsetMeasurementUnit.Percent);
                     break;
+
                 default:
                     throw new CompileException(context.fileName, value, $"Invalid AlignX {value}. " +
                                                                         "Make sure you use one of the following keywords: start, center, end or provide an OffsetMeasurement.");
@@ -462,14 +590,17 @@ namespace UIForia.Compilers.Style {
                     targetStyle.AlignmentOriginY = new OffsetMeasurement(0);
                     targetStyle.AlignmentOffsetY = new OffsetMeasurement(0);
                     break;
+
                 case "center":
                     targetStyle.AlignmentOriginY = new OffsetMeasurement(0.5f, OffsetMeasurementUnit.Percent);
                     targetStyle.AlignmentOffsetY = new OffsetMeasurement(-0.5f, OffsetMeasurementUnit.Percent);
                     break;
+
                 case "end":
                     targetStyle.AlignmentOriginY = new OffsetMeasurement(1f, OffsetMeasurementUnit.Percent);
                     targetStyle.AlignmentOffsetY = new OffsetMeasurement(-1f, OffsetMeasurementUnit.Percent);
                     break;
+
                 default:
                     throw new CompileException(context.fileName, value, $"Invalid AlignY {value}. " +
                                                                         "Make sure you use one of the following keywords: start, center, end or provide an OffsetMeasurement.");
@@ -517,6 +648,7 @@ namespace UIForia.Compilers.Style {
                         }
 
                         break;
+
                     default:
                         throw new CompileException(context.fileName, value, $"Invalid TextFontStyle {value}. " +
                                                                             "Make sure you use one of those: bold, italic, underline or strikethrough.");
@@ -525,7 +657,6 @@ namespace UIForia.Compilers.Style {
 
             return style;
         }
-
 
         private static void MapMaxSize(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
             UIMeasurement x = MapMeasurement(property.children[0], context);
@@ -790,6 +921,7 @@ namespace UIForia.Compilers.Style {
 
                             return default;
                         }
+
                         case "shrink": {
                             if (functionNode.children.Count != 2 && functionNode.children.Count != 3) {
                                 throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. shrnk() must have two arguments.");
@@ -826,6 +958,7 @@ namespace UIForia.Compilers.Style {
 
                             return new GridTrackSize(cellDefinition);
                         }
+
                         case "grow": {
                             GridCellDefinition cellDefinition = default;
 
@@ -868,6 +1001,7 @@ namespace UIForia.Compilers.Style {
                                 return new GridTrackSize(cellDefinition);
                             }
                         }
+
                         default:
                             throw new CompileException(context.fileName, trackSize, $"Had a hard time parsing that track size: {trackSize}. Expected a known track size function (repeat, grow, shrink) but all I got was {functionNode.identifier}");
                     }
@@ -1070,6 +1204,7 @@ namespace UIForia.Compilers.Style {
                     UIMeasurementUnit unit = MapUnit(identifierNode.name, context, identifierNode.line, identifierNode.column);
                     return new UIMeasurement(1, unit);
                 }
+
                 case MeasurementNode measurementNode: {
                     UIMeasurementUnit unit = MapUnit(measurementNode.unit, context);
                     if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
@@ -1083,6 +1218,7 @@ namespace UIForia.Compilers.Style {
                         return new UIMeasurement(1f, unit);
                     }
                 }
+
                 case StyleLiteralNode literalNode:
                     if (TryParseFloat(literalNode.rawValue, out float literalValue)) {
                         return new UIMeasurement(literalValue);
@@ -1148,6 +1284,7 @@ namespace UIForia.Compilers.Style {
 
                 case "%":
                     return UIMeasurementUnit.Percentage;
+
                 case "auto":
                     return UIMeasurementUnit.Auto;
 
@@ -1180,12 +1317,16 @@ namespace UIForia.Compilers.Style {
             switch (unitNode.value) {
                 case "px":
                     return UIFixedUnit.Pixel;
+
                 case "%":
                     return UIFixedUnit.Percent;
+
                 case "vh":
                     return UIFixedUnit.ViewportHeight;
+
                 case "vw":
                     return UIFixedUnit.ViewportWidth;
+
                 case "em":
                     return UIFixedUnit.Em;
             }
@@ -1202,12 +1343,16 @@ namespace UIForia.Compilers.Style {
             switch (unitNode.value) {
                 case "px":
                     return UIFixedUnit.Pixel;
+
                 case "%":
                     return UIFixedUnit.Percent;
+
                 case "vh":
                     return UIFixedUnit.ViewportHeight;
+
                 case "vw":
                     return UIFixedUnit.ViewportWidth;
+
                 case "em":
                     return UIFixedUnit.Em;
             }
@@ -1224,22 +1369,31 @@ namespace UIForia.Compilers.Style {
             switch (unitNode.value) {
                 case "px":
                     return GridTemplateUnit.Pixel;
+
                 case "mx":
                     return GridTemplateUnit.MaxContent;
+
                 case "mn":
                     return GridTemplateUnit.MinContent;
+
                 case "fr":
                     return GridTemplateUnit.FractionalRemaining;
+
                 case "vw":
                     return GridTemplateUnit.ViewportWidth;
+
                 case "vh":
                     return GridTemplateUnit.ViewportHeight;
+
                 case "em":
                     return GridTemplateUnit.Em;
+
                 case "pca":
                     return GridTemplateUnit.ParentContentArea;
+
                 case "psz":
                     return GridTemplateUnit.ParentSize;
+
                 case "%":
                     return GridTemplateUnit.Percent;
             }
@@ -1282,40 +1436,58 @@ namespace UIForia.Compilers.Style {
             switch (unitNode.value) {
                 case "px":
                     return OffsetMeasurementUnit.Pixel;
+
                 case "w":
                     return OffsetMeasurementUnit.ActualWidth;
+
                 case "h":
                     return OffsetMeasurementUnit.ActualHeight;
+
                 case "alw":
                     return OffsetMeasurementUnit.AllocatedWidth;
+
                 case "alh":
                     return OffsetMeasurementUnit.AllocatedHeight;
+
                 case "cw":
                     return OffsetMeasurementUnit.ContentWidth;
+
                 case "ch":
                     return OffsetMeasurementUnit.ContentHeight;
+
                 case "em":
                     return OffsetMeasurementUnit.Em;
+
                 case "caw":
                     return OffsetMeasurementUnit.ContentAreaWidth;
+
                 case "cah":
                     return OffsetMeasurementUnit.ContentAreaHeight;
+
                 case "vw":
                     return OffsetMeasurementUnit.ViewportWidth;
+
                 case "vh":
                     return OffsetMeasurementUnit.ViewportHeight;
+
                 case "pw":
                     return OffsetMeasurementUnit.ParentWidth;
+
                 case "ph":
                     return OffsetMeasurementUnit.ParentHeight;
+
                 case "pcaw":
                     return OffsetMeasurementUnit.ParentContentAreaWidth;
+
                 case "pcah":
                     return OffsetMeasurementUnit.ParentContentAreaHeight;
+
                 case "sw":
                     return OffsetMeasurementUnit.ScreenWidth;
+
                 case "sh":
                     return OffsetMeasurementUnit.ScreenHeight;
+
                 case "%":
                     return OffsetMeasurementUnit.Percent;
             }
@@ -1358,8 +1530,10 @@ namespace UIForia.Compilers.Style {
             switch (unitNode.value) {
                 case "%":
                     return UITimeMeasurementUnit.Percentage;
+
                 case "s":
                     return UITimeMeasurementUnit.Seconds;
+
                 case "ms":
                     return UITimeMeasurementUnit.Milliseconds;
             }
@@ -1394,6 +1568,7 @@ namespace UIForia.Compilers.Style {
                     }
 
                     return context.resourceManager?.GetTexture(assetInfo.Path);
+
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
                     if (value == "unset" || value == "default" || value == "null") {
@@ -1416,6 +1591,7 @@ namespace UIForia.Compilers.Style {
                     }
 
                     return context.resourceManager?.GetFont(assetInfo.Path);
+
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
                     if (value == "unset" || value == "default" || value == "null") {
@@ -1453,7 +1629,6 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(url, "Invalid url value.");
         }
 
-
         private static Color MapColor(PropertyNode property, StyleCompileContext context) {
             AssertSingleValue(property.children, context);
             return MapColor(property.children[0], context);
@@ -1468,6 +1643,7 @@ namespace UIForia.Compilers.Style {
                 case ColorNode colorNode: return colorNode.color;
                 case RgbaNode rgbaNode: return MapRbgaNodeToColor(rgbaNode, context);
                 case RgbNode rgbNode: return MapRgbNodeToColor(rgbNode, context);
+
                 default:
                     throw new CompileException(context.fileName, styleAstNode, "Unsupported color value.");
             }
@@ -1664,6 +1840,7 @@ namespace UIForia.Compilers.Style {
                     }
 
                     break;
+
                 case StyleIdentifierNode identifierNode: {
                     switch (identifierNode.name.ToLower()) {
                         case "start": return 0f;
@@ -1672,6 +1849,7 @@ namespace UIForia.Compilers.Style {
                         default: throw new CompileException(context.fileName, node, $"Expected a [start|center|end] but all I got was this lousy {node}");
                     }
                 }
+
                 case StyleLiteralNode literalNode: {
                     if (literalNode.type == StyleASTNodeType.NumericLiteral) {
                         if (TryParseFloat(((StyleLiteralNode) node).rawValue, out float number)) {

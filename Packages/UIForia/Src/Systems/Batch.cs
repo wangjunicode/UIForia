@@ -9,6 +9,7 @@ namespace UIForia.Rendering {
         public int drawCallSize;
         public BatchType batchType;
         public PooledMesh pooledMesh;
+        public MaterialPropertyBlock propertyBlock;
         public Mesh unpooledMesh;
         public Material material;
         public UIForiaData uiforiaData;

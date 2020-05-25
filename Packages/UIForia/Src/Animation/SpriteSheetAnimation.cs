@@ -1,4 +1,4 @@
-using Boo.Lang.Runtime;
+using System;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Sound;
@@ -17,7 +17,7 @@ namespace UIForia.Animation {
         public SpriteSheetAnimation(UIElement target, AnimationData animationData) : base(target, animationData) {
             frames = new LightList<Texture2D>();
             if (!animationData.options.startFrame.HasValue) {
-                throw new RuntimeException($"SpriteSheetAnimations must define a startFrame. File: {animationData.fileName}>{animationData.name}");
+                throw new Exception($"SpriteSheetAnimations must define a startFrame. File: {animationData.fileName}>{animationData.name}");
             }
             for (int i = animationData.options.startFrame.Value; i <= animationData.options.endFrame; i++) {
                 frames.Add(target.application.ResourceManager.GetTexture(animationData.options.pathPrefix + i));

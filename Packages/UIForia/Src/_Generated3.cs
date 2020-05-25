@@ -18,6 +18,11 @@ namespace UIForia.Rendering {
 		public const float Opacity = 1f;
 		public static readonly CursorStyle Cursor = default(CursorStyle);
 		public static readonly string Painter = "";
+		public static readonly MaterialId Material = (MaterialId)0;
+		public const MeshType MeshType = UIForia.Rendering.MeshType.Simple;
+		public const MeshFillDirection MeshFillDirection = UIForia.Rendering.MeshFillDirection.Clockwise;
+		public const MeshFillOrigin MeshFillOrigin = UIForia.Rendering.MeshFillOrigin.OriginVertical_Bottom;
+		public const float MeshFillAmount = 1f;
 		public const Overflow OverflowX = UIForia.Rendering.Overflow.Visible;
 		public const Overflow OverflowY = UIForia.Rendering.Overflow.Visible;
 		public const ClipBehavior ClipBehavior = UIForia.Layout.ClipBehavior.Normal;
@@ -160,6 +165,16 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.Cursor, default(CursorStyle));
 				case StylePropertyId.Painter:
 					 return new StyleProperty(StylePropertyId.Painter, "");
+				case StylePropertyId.Material:
+					 return new StyleProperty(StylePropertyId.Material, (MaterialId)0);
+				case StylePropertyId.MeshType:
+					 return new StyleProperty(StylePropertyId.MeshType, (int)UIForia.Rendering.MeshType.Simple);
+				case StylePropertyId.MeshFillDirection:
+					 return new StyleProperty(StylePropertyId.MeshFillDirection, (int)UIForia.Rendering.MeshFillDirection.Clockwise);
+				case StylePropertyId.MeshFillOrigin:
+					 return new StyleProperty(StylePropertyId.MeshFillOrigin, (int)UIForia.Rendering.MeshFillOrigin.OriginVertical_Bottom);
+				case StylePropertyId.MeshFillAmount:
+					 return new StyleProperty(StylePropertyId.MeshFillAmount, 1f);
 				case StylePropertyId.OverflowX:
 					 return new StyleProperty(StylePropertyId.OverflowX, (int)UIForia.Rendering.Overflow.Visible);
 				case StylePropertyId.OverflowY:

@@ -27,6 +27,7 @@ namespace UIForia.Rendering {
         BorderColorLeft,
         BackgroundTint,
         BackgroundFit,
+        Material,
 
         GridItemY,
         GridItemHeight,
@@ -163,6 +164,14 @@ namespace UIForia.Rendering {
         FitItemsVertical,
         DistributeExtraSpaceVertical,
         DistributeExtraSpaceHorizontal,
+
+        MeshType,
+
+        MeshFillAmount,
+
+        MeshFillDirection,
+
+        MeshFillOrigin
 
     }
 

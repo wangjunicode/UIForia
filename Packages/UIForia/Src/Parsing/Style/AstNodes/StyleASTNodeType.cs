@@ -39,6 +39,8 @@ namespace UIForia.Parsing.Style.AstNodes {
         SpriteSheetDeclaration = 131,
         SoundDeclaration = 135,
         StyleGroup = 140,
+        MaterialProperty
+
     }
 
 }

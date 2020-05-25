@@ -135,8 +135,9 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_StringBuilder_AppendSByte = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(sbyte)});
         internal static readonly MethodInfo s_StringBuilder_AppendBool = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(bool)});
         internal static readonly MethodInfo s_StringBuilder_AppendChar = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
-    
-        private TemplateCompiler(TemplateSettings settings) {
+        private MaterialDatabase materialDatabase;
+
+        private TemplateCompiler(TemplateSettings settings, MaterialDatabase materialDatabase) {
             this.templateCache = new TemplateCache(settings);
             this.templateMap = new Dictionary<Type, CompiledTemplate>();
             this.templateData = new CompiledTemplateData(settings);
@@ -145,7 +146,8 @@ namespace UIForia.Compilers {
             this.enabledCompiler = new UIForiaLinqCompiler();
             this.lateCompiler = new UIForiaLinqCompiler();
             this.typeResolver = new UIForiaLinqCompiler();
-
+            this.materialDatabase = materialDatabase;
+            
             Func<string, LinqCompiler, Expression> resolveAlias = ResolveAlias;
 
             this.createdCompiler.resolveAlias = resolveAlias;
@@ -161,10 +163,14 @@ namespace UIForia.Compilers {
             
             TypeProcessor.ClearDynamics();
             
-            TemplateCompiler instance = new TemplateCompiler(templateSettings);
-
+            MaterialDatabase materialDatabase = MaterialAssetBuilder.BuildMaterialDatabase(templateSettings.materialAssets);
+            
+            TemplateCompiler instance = new TemplateCompiler(templateSettings, materialDatabase);
+                
             CompiledTemplateData compiledTemplateData = instance.CompileRoot(appRootType, templateSettings.dynamicallyCreatedTypes);
-
+            
+            compiledTemplateData.materialDatabase = materialDatabase;
+            
             return compiledTemplateData;
         }
 
@@ -268,7 +274,7 @@ namespace UIForia.Compilers {
             for (int i = 0; i < templateRootNode.templateShell.styles.size; i++) {
                 ref StyleDefinition styleDef = ref templateRootNode.templateShell.styles.array[i];
 
-                StyleSheet sheet = templateData.ImportStyleSheet(styleDef);
+                StyleSheet sheet = templateData.ImportStyleSheet(styleDef, materialDatabase);
 
                 if (sheet != null) {
                     ctx.AddStyleSheet(styleDef.alias, sheet);

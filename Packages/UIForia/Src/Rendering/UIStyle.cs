@@ -68,6 +68,16 @@ namespace UIForia.Rendering {
             return UIMeasurement.Unset;
         }
         
+        private MaterialId FindMaterialIdProperty(StylePropertyId propertyId) {
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
+                    return array[i].AsMaterialId;
+                }
+            }
+
+            return (MaterialId) 0;
+        }
+        
         private OffsetMeasurement FindOffsetMeasurementProperty(StylePropertyId propertyId) {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {

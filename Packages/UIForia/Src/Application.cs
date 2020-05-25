@@ -66,6 +66,8 @@ namespace UIForia {
         public event Action<UIView> onViewRemoved;
         public event Action onRefresh;
 
+        public MaterialDatabase materialDatabase;
+
         internal CompiledTemplateData templateData;
 
         internal int frameId;
@@ -102,7 +104,7 @@ namespace UIForia {
             this.onElementRegistered = onElementRegistered;
             this.id = templateSettings.applicationName;
             this.resourceManager = resourceManager ?? new ResourceManager();
-
+            
             Applications.Add(this);
 #if UNITY_EDITOR
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnEditorReload;
@@ -156,6 +158,8 @@ namespace UIForia {
                 templateData = TemplateLoader.LoadRuntimeTemplates(templateSettings.rootType, templateSettings);
             }
 
+            materialDatabase = templateData.materialDatabase;
+            
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this));
 
             view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Width, Height));
@@ -275,6 +279,7 @@ namespace UIForia {
 
             resourceManager.Reset();
 
+            materialDatabase.Destroy();
             templateData.Destroy();
 
             m_AfterUpdateTaskSystem.OnDestroy();

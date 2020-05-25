@@ -1,8 +1,8 @@
 {
     "name": "com.klang-games.uiforia",
     "displayName": "UIForia",
-    "version": "0.1.3-SNAPSHOT-2",
-    "unity": "2019.2",
+    "version": "0.1.11",
+    "unity": "2019.3",
     "description": "",
     "keywords": ["UI", "UIForia"],
     "category": "UI",

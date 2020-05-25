@@ -1,0 +1,26 @@
+﻿<UITemplate>
+    
+    <Style src="SpaceGameDemo/SpaceGameRoot.style"/>
+    
+    <Contents>
+        
+<!--        <Image src="'Images/uiforia_logo_white@2x'" style="logo"/>-->
+        
+<!--        <Group style="menu">-->
+<!--            <SpaceMenuItem label="'Single Player'" mouse:click="FindById('single-player').SetEnabled(true)"/>-->
+<!--            <SpaceMenuItem label="'Server Browser'" />-->
+<!--            <SpaceMenuItem label="'Settings'" />-->
+<!--            <SpaceMenuItem label="'Quit'" />-->
+<!--        </Group>-->
+        
+<!--        <Group attr:id="single-player" style="single-player" if.once="false">-->
+<!--            -->
+<!--            <Text>Single player!</Text>-->
+<!--            -->
+<!--        </Group>-->
+
+        <JoinServer/>
+        
+    </Contents>
+    
+</UITemplate>

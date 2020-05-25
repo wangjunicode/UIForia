@@ -41,49 +41,7 @@ namespace UIForia.Rendering {
 
     }
 
-    public enum MeshType {
-
-        Simple,
-        FillRadial90,
-        FillRadial180,
-        FillRadial360,
-        FillHorizontal,
-        FillVertical,
-
-    }
-
-    public enum MeshFillOrigin {
-
-        Origin360_Bottom = 0,
-        Origin360_Right = 1,
-        Origin360_Top = 2,
-        Origin360_Left = 3,
-
-        Origin180_Bottom = 0,
-        Origin180_Left = 1,
-        Origin180_Top = 2,
-        Origin180_Right = 3,
-
-        Origin90_BottomLeft = 0,
-        Origin90_TopLeft = 1,
-        Origin90_TopRight = 2,
-        Origin90_BottomRight = 3,
-
-        OriginVertical_Bottom = 0,
-        OriginVertical_Top = 1,
-
-        OriginHorizontal_Left = 0,
-        OriginHorizontal_Right = 1
-
-    }
-
-    public enum MeshFillDirection {
-
-        Clockwise,
-        CounterClockwise
-
-    }
-
+    
     [DebuggerDisplay("{element.ToString()}")]
     public class StandardRenderBox : RenderBox {
 
@@ -119,7 +77,11 @@ namespace UIForia.Rendering {
         protected MeshFillDirection meshFillDirection;
 
         public MaterialId materialId;
-
+        
+        private PooledMesh mesh;
+        private MaterialPropertyBlock propertyBlock;
+        private static readonly int s_Main = Shader.PropertyToID("_MainTex");
+        
         public StandardRenderBox() {
             this.uniqueId = "UIForia::StandardRenderBox";
             this.geometry = new UIForiaGeometry();
@@ -309,28 +271,11 @@ namespace UIForia.Rendering {
 
             float width = size.width;
             float height = size.height;
-            float min = Mathf.Min(width, height);
 
             Vector2 pivotOffset = element.layoutResult.pivotOffset;
-            //new Vector2(-element.layoutBox.pivotX * size.width, -element.layoutBox.pivotY * size.height);
 
-            switch (meshType) {
-
-                case MeshType.Simple:
-                    geometry.FillRect(size.width, size.height, pivotOffset);
-                    break;
-
-                case MeshType.FillRadial180:
-                case MeshType.FillRadial90:
-                case MeshType.FillRadial360:
-                case MeshType.FillHorizontal:
-                case MeshType.FillVertical:
-                    geometry.FillMeshType(new Rect(0, 0, size.width, size.height), meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            // geometry.FillRect(size.width, size.height);
+            geometry.FillMeshType(0, 0, size.width, size.height, meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
 
             if (!ReferenceEquals(backgroundImage, null)) {
                 Vector3[] positions = geometry.positionList.array;
@@ -622,16 +567,12 @@ namespace UIForia.Rendering {
             ctx.DrawBatchedGeometry(geometry, range, matrix, clipper);
         }
 
-        private PooledMesh mesh;
-        private MaterialPropertyBlock propertyBlock;
-        private static readonly int s_Main = Shader.PropertyToID("_MainTex");
-
-        private float percent;
-
+      
+        
         public void RenderFromMaterial(RenderContext ctx) {
 
-            if (!element.application.materialDatabase.TryGetMaterial(materialId, out MaterialInfo info)) {
-                //     return;
+            if (!element.application.materialDatabase.TryGetMaterial(materialId, out MaterialInfo info)) { 
+                return;
             }
 
             if (ReferenceEquals(mesh, null)) {
@@ -640,16 +581,6 @@ namespace UIForia.Rendering {
 
             Size size = element.layoutResult.actualSize;
 
-            // Image's dimensions used for drawing. X = left, Y = bottom, Z = right, W = top.
-            // VertexHelper vh = new VertexHelper();
-            // percent += 0.001f;
-            // if (percent > 1f) percent = 0;
-            // // Image.Origin360
-            // // GenerateFilledSprite(new Vector4(0, -size.height, size.width, 0), vh, Image.FillMethod.Radial360, (int) Image.Origin360.Bottom, percent, false, Color.red);
-            //
-            // vh.FillMesh(mesh.mesh);
-            // info.material.mainTexture = backgroundImage;
-            // info.material.SetTexture("_NoiseTex", Resources.Load<Texture2D>("Noise"));
             propertyBlock = propertyBlock ?? new MaterialPropertyBlock();
             
             if (!ReferenceEquals(backgroundImage, null)) {
@@ -657,10 +588,15 @@ namespace UIForia.Rendering {
             }
             
             element.application.materialDatabase.GetInstanceProperties(element.id, materialId, propertyBlock);
+            
+            // todo -- will want to set the properties that are expected by UI shaders
+            // clip rect is in world space it seems, I'm not sure how to replicate it. seems to be in 2 point form, x + height & width + y? seems odd
+            // propertyBlock.SetVector("_ClipRect", new Vector4(100, 100, 100, 100));
+            
             geometry.Clear();
-            geometry.FillRect(size.width, size.height);
+            geometry.FillMeshType(0, 0, size.width, size.height, meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
             geometry.ToMesh(mesh);
-
+            
             Matrix4x4 matrix = default;
             element.layoutResult.matrix.GetMatrix4x4(ref matrix);
             ctx.DrawMesh(mesh.mesh, info.material, propertyBlock, matrix);

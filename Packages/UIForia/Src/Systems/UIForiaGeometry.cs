@@ -2,6 +2,7 @@ using System;
 using UIForia.Layout;
 using UIForia.Rendering.Vertigo;
 using UIForia.Util;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -248,146 +249,60 @@ namespace UIForia.Rendering {
         }
 
         private static readonly Vector3[] s_Xy = new Vector3[4];
-        private static readonly Vector3[] s_Uv = new Vector3[4];
 
-        public void FillMeshType(Rect rect, MeshType fillMethod, MeshFillOrigin fillOrigin, float fillAmount, MeshFillDirection fillClockwise) {
-            GenerateFilledSprite(new Vector4(0, -rect.height, rect.width, 0), fillMethod, (int) fillOrigin, fillAmount, fillClockwise == MeshFillDirection.Clockwise, Color.white);
+        public void FillMeshType(float x, float y, float width, float height, MeshType fillMethod, MeshFillOrigin fillOrigin, float fillAmount, MeshFillDirection fillClockwise) {
+
+            GenerateFilledSprite(new Vector4(x, -height, width, y), fillMethod, (int) fillOrigin, fillAmount, fillClockwise == MeshFillDirection.Clockwise);
+
+            for (int i = 0; i < texCoordList0.size; i++) {
+                float uvX = (positionList.array[i].x / width);
+                float uvY = 1 - (positionList.array[i].y / -height);
+                texCoordList0.array[i] = new Vector4(uvX, uvY, uvX, uvY);
+            }
+
         }
 
-        private void GenerateFilledSprite(Vector4 v, MeshType fillMethod, int m_FillOrigin, float m_FillAmount, bool m_FillClockwise, Color color) {
+        private void GenerateFilledSprite(Vector4 v, MeshType fillMethod, int fillOrigin, float fillAmount, bool fillClockwise) {
 
-            positionList.size = 0;
-            triangleList.size = 0;
-            texCoordList0.size = 0;
-            texCoordList1.size = 0;
-           FillRect(200, 200);
-
-            if (m_FillAmount < 0.001f) {
+            if (fillAmount < 0.001f) {
                 return;
             }
-            
-            float tx0 = 0;//outer.x;
-            float ty0 = 1; //outer.y;
-            float tx1 = 1; //outer.z;
-            float ty1 = 0; //outer.w;
-            s_Uv[0] = new Vector2(tx0, ty0);
-            s_Uv[2] = new Vector2(tx1, ty0);
-            s_Uv[1] = new Vector2(tx1, ty1);
-            s_Uv[3] = new Vector2(tx0, ty1);
-            s_Xy[0] = new Vector2(v.x, v.y);
-            s_Xy[1] = new Vector2(v.x, v.w);
-            s_Xy[2] = new Vector2(v.z, v.w);
-            s_Xy[3] = new Vector2(v.z, v.y);
-            positionList.size = 0;
-            triangleList.size = 0;
-            texCoordList0.size = 0;
-            texCoordList1.size = 0;
-            // Horizontal and vertical filled sprites are simple -- just end the Image prematurely
-            if (fillMethod == MeshType.FillHorizontal || fillMethod == MeshType.FillVertical) {
-                if (fillMethod == MeshType.FillHorizontal) {
-                    float fill = (tx1 - tx0) * m_FillAmount;
 
-                    if (m_FillOrigin == 1) {
-                        v.x = v.z - (v.z - v.x) * m_FillAmount;
-                        tx0 = tx1 - fill;
-                    }
-                    else {
-                        v.z = v.x + (v.z - v.x) * m_FillAmount;
-                        tx1 = tx0 + fill;
-                    }
-                }
-                else if (fillMethod == MeshType.FillVertical) {
-                    float fill = (ty1 - ty0) * m_FillAmount;
-
-                    if (m_FillOrigin == 1) {
-                        v.y = v.w - (v.w - v.y) * m_FillAmount;
-                        ty0 = ty1 - fill;
-                    }
-                    else {
-                        v.w = v.y + (v.w - v.y) * m_FillAmount;
-                        ty1 = ty0 + fill;
-                    }
-                }
+            if (fillAmount >= 1) {
+                fillMethod = MeshType.Simple;
             }
 
-            s_Xy[0] = new Vector2(v.x, v.y);
-            s_Xy[1] = new Vector2(v.x, v.w);
-            s_Xy[2] = new Vector2(v.z, v.w);
-            s_Xy[3] = new Vector2(v.z, v.y);
+            if (fillOrigin > 3) fillOrigin = 0;
 
-            s_Uv[0] = new Vector2(tx0, ty0);
-            s_Uv[1] = new Vector2(tx1, ty0);
-            s_Uv[2] = new Vector2(tx1, ty1);
-            s_Uv[3] = new Vector2(tx0, ty1);
+            switch (fillMethod) {
 
-            {
-                if (m_FillAmount < 1f && fillMethod != MeshType.FillHorizontal && fillMethod != MeshType.FillVertical) {
-                    if (fillMethod == MeshType.FillRadial90) {
-                        if (RadialCut(s_Xy, s_Uv, m_FillAmount, m_FillClockwise, m_FillOrigin))
-                            AddQuad(s_Xy, s_Uv);
-                    }
-                    else if (fillMethod == MeshType.FillRadial180) {
-                        for (int side = 0; side < 2; ++side) {
-                            float fx0, fx1, fy0, fy1;
-                            int even = m_FillOrigin > 1 ? 1 : 0;
+                case MeshType.Simple:
+                    s_Xy[0] = new Vector2(v.x, v.y);
+                    s_Xy[1] = new Vector2(v.x, v.w);
+                    s_Xy[2] = new Vector2(v.z, v.w);
+                    s_Xy[3] = new Vector2(v.z, v.y);
+                    AddQuad(s_Xy);
+                    return;
 
-                            if (m_FillOrigin == 0 || m_FillOrigin == 2) {
-                                fy0 = 0f;
-                                fy1 = 1f;
-                                if (side == even) {
-                                    fx0 = 0f;
-                                    fx1 = 0.5f;
-                                }
-                                else {
-                                    fx0 = 0.5f;
-                                    fx1 = 1f;
-                                }
-                            }
-                            else {
-                                fx0 = 0f;
-                                fx1 = 1f;
-                                if (side == even) {
-                                    fy0 = 0.5f;
-                                    fy1 = 1f;
-                                }
-                                else {
-                                    fy0 = 0f;
-                                    fy1 = 0.5f;
-                                }
-                            }
+                case MeshType.FillRadial90: {
+                    s_Xy[0] = new Vector2(v.x, v.y);
+                    s_Xy[1] = new Vector2(v.x, v.w);
+                    s_Xy[2] = new Vector2(v.z, v.w);
+                    s_Xy[3] = new Vector2(v.z, v.y);
+                    RadialCut(s_Xy, fillAmount, fillClockwise, fillOrigin);
+                    AddQuad(s_Xy);
+                    return;
+                }
 
-                            s_Xy[0].x = Mathf.Lerp(v.x, v.z, fx0);
-                            s_Xy[1].x = s_Xy[0].x;
-                            s_Xy[2].x = Mathf.Lerp(v.x, v.z, fx1);
-                            s_Xy[3].x = s_Xy[2].x;
+                case MeshType.FillRadial180: {
+                    for (int side = 0; side < 2; side++) {
+                        float fx0, fx1, fy0, fy1;
+                        int even = fillOrigin > 1 ? 1 : 0;
 
-                            s_Xy[0].y = Mathf.Lerp(v.y, v.w, fy0);
-                            s_Xy[1].y = Mathf.Lerp(v.y, v.w, fy1);
-                            s_Xy[2].y = s_Xy[1].y;
-                            s_Xy[3].y = s_Xy[0].y;
-
-                            s_Uv[0].x = Mathf.Lerp(tx0, tx1, fx0);
-                            s_Uv[1].x = s_Uv[0].x;
-                            s_Uv[2].x = Mathf.Lerp(tx0, tx1, fx1);
-                            s_Uv[3].x = s_Uv[2].x;
-
-                            s_Uv[0].y = Mathf.Lerp(ty0, ty1, fy0);
-                            s_Uv[1].y = Mathf.Lerp(ty0, ty1, fy1);
-                            s_Uv[2].y = s_Uv[1].y;
-                            s_Uv[3].y = s_Uv[0].y;
-
-                            float val = m_FillClockwise ? m_FillAmount * 2f - side : m_FillAmount * 2f - (1 - side);
-
-                            if (RadialCut(s_Xy, s_Uv, Mathf.Clamp01(val), m_FillClockwise, ((side + m_FillOrigin + 3) % 4))) {
-                                AddQuad(s_Xy, s_Uv);
-                            }
-                        }
-                    }
-                    else if (fillMethod == MeshType.FillRadial360) {
-                        for (int corner = 0; corner < 4; ++corner) {
-                            float fx0, fx1, fy0, fy1;
-
-                            if (corner < 2) {
+                        if (fillOrigin == 0 || fillOrigin == 2) {
+                            fy0 = 0f;
+                            fy1 = 1f;
+                            if (side == even) {
                                 fx0 = 0f;
                                 fx1 = 0.5f;
                             }
@@ -395,84 +310,169 @@ namespace UIForia.Rendering {
                                 fx0 = 0.5f;
                                 fx1 = 1f;
                             }
-
-                            if (corner == 0 || corner == 3) {
-                                fy0 = 0f;
-                                fy1 = 0.5f;
-                            }
-                            else {
+                        }
+                        else {
+                            fx0 = 0f;
+                            fx1 = 1f;
+                            if (side == even) {
                                 fy0 = 0.5f;
                                 fy1 = 1f;
                             }
-
-                            s_Xy[0].x = Mathf.Lerp(v.x, v.z, fx0);
-                            s_Xy[1].x = s_Xy[0].x;
-                            s_Xy[2].x = Mathf.Lerp(v.x, v.z, fx1);
-                            s_Xy[3].x = s_Xy[2].x;
-
-                            s_Xy[0].y = Mathf.Lerp(v.y, v.w, fy0);
-                            s_Xy[1].y = Mathf.Lerp(v.y, v.w, fy1);
-                            s_Xy[2].y = s_Xy[1].y;
-                            s_Xy[3].y = s_Xy[0].y;
-
-                            s_Uv[0].x = Mathf.Lerp(tx0, tx1, fx0);
-                            s_Uv[1].x = s_Uv[0].x;
-                            s_Uv[2].x = Mathf.Lerp(tx0, tx1, fx1);
-                            s_Uv[3].x = s_Uv[2].x;
-
-                            s_Uv[0].y = Mathf.Lerp(ty0, ty1, fy0);
-                            s_Uv[1].y = Mathf.Lerp(ty0, ty1, fy1);
-                            s_Uv[2].y = s_Uv[1].y;
-                            s_Uv[3].y = s_Uv[0].y;
-
-                            float val = m_FillClockwise
-                                ? m_FillAmount * 4f - ((corner + m_FillOrigin) % 4)
-                                : m_FillAmount * 4f - (3 - ((corner + m_FillOrigin) % 4));
-
-                            if (RadialCut(s_Xy, s_Uv, Mathf.Clamp01(val), m_FillClockwise, ((corner + 2) % 4)))
-                                AddQuad(s_Xy, s_Uv);
+                            else {
+                                fy0 = 0f;
+                                fy1 = 0.5f;
+                            }
                         }
+
+                        s_Xy[0].x = Mathf.Lerp(v.x, v.z, fx0);
+                        s_Xy[0].y = Mathf.Lerp(v.y, v.w, fy0);
+
+                        s_Xy[1].x = s_Xy[0].x;
+                        s_Xy[1].y = Mathf.Lerp(v.y, v.w, fy1);
+
+                        s_Xy[2].x = Mathf.Lerp(v.x, v.z, fx1);
+                        s_Xy[2].y = s_Xy[1].y;
+
+                        s_Xy[3].x = s_Xy[2].x;
+                        s_Xy[3].y = s_Xy[0].y;
+
+                        float val = fillClockwise ? fillAmount * 2f - side : fillAmount * 2f - (1 - side);
+
+                        RadialCut(s_Xy, Mathf.Clamp01(val), fillClockwise, ((side + fillOrigin + 3) % 4));
+                        AddQuad(s_Xy);
                     }
+
+                    return;
                 }
-                else {
-                    AddQuad(s_Xy, s_Uv);
+
+                case MeshType.FillRadial360: {
+                    for (int corner = 0; corner < 4; ++corner) {
+                        float fx0, fx1, fy0, fy1;
+
+                        if (corner < 2) {
+                            fx0 = 0f;
+                            fx1 = 0.5f;
+                        }
+                        else {
+                            fx0 = 0.5f;
+                            fx1 = 1f;
+                        }
+
+                        if (corner == 0 || corner == 3) {
+                            fy0 = 0f;
+                            fy1 = 0.5f;
+                        }
+                        else {
+                            fy0 = 0.5f;
+                            fy1 = 1f;
+                        }
+
+                        s_Xy[0].x = Mathf.Lerp(v.x, v.z, fx0);
+                        s_Xy[0].y = Mathf.Lerp(v.y, v.w, fy0);
+
+                        s_Xy[1].x = s_Xy[0].x;
+                        s_Xy[1].y = Mathf.Lerp(v.y, v.w, fy1);
+
+                        s_Xy[2].x = Mathf.Lerp(v.x, v.z, fx1);
+                        s_Xy[2].y = s_Xy[1].y;
+
+                        s_Xy[3].x = s_Xy[2].x;
+                        s_Xy[3].y = s_Xy[0].y;
+
+                        float val = fillClockwise
+                            ? fillAmount * 4f - ((corner + fillOrigin) % 4)
+                            : fillAmount * 4f - (3 - ((corner + fillOrigin) % 4));
+
+                        RadialCut(s_Xy, Mathf.Clamp01(val), fillClockwise, ((corner + 2) % 4));
+                        AddQuad(s_Xy);
+                    }
+
+                    return;
                 }
+
+                case MeshType.FillHorizontal: {
+                    if (fillOrigin == 1) {
+                        v.x = v.z - (v.z - v.x) * fillAmount;
+                    }
+                    else {
+                        v.z = v.x + (v.z - v.x) * fillAmount;
+                    }
+
+                    s_Xy[0] = new Vector3(v.x, v.y, 0);
+                    s_Xy[1] = new Vector3(v.x, v.w, 0);
+                    s_Xy[2] = new Vector3(v.z, v.w, 0);
+                    s_Xy[3] = new Vector3(v.z, v.y, 0);
+                    AddQuad(s_Xy);
+                    return;
+                }
+
+                case MeshType.FillVertical: {
+
+                    if (fillOrigin == 1) {
+                        v.y = v.w - (v.w - v.y) * fillAmount;
+                    }
+                    else {
+                        v.w = v.y + (v.w - v.y) * fillAmount;
+                    }
+
+                    s_Xy[0] = new Vector3(v.x, v.y, 0);
+                    s_Xy[1] = new Vector3(v.x, v.w, 0);
+                    s_Xy[2] = new Vector3(v.z, v.w, 0);
+                    s_Xy[3] = new Vector3(v.z, v.y, 0);
+                    AddQuad(s_Xy);
+                    return;
+                }
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(fillMethod), fillMethod, null);
             }
+
         }
 
-        private void AddQuad(Vector3[] quadPositions, Vector3[] quadUVs) {
+        private unsafe void AddQuad(Vector3[] quadPositions) {
             int startIndex = positionList.size;
 
-            for (int i = 0; i < 4; ++i) {
-                positionList.Add(quadPositions[i]);
-                texCoordList0.Add(new Vector4(quadUVs[i].x, quadUVs[i].y, 0, 0));
-                texCoordList1.Add(new Vector4(0, 0, 0, 0));
+            if (positionList.size + 4 >= positionList.array.Length) {
+                positionList.EnsureAdditionalCapacity(4);
+                texCoordList0.EnsureAdditionalCapacity(4);
+                texCoordList1.EnsureAdditionalCapacity(4);
             }
 
-            triangleList.Add(startIndex + 0);
-            triangleList.Add(startIndex + 1);
-            triangleList.Add(startIndex + 2);
+            if (triangleList.size + 6 >= triangleList.array.Length) {
+                triangleList.EnsureAdditionalCapacity(6);
+            }
 
-            triangleList.Add(startIndex + 2);
-            triangleList.Add(startIndex + 3);
-            triangleList.Add(startIndex + 0);
+            fixed (Vector3* positions = quadPositions)
+            fixed (Vector3* ptr = positionList.array) {
+                UnsafeUtility.MemCpy(ptr + positionList.size, positions, sizeof(Vector4) * 4);
+            }
 
-            // vertexHelper.AddTriangle(startIndex, startIndex + 1, startIndex + 2);
-            // vertexHelper.AddTriangle(startIndex + 2, startIndex + 3, startIndex);
+            positionList.size += 4;
+            texCoordList0.size += 4;
+            texCoordList1.size += 4;
+
+            int tri = triangleList.size;
+            triangleList.array[tri + 0] = startIndex + 0;
+            triangleList.array[tri + 1] = startIndex + 1;
+            triangleList.array[tri + 2] = startIndex + 2;
+
+            triangleList.array[tri + 3] = startIndex + 2;
+            triangleList.array[tri + 4] = startIndex + 3;
+            triangleList.array[tri + 5] = startIndex + 0;
+            triangleList.size += 6;
+
         }
 
         /// <summary>
         /// Adjust the specified quad, making it be radially filled instead.
         /// </summary>
-        private static bool RadialCut(Vector3[] xy, Vector3[] uv, float fill, bool invert, int corner) {
-            // Nothing to fill
-            if (fill < 0.001f) return false;
+        private static void RadialCut(Vector3[] xy, float fill, bool invert, int corner) {
 
             // Even corners invert the fill direction
             if ((corner & 1) == 1) invert = !invert;
 
             // Nothing to adjust
-            if (!invert && fill > 0.999f) return true;
+            if (!invert && fill > 0.999f) return;
 
             // Convert 0-1 value into 0 to 90 degrees angle in radians
             float angle = Mathf.Clamp01(fill);
@@ -484,8 +484,7 @@ namespace UIForia.Rendering {
             float sin = Mathf.Sin(angle);
 
             RadialCut(xy, cos, sin, invert, corner);
-            RadialCut(uv, cos, sin, invert, corner);
-            return true;
+
         }
 
         /// <summary>

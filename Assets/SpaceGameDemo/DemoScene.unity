@@ -399,6 +399,7 @@ GameObject:
   - component: {fileID: 2067112526}
   - component: {fileID: 2067112525}
   - component: {fileID: 2067112527}
+  - component: {fileID: 2067112528}
   m_Layer: 0
   m_Name: UIForia
   m_TagString: Untagged
@@ -480,3 +481,20 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &2067112528
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2067112524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f61c6807d5b4e93a149587feb774f02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  materialReferences:
+  - name: Shine
+    material: {fileID: 2100000, guid: f8cc1fe39b73d814092eaf96ca3a8fa6, type: 2}
+    isShared: 0
+  animationCurveReferences: []

@@ -316,6 +316,7 @@ namespace UIForia.Editor {
                 s_Content.text = "Instance";
                 DrawStyleGroup("", instanceStyle);
             }
+
 //
             for (int i = 0; i < baseStyles.Count; i++) {
                 UIStyleGroupContainer container = baseStyles[i];
@@ -489,12 +490,20 @@ namespace UIForia.Editor {
                 case StylePropertyId.TextOutlineSoftness:
                     return DrawFloat(property, isEditable);
 
+                case StylePropertyId.MeshType:
+                case StylePropertyId.MeshFillDirection:
+                case StylePropertyId.MeshFillOrigin:
+                    return DrawEnumWithValue<MeshType>(property, isEditable);
+
+                case StylePropertyId.MeshFillAmount:
+                    return DrawFloat(property, isEditable);
+                
                 case StylePropertyId.Layer:
                     return DrawInt(property, isEditable);
 
                 case StylePropertyId.Material:
                     return DrawMaterial(property);
-                
+
                 case StylePropertyId.TextOutlineColor:
                 case StylePropertyId.TextGlowColor:
                 case StylePropertyId.TextUnderlayColor:
@@ -719,9 +728,7 @@ namespace UIForia.Editor {
                 return property;
             }
 
-            if (UIForiaHierarchyWindow.s_SelectedApplication.materialDatabase.TryGetMaterial(property.AsMaterialId, out MaterialInfo info)) {
-                
-            }
+            if (UIForiaHierarchyWindow.s_SelectedApplication.materialDatabase.TryGetMaterial(property.AsMaterialId, out MaterialInfo info)) { }
 
             return property;
 

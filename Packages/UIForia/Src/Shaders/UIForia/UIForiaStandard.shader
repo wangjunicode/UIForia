@@ -88,7 +88,6 @@ Shader "UIForia/Standard"
             
             v2f vert (appdata v) {
                 v2f o;
-                
                 int objectIndex = (int)v.texCoord1.w; // can be a byte, consider packing this if needed
 
                 float4 objectInfo = _ObjectData[objectIndex];
@@ -189,7 +188,8 @@ Shader "UIForia/Standard"
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];           
                 float opacity = _ObjectData[(uint)i.texCoord1.w].w;              
                 float4 cornerBevels = _CornerData[(uint)i.texCoord1.w];
-                
+                //return fixed4(i.texCoord0.y, i.texCoord0.y, i.texCoord0.y, 1);
+               // return fixed4(i.texCoord0.x, i.texCoord0.x, i.texCoord0.x, 1);
                 // todo -- returns cause branching here
                 // get rid of text and we can get rid of branching
                 

@@ -18,8 +18,10 @@ namespace UIForia.Animation {
 
         private LightList<AnimationTask> thisFrame;
         private LightList<AnimationTask> nextFrame;
-
-        public AnimationSystem() {
+        private ElementSystem elementSystem;
+        
+        public AnimationSystem(ElementSystem elementSystem) {
+            this.elementSystem = elementSystem;
             thisFrame = new LightList<AnimationTask>();
             nextFrame = new LightList<AnimationTask>();
         }
@@ -28,7 +30,7 @@ namespace UIForia.Animation {
             switch (styleAnimation.animationType) {
                 case AnimationType.KeyFrame: 
                     styleAnimation.options = EnsureDefaultAnimationOptionValues(styleAnimation);
-                    StyleKeyFrameAnimation animationTask = new StyleKeyFrameAnimation(element, styleAnimation);
+                    StyleKeyFrameAnimation animationTask = new StyleKeyFrameAnimation(elementSystem, element, styleAnimation);
                     thisFrame.Add(animationTask);
                     return animationTask;
                 case AnimationType.SpriteSheet:

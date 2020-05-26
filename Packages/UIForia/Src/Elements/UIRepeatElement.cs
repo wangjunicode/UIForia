@@ -85,7 +85,8 @@ namespace UIForia.Elements {
             else {
                 int diff = prevCount - count;
                 for (int i = 0; i < diff; i++) {
-                    children.array[children.size - 1].Destroy();
+                    GetLastChild().Destroy();
+                    // children.array[children.size - 1].Destroy();
                 }
             }
         }

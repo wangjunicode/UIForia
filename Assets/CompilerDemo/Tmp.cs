@@ -7,6 +7,7 @@ using Mono.Linq.Expressions;
 using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
+using UIForia.UIInput;
 using UnityEngine;
 
 public class DemoMethod : Attribute { }
@@ -25,7 +26,19 @@ public class Tmp : UIElement {
     public void OnValueChanged() {
         selected.Invoke(this, null);
     }
+    public int clickedChildIndex = -1;
+    public bool wasMouseDown;
 
+    [OnMouseDown]
+    public void OnAnyMouseDown(MouseInputEvent evt) {
+        wasMouseDown = true;
+        Debug.Log("down");
+    }
+
+    public void HandleClickedChild(int index) {
+        clickedChildIndex = index;
+        Debug.Log("clicked " + index);
+    }
 
     public override void OnCreate() {
         

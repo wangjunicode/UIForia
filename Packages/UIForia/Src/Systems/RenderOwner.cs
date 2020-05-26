@@ -4,7 +4,6 @@ using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
-using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 
 namespace Src.Systems {
@@ -18,7 +17,7 @@ namespace Src.Systems {
 
         private static readonly DepthComparer2 s_RenderComparer = new DepthComparer2();
 
-        public RenderOwner(UIView view, Camera camera) {
+        public RenderOwner(UIView view) {
             this.view = view;
             this.painterPool = new RenderBoxPool();
             this.view.dummyRoot.renderBox = new RootRenderBox();
@@ -42,7 +41,7 @@ namespace Src.Systems {
             for (int i = 0; i < clippers.size; i++) {
                 ClipData clipData = clippers.array[i];
                 if (!clipData.isCulled && clipData.visibleBoxCount > 0) {
-                    clipData.clipPath = clipData.renderBox?.GetClipShape();
+                    // clipData.clipPath = clipData.renderBox?.GetClipShape();
                     ctx.DrawClipData(clipData);
                 }
             }

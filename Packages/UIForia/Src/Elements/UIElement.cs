@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Systems.SelectorSystem;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Layout;
@@ -77,7 +76,7 @@ namespace UIForia.Elements {
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public abstract class UIElement : IHierarchical {
 
-        public int id; // todo -- internal with accessor
+        public ElementId id;
 
         public InputHandlerGroup inputHandlers; // todo -- internal with accessor
 
@@ -85,10 +84,8 @@ namespace UIForia.Elements {
 
         internal UIElementFlags flags;
         public UIElement parent;
-        internal TagNameIndex tagNameIndex;
 
         // todo -- maybe move a lot of this data to an internal representation of UIElement
-        public LayoutResult layoutResult;
         internal AwesomeLayoutBox layoutBox;
         internal RenderBox renderBox;
         public UIStyleSet style; // todo -- make internal with accessor
@@ -108,7 +105,7 @@ namespace UIForia.Elements {
             internal set {
                 if (_siblingIndex == value) return;
                 _siblingIndex = value;
-                flags |= UIElementFlags.IndexChanged;
+                // flags |= UIElementFlags.IndexChanged;
             }
         }
 
@@ -120,8 +117,8 @@ namespace UIForia.Elements {
 
         public int ChildCount => children?.Count ?? 0;
 
-        public bool __internal_isEnabledAndNeedsUpdate => (flags & UIElementFlags.EnabledFlagSetWithUpdate ) == (UIElementFlags.EnabledFlagSetWithUpdate);
-        
+        public bool __internal_isEnabledAndNeedsUpdate => (flags & UIElementFlags.EnabledFlagSetWithUpdate) == (UIElementFlags.EnabledFlagSetWithUpdate);
+
         public bool isSelfEnabled => (flags & UIElementFlags.Enabled) != 0;
 
         public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
@@ -138,9 +135,9 @@ namespace UIForia.Elements {
         public virtual void OnCreate() { }
 
         public virtual void OnUpdate() { }
-        
+
         public virtual void OnBeforePropertyBindings() { }
-        
+
         public virtual void OnAfterPropertyBindings() { }
 
         public virtual void OnEnable() { }
@@ -153,32 +150,125 @@ namespace UIForia.Elements {
             View.application.DoDestroyElement(this);
         }
 
-        public UIElement InsertChild(uint idx, UIElement element) {
-            throw new NotImplementedException();
-            // if (element == null || element == this || element.isDestroyed) {
-            //     return null;
-            // }
-            //
-            // if (View == null) {
-            //     element.parent = this;
-            //     element.View = null;
-            //     element.siblingIndex = children.Count;
-            //     element.depth = depth + 1;
-            //     children.Insert((int) idx, element);
-            // }
-            // else {
-            //     Application.InsertChild(this, element, (uint) children.Count);
-            // }
-            //
-            // return element;
+        public ref LayoutResult layoutResult {
+            get => ref application.elementSystem.layoutTable[id.index];
         }
 
+        public UIElement GetLastChild() {
+            ElementSystem elementSystem = application.elementSystem;
+            ElementTable<HierarchyInfo> hierarchyTable = elementSystem.hierarchyTable;
+            UIElement[] instanceTable = elementSystem.instanceTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+
+            if (tableEntry.lastChildId.index != 0) {
+                return instanceTable[tableEntry.lastChildId.index];
+            }
+
+            return null;
+        }
+
+        public UIElement GetFirstChild() {
+
+            ElementSystem elementSystem = application.elementSystem;
+            ElementTable<HierarchyInfo> hierarchyTable = elementSystem.hierarchyTable;
+            UIElement[] instanceTable = elementSystem.instanceTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+
+            if (tableEntry.firstChildId.index != 0) {
+                return instanceTable[tableEntry.firstChildId.index];
+            }
+
+            return null;
+        }
+
+        public UIElement GetPreviousSibling() {
+
+            ElementSystem elementSystem = application.elementSystem;
+            ElementTable<HierarchyInfo> hierarchyTable = elementSystem.hierarchyTable;
+            UIElement[] instanceTable = elementSystem.instanceTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+
+            if (tableEntry.prevSiblingId.index != 0) {
+                return instanceTable[tableEntry.prevSiblingId.index];
+            }
+
+            return null;
+        }
+
+        public UIElement GetNextSibling() {
+
+            ElementSystem elementSystem = application.elementSystem;
+            ElementTable<HierarchyInfo> hierarchyTable = elementSystem.hierarchyTable;
+            UIElement[] instanceTable = elementSystem.instanceTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+
+            if (tableEntry.nextSiblingId.index != 0) {
+                return instanceTable[tableEntry.nextSiblingId.index];
+            }
+
+            return null;
+        }
+
+        public UIElement FindChildAt(int index) {
+
+            ElementSystem elementSystem = application.elementSystem;
+            ElementTable<HierarchyInfo> hierarchyTable = elementSystem.hierarchyTable;
+            UIElement[] instanceTable = elementSystem.instanceTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+
+            if (tableEntry.childCount == 0 || index >= tableEntry.childCount) {
+                return null;
+            }
+
+            ElementId ptr = tableEntry.firstChildId;
+            int cnt = 0;
+            while (ptr.index != 0) {
+                if (cnt == index) {
+                    return instanceTable[ptr.index];
+                }
+
+                cnt++;
+                ptr = hierarchyTable[ptr].nextSiblingId;
+            }
+
+            return null;
+        }
+
+        public int GetChildren(IList<UIElement> retn, bool replaceListContents = true) {
+            if (retn == null) return -1;
+            if (replaceListContents) {
+                retn.Clear();
+            }
+
+            ElementSystem elementSystem = application.elementSystem;
+            ElementTable<HierarchyInfo> hierarchyTable = elementSystem.hierarchyTable;
+            UIElement[] instanceTable = elementSystem.instanceTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+
+            if (tableEntry.childCount == 0) return 0;
+
+            ElementId ptr = tableEntry.firstChildId;
+            while (ptr.index != 0) {
+                retn.Add(instanceTable[ptr.index]);
+                ptr = hierarchyTable[ptr].nextSiblingId;
+            }
+
+            return tableEntry.childCount;
+        }
+
+        // todo -- kill
         internal UIElement AddChild(UIElement element) {
             // todo -- if <Children/> is defined in the template, attach child to that element instead
             if (element == null || element == this || element.isDestroyed) {
                 return null;
             }
-
+        
             if (View == null) {
                 element.parent = this;
                 element.View = null;
@@ -189,7 +279,7 @@ namespace UIForia.Elements {
             else {
                 application.InsertChild(this, element, (uint) children.Count);
             }
-
+        
             return element;
         }
 
@@ -243,10 +333,10 @@ namespace UIForia.Elements {
 
                     // todo -- need to figure out if we should descend into children. probably want to scrap this whole method and do something better with selectors
                     // if (child.templateMetaData == element.templateMetaData) {
-                        if (child is T castChild && child.GetAttribute("id") == elementId) {
-                            LightStack<UIElement>.Release(ref elementStack);
-                            return castChild;
-                        }
+                    if (child is T castChild && child.GetAttribute("id") == elementId) {
+                        LightStack<UIElement>.Release(ref elementStack);
+                        return castChild;
+                    }
                     // }
 
                     elementStack.array[elementStack.size++] = child;
@@ -398,7 +488,7 @@ namespace UIForia.Elements {
             return GetAttribute(name) != null;
         }
 
-        public int UniqueId => id;
+        public int UniqueId => id.id;
         public IHierarchical Element => this;
         public IHierarchical Parent => parent;
 
@@ -462,7 +552,7 @@ namespace UIForia.Elements {
 
             float crawlPositionX = layoutResult.localPosition.x;
             float crawlPositionY = layoutResult.localPosition.y;
-            
+
             while (ptr != null) {
 
                 if (ptr is ScrollView scrollView) {
@@ -472,12 +562,12 @@ namespace UIForia.Elements {
 
                 crawlPositionX += ptr.layoutResult.localPosition.x;
                 crawlPositionY += ptr.layoutResult.localPosition.y;
-                
+
                 ptr = ptr.parent;
             }
         }
 
-        public T FindParent<T>() where T : UIElement{
+        public T FindParent<T>() where T : UIElement {
             UIElement ptr = parent;
             while (ptr != null) {
                 if (ptr is T retn) {
@@ -488,12 +578,6 @@ namespace UIForia.Elements {
             }
 
             return null;
-        }
-
-        public void RunBindings() {
-            flags &= ~UIElementFlags.NeedsUpdate;
-            bindingNode.updateBindings?.Invoke(bindingNode.root, this);
-            flags |= UIElementFlags.NeedsUpdate;
         }
 
     }

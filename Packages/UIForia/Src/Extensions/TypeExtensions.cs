@@ -3,12 +3,17 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+using UIForia.Compilers;
 using UIForia.Util;
 
 namespace UIForia.Extensions {
 
     public static class TypeExtensions {
-
+    
+        public static string GetTypeName(this Type type) {
+            return TypeNameGenerator.GetTypeName(type);
+        }
+        
         internal class CacheDict<TKey, TValue> {
 
             protected readonly int mask;
@@ -30,6 +35,8 @@ namespace UIForia.Extensions {
                 return size + 1;
             }
 
+        
+            
             internal bool TryGetValue(TKey key, out TValue value) {
                 int hashCode = key.GetHashCode();
                 Entry entry = Volatile.Read<Entry>(ref this.entries[hashCode & this.mask]);

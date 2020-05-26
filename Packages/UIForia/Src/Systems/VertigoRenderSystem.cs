@@ -111,7 +111,7 @@ namespace Src.Systems {
         }
 
         public void OnViewAdded(UIView view) {
-            renderOwners.Add(new RenderOwner(view, camera));
+            renderOwners.Add(new RenderOwner(view));
         }
 
         public void OnViewRemoved(UIView view) {

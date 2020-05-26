@@ -125,22 +125,24 @@ namespace UIForia.Elements {
         }
 
         private void DisableAllChildren(UIElement element) {
-            for (int index = 0; index < element.children.Count; index++) {
-                UIElement child = element.children[index];
-                if (!child.HasAttribute("disabled")) {
-                    child.SetAttribute("disabled", disabledAttributeValue);
-                    DisableAllChildren(child);
+            UIElement ptr = element.GetFirstChild();
+            while (ptr != null) {
+                if (!ptr.HasAttribute("disabled")) {
+                    ptr.SetAttribute("disabled", disabledAttributeValue);
+                    DisableAllChildren(ptr);
                 }
+                ptr = element.GetNextSibling();
             }
         }
 
         private void EnableAllChildren(UIElement element) {
-            for (int index = 0; index < element.children.Count; index++) {
-                UIElement child = element.children[index];
-                if (child.GetAttribute("disabled") == disabledAttributeValue) {
-                    child.SetAttribute("disabled", null);
-                    EnableAllChildren(child);
+            UIElement ptr = element.GetFirstChild();
+            while (ptr != null) {
+                if (ptr.GetAttribute("disabled") == disabledAttributeValue) {
+                    ptr.SetAttribute("disabled", null);
+                    EnableAllChildren(ptr);
                 }
+                ptr = ptr.GetNextSibling();
             }
         }
 
@@ -165,7 +167,7 @@ namespace UIForia.Elements {
                 // space and return should only choose the currently keyboard-selected item
                 if (keyboardNavigationIndex > -1) {
                     SetSelectedValue(keyboardNavigationIndex);
-                    childrenElement.children[selectedIndex].style.ExitState(StyleState.Hover);
+                    childrenElement.FindChildAt(selectedIndex).style.ExitState(StyleState.Hover);
                 }
 
                 return;
@@ -193,7 +195,7 @@ namespace UIForia.Elements {
                         keyboardNavigationIndex = 0;
                     }
 
-                    childrenElement.children[keyboardNavigationIndex].style.EnterState(StyleState.Hover);
+                    childrenElement.FindChildAt(keyboardNavigationIndex).style.EnterState(StyleState.Hover);
                 }
             }
         }
@@ -236,7 +238,7 @@ namespace UIForia.Elements {
 
                 if (evt.keyCode == KeyCode.UpArrow) {
                     if (keyboardNavigationIndex > -1) {
-                        childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
+                        childrenElement.FindChildAt(keyboardNavigationIndex).style.ExitState(StyleState.Hover);
                     }
 
                     keyboardNavigationIndex--;
@@ -249,7 +251,7 @@ namespace UIForia.Elements {
                 }
                 else if (evt.keyCode == KeyCode.DownArrow) {
                     if (keyboardNavigationIndex > -1) {
-                        childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
+                        childrenElement.FindChildAt(keyboardNavigationIndex).style.ExitState(StyleState.Hover);
                     }
 
                     keyboardNavigationIndex++;
@@ -294,7 +296,7 @@ namespace UIForia.Elements {
         [OnMouseMove]
         public void OnMouseMove() {
             if (keyboardNavigationIndex > 0) {
-                childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
+                childrenElement.FindChildAt(keyboardNavigationIndex).style.ExitState(StyleState.Hover);
             }
         }
 

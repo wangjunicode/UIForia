@@ -14,10 +14,6 @@ namespace UIForia.Elements {
         public float Width;
         public float Height;
         
-        public UIImageElement() {
-            flags |= UIElementFlags.Primitive;
-        }
-        
         [OnPropertyChanged(nameof(src))]
         public void OnSrcChanged() {
             if (src != null) {

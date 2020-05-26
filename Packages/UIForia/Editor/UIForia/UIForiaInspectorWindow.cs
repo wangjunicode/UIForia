@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using UIForiaTMPro;
+using TMPro;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Layout;
@@ -395,7 +395,7 @@ namespace UIForia.Editor {
                 return;
             }
 
-            int elementId = UIForiaHierarchyWindow.s_SelectedElementId;
+            ElementId elementId = UIForiaHierarchyWindow.s_SelectedElementId;
 
             selectedElement = app.GetElement(elementId);
 

@@ -69,11 +69,15 @@ namespace UIForia.Systems {
 
         private float lastDpi;
 
-        public AwesomeLayoutRunner(AwesomeLayoutSystem layoutSystem, UIElement rootElement) {
+        private ViewParameters viewParameters;
+        private UIView view;
+
+        public AwesomeLayoutRunner(AwesomeLayoutSystem layoutSystem, UIView view, UIElement rootElement) {
             this.layoutSystem = layoutSystem;
+            this.view = view;
             this.rootElement = rootElement;
             this.rootElement.layoutBox = new AwesomeRootLayoutBox();
-            this.rootElement.layoutBox.Initialize(rootElement, 0);
+            this.rootElement.layoutBox.Initialize(layoutSystem, layoutSystem.elementSystem, rootElement, 0);
             this.hierarchyRebuildList = new LightList<UIElement>();
             this.ignoredList = new LightList<AwesomeLayoutBox>();
             this.alignHorizontalList = new LightList<UIElement>();
@@ -89,10 +93,21 @@ namespace UIForia.Systems {
             lastDpi = rootElement.application.DPIScaleFactor;
         }
 
-
         public void RunLayout() {
+            
+            float viewportWidth = view.Viewport.width;
+            float viewportHeight = view.Viewport.height;
+            
+            viewParameters = new ViewParameters() {
+                viewX = view.position.x,
+                viewY = view.position.y,
+                viewWidth = viewportWidth,
+                viewHeight = viewportHeight,
+                applicationWidth = layoutSystem.application.Width,
+                applicationHeight = layoutSystem.application.Height
+            };
+            
             frameId = rootElement.application.frameId;
-
 
             if (rootElement.isDisabled) {
                 return;
@@ -183,7 +198,7 @@ namespace UIForia.Systems {
             if (element.children == null) {
                 return;
             }
-            
+
             for (int i = 0; i < element.children.size; i++) {
                 InvalidateAll(element.children[i]);
             }
@@ -247,15 +262,17 @@ namespace UIForia.Systems {
                     hierarchyRebuildList.Add(currentElement);
                 }
 
+                ref LayoutResult layoutResult = ref layoutSystem.elementSystem.layoutTable[currentElement.id.index];
+                
                 switch (layoutBox.clipBehavior) {
                     case ClipBehavior.Never:
 
                         if (currentElement.layoutResult.clipper != null) {
                             layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
-                            currentElement.layoutResult.clipper = null;
+                            layoutSystem.elementSystem.layoutTable[currentElement.id.index].clipper = default;
                         }
 
-                        currentElement.layoutResult.isCulled = false;
+                        layoutResult.isCulled = false;
                         queryableElements.Add(new ElemRef(layoutBox.element)); // todo -- inline, or just avoid and iterate non culled clipper lists instead
 
                         break;
@@ -267,7 +284,7 @@ namespace UIForia.Systems {
 
                         if (currentElement.layoutResult.clipper != currentClipper) {
                             layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
-                            currentElement.layoutResult.clipper = currentClipper;
+                            layoutResult.clipper = currentClipper;
                         }
 
                         // this is inlined because it was identified as a hot point, inlining this makes it run significantly faster
@@ -279,10 +296,11 @@ namespace UIForia.Systems {
 
                         break;
                     }
+
                     case ClipBehavior.View: {
                         if (currentElement.layoutResult.clipper != viewClipper) {
                             layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
-                            currentElement.layoutResult.clipper = viewClipper;
+                            layoutResult.clipper = viewClipper;
                         }
 
                         viewClipper.clipList.Add(new ElemRef(currentElement));
@@ -292,7 +310,7 @@ namespace UIForia.Systems {
                     case ClipBehavior.Screen: {
                         if (currentElement.layoutResult.clipper != screenClipper) {
                             layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
-                            currentElement.layoutResult.clipper = screenClipper;
+                            layoutResult.clipper = screenClipper;
                         }
 
                         screenClipper.clipList.Add(new ElemRef(currentElement));
@@ -426,15 +444,20 @@ namespace UIForia.Systems {
                 EnableHierarchy(child);
 
                 switch (child.style.LayoutBehavior) {
-                    case LayoutBehavior.Ignored:
-                        child.layoutResult.layoutParent = currentElement.layoutResult; // todo -- multiple ignore levels?
+                    case LayoutBehavior.Ignored: {
+                        layoutSystem.elementSystem.layoutTable[child.id.index].layoutParent = currentElement.id;
+                        // child.layoutResult.layoutParent = currentElement.id; // todo -- multiple ignore levels?
                         ignoredList.Add(child.layoutBox);
                         break;
+                    }
+
                     case LayoutBehavior.TranscludeChildren:
+                        layoutSystem.elementSystem.layoutTable[child.id.index].layoutParent = currentElement.id;
                         child.layoutBox.parent = currentElement.layoutBox;
-                        child.layoutResult.layoutParent = currentElement.layoutResult; // todo -- multiple ignore levels?
+                        // child.layoutResult.layoutParent = currentElement.id; // todo -- multiple ignore levels?
                         child.layoutBox.GetChildren(list);
                         break;
+
                     default:
                         list.Add(child.layoutBox);
                         break;
@@ -450,10 +473,13 @@ namespace UIForia.Systems {
 
                     if (currentElement.layoutResult.clipper != null) {
                         layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
-                        currentElement.layoutResult.clipper = null;
+                        // currentElement.layoutResult.clipper = null;
+                        layoutSystem.elementSystem.layoutTable[currentElement.id.index].clipper = null;
+                        // layoutParent = currentElement.id;
                     }
 
-                    currentElement.layoutResult.isCulled = false;
+                    ref LayoutResult layoutResult = ref currentElement.layoutResult;
+                    layoutResult.isCulled = false;
                     queryableElements.Add(new ElemRef(layoutBox.element)); // todo -- inline, or just avoid and iterate non culled clipper lists instead
 
                     break;
@@ -477,6 +503,7 @@ namespace UIForia.Systems {
 
                     break;
                 }
+
                 case ClipBehavior.View: {
                     if (currentElement.layoutResult.clipper != viewClipper) {
                         layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
@@ -514,7 +541,8 @@ namespace UIForia.Systems {
                     clipper.isCulled = true;
                     for (int j = 0; j < clipper.clipList.size; j++) {
                         UIElement element = clipper.clipList.array[j].element;
-                        element.layoutResult.isCulled = true;
+                        ref LayoutResult layoutResult = ref element.layoutResult;
+                        layoutResult.isCulled = true;
                     }
 
                     continue;
@@ -539,7 +567,8 @@ namespace UIForia.Systems {
                     clipper.aabb = default;
                     for (int j = 0; j < clipper.clipList.size; j++) {
                         UIElement element = clipper.clipList.array[j].element;
-                        element.layoutResult.isCulled = true;
+                        ref LayoutResult layoutResult = ref element.layoutResult;
+                        layoutResult.isCulled = true;
                     }
                 }
                 else {
@@ -552,7 +581,8 @@ namespace UIForia.Systems {
                         if (element == rootElement) continue;
                         ref Vector4 aabb = ref element.layoutResult.axisAlignedBounds;
                         bool overlappingOrContains = aabb.z >= clipper.aabb.x && aabb.x <= clipper.aabb.z && aabb.w >= clipper.aabb.y && aabb.y <= clipper.aabb.w;
-                        element.layoutResult.isCulled = !overlappingOrContains || (element.layoutResult.actualSize.width == 0 || element.layoutResult.actualSize.height == 0);
+                        ref LayoutResult layoutResult = ref element.layoutResult;
+                        layoutResult.isCulled = !overlappingOrContains || (element.layoutResult.actualSize.width == 0 || element.layoutResult.actualSize.height == 0);
 
                         if (!element.layoutResult.isCulled) {
                             clipper.visibleBoxCount++;
@@ -564,19 +594,18 @@ namespace UIForia.Systems {
         }
 
         private void ApplyHorizontalAlignments() {
-            float viewportWidth = rootElement.View.Viewport.width;
-            float viewportHeight = rootElement.View.Viewport.height;
-            UIView view = rootElement.View;
             InputSystem inputSystem = view.application.InputSystem;
-            float screenWidth = view.application.Width;
 
+            LayoutResult[] layoutTable = layoutSystem.elementSystem.layoutTable;
+            ElementId viewRootId = view.dummyRoot.id;
+            
             for (int i = 0; i < alignHorizontalList.size; i++) {
                 UIElement element = alignHorizontalList.array[i];
                 AwesomeLayoutBox box = element.layoutBox;
 
                 // if box was aligned from a scroll view, continue
 
-                LayoutResult result = element.layoutResult;
+                ref LayoutResult result = ref element.layoutResult;
 
                 // todo -- cache these values on layout box or make style reads fast
                 OffsetMeasurement originX = box.element.style.AlignmentOriginX;
@@ -585,10 +614,10 @@ namespace UIForia.Systems {
                 AlignmentTarget alignmentTargetX = element.style.AlignmentTargetX;
                 AlignmentBoundary alignmentBoundaryX = element.style.AlignmentBoundaryX;
 
-                float originBase = MeasurementUtil.ResolveOriginBaseX(result, view.position.x, alignmentTargetX, direction, inputSystem);
-                float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(result, viewportWidth, alignmentTargetX);
-                float originOffset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, originX, originSize);
-                float offset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, offsetX, box.finalWidth);
+                float originBase = MeasurementUtil.ResolveOriginBaseX(layoutTable, result, viewParameters, alignmentTargetX, direction, inputSystem);
+                float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(layoutTable, result, viewParameters, alignmentTargetX);
+                float originOffset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, originX, originSize);
+                float offset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, offsetX, box.finalWidth);
 
                 if (direction == AlignmentDirection.End) {
                     result.alignedPosition.x = (originBase + originSize) - (originOffset + offset) - box.finalWidth;
@@ -600,20 +629,20 @@ namespace UIForia.Systems {
                 if (alignmentBoundaryX != AlignmentBoundary.Unset) {
                     switch (alignmentBoundaryX) {
                         case AlignmentBoundary.View: {
-                            float viewPos = MeasurementUtil.GetXDistanceToView(result);
+                            float viewPos = MeasurementUtil.GetXDistanceToView(layoutTable, viewRootId, result);
                             if (result.alignedPosition.x < viewPos) {
                                 result.alignedPosition.x = viewPos;
                             }
 
-                            if (result.alignedPosition.x + result.actualSize.width > viewportWidth + viewPos) {
-                                result.alignedPosition.x = viewportWidth + viewPos - result.actualSize.width;
+                            if (result.alignedPosition.x + result.actualSize.width > viewParameters.viewWidth + viewPos) {
+                                result.alignedPosition.x = viewParameters.viewWidth + viewPos - result.actualSize.width;
                             }
 
                             break;
                         }
 
                         case AlignmentBoundary.Clipper: {
-                            float clipperPos = MeasurementUtil.GetXDistanceToClipper(result, out float clipperWidth);
+                            float clipperPos = MeasurementUtil.GetXDistanceToClipper(layoutTable, result, result.clipper.element.id, viewParameters.applicationWidth, out float clipperWidth);
 
                             if (result.alignedPosition.x < clipperPos) {
                                 result.alignedPosition.x = clipperPos;
@@ -625,14 +654,15 @@ namespace UIForia.Systems {
 
                             break;
                         }
+
                         case AlignmentBoundary.Screen:
-                            float screenPos = MeasurementUtil.GetXDistanceToScreen(result);
+                            float screenPos = MeasurementUtil.GetXDistanceToScreen(layoutTable, result);
                             if (result.alignedPosition.x < screenPos) {
                                 result.alignedPosition.x = screenPos;
                             }
 
-                            if (result.alignedPosition.x + result.actualSize.width > screenWidth + screenPos) {
-                                result.alignedPosition.x = screenWidth + screenPos - result.actualSize.width;
+                            if (result.alignedPosition.x + result.actualSize.width > viewParameters.applicationWidth + screenPos) {
+                                result.alignedPosition.x =  viewParameters.applicationWidth + screenPos - result.actualSize.width;
                             }
 
                             break;
@@ -648,6 +678,7 @@ namespace UIForia.Systems {
 
                             break;
                         }
+
                         case AlignmentBoundary.ParentContentArea: {
                             if (result.alignedPosition.x < box.parent.paddingBorderHorizontalStart) {
                                 result.alignedPosition.x = box.parent.paddingBorderHorizontalStart;
@@ -676,16 +707,18 @@ namespace UIForia.Systems {
         }
 
         private void ApplyVerticalAlignments() {
-            float viewportWidth = rootElement.View.Viewport.width;
-            float viewportHeight = rootElement.View.Viewport.height;
-            UIView view = rootElement.View;
-            float screenHeight = rootElement.application.Height;
+            
+            // todo -- alignment animations should trigger NOW, not with regular animations
+            
             InputSystem inputSystem = view.application.InputSystem;
+            ElementId viewRootId = view.dummyRoot.id;
 
+            LayoutResult[] layoutTable = layoutSystem.elementSystem.layoutTable;
+            
             for (int i = 0; i < alignVerticalList.size; i++) {
                 UIElement element = alignVerticalList.array[i];
                 AwesomeLayoutBox box = element.layoutBox;
-                LayoutResult result = element.layoutResult;
+                ref LayoutResult result = ref element.layoutResult;
 
                 // todo -- cache these values on layout box or make style reads fast
                 OffsetMeasurement originY = box.element.style.AlignmentOriginY;
@@ -694,10 +727,13 @@ namespace UIForia.Systems {
                 AlignmentTarget alignmentTargetY = element.style.AlignmentTargetY;
                 AlignmentBoundary alignmentBoundaryY = element.style.AlignmentBoundaryY;
 
-                float originBase = MeasurementUtil.ResolveOriginBaseY(result, view.position.y, alignmentTargetY, direction, inputSystem);
-                float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(result, viewportHeight, alignmentTargetY);
-                float originOffset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, originY, originSize);
-                float offset = MeasurementUtil.ResolveOffsetMeasurement(element, viewportWidth, viewportHeight, offsetY, box.finalHeight);
+                float originBase = MeasurementUtil.ResolveOriginBaseY(layoutTable, result, view.position.y, alignmentTargetY, direction, inputSystem);
+                
+                float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(layoutTable, result, viewParameters, alignmentTargetY);
+                
+                float originOffset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, originY, originSize);
+                
+                float offset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, offsetY, box.finalHeight);
 
                 if (direction == AlignmentDirection.End) {
                     result.alignedPosition.y = (originBase + originSize) - (originOffset + offset) - box.finalHeight;
@@ -709,20 +745,20 @@ namespace UIForia.Systems {
                 if (alignmentBoundaryY != AlignmentBoundary.Unset) {
                     switch (alignmentBoundaryY) {
                         case AlignmentBoundary.View: {
-                            float viewPos = MeasurementUtil.GetYDistanceToView(result);
+                            float viewPos = MeasurementUtil.GetYDistanceToView(layoutTable, viewRootId, result);
                             if (result.alignedPosition.y < viewPos) {
                                 result.alignedPosition.y = viewPos;
                             }
 
-                            if (result.alignedPosition.y + result.actualSize.height > viewportHeight + viewPos) {
-                                result.alignedPosition.y = viewportHeight + viewPos - result.actualSize.height;
+                            if (result.alignedPosition.y + result.actualSize.height > viewParameters.viewHeight + viewPos) {
+                                result.alignedPosition.y =  viewParameters.viewHeight + viewPos - result.actualSize.height;
                             }
 
                             break;
                         }
 
                         case AlignmentBoundary.Clipper: {
-                            float clipperPos = MeasurementUtil.GetYDistanceToClipper(result, out float clipperHeight);
+                            float clipperPos = MeasurementUtil.GetYDistanceToClipper(layoutTable, result, result.clipper.element.id, viewParameters.applicationHeight, out float clipperHeight);
 
                             if (result.alignedPosition.y < clipperPos) {
                                 result.alignedPosition.y = clipperPos;
@@ -737,16 +773,17 @@ namespace UIForia.Systems {
 
                         case AlignmentBoundary.Screen:
 
-                            float screenPos = MeasurementUtil.GetYDistanceToScreen(result);
+                            float screenPos = MeasurementUtil.GetYDistanceToScreen(layoutTable, result);
                             if (result.alignedPosition.y < screenPos) {
                                 result.alignedPosition.y = screenPos;
                             }
 
-                            if (result.alignedPosition.y + result.actualSize.height > screenHeight + screenPos) {
-                                result.alignedPosition.y = screenHeight + screenPos - result.actualSize.height;
+                            if (result.alignedPosition.y + result.actualSize.height >  viewParameters.applicationHeight + screenPos) {
+                                result.alignedPosition.y = viewParameters.applicationHeight + screenPos - result.actualSize.height;
                             }
 
                             break;
+
                         case AlignmentBoundary.Parent: {
                             if (result.alignedPosition.y < 0) {
                                 result.alignedPosition.y = 0;
@@ -758,6 +795,7 @@ namespace UIForia.Systems {
 
                             break;
                         }
+
                         case AlignmentBoundary.ParentContentArea: {
                             if (result.alignedPosition.y < box.parent.paddingBorderVerticalStart) {
                                 result.alignedPosition.y = box.parent.paddingBorderVerticalStart;
@@ -816,7 +854,7 @@ namespace UIForia.Systems {
                 // no need to size check the stack, same size as element stack which was already sized
                 AwesomeLayoutBox ptr = layoutBox.firstChild;
                 while (ptr != null) {
-                    boxRefStack.Push(new BoxRef { box = ptr });
+                    boxRefStack.Push(new BoxRef {box = ptr});
                     ptr = ptr.nextSibling;
                 }
             }
@@ -826,6 +864,13 @@ namespace UIForia.Systems {
             float viewWidth = rootBox.element.View.Viewport.width;
             float viewHeight = rootBox.element.View.Viewport.height;
 
+            ViewParameters viewParameters = new ViewParameters() {
+                viewWidth = viewWidth,
+                viewHeight = viewHeight,
+                applicationWidth = layoutSystem.application.Width,
+                applicationHeight = layoutSystem.application.Height
+            };
+            
             boxRefStack.Push(new BoxRef() {box = rootBox});
 
             while (boxRefStack.size > 0) {
@@ -841,8 +886,8 @@ namespace UIForia.Systems {
                 }
 
                 if ((layoutBox.element.flags & UIElementFlags.LayoutTransformNotIdentity) != 0) {
-                    float x = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.transformPositionX, layoutBox.finalWidth);
-                    float y = MeasurementUtil.ResolveOffsetMeasurement(layoutBox.element, viewWidth, viewHeight, layoutBox.transformPositionY, layoutBox.finalHeight);
+                    float x = MeasurementUtil.ResolveOffsetMeasurement(layoutSystem.elementSystem.layoutTable, layoutBox.element, viewParameters, layoutBox.transformPositionX, layoutBox.finalWidth);
+                    float y = MeasurementUtil.ResolveOffsetMeasurement(layoutSystem.elementSystem.layoutTable, layoutBox.element, viewParameters, layoutBox.transformPositionY, layoutBox.finalHeight);
                     if (!Mathf.Approximately(x, layoutBox.transformX) || !Mathf.Approximately(y, layoutBox.transformY)) {
                         layoutBox.transformX = x;
                         layoutBox.transformY = y;
@@ -861,7 +906,7 @@ namespace UIForia.Systems {
 
                 AwesomeLayoutBox ptr = layoutBox.firstChild;
                 while (ptr != null) {
-                    boxRefStack.Push(new BoxRef { box = ptr });
+                    boxRefStack.Push(new BoxRef {box = ptr});
                     ptr = ptr.nextSibling;
                 }
             }
@@ -914,6 +959,13 @@ namespace UIForia.Systems {
             float viewWidth = rootElement.View.Viewport.width;
             float viewHeight = rootElement.View.Viewport.height;
 
+            ViewParameters viewParameters = new ViewParameters() {
+                viewWidth = viewWidth,
+                viewHeight = viewHeight,
+                applicationWidth = layoutSystem.application.Width,
+                applicationHeight = layoutSystem.application.Height
+            };
+
             SVGXMatrix identity = SVGXMatrix.identity;
 
             for (int i = 0; i < size; i++) {
@@ -928,7 +980,7 @@ namespace UIForia.Systems {
                     while (elemRefStack.size > 0) {
                         UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
                         AwesomeLayoutBox currentBox = currentElement.layoutBox;
-                        LayoutResult result = currentElement.layoutResult;
+                        ref LayoutResult result = ref currentElement.layoutResult;
                         currentBox.flags &= ~LayoutBoxFlags.RequiresMatrixUpdate;
 
                         result.localPosition.x = result.alignedPosition.x;
@@ -950,10 +1002,10 @@ namespace UIForia.Systems {
 
                         if (!isIdentity) {
                             // todo -- only need to do this if transform is not identity
-                            float x = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentBox.transformPositionX, currentBox.finalWidth);
-                            float y = MeasurementUtil.ResolveOffsetMeasurement(currentElement, viewWidth, viewHeight, currentBox.transformPositionY, currentBox.finalHeight);
+                            float x = MeasurementUtil.ResolveOffsetMeasurement(layoutSystem.elementSystem.layoutTable, currentElement, viewParameters, currentBox.transformPositionX, currentBox.finalWidth);
+                            float y = MeasurementUtil.ResolveOffsetMeasurement(layoutSystem.elementSystem.layoutTable, currentElement, viewParameters, currentBox.transformPositionY, currentBox.finalHeight);
 
-                            // todo -- em size
+                            // todo -- em size, remove percentage padding
                             float px = MeasurementUtil.ResolveFixedSize(result.actualSize.width, viewWidth, viewHeight, 0, currentBox.transformPivotX);
                             float py = MeasurementUtil.ResolveFixedSize(result.actualSize.height, viewWidth, viewHeight, 0, currentBox.transformPivotY);
 
@@ -1035,7 +1087,7 @@ namespace UIForia.Systems {
 
             while (elemRefStack.size > 0) {
                 UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
-                LayoutResult result = currentElement.layoutResult;
+                ref LayoutResult result = ref currentElement.layoutResult;
 
                 float x = 0;
                 float y = 0;
@@ -1144,20 +1196,24 @@ namespace UIForia.Systems {
                         continue;
                     }
 
+                    ref LayoutResult layoutResult = ref child.layoutResult;
                     switch (child.style.LayoutBehavior) {
                         // todo -- flag on box instead would be faster
                         case LayoutBehavior.Unset:
                         case LayoutBehavior.Normal:
                             childList.Add(child.layoutBox);
                             break;
+
                         case LayoutBehavior.Ignored:
-                            child.layoutResult.layoutParent = element.layoutResult; // not 100% sure of this
+                            layoutResult.layoutParent = element.id; // not 100% sure of this
                             ignoredList.Add(child.layoutBox);
                             break;
+
                         case LayoutBehavior.TranscludeChildren:
-                            child.layoutResult.layoutParent = element.layoutResult; // not 100% sure of this
+                            layoutResult.layoutParent = element.id; // not 100% sure of this
                             child.layoutBox.GetChildren(childList);
                             break;
+
                         default:
                             throw new ArgumentOutOfRangeException();
                     }
@@ -1239,6 +1295,8 @@ namespace UIForia.Systems {
                     continue;
                 }
 
+                // todo -- returning true for 0 oriented bounds
+                
                 if (PolygonUtil.PointInOrientedBounds(point, layoutResult.orientedBounds)) {
                     // todo -- make this property look up not slow
                     if (element.style.Visibility == Visibility.Hidden) {

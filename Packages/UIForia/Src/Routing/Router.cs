@@ -131,7 +131,7 @@ namespace UIForia.Routing {
 
     public class Router {
 
-        public int hostId;
+        public ElementId hostId;
         public readonly string name;
         private bool isInitialized;
         private int historyIndex;
@@ -151,7 +151,7 @@ namespace UIForia.Routing {
         private string targetUrl;
         public string defaultRoute { set; get; }
 
-        internal Router(int hostId, string name, string defaultRoute = null) {
+        internal Router(ElementId hostId, string name, string defaultRoute = null) {
             this.hostId = hostId;
             this.name = name;
             this.defaultRoute = defaultRoute;

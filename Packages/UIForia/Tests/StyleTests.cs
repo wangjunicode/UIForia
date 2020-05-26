@@ -2,7 +2,7 @@ using System;
 using System.Reflection;
 using NUnit.Framework;
 using Tests.Mocks;
-using UIForiaTMPro;
+using TMPro;
 using UIForia;
 using UIForia.Attributes;
 using UIForia.Compilers.Style;

@@ -54,7 +54,7 @@ namespace UIForia.Util {
 
         [DebuggerStepThrough]
         public LightList(int minCapacity = 8) {
-            if (minCapacity < 1) minCapacity = 8;
+            if (minCapacity < 0) minCapacity = 0;
             this.array = new T[minCapacity];
             this.size = 0;
         }

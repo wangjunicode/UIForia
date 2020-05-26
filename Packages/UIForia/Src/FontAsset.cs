@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using UIForiaTMPro;
+using TMPro;
 using UIForia.Util;
 using UnityEngine;
 

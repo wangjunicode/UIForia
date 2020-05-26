@@ -10,7 +10,7 @@ namespace UIForia.Util {
 
     public static class MeasurementUtil {
 
-        public static float ResolveOriginBaseX(LayoutResult result, float viewportX, AlignmentTarget target, AlignmentDirection direction, InputSystem inputSystem) {
+        public static float ResolveOriginBaseX(LayoutResult[] layoutTable, in LayoutResult result, in ViewParameters viewParameters, AlignmentTarget target, AlignmentDirection direction, InputSystem inputSystem) {
             switch (target) {
                 case AlignmentTarget.Unset:
                 case AlignmentTarget.LayoutBox:
@@ -20,8 +20,9 @@ namespace UIForia.Util {
                     return 0;
 
                 case AlignmentTarget.ParentContentArea:
-                    LayoutResult parentResult = result.layoutParent;
-                    if (parentResult == null) return 0;
+                    if (result.layoutParent == default) return 0;
+
+                    ref LayoutResult parentResult = ref layoutTable[result.elementId.index];
 
                     if (direction == AlignmentDirection.Start) {
                         return parentResult.padding.left + parentResult.border.left;
@@ -39,39 +40,44 @@ namespace UIForia.Util {
                     return 0;
 
                 case AlignmentTarget.View: {
-                    if (result.element.parent == null) return 0;
-                    LayoutResult ptr = result.element.parent.layoutResult;
-                    float output = viewportX;
-                    while (ptr != null) {
-                        output -= ptr.alignedPosition.x;
-                        if (ptr.element.parent == null) {
-                            return output;
-                        }
 
-                        ptr = ptr.element.parent.layoutResult;
+                    float output = viewParameters.viewX;
+
+                    ElementId ptr = result.layoutParent;
+
+                    while (ptr != default) {
+
+                        ref LayoutResult layoutResult = ref layoutTable[ptr.index];
+
+                        output -= layoutResult.alignedPosition.x;
+
+                        ptr = layoutResult.layoutParent;
+
                     }
 
                     return output;
                 }
 
                 case AlignmentTarget.Screen: {
-                    if (result.element.parent == null) return 0;
-                    LayoutResult ptr = result.element.parent.layoutResult;
                     float output = 0;
-                    while (ptr != null) {
-                        output -= ptr.alignedPosition.x;
-                        if (ptr.element.parent == null) {
-                            return output;
-                        }
 
-                        ptr = ptr.element.parent.layoutResult;
+                    ElementId ptr = result.layoutParent;
+
+                    while (ptr != default) {
+
+                        ref LayoutResult layoutResult = ref layoutTable[ptr.index];
+
+                        output -= layoutResult.alignedPosition.x;
+
+                        ptr = layoutResult.layoutParent;
+
                     }
 
                     return output;
                 }
 
                 case AlignmentTarget.Mouse: {
-                    float dist = GetXDistanceToScreen(result);
+                    float dist = GetXDistanceToScreen(layoutTable, result);
                     return inputSystem.MousePosition.x + dist;
                 }
 
@@ -80,7 +86,7 @@ namespace UIForia.Util {
             }
         }
 
-        public static float ResolveOriginBaseY(LayoutResult result, float viewportY, AlignmentTarget target, AlignmentDirection direction, InputSystem inputSystem) {
+        public static float ResolveOriginBaseY(LayoutResult[] layoutTable, in LayoutResult result, float viewportY, AlignmentTarget target, AlignmentDirection direction, InputSystem inputSystem) {
             switch (target) {
                 case AlignmentTarget.Unset:
                 case AlignmentTarget.LayoutBox:
@@ -90,8 +96,9 @@ namespace UIForia.Util {
                     return 0;
 
                 case AlignmentTarget.ParentContentArea:
-                    LayoutResult parentResult = result.layoutParent;
-                    if (parentResult == null) return 0;
+                    if (result.layoutParent == default) return 0;
+
+                    ref LayoutResult parentResult = ref layoutTable[result.elementId.index];
 
                     if (direction == AlignmentDirection.Start) {
                         return parentResult.padding.top + parentResult.border.top;
@@ -107,40 +114,46 @@ namespace UIForia.Util {
                     throw new NotImplementedException();
 
                 case AlignmentTarget.View: {
-                    if (result.element.parent == null) return 0;
 
-                    LayoutResult ptr = result.element.parent.layoutResult;
                     float output = viewportY;
-                    while (ptr != null) {
-                        output -= ptr.alignedPosition.y;
-                        if (ptr.element.parent == null) {
-                            return output;
-                        }
 
-                        ptr = ptr.element.parent.layoutResult;
+                    ElementId ptr = result.layoutParent;
+
+                    while (ptr != default) {
+
+                        ref LayoutResult layoutResult = ref layoutTable[ptr.index];
+
+                        output -= layoutResult.alignedPosition.y;
+
+                        ptr = layoutResult.layoutParent;
+
                     }
 
                     return output;
                 }
 
                 case AlignmentTarget.Screen: {
-                    if (result.element.parent == null) return 0;
-                    LayoutResult ptr = result.element.parent.layoutResult;
-                    float output = 0;
-                    while (ptr != null) {
-                        output -= ptr.alignedPosition.y;
-                        if (ptr.element.parent == null) {
-                            return output;
-                        }
 
-                        ptr = ptr.element.parent.layoutResult;
+                    float output = 0;
+
+                    ElementId ptr = result.layoutParent;
+
+                    while (ptr != default) {
+
+                        ref LayoutResult layoutResult = ref layoutTable[ptr.index];
+
+                        output -= layoutResult.alignedPosition.y;
+
+                        ptr = layoutResult.layoutParent;
+
                     }
 
                     return output;
+
                 }
 
                 case AlignmentTarget.Mouse:
-                    float dist = GetYDistanceToScreen(result);
+                    float dist = GetYDistanceToScreen(layoutTable, result);
                     return inputSystem.MousePosition.y + dist;
 
                 default:
@@ -148,153 +161,136 @@ namespace UIForia.Util {
             }
         }
 
-        public static float GetXDistanceToClipper(LayoutResult result, out float width) {
-            LayoutResult ptr = result.element.parent.layoutResult;
+        public static float GetXDistanceToClipper(LayoutResult[] layoutTable, LayoutResult result, ElementId clipper, float applicationWidth, out float width) {
 
             float output = 0;
 
-            ClipData clipper = result.clipper;
-
-            if (clipper == null) {
-                width = ptr.element.application.Width;
-                return GetXDistanceToScreen(result);
+            if (clipper == default) {
+                width = applicationWidth;
+                return GetXDistanceToScreen(layoutTable, result);
             }
 
-            LayoutResult clipResult = clipper.element.layoutResult;
+            ElementId ptr = result.layoutParent;
 
-            width = clipResult.actualSize.width;
+            width = layoutTable[clipper.index].actualSize.width;
 
-            while (ptr != clipResult) {
-                output -= ptr.alignedPosition.x;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
+            while (ptr != clipper) {
 
-                ptr = ptr.element.parent.layoutResult;
+                ref LayoutResult layoutResult = ref layoutTable[ptr.index];
+
+                output -= layoutResult.alignedPosition.x;
+
+                ptr = layoutResult.layoutParent;
+
             }
 
             return output;
         }
 
-        public static float GetYDistanceToClipper(LayoutResult result, out float height) {
-            LayoutResult ptr = result.element.parent.layoutResult;
-
+        public static float GetYDistanceToClipper(LayoutResult[] layoutTable, LayoutResult result, ElementId clipper, float applicationHeight, out float height) {
             float output = 0;
 
-            ClipData clipper = result.clipper;
-
-            if (clipper == null) {
-                height = ptr.element.application.Height;
-                return GetYDistanceToScreen(result);
+            if (clipper == default) {
+                height = applicationHeight;
+                return GetXDistanceToScreen(layoutTable, result);
             }
 
-            LayoutResult clipResult = clipper.element.layoutResult;
+            ElementId ptr = result.layoutParent;
 
-            height = clipResult.actualSize.height;
+            height = layoutTable[clipper.index].actualSize.height;
 
-            while (ptr != clipResult) {
-                output -= ptr.alignedPosition.y;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
+            while (ptr != clipper) {
 
-                ptr = ptr.element.parent.layoutResult;
+                ref LayoutResult layoutResult = ref layoutTable[ptr.index];
+
+                output -= layoutResult.alignedPosition.y;
+
+                ptr = layoutResult.layoutParent;
+
             }
 
             return output;
         }
 
-        public static float GetXDistanceToView(LayoutResult result) {
-            LayoutResult view = result.element.View.RootElement.layoutResult;
+        public static float GetXDistanceToView(LayoutResult[] layoutTable, ElementId viewRoot, LayoutResult result) {
+
+            ElementId ptr = result.layoutParent;
 
             float output = 0;
 
-            LayoutResult ptr = result.element.parent.layoutResult;
-
-            while (ptr != view) {
-                output -= ptr.alignedPosition.x;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
-
-                ptr = ptr.element.parent.layoutResult;
+            while (ptr != viewRoot && ptr != default) {
+                ref LayoutResult layoutResult = ref layoutTable[ptr.index];
+                output -= layoutResult.alignedPosition.x;
+                ptr = layoutResult.layoutParent;
+                ;
             }
 
             return output;
         }
 
-        public static float GetYDistanceToView(LayoutResult result) {
-            LayoutResult view = result.element.View.RootElement.layoutResult;
+        public static float GetYDistanceToView(LayoutResult[] layoutTable, ElementId viewRoot, LayoutResult result) {
+            ElementId ptr = result.layoutParent;
 
             float output = 0;
 
-            LayoutResult ptr = result.element.parent.layoutResult;
-
-            while (ptr != view) {
-                output -= ptr.alignedPosition.y;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
-
-                ptr = ptr.element.parent.layoutResult;
+            // should never be default, should always hit viewRoot
+            while (ptr != viewRoot && ptr != default) {
+                ref LayoutResult layoutResult = ref layoutTable[ptr.index];
+                output -= layoutResult.alignedPosition.y;
+                ptr = layoutResult.layoutParent;
             }
 
             return output;
         }
 
+        public static float GetXDistanceToScreen(LayoutResult[] layoutTable, LayoutResult result) {
+            ElementId ptr = result.layoutParent;
 
-        public static float GetXDistanceToScreen(LayoutResult result) {
-            if (result.element.parent == null) return 0;
-
-            LayoutResult ptr = result.element.parent.layoutResult;
             float output = 0;
-            while (ptr != null) {
-                output -= ptr.alignedPosition.x;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
 
-                ptr = ptr.element.parent.layoutResult;
+            while (ptr != default) {
+                ref LayoutResult layoutResult = ref layoutTable[ptr.index];
+                output -= layoutResult.alignedPosition.x;
+                ptr = layoutResult.layoutParent;
             }
 
             return output;
         }
 
-        public static float GetYDistanceToScreen(LayoutResult result) {
-            if (result.element.parent == null) return 0;
-            LayoutResult ptr = result.element.parent.layoutResult;
-            float output = 0;
-            while (ptr != null) {
-                output -= ptr.alignedPosition.y;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
+        public static float GetYDistanceToScreen(LayoutResult[] layoutTable, LayoutResult result) {
+            ElementId ptr = result.layoutParent;
 
-                ptr = ptr.element.parent.layoutResult;
+            float output = 0;
+
+            while (ptr != default) {
+                ref LayoutResult layoutResult = ref layoutTable[ptr.index];
+                output -= layoutResult.alignedPosition.y;
+                ptr = layoutResult.layoutParent;
             }
 
             return output;
         }
 
-        public static float ResolveOffsetOriginSizeX(LayoutResult layoutResult, float viewportWidth, AlignmentTarget target) {
+        public static float ResolveOffsetOriginSizeX(LayoutResult[] layoutTable, in LayoutResult layoutResult, in ViewParameters viewParameters, AlignmentTarget target) {
             switch (target) {
                 case AlignmentTarget.Unset:
                 case AlignmentTarget.LayoutBox:
                     return layoutResult.allocatedSize.width;
 
                 case AlignmentTarget.Parent:
-                    if (layoutResult.layoutParent == null) {
-                        return viewportWidth;
+
+                    if (layoutResult.layoutParent == default) {
+                        return viewParameters.viewWidth;
                     }
 
-                    return layoutResult.layoutParent.actualSize.width;
+                    return layoutTable[layoutResult.layoutParent.index].actualSize.width;
 
                 case AlignmentTarget.ParentContentArea:
-                    if (layoutResult.layoutParent == null) {
-                        return viewportWidth;
+                    if (layoutResult.layoutParent == default) {
+                        return viewParameters.viewWidth;
                     }
 
-                    return Mathf.Max(0, layoutResult.layoutParent.ContentAreaWidth);
+                    return Mathf.Max(0, layoutTable[layoutResult.layoutParent.index].ContentAreaWidth);
 
                 case AlignmentTarget.Template:
                     // todo handle transclusion
@@ -305,38 +301,40 @@ namespace UIForia.Util {
                     return 0;
 
                 case AlignmentTarget.View:
-                    return viewportWidth;
+                    return viewParameters.viewWidth;
 
                 case AlignmentTarget.Screen:
-                    return layoutResult.element.application.Width;
+                    return viewParameters.applicationWidth;
 
                 case AlignmentTarget.Mouse: {
                     return 0;
                 }
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
             }
         }
 
-        public static float ResolveOffsetOriginSizeY(LayoutResult result, float viewportHeight, AlignmentTarget target) {
+        public static float ResolveOffsetOriginSizeY(LayoutResult[] layoutTable, in LayoutResult layoutResult, in ViewParameters viewParameters, AlignmentTarget target) {
             switch (target) {
                 case AlignmentTarget.Unset:
                 case AlignmentTarget.LayoutBox:
-                    return result.allocatedSize.height;
+                    return layoutResult.allocatedSize.height;
 
                 case AlignmentTarget.Parent:
-                    if (result.layoutParent == null) {
-                        return viewportHeight;
+
+                    if (layoutResult.layoutParent == default) {
+                        return viewParameters.viewHeight;
                     }
 
-                    return result.layoutParent.actualSize.height;
+                    return layoutTable[layoutResult.layoutParent.index].actualSize.height;
 
                 case AlignmentTarget.ParentContentArea:
-                    if (result.layoutParent == null) {
-                        return viewportHeight;
+                    if (layoutResult.layoutParent == default) {
+                        return viewParameters.viewHeight;
                     }
 
-                    return Mathf.Max(0, result.layoutParent.ContentAreaHeight);
+                    return Mathf.Max(0, layoutTable[layoutResult.layoutParent.index].ContentAreaHeight);
 
                 case AlignmentTarget.Template:
                     // todo handle transclusion
@@ -347,14 +345,15 @@ namespace UIForia.Util {
                     return 0;
 
                 case AlignmentTarget.View:
-                    return viewportHeight;
+                    return viewParameters.viewHeight;
 
                 case AlignmentTarget.Screen:
-                    return result.element.application.Height;
+                    return viewParameters.applicationHeight;
 
                 case AlignmentTarget.Mouse: {
                     return 0;
                 }
+
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
             }
@@ -383,7 +382,7 @@ namespace UIForia.Util {
             }
         }
 
-        public static float ResolveOffsetMeasurement(UIElement element, float viewportWidth, float viewportHeight, in OffsetMeasurement measurement, float percentageRelativeVal) {
+        public static float ResolveOffsetMeasurement(LayoutResult[] layoutTable, UIElement element, in ViewParameters viewParameters, in OffsetMeasurement measurement, float percentageRelativeVal) {
             switch (measurement.unit) {
                 case OffsetMeasurementUnit.Unset:
                     return 0;
@@ -395,16 +394,16 @@ namespace UIForia.Util {
                     return element.style.GetResolvedFontSize() * measurement.value;
 
                 case OffsetMeasurementUnit.ActualWidth:
-                    return measurement.value * element.layoutResult.actualSize.width;
+                    return measurement.value * layoutTable[element.id.index].actualSize.width;
 
                 case OffsetMeasurementUnit.ActualHeight:
-                    return measurement.value * element.layoutResult.actualSize.height;
+                    return measurement.value * layoutTable[element.id.index].actualSize.height;
 
                 case OffsetMeasurementUnit.AllocatedWidth:
-                    return measurement.value * element.layoutResult.allocatedSize.width;
+                    return measurement.value * layoutTable[element.id.index].allocatedSize.width;
 
                 case OffsetMeasurementUnit.AllocatedHeight:
-                    return measurement.value * element.layoutResult.allocatedSize.height;
+                    return measurement.value * layoutTable[element.id.index].allocatedSize.height;
 
                 case OffsetMeasurementUnit.ContentWidth:
                     throw new NotImplementedException();
@@ -423,10 +422,10 @@ namespace UIForia.Util {
 //                    return box.contentSize.height * measurement.value;
 
                 case OffsetMeasurementUnit.ViewportWidth:
-                    return viewportWidth * measurement.value;
+                    return viewParameters.viewWidth * measurement.value;
 
                 case OffsetMeasurementUnit.ViewportHeight:
-                    return viewportHeight * measurement.value;
+                    return viewParameters.viewHeight * measurement.value;
 
                 case OffsetMeasurementUnit.ParentWidth:
                     throw new NotImplementedException();
@@ -455,10 +454,10 @@ namespace UIForia.Util {
 //                    return box.ResolveLayoutParent().contentSize.height * measurement.value;
 
                 case OffsetMeasurementUnit.ScreenWidth:
-                    return element.application.Width * measurement.value;
+                    return viewParameters.applicationWidth * measurement.value;
 
                 case OffsetMeasurementUnit.ScreenHeight:
-                    return element.application.Height * measurement.value;
+                    return viewParameters.applicationHeight * measurement.value;
 
                 case OffsetMeasurementUnit.Percent:
                     return percentageRelativeVal * measurement.value;

@@ -125,67 +125,67 @@ namespace UIForia.Rendering {
             for (int i = 0; i < clippers.size; i++) {
                 ClipData clipData = clippers.array[i];
 
-                if (clipData.clipPath == null) {
+               // if (clipData.clipPath == null) {
                     float xy = VertigoUtil.PackSizeVector(new Vector2(clipData.aabb.x, clipData.aabb.y));
                     float zw = VertigoUtil.PackSizeVector(new Vector2(clipData.aabb.z, clipData.aabb.w));
                     clipData.packedBoundsAndChannel.x = xy;
                     clipData.packedBoundsAndChannel.y = zw;
-                    continue;
-                }
+                    // continue;
+                //}
 
-                clipData.zIndex = i + 1; // will have to change depending on how we decide to handle different channels
-
-                int width = (int) (clipData.aabb.z - clipData.aabb.x);
-                int height = (int) (clipData.aabb.w - clipData.aabb.y);
-                SimpleRectPacker.PackedRect region;
-
-                clipData.textureChannel = -1;
-                if (maskPackerR.TryPackRect(width, height, out region)) {
-                    clipData.textureChannel = 0;
-                }
-                // todo -- other channels don't work right now, need to figure out if we use additional draw calls or super double dip region packing
-//                else if (maskPackerG.TryPackRect(width, height, out region)) {
-//                    clipData.textureChannel = 1;
-//                }
-//                else if (maskPackerB.TryPackRect(width, height, out region)) {
-//                    clipData.textureChannel = 2;
-//                }
-//                else if (maskPackerA.TryPackRect(width, height, out region)) {
-//                    clipData.textureChannel = 3;
-//                }
-                else {
-                    Debug.Log($"Can't fit {width}, {height} into clip texture");
-                }
+//                 clipData.zIndex = i + 1; // will have to change depending on how we decide to handle different channels
+//
+//                 int width = (int) (clipData.aabb.z - clipData.aabb.x);
+//                 int height = (int) (clipData.aabb.w - clipData.aabb.y);
+//                 SimpleRectPacker.PackedRect region;
+//
+//                 clipData.textureChannel = -1;
+//                 if (maskPackerR.TryPackRect(width, height, out region)) {
+//                     clipData.textureChannel = 0;
+//                 }
+//                 // todo -- other channels don't work right now, need to figure out if we use additional draw calls or super double dip region packing
+// //                else if (maskPackerG.TryPackRect(width, height, out region)) {
+// //                    clipData.textureChannel = 1;
+// //                }
+// //                else if (maskPackerB.TryPackRect(width, height, out region)) {
+// //                    clipData.textureChannel = 2;
+// //                }
+// //                else if (maskPackerA.TryPackRect(width, height, out region)) {
+// //                    clipData.textureChannel = 3;
+// //                }
+//                 else {
+//                     Debug.Log($"Can't fit {width}, {height} into clip texture");
+//                 }
 
                 // note this is in 2 point form, not height & width
-                if (clipData.textureChannel != -1) {
-                    clipData.clipTexture = clipTexture;
-                    clipData.textureRegion = region;
-                    clipData.clipUVs = new Vector4(
-                        region.xMin / (float) clipTexture.width,
-                        region.yMin / (float) clipTexture.height,
-                        region.xMax / (float) clipTexture.width,
-                        region.yMax / (float) clipTexture.height
-                    );
-                    float xy = VertigoUtil.PackSizeVector(new Vector2(clipData.aabb.x, clipData.aabb.y));
-                    float zw = VertigoUtil.PackSizeVector(new Vector2(clipData.aabb.z, clipData.aabb.w));
-                    clipData.packedBoundsAndChannel.x = xy;
-                    clipData.packedBoundsAndChannel.y = zw;
-                    clipData.packedBoundsAndChannel.z = clipData.textureChannel;
-                }
+                // if (clipData.textureChannel != -1) {
+                //     clipData.clipTexture = clipTexture;
+                //     clipData.textureRegion = region;
+                //     clipData.clipUVs = new Vector4(
+                //         region.xMin / (float) clipTexture.width,
+                //         region.yMin / (float) clipTexture.height,
+                //         region.xMax / (float) clipTexture.width,
+                //         region.yMax / (float) clipTexture.height
+                //     );
+                //     float xy = VertigoUtil.PackSizeVector(new Vector2(clipData.aabb.x, clipData.aabb.y));
+                //     float zw = VertigoUtil.PackSizeVector(new Vector2(clipData.aabb.z, clipData.aabb.w));
+                //     clipData.packedBoundsAndChannel.x = xy;
+                //     clipData.packedBoundsAndChannel.y = zw;
+                //     clipData.packedBoundsAndChannel.z = clipData.textureChannel;
+                // }
             }
         }
 
-        private void Gather() {
-            for (int i = 0; i < clippers.size; i++) {
-                ClipData clipper = clippers.array[i];
-                ClipData ptr = clipper.parent;
-                while (ptr != null) {
-                    ptr.dependents.Add(clipper);
-                    ptr = ptr.parent;
-                }
-            }
-        }
+        // private void Gather() {
+        //     for (int i = 0; i < clippers.size; i++) {
+        //         ClipData clipper = clippers.array[i];
+        //         ClipData ptr = clipper.parent;
+        //         while (ptr != null) {
+        //             ptr.dependents.Add(clipper);
+        //             ptr = ptr.parent;
+        //         }
+        //     }
+        // }
 
         // depth buffer means our regions are locked per channel
         // 2 options: 1. each channel is its own set of draw calls, this is easy but maybe not as fast. do this as a first pass
@@ -194,133 +194,133 @@ namespace UIForia.Rendering {
         // would definitely want to sort by size in that case and first try to pack larger regions into themselves
         // would likely update rect packer to be channel aware, when trying to place next item instead of moving over try colliding a different channel instead
 
-        public void Clip(Camera camera, CommandBuffer commandBuffer) {
-            // breaks on refresh if we don't do this :(
-            this.clearMaterial.SetColor(s_Color, Color.white);
-            this.clearCountMaterial.SetColor(s_Color, new Color(0, 0, 0, 0));
-            requireRegionCounting = false;
-
-            for (int i = 0; i < batchesToRender.size; i++) {
-                batchesToRender[i].pooledMesh.Release();
-                StructList<Matrix4x4>.Release(ref batchesToRender.array[i].transforms);
-                StructList<Vector4>.Release(ref batchesToRender.array[i].objectData);
-                StructList<Vector4>.Release(ref batchesToRender.array[i].colorData);
-            }
-
-            batchesToRender.Clear();
-            Gather();
-
-            Vector3 cameraOrigin = camera.transform.position;
-            cameraOrigin.x -= 0.5f * Screen.width;
-            cameraOrigin.y += (0.5f * Screen.height);
-            cameraOrigin.z += 2;
-
-            Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one);
-
-            LightList<ClipData> texturedClippers = LightList<ClipData>.Get();
-
-            regionMesh?.Release();
-
-            regionMesh = GetRegionMesh(out requireRegionCounting);
-
-            clipTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, 24, RenderTextureFormat.Default); // todo -- use lower resolution
-
-#if DEBUG
-            commandBuffer.BeginSample("UIFora Clip Draw");
-#endif
-            commandBuffer.SetRenderTarget(clipTexture);
-
-            // probably don't need this actually, can bake it into clear. keep for debugging
-            commandBuffer.ClearRenderTarget(true, true, Color.black);
-
-            commandBuffer.DrawMesh(regionMesh.mesh, origin, clearMaterial, 0, 0);
-
-            // todo -- handle multiple shapes from one path
-
-            ClipBatch batch = new ClipBatch();
-            batch.transforms = StructList<Matrix4x4>.Get();
-            batch.colorData = StructList<Vector4>.Get();
-            batch.objectData = StructList<Vector4>.Get();
-
-            for (int i = 0; i < clippers.size; i++) {
-                ClipData clipData = clippers[i];
-                Path2D clipPath = clipData.clipPath;
-
-                if (clipPath == null) {
-                    // todo if transform is not identity we need to generate a rotated or skewed rect for the clip shape
-                    continue;
-                }
-
-                clipPath.UpdateGeometry(); // should early out if no update required
-
-                if (AnyShapeUsesTextures(clipPath)) {
-                    // todo -- handle textures
-                    // todo -- handle text
-                    continue;
-                }
-
-                batch = DrawShapesInPath(batch, clipPath, clipData, clipData);
-
-                for (int j = 0; j < clipData.dependents.size; j++) {
-                    batch = DrawShapesInPath(batch, clipPath, clipData, clipData.dependents[j]);
-                }
-            }
-
-            FinalizeBatch(batch, false);
-
-            for (int i = 0; i < batchesToRender.size; i++) {
-                ref ClipBatch clipBatch = ref batchesToRender.array[i];
-
-                ClipPropertyBlock propertyBlock = clipMaterialPool.GetPropertyBlock(clipBatch.transforms.size);
-
-                propertyBlock.SetData(clipBatch);
-
-                commandBuffer.DrawMesh(clipBatch.pooledMesh.mesh, origin, clipDrawMaterial, 0, 0, propertyBlock.matBlock);
-            }
-
-            commandBuffer.SetRenderTarget(countTexture);
-
-#if DEBUG
-            commandBuffer.EndSample("UIFora Clip Draw");
-            commandBuffer.BeginSample("UIForia Clip Count");
-#endif
-            if (requireRegionCounting) {
-                // todo -- only need to count-blend a region if it has more than 1 draw into it
-                // todo -- skip the pass entirely if no region needs a count
-                // probably don't need this actually, can bake it into clear. keep for debugging
-                commandBuffer.ClearRenderTarget(true, true, Color.black);
-
-                commandBuffer.DrawMesh(regionMesh.mesh, origin, clearCountMaterial, 0, 0);
-
-                for (int i = 0; i < batchesToRender.size; i++) {
-                    ref ClipBatch clipBatch = ref batchesToRender.array[i];
-
-                    ClipPropertyBlock propertyBlock = clipMaterialPool.GetPropertyBlock(clipBatch.transforms.size);
-
-                    propertyBlock.SetData(clipBatch);
-
-                    commandBuffer.DrawMesh(batchesToRender[i].pooledMesh.mesh, origin, countMaterial, 0, 0, propertyBlock.matBlock);
-                }
-            }
-#if DEBUG
-            commandBuffer.EndSample("UIForia Clip Count");
-            commandBuffer.BeginSample("UIForia Clip Blit");
-#endif
-            if (requireRegionCounting) {
-                commandBuffer.SetRenderTarget(clipTexture);
-
-                blitCountMaterial.SetTexture(s_MainTex, countTexture);
-
-                commandBuffer.DrawMesh(regionMesh.mesh, origin, blitCountMaterial, 0, 0);
-            }
-
-#if DEBUG
-            commandBuffer.EndSample("UIForia Clip Blit");
-#endif
-            commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
-
-            LightList<ClipData>.Release(ref texturedClippers);
-        }
+//         public void Clip(Camera camera, CommandBuffer commandBuffer) {
+//             // breaks on refresh if we don't do this :(
+//             this.clearMaterial.SetColor(s_Color, Color.white);
+//             this.clearCountMaterial.SetColor(s_Color, new Color(0, 0, 0, 0));
+//             requireRegionCounting = false;
+//
+//             for (int i = 0; i < batchesToRender.size; i++) {
+//                 batchesToRender[i].pooledMesh.Release();
+//                 StructList<Matrix4x4>.Release(ref batchesToRender.array[i].transforms);
+//                 StructList<Vector4>.Release(ref batchesToRender.array[i].objectData);
+//                 StructList<Vector4>.Release(ref batchesToRender.array[i].colorData);
+//             }
+//
+//             batchesToRender.Clear();
+//             Gather();
+//
+//             Vector3 cameraOrigin = camera.transform.position;
+//             cameraOrigin.x -= 0.5f * Screen.width;
+//             cameraOrigin.y += (0.5f * Screen.height);
+//             cameraOrigin.z += 2;
+//
+//             Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one);
+//
+//             LightList<ClipData> texturedClippers = LightList<ClipData>.Get();
+//
+//             regionMesh?.Release();
+//
+//             regionMesh = GetRegionMesh(out requireRegionCounting);
+//
+//             clipTexture = RenderTexture.GetTemporary(Screen.width, Screen.height, 24, RenderTextureFormat.Default); // todo -- use lower resolution
+//
+// #if DEBUG
+//             commandBuffer.BeginSample("UIFora Clip Draw");
+// #endif
+//             commandBuffer.SetRenderTarget(clipTexture);
+//
+//             // probably don't need this actually, can bake it into clear. keep for debugging
+//             commandBuffer.ClearRenderTarget(true, true, Color.black);
+//
+//             commandBuffer.DrawMesh(regionMesh.mesh, origin, clearMaterial, 0, 0);
+//
+//             // todo -- handle multiple shapes from one path
+//
+//             ClipBatch batch = new ClipBatch();
+//             batch.transforms = StructList<Matrix4x4>.Get();
+//             batch.colorData = StructList<Vector4>.Get();
+//             batch.objectData = StructList<Vector4>.Get();
+//
+//             for (int i = 0; i < clippers.size; i++) {
+//                 ClipData clipData = clippers[i];
+//                 Path2D clipPath = clipData.clipPath;
+//
+//                 if (clipPath == null) {
+//                     // todo if transform is not identity we need to generate a rotated or skewed rect for the clip shape
+//                     continue;
+//                 }
+//
+//                 clipPath.UpdateGeometry(); // should early out if no update required
+//
+//                 if (AnyShapeUsesTextures(clipPath)) {
+//                     // todo -- handle textures
+//                     // todo -- handle text
+//                     continue;
+//                 }
+//
+//                 batch = DrawShapesInPath(batch, clipPath, clipData, clipData);
+//
+//                 for (int j = 0; j < clipData.dependents.size; j++) {
+//                     batch = DrawShapesInPath(batch, clipPath, clipData, clipData.dependents[j]);
+//                 }
+//             }
+//
+//             FinalizeBatch(batch, false);
+//
+//             for (int i = 0; i < batchesToRender.size; i++) {
+//                 ref ClipBatch clipBatch = ref batchesToRender.array[i];
+//
+//                 ClipPropertyBlock propertyBlock = clipMaterialPool.GetPropertyBlock(clipBatch.transforms.size);
+//
+//                 propertyBlock.SetData(clipBatch);
+//
+//                 commandBuffer.DrawMesh(clipBatch.pooledMesh.mesh, origin, clipDrawMaterial, 0, 0, propertyBlock.matBlock);
+//             }
+//
+//             commandBuffer.SetRenderTarget(countTexture);
+//
+// #if DEBUG
+//             commandBuffer.EndSample("UIFora Clip Draw");
+//             commandBuffer.BeginSample("UIForia Clip Count");
+// #endif
+//             if (requireRegionCounting) {
+//                 // todo -- only need to count-blend a region if it has more than 1 draw into it
+//                 // todo -- skip the pass entirely if no region needs a count
+//                 // probably don't need this actually, can bake it into clear. keep for debugging
+//                 commandBuffer.ClearRenderTarget(true, true, Color.black);
+//
+//                 commandBuffer.DrawMesh(regionMesh.mesh, origin, clearCountMaterial, 0, 0);
+//
+//                 for (int i = 0; i < batchesToRender.size; i++) {
+//                     ref ClipBatch clipBatch = ref batchesToRender.array[i];
+//
+//                     ClipPropertyBlock propertyBlock = clipMaterialPool.GetPropertyBlock(clipBatch.transforms.size);
+//
+//                     propertyBlock.SetData(clipBatch);
+//
+//                     commandBuffer.DrawMesh(batchesToRender[i].pooledMesh.mesh, origin, countMaterial, 0, 0, propertyBlock.matBlock);
+//                 }
+//             }
+// #if DEBUG
+//             commandBuffer.EndSample("UIForia Clip Count");
+//             commandBuffer.BeginSample("UIForia Clip Blit");
+// #endif
+//             if (requireRegionCounting) {
+//                 commandBuffer.SetRenderTarget(clipTexture);
+//
+//                 blitCountMaterial.SetTexture(s_MainTex, countTexture);
+//
+//                 commandBuffer.DrawMesh(regionMesh.mesh, origin, blitCountMaterial, 0, 0);
+//             }
+//
+// #if DEBUG
+//             commandBuffer.EndSample("UIForia Clip Blit");
+// #endif
+//             commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+//
+//             LightList<ClipData>.Release(ref texturedClippers);
+//         }
 
         private ClipBatch FinalizeBatch(ClipBatch clipBatch, bool createNewBatch = true) {
             clipBatch.pooledMesh = meshPool.Get();
@@ -351,168 +351,168 @@ namespace UIForia.Rendering {
             return true;
         }
 
-        private bool AnyShapeUsesTextures(Path2D path) {
-            return false;
-        }
-
-        private ClipBatch DrawShapesInPath(ClipBatch clipBatch, Path2D path, ClipData clipData, ClipData target) {
-            int vertexAdjustment = 0;
-
-            for (int drawCallIndex = 0; drawCallIndex < path.drawCallList.size; drawCallIndex++) {
-                ref SVGXDrawCall drawCall = ref path.drawCallList.array[drawCallIndex];
-
-                if (!BatchCanHandleShape(clipBatch, drawCall)) {
-                    // handle batch breaking here    
-                    clipBatch = FinalizeBatch(clipBatch);
-                    throw new NotImplementedException();
-                }
-
-                int objectStart = drawCall.objectRange.start;
-                int objectEnd = drawCall.objectRange.end;
-                int insertIdx = clipBatch.objectData.size;
-
-                // todo -- keep looping until batch would break
-                // break conditions: texture change (can mitigate)
-                //                   too many vertices
-                //                   too many objects
-
-                clipBatch.objectData.EnsureAdditionalCapacity(objectEnd - objectStart);
-                clipBatch.colorData.EnsureAdditionalCapacity(objectEnd - objectStart);
-                clipBatch.transforms.EnsureAdditionalCapacity(objectEnd - objectStart);
-
-                GeometryRange range = drawCall.geometryRange;
-                int vertexCount = range.vertexEnd - range.vertexStart;
-                int triangleCount = range.triangleEnd - range.triangleStart;
-
-                int start = positionList.size;
-
-                positionList.AddRange(path.geometry.positionList, range.vertexStart, vertexCount);
-                texCoordList0.AddRange(path.geometry.texCoordList0, range.vertexStart, vertexCount);
-                texCoordList1.AddRange(path.geometry.texCoordList1, range.vertexStart, vertexCount);
-
-                Vector4[] texCoord1 = texCoordList1.array;
-
-                for (int objIdx = objectStart; objIdx < objectEnd; objIdx++) {
-                    clipBatch.objectData.array[insertIdx] = path.objectDataList.array[objIdx].objectData;
-                    clipBatch.colorData.array[insertIdx] = path.objectDataList.array[objIdx].colorData;
-                    Matrix4x4 matrix;
-
-                    if (path.transforms != null) {
-                        matrix = path.transforms.array[drawCall.transformIdx];
-                    }
-                    else {
-                        matrix = Matrix4x4.identity;
-                    }
-
-                    float x = matrix.m03;
-                    float y = matrix.m13;
-
-                    float xDiff = target.textureRegion.xMin - x;
-                    float yDiff = target.textureRegion.yMin - y;
-
-                    if (target != clipData) {
-                        xDiff += (clipData.aabb.x - target.aabb.x);
-                        yDiff += clipData.aabb.y - target.aabb.y;
-                    }
-
-                    matrix.m03 = x + xDiff;
-                    matrix.m13 = -(y + yDiff);
-                    matrix.m23 = target.zIndex;
-
-                    clipBatch.transforms[insertIdx] = matrix;
-
-                    ref Path2D.ObjectData objectData = ref path.objectDataList.array[objIdx];
-                    int geometryStart = objectData.geometryRange.vertexStart;
-                    int geometryEnd = objectData.geometryRange.vertexEnd;
-                    for (int s = geometryStart; s < geometryEnd; s++) {
-                        texCoord1[start + (s - vertexAdjustment)].w = insertIdx;
-                    }
-
-                    insertIdx++;
-                }
-
-                clipBatch.objectData.size = insertIdx;
-                clipBatch.colorData.size = insertIdx;
-                clipBatch.transforms.size = insertIdx;
-
-                triangleList.EnsureAdditionalCapacity(triangleCount);
-
-                int offset = triangleList.size;
-                int[] triangles = triangleList.array;
-                int[] geometryTriangles = path.geometry.triangleList.array;
-
-                for (int t = 0; t < triangleCount; t++) {
-                    triangles[offset + t] = start + (geometryTriangles[range.triangleStart + t] - range.vertexStart);
-                }
-
-                triangleList.size += triangleCount;
-            }
-
-            return clipBatch;
-        }
-
-        private PooledMesh GetRegionMesh(out bool requireCountPass) {
-            positionList.EnsureAdditionalCapacity(clippers.size * 4);
-            texCoordList0.EnsureAdditionalCapacity(clippers.size * 4);
-            texCoordList1.EnsureAdditionalCapacity(clippers.size * 4);
-            triangleList.EnsureAdditionalCapacity(clippers.size * 6);
-            int vertIdx = 0;
-            int triIdx = 0;
-
-            Vector3[] positions = positionList.array;
-            Vector4[] texCoord0 = texCoordList0.array;
-            int[] triangles = triangleList.array;
-            requireCountPass = false;
-
-            for (int i = 0; i < clippers.size; i++) {
-                ClipData clipData = clippers.array[i];
-
-                if (clipData.clipPath == null) continue;
-
-                SimpleRectPacker.PackedRect region = clipData.textureRegion;
-                int cnt = 1; // 1 because we always draw self
-                ClipData ptr = clipData.parent;
-                while (ptr != null) {
-                    // only add 1 to cnt if parent clipper is actually rendered!
-
-                    if (ptr.clipPath != null) {
-                        cnt++;
-                    }
-
-                    ptr = ptr.parent;
-                }
-
-                clipData.regionDrawCount = cnt;
-                requireRegionCounting = requireRegionCounting || cnt > 1;
-
-                positions[vertIdx + 0] = new Vector3(region.xMin, -region.yMin, clipData.zIndex);
-                positions[vertIdx + 1] = new Vector3(region.xMax, -region.yMin, clipData.zIndex);
-                positions[vertIdx + 2] = new Vector3(region.xMax, -region.yMax, clipData.zIndex);
-                positions[vertIdx + 3] = new Vector3(region.xMin, -region.yMax, clipData.zIndex);
-
-                texCoord0[vertIdx + 0] = new Vector4(clipData.clipUVs.x, clipData.clipUVs.y, cnt, 0);
-                texCoord0[vertIdx + 1] = new Vector4(clipData.clipUVs.z, clipData.clipUVs.y, cnt, 0);
-                texCoord0[vertIdx + 2] = new Vector4(clipData.clipUVs.z, clipData.clipUVs.w, cnt, 0);
-                texCoord0[vertIdx + 3] = new Vector4(clipData.clipUVs.x, clipData.clipUVs.w, cnt, 0);
-
-                triangles[triIdx++] = vertIdx + 0;
-                triangles[triIdx++] = vertIdx + 1;
-                triangles[triIdx++] = vertIdx + 2;
-                triangles[triIdx++] = vertIdx + 2;
-                triangles[triIdx++] = vertIdx + 3;
-                triangles[triIdx++] = vertIdx + 0;
-                vertIdx += 4;
-            }
-
-            // no need to set sizes for lists!
-
-            PooledMesh pooledMesh = meshPool.Get();
-            pooledMesh.SetVertices(positions, vertIdx);
-            pooledMesh.SetTextureCoord0(texCoord0, vertIdx);
-            pooledMesh.SetTriangles(triangles, triIdx);
-
-            return pooledMesh;
-        }
+        // private bool AnyShapeUsesTextures(Path2D path) {
+        //     return false;
+        // }
+        //
+        // private ClipBatch DrawShapesInPath(ClipBatch clipBatch, Path2D path, ClipData clipData, ClipData target) {
+        //     int vertexAdjustment = 0;
+        //
+        //     for (int drawCallIndex = 0; drawCallIndex < path.drawCallList.size; drawCallIndex++) {
+        //         ref SVGXDrawCall drawCall = ref path.drawCallList.array[drawCallIndex];
+        //
+        //         if (!BatchCanHandleShape(clipBatch, drawCall)) {
+        //             // handle batch breaking here    
+        //             clipBatch = FinalizeBatch(clipBatch);
+        //             throw new NotImplementedException();
+        //         }
+        //
+        //         int objectStart = drawCall.objectRange.start;
+        //         int objectEnd = drawCall.objectRange.end;
+        //         int insertIdx = clipBatch.objectData.size;
+        //
+        //         // todo -- keep looping until batch would break
+        //         // break conditions: texture change (can mitigate)
+        //         //                   too many vertices
+        //         //                   too many objects
+        //
+        //         clipBatch.objectData.EnsureAdditionalCapacity(objectEnd - objectStart);
+        //         clipBatch.colorData.EnsureAdditionalCapacity(objectEnd - objectStart);
+        //         clipBatch.transforms.EnsureAdditionalCapacity(objectEnd - objectStart);
+        //
+        //         GeometryRange range = drawCall.geometryRange;
+        //         int vertexCount = range.vertexEnd - range.vertexStart;
+        //         int triangleCount = range.triangleEnd - range.triangleStart;
+        //
+        //         int start = positionList.size;
+        //
+        //         positionList.AddRange(path.geometry.positionList, range.vertexStart, vertexCount);
+        //         texCoordList0.AddRange(path.geometry.texCoordList0, range.vertexStart, vertexCount);
+        //         texCoordList1.AddRange(path.geometry.texCoordList1, range.vertexStart, vertexCount);
+        //
+        //         Vector4[] texCoord1 = texCoordList1.array;
+        //
+        //         for (int objIdx = objectStart; objIdx < objectEnd; objIdx++) {
+        //             clipBatch.objectData.array[insertIdx] = path.objectDataList.array[objIdx].objectData;
+        //             clipBatch.colorData.array[insertIdx] = path.objectDataList.array[objIdx].colorData;
+        //             Matrix4x4 matrix;
+        //
+        //             if (path.transforms != null) {
+        //                 matrix = path.transforms.array[drawCall.transformIdx];
+        //             }
+        //             else {
+        //                 matrix = Matrix4x4.identity;
+        //             }
+        //
+        //             float x = matrix.m03;
+        //             float y = matrix.m13;
+        //
+        //             float xDiff = target.textureRegion.xMin - x;
+        //             float yDiff = target.textureRegion.yMin - y;
+        //
+        //             if (target != clipData) {
+        //                 xDiff += (clipData.aabb.x - target.aabb.x);
+        //                 yDiff += clipData.aabb.y - target.aabb.y;
+        //             }
+        //
+        //             matrix.m03 = x + xDiff;
+        //             matrix.m13 = -(y + yDiff);
+        //             matrix.m23 = target.zIndex;
+        //
+        //             clipBatch.transforms[insertIdx] = matrix;
+        //
+        //             ref Path2D.ObjectData objectData = ref path.objectDataList.array[objIdx];
+        //             int geometryStart = objectData.geometryRange.vertexStart;
+        //             int geometryEnd = objectData.geometryRange.vertexEnd;
+        //             for (int s = geometryStart; s < geometryEnd; s++) {
+        //                 texCoord1[start + (s - vertexAdjustment)].w = insertIdx;
+        //             }
+        //
+        //             insertIdx++;
+        //         }
+        //
+        //         clipBatch.objectData.size = insertIdx;
+        //         clipBatch.colorData.size = insertIdx;
+        //         clipBatch.transforms.size = insertIdx;
+        //
+        //         triangleList.EnsureAdditionalCapacity(triangleCount);
+        //
+        //         int offset = triangleList.size;
+        //         int[] triangles = triangleList.array;
+        //         int[] geometryTriangles = path.geometry.triangleList.array;
+        //
+        //         for (int t = 0; t < triangleCount; t++) {
+        //             triangles[offset + t] = start + (geometryTriangles[range.triangleStart + t] - range.vertexStart);
+        //         }
+        //
+        //         triangleList.size += triangleCount;
+        //     }
+        //
+        //     return clipBatch;
+        // }
+        //
+        // private PooledMesh GetRegionMesh(out bool requireCountPass) {
+        //     positionList.EnsureAdditionalCapacity(clippers.size * 4);
+        //     texCoordList0.EnsureAdditionalCapacity(clippers.size * 4);
+        //     texCoordList1.EnsureAdditionalCapacity(clippers.size * 4);
+        //     triangleList.EnsureAdditionalCapacity(clippers.size * 6);
+        //     int vertIdx = 0;
+        //     int triIdx = 0;
+        //
+        //     Vector3[] positions = positionList.array;
+        //     Vector4[] texCoord0 = texCoordList0.array;
+        //     int[] triangles = triangleList.array;
+        //     requireCountPass = false;
+        //
+        //     for (int i = 0; i < clippers.size; i++) {
+        //         ClipData clipData = clippers.array[i];
+        //
+        //         if (clipData.clipPath == null) continue;
+        //
+        //         SimpleRectPacker.PackedRect region = clipData.textureRegion;
+        //         int cnt = 1; // 1 because we always draw self
+        //         ClipData ptr = clipData.parent;
+        //         while (ptr != null) {
+        //             // only add 1 to cnt if parent clipper is actually rendered!
+        //
+        //             if (ptr.clipPath != null) {
+        //                 cnt++;
+        //             }
+        //
+        //             ptr = ptr.parent;
+        //         }
+        //
+        //         // clipData.regionDrawCount = cnt;
+        //         requireRegionCounting = requireRegionCounting || cnt > 1;
+        //
+        //         positions[vertIdx + 0] = new Vector3(region.xMin, -region.yMin, clipData.zIndex);
+        //         positions[vertIdx + 1] = new Vector3(region.xMax, -region.yMin, clipData.zIndex);
+        //         positions[vertIdx + 2] = new Vector3(region.xMax, -region.yMax, clipData.zIndex);
+        //         positions[vertIdx + 3] = new Vector3(region.xMin, -region.yMax, clipData.zIndex);
+        //
+        //         texCoord0[vertIdx + 0] = new Vector4(clipData.clipUVs.x, clipData.clipUVs.y, cnt, 0);
+        //         texCoord0[vertIdx + 1] = new Vector4(clipData.clipUVs.z, clipData.clipUVs.y, cnt, 0);
+        //         texCoord0[vertIdx + 2] = new Vector4(clipData.clipUVs.z, clipData.clipUVs.w, cnt, 0);
+        //         texCoord0[vertIdx + 3] = new Vector4(clipData.clipUVs.x, clipData.clipUVs.w, cnt, 0);
+        //
+        //         triangles[triIdx++] = vertIdx + 0;
+        //         triangles[triIdx++] = vertIdx + 1;
+        //         triangles[triIdx++] = vertIdx + 2;
+        //         triangles[triIdx++] = vertIdx + 2;
+        //         triangles[triIdx++] = vertIdx + 3;
+        //         triangles[triIdx++] = vertIdx + 0;
+        //         vertIdx += 4;
+        //     }
+        //
+        //     // no need to set sizes for lists!
+        //
+        //     PooledMesh pooledMesh = meshPool.Get();
+        //     pooledMesh.SetVertices(positions, vertIdx);
+        //     pooledMesh.SetTextureCoord0(texCoord0, vertIdx);
+        //     pooledMesh.SetTriangles(triangles, triIdx);
+        //
+        //     return pooledMesh;
+        // }
 
         public void Clear() {
             clippers.Clear();

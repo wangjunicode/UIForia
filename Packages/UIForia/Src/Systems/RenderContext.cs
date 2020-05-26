@@ -301,8 +301,8 @@ namespace UIForia.Rendering {
 
             if (clipper != null) {
                 // todo break batch if changed
-                currentBatch.uiforiaData.clipTexture = !ReferenceEquals(clipper.clipTexture, null) ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;
-                currentBatch.uiforiaData.clipUVs.Add(clipper.clipUVs);
+                currentBatch.uiforiaData.clipTexture = currentBatch.uiforiaData.clipTexture;
+                currentBatch.uiforiaData.clipUVs.Add(default); //clipper.clipUVs);
                 currentBatch.uiforiaData.clipRects.Add(clipper.packedBoundsAndChannel);
             }
             else {
@@ -396,8 +396,8 @@ namespace UIForia.Rendering {
 
             if (clipper != null) {
                 // todo break batch if changed
-                currentBatch.uiforiaData.clipTexture = !ReferenceEquals(clipper.clipTexture, null) ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;
-                currentBatch.uiforiaData.clipUVs.Add(clipper.clipUVs);
+                currentBatch.uiforiaData.clipTexture = currentBatch.uiforiaData.clipTexture;
+                currentBatch.uiforiaData.clipUVs.Add(default); //clipper.clipUVs);
                 currentBatch.uiforiaData.clipRects.Add(clipper.packedBoundsAndChannel);
             }
             else {

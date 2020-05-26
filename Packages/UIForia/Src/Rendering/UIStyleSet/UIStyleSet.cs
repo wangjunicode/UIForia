@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Systems.SelectorSystem;
 using SVGX;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
@@ -12,10 +11,33 @@ using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Rendering {
 
+    public struct PropertyMap {
+
+        public int size;
+        public StyleProperty[] properties;
+
+        public bool TryGetValue(int propertyId, out StyleProperty property) {
+            property = default;
+            return true;
+        }
+
+        public void Clear() { }
+
+        public void Add(int propertyId, in StyleProperty property) { }
+
+        public bool ContainsKey(int key) {
+            return true;
+        }
+
+        public StyleProperty this[int propertyId] {
+            get => default;
+        }
+
+    }
+    
     [DebuggerDisplay("id = {element.id} state = {currentState}")]
     public partial class UIStyleSet {
 
@@ -1008,83 +1030,7 @@ namespace UIForia.Rendering {
                 underlayDilate = TextUnderlayDilate,
             };
         }
-
-        public void AddSelectorStyleGroup(Selector selector) {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveSelectorStyleGroup(Selector selector) {
-            throw new NotImplementedException();
-        }
-
-        internal StructList<AnimatedProperty> animatedProperties;
-
-        internal AnimationFlags animationFlags;
-
-        internal bool TryGetAnimatedProperty(StylePropertyId propertyId, out AnimatedProperty property) {
-            if (animatedProperties == null) {
-                property = default;
-                return false;
-            }
-
-            for (int i = 0; i < animatedProperties.size; i++) {
-                ref AnimatedProperty animatedProperty = ref animatedProperties.array[i];
-                if (animatedProperty.propertyId == propertyId) {
-                    property = animatedProperty;
-                    return true;
-                }
-            }
-
-            property = default;
-            return false;
-        }
-
-        internal void SetAnimatedMeasurementProperty(StylePropertyId propertyId, in StyleProperty v0, in StyleProperty v1, float time) {
-            animatedProperties = animatedProperties ?? StructList<AnimatedProperty>.Get();
-            switch (propertyId) {
-                case StylePropertyId.PreferredWidth:
-                    animationFlags |= AnimationFlags.PreferredWidth;
-                    break;
-
-                case StylePropertyId.MinWidth:
-                    animationFlags |= AnimationFlags.MinWidth;
-                    break;
-
-                case StylePropertyId.MaxWidth:
-                    animationFlags |= AnimationFlags.MaxWidth;
-                    break;
-
-                case StylePropertyId.PreferredHeight:
-                    animationFlags |= AnimationFlags.PreferredHeight;
-                    break;
-
-                case StylePropertyId.MinHeight:
-                    animationFlags |= AnimationFlags.MinHeight;
-                    break;
-
-                case StylePropertyId.MaxHeight:
-                    animationFlags |= AnimationFlags.MaxHeight;
-                    break;
-            }
-
-            for (int i = 0; i < animatedProperties.size; i++) {
-                ref AnimatedProperty animatedProperty = ref animatedProperties.array[i];
-                if (animatedProperty.propertyId == propertyId) {
-                    animatedProperty = new AnimatedProperty(propertyId, v0, v1, time);
-                    return;
-                }
-            }
-
-            animatedProperties.Add(new AnimatedProperty(propertyId, v0, v1, time));
-            // styleSystem.SetStyleProperty(element, propertyId);
-        }
-
-        private LightList<UIStyle> selectorStyles;
-
-        public void SetSelectorStyle(UIStyle matchStyle) {
-            selectorStyles = selectorStyles ?? new LightList<UIStyle>();
-        }
-
+        
     }
 
     [Flags]

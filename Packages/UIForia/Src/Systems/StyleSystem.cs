@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Systems.SelectorSystem;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -75,12 +74,12 @@ namespace UIForia.Systems {
         public void OnElementEnabled(UIElement element) { }
 
         public void OnElementDisabled(UIElement element) {
-            m_ChangeSets.Remove(element.id);
+            m_ChangeSets.Remove(element.id.id);
         }
 
         public void OnElementDestroyed(UIElement element) {
             element.style = null;
-            m_ChangeSets.Remove(element.id);
+            m_ChangeSets.Remove(element.id.id);
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
@@ -88,9 +87,9 @@ namespace UIForia.Systems {
         }
 
         private void AddToChangeSet(UIElement element, StyleProperty property) {
-            if (!m_ChangeSets.TryGetValue(element.id, out ChangeSet changeSet)) {
+            if (!m_ChangeSets.TryGetValue(element.id.id, out ChangeSet changeSet)) {
                 changeSet = new ChangeSet(element, StructList<StyleProperty>.Get());
-                m_ChangeSets[element.id] = changeSet;
+                m_ChangeSets[element.id.id] = changeSet;
             }
 
             changeSet.changes.Add(property);
@@ -154,14 +153,6 @@ namespace UIForia.Systems {
                     s_ElementStack.Push(descendant.children[i]);
                 }
             }
-        }
-
-        public void AddSelectors(Selector[] selectors) {
-            if (selectors == null) return;
-        }
-
-        public void RemoveSelectors(Selector[] selectors) {
-            if (selectors == null) return;
         }
 
         private struct ChangeSet {

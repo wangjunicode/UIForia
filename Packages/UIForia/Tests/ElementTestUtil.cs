@@ -46,11 +46,11 @@ namespace Tests {
 
         public static void AssertHierarchy(UIElement element, TypeAssert assertRoot, int depth = 0) {
             Assert.AreEqual(element.GetType(), assertRoot.parentType);
-            if (element.children.Count != assertRoot.childTypes.Length) {
+            if (element.ChildCount != assertRoot.childTypes.Length) {
                 Assert.Fail("Child Count did not match at depth: " + depth);
             }
 
-            for (int i = 0; i < element.children.Count; i++) {
+            for (int i = 0; i < element.ChildCount; i++) {
                 if (element.children[i].GetType() != assertRoot.childTypes[i].parentType) {
                     Assert.Fail($"Types did not match for child number {i} at depth {depth}. {element.children[i].GetType()} is not {assertRoot.childTypes[i].parentType}");
                 }

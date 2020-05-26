@@ -10,7 +10,7 @@ namespace SpaceGameDemo {
         public Camera gameCamera;
 
         public override void OnCreate() {
-            gameCamera = GameObject.Find("Look Camera").GetComponent<Camera>();
+            // gameCamera = GameObject.Find("Look Camera").GetComponent<Camera>();
         }
 
         public void OnSinglePlayerClick() {

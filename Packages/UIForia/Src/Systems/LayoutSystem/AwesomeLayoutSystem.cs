@@ -11,12 +11,14 @@ namespace UIForia.Systems {
 
     public class AwesomeLayoutSystem : ILayoutSystem {
 
-        private Application application;
+        internal Application application;
         private LightList<AwesomeLayoutRunner> runners;
         internal int traversalIndex;
+        public ElementSystem elementSystem;
 
-        public AwesomeLayoutSystem(Application application) {
+        public AwesomeLayoutSystem(Application application, ElementSystem elementSystem) {
             this.application = application;
+            this.elementSystem = elementSystem;
             this.runners = new LightList<AwesomeLayoutRunner>();
 
             // for (int i = 0; i < application.views.Count; i++) {
@@ -60,7 +62,7 @@ namespace UIForia.Systems {
                 }
             }
 
-            currentElement.layoutBox.Initialize(currentElement, application.frameId);
+            currentElement.layoutBox.Initialize(this, elementSystem, currentElement, application.frameId);
         }
 
         internal void ChangeLayoutBox(UIElement currentElement, LayoutType layoutType) {
@@ -107,7 +109,7 @@ namespace UIForia.Systems {
                     break;
             }
 
-            currentElement.layoutBox.Initialize(currentElement, application.frameId);
+            currentElement.layoutBox.Initialize(this, elementSystem, currentElement, application.frameId);
 
             // parent will need to update children
             if (currentElement.parent?.layoutBox != null) {
@@ -299,7 +301,7 @@ namespace UIForia.Systems {
         public void OnDestroy() { }
 
         public void OnViewAdded(UIView view) {
-            runners.Add(new AwesomeLayoutRunner(this, view.dummyRoot));
+            runners.Add(new AwesomeLayoutRunner(this, view, view.dummyRoot));
         }
 
         public void OnViewRemoved(UIView view) {

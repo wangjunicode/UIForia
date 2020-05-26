@@ -6,53 +6,6 @@ using UnityEngine;
 
 namespace UIForia.Rendering {
 
-    // style.Material.SetInstanceFloat("name", value);
-    
-    // string -> annoying / slow to re-parse
-    // struct/id -> annoying to set
-    
-    // style.Material = new MaterialRef("glitch", MaterialFloat("shake", 34));
-    
-    // style.Material = MaterialRef.Set(style.Material, Float("shake", 34));
-    
-    // MaterialRef.Create("name");
-    // clean up sucks w/ pointer version in current uiforia
-    // but object would be fine I think, can convert to pointer & watch it in upgrade
-    // still dont know how to handle nested properties 
-    
-    // <Element style:Material=" 'glitch { val: 34 } '"/>
-    
-    // <Element style.hover:Material.glitch.shake="3"/>
-    
-    // <Element style:material="glitch" material.hover:glitch.shake="5"/>
-    
-    // [keyframes] { [material:glitch] { shake = 5; } }
-    
-    // style.Material = Application.MaterialRenderData("name", new MaterialProperty() {
-    //    
-    // });
-    
-    // element.style.SetMaterial(MakeMaterial("glitch", new FloatProperty("name", value));
-    
-    // 3 levels
-    //     base material (with properties set via import)
-    //     style overrides (with properties mixed between import & style)
-    //     instance overrides (with properties mixed between import & style & instance)
-    
-    // so style sheet will create material entries
-    // 
-    
-    // element.style.SetMaterialTexture("glitch", "name", new TextureProperty(), StyleState.Hover);
-    // materialDatabase
-    // set material name to use
-    // then override properties
-    // property overrides are stored per-element in a map
-    // kill map entry when element destroyed
-    // need template compiler to handle proper code gen for this
-    // need render system to know if an override material is in use
-    // then lookup per element property overrides for that material
-
-
     public struct PolyRect {
 
         public Vector2 p0;

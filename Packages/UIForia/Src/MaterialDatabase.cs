@@ -42,9 +42,9 @@ namespace UIForia {
         }
 
         public void OnElementDestroyed(UIElement element) {
-            if (instanceProperties.TryGetValue(element.id, out LightList<MaterialProperty> list)) {
+            if (instanceProperties.TryGetValue(element.id.id, out LightList<MaterialProperty> list)) {
                 list.Release();
-                instanceProperties.Remove(element.id);
+                instanceProperties.Remove(element.id.id);
             }
         }
 
@@ -185,7 +185,7 @@ namespace UIForia {
             return false;
         }
 
-        public void SetInstanceProperty(int elementId, string materialName, string propertyName, in MaterialPropertyValue2 value) {
+        public void SetInstanceProperty(ElementId elementId, string materialName, string propertyName, in MaterialPropertyValue2 value) {
             for (int i = 0; i < baseMaterialInfos.Length; i++) {
                 if (baseMaterialInfos[i].materialName == materialName) {
                     SetInstanceProperty(elementId, new MaterialId(i + 1, 0), propertyName, value);
@@ -193,7 +193,7 @@ namespace UIForia {
             }
         }
 
-        public void SetInstanceProperty(int elementId, MaterialId materialId, string propertyName, in MaterialPropertyValue2 value) {
+        public void SetInstanceProperty(ElementId elementId, MaterialId materialId, string propertyName, in MaterialPropertyValue2 value) {
 
             // only care about base id here
             if (!materialMap.TryGetValue(materialId.baseId, out MaterialInfo info)) {
@@ -211,9 +211,9 @@ namespace UIForia {
             }
 
             // could be per-instance array but i dont think we'll enough of these to merit the memory overhead
-            if (!instanceProperties.TryGetValue(elementId, out LightList<MaterialProperty> properties)) {
+            if (!instanceProperties.TryGetValue(elementId.id, out LightList<MaterialProperty> properties)) {
                 properties = LightList<MaterialProperty>.Get();
-                instanceProperties.Add(elementId, properties);
+                instanceProperties.Add(elementId.id, properties);
             }
 
             for (int i = 0; i < properties.size; i++) {
@@ -233,8 +233,8 @@ namespace UIForia {
 
         }
 
-        public int GetInstanceProperties(int elementId, MaterialId materialId, IList<MaterialProperty> output) {
-            if (!instanceProperties.TryGetValue(elementId, out LightList<MaterialProperty> properties)) {
+        public int GetInstanceProperties(ElementId elementId, MaterialId materialId, IList<MaterialProperty> output) {
+            if (!instanceProperties.TryGetValue(elementId.id, out LightList<MaterialProperty> properties)) {
                 return 0;
             }
 
@@ -251,8 +251,8 @@ namespace UIForia {
             return cnt;
         }
 
-        public int GetInstanceProperties(int elementId, MaterialId materialId, Material material) {
-            if (!instanceProperties.TryGetValue(elementId, out LightList<MaterialProperty> properties)) {
+        public int GetInstanceProperties(ElementId elementId, MaterialId materialId, Material material) {
+            if (!instanceProperties.TryGetValue(elementId.id, out LightList<MaterialProperty> properties)) {
                 return 0;
             }
 
@@ -292,8 +292,8 @@ namespace UIForia {
             return cnt;
         }
 
-        public int GetInstanceProperties(int elementId, MaterialId materialId, MaterialPropertyBlock propertyBlock) {
-            if (!instanceProperties.TryGetValue(elementId, out LightList<MaterialProperty> properties)) {
+        public int GetInstanceProperties(ElementId elementId, MaterialId materialId, MaterialPropertyBlock propertyBlock) {
+            if (!instanceProperties.TryGetValue(elementId.id, out LightList<MaterialProperty> properties)) {
                 return 0;
             }
 

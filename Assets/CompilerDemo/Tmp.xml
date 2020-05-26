@@ -2,12 +2,12 @@
 
     <Style>
 
-        style container {
-            TextFontSize = 24px;
-            TextWhitespaceMode = PreserveNewLines;
-            TextColor = white;
-
-        }
+     //   style container {
+     //       TextFontSize = 24px;
+     //       TextWhitespaceMode = PreserveNewLines;
+     //       TextColor = white;
+//
+     //   }
         
         style scroll-view {
             PreferredSize = 1vw 1vh;
@@ -33,17 +33,29 @@
             //BackgroundImage = url("images/2");
             BorderRadius = 50%;
         }
+        style container {
+        FlexLayoutDirection = Horizontal;
+        PreferredSize = 300px, 100px;
+        }
+
+        style cell {
+        PreferredSize = 100px;
+        BackgroundColor = blue;
+        }
     
     </Style>
 
     <Contents style="container">
-
-        <Group style="mesh-test" 
-               style:meshType="meshTest.meshType"
-               style:meshFillAmount="meshTest.meshFillAmount"
-               style:meshFillOrigin="meshTest.meshFillOrigin"
-               style:meshFillDirection="meshTest.meshFillDirection"
-        />
+        <Group mouse:down="HandleClickedChild(0)" style="cell"/>
+        <Group mouse:down="HandleClickedChild(1)" style="cell"/>
+        <Group mouse:down="HandleClickedChild(2)" style="cell"/>
+        
+<!--        <Group style="mesh-test" -->
+<!--               style:meshType="meshTest.meshType"-->
+<!--               style:meshFillAmount="meshTest.meshFillAmount"-->
+<!--               style:meshFillOrigin="meshTest.meshFillOrigin"-->
+<!--               style:meshFillDirection="meshTest.meshFillDirection"-->
+<!--        />-->
 <!--        <Select style="select" sync:selectedValue="selected" options="options" onChange:selectedValue="OnValueChanged()"/>-->
 <!--        -->
 <!--        <Text style="expression">{expression} </Text>-->

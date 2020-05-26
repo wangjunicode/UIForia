@@ -77,6 +77,7 @@ namespace UIForia.Rendering {
         protected MeshFillDirection meshFillDirection;
 
         public MaterialId materialId;
+        public LayoutResult[] layoutTable;
         
         private PooledMesh mesh;
         private MaterialPropertyBlock propertyBlock;
@@ -475,10 +476,10 @@ namespace UIForia.Rendering {
 
             Size newSize = element.layoutResult.actualSize;
 
-            if (geometryNeedsUpdate || (newSize != lastSize) || element.layoutResult.rebuildGeometry) {
+            // todo re-implement cache
+            if (true || geometryNeedsUpdate || (newSize != lastSize)) {
                 UpdateGeometry(newSize);
                 lastSize = newSize;
-                element.layoutResult.rebuildGeometry = false; // kind of a hack, change this
             }
 
             // todo -- fix caching issue here
@@ -488,6 +489,14 @@ namespace UIForia.Rendering {
             }
 
             if (shadowColor.a > 0 && opacity > 0) {
+                
+                ViewParameters viewParameters = new ViewParameters() {
+                    viewWidth = element.View.Viewport.width,
+                    viewHeight = element.View.Viewport.height,
+                    applicationWidth = element.application.Width,
+                    applicationHeight = element.application.Height
+                };
+                
                 float min = math.min(element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
 
                 if (min <= 0) min = 0.0001f;
@@ -522,8 +531,8 @@ namespace UIForia.Rendering {
                 Vector2 size = element.layoutResult.actualSize + new Vector2(style.ShadowSizeX, style.ShadowSizeY) + new Vector2(style.ShadowIntensity, style.ShadowIntensity);
                 position -= new Vector2(style.ShadowSizeX, style.ShadowSizeY) * 0.5f;
                 position -= new Vector2(style.ShadowIntensity, style.ShadowIntensity) * 0.5f;
-                float x = MeasurementUtil.ResolveOffsetMeasurement(element, viewWidth, viewHeight, style.ShadowOffsetX, element.layoutResult.actualSize.width);
-                float y = MeasurementUtil.ResolveOffsetMeasurement(element, viewWidth, viewHeight, style.ShadowOffsetY, element.layoutResult.actualSize.height);
+                float x = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, style.ShadowOffsetX, element.layoutResult.actualSize.width);
+                float y = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, style.ShadowOffsetY, element.layoutResult.actualSize.height);
                 position.x += x;
                 position.y += y;
                 shadowGeometry.mainTexture = null;

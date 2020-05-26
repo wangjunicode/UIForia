@@ -1206,7 +1206,7 @@ namespace Mono.Linq.Expressions {
                 return node;
             }
 
-            ParameterInfo[] parameterInfos = method.GetParametersCached();
+            ParameterInfo[] parameterInfos = method.GetParameters();
 
             WriteToken("(");
 

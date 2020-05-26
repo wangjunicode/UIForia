@@ -112,7 +112,7 @@ namespace UIForia.Routing {
             IHierarchical ptr = element;
             while (ptr != null) {
                 for (int i = 0; i < m_Routers.Count; i++) {
-                    if (m_Routers[i].hostId == ptr.UniqueId) {
+                    if (m_Routers[i].hostId.id == ptr.UniqueId) {
                         return m_Routers[i];
                     }
                 }

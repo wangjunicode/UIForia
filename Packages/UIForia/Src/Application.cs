@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Systems.SelectorSystem;
 using Src.Systems;
 using UIForia.Animation;
 using UIForia.Compilers;
@@ -32,18 +31,17 @@ namespace UIForia {
             get => dpiScaleFactor;
             set => dpiScaleFactor = value;
         }
-        
+
         public static SizeInt UiApplicationSize => UIApplicationSize;
-        
+
         public static List<Application> Applications = new List<Application>();
-        
+
         internal Stopwatch layoutTimer = new Stopwatch();
         internal Stopwatch renderTimer = new Stopwatch();
         internal Stopwatch bindingTimer = new Stopwatch();
         internal Stopwatch loopTimer = new Stopwatch();
 
         public readonly string id;
-        internal SelectorSystem selectorSystem;
         internal IStyleSystem styleSystem;
         internal ILayoutSystem layoutSystem;
         internal IRenderSystem renderSystem;
@@ -52,6 +50,7 @@ namespace UIForia {
         internal AnimationSystem animationSystem;
         internal UISoundSystem soundSystem;
         internal LinqBindingSystem linqBindingSystem;
+        internal ElementSystem elementSystem;
 
         private int elementIdGenerator;
 
@@ -104,7 +103,7 @@ namespace UIForia {
             this.onElementRegistered = onElementRegistered;
             this.id = templateSettings.applicationName;
             this.resourceManager = resourceManager ?? new ResourceManager();
-            
+
             Applications.Add(this);
 #if UNITY_EDITOR
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnEditorReload;
@@ -121,13 +120,14 @@ namespace UIForia {
 
         protected virtual void CreateSystems() {
             styleSystem = new StyleSystem();
-            layoutSystem = new AwesomeLayoutSystem(this);
-            inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
             renderSystem = new VertigoRenderSystem(Camera ?? Camera.current, this);
             routingSystem = new RoutingSystem();
-            animationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
             soundSystem = new UISoundSystem();
+            elementSystem = new ElementSystem(1024);
+            animationSystem = new AnimationSystem(elementSystem);
+            layoutSystem = new AwesomeLayoutSystem(this, elementSystem);
+            inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
         }
 
         internal void Initialize() {
@@ -159,7 +159,7 @@ namespace UIForia {
             }
 
             materialDatabase = templateData.materialDatabase;
-            
+
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this));
 
             view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Width, Height));
@@ -273,6 +273,8 @@ namespace UIForia {
                 system.OnDestroy();
             }
 
+            elementSystem.Dispose();
+
             for (int i = views.Count - 1; i >= 0; i--) {
                 views[i].Destroy();
             }
@@ -284,7 +286,6 @@ namespace UIForia {
 
             m_AfterUpdateTaskSystem.OnDestroy();
             m_BeforeUpdateTaskSystem.OnDestroy();
-
 
             elementIdGenerator = 0;
 
@@ -340,24 +341,34 @@ namespace UIForia {
                 current.OnDestroy();
                 toInternalDestroy.Add(current);
 
-                UIElement[] children = current.children.array;
-                int childCount = current.children.size;
+                // UIElement[] children = current.children.array;
+                int childCount = current.ChildCount;
 
                 if (stack.size + childCount >= stack.array.Length) {
                     Array.Resize(ref stack.array, stack.size + childCount + 16);
                 }
 
-                for (int i = childCount - 1; i >= 0; i--) {
+                UIElement ptr = current.GetLastChild();
+                while (ptr != null) {
                     // inline stack push
-                    stack.array[stack.size++] = children[i];
+                    stack.array[stack.size++] = ptr;
+                    ptr = ptr.GetPreviousSibling();
                 }
+
+                //for (int i = childCount - 1; i >= 0; i--) {
+                //}
             }
 
             if (element.parent != null && !removingChildren) {
+
+                elementSystem.RemoveChild(element.parent.id, element.id);
+
+                // todo -- remove
                 element.parent.children.Remove(element);
                 for (int i = 0; i < element.parent.children.Count; i++) {
                     element.parent.children[i].siblingIndex = i;
                 }
+
             }
 
             for (int i = 0; i < systems.Count; i++) {
@@ -397,7 +408,6 @@ namespace UIForia {
             for (int i = 0; i < views.Count; i++) {
                 views[i].Viewport = new Rect(0, 0, Width, Height);
             }
-
 
             inputSystem.OnUpdate();
             m_BeforeUpdateTaskSystem.OnUpdate();
@@ -535,7 +545,6 @@ namespace UIForia {
                 // only continue if calling enable didn't re-disable the element
                 if ((child.flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled) {
                     child.enableStateChangedFrameId = frameId;
-                    child.tagNameIndex.Add(child);
                     UIElement[] children = child.children.array;
                     int childCount = child.children.size;
                     if (stack.size + childCount >= stack.array.Length) {
@@ -603,6 +612,7 @@ namespace UIForia {
                 // todo -- maybe do this on enable instead
                 if (child.style.currentState != StyleState.Normal) {
                     // todo -- maybe just have a clear states method
+                    // todo -- change to ExitState(State.Hover|State.Active|State.Focus) and see if its better / faster
                     child.style.ExitState(StyleState.Hover);
                     child.style.ExitState(StyleState.Active);
                     child.style.ExitState(StyleState.Focused);
@@ -637,7 +647,7 @@ namespace UIForia {
             }
         }
 
-        public UIElement GetElement(int elementId) {
+        public UIElement GetElement(ElementId elementId) {
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
 
             for (int i = 0; i < views.Count; i++) {
@@ -798,9 +808,11 @@ namespace UIForia {
                     onElementRegistered?.Invoke(current);
                     try {
                         current.OnCreate();
-                    } catch (Exception e){
+                    }
+                    catch (Exception e) {
                         Debug.Log(e);
                     }
+
                     view.ElementRegistered(current);
                 }
 
@@ -895,36 +907,21 @@ namespace UIForia {
             return retn;
         }
 
-        public struct TagNameEntry {
-
-            public int depth;
-            public UIElement element;
-
-        }
-
-        internal Dictionary<int, TagNameIndex> tagNameIndexMap = new Dictionary<int, TagNameIndex>();
-
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
         public UIElement CreateElementFromPool(int typeId, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
             // children get assigned in the template function but we need to setup the list here
             ConstructedElement retn = templateData.ConstructElement(typeId);
             UIElement element = retn.element;
 
-            if (!tagNameIndexMap.TryGetValue(retn.tagNameId, out TagNameIndex index)) {
-                index = new TagNameIndex();
-                tagNameIndexMap[retn.tagNameId] = index;
-            }
-
-            element.tagNameIndex = index;
-
             element.application = this;
             element.templateMetaData = templateData.templateMetaData[originTemplateId];
-            element.id = NextElementId;
-            element.style = new UIStyleSet(element);
-            element.layoutResult = new LayoutResult(element);
-            element.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
 
-            element.children = LightList<UIElement>.GetMinSize(childCount);
+            element.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate; // todo -- am I always setting needs update? dumb!
+
+            element.id = elementSystem.CreateElement(element, parent?.hierarchyDepth + 1 ?? 0, -999, -999, element.flags);
+
+            element.style = new UIStyleSet(element);
+            element.children = new LightList<UIElement>(childCount);
 
             if (attributeCount > 0) {
                 element.attributes = new StructList<ElementAttribute>(attributeCount);
@@ -933,7 +930,10 @@ namespace UIForia {
 
             element.parent = parent;
 
-            parent?.children.Add(element);
+            if (parent != null) {
+                parent.children.Add(element);
+                elementSystem.AddChild(parent.id, element.id);
+            }
 
             return element;
         }

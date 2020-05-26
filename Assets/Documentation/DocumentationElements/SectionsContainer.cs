@@ -10,13 +10,16 @@ namespace Documentation.DocumentationElements {
         public List<SectionPanel> sectionPanels = new List<SectionPanel>();
         
         public override void OnCreate() {
-            var list = FindById<UIChildrenElement>("section-content").children;
+            
+            UIChildrenElement element = FindById<UIChildrenElement>("section-content");
             
             sectionPanels.Clear();
 
-            for (int i = 0; i < list.Count; i++) {
-                SectionPanel sectionPanel = (SectionPanel) list[i];
-                sectionPanels.Add(sectionPanel);
+            UIElement ptr = element;
+
+            while (ptr != null) {
+                sectionPanels.Add(ptr as SectionPanel);
+                ptr = ptr.GetNextSibling();
             }
         }
     }

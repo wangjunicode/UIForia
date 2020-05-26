@@ -53,9 +53,12 @@ namespace UIForia.Elements {
         private float accumulatedScrollSpeedY;
         private float accumulatedScrollSpeedX;
 
+        private UIElement firstChild;
+        
         public override void OnEnable() {
-            verticalHandle = children[2];
-            horizontalHandle = children[4];
+            firstChild = GetFirstChild();
+            verticalHandle = FindChildAt(2);
+            horizontalHandle = FindChildAt(4);
         }
 
         public override void OnUpdate() {
@@ -74,12 +77,14 @@ namespace UIForia.Elements {
                 isScrollingX = t < 1;
             }
 
-            if (!children[0].isEnabled) {
+            UIElement firstChild = GetFirstChild();
+            
+            if (!firstChild.isEnabled) {
                 isOverflowingX = false;
                 isOverflowingY = false;
             }
             else {
-                Size currentChildrenSize = new Size(children[0].layoutResult.actualSize.width, children[0].layoutResult.allocatedSize.height);
+                Size currentChildrenSize = new Size(firstChild.layoutResult.actualSize.width, firstChild.layoutResult.allocatedSize.height);
 
                 isOverflowingX = currentChildrenSize.width > layoutResult.actualSize.width;
                 isOverflowingY = currentChildrenSize.height > layoutResult.actualSize.height;
@@ -101,7 +106,7 @@ namespace UIForia.Elements {
         [OnMouseWheel]
         public void OnMouseWheel(MouseInputEvent evt) {
             if (verticalScrollingEnabled) {
-                float actualContentHeight = children[0].layoutResult.actualSize.height;
+                float actualContentHeight = firstChild.layoutResult.actualSize.height;
                 float visibleContentHeight = layoutResult.ActualHeight;
                 if (!isScrollingY || (int) Mathf.Sign(evt.ScrollDelta.y) != (int) Mathf.Sign(fromScrollY - toScrollY)) {
                     accumulatedScrollSpeedY = scrollSpeedY;
@@ -122,7 +127,7 @@ namespace UIForia.Elements {
             }
 
             if (horizontalScrollingEnabled) {
-                float actualContentWidth = children[0].layoutResult.actualSize.width;
+                float actualContentWidth = firstChild.layoutResult.actualSize.width;
                 float visibleContentWidth = layoutResult.ActualWidth;
                 if (!isScrollingX || (int) Mathf.Sign(-evt.ScrollDelta.x) != (int) Mathf.Sign(fromScrollX - toScrollX)) {
                     accumulatedScrollSpeedX = scrollSpeedX;
@@ -146,7 +151,7 @@ namespace UIForia.Elements {
         public void OnClickVertical(MouseInputEvent evt) {
 
             float contentAreaHeight = layoutResult.ContentAreaHeight;
-            float contentHeight = children[0].layoutResult.actualSize.height;
+            float contentHeight = firstChild.layoutResult.actualSize.height;
             float paddingBorderStart = layoutResult.VerticalPaddingBorderStart;
             float y = evt.MousePosition.y - layoutResult.screenPosition.y - paddingBorderStart;
             
@@ -171,7 +176,7 @@ namespace UIForia.Elements {
             float x = evt.MousePosition.x - layoutResult.screenPosition.x;
 
             float contentAreaWidth = layoutResult.ContentAreaWidth;
-            float contentWidth = children[0].layoutResult.actualSize.width;
+            float contentWidth = firstChild.layoutResult.actualSize.width;
 
             if (contentWidth == 0) return;
 
@@ -280,8 +285,8 @@ namespace UIForia.Elements {
 
         }
 
-        public float ScrollOffsetX => -(children[0].layoutResult.alignedPosition.x - layoutResult.HorizontalPaddingBorderStart);
-        public float ScrollOffsetY => -(children[0].layoutResult.alignedPosition.y - layoutResult.VerticalPaddingBorderStart);
+        public float ScrollOffsetX => -(firstChild.layoutResult.alignedPosition.x - layoutResult.HorizontalPaddingBorderStart);
+        public float ScrollOffsetY => -(firstChild.layoutResult.alignedPosition.y - layoutResult.VerticalPaddingBorderStart);
 
         internal void ScrollElementIntoView(UIElement element, float crawlPositionX, float crawlPositionY) {
             
@@ -291,7 +296,7 @@ namespace UIForia.Elements {
             float elementWidth = element.layoutResult.ActualWidth;
             float elementRight = localPositionX + scrollOffsetX + elementWidth;
 
-            float childrenWidth = children[0].layoutResult.ActualWidth;
+            float childrenWidth = firstChild.layoutResult.ActualWidth;
             float contentWidth = layoutResult.ContentAreaWidth;
 
             if (localPositionX < 0) {
@@ -308,7 +313,7 @@ namespace UIForia.Elements {
             float elementHeight = element.layoutResult.ActualHeight;
             float elementBottom = localPositionY + scrollOffsetY + elementHeight;
 
-            float childrenHeight = children[0].layoutResult.ActualHeight;
+            float childrenHeight = firstChild.layoutResult.ActualHeight;
             float contentHeight = layoutResult.ContentAreaHeight;
 
             if (localPositionY < 0) {

@@ -20,14 +20,17 @@ namespace Tests.Mocks {
 
         protected MockApplication(bool isPreCompiled, TemplateSettings templateData, ResourceManager resourceManager, Action<UIElement> onRegister) : base(isPreCompiled, templateData, resourceManager, onRegister) { }
 
+        private static ElementSystem s_ElementSystem = new ElementSystem(32);
         protected override void CreateSystems() {
             styleSystem = new StyleSystem();
-            layoutSystem = new MockLayoutSystem(this);
-            inputSystem = new MockInputSystem(layoutSystem);
             renderSystem = new MockRenderSystem(Camera, this);
             routingSystem = new RoutingSystem();
-            animationSystem = new AnimationSystem();
             linqBindingSystem = new LinqBindingSystem();
+            elementSystem = s_ElementSystem;
+            elementSystem.Initialize();
+            layoutSystem = new MockLayoutSystem(this, elementSystem);
+            animationSystem = new AnimationSystem(elementSystem);
+            inputSystem = new MockInputSystem(layoutSystem);
         }
 
         public static void Generate(bool shouldGenerate = true) {

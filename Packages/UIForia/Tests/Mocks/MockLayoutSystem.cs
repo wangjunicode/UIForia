@@ -5,8 +5,8 @@ namespace Tests.Mocks {
 
     public class MockLayoutSystem : AwesomeLayoutSystem {
 
-        public MockLayoutSystem(Application application)
-            : base(application) { }
+        public MockLayoutSystem(Application application, ElementSystem elementSystem)
+            : base(application, elementSystem) { }
 
     }
 

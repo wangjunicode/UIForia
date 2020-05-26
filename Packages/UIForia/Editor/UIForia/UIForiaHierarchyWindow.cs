@@ -47,7 +47,7 @@ namespace UIForia.Editor {
 
         private static MethodInfo s_GameWindowSizeMethod;
 
-        public static int s_SelectedElementId;
+        public static ElementId s_SelectedElementId;
         public static Application s_SelectedApplication;
 
         public void OnEnable() {
@@ -91,7 +91,7 @@ namespace UIForia.Editor {
                 s_SelectedElementId = element.id;
             }
             else {
-                s_SelectedElementId = -1;
+                s_SelectedElementId = default;
             }
         }
 
@@ -104,7 +104,7 @@ namespace UIForia.Editor {
         }
 
         public void OnRefresh() {
-            s_SelectedElementId = -1;
+            s_SelectedElementId =default;
             treeView?.Destroy();
 
             Application app = Application.Find(inspectedAppId);
@@ -137,10 +137,10 @@ namespace UIForia.Editor {
                     int selectIdx = 0;
 
                     s_SelectedElementId = s_SelectedApplication.InputSystem.DebugElementsThisFrame[selectIdx].id;
-                    selectedIds.Add(s_SelectedElementId);
+                    selectedIds.Add(s_SelectedElementId.id);
                     treeView.SetSelection(selectedIds);
                     if (selectedIds.Count > 0) {
-                        treeView.FrameItem(s_SelectedElementId);
+                        treeView.FrameItem(s_SelectedElementId.id);
                     }
                 }
             }
@@ -187,7 +187,7 @@ namespace UIForia.Editor {
             }
             
             s_SelectedApplication = app;
-            s_SelectedElementId = -1;
+            s_SelectedElementId = default;
         }
 
         public void OnGUI() {
@@ -233,7 +233,7 @@ namespace UIForia.Editor {
                 SetApplication(names[idx]);
                 if (firstLoad) {
                     SetApplication(names[idx]);
-                    s_SelectedElementId = -1;
+                    s_SelectedElementId = default;
                     firstLoad = false;
                 }
             }
@@ -308,7 +308,7 @@ namespace UIForia.Editor {
             path.SetFillOpacity(1);
             path.SetStrokeOpacity(1);
 
-            var selectedElement = s_SelectedApplication.GetElement(s_SelectedElementId);
+            UIElement selectedElement = s_SelectedApplication.GetElement(s_SelectedElementId);
 
             if (selectedElement != null && selectedElement.isEnabled) {
 

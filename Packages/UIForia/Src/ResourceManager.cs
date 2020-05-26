@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
-using UIForia.Rendering;
-using UIForiaTMPro;
+using TMPro;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.U2D;

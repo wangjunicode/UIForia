@@ -10,7 +10,6 @@ namespace UIForia.Rendering {
     public class UIViewRootElement : UIElement, IPointerQueryHandler {
 
         public UIViewRootElement() {
-            flags |= UIElementFlags.ImplicitElement;
             flags |= UIElementFlags.Created;
         }
 
@@ -68,10 +67,10 @@ namespace UIForia.Rendering {
             this.dummyRoot.application = application;
             this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
             this.dummyRoot.style = new UIStyleSet(dummyRoot);
-            this.dummyRoot.layoutResult = new LayoutResult(dummyRoot);
             this.dummyRoot.View = this;
             this.dummyRoot.children = new LightList<UIElement>(1);
-            this.dummyRoot.AddChild(element);
+            this.dummyRoot.id = application.elementSystem.CreateElement(dummyRoot, 0, -999, -999, UIElementFlags.EnabledFlagSet);
+            this.dummyRoot.AddChild(element); // todo -- nuke
             this.sizeChanged = true;
         }
 

@@ -47,7 +47,16 @@ namespace UIForia.Systems {
         public UIFixedLength transformPivotX;
         public UIFixedLength transformPivotY;
 
-        public void Initialize(UIElement element, int frameId) {
+        protected AwesomeLayoutSystem layoutSystem;
+
+        public ElementId layoutParent;
+        public ElementId elementId;
+        public ElementSystem elementSystem;
+
+        public void Initialize(AwesomeLayoutSystem layoutSystem, ElementSystem elementSystem, UIElement element, int frameId) {
+            this.elementId = element.id;
+            this.elementSystem = elementSystem;
+            this.layoutSystem = layoutSystem;
             this.element = element;
             OnInitialize();
         }
@@ -77,15 +86,17 @@ namespace UIForia.Systems {
             firstChild = null;
             childCount = layoutBoxes.size;
             if (childCount > 0) {
-                LayoutResult result = element.layoutResult;
+                LayoutResult[] layoutTable = elementSystem.layoutTable;
+
                 firstChild = layoutBoxes[0];
                 firstChild.parent = this;
-                firstChild.element.layoutResult.layoutParent = result;
+                layoutTable[firstChild.element.id.index].layoutParent = element.id;
 
                 for (int i = 0; i < layoutBoxes.size; i++) {
                     layoutBoxes.array[i].parent = this;
                     layoutBoxes.array[i].nextSibling = null;
-                    layoutBoxes.array[i].element.layoutResult.layoutParent = result;
+                    layoutTable[layoutBoxes.array[i].element.id.index].layoutParent = element.id;
+                    // layoutBoxes.array[i].element.layoutResult.layoutParent = element.id;
                 }
 
                 AwesomeLayoutBox ptr = firstChild;
@@ -110,13 +121,12 @@ namespace UIForia.Systems {
             float borderRight = MeasurementUtil.ResolveFixedSize(finalWidth, viewSize.x, viewSize.y, emSize, element.style.BorderRight);
 
             // write to layout result here? would need to flag layout result for changes anyway
-            LayoutResult layoutResult = element.layoutResult;
+            ref LayoutResult layoutResult = ref element.layoutResult;
 
             layoutResult.padding.left = paddingLeft;
             layoutResult.padding.right = paddingRight;
             layoutResult.border.left = borderLeft;
             layoutResult.border.right = borderRight;
-            layoutResult.rebuildGeometry = true;
 
             paddingBorderHorizontalStart = paddingLeft + borderLeft;
             paddingBorderHorizontalEnd = paddingRight + borderRight;
@@ -126,7 +136,7 @@ namespace UIForia.Systems {
             flags &= ~LayoutBoxFlags.ContentAreaHeightChanged;
             Vector2 viewSize = element.View.Viewport.size;
             float emSize = element.style.GetResolvedFontSize();
-            LayoutResult layoutResult = element.layoutResult;
+            ref LayoutResult layoutResult = ref element.layoutResult;
 
             float paddingTop = MeasurementUtil.ResolveFixedSize(finalHeight, viewSize.x, viewSize.y, emSize, element.style.PaddingTop);
             float paddingBottom = MeasurementUtil.ResolveFixedSize(finalHeight, viewSize.x, viewSize.y, emSize, element.style.PaddingBottom);
@@ -137,14 +147,13 @@ namespace UIForia.Systems {
             layoutResult.padding.bottom = paddingBottom;
             layoutResult.border.top = borderTop;
             layoutResult.border.bottom = borderBottom;
-            layoutResult.rebuildGeometry = true;
 
             paddingBorderVerticalStart = paddingTop + borderTop;
             paddingBorderVerticalEnd = paddingBottom + borderBottom;
         }
 
         public void ApplyLayoutHorizontalExplicit(float localX, float size, int frameId) {
-            LayoutResult layoutResult = element.layoutResult;
+            ref LayoutResult layoutResult = ref element.layoutResult;
 
             layoutResult.alignedPosition.x = localX;
             layoutResult.allocatedPosition.x = localX;
@@ -211,7 +220,7 @@ namespace UIForia.Systems {
             }
 
             // write to layout result here? would need to flag layout result for changes anyway
-            LayoutResult layoutResult = element.layoutResult;
+            ref LayoutResult layoutResult = ref element.layoutResult;
 
             float previousPosition = layoutResult.alignedPosition.x;
 
@@ -277,7 +286,7 @@ namespace UIForia.Systems {
 
             // if aligned position changed -> flag for matrix recalc 
             // write to layout result here? would need to flag layout result for changes anyway
-            LayoutResult layoutResult = element.layoutResult;
+            ref LayoutResult layoutResult = ref element.layoutResult;
 
             // todo -- layout result change flags (and maybe history entry if enabled)
 
@@ -288,10 +297,9 @@ namespace UIForia.Systems {
 
             layoutResult.actualSize.height = newHeight;
             layoutResult.allocatedSize.height = availableSize;
-            layoutResult.pivot.y = newHeight * 0.5f; // todo -- resolve pivot
+            // layoutResult.pivot.y = newHeight * 0.5f; // todo -- resolve pivot
 
             // todo -- margin
-
 
             if ((flags & LayoutBoxFlags.RequireAlignmentVertical) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
                 flags |= LayoutBoxFlags.RequiresMatrixUpdate;
@@ -307,7 +315,7 @@ namespace UIForia.Systems {
         }
 
         public void ApplyLayoutVerticalExplicit(float localY, float size, int frameId) {
-            LayoutResult layoutResult = element.layoutResult;
+            ref LayoutResult layoutResult = ref element.layoutResult;
 
             layoutResult.alignedPosition.y = localY;
             layoutResult.allocatedPosition.y = localY;
@@ -447,6 +455,7 @@ namespace UIForia.Systems {
                     // ignored elements can use the output size of their parent since it has been resolved already
                     return ComputeBlockWidth(measurement.value);
                 }
+
                 case UIMeasurementUnit.Percentage:
                 case UIMeasurementUnit.ParentContentArea: {
                     return ComputeBlockContentAreaWidth(measurement.value);
@@ -493,7 +502,7 @@ namespace UIForia.Systems {
 
             // ignored elements can use the output size of their parent since it has been resolved already
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                LayoutResult parentResult = element.layoutResult.layoutParent;
+                LayoutResult parentResult = elementSystem.layoutTable[layoutParent.index]; //element.layoutResult.layoutParent;
                 paddingBorder = parentResult.padding.left + parentResult.padding.right + parentResult.border.left + parentResult.border.right;
                 return Math.Max(0, (parentResult.actualSize.width - paddingBorder) * value);
             }
@@ -520,7 +529,8 @@ namespace UIForia.Systems {
 
         internal float ComputeBlockWidth(float value) {
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                LayoutResult parentResult = element.layoutResult.layoutParent;
+                // LayoutResult parentResult = element.layoutResult.layoutParent;
+                LayoutResult parentResult = elementSystem.layoutTable[layoutParent.index];
                 return Math.Max(0, parentResult.actualSize.width * value);
             }
 
@@ -558,7 +568,8 @@ namespace UIForia.Systems {
 
             // ignored elements can use the output size of their parent since it has been resolved already
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                LayoutResult parentResult = element.layoutResult.layoutParent;
+                // LayoutResult parentResult = element.layoutResult.layoutParent;
+                LayoutResult parentResult = elementSystem.layoutTable[layoutParent.index];
                 paddingBorder = parentResult.padding.top + parentResult.padding.bottom + parentResult.border.top + parentResult.border.bottom;
                 return Math.Max(0, (parentResult.actualSize.height - paddingBorder) * value);
             }
@@ -588,7 +599,8 @@ namespace UIForia.Systems {
 
             // ignored elements can use the output size of their parent since it has been resolved already
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                LayoutResult parentResult = element.layoutResult.layoutParent;
+                LayoutResult parentResult = elementSystem.layoutTable[layoutParent.index];
+                // LayoutResult parentResult = element.layoutResult.layoutParent;
                 return Math.Max(0, (parentResult.actualSize.height) * value);
             }
 
@@ -616,6 +628,7 @@ namespace UIForia.Systems {
                 case UIMeasurementUnit.Content: {
                     return GetContentHeight(measurement.value);
                 }
+
                 case UIMeasurementUnit.FitContent:
                     throw new NotImplementedException();
 
@@ -655,10 +668,8 @@ namespace UIForia.Systems {
 
         public abstract void RunLayoutVertical(int frameId);
 
-     
-        
         public void GetWidths(ref LayoutSize size) {
-            
+
             // if((element.style.animationFlags & AnimationFlags.PreferredWidth) != 0) {
             //     AnimatedProperty animatedProperty;
             //     element.style.TryGetAnimatedProperty(StylePropertyId.PreferredWidth, out animatedProperty);
@@ -667,9 +678,9 @@ namespace UIForia.Systems {
             //     size.preferred = Mathf.Lerp(v0, v1, animatedProperty.time);
             // }
             // else {
-                size.preferred = ResolveWidth(element.style.PreferredWidth);
+            size.preferred = ResolveWidth(element.style.PreferredWidth);
             // }
-            
+
             size.minimum = ResolveWidth(element.style.MinWidth);
             size.maximum = ResolveWidth(element.style.MaxWidth);
             Vector2 viewSize = element.View.Viewport.size;
@@ -677,8 +688,9 @@ namespace UIForia.Systems {
             size.marginStart = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginLeft);
             size.marginEnd = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginRight);
             // todo -- not sure this is right or desired
-            element.layoutResult.margin.left = size.marginStart;
-            element.layoutResult.margin.right = size.marginEnd;
+            ref LayoutResult layoutResult = ref element.layoutResult;
+            layoutResult.margin.left = size.marginStart;
+            layoutResult.margin.right = size.marginEnd;
         }
 
         public void GetHeights(ref LayoutSize size) {
@@ -690,8 +702,9 @@ namespace UIForia.Systems {
             size.marginStart = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginTop);
             size.marginEnd = MeasurementUtil.ResolveFixedSize(0, viewSize.x, viewSize.y, emSize, element.style.MarginBottom);
             // todo -- not sure this is right or desired
-            element.layoutResult.margin.top = size.marginStart;
-            element.layoutResult.margin.bottom = size.marginEnd;
+            ref LayoutResult layoutResult = ref element.layoutResult;
+            layoutResult.margin.top = size.marginStart;
+            layoutResult.margin.bottom = size.marginEnd;
         }
 
         public virtual void OnStyleChanged(StructList<StyleProperty> propertyList) { }
@@ -888,7 +901,7 @@ namespace UIForia.Systems {
             transformPivotY = element.style.TransformPivotY;
             transformScaleX = element.style.TransformScaleX;
             transformScaleY = element.style.TransformScaleY;
-            
+
             clipBehavior = element.style.ClipBehavior;
             clipBounds = element.style.ClipBounds;
             UpdateBlockProviderWidth();
@@ -904,17 +917,20 @@ namespace UIForia.Systems {
             for (int i = 0; i < element.children.size; i++) {
                 var child = element.children.array[i];
                 if (!child.isEnabled) continue;
+                ref LayoutResult childLayoutResult = ref layoutSystem.elementSystem.layoutTable[child.id.index];
                 switch (child.style.LayoutBehavior) {
                     case LayoutBehavior.Ignored:
                         child.layoutBox.parent = this;
-                        child.layoutResult.layoutParent = element.layoutResult; // todo -- multiple ignore levels?
+                        childLayoutResult.layoutParent = element.id; // todo -- multiple ignore levels?
                         // ignoredList.Add(child.layoutBox);
                         break;
+
                     case LayoutBehavior.TranscludeChildren:
                         child.layoutBox.parent = this;
-                        child.layoutResult.layoutParent = element.layoutResult; // todo -- multiple ignore levels?
+                        childLayoutResult.layoutParent = element.id; // todo -- multiple ignore levels?
                         child.layoutBox.GetChildren(list);
                         break;
+
                     default:
                         list.Add(child.layoutBox);
                         break;
@@ -930,8 +946,8 @@ namespace UIForia.Systems {
 
         internal UIElement GetBlockWidthProvider() {
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                LayoutResult parentResult = element.layoutResult.layoutParent;
-                return parentResult.element;
+                // LayoutResult parentResult = element.layoutResult.layoutParent;
+                return elementSystem.instanceTable[layoutParent.index]; //parentResult.element;
             }
 
             AwesomeLayoutBox ptr = parent;
@@ -953,8 +969,9 @@ namespace UIForia.Systems {
 
         internal UIElement GetBlockHeightProvider() {
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                LayoutResult parentResult = element.layoutResult.layoutParent;
-                return parentResult.element;
+                // LayoutResult parentResult = element.layoutResult.layoutParent;
+                // return parentResult.element;
+                return elementSystem.instanceTable[layoutParent.index];
             }
 
             AwesomeLayoutBox ptr = parent;

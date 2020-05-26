@@ -16,7 +16,7 @@ namespace UIForia.Systems {
 
         private const float k_DragThreshold = 5f;
 
-        private readonly ILayoutSystem m_LayoutSystem;
+        private readonly ILayoutSystem layoutSystem;
 
         protected readonly KeyboardInputManager keyboardInputManager;
 
@@ -63,7 +63,7 @@ namespace UIForia.Systems {
         private int focusableIndex;
 
         protected InputSystem(ILayoutSystem layoutSystem, KeyboardInputManager keyboardInputManager = null) {
-            this.m_LayoutSystem = layoutSystem;
+            this.layoutSystem = layoutSystem;
 
             this.m_MouseDownElements = new LightList<UIElement>();
             this.m_ElementsThisFrame = new List<UIElement>();
@@ -312,7 +312,7 @@ namespace UIForia.Systems {
             // if dragging only attempt intersections with elements who have drag responders
             // if not dragging only attempt intersections with elements who have hover state (if mouse is present) or drag create or mouse / touch interactions
 
-            LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
+            LightList<UIElement> queryResults = (LightList<UIElement>) layoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
 
             // todo -- bug!
             queryResults.Sort((a, b) => {

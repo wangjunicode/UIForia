@@ -50,8 +50,8 @@ namespace Vertigo {
             // todo this probably isn't generating in a fan from the center, I think it should so we can use edge distance sdf
             for (int i = 0; i < nPlus1; i++) {
                 float a = (2 * Mathf.PI * i) / segmentCount;
-                float x = halfWidth * math.sin(a);
-                float y = halfHeight * math.cos(a);
+                float x = halfWidth * Mathf.Sin(a);
+                float y = halfHeight * Mathf.Cos(a);
                 int vertIdx = vertexStart + i;
                 float finalY = -(centerY + y);
                 positions[vertIdx].x = centerX + x;

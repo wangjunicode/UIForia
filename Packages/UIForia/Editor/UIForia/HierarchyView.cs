@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UIForia;
 using UIForia.Editor;
 using UIForia.Elements;
 using UIForia.Layout;
@@ -86,6 +87,7 @@ public class HierarchyView : TreeView {
                     if (childItem.element.isDisabled && !showDisabled) {
                         continue;
                     }
+
                     childItem.displayName = ownChildren[i].ToString();
                     current.AddChild(childItem);
                     stack.Push(childItem);
@@ -101,9 +103,9 @@ public class HierarchyView : TreeView {
         if (root.children == null) {
             root.children = new List<TreeViewItem>();
         }
+
         return root;
     }
-
 
     public bool RunGUI() {
         OnGUI(GUILayoutUtility.GetRect(0, 10000, 0, 10000));
@@ -137,9 +139,9 @@ public class HierarchyView : TreeView {
         GUIStyleState textStyle = s_ElementNameStyle.normal;
 
         bool isTemplateRoot = (item.element.flags & UIElementFlags.TemplateRoot) != 0;
-        
+
         Color mainColor = isTemplateRoot
-            ? UIForiaEditorTheme.mainColorTemplateRoot 
+            ? UIForiaEditorTheme.mainColorTemplateRoot
             : UIForiaEditorTheme.mainColorRegularChild;
 
         if (item.element.style.LayoutBehavior == LayoutBehavior.TranscludeChildren) {
@@ -157,17 +159,17 @@ public class HierarchyView : TreeView {
         if (showLayoutStats) {
             s_Content.text += $"w: {item.element.layoutBox.cacheHit}, {item.element.layoutBox.cacheMiss}";
         }
-        
+
         if (item.element.isEnabled && item.element.renderBox != null) {
             if (item.element.renderBox.overflowX != Overflow.Visible || item.element.renderBox.overflowY != Overflow.Visible) {
                 s_Content.text += " [Clipper]";
-            }    
+            }
         }
-        
-        if((item.element.flags & UIElementFlags.DebugLayout) != 0) {
+
+        if ((item.element.flags & UIElementFlags.DebugLayout) != 0) {
             s_Content.text = "{Debug Layout} " + s_Content.text;
         }
-        
+
         Vector2 v = s_ElementNameStyle.CalcSize(s_Content);
         Rect r = new Rect(args.rowRect);
         GUI.Label(args.rowRect, s_Content, s_ElementNameStyle);
@@ -210,7 +212,7 @@ public class HierarchyView : TreeView {
         }
 
         ViewState viewState;
-        m_ViewState.TryGetValue(item.element.id, out viewState);
+        m_ViewState.TryGetValue(item.element.id.id, out viewState);
 
         r.x = rowWidth - 16;
         r.width = 16;
@@ -220,7 +222,7 @@ public class HierarchyView : TreeView {
         if (Event.current.type == EventType.MouseDown) {
             if (r.Contains(Event.current.mousePosition)) {
                 viewState.showTemplateContents = !viewState.showTemplateContents;
-                m_ViewState[item.element.id] = viewState;
+                m_ViewState[item.element.id.id] = viewState;
                 needsReload = true;
             }
         }
@@ -243,7 +245,7 @@ public class HierarchyView : TreeView {
                 rect.width -= size.x;
             }
         }
-        
+
         return rect;
     }
 
@@ -258,7 +260,7 @@ public class HierarchyView : TreeView {
         }
 
         int id = selectedIds[0];
-        UIElement element = UIForiaHierarchyWindow.s_SelectedApplication.GetElement(id);
+        UIElement element = UIForiaHierarchyWindow.s_SelectedApplication.GetElement((ElementId) id);
         onSelectionChanged?.Invoke(element);
     }
 

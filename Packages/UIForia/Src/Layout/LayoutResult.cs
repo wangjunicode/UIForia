@@ -8,15 +8,14 @@ using UnityEngine;
 
 namespace UIForia.Layout {
 
-    public class LayoutResult {
+    public struct LayoutResult {
 
-        public float localRotation;
-        public Vector2 localScale;
+        // public float localRotation;
+        // public Vector2 localScale;
         public Vector2 localPosition;
 
         public Vector2 scale;
         public Vector2 screenPosition;
-        public Vector2 pivot;
 
         public Size actualSize;
         public Size allocatedSize;
@@ -36,28 +35,21 @@ namespace UIForia.Layout {
         public Vector2 alignedPosition; // where the element wants to be (might be relative to allocated, might not be) 
         // local position = actual position post transform
 
-        public Rect ScreenRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
-        public Rect AllocatedRect => new Rect(allocatedPosition, new Vector2(allocatedSize.width, allocatedSize.height));
-
-        public Rect LocalRect => new Rect(alignedPosition, new Vector2(actualSize.width, actualSize.height));
-
-        public float AllocatedWidth => allocatedSize.width; // this should be size with padding & border already subtracted
-        public float AllocatedHeight => allocatedSize.height;
-
-        public float ActualWidth => actualSize.width;
-        public float ActualHeight => actualSize.height;
-
-        public float ContentAreaWidth => actualSize.width - padding.left - border.left - padding.right - border.right;
-        public float ContentAreaHeight => actualSize.height - padding.top - border.top - padding.bottom - border.bottom;
-
-        public LayoutResult layoutParent;
-        public UIElement element;
+        public ElementId layoutParent;
         public OrientedBounds orientedBounds;
         public Vector4 axisAlignedBounds;
 
         internal ClipData clipper;
+
         public bool isCulled;
-        public bool rebuildGeometry;
+
+        //public bool rebuildGeometry;
+        public ElementId elementId;
+
+        internal LayoutResult(UIElement element) : this() {
+            this.elementId = element.id;
+            this.matrix = SVGXMatrix.identity;
+        }
 
         public Rect ContentRect => new Rect(
             padding.left + border.left,
@@ -71,10 +63,19 @@ namespace UIForia.Layout {
         public float HorizontalPaddingBorderStart => padding.left + border.left;
         public float HorizontalPaddingBorderEnd => padding.right + border.right;
 
-        internal LayoutResult(UIElement element) {
-            this.element = element;
-            this.matrix = SVGXMatrix.identity;
-        }
+        public Rect ScreenRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
+        public Rect AllocatedRect => new Rect(allocatedPosition, new Vector2(allocatedSize.width, allocatedSize.height));
+
+        public Rect LocalRect => new Rect(alignedPosition, new Vector2(actualSize.width, actualSize.height));
+
+        public float AllocatedWidth => allocatedSize.width; // this should be size with padding & border already subtracted
+        public float AllocatedHeight => allocatedSize.height;
+
+        public float ActualWidth => actualSize.width;
+        public float ActualHeight => actualSize.height;
+
+        public float ContentAreaWidth => actualSize.width - padding.left - border.left - padding.right - border.right;
+        public float ContentAreaHeight => actualSize.height - padding.top - border.top - padding.bottom - border.bottom;
 
     }
 

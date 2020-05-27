@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using UIForia.Elements;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace UIForia {
@@ -22,7 +20,9 @@ namespace UIForia {
         public ResourceManager resourceManager;
         public Func<Type, string, string> filePathResolver;
         public List<Type> dynamicallyCreatedTypes;
-        
+
+        public MaterialReference[] materialAssets;
+
         public TemplateSettings() {
             this.applicationName = "DefaultApplication";
             this.assemblyName = "UIForia.Application";
@@ -31,14 +31,6 @@ namespace UIForia {
             this.codeFileExtension = "cs";
             this.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
         }
-        
-        // todo -- remove this dirty hack!
-        static TemplateSettings() {
-            s_InternalNonStreamingPath = Path.Combine(PackageInfo.FindForAssembly(Assembly.GetAssembly(typeof(UIElement))).resolvedPath, "Src");
-        }
-
-        private static readonly string s_InternalNonStreamingPath;
-        public MaterialReference[] materialAssets;
 
         public string StrippedApplicationName => Regex.Replace(applicationName, @"\s", "" );
 
@@ -56,7 +48,11 @@ namespace UIForia {
         }
 
         public string GetInternalTemplatePath(string fileName) {
-            return Path.GetFullPath(Path.Combine(s_InternalNonStreamingPath, fileName));
+            return Path.GetFullPath(Path.Combine(GetCallPath(), fileName));
+        }
+
+        private string GetCallPath([CallerFilePath] string callerFilePath = "") {
+            return Path.GetDirectoryName(callerFilePath);
         }
 
         public string GetTemplatePath(string templateAttrTemplate) {

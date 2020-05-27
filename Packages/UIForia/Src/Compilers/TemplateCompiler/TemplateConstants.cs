@@ -11,7 +11,11 @@ using UIForia.Compilers.Style;
 namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_::APPNAME:: : ITemplateLoader {
-        
+    
+        public MaterialDatabase GetMaterialDatabase() {
+            return null;
+        }
+
         public string[] StyleFilePaths => styleFilePaths;
 
         private string[] styleFilePaths = {

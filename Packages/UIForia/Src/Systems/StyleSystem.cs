@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Src.Systems;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -14,93 +15,96 @@ namespace UIForia.Systems {
 
     public class StyleSystem : IStyleSystem {
 
-        public event Action<UIElement, StructList<StyleProperty>> onStylePropertyChanged;
-
-        private static readonly Stack<UIElement> s_ElementStack = new Stack<UIElement>();
-
-        private readonly IntMap<ChangeSet> m_ChangeSets;
+        private readonly Stack<UIElement> elementStack;
+        private readonly StructList<ChangeSet> changeSets;
 
         public StyleSystem() {
-            this.m_ChangeSets = new IntMap<ChangeSet>();
+            this.elementStack = new Stack<UIElement>(16);
+            this.changeSets = new StructList<ChangeSet>();
         }
 
-        public void OnReset() { }
+        public void FlushChangeSets(ElementSystem elementSystem, LayoutSystem layoutSystem, RenderSystem renderSystem) {
+            
+            // if disabled or destroyed, move on
+            // if enabled this frame, move on
 
-        public void OnElementCreated(UIElement element) { }
-
-        public void OnUpdate() {
-            if (onStylePropertyChanged == null) {
-                return;
-            }
-
-            m_ChangeSets.ForEach(this, (id, changeSet, self) => {
-                if (!changeSet.element.isEnabled) {
-                    StructList<StyleProperty>.Release(ref changeSet.changes);
+            for (int idx = 1; idx < changeSets.size; idx++) {
+                ref ChangeSet changeSet = ref changeSets.array[idx];
+                UIElementFlags flags = elementSystem.metaTable[changeSet.element.id].flags;
+                if ((flags & UIElementFlags.EnabledFlagSet) != (UIElementFlags.EnabledFlagSet)) {
+                    changeSet.element.style.changeSetId = 0;
+                    changeSet.changes.size = 0;
                     changeSet.element = null;
-                    return;
+                    changeSets[idx--] = changeSets[--changeSets.size];
                 }
 
-                // if (changeSet.element is IStylePropertiesWillChangeHandler willChangeHandler) {
-                //     willChangeHandler.OnStylePropertiesWillChange();
-                // }
+            }
 
-                self.onStylePropertyChanged.Invoke(changeSet.element, changeSet.changes);
+            for (int changeId = 1; changeId < changeSets.size; changeId++) {
+                
+                ChangeSet changeSet = changeSets.array[changeId];
 
+                layoutSystem.HandleStylePropertyUpdates(changeSet.element, changeSet.changes.array, changeSet.changes.size);
+                renderSystem.HandleStylePropertyUpdates(changeSet.element, changeSet.changes.array, changeSet.changes.size);
+                
+                // this is really only for text, find a better way
                 if (changeSet.element is IStyleChangeHandler changeHandler) {
-                    StyleProperty[] properties = changeSet.changes.Array;
-                    int count = changeSet.changes.Count;
+                    StyleProperty[] properties = changeSet.changes.array;
+                    int count = changeSet.changes.size;
                     for (int i = 0; i < count; i++) {
                         changeHandler.OnStylePropertyChanged(properties[i]);
                     }
                 }
 
-                // if (changeSet.element is IStylePropertiesDidChangeHandler didChangeHandler) {
-                //     didChangeHandler.OnStylePropertiesDidChange();
-                // }
-
-                StructList<StyleProperty>.Release(ref changeSet.changes);
+            }
+            
+            for (int changeId = 1; changeId < changeSets.size; changeId++) {
+                ref ChangeSet changeSet = ref changeSets.array[changeId];
+                changeSet.element.style.changeSetId = 0;
+                changeSet.changes.size = 0;
                 changeSet.element = null;
-            });
-
-            m_ChangeSets.Clear();
-        }
-
-        public void OnDestroy() { }
-
-        public void OnViewAdded(UIView view) { }
-
-        public void OnViewRemoved(UIView view) { }
-
-        public void OnElementEnabled(UIElement element) { }
-
-        public void OnElementDisabled(UIElement element) {
-            m_ChangeSets.Remove(element.id.id);
-        }
-
-        public void OnElementDestroyed(UIElement element) {
-            element.style = null;
-            m_ChangeSets.Remove(element.id.id);
+            }
+            
+            changeSets.QuickClear();
+            changeSets.size = 1; // start at size 1
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
             element.style.UpdateApplicableAttributeRules();
         }
 
+        // i need to know if an element had its enable state changed this frame
         private void AddToChangeSet(UIElement element, StyleProperty property) {
-            if (!m_ChangeSets.TryGetValue(element.id.id, out ChangeSet changeSet)) {
-                changeSet = new ChangeSet(element, StructList<StyleProperty>.Get());
-                m_ChangeSets[element.id.id] = changeSet;
-            }
 
-            changeSet.changes.Add(property);
+            if (element.style.changeSetId == 0) {
+                element.style.changeSetId = changeSets.size;
+
+                SizedArray<StyleProperty> changeList = new SizedArray<StyleProperty>(8);
+                
+                changeList.Add(property);
+                
+                changeSets.Add(new ChangeSet() {
+                    element = element,
+                    changes = changeList
+                });
+            }
+            else {
+                changeSets.array[element.style.changeSetId].changes.Add(property);
+            }
+        }
+
+        public struct DeferredStyleInherit {
+
+            public UIElement element;
+            public StyleProperty property;
+
         }
 
         public void SetStyleProperty(UIElement element, StyleProperty property) {
 
-            if (element.isDisabled) return;
-
             AddToChangeSet(element, property);
 
+            // should probably just defer inheritance
             if (!StyleUtil.IsInherited(property.propertyId) || element.children == null || element.children.Count == 0) {
                 return;
             }
@@ -128,11 +132,11 @@ namespace UIForia.Systems {
             }
 
             for (int i = 0; i < element.children.Count; i++) {
-                s_ElementStack.Push(element.children[i]);
+                elementStack.Push(element.children[i]);
             }
 
-            while (s_ElementStack.Count > 0) {
-                UIElement descendant = s_ElementStack.Pop();
+            while (elementStack.Count > 0) {
+                UIElement descendant = elementStack.Pop();
 
                 if (!descendant.style.SetInheritedStyle(property)) {
                     continue;
@@ -150,7 +154,7 @@ namespace UIForia.Systems {
                 }
 
                 for (int i = 0; i < descendant.children.Count; i++) {
-                    s_ElementStack.Push(descendant.children[i]);
+                    elementStack.Push(descendant.children[i]);
                 }
             }
         }
@@ -158,12 +162,7 @@ namespace UIForia.Systems {
         private struct ChangeSet {
 
             public UIElement element;
-            public StructList<StyleProperty> changes;
-
-            public ChangeSet(UIElement element, StructList<StyleProperty> changes) {
-                this.element = element;
-                this.changes = changes;
-            }
+            public SizedArray<StyleProperty> changes;
 
         }
 

@@ -91,9 +91,9 @@ namespace UIForia.Rendering {
         public virtual void OnDestroy() { }
 
 
-        public virtual void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
-            for (int i = 0; i < propertyList.size; i++) {
-                ref StyleProperty property = ref propertyList.array[i];
+        public virtual void OnStylePropertyChanged(StyleProperty[] propertyList, int propertyCount) {
+            for (int i = 0; i < propertyCount; i++) {
+                ref StyleProperty property = ref propertyList[i];
                 switch (property.propertyId) {
                     case StylePropertyId.Material:
                         // materialInfo = property.AsString;

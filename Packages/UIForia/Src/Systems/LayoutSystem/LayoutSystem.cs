@@ -4,60 +4,72 @@ using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
+using UIForia.Util.Unsafe;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace UIForia.Systems {
 
-    public class AwesomeLayoutSystem : ILayoutSystem {
+    public class LayoutSystem : ILayoutSystem {
 
         internal Application application;
-        private LightList<AwesomeLayoutRunner> runners;
+        private LightList<LayoutRunner> runners;
         internal int traversalIndex;
         public ElementSystem elementSystem;
 
-        public AwesomeLayoutSystem(Application application, ElementSystem elementSystem) {
+        private SizedArray<TextLayoutBox> textLayoutPool;
+        private SizedArray<FlexLayoutBox> flexLayoutPool;
+        private SizedArray<GridLayoutBox> gridLayoutPool;
+        private SizedArray<ImageLayoutBox> imageLayoutPool;
+        private SizedArray<RootLayoutBox> rootLayoutPool;
+        private SizedArray<StackLayoutBox> stackLayoutPool;
+        private SizedArray<ScrollViewLayoutBox> scrollLayoutPool;
+        private SizedArray<TranscludedLayoutBox> transcludedLayoutPool;
+
+        public LayoutSystem(Application application, ElementSystem elementSystem) {
             this.application = application;
             this.elementSystem = elementSystem;
-            this.runners = new LightList<AwesomeLayoutRunner>();
+            this.runners = new LightList<LayoutRunner>();
 
-            // for (int i = 0; i < application.views.Count; i++) {
-            //     runners.Add(new AwesomeLayoutRunner(this, application.views[i].dummyRoot));
-            // }
+            this.textLayoutPool = new SizedArray<TextLayoutBox>(32);
+            this.flexLayoutPool = new SizedArray<FlexLayoutBox>(32);
+            this.gridLayoutPool = new SizedArray<GridLayoutBox>(16);
+            this.imageLayoutPool = new SizedArray<ImageLayoutBox>(16);
+            this.rootLayoutPool = new SizedArray<RootLayoutBox>(4);
+            this.stackLayoutPool = new SizedArray<StackLayoutBox>(16);
+            this.scrollLayoutPool = new SizedArray<ScrollViewLayoutBox>(16);
+            this.transcludedLayoutPool = new SizedArray<TranscludedLayoutBox>(16);
 
-            application.onViewsSorted += uiViews => {
-                runners.Sort((a, b) =>
-                    Array.IndexOf(uiViews, b.rootElement.View) - Array.IndexOf(uiViews, a.rootElement.View));
-            };
-
-            application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
-            // application.StyleSystem.onStylePropertyAnimated += HandleStylepropertyAnimated;
+            application.onViewsSorted += uiViews => { runners.Sort((a, b) => Array.IndexOf(uiViews, b.rootElement.View) - Array.IndexOf(uiViews, a.rootElement.View)); };
         }
 
         internal void CreateLayoutBox(UIElement currentElement) {
             if (currentElement is UITextElement) {
-                currentElement.layoutBox = new AwesomeTextLayoutBox();
+                currentElement.layoutBox = new TextLayoutBox();
             }
             else if (currentElement is ScrollView) {
-                currentElement.layoutBox = new AwesomeScrollViewLayoutBox();
+                currentElement.layoutBox = new ScrollViewLayoutBox();
             }
             else if (currentElement is UIImageElement) {
-                currentElement.layoutBox = new AwesomeImageLayoutBox();
+                currentElement.layoutBox = new ImageLayoutBox();
             }
             else {
                 switch (currentElement.style.LayoutType) {
                     default:
                     case LayoutType.Unset:
                     case LayoutType.Flex:
-                        currentElement.layoutBox = new AwesomeFlexLayoutBox();
+                        currentElement.layoutBox = new FlexLayoutBox();
                         break;
+
                     case LayoutType.Grid:
-                        currentElement.layoutBox = new AwesomeGridLayoutBox();
+                        currentElement.layoutBox = new GridLayoutBox();
                         break;
+
                     case LayoutType.Radial:
                         throw new NotImplementedException();
+
                     case LayoutType.Stack:
-                        currentElement.layoutBox = new AwesomeStackLayoutBox();
+                        currentElement.layoutBox = new StackLayoutBox();
                         break;
                 }
             }
@@ -82,30 +94,33 @@ namespace UIForia.Systems {
                 default:
                 case LayoutType.Unset:
                 case LayoutType.Flex:
-                    if (currentElement.layoutBox is AwesomeFlexLayoutBox) {
+                    if (currentElement.layoutBox is FlexLayoutBox) {
                         return;
                     }
 
                     currentElement.layoutBox.Destroy();
-                    currentElement.layoutBox = new AwesomeFlexLayoutBox();
+                    currentElement.layoutBox = new FlexLayoutBox();
                     break;
+
                 case LayoutType.Grid:
-                    if (currentElement.layoutBox is AwesomeGridLayoutBox) {
+                    if (currentElement.layoutBox is GridLayoutBox) {
                         return;
                     }
 
                     currentElement.layoutBox.Destroy();
-                    currentElement.layoutBox = new AwesomeGridLayoutBox();
+                    currentElement.layoutBox = new GridLayoutBox();
                     break;
+
                 case LayoutType.Radial:
                     throw new NotImplementedException();
+
                 case LayoutType.Stack:
-                    if (currentElement.layoutBox is AwesomeStackLayoutBox) {
+                    if (currentElement.layoutBox is StackLayoutBox) {
                         return;
                     }
 
                     currentElement.layoutBox.Destroy();
-                    currentElement.layoutBox = new AwesomeStackLayoutBox();
+                    currentElement.layoutBox = new StackLayoutBox();
                     break;
             }
 
@@ -117,27 +132,136 @@ namespace UIForia.Systems {
             }
         }
 
-        private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> properties) {
+        // layout box
+        // layout behavior
+        // later determine 
+
+        // set box to null when disabling? should be cheap to grab a new one from pool at that point when re-enabling
+        // just need to re-initialize styles which I think wont be that expensive
+
+        // also triggered for destroy
+
+        public void HandleElementDisabled(DataList<ElementId>.Shared disabledElements) {
+
+            for (int i = 0; i < disabledElements.size; i++) {
+
+                UIElement element = elementSystem.instanceTable[disabledElements[i].index];
+
+                if (element.layoutBox != null) {
+                    // add to pool
+                    LayoutBox layoutBox = element.layoutBox;
+                    element.layoutBox = null;
+                    layoutBox.Destroy();
+
+                    switch (layoutBox) {
+
+                        case FlexLayoutBox flexLayoutBox:
+                            flexLayoutPool.Add(flexLayoutBox);
+                            break;
+
+                        case GridLayoutBox gridLayoutBox:
+                            gridLayoutPool.Add(gridLayoutBox);
+                            break;
+
+                        case ImageLayoutBox imageLayoutBox:
+                            imageLayoutPool.Add(imageLayoutBox);
+                            break;
+
+                        case RootLayoutBox rootLayoutBox:
+                            rootLayoutPool.Add(rootLayoutBox);
+                            break;
+
+                        case ScrollViewLayoutBox scrollViewLayoutBox:
+                            scrollLayoutPool.Add(scrollViewLayoutBox);
+                            break;
+
+                        case StackLayoutBox stackLayoutBox:
+                            stackLayoutPool.Add(stackLayoutBox);
+                            break;
+
+                        case TextLayoutBox textLayoutBox:
+                            textLayoutPool.Add(textLayoutBox);
+                            break;
+
+                        case TranscludedLayoutBox transcludedLayoutBox:
+                            // todo -- I think i can kill this
+                            transcludedLayoutPool.Add(transcludedLayoutBox);
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        // also triggered for create
+        public void HandleElementEnabled(DataList<ElementId>.Shared enabledElements) {
+
+            for (int i = 0; i < enabledElements.size; i++) {
+
+                UIElement element = elementSystem.instanceTable[enabledElements[i].index];
+
+                switch (element) {
+                    case UITextElement _:
+                        element.layoutBox = textLayoutPool.size > 0 ? textLayoutPool.RemoveLast() : new TextLayoutBox();
+                        break;
+
+                    case ScrollView _:
+                        element.layoutBox = scrollLayoutPool.size > 0 ? scrollLayoutPool.RemoveLast() : new ScrollViewLayoutBox();
+                        break;
+
+                    case UIImageElement _:
+                        element.layoutBox = imageLayoutPool.size > 0 ? imageLayoutPool.RemoveLast() : new ImageLayoutBox();
+                        break;
+
+                    default:
+                        switch (element.style.LayoutType) {
+                            default:
+                            case LayoutType.Unset:
+                            case LayoutType.Flex:
+                                element.layoutBox = flexLayoutPool.size > 0 ? flexLayoutPool.RemoveLast() : new FlexLayoutBox();
+                                break;
+
+                            case LayoutType.Grid:
+                                element.layoutBox = gridLayoutPool.size > 0 ? gridLayoutPool.RemoveLast() : new GridLayoutBox();
+                                break;
+
+                            case LayoutType.Radial:
+                                throw new NotImplementedException();
+
+                            case LayoutType.Stack:
+                                element.layoutBox = stackLayoutPool.size > 0 ? stackLayoutPool.RemoveLast() : new StackLayoutBox();
+                                break;
+                        }
+
+                        break;
+                }
+
+            }
+
+            for (int i = 0; i < enabledElements.size; i++) {
+                UIElement element = elementSystem.instanceTable[enabledElements[i].index];
+                element.layoutBox.Initialize(this, elementSystem, element, application.frameId);
+            }
+
+        }
+
+        // only called for elements that were not enabled this frame
+        public void HandleStylePropertyUpdates(UIElement element, StyleProperty[] properties, int propertyCount) {
             bool checkAlignHorizontal = false;
             bool updateAlignVertical = false;
             bool updateTransform = false;
 
-            // if it was just enabled, let the system handle that as normal
-            if (element.enableStateChangedFrameId == application.frameId) {
-                return;
-            }
+            ElementTable<ElementMetaInfo> metaTable = elementSystem.metaTable;
+            ref ElementMetaInfo metaInfo = ref metaTable[element.id];
 
-            if (element.layoutBox == null) {
-                // create box here
-                CreateLayoutBox(element);
-                return;
-            }
-
-            // assume box didn't change
-            // if it did, it'll be updated later anyway
-
-            for (int i = 0; i < properties.size; i++) {
-                ref StyleProperty property = ref properties.array[i];
+            for (int i = 0; i < propertyCount; i++) {
+                ref StyleProperty property = ref properties[i];
                 // todo -- these flags can maybe probably be baked into setting the property
                 switch (property.propertyId) {
                     case StylePropertyId.ClipBehavior:
@@ -151,6 +275,7 @@ namespace UIForia.Systems {
                         element.layoutBox.clipBounds = property.AsClipBounds;
 
                         break;
+
                     case StylePropertyId.OverflowX:
                     case StylePropertyId.OverflowY:
                         element.layoutBox.UpdateClipper();
@@ -161,44 +286,51 @@ namespace UIForia.Systems {
                         break;
 
                     case StylePropertyId.LayoutBehavior:
-                        element.flags |= UIElementFlags.LayoutTypeOrBehaviorDirty;
+                        metaInfo.flags |= UIElementFlags.LayoutTypeOrBehaviorDirty;
                         break;
+
                     case StylePropertyId.TransformRotation: {
                         element.layoutBox.transformRotation = property.AsFloat;
 
                         updateTransform = true;
                         break;
                     }
+
                     case StylePropertyId.TransformPositionX: {
                         element.layoutBox.transformPositionX = property.AsOffsetMeasurement;
 
                         updateTransform = true;
                         break;
                     }
+
                     case StylePropertyId.TransformPositionY: {
                         element.layoutBox.transformPositionY = property.AsOffsetMeasurement;
 
                         updateTransform = true;
                         break;
                     }
+
                     case StylePropertyId.TransformScaleX: {
                         element.layoutBox.transformScaleX = property.AsFloat;
 
                         updateTransform = true;
                         break;
                     }
+
                     case StylePropertyId.TransformScaleY: {
                         element.layoutBox.transformScaleY = property.AsFloat;
 
                         updateTransform = true;
                         break;
                     }
+
                     case StylePropertyId.TransformPivotX: {
                         element.layoutBox.transformPivotX = property.AsUIFixedLength;
 
                         updateTransform = true;
                         break;
                     }
+
                     case StylePropertyId.TransformPivotY:
                         element.layoutBox.transformPivotY = property.AsUIFixedLength;
 
@@ -212,6 +344,7 @@ namespace UIForia.Systems {
                     case StylePropertyId.AlignmentBoundaryX:
                         checkAlignHorizontal = true;
                         break;
+
                     case StylePropertyId.AlignmentTargetY:
                     case StylePropertyId.AlignmentOriginY:
                     case StylePropertyId.AlignmentOffsetY:
@@ -219,24 +352,28 @@ namespace UIForia.Systems {
                     case StylePropertyId.AlignmentBoundaryY:
                         updateAlignVertical = true;
                         break;
+
                     case StylePropertyId.MinWidth:
                     case StylePropertyId.MaxWidth:
                     case StylePropertyId.PreferredWidth:
                         element.layoutBox.UpdateBlockProviderWidth();
                         element.layoutBox.MarkForLayoutHorizontal();
                         break;
+
                     case StylePropertyId.MinHeight:
                     case StylePropertyId.MaxHeight:
                     case StylePropertyId.PreferredHeight:
                         element.layoutBox.UpdateBlockProviderHeight();
                         element.layoutBox.MarkForLayoutVertical();
                         break;
+
                     case StylePropertyId.PaddingLeft:
                     case StylePropertyId.PaddingRight:
                     case StylePropertyId.BorderLeft:
                     case StylePropertyId.BorderRight:
                         element.layoutBox.flags |= LayoutBoxFlags.ContentAreaWidthChanged;
                         break;
+
                     case StylePropertyId.PaddingTop:
                     case StylePropertyId.PaddingBottom:
                     case StylePropertyId.BorderTop:
@@ -246,12 +383,15 @@ namespace UIForia.Systems {
                         }
 
                         break;
+
                     case StylePropertyId.LayoutFitHorizontal:
-                        element.flags |= UIElementFlags.LayoutFitWidthDirty;
+                        metaInfo.flags |= UIElementFlags.LayoutFitWidthDirty;
                         break;
+
                     case StylePropertyId.LayoutFitVertical:
-                        element.flags |= UIElementFlags.LayoutFitHeightDirty;
+                        metaInfo.flags |= UIElementFlags.LayoutFitHeightDirty;
                         break;
+
                     case StylePropertyId.ZIndex:
                         element.layoutBox.zIndex = property.AsInt;
                         break;
@@ -266,16 +406,16 @@ namespace UIForia.Systems {
                 float positionY = element.style.TransformPositionY.value;
 
                 if (rotation != 0 || scaleX != 1 || scaleY != 1 || positionX != 0 || positionY != 0) {
-                    element.flags |= UIElementFlags.LayoutTransformNotIdentity;
+                    metaInfo.flags |= UIElementFlags.LayoutTransformNotIdentity;
                 }
                 else {
-                    element.flags &= ~UIElementFlags.LayoutTransformNotIdentity;
+                    metaInfo.flags &= ~UIElementFlags.LayoutTransformNotIdentity;
                 }
 
                 element.layoutBox.flags |= LayoutBoxFlags.TransformDirty;
             }
 
-            AwesomeLayoutBox layoutBox = element.layoutBox;
+            LayoutBox layoutBox = element.layoutBox;
             if (checkAlignHorizontal) {
                 layoutBox.UpdateRequiresHorizontalAlignment();
             }
@@ -284,12 +424,10 @@ namespace UIForia.Systems {
                 layoutBox.UpdateRequiresVerticalAlignment();
             }
 
-            layoutBox.OnStyleChanged(properties);
+            layoutBox.OnStyleChanged(properties, propertyCount);
             // don't need to null check since root box will never have a style changed
-            layoutBox.OnChildStyleChanged(element.layoutBox, properties);
+            layoutBox.OnChildStyleChanged(element.layoutBox, properties, propertyCount);
         }
-
-        public void OnReset() { }
 
         public void OnUpdate() {
             traversalIndex = 0;
@@ -298,12 +436,12 @@ namespace UIForia.Systems {
             }
         }
 
-        public void OnDestroy() { }
-
+        // todo -- re-instate this
         public void OnViewAdded(UIView view) {
-            runners.Add(new AwesomeLayoutRunner(this, view, view.dummyRoot));
+            runners.Add(new LayoutRunner(this, view, view.dummyRoot));
         }
 
+        // todo -- re-instate this
         public void OnViewRemoved(UIView view) {
             for (int i = 0; i < runners.size; i++) {
                 if (runners[i].rootElement == view.dummyRoot) {
@@ -312,24 +450,7 @@ namespace UIForia.Systems {
                 }
             }
         }
-
-        public void OnElementEnabled(UIElement element) { }
-
-        public void OnElementDisabled(UIElement element) {
-            // disable / destroy layout box?
-        }
-
-        public void OnElementDestroyed(UIElement element) {
-            if (element.layoutBox != null) {
-                element.layoutBox.Destroy();
-                element.layoutBox = null;
-            }
-        }
-
-        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
-
-        public void OnElementCreated(UIElement element) { }
-
+        
         public IList<UIElement> QueryPoint(Vector2 point, IList<UIElement> retn) {
             for (int i = 0; i < runners.size; i++) {
                 runners[i].QueryPoint(point, retn);
@@ -338,7 +459,7 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        public AwesomeLayoutRunner GetLayoutRunner(UIElement viewRoot) {
+        public LayoutRunner GetLayoutRunner(UIElement viewRoot) {
             for (int i = 0; i < runners.size; i++) {
                 if (runners.array[i].rootElement == viewRoot) {
                     return runners.array[i];

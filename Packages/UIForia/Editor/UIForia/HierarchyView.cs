@@ -138,8 +138,12 @@ public class HierarchyView : TreeView {
         ElementTreeItem item = (ElementTreeItem) args.item;
         GUIStyleState textStyle = s_ElementNameStyle.normal;
 
-        bool isTemplateRoot = (item.element.flags & UIElementFlags.TemplateRoot) != 0;
 
+        ElementSystem elementSystem = UIForiaHierarchyWindow.s_SelectedApplication.elementSystem;
+        UIElementFlags flags = elementSystem.metaTable[item.element.id].flags;
+        
+        bool isTemplateRoot = (flags & UIElementFlags.TemplateRoot) != 0;
+        
         Color mainColor = isTemplateRoot
             ? UIForiaEditorTheme.mainColorTemplateRoot
             : UIForiaEditorTheme.mainColorRegularChild;
@@ -166,7 +170,7 @@ public class HierarchyView : TreeView {
             }
         }
 
-        if ((item.element.flags & UIElementFlags.DebugLayout) != 0) {
+        if ((flags & UIElementFlags.DebugLayout) != 0) {
             s_Content.text = "{Debug Layout} " + s_Content.text;
         }
 

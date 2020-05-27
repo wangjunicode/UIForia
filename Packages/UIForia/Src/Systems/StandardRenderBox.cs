@@ -123,14 +123,11 @@ namespace UIForia.Rendering {
 
         }
 
-        public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
-            StyleProperty[] properties = propertyList.array;
-            int count = propertyList.size;
+        public override void OnStylePropertyChanged(StyleProperty[] propertyList, int propertyCount) {
+            base.OnStylePropertyChanged(propertyList, propertyCount);
 
-            base.OnStylePropertyChanged(propertyList);
-
-            for (int i = 0; i < count; i++) {
-                ref StyleProperty property = ref properties[i];
+            for (int i = 0; i < propertyCount; i++) {
+                ref StyleProperty property = ref propertyList[i];
 
                 switch (property.propertyId) {
                     case StylePropertyId.MeshFillAmount:

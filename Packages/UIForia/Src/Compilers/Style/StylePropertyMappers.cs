@@ -305,7 +305,7 @@ namespace UIForia.Compilers.Style {
                 }
 
                 if (!context.materialDatabase.TryGetBaseMaterialId(idSpan, out MaterialId materialId)) {
-                    throw new Exception($"Cannot find a material registered by name {idSpan}.");
+                    throw new Exception($"Cannot find a material registered by name {idSpan}. " + context.fileName);
                 }
 
                 stream.TryParseCharacter('"');

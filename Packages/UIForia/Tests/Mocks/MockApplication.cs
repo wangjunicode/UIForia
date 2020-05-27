@@ -91,13 +91,13 @@ namespace Tests.Mocks {
 
     }
 
-    public class MockRenderSystem : VertigoRenderSystem {
+    public class MockRenderSystem : RenderSystem {
 
         public override void OnUpdate() {
             // do nothing
         }
 
-        public MockRenderSystem(Camera camera, Application application) : base(camera, application) { }
+        public MockRenderSystem(Camera camera, Application application) : base(camera, application, application.elementSystem) { }
 
     }
 

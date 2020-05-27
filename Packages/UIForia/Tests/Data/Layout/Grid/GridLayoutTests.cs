@@ -224,7 +224,7 @@ namespace Layout {
 
             mockView.Update();
 
-            AwesomeGridLayoutBox box = (AwesomeGridLayoutBox) root.layoutBox;
+            GridLayoutBox box = (GridLayoutBox) root.layoutBox;
 
             Assert.AreEqual(2, box.RowCount);
             Assert.AreEqual(3, box.ColCount);

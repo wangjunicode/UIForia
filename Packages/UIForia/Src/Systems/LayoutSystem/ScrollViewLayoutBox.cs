@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UIForia.Systems {
 
-    public class AwesomeScrollViewLayoutBox : AwesomeLayoutBox {
+    public class ScrollViewLayoutBox : LayoutBox {
 
         private ScrollView scrollView;
 
@@ -41,10 +41,10 @@ namespace UIForia.Systems {
             firstChild.ApplyLayoutHorizontalExplicit(alignedPosition, contentWidth, frameId);
             firstChild.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
 
-            AwesomeLayoutBox verticalTrack = element.children.array[1].layoutBox;
-            AwesomeLayoutBox verticalHandle = element.children.array[2].layoutBox;
-            AwesomeLayoutBox horizontalTrack = element.children.array[3].layoutBox;
-            AwesomeLayoutBox horizontalHandle = element.children.array[4].layoutBox;
+            LayoutBox verticalTrack = element.children.array[1].layoutBox;
+            LayoutBox verticalHandle = element.children.array[2].layoutBox;
+            LayoutBox horizontalTrack = element.children.array[3].layoutBox;
+            LayoutBox horizontalHandle = element.children.array[4].layoutBox;
 
             float trackSize = Mathf.Max(5f, scrollView.trackSize);
             
@@ -92,10 +92,10 @@ namespace UIForia.Systems {
             firstChild.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
 
 
-            AwesomeLayoutBox verticalTrack = element.children.array[1].layoutBox;
-            AwesomeLayoutBox verticalHandle = element.children.array[2].layoutBox;
-            AwesomeLayoutBox horizontalTrack = element.children.array[3].layoutBox;
-            AwesomeLayoutBox horizontalHandle = element.children.array[4].layoutBox;
+            LayoutBox verticalTrack = element.children.array[1].layoutBox;
+            LayoutBox verticalHandle = element.children.array[2].layoutBox;
+            LayoutBox horizontalTrack = element.children.array[3].layoutBox;
+            LayoutBox horizontalHandle = element.children.array[4].layoutBox;
 
             float trackSize = Mathf.Max(5f, scrollView.trackSize);
             float verticalHeight = scrollView.verticalScrollingEnabled ? contentAreaHeight - trackSize : contentAreaHeight;
@@ -124,7 +124,7 @@ namespace UIForia.Systems {
             }
         }
 
-        public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) { }
+        public override void OnChildrenChanged(LightList<LayoutBox> childList) { }
 
     }
 

@@ -354,7 +354,7 @@ namespace UIForia.Systems {
                 for (int i = 0; i < hoveredElements.size; i++) {
                     UIElement element = hoveredElements.array[i];
 
-                    if ((element.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
+                    if (!element.isEnabled) {
                         hoveredElements.RemoveAt(i--);
                         continue;
                     }

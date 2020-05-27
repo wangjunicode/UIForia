@@ -3,7 +3,7 @@ using UIForia.Util;
 
 namespace UIForia.Systems {
 
-    public class AwesomeImageLayoutBox : AwesomeLayoutBox {
+    public class ImageLayoutBox : LayoutBox {
 
         protected override float ComputeContentWidth() {
             UIImageElement imageElement = (UIImageElement) element;
@@ -23,7 +23,7 @@ namespace UIForia.Systems {
             return imageElement.Height;
         }
 
-        public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) { }
+        public override void OnChildrenChanged(LightList<LayoutBox> childList) { }
 
         public override void RunLayoutHorizontal(int frameId) { }
 

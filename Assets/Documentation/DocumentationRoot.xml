@@ -9,7 +9,6 @@
                 <Div style="burger-patty" />
             </Group>
             
-            <Group style="custom-material"/>
             
             <ScrollView style="navigation" attr:id="nav">
                 <Heading1>Choose a feature</Heading1>

@@ -51,6 +51,7 @@ namespace UIForia.Rendering {
         internal readonly StructList<StyleEntry> availableStyles;
         internal readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
         internal readonly IntMap<StyleProperty> propertyMap;
+        internal int changeSetId;
 
         // idea -- for styles are inactive, sort them to the back of the available styles list,
         // then we have to look though less of an array (also track a count for how many styles are active)
@@ -704,6 +705,9 @@ namespace UIForia.Rendering {
         }
 
         public void SetProperty(in StyleProperty property, StyleState state) {
+            
+            if (element.isDestroyed) return;
+            
             UIStyle style = GetOrCreateInstanceStyle(state);
             if ((state & currentState) == 0) {
                 style.SetProperty(property);

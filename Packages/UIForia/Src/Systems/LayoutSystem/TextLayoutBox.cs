@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace UIForia.Systems {
 
-    public class AwesomeTextLayoutBox : AwesomeLayoutBox {
+    public class TextLayoutBox : LayoutBox {
 
         private TextInfo textInfo;
         public Action onTextContentChanged;
@@ -31,7 +31,7 @@ namespace UIForia.Systems {
             cachedContentHeight = -1;
             if (textAlreadyDirty) return;
             textAlreadyDirty = true;
-            AwesomeLayoutBox ptr = parent;
+            LayoutBox ptr = parent;
 
             while (ptr != null) {
                 // once we hit a block provider we can safely stop traversing since the provider's parent doesn't care about content size changing
@@ -81,7 +81,7 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) { }
+        public override void OnChildrenChanged(LightList<LayoutBox> childList) { }
 
         public override void RunLayoutHorizontal(int frameId) { }
 

@@ -178,14 +178,12 @@ namespace UIForia.Rendering {
             geometry.triangleList.size = triIndex;
         }
 
-        public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
-            StyleProperty[] properties = propertyList.array;
-            int count = propertyList.size;
+        public override void OnStylePropertyChanged(StyleProperty[] propertyList, int propertyCount) {
 
-            base.OnStylePropertyChanged(propertyList);
+            base.OnStylePropertyChanged(propertyList, propertyCount);
 
-            for (int i = 0; i < count; i++) {
-                ref StyleProperty property = ref properties[i];
+            for (int i = 0; i < propertyCount; i++) {
+                ref StyleProperty property = ref propertyList[i];
                 switch (property.propertyId) {
                     case StylePropertyId.TextFontAsset:
                     case StylePropertyId.Opacity:

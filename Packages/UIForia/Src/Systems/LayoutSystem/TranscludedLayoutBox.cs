@@ -4,10 +4,10 @@ using UIForia.Util;
 
 namespace UIForia.Systems {
 
-    public class AwesomeTranscludedLayoutBox : AwesomeLayoutBox {
+    public class TranscludedLayoutBox : LayoutBox {
 
-        private LightList<AwesomeLayoutBox> childList;
-        
+        private LightList<LayoutBox> childList;
+
         protected override float ComputeContentWidth() {
             throw new NotImplementedException();
         }
@@ -16,8 +16,8 @@ namespace UIForia.Systems {
             throw new NotImplementedException();
         }
 
-        public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) {
-            this.childList = this.childList ?? new LightList<AwesomeLayoutBox>(childList.size);
+        public override void OnChildrenChanged(LightList<LayoutBox> childList) {
+            this.childList = this.childList ?? new LightList<LayoutBox>(childList.size);
             this.childList.AddRange(childList);
         }
 
@@ -29,11 +29,7 @@ namespace UIForia.Systems {
             throw new NotImplementedException();
         }
 
-        public override void OnStyleChanged(StructList<StyleProperty> propertyList) {}
-
-        public LightList<AwesomeLayoutBox> GetChildren() {
-            return childList;
-        }
+        public override void OnStyleChanged(StyleProperty[] propertyList, int propertyCount) { }
 
     }
 

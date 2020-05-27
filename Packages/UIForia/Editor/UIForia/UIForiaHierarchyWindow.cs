@@ -95,11 +95,15 @@ namespace UIForia.Editor {
             }
         }
 
-        private void Refresh(UIElement element) {
+        private void Refresh() {
             needsReload = true;
         }
         
         private void Refresh(UIView view) {
+            needsReload = true;
+        }
+        
+        private void Refresh(UIElement element) {
             needsReload = true;
         }
 
@@ -434,14 +438,14 @@ namespace UIForia.Editor {
                 DrawVerticalDotted(contentX, contentColor);
                 DrawVerticalDotted(contentX + contentWidth, contentColor);
 
-                if (selectedElement.layoutBox is AwesomeGridLayoutBox layoutBox) {
+                if (selectedElement.layoutBox is GridLayoutBox layoutBox) {
                     path.SetTransform(SVGXMatrix.TRS(selectedElement.layoutResult.screenPosition + selectedElement.layoutResult.ContentRect.min, 0, Vector2.one).ToMatrix4x4());
                     path.BeginPath();
                     path.SetStrokeWidth(1);
                     path.SetStroke(Color.black);
 
-                    StructList<AwesomeGridLayoutBox.GridTrack> rows = layoutBox.rowTrackList;
-                    StructList<AwesomeGridLayoutBox.GridTrack> cols = layoutBox.colTrackList;
+                    StructList<GridLayoutBox.GridTrack> rows = layoutBox.rowTrackList;
+                    StructList<GridLayoutBox.GridTrack> cols = layoutBox.colTrackList;
 
                     Rect contentRect = selectedElement.layoutResult.ContentRect;
                     for (int i = 0; i < rows.Count; i++) {

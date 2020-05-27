@@ -70,12 +70,14 @@ namespace UIForia.Editor {
 
             UIStyleSet style = selectedElement.style;
 
-            bool isSet = (selectedElement.flags & UIElementFlags.DebugLayout) != 0;
+            UIElementFlags flags = (UIElementFlags)UIForiaHierarchyWindow.s_SelectedApplication.elementSystem.metaTable[selectedElement.id].flags;
+            
+            bool isSet = (flags & UIElementFlags.DebugLayout) != 0;
             if (EditorGUILayout.ToggleLeft("Debug Layout", isSet)) {
-                selectedElement.flags |= UIElementFlags.DebugLayout;
+                UIForiaHierarchyWindow.s_SelectedApplication.elementSystem.metaTable[selectedElement.id].flags |= UIElementFlags.DebugLayout;
             }
             else {
-                selectedElement.flags &= ~UIElementFlags.DebugLayout;
+                UIForiaHierarchyWindow.s_SelectedApplication.elementSystem.metaTable[selectedElement.id].flags &= ~UIElementFlags.DebugLayout;
             }
 
             GUILayout.BeginHorizontal();

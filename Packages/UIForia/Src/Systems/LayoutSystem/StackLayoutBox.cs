@@ -7,10 +7,10 @@ namespace UIForia.Systems {
     // stack ignores extra space distribution since we never have any, items are always allocated the entire space so 
     // that fit properties will fill the whole layout box
     // aligning items works though
-    public class AwesomeStackLayoutBox : AwesomeLayoutBox {
+    public class StackLayoutBox : LayoutBox {
 
         protected override float ComputeContentWidth() {
-            AwesomeLayoutBox ptr = firstChild;
+            LayoutBox ptr = firstChild;
             float retn = 0f;
             
             while (ptr != null) {
@@ -26,7 +26,7 @@ namespace UIForia.Systems {
         }
 
         protected override float ComputeContentHeight() {
-            AwesomeLayoutBox ptr = firstChild;
+            LayoutBox ptr = firstChild;
             float retn = 0f;
             while (ptr != null) {
                 LayoutSize size = default;
@@ -39,12 +39,12 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) { }
+        public override void OnChildrenChanged(LightList<LayoutBox> childList) { }
 
-        public override void OnStyleChanged(StructList<StyleProperty> propertyList) {
-            for (int i = 0; i < propertyList.size; i++) {
+        public override void OnStyleChanged(StyleProperty[] propertyList, int propertyCount) {
+            for (int i = 0; i < propertyCount; i++) {
                 // note: space distribution is ignored, we don't care if it changes
-                switch (propertyList.array[i].propertyId) {
+                switch (propertyList[i].propertyId) {
                     case StylePropertyId.AlignItemsHorizontal:
                     case StylePropertyId.FitItemsHorizontal:
                         flags |= LayoutBoxFlags.RequireLayoutHorizontal;
@@ -60,7 +60,7 @@ namespace UIForia.Systems {
         }
 
         public override void RunLayoutHorizontal(int frameId) {
-            AwesomeLayoutBox ptr = firstChild;
+            LayoutBox ptr = firstChild;
 
             float contentAreaWidth = finalWidth - (paddingBorderHorizontalStart + paddingBorderHorizontalEnd);
 
@@ -83,7 +83,7 @@ namespace UIForia.Systems {
         }
 
         public override void RunLayoutVertical(int frameId) {
-            AwesomeLayoutBox ptr = firstChild;
+            LayoutBox ptr = firstChild;
 
             float contentAreaHeight = finalHeight - (paddingBorderVerticalStart + paddingBorderVerticalEnd);
 

@@ -63,9 +63,8 @@ namespace UIForia.Rendering {
                             if (v == null) {
                                 throw new ApplicationException("Line segments don't intersect"); //	may be colinear, or may be a bug
                             }
-                            else {
-                                outputList.Add(v.Value);
-                            }
+
+                            outputList.Add(v.Value);
                         }
 
                         outputList.Add(E);
@@ -75,9 +74,8 @@ namespace UIForia.Rendering {
                         if (Vector2 == null) {
                             throw new ApplicationException("Line segments don't intersect"); //	may be colinear, or may be a bug
                         }
-                        else {
-                            outputList.Add(Vector2.Value);
-                        }
+
+                        outputList.Add(Vector2.Value);
                     }
 
                     S = E;
@@ -173,12 +171,12 @@ namespace UIForia.Rendering {
             if (x < 0) {
                 return false;
             }
-            else if (x > 0) {
+
+            if (x > 0) {
                 return true;
             }
-            else {
-                return null;
-            }
+
+            return null;
         }
 
     }

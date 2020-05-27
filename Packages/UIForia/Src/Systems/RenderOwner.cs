@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using UIForia;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems;
@@ -15,10 +16,13 @@ namespace Src.Systems {
         private readonly StructStack<ElemRef> elemRefStack;
         private readonly StructList<RenderOperationWrapper> wrapperList;
 
+        private ElementSystem elementSystem;
+        
         private static readonly DepthComparer2 s_RenderComparer = new DepthComparer2();
 
-        public RenderOwner(UIView view) {
+        public RenderOwner(UIView view, ElementSystem elementSystem) {
             this.view = view;
+            this.elementSystem = elementSystem;
             this.painterPool = new RenderBoxPool();
             this.view.dummyRoot.renderBox = new RootRenderBox();
             this.view.dummyRoot.renderBox.element = view.dummyRoot;
@@ -152,7 +156,7 @@ namespace Src.Systems {
 
                 for (int i = currentElement.children.size - 1; i >= 0; i--) {
                     UIElement child = currentElement.children.array[i];
-                    if ((child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
+                    if ((elementSystem.metaTable[child.id].flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
                         // todo change check on painter
                         if (child.renderBox == null) {
                             CreateRenderBox(child);

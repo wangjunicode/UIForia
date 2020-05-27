@@ -3,7 +3,7 @@ using UIForia.Util;
 
 namespace UIForia.Systems {
 
-    public class AwesomeRootLayoutBox : AwesomeLayoutBox {
+    public class RootLayoutBox : LayoutBox {
 
         protected override float ComputeContentWidth() {
             return 0;
@@ -13,7 +13,7 @@ namespace UIForia.Systems {
             return 0;
         }
 
-        public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) { }
+        public override void OnChildrenChanged(LightList<LayoutBox> childList) { }
 
         public override void RunLayoutHorizontal(int frameId) {
             if (firstChild == null) return;

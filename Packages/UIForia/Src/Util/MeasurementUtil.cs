@@ -10,7 +10,7 @@ namespace UIForia.Util {
 
     public static class MeasurementUtil {
 
-        public static float ResolveOriginBaseX(LayoutResult[] layoutTable, in LayoutResult result, in ViewParameters viewParameters, AlignmentTarget target, AlignmentDirection direction, InputSystem inputSystem) {
+        public static float ResolveOriginBaseX(LayoutResult[] layoutTable, in LayoutResult result, in ViewParameters viewParameters, AlignmentTarget target, AlignmentDirection direction, float mouseX) {
             switch (target) {
                 case AlignmentTarget.Unset:
                 case AlignmentTarget.LayoutBox:
@@ -78,7 +78,7 @@ namespace UIForia.Util {
 
                 case AlignmentTarget.Mouse: {
                     float dist = GetXDistanceToScreen(layoutTable, result);
-                    return inputSystem.MousePosition.x + dist;
+                    return mouseX + dist;
                 }
 
                 default:
@@ -86,7 +86,7 @@ namespace UIForia.Util {
             }
         }
 
-        public static float ResolveOriginBaseY(LayoutResult[] layoutTable, in LayoutResult result, float viewportY, AlignmentTarget target, AlignmentDirection direction, InputSystem inputSystem) {
+        public static float ResolveOriginBaseY(LayoutResult[] layoutTable, in LayoutResult result, float viewportY, AlignmentTarget target, AlignmentDirection direction, float mouseY) {
             switch (target) {
                 case AlignmentTarget.Unset:
                 case AlignmentTarget.LayoutBox:
@@ -154,7 +154,7 @@ namespace UIForia.Util {
 
                 case AlignmentTarget.Mouse:
                     float dist = GetYDistanceToScreen(layoutTable, result);
-                    return inputSystem.MousePosition.y + dist;
+                    return mouseY + dist;
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(target), target, null);
@@ -360,7 +360,7 @@ namespace UIForia.Util {
         }
 
         [DebuggerStepThrough]
-        public static float ResolveFixedSize(float baseSize, float viewWidth, float viewHeight, float emSize, UIFixedLength fixedSize) {
+        public static float ResolveFixedSize(float baseSize, in ViewParameters viewParameters, float emSize, UIFixedLength fixedSize) {
             switch (fixedSize.unit) {
                 case UIFixedUnit.Pixel:
                     return fixedSize.value;
@@ -369,10 +369,10 @@ namespace UIForia.Util {
                     return baseSize * fixedSize.value;
 
                 case UIFixedUnit.ViewportHeight:
-                    return viewHeight * fixedSize.value;
+                    return viewParameters.viewHeight * fixedSize.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return viewWidth * fixedSize.value;
+                    return viewParameters.viewWidth * fixedSize.value;
 
                 case UIFixedUnit.Em:
                     return emSize * fixedSize.value;

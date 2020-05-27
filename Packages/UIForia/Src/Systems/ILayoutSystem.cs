@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace UIForia.Systems {
 
-    public interface ILayoutSystem : ISystem {
+    public interface ILayoutSystem  {
 
         IList<UIElement> QueryPoint(Vector2 point, IList<UIElement> retn);
 
-        AwesomeLayoutRunner GetLayoutRunner(UIElement viewRoot);
+        LayoutRunner GetLayoutRunner(UIElement viewRoot);
 
     }
 

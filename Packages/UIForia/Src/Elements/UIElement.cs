@@ -11,68 +11,6 @@ using UIForia.Util;
 
 namespace UIForia.Elements {
 
-    // public struct UIElementRef {
-    //
-    //     private readonly int id;
-    //     private UIElement element;
-    //
-    //     public UIElementRef(UIElement element) {
-    //         this.id = element?.id ?? -1;
-    //         this.element = element;
-    //     }
-    //
-    //     public UIElement Element {
-    //         get {
-    //             if (id != element.id) {
-    //                 element = null;
-    //                 return null;
-    //             }
-    //
-    //             return element;
-    //         }
-    //     }
-    //
-    //     public static implicit operator UIElement(UIElementRef elementRef) {
-    //         return elementRef.Element;
-    //     }
-    //
-    // }
-    //
-    // public struct UIElementRef<T> where T : UIElement {
-    //
-    //     private readonly int id;
-    //     private T element;
-    //
-    //     public UIElementRef(T element) {
-    //         this.id = element?.id ?? -1;
-    //         this.element = element;
-    //     }
-    //
-    //     public T Element {
-    //         get {
-    //             if (id != element.id) {
-    //                 element = null;
-    //                 return null;
-    //             }
-    //
-    //             return element;
-    //         }
-    //     }
-    //
-    //     public static implicit operator UIElementRef(UIElementRef<T> elementRef) {
-    //         return new UIElementRef(elementRef.Element);
-    //     }
-    //
-    //     public static implicit operator UIElement(UIElementRef<T> elementRef) {
-    //         return elementRef.Element;
-    //     }
-    //
-    //     public static implicit operator T(UIElementRef<T> elementRef) {
-    //         return elementRef.Element;
-    //     }
-    //
-    // }
-
     [DebuggerDisplay("{" + nameof(ToString) + "()}")]
     public abstract class UIElement : IHierarchical {
 
@@ -82,11 +20,11 @@ namespace UIForia.Elements {
 
         public LightList<UIElement> children; // todo -- replace w/ linked list & child count
 
-        internal UIElementFlags flags;
+        private UIElementFlags flags;
         public UIElement parent;
 
         // todo -- maybe move a lot of this data to an internal representation of UIElement
-        internal AwesomeLayoutBox layoutBox;
+        internal LayoutBox layoutBox;
         internal RenderBox renderBox;
         public UIStyleSet style; // todo -- make internal with accessor
         public LinqBindingNode bindingNode; // todo -- make internal with accessor
@@ -113,7 +51,7 @@ namespace UIForia.Elements {
         // not actually used since we get elements from the pool as uninitialized
         protected internal UIElement() { }
 
-        public IInputProvider Input => View.application.InputSystem; // todo -- remove
+        public IInputProvider Input => application.InputSystem; // todo -- remove
 
         public int ChildCount => children?.Count ?? 0;
 
@@ -123,7 +61,10 @@ namespace UIForia.Elements {
 
         public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
 
-        public bool isEnabled => (flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet);
+        public bool isEnabled {
+            get => ((UIElementFlags)application.elementSystem.metaTable[id].flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet);
+        }
+        
         //!isDestroyed && (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
 
         public bool isDisabled => (flags & UIElementFlags.EnabledFlagSet) != (UIElementFlags.EnabledFlagSet);
@@ -146,8 +87,8 @@ namespace UIForia.Elements {
 
         public virtual void OnDestroy() { }
 
-        public void Destroy() {
-            View.application.DoDestroyElement(this);
+        internal void Destroy() {
+            application.DoDestroyElement(this);
         }
 
         public ref LayoutResult layoutResult {
@@ -262,30 +203,9 @@ namespace UIForia.Elements {
             return tableEntry.childCount;
         }
 
-        // todo -- kill
-        internal UIElement AddChild(UIElement element) {
-            // todo -- if <Children/> is defined in the template, attach child to that element instead
-            if (element == null || element == this || element.isDestroyed) {
-                return null;
-            }
-        
-            if (View == null) {
-                element.parent = this;
-                element.View = null;
-                element.siblingIndex = children.Count;
-                element.hierarchyDepth = hierarchyDepth + 1;
-                children.Add(element);
-            }
-            else {
-                application.InsertChild(this, element, (uint) children.Count);
-            }
-        
-            return element;
-        }
-
         public bool internal__dontcallmeplease_SetEnabledIfBinding(bool enabled) {
             if (enabled && isSelfDisabled) {
-                application.DoEnableElement(this, false);
+                application.DoEnableElement(this);
             }
             else if (!enabled && isSelfEnabled) {
                 application.DoDisableElement(this);
@@ -296,7 +216,7 @@ namespace UIForia.Elements {
 
         public void SetEnabled(bool enabled) {
             if (enabled && isSelfDisabled) {
-                application.DoEnableElement(this, true);
+                application.DoEnableElement(this);
             }
             else if (!enabled && isSelfEnabled) {
                 application.DoDisableElement(this);
@@ -387,7 +307,7 @@ namespace UIForia.Elements {
                     continue;
                 }
 
-                children[i].FindByType<T>(retn);
+                children[i].FindByType(retn);
             }
 
             return retn;
@@ -492,8 +412,9 @@ namespace UIForia.Elements {
         public IHierarchical Element => this;
         public IHierarchical Parent => parent;
 
+        // todo -- remove
         public List<UIElement> GetChildren(List<UIElement> retn = null) {
-            retn = ListPool<UIElement>.Get();
+            retn = retn ?? ListPool<UIElement>.Get();
 
             if (children == null) {
                 return retn;

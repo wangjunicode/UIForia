@@ -5,8 +5,10 @@ using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Systems {
+
     [DebuggerDisplay("{element.ToString()} | Flex")]
-    public class AwesomeFlexLayoutBox : AwesomeLayoutBox {
+    public class FlexLayoutBox : LayoutBox {
+
         private StructList<FlexItem> items;
         private LayoutDirection direction;
         private StructList<Track> wrappedTracks;
@@ -110,16 +112,17 @@ namespace UIForia.Systems {
             return totalSize;
         }
 
-        public override void OnStyleChanged(StructList<StyleProperty> propertyList) {
+        public override void OnStyleChanged(StyleProperty[] propertyList, int propertyCount) {
             // todo -- a lot of these won't require a full layout, optimize this later to just do alignment / etc
-            for (int i = 0; i < propertyList.size; i++) {
-                ref StyleProperty property = ref propertyList.array[i];
+            for (int i = 0; i < propertyCount; i++) {
+                ref StyleProperty property = ref propertyList[i];
                 switch (property.propertyId) {
                     case StylePropertyId.FlexLayoutWrap:
                     case StylePropertyId.FlexLayoutDirection:
                         flags |= (LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical);
                         // todo - notify parent of layout
                         break;
+
                     case StylePropertyId.DistributeExtraSpaceHorizontal:
                         flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         break;
@@ -131,10 +134,12 @@ namespace UIForia.Systems {
                     case StylePropertyId.AlignItemsHorizontal:
                         flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         break;
+
                     case StylePropertyId.AlignItemsVertical:
                     case StylePropertyId.FitItemsHorizontal:
                         flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         break;
+
                     case StylePropertyId.FitItemsVertical:
                         flags |= LayoutBoxFlags.RequireLayoutVertical;
                         break;
@@ -142,7 +147,7 @@ namespace UIForia.Systems {
             }
         }
 
-        public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) {
+        public override void OnChildrenChanged(LightList<LayoutBox> childList) {
             items?.Clear();
 
             if (childList.size == 0) {
@@ -283,7 +288,6 @@ namespace UIForia.Systems {
                 MarkForLayoutVertical(frameId);
             }
         }
-
 
         private void GrowHorizontal(ref Track track) {
             int pieces = 0;
@@ -528,14 +532,13 @@ namespace UIForia.Systems {
             return direction != LayoutDirection.Vertical;
         }
 
-        protected override float ResolveAutoWidth(AwesomeLayoutBox child, float factor) {
+        protected override float ResolveAutoWidth(LayoutBox child, float factor) {
             if (direction == LayoutDirection.Vertical) {
                 return child.ComputeBlockContentAreaWidth(factor);
             }
 
             return child.GetContentWidth(factor);
         }
-
 
         public override void RunLayoutVertical(int frameId) {
             if (childCount == 0) return;
@@ -822,7 +825,8 @@ namespace UIForia.Systems {
         }
 
         private struct FlexItem {
-            public AwesomeLayoutBox layoutBox;
+
+            public LayoutBox layoutBox;
             public LayoutSize widthData;
             public LayoutSize heightData;
             public int growPieces;
@@ -832,9 +836,11 @@ namespace UIForia.Systems {
             public float availableSize;
             public byte grew;
             public byte shrunk;
+
         }
 
         private struct Track {
+
             public int endIndex;
             public int startIndex;
             public float remaining;
@@ -848,6 +854,9 @@ namespace UIForia.Systems {
             }
 
             public bool IsEmpty => startIndex == endIndex;
+
         }
+
     }
+
 }

@@ -1,5 +1,6 @@
 using System;
 using SVGX;
+using UIForia;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
@@ -14,11 +15,11 @@ namespace Src.Systems {
 
         // todo -- this doesn't actually pool right now
         public RenderBox GetCustomPainter(string painterId) {
-            
+
             if (painterId == "self") {
                 return new SelfPaintedRenderBox();
             }
-            
+
             if (Application.s_CustomPainters.TryGetValue(painterId, out Type boxType)) {
                 return (RenderBox) Activator.CreateInstance(boxType);
             }
@@ -28,14 +29,17 @@ namespace Src.Systems {
 
     }
 
-    public class VertigoRenderSystem : IRenderSystem {
+    public class RenderSystem : IRenderSystem {
 
         private Camera camera;
         private CommandBuffer commandBuffer;
         private RenderContext renderContext;
         internal LightList<RenderOwner> renderOwners;
-
-        public VertigoRenderSystem(Camera camera, Application application) {
+        
+        private ElementSystem elementSystem;
+        
+        public RenderSystem(Camera camera, Application application, ElementSystem elementSystem) {
+            this.elementSystem = elementSystem;
             this.camera = camera;
             this.commandBuffer = new CommandBuffer(); // todo -- per view
             this.commandBuffer.name = "UIForia Main Command Buffer";
@@ -46,28 +50,7 @@ namespace Src.Systems {
                 this.camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
             }
 
-            application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
-            application.onViewsSorted += uiViews => {
-                renderOwners.Sort((o1, o2) => o1.view.Depth.CompareTo(o2.view.Depth));
-            };
-        }
-
-        private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> propertyList) {
-            if (element.renderBox == null) return;
-
-            int count = propertyList.size;
-            StyleProperty[] properties = propertyList.array;
-
-            for (int i = 0; i < count; i++) {
-                ref StyleProperty property = ref properties[i];
-                switch (property.propertyId) {
-                    case StylePropertyId.Painter:
-                        ReplaceRenderBox(element, property.AsString);
-                        break;
-                }
-            }
-
-            element.renderBox.OnStylePropertyChanged(propertyList);
+            application.onViewsSorted += uiViews => { renderOwners.Sort((o1, o2) => o1.view.Depth.CompareTo(o2.view.Depth)); };
         }
 
         private void ReplaceRenderBox(UIElement element, string painterId) {
@@ -81,6 +64,7 @@ namespace Src.Systems {
             for (int i = 0; i < renderOwners.size; i++) {
                 renderOwners[i].Destroy();
             }
+
             renderOwners.QuickClear();
             renderContext.clipContext.Destroy();
             renderContext.clipContext = new ClipContext(Application.Settings);
@@ -111,7 +95,7 @@ namespace Src.Systems {
         }
 
         public void OnViewAdded(UIView view) {
-            renderOwners.Add(new RenderOwner(view));
+            renderOwners.Add(new RenderOwner(view, elementSystem));
         }
 
         public void OnViewRemoved(UIView view) {
@@ -143,6 +127,22 @@ namespace Src.Systems {
             if (this.camera != null) {
                 this.camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
             }
+        }
+
+        public void HandleStylePropertyUpdates(UIElement element, StyleProperty[] propertyList, int propertyCount) {
+            if (element.renderBox == null) return;
+
+
+            for (int i = 0; i < propertyCount; i++) {
+                ref StyleProperty property = ref propertyList[i];
+                switch (property.propertyId) {
+                    case StylePropertyId.Painter:
+                        ReplaceRenderBox(element, property.AsString);
+                        break;
+                }
+            }
+
+            element.renderBox.OnStylePropertyChanged(propertyList, propertyCount);
         }
 
     }
@@ -177,7 +177,7 @@ namespace Src.Systems {
         };
 
     }
-    
+
     internal struct SVGXStrokeStyle {
 
         public PaintMode paintMode;
@@ -191,7 +191,7 @@ namespace Src.Systems {
         public Vertigo.LineJoin lineJoin;
         public Vertigo.LineCap lineCap;
         public float miterLimit;
-        
+
         public static SVGXStrokeStyle Default => new SVGXStrokeStyle() {
             paintMode = PaintMode.Color,
             encodedColor = VertigoUtil.ColorToFloat(Color.black),

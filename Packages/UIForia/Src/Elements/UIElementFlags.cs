@@ -3,7 +3,7 @@
 namespace UIForia.Elements {
 
     [Flags]
-    internal enum UIElementFlags {
+    public enum UIElementFlags : ushort {
 
         // Element Flags
         // 1 << 0 is free
@@ -21,9 +21,10 @@ namespace UIForia.Elements {
         // 8 is free
         
         NeedsUpdate = 1 << 9,
-        // Layout Flags
+        // Layout Flags, get rid of these
+        
         DebugLayout = 1 << 10,
-        LayoutHierarchyDirty = 1 << 11,
+        
         LayoutTransformNotIdentity = 1 << 12,
         LayoutFitWidthDirty = 1 << 13,
         LayoutFitHeightDirty = 1 << 14,

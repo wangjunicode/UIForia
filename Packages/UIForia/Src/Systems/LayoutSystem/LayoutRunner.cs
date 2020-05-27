@@ -42,18 +42,18 @@ namespace UIForia.Systems {
 
     internal struct BoxRef {
 
-        public AwesomeLayoutBox box;
+        public LayoutBox box;
 
     }
 
-    public class AwesomeLayoutRunner {
+    public class LayoutRunner {
 
         private int frameId;
         internal readonly UIElement rootElement;
         internal LightList<UIElement> hierarchyRebuildList;
         internal LightList<UIElement> alignHorizontalList;
         internal LightList<UIElement> alignVerticalList;
-        internal LightList<AwesomeLayoutBox> ignoredList;
+        internal LightList<LayoutBox> ignoredList;
         internal StructList<ElemRef> queryableElements;
         internal StructStack<ElemRef> elemRefStack;
         internal StructStack<BoxRef> boxRefStack;
@@ -63,7 +63,7 @@ namespace UIForia.Systems {
         private readonly LightStack<ClipData> clipStack;
         private readonly ClipData screenClipper;
         private readonly ClipData viewClipper;
-        private readonly AwesomeLayoutSystem layoutSystem;
+        private readonly LayoutSystem layoutSystem;
 
         private static readonly StructList<Vector2> s_SubjectRect = new StructList<Vector2>(4);
 
@@ -72,14 +72,14 @@ namespace UIForia.Systems {
         private ViewParameters viewParameters;
         private UIView view;
 
-        public AwesomeLayoutRunner(AwesomeLayoutSystem layoutSystem, UIView view, UIElement rootElement) {
+        public LayoutRunner(LayoutSystem layoutSystem, UIView view, UIElement rootElement) {
             this.layoutSystem = layoutSystem;
             this.view = view;
             this.rootElement = rootElement;
-            this.rootElement.layoutBox = new AwesomeRootLayoutBox();
+            this.rootElement.layoutBox = new RootLayoutBox();
             this.rootElement.layoutBox.Initialize(layoutSystem, layoutSystem.elementSystem, rootElement, 0);
             this.hierarchyRebuildList = new LightList<UIElement>();
-            this.ignoredList = new LightList<AwesomeLayoutBox>();
+            this.ignoredList = new LightList<LayoutBox>();
             this.alignHorizontalList = new LightList<UIElement>();
             this.alignVerticalList = new LightList<UIElement>();
             this.queryableElements = new StructList<ElemRef>(32);
@@ -93,7 +93,18 @@ namespace UIForia.Systems {
             lastDpi = rootElement.application.DPIScaleFactor;
         }
 
+        // store pref width & height seperate w/ any animation data, re-interpolate anim data when resolving
+        // store alignment & transform seperately also
+        // store horizontal and vertical data seperately
+        // store layout behavior and flags seperately
+        
         public void RunLayout() {
+            
+            // for tomorrow -- i want to remove the layout box from basically everywhere in this class except actual layout run
+            // need to break flags into arrays, store per-view list of enabled/disabled/added/destoryed elements per frame
+            // handle the style property changes at frame start
+            // this includes any updates to layout box or changes to it.
+            // all data should be 100% valid by the time we start our work 
             
             float viewportWidth = view.Viewport.width;
             float viewportHeight = view.Viewport.height;
@@ -114,6 +125,7 @@ namespace UIForia.Systems {
             }
 
             float currentDpi = rootElement.application.DPIScaleFactor;
+            
             if (currentDpi != lastDpi) {
                 InvalidateAll(rootElement);
             }
@@ -204,9 +216,21 @@ namespace UIForia.Systems {
             }
         }
 
+        // things we always need
+        // layout behavior
+        // transforms
+        // alignment
+        
+        // layout box -> NEVER null, create on change early on
+        
+        // flags
+        
+        
         public void GatherLayoutData() {
             elemRefStack.array[elemRefStack.size++].element = rootElement;
 
+            ElementTable<ElementMetaInfo> metaTable = layoutSystem.elementSystem.metaTable;
+            
             while (elemRefStack.size > 0) {
                 UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
 
@@ -216,9 +240,10 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                UIElementFlags flags = currentElement.flags;
+                ref ElementMetaInfo metaInfo = ref metaTable[currentElement.id];
 
-                AwesomeLayoutBox layoutBox = currentElement.layoutBox;
+
+                LayoutBox layoutBox = currentElement.layoutBox;
 
                 layoutBox.traversalIndex = layoutSystem.traversalIndex++;
 
@@ -332,7 +357,7 @@ namespace UIForia.Systems {
                     clipperList.Add(layoutBox.clipData);
                 }
 
-                currentElement.flags = flags; // write changes back to element
+                // currentElement.flags = flags; // write changes back to element
 
                 UIElement[] childArray = currentElement.children.array;
                 int childCount = currentElement.children.size;
@@ -350,11 +375,14 @@ namespace UIForia.Systems {
                 bool needsGather = (layoutBox.flags & LayoutBoxFlags.GatherChildren) != 0;
 
                 // if any child had it's type changed, enabled, disabled, or behavior changed, need to gather
-
+                if (elemRefStack.size + childCount <= elemRefStack.array.Length) {
+                    elemRefStack.EnsureAdditionalCapacity(childCount);
+                }
+                
                 for (int i = childCount - 1; i >= 0; i--) {
                     UIElement child = childArray[i];
 
-                    bool childEnabled = (child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet;
+                    bool childEnabled = child.isEnabled; //flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet;
 
                     if (child.enableStateChangedFrameId == frameId) {
                         needsGather = true;
@@ -368,10 +396,6 @@ namespace UIForia.Systems {
                     else if (childEnabled) {
                         // if child was previously enabled, it will definitely have a layout box
                         needsGather ^= (child.layoutBox.flags & LayoutBoxFlags.TypeOrBehaviorChanged) != 0;
-                        if (elemRefStack.array.Length <= elemRefStack.size) {
-                            elemRefStack.EnsureAdditionalCapacity(childCount);
-                        }
-
                         elemRefStack.array[elemRefStack.size++].element = childArray[i];
                     }
                 }
@@ -393,6 +417,12 @@ namespace UIForia.Systems {
             }
         }
 
+        // when children are added/disabled/enabled/removed we need invalidate content size
+        // when children have new layout box size we need to invalidate
+        // when children have new size, padding, margin params we need to relayout
+        // depending on layout, might need to re-layout
+        
+        // todo -- pre-buffer enables, create layout box from that before it enters this system
         private void EnableHierarchy(UIElement currentElement) {
             if (currentElement.layoutBox == null) {
                 layoutSystem.CreateLayoutBox(currentElement);
@@ -403,7 +433,7 @@ namespace UIForia.Systems {
 
             Debug.Assert(currentElement.layoutBox != null, "currentElement.layoutBox != null");
 
-            AwesomeLayoutBox layoutBox = currentElement.layoutBox;
+            LayoutBox layoutBox = currentElement.layoutBox;
             layoutBox.traversalIndex = layoutSystem.traversalIndex++;
 
             currentElement.layoutBox.Enable();
@@ -432,12 +462,12 @@ namespace UIForia.Systems {
                 clipperList.Add(layoutBox.clipData);
             }
 
-            LightList<AwesomeLayoutBox> list = LightList<AwesomeLayoutBox>.Get();
+            LightList<LayoutBox> list = LightList<LayoutBox>.Get();
 
             for (int i = 0; i < currentElement.children.size; i++) {
                 UIElement child = currentElement.children.array[i];
 
-                if ((child.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
+                if (child.isDisabled) {
                     continue;
                 }
 
@@ -526,7 +556,7 @@ namespace UIForia.Systems {
             }
 
             currentElement.layoutBox.SetChildren(list);
-            LightList<AwesomeLayoutBox>.Release(ref list);
+            LightList<LayoutBox>.Release(ref list);
         }
 
         private void UpdateClippers() {
@@ -584,7 +614,7 @@ namespace UIForia.Systems {
                         ref LayoutResult layoutResult = ref element.layoutResult;
                         layoutResult.isCulled = !overlappingOrContains || (element.layoutResult.actualSize.width == 0 || element.layoutResult.actualSize.height == 0);
 
-                        if (!element.layoutResult.isCulled) {
+                        if (!layoutResult.isCulled) {
                             clipper.visibleBoxCount++;
                             queryableElements.Add(new ElemRef(element)); // todo -- inline, or just avoid and iterate non culled clipper lists instead
                         }
@@ -596,12 +626,14 @@ namespace UIForia.Systems {
         private void ApplyHorizontalAlignments() {
             InputSystem inputSystem = view.application.InputSystem;
 
+            float mouseX = inputSystem.MousePosition.x;
+            
             LayoutResult[] layoutTable = layoutSystem.elementSystem.layoutTable;
             ElementId viewRootId = view.dummyRoot.id;
             
             for (int i = 0; i < alignHorizontalList.size; i++) {
                 UIElement element = alignHorizontalList.array[i];
-                AwesomeLayoutBox box = element.layoutBox;
+                LayoutBox box = element.layoutBox;
 
                 // if box was aligned from a scroll view, continue
 
@@ -614,7 +646,7 @@ namespace UIForia.Systems {
                 AlignmentTarget alignmentTargetX = element.style.AlignmentTargetX;
                 AlignmentBoundary alignmentBoundaryX = element.style.AlignmentBoundaryX;
 
-                float originBase = MeasurementUtil.ResolveOriginBaseX(layoutTable, result, viewParameters, alignmentTargetX, direction, inputSystem);
+                float originBase = MeasurementUtil.ResolveOriginBaseX(layoutTable, result, viewParameters, alignmentTargetX, direction, mouseX);
                 float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(layoutTable, result, viewParameters, alignmentTargetX);
                 float originOffset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, originX, originSize);
                 float offset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, offsetX, box.finalWidth);
@@ -714,10 +746,11 @@ namespace UIForia.Systems {
             ElementId viewRootId = view.dummyRoot.id;
 
             LayoutResult[] layoutTable = layoutSystem.elementSystem.layoutTable;
+            float mouseY = inputSystem.MousePosition.y;
             
             for (int i = 0; i < alignVerticalList.size; i++) {
                 UIElement element = alignVerticalList.array[i];
-                AwesomeLayoutBox box = element.layoutBox;
+                LayoutBox box = element.layoutBox;
                 ref LayoutResult result = ref element.layoutResult;
 
                 // todo -- cache these values on layout box or make style reads fast
@@ -727,7 +760,7 @@ namespace UIForia.Systems {
                 AlignmentTarget alignmentTargetY = element.style.AlignmentTargetY;
                 AlignmentBoundary alignmentBoundaryY = element.style.AlignmentBoundaryY;
 
-                float originBase = MeasurementUtil.ResolveOriginBaseY(layoutTable, result, view.position.y, alignmentTargetY, direction, inputSystem);
+                float originBase = MeasurementUtil.ResolveOriginBaseY(layoutTable, result, view.position.y, alignmentTargetY, direction, mouseY);
                 
                 float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(layoutTable, result, viewParameters, alignmentTargetY);
                 
@@ -833,14 +866,14 @@ namespace UIForia.Systems {
             alignVerticalList.Clear();
         }
 
-        private void PerformLayoutStepHorizontal(AwesomeLayoutBox rootBox) {
+        private void PerformLayoutStepHorizontal(LayoutBox rootBox) {
             boxRefStack.Push(new BoxRef() {box = rootBox});
 
             // Resolve all widths first, then process heights. These operations cannot be interleaved for we can't be sure
             // that widths are final before heights are computed, this is critical for the system to work.
 
             while (boxRefStack.size > 0) {
-                AwesomeLayoutBox layoutBox = boxRefStack.array[--boxRefStack.size].box;
+                LayoutBox layoutBox = boxRefStack.array[--boxRefStack.size].box;
 
                 if ((layoutBox.flags & LayoutBoxFlags.ContentAreaWidthChanged) != 0) {
                     layoutBox.UpdateContentAreaWidth();
@@ -852,7 +885,7 @@ namespace UIForia.Systems {
                 }
 
                 // no need to size check the stack, same size as element stack which was already sized
-                AwesomeLayoutBox ptr = layoutBox.firstChild;
+                LayoutBox ptr = layoutBox.firstChild;
                 while (ptr != null) {
                     boxRefStack.Push(new BoxRef {box = ptr});
                     ptr = ptr.nextSibling;
@@ -860,21 +893,12 @@ namespace UIForia.Systems {
             }
         }
 
-        private void PerformLayoutStepVertical(AwesomeLayoutBox rootBox) {
-            float viewWidth = rootBox.element.View.Viewport.width;
-            float viewHeight = rootBox.element.View.Viewport.height;
+        private void PerformLayoutStepVertical(LayoutBox rootBox) {
 
-            ViewParameters viewParameters = new ViewParameters() {
-                viewWidth = viewWidth,
-                viewHeight = viewHeight,
-                applicationWidth = layoutSystem.application.Width,
-                applicationHeight = layoutSystem.application.Height
-            };
-            
             boxRefStack.Push(new BoxRef() {box = rootBox});
 
             while (boxRefStack.size > 0) {
-                AwesomeLayoutBox layoutBox = boxRefStack.array[--boxRefStack.size].box;
+                LayoutBox layoutBox = boxRefStack.array[--boxRefStack.size].box;
 
                 if ((layoutBox.flags & LayoutBoxFlags.ContentAreaHeightChanged) != 0) {
                     layoutBox.UpdateContentAreaHeight();
@@ -885,7 +909,8 @@ namespace UIForia.Systems {
                     layoutBox.flags &= ~LayoutBoxFlags.RequireLayoutVertical;
                 }
 
-                if ((layoutBox.element.flags & UIElementFlags.LayoutTransformNotIdentity) != 0) {
+                // todo -- always update transform probably
+                //if ((layoutBox.element.flags & UIElementFlags.LayoutTransformNotIdentity) != 0) {
                     float x = MeasurementUtil.ResolveOffsetMeasurement(layoutSystem.elementSystem.layoutTable, layoutBox.element, viewParameters, layoutBox.transformPositionX, layoutBox.finalWidth);
                     float y = MeasurementUtil.ResolveOffsetMeasurement(layoutSystem.elementSystem.layoutTable, layoutBox.element, viewParameters, layoutBox.transformPositionY, layoutBox.finalHeight);
                     if (!Mathf.Approximately(x, layoutBox.transformX) || !Mathf.Approximately(y, layoutBox.transformY)) {
@@ -893,7 +918,7 @@ namespace UIForia.Systems {
                         layoutBox.transformY = y;
                         layoutBox.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
                     }
-                }
+                //}
 
                 // if we need to update this element's matrix then add to the list
                 // this can happen if the parent assigned a different position to 
@@ -904,7 +929,7 @@ namespace UIForia.Systems {
 
                 // no need to size check the stack, same size as element stack which was already sized
 
-                AwesomeLayoutBox ptr = layoutBox.firstChild;
+                LayoutBox ptr = layoutBox.firstChild;
                 while (ptr != null) {
                     boxRefStack.Push(new BoxRef {box = ptr});
                     ptr = ptr.nextSibling;
@@ -912,13 +937,13 @@ namespace UIForia.Systems {
             }
         }
 
-        private void PerformLayoutStep(AwesomeLayoutBox rootBox) {
+        private void PerformLayoutStep(LayoutBox rootBox) {
             PerformLayoutStepHorizontal(rootBox);
             PerformLayoutStepVertical(rootBox);
         }
 
-        private void PerformLayoutStepHorizontal_Ignored(AwesomeLayoutBox ignoredBox) {
-            AwesomeLayoutBox.LayoutSize size = default;
+        private void PerformLayoutStepHorizontal_Ignored(LayoutBox ignoredBox) {
+            LayoutBox.LayoutSize size = default;
             //if ((ignoredBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
             ignoredBox.GetWidths(ref size);
             float outputSize = size.Clamped;
@@ -927,8 +952,8 @@ namespace UIForia.Systems {
             //}
         }
 
-        private void PerformLayoutStepVertical_Ignored(AwesomeLayoutBox ignoredBox) {
-            AwesomeLayoutBox.LayoutSize size = default;
+        private void PerformLayoutStepVertical_Ignored(LayoutBox ignoredBox) {
+            LayoutBox.LayoutSize size = default;
             ignoredBox.GetHeights(ref size);
             float outputSize = size.Clamped;
             ignoredBox.ApplyLayoutVertical(0, 0, size, outputSize, ignoredBox.parent?.finalHeight ?? outputSize, LayoutFit.None, frameId);
@@ -943,7 +968,7 @@ namespace UIForia.Systems {
             PerformLayoutStep(rootElement.layoutBox);
 
             for (int i = 0; i < ignoredList.size; i++) {
-                AwesomeLayoutBox ignoredBox = ignoredList.array[i];
+                LayoutBox ignoredBox = ignoredList.array[i];
 
                 // todo -- account for margin on ignored element
 
@@ -956,21 +981,11 @@ namespace UIForia.Systems {
             int size = matrixUpdateList.size;
             UIElement[] array = matrixUpdateList.array;
 
-            float viewWidth = rootElement.View.Viewport.width;
-            float viewHeight = rootElement.View.Viewport.height;
-
-            ViewParameters viewParameters = new ViewParameters() {
-                viewWidth = viewWidth,
-                viewHeight = viewHeight,
-                applicationWidth = layoutSystem.application.Width,
-                applicationHeight = layoutSystem.application.Height
-            };
-
             SVGXMatrix identity = SVGXMatrix.identity;
 
             for (int i = 0; i < size; i++) {
                 UIElement startElement = array[i];
-                AwesomeLayoutBox box = startElement.layoutBox;
+                LayoutBox box = startElement.layoutBox;
 
                 // this element might have been processed by it's parent traversing, this check makes sure we only traverse an element hierarchy once
 
@@ -979,7 +994,7 @@ namespace UIForia.Systems {
 
                     while (elemRefStack.size > 0) {
                         UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
-                        AwesomeLayoutBox currentBox = currentElement.layoutBox;
+                        LayoutBox currentBox = currentElement.layoutBox;
                         ref LayoutResult result = ref currentElement.layoutResult;
                         currentBox.flags &= ~LayoutBoxFlags.RequiresMatrixUpdate;
 
@@ -1006,8 +1021,8 @@ namespace UIForia.Systems {
                             float y = MeasurementUtil.ResolveOffsetMeasurement(layoutSystem.elementSystem.layoutTable, currentElement, viewParameters, currentBox.transformPositionY, currentBox.finalHeight);
 
                             // todo -- em size, remove percentage padding
-                            float px = MeasurementUtil.ResolveFixedSize(result.actualSize.width, viewWidth, viewHeight, 0, currentBox.transformPivotX);
-                            float py = MeasurementUtil.ResolveFixedSize(result.actualSize.height, viewWidth, viewHeight, 0, currentBox.transformPivotY);
+                            float px = MeasurementUtil.ResolveFixedSize(result.actualSize.width, viewParameters, 0, currentBox.transformPivotX);
+                            float py = MeasurementUtil.ResolveFixedSize(result.actualSize.height, viewParameters, 0, currentBox.transformPivotY);
 
                             float rotation = currentBox.transformRotation * Mathf.Deg2Rad;
                             float ca = Mathf.Cos(rotation);
@@ -1067,7 +1082,7 @@ namespace UIForia.Systems {
 
                         for (int childIdx = 0; childIdx < childCount; childIdx++) {
                             UIElement child = currentElement.children.array[childIdx];
-                            if ((child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
+                            if (child.isEnabled) {//(child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
                                 elemRefStack.array[elemRefStack.size++].element = child;
                             }
                         }
@@ -1166,7 +1181,7 @@ namespace UIForia.Systems {
 
                 for (int childIdx = 0; childIdx < childCount; childIdx++) {
                     UIElement child = currentElement.children.array[childIdx];
-                    if ((child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
+                    if (child.isEnabled) {
                         elemRefStack.array[elemRefStack.size++].element = child;
                     }
                 }
@@ -1177,22 +1192,22 @@ namespace UIForia.Systems {
             if (hierarchyRebuildList.size == 0) return;
 
             // do this back to front so parent always works with final children
-            LightList<AwesomeLayoutBox> childList = LightList<AwesomeLayoutBox>.Get();
+            LightList<LayoutBox> childList = LightList<LayoutBox>.Get();
 
             // input list is already in depth traversal order, so iterating backwards will effectively walk up the leaves
             for (int i = hierarchyRebuildList.size - 1; i >= 0; i--) {
                 UIElement element = hierarchyRebuildList.array[i];
 
-                Assert.IsTrue((element.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet);
+                Assert.IsTrue(element.isEnabled);
 
-                AwesomeLayoutBox elementBox = element.layoutBox;
+                LayoutBox elementBox = element.layoutBox;
 
                 LightList<UIElement> elementChildList = element.children;
 
                 for (int j = 0; j < elementChildList.size; j++) {
                     UIElement child = elementChildList.array[j];
 
-                    if ((child.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
+                    if (child.isDisabled) {
                         continue;
                     }
 
@@ -1232,11 +1247,11 @@ namespace UIForia.Systems {
 
                 elementBox.SetChildren(childList);
                 elementBox.flags &= ~LayoutBoxFlags.GatherChildren;
-                element.flags &= ~UIElementFlags.LayoutHierarchyDirty;
+                // element.flags &= ~UIElementFlags.LayoutHierarchyDirty;
                 childList.size = 0;
             }
 
-            LightList<AwesomeLayoutBox>.Release(ref childList);
+            LightList<LayoutBox>.Release(ref childList);
         }
 
         // public enum QueryFilter {

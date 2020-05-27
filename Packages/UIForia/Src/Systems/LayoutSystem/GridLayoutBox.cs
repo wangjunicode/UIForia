@@ -50,7 +50,7 @@ namespace UIForia.Systems {
 
     }
 
-    public class AwesomeGridLayoutBox : AwesomeLayoutBox {
+    public class GridLayoutBox : LayoutBox {
 
         private bool placementDirty;
         internal readonly StructList<GridTrack> colTrackList;
@@ -63,13 +63,13 @@ namespace UIForia.Systems {
         public int RowCount => rowTrackList.size;
         public int ColCount => colTrackList.size;
 
-        public AwesomeGridLayoutBox() {
+        public GridLayoutBox() {
             this.placementList = new StructList<GridPlacement>();
             this.colTrackList = new StructList<GridTrack>(4);
             this.rowTrackList = new StructList<GridTrack>(4);
         }
 
-        public override bool CanProvideHorizontalBlockSize(AwesomeLayoutBox layoutBox, out float blockSize) {
+        public override bool CanProvideHorizontalBlockSize(LayoutBox layoutBox, out float blockSize) {
             blockSize = 0;
             if (finalSizeResolutionMode) {
                 for (int i = 0; i < placementList.size; i++) {
@@ -152,7 +152,7 @@ namespace UIForia.Systems {
             }
         }
 
-        public override bool CanProvideVerticalBlockSize(AwesomeLayoutBox layoutBox, out float blockSize) {
+        public override bool CanProvideVerticalBlockSize(LayoutBox layoutBox, out float blockSize) {
             blockSize = 0;
             if (finalSizeResolutionMode) {
                 for (int i = 0; i < placementList.size; i++) {
@@ -563,16 +563,14 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        public override void OnChildrenChanged(LightList<AwesomeLayoutBox> childList) {
+        public override void OnChildrenChanged(LightList<LayoutBox> childList) {
             placementDirty = true;
             // todo -- history entry?
         }
 
-        public override void OnStyleChanged(StructList<StyleProperty> propertyList) {
-            StyleProperty[] array = propertyList.array;
-            int size = propertyList.size;
-            for (int i = 0; i < size; i++) {
-                ref StyleProperty property = ref array[i];
+        public override void OnStyleChanged(StyleProperty[] propertyList, int propertyCount) {
+            for (int i = 0; i < propertyCount; i++) {
+                ref StyleProperty property = ref propertyList[i];
                 switch (property.propertyId) {
                     case StylePropertyId.GridLayoutColAlignment:
                     case StylePropertyId.GridLayoutRowAlignment:
@@ -617,11 +615,9 @@ namespace UIForia.Systems {
             }
         }
 
-        public override void OnChildStyleChanged(AwesomeLayoutBox child, StructList<StyleProperty> propertyList) {
-            StyleProperty[] array = propertyList.array;
-            int size = propertyList.size;
-            for (int i = 0; i < size; i++) {
-                ref StyleProperty property = ref array[i];
+        public override void OnChildStyleChanged(LayoutBox child, StyleProperty[] propertyList, int propertyCount) {
+            for (int i = 0; i < propertyCount; i++) {
+                ref StyleProperty property = ref propertyList[i];
                 switch (property.propertyId) {
                     case StylePropertyId.GridItemX:
                     case StylePropertyId.GridItemY:
@@ -906,7 +902,7 @@ namespace UIForia.Systems {
             placementDirty = false;
 
             placementList.size = 0;
-            AwesomeLayoutBox child = firstChild;
+            LayoutBox child = firstChild;
 
             while (child != null) {
                 GridItemPlacement x = child.element.style.GridItemX;
@@ -1260,7 +1256,7 @@ namespace UIForia.Systems {
             public int y;
             public int width;
             public int height;
-            public AwesomeLayoutBox layoutBox;
+            public LayoutBox layoutBox;
             public LayoutSize widthData;
             public LayoutSize heightData;
             public float outputWidth;

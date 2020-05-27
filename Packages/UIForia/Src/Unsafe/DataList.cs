@@ -463,6 +463,20 @@ namespace UIForia.Util.Unsafe {
                 array[i] = array[--state->size];
             }
 
+            public void FilterSwapRemove<TFilter>(TFilter filter) where TFilter: IListFilter<T> {
+                T* array = (T*)state->array;
+                int itemCount = state->size;
+                
+                for (int i = 0; i < itemCount; i++) {
+                    if (!filter.Filter(array[i])) {
+                        array[i--] = array[--itemCount];
+                    }        
+                }
+
+                state->size = itemCount;
+
+            }
+
         }
 
     }

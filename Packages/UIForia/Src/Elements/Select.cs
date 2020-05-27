@@ -131,7 +131,7 @@ namespace UIForia.Elements {
                     ptr.SetAttribute("disabled", disabledAttributeValue);
                     DisableAllChildren(ptr);
                 }
-                ptr = element.GetNextSibling();
+                ptr = ptr.GetNextSibling();
             }
         }
 

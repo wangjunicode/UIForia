@@ -292,6 +292,7 @@ namespace UIForia.Compilers.Style {
         // when using style database, we need to know per-module what the materials are already. should be easy
         private static unsafe MaterialId MapMaterial(PropertyNode node, StyleCompileContext context) {
 
+            return new MaterialId();
             if (!(node.children[0] is StyleLiteralNode literalNode) || literalNode.type != StyleASTNodeType.StringLiteral) {
                 return default;
             }

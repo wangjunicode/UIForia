@@ -8,14 +8,6 @@ using UnityEngine;
 
 namespace UIForia.Text {
 
-    public abstract class TextLayoutPolygon {
-
-        public abstract bool LineCast(float y, out Vector2 intersection);
-
-        public abstract Rect GetBounds();
-
-    }
-
     public class TextInfo {
 
         private static int s_SpanIdGenerator;

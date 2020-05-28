@@ -10,6 +10,15 @@ namespace UIForia.Layout {
 
     public struct LayoutResult {
 
+        
+        // transform info
+        
+        // alignment info
+        
+        // width info
+        // height info
+        // clip info? bounds
+        // layer info (zindex + layer)
         // public float localRotation;
         // public Vector2 localScale;
         public Vector2 localPosition;

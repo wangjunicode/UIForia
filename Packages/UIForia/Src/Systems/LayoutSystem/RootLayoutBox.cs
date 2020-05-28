@@ -1,5 +1,4 @@
 using UIForia.Layout;
-using UIForia.Util;
 
 namespace UIForia.Systems {
 
@@ -13,7 +12,7 @@ namespace UIForia.Systems {
             return 0;
         }
 
-        public override void OnChildrenChanged(LightList<LayoutBox> childList) { }
+        public override void OnChildrenChanged() { }
 
         public override void RunLayoutHorizontal(int frameId) {
             if (firstChild == null) return;

@@ -56,6 +56,10 @@ namespace UIForia {
             application?.GetView(0).SetSize((int) application.Width, (int) application.Height);
         }
 
+        public void OnApplicationQuit() {
+            application?.Dispose();
+        }
+
     }
 
 }

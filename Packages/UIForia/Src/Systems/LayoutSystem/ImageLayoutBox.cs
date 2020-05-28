@@ -23,7 +23,7 @@ namespace UIForia.Systems {
             return imageElement.Height;
         }
 
-        public override void OnChildrenChanged(LightList<LayoutBox> childList) { }
+        public override void OnChildrenChanged() { }
 
         public override void RunLayoutHorizontal(int frameId) { }
 

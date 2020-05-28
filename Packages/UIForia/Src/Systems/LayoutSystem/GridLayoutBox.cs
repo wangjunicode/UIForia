@@ -56,6 +56,8 @@ namespace UIForia.Systems {
         internal readonly StructList<GridTrack> colTrackList;
         internal readonly StructList<GridTrack> rowTrackList;
         internal readonly StructList<GridPlacement> placementList;
+        
+        // todo -- cannot use static with multithreading!!!!!
         internal static readonly StructList<GridRegion> s_OccupiedAreas = new StructList<GridRegion>(32);
         private StructList<int> deferredList;
         private bool finalSizeResolutionMode;
@@ -563,7 +565,7 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        public override void OnChildrenChanged(LightList<LayoutBox> childList) {
+        public override void OnChildrenChanged() {
             placementDirty = true;
             // todo -- history entry?
         }

@@ -1,5 +1,8 @@
-﻿namespace UIForia {
+﻿using System.Diagnostics;
 
+namespace UIForia {
+
+    [DebuggerDisplay("Index = {index} generation = {generation}")]
     public struct ElementId {
 
         private const int ENTITY_INDEX_BITS = 24;
@@ -31,11 +34,11 @@
         }
 
         public static bool operator ==(ElementId elementId, ElementId other) {
-            return elementId.id == other.index;
+            return elementId.id == other.id;
         }
 
         public static bool operator !=(ElementId elementId, ElementId other) {
-            return elementId.id != other.index;
+            return elementId.id != other.id;
         }
 
         public static explicit operator int(ElementId elementId) {

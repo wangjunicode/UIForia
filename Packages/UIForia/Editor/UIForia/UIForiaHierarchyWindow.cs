@@ -12,6 +12,53 @@ using UnityEngine;
 
 namespace UIForia.Editor {
 
+    public class UIForiaLayoutHierarchyWindow : EditorWindow {
+
+        public TreeViewState state;
+        public LayoutHierarchyView treeView;
+
+        private void OnInspectorUpdate() {
+            Repaint();
+        }
+
+        public void OnEnable() {
+            state = new TreeViewState();
+            treeView = new LayoutHierarchyView(state);
+            autoRepaintOnSceneChange = true;
+            wantsMouseMove = true;
+            wantsMouseEnterLeaveWindow = true;
+        }
+
+        private void Update() {
+            if (!EditorApplication.isPlaying) {
+                return;
+            }
+            Repaint();
+        }
+        
+        public void OnGUI() {
+            if (!EditorApplication.isPlaying) {
+                EditorGUILayout.LabelField("Enter play mode to inspect a UIForia Application");
+                return;
+            }
+
+            if (UIForiaHierarchyWindow.s_SelectedApplication != null) {
+                DrawHierarchyInfo();
+            }
+
+        }
+
+        private void DrawHierarchyInfo() {
+
+            EditorGUILayout.BeginVertical();
+
+            treeView.RunGUI();
+
+            EditorGUILayout.EndVertical();
+        }
+
+    }
+
     public class UIForiaHierarchyWindow : EditorWindow {
 
         public static readonly List<int> EmptyList = new List<int>();
@@ -28,17 +75,17 @@ namespace UIForia.Editor {
         private Color allocatedSpaceColor = Color.red;
         private Color descenderColor = Color.blue;
         private Color outlineColor = new Color32(196, 208, 139, 175);
-        
+
         private bool showTextBaseline;
         private bool showTextDescender;
         private bool drawDebugBox;
-        
+
         public TreeViewState state;
         public HierarchyView treeView;
         private bool needsReload;
         private string inspectedAppId;
         private bool firstLoad;
-        
+
         private Path2D path = new Path2D();
 
         private void OnInspectorUpdate() {
@@ -56,7 +103,7 @@ namespace UIForia.Editor {
             autoRepaintOnSceneChange = true;
             wantsMouseMove = true;
             wantsMouseEnterLeaveWindow = true;
-            
+
             if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.ContentColor"), out contentColor)) {
                 contentColor = new Color32(140, 182, 193, 175);
             }
@@ -98,17 +145,17 @@ namespace UIForia.Editor {
         private void Refresh() {
             needsReload = true;
         }
-        
+
         private void Refresh(UIView view) {
             needsReload = true;
         }
-        
+
         private void Refresh(UIElement element) {
             needsReload = true;
         }
 
         public void OnRefresh() {
-            s_SelectedElementId =default;
+            s_SelectedElementId = default;
             treeView?.Destroy();
 
             Application app = Application.Find(inspectedAppId);
@@ -158,7 +205,7 @@ namespace UIForia.Editor {
 
             if (oldApp != null) {
                 oldApp.onElementDestroyed -= Refresh;
-               // oldApp.onViewAdded -= Refresh;
+                // oldApp.onViewAdded -= Refresh;
                 oldApp.onElementEnabled -= Refresh;
                 //oldApp.onRefresh -= OnRefresh;
             }
@@ -181,7 +228,7 @@ namespace UIForia.Editor {
                 app.onElementEnabled += Refresh;
                 app.onRefresh += OnRefresh;
             }
-            
+
             if (s_SelectedApplication != null) {
                 s_SelectedApplication.RenderSystem.DrawDebugOverlay2 -= DrawDebugOverlay;
             }
@@ -189,7 +236,7 @@ namespace UIForia.Editor {
             if (app != null) {
                 app.RenderSystem.DrawDebugOverlay2 += DrawDebugOverlay;
             }
-            
+
             s_SelectedApplication = app;
             s_SelectedElementId = default;
         }
@@ -206,9 +253,11 @@ namespace UIForia.Editor {
                 case 0:
                     DrawHierarchyInfo();
                     break;
+
                 case 1:
                     DrawSettings();
                     break;
+
                 case 2:
                     DrawMetrics();
                     break;
@@ -246,7 +295,7 @@ namespace UIForia.Editor {
                 treeView?.Destroy();
                 treeView = null;
             }
-            
+
             if (treeView == null) {
                 EditorGUILayout.EndVertical();
                 return;
@@ -254,14 +303,15 @@ namespace UIForia.Editor {
 
             treeView.showChildrenAndId = EditorGUILayout.ToggleLeft("Show Meta Data", treeView.showChildrenAndId);
             treeView.selectMode = EditorGUILayout.ToggleLeft("Activate Select Mode", treeView.selectMode);
-            
+
             bool wasShowingDisabled = treeView.showDisabled;
             treeView.showDisabled = EditorGUILayout.ToggleLeft("Show Disabled", treeView.showDisabled);
             treeView.showLayoutStats = EditorGUILayout.ToggleLeft("Show Layout Stats", treeView.showLayoutStats);
-            
+
             if (treeView.showDisabled != wasShowingDisabled) {
                 needsReload = true;
             }
+
             if (needsReload) {
                 needsReload = false;
                 treeView.views = s_SelectedApplication.GetViews();
@@ -271,6 +321,15 @@ namespace UIForia.Editor {
 
             needsReload = treeView.RunGUI();
 
+            if (s_SelectedApplication != null && s_SelectedElementId != default) {
+                
+                if (Event.current.Equals(Event.KeyboardEvent("d"))) {
+                    UIElement element = s_SelectedApplication.GetElement(s_SelectedElementId);
+                    element.SetEnabled(!element.isEnabled);
+                }    
+                
+            }
+            
             EditorGUILayout.EndVertical();
         }
 
@@ -460,7 +519,7 @@ namespace UIForia.Editor {
 
                     path.Stroke();
                 }
-                
+
                 ctx.DrawPath(path);
             }
         }
@@ -471,17 +530,17 @@ namespace UIForia.Editor {
                 EditorGUILayout.PrefixLabel("Frame time: ");
                 EditorGUILayout.LabelField(s_SelectedApplication.loopTimer.Elapsed.TotalMilliseconds.ToString("F3"));
                 EditorGUILayout.EndHorizontal();
-                
+
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PrefixLabel("Layout: ");
                 EditorGUILayout.LabelField(s_SelectedApplication.layoutTimer.Elapsed.TotalMilliseconds.ToString("F3"));
                 EditorGUILayout.EndHorizontal();
-                
+
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PrefixLabel("Bindings: ");
                 EditorGUILayout.LabelField(s_SelectedApplication.bindingTimer.Elapsed.TotalMilliseconds.ToString("F3"));
                 EditorGUILayout.EndHorizontal();
-                
+
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PrefixLabel("Rendering: ");
                 EditorGUILayout.LabelField(s_SelectedApplication.renderTimer.Elapsed.TotalMilliseconds.ToString("F3"));
@@ -491,17 +550,17 @@ namespace UIForia.Editor {
                 int enabledElements = 0;
                 int disableElements = 0;
                 s_SelectedApplication.GetElementCount(out totalElements, out enabledElements, out disableElements);
-                
+
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PrefixLabel("Element count: ");
                 EditorGUILayout.LabelField(totalElements.ToString());
                 EditorGUILayout.EndHorizontal();
-                
+
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PrefixLabel("Enabled element count: ");
                 EditorGUILayout.LabelField(enabledElements.ToString());
                 EditorGUILayout.EndHorizontal();
-                
+
                 EditorGUILayout.BeginHorizontal();
                 EditorGUILayout.PrefixLabel("Disabled element count: ");
                 EditorGUILayout.LabelField(disableElements.ToString());
@@ -565,6 +624,7 @@ namespace UIForia.Editor {
 
             EditorPrefs.SetBool("UIForia.Inspector.DrawDebugBox", drawDebugBox);
         }
+
     }
 
 }

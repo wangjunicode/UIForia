@@ -11,7 +11,7 @@ using UIForia.Util;
 
 namespace UIForia.Elements {
 
-    [DebuggerDisplay("{" + nameof(ToString) + "()}")]
+    [DebuggerDisplay("{ToString()}")]
     public abstract class UIElement : IHierarchical {
 
         public ElementId id;
@@ -21,7 +21,7 @@ namespace UIForia.Elements {
         public LightList<UIElement> children; // todo -- replace w/ linked list & child count
 
         private UIElementFlags flags;
-        public UIElement parent;
+        internal UIElement parent;
 
         // todo -- maybe move a lot of this data to an internal representation of UIElement
         internal LayoutBox layoutBox;
@@ -51,27 +51,67 @@ namespace UIForia.Elements {
         // not actually used since we get elements from the pool as uninitialized
         protected internal UIElement() { }
 
+        public UIElement GetParent() {
+            return parent;
+        }
+        
         public IInputProvider Input => application.InputSystem; // todo -- remove
 
         public int ChildCount => children?.Count ?? 0;
 
         public bool __internal_isEnabledAndNeedsUpdate => (flags & UIElementFlags.EnabledFlagSetWithUpdate) == (UIElementFlags.EnabledFlagSetWithUpdate);
 
-        public bool isSelfEnabled => (flags & UIElementFlags.Enabled) != 0;
+        public bool isSelfEnabled {
+            get => (flags & UIElementFlags.Enabled) != 0;
+            internal set {
+                if (value) {
+                    flags |= UIElementFlags.Enabled;
+                }
+                else {
+                    flags &= ~UIElementFlags.Enabled;
+                }
+            }
+        }
 
-        public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
+        public bool isAncestorEnabled {
+            get => (flags & UIElementFlags.AncestorEnabled) != 0;
+            internal set {
+                if (value) {
+                    flags |= UIElementFlags.AncestorEnabled;
+                }
+                else {
+                    flags &= ~UIElementFlags.AncestorEnabled;
+                }
+            }
+        }
 
-        public bool isEnabled {
-            get => ((UIElementFlags)application.elementSystem.metaTable[id].flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet);
+        public bool isAlive {
+            get => (flags & UIElementFlags.Alive) != 0;
+            internal set {
+                if (value) {
+                    flags |= UIElementFlags.Alive;
+                }
+                else {
+                    flags &= ~UIElementFlags.Alive;
+                }
+            }
         }
         
-        //!isDestroyed && (flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled;
+        public bool isEnabled {
+            get => (flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet;
+        }
 
-        public bool isDisabled => (flags & UIElementFlags.EnabledFlagSet) != (UIElementFlags.EnabledFlagSet);
+        public bool isSelfDisabled {
+            get => (flags & UIElementFlags.Enabled) == 0;
+        }
 
-        //isDestroyed || (flags & UIElementFlags.Enabled) == 0 || (flags & UIElementFlags.AncestorEnabled) == 0;
-
-        public bool isDestroyed => (flags & UIElementFlags.Alive) == 0;
+        public bool isDestroyed {
+            get => (flags & flags & UIElementFlags.Alive) == 0;
+        }
+        
+        public bool isDisabled {
+            get => (flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet;
+        }
 
         public virtual void OnCreate() { }
 
@@ -317,10 +357,10 @@ namespace UIForia.Elements {
             if (style != null) {
                 string idText = GetAttribute("id");
                 string styleNames = style.GetStyleNames();
-                return $"<{GetDisplayName()}[{id}]{(idText != null ? ":" + idText : "")}> {styleNames}";
+                return $"<{GetDisplayName()}[{id.index}]{(idText != null ? ":" + idText : "")}> {styleNames}";
             }
             else {
-                return "<" + GetDisplayName() + " " + id + ">";
+                return "<" + GetDisplayName() + " " + id.index + ">";
             }
         }
 

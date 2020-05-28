@@ -1,10 +1,17 @@
+using System;
 using System.Diagnostics;
+using UIForia;
+using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Systems;
 using UIForia.Util;
+using UIForia.Util.Unsafe;
+using Unity.Collections;
 using UnityEngine;
 
 namespace UIForia.Systems {
+
 
     [DebuggerDisplay("{element.ToString()} | Flex")]
     public class FlexLayoutBox : LayoutBox {
@@ -13,19 +20,36 @@ namespace UIForia.Systems {
         private LayoutDirection direction;
         private StructList<Track> wrappedTracks;
 
-        protected override void OnInitialize() {
-            direction = element.style.FlexLayoutDirection;
+        public readonly int instanceId;
+
+        public FlexLayoutBox(int instanceId) {
+            this.instanceId = instanceId;
         }
 
+        // protected override void OnInitialize() {
+        //     direction = element.style.FlexLayoutDirection;
+        // }
+
+        // public static void Initialize(ref FlexLayoutInfo layoutInfo, UIElement element) {
+        //     layoutInfo.direction = element.style.FlexLayoutDirection;
+        //     layoutInfo.layoutWrap = element.style.FlexLayoutWrap;
+        //     layoutInfo.alignHorizontal = element.style.AlignItemsHorizontal;
+        //     layoutInfo.alignVertical = element.style.AlignItemsVertical;
+        //     layoutInfo.fitHorizontal = element.style.FitItemsHorizontal;
+        //     layoutInfo.fitVertical = element.style.FitItemsVertical;
+        //     layoutInfo.horizontalDistribution = element.style.DistributeExtraSpaceHorizontal;
+        //     layoutInfo.verticalDistribution = element.style.DistributeExtraSpaceVertical;
+        // }
+
         protected override float ComputeContentWidth() {
-            if (childCount == 0) return 0;
+            if (items == null || items.size == 0) return 0;
             return direction == LayoutDirection.Horizontal
                 ? ComputeContentWidthHorizontal()
                 : ComputeContentWidthVertical();
         }
 
         protected override float ComputeContentHeight() {
-            if (childCount == 0) return 0;
+            if (items == null || items.size == 0) return 0;
             return direction == LayoutDirection.Horizontal
                 ? ComputeContentHeightHorizontal()
                 : ComputeContentHeightVertical();
@@ -147,22 +171,31 @@ namespace UIForia.Systems {
             }
         }
 
-        public override void OnChildrenChanged(LightList<LayoutBox> childList) {
+        public override void OnChildrenChanged() {
             items?.Clear();
 
-            if (childList.size == 0) {
+            ref LayoutHierarchyInfo layoutHierarchyInfo = ref layoutSystem.elementSystem.layoutHierarchyTable[elementId];
+
+            if (layoutHierarchyInfo.childCount == 0) {
                 return;
             }
 
-            items = items ?? new StructList<FlexItem>(childCount);
+            items = items ?? new StructList<FlexItem>(layoutHierarchyInfo.childCount);
             items.EnsureCapacity(childCount);
             items.size = childCount;
-            for (int i = 0; i < childList.size; i++) {
+            ElementId ptr = layoutHierarchyInfo.firstChildId;
+
+            for (int i = 0; i < childCount; i++) {
+
+                LayoutBox childBox = elementSystem.layoutBoxes[ptr.index];
+
                 items.array[i] = new FlexItem() {
-                    layoutBox = childList.array[i],
-                    growPieces = childList.array[i].element.style.FlexItemGrow,
-                    shrinkPieces = childList.array[i].element.style.FlexItemShrink
+                    layoutBox = childBox,
+                    growPieces = childBox.element.style.FlexItemGrow,
+                    shrinkPieces = childBox.element.style.FlexItemShrink
                 };
+
+                ptr = layoutSystem.elementSystem.layoutHierarchyTable[ptr].nextSiblingId;
             }
         }
 

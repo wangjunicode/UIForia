@@ -53,6 +53,34 @@ namespace UIForia.Rendering {
         public bool focusOnMouseDown;
         public bool sizeChanged;
 
+        internal UIView(Application application, string name, Matrix4x4 matrix, Size size) {
+            this.name = name;
+            this.application = application;
+            this.matrix = matrix;
+            this.Viewport = new Rect(0, 0, size.width, size.height);
+            this.visibleElements = new LightList<UIElement>(32);
+            this.dummyRoot = new UIViewRootElement();
+            this.dummyRoot.application = application;
+            // this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
+            this.dummyRoot.style = new UIStyleSet(dummyRoot);
+            this.dummyRoot.View = this;
+            this.dummyRoot.children = new LightList<UIElement>(1);
+            this.dummyRoot.id = application.elementSystem.CreateElement(dummyRoot, 0, -999, -999, UIElementFlags.EnabledFlagSet);
+            
+            dummyRoot.isAncestorEnabled = true;
+            dummyRoot.isSelfEnabled = true;
+            dummyRoot.isAlive = true;
+            
+            this.sizeChanged = true;
+        }
+
+        internal void Init(UIElement element) {
+            element.parent = dummyRoot;
+            dummyRoot.children.Add(element);
+            application.elementSystem.AddChild(dummyRoot.id, element.id);
+            application.InitializeElement(element);
+        }
+        
         internal UIView(Application application, string name, UIElement element, Matrix4x4 matrix, Size size) {
             this.name = name;
             this.application = application;
@@ -66,7 +94,17 @@ namespace UIForia.Rendering {
             this.dummyRoot.View = this;
             this.dummyRoot.children = new LightList<UIElement>(1);
             this.dummyRoot.id = application.elementSystem.CreateElement(dummyRoot, 0, -999, -999, UIElementFlags.EnabledFlagSet);
+            
+            dummyRoot.isAncestorEnabled = true;
+            dummyRoot.isSelfEnabled = true;
+            dummyRoot.isAlive = true;
+            
             // probably need some setup here
+            element.parent = dummyRoot;
+            dummyRoot.children.Add(element);
+            
+            application.elementSystem.AddChild(dummyRoot.id, element.id);
+            
             application.InitializeElement(element);
             this.sizeChanged = true;
         }

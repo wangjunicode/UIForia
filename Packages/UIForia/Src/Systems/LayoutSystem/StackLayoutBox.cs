@@ -39,7 +39,7 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        public override void OnChildrenChanged(LightList<LayoutBox> childList) { }
+        public override void OnChildrenChanged() { }
 
         public override void OnStyleChanged(StyleProperty[] propertyList, int propertyCount) {
             for (int i = 0; i < propertyCount; i++) {

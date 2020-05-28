@@ -41,6 +41,7 @@ namespace Src.Systems {
         }
 
         private void DrawClipShapes(RenderContext ctx) {
+            return;
             LightList<ClipData> clippers = view.application.LayoutSystem.GetLayoutRunner(view.dummyRoot).clipperList;
             for (int i = 0; i < clippers.size; i++) {
                 ClipData clipData = clippers.array[i];

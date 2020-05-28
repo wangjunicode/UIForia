@@ -8,7 +8,7 @@ namespace Tests.Mocks {
 
     public class MockInputSystem : InputSystem {
         
-        public MockInputSystem(ILayoutSystem layoutSystem) : base(layoutSystem, new MockKeyboardInputManager()) { }
+        public MockInputSystem(UIForia.Systems.LayoutSystem layoutSystem) : base(layoutSystem, new MockKeyboardInputManager()) { }
 
         public void SetMouseState(MouseState mouseState) {
             this.mouseState = mouseState;

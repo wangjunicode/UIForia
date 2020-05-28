@@ -228,7 +228,7 @@ namespace UIForia.Util.Unsafe {
             state.size = count;
         }
 
-        [DebuggerTypeProxy(typeof(DisposedDataListDebugView<>))]
+   //     [DebuggerTypeProxy(typeof(DisposedDataListDebugView<>))]
         public struct Shared : IDisposable {
 
             [NativeDisableUnsafePtrRestriction] public DataListState* state;
@@ -376,7 +376,7 @@ namespace UIForia.Util.Unsafe {
             return (T*) state.array;
         }
 
-        [DebuggerTypeProxy(typeof(DataListDebugView<>))]
+        // [DebuggerTypeProxy(typeof(DataListDebugView<>))]
         public struct Shared : IDisposable {
 
             [NativeDisableUnsafePtrRestriction] public DataListState* state;

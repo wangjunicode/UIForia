@@ -12,6 +12,10 @@ namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_::APPNAME:: : ITemplateLoader {
         
+        public MaterialDatabase GetMaterialDatabase() {
+            return null;
+        }
+
         public string[] StyleFilePaths => styleFilePaths;
 
         private string[] styleFilePaths = {
@@ -77,6 +81,7 @@ namespace UIForia.Generated {
 ::BINDINGS::
 ::SLOTS::
     }
+
 
 }
 #pragma warning restore 0164

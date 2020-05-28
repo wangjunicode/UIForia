@@ -447,9 +447,9 @@ namespace UIForia.Util.Unsafe {
                 MemCpy(newPtr, oldPtr, sizeof(T) * oldCount);
             }
 
-            if (clearNewMemory) {
-                MemClear(newPtr + oldCount, newCount - oldCount);
-            }
+            // if (clearNewMemory) {
+            //     MemClear(newPtr + oldCount, newCount - oldCount);
+            // }
         }
 
         public static int ByteSize<T, T1>(int count) where T : unmanaged where T1 : unmanaged {

@@ -246,8 +246,10 @@ namespace UIForia.Editor {
                 DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredWidth), false);
                 DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredHeight), false);
 
-                DrawLabel("Block Width Provider:", selectedElement.layoutBox.GetBlockWidthProvider() + " size: " + selectedElement.layoutBox.ComputeBlockWidth(1));
-                DrawLabel("Block Height Provider:", selectedElement.layoutBox.GetBlockHeightProvider() + " size: " + selectedElement.layoutBox.ComputeBlockHeight(1));
+                if (selectedElement.layoutBox != null) {
+                //    DrawLabel("Block Width Provider:", selectedElement.layoutBox.GetBlockWidthProvider() + " size: " + selectedElement.layoutBox.ComputeBlockWidth(1));
+                //    DrawLabel("Block Height Provider:", selectedElement.layoutBox.GetBlockHeightProvider() + " size: " + selectedElement.layoutBox.ComputeBlockHeight(1));
+                }
 
                 GUILayout.Space(16);
 

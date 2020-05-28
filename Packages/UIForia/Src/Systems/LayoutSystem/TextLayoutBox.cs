@@ -81,7 +81,7 @@ namespace UIForia.Systems {
             return retn;
         }
 
-        public override void OnChildrenChanged(LightList<LayoutBox> childList) { }
+        public override void OnChildrenChanged() { }
 
         public override void RunLayoutHorizontal(int frameId) { }
 

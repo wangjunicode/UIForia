@@ -6,7 +6,10 @@ namespace UIForia.Layout {
         Flex,
         Grid,
         Radial,
-        Stack
+        Stack,
+        Image,
+        ScrollView,
+        Text
 
     }
 

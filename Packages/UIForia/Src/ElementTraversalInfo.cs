@@ -6,16 +6,16 @@
         public int depth;
         public int ftbIndex;
         public int btfIndex;
-        public ushort templateOriginId;
-        public ushort templateId;
+        // public ushort templateOriginId;
+        // public ushort templateId;
 
         public bool IsDescendentOf(in ElementTraversalInfo info) {
             return ftbIndex > info.ftbIndex && btfIndex > info.btfIndex;
         }
 
-        public bool IsTemplateDescendentOf(in ElementTraversalInfo info) {
-            return templateOriginId == info.templateId && ftbIndex > info.ftbIndex && btfIndex > info.btfIndex;
-        }
+//        public bool IsTemplateDescendentOf(in ElementTraversalInfo info) {
+//            return templateOriginId == info.templateId && ftbIndex > info.ftbIndex && btfIndex > info.btfIndex;
+//        }
 
         public bool IsAncestorOf(in ElementTraversalInfo info) {
             return ftbIndex < info.ftbIndex && btfIndex < info.btfIndex;

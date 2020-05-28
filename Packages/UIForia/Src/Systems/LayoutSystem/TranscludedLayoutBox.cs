@@ -16,9 +16,10 @@ namespace UIForia.Systems {
             throw new NotImplementedException();
         }
 
-        public override void OnChildrenChanged(LightList<LayoutBox> childList) {
-            this.childList = this.childList ?? new LightList<LayoutBox>(childList.size);
-            this.childList.AddRange(childList);
+        public override void OnChildrenChanged() {
+            // throw new NotImplementedException();
+            // this.childList = this.childList ?? new LightList<LayoutBox>(childList.size);
+            // this.childList.AddRange(childList);
         }
 
         public override void RunLayoutHorizontal(int frameId) {

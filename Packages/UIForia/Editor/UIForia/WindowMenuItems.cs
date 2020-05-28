@@ -9,6 +9,11 @@ namespace UIForia.Editor {
             EditorWindow.GetWindow<UIForiaHierarchyWindow>("UIForia Hierarchy");
         }
 
+        [MenuItem("Window/UIForia/UIForia Layout Hierarchy")]
+        private static void UIForiaLayoutHierarchy() {
+            EditorWindow.GetWindow<UIForiaLayoutHierarchyWindow>("UIForia Layout Hierarchy");
+        }
+        
         [MenuItem("Window/UIForia/UIForia Inspector")]
         private static void UIForiaInspector() {
             EditorWindow.GetWindow<UIForiaInspectorWindow>("UIForia Inspector");

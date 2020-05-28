@@ -16,7 +16,7 @@ namespace UIForia.Systems {
 
         private const float k_DragThreshold = 5f;
 
-        private readonly ILayoutSystem layoutSystem;
+        private readonly LayoutSystem layoutSystem;
 
         protected readonly KeyboardInputManager keyboardInputManager;
 
@@ -62,7 +62,7 @@ namespace UIForia.Systems {
 
         private int focusableIndex;
 
-        protected InputSystem(ILayoutSystem layoutSystem, KeyboardInputManager keyboardInputManager = null) {
+        protected InputSystem(LayoutSystem layoutSystem, KeyboardInputManager keyboardInputManager = null) {
             this.layoutSystem = layoutSystem;
 
             this.m_MouseDownElements = new LightList<UIElement>();
@@ -315,14 +315,17 @@ namespace UIForia.Systems {
             LightList<UIElement> queryResults = (LightList<UIElement>) layoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
 
             // todo -- bug!
+            var traversalTable = layoutSystem.elementSystem.traversalTable;
             queryResults.Sort((a, b) => {
                 int viewDepthComparison = b.View.Depth - a.View.Depth;
                 if (viewDepthComparison != 0) return viewDepthComparison;
-                if (b.layoutBox.zIndex != a.layoutBox.zIndex) {
-                    return b.layoutBox.zIndex - a.layoutBox.zIndex;
-                }
+                // if (b.layoutBox.zIndex != a.layoutBox.zIndex) {
+                //     return b.layoutBox.zIndex - a.layoutBox.zIndex;
+                // }
+                //
+                return traversalTable[a.id].ftbIndex - traversalTable[b.id].ftbIndex;
+                // return b.layoutBox.traversalIndex - a.layoutBox.traversalIndex;
 
-                return b.layoutBox.traversalIndex - a.layoutBox.traversalIndex;
             });
 
             if (!IsDragging) {
@@ -694,7 +697,7 @@ namespace UIForia.Systems {
             
         }
 
-        private void BlurOnDisableOrDestroy() {
+        internal void BlurOnDisableOrDestroy() {
             if (m_FocusedElement != null && (m_FocusedElement.isDisabled || m_FocusedElement.isDestroyed)) {
                 ReleaseFocus((IFocusable) m_FocusedElement);
             }

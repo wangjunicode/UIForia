@@ -8,75 +8,102 @@ using UnityEngine.Assertions;
 
 namespace UIForia.Systems {
 
+    public struct LayoutHierarchyInfo {
+
+        public ElementId parentId;
+        public ElementId firstChildId;
+        public ElementId lastChildId;
+        public ElementId nextSiblingId;
+        public ElementId prevSiblingId;
+        public int childCount;
+
+    }
+    
     public abstract class LayoutBox {
 
+        public LayoutBoxFlags flags;
+        
         public float finalWidth;
         public float finalHeight;
+        public float cachedContentWidth;
+        public float cachedContentHeight;
+        public float cachedBlockWidth;
+        public float cachedBlockHeight;
 
+        public UIElement element;
+   
+        public ElementId layoutParentId;
+        public ElementId elementId;
+        
+        public ElementSystem elementSystem;
+        protected LayoutSystem layoutSystem;
+        
         public float paddingBorderHorizontalStart;
         public float paddingBorderHorizontalEnd;
         public float paddingBorderVerticalStart;
         public float paddingBorderVerticalEnd;
 
-        public LayoutBoxFlags flags;
-        public float cachedContentWidth;
-        public float cachedContentHeight;
+        public float marginHorizontalStart;
+        public float marginHorizontalEnd;
+        public float marginVerticalStart;
+        public float marginVerticalEnd;
+        
+        
+        // Kill List
+        
+        // move to debug data
         internal int cacheMiss;
         internal int cacheHit;
-        public float cachedBlockWidth;
-        public float cachedBlockHeight;
-
-        public int childCount;
-      
-        public float transformX;
-        public float transformY;
-        public ClipBehavior clipBehavior;
-        public ClipBounds clipBounds;
-        public int traversalIndex;
-        public int zIndex;
-
-        public OffsetMeasurement transformPositionX;
-        public OffsetMeasurement transformPositionY;
-        public float transformScaleX;
-        public float transformScaleY;
-        public float transformRotation;
-        public UIFixedLength transformPivotX;
-        public UIFixedLength transformPivotY;
-
-        public UIElement element;
+        
         public LayoutBox firstChild;
         public LayoutBox nextSibling;
         public LayoutBox parent;
-        public ElementId layoutParent;
-        public ElementId elementId;
-        public ElementSystem elementSystem;
-        
-        public ClipData clipData;
-        protected LayoutSystem layoutSystem;
-        
+        //public ClipData clipData;
+        //public float transformX;
+        //public float transformY;
+        //public ClipBehavior clipBehavior;
+        //public ClipBounds clipBounds;
+        //public int traversalIndex;
+        //public int zIndex;
+//
+        //public OffsetMeasurement transformPositionX;
+        //public OffsetMeasurement transformPositionY;
+        //public float transformScaleX;
+        //public float transformScaleY;
+        //public float transformRotation;
+        //public UIFixedLength transformPivotX;
+        //public UIFixedLength transformPivotY;
+
         public void Initialize(LayoutSystem layoutSystem, ElementSystem elementSystem, UIElement element, int frameId) {
             this.elementId = element.id;
             this.elementSystem = elementSystem;
             this.layoutSystem = layoutSystem;
             this.element = element;
+            this.finalWidth = -1;
+            this.finalHeight = -1;
+            this.cachedContentWidth = -1;
+            this.cachedContentHeight = -1;
+            this.cachedBlockWidth = -1;
+            this.cachedBlockHeight = -1;
+            this.cacheHit = 0;
+            this.cacheMiss = 0;
             OnInitialize();
         }
 
+        public int childCount {
+            get => elementSystem.layoutHierarchyTable[elementId].childCount;
+        }
+        
         protected virtual void OnInitialize() { }
 
         public void Destroy() {
             OnDestroy();
-            clipData = null; // /might kill this
             layoutSystem = null;
             elementSystem = null; 
             flags = 0;
             element = null;
             nextSibling = null;
             firstChild = null;
-            if (parent != null) {
-                parent.flags |= LayoutBoxFlags.GatherChildren;
-                parent = null;
-            }
         }
 
         protected virtual void OnDestroy() { }
@@ -85,38 +112,10 @@ namespace UIForia.Systems {
 
         protected abstract float ComputeContentHeight();
 
-        // update list of children and set their layout parent accordingly
-        public void SetChildren(LightList<LayoutBox> layoutBoxes) {
-            firstChild = null;
-            childCount = layoutBoxes.size;
-            if (childCount > 0) {
-                LayoutResult[] layoutTable = elementSystem.layoutTable;
-
-                firstChild = layoutBoxes[0];
-                firstChild.parent = this;
-                layoutTable[firstChild.element.id.index].layoutParent = element.id;
-
-                for (int i = 0; i < layoutBoxes.size; i++) {
-                    layoutBoxes.array[i].parent = this;
-                    layoutBoxes.array[i].nextSibling = null;
-                    layoutTable[layoutBoxes.array[i].element.id.index].layoutParent = element.id;
-                    // layoutBoxes.array[i].element.layoutResult.layoutParent = element.id;
-                }
-
-                LayoutBox ptr = firstChild;
-                for (int i = 1; i < layoutBoxes.size; i++) {
-                    ptr.nextSibling = layoutBoxes.array[i];
-                    ptr = ptr.nextSibling;
-                }
-            }
-
-            OnChildrenChanged(layoutBoxes);
-        }
-
-        public abstract void OnChildrenChanged(LightList<LayoutBox> childList);
+        public abstract void OnChildrenChanged();
 
         public void UpdateContentAreaWidth() {
-            flags &= ~LayoutBoxFlags.ContentAreaWidthChanged;
+            // flags &= ~LayoutBoxFlags.ContentAreaWidthChanged;
             Vector2 viewSize = element.View.Viewport.size;
             float emSize = element.style.GetResolvedFontSize();
             
@@ -144,7 +143,7 @@ namespace UIForia.Systems {
         }
 
         public void UpdateContentAreaHeight() {
-            flags &= ~LayoutBoxFlags.ContentAreaHeightChanged;
+            // flags &= ~LayoutBoxFlags.ContentAreaHeightChanged;
             Vector2 viewSize = element.View.Viewport.size;
             float emSize = element.style.GetResolvedFontSize();
             ref LayoutResult layoutResult = ref element.layoutResult;
@@ -179,11 +178,14 @@ namespace UIForia.Systems {
             layoutResult.margin.right = 0;
             if (size != finalWidth) {
                 flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                flags |= LayoutBoxFlags.RecomputeClipping;
                 finalWidth = size;
             }
 
             UpdateContentAreaWidth();
+        }
+
+        public static void ApplyLayoutHorizontalBurst(float localX, float alignedPosition, in LayoutSize reportedSize, float size, float availableSize, LayoutFit defaultFit) {
+            
         }
 
         public void ApplyLayoutHorizontal(float localX, float alignedPosition, in LayoutSize reportedSize, float size, float availableSize, LayoutFit defaultFit, int frameId) {
@@ -248,15 +250,14 @@ namespace UIForia.Systems {
             layoutResult.margin.left = reportedSize.marginStart;
             layoutResult.margin.right = reportedSize.marginEnd;
 
-            if ((flags & LayoutBoxFlags.RequireAlignmentHorizontal) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
-                flags |= LayoutBoxFlags.RequiresMatrixUpdate;
-                flags |= LayoutBoxFlags.RecomputeClipping;
-            }
+            // if ((flags & LayoutBoxFlags.RequireAlignmentHorizontal) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
+            //     flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+            //     flags |= LayoutBoxFlags.RecomputeClipping;
+            // }
 
             // todo -- should probably be when content area size changes, not just overall size
             if (newWidth != finalWidth) {
                 flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                flags |= LayoutBoxFlags.RecomputeClipping;
                 finalWidth = newWidth;
             }
 
@@ -317,9 +318,9 @@ namespace UIForia.Systems {
 
             // todo -- margin
 
-            if ((flags & LayoutBoxFlags.RequireAlignmentVertical) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
-                flags |= LayoutBoxFlags.RequiresMatrixUpdate;
-            }
+            // if ((flags & LayoutBoxFlags.RequireAlignmentVertical) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
+            //     flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+            // }
 
             if (newHeight != finalHeight) {
                 flags |= LayoutBoxFlags.RequireLayoutVertical;
@@ -341,7 +342,6 @@ namespace UIForia.Systems {
             layoutResult.margin.bottom = 0;
             if (size != finalHeight) {
                 flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                flags |= LayoutBoxFlags.RecomputeClipping;
                 finalHeight = size;
             }
 
@@ -533,7 +533,7 @@ namespace UIForia.Systems {
 
             // ignored elements can use the output size of their parent since it has been resolved already
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                LayoutResult parentResult = elementSystem.layoutTable[layoutParent.index]; //element.layoutResult.layoutParent;
+                LayoutResult parentResult = elementSystem.layoutTable[layoutParentId.index]; //element.layoutResult.layoutParent;
                 paddingBorder = parentResult.padding.left + parentResult.padding.right + parentResult.border.left + parentResult.border.right;
                 return Math.Max(0, (parentResult.actualSize.width - paddingBorder) * value);
             }
@@ -561,7 +561,7 @@ namespace UIForia.Systems {
         internal float ComputeBlockWidth(float value) {
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
                 // LayoutResult parentResult = element.layoutResult.layoutParent;
-                LayoutResult parentResult = elementSystem.layoutTable[layoutParent.index];
+                LayoutResult parentResult = elementSystem.layoutTable[layoutParentId.index];
                 return Math.Max(0, parentResult.actualSize.width * value);
             }
 
@@ -600,7 +600,7 @@ namespace UIForia.Systems {
             // ignored elements can use the output size of their parent since it has been resolved already
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
                 // LayoutResult parentResult = element.layoutResult.layoutParent;
-                LayoutResult parentResult = elementSystem.layoutTable[layoutParent.index];
+                LayoutResult parentResult = elementSystem.layoutTable[layoutParentId.index];
                 paddingBorder = parentResult.padding.top + parentResult.padding.bottom + parentResult.border.top + parentResult.border.bottom;
                 return Math.Max(0, (parentResult.actualSize.height - paddingBorder) * value);
             }
@@ -630,7 +630,7 @@ namespace UIForia.Systems {
 
             // ignored elements can use the output size of their parent since it has been resolved already
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                LayoutResult parentResult = elementSystem.layoutTable[layoutParent.index];
+                LayoutResult parentResult = elementSystem.layoutTable[layoutParentId.index];
                 // LayoutResult parentResult = element.layoutResult.layoutParent;
                 return Math.Max(0, (parentResult.actualSize.height) * value);
             }
@@ -852,65 +852,65 @@ namespace UIForia.Systems {
             }
         }
 
-        public void UpdateClipper() {
-            if (element.style.OverflowX != Overflow.Visible || element.style.OverflowY != Overflow.Visible) {
-                flags |= LayoutBoxFlags.Clipper;
-            }
-            else {
-                flags &= ~LayoutBoxFlags.Clipper;
-            }
-        }
+        // public void UpdateClipper() {
+        //     if (element.style.OverflowX != Overflow.Visible || element.style.OverflowY != Overflow.Visible) {
+        //         flags |= LayoutBoxFlags.Clipper;
+        //     }
+        //     else {
+        //         flags &= ~LayoutBoxFlags.Clipper;
+        //     }
+        // }
 
         public void UpdateRequiresHorizontalAlignment() {
-            UIStyleSet style = element.style;
-            AlignmentTarget alignment = style.AlignmentTargetX;
-
-            if (alignment != AlignmentTarget.Unset) {
-                flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
-                return;
-            }
-
-            if (style.AlignmentOffsetX.value != 0) {
-                flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
-                return;
-            }
-
-            if (style.AlignmentOriginX.value != 0) {
-                flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
-                return;
-            }
-
-            if (style.AlignmentDirectionX != AlignmentDirection.Start) {
-                flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
-                return;
-            }
+            // UIStyleSet style = element.style;
+            // AlignmentTarget alignment = style.AlignmentTargetX;
+            //
+            // if (alignment != AlignmentTarget.Unset) {
+            //     flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
+            //     return;
+            // }
+            //
+            // if (style.AlignmentOffsetX.value != 0) {
+            //     flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
+            //     return;
+            // }
+            //
+            // if (style.AlignmentOriginX.value != 0) {
+            //     flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
+            //     return;
+            // }
+            //
+            // if (style.AlignmentDirectionX != AlignmentDirection.Start) {
+            //     flags |= LayoutBoxFlags.RequireAlignmentHorizontal;
+            //     return;
+            // }
 
             //   flags &= ~LayoutBoxFlags.RequireAlignmentHorizontal;
         }
 
         public void UpdateRequiresVerticalAlignment() {
-            UIStyleSet style = element.style;
-            AlignmentTarget alignment = style.AlignmentTargetY;
-
-            if (alignment != AlignmentTarget.Unset) {
-                flags |= LayoutBoxFlags.RequireAlignmentVertical;
-                return;
-            }
-
-            if (style.AlignmentOffsetY.value != 0) {
-                flags |= LayoutBoxFlags.RequireAlignmentVertical;
-                return;
-            }
-
-            if (style.AlignmentOriginY.value != 0) {
-                flags |= LayoutBoxFlags.RequireAlignmentVertical;
-                return;
-            }
-
-            if (style.AlignmentDirectionY != AlignmentDirection.Start) {
-                flags |= LayoutBoxFlags.RequireAlignmentVertical;
-                return;
-            }
+            // UIStyleSet style = element.style;
+            // AlignmentTarget alignment = style.AlignmentTargetY;
+            //
+            // if (alignment != AlignmentTarget.Unset) {
+            //     flags |= LayoutBoxFlags.RequireAlignmentVertical;
+            //     return;
+            // }
+            //
+            // if (style.AlignmentOffsetY.value != 0) {
+            //     flags |= LayoutBoxFlags.RequireAlignmentVertical;
+            //     return;
+            // }
+            //
+            // if (style.AlignmentOriginY.value != 0) {
+            //     flags |= LayoutBoxFlags.RequireAlignmentVertical;
+            //     return;
+            // }
+            //
+            // if (style.AlignmentDirectionY != AlignmentDirection.Start) {
+            //     flags |= LayoutBoxFlags.RequireAlignmentVertical;
+            //     return;
+            // }
 
             // flags &= ~LayoutBoxFlags.RequireAlignmentVertical;
         }
@@ -923,31 +923,19 @@ namespace UIForia.Systems {
 //            element.layoutHistory = element.layoutHistory ?? new LayoutHistory(element);
 //            element.layoutHistory.AddLogEntry(LayoutDirection.Horizontal, -1, LayoutReason.Initialized, boxName);
 //            element.layoutHistory.AddLogEntry(LayoutDirection.Vertical, -1, LayoutReason.Initialized, boxName);
-            flags |= LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical | LayoutBoxFlags.RequiresMatrixUpdate;
+            flags |= LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutVertical;
 
             if (element.style.LayoutBehavior == LayoutBehavior.Ignored) {
                 flags |= LayoutBoxFlags.Ignored;
             }
-
-            zIndex = element.style.ZIndex;
-
-            transformRotation = element.style.TransformRotation;
-            transformPositionX = element.style.TransformPositionX;
-            transformPositionY = element.style.TransformPositionY;
-            transformPivotX = element.style.TransformPivotX;
-            transformPivotY = element.style.TransformPivotY;
-            transformScaleX = element.style.TransformScaleX;
-            transformScaleY = element.style.TransformScaleY;
-
-            clipBehavior = element.style.ClipBehavior;
-            clipBounds = element.style.ClipBounds;
-            UpdateBlockProviderWidth();
-            UpdateBlockProviderHeight();
-
-            UpdateRequiresHorizontalAlignment();
-            UpdateRequiresVerticalAlignment();
-
-            UpdateClipper();
+            
+            // UpdateBlockProviderWidth();
+            // UpdateBlockProviderHeight();
+            //
+            // UpdateRequiresHorizontalAlignment();
+            // UpdateRequiresVerticalAlignment();
+            //
+            // UpdateClipper();
         }
 
         internal void GetChildren(LightList<LayoutBox> list) {
@@ -984,7 +972,7 @@ namespace UIForia.Systems {
         internal UIElement GetBlockWidthProvider() {
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
                 // LayoutResult parentResult = element.layoutResult.layoutParent;
-                return elementSystem.instanceTable[layoutParent.index]; //parentResult.element;
+                return elementSystem.instanceTable[layoutParentId.index]; //parentResult.element;
             }
 
             LayoutBox ptr = parent;
@@ -1008,7 +996,7 @@ namespace UIForia.Systems {
             if ((flags & LayoutBoxFlags.Ignored) != 0) {
                 // LayoutResult parentResult = element.layoutResult.layoutParent;
                 // return parentResult.element;
-                return elementSystem.instanceTable[layoutParent.index];
+                return elementSystem.instanceTable[layoutParentId.index];
             }
 
             LayoutBox ptr = parent;

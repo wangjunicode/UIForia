@@ -28,14 +28,24 @@ namespace UIForia.Systems {
             // if disabled or destroyed, move on
             // if enabled this frame, move on
 
+            const UIElementFlags mask = ~UIElementFlags.EnableStateChanged | UIElementFlags.EnabledFlagSet;
+            
+            // todo -- dont even add things that were enabled / created this frame to the change set list
+            
             for (int idx = 1; idx < changeSets.size; idx++) {
+                
                 ref ChangeSet changeSet = ref changeSets.array[idx];
                 UIElementFlags flags = elementSystem.metaTable[changeSet.element.id].flags;
-                if ((flags & UIElementFlags.EnabledFlagSet) != (UIElementFlags.EnabledFlagSet)) {
+                
+                if ((flags & mask) != (UIElementFlags.EnabledFlagSet)) {
                     changeSet.element.style.changeSetId = 0;
                     changeSet.changes.size = 0;
                     changeSet.element = null;
+                    // need to swap or we kill our reference to the array 
+                    ChangeSet tmp = changeSet;
+                    int end = changeSets.size - 1;
                     changeSets[idx--] = changeSets[--changeSets.size];
+                    changeSets.array[end] = tmp;
                 }
 
             }
@@ -65,8 +75,7 @@ namespace UIForia.Systems {
                 changeSet.element = null;
             }
             
-            changeSets.QuickClear();
-            changeSets.size = 1; // start at size 1
+            changeSets.size = 1; // start at size 1. DO NOT CLEAR, keeping array references 
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {

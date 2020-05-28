@@ -168,6 +168,11 @@ namespace UIForia.Systems {
         }
 
         public void ReleaseFocus(IFocusable target) {
+
+            if (m_FocusedElement == null) {
+                return;
+            }
+
             if (m_FocusedElement.isDisabled || m_FocusedElement.isDestroyed) {          
                 m_FocusedElement = null;
                 focusableIndex = -1;

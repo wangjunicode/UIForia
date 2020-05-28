@@ -1,6 +1,6 @@
 [![openupm](https://img.shields.io/npm/v/com.klang-games.uiforia?label=UIForia&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.klang-games.uiforia/)
 
-# UIForia - new UI for Unity ... PREVIEW!
+# UIForia - a new UI framework written for Unity ... PREVIEW!
 This is just a preview, we'll release a stable version of UIForia later
 this year, once we're ready. Feel free to look at the current state and
 get excited! The docs aren't ready and we still rely on a forked version

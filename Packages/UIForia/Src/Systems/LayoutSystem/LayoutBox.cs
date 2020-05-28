@@ -183,11 +183,7 @@ namespace UIForia.Systems {
 
             UpdateContentAreaWidth();
         }
-
-        public static void ApplyLayoutHorizontalBurst(float localX, float alignedPosition, in LayoutSize reportedSize, float size, float availableSize, LayoutFit defaultFit) {
-            
-        }
-
+        
         public void ApplyLayoutHorizontal(float localX, float alignedPosition, in LayoutSize reportedSize, float size, float availableSize, LayoutFit defaultFit, int frameId) {
             LayoutFit fit = element.style.LayoutFitHorizontal;
 
@@ -781,31 +777,6 @@ namespace UIForia.Systems {
             }
         }
 
-        public struct LayoutSize {
-
-            public float preferred;
-            public float minimum;
-            public float maximum;
-            public float marginStart;
-            public float marginEnd;
-
-            public float Clamped {
-                get {
-                    float f = preferred;
-                    if (preferred > maximum) {
-                        f = maximum;
-                    }
-
-                    if (minimum > f) {
-                        f = minimum;
-                    }
-
-                    return f;
-                }
-            }
-
-        }
-
         protected virtual bool IsAutoWidthContentBased() {
             return true;
         }
@@ -1024,6 +995,31 @@ namespace UIForia.Systems {
             finalWidth = -1;
             finalHeight = -1;
             flags |= LayoutBoxFlags.RequireLayoutVertical | LayoutBoxFlags.RequireLayoutHorizontal;
+        }
+
+    }
+
+    public struct LayoutSize {
+
+        public float preferred;
+        public float minimum;
+        public float maximum;
+        public float marginStart;
+        public float marginEnd;
+
+        public float Clamped {
+            get {
+                float f = preferred;
+                if (preferred > maximum) {
+                    f = maximum;
+                }
+
+                if (minimum > f) {
+                    f = minimum;
+                }
+
+                return f;
+            }
         }
 
     }

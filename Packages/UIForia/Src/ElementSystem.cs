@@ -47,6 +47,8 @@ namespace UIForia {
         public ElementTable<AlignmentInfo> alignmentInfoVertical;
         public ElementTable<LayoutBoxFlags> layoutFlags;
         
+        public ElementTable<LayoutBoxUnion> layoutBoxTable;
+
         public ElementSystem(int initialElementCount) {
             this.idGenerator = 1; // 0 is always invalid
             this.indexQueue = new Queue<int>(k_MinFreeIndices * 2);
@@ -55,7 +57,6 @@ namespace UIForia {
             // todo -- allocate from same buffer w/ front-back load config (grow one size from top, other from bottom)
             enabledElementsThisFrame = new DataList<ElementId>.Shared(64, Allocator.Persistent);
             disabledElementsThisFrame = new DataList<ElementId>.Shared(64, Allocator.Persistent);
-
             Initialize();
         }
 
@@ -255,6 +256,7 @@ namespace UIForia {
                 ref hierarchyTable.array,
                 ref layoutHierarchyTable.array,
                 ref layoutMetaDataTable.array,
+                ref layoutBoxTable.array,
                 elementCapacity,
                 newCapacity,
                 Allocator.Persistent,

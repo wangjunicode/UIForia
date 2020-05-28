@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems;
@@ -9,7 +8,7 @@ using Unity.Jobs;
 
 namespace UIForia.Layout {
 
-    internal class LayoutRunner2 {
+    internal unsafe class LayoutRunner2 : IDisposable {
 
         private UIElement rootElement;
         private LayoutSystem layoutSystem;
@@ -17,15 +16,19 @@ namespace UIForia.Layout {
         private UIView view;
         private ViewParameters viewParameters;
         private float lastDpi;
-
+        public BurstLayoutRunner* runner;
+        
         public LayoutRunner2(UIView view, LayoutSystem layoutSystem) {
             this.view = view;
+            this.rootElement = view.RootElement;
             this.layoutSystem = layoutSystem;
             this.elementSystem = layoutSystem.elementSystem;
+            this.runner = TypedUnsafe.Malloc<BurstLayoutRunner>(1, Allocator.Persistent);
         }
-        
+
+        // todo -- return job to run 
         public void RunLayout() {
-            
+
             if (rootElement.isDisabled) {
                 return;
             }
@@ -38,28 +41,19 @@ namespace UIForia.Layout {
                 applicationWidth = layoutSystem.application.Width,
                 applicationHeight = layoutSystem.application.Height
             };
-            
+
             float currentDpi = view.application.DPIScaleFactor;
-            
+
             if (currentDpi != lastDpi) {
                 // InvalidateAll(rootElement);
             }
-            
-            
-            
-        }
 
-        [StructLayout(LayoutKind.Explicit)]
-        public struct LayoutBoxUnion {
-
-            [FieldOffset(0)] public LayoutType layoutType;
-            [FieldOffset(4)] public FlexLayoutBoxBurst flex;
-            [FieldOffset(4)] public FlexLayoutBoxBurst text;
-            [FieldOffset(4)] public FlexLayoutBoxBurst grid;
-            [FieldOffset(4)] public FlexLayoutBoxBurst stack;
-            [FieldOffset(4)] public FlexLayoutBoxBurst scroll;
-            [FieldOffset(4)] public FlexLayoutBoxBurst radial;
-            [FieldOffset(4)] public FlexLayoutBoxBurst image;
+            new LayoutRun() {
+                rootElementId = rootElement.id,
+                layoutBoxTable = layoutSystem.elementSystem.layoutBoxTable,
+                layoutMetaTable = layoutSystem.elementSystem.layoutMetaDataTable,
+                layoutHierarchyTable = layoutSystem.elementSystem.layoutHierarchyTable
+            }.Run();
 
         }
 
@@ -68,12 +62,13 @@ namespace UIForia.Layout {
             public ElementId rootElementId;
             public ElementTable<LayoutHierarchyInfo> layoutHierarchyTable;
             public ElementTable<LayoutMetaData> layoutMetaTable;
-            public DataList<LayoutBoxUnion>.Shared layoutBoxList;
-            
+            public ElementTable<LayoutBoxUnion> layoutBoxTable;
+            public BurstLayoutRunner* runner;
+
             public void Execute() {
                 // todo -- profile traversing into list and then running vs running via tree
 
-                DataList<ElementId> stack = new DataList<ElementId>(128, Allocator.TempJob);
+                DataList<ElementId> stack = new DataList<ElementId>(256, Allocator.TempJob);
 
                 ElementId ptr = layoutHierarchyTable[rootElementId].lastChildId;
 
@@ -85,55 +80,26 @@ namespace UIForia.Layout {
                 while (stack.size != 0) {
                     ElementId current = stack[--stack.size];
 
-                    LayoutBoxId boxId = layoutMetaTable[current].layoutBoxId;
-                    
-                    RunLayoutHorizontal(boxId);
-                    
-                    ElementId childPtr = layoutHierarchyTable[rootElementId].lastChildId;
+                    // will need flags probably
+                    layoutBoxTable[current].RunLayoutHorizontal(runner);
+
+                    ElementId childPtr = layoutHierarchyTable[current].lastChildId;
 
                     while (childPtr != default) {
                         stack.Add(childPtr);
                         childPtr = layoutHierarchyTable[childPtr].prevSiblingId;
                     }
 
-
                 }
-                
+
                 stack.Dispose();
 
             }
 
-            private void RunLayoutHorizontal(LayoutBoxId layoutBoxId) {
-                
-                switch (layoutBoxId.layoutBoxType) {
+        }
 
-                    case LayoutType.Flex: {
-                        layoutBoxList[layoutBoxId.instanceId].flex.RunHorizontal();
-                        break;
-                    }
-
-                    case LayoutType.Unset:
-                        break;
-
-                    case LayoutType.Grid:
-                        break;
-
-                    case LayoutType.Radial:
-                        break;
-
-                    case LayoutType.Stack:
-                        break;
-                    
-                    case LayoutType.Text:
-                        break;
-                    
-                }
-            }
-
-            private static void RunLayoutHorizontal(LayoutType layoutType, ElementId elementId) {
-                
-               
-            } 
+        public void Dispose() {
+            TypedUnsafe.Dispose(runner, Allocator.Persistent);
         }
 
     }

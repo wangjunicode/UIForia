@@ -7,6 +7,16 @@ namespace UIForia.Layout {
         Grid,
         Radial,
         Stack,
+
+    }
+    
+    public enum LayoutBoxType {
+
+        Unset,
+        Flex,
+        Grid,
+        Radial,
+        Stack,
         Image,
         ScrollView,
         Text

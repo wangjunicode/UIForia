@@ -18,11 +18,11 @@ namespace UIForia.Systems {
     public struct LayoutBoxId {
 
         public int instanceId;
-        public LayoutType layoutBoxType;
+        public LayoutBoxType layoutBoxType;
 
     }
-    
-    public class LayoutSystem : ILayoutSystem {
+
+    public class LayoutSystem : ILayoutSystem, IDisposable {
 
         internal Application application;
         private LightList<LayoutRunner> runners;
@@ -37,8 +37,7 @@ namespace UIForia.Systems {
         private SizedArray<ScrollViewLayoutBox> scrollLayoutPool;
         private SizedArray<TranscludedLayoutBox> transcludedLayoutPool;
 
-        private DataList<FlexLayoutInfo>.Shared flexLayoutInfo;
-        
+
         public LayoutSystem(Application application, ElementSystem elementSystem) {
             this.application = application;
             this.elementSystem = elementSystem;
@@ -55,7 +54,6 @@ namespace UIForia.Systems {
 
             application.onViewsSorted += uiViews => { runners.Sort((a, b) => Array.IndexOf(uiViews, b.rootElement.View) - Array.IndexOf(uiViews, a.rootElement.View)); };
         }
-        
 
         // set box to null when disabling? should be cheap to grab a new one from pool at that point when re-enabling
         // just need to re-initialize styles which I think wont be that expensive
@@ -184,116 +182,26 @@ namespace UIForia.Systems {
 
         }
 
-        private int flexFreeList;
-        private DataList<FlexLayoutBoxBurst> flexLayoutBoxes;
-        
-        public void InitializeLayoutBox(UIElement element) {
 
-            LayoutType layoutType = element.style.LayoutType;
-            
-            switch (element) {
-                // case UITextElement _:
-                //     layoutBox = textLayoutPool.size > 0 ? textLayoutPool.RemoveLast() : new TextLayoutBox();
-                //     break;
-                //
-                // case ScrollView _:
-                //     layoutBox = scrollLayoutPool.size > 0 ? scrollLayoutPool.RemoveLast() : new ScrollViewLayoutBox();
-                //     break;
-                //
-                // case UIImageElement _:
-                //     layoutBox = imageLayoutPool.size > 0 ? imageLayoutPool.RemoveLast() : new ImageLayoutBox();
-                //     break;
+      
 
-                default:
-                    switch (layoutType) { // todo -- use meta data
-                        default:
-                        case LayoutType.Unset:
-                        case LayoutType.Flex:
-                            // layoutBoxTable[element.id] = new LayoutRunner2.LayoutBoxUnion() {
-                            //     flex = 
-                            // }
-                            break;
-
-                        case LayoutType.Grid:
-                            // layoutBox = gridLayoutPool.size > 0 ? gridLayoutPool.RemoveLast() : new GridLayoutBox();
-                            break;
-
-                        case LayoutType.Radial:
-                            throw new NotImplementedException();
-
-                        case LayoutType.Stack:
-                            // layoutBox = stackLayoutPool.size > 0 ? stackLayoutPool.RemoveLast() : new StackLayoutBox();
-                            break;
-                    }
-
-                    break;
-            }
-
-            // elementSystem.layoutBoxes[element.id.index] = layoutBox;
-            // element.layoutBox = layoutBox; // todo -- remove
-            elementSystem.layoutHierarchyTable[element.id] = default;
-            
-            
-        }
-        
         // also triggered for create
         public void HandleElementEnabled(DataList<ElementId>.Shared enabledElements) {
+
             for (int i = 0; i < enabledElements.size; i++) {
 
                 UIElement element = elementSystem.instanceTable[enabledElements[i].index];
+                elementSystem.layoutHierarchyTable[element.id] = default;
 
-                LayoutBox layoutBox = null;
-                switch (element) {
-                    case UITextElement _:
-                        layoutBox = textLayoutPool.size > 0 ? textLayoutPool.RemoveLast() : new TextLayoutBox();
-                        break;
+                // this point styles are all final for the frame because we ignore changesets for elements enabled this frame
+                ref LayoutBoxUnion layoutBoxUnion = ref elementSystem.layoutBoxTable[element.id];
+                layoutBoxUnion.Initialize(element);
 
-                    case ScrollView _:
-                        layoutBox = scrollLayoutPool.size > 0 ? scrollLayoutPool.RemoveLast() : new ScrollViewLayoutBox();
-                        break;
-
-                    case UIImageElement _:
-                        layoutBox = imageLayoutPool.size > 0 ? imageLayoutPool.RemoveLast() : new ImageLayoutBox();
-                        break;
-
-                    default:
-                        switch (element.style.LayoutType) { // todo -- use meta data
-                            default:
-                            case LayoutType.Unset:
-                            case LayoutType.Flex:
-                                layoutBox = flexLayoutPool.size > 0 ? flexLayoutPool.RemoveLast() : new FlexLayoutBox(1);
-                                break;
-
-                            case LayoutType.Grid:
-                                layoutBox = gridLayoutPool.size > 0 ? gridLayoutPool.RemoveLast() : new GridLayoutBox();
-                                break;
-
-                            case LayoutType.Radial:
-                                throw new NotImplementedException();
-
-                            case LayoutType.Stack:
-                                layoutBox = stackLayoutPool.size > 0 ? stackLayoutPool.RemoveLast() : new StackLayoutBox();
-                                break;
-                        }
-
-                        break;
+                if (layoutBoxUnion.layoutType == LayoutBoxType.Text) {
+                    // todo -- add to list for text change detection, we'll poll every frame to check for updates to content or styles that matter
                 }
 
-                elementSystem.layoutBoxes[element.id.index] = layoutBox;
-                element.layoutBox = layoutBox; // todo -- remove
-                elementSystem.layoutHierarchyTable[element.id] = default;
-            }
-
-            for (int i = 0; i < enabledElements.size; i++) {
-                
-                UIElement element = elementSystem.instanceTable[enabledElements[i].index];
-                
-                element.layoutBox.Initialize(this, elementSystem, element, application.frameId);
-                // this point styles are all final for the frame because we ignore changesets for elements enabled this frame
                 UIStyleSet style = element.style;
-
-                InitializeLayoutBox(element);
-                
                 TransformInfo transformInfo = new TransformInfo() {
                     positionX = style.TransformPositionX,
                     positionY = style.TransformPositionY,
@@ -332,9 +240,6 @@ namespace UIForia.Systems {
                 meta.isHeightContentBased = style.PreferredHeight.IsContentBased;
                 meta.widthBlockProvider = false;
                 meta.heightBlockProvider = false;
-
-                
-                // is layout root = no fit & fixed size on axis
 
                 // if (TransformNotIdentity) {
                 // transformList.Add(transformInfo);
@@ -375,27 +280,24 @@ namespace UIForia.Systems {
             }.Run();
 
             for (int i = 0; i < enabledElements.size; i++) {
-                LayoutBox layoutBox = elementSystem.layoutBoxes[enabledElements[i].index];
-                LayoutHierarchyInfo layoutInfo = elementSystem.layoutHierarchyTable[enabledElements[i]];
+                // LayoutBox layoutBox = elementSystem.layoutBoxes[enabledElements[i].index];
+                // LayoutHierarchyInfo layoutInfo = elementSystem.layoutHierarchyTable[enabledElements[i]];
+                //
+                // // out of bounds lookups are fine here since 0 is always invalid and will just return null
+                // layoutBox.firstChild = elementSystem.layoutBoxes[layoutInfo.firstChildId.index];
+                // layoutBox.parent = elementSystem.layoutBoxes[layoutInfo.parentId.index];
+                // layoutBox.nextSibling = elementSystem.layoutBoxes[layoutInfo.nextSiblingId.index];
+                // layoutBox.layoutParentId = layoutInfo.parentId;
 
-                // out of bounds lookups are fine here since 0 is always invalid and will just return null
-                layoutBox.firstChild = elementSystem.layoutBoxes[layoutInfo.firstChildId.index];
-                layoutBox.parent = elementSystem.layoutBoxes[layoutInfo.parentId.index];
-                layoutBox.nextSibling = elementSystem.layoutBoxes[layoutInfo.nextSiblingId.index];
-                layoutBox.layoutParentId = layoutInfo.parentId;
-                layoutBox.OnChildrenChanged();
+                elementSystem.layoutBoxTable[enabledElements[i]].OnChildrenChanged(enabledElements[i], this);
+                
             }
 
             for (int i = 0; i < roots.size; i++) {
                 // todo -- tell root parents children changed & mark for layout
-                
                 LayoutHierarchyInfo layoutInfo = elementSystem.layoutHierarchyTable[roots[i]];
-                LayoutHierarchyInfo parentLayoutInfo = elementSystem.layoutHierarchyTable[layoutInfo.parentId];
-                LayoutBox layoutBox = elementSystem.layoutBoxes[layoutInfo.parentId.index];
-                layoutBox.firstChild = elementSystem.layoutBoxes[parentLayoutInfo.firstChildId.index];
-
-                layoutBox.OnChildrenChanged();
-
+                elementSystem.layoutBoxTable[layoutInfo.parentId].OnChildrenChanged(layoutInfo.parentId, this);
+                
             }
 
             ignoredLayoutList.Dispose();
@@ -633,12 +535,20 @@ namespace UIForia.Systems {
         }
 
         public void RunLayout() {
+            
+            for (int i = 0; i < burstRunners.size; i++) {
+                burstRunners[i].RunLayout();
+            }
+
             for (int i = 0; i < runners.size; i++) {
                 runners[i].RunLayout();
             }
         }
 
+        private LightList<LayoutRunner2> burstRunners = new LightList<LayoutRunner2>();
+        
         public void OnViewAdded(UIView view) {
+            burstRunners.Add(new LayoutRunner2(view, this));
             runners.Add(new LayoutRunner(this, view, view.dummyRoot));
         }
 
@@ -668,6 +578,12 @@ namespace UIForia.Systems {
             }
 
             return null;
+        }
+
+        public void Dispose() {
+            for (int i = 0; i < burstRunners.size; i++) {
+                burstRunners[i].Dispose();
+            }
         }
 
     }

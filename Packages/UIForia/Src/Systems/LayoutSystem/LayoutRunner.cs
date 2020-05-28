@@ -570,7 +570,7 @@ namespace UIForia.Systems {
         }
 
         private void PerformLayoutStepHorizontal_Ignored(LayoutBox ignoredBox) {
-            LayoutBox.LayoutSize size = default;
+            LayoutSize size = default;
             //if ((ignoredBox.flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0) {
             ignoredBox.GetWidths(ref size);
             float outputSize = size.Clamped;
@@ -580,7 +580,7 @@ namespace UIForia.Systems {
         }
 
         private void PerformLayoutStepVertical_Ignored(LayoutBox ignoredBox) {
-            LayoutBox.LayoutSize size = default;
+            LayoutSize size = default;
             ignoredBox.GetHeights(ref size);
             float outputSize = size.Clamped;
             ignoredBox.ApplyLayoutVertical(0, 0, size, outputSize, ignoredBox.parent?.finalHeight ?? outputSize, LayoutFit.None, frameId);

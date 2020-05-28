@@ -20,26 +20,9 @@ namespace UIForia.Systems {
         private LayoutDirection direction;
         private StructList<Track> wrappedTracks;
 
-        public readonly int instanceId;
-
-        public FlexLayoutBox(int instanceId) {
-            this.instanceId = instanceId;
+        protected override void OnInitialize() {
+            direction = element.style.FlexLayoutDirection;
         }
-
-        // protected override void OnInitialize() {
-        //     direction = element.style.FlexLayoutDirection;
-        // }
-
-        // public static void Initialize(ref FlexLayoutInfo layoutInfo, UIElement element) {
-        //     layoutInfo.direction = element.style.FlexLayoutDirection;
-        //     layoutInfo.layoutWrap = element.style.FlexLayoutWrap;
-        //     layoutInfo.alignHorizontal = element.style.AlignItemsHorizontal;
-        //     layoutInfo.alignVertical = element.style.AlignItemsVertical;
-        //     layoutInfo.fitHorizontal = element.style.FitItemsHorizontal;
-        //     layoutInfo.fitVertical = element.style.FitItemsVertical;
-        //     layoutInfo.horizontalDistribution = element.style.DistributeExtraSpaceHorizontal;
-        //     layoutInfo.verticalDistribution = element.style.DistributeExtraSpaceVertical;
-        // }
 
         protected override float ComputeContentWidth() {
             if (items == null || items.size == 0) return 0;

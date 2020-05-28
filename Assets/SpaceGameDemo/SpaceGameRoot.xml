@@ -8,11 +8,15 @@
             PreferredWidth = 200px;
         }
         
+        style child {
+            PreferredWidth = 100px;
+        }
+        
     </Style>
     <Contents>
         <Div style="box">
-            <Group></Group>
-            <Group></Group>
+            <Group style="child"></Group>
+            <Group style="child"></Group>
 <!--            <Group></Group>-->
 <!--            <Group></Group>-->
 <!--            <Group></Group>-->

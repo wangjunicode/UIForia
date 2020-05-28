@@ -1,11 +1,12 @@
 [![openupm](https://img.shields.io/npm/v/com.klang-games.uiforia?label=UIForia&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.klang-games.uiforia/)
 
-# UIForia User Guide
-Please head over to our [online documentation](https://uiforia.io/docs)!
-
-# Contribute
-If you find a bug or have a cool feature idea please file a ticket, open a pull request or just
-talk to us!
+# UIForia - new UI for Unity ... PREVIEW!
+This is just a preview, we'll release a stable version of UIForia later
+this year, once we're ready. Feel free to look at the current state and
+get excited! The docs aren't ready and we still rely on a forked version
+of TextMesh Pro (copy our forked package into your project). But not forever!
+Comments, fixes or demos are welcome. We might not have time for support
+right now, since we're working hard on the framework!
 
 # License - MIT
 

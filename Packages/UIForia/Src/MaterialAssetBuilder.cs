@@ -112,11 +112,8 @@ namespace UIForia.Compilers {
             }
         }
 #else
-        public static MaterialDatabase BuildMaterialWrappers(MaterialReference[] materialReferences) {
-            return new MaterialDatabase() {
-                materialInfos = new MaterialInfo[0],
-                materialProperties = new MaterialPropertyInfo[0]
-            };
+        public static MaterialDatabase BuildMaterialDatabase(MaterialReference[] materialReferences) {
+            return new MaterialDatabase(new MaterialInfo[0], new MaterialPropertyInfo[0]);
         }
 #endif
 

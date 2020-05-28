@@ -160,17 +160,17 @@ namespace UIForia.Compilers {
         }
 
         public static CompiledTemplateData CompileTemplates(Type appRootType, TemplateSettings templateSettings) {
-            
+
             TypeProcessor.ClearDynamics();
-            
+
             MaterialDatabase materialDatabase = MaterialAssetBuilder.BuildMaterialDatabase(templateSettings.materialAssets);
-            
+
             TemplateCompiler instance = new TemplateCompiler(templateSettings, materialDatabase);
-                
+
             CompiledTemplateData compiledTemplateData = instance.CompileRoot(appRootType, templateSettings.dynamicallyCreatedTypes);
-            
+
             compiledTemplateData.materialDatabase = materialDatabase;
-            
+
             return compiledTemplateData;
         }
 

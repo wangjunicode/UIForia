@@ -6,7 +6,11 @@ namespace UIForia.Style {
 
     public class MinSizeParser : IStyleShorthandParser {
 
-        public bool TryParse(CharStream stream, StructList<StyleProperty2> output) {
+        public bool TryParse(CharStream stream, Diagnostics diagnostics, StructList<StyleProperty2> output) {
+            return MeasurementParser.TryParseSize(stream, output, PropertyId.MinWidth, PropertyId.MinHeight);
+        }
+
+        public bool TryParseFromBinding(CharStream stream, Diagnostics diagnostics, StructList<StyleProperty2> output) {
             return MeasurementParser.TryParseSize(stream, output, PropertyId.MinWidth, PropertyId.MinHeight);
         }
 
@@ -14,7 +18,11 @@ namespace UIForia.Style {
 
     public class MaxSizeParser : IStyleShorthandParser {
 
-        public bool TryParse(CharStream stream, StructList<StyleProperty2> output) {
+        public bool TryParse(CharStream stream, Diagnostics diagnostics, StructList<StyleProperty2> output) {
+            return MeasurementParser.TryParseSize(stream, output, PropertyId.MaxWidth, PropertyId.MaxHeight);
+        }
+
+        public bool TryParseFromBinding(CharStream stream, Diagnostics diagnostics, StructList<StyleProperty2> output) {
             return MeasurementParser.TryParseSize(stream, output, PropertyId.MaxWidth, PropertyId.MaxHeight);
         }
 
@@ -23,6 +31,14 @@ namespace UIForia.Style {
     public class PreferredSizeParser : IStyleShorthandParser {
 
         public bool TryParse(CharStream stream, StructList<StyleProperty2> output) {
+            return MeasurementParser.TryParseSize(stream, output, PropertyId.PreferredWidth, PropertyId.PreferredHeight);
+        }
+
+        public bool TryParse(CharStream stream, Diagnostics diagnostics, StructList<StyleProperty2> output) {
+            return MeasurementParser.TryParseSize(stream, output, PropertyId.PreferredWidth, PropertyId.PreferredHeight);
+        }
+
+        public bool TryParseFromBinding(CharStream stream, Diagnostics diagnostics, StructList<StyleProperty2> output) {
             return MeasurementParser.TryParseSize(stream, output, PropertyId.PreferredWidth, PropertyId.PreferredHeight);
         }
 
@@ -48,7 +64,7 @@ namespace UIForia.Style {
 
             // optional comma support
             stream.TryParseCharacter(',');
-            
+
             if (!Parse(ref stream, out second)) {
                 return false;
             }
@@ -60,7 +76,6 @@ namespace UIForia.Style {
 
             return true;
         }
-
 
         public static bool Parse(ref CharStream stream, out UIMeasurement measurement) {
             if (!stream.TryParseFloat(out float value)) {
@@ -120,6 +135,26 @@ namespace UIForia.Style {
         }
 
         public bool TryParse(CharStream stream, PropertyId propertyId, out StyleProperty2 property) {
+            if (Parse(ref stream, out UIMeasurement measurement)) {
+                property = StyleProperty2.FromValue(propertyId, measurement);
+                return true;
+            }
+
+            property = default;
+            return false;
+        }
+
+        public bool TryParse(CharStream stream, PropertyId propertyId, Diagnostics diagnostics, out StyleProperty2 property) {
+            if (Parse(ref stream, out UIMeasurement measurement)) {
+                property = StyleProperty2.FromValue(propertyId, measurement);
+                return true;
+            }
+
+            property = default;
+            return false;
+        }
+
+        public bool TryParseFromBinding(CharStream stream, PropertyId propertyId, Diagnostics diagnostics, out StyleProperty2 property) {
             if (Parse(ref stream, out UIMeasurement measurement)) {
                 property = StyleProperty2.FromValue(propertyId, measurement);
                 return true;

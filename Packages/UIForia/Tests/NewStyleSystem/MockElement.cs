@@ -14,12 +14,13 @@ namespace Tests {
         public string name;
         public int depth;
         public Context context;
-
+        public ushort ftbIndex;
+        public ushort btfIndex;
         public MockElement(Context context, MockElement parent) {
             
             this.depth = parent?.depth ?? 0;
             
-            this.id = context.elementSystem.CreateElement(this.depth, 0, 0, UIElementFlags.EnabledFlagSet);
+            this.id = context.elementSystem.CreateElement(this, this.depth, 0, 0, UIElementFlags.EnabledFlagSet);
             context.styleSystem.CreateElement(id);
             this.context = context;
             this.parent = parent;
@@ -30,11 +31,11 @@ namespace Tests {
         public bool IsDescendentOf(in MockElement info) {
             return ftbIndex > info.ftbIndex && btfIndex > info.btfIndex;
         }
-
+        
         public bool IsAncestorOf(in MockElement info) {
             return ftbIndex < info.ftbIndex && btfIndex < info.btfIndex;
         }
-
+        
         public bool IsParentOf(in MockElement info) {
             return depth == info.depth + 1 && ftbIndex < info.ftbIndex && btfIndex < info.btfIndex;
         }

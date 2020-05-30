@@ -228,56 +228,6 @@ namespace Src.Systems {
             }
         }
 
-//        // todo -- can completely get rid of this
-//        private void Cull() {
-//            // first do an easy screen cull
-//            // screen is always aligned
-//            // if world space rect is not inside the screen, fail immediately
-//
-//            for (int i = 0; i < wrapperList.size; i++) {
-//                ref RenderOperationWrapper wrapper = ref wrapperList.array[i];
-//
-//                RenderBox renderBox = wrapper.renderBox;
-//
-//                switch (wrapper.renderOperation) {
-//                    default:
-//                    case RenderOpType.Unset:
-//                        break;
-//
-//                    case RenderOpType.DrawBackground: {
-//                        renderBox.culled = renderBox.element.layoutResult.isCulled;
-//
-//                        if (!renderBox.culled && renderBox.visibility != Visibility.Hidden) {
-//                            drawList.Add(new DrawCommand(renderBox, DrawCommandType.BackgroundTransparent));
-//                        }
-//
-//                        break;
-//                    }
-//
-//                    case RenderOpType.DrawForeground:
-//
-//                        if (!renderBox.culled) {
-//                            drawList.Add(new DrawCommand(renderBox, DrawCommandType.ForegroundTransparent));
-//                        }
-//
-//                        break;
-//
-//                    case RenderOpType.PushClipShape: {
-//                        break;
-//                    }
-//
-//                    case RenderOpType.PopClipShape: {
-//                        break;
-//                    }
-//                    case RenderOpType.PushPostEffect:
-//                        break;
-//
-//                    case RenderOpType.PopPostEffect:
-//                        break;
-//                }
-//            }
-//        }
-
         private void Draw(RenderContext renderContext) {
             RenderOperationWrapper[] commands = wrapperList.array;
             int commandCount = wrapperList.size;

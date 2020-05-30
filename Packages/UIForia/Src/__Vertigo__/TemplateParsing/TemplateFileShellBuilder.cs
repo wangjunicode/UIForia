@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
 using UIForia.Compilers;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
@@ -10,7 +9,7 @@ using UnityEngine;
 namespace UIForia {
 
     [Serializable]
-    internal struct IndexedString {
+    public struct IndexedString {
 
         public int index;
         public string value;

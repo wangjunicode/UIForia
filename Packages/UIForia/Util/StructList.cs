@@ -28,7 +28,7 @@ namespace UIForia.Util {
         private bool isInPool;
 
         public T[] Array => array;
-
+        
         public StructList(int capacity = 8) {
             this.size = 0;
             this.array = new T[capacity];

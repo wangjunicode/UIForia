@@ -1,6 +1,7 @@
 using System;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 
 namespace UIForia {
@@ -47,6 +48,7 @@ namespace UIForia {
 
         public unsafe struct Deferred {
 
+            [NativeDisableUnsafePtrRestriction]
             public readonly int* itemCount;
             public readonly int minBatchSize;
 
@@ -61,13 +63,19 @@ namespace UIForia {
 
     public interface IVertigoParallelDeferred : IJob, IJobParallelForDeferBatched {
 
-        ParallelParams.Deferred defer { get; }
+        ParallelParams.Deferred defer { get; set; }
+
+    }
+
+    public interface IVertigoParallelFor : IJob, IJobParallelFor {
+
+        ParallelParams parallel { get; set; }
 
     }
 
     public interface IVertigoParallel : IJob, IJobParallelForBatch {
 
-        ParallelParams parallel { get; }
+        ParallelParams parallel { get; set; }
 
     }
 
@@ -92,26 +100,26 @@ namespace UIForia {
 
             public SchedulerStep ThenParallel<T>(T job) where T : struct, IVertigoParallel {
                 ParallelParams par = job.parallel;
-            
+
                 if (par.itemCount <= 0) {
                     return new SchedulerStep(handle);
                 }
 
                 int minBatchSize = par.minBatchSize < 1 ? 1 : par.minBatchSize;
-            
+
                 if (par.itemCount <= minBatchSize) {
-                    return new SchedulerStep(job.Schedule(handle));    
+                    return new SchedulerStep(job.Schedule(handle));
                 }
-            
+
                 return new SchedulerStep(job.ScheduleBatch(par.itemCount, minBatchSize, handle));
             }
-            
+
             public SchedulerStep ThenDeferParallel<T>(T job) where T : struct, IVertigoParallelDeferred {
                 ParallelParams.Deferred par = job.defer;
                 int minBatchSize = par.minBatchSize < 1 ? 1 : par.minBatchSize;
                 return new SchedulerStep(job.Schedule(par.itemCount, minBatchSize, handle));
             }
-            
+
             public SchedulerStep Then<T, U>(T job, U job2) where T : struct, IJob where U : struct, IJob {
                 return new SchedulerStep(JobHandle.CombineDependencies(job.Schedule(handle), job2.Schedule(handle)));
             }
@@ -130,8 +138,20 @@ namespace UIForia {
 
         }
 
-        public static SchedulerStep ParallelFor<T>(int itemCount, int minBatchSize, T job) where T : struct, IJobParallelFor {
-            return new SchedulerStep(job.Schedule(itemCount, minBatchSize));
+        public static SchedulerStep ParallelFor<T>(T job) where T : struct, IVertigoParallelFor {
+            ParallelParams par = job.parallel;
+
+            if (par.itemCount <= 0) {
+                return new SchedulerStep();
+            }
+
+            int minBatchSize = par.minBatchSize < 1 ? 1 : par.minBatchSize;
+
+            if (par.itemCount <= minBatchSize) {
+                return new SchedulerStep(job.Schedule());
+            }
+
+            return new SchedulerStep(job.Schedule(par.itemCount, minBatchSize));
         }
 
         public static SchedulerStep ParallelForRange<T>(int itemCount, int minBatchSize, T job) where T : struct, IJobParallelForBatch {
@@ -173,23 +193,22 @@ namespace UIForia {
             return retn;
         }
 
-      
         public static SchedulerStep Parallel<T>(T job) where T : struct, IJob, IJobParallelForBatch, IVertigoParallel {
             ParallelParams par = job.parallel;
-            
+
             if (par.itemCount <= 0) {
                 return new SchedulerStep();
             }
 
             int minBatchSize = par.minBatchSize < 1 ? 1 : par.minBatchSize;
-            
+
             if (par.itemCount <= minBatchSize) {
-                return new SchedulerStep(job.Schedule());    
+                return new SchedulerStep(job.Schedule());
             }
-            
+
             return new SchedulerStep(job.ScheduleBatch(par.itemCount, minBatchSize));
         }
-        
+
         // public static SchedulerStep AwaitParallel<T>(T job) where T : struct, IJob, IJobParallelForBatch, IVertigoParallel {
         //     ParallelParams par = job.parallel;
         //     

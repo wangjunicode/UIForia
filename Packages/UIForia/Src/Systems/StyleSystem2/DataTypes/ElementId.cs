@@ -10,9 +10,9 @@ namespace UIForia {
 
         public readonly int id;
 
-        internal ElementId(int id, byte generation) {
+        internal ElementId(int index, byte generation) {
             // todo -- not totally sure of this
-            this.id = (id & ENTITY_INDEX_MASK) | (generation << ENTITY_INDEX_BITS);
+            this.id = (index & ENTITY_INDEX_MASK) | (generation << ENTITY_INDEX_BITS);
         }
 
         internal ElementId(int id) {
@@ -20,11 +20,15 @@ namespace UIForia {
         }
 
         public int index {
-            get => id & ENTITY_INDEX_MASK;
+            get => (id & ENTITY_INDEX_MASK);
         }
 
         public int generation {
             get => ((id >> ENTITY_INDEX_BITS) & ENTITY_GENERATION_MASK);
+        }
+
+        public static ElementId Invalid {
+            get => new ElementId(0, 0);
         }
 
         public static bool operator ==(ElementId elementId, ElementId other) {
@@ -39,7 +43,7 @@ namespace UIForia {
             return elementId.id;
         }
 
-        public static implicit operator ElementId(int elementId) {
+        public static explicit operator ElementId(int elementId) {
             return new ElementId(elementId);
         }
         
@@ -54,7 +58,6 @@ namespace UIForia {
         public override int GetHashCode() {
             return id;
         }
-
 
     }
 

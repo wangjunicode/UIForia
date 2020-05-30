@@ -111,7 +111,7 @@ namespace UIForia {
         }
 
         // only used for testing!
-        public StyleRebuildResult GetResultForId(int id) {
+        public StyleRebuildResult GetResultForId(ElementId id) {
 
             PagedList<StyleRebuildResult> list = new PagedList<StyleRebuildResult>(infoList);
 

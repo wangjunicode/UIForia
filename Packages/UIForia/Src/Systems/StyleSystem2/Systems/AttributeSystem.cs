@@ -25,24 +25,6 @@ namespace UIForia {
 
     }
 
-    public unsafe class StyleStateDatabase : IDisposable {
-
-        public DataList<ElementId>.Shared hoverState;
-        public DataList<ElementId>.Shared focusState;
-        public DataList<ElementId>.Shared activeState;
-        
-        public StyleStateDatabase() {
-            
-        }
-
-        public void SetState(ElementId elementId, StyleState2 state) {
-            
-        }
-        
-        public void Dispose() { }
-
-    }
-
     public unsafe class AttributeSystem : IDisposable {
 
         internal IntMap<List_ElementId> index;
@@ -160,6 +142,7 @@ namespace UIForia {
         public void InitializeAttributes(ElementId elementId, int attrCount) {
             if (attrCount <= 0) return;
             // todo -- allocate space for attrCount attributes
+            // maybe use linked list for attributes since we almost never iterate them
         }
         
         public void SetAttribute(ElementId elementId, string key, string value) {

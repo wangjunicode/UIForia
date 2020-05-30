@@ -26,7 +26,6 @@ namespace UIForia.Generated {
 
 namespace UIForia {
 
-    public abstract class WindowManager { }
 
     public abstract class LogManager { }
 
@@ -38,7 +37,6 @@ namespace UIForia {
         public ApplicationType applicationType;
         public TemplateLoader templateLoader;
         public ResourceManager resourceManager;
-        public WindowManager windowManager;
         public LogManager logManager;
         public PerformanceManager performanceManager;
         public float? dpiFactor;
@@ -134,7 +132,7 @@ namespace UIForia {
             this.resourceManager = config.resourceManager ?? new ResourceManager();
             this.views = new List<UIView>();
 
-            this.templateSystem = new TemplateSystem(config.templateLoader.templateDataMap);
+            this.templateSystem = default;//new TemplateSystem(config.templateLoader.templateDataMap);
             this.routingSystem = new RoutingSystem();
             this.animationSystem = new AnimationSystem();
             this.linqBindingSystem = new LinqBindingSystem();
@@ -626,10 +624,10 @@ namespace UIForia {
                 while (stack.size > 0) {
                     UIElement element = stack.PopUnchecked();
 
-                    if (element.id == elementId) {
-                        LightStack<UIElement>.Release(ref stack);
-                        return element;
-                    }
+                    // if (element.id == elementId) {
+                    //     LightStack<UIElement>.Release(ref stack);
+                    //     return element;
+                    // }
 
                     if (element.children == null) continue;
 

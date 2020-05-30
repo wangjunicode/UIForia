@@ -3,7 +3,6 @@ namespace UIForia {
     public unsafe struct BurstableStyleDatabase {
 
         public byte* staticStyleProperties;
-        public ModuleTable<ModuleCondition> conditionTable;
         public StyleTable<StaticStyleInfo> sharedStyleTable;
         public SelectorTable<SelectorStyleEffect> selectorStyleTable;
 
@@ -14,12 +13,10 @@ namespace UIForia {
             return 0;
         }
 
-        public int GetStyleProperties(StyleId styleId, StyleState2 state, out StaticPropertyId* keys, out PropertyData* values, out ModuleCondition conditionSet) {
+        public int GetStyleProperties(StyleId styleId, StyleState2 state, out StaticPropertyId* keys, out PropertyData* values) {
 
             ref StaticStyleInfo staticStyle = ref sharedStyleTable[styleId];
-
-            conditionSet = conditionTable[staticStyle.moduleId];
-
+            
             int offset = 0;
             int count = 0;
 

@@ -9,16 +9,16 @@ namespace UI {
 
         [OnMouseEnter]
         public void OnMouseEnter(MouseInputEvent evt) {
-            foreach (UIElement child in GetChild(0).GetChildren()) {
-                child.SetAttribute("hovered", "true");
-            }
+            // foreach (UIElement child in FindChildAt(0).GetChildren()) {
+            //     child.SetAttribute("hovered", "true");
+            // }
         }
 
         [OnMouseExit()]
         public void OnMouseExit(MouseInputEvent evt) {
-            foreach (UIElement child in GetChild(0).GetChildren()) {
-                child.SetAttribute("hovered", null);
-            }
+            // foreach (UIElement child in FindChildAt(0).GetChildren()) {
+                // child.SetAttribute("hovered", null);
+            // }
         }
     }
 }

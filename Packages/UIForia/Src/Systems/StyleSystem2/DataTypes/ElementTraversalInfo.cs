@@ -9,8 +9,6 @@ namespace UIForia {
         public ushort templateOriginId;
         public ushort templateId;
         
-        // todo -- confirm these functions do what I think they do
-
         public bool IsDescendentOf(in ElementTraversalInfo info) {
             return ftbIndex > info.ftbIndex && btfIndex > info.btfIndex;
         }

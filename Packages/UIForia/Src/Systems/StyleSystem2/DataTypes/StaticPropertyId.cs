@@ -5,11 +5,15 @@ namespace UIForia {
     public struct StaticPropertyId {
 
         public PropertyId propertyId;
-        public ModuleCondition conditionRequirement;
+        // public ModuleCondition conditionRequirement;
 
-        public StaticPropertyId(PropertyId propertyId, ModuleCondition conditionRequirement = 0) {
+        public ushort conditionDepth;
+        public ushort conditionId;
+        
+        public StaticPropertyId(PropertyId propertyId, int conditionDepth = 0, int conditionId = 0) {
             this.propertyId = propertyId;
-            this.conditionRequirement = conditionRequirement;
+            this.conditionDepth = (ushort)conditionDepth;
+            this.conditionId = (ushort)conditionId;
         }
 
     }

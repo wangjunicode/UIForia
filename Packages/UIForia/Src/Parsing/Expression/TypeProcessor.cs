@@ -35,7 +35,7 @@ namespace UIForia.Parsing {
 
         private static readonly object genericLock = new object();
 
-        [ThreadStatic] private static List<CharSpan> strings;
+        [ThreadStatic] private static List<CharSpan> ts_strings;
 
         internal static IList<Type> moduleTypes;
         internal static IList<Type> elements;
@@ -244,7 +244,7 @@ namespace UIForia.Parsing {
 
         }
 
-        internal static ProcessedType ResolveGenericElementType(ProcessedType generic, string genericTypeResolver, IReadOnlyList<string> referencedNamespaces, Diagnostics diagnostics) {
+        internal static unsafe ProcessedType ResolveGenericElementType(ProcessedType generic, string genericTypeResolver, IReadOnlyList<string> referencedNamespaces, Diagnostics diagnostics) {
 
             Type[] arguments = generic.rawType.GetGenericArguments();
             Type[] resolvedTypes = new Type[arguments.Length];
@@ -253,58 +253,60 @@ namespace UIForia.Parsing {
             int rangeStart = 0;
             int depth = 0;
 
-            strings = strings ?? new List<CharSpan>(8);
-            strings.Clear();
+            ts_strings = ts_strings ?? new List<CharSpan>(8);
+            ts_strings.Clear();
 
             // todo -- is it better to just generate the Element< > wrapper and use TypeResolver.TryParseTypeName directly?
 
-            while (ptr != genericTypeResolver.Length) {
-                char c = genericTypeResolver[ptr];
-                switch (c) {
-                    case '<':
-                        depth++;
-                        break;
+            fixed (char* typecharptr = genericTypeResolver) {
+                while (ptr != genericTypeResolver.Length) {
+                    char c = genericTypeResolver[ptr];
+                    switch (c) {
+                        case '<':
+                            depth++;
+                            break;
 
-                    case '>':
-                        depth--;
-                        break;
+                        case '>':
+                            depth--;
+                            break;
 
-                    case ',': {
-                        if (depth == 0) {
-                            strings.Add(new CharSpan(genericTypeResolver, rangeStart, ptr));
-                            rangeStart = ptr;
+                        case ',': {
+                            if (depth == 0) {
+                                ts_strings.Add(new CharSpan(typecharptr, rangeStart, ptr));
+                                rangeStart = ptr;
+                            }
+
+                            break;
+                        }
+                    }
+
+                    ptr++;
+                }
+
+                if (rangeStart != ptr) {
+                    ts_strings.Add(new CharSpan(typecharptr, rangeStart, ptr));
+                }
+
+                if (arguments.Length != ts_strings.Count) {
+                    diagnostics?.LogError($"Expected {arguments.Length} arguments but was only provided {ts_strings.Count} {genericTypeResolver}");
+                    return null;
+                }
+
+                for (int i = 0; i < ts_strings.Count; i++) {
+                    if (TypeResolver.TryParseTypeName(ts_strings[i], out TypeLookup typeLookup)) {
+                        Type type = TypeResolver.Default.ResolveType(typeLookup, referencedNamespaces);
+
+                        if (type == null) {
+                            diagnostics?.LogError(TemplateCompileException.UnresolvedType(typeLookup, referencedNamespaces).Message);
+                            return null;
                         }
 
-                        break;
+                        resolvedTypes[i] = type;
                     }
-                }
-
-                ptr++;
-            }
-
-            if (rangeStart != ptr) {
-                strings.Add(new CharSpan(genericTypeResolver, rangeStart, ptr));
-            }
-
-            if (arguments.Length != strings.Count) {
-                diagnostics?.LogError($"Expected {arguments.Length} arguments but was only provided {strings.Count} {genericTypeResolver}");
-                return null;
-            }
-
-            for (int i = 0; i < strings.Count; i++) {
-                if (TypeResolver.TryParseTypeName(strings[i], out TypeLookup typeLookup)) {
-                    Type type = TypeResolver.Default.ResolveType(typeLookup, referencedNamespaces);
-
-                    if (type == null) {
-                        diagnostics?.LogError(TemplateCompileException.UnresolvedType(typeLookup, referencedNamespaces).Message);
+                    else {
+                        diagnostics?.LogError($"Failed to parse generic specifier {ts_strings[i]}. Original expression = {genericTypeResolver}");
                         return null;
                     }
-
-                    resolvedTypes[i] = type;
-                }
-                else {
-                    diagnostics?.LogError($"Failed to parse generic specifier {strings[i]}. Original expression = {genericTypeResolver}");
-                    return null;
                 }
             }
 

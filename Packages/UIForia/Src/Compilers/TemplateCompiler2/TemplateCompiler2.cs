@@ -154,10 +154,8 @@ namespace UIForia.Compilers {
             return retn;
 
         }
-
-
         
-        private void CompileNode_New(in ConstructedChildData constructedChildData, StructList<AttrInfo> injectedAttributes) {
+        private int CompileNode_New(in ConstructedChildData constructedChildData, StructList<AttrInfo> injectedAttributes) {
             context.Setup();
 
             state.systemParam = context.AddParameter<TemplateSystem>("system");
@@ -285,7 +283,7 @@ namespace UIForia.Compilers {
 
             StructList<AttrInfo> injectedChildAttributes = StructList<AttrInfo>.Get();
 
-            CompileChildren(setupChildren, injectedAttributes);
+            int elementCount = CompileChildren(setupChildren, injectedAttributes);
 
             if (alteredStateStack) {
                 state.variableStack.Pop().Release();
@@ -293,7 +291,7 @@ namespace UIForia.Compilers {
 
             injectedChildAttributes.Release();
             setupChildren.Release();
-
+            return elementCount;
         }
 
         private static void GatherAttributes(TemplateFileShell shell, int templateNodeId, ref SizedArray<AttributeDefinition2> attributes) {
@@ -572,7 +570,7 @@ namespace UIForia.Compilers {
 
             templateDataBuilder.SetEntryPoint(context.Build(processedType.GetType().GetTypeName()));
 
-            CompileHydratePoint(rootNode, processedType);
+            int elementCount = CompileHydratePoint(rootNode, processedType);
 
             if (needPop) {
                 state.variableStack.Pop().Release();
@@ -594,7 +592,7 @@ namespace UIForia.Compilers {
             return count;
         }
 
-        private void CompileHydratePoint(TemplateASTNode node, ProcessedType processedType) {
+        private int CompileHydratePoint(TemplateASTNode node, ProcessedType processedType) {
 
             context.Setup();
 
@@ -606,19 +604,24 @@ namespace UIForia.Compilers {
 
             templateDataBuilder.SetHydratePoint(context.Build(processedType.rawType.GetTypeName()));
 
-            CompileChildren(childrenSetup, null);
+            int elementCount = CompileChildren(childrenSetup, null);
 
             childrenSetup.Release();
 
+            return elementCount;
+
         }
 
-        private void CompileChildren(StructList<ConstructedChildData> childData, StructList<AttrInfo> injectedAttributes) {
+        private int CompileChildren(StructList<ConstructedChildData> childData, StructList<AttrInfo> injectedAttributes) {
 
+            int elementCount = 0;
+            
             for (int i = 0; i < childData.size; i++) {
                 ref ConstructedChildData data = ref childData.array[i];
-                CompileNode_New(data, injectedAttributes);
+                elementCount += CompileNode_New(data, injectedAttributes);
             }
 
+            return childData.size + elementCount;
         }
 
         private void SetupElementChildren_New(Expression systemParam, in TemplateASTNode parent, StructList<ConstructedChildData> output) {
@@ -867,7 +870,10 @@ namespace UIForia.Compilers {
         private ProcessedType ResolveProcessedType(int nodeIndex) {
 
             ProcessedType processedType = fileShell.processedTypes[nodeIndex];
-
+            if (processedType == null) {
+                return null;
+            }
+            
             if (!processedType.IsUnresolvedGeneric) {
                 return processedType;
             }

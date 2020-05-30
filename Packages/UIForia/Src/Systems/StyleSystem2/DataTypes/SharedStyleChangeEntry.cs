@@ -43,7 +43,7 @@ namespace UIForia {
 
         public StyleId* pStyles;
 
-        public SharedStyleChangeEntry(int elementId, StyleState2Byte state) {
+        public SharedStyleChangeEntry(ElementId elementId, StyleState2Byte state) {
             this.elementId = elementId;
             this.newState = state;
             this.oldState = state;

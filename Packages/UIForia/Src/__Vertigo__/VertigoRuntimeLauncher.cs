@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using UIForia.Elements;
-using UIForia.Src;
 using UIForia.Util;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -74,6 +73,11 @@ namespace UIForia {
             if (GUILayout.Button("Run")) {
                 launcher.RebuildApplication();
             }
+
+            if (GUILayout.Button("Precompile")) {
+                // VertigoLoader.LoadPrecompiled();
+            }
+            
             serializedObject.FindProperty("typeName").stringValue = launcher.typeName;
             serializedObject.ApplyModifiedProperties();
 
@@ -91,43 +95,29 @@ namespace UIForia {
         [HideInInspector] public Type currentType;
         [HideInInspector] public VertigoApplication currentApplication;
 
-        public void Start() { }
+        public void Start() {
+            RebuildApplication();
+        }
 
         public void RebuildApplication() {
-            if (currentApplication != null) {
-                // teardown here
-            }
 
             if (currentType == null) {
                 return;
             }
 
-            currentApplication = new VertigoApplication("Default", ApplicationType.Game, CompilationType.Dynamic, currentType);
-            
-            currentApplication.Initialize();
-            
+            if (currentApplication != null) {
+                currentApplication.Refresh(currentType);
+            }
+            else {
+                currentApplication = new VertigoApplication("Default", ApplicationType.Game, CompilationType.Dynamic, currentType);
+                currentApplication.Initialize(currentType);
+            }
+
         }
 
         public void Update() {
 
-            if (currentApplication == null) {
-                return;
-            }
-
-            if (currentApplication.IsCompiling) {
-                // overlay some compilation UI
-                return;
-            }
-
-            if (currentApplication.HasCompilationErrors) {
-                return;
-            }
-
-            if (!currentApplication.IsInitialized) {
-                return;
-            }
-
-            currentApplication.RunFrame();
+            currentApplication?.RunFrame();
 
             // resource loading & unloading
             // compile outside play mode
@@ -137,70 +127,11 @@ namespace UIForia {
             // managing built in assets
             // shaders mostly, maybe a default font. everything else comes in packages
 
-            // what is a compiled app?
-            // module / entry point
-            // custom styles
-            // template database
-            // style database
-            // selector database
-            // animation database
-            // asset database
-
             // tooling layer
             //    debug view per system
 
-            // virtual repeat
-            //    -- fixed height or width
-            //    -- big list
-            //    -- elements only for visible items
-            //    -- bindings run as part of layout? or we have an isEnabled keyFn like thing?
-            //    dont allow nested templates? dont allow bindings? 
-            //    need to know some layout properties before we can make elements
-            //    1 frame lag? same frame but after layout runs? defer all events to next frame maybe
-            //    then layout is fine
-            //    or elements are just super cheap and it doesnt matter? renderer will cull effectively
-            //    1 element gets rendered & laid out many many times and gets its data from the view
-            //    elements can generate layout, input and render boxes dynamically per frame
-            //    only 'weirdness' is that the same element id would get handed back for events 
-            //    but maybe with a different index? 
-            //    not selectable? 
-            //    would need combinatorial styling
-            //    reverse selector query? find all selectors applying to this box?
-            //    while(has more vertical space) { keep laying out } 
-
-            // diagnostics
-            // memory stats
-            // runtime stats
-            // object count stats
-            // some built in element types can be pooled for sure
-            // div / text / etc
-            // some sort of cross application enforcement -- maybe a couple bits in element id? turn elementId into long?
-            // what does compiling mean?
-            // we have an entry point
-            // compile all its dependent files
-            // modules, styles, etc
-            // templates & styles should be in cache if were compiled before and no changes 
-            // once an application is fully valid we're ready to go
-            // start hydrating the templates
-
-            // should have a dry run or offline style + template parser
-
-            // probably a good time to get the window system in place
-            // maybe checkout addressables
-
-            // if application compiling
-            // use some overlay gui to print "compiling"
-
-            // if application had compiler errors
-            // try compiling again every few seconds
-
-            // if all is well and first frame
-            // application.Initialize();
-
-            // if all is well and not first frame
-            // application.RunFrame();
-
         }
+
 
     }
 

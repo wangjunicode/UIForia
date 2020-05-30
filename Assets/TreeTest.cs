@@ -16,7 +16,7 @@ public class TreeTest : MonoBehaviour {
 
         public TreeNode parent;
         public List<TreeNode> children;
-        public int id;
+        public ElementId id;
         public int depth;
 
         public bool IsDescendentOf(TreeNode other) {
@@ -37,17 +37,43 @@ public class TreeTest : MonoBehaviour {
     public class TreeGenerator {
 
         public int id;
+        
+        public ElementTable<HierarchyInfo> hierarchyTable;
+        public ElementTable<ElementTraversalInfo> traversalTable;
+        
+        public void AddChild(ElementId parentId, ElementId childId) {
+            ref HierarchyInfo parentInfo = ref hierarchyTable[parentId];
+            ref HierarchyInfo childInfo = ref hierarchyTable[childId];
 
+            childInfo.parentId = parentId;
+
+            if (parentInfo.childCount == 0) {
+                parentInfo.firstChildId = childId;
+                parentInfo.lastChildId = childId;
+                childInfo.nextSiblingId = default;
+                childInfo.prevSiblingId = default;
+            }
+            else {
+                childInfo.prevSiblingId = parentInfo.lastChildId;
+                childInfo.nextSiblingId = default;
+                parentInfo.lastChildId = childId;
+            }
+
+            parentInfo.childCount++;
+            
+        }
+        
         public TreeNode CreateTree(int depth, TreeNode parent, int maxDepth, int childCount, List<TreeNode> flatList) {
             var node = new TreeNode();
             node.depth = depth;
             flatList.Add(node);
-            node.id = id++;
+            node.id = default; // todo -- new ElementId(id++, 1);
             node.parent = parent;
             if (maxDepth > 0) {
                 node.children = new List<TreeNode>(childCount);
                 for (int i = 0; i < childCount; ++i) {
                     node.children.Add(CreateTree(depth + 1, node, maxDepth - 1, childCount, flatList));
+                    AddChild(node.id, node.children[node.children.Count - 1].id);
                 }
             }
             else {
@@ -72,126 +98,98 @@ public class TreeTest : MonoBehaviour {
 
     void Start() {
 
-        int count = 1000;
 
-        NativeArray<JobHandle> jobs = new NativeArray<JobHandle>(count, Allocator.Persistent);
-
-        for (int i = 0; i < count - 1; i++) {
-            jobs[i] = new TestJobSchedule().Schedule(jobs[i + 1]);
-        }
-
-        jobs[count - 1] = new TestJobSchedule().Schedule(); //jobs[1]);
-
-        Stopwatch stop = Stopwatch.StartNew();
-        JobHandle.ScheduleBatchedJobs();
-        Debug.Log("time: " + stop.Elapsed.TotalMilliseconds.ToString("F3"));
-        JobHandle.CompleteAll(jobs);
-        
-
-        for (int i = 0; i < count - 1; i++) {
-            jobs[i] = new TestJobSchedule().Schedule(jobs[i + 1]);
-        }
-
-        jobs[count - 1] = new TestJobSchedule().Schedule(); //jobs[1]);
-
-        Stopwatch stop2= Stopwatch.StartNew();
-        JobHandle.ScheduleBatchedJobs();
-        Debug.Log("time: " + stop2.Elapsed.TotalMilliseconds.ToString("F3"));
-        JobHandle.CompleteAll(jobs);
-
-        jobs.Dispose();
-        return;
         List<TreeNode> nodes = new List<TreeNode>(10000);
         TreeGenerator generator = new TreeGenerator();
         tree = generator.CreateTree(0, null, 6, 5, nodes);
         Debug.Log(nodes.Count + " nodes");
-        BufferList<bool> expectedResults = new BufferList<bool>(nodes.Count * nodes.Count, Allocator.Persistent);
-
-        for (int i = 0; i < nodes.Count; i++) {
-            for (int j = 0; j < nodes.Count; j++) {
-                nodes[j].IsDescendentOf(nodes[i]);
-            }
-        }
+        //BufferList<bool> expectedResults = new BufferList<bool>(nodes.Count * nodes.Count, Allocator.Persistent);
+        //
+        // for (int i = 0; i < nodes.Count; i++) {
+        //     for (int j = 0; j < nodes.Count; j++) {
+        //         nodes[j].IsDescendentOf(nodes[i]);
+        //     }
+        // }
 
         Stopwatch s = Stopwatch.StartNew();
 
         int x = 0;
-        for (int i = 0; i < nodes.Count; i++) {
-            for (int j = 0; j < nodes.Count; j++) {
-                expectedResults[x++] = (nodes[j].IsDescendentOf(nodes[i]));
-            }
-        }
-
-        expectedResults.size = nodes.Count * nodes.Count;
-
-        Debug.Log("traditional method took : " + s.Elapsed.TotalMilliseconds.ToString("F4"));
-
-        BufferList<ElementTraversalInfo> traversalInfo = new BufferList<ElementTraversalInfo>(nodes.Count, Allocator.Persistent);
-        BufferList<bool> results = new BufferList<bool>(nodes.Count * nodes.Count, Allocator.Persistent);
-
-        TraversalIndexJob_Managed job = new TraversalIndexJob_Managed() {
-            root = tree,
-            stack = new LightStack<TreeNode>(nodes.Count / 2)
-        };
-        job.Execute(ref traversalInfo);
-        Stopwatch s2 = Stopwatch.StartNew();
-        job.Execute(ref traversalInfo);
-        Debug.Log("traversal took : " + s2.Elapsed.TotalMilliseconds.ToString("F4"));
-
-        traversalInfo.size = nodes.Count;
-
-        new TestJob() {
-            traversalInfo = traversalInfo,
-            output = results
-        }.Run();
-
-        results.size = 0;
-
-        new TestJob() {
-            traversalInfo = traversalInfo,
-            output = results
-        }.Run();
-
-        results.size = 0;
-
-        Stopwatch s3 = Stopwatch.StartNew();
-
-        new TestJob() {
-            traversalInfo = traversalInfo,
-            output = results
-        }.Run();
-        Debug.Log("query took " + s3.Elapsed.TotalMilliseconds.ToString("F4"));
-
-        for (int i = 0; i < expectedResults.size; i++) {
-            if (results[i] != expectedResults[i]) {
-                Debug.Log("wrong " + i);
-                break;
-            }
-        }
-        // for (int i = 0; i < traversalInfo.size; i++) {
-        //     for (int j = 0; j < traversalInfo.size; j++) {
-        //         traversalInfo[i].IsDescendentOf(traversalInfo[j]);
-        //         // if (expectedResults[idx++] != traversalInfo[i].IsDescendentOf(traversalInfo[j])) {
-        //             // Debug.Log("wrong");
-        //             // traversalInfo.Dispose();
-        //             // return;
-        //         // }
+        // for (int i = 0; i < nodes.Count; i++) {
+        //     for (int j = 0; j < nodes.Count; j++) {
+        //         expectedResults[x++] = (nodes[j].IsDescendentOf(nodes[i]));
         //     }
         // }
+        //
+        // expectedResults.size = nodes.Count * nodes.Count;
 
-        // PrintTree(tree, traversalInfo);
+        // Debug.Log("traditional method took : " + s.Elapsed.TotalMilliseconds.ToString("F4"));
 
+        BufferList<ElementTraversalInfo> traversalInfo = new BufferList<ElementTraversalInfo>(nodes.Count, Allocator.Persistent);
+        // BufferList<bool> results = new BufferList<bool>(nodes.Count * nodes.Count, Allocator.Persistent);
+
+        TraversalIndexJob job = new TraversalIndexJob() {
+        };
+        job.Run();
+        Stopwatch s2 = Stopwatch.StartNew();
+        job.Run();
+        
+        Debug.Log("traversal took : " + s2.Elapsed.TotalMilliseconds.ToString("F4"));
+        traversalInfo.size = nodes.Count;
         traversalInfo.Dispose();
-        results.Dispose();
+
+        //
+        // new TestJob() {
+        //     traversalInfo = traversalInfo,
+        //     output = results
+        // }.Run();
+        //
+        // results.size = 0;
+        //
+        // new TestJob() {
+        //     traversalInfo = traversalInfo,
+        //     output = results
+        // }.Run();
+        //
+        // results.size = 0;
+        //
+        // Stopwatch s3 = Stopwatch.StartNew();
+        //
+        // new TestJob() {
+        //     traversalInfo = traversalInfo,
+        //     output = results
+        // }.Run();
+        // Debug.Log("query took " + s3.Elapsed.TotalMilliseconds.ToString("F4"));
+        //
+        // for (int i = 0; i < expectedResults.size; i++) {
+        //     if (results[i] != expectedResults[i]) {
+        //         Debug.Log("wrong " + i);
+        //         break;
+        //     }
+        // }
+        // // for (int i = 0; i < traversalInfo.size; i++) {
+        // //     for (int j = 0; j < traversalInfo.size; j++) {
+        // //         traversalInfo[i].IsDescendentOf(traversalInfo[j]);
+        // //         // if (expectedResults[idx++] != traversalInfo[i].IsDescendentOf(traversalInfo[j])) {
+        // //             // Debug.Log("wrong");
+        // //             // traversalInfo.Dispose();
+        // //             // return;
+        // //         // }
+        // //     }
+        // // }
+        //
+        // // PrintTree(tree, traversalInfo);
+        //
+        // traversalInfo.Dispose();
+        // results.Dispose();
 
     }
 
     public void PrintTree(TreeNode node, BufferList<ElementTraversalInfo> traversalInfo) {
         string retn = new string(' ', 4 * node.depth);
 
-        retn += " id = (" + node.id + ") ";
-        retn += "  ftb = " + traversalInfo[node.id].ftbIndex;
-        retn += "  btf = " + traversalInfo[node.id].btfIndex;
+        // retn += " id = (" + node.id + ") ";
+        // retn += "  ftb = " + traversalInfo[node.id].ftbIndex;
+        // retn += "  btf = " + traversalInfo[node.id].btfIndex;
 
         Debug.Log(retn);
 
@@ -220,89 +218,74 @@ public class TreeTest : MonoBehaviour {
 
     }
 
-    public unsafe struct TraversalIndexJob_Managed {
-
-        /// <summary>
-        /// freed internally
-        /// </summary>
-        /// <summary>
-        /// output list, expects to already have proper size
-        /// </summary>
-        public LightStack<TreeNode> stack;
-
-        public TreeNode root;
-
-        public void Execute(ref BufferList<ElementTraversalInfo> traversalInfo) {
-
-            // LightStack<TreeNode>.Get();
-
-            stack.array[stack.size++] = root;
-            int idx = 0;
+    [BurstCompile(CompileSynchronously = true)]
+    public unsafe struct TraversalIndexJob : IJob {
+        
+        public ElementId rootId;
+        public ElementTable<ElementTraversalInfo> traversalTable;
+        public ElementTable<HierarchyInfo> hierarchyTable;
+        
+        public void Execute() {
 
             ushort ftbIndex = 0;
             ushort btfIndex = 0;
 
-            List<int> forward = new List<int>();
-            List<int> backwards = new List<int>();
-            while (stack.size != 0) {
+            DataList<ElementId> stack = new DataList<ElementId>(512, Allocator.TempJob);
 
-                TreeNode current = stack.array[--stack.size];
-
-                forward.Add(current.id);
-
-                traversalInfo.array[current.id] = new ElementTraversalInfo() {
-                    depth = (ushort) current.depth,
-                    ftbIndex = ftbIndex++
-                };
-
-                // current.ftbIndex = (ushort) (ftbIndex - 1);
-
-                int childCount = current.children.Count;
-
-                //stack.EnsureAdditionalCapacity(childCount);
-
-                for (int i = childCount - 1; i >= 0; i--) {
-
-                    TreeNode child = current.children[i];
-
-                    //  if ((child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
-                    stack.array[stack.size++] = child;
-                    //  }
-
-                }
-
-            }
-
-            stack.array[stack.size++] = root;
-            idx = 0;
+            stack[stack.size++] = rootId;
 
             while (stack.size != 0) {
 
-                TreeNode current = stack.array[--stack.size];
-                backwards.Add(current.id);
-                traversalInfo.array[current.id].btfIndex = btfIndex++;
+                ElementId current = stack[--stack.size];
 
-                int childCount = current.children.Count; //ChildCount;
-                // current.btfIndex = (ushort) (btfIndex - 1);
+                traversalTable[current].ftbIndex = ftbIndex++;
+
+                int childCount = hierarchyTable[current].childCount;
+
+                stack.EnsureAdditionalCapacity(childCount);
+
+                ElementId childPtr = hierarchyTable[current].lastChildId;
 
                 for (int i = 0; i < childCount; i++) {
 
-                    TreeNode child = current.children[i];
+                    //if (!ElementSystem.IsDeadOrDisabled(childPtr, metaTable)) {
+                    stack.AddUnchecked(childPtr);
+                    // }
 
-                    stack.array[stack.size++] = child;
+                    childPtr = hierarchyTable[childPtr].prevSiblingId;
 
                 }
 
             }
 
-            traversalInfo.size = idx;
-            // stack.Release();
-            // rootElementHandle.Free();
+            stack[stack.size++] = rootId;
+
+            while (stack.size != 0) {
+
+                ElementId current = stack[--stack.size];
+
+                traversalTable[current].btfIndex = btfIndex++;
+
+                int childCount = hierarchyTable[current].childCount;
+
+                ElementId childPtr = hierarchyTable[current].firstChildId;
+
+                for (int i = 0; i < childCount; i++) {
+
+                    //  if (!ElementSystem.IsDeadOrDisabled(childPtr, metaTable)) {
+                    stack.AddUnchecked(childPtr);
+                    //   }
+
+                    childPtr = hierarchyTable[childPtr].nextSiblingId;
+
+                }
+
+            }
+
+            stack.Dispose();
+
         }
 
     }
-
-    // Update is called once per frame
-    void Update() { }
 
 }

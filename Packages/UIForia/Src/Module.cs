@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using UIForia.Compilers;
 using UIForia.Elements;
@@ -10,7 +9,6 @@ using UIForia.Src;
 using UIForia.Style;
 using UIForia.Style2;
 using UIForia.Util;
-using UnityEngine;
 
 namespace UIForia {
 
@@ -26,7 +24,6 @@ namespace UIForia {
         public readonly bool IsBuiltIn;
 
         private LightList<StyleSheet2> styleSheets;
-        private Diagnostics diagnostics;
 
         private List<bool> conditionResults;
         private IList<StyleCondition> styleConditions;
@@ -41,13 +38,14 @@ namespace UIForia {
 
         private string assetPath;
         private string moduleName;
+        internal ushort index;
 
         public string location { get; internal set; }
 
         protected Module() {
 
             if (!ModuleSystem.s_ConstructionAllowed) {
-                throw new ModuleLoadException("Modules should never have their constructor called.");
+                throw new ModuleLoadException("Modules should never have their constructor called outside of the ModuleSystem initialization.");
             }
 
             this.type = GetType();
@@ -57,7 +55,6 @@ namespace UIForia {
             this.IsBuiltIn = type == typeof(BuiltInElementsModule);
             this.elementTypes = new PagedLightList<ProcessedType>(32);
             this.tagNameMap = new Dictionary<string, ProcessedType>(31);
-            this.diagnostics = new Diagnostics();
         }
 
         // internal Action zz__INTERNAL_DO_NOT_CALL; // use this for precompiled loading instead of doing type reflection to find caller type
@@ -105,10 +102,6 @@ namespace UIForia {
             }
         }
 
-        public ModuleCondition GetDisplayConditions() {
-            return default;
-        }
-
         public int GetDisplayConditionId(CharSpan conditionSpan) {
             if (styleConditions == null) return -1;
             for (int i = 0; i < styleConditions.Count; i++) {
@@ -118,10 +111,6 @@ namespace UIForia {
             }
 
             return -1;
-        }
-
-        public bool HasStyleCondition(string conditionName) {
-            return HasStyleCondition(new CharSpan(conditionName));
         }
 
         public bool HasStyleCondition(CharSpan conditionName) {
@@ -163,13 +152,13 @@ namespace UIForia {
             styleConditions.Add(new StyleCondition(styleConditions.Count, condition, fn));
         }
 
-        public bool TryResolveTagName(string moduleName, string tagName, Diagnostics diagnostics, out ProcessedType processedType) {
-            processedType = ResolveTagName(moduleName, tagName, diagnostics);
+        public bool TryResolveTagName(string moduleName, string tagName, Diagnostics diagnostics, string file, LineInfo lineInfo, out ProcessedType processedType) {
+            processedType = ResolveTagName(moduleName, tagName, diagnostics, file, lineInfo);
             return processedType != null;
         }
 
         // this is called from multiple threads!
-        internal ProcessedType ResolveTagName(string moduleName, string tagName, Diagnostics diagnostics) {
+        internal ProcessedType ResolveTagName(string moduleName, string tagName, Diagnostics diagnostics, string file, LineInfo lineInfo) {
 
             ProcessedType retn;
 
@@ -181,11 +170,13 @@ namespace UIForia {
                     }
                 }
 
-                if (tagName == null) {
-                    Debugger.Break();
+                if (ModuleSystem.BuiltInModule.tagNameMap.TryGetValue(tagName, out retn)) {
+                    return retn;
                 }
-                return ModuleSystem.BuiltInModule.tagNameMap.TryGetValue(tagName, out retn) ? retn : null;
 
+                diagnostics.LogError($"Unable to resolve element tag name '{tagName}'.", file, lineInfo.line, lineInfo.column);
+                
+                return null;
             }
 
             // todo -- if we support <Using module="x" as="y"/> do the resolution here
@@ -193,7 +184,7 @@ namespace UIForia {
 
             if (module == null) {
                 List<string> list = dependencies.Select(d => d.GetAlias()).ToList();
-                diagnostics?.LogError($"Unable to resolve module `{moduleName}`. Available module names from current module ({GetType().GetTypeName()}) are {StringUtil.ListToString(list)}");
+                diagnostics?.LogError($"Unable to resolve module `{moduleName}`. Available module names from current module ({GetType().GetTypeName()}) are {StringUtil.ListToString(list)}", file, lineInfo.line, lineInfo.column);
                 return null;
             }
 
@@ -201,12 +192,10 @@ namespace UIForia {
                 return retn;
             }
 
-            diagnostics?.LogError($"Unable to resolve tag name `{tagName}` from module {moduleName}.");
+            diagnostics?.LogError($"Unable to resolve tag name `{tagName}` from module {moduleName}.", file, lineInfo.line, lineInfo.column);
             return null;
         }
-
-        public void AddDiagnostic(string message) { }
-
+        
         public string GetModuleName() {
             return moduleName;
         }
@@ -291,14 +280,6 @@ namespace UIForia {
             dependencyList.Release();
             stack.Release();
             return flattenedDependencyTree;
-        }
-
-        public Diagnostics GetDiagnostics() {
-            return diagnostics;
-        }
-
-        internal void ClearDiagnostics() {
-            diagnostics.Clear();
         }
 
 

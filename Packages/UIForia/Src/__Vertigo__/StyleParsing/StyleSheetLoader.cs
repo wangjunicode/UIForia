@@ -1,7 +1,6 @@
 using System;
 using UIForia.Exceptions;
 using UIForia.Parsing;
-using UIForia.Style;
 using UIForia.Style2;
 using UIForia.Util;
 using UnityEngine;
@@ -24,7 +23,7 @@ namespace UIForia {
     [Serializable]
     public struct StringTableEntry {
 
-        public int propertyIndex;
+        public int index;
         public string value;
 
     }
@@ -44,16 +43,6 @@ namespace UIForia {
 
         public int propertyIndex;
         public int conditionRequirement;
-
-    }
-
-    [Serializable]
-    public struct PropertyDefinition {
-
-        public PropertyId propertyId;
-        public ushort conditionIndex; // when adding to database this will be resolved
-        public ushort conditionDepth;
-        public long value;
 
     }
 
@@ -232,7 +221,7 @@ namespace UIForia {
                 return default;// ParseStyleBody(ref bodyStream);
             }
 
-            return ReportCriticalParseError($"Invalid style block for style {styleName}", stream.GetLineNumber(), stream.colNumber);
+            return ReportCriticalParseError($"Invalid style block for style {styleName}", stream.GetLineInfo().line);
 
         }
 
@@ -454,12 +443,12 @@ namespace UIForia {
 
         private ParseResult ReportCriticalParseError(string message, int lineNumber = -1, int columnNumber = -1) {
             hitCriticalFailure = true;
-            diagnostics.LogParseError(filePath, message, lineNumber, columnNumber);
+            diagnostics.LogError(message, filePath, lineNumber, columnNumber);
             return ParseResult.CriticalFailure;
         }
 
         private ParseResult ReportRecoverableParseError(string message, int lineNumber = -1, int columnNumber = -1) {
-            diagnostics.LogParseError(filePath, message, lineNumber, columnNumber);
+            diagnostics.LogError(message, filePath, lineNumber, columnNumber);
             return ParseResult.RecoverableFailure;
         }
 

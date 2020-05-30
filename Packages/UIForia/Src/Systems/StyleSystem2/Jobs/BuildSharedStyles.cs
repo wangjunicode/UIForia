@@ -49,17 +49,17 @@ namespace UIForia {
                         stylePair.styleId,
                         stylePair.state,
                         out StaticPropertyId* keys,
-                        out PropertyData* data,
-                        out ModuleCondition conditionMask
+                        out PropertyData* data
                     );
 
                     for (int k = 0; k < count; k++) {
 
                         ref StaticPropertyId key = ref keys[k];
 
-                        if ((key.conditionRequirement & conditionMask) != conditionMask) {
-                            continue;
-                        }
+                        // todo -- use condition depth + condition id to decide if we need to skip a bunch of properties
+                        // if ((key.conditionRequirement & conditionMask) != conditionMask) {
+                        //     continue;
+                        // }
 
                         if (map.TrySetIndex(key.propertyId.index)) {
                             idbuffer[propertyCount] = key.propertyId;

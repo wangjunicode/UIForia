@@ -10,8 +10,6 @@ namespace UIForia.Layout {
 
     public class LayoutResult {
 
-        public float localRotation;
-        public Vector2 localScale;
         public Vector2 localPosition;
 
         public Vector2 scale;
@@ -35,7 +33,16 @@ namespace UIForia.Layout {
 
         public Vector2 alignedPosition; // where the element wants to be (might be relative to allocated, might not be) 
         // local position = actual position post transform
+        
+        public LayoutResult layoutParent;
+        public UIElement element;
+        public OrientedBounds orientedBounds;
+        public Vector4 axisAlignedBounds;
 
+        internal ClipData clipper;
+        public bool isCulled;
+        public bool rebuildGeometry;
+        
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
         public Rect AllocatedRect => new Rect(allocatedPosition, new Vector2(allocatedSize.width, allocatedSize.height));
 
@@ -50,14 +57,7 @@ namespace UIForia.Layout {
         public float ContentAreaWidth => actualSize.width - padding.left - border.left - padding.right - border.right;
         public float ContentAreaHeight => actualSize.height - padding.top - border.top - padding.bottom - border.bottom;
 
-        public LayoutResult layoutParent;
-        public UIElement element;
-        public OrientedBounds orientedBounds;
-        public Vector4 axisAlignedBounds;
 
-        internal ClipData clipper;
-        public bool isCulled;
-        public bool rebuildGeometry;
 
         public Rect ContentRect => new Rect(
             padding.left + border.left,

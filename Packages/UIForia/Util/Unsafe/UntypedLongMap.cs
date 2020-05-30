@@ -93,6 +93,10 @@ namespace UIForia.Util.Unsafe {
             mapState->CopyKeyValuePairs<TValue>(data);
         }
 
+        public void Clear() {
+            mapState->Clear();
+        }
+
     }
 
     public unsafe struct UntypedLongMap : IDisposable {

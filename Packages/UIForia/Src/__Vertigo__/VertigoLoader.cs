@@ -1,268 +1,284 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq.Expressions;
-using FastExpressionCompiler;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Parsing;
 using UIForia.Src;
-using UIForia.Systems;
 using UIForia.Util;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEditor;
-using UnityEngine;
-using Debug = UnityEngine.Debug;
+using Unity.Jobs.LowLevel.Unsafe;
 
 namespace UIForia {
 
-    public struct CompilationId {
+    public struct CompileResult : IDisposable {
 
-        public readonly int id;
+        public Diagnostics diagnostics;
+        public StyleDatabase styleDatabase;
+        public StringInternSystem internSystem;
+        public Dictionary<Type, TemplateData> templateDataMap;
 
-        internal CompilationId(int id) {
-            this.id = id;
+        public void Dispose() {
+            styleDatabase?.Dispose();
+            internSystem?.Dispose();
         }
 
     }
 
-    public class Compilation : IDisposable {
+    public static unsafe class VertigoLoader {
 
-        public readonly CompilationId compilationId;
-        public readonly Type entryType;
-        public readonly Diagnostics diagnostics;
+        private struct DisposedCompileData : IDisposable {
 
-        public Compilation(CompilationId compilationId, Type entryType, Diagnostics diagnostics) {
-            this.compilationId = compilationId;
-            this.entryType = entryType;
-            this.diagnostics = diagnostics;
-        }
+            public GCHandleArray<Module> moduleArrayHandle;
+            public GCHandleArray<TemplateFileShell> templateFiles;
+            
+            public GCHandleList<StyleFile> mergedStyleFileList;
+            public GCHandleList<TemplateData> templateDataHandle;
+            public GCHandleList<TemplateExpressionSet> compiledTemplateHandle;
+            
+            public PerThreadList<StyleFile> perThread_StyleFiles;
+            public PerThreadObject<Diagnostics> perThread_Diagnostics;
+            
+            public GCHandle<string> baseCachePath;
+            public GCHandle<Diagnostics> gatheredDiagnostics;
+   
+            public HeapAllocated<int> parseCount;
 
-        public void Dispose() { }
-
-    }
-
-    public class VertigoLoader {
-
-        private static int idGenerator;
-
-        private static readonly List<Compilation> compilations = new List<Compilation>();
-        private static readonly Dictionary<string, TemplateFileShell> s_ParseCacheMap = new Dictionary<string, TemplateFileShell>(64);
-
-        public static CompilationId Compile(Type type, Diagnostics diagnostics) {
-
-            ModuleSystem.Initialize();
-
-            if (!type.IsSubclassOf(typeof(UIElement))) {
-                diagnostics.LogError($"Cannot compile entry type {type.GetTypeName()} because it is not a subclass of {typeof(UIElement).GetTypeName()}");
-                return new CompilationId(-1);
+            public void Dispose() {
+                moduleArrayHandle.Dispose();
+                templateFiles.Dispose();
+                mergedStyleFileList.Dispose();
+                perThread_StyleFiles.Dispose();
+                perThread_Diagnostics.Dispose();
+                baseCachePath.Dispose();
+                gatheredDiagnostics.Dispose();
+                templateDataHandle.Dispose();
+                compiledTemplateHandle.Dispose();
             }
 
-            CompilationId retn = new CompilationId(idGenerator++);
-
-            Compilation result = new Compilation(retn, type, diagnostics);
-
-            BeginCompile(result);
-
-            return retn;
-
         }
 
-        private static void BeginCompile(Compilation result) {
+        public static bool AllowCaching {
+            get => false; // module types changed, module conditions changed, styles regenerated
+        }
 
-            ProcessedType processedEntryType = TypeProcessor.GetProcessedType(result.entryType);
+        public static bool Compile(Type entryType, CompilationType compileType, out CompileResult compileResult) {
+            ModuleSystem.Initialize();
+
+            Diagnostics diagnostics = new Diagnostics();
+            if (!entryType.IsSubclassOf(typeof(UIElement))) {
+                diagnostics.LogError($"Cannot compile entry type {entryType.GetTypeName()} because it is not a subclass of {typeof(UIElement).GetTypeName()}");
+                compileResult = new CompileResult() {
+                    diagnostics = diagnostics,
+                };
+                return false;
+            }
+
+            // todo -- ensure has [EntryPoint] 
+
+            ProcessedType processedEntryType = TypeProcessor.GetProcessedType(entryType);
 
             if (processedEntryType == null) {
-                result.diagnostics.LogError($"Cannot find processed type for entry type {result.entryType.GetTypeName()}");
-                return;
+                diagnostics.LogError($"Cannot find processed type for entry type {entryType.GetTypeName()}");
+                compileResult = new CompileResult() {
+                    diagnostics = diagnostics,
+                };
+                return false;
             }
 
             if (processedEntryType.IsUnresolvedGeneric) {
-                result.diagnostics.LogError($"Cannot use an open generic type as an application entry point. {result.entryType.GetTypeName()} is invalid.");
-                return;
+                diagnostics.LogError($"Cannot use an open generic type as an application entry point. {entryType.GetTypeName()} is invalid.");
+                compileResult = new CompileResult() {
+                    diagnostics = diagnostics,
+                };
+                return false;
             }
 
             if (processedEntryType.module == null) {
-                result.diagnostics.LogError($"{result.entryType.GetTypeName()} had no module associated with it.");
-                return;
+                diagnostics.LogError($"{entryType.GetTypeName()} had no module associated with it.");
+                compileResult = new CompileResult() {
+                    diagnostics = diagnostics,
+                };
+                return false;
             }
 
             Module[] moduleList = processedEntryType.module.GetFlattenedDependencyTree();
 
-            StructList<StyleFile> styleFiles = new StructList<StyleFile>(64);
+            TemplateFileShell[] templatesToParse = PopulateTemplateList(moduleList);
+            LightList<StyleFile> styleFiles = new LightList<StyleFile>(64);
 
-            JobHandle styleGather = new GatherStyleFiles_Managed(moduleList, styleFiles, UnityEngine.Application.dataPath).Schedule();
-            // new GatherStyleFiles_Managed(moduleList, styleFiles, UnityEngine.Application.dataPath).Execute();
+            DisposedCompileData compileData = new DisposedCompileData() {
+                moduleArrayHandle = new GCHandleArray<Module>(moduleList),
+                templateFiles = new GCHandleArray<TemplateFileShell>(templatesToParse),
+                mergedStyleFileList = new GCHandleList<StyleFile>(styleFiles),
+                perThread_StyleFiles = new PerThreadList<StyleFile>(JobsUtility.MaxJobThreadCount),
+                perThread_Diagnostics = new PerThreadObject<Diagnostics>(JobsUtility.MaxJobThreadCount),
+                baseCachePath = new GCHandle<string>(Path.Combine(UnityEngine.Application.dataPath, "UIForiaCache")),
+                gatheredDiagnostics = new GCHandle<Diagnostics>(diagnostics),
+                parseCount = new HeapAllocated<int>(0)
+            };
 
-            string tempFileLocation = EditorPrefs.GetString("UIFORIA_TEMPLATE_PARSE_CACHE");
-
-            // need UIFORIA parsecache or something
-            if (tempFileLocation != null && File.Exists(tempFileLocation)) { }
-            else {
-                tempFileLocation = FileUtil.GetUniqueTempPathInProject();
-                EditorPrefs.SetString("UIFORIA_TEMPLATE_PARSE_CACHE", tempFileLocation);
-            }
-
-            LightList<TemplateFileShell> templatesToParse = LightList<TemplateFileShell>.Get();
-
-            // needed? maybe not
-            s_ParseCacheMap.Clear();
-
-            for (int i = 0; i < moduleList.Length; i++) {
-
-                Module module = moduleList[i];
-
-                RebuildParseCache(module, tempFileLocation);
-
-                for (int j = 0; j < module.templateShells.size; j++) {
-
-                    if (!s_ParseCacheMap.TryGetValue(module.templateShells[j].filePath, out TemplateFileShell cachedFile)) {
-                        templatesToParse.Add(module.templateShells[j]);
-                    }
-
-                }
-
-            }
-
-            // todo this could be multithreaded pretty easily
-            // would want to sort by parser type etc
-
-            TemplateParser parser = TemplateParser.GetParserForFileType("xml");
-
-            TemplateFileShellBuilder builder = new TemplateFileShellBuilder();
-
-            for (int i = 0; i < templatesToParse.size; i++) {
-
-                TemplateFileShell templateFile = templatesToParse.array[i];
-
-                string filePath = templatesToParse.array[i].filePath;
-
-                if (!File.Exists(filePath)) {
-                    result.diagnostics.LogError("Unable to find template file at path: " + filePath);
-                    continue;
-                }
-
-                string contents = File.ReadAllText(filePath);
-
-                parser.Setup(filePath, result.diagnostics);
-
-                templateFile.successfullyParsed = parser.TryParse(contents, builder);
-
-                if (templateFile.successfullyParsed) {
-                    builder.Build(templateFile);
-                    s_ParseCacheMap[filePath] = templateFile;
-                }
-
-                parser.Reset();
-
-            }
-
-            for (int i = 0; i < moduleList.Length; i++) {
-                ValidateModuleTemplates(moduleList[i]);
-            }
-
-            SerializeParsedTemplates(moduleList);
-
-            // start parsing style sheets
-
-            bool allModulesValid = true;
-            for (int i = 0; i < moduleList.Length; i++) {
-                if (moduleList[i].GetDiagnostics().HasErrors) {
-                    allModulesValid = false;
-                    break;
-                }
-            }
-
-            if (allModulesValid) {
-                CompileTemplates(processedEntryType);
-            }
-            styleGather.Complete();
-        }
-
-        private struct TemplatePair {
-
-            public Type type;
-            public string templateName;
-
-        }
-
-        public static string TemplateFile(string appName, string templateName, string templateInfo) {
-            return
-                $@"using UIForia.Compilers;
-// ReSharper disable PossibleNullReferenceException
-
-namespace UIForia.Generated {{
-
-    public partial class Generated_{appName} : TemplateLoader {{
-    
-        public static readonly {nameof(TemplateData)} {templateName} = {templateInfo}
-
-    }}
-
-}}";
-        }
-
-        private static void CompileTemplates(ProcessedType processedEntryType) {
-
-            string appName = "DefaultApp";
-            string path = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGeneratedNew", appName));
-
-            TemplateCompiler2 compiler = new TemplateCompiler2();
-            IndentedStringBuilder builder = new IndentedStringBuilder(1024);
-            List<TemplatePair> templateNames = new List<TemplatePair>();
-
-            Action<TemplateExpressionSet> callback = (set) => {
-                builder.Clear();
-
-                ProcessedType processedType = set.processedType;
-                string templateName = "template_" + set.GetGUID();
-                templateNames.Add(new TemplatePair() {
-                    type = processedType.rawType,
-                    templateName = templateName
+            JobHandle compileStyles = VertigoScheduler.ParallelFor(new GatherStyleFiles_Managed() {
+                    parallel = new ParallelParams(moduleList.Length, 1),
+                    baseCachePath = compileData.baseCachePath,
+                    moduleListHandle = compileData.moduleArrayHandle,
+                    perThread_styleFileList = compileData.perThread_StyleFiles
+                })
+                .Then(new MergeStyleFileLists_Managed() {
+                    perThread_styleFileList = compileData.perThread_StyleFiles,
+                    mergeResult = compileData.mergedStyleFileList,
+                    lengthResult = compileData.parseCount
+                })
+                .ThenDeferParallel(new ParseStyleFiles_Managed() {
+                    defer = new ParallelParams.Deferred(compileData.parseCount, 5),
+                    styleFileListHandle = compileData.mergedStyleFileList,
+                    perThread_DiagnosticsHandle = compileData.perThread_Diagnostics
+                })
+                .ThenDeferParallel(new CompileStyleFiles_Managed() {
+                    defer = new ParallelParams.Deferred(compileData.parseCount, 5),
+                    styleFileListHandle = compileData.mergedStyleFileList,
+                    perThread_DiagnosticsHandle = compileData.perThread_Diagnostics
                 });
 
-                set.ToCSharpCode(builder);
+            // maybe setup style db here, but would include all styles from referenced modules, not just the used ones
+            // which might be desirable anyway tbh
 
-                string data = TemplateFile(appName, templateName, builder.ToString());
+            JobHandle parseTemplates = VertigoScheduler.Parallel(new LoadTemplates_Managed() {
+                    parallel = new ParallelParams(templatesToParse.Length, 5),
+                    perThread_diagnosticsList = compileData.perThread_Diagnostics,
+                    fileShells = compileData.templateFiles,
+                    cachePathBase = compileData.baseCachePath
+                })
+                .ThenParallel(new ValidateTemplates_Managed() {
+                    parallel = new ParallelParams(templatesToParse.Length, 5),
+                    perThread_diagnostics = compileData.perThread_Diagnostics,
+                    templateFileArray = compileData.templateFiles
+                });
 
-                string moduleTypeName = processedType.module.GetType().GetTypeName();
+            JobHandle gatherDiagnostics = VertigoScheduler.Await(parseTemplates, compileStyles).Then(new GatherDiagnostics_Managed() {
+                perThread_diagnostics = compileData.perThread_Diagnostics,
+                gathered = compileData.gatheredDiagnostics
+            });
 
-                string fileName;
-                if (processedType.rawType.IsGenericType) {
-                    string typeName = processedType.rawType.GetTypeName();
-                    int idx = typeName.IndexOf('<');
+            // sync point!
+            JobHandle.CompleteAll(ref parseTemplates, ref compileStyles, ref gatherDiagnostics);
 
-                    fileName = processedType.tagName + typeName.Substring(idx).InlineReplace('<', '(').InlineReplace('>', ')');
+            // could kick off the write back jobs now for parse caching instead of writing as soon as it completes parsing
+
+            // start compiling if we dont have any problems
+
+            bool allModulesValid = !diagnostics.HasErrors();
+
+            if (!allModulesValid) {
+                compileData.Dispose();
+                compileResult = new CompileResult() {
+                    diagnostics = diagnostics,
+                };
+                return false;
+            }
+
+            StringInternSystem internSystem = new StringInternSystem();
+            StyleDatabase styleDatabase = new StyleDatabase(internSystem);
+
+            styleDatabase.Initialize(styleFiles);
+
+            if (compileType == CompilationType.Dynamic) {
+                
+            }
+            else {
+                
+            }
+            LightList<TemplateData> compiledTemplateData = CompileTemplates(processedEntryType, ref compileData);
+
+            bool applicationValid = !diagnostics.HasErrors();
+
+            compileData.Dispose();
+
+            if (!applicationValid) {
+                internSystem.Dispose();
+                styleDatabase.Dispose();
+                compileResult = new CompileResult() {
+                    diagnostics = diagnostics
+                };
+                return false;
+            }
+
+            // todo -- replace with array lookup by type index (does make caching templates harder, but can still cache bindings which is better anyway)
+
+            Dictionary<Type, TemplateData> templateDataMap = new Dictionary<Type, TemplateData>(compiledTemplateData.size);
+
+            for (int i = 0; i < compiledTemplateData.size; i++) {
+                templateDataMap.Add(compiledTemplateData.array[i].type, compiledTemplateData.array[i]);
+            }
+
+            compileResult = new CompileResult() {
+                diagnostics = diagnostics,
+                internSystem = internSystem,
+                styleDatabase = styleDatabase,
+                templateDataMap = templateDataMap
+            };
+
+            return true;
+
+        }
+
+        private static TemplateFileShell[] PopulateTemplateList(Module[] moduleList) {
+            int count = 0;
+            for (int i = 0; i < moduleList.Length; i++) {
+                count += moduleList[i].templateShells.size;
+            }
+
+            int size = 0;
+            TemplateFileShell[] retn = new TemplateFileShell[count];
+
+            for (int i = 0; i < moduleList.Length; i++) {
+
+                Array.Copy(moduleList[i].templateShells.array, 0, retn, size, moduleList[i].templateShells.size);
+                size += moduleList[i].templateShells.size;
+            }
+
+            return retn;
+        }
+
+        private static LightList<TemplateData> CompileTemplates(ProcessedType processedEntryType, ref DisposedCompileData compileData) {
+
+            TemplateCompiler2 compiler = new TemplateCompiler2();
+
+            LightList<TemplateExpressionSet> compileTemplateList = new LightList<TemplateExpressionSet>(64);
+            LightList<TemplateData> templateDataList = new LightList<TemplateData>(64);
+
+            GCHandleList<TemplateExpressionSet> compiledTemplateHandle = new GCHandleList<TemplateExpressionSet>(compileTemplateList);
+            GCHandleList<TemplateData> templateDataHandle = new GCHandleList<TemplateData>(templateDataList);
+            PerThreadObject<Diagnostics> diagnosticsHandle = compileData.perThread_Diagnostics;
+
+            compileData.compiledTemplateHandle = compiledTemplateHandle;
+            compileData.templateDataHandle = templateDataHandle;
+
+            StructList<JobHandle> handles = new StructList<JobHandle>();
+
+            int templateCount = 5;
+            Action<TemplateExpressionSet> callback = (set) => {
+
+                compileTemplateList.Add(set);
+
+                // job will write into this slot, just make sure list can hold it
+                templateDataList.Add(default);
+
+                JobHandle compileHandle = new CompileBuiltTemplates_Managed() {
+                    compiledTemplateHandle = compiledTemplateHandle,
+                    outputList = templateDataHandle,
+                    templateIndex = compileTemplateList.size - 1,
+                    perThread_diagnostics = diagnosticsHandle
+                }.Schedule();
+
+                if (templateCount++ >= 5) {
+                    JobHandle.ScheduleBatchedJobs();
+                    templateCount = 0;
                 }
-                else {
-                    fileName = processedType.tagName;
-                }
 
-                Debug.Log(data);
-                //  string file = Path.Combine(path, "Modules", moduleTypeName, fileName + "_generated.cs");
-
-                // Directory.CreateDirectory(Path.GetDirectoryName(file));
-                // File.WriteAllText(file, data);
-
-                // builder.Clear();
-                // builder.Indent();
-                // builder.Indent();
-                // builder.Indent();
-                // builder.Indent();
-                //
-                // for (int i = 0; i < templateNames.Count; i++) {
-                //     builder.Append("{ typeof(");
-                //     builder.AppendInline(templateNames[i].type.GetTypeName());
-                //     builder.AppendInline("), ");
-                //     builder.AppendInline(templateNames[i].templateName);
-                //     builder.AppendInline("}");
-                //     if (i != templateNames.Count - 1) {
-                //         builder.AppendInline(",\n");
-                //     }
-                // }
-                //
-                // File.WriteAllText(Path.Combine(outputPath, "init_generated.cs"), InitTemplate(appName, builder.ToString(), "template_" + compiler.CompileTemplate(TypeProcessor.GetProcessedType(rootType)).GetGUID()));
+                handles.Add(compileHandle);
 
             };
 
@@ -272,95 +288,26 @@ namespace UIForia.Generated {{
 
             compiler.onTemplateCompiled -= callback;
 
-        }
+            NativeArray<JobHandle> handleArray = new NativeArray<JobHandle>(handles.size, Allocator.Temp);
 
-        private static void OnTemplateCompiled(TemplateExpressionSet obj) {
-            throw new NotImplementedException();
-        }
-
-        private static void ValidateModuleTemplates(Module module) {
-            // totally parallel, todo -- make this real
-            new ResolveTagNamesAndValidateTemplates_ManagedJob(module).Execute();
-        }
-
-        private static void RebuildParseCache(Module module, string cacheLocation) {
-            return; // todo -- verify this 
-            string cachepath = cacheLocation + "/" + module.location + "/cache.json";
-            if (File.Exists(cachepath)) {
-                TemplateFileShell[] fileShells = null;
-                try {
-                    fileShells = JsonUtility.FromJson<TemplateFileShell[]>(cachepath);
-
-                    for (int j = 0; j < fileShells.Length; j++) {
-
-                        if (!File.Exists(module.templateShells[j].filePath)) {
-                            continue;
-                        }
-
-                        DateTime writeTime = File.GetLastWriteTime(module.templateShells[j].filePath);
-
-                        if (fileShells[j].lastWriteTime != writeTime) {
-                            continue;
-                        }
-
-                        s_ParseCacheMap.Add(fileShells[j].filePath, fileShells[j]);
-                    }
-
-                }
-                catch (Exception e) {
-                    Debug.Log(e);
-                }
+            fixed (JobHandle* handleptr = handles.array) {
+                UnsafeUtility.MemCpy(handleArray.GetUnsafePtr(), handleptr, sizeof(JobHandle) * handles.size);
             }
 
-        }
+            JobHandle.CompleteAll(handleArray);
 
-        private static void SerializeParsedTemplates(Module[] modules) {
-// kick off job to update the parsed templates
-// can be parallel, 1 job per module
-// 1 file per module or 1 file per template? will have to profile but 1 per module i think
-            for (int i = 0; i < modules.Length;
-                i++) {
-                new SerializeTemplateParseResults().Schedule();
-            }
-        }
+            new GatherDiagnostics_Managed() {
+                perThread_diagnostics = compileData.perThread_Diagnostics,
+                gathered = compileData.gatheredDiagnostics
+            }.Execute();
 
-        private struct SerializeTemplateParseResults : IJob {
+            handleArray.Dispose();
 
-            public SerializeTemplateParseResults(Module module) { }
-
-            public void Execute() { }
+            return templateDataList;
 
         }
 
-        public static bool IsCompleted(CompilationId compilationId) {
-            return false;
-        }
-
-        public static Compilation GetCompilationResult(CompilationId id) {
-            if (id.id < 0 || !IsCompleted(id)) {
-                return null;
-            }
-
-            for (int i = 0; i < compilations.Count;
-                i++) {
-                if (compilations[i].compilationId.id == id.id) {
-                    Compilation compilation = compilations[i];
-                    compilations[i] = compilations[compilations.Count - 1];
-                    return compilation;
-                }
-            }
-
-            return null;
-        }
-
-    }
-
-    public struct StyleFile {
-
-        public Module module;
-        public string filePath;
-        public DateTime lastWriteTime;
-        public string contents;
+        public static void LoadPrecompiled(VertigoApplication vertigoApplication, Type entryPoint) { }
 
     }
 

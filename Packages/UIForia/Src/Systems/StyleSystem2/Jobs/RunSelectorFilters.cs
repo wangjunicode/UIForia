@@ -90,7 +90,7 @@ namespace UIForia {
                             output_WhereFilterCandidates.Add(new WhereFilterCandidate() {
                                 candidateId = info.candidates[j],
                                 selectorIndex = info.selectorId,
-                                hostElementId = info.hostId.id,
+                                hostElementId = info.hostId,
                                 whereFilterId = info.whereFilterId
                             });
                         }
@@ -113,12 +113,12 @@ namespace UIForia {
 
         }
 
-        private void RunTagFilter(ResolvedSelectorFilter filter, bool expectation, int* candidates, ref int candidateCount) {
+        private void RunTagFilter(ResolvedSelectorFilter filter, bool expectation, ElementId* candidates, ref int candidateCount) {
             // todo -- could optimize to a. binary search, b. check a lookup table if list is large
             for (int i = 0; i < candidateCount; i++) {
 
                 bool found = false;
-                int candidate = candidates[i];
+                ElementId candidate = candidates[i];
 
                 for (int j = 0; j < filter.indexTableSize; j++) {
                     // todo better vectorize this
@@ -136,12 +136,12 @@ namespace UIForia {
 
         }
 
-        private void RunStateFilter(ResolvedSelectorFilter filter, bool expectation, int* candidates, ref int candidateCount) {
+        private void RunStateFilter(ResolvedSelectorFilter filter, bool expectation, ElementId* candidates, ref int candidateCount) {
             // todo -- could optimize to a. binary search, b. check a lookup table if list is large
             for (int i = 0; i < candidateCount; i++) {
 
                 bool found = false;
-                int candidate = candidates[i];
+                ElementId candidate = candidates[i];
 
                 for (int j = 0; j < filter.indexTableSize; j++) {
                     // todo better vectorize this
@@ -159,22 +159,33 @@ namespace UIForia {
 
         }
 
-        private void RunStyleFilter(ResolvedSelectorFilter filter, bool expectation, int* candidates, ref int candidateCount) {
+        private void RunStyleFilter(ResolvedSelectorFilter filter, bool expectation, ElementId* candidates, ref int candidateCount) {
             // todo -- could optimize to a. binary search, b. check a lookup table if list is large
             for (int i = 0; i < candidateCount; i++) {
 
-                if (expectation != (filter.indexTable[candidates[i]] == filter.key)) {
-                    candidates[--i] = candidates[--candidateCount];
+                bool found = false;
+                ElementId candidate = candidates[i];
+
+                for (int j = 0; j < filter.indexTableSize; j++) {
+                    // todo better vectorize this
+                    if (filter.indexTable[j] == candidate) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found != expectation) {
+                    candidates[i--] = candidates[--candidateCount];
                 }
 
             }
 
         }
 
-        private void RunAttributeFilter(ResolvedSelectorFilter filter, bool expectation, int* candidates, ref int candidateCount) {
+        private void RunAttributeFilter(ResolvedSelectorFilter filter, bool expectation, ElementId* candidates, ref int candidateCount) {
             for (int i = 0; i < candidateCount; i++) {
 
-                int candidate = candidates[i];
+                ElementId candidate = candidates[i];
                 bool found = false;
 
                 // todo -- find a way to vectorize this maybe. the break prevents it
@@ -201,7 +212,7 @@ namespace UIForia {
 
         }
 
-        private void RunAttrCompareFilter(in ResolvedSelectorFilter filter, AttributeOperator op, bool expectation, int* candidates, ref int candidateCount) {
+        private void RunAttrCompareFilter(in ResolvedSelectorFilter filter, AttributeOperator op, bool expectation, ElementId* candidates, ref int candidateCount) {
             RunAttributeFilter(filter, true, candidates, ref candidateCount);
             
             int keyIndex = filter.key;
@@ -216,9 +227,9 @@ namespace UIForia {
             // for each remaining attribute, test that attr value is equal to expectation
             for (int i = 0; i < candidateCount; i++) {
 
-                int candidateId = candidates[i];
+                ElementId candidateId = candidates[i];
 
-                map_ElementAttributes.TryGetValue(candidateId, out TypedListHandle<AttributeInfo> attributes);
+                map_ElementAttributes.TryGetValue(candidateId.id, out TypedListHandle<AttributeInfo> attributes);
 
                 for (int attrIdx = 0; attrIdx < attributes.size; attrIdx++) {
                     ref AttributeInfo attributeInfo = ref attributes[attrIdx];

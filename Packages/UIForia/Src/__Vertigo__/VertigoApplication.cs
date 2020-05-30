@@ -1,4 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Src.Systems;
+using UIForia.Elements;
+using UIForia.Systems;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
@@ -7,7 +13,7 @@ namespace UIForia {
 
         Dynamic,
         Precompiled
-        
+
     }
 
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
@@ -21,68 +27,174 @@ namespace UIForia {
 
     }
 
-    public class VertigoApplication {
+    public class UIWindow {
+
+        public readonly int id;
+        protected UIElement rootElement;
+
+        protected UIWindow host;
+        protected LightList<UIWindow> subWindows;
+        public readonly VertigoApplication application;
+
+        public UIWindow(int id, UIWindow host, VertigoApplication application) {
+            this.application = application;
+            this.host = host;
+            this.id = id;
+        }
+
+        public void SetRootElement(UIElement rootElement) {
+            this.rootElement = rootElement;
+        }
+
+    }
+
+    public class RootWindow : UIWindow {
+
+        public RootWindow(int id, UIWindow host, VertigoApplication application) : base(id, host, application) { }
+
+        public UIElement GetRootElement() {
+            return rootElement;
+        }
+
+    }
+
+    public sealed class WindowManager {
+
+        public readonly RootWindow rootWindow;
+
+        internal WindowManager(VertigoApplication application) {
+            this.rootWindow = new RootWindow(0, null, application);
+        }
+
+    }
+
+    public class VertigoApplication : IDisposable {
+
+        public readonly string name;
+
+        internal StyleDatabase styleDatabase;
+        internal AttributeSystem attributeSystem;
+        internal StringInternSystem internSystem;
+        internal AwesomeLayoutSystem layoutSystem;
+        internal VertigoRenderSystem renderSystem;
+        internal LinqBindingSystem bindingSystem;
+        internal InputSystem inputSystem;
+        internal WindowManager windowManager;
 
         internal ElementSystem elementSystem;
+        internal TemplateSystem templateSystem;
+        internal StyleSystem2 styleSystem;
 
         public ApplicationType ApplicationType { get; private set; }
         public CompilationType CompilationType { get; private set; }
-
-        public readonly string name;
-        public readonly Type entryPoint;
+        public bool IsInitialized { get; private set; }
+        public bool IsRunning { get; private set; }
         
+        internal Type entryPoint;
+
+        private static LightList<VertigoApplication> s_RunningApplications = new LightList<VertigoApplication>();
+
         public VertigoApplication(string name, ApplicationType applicationType, CompilationType compilationType, Type entryPoint) {
-            this.name = name;
             ApplicationType = applicationType;
             CompilationType = compilationType;
+            this.name = name;
             this.entryPoint = entryPoint;
+            this.elementSystem = new ElementSystem(1024);
+            this.templateSystem = new TemplateSystem(this);
+            this.windowManager = new WindowManager(this);
+            s_RunningApplications.Add(this);
         }
 
-        public bool IsCompiling { get; private set; }
-        public bool HasCompilationErrors { get; private set; }
-        public bool IsInitialized { get; private set; }
+        private bool wasInitialized;
+        private bool isValid;
 
-        private CompilationId compilationId;
-        private Diagnostics diagnostics = new Diagnostics();
-        
-        public void Initialize() {
-            if (IsInitialized) return;
+        public void Destroy() {
+            s_RunningApplications.Remove(this);
+        }
 
-            compilationId = VertigoLoader.Compile(entryPoint, diagnostics);
+        private void InitializeSystems(in CompileResult compileResult) {
+            if (wasInitialized) {
+                // some systems are complex with allocators and memory, safer to just dispose and re-create them
+                styleDatabase.Dispose();
+                styleSystem.Dispose();
+                attributeSystem.Dispose();
+                internSystem.Dispose();
+            }
 
-          //  if (compilationId.id == -1) {
-                for (int i = 0; i < diagnostics.diagnosticList.Count; i++) {
-                    Debug.Log(diagnostics.diagnosticList[i].message);
-                }
-             //   Debug.Log("Failed");
-           // }
-            // applicationLoader.LoadEntryPoint(ApplicationType, systems, entryType);
-            // 
-            // ideally we can run some / all of the init steps in parallel
-
-            // int compileId = applicationLoader.LoadEntryPoint(entry, systems);
-
-            // how do I handle other entry points?
-            // other window requirements etc?
-
-            // AppDescription {
-            //    entrypoint
-            //    also compile all other entry points in all referenced modules by default? 
-            //    cant, still need to figure out generics
-            //    entry, dynamics[] -> window types, any other generic element type
-            //    thats not part of a module though, or is it? 
-            //    kind of makes sense, entry point doesnt / shouldnt know all dynamic usages like windows
-            //    can load dynamic / generics from depdendency modules
-            //    ie IncludeType(typeof(KlangWindow<Chat>));
-            //    part of entry point? part of element definition?
-            //    
-            //    [RequireDynamicTemplate(typeof(Window<>))]
-            //    
+            styleDatabase = compileResult.styleDatabase;
+            internSystem = compileResult.internSystem;
+            attributeSystem = new AttributeSystem(internSystem, elementSystem);
+            styleSystem = new StyleSystem2(1024, styleDatabase);
+            elementSystem.Initialize();
+            templateSystem.Initialize(compileResult.templateDataMap, elementSystem, styleSystem, attributeSystem);
+            wasInitialized = true;
 
         }
-        
+
+        // todo -- [RequireDynamicTemplate(typeof(Window<>))]
+        public void Initialize(Type currentType) {
+
+            switch (CompilationType) {
+
+                case CompilationType.Dynamic:
+
+                    if (VertigoLoader.Compile(entryPoint, out CompileResult compileResult)) {
+                        isValid = true;
+                        IsRunning = true;
+                        InitializeSystems(compileResult);
+                        templateSystem.CreateAppEntryPoint(windowManager.rootWindow, currentType);
+                        // how do I handle elements?
+                        // windows seem to make sense as root containers
+                        // what is a window? stackable, spawnable, despawnable, binding behavior, layout & render parallel 
+                    }
+                    else {
+                        IsRunning = false;
+                        isValid = false; // maybe just keep running old version if we had one
+                        compileResult.diagnostics.Dump();
+                    }
+
+                    break;
+
+                case CompilationType.Precompiled:
+                    VertigoLoader.LoadPrecompiled(this, entryPoint); // new Precompiled<T>(); ??? need to get at the template data somehow, ideally w/o reflection
+                    break;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+        }
+
+        public void Refresh(Type currentType) {
+            if (!IsInitialized) {
+                Initialize(currentType);
+                return;
+            }
+
+            if (currentType != entryPoint) {
+                entryPoint = currentType;
+                // 
+            }
+
+            switch (CompilationType) {
+
+                case CompilationType.Dynamic:
+                    VertigoLoader.Compile(entryPoint, out CompileResult result);
+                    break;
+
+                case CompilationType.Precompiled:
+                    Debug.Log("Cannot refresh a precompiled application.");
+                    return;
+
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
         public void RunFrame() {
-            
+
+            if (!IsInitialized) return;
+
             switch (ApplicationType) {
 
                 case ApplicationType.Game:
@@ -113,6 +225,16 @@ namespace UIForia {
 
         private void RunGameFrame() {
             throw new NotImplementedException();
+        }
+
+        public void Dispose() {
+            styleDatabase?.Dispose();
+            attributeSystem?.Dispose();
+            elementSystem?.Dispose();
+        }
+
+        public static IReadOnlyList<VertigoApplication> GetActiveApplications() {
+            return s_RunningApplications;
         }
 
     }

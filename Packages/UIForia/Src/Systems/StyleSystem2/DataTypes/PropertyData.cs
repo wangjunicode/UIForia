@@ -1,5 +1,8 @@
+using System;
+
 namespace UIForia {
 
+    [Serializable]
     public struct PropertyData {
 
         public long value;

@@ -60,10 +60,22 @@ namespace UIForia {
 
             ResizeBackingBuffer(initialElementCount);
 
+            const int largestBlockPerPages = 128;
             int minCapacity = TypedUnsafe.ByteSize<PropertyId, PropertyData>(8);
             int maxCapacity = TypedUnsafe.ByteSize<PropertyId, PropertyData>(VertigoStyleSystem.k_MaxStyleProperties);
-            int largestBlockPerPages = 128;
             stylePropertyListAllocator = Pow2AllocatorSet.CreateFromSizeRange(minCapacity, maxCapacity, largestBlockPerPages);
+        }
+        
+        public void Initialize(StyleDatabase styleDatabase) {
+            this.styleDatabase = styleDatabase;
+            this.styleIdAllocator.Dispose();
+            this.sharedChangeSets.size = 0;
+            this.instanceChangeSets.size = 0;
+            this.stateUpdates.size = 0;
+            this.updatedStyleIdBuffer.Clear();
+            this.activeStateIndex.size = 0;
+            this.focusStateIndex.size = 0;
+            this.hoverStateIndex.size = 0;
         }
 
         // maybe this should return a job struct? probably best done in a job since we'll want to clean the index of dead elements also (or leave them, not sure)
@@ -363,7 +375,7 @@ namespace UIForia {
 
             int maxStyleIndex = styleDatabase.styleCount;
 
-            // technically this is n^2 but the list size is typically 1 - 4 elements, so who care?
+            // technically this is n^2 but the list size is typically 1 - 4 elements, so who cares?
             for (int i = count - 1; i >= 0; i--) {
 
                 ref StyleId target = ref newStyles[i];
@@ -438,31 +450,6 @@ namespace UIForia {
 
             elementCapacity = newCapacity;
 
-            //
-            // long byteCount = 0;
-            //
-            // byteCount += styleSets.ItemSize * newCapacity;
-            // byteCount += instanceResults.ItemSize * newCapacity;
-            // byteCount += sharedResults.ItemSize * newCapacity;
-            // byteCount += selectorResults.ItemSize * newCapacity;
-            // byteCount += animationResults.ItemSize * newCapacity;
-            // byteCount += finalResults.ItemSize * newCapacity;
-            //
-            // byte* buffer = (byte*) UnsafeUtility.Malloc(byteCount, 4, Allocator.Persistent);
-            //
-            // byte* ptr = buffer;
-            //
-            // SharedBufferUtil.Move(ref styleSets, ref ptr, elementCapacity, newCapacity);
-            // SharedBufferUtil.Move(ref instanceResults, ref ptr, elementCapacity, newCapacity);
-            // SharedBufferUtil.Move(ref sharedResults, ref ptr, elementCapacity, newCapacity);
-            // SharedBufferUtil.Move(ref selectorResults, ref ptr, elementCapacity, newCapacity);
-            // SharedBufferUtil.Move(ref animationResults, ref ptr, elementCapacity, newCapacity);
-            // SharedBufferUtil.Move(ref finalResults, ref ptr, elementCapacity, newCapacity);
-            //
-            // if (backingStore != null) {
-            //     UnsafeUtility.Free(backingStore, Allocator.Persistent);
-            // }
-
         }
 
         // used to get a stack allocated list of 16 style ids
@@ -471,6 +458,8 @@ namespace UIForia {
             public fixed int ids[16];
 
         }
+
+
 
     }
 

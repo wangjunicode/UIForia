@@ -20,7 +20,7 @@ namespace Documentation.Features {
             UIView view = application.CreateView<KlangWindow>("Window " + windowCount, new Size(application.Width, application.Height));
             view.focusOnMouseDown = true;
 
-            ((KlangWindow) view.RootElement.GetChild(0)).onClose += () => {
+            ((KlangWindow) view.RootElement.FindChildAt(0)).onClose += () => {
                 windowCount--;
                 view.Destroy();
             };

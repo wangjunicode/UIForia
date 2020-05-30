@@ -8,7 +8,7 @@ namespace UIForia {
         public int whereFilterId;
         public int candidateCount;
         public int filterCount;
-        public int* candidates;
+        public ElementId* candidates;
         public ResolvedSelectorFilter* filters;
 
     }

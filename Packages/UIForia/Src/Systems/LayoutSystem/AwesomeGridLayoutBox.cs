@@ -162,6 +162,8 @@ namespace UIForia.Systems {
                         for (int y = placement.y; y < placement.y + placement.height; y++) {
                             ref GridTrack track = ref rowTrackList.array[y];
 
+                            // replace with (track.cellDefinition.baseSize.unit | track.cellDefinition.shrinkLimit.unit | track.cellDefinition.growLimit.unit) & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0)
+                            
                             if ((track.cellDefinition.baseSize.unit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
                                 blockSize = 0;
                                 return false;

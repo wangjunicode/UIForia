@@ -5,6 +5,7 @@ using System.Xml;
 using System.Xml.Linq;
 using JetBrains.Annotations;
 using UIForia.Parsing.Expressions;
+using UIForia.Util;
 
 namespace UIForia.Parsing {
 

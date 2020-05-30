@@ -12,6 +12,7 @@ using UIForia.Templates;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
+using LineInfo = UIForia.Util.LineInfo;
 
 namespace UIForia.Parsing {
 

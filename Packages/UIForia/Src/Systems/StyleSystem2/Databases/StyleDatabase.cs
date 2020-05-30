@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Packages.UIForia.Util.Unsafe;
+using UIForia.NewStyleParsing;
 using UIForia.Parsing;
 using UIForia.Src;
 using UIForia.Style;
@@ -14,39 +15,45 @@ namespace UIForia {
     public class StyleDatabase : IDisposable {
 
         private const string k_ImplicitStyleSheetName = "_IMPLICIT_STYLE_SHEET_";
-        private const int ImplicitStyleSheetIndex = 0;
 
-        private readonly int dbIndex;
+        private readonly ushort dbIndex;
 
-        public ByteBuffer buffer_staticStyleProperties; 
+        public ByteBuffer buffer_staticStyleProperties;
 
-        // maybe introduce a new Table type that grows at a non doubling rate after initializing
-        public DataList<ModuleInfo> table_ModuleInfo;
+        public StringInternSystem internSystem;
         public DataList<StaticStyleInfo> table_StyleInfo;
         public DataList<StyleSheetInfo> table_StyleSheetInfo;
 
-        public ModuleTable<ModuleCondition> conditionTable;
-
-        public DataList<int> join_StyleIndex__ModuleIndex;
-        public DataList<int> join_StyleIndex__StyleSheetIndex;
-
+        // maybe introduce a new Table type that grows at a non doubling rate after initializing
+        public DataList<ModuleInfo> table_ModuleInfo;
         public UnmanagedLongMap<int> table_StyleSheetMap;
         public UnmanagedLongMap<StyleId> table_StyleIdMap;
 
-        public LightList<string> join_StyleIndex__StyleName;
-        public LightList<string> join_StyleSheetIndex__Name;
-
         public SelectorDatabase selectorDatabase;
-        public StaticStringTable staticStringTable;
 
         private StructList<PendingSelectorFilter> selectorFiltersToBuild;
         private IList<Module> moduleList;
 
         internal static readonly List<StyleDatabase> s_DebugDatabases = new List<StyleDatabase>();
 
+        public StyleDatabase(StringInternSystem internSystem) {
+            this.internSystem = internSystem;
+            this.moduleList = ModuleSystem.GetModuleList();
+
+            // todo -- move this to a builder, doesn't belong here
+            // selectorFiltersToBuild = new StructList<PendingSelectorFilter>(64);
+
+            // todo -- defer to init when we know how big our data is
+            // selectorDatabase = SelectorDatabase.Create();
+
+            // AddStyle("__INVALID__", 0, default); // 0 index should be considered invalid
+
+            this.dbIndex = (ushort) s_DebugDatabases.Count;
+            s_DebugDatabases.Add(this);
+        }
+
         public unsafe BurstableStyleDatabase GetBurstable() {
             return new BurstableStyleDatabase() {
-                conditionTable = conditionTable,
                 sharedStyleTable = new StyleTable<StaticStyleInfo>(table_StyleInfo.GetArrayPointer()),
                 staticStyleProperties = buffer_staticStyleProperties.data,
                 selectorStyleTable = new SelectorTable<SelectorStyleEffect>() // todo -- hook up selector styles here
@@ -58,9 +65,6 @@ namespace UIForia {
             table_ModuleInfo.Dispose();
             table_StyleSheetInfo.Dispose();
             buffer_staticStyleProperties.Dispose();
-            staticStringTable.Dispose();
-            join_StyleIndex__ModuleIndex.Dispose();
-            join_StyleIndex__StyleSheetIndex.Dispose();
 
             table_StyleInfo.Dispose();
             table_StyleSheetMap.Dispose();
@@ -70,99 +74,48 @@ namespace UIForia {
 
         }
 
-        private Module rootModule;
-
         public int styleCount {
             get => table_StyleInfo.size; // todo -- this will change
-        }
-
-        public StyleDatabase(Module rootModule, int initialStyleCount = 64, int initialPropertyCount = 512) {
-            this.rootModule = rootModule;
-            this.moduleList = ModuleSystem.GetModuleList();
-
-            // for compiled output we know this already
-            buffer_staticStyleProperties = new ByteBuffer(TypedUnsafe.SizeOf<StaticPropertyId, PropertyData>(initialPropertyCount), Allocator.Persistent);
-
-            join_StyleIndex__StyleName = new LightList<string>();
-
-            join_StyleSheetIndex__Name = new LightList<string>();
-
-            staticStringTable = StaticStringTable.Create();
-
-            table_ModuleInfo = new DataList<ModuleInfo>(8, Allocator.Persistent);
-            table_StyleSheetMap = new UnmanagedLongMap<int>(16, Allocator.Persistent);
-            table_StyleIdMap = new UnmanagedLongMap<StyleId>(128, Allocator.Persistent);
-
-            // these could all live in a single buffer since they grow identically.
-            table_StyleInfo = new DataList<StaticStyleInfo>(initialStyleCount, Allocator.Persistent);
-            join_StyleIndex__ModuleIndex = new DataList<int>(initialStyleCount, Allocator.Persistent);
-            join_StyleIndex__StyleSheetIndex = new DataList<int>(initialStyleCount, Allocator.Persistent);
-
-            table_StyleSheetInfo = new DataList<StyleSheetInfo>(8, Allocator.Persistent);
-            selectorFiltersToBuild = new StructList<PendingSelectorFilter>(64);
-
-            selectorDatabase = SelectorDatabase.Create();
-
-            BuildModuleData();
-
-            NameKey styleSheetHash = MurmurHash3.Hash(k_ImplicitStyleSheetName);
-
-            // implicit style sheet
-            table_StyleSheetInfo.Add(new StyleSheetInfo(0, table_ModuleInfo[0].nameKey));
-
-            join_StyleSheetIndex__Name.Add(k_ImplicitStyleSheetName);
-
-            table_StyleSheetMap.Add(MakeStyleSheetKey(table_ModuleInfo[0].nameKey, styleSheetHash), 0);
-
-            AddStyle("__INVALID__", ImplicitStyleSheetIndex, 0, default, default); // 0 index should be considered invalid
-
-            this.dbIndex = s_DebugDatabases.Count;
-            s_DebugDatabases.Add(this);
-        }
-
-        private void BuildModuleData() {
-
-            table_ModuleInfo.SetSize(moduleList.Count);
-
-            for (int i = 0; i < moduleList.Count; i++) {
-                table_ModuleInfo[i] = new ModuleInfo(MurmurHash3.Hash(moduleList[i].GetModuleName()));
-            }
-
-            // todo -- condition table should be initialized here
-
         }
 
         public void Initialize() {
             BuildPendingSelectorFilters();
         }
 
-        internal bool TryGetStyleSheet(Module module, string sheetName, out StyleSheetInterface styleSheetInterface) {
-            NameKey moduleName = MurmurHash3.Hash(module.GetModuleName());
-            long key = BitUtil.IntsToLong(moduleName, MurmurHash3.Hash(sheetName));
-
-            if (table_StyleSheetMap.TryGetValue(key, out int idx)) {
-                styleSheetInterface = new StyleSheetInterface(this, idx);
-                return true;
-            }
-
-            styleSheetInterface = default;
-            return false;
-        }
-
-        public StyleSheetInterface GetStyleSheet<TModuleType>(string sheetName) where TModuleType : Module {
-
-            int moduleIndex = GetModuleIndex(typeof(TModuleType));
-
-            NameKey styleSheetName = MurmurHash3.Hash(sheetName);
-            NameKey moduleName = table_ModuleInfo[moduleIndex].nameKey;
-            long key = MakeStyleSheetKey(moduleName, styleSheetName);
-
-            if (table_StyleSheetMap.TryGetValue(key, out int idx)) {
-                return new StyleSheetInterface(this, idx);
-            }
-
-            return default;
-        }
+        // internal bool TryGetStyleSheet(Module module, string sheetName, out StyleSheetInterface styleSheetInterface) {
+        //     
+        //     int moduleIndex = module.index;
+        //     int styleSheetNameId = internSystem.GetIndex(sheetName);
+        //     
+        //     if (styleSheetNameId < 0) {
+        //         styleSheetInterface = default;
+        //         return false;
+        //     }
+        //     
+        //     long key = MakeStyleSheetKey(moduleIndex, styleSheetNameId);
+        //     
+        //     if (table_StyleSheetMap.TryGetValue(key, out int idx)) {
+        //         styleSheetInterface = new StyleSheetInterface(this, idx);
+        //         return true;
+        //     }
+        //
+        //     styleSheetInterface = default;
+        //     return false;
+        // }
+        //
+        // public StyleSheetInterface GetStyleSheet<TModuleType>(string sheetName) where TModuleType : Module {
+        //
+        //     int moduleIndex = ModuleSystem.GetModule<TModuleType>().index;
+        //
+        //     int styleSheetNameId = internSystem.GetIndex(sheetName);
+        //     long key = MakeStyleSheetKey(moduleIndex, styleSheetNameId);
+        //
+        //     if (table_StyleSheetMap.TryGetValue(key, out int idx)) {
+        //         return new StyleSheetInterface(this, idx);
+        //     }
+        //
+        //     return default;
+        // }
 
         public unsafe StyleProperty2 GetSelectorPropertyValue(ushort selectorIndex, PropertyId propertyId) {
             SelectorStyleEffect selectorEffect = selectorDatabase.table_SelectorStyles[selectorIndex];
@@ -183,9 +136,6 @@ namespace UIForia {
         }
 
         public unsafe PropertyData GetPropertyValue(ushort styleIndex, PropertyId propertyId, StyleState2 state) {
-            if (styleIndex > join_StyleIndex__StyleName.size) {
-                return default;
-            }
 
             StaticStyleInfo staticStyle = table_StyleInfo[styleIndex];
 
@@ -248,8 +198,6 @@ namespace UIForia {
                 throw new Exception("Duplicate style in module: " + styleSheetName);
             }
 
-            join_StyleSheetIndex__Name.Add(styleSheetName);
-
             StyleSheetBuilder builder = new StyleSheetBuilder(this, moduleIndex, styleSheetIndex);
 
             action.Invoke(builder);
@@ -260,109 +208,79 @@ namespace UIForia {
         }
 
         // Assumes style data is already in the buffer
-        internal int AddStyle(string name, int styleSheetIndex, int moduleIndex, StyleState2 selectorStates, StaticStyleInfo styleInfo) {
-            long styleKey = MakeStyleKey(styleSheetIndex, name);
-            int styleIndex = table_StyleInfo.size;
-
-            StyleState2 states = default;
-
-            if (styleInfo.activeCount > 0) states |= StyleState2.Active;
-            if (styleInfo.focusCount > 0) states |= StyleState2.Focused;
-            if (styleInfo.hoverCount > 0) states |= StyleState2.Hover;
-            if (styleInfo.normalCount > 0) states |= StyleState2.Normal;
-
-            StyleId styleId = new StyleId((ushort) styleIndex, states, selectorStates, dbIndex); // todo -- selectors
-
-            if (!table_StyleIdMap.TryAddValue(styleKey, styleId)) {
-                // todo -- diagnostics
-                throw new Exception("Duplicate style in sheet: " + name);
-            }
-
-            Assert.IsTrue(
-                (join_StyleIndex__ModuleIndex.size == join_StyleIndex__StyleSheetIndex.size) &&
-                (join_StyleIndex__StyleName.size == join_StyleIndex__StyleSheetIndex.size) &&
-                (join_StyleIndex__StyleSheetIndex.size == table_StyleInfo.size)
-            );
-
-            table_StyleInfo.Add(styleInfo);
-
-            join_StyleIndex__ModuleIndex.Add(moduleIndex);
-            join_StyleIndex__StyleSheetIndex.Add(styleSheetIndex);
-            join_StyleIndex__StyleName.Add(name);
-
-            return styleIndex;
-
-        }
+        // internal int AddStyle(string name, StyleState2 selectorStates, StaticStyleInfo styleInfo) { }
 
         internal int AddStyleFromBuilder(string name, int moduleIndex, int styleSheetIndex, Action<StyleBuilder> action) {
+            throw new NotImplementedException();
 
-            StyleBuilder builder = new StyleBuilder(); // todo optimize if i use this for non test code
+            // StyleBuilder builder = new StyleBuilder(); // todo optimize if i use this for non test code
+            //
+            // action?.Invoke(builder);
+            //
+            // int totalPropertyCount = builder.GetSharedStylePropertyCount();
+            //
+            // buffer_staticStyleProperties.EnsureAdditionalCapacity<StaticPropertyId, PropertyData>(totalPropertyCount);
+            //
+            // int baseOffset = buffer_staticStyleProperties.GetWritePosition();
+            //
+            // PropertyRange activeRange = WriteSharedProperties(builder.activeGroup?.properties, ref buffer_staticStyleProperties, baseOffset);
+            // PropertyRange focusRange = WriteSharedProperties(builder.focusGroup?.properties, ref buffer_staticStyleProperties, baseOffset);
+            // PropertyRange hoverRange = WriteSharedProperties(builder.hoverGroup?.properties, ref buffer_staticStyleProperties, baseOffset);
+            // PropertyRange normalRange = WriteSharedProperties(builder.normalGroup?.properties, ref buffer_staticStyleProperties, baseOffset);
+            //
+            // StyleState2 selectorStates = default;
+            //
+            // if (builder.activeGroup?.selectorBuilders != null) {
+            //     selectorStates |= StyleState2.Active;
+            // }
+            //
+            // if (builder.focusGroup?.selectorBuilders != null) {
+            //     selectorStates |= StyleState2.Focused;
+            // }
+            //
+            // if (builder.hoverGroup?.selectorBuilders != null) {
+            //     selectorStates |= StyleState2.Hover;
+            // }
+            //
+            // if (builder.normalGroup?.selectorBuilders != null) {
+            //     selectorStates |= StyleState2.Normal;
+            // }
 
-            action?.Invoke(builder);
+            // int styleIndex = AddStyle(name, selectorStates, new StaticStyleInfo() {
+            //     moduleIndex = (ushort) moduleIndex,
+            //     styleSheetIndex = (ushort) styleSheetIndex,
+            //     propertyOffsetInBytes = baseOffset,
+            //     activeCount = activeRange.count,
+            //     activeOffset = activeRange.offset,
+            //     focusCount = focusRange.count,
+            //     focusOffset = focusRange.offset,
+            //     hoverCount = hoverRange.count,
+            //     hoverOffset = hoverRange.offset,
+            //     normalCount = normalRange.count,
+            //     normalOffset = normalRange.offset,
+            //     totalPropertyCount = (ushort) (activeRange.count + focusRange.count + hoverRange.count + normalRange.count),
+            //     dataBaseId = (ushort) this.dbIndex
+            // });
 
-            int totalPropertyCount = builder.GetSharedStylePropertyCount();
-
-            buffer_staticStyleProperties.EnsureAdditionalCapacity<StaticPropertyId, PropertyData>(totalPropertyCount);
-
-            int baseOffset = buffer_staticStyleProperties.GetWritePosition();
-
-            PropertyRange activeRange = WriteSharedProperties(builder.activeGroup?.properties, ref buffer_staticStyleProperties, baseOffset);
-            PropertyRange focusRange = WriteSharedProperties(builder.focusGroup?.properties, ref buffer_staticStyleProperties, baseOffset);
-            PropertyRange hoverRange = WriteSharedProperties(builder.hoverGroup?.properties, ref buffer_staticStyleProperties, baseOffset);
-            PropertyRange normalRange = WriteSharedProperties(builder.normalGroup?.properties, ref buffer_staticStyleProperties, baseOffset);
-
-            StyleState2 selectorStates = default;
-
-            if (builder.activeGroup?.selectorBuilders != null) {
-                selectorStates |= StyleState2.Active;
-            }
-
-            if (builder.focusGroup?.selectorBuilders != null) {
-                selectorStates |= StyleState2.Focused;
-            }
-
-            if (builder.hoverGroup?.selectorBuilders != null) {
-                selectorStates |= StyleState2.Hover;
-            }
-
-            if (builder.normalGroup?.selectorBuilders != null) {
-                selectorStates |= StyleState2.Normal;
-            }
-
-            int styleIndex = AddStyle(name, styleSheetIndex, moduleIndex, selectorStates, new StaticStyleInfo() {
-                moduleId = new ModuleId(moduleIndex),
-                propertyOffsetInBytes = baseOffset,
-                activeCount = activeRange.count,
-                activeOffset = activeRange.offset,
-                focusCount = focusRange.count,
-                focusOffset = focusRange.offset,
-                hoverCount = hoverRange.count,
-                hoverOffset = hoverRange.offset,
-                normalCount = normalRange.count,
-                normalOffset = normalRange.offset,
-                totalPropertyCount = (ushort) (activeRange.count + focusRange.count + hoverRange.count + normalRange.count),
-                dataBaseId = (ushort) this.dbIndex
-            });
-
-            Module module = moduleList[moduleIndex];
-
-            if (builder.activeGroup?.selectorBuilders != null) {
-                BuildSelectors(styleIndex, StyleState2.Active, module, styleSheetIndex, builder.activeGroup.selectorBuilders);
-            }
-
-            if (builder.focusGroup?.selectorBuilders != null) {
-                BuildSelectors(styleIndex, StyleState2.Focused, module, styleSheetIndex, builder.focusGroup.selectorBuilders);
-            }
-
-            if (builder.hoverGroup?.selectorBuilders != null) {
-                BuildSelectors(styleIndex, StyleState2.Hover, module, styleSheetIndex, builder.hoverGroup.selectorBuilders);
-            }
-
-            if (builder.normalGroup?.selectorBuilders != null) {
-                BuildSelectors(styleIndex, StyleState2.Normal, module, styleSheetIndex, builder.normalGroup.selectorBuilders);
-            }
-
-            return styleIndex;
+            // Module module = moduleList[moduleIndex];
+            //
+            // if (builder.activeGroup?.selectorBuilders != null) {
+            //     BuildSelectors(styleIndex, StyleState2.Active, module, styleSheetIndex, builder.activeGroup.selectorBuilders);
+            // }
+            //
+            // if (builder.focusGroup?.selectorBuilders != null) {
+            //     BuildSelectors(styleIndex, StyleState2.Focused, module, styleSheetIndex, builder.focusGroup.selectorBuilders);
+            // }
+            //
+            // if (builder.hoverGroup?.selectorBuilders != null) {
+            //     BuildSelectors(styleIndex, StyleState2.Hover, module, styleSheetIndex, builder.hoverGroup.selectorBuilders);
+            // }
+            //
+            // if (builder.normalGroup?.selectorBuilders != null) {
+            //     BuildSelectors(styleIndex, StyleState2.Normal, module, styleSheetIndex, builder.normalGroup.selectorBuilders);
+            // }
+            //
+            // return styleIndex;
 
         }
 
@@ -390,7 +308,8 @@ namespace UIForia {
                             tagName = pendingFilter.key.Substring(colonIdx + 1);
                         }
 
-                        ProcessedType processedType = pendingFilter.module.ResolveTagName(moduleName, tagName, default); // todo -- diagnostic
+                        // todo -- this ain't right
+                        ProcessedType processedType = pendingFilter.module.ResolveTagName(moduleName, tagName, default, null, new LineInfo()); // todo -- diagnostic & line number
 
                         if (processedType == null) {
                             // todo -- diagnostic
@@ -420,7 +339,7 @@ namespace UIForia {
                     }
 
                     case SelectorFilterType.ElementsWithAttribute: {
-                        builtFilter.key = staticStringTable.GetOrCreateReference(pendingFilter.key);
+                        builtFilter.key = internSystem.AddConstant(pendingFilter.key);
                         break;
                     }
 
@@ -428,8 +347,8 @@ namespace UIForia {
                     case SelectorFilterType.ElementsWithAttribute_ValueContains:
                     case SelectorFilterType.ElementsWithAttribute_ValueEndsWith:
                     case SelectorFilterType.ElementsWithAttribute_ValueStartsWith: {
-                        builtFilter.key = staticStringTable.GetOrCreateReference(pendingFilter.key);
-                        builtFilter.value = staticStringTable.GetOrCreateReference(pendingFilter.value);
+                        builtFilter.key = internSystem.AddConstant(pendingFilter.key);
+                        builtFilter.value = internSystem.AddConstant(pendingFilter.value);
                         break;
                     }
                 }
@@ -580,17 +499,18 @@ namespace UIForia {
             if (dotIndex != -1) {
                 string styleSheetName = styleNameExpression.Substring(0, dotIndex - 1);
                 styleNameExpression = styleSheetName.Substring(dotIndex + 1);
-                if (!TryGetStyleSheet(module, styleSheetName, out StyleSheetInterface sheet)) {
-                    // todo -- diagnostic
-                    throw new Exception($"Unable to resolve style sheet in module {module.GetModuleName()} with name {styleSheetName}");
-                }
+                // todo -- this needs to work with style packages, because sheets aren't named except in the builder, which is silly
+                // if (!TryGetStyleSheet(module, styleSheetName, out StyleSheetInterface sheet)) {
+                //     // todo -- diagnostic
+                //     throw new Exception($"Unable to resolve style sheet in module {module.GetModuleName()} with name {styleSheetName}");
+                // }
 
-                if (!sheet.TryGetStyle(styleNameExpression, out StyleId styleId)) {
-                    // todo -- diagnostic
-                    throw new Exception($"Unable to resolve style in module {module.GetModuleName()} with stylesheet {styleSheetName} with style name {styleNameExpression}");
-                }
+                //if (!sheet.TryGetStyle(styleNameExpression, out StyleId styleId)) {
+                //    // todo -- diagnostic
+                //    throw new Exception($"Unable to resolve style in module {module.GetModuleName()} with stylesheet {styleSheetName} with style name {styleNameExpression}");
+                //}
 
-                return styleId.id;
+                // return styleId.id;
 
             }
             else {
@@ -605,13 +525,12 @@ namespace UIForia {
 
         internal string Debug_ResolveStyleName(ushort styleIndex) {
 
-            if (styleIndex > join_StyleIndex__StyleName.size) {
-                return "unresolved style";
-            }
+            ref StaticStyleInfo styleInfo = ref table_StyleInfo[styleIndex];
+            ref StyleSheetInfo sheetInfo = ref table_StyleSheetInfo[styleInfo.styleSheetIndex];
 
-            int sheetIdx = join_StyleIndex__StyleSheetIndex[styleIndex];
-            string sheetName = join_StyleSheetIndex__Name[sheetIdx];
-            string styleName = join_StyleIndex__StyleName[styleIndex];
+            string sheetName = internSystem.GetString(sheetInfo.nameKey);
+            string styleName = internSystem.GetString(styleInfo.styleSheetIndex);
+
             return sheetName + " / " + styleName;
         }
 
@@ -698,6 +617,104 @@ namespace UIForia {
 
         public static int MakeSelectorKey(StyleId styleId, StyleState2 state) {
             return BitUtil.SetHighLowBits(styleId.index, (int) state);
+        }
+
+        private bool isInitialized;
+
+        public void Initialize(LightList<StyleFile> styleFiles) {
+            int totalStyleCount = 0;
+            int totalPropertyCount = 0;
+
+            for (int i = 0; i < styleFiles.size; i++) {
+                ref StyleFile file = ref styleFiles.array[i];
+
+                for (int j = 0; j < file.compileResult.styles.Length; j++) {
+                    totalStyleCount++;
+                    totalPropertyCount += file.compileResult.propertyCount;
+                }
+
+            }
+
+            totalStyleCount += (totalStyleCount / 4);
+            int styleSheetCount = styleFiles.size + (styleFiles.size / 4);
+            int propertyCount = totalPropertyCount + (totalPropertyCount / 4);
+            int propertyByteSize = TypedUnsafe.ByteSize<PropertyId, PropertyData>(propertyCount);
+
+            if (!isInitialized) {
+                isInitialized = true;
+                // todo -- dataList will always have pow2 size, make something different for this that isnt overallocating like mad
+                table_StyleInfo = new DataList<StaticStyleInfo>(totalStyleCount, Allocator.Persistent);
+                table_StyleSheetInfo = new DataList<StyleSheetInfo>(styleSheetCount, Allocator.Persistent);
+                buffer_staticStyleProperties = new ByteBuffer(propertyByteSize, Allocator.Persistent);
+                table_StyleSheetMap = new UnmanagedLongMap<int>(styleSheetCount, Allocator.Persistent);
+                table_StyleIdMap = new UnmanagedLongMap<StyleId>(totalStyleCount, Allocator.Persistent);
+            }
+            else {
+                table_StyleInfo.size = 0;
+                table_StyleSheetInfo.size = 0;
+                table_StyleInfo.EnsureCapacity(totalStyleCount);
+                table_StyleSheetInfo.EnsureCapacity(styleSheetCount);
+                buffer_staticStyleProperties.Reset(propertyByteSize);
+                table_StyleSheetMap.Clear();
+                table_StyleIdMap.Clear();
+            }
+
+            int propertyByteOffset = 0;
+
+            for (int i = 0; i < styleFiles.size; i++) {
+                ref StyleFile file = ref styleFiles.array[i];
+
+                ushort styleSheetId = (ushort) i;
+
+                int styleSheetLocationId = internSystem.AddConstWithoutBurst(file.filePath);
+
+                // todo -- continue here, sort out style file names and mapping
+
+                long key = MakeStyleSheetKey(file.module.index, styleSheetLocationId);
+
+                table_StyleSheetMap.Add(key, i);
+
+                for (int j = 0; j < file.compileResult.styles.Length; j++) {
+                    CompiledSharedStyle style = file.compileResult.styles[j];
+                    // todo -- selectors
+
+                    int styleIndex = table_StyleInfo.size;
+                    long styleKey = MakeStyleKey(styleSheetId, style.styleName);
+
+                    StyleState2 states = default;
+
+                    if (style.activeCount > 0) states |= StyleState2.Active;
+                    if (style.focusCount > 0) states |= StyleState2.Focused;
+                    if (style.hoverCount > 0) states |= StyleState2.Hover;
+                    if (style.normalCount > 0) states |= StyleState2.Normal;
+
+                    StyleId styleId = new StyleId((ushort) styleIndex, states, default, dbIndex); // todo -- selectors
+
+                    // style sheet would have already ensured name was valid
+                    table_StyleIdMap.TryAddValue(styleKey, styleId);
+
+                    table_StyleInfo.Add(new StaticStyleInfo {
+                        moduleIndex = file.module.index,
+                        styleSheetIndex = styleSheetId,
+                        activeOffset = style.activeOffset,
+                        activeCount = style.activeOffset,
+                        normalOffset = style.normalOffset,
+                        normalCount = style.normalCount,
+                        hoverOffset = style.hoverOffset,
+                        hoverCount = style.hoverCount,
+                        focusOffset = style.focusOffset,
+                        focusCount = style.focusCount,
+                        totalPropertyCount = style.totalPropertyCount,
+                        propertyOffsetInBytes = propertyByteOffset,
+                        dataBaseId = dbIndex
+                    });
+
+                    propertyByteOffset += TypedUnsafe.ByteSize<StaticPropertyId, PropertyData>(style.totalPropertyCount);
+                }
+
+                buffer_staticStyleProperties.WriteRange(file.compileResult.properties, file.compileResult.propertyCount);
+
+            }
         }
 
     }

@@ -9,7 +9,6 @@ namespace UIForia {
     [StructLayout(LayoutKind.Sequential)]
     public struct StaticStyleInfo {
 
-        public ModuleId moduleId;
         public ushort activeOffset;
         public ushort activeCount;
         public ushort normalOffset;
@@ -22,6 +21,9 @@ namespace UIForia {
         public int propertyOffsetInBytes;
 
         public ushort dataBaseId;
+        public ushort moduleIndex;
+        public ushort styleSheetIndex;
+        public ushort styleNameId;
 
     }
 

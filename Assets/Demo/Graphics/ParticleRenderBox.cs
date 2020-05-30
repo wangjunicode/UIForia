@@ -1,6 +1,8 @@
 using UIForia;
 using UIForia.Rendering;
+using UIForia.Rendering.Vertigo;
 using UnityEngine;
+using Vertigo;
 
 namespace Demo.Graphics {
 

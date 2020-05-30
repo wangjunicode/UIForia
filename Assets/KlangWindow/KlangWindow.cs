@@ -325,7 +325,7 @@ namespace UI {
         }
 
         public void SidebarReset() {
-            currentSidebarItem = sidebar?.GetChild(0);
+            currentSidebarItem = sidebar?.FindChildAt(0);
             if (currentSidebarItem != null) {
                 runner.style.SetTransformPositionY(null, StyleState.Normal);
             }

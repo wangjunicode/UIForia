@@ -4,7 +4,9 @@ namespace UIForia {
 
         CriticalFailure,
         RecoverableFailure,
-        Success
+        Success,
+
+        Invalid
 
     }
 

@@ -4,9 +4,9 @@ namespace UIForia {
     public struct WhereFilterCandidate {
 
         public int selectorIndex;
-        public int hostElementId;
+        public ElementId hostElementId;
         public int whereFilterId;
-        public int candidateId;
+        public ElementId candidateId;
 
     }
 

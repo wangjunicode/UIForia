@@ -26,7 +26,7 @@ namespace UIForia.Parsing {
 
     public abstract class TemplateParser_Deprecated {
 
-        internal List<Diagnostic> diagnostics;
+        internal List<DiagnosticEntry> diagnostics;
 
         public string FilePath { get; private set; }
         
@@ -37,7 +37,7 @@ namespace UIForia.Parsing {
         public string extension { get; internal set; }
 
         protected TemplateParser_Deprecated() {
-            diagnostics = new List<Diagnostic>();
+            diagnostics = new List<DiagnosticEntry>();
         }
         
         internal void Setup(string filePath) {

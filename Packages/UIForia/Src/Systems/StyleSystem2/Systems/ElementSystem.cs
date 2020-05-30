@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UIForia.Elements;
+using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -9,16 +10,6 @@ using Unity.Collections.LowLevel.Unsafe;
 namespace UIForia {
 
     // todo -- would be awesome to get per-application metrics so we know how big a lot of the lists we create need to be
-
-    // maybe keep this structure in parallel with the local children array
-    // useful for burst traversal
-
-    public struct TemplateId {
-
-        public ushort templateIndex;
-        public ushort lexicalTemplateIndex;
-
-    }
 
     public struct HierarchyInfo {
 
@@ -41,7 +32,8 @@ namespace UIForia {
         public ElementTable<ElementMetaInfo> metaTable;
         public ElementTable<HierarchyInfo> hierarchyTable;
         public ElementTable<ElementTraversalInfo> traversalTable;
-
+        public UIElement[] instanceTable;
+        
         private int elementCapacity;
         private byte* backingStore;
 
@@ -56,11 +48,18 @@ namespace UIForia {
             this.indexQueue = new Queue<int>(k_MinFreeIndices * 2);
 
             ResizeBackingBuffer(initialElementCount);
+            idGenerator = 1; // 0 is always invalid
 
         }
 
+        public void Initialize() {
+            TypedUnsafe.MemClear(metaTable.array, elementCapacity);
+            TypedUnsafe.MemClear(traversalTable.array, elementCapacity);
+            TypedUnsafe.MemClear(hierarchyTable.array, elementCapacity);
+        }
+
         // I'll have to see how this gets used. Ideally we push out a lot of indices at once and bulk create
-        internal ElementId CreateElement(int depth, int templateId, int templateOriginId, UIElementFlags flags) {
+        internal ElementId CreateElement(UIElement element, int depth, int templateId, int templateOriginId, UIElementFlags flags) {
 
             int idx;
             if (indexQueue.Count >= k_MinFreeIndices) {
@@ -74,10 +73,10 @@ namespace UIForia {
             }
 
             // note: need to use generation from existing data at idx
-            metaTable[idx].flags = (UIElementFlags2) flags; // todo -- make this better
-            metaTable[idx].someFlags = 0;
+            metaTable.array[idx].flags = (UIElementFlags2) flags; // todo -- make this better
+            metaTable.array[idx].someFlags = 0;
 
-            traversalTable[idx] = new ElementTraversalInfo() {
+            traversalTable.array[idx] = new ElementTraversalInfo() {
                 depth = depth,
                 btfIndex = 0,
                 ftbIndex = 0,
@@ -85,35 +84,41 @@ namespace UIForia {
                 templateOriginId = (ushort) templateOriginId
             };
 
-            hierarchyTable[idx] = new HierarchyInfo() {
+            hierarchyTable.array[idx] = new HierarchyInfo() {
                 childCount = 0,
-                firstChildId = 0,
-                lastChildId = 0,
-                nextSiblingId = 0,
-                prevSiblingId = 0,
-                parentId = 0
+                firstChildId = default,
+                lastChildId = default,
+                nextSiblingId = default,
+                prevSiblingId = default,
+                parentId = default
             };
 
-            return new ElementId(idx, metaTable[idx].generation);
+            instanceTable[idx] = element;
+            
+            return new ElementId(idx, metaTable.array[idx].generation);
 
         }
 
         public void AddChild(ElementId parentId, ElementId childId) {
-            ref HierarchyInfo parentInfo = ref hierarchyTable[parentId.index];
-            ref HierarchyInfo childInfo = ref hierarchyTable[childId.index];
+            ref HierarchyInfo parentInfo = ref hierarchyTable.array[parentId.index];
+            ref HierarchyInfo childInfo = ref hierarchyTable.array[childId.index];
 
             childInfo.parentId = parentId;
-//
+
             if (parentInfo.childCount == 0) {
                 parentInfo.firstChildId = childId;
                 parentInfo.lastChildId = childId;
-                childInfo.nextSiblingId = 0;
-                childInfo.prevSiblingId = 0;
+                childInfo.nextSiblingId = default;
+                childInfo.prevSiblingId = default;
             }
             else {
+                
+                ref HierarchyInfo prevSibling = ref hierarchyTable.array[parentInfo.lastChildId.index];
+
                 childInfo.prevSiblingId = parentInfo.lastChildId;
-                childInfo.nextSiblingId = 0;
+                childInfo.nextSiblingId = default;
                 parentInfo.lastChildId = childId;
+                prevSibling.nextSiblingId = childId;
             }
 
             parentInfo.childCount++;
@@ -121,7 +126,7 @@ namespace UIForia {
         }
 
         public void DestroyElement(ElementId elementId) {
-            ref ElementMetaInfo meta = ref metaTable[elementId.index];
+            ref ElementMetaInfo meta = ref metaTable.array[elementId.index];
             meta.generation++;
             meta.flags = default;
             meta.someFlags = default;
@@ -130,12 +135,12 @@ namespace UIForia {
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsAlive(ElementId elementId) {
-            return metaTable[elementId.index].generation == elementId.generation;
+            return metaTable.array[elementId.index].generation == elementId.generation;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsAlive(ElementId elementId, in ElementTable<ElementMetaInfo> metaTable) {
-            return metaTable[elementId.index].generation == elementId.generation;
+            return metaTable.array[elementId.index].generation == elementId.generation;
         }
 
         public static bool IsDeadOrDisabled(ElementId elementId, ElementTable<ElementMetaInfo> metaTable) {
@@ -165,6 +170,14 @@ namespace UIForia {
                 true
             );
             elementCapacity = newCapacity;
+            if (instanceTable == null) {
+                instanceTable = new UIElement[elementCapacity];
+            }
+            else {
+                if (instanceTable.Length < elementCapacity) {
+                    Array.Resize(ref instanceTable, elementCapacity);
+                }
+            }
         }
 
         public int RemoveDeadElements(ElementId* ptr, int size) {

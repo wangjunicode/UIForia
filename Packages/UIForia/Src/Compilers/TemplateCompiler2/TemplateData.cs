@@ -8,7 +8,8 @@ namespace UIForia.Compilers {
 
         public string tagName;
         public string templateId;
-
+        public Type type;
+        
         public TemplateData(string tagName = null) {
             this.tagName = tagName;
         }

@@ -1,46 +1,51 @@
 using System;
 using UIForia.Compilers;
+using UIForia.NewStyleParsing;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
-
-    [Serializable]
+    
     public class TemplateFileShell {
 
-        [SerializeField] internal string filePath;
-        [SerializeField] internal DateTime lastWriteTime; // make ulong if needed for serializer
+        public string filePath;
+        public DateTime lastWriteTime; // make ulong if needed for serializer
 
-        [SerializeField] internal IndexedString[] tagNames;
-        [SerializeField] internal IndexedString[] moduleNames;
-        [SerializeField] internal IndexedString[] requiredTypes;
-        [SerializeField] internal IndexedString[] genericTypeResolvers;
-        [SerializeField] internal TextContent[] textContents;
-        [SerializeField] internal TextExpression[] textExpressions;
+        public IndexedString[] tagNames;
+        public IndexedString[] moduleNames;
+        public IndexedString[] requiredTypes;
+        public IndexedString[] genericTypeResolvers;
+        public TextContent[] textContents;
+        public TextExpression[] textExpressions;
 
-        [SerializeField] internal TemplateASTRoot[] rootNodes;
-        [SerializeField] internal TemplateASTNode[] templateNodes;
-        [SerializeField] internal AttributeDefinition2[] attributeList;
-        [SerializeField] internal UsingDeclaration[] usings;
-        [SerializeField] internal string[] referencedNamespaces;
-        [SerializeField] internal SlotAST[] slots;
+        public TemplateASTRoot[] rootNodes;
+        public TemplateASTNode[] templateNodes;
+        public AttributeDefinition2[] attributeList;
+        public UsingDeclaration[] usings;
+        public string[] referencedNamespaces;
+        public SlotAST[] slots;
 
-        internal ProcessedType[] processedTypes;
-        [NonSerialized] public bool successfullyParsed;
+        // --- not serialized ---
+        public Module module;
+        public ProcessedType[] processedTypes;
+        public bool successfullyParsed;
+        public bool successfullyValidated;
+        // ----------------------
 
         public TemplateFileShell(string templateLocation) {
             this.filePath = templateLocation;
         }
 
         public string GetSlotName(int templateNodeId) {
-            if((templateNodes[templateNodeId].templateNodeType & TemplateNodeType.Slot) == 0) {
+            if ((templateNodes[templateNodeId].templateNodeType & TemplateNodeType.Slot) == 0) {
                 return null;
             }
+
             return FindValueForIndex(tagNames, templateNodeId);
         }
-        
+
         public string GetRequiredType(int nodeIndex) {
             return FindValueForIndex(requiredTypes, nodeIndex);
         }
@@ -116,7 +121,7 @@ namespace UIForia {
 
             return false;
         }
-        
+
         public string GetFormattedTagName(ProcessedType processedType, int templateNodeIndex) {
             ref TemplateASTNode node = ref templateNodes[templateNodeIndex];
             switch (node.templateNodeType) {
@@ -132,8 +137,6 @@ namespace UIForia {
 
                 case TemplateNodeType.SlotOverride:
                     return "override:" + GetRawTagName(templateNodeIndex);
-
-
 
                 case TemplateNodeType.Root:
                     return processedType.tagName;
@@ -163,6 +166,9 @@ namespace UIForia {
             return processedTypes[nodeIndex].rawType.GetTypeName();
         }
 
+        public void Serialize(ref ManagedByteBuffer buffer) { }
+
+        public void Deserialize(ref ManagedByteBuffer buffer) { }
 
     }
 

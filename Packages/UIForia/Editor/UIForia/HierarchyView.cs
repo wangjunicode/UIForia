@@ -74,7 +74,7 @@ public class HierarchyView : TreeView {
 
                 UIElement element = current.element;
 
-                List<UIElement> ownChildren = element.GetChildren();
+                List<UIElement> ownChildren = null; //element.GetChildren();
 
                 if (ownChildren.Count == 0) {
                     ListPool<UIElement>.Release(ref ownChildren);

@@ -128,6 +128,10 @@ namespace UIForia.Util.Unsafe {
             TypedUnsafe.MemCpy((T*)list.array, items, itemCount);
         }
 
+        public void Clear() {
+            throw new NotImplementedException();
+        }
+
     }
 
 }

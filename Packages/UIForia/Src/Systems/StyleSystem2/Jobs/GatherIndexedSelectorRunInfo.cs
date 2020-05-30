@@ -17,7 +17,7 @@ namespace UIForia {
         
         public DataList<ActiveSelector>.Shared table_ActiveSelectors;
         public DataList<SelectorQuery>.Shared table_SelectorQueries;
-        public DataList<ElementTraversalInfo>.Shared table_TraversalInfo;
+        public ElementTable<ElementTraversalInfo> table_TraversalInfo;
 
         public ElementIndex table_ElementIndex;
 
@@ -38,7 +38,7 @@ namespace UIForia {
             ref SelectorRunInfoList output = ref output_SelectorRunInfoList.GetForThread(threadIndex);
 
             DataList<ResolvedSelectorFilter> filterBuffer = new DataList<ResolvedSelectorFilter>(16, Allocator.Temp);
-            DataList<int> candidateBuffer = new DataList<int>(64, Allocator.Temp);
+            DataList<ElementId> candidateBuffer = new DataList<ElementId>(64, Allocator.Temp);
 
             // todo -- still nothing here doing the 'i dont need to update' check, can add that later if needed.
 
@@ -135,7 +135,7 @@ namespace UIForia {
                 buffer.AddUnchecked(new ResolvedSelectorFilter() {
                     filterType = filter.filterType,
                     indexTableSize = list.size,
-                    indexTable = (int*) list.array,
+                    indexTable = list.array,
                     key = filter.key,
                     value = filter.value
                 });
@@ -146,9 +146,9 @@ namespace UIForia {
         }
 
         // todo -- this needs to check for dead & disabled elements and reject them
-        private void BuildCandidateList(ElementId sourceElementId, SelectionSource querySource, int* candidates, int candidateCount, ref DataList<int> candidateBuffer) {
+        private void BuildCandidateList(ElementId sourceElementId, SelectionSource querySource, ElementId* candidates, int candidateCount, ref DataList<ElementId> candidateBuffer) {
 
-            ElementTraversalInfo sourceTraversalInfo = table_TraversalInfo[sourceElementId.index];
+            ElementTraversalInfo sourceTraversalInfo = table_TraversalInfo[sourceElementId];
             candidateBuffer.EnsureCapacity(candidateCount);
             candidateBuffer.SetSize(0);
 
@@ -156,7 +156,7 @@ namespace UIForia {
 
                 case SelectionSource.Children: {
                     for (int i = 0; i < candidateCount; i++) {
-                        int candidate = candidates[i];
+                        ElementId candidate = candidates[i];
                         if (table_TraversalInfo[candidate].IsChildOf(sourceTraversalInfo)) {
                             candidateBuffer.AddUnchecked(candidate);
                         }
@@ -168,7 +168,7 @@ namespace UIForia {
                 case SelectionSource.Descendents: {
 
                     for (int i = 0; i < candidateCount; i++) {
-                        int candidate = candidates[i];
+                        ElementId candidate = candidates[i];
                         if (table_TraversalInfo[candidate].IsTemplateDescendentOf(sourceTraversalInfo)) {
                             candidateBuffer.AddUnchecked(candidate);
                         }
@@ -180,7 +180,7 @@ namespace UIForia {
                 case SelectionSource.UnscopedDescendents: {
 
                     for (int i = 0; i < candidateCount; i++) {
-                        int candidate = candidates[i];
+                        ElementId candidate = candidates[i];
 
                         if (table_TraversalInfo[candidate].IsDescendentOf(sourceTraversalInfo)) {
                             candidateBuffer.AddUnchecked(candidate);
@@ -192,7 +192,7 @@ namespace UIForia {
 
                 case SelectionSource.LexicalChildren: {
                     for (int i = 0; i < candidateCount; i++) {
-                        int candidate = candidates[i];
+                        ElementId candidate = candidates[i];
 
                         if (table_TraversalInfo[candidate].IsTemplateChildOf(sourceTraversalInfo)) {
                             candidateBuffer.AddUnchecked(candidate);

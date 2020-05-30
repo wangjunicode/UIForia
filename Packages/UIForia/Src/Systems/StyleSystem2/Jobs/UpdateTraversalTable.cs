@@ -5,7 +5,7 @@ using Unity.Jobs;
 
 namespace UIForia {
 
- //   [BurstCompile]
+   // [BurstCompile]
     public struct UpdateTraversalTable : IJob {
 
         public ElementId rootId;
@@ -75,7 +75,7 @@ namespace UIForia {
 
             }
 
-          //  stack.Dispose();
+            stack.Dispose();
         }
 
     }

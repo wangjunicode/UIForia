@@ -39,7 +39,7 @@ namespace UIForia {
             selectorRunInfoList = new PagedList<SelectorRunInfo>(64, allocator).GetStatePointer();
         }
 
-        public void Add(ElementId hostElementId, int selectorIndex, int * candidateBuffer, int candidateCount, ResolvedSelectorFilter* filterBuffer, int filterCount, int whereFilterId) {
+        public void Add(ElementId hostElementId, int selectorIndex, ElementId* candidateBuffer, int candidateCount, ResolvedSelectorFilter* filterBuffer, int filterCount, int whereFilterId) {
 
             selectorRunInfoList->AddItem<SelectorRunInfo>(
                 new SelectorRunInfo() {

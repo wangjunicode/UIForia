@@ -5,155 +5,16 @@ using UnityEngine;
 
 namespace UIForia.Util {
 
-    internal unsafe struct CharStreamData {
-
-        private char* data;
-        private uint dataStart;
-        private uint dataEnd;
-        private uint ptr;
-
-    }
-
-    public unsafe struct XMLCharStream {
-
-        private char* data;
-        private uint dataStart;
-        private uint dataEnd;
-        private uint ptr;
-
-        public XMLCharStream(string data) {
-
-            fixed (char* dataptr = data) {
-                this.data = dataptr;
-            }
-
-            this.dataStart = 0;
-            this.dataEnd = (uint) data.Length;
-            this.ptr = dataStart;
-        }
-
-        public bool HasMoreTokens => ptr < dataEnd;
-
-        public char this[uint idx] => data[idx];
-
-        public void Advance(uint advance = 1) {
-            ptr += advance;
-            if (ptr >= dataEnd) {
-                ptr = dataEnd;
-            }
-        }
-
-        public void AdvanceTo(uint target) {
-            if (target < ptr) return;
-            ptr = target;
-            if (ptr >= dataEnd) {
-                ptr = dataEnd;
-            }
-        }
-
-        public bool TryParseIdentifier(out CharSpan span, bool allowMinus = true, WhitespaceHandling whitespaceHandling = WhitespaceHandling.ConsumeAll) {
-            uint start = ptr;
-
-            if ((whitespaceHandling & WhitespaceHandling.ConsumeBefore) != 0) {
-                ConsumeWhiteSpaceAndComments();
-            }
-
-            if (TryParseIdentifier(out int rangeStart, out int rangeEnd, allowMinus)) {
-                span = new CharSpan(data, rangeStart, rangeEnd);
-                if ((whitespaceHandling & WhitespaceHandling.ConsumeAfter) != 0) {
-                    ConsumeWhiteSpaceAndComments();
-                }
-
-                return true;
-            }
-
-            ptr = start;
-            span = default;
-            return false;
-        }
-
-        public bool TryParseIdentifier(out int rangeStart, out int rangeEnd, bool allowMinus = true) {
-            char first = data[ptr];
-
-            if (!char.IsLetter(first) && first != '_') {
-                rangeStart = -1;
-                rangeEnd = -1;
-                return false;
-            }
-
-            uint ptr2 = ptr;
-            while (ptr2 < dataEnd) {
-                char c = data[ptr2];
-                if (!char.IsLetterOrDigit(c) && c != '_' && (allowMinus && c != '-')) {
-                    break;
-                }
-
-                ptr2++;
-            }
-
-            uint length = ptr2 - ptr;
-            if (length > 0) {
-                rangeStart = (int) ptr;
-                rangeEnd = (int) ptr2;
-                Advance(length);
-                return true;
-            }
-
-            rangeStart = -1;
-            rangeEnd = -1;
-            return false;
-        }
-
-        public void ConsumeWhiteSpaceAndComments() {
-            while (true) {
-                while (ptr < dataEnd && char.IsWhiteSpace(data[ptr])) {
-                    ptr++;
-                }
-
-                // todo -- doesnt handle nested comment case
-                // 7 for <!-- --> length
-                if (ptr + 7 < dataEnd) {
-
-                    if (!(data[ptr + 0] == '<' && data[ptr + 1] == '!' && data[ptr + 2] == '-' && data[ptr + 3] == '-')) {
-                        break;
-                    }
-
-                    uint idx = ptr + 4;
-
-                    while (idx < dataEnd) {
-                        if (data[idx] == '-') {
-                            if (data[idx + 1] == '-' && data[idx + 2] == '>') {
-                                ptr = idx + 3;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-    }
-
     public unsafe struct CharStream {
 
         private char* data;
         private uint dataStart;
         private uint dataEnd;
         private uint ptr;
-        public int lineNumber;
-        public int colNumber;
+        public int baseOffset;
         
         [ThreadStatic] private static string s_ScratchBuffer;
         [ThreadStatic] private static List<EnumNameEntry> s_EnumNameEntryList;
-
-        public CharStream(char[] data, uint dataStart, uint dataEnd) : this() {
-            fixed (char* dataptr = data) {
-                this.data = dataptr;
-            }
-
-            this.dataStart = dataStart;
-            this.dataEnd = dataEnd;
-            this.ptr = dataStart;
-        }
 
         public CharStream(CharSpan span) : this() {
             this.data = span.data;
@@ -398,6 +259,23 @@ namespace UIForia.Util {
             span = default;
             return false;
         }
+        
+        public bool TryGetCharSpanTo(char c0, out CharSpan span) {
+            uint i = ptr;
+            while (i < dataEnd) {
+                char c = data[i];
+                if (c == c0) {
+                    span = new CharSpan(data, (int) ptr, (int) i);
+                    Advance(i - ptr + 1);
+                    return true;
+                }
+
+                i++;
+            }
+
+            span = default;
+            return false;
+        }
 
         public bool TryGetSubstreamTo(char c0, out CharStream stream) {
             uint i = ptr;
@@ -627,10 +505,13 @@ namespace UIForia.Util {
             uint ptr2 = ptr;
             while (ptr2 < End) {
                 char c = data[ptr2];
-                if (!char.IsLetterOrDigit(c) || (c != '_' && (allowMinus && c != '-'))) {
+                if (!char.IsLetterOrDigit(c)) {
+                    if (c == '_' || (allowMinus && c == '-')) {
+                        ptr2++;
+                        continue;
+                    }
                     break;
                 }
-
                 ptr2++;
             }
 
@@ -1091,6 +972,26 @@ namespace UIForia.Util {
             dataEnd--;
         }
 
+        public LineInfo GetLineInfo() {
+            int line = 0;
+            int x = 0;
+            
+            for (int i = 0; i < ptr; i++) {
+                if (data[i] == '\n') {
+                    line++;
+                    x = i;
+                }
+            }
+
+            int col = 0;
+            for (int i = x; i < ptr; i++) {
+                col++;
+            }
+
+            return new LineInfo(line, col);
+        }
+
+
     }
 
     [Flags]
@@ -1151,49 +1052,34 @@ namespace UIForia.Util {
 
         public readonly ushort rangeStart;
         public readonly ushort rangeEnd;
-
+        public readonly int baseOffset;
         public char* data { get; }
 
         public bool HasValue => Length > 0;
 
         public int Length => data != null ? rangeEnd - rangeStart : 0;
 
-        public CharSpan(char[] data, int rangeStart, int rangeEnd) {
-            fixed (char* charptr = data) {
-                this.data = charptr;
-            }
+        // public CharSpan(char[] data, int rangeStart, int rangeEnd) {
+        //     fixed (char* charptr = data) {
+        //         this.data = charptr;
+        //     }
+        //
+        //     this.rangeStart = (ushort) rangeStart;
+        //     this.rangeEnd = (ushort) rangeEnd;
+        // }
 
-            this.rangeStart = (ushort) rangeStart;
-            this.rangeEnd = (ushort) rangeEnd;
-        }
-
-        public CharSpan(char* data, int rangeStart, int rangeEnd) {
+        public CharSpan(char* data, int rangeStart, int rangeEnd, int baseOffset = 0) {
             this.data = data;
             this.rangeStart = (ushort) rangeStart;
             this.rangeEnd = (ushort) rangeEnd;
+            this.baseOffset = baseOffset;
         }
 
         public CharSpan(CharStream stream) {
             this.data = stream.Data;
             this.rangeStart = (ushort) stream.Ptr;
             this.rangeEnd = (ushort) stream.End;
-        }
-
-        public CharSpan(string data) {
-            fixed (char* ptr = data) {
-                this.data = ptr;
-                this.rangeStart = 0;
-                this.rangeEnd = (ushort) data.Length;
-            }
-        }
-
-        public CharSpan(string data, int rangeStart, int rangeEnd) {
-            fixed (char* ptr = data) {
-                this.data = ptr;
-            }
-
-            this.rangeStart = (ushort) rangeStart;
-            this.rangeEnd = (ushort) rangeEnd;
+            this.baseOffset = stream.baseOffset;
         }
 
         public static bool operator ==(CharSpan a, string b) {
@@ -1226,6 +1112,28 @@ namespace UIForia.Util {
             return true;
         }
 
+        public bool EqualsIgnoreCase(string str) {
+            
+            if (rangeEnd - rangeStart != str.Length) return false;
+            
+            fixed (char* s = str) {
+                int idx = 0;
+                for (int i = rangeStart; i < rangeEnd; i++) {
+                    char strChar = s[idx++];
+                    char dataChar = data[i];
+
+                    char c1 = strChar >= 'a' && strChar <= 'z' ? char.ToLower(strChar) : strChar;
+                    char c2 = dataChar >= 'a' && dataChar <= 'z' ? char.ToLower(dataChar) : dataChar;
+
+                    if (c1 != c2) {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+        
         public static bool operator !=(CharSpan a, CharSpan b) {
             return !(a == b);
         }
@@ -1368,6 +1276,10 @@ namespace UIForia.Util {
             }
 
             return -1;
+        }
+
+        public RangeInt GetContentRange() {
+            return new RangeInt(rangeStart, rangeEnd - rangeEnd);
         }
 
     }

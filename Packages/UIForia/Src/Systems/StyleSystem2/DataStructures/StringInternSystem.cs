@@ -5,7 +5,21 @@ using UIForia.Util.Unsafe;
 using Unity.Collections;
 
 namespace UIForia {
+     public unsafe struct StringHandle {
 
+         public int index;
+         public readonly int length;
+         public readonly AllocatorId capacity;
+         public readonly ushort* data;
+
+         public StringHandle(int index, AllocatorId allocatorId, int length, ushort* data) {
+             this.index = index;
+             this.capacity = allocatorId;
+             this.length = length;
+             this.data = data;
+         }
+
+     }
     /// <summary>
     /// This is a system that handles uniquely identifying strings. This is needed for 2 reasons. Firstly for UIForia to work in
     /// burst we cannot use strings in any of our burst data types. Secondly, style keys are stored using a combination of
@@ -64,6 +78,65 @@ namespace UIForia {
             return Add(value, false);
         }
 
+        public int AddWithoutBurst(string value) {
+            return AddWithoutBurst(value, false);
+        }
+        
+        public int AddConstWithoutBurst(string value) {
+            return AddWithoutBurst(value, true);
+        }
+        
+        private int AddWithoutBurst(string value, bool isConstant) {
+            if (internMap.TryGetValue(value, out StringInfo info)) {
+
+                // reference count will be negative if string is constant
+                // I really wish dictionary could return a ref here
+                if (info.referenceCount > 0) {
+                    info.referenceCount++;
+                    internMap[value] = info;
+                }
+
+                return info.idx;
+            }
+
+            int idx;
+            if (freeIndices.size > 0) {
+                idx = freeIndices.array[0];
+                freeIndices.SwapRemoveAt(0);
+            }
+            else {
+                // if we need a new id then make sure we can support it
+                idx = idGenerator++;
+                stringValues.EnsureCapacity(idGenerator);
+                burstValues.EnsureCapacity(idGenerator);
+            }
+
+            internMap.Add(value, new StringInfo() {
+                idx = idx,
+                referenceCount = isConstant ? int.MinValue : 1
+            });
+
+            // still writes to burst index but wont allocate
+            stringValues.array[idx] = value;
+            burstValues[idx] = default;
+
+            return idx;
+        }
+
+        private void AssertHasBurstValue(ref StringInfo info, string value) {
+            if (info.hasBurst == false) {
+                AllocatorId allocatorId = allocatorSet.AllocateBlock(value.Length * 2, out void* ptr);
+
+                // update our lookup values
+                burstValues[info.idx] = new StringHandle(info.idx, allocatorId, value.Length, (ushort*) ptr);
+
+                // copy the string content into the string handle pointer
+                fixed (char* charptr = value) {
+                    TypedUnsafe.MemCpy((ushort*) ptr, (ushort*) charptr, value.Length);
+                }
+            }
+        }
+
         private int Add(string value, bool isConstant) {
             if (internMap.TryGetValue(value, out StringInfo info)) {
 
@@ -71,6 +144,11 @@ namespace UIForia {
                 // I really wish dictionary could return a ref here
                 if (info.referenceCount > 0) {
                     info.referenceCount++;
+                    AssertHasBurstValue(ref info, value);
+                    internMap[value] = info;
+                }
+                else if(!info.hasBurst) {
+                    AssertHasBurstValue(ref info, value);
                     internMap[value] = info;
                 }
 
@@ -127,7 +205,11 @@ namespace UIForia {
             if (info.referenceCount == 0) {
                 freeIndices.Add(info.idx);
                 internMap.Remove(value);
-                allocatorSet.Free(burstValues[info.idx].data, burstValues[info.idx].capacity);
+
+                if (burstValues[info.idx].data != null) {
+                    allocatorSet.Free(burstValues[info.idx].data, burstValues[info.idx].capacity);
+                }
+
                 burstValues[info.idx] = default;
                 stringValues[info.idx] = default;
             }
@@ -160,6 +242,7 @@ namespace UIForia {
 
             public int idx;
             public int referenceCount;
+            public bool hasBurst;
 
         }
 
@@ -167,6 +250,7 @@ namespace UIForia {
             if (internMap.TryGetValue(value, out StringInfo info)) {
                 return info.idx;
             }
+
             return -1;
         }
 

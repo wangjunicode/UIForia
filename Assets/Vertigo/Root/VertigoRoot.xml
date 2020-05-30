@@ -1,15 +1,15 @@
 <UITemplate>
-    
+
     <Contents style="vertigo-root">
+
+        <Div style="box"/>
         
-        <Div style="working"/>
-        <Div style="working"/>
-        <Div style="working"/>
-        <Div style="working"/>
-        <Div style="working"/>
-        
-        <Text> Here is text! </Text>
-        
+        <Div style="text-container">
+
+            <Text>Here is text!</Text>
+            
+        </Div>
+
     </Contents>
-    
+
 </UITemplate>

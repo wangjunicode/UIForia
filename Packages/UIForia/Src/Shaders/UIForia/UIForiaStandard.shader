@@ -107,8 +107,7 @@ Shader "UIForia/Standard"
                 
                 // this only works for 'flower' configuration meshes, not for quads. use a flag for the quad
                 o.texCoord4 = float4(lerp(0, 1, v.texCoord0.x == 0.5 && v.texCoord0.y == 0.5), screenPos.xyw);
-             
-                
+                             
                 if(shapeType != ShapeType_Text) {
                     o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
                     //o.vertex = UnityPixelSnap(o.vertex); // pixel snap is bad for text rendering

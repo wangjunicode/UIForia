@@ -5,10 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Parsing;
+using UIForia.Text;
 using UIForia.Util;
 using Unity.Jobs;
 using UnityEngine.Assertions;
@@ -22,7 +24,7 @@ namespace UIForia.Src {
 
         internal static bool s_ConstructionAllowed;
 
-        private static List<Diagnostic> diagnostics;
+        private static List<DiagnosticEntry> diagnostics;
         private static readonly object diagnosticLock = new object();
         private static TemplateCache s_TemplateCache;
 
@@ -31,7 +33,7 @@ namespace UIForia.Src {
         public static bool IsLoading { get; internal set; }
         public static bool IsInitialized { get; private set; }
 
-        private static List<Diagnostic> diagnosticLog = new List<Diagnostic>();
+        private static List<DiagnosticEntry> diagnosticLog = new List<DiagnosticEntry>();
         internal static Dictionary<string, TemplateFileShell> s_TemplateShells;
 
         public struct Stats {
@@ -54,7 +56,7 @@ namespace UIForia.Src {
             return stats;
         }
 
-        public static List<Diagnostic> GetDiagnosticLogs() {
+        public static List<DiagnosticEntry> GetDiagnosticLogs() {
             return diagnosticLog;
         }
 
@@ -156,16 +158,51 @@ namespace UIForia.Src {
             stats.totalModuleLoadTime = total.Elapsed.TotalMilliseconds;
         }
 
-
         static ModuleSystem() {
             Initialize();
         }
 
+        private static string indexCache;
+        
+        public static bool ModuleIndicesChanged() {
+            if (indexCache != null) {
+                return false;
+            }
+#if UNITY_EDITOR
+
+            string lastIndexCache = UnityEditor.EditorPrefs.GetString("UIFORIA_MODULE_INDEX_CACHE");
+
+            string[] names = new string[modules.Length];
+
+            for (int i = 0; i < modules.Length; i++) {
+                names[i] = modules[i].GetType().AssemblyQualifiedName;
+            }
+
+            Array.Sort(names);
+
+            for (int i = 0; i < names.Length; i++) {
+                TextUtil.StringBuilder.Append(names[i]);
+            }
+
+            indexCache = TextUtil.StringBuilder.ToString();
+            TextUtil.StringBuilder.Clear();
+            if (lastIndexCache == null || lastIndexCache != indexCache) {
+                UnityEditor.EditorPrefs.SetString("UIFORIA_MODULE_INDEX_CACHE", indexCache);
+                return true;
+            }
+
+            return false;
+#else
+            return true;
+
+#endif
+        }
+
         internal static void LogDiagnosticException(string message, Exception e) {
-            diagnosticLog.Add(new Diagnostic() {
+            diagnosticLog.Add(new DiagnosticEntry() {
                 exception = e,
                 message = message,
-                diagnosticType = DiagnosticType.ModuleException
+                diagnosticType = DiagnosticType.Exception
             });
             Debug.LogError(message + "\n" + e.Message);
             Debug.LogError(e.StackTrace);
@@ -173,18 +210,18 @@ namespace UIForia.Src {
         }
 
         internal static void LogDiagnosticError(string message) {
-            diagnosticLog.Add(new Diagnostic() {
+            diagnosticLog.Add(new DiagnosticEntry() {
                 message = message,
-                diagnosticType = DiagnosticType.ModuleError
+                diagnosticType = DiagnosticType.Error
             });
             Debug.LogError(message);
             FailedToLoad = true;
         }
 
         internal static void LogDiagnosticInfo(string message) {
-            diagnosticLog.Add(new Diagnostic() {
+            diagnosticLog.Add(new DiagnosticEntry() {
                 message = message,
-                diagnosticType = DiagnosticType.ModuleInfo
+                diagnosticType = DiagnosticType.Info
             });
             Debug.Log(message);
         }
@@ -278,7 +315,7 @@ namespace UIForia.Src {
                 if (processedType.IsContainerElement) {
                     return;
                 }
-                
+
                 try {
                     processedType.resolvedTemplateLocation = module.ResolveTemplatePath(new TemplateLookup(processedType));
                 }
@@ -298,6 +335,7 @@ namespace UIForia.Src {
                     shell = new TemplateFileShell(templateLocation);
                     module.templateShells.Add(shell);
                     processedType.templateFileShell = shell;
+                    shell.module = module;
                     s_TemplateShells.Add(templateLocation, shell);
                 }
                 else {
@@ -332,19 +370,6 @@ namespace UIForia.Src {
                                            $"{TypeNameGenerator.GetTypeName(moduleI.GetType())}. ({moduleI.location})");
                     }
                 }
-            }
-        }
-
-        internal static void ReportParseError(string file, string message, int lineNumber, int col = -1) {
-            lock (diagnosticLock) {
-                diagnostics = diagnostics ?? new List<Diagnostic>();
-                diagnostics.Add(new Diagnostic() {
-                    filePath = file,
-                    message = message,
-                    lineNumber = lineNumber,
-                    columnNumber = col,
-                    diagnosticType = DiagnosticType.ParseError
-                });
             }
         }
 

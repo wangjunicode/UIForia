@@ -23,7 +23,7 @@ namespace UIForia.Parsing {
         private Diagnostics diagnostics;
 
         protected bool ReportParseError(string message) {
-            diagnostics.LogParseError(FilePath, message, errorContext.lineNumber, errorContext.colNumber);
+            diagnostics.LogError(message, FilePath, errorContext.lineNumber, errorContext.colNumber);
             return false;
         }
 

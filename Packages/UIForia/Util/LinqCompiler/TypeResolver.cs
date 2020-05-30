@@ -10,7 +10,7 @@ namespace UIForia.Util {
 
     public class TypeResolver {
 
-        private readonly string[] SingleNamespace = new string[1]; // instance for thread safety
+        [ThreadStatic] private static string[] SingleNamespace; // instance for thread safety
 
         private static Dictionary<string, LightList<Assembly>> s_NamespaceMap;
 
@@ -273,13 +273,11 @@ namespace UIForia.Util {
             return true;
         }
 
-        private LightList<Type> ResolveGenericTypes(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null, Type scopeType = null) {
+        private Type[] ResolveGenericTypes(TypeLookup typeLookup, IReadOnlyList<string> namespaces = null, Type scopeType = null) {
             int count = typeLookup.generics.size;
 
-            LightList<Type> results = LightList<Type>.Get();
-            results.EnsureCapacity(count);
-
-            Type[] array = results.array;
+            // new array because this is called from multiple threads
+            Type[] array = new Type[count];
             Type[] generics = null;
             Type[] concreteArgs = null;
             if (scopeType != null) {
@@ -306,8 +304,7 @@ namespace UIForia.Util {
                 }
             }
 
-            results.Count = typeLookup.generics.size;
-            return results;
+            return array;
         }
 
         private Type ResolveBaseTypePath(TypeLookup typeLookup, IReadOnlyList<string> namespaces) {
@@ -384,11 +381,13 @@ namespace UIForia.Util {
         }
 
         public Type ResolveType(string typeName, string namespaceName) {
+            SingleNamespace = SingleNamespace ?? new string[1];
             SingleNamespace[0] = namespaceName ?? string.Empty;
             return ResolveType(new TypeLookup(typeName), SingleNamespace);
         }
 
         public Type ResolveType(TypeLookup typeLookup, string namespaceName) {
+            SingleNamespace = SingleNamespace ?? new string[1];
             SingleNamespace[0] = namespaceName ?? string.Empty;
             return ResolveType(typeLookup, SingleNamespace);
         }

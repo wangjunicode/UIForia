@@ -183,7 +183,6 @@ namespace UIForia.Rendering {
             int count = propertyList.size;
 
             base.OnStylePropertyChanged(propertyList);
-
             for (int i = 0; i < count; i++) {
                 ref StyleProperty property = ref properties[i];
                 switch (property.propertyId) {

@@ -1,8 +1,14 @@
 using UnityEditor;
+using VertigoEditor;
 
 namespace UIForia.Editor {
 
     public static class WindowMenuItems {
+
+        [MenuItem("Window/UIForia/Vertigo Hierarchy")]
+        private static void VertigoHierarchy() {
+            EditorWindow.GetWindow<VertigoHierarchyWindow>("Vertigo Hierarchy");
+        }
 
         [MenuItem("Window/UIForia/UIForia Hierarchy")]
         private static void UIForiaHierarchy() {
@@ -13,7 +19,7 @@ namespace UIForia.Editor {
         private static void UIForiaInspector() {
             EditorWindow.GetWindow<UIForiaInspectorWindow>("UIForia Inspector");
         }
-        
+
         [MenuItem("Window/UIForia/UIForia Diagnostics")]
         private static void UIForiaDiagnostics() {
             EditorWindow.GetWindow<UIForiaDiagnosticWindow>("UIForia Diagnostics");

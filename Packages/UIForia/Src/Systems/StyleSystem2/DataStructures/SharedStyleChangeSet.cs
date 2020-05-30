@@ -19,14 +19,14 @@ namespace UIForia {
             get => entries.size;
         }
 
-        public void InitializeSharedStyles(int styleDataId, StyleState2 state, params StyleId[] newStyles) {
+        public void InitializeSharedStyles(ElementId styleDataId, StyleState2 state, params StyleId[] newStyles) {
             fixed (StyleId* styles = newStyles) {
                 InitializeSharedStyles(styleDataId, styles, newStyles.Length, state);
             }
 
         }
 
-        public void InitializeSharedStyles(int styleDataId, StyleId* newStyleBuffer, int newStyleCount, StyleState2 state) {
+        public void InitializeSharedStyles(ElementId styleDataId, StyleId* newStyleBuffer, int newStyleCount, StyleState2 state) {
             state |= StyleState2.Normal;
 
             StyleId* ptr = styleIds.Reserve(newStyleCount);
@@ -46,7 +46,7 @@ namespace UIForia {
         }
 
         // this is just for testing
-        public void SetSharedStyles(int styleDataId, ref StyleSetData styleData, params StyleId[] newStyles) {
+        public void SetSharedStyles(ElementId styleDataId, ref StyleSetData styleData, params StyleId[] newStyles) {
             StyleId* styles = stackalloc StyleId[newStyles.Length];
             for (int i = 0; i < newStyles.Length; i++) {
                 styles[i] = newStyles[i];
@@ -55,7 +55,7 @@ namespace UIForia {
             SetSharedStyles(styleDataId, ref styleData, styles, newStyles.Length);
         }
 
-        public void SetSharedStyles(int styleDataId, ref StyleSetData styleData, IList<StyleId> newStyles) {
+        public void SetSharedStyles(ElementId styleDataId, ref StyleSetData styleData, IList<StyleId> newStyles) {
             StyleId* styles = stackalloc StyleId[newStyles.Count];
             for (int i = 0; i < newStyles.Count; i++) {
                 styles[i] = newStyles[i];
@@ -64,7 +64,7 @@ namespace UIForia {
             SetSharedStyles(styleDataId, ref styleData, styles, newStyles.Count);
         }
 
-        public void SetSharedStyles(int styleDataId, ref StyleSetData styleData, StyleId* newStyleBuffer, int newStyleCount) {
+        public void SetSharedStyles(ElementId styleDataId, ref StyleSetData styleData, StyleId* newStyleBuffer, int newStyleCount) {
 
             if (styleData.styleChangeIndex == ushort.MaxValue) {
                 styleData.styleChangeIndex = (ushort) entries.size;

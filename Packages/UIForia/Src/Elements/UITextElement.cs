@@ -39,7 +39,7 @@ namespace UIForia.Elements {
                     textParent.textSpan.InsertChild(textSpan, (uint) siblingIndex);
                 }
                 else {
-                    textInfo = new TextInfo(newText, style.GetTextStyle());
+                    textInfo = new TextInfo(newText); //, style.GetTextStyle());
                     textSpan = textInfo.rootSpan;
                 }
             }

@@ -126,9 +126,12 @@ namespace UIForia.Util.Unsafe {
         }
 
         public void Dispose() {
-            Allocator allocator = state->allocator;
-            state->Dispose();
-            UnsafeUtility.Free(state, allocator);
+            if (state != null) {
+                Allocator allocator = state->allocator;
+                state->Dispose();
+                UnsafeUtility.Free(state, allocator);
+            }
+
             this = default;
         }
 

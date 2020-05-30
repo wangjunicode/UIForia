@@ -251,13 +251,13 @@ namespace UIForia.Style2 {
             }
 
             for (int i = 0; i < mixinTracer.size; i++) {
-                
+
                 if (mixinTracer.array[i] != mixin.mixinName) {
                     continue;
                 }
-                
+
                 string error = mixinTracer.array[0].ToString();
-                
+
                 for (int j = 1; j <= i; j++) {
                     error += " -> ";
                     error += mixinTracer.array[j].ToString();
@@ -338,14 +338,14 @@ namespace UIForia.Style2 {
                         }
                     }
 
-                    CharStream parseStream = new CharStream(s_CharBuffer.array, 0, (uint) s_CharBuffer.size);
-
-                    if (!PropertyParsers.s_parseEntries[propertyIdIndex].parser.TryParse(parseStream, variableProperty.propertyId, out property)) {
-                        // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
-                        ParseException ex = new ParseException($"Error parsing property {variableProperty.propertyId} on line {variableProperty.declaration.GetLineNumber()}");
-                        ex.SetFileName(filePath);
-                        throw ex;
-                    }
+                    CharStream parseStream = default; //new CharStream(s_CharBuffer.array, 0, (uint) s_CharBuffer.size);
+                    //
+                    // if (!PropertyParsers.s_parseEntries[propertyIdIndex].parser.TryParse(parseStream, variableProperty.propertyId, out property)) {
+                    //     // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
+                    //     ParseException ex = new ParseException($"Error parsing property {variableProperty.propertyId} on line {variableProperty.declaration.GetLineNumber()}");
+                    //     ex.SetFileName(filePath);
+                    //     throw ex;
+                    // }
                 }
 
                 state[map.Occupancy - 1] = property;
@@ -398,9 +398,9 @@ namespace UIForia.Style2 {
             s_CharBuffer.size = 0;
 
             ReplaceConstants(s_CharBuffer, stream);
-
+            throw new NotImplementedException();
             //note! line numbers will be wrong in parser probably. we can fix this by storing a line number, or by injecting n new lines into s_CharBuffer.
-            CharStream parseStream = new CharStream(s_CharBuffer.array, 0, (ushort) s_CharBuffer.size);
+            CharStream parseStream = default; // new CharStream(s_CharBuffer.array, 0, (ushort) s_CharBuffer.size);
             ShorthandEntry entry = PropertyParsers.s_ShorthandEntries[shorthand.shorthandIndex];
 
             // need a temp buffer to store output from parser
@@ -409,11 +409,11 @@ namespace UIForia.Style2 {
 
             try {
 
-                if (!entry.parser.TryParse(parseStream, properties)) {
-                    ParseException ex = new ParseException($"Failed to parse shorthand '{PropertyParsers.s_ShorthandNames[shorthand.shorthandIndex]}' with value '{parseStream}' on line {stream.GetLineNumber()}. Original value was '{shorthand.declaration}'.");
-                    ex.SetFileName(filePath);
-                    throw ex;
-                }
+                // if (!entry.parser.TryParse(parseStream, properties)) {
+                //     ParseException ex = new ParseException($"Failed to parse shorthand '{PropertyParsers.s_ShorthandNames[shorthand.shorthandIndex]}' with value '{parseStream}' on line {stream.GetLineNumber()}. Original value was '{shorthand.declaration}'.");
+                //     ex.SetFileName(filePath);
+                //     throw ex;
+                // }
 
                 for (int i = propertyCount; i < properties.size; i++) {
                     int propertyIdIndex = properties.array[i].propertyId.index;
@@ -575,12 +575,13 @@ namespace UIForia.Style2 {
         }
 
         public string GetConstant(string s) {
-            CharSpan span = new CharSpan(s);
-            if (TryResolveLocalConstant(span, out CharSpan value)) {
-                return value.ToString();
-            }
-
             return null;
+            // CharSpan span = new CharSpan(s);
+            // if (TryResolveLocalConstant(span, out CharSpan value)) {
+            // return value.ToString();
+            // }
+
+            // return null;
         }
 
         internal void SetParts(StyleBodyPart[] partArray) {

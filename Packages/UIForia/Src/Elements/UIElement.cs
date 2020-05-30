@@ -21,7 +21,7 @@ namespace UIForia.Elements {
         public int count => end - start;
 
     }
-    
+
     // some data can be held in a struct. can pin the struct to update it / recycle an element
 
     [StructLayout(LayoutKind.Sequential)]
@@ -67,10 +67,6 @@ namespace UIForia.Elements {
         internal UIElementFlags flags;
         internal UIElement parent;
 
-        // todo-- temp
-        public uint ftbIndex;
-        public uint btfIndex;
-
         // todo -- maybe move a lot of this data to an internal representation of UIElement
         public LayoutResult layoutResult;
         internal AwesomeLayoutBox layoutBox;
@@ -84,6 +80,7 @@ namespace UIForia.Elements {
 
         public UIView View { get; internal set; }
         public Application application { get; internal set; }
+        public VertigoApplication vertigoApplication { get; internal set; }
         public int hierarchyDepth { get; internal set; }
         private int _siblingIndex;
         public StyleSet styleSet2;
@@ -101,7 +98,7 @@ namespace UIForia.Elements {
         internal int index {
             get => id.index;
         }
-        
+
         public IInputProvider Input => View.application.InputSystem; // todo -- remove
 
         public int ChildCount => children?.Count ?? 0;
@@ -139,26 +136,6 @@ namespace UIForia.Elements {
             View.application.DoDestroyElement(this);
         }
 
-        internal UIElement AddChild(UIElement element) {
-            // todo -- if <Children/> is defined in the template, attach child to that element instead
-            if (element == null || element == this || element.isDestroyed) {
-                return null;
-            }
-
-            if (View == null) {
-                element.parent = this;
-                element.View = null;
-                element.siblingIndex = children.Count;
-                element.hierarchyDepth = hierarchyDepth + 1;
-                children.Add(element);
-            }
-            else {
-                application.InsertChild(this, element, (uint) children.Count);
-            }
-
-            return element;
-        }
-
         public bool internal__dontcallmeplease_SetEnabledIfBinding(bool enabled) {
             if (enabled && isSelfDisabled) {
                 application.DoEnableElement(this, false);
@@ -179,12 +156,104 @@ namespace UIForia.Elements {
             }
         }
 
-        public UIElement GetChild(int index) {
-            if (children == null || (uint) index >= (uint) children.Count) {
+        public UIElement GetLastChild() {
+            ElementTable<HierarchyInfo> hierarchyTable = vertigoApplication.elementSystem.hierarchyTable;
+            UIElement[] instanceTable = vertigoApplication.elementSystem.instanceTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+
+            if (tableEntry.lastChildId.index != 0) {
+                return instanceTable[tableEntry.lastChildId.index];
+            }
+
+            return null;
+        }
+
+        public UIElement GetFirstChild() {
+            ElementTable<HierarchyInfo> hierarchyTable = vertigoApplication.elementSystem.hierarchyTable;
+            UIElement[] instanceTable = vertigoApplication.elementSystem.instanceTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+
+            if (tableEntry.firstChildId.index != 0) {
+                return instanceTable[tableEntry.firstChildId.index];
+            }
+
+            return null;
+        }
+
+        public UIElement GetPreviousSibling() {
+            ElementTable<HierarchyInfo> hierarchyTable = vertigoApplication.elementSystem.hierarchyTable;
+            UIElement[] instanceTable = vertigoApplication.elementSystem.instanceTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+
+            if (tableEntry.prevSiblingId.index != 0) {
+                return instanceTable[tableEntry.prevSiblingId.index];
+            }
+
+            return null;
+        }
+
+        public UIElement GetNextSibling() {
+
+            ElementTable<HierarchyInfo> hierarchyTable = vertigoApplication.elementSystem.hierarchyTable;
+            UIElement[] instanceTable = vertigoApplication.elementSystem.instanceTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+
+            if (tableEntry.nextSiblingId.index != 0) {
+                return instanceTable[tableEntry.nextSiblingId.index];
+            }
+
+            return null;
+        }
+
+        public UIElement FindChildAt(int index) {
+
+            ElementTable<HierarchyInfo> hierarchyTable = vertigoApplication.elementSystem.hierarchyTable;
+            UIElement[] instanceTable = vertigoApplication.elementSystem.instanceTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+
+            if (tableEntry.childCount == 0 || index >= tableEntry.childCount) {
                 return null;
             }
 
-            return children[index];
+            ElementId ptr = tableEntry.firstChildId;
+            int cnt = 0;
+            while (ptr.index != 0) {
+                if (cnt == index) {
+                    return instanceTable[ptr.index];
+                }
+
+                cnt++;
+                ptr = hierarchyTable[ptr].nextSiblingId;
+            }
+
+            return null;
+        }
+
+        public int GetChildren(IList<UIElement> retn, bool replaceListContents = true) {
+            if (retn == null) return -1;
+            if (replaceListContents) {
+                retn.Clear();
+            }
+
+            ElementTable<HierarchyInfo> hierarchyTable = vertigoApplication.elementSystem.hierarchyTable;
+
+            ref HierarchyInfo tableEntry = ref hierarchyTable[id];
+            UIElement[] instanceTable = vertigoApplication.elementSystem.instanceTable;
+
+            if (tableEntry.childCount == 0) return 0;
+
+            ElementId ptr = tableEntry.firstChildId;
+            while (ptr.index != 0) {
+                retn.Add(instanceTable[ptr.index]);
+                ptr = hierarchyTable[ptr].nextSiblingId;
+            }
+
+            return tableEntry.childCount;
         }
 
         public UIElement FindById(string elementId) {
@@ -298,7 +367,7 @@ namespace UIForia.Elements {
         }
 
         public void SetAttribute(string name, string value) {
-            
+
             // application.SetAttribute(id, name, value);
             throw new NotImplementedException();
         }
@@ -330,24 +399,9 @@ namespace UIForia.Elements {
             return GetAttribute(name) != null;
         }
 
-        public int UniqueId => (int)id;
+        public int UniqueId => (int) id;
         public IHierarchical Element => this;
         public IHierarchical Parent => parent;
-
-        public List<UIElement> GetChildren(List<UIElement> retn = null) {
-            retn = ListPool<UIElement>.Get();
-
-            if (children == null) {
-                return retn;
-            }
-
-            UIElement[] childArray = children.Array;
-            for (int i = 0; i < children.Count; i++) {
-                retn.Add(childArray[i]);
-            }
-
-            return retn;
-        }
 
         internal void InternalDestroy() {
             LightList<UIElement>.Release(ref children);
@@ -371,17 +425,18 @@ namespace UIForia.Elements {
             return false;
         }
 
+        // todo -- deprecate this!
         public UIElement this[int i] {
-            get { return GetChild(i); }
+            get { return FindChildAt(i); }
         }
 
         public UIElement this[string id] {
             get { return FindById(id); }
         }
 
-        public ElementAnimator Animator => new ElementAnimator(application.animationSystem, this);
+        public ElementAnimator Animator => default; //new ElementAnimator(vertigoApplication.animationSystem, this);
 
-        public IInputSystem InputSystem => application.inputSystem;
+        public IInputSystem InputSystem => vertigoApplication.inputSystem;
 
         // element.animator.Stop();
 
@@ -427,7 +482,7 @@ namespace UIForia.Elements {
         public virtual void OnReady() { }
 
         // todo -- probably want to move this
-    
+
     }
 
 }

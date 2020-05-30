@@ -7,7 +7,7 @@ namespace UIForia {
         public int indexTableSize;
         public int key;
         public int value;
-        public int* indexTable;
+        public ElementId* indexTable;
         
         public int padding0;
         public int padding1;

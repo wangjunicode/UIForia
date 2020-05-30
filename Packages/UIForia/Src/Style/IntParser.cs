@@ -4,7 +4,17 @@ namespace UIForia.Style {
 
     public class IntParser : IStylePropertyParser {
 
-        public bool TryParse(CharStream stream, PropertyId propertyId, out StyleProperty2 property) {
+        public bool TryParse(CharStream stream, PropertyId propertyId, Diagnostics diagnostics, out StyleProperty2 property) {
+            if (stream.TryParseInt(out int value)) {
+                property = new StyleProperty2(propertyId, value);
+                return true;
+            }
+
+            property = default;
+            return false;
+        }
+
+        public bool TryParseFromBinding(CharStream stream, PropertyId propertyId, Diagnostics diagnostics, out StyleProperty2 property) {
             if (stream.TryParseInt(out int value)) {
                 property = new StyleProperty2(propertyId, value);
                 return true;

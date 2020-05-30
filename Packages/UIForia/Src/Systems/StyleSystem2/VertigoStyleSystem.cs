@@ -246,7 +246,7 @@ namespace UIForia {
                     table_ElementIndex = default,
                     table_ActiveSelectors = table.activeSelectors,
                     table_SelectorQueries = table.selectorQueries,
-                    table_TraversalInfo = table.traversalInfo,
+                    // table_TraversalInfo = table.traversalInfo,
                 })
                 .Then(new RunSelectorFilters() {
                     output_Matches = default,
@@ -349,7 +349,7 @@ namespace UIForia {
             // todo -- we do need to de-dup these styles after all. but theres max 7 or so, should be fast and easy to do on-stack
             fixed (int* buffer = newStyleBuffer.array) {
                 ref StyleSetData styleData = ref styleSetTable.GetReference(styleSet.styleDataId);
-                sharedStyleChangeSet.SetSharedStyles(styleSet.styleDataId, ref styleData, (StyleId*) buffer, newStyleBuffer.size);
+                // sharedStyleChangeSet.SetSharedStyles(styleSet.styleDataId, ref styleData, (StyleId*) buffer, newStyleBuffer.size);
             }
         }
 

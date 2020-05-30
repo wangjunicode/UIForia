@@ -35,8 +35,10 @@ namespace UIForia {
             sizeInBytes += sizeof(T);
         }
 
-        public void Write<T>(T* items, int itemCount) where T : unmanaged { }
-
+        public int byteSize {
+            get => sizeInBytes;
+        }
+        
         public int WriteRange<T>(T* items, int itemCount) where T : unmanaged {
             EnsureAdditionalCapacity<T>(itemCount);
             int retn = sizeInBytes;
@@ -81,6 +83,15 @@ namespace UIForia {
 
         public int GetWritePosition() {
             return sizeInBytes;
+        }
+
+        public void ResetSize() {
+            sizeInBytes = 0;
+        }
+
+        public void Reset(int newByteCapacity) {
+            sizeInBytes = 0;
+            EnsureAdditionalCapacity<byte>(newByteCapacity);
         }
 
     }

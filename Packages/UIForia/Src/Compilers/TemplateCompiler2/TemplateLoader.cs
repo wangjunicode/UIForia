@@ -22,10 +22,6 @@ namespace UIForia.Compilers {
         private LightList<TemplateExpressionSet> expressionSets;
         public TemplateData mainEntryPoint;
 
-        public static TemplateLoader RuntimeCompileModule(Module module, IEnumerable<Type> dynamicRoots = null) {
-            return new TemplateLoader();
-        }
-
         public static TemplateLoader RuntimeCompile(Type rootType) {
             
             ModuleSystem.ParseTemplates(rootType);
@@ -102,7 +98,7 @@ namespace UIForia.Compilers {
         }
 
         public UIElement LoadRoot(Application application, UIView rootView, TemplateData templateData) {
-            return application.templateSystem.CreateEntryPoint(rootView, templateData);
+            throw new NotImplementedException();
         }
 
         public static string InitTemplate(string appName, string templateMap, string mainEntryPoint) {

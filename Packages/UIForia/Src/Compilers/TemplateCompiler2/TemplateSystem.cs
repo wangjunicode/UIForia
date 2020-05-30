@@ -26,42 +26,29 @@ namespace UIForia {
         private TemplateData currentTemplateData;
         private Dictionary<Type, TemplateData> templateDataMap;
 
+        private VertigoApplication application;
+        
         private Action<UIElement> onElementRegistered;
 
-        // internal readonly StructList<int> freeListIndex;
-        // internal readonly LightList<UIElement> elementMap;
-        // private int indexGenerator;
         private ElementSystem elementSystem;
         private StyleSystem2 styleSystem;
         private AttributeSystem attributeSystem;
 
-        internal TemplateSystem(Dictionary<Type, TemplateData> templateDataMap) {
-            this.templateDataMap = templateDataMap;
+        internal TemplateSystem(VertigoApplication application) {
+            this.application = application;
             this.contextStack = new LightStack<ContextEntry>(16);
-            //       this.freeListIndex = new StructList<int>(64);
-            //      this.elementMap = new LightList<UIElement>(64);
         }
 
-        internal UIElement CreateEntryPoint<T>() where T : UIElement, new() {
-            throw new NotImplementedException();
-        }
-
-        internal UIElement CreateEntryPoint(UIView window, TemplateData data) {
-            currentTemplateData = data;
-
-            UIElement retn = data.entry(this);
-
-            window.dummyRoot.children.Add(retn);
-
-            return retn;
-        }
-
-        internal UIElement CreateAndInsertChild() {
-            throw new NotImplementedException();
-        }
-
-        internal UIElement CreateAndAppendChild() {
-            throw new NotImplementedException();
+        public void Initialize(Dictionary<Type, TemplateData> templateDataMap, ElementSystem elementSystem, StyleSystem2 styleSystem, AttributeSystem attributeSystem) {
+            this.templateDataMap = templateDataMap;
+            this.contextStack.Clear();
+            this.currentTemplateData = default;
+            this.root = default;
+            this.parent = default;
+            this.element = default;
+            this.elementSystem = elementSystem;
+            this.styleSystem = styleSystem;
+            this.attributeSystem = attributeSystem;
         }
 
         public void HydrateEntryPoint() {
@@ -87,6 +74,7 @@ namespace UIForia {
 
             TemplateData oldTemplateData = currentTemplateData;
 
+            // this could definitely turn into a type id indexed array and not use a map
             templateDataMap.TryGetValue(type, out currentTemplateData);
 
             UIElement oldRoot = root;
@@ -136,7 +124,7 @@ namespace UIForia {
             parent = element;
             element = child;
             currentTemplateData.elements[templateIndex](this);
-            parent.children[parent.children.size++] = child;
+            // parent.children[parent.children.size++] = child;
             elementSystem.AddChild(parent.id, child.id);
             parent = lastParent;
             element = lastElement;
@@ -149,7 +137,8 @@ namespace UIForia {
             parent = element;
             element = child;
 
-            parent.children[parent.children.size++] = child;
+            elementSystem.AddChild(parent.id, child.id);
+            // parent.children[parent.children.size++] = child;
 
             bool found = false;
             if (entry.overrides != null) {
@@ -185,15 +174,21 @@ namespace UIForia {
         public void InitializeEntryPoint(UIElement entry, int attrCount, int childCount) {
             element = entry;
             root = entry;
-            // todo -- elementSystem.CreateElement()
-            element.attributes = new SizedArray<ElementAttribute>(attrCount);
-            element.children = new LightList<UIElement>(childCount);
             element.bindingNode = new LinqBindingNode();
             element.bindingNode.root = element;
             element.bindingNode.parent = null;
             element.bindingNode.element = entry;
             element.flags = UIElementFlags.Alive | UIElementFlags.Enabled | UIElementFlags.AncestorEnabled;
-            element.style = new UIStyleSet(element); // todo -- remove
+            element.vertigoApplication = application;
+            // todo -- template id / origin id / lexical id or whatever
+            // todo -- entry point needs some love
+            element.id = elementSystem.CreateElement(element, 0, -9999, -99999, element.flags);
+            styleSystem.CreateElement(element.id);
+
+            attributeSystem.InitializeAttributes(element.id, attrCount);
+
+            onElementRegistered?.Invoke(element); // do this later in batches maybe? depends on when it must be called
+
         }
 
         // todo -- template origin info / id
@@ -211,40 +206,24 @@ namespace UIForia {
         public void InitializeElement(int attrCount, int childCount) {
             element.flags |= UIElementFlags.Alive;
 
+            element.vertigoApplication = application;
             if ((parent.flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet)) {
                 element.flags |= UIElementFlags.Enabled | UIElementFlags.AncestorEnabled;
             }
 
             element.parent = parent;
             // todo -- template id / origin id / lexical id or whatever
-            element.id = elementSystem.CreateElement(parent.hierarchyDepth + 1, -9999, -99999, element.flags);
+            element.id = elementSystem.CreateElement(element, parent.hierarchyDepth + 1, -9999, -99999, element.flags);
             styleSystem.CreateElement(element.id);
-            
+
             attributeSystem.InitializeAttributes(element.id, attrCount);
-            
-            // todo -- other systems will need to know that this element was created as well
-            // would be REALLY nice to do this in bulk when we have all the data, explore this!
-            // could do 2 passes, 1 to generate data, relationships and sizes, and a second one to fill with data?
-            // element.attributes = new SizedArray<ElementAttribute>(attrCount);
-            
-            // todo to sized array or block allocated range list
-            // sized array at miniumum reduces allocation by a lot
-            // this becomes a linked list, which I already have with the hierarchy info array
-            // just need instances also stored & indexed by elementId then this is basically free!
-            element.children = new LightList<UIElement>(childCount);
-            
-            // element.layoutResult = new LayoutResult(element); // implicitly created now :)
             
             element.bindingNode = new LinqBindingNode();
             element.bindingNode.element = element;
             element.bindingNode.root = root;
-            // element.style = new UIStyleSet(element); // todo -- remove!
 
             onElementRegistered?.Invoke(element); // do this later in batches maybe? depends on when it must be called
 
-            // element.FindChildAt(i); // more clear that this isnt a cheap operation
-            // element.GetChildren(list); 
-            
             element.hierarchyDepth = parent.hierarchyDepth + 1;
 
         }
@@ -254,7 +233,7 @@ namespace UIForia {
             element.bindingNode.referencedContexts = new UIElement[contextDepth];
             UIElement ptr = root;
             // inverted?
-            
+
             // assign context by walking back up the root hierarchies
             for (int i = 0; i < contextDepth; i++) {
                 element.bindingNode.referencedContexts[i] = ptr;
@@ -338,6 +317,15 @@ namespace UIForia {
             public TemplateData templateData;
             public StructList<SlotOverride> overrides;
 
+        }
+
+        public void CreateEntryPoint(UIElement attachPoint, Type currentType) { }
+
+        public void CreateAppEntryPoint(UIWindow rootWindow, Type currentType) {
+            if (templateDataMap.TryGetValue(currentType, out currentTemplateData)) {
+                UIElement retn = currentTemplateData.entry.Invoke(this);
+                rootWindow.SetRootElement(retn);
+            }
         }
 
     }

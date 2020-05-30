@@ -654,8 +654,6 @@ namespace UIForia.Systems {
         public abstract void RunLayoutHorizontal(int frameId);
 
         public abstract void RunLayoutVertical(int frameId);
-
-     
         
         public void GetWidths(ref LayoutSize size) {
             

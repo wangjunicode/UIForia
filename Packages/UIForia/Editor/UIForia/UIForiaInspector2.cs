@@ -112,7 +112,7 @@ public class UIForiaDebugUI : EditorWindow {
         GUILayout.BeginArea(upperPanel);
         upperPanelScroll = GUILayout.BeginScrollView(upperPanelScroll);
 
-        List<Diagnostic> logs = ModuleSystem.GetDiagnosticLogs();
+        List<DiagnosticEntry> logs = ModuleSystem.GetDiagnosticLogs();
 
         for (int i = 0; i < logs.Count; i++) {
             if (DrawBoxLog(logs[i], i)) {
@@ -131,7 +131,7 @@ public class UIForiaDebugUI : EditorWindow {
         GUILayout.BeginArea(lowerPanel);
         lowerPanelScroll = GUILayout.BeginScrollView(lowerPanelScroll);
 
-        List<Diagnostic> logs = ModuleSystem.GetDiagnosticLogs();
+        List<DiagnosticEntry> logs = ModuleSystem.GetDiagnosticLogs();
         if (selectedLogIndex != -1 && selectedLogIndex < logs.Count) {
             GUILayout.TextArea(ModuleSystem.GetDiagnosticLogs()[selectedLogIndex].message, textAreaStyle);
         }
@@ -173,7 +173,7 @@ public class UIForiaDebugUI : EditorWindow {
         }
     }
 
-    private bool DrawBoxLog(Diagnostic log, int index) {
+    private bool DrawBoxLog(DiagnosticEntry log, int index) {
         bool isSelected = selectedLogIndex == index;
         bool isOdd = index % 2 != 0;
 
@@ -186,23 +186,16 @@ public class UIForiaDebugUI : EditorWindow {
 
         switch (log.diagnosticType) {
 
-            case DiagnosticType.ModuleLog:
+            case DiagnosticType.Info:
                 guidContent.image = infoIcon;
                 break;
 
-            case DiagnosticType.ModuleError:
+            case DiagnosticType.Error:
+            case DiagnosticType.Exception:
                 guidContent.image = errorIcon;
                 break;
 
-            case DiagnosticType.ModuleException:
-                guidContent.image = errorIcon;
-                break;
-
-            case DiagnosticType.ParseError:
-                guidContent.image = errorIcon;
-                break;
-
-            case DiagnosticType.ParseWarning:
+            case DiagnosticType.Warning:
                 guidContent.image = warningIcon;
                 break;
 

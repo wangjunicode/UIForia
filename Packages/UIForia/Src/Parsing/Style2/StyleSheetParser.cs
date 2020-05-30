@@ -622,7 +622,7 @@ namespace UIForia.Style2 {
                 return;
             }
 
-            if (!entry.parser.TryParse(propertyStream, entry.propertyId, out StyleProperty2 property)) {
+            if (!entry.parser.TryParse(propertyStream, entry.propertyId, default, out StyleProperty2 property)) {
                 throw new ParseException($"Failed to parse style property {propertyName} in style {currentScopeName} on line {propertyStream.GetLineNumber()}.");
             }
 
@@ -651,7 +651,7 @@ namespace UIForia.Style2 {
             s_PropertyBuffer = s_PropertyBuffer ?? new StructList<StyleProperty2>();
             s_PropertyBuffer.size = 0;
 
-            if (!entry.parser.TryParse(propertyStream, s_PropertyBuffer)) {
+            if (!entry.parser.TryParse(propertyStream, default,  s_PropertyBuffer)) {
                 throw new ParseException($"Failed to parse style property {propertyName} in style {currentScopeName} on line {propertyStream.GetLineNumber()}.");
             }
 
@@ -809,7 +809,7 @@ namespace UIForia.Style2 {
                 s_CharBuffer.array[s_CharBuffer.size++] = char.ToLower(span.data[j]);
             }
 
-            return new CharSpan(s_CharBuffer.array, 0, s_CharBuffer.size);
+            return default; // new CharSpan(s_CharBuffer.array, 0, s_CharBuffer.size);
         }
 
         private static unsafe void AppendToCharBuffer(in char* data, uint start, uint length) {

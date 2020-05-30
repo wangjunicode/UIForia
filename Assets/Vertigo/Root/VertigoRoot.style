@@ -1,7 +1,16 @@
 
 style vertigo-root {
-    
     PreferredSize = 300px;
     BackgroundColor = red;
-    
+}
+
+style text-container {
+    PreferredSize = 200px;
+    BackgroundColor = green;
+}
+
+style box {
+    PreferredWidth = 100px;
+    PreferredHeight = 100px;
+    BackgroundColor = blue;
 }

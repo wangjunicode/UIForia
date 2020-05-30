@@ -1,10 +1,8 @@
 using System;
-using System.Collections;
 using System.Linq.Expressions;
 using Mono.Linq.Expressions;
 using UIForia.Parsing;
 using UIForia.Systems;
-using UIForia.UIInput;
 using UIForia.Util;
 
 namespace UIForia.Compilers {

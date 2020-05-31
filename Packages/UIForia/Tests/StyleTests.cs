@@ -2,7 +2,6 @@ using System;
 using System.Reflection;
 using NUnit.Framework;
 using Tests.Mocks;
-using UIForiaTMPro;
 using UIForia;
 using UIForia.Attributes;
 using UIForia.Compilers.Style;
@@ -484,8 +483,8 @@ public class StyleTests {
         MockApplication app = MockApplication.Setup<StyleSetTestThing>();
         StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
         UIStyleSetStateProxy normal = root.style.Normal;
-        var font0 = new FontAsset(TMP_FontAsset.defaultFontAsset);
-        var font1 = new FontAsset(TMP_FontAsset.defaultFontAsset);
+        var font0 = FontAsset.defaultFontAsset;
+        var font1 = FontAsset.defaultFontAsset;
         normal.TextFontAsset = font0;
         app.Update();
         Assert.AreEqual(font0, root.FindById("group1").style.TextFontAsset);

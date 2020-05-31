@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using UIForiaTMPro;
 using UnityEngine;
 
 namespace UIForia.Text {
@@ -23,7 +22,7 @@ namespace UIForia.Text {
         // todo -- pull glyph & adjustment into their own data structure, not part of charinfo
 
         public TextGlyph glyph;
-        public GlyphValueRecord glyphAdjustment;
+       // public GlyphValueRecord glyphAdjustment;
 
         // for sampling the font texture 
         public Vector2 topLeftUV;
@@ -39,6 +38,7 @@ namespace UIForia.Text {
 
         public int lineIndex;
         public bool visible;
+        public float kerningAdvance;
 
         public float LayoutX => wordLayoutX + topLeft.x;
         public float LayoutY => wordLayoutY + topLeft.y;

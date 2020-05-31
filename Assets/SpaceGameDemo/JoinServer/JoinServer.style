@@ -22,7 +22,7 @@ style bread-crumb-divider {
 }
 
 style header {
-    TextFontAsset = @theme.orbitron;
+    TextFontAsset = @theme.orbitronBold;
     TextFontSize = 24px;
     TextFontStyle = Bold;
     TextColor = white;
@@ -35,6 +35,14 @@ style header {
     BorderColorBottom = rgba(255, 255, 255, 20);
     PaddingLeft = 12px;
     PaddingRight = 12px;
+}
+
+style NOTMP {
+
+    TextFontSize = 48;
+    TextColor = white;
+    AlignX = Center Parent;
+
 }
 
 style toggle {

@@ -1,4 +1,3 @@
-using UIForiaTMPro;
 
 namespace UIForia {
 
@@ -6,8 +5,7 @@ namespace UIForia {
 
         public uint firstGlyph;
         public uint secondGlyph;
-        public GlyphValueRecord firstGlyphAdjustments;
-        public GlyphValueRecord secondGlyphAdjustments;
+        public float advance;
 
     }
 

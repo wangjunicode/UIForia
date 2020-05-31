@@ -1,0 +1,9 @@
+Font: Orbitron  Pt. Size: 141
+Characters packed: 95/99
+
+Missing Characters
+----------------------------------------
+ID: 94	Hex: 5E	Char [^]
+ID: 160	Hex: A0	Char [ ]
+ID: 8203	Hex: 200B	Char [​]
+ID: 9633	Hex: 25A1	Char [□]

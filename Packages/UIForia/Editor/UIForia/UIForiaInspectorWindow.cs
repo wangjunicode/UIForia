@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UIForiaTMPro;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Layout;
@@ -868,7 +867,7 @@ namespace UIForia.Editor {
             GUILayout.BeginHorizontal();
             FontAsset fontAsset = property.AsFont;
 
-            TMP_FontAsset newFont = (TMP_FontAsset) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property), fontAsset.textMeshProFont, typeof(TMP_FontAsset), false);
+            FontAsset newFont = (FontAsset) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property), fontAsset, typeof(FontAsset), false);
 
             GUI.enabled = true;
             GUILayout.EndHorizontal();

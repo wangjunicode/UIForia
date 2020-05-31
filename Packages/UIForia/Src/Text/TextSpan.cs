@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using SVGX;
-using UIForiaTMPro;
 using UIForia.Util;
 using UnityEngine;
 
@@ -122,7 +121,6 @@ namespace UIForia.Text {
             textInfo.RebuildSpans();
         }
 
-
         // todo -- handle this later
 //            for (int i = 0; i < characters.Length; i++) {
 //                if (characters[i] == '&') {
@@ -135,7 +133,6 @@ namespace UIForia.Text {
 //                    }
 //                }
 //            }
-
 
         // todo -- support this, need an Append buffer method, need to merge old words, can save on layout, etch
         public void AppendText(string text) { }
@@ -198,11 +195,11 @@ namespace UIForia.Text {
         }
 
         public void SetText(string text) {
-            
+
             if (text == null) {
                 text = string.Empty;
             }
-            
+
             if (rawContent == null) {
                 rawContent = new char[text.Length];
             }
@@ -213,7 +210,7 @@ namespace UIForia.Text {
             SetRawContentFromString(text);
 
             UpdateBuffers();
-            
+
         }
 
         public void SetText(char[] characters) {
@@ -237,7 +234,7 @@ namespace UIForia.Text {
             if (bufferSize == 0 && geometryVersion != 0) {
                 geometryVersion = 0;
             }
-            
+
             // handle all kerning within a span as if there were no other spans. text info will handle 'gluing' spans together
             if (charInfoList == null) {
                 charInfoList = new StructList<CharInfo>(bufferSize);
@@ -253,7 +250,7 @@ namespace UIForia.Text {
             charInfoList.size = bufferSize;
 
             for (int i = 0; i < bufferSize; i++) {
-                charInfos[i].visible = false;// technically safer to set to default but this faster
+                charInfos[i].visible = false; // technically safer to set to default but this faster
                 charInfos[i].character = processedContent[i];
             }
 
@@ -472,15 +469,13 @@ namespace UIForia.Text {
                     TextGlyph glyph = charInfo.glyph;
                     if (glyph == null) {
                         // todo -- replace missing glyph with a question mark?
-                        Debug.Log($"Missing glyph for character '{(char)charInfo.character}' (char code {charInfo.character}) in font {fontAsset.name}");
+                        Debug.Log($"Missing glyph for character '{(char) charInfo.character}' (char code {charInfo.character}) in font {fontAsset.name}");
                         continue;
                     }
 
-                    GlyphValueRecord glyphAdjustments = charInfo.glyphAdjustment;
-
                     float currentElementScale = fontScale * fontScaleMultiplier * glyph.scale;
 
-                    topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) * currentElementScale;
+                    topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding) * currentElementScale;
                     topLeft.y = fontBaseLineOffset + (fontAscender - (glyph.yOffset + padding)) * currentElementScale;
                     bottomRight.x = topLeft.x + (glyph.width + padding * 2 + stylePadding * 2) * currentElementScale;
                     bottomRight.y = topLeft.y + (glyph.height + padding * 2) * currentElementScale;
@@ -501,12 +496,12 @@ namespace UIForia.Text {
                     charInfo.topLeftUV = topLeftUV;
                     charInfo.bottomRightUV = bottomRightUV;
                     charInfo.scale = currentElementScale;
-                
+
                     // maybe just store x advance per character since we need a word pass on xadvance any
                     xAdvance += (glyph.xAdvance
                                  * boldAdvanceMultiplier
                                  + currentFontAsset.normalSpacingOffset
-                                 + glyphAdjustments.xAdvance) * currentElementScale;
+                                 + charInfo.kerningAdvance) * currentElementScale;
                 }
 
                 words[w].width = xAdvance;
@@ -562,30 +557,28 @@ namespace UIForia.Text {
         }
 
         private static void FindKerningInfo(FontAsset fontAsset, CharInfo[] charInfos, int count) {
+            if (fontAsset.kerningDictionary == null) {
+                return;
+            }
+
             IntMap<TextKerningPair> kerningDictionary = fontAsset.kerningDictionary;
             if (count < 2) {
                 return;
             }
 
-            GlyphValueRecord glyphAdjustments = default;
             int idx = 0;
 
-            glyphAdjustments = kerningDictionary.GetOrDefault(((charInfos[1].character) << 16) + charInfos[0].character).firstGlyphAdjustments;
-            charInfos[idx++].glyphAdjustment = glyphAdjustments;
+            float advance = kerningDictionary.GetOrDefault(((charInfos[1].character) << 16) + charInfos[0].character).advance;
+            charInfos[idx++].kerningAdvance = advance;
 
             for (int i = 1; i < count - 1; i++) {
                 int current = charInfos[i].character;
                 int next = charInfos[i + 1].character;
-                int prev = charInfos[i - 1].character;
 
-                glyphAdjustments = kerningDictionary.GetOrDefault((next << 16) + current).firstGlyphAdjustments;
-                glyphAdjustments += kerningDictionary.GetOrDefault((current << 16) + prev).secondGlyphAdjustments;
-
-                charInfos[idx++].glyphAdjustment = glyphAdjustments;
+                charInfos[idx++].kerningAdvance = kerningDictionary.GetOrDefault((next << 16) + current).advance;
             }
 
-            glyphAdjustments = kerningDictionary.GetOrDefault(((charInfos[count - 1].character) << 16) + charInfos[count - 2].character).firstGlyphAdjustments;
-            charInfos[idx++].glyphAdjustment = glyphAdjustments;
+            charInfos[idx].kerningAdvance = kerningDictionary.GetOrDefault(((charInfos[count - 1].character) << 16) + charInfos[count - 2].character).advance;
         }
 
         public SVGXTextStyle GetStyle() {
@@ -633,7 +626,6 @@ namespace UIForia.Text {
             retn.whitespaceMode = whitespaceMode;
             retn.alignment = alignment;
         }
-
 
         private static bool Color32Equal(Color32 a, Color32 b) {
             return a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a;
@@ -759,6 +751,7 @@ namespace UIForia.Text {
                 case TextStyleProperty.FontSize:
                     textStyle.fontSize = value;
                     break;
+
                 case TextStyleProperty.GlowOffset:
                     textStyle.glowOffset = value;
                     break;
@@ -863,6 +856,7 @@ namespace UIForia.Text {
                 case TextStyleProperty.FontSize:
                     inheritedStyle.fontSize = value;
                     break;
+
                 case TextStyleProperty.GlowOffset:
                     inheritedStyle.glowOffset = value;
                     break;

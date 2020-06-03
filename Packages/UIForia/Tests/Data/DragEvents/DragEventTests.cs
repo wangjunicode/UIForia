@@ -1,3 +1,4 @@
+using System;
 using NUnit.Framework;
 using Tests.Mocks;
 using UIForia.Attributes;
@@ -6,6 +7,8 @@ using UIForia.Exceptions;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.PlayerLoop;
+using UnityEngine.UIElements;
 using static Tests.TestUtils;
 
 namespace DragEventTests {
@@ -598,6 +601,73 @@ namespace DragEventTests {
             testView.Update();
 
             Assert.AreEqual(new[] {"move:child0:root"}, root.dragList.ToArray());
+        }
+
+        public class DragElementWithSyncBinding : UIContainerElement {
+            public float value;
+
+            private Action<Vector2> onDragUpdate;
+
+            public override void OnCreate() {
+                onDragUpdate = OnDragUpdate;
+            }
+
+            private void OnDragUpdate(Vector2 position) {
+                value = position.x;
+            }
+
+            public class TestDragEvent : DragEvent {
+
+                public readonly Action<Vector2> dragUpdate;
+
+                public TestDragEvent(Action<Vector2> dragUpdate) {
+                    this.dragUpdate = dragUpdate;
+                }
+
+                public override void Update() {
+                    dragUpdate?.Invoke(MousePosition);
+                }
+            }
+
+            [OnDragCreate()]
+            public DragEvent OnDragCreate() {
+                return new TestDragEvent(onDragUpdate);
+            }
+        }
+
+        [Template("Data/DragEvents/DragEventTest_Drag.xml#drag_and_change_sync_binding")]
+        public class DragElementWithSyncBindingTestWrapper : UIElement {
+
+            public float syncValue;
+
+        }
+
+        [Test]
+        public void Drag_element_and_update_synced_value_while_not_hovering_draggeed_element() {
+            MockApplication testView = MockApplication.Setup<DragElementWithSyncBindingTestWrapper>();
+            testView.Update();
+            testView.SetViewportRect(new Rect(0, 0, 1000, 1000));
+            DragElementWithSyncBindingTestWrapper root = (DragElementWithSyncBindingTestWrapper) testView.RootElement;
+
+            testView.InputSystem.MouseDown(new Vector2(10, 10));
+            testView.Update();
+
+            // drag move the mouse over to the sibling element
+            testView.InputSystem.MouseDragMove(new Vector2(20, 90));
+            testView.Update();
+            Assert.AreEqual(20, root.children[0].layoutResult.screenPosition.x);
+            
+            testView.InputSystem.MouseDragMove(new Vector2(31, 89));
+            testView.Update();
+            Assert.AreEqual(31, root.children[0].layoutResult.screenPosition.x);
+            
+            testView.InputSystem.MouseDragMove(new Vector2(30, 75));
+            testView.Update();
+            Assert.AreEqual(30, root.children[0].layoutResult.screenPosition.x);
+            
+            testView.InputSystem.MouseDragMove(new Vector2(400, 120));
+            testView.Update();
+            Assert.AreEqual(400, root.children[0].layoutResult.screenPosition.x);
         }
 
     }

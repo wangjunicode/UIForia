@@ -195,44 +195,20 @@ namespace UIForia.Systems {
             mouseState = GetMouseState();
         }
 
-        private void RunBindings(UIElement element) {
-            UIElement start = element;
-
-            LightList<UIElement> tmp = LightList<UIElement>.Get();
-
-            UIElement ptr = start;
-            while (ptr != null) {
-                tmp.Add(ptr);
-                ptr = ptr.parent;
-            }
-            
-            for (int i = tmp.size - 1; i >= 0; i--) {
-                LinqBindingNode bindingNode = tmp[i].bindingNode;
+        private void RunBindings(LightList<UIElement> elementsToUpdate) {
+            for (int i = elementsToUpdate.size - 1; i >= 0; i--) {
+                LinqBindingNode bindingNode = elementsToUpdate[i].bindingNode;
                 bindingNode?.updateBindings?.Invoke(bindingNode.root, bindingNode.element);
-                // UnityEngine.Debug.Log($"{new string(' ', bindingNode.element.hierarchyDepth * 4)}pre-binding" + bindingNode.element.GetDisplayName());
             }
-            
-            tmp.Release();
         }
         
-        private void RunWriteBindings(UIElement element) {
-            UIElement start = element;
-
-            LightList<UIElement> tmp = LightList<UIElement>.Get();
-
-            UIElement ptr = start;
-            while (ptr != null) {
-                tmp.Add(ptr);
-                ptr = ptr.parent;
-            }
-            
-            for (int i = 0; i < tmp.size; i++) {
-                LinqBindingNode bindingNode = tmp[i].bindingNode;
+        private void RunWriteBindingsAndReleaseList(LightList<UIElement> elementsToUpdate) {
+            for (int i = 0; i < elementsToUpdate.size; i++) {
+                LinqBindingNode bindingNode = elementsToUpdate[i].bindingNode;
                 bindingNode?.lateBindings?.Invoke(bindingNode.root, bindingNode.element);
-                // UnityEngine.Debug.Log($"{new string(' ', bindingNode.element.hierarchyDepth * 4)}pre-binding" + bindingNode.element.GetDisplayName());
             }
-            
-            tmp.Release();
+
+            elementsToUpdate.Release();
         }
         
         public virtual void OnUpdate() {
@@ -241,12 +217,10 @@ namespace UIForia.Systems {
 
             ProcessKeyboardEvents();
             ProcessMouseInput();
-            UIElement firstElement = null;
-            if (m_ElementsThisFrame.Count != 0) {
-                firstElement = m_ElementsThisFrame[0];
 
-                RunBindings(firstElement);
-            }
+            LightList<UIElement> bindingUpdateList = BuildBindingUpdateList(m_ElementsThisFrame.Count > 0 ? m_ElementsThisFrame[0] : null);
+
+            RunBindings(bindingUpdateList);
 
             if (!IsDragging) {
                 ProcessMouseEvents();
@@ -257,9 +231,7 @@ namespace UIForia.Systems {
 
             ProcessDragEvents();
 
-            if (firstElement != null) {
-                RunWriteBindings(firstElement);
-            }
+            RunWriteBindingsAndReleaseList(bindingUpdateList);
 
             List<UIElement> temp = m_ElementsLastFrame;
             m_ElementsLastFrame = m_ElementsThisFrame;
@@ -278,6 +250,62 @@ namespace UIForia.Systems {
             if (IsMouseLeftUpThisFrame) {
                 m_MouseDownElements.Clear();
             }
+        }
+
+        private LightList<UIElement> BuildBindingUpdateList(UIElement rootElement) {
+
+            LightList<UIElement> bindingUpdateList = LightList<UIElement>.Get();
+            
+            if (currentDragEvent == null) {
+                if (rootElement != null) {
+                    UIElement ptr = rootElement;
+                    while (ptr != null) {
+                        bindingUpdateList.Add(ptr);
+                        ptr = ptr.parent;
+                    }
+                }
+            }
+            else {
+
+                UIElement dragEventBranch = currentDragEvent.origin;
+                UIElement rootElementBranch = rootElement;
+
+                while (dragEventBranch != null || rootElementBranch != null) {
+                    if (dragEventBranch != null && rootElementBranch != null) {
+                        if (dragEventBranch.layoutBox.traversalIndex > rootElementBranch.layoutBox.traversalIndex) {
+                            bindingUpdateList.Add(dragEventBranch);
+                            dragEventBranch = dragEventBranch.parent;
+                        }
+                        else if (dragEventBranch.layoutBox.traversalIndex < rootElementBranch.layoutBox.traversalIndex) {
+                            bindingUpdateList.Add(rootElementBranch);
+                            rootElementBranch = rootElementBranch.parent;
+                        }
+                        else {
+                            while (rootElementBranch != null) {
+                                bindingUpdateList.Add(rootElementBranch);
+                                rootElementBranch = rootElementBranch.parent;
+                            }
+
+                            break;
+                        }
+                    }
+                    else {
+                        if (dragEventBranch == null) {
+                            bindingUpdateList.Add(rootElementBranch);
+                            rootElementBranch = rootElementBranch.parent;
+                        }
+                    
+                        if (rootElementBranch == null) {
+                            bindingUpdateList.Add(dragEventBranch);
+                            dragEventBranch = dragEventBranch.parent;
+                        }
+                    }
+                }
+            }
+            
+            bindingUpdateList.Sort((e1, e2) => e1.layoutBox.traversalIndex > e2.layoutBox.traversalIndex ? -1 : 1);
+
+            return bindingUpdateList;
         }
 
         public virtual void DelayEvent(UIElement origin, UIEvent evt) {
@@ -752,6 +780,7 @@ namespace UIForia.Systems {
                     InputHandlerGroup evtHandlerGroup = item.inputHandlers;
 
                     bool ran = false;
+                    LightList<UIElement> elementsToUpdate = null;
                     for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                         if (evt.stopPropagation) break;
                         ref InputHandlerGroup.HandlerData handler = ref evtHandlerGroup.eventHandlers.array[i];
@@ -761,7 +790,8 @@ namespace UIForia.Systems {
 
                         if (!ran) {
                             ran = true;
-                            RunBindings(element);
+                            elementsToUpdate = BuildBindingUpdateList(element);
+                            RunBindings(elementsToUpdate);
                         }
                         Action<KeyboardInputEvent> keyHandler = handler.handlerFn as Action<KeyboardInputEvent>;
                         Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
@@ -769,7 +799,7 @@ namespace UIForia.Systems {
                     }
 
                     if (ran) {
-                        RunWriteBindings(element);
+                        RunWriteBindingsAndReleaseList(elementsToUpdate);
                     }
                     
                     return !evt.stopPropagation;
@@ -783,7 +813,8 @@ namespace UIForia.Systems {
                     return;
                 }
 
-                RunBindings(element);
+                LightList<UIElement> elementsToUpdate = BuildBindingUpdateList(element);
+                RunBindings(elementsToUpdate);
 
                 for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
                     if (m_EventPropagator.shouldStopPropagation) break;
@@ -797,7 +828,7 @@ namespace UIForia.Systems {
                     keyHandler.Invoke(keyInputEvent);
                 }
 
-                RunWriteBindings(element);
+                RunWriteBindingsAndReleaseList(elementsToUpdate);
             }
         }
 

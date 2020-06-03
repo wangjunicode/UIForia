@@ -35,6 +35,7 @@ sysinfo.txt
 .idea/**/*
 *.DotSettings
 /Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll
+/Assets/StreamingAssets.meta
 /Assets/StreamingAssets/UIForia/
 /Assets/StreamingAssets/UIForia.meta
 /Assets/StreamingAssets/UIForiaInternal/

@@ -2775,7 +2775,7 @@ namespace UIForia.Compilers {
                 char lastChar = char.ToLower(value[value.Length - 1]);
                 if (value.Length > 1) {
                     if (lastChar == 'f') {
-                        if (float.TryParse(value.Remove(value.Length - 1), out float fVal)) {
+                        if (float.TryParse(value.Remove(value.Length - 1), NumberStyles.Float, CultureInfo.InvariantCulture, out float fVal)) {
                             return Expression.Constant(fVal);
                         }
 
@@ -2783,7 +2783,7 @@ namespace UIForia.Compilers {
                     }
 
                     if (lastChar == 'd') {
-                        if (double.TryParse(value.Remove(value.Length - 1), out double fVal)) {
+                        if (double.TryParse(value.Remove(value.Length - 1), NumberStyles.Float, CultureInfo.InvariantCulture, out double fVal)) {
                             return Expression.Constant(fVal);
                         }
 
@@ -2791,7 +2791,7 @@ namespace UIForia.Compilers {
                     }
 
                     if (lastChar == 'm') {
-                        if (decimal.TryParse(value.Remove(value.Length - 1), out decimal fVal)) {
+                        if (decimal.TryParse(value.Remove(value.Length - 1), NumberStyles.Float, CultureInfo.InvariantCulture, out decimal fVal)) {
                             return Expression.Constant(fVal);
                         }
 
@@ -2828,7 +2828,7 @@ namespace UIForia.Compilers {
                     // no character specifier, parse as double if there is a decimal or int if there is not
 
                     if (value.Contains(".")) {
-                        if (double.TryParse(value, out double fVal)) {
+                        if (double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out double fVal)) {
                             return Expression.Constant(fVal);
                         }
 
@@ -2855,7 +2855,7 @@ namespace UIForia.Compilers {
                     return Expression.Constant(f);
                 }
                 else {
-                    throw new CompileException("Tried to parse value {literalNode.rawValue} as a float but failed");
+                    throw new CompileException($"Tried to parse value {literalNode.rawValue} as a float but failed");
                 }
             }
 

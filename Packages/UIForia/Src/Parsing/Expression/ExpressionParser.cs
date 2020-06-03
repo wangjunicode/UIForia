@@ -1197,11 +1197,17 @@ namespace UIForia.Parsing.Expressions {
         }
 
         private void Abort(string info = null) {
+            
+            string expression = tokenStream.PrintTokens();
+            tokenStream.Release();
+            StackPool<OperatorNode>.Release(operatorStack);
+            StackPool<ASTNode>.Release(expressionStack);
+
             if (info != null) {
-                throw new ParseException($"Failed to parse expression: {tokenStream.PrintTokens()}. {info}");
+                throw new ParseException($"Failed to parse expression: {expression}. {info}");
             }
             else {
-                throw new ParseException($"Failed to parse expression: {tokenStream.PrintTokens()}");
+                throw new ParseException($"Failed to parse expression: {expression}");
             }
         }
 

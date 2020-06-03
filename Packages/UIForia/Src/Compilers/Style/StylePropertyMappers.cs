@@ -293,7 +293,7 @@ namespace UIForia.Compilers.Style {
         private static unsafe MaterialId MapMaterial(PropertyNode node, StyleCompileContext context) {
 
             if (!(node.children[0] is StyleLiteralNode literalNode) || literalNode.type != StyleASTNodeType.StringLiteral) {
-                return default;
+                throw new CompileException(context.fileName, node, "Expected a literal value.");
             }
 
             fixed (char* charptr = literalNode.rawValue) {
@@ -301,11 +301,11 @@ namespace UIForia.Compilers.Style {
                 stream.TryParseCharacter('"');
 
                 if (!stream.TryParseIdentifier(out CharSpan idSpan)) {
-                    throw new Exception($"Expected a valid identifier for material style value. Found: " + literalNode.rawValue);
+                    throw new CompileException(context.fileName, literalNode, $"Expected a valid identifier for material style value. Found: " + literalNode.rawValue);
                 }
 
                 if (!context.materialDatabase.TryGetBaseMaterialId(idSpan, out MaterialId materialId)) {
-                    throw new Exception($"Cannot find a material registered by name {idSpan}.");
+                    throw new CompileException(context.fileName, literalNode, $"Cannot find a material registered by name {idSpan}.");
                 }
 
                 stream.TryParseCharacter('"');
@@ -317,7 +317,7 @@ namespace UIForia.Compilers.Style {
                 }
 
                 if (!stream.TryGetSubStream('{', '}', out CharStream propertyStream)) {
-                    return default;
+                    throw new CompileException(context.fileName, literalNode, "Expected a { ... }-block.");
                 }
 
                 LightList<MaterialValueOverride> valueList = LightList<MaterialValueOverride>.Get();
@@ -330,7 +330,7 @@ namespace UIForia.Compilers.Style {
                     bool isValid = true;
 
                     if (!propertyStream.TryParseIdentifier(out CharSpan propertySpan)) {
-                        throw new Exception($"Expected to find a valid property name identifier in material style property {idSpan}");
+                        throw new CompileException(context.fileName, literalNode, $"Expected to find a valid property name identifier in material style property {idSpan}");
                     }
 
                     // if (!materialInfo.material.HasProperty(propertySpan.ToString())) {
@@ -339,7 +339,7 @@ namespace UIForia.Compilers.Style {
                     // }
 
                     if (!propertyStream.TryParseCharacter('=')) {
-                        throw new Exception($"Expected to find an = sign after material property {propertySpan}");
+                        throw new CompileException(context.fileName, literalNode, $"Expected to find an = sign after material property {propertySpan}");
                     }
 
                     if (!context.materialDatabase.TryGetMaterialProperty(materialId, propertySpan, out MaterialPropertyInfo info)) {
@@ -348,7 +348,7 @@ namespace UIForia.Compilers.Style {
                     }
 
                     if (!propertyStream.TryGetDelimitedSubstream(';', out CharStream valueStream)) {
-                        return default;
+                        throw new CompileException(context.fileName, literalNode, $"Expected to a semi-colon.");
                     }
 
                     switch (info.propertyType) {
@@ -387,7 +387,7 @@ namespace UIForia.Compilers.Style {
                             break;
 
                         default:
-                            throw new ArgumentOutOfRangeException();
+                            throw new CompileException(context.fileName, literalNode, "Invalid MaterialPropertyType.");
                     }
 
                 }

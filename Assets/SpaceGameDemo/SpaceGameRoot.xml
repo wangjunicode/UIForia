@@ -1,30 +1,25 @@
 ﻿<UITemplate>
     
     <Style src="SpaceGameDemo/SpaceGameRoot.style"/>
+    <Style src="SpaceGameDemo/Theme.style" alias="theme"/>
     
     <Contents>
         
-        <Image src="'Images/uiforia_logo_white@2x'" style="logo"/>
+        <SpacePanel name="'StartMenu'">
+            <StartMenu style="container" />
+        </SpacePanel>
         
-        <Group style="menu">
-            <SpaceMenuItem label="'Single Player'" mouse:click="FindById('single-player').SetEnabled(true)"/>
-            <SpaceMenuItem label="'Server Browser'" />
-            <SpaceMenuItem label="'Settings'" />
-            <SpaceMenuItem label="'Quit'" />
-        </Group>
+        <SpacePanel name="'Players'">
+            <StartMenu style="container" />
+        </SpacePanel>
         
-        <Group style="radial">
-            <Group style="radial-fill" style:meshFillAmount="progress"/>
-            <Text style="progress-text"> {progressString}% </Text>
-        </Group>
+        <SpacePanel name="'JoinServer'">
+            <JoinServer style="container" />
+        </SpacePanel>
         
-<!--        <Group attr:id="single-player" style="single-player" if.once="false">-->
-<!--            -->
-<!--            <Text>Single player!</Text>-->
-<!--            -->
-<!--        </Group>-->
-
-<!--        <JoinServer/>-->
+        <SpacePanel name="'Settings'">
+            <Settings style="container" />
+        </SpacePanel>
         
     </Contents>
     

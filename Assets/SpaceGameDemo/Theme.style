@@ -1,4 +1,21 @@
 ﻿export const orbitron = url("Fonts/Orbitron/Orbitron-Medium SDF");
 export const orbitronBold = url("Fonts/Orbitron/Orbitron-Bold SDF");
 
+export const orange = #fbb03b;
 
+style container {
+    PreferredSize = 1pca;
+    Padding = 30px 60px;
+    FlexLayoutDirection = Horizontal;
+}
+
+style main-content {
+    PreferredWidth = 800px;
+    FlexItemGrow = 1;
+    FlexItemShrink = 1;
+    LayoutFitVertical = Fill;
+}
+
+style menu {
+    AlignY = End ParentContentArea;
+}

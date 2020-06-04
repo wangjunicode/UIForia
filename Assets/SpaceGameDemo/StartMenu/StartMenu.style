@@ -1,0 +1,38 @@
+﻿import "SpaceGameDemo/Theme.style" as theme;
+
+style menu {
+    AlignX = 50px Screen;
+    AlignY = 15% -15% Screen End;
+}
+
+style logo {
+    AlignX = Center Screen;
+    AlignY = 15% Screen;
+    Material = "Shine";
+}
+
+style radial {
+    BackgroundImage = url("Images/HexagonBorder1");
+    PreferredSize = 110px 122.5px;
+    AlignX = 90% Parent;
+    BackgroundTint = rgba(255, 255, 255, 100);
+}
+
+style radial-fill {
+    BackgroundImage = url("Images/HexagonBorder1Thick");
+    PreferredSize = 112px 124.5px;
+    AlignX = 0% Parent;
+    TransformPositionY = -1px;
+    MeshType = FillRadial360;
+    MeshFillAmount = 0.6;
+    BackgroundTint = red;
+    MeshFillOrigin = Origin360_Top;
+}
+
+style progress-text {
+    LayoutBehavior = Ignored;
+    AlignX = Center Parent;
+    AlignY = Center Parent;
+    TextColor = white;
+    TextFontAsset = @theme.orbitron;
+}

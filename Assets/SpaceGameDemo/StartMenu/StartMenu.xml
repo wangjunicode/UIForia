@@ -1,0 +1,18 @@
+﻿<UITemplate>
+    <Style src="SpaceGameDemo/StartMenu/StartMenu.style" />
+    <Contents>
+        <Image Width="401" Height="105" src="'Images/uiforia_logo_white@2x'" style="logo" />
+
+        <Group style="menu">
+            <SpaceMenuItem label="'Single Player'" targetPanel="'Players'" />
+            <SpaceMenuItem label="'Server Browser'" targetPanel="'JoinServer'" />
+            <SpaceMenuItem label="'Settings'" targetPanel="'Settings'" />
+            <SpaceMenuItem label="'Quit'" targetPanel="'Quit'" />
+        </Group>
+
+        <Group style="radial">
+            <Group style="radial-fill" style:meshFillAmount="progress"/>
+            <Text style="progress-text"> {progressString}% </Text>
+        </Group>
+    </Contents>
+</UITemplate>

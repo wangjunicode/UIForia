@@ -1051,25 +1051,25 @@ style xyz {
         AnimationData animationData = styleSheet.animations[0];
         Assert.AreEqual("anim1", animationData.name);
         Assert.AreEqual(4, animationData.frames.Count);
-        AnimationKeyFrame frame0 = animationData.frames[0];
+        StyleAnimationKeyFrame frame0 = animationData.frames[0];
         Assert.AreEqual(1, frame0.properties.Count);
         Assert.AreEqual(0, frame0.key);
         Assert.AreEqual(StylePropertyId.BackgroundColor, frame0.properties[0].propertyId);
         Assert.AreEqual(Color.red, frame0.properties[0].styleProperty.AsColor);
 
-        AnimationKeyFrame frame1 = animationData.frames[1];
+        StyleAnimationKeyFrame frame1 = animationData.frames[1];
         Assert.AreEqual(2, frame1.properties.Count);
         Assert.AreEqual(0.5f, frame1.key);
         Assert.AreEqual(StylePropertyId.TextFontSize, frame1.properties[0].propertyId);
         Assert.AreEqual(StylePropertyId.BackgroundColor, frame1.properties[1].propertyId);
 
-        AnimationKeyFrame frame2 = animationData.frames[2];
+        StyleAnimationKeyFrame frame2 = animationData.frames[2];
         Assert.AreEqual(2, frame2.properties.Count);
         Assert.AreEqual(0.6f, frame2.key);
         Assert.AreEqual(StylePropertyId.PreferredWidth, frame2.properties[0].propertyId);
         Assert.AreEqual(StylePropertyId.PreferredHeight, frame2.properties[1].propertyId);
 
-        AnimationKeyFrame frame3 = animationData.frames[3];
+        StyleAnimationKeyFrame frame3 = animationData.frames[3];
         Assert.AreEqual(1, frame3.properties.Count);
         Assert.AreEqual(1, frame3.key);
         Assert.AreEqual(StylePropertyId.BackgroundColor, frame3.properties[0].propertyId);

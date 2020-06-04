@@ -4,7 +4,7 @@ using UIForia.Elements;
 using UnityEngine;
 
 namespace UIForia {
-
+    
     public class UIViewBehavior : MonoBehaviour {
 
         public Type type;
@@ -24,6 +24,7 @@ namespace UIForia {
             settings.codeFileExtension = "generated.cs";
             settings.preCompiledTemplatePath = "Assets/UIForia_Generated2/" + applicationName;
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
+            
             return settings;
         }
 
@@ -32,10 +33,15 @@ namespace UIForia {
             if (type == null) return;
 
             TemplateSettings settings = GetTemplateSettings(type);
-
+            settings.materialAssets = GetComponent<UIForiaAssets>()?.materialReferences;
+            
+#if UNITY_EDITOR
             application = usePreCompiledTemplates
                 ? GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection)
                 : GameApplication.CreateFromRuntimeTemplates(settings, camera, DoDependencyInjection);
+#else
+            application = GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection);
+#endif
 
         }
 
@@ -47,7 +53,7 @@ namespace UIForia {
         private void Update() {
             if (type == null) return;
             application?.Update();
-            application?.GetView(0).SetSize((int)application.Width, (int)application.Height);
+            application?.GetView(0).SetSize((int) application.Width, (int) application.Height);
         }
 
     }

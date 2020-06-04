@@ -156,6 +156,20 @@ namespace UIForia.Rendering {
             this.meshesToRelease = new LightList<PooledMesh>();
         }
 
+        public void DrawMesh(Mesh mesh, Material material, MaterialPropertyBlock propertyBlock, in Matrix4x4 transform) {
+            FinalizeCurrentBatch();
+            currentBatch = new Batch();
+            currentBatch.transformData = StructList<Matrix4x4>.Get();
+            currentBatch.material = material;
+            currentBatch.propertyBlock = propertyBlock;
+            currentBatch.batchType = BatchType.Mesh;
+            currentBatch.unpooledMesh = mesh;
+            currentBatch.drawCallSize++;
+            currentBatch.uiforiaData = UIForiaData.Get();
+            currentBatch.transformData.Add(transform);
+            FinalizeCurrentBatch();
+        }
+        
         public void DrawMesh(Mesh mesh, Material material, in Matrix4x4 transform) {
             FinalizeCurrentBatch();
             currentBatch = new Batch();
@@ -830,7 +844,7 @@ namespace UIForia.Rendering {
 
                             case BatchType.Mesh: {
                                 Matrix4x4 m = batch.transformData.array[0] * origin;
-                                commandBuffer.DrawMesh(batch.unpooledMesh, m, batch.material, 0, batch.material.passCount - 1, null);
+                                commandBuffer.DrawMesh(batch.unpooledMesh, m, batch.material, 0, batch.material.passCount - 1, batch.propertyBlock);
                                 break;
                             }
                         }

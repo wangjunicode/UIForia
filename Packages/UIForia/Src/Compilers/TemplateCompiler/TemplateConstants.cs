@@ -11,7 +11,11 @@ using UIForia.Compilers.Style;
 namespace UIForia.Generated {
 
     public partial class UIForiaGeneratedTemplates_::APPNAME:: : ITemplateLoader {
-        
+    
+        public MaterialDatabase GetMaterialDatabase() {
+            return null;
+        }
+
         public string[] StyleFilePaths => styleFilePaths;
 
         private string[] styleFilePaths = {
@@ -52,6 +56,12 @@ namespace UIForia.Generated {
         private Dictionary<string, int> tagNameIdMap = new Dictionary<string,int>() {
 ::TAGNAME_ID_MAP::
         };
+
+        public UIForiaGeneratedTemplates_::APPNAME::() {
+            Application.SetCustomPainters(new Dictionary<string, Type>() {
+::CUSTOM_PAINTER_TYPES::
+            });
+        }
 
     }
 #pragma warning restore 0164

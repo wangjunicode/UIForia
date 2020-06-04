@@ -1,22 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
 
+    <Style path="Documentation/Documentation.style" alias="theme"/>
     <Style>
 
-        style container {
-         
+        style trans-container {
+            BackgroundColor = thistle;
             FlexLayoutDirection = Horizontal;
+            Padding = 20px;
         }
 
         style transcluded {
             LayoutBehavior = TranscludeChildren;
-            FlexLayoutDirection = Horizontal;
+            FlexLayoutDirection = Vertical;
             Padding = 50px;
+            BackgroundColor = green;
         }
 
         style child {
             BackgroundColor = red;
             PreferredSize = 100px;
+            Border = 1px;
+            BorderColor = black;
         }
         
         style bleu {
@@ -26,21 +30,31 @@
 
     </Style>
 
-    <Contents style="container">
+    <Contents>
 
-        <Group style="transcluded">
+        <Paragraph>
+            Elements with the LayoutBehavior = TranscludeChildren will not take part in 
+            Layout or get other styles applied. This demo shows how the FlexLayoutDirection
+            of the container element is still being applied to the (red) children of the 
+            transcluded elements. None of the other style properties of the transcluded 
+            elements are applied to their children.
+        </Paragraph>
+        
+        <Div style="trans-container">
             <Group style="transcluded">
-
-                <Group style="child"/>
-                <Group style="child"/>
-                <Group style="child"/>
-                <Group style="child"/>
-                <Group style="child bleu"/>
-                <Group style="child"/>
+                <Group style="transcluded">
+    
+                    <Group style="child"/>
+                    <Group style="child"/>
+                    <Group style="child"/>
+                    <Group style="child"/>
+                    <Group style="child bleu"/>
+                    <Group style="child"/>
+                    
+                </Group>
                 
             </Group>
-            
-        </Group>
+        </Div>
     </Contents>
 
 </UITemplate>

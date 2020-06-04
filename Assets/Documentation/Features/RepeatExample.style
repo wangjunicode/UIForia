@@ -9,10 +9,10 @@ style dict {
 }
 
 style entry {
-    PreferredSize = 1pca 30px;
-    LayoutType = Grid;
-    GridLayoutColTemplate = 600px 600px;
-    GridLayoutColGap = 50;
+    Padding = 8px 16px;
+    [hover] {
+        BackgroundColor = rgb(240, 240, 240);
+    }
 }
 
 style next-section {

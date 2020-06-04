@@ -30,6 +30,13 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1, InheritanceType.Inherited),
             new PropertyGenerator<CursorStyle>(StylePropertyId.Cursor, null),
             new PropertyGenerator<string>(StylePropertyId.Painter, string.Empty),
+            new AnimatedPropertyGenerator<MaterialId>(StylePropertyId.Material, default, InheritanceType.NotInherited, "(MaterialId)0"), 
+            
+            // Mesh
+            new PropertyGenerator<MeshType>(StylePropertyId.MeshType, MeshType.Simple), 
+            new PropertyGenerator<MeshFillDirection>(StylePropertyId.MeshFillDirection, MeshFillDirection.Clockwise), 
+            new PropertyGenerator<MeshFillOrigin>(StylePropertyId.MeshFillOrigin, 0),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.MeshFillAmount, 1f), 
             
             // Overflow
             new PropertyGenerator<Overflow>(StylePropertyId.OverflowX, Overflow.Visible),
@@ -490,6 +497,10 @@ namespace UIForia.Rendering {
                 return $"({propertyGenerator.GetFullTypeName()})FindEnumProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
 
+            if (typeof(MaterialId) == propertyGenerator.type) {
+                return $"FindMaterialIdProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
+            }
+            
             if (typeof(int) == propertyGenerator.type) {
                 return $"FindIntProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }

@@ -24,22 +24,37 @@
             MarginBottom = 12px;
         }
         
+        style mesh-test {
+            PreferredSize = 200px 200px;
+            // BackgroundColor = red;
+            // Material = "Red";
+            Border = 4px;
+            BorderColor = black;
+            //BackgroundImage = url("images/2");
+            BorderRadius = 50%;
+        }
     
     </Style>
 
     <Contents style="container">
 
-        <Select style="select" sync:selectedValue="selected" options="options" onChange:selectedValue="OnValueChanged()"/>
-        
-        <Text style="expression">{expression} </Text>
-        
-        <ScrollView style="scroll-view">
-            
-            <Text>{compiledCode}</Text>
+        <Group style="mesh-test" 
+               style:meshType="meshTest.meshType"
+               style:meshFillAmount="meshTest.meshFillAmount"
+               style:meshFillOrigin="meshTest.meshFillOrigin"
+               style:meshFillDirection="meshTest.meshFillDirection"
+        />
+<!--        <Select style="select" sync:selectedValue="selected" options="options" onChange:selectedValue="OnValueChanged()"/>-->
+<!--        -->
+<!--        <Text style="expression">{expression} </Text>-->
+<!--        -->
+<!--        <ScrollView style="scroll-view">-->
+<!--            -->
+<!--            <Text>{compiledCode}</Text>-->
 
-            <Text if="output != null">output is {output}</Text>
+<!--            <Text if="output != null">output is {output}</Text>-->
 
-        </ScrollView>
+<!--        </ScrollView>-->
 
     </Contents>
 

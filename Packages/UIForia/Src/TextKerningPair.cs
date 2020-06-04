@@ -1,4 +1,4 @@
-using TMPro;
+using UIForiaTMPro;
 
 namespace UIForia {
 

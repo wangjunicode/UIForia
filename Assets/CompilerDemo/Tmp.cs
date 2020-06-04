@@ -21,11 +21,16 @@ public class Tmp : UIElement {
     public MethodInfo selected;
     public string expression;
 
+    public MeshTest meshTest;
     public void OnValueChanged() {
         selected.Invoke(this, null);
     }
-    
+
+
     public override void OnCreate() {
+        
+        meshTest = GameObject.Find("UIForia").GetComponent<MeshTest>();
+        
         options = new List<ISelectOption<MethodInfo>>();
         
         MethodInfo[] methods = GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic);

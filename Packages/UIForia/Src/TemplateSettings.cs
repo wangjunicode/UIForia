@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using UnityEngine;
 
@@ -19,7 +20,9 @@ namespace UIForia {
         public ResourceManager resourceManager;
         public Func<Type, string, string> filePathResolver;
         public List<Type> dynamicallyCreatedTypes;
-        
+
+        public MaterialReference[] materialAssets;
+
         public TemplateSettings() {
             this.applicationName = "DefaultApplication";
             this.assemblyName = "UIForia.Application";
@@ -28,8 +31,6 @@ namespace UIForia {
             this.codeFileExtension = "cs";
             this.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
         }
-        
-        private static readonly string s_InternalNonStreamingPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Src");
 
         public string StrippedApplicationName => Regex.Replace(applicationName, @"\s", "" );
 
@@ -47,7 +48,11 @@ namespace UIForia {
         }
 
         public string GetInternalTemplatePath(string fileName) {
-            return Path.GetFullPath(Path.Combine(s_InternalNonStreamingPath, fileName));
+            return Path.GetFullPath(Path.Combine(GetCallPath(), fileName));
+        }
+
+        private string GetCallPath([CallerFilePath] string callerFilePath = "") {
+            return Path.GetDirectoryName(callerFilePath);
         }
 
         public string GetTemplatePath(string templateAttrTemplate) {

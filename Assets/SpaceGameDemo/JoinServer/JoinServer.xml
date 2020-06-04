@@ -1,0 +1,37 @@
+﻿<UITemplate>
+
+    <Style src="SpaceGameDemo/JoinServer/JoinServer.style"/>
+
+    <Contents style="container">
+
+        <Group style="bread-crumb">
+            <Text>Start</Text>
+            <Text style="bread-crumb-divider"> // </Text>
+            <Text> Join server </Text>
+        </Group>
+        
+        <Group style="header">
+            <Text>Join Server</Text>
+            
+            <Group style="toggle">
+                <Text>Show Filters</Text>
+            </Group>
+            
+        </Group>
+        
+        <Group style="table">
+            
+            <Group style="table-header">
+                    
+            </Group>
+            
+            <ScrollView style="table-scroll-view">
+                
+            </ScrollView>
+            
+        </Group>
+     
+
+    </Contents>
+
+</UITemplate>

@@ -1,7 +1,7 @@
 import "Documentation/Documentation.style" as theme;
 
 style parent {
-    PreferredSize = 300px;
+    PreferredSize = 200px;
     BackgroundColor = red;
     FlexLayoutDirection = Vertical; 
 }
@@ -10,10 +10,21 @@ style align-demo-root {
     LayoutType = Grid;
     Padding = 30px;
     FlexItemGrow = 1;
-    GridLayoutColTemplate = 300px 300px 300px;
-    GridLayoutRowTemplate = 300px 300px 300px;
+    GridLayoutColTemplate = 200px 200px 200px;
+    GridLayoutRowTemplate = 200px 200px 200px;
     GridLayoutColGap = 20;
     GridLayoutRowGap = 20;
+}
+
+style property-setters {
+    FlexLayoutWrap = WrapHorizontal;
+    FlexLayoutDirection = Horizontal;
+}
+
+style property-changer {
+    PreferredWidth = 200px;
+    FitItemsHorizontal = Fill;
+    MarginRight = 20px;
 }
 
 style grid-cell {
@@ -24,18 +35,18 @@ style grid-cell {
 } 
 
 style align-left-top {
-    AlignX = 20px 0px Parent Start;
-    AlignY = 20px 0px Parent Start;
+    AlignX = 0px 0px Parent Start;
+    AlignY = 0px 0px Parent Start;
 }
 
 style align-left-center {
-    AlignX = 20px 0px Parent;
+    AlignX = 0px 0px Parent;
     AlignY = Center Parent;
 }
 
 style align-top-center {
     AlignX = Center Parent;
-    AlignY = 20px 0px Parent;
+    AlignY = 0px 0px Parent;
 }
 
 style align-center-center {
@@ -44,44 +55,36 @@ style align-center-center {
 }
 
 style align-right-center {
-    AlignX = 20px 0px Parent End;
+    AlignX = 0px 0px Parent End;
     AlignY = Center Parent;
 }
 
 style align-top-right {
-    AlignX = 20px 0px Parent End;
-    AlignY = 20px 0px Parent;
+    AlignX = 0px 0px Parent End;
+    AlignY = 0px 0px Parent;
 }
 
 style align-left-bottom {
-    AlignX = 20px 0px Parent;
-    AlignY = 20px 0px Parent End;
+    AlignX = 0px 0px Parent;
+    AlignY = 0px 0px Parent End;
 }
 
 style align-center-bottom {
     AlignX = Center Parent;
-    AlignY = 20px 0px Parent End;
+    AlignY = 0px 0px Parent End;
 }
 
 style align-right-bottom {
-    AlignX = 20px 0px Parent End;
-    AlignY = 20px 0px Parent End;
-}
-
-style button {
-    PreferredSize = 1cnt 40px;
-    Padding = 10px;
-    Border = 1px;
-    BorderColor = black;
-    Margin = 3px 5px 20px;
-    [hover] {
-        Cursor = @theme.cursorHand;
-        BackgroundColor = rgba(200, 220, 220, 200);
-    }
+    AlignX = 0px 0px Parent End;
+    AlignY = 0px 0px Parent End;
 }
 
 style icon {
     Margin = 4px;
-    PreferredSize = 40px;
+    PreferredSize = 20px;
     ZIndex = 1;
+}
+
+style pointers-none {
+    PointerEvents = None;
 }

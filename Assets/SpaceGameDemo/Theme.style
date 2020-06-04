@@ -1,0 +1,4 @@
+﻿export const orbitron = url("Fonts/Orbitron/Orbitron-Medium SDF");
+export const orbitronBold = url("Fonts/Orbitron/Orbitron-Bold SDF");
+
+

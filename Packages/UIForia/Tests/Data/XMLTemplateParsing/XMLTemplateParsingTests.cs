@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
 using Tests.Mocks;
@@ -8,9 +6,6 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
-using UIForia.Parsing.Expressions.AstNodes;
-using UIForia.Util;
-using UnityEngine;
 using Application = UnityEngine.Application;
 
 namespace TemplateParsing_XML {
@@ -180,66 +175,6 @@ namespace TemplateParsing_XML {
 
             Assert.AreEqual("Hello Matt!", GetText(e[0][0]));
         }
-
-
-        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_UseDynamicElement.xml#generic_main")]
-        public class XMLTemplateParsing_UseDynamicElement_Generic : UIElement {
-
-            public Vector2 vector;
-
-        }
-
-        [Test]
-        public void ParseDynamicGenericElement() {
-            MockApplication app = MockApplication.Setup<XMLTemplateParsing_UseDynamicElement_Generic>();
-            XMLTemplateParsing_UseDynamicElement_Generic e = (XMLTemplateParsing_UseDynamicElement_Generic) app.RootElement;
-
-            app.Update();
-
-            Assert.AreEqual(typeof(float), e[0].GetType().GetGenericArguments()[0]);
-            Assert.AreEqual(typeof(int), e[0].GetType().GetGenericArguments()[1]);
-
-            Assert.AreEqual(typeof(int), e[1].GetType().GetGenericArguments()[0]);
-            Assert.AreEqual(typeof(string), e[1].GetType().GetGenericArguments()[1]);
-
-            Assert.AreEqual(typeof(string), e[2].GetType().GetGenericArguments()[0]);
-            Assert.AreEqual(typeof(Vector2), e[2].GetType().GetGenericArguments()[1]);
-        }
-
-        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_UsingElement.xml")]
-        public class XMLTemplateParsing_UsingElement : UIElement { }
-
-        [Test]
-        public void ParseUsingElement() {
-            MockApplication app = MockApplication.Setup<XMLTemplateParsing_UsingElement>();
-            XMLTemplateParsing_UsingElement e = (XMLTemplateParsing_UsingElement) app.RootElement;
-
-            app.Update();
-
-            Assert.AreEqual("Hello 1!", GetText(e[0][0]));
-            Assert.AreEqual("Hello 2!", GetText(e[1][0]));
-            Assert.AreEqual("Hello Same File 3!", GetText(e[2][0]));
-            Assert.AreEqual("Hello Same File 4!", GetText(e[3][0]));
-        }
-
-        [Test]
-        public void GenerateTypeSkeleton() {
-            ClassBuilder builder = new ClassBuilder();
-            Type type = builder.CreateRuntimeType("SkeletonTest", typeof(object),
-                new List<ReflectionUtil.FieldDefinition>() { },
-                new List<ReflectionUtil.MethodDefinition>() {
-                    new ReflectionUtil.MethodDefinition() {
-                        methodName = "InstanceMethod0",
-                        returnType = new TypeLookup(typeof(string)),
-                        arguments = new LambdaArgument[0],
-                        // body = 
-                    }
-                },
-                null);
-            
-            
-        }
-
 
         public static string GetText(UIElement element) {
             UITextElement textEl = element as UITextElement;

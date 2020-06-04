@@ -23,14 +23,6 @@
         
     </Element>
     
-    <Contents id="generic_main">
-        
-        <GenericElement valueT="1f" valueU="1"/>
-        <GenericElement valueT="1" valueU="'str'"/>
-        <GenericElement valueT="'str'" valueU="vector"/>
-        
-    </Contents>
-    
      <Element id="GenericElement" generic="T, U">
         
         <Field name="valueT" type="T"/>

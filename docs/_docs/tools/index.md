@@ -51,7 +51,7 @@ UIForia Hierarchy. Once selected you'll find four tabs to choose from:
 
 ### Element
 Here you'll see:
-- attributes that have been set via template or code on the element (`<Group x-id="nav"/>`: id would show up)
+- attributes that have been set via template or code on the element (`<Group attr:id="nav"/>`: id would show up)
 - view and view port that the element is defined in
 - local and screen position - the local position is always relative to the element's direct parent
 - [allocated and actual size](/docs/layout/#layoutbox-and-allocated-size)

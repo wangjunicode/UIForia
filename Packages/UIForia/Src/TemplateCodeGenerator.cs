@@ -63,6 +63,7 @@ namespace UIForia {
             template = template.Replace("::ELEMENT_CONSTRUCTORS::", GenerateElementConstructors(compiledTemplateData, out List<ProcessedType> dynamicElementTypes));
             template = template.Replace("::TAGNAME_ID_MAP::", GenerateTagNameIdMap(compiledTemplateData));
             template = template.Replace("::DYNAMIC_TEMPLATES::", GenerateDynamicTemplates(compiledTemplateData));
+            template = template.Replace("::CUSTOM_PAINTER_TYPES::", GenerateCustomPainterTypes());
 
             string initPath = Path.Combine(path, "__init" + extension);
             Directory.CreateDirectory(Path.GetDirectoryName(initPath));
@@ -76,10 +77,21 @@ namespace UIForia {
             GenerateDynamicTypes(path, dynamicElementTypes);
         }
 
+        private static string GenerateCustomPainterTypes() {
+            string retn = "";
+            #if UNITY_EDITOR
+            foreach (Type painterType in UnityEditor.TypeCache.GetTypesWithAttribute<CustomPainterAttribute>()) {
+                CustomPainterAttribute attr = painterType.GetCustomAttribute<CustomPainterAttribute>();
+                retn += $"                {{ \"{attr.name}\", typeof({TypeNameGenerator.GetTypeName(painterType)}) }},\n";
+            }
+            #endif
+            return retn;
+        }
+
         public static string PrintDynamicTypeOutput(Type type) {
             ProcessedType processedType = TypeProcessor.GetProcessedType(type);
             StringBuilder stringBuilder = new StringBuilder();
-            
+
             string output = TemplateConstants.DynamicElement;
             GetTypeOutput(processedType, stringBuilder);
             output = output.Replace("::CLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType));
@@ -88,7 +100,7 @@ namespace UIForia {
 
             return output;
         }
-        
+
         private static void GenerateDynamicTypes(string path, List<ProcessedType> dynamicElementTypes) {
             StringBuilder typeBuilder = new StringBuilder(128);
 
@@ -117,79 +129,79 @@ namespace UIForia {
         }
 
         private static void GetTypeOutput(ProcessedType processedType, StringBuilder typeBuilder) {
-            
-                ClassBuilder.TypeData data = ClassBuilder.GetDynamicTypeData(processedType.rawType);
 
-                FieldInfo[] fields = processedType.rawType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            ClassBuilder.TypeData data = ClassBuilder.GetDynamicTypeData(processedType.rawType);
 
-                for (int f = 0; f < fields.Length; f++) {
-                    bool isStatic = fields[f].IsStatic;
+            FieldInfo[] fields = processedType.rawType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
-                    ClassBuilder.FieldData fieldData = data.GetFieldData(fields[f].Name);
+            for (int f = 0; f < fields.Length; f++) {
+                bool isStatic = fields[f].IsStatic;
 
-                    typeBuilder.Append(s_Indent8);
-                    typeBuilder.Append("public ");
+                ClassBuilder.FieldData fieldData = data.GetFieldData(fields[f].Name);
 
-                    if (isStatic) {
-                        typeBuilder.Append("static ");
-                    }
+                typeBuilder.Append(s_Indent8);
+                typeBuilder.Append("public ");
 
-                    typeBuilder.Append(TypeNameGenerator.GetTypeName(fields[f].FieldType));
-                    typeBuilder.Append(" ");
-                    typeBuilder.Append(fields[f].Name);
-
-                    // todo -- check for default value
-                    if (fieldData.lambdaValue != null) {
-                        typeBuilder.Append(" = ");
-                        typeBuilder.AppendLine(fieldData.lambdaValue.ToTemplateBodyFunction());
-                    }
-                    else {
-                        typeBuilder.AppendLine(";");
-                    }
+                if (isStatic) {
+                    typeBuilder.Append("static ");
                 }
 
-                typeBuilder.AppendLine();
-                typeBuilder.AppendLine();
+                typeBuilder.Append(TypeNameGenerator.GetTypeName(fields[f].FieldType));
+                typeBuilder.Append(" ");
+                typeBuilder.Append(fields[f].Name);
 
-                for (int m = 0; m < data.methodData.size; m++) {
-                    ref ClassBuilder.MethodData methodData = ref data.methodData.array[m];
-
-                    // attributes
-
-                    typeBuilder.Append(s_Indent8);
-                    typeBuilder.Append("public ");
-
-                    if (methodData.isStatic) {
-                        typeBuilder.Append("static ");
-                    }
-
-                    typeBuilder.Append(TypeNameGenerator.GetTypeName(methodData.returnType));
-                    typeBuilder.Append(" ");
-                    typeBuilder.Append(methodData.methodName);
-                    typeBuilder.Append("(");
-
-                    PrintMethodSignature(methodData.signature, typeBuilder);
-
-                    typeBuilder.AppendLine(") {");
-                    typeBuilder.Append(s_Indent12);
-
-                    if (methodData.returnType != null && methodData.returnType != typeof(void)) {
-                        typeBuilder.Append("return ");
-                    }
-
-                    typeBuilder.Append("__");
-                    typeBuilder.Append(methodData.methodName);
-                    typeBuilder.Append("(");
-
-                    PrintMethodArgumentsSignature(methodData.isStatic, methodData.signature, typeBuilder);
-
-                    typeBuilder.AppendLine(");");
-                    typeBuilder.Append(s_Indent8);
-                    typeBuilder.AppendLine("}\n");
+                // todo -- check for default value
+                if (fieldData.lambdaValue != null) {
+                    typeBuilder.Append(" = ");
+                    typeBuilder.AppendLine(fieldData.lambdaValue.ToTemplateBodyFunction());
                 }
+                else {
+                    typeBuilder.AppendLine(";");
+                }
+            }
+
+            typeBuilder.AppendLine();
+            typeBuilder.AppendLine();
+
+            for (int m = 0; m < data.methodData.size; m++) {
+                ref ClassBuilder.MethodData methodData = ref data.methodData.array[m];
+
+                // attributes
+
+                typeBuilder.Append(s_Indent8);
+                typeBuilder.Append("public ");
+
+                if (methodData.isStatic) {
+                    typeBuilder.Append("static ");
+                }
+
+                typeBuilder.Append(TypeNameGenerator.GetTypeName(methodData.returnType));
+                typeBuilder.Append(" ");
+                typeBuilder.Append(methodData.methodName);
+                typeBuilder.Append("(");
+
+                PrintMethodSignature(methodData.signature, typeBuilder);
+
+                typeBuilder.AppendLine(") {");
+                typeBuilder.Append(s_Indent12);
+
+                if (methodData.returnType != null && methodData.returnType != typeof(void)) {
+                    typeBuilder.Append("return ");
+                }
+
+                typeBuilder.Append("__");
+                typeBuilder.Append(methodData.methodName);
+                typeBuilder.Append("(");
+
+                PrintMethodArgumentsSignature(methodData.isStatic, methodData.signature, typeBuilder);
+
+                typeBuilder.AppendLine(");");
+                typeBuilder.Append(s_Indent8);
+                typeBuilder.AppendLine("}\n");
+            }
 
         }
-        
+
         private static void PrintMethodArgumentsSignature(bool isStatic, ClassBuilder.ResolvedParameter[] parameters, StringBuilder stringBuilder) {
             if (!isStatic) {
                 stringBuilder.Append("this");
@@ -464,6 +476,7 @@ namespace UIForia {
                             slotCode += compiledSlot.templateFn.ToTemplateBodyFunction();
                             slotCode += "\n";
                         }
+
                     }
                 }
 
@@ -477,6 +490,7 @@ namespace UIForia {
                 template = template.Replace("::APPNAME::", templateSettings.StrippedApplicationName);
                 File.WriteAllText(file, template);
             }
+
         }
 
     }

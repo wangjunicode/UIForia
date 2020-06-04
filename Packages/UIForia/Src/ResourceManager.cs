@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
+using UIForia.Rendering;
+using UIForiaTMPro;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -205,6 +206,7 @@ namespace UIForia {
                 map.Remove(pathId);
             }
         }
+
 
     }
 

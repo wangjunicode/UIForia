@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
+using UIForiaTMPro;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Layout;
@@ -316,6 +316,7 @@ namespace UIForia.Editor {
                 s_Content.text = "Instance";
                 DrawStyleGroup("", instanceStyle);
             }
+
 //
             for (int i = 0; i < baseStyles.Count; i++) {
                 UIStyleGroupContainer container = baseStyles[i];
@@ -377,7 +378,7 @@ namespace UIForia.Editor {
                     s_Content.text = "isExit";
                     GUILayout.BeginHorizontal();
                     EditorGUILayout.LabelField(s_Content);
-                    EditorGUILayout.TextField(animationRunCommand.IsExit ? "yes" : "no");
+                    // EditorGUILayout.TextField(animationRunCommand.IsExit ? "yes" : "no");
                     GUILayout.EndHorizontal();
                     EditorGUI.indentLevel--;
                 }
@@ -489,8 +490,19 @@ namespace UIForia.Editor {
                 case StylePropertyId.TextOutlineSoftness:
                     return DrawFloat(property, isEditable);
 
+                case StylePropertyId.MeshType:
+                case StylePropertyId.MeshFillDirection:
+                case StylePropertyId.MeshFillOrigin:
+                    return DrawEnumWithValue<MeshType>(property, isEditable);
+
+                case StylePropertyId.MeshFillAmount:
+                    return DrawFloat(property, isEditable);
+                
                 case StylePropertyId.Layer:
                     return DrawInt(property, isEditable);
+
+                case StylePropertyId.Material:
+                    return DrawMaterial(property);
 
                 case StylePropertyId.TextOutlineColor:
                 case StylePropertyId.TextGlowColor:
@@ -705,6 +717,21 @@ namespace UIForia.Editor {
                     Debug.Log(property.propertyId.ToString() + " has no inspector");
                     return StyleProperty.Unset(property.propertyId);
             }
+        }
+
+        private static StyleProperty DrawMaterial(in StyleProperty property) {
+            if (property.AsMaterialId.id == 0) {
+                s_Content.text = "Material";
+                GUI.enabled = false;
+                EditorGUILayout.TextField(s_Content, "None");
+                GUI.enabled = true;
+                return property;
+            }
+
+            if (UIForiaHierarchyWindow.s_SelectedApplication.materialDatabase.TryGetMaterial(property.AsMaterialId, out MaterialInfo info)) { }
+
+            return property;
+
         }
 
         private static StyleProperty DrawCursor(StyleProperty property, bool isEditable) {

@@ -1,80 +1,21 @@
 import "Documentation/Documentation.style" as theme;
 
-style big-child {
-    PreferredSize = 300px;
-    BackgroundColor = rgba(240, 240, 10, 255);
+style scroll-demo {
+    PreferredSize = 1pca;
 }
 
-style level-0 {
-    PreferredSize = 400px;
-    BackgroundColor = red;
-    FlexLayoutDirection = Horizontal;
-    AlignX = 20px View;
-    AlignY = 20px View;
+style scroll {
+    FlexItemShrink = 1;
+    FlexItemGrow = 1;
+    LayoutFitHorizontal = Fill;
+    PreferredSize = 1pca;
 }
 
-style <Text> {
-    TextColor = rgba(9, 8, 9, 255);
-}
-
-style p {
-    PreferredWidth = 400px;
-    TextFontSize = 18;
-    TextFontAsset = @theme.fontGothamLight;
-    TextFaceDilate = 0.5;
-}
-
-style level-1 {
-    // PreferredSize = 1350px;
-  //  BackgroundColor = green;
-    FlexLayoutDirection = Horizontal;
-    TextFontSize = 28px;
-}
-
-style level-2-a {
-    PreferredSize = 100px;
-    BackgroundColor = yellow;
-    FlexLayoutDirection = Horizontal;
-}
-
-style level-2-b {
-    PreferredSize = 100px;
-    BackgroundColor = white;
-    FlexLayoutDirection = Horizontal;
-}
-
-style level-2-c {
-    PreferredSize = 600px;
-    BackgroundColor = black;
-    FlexLayoutDirection = Horizontal;
-}
-style level-2-ignored {
-    BackgroundImage = url("image");
-    PreferredSize = 140px;
+style hidden-element {
     LayoutBehavior = Ignored;
-}
-
-style big {
-    PreferredSize = 1vw 1vh;
-    BackgroundImage = url("image");
-    Margin = 50px;
-}
-
-style button {
-    BorderRadius = 6px;
-    Border = 2px;
-    BorderColor = black;
+    AlignY = End Parent;
+    AlignX = End Parent;
+    Padding = 20px;
+    BackgroundColor = black;
     TextColor = white;
-    PreferredSize = 1cnt 1cnt;
-    Padding = 10px 40px;
-    Margin = 10px;
-    BackgroundColor = rgba(190, 80, 80, 240);
-    [hover] {
-        BackgroundColor = rgba(190, 100, 100, 230);
-    }
-    [active] {
-        MarginTop = 12px;
-        PreferredSize = 200px 58px;
-        BackgroundColor = rgba(170, 120, 120, 250);
-    }
 }

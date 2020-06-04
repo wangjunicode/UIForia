@@ -1,4 +1,6 @@
 <UITemplate>
+    
+    <Using namespace="UIForia" />
 
     <Style>
         
@@ -42,4 +44,14 @@
     
     <Contents id="drag_create_annotation_null" style="block"/>
 
+    <Contents id="drag_and_change_sync_binding" style:preferredWidth="1000" style:preferredHeight="200">
+        <DragElementWithSyncBinding
+                sync:value="syncValue"
+                style:preferredHeight="100"
+                style:preferredWidth="100">
+            Drag This
+        </DragElementWithSyncBinding>
+        <Group style:preferredWidth="1000" style:preferredHeight="100">Over This</Group>
+    </Contents>
+    
 </UITemplate>

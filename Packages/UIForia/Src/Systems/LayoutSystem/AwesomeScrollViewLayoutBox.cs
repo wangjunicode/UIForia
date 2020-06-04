@@ -52,6 +52,7 @@ namespace UIForia.Systems {
 
             if (verticalTrack != null && verticalTrack.element.isEnabled) {
                 verticalTrack.ApplyLayoutHorizontalExplicit(paddingBorderHorizontalStart + contentAreaWidth - trackSize, trackSize, frameId);
+                verticalTrack.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
 
             if (verticalHandle != null && verticalHandle.element.isEnabled) {
@@ -61,6 +62,7 @@ namespace UIForia.Systems {
 
             if (horizontalTrack != null && horizontalTrack.element.isEnabled) {
                 horizontalTrack.ApplyLayoutHorizontalExplicit(paddingBorderHorizontalStart, horizontalWidth, frameId);
+                horizontalTrack.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
 
             if (horizontalHandle != null && horizontalHandle.element.isEnabled) {
@@ -85,7 +87,7 @@ namespace UIForia.Systems {
             float y = inset + size.marginStart;
             float originBase = y;
             float originOffset = contentAreaHeight * scrollOffsetPercentage;
-            float alignedPosition = originBase + originOffset + (contentHeight * -scrollOffsetPercentage);
+            float alignedPosition = contentAreaHeight > contentHeight ? originBase : originBase + originOffset + (contentHeight * -scrollOffsetPercentage);
             firstChild.ApplyLayoutVerticalExplicit(alignedPosition, contentHeight, frameId);
             firstChild.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
 
@@ -100,6 +102,7 @@ namespace UIForia.Systems {
 
             if (verticalTrack != null && verticalTrack.element.isEnabled) {
                 verticalTrack.ApplyLayoutVerticalExplicit(inset, contentAreaHeight, frameId);
+                verticalTrack.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
 
             if (verticalHandle != null && verticalHandle.element.isEnabled) {
@@ -107,14 +110,17 @@ namespace UIForia.Systems {
                 float handlePosition = (contentAreaHeight - handleHeight) * scrollOffsetPercentage;
                 verticalHandle.ApplyLayoutVerticalExplicit(handlePosition + inset, handleHeight, frameId);
                 verticalHandle.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+                verticalHandle.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
 
             if (horizontalTrack != null && horizontalTrack.element.isEnabled) {
                 horizontalTrack.ApplyLayoutVerticalExplicit(paddingBorderVerticalStart + contentAreaHeight - trackSize, trackSize, frameId);
+                horizontalTrack.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
 
             if (horizontalHandle != null && horizontalHandle.element.isEnabled) {
                 horizontalHandle.ApplyLayoutVerticalExplicit(paddingBorderVerticalStart + contentAreaHeight - trackSize, trackSize, frameId);
+                horizontalHandle.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
         }
 

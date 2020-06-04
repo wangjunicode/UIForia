@@ -7,10 +7,10 @@ namespace UIForia.Parsing.Style.AstNodes {
 
         internal static readonly ObjectPool<SoundCommandNode> s_SoundCommandNodePool = new ObjectPool<SoundCommandNode>();
 
-        internal static SoundCommandNode SoundCommandNode(StyleASTNode name, bool isExit, RunAction runAction) {
+        internal static SoundCommandNode SoundCommandNode(StyleASTNode name, RunCommandType cmdType, RunAction runAction) {
             SoundCommandNode soundCommandNode = s_SoundCommandNodePool.Get();
             soundCommandNode.name = name;
-            soundCommandNode.isExit = isExit;
+            soundCommandNode.cmdType = cmdType;
             soundCommandNode.runAction = runAction;
             return soundCommandNode;
         }
@@ -19,9 +19,9 @@ namespace UIForia.Parsing.Style.AstNodes {
     public class SoundCommandNode : CommandNode {
 
         public StyleASTNode name;
-        public bool isExit;
         public RunAction runAction;
-
+        public RunCommandType cmdType;
+        
         public override void Release() {
             name.Release();
             StyleASTNodeFactory.s_SoundCommandNodePool.Release(this);

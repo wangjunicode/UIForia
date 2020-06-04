@@ -1,11 +1,5 @@
 import "Documentation/Documentation.style" as theme;
 
-style container {
-    PreferredSize = 1cnt;
-    Padding = 50px;
-    // run animation(fadeIn);
-}
-
 style button-container {
     FlexLayoutDirection = Horizontal;
     MarginBottom = 10px;
@@ -31,6 +25,15 @@ style button {
 
 style flex-horizontal {
     FlexLayoutDirection = Horizontal;
+}
+
+style result-and-options {
+    FlexLayoutDirection = Horizontal;
+    LayoutFitHorizontal = Fill;
+}
+
+style result-container {
+    MarginRight = 30px;
 }
 
 style spritesheet-container {
@@ -128,7 +131,10 @@ spritesheet flipbook {
 }
 
 animation button-hover {
-    [options] { TimingFunction = QuadraticEaseInOut; }
+    [options] {
+        Duration = 400ms;
+        TimingFunction = QuadraticEaseInOut;
+    }
     [keyframes] {
         100% { 
             BackgroundColor = rgba(220, 200, 200, 190);
@@ -138,7 +144,10 @@ animation button-hover {
 }
 
 animation button-normal {
-    [options] { TimingFunction = QuadraticEaseInOut; }
+    [options] {
+        Duration = 400ms;
+        TimingFunction = QuadraticEaseInOut;
+    }
     [keyframes] { 
         100% {
             BackgroundColor = rgba(120, 100, 100, 190);

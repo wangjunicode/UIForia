@@ -35,9 +35,13 @@ sysinfo.txt
 .idea/**/*
 *.DotSettings
 /Assets/Plugins/Editor/JetBrains/JetBrains.Rider.Unity.Editor.Plugin.Repacked.dll
+/Assets/StreamingAssets.meta
 /Assets/StreamingAssets/UIForia/
+/Assets/StreamingAssets/UIForia.meta
 /Assets/StreamingAssets/UIForiaInternal/
+/Assets/StreamingAssets/UIForiaInternal.meta
 /Packages/UIForia/Tests/UIForiaGenerated/
+/Packages/UIForia/Tests/UIForiaGenerated.meta
 .DS_Store
 node_modules
 lib/core/metadata.js

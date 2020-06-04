@@ -111,8 +111,8 @@ namespace TemplateLoading {
 
             app.Update();
 
-            Assert.AreEqual("0.5", GetText(e[0][0]));
-            Assert.AreEqual("7", GetText(e[1][0]));
+            Assert.AreEqual(0.5f.ToString(), GetText(e[0][0]));
+            Assert.AreEqual(7.ToString(), GetText(e[1][0]));
             Assert.AreEqual("str", GetText(e[2][0]));
         }
 

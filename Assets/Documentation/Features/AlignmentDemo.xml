@@ -7,23 +7,28 @@
     <Using namespace="UIForia.Layout"/>
     
     <Contents>
-        
+
         <Heading1>Learn all about Alignments here!</Heading1>
-        
-        <Group style="theme.button-group">
-            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.Screen)">Screen</Div>
-            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.Parent)">Parent</Div>
-            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.ParentContentArea)">Parent Content Area</Div>
-            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.LayoutBox)">Layout Box</Div>
-            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.Unset)">Unset</Div>
-<!--            <Div style="button" mouse:click="SetAlignmentTarget(AlignmentTarget.View)">View</Div>-->
+
+        <Group style="property-setters">
+            <Group style="property-changer">
+                <Heading3>AlignmentTarget</Heading3>
+                <Select sync:selectedValue="alignmentTarget" options="alignmentTargets" />
+            </Group>
+            <Group style="property-changer">
+                <Heading3>AlignmentBoundary</Heading3>
+                <Select sync:selectedValue="alignmentBoundary" options="alignmentBoundaries" />
+            </Group>
         </Group>
-
-        <Text>Current Anchor Target is {alignmentTarget}</Text>
-
+        
         <Group style="align-demo-root">
             <Group style="grid-cell">
-                <Group style="align-left-top" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                <Group style="pointers-none align-left-top" 
+                       style:alignmentTargetX="alignmentTarget"
+                       style:alignmentTargetY="alignmentTarget"
+                       style:alignmentBoundaryY="alignmentBoundary"
+                       style:alignmentBoundaryX="alignmentBoundary"
+                >
                     <Image style="icon" src="'icon_1'" />
                     <Image style="icon" src="'icon_2'" />
                     <Image style="icon" src="'icon_3'" />
@@ -32,7 +37,12 @@
             </Group>
 
             <Group style="grid-cell">
-                <Group style="align-top-center" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                <Group style="pointers-none align-top-center"
+                       style:alignmentTargetX="alignmentTarget"
+                       style:alignmentTargetY="alignmentTarget"
+                       style:alignmentBoundaryY="alignmentBoundary"
+                       style:alignmentBoundaryX="alignmentBoundary"
+                >
                     <Div style="center-this">
                         <Image style="icon" src="'icon_2'" />
                         <Image style="icon" src="'icon_6'" />
@@ -42,7 +52,12 @@
                 </Group>
             </Group>
             <Group style="grid-cell">
-                <Group style="align-top-right" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                <Group style="pointers-none align-top-right"
+                       style:alignmentTargetX="alignmentTarget"
+                       style:alignmentTargetY="alignmentTarget"
+                       style:alignmentBoundaryY="alignmentBoundary"
+                       style:alignmentBoundaryX="alignmentBoundary"
+                >
                     <Image style="icon" src="'icon_3'" />
                     <Image style="icon" src="'icon_1'" />
                     <Image style="icon" src="'icon_2'" />
@@ -51,7 +66,12 @@
             </Group>
 
             <Group style="grid-cell">
-                <Group style="align-left-center" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                <Group style="pointers-none align-left-center"
+                       style:alignmentTargetX="alignmentTarget"
+                       style:alignmentTargetY="alignmentTarget"
+                       style:alignmentBoundaryY="alignmentBoundary"
+                       style:alignmentBoundaryX="alignmentBoundary"
+                >
                     <Image style="icon" src="'icon_2'" />
                     <Image style="icon" src="'icon_5'" />
                     <Image style="icon" src="'icon_8'" />
@@ -59,7 +79,12 @@
                 </Group>
             </Group>
             <Group style="grid-cell">
-                <Group style="align-center-center" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                <Group style="pointers-none align-center-center"
+                       style:alignmentTargetX="alignmentTarget"
+                       style:alignmentTargetY="alignmentTarget"
+                       style:alignmentBoundaryY="alignmentBoundary"
+                       style:alignmentBoundaryX="alignmentBoundary"
+                >
                     <Image style="icon" src="'icon_3'" />
                     <Image style="icon" src="'icon_4'" />
                     <Image style="icon" src="'icon_9'" />
@@ -67,7 +92,12 @@
                 </Group>
             </Group>
             <Group style="grid-cell">
-                <Group style="align-right-center" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                <Group style="pointers-none align-right-center"
+                       style:alignmentTargetX="alignmentTarget"
+                       style:alignmentTargetY="alignmentTarget"
+                       style:alignmentBoundaryY="alignmentBoundary"
+                       style:alignmentBoundaryX="alignmentBoundary"
+                >
                     <Image style="icon" src="'icon_5'" />
                     <Image style="icon" src="'icon_6'" />
                     <Image style="icon" src="'icon_7'" />
@@ -76,7 +106,12 @@
             </Group>
 
             <Group style="grid-cell">
-                <Group style="align-left-bottom" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                <Group style="pointers-none align-left-bottom"
+                       style:alignmentTargetX="alignmentTarget"
+                       style:alignmentTargetY="alignmentTarget"
+                       style:alignmentBoundaryY="alignmentBoundary"
+                       style:alignmentBoundaryX="alignmentBoundary"
+                >
                     <Image style="icon" src="'icon_5'" />
                     <Image style="icon" src="'icon_6'" />
                     <Image style="icon" src="'icon_7'" />
@@ -84,7 +119,12 @@
                 </Group>
             </Group>
             <Group style="grid-cell">
-                <Group style="align-center-bottom" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                <Group style="pointers-none align-center-bottom"
+                       style:alignmentTargetX="alignmentTarget"
+                       style:alignmentTargetY="alignmentTarget"
+                       style:alignmentBoundaryY="alignmentBoundary"
+                       style:alignmentBoundaryX="alignmentBoundary"
+                >
                     <Image style="icon" src="'icon_5'" />
                     <Image style="icon" src="'icon_6'" />
                     <Image style="icon" src="'icon_7'" />
@@ -92,7 +132,12 @@
                 </Group>
             </Group>
             <Group style="grid-cell">
-                <Group style="align-right-bottom" style.alignmentTargetX="alignmentTarget" style.alignmentTargetY="alignmentTarget">
+                <Group style="pointers-none align-right-bottom"
+                       style:alignmentTargetX="alignmentTarget"
+                       style:alignmentTargetY="alignmentTarget"
+                       style:alignmentBoundaryY="alignmentBoundary"
+                       style:alignmentBoundaryX="alignmentBoundary"
+                >
                     <Image style="icon" src="'icon_5'" />
                     <Image style="icon" src="'icon_6'" />
                     <Image style="icon" src="'icon_7'" />

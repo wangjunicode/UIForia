@@ -5,6 +5,7 @@ using UIForia.Exceptions;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Parsing.Style.Tokenizer;
 using UIForia.Rendering;
+using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 
@@ -80,7 +81,7 @@ namespace UIForia.Parsing.Style {
                     tokenStream.Advance();
                     ParseAnimation();
                     break;
-                
+
                 case StyleTokenType.SpriteSheet:
                     tokenStream.Advance();
                     ParseSpriteSheet();
@@ -102,6 +103,7 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.Cursor:
                     tokenStream.Advance();
                     break;
+
                 default:
                     throw new ParseException(tokenStream.Current, $"Did not expect token {tokenStream.Current.value} of type {tokenStream.Current.styleTokenType} here at line");
             }
@@ -133,11 +135,13 @@ namespace UIForia.Parsing.Style {
 
                     AssertTokenTypeAndAdvance(StyleTokenType.GreaterThan);
                     break;
+
                 // styleId { ... }
                 case StyleTokenType.Identifier:
                     identifier = tokenStream.Current.value;
                     tokenStream.Advance();
                     break;
+
                 default:
                     throw new ParseException(initialStyleToken, $"Expected style definition or tag name but found {initialStyleToken.styleTokenType}");
             }
@@ -164,7 +168,7 @@ namespace UIForia.Parsing.Style {
             tokenStream.Advance();
             AssertTokenTypeAndAdvance(StyleTokenType.BracesOpen);
             SoundParseLoop(soundRootNode);
-            nodes.Add(soundRootNode);  
+            nodes.Add(soundRootNode);
         }
 
         private void SoundParseLoop(SoundRootNode soundRootNode) {
@@ -198,6 +202,9 @@ namespace UIForia.Parsing.Style {
                 }
                 else if (identifier == "options") {
                     ParseAnimationOptions(rootNode);
+                }
+                else if (identifier == "triggers") {
+                    
                 }
             }
         }
@@ -244,15 +251,15 @@ namespace UIForia.Parsing.Style {
         }
 
         public static readonly ValueTuple<string, Type>[] s_SupportedVariableTypes = {
-                ValueTuple.Create("float", typeof(float)), 
-                ValueTuple.Create("int", typeof(int)), 
-                ValueTuple.Create("Color", typeof(Color)), 
-                ValueTuple.Create("UIMeasurement", typeof(UIMeasurement)), 
-                ValueTuple.Create("Measurement", typeof(UIMeasurement)),
-                ValueTuple.Create("UIFixedLength", typeof(UIFixedLength)), 
-                ValueTuple.Create("FixedLength", typeof(UIFixedLength)),
-                ValueTuple.Create("TransformOffset", typeof(OffsetMeasurement)),
-                ValueTuple.Create("Offset", typeof(OffsetMeasurement)),
+            ValueTuple.Create("float", typeof(float)),
+            ValueTuple.Create("int", typeof(int)),
+            ValueTuple.Create("Color", typeof(Color)),
+            ValueTuple.Create("UIMeasurement", typeof(UIMeasurement)),
+            ValueTuple.Create("Measurement", typeof(UIMeasurement)),
+            ValueTuple.Create("UIFixedLength", typeof(UIFixedLength)),
+            ValueTuple.Create("FixedLength", typeof(UIFixedLength)),
+            ValueTuple.Create("TransformOffset", typeof(OffsetMeasurement)),
+            ValueTuple.Create("Offset", typeof(OffsetMeasurement)),
         };
 
         public static readonly ValueTuple<string, string>[] s_AnimationOptionNames = {
@@ -286,39 +293,39 @@ namespace UIForia.Parsing.Style {
         };
 
         public static readonly ValueTuple<string, string>[] s_SpriteSheetOptionNames = {
-                ValueTuple.Create(
-                        nameof(AnimationOptions.iterations).ToLower(),
-                        nameof(AnimationOptions.iterations)),
-                ValueTuple.Create(
-                        nameof(AnimationOptions.delay).ToLower(),
-                        nameof(AnimationOptions.delay)),
-                ValueTuple.Create(
-                        nameof(AnimationOptions.duration).ToLower(),
-                        nameof(AnimationOptions.duration)),
-                ValueTuple.Create(
-                        nameof(AnimationOptions.direction).ToLower(),
-                        nameof(AnimationOptions.direction)),
-                ValueTuple.Create(
-                        nameof(AnimationOptions.loopType).ToLower(),
-                        nameof(AnimationOptions.loopType)),
-                ValueTuple.Create(
-                        nameof(AnimationOptions.forwardStartDelay).ToLower(),
-                        nameof(AnimationOptions.forwardStartDelay)),
-                ValueTuple.Create(
-                        nameof(AnimationOptions.reverseStartDelay).ToLower(),
-                        nameof(AnimationOptions.reverseStartDelay)),
-                ValueTuple.Create(
-                        nameof(AnimationOptions.fps).ToLower(),
-                        nameof(AnimationOptions.fps)),
-                ValueTuple.Create(
-                        nameof(AnimationOptions.endFrame).ToLower(),
-                        nameof(AnimationOptions.endFrame)),
-                ValueTuple.Create(
-                        nameof(AnimationOptions.startFrame).ToLower(),
-                        nameof(AnimationOptions.startFrame)),
-                ValueTuple.Create(
-                        nameof(AnimationOptions.pathPrefix).ToLower(),
-                        nameof(AnimationOptions.pathPrefix))
+            ValueTuple.Create(
+                nameof(AnimationOptions.iterations).ToLower(),
+                nameof(AnimationOptions.iterations)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.delay).ToLower(),
+                nameof(AnimationOptions.delay)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.duration).ToLower(),
+                nameof(AnimationOptions.duration)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.direction).ToLower(),
+                nameof(AnimationOptions.direction)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.loopType).ToLower(),
+                nameof(AnimationOptions.loopType)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.forwardStartDelay).ToLower(),
+                nameof(AnimationOptions.forwardStartDelay)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.reverseStartDelay).ToLower(),
+                nameof(AnimationOptions.reverseStartDelay)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.fps).ToLower(),
+                nameof(AnimationOptions.fps)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.endFrame).ToLower(),
+                nameof(AnimationOptions.endFrame)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.startFrame).ToLower(),
+                nameof(AnimationOptions.startFrame)),
+            ValueTuple.Create(
+                nameof(AnimationOptions.pathPrefix).ToLower(),
+                nameof(AnimationOptions.pathPrefix))
         };
 
         private void ParseAnimationVariables(AnimationRootNode rootNode) {
@@ -496,21 +503,26 @@ namespace UIForia.Parsing.Style {
                         // cursor token for the property AND the top level definition ¯\_(ツ)_/¯
                         ParseProperty(styleRootNode);
                         break;
+
                     case StyleTokenType.Identifier:
                         ParseProperty(styleRootNode);
                         break;
+
                     case StyleTokenType.Run:
                         tokenStream.Advance();
-                        styleRootNode.AddChildNode(ParseRunNode(false, RunAction.Run));
+                        styleRootNode.AddChildNode(ParseRunNode(RunCommandType.Enter, RunAction.Run));
                         break;
+
                     case StyleTokenType.Stop:
                         tokenStream.Advance();
-                        styleRootNode.AddChildNode(ParseRunNode(false, RunAction.Stop));
+                        styleRootNode.AddChildNode(ParseRunNode(RunCommandType.Enter, RunAction.Stop));
                         break;
+
                     case StyleTokenType.Pause:
                         tokenStream.Advance();
-                        styleRootNode.AddChildNode(ParseRunNode(false, RunAction.Pause));
+                        styleRootNode.AddChildNode(ParseRunNode(RunCommandType.Enter, RunAction.Pause));
                         break;
+
                     case StyleTokenType.BracesOpen: {
                         // At this point only unconsumed attribute/expression group bodies are allowed
 
@@ -553,9 +565,11 @@ namespace UIForia.Parsing.Style {
                     styleRootNode.AddChildNode(stateGroupRootNode);
 
                     break;
+
                 case StyleTokenType.AttributeSpecifier:
                     ParseAttributeGroup();
                     break;
+
                 default:
                     throw new ParseException(tokenStream.Current, "Expected either a group state identifier (hover etc.)" + " or an attribute identifier (attr:...)");
             }
@@ -567,22 +581,22 @@ namespace UIForia.Parsing.Style {
             }
         }
 
-        private void ParseProperty(StyleNodeContainer styleRootNode) {
+        private void ParseProperty(StyleNodeContainer styleRootNode, bool parsingKeyframes = false) {
             StyleToken propertyNodeToken = tokenStream.Current;
             string propertyName;
             if (AdvanceIfTokenType(StyleTokenType.Cursor)) {
                 propertyName = propertyNodeToken.value;
             }
             else if (AdvanceIfTokenType(StyleTokenType.Run)) {
-                styleRootNode.AddChildNode(ParseRunNode(false, RunAction.Run));
+                styleRootNode.AddChildNode(ParseRunNode(RunCommandType.Enter, RunAction.Run));
                 return;
             }
             else if (AdvanceIfTokenType(StyleTokenType.Pause)) {
-                styleRootNode.AddChildNode(ParseRunNode(false, RunAction.Pause));
+                styleRootNode.AddChildNode(ParseRunNode(RunCommandType.Enter, RunAction.Pause));
                 return;
             }
             else if (AdvanceIfTokenType(StyleTokenType.Stop)) {
-                styleRootNode.AddChildNode(ParseRunNode(false, RunAction.Stop));
+                styleRootNode.AddChildNode(ParseRunNode(RunCommandType.Enter, RunAction.Stop));
                 return;
             }
             else if (AdvanceIfTokenType(StyleTokenType.BracketOpen)) {
@@ -594,6 +608,45 @@ namespace UIForia.Parsing.Style {
             }
             else {
                 propertyName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+
+                if (propertyName == "material" || propertyName == "Material") {
+
+                    if (tokenStream.Current == StyleTokenType.Colon) {
+                        tokenStream.Advance();
+
+                        string materialName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+
+                        AssertTokenTypeAndAdvance(StyleTokenType.Dot);
+
+                        string materialPropertyName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
+
+                        AssertTokenTypeAndAdvance(StyleTokenType.EqualSign);
+
+                        TextUtil.StringBuilder.Clear();
+
+                        while (tokenStream.HasMoreTokens && tokenStream.Current != StyleTokenType.EndStatement) {
+                            TextUtil.StringBuilder.Append(tokenStream.Current.value);
+                            tokenStream.Advance();
+                        }
+
+                        tokenStream.Advance();
+
+                        MaterialPropertyNode materialPropertyNode = new MaterialPropertyNode {
+                            materialName = materialName,
+                            identifier = materialPropertyName,
+                            value = TextUtil.StringBuilder.ToString()
+                        };
+
+                        TextUtil.StringBuilder.Clear();
+
+                        materialPropertyNode.WithLocation(propertyNodeToken);
+                        styleRootNode.AddChildNode(materialPropertyNode);
+                        return;
+
+                    }
+
+                }
+
             }
 
             AssertTokenTypeAndAdvance(StyleTokenType.EqualSign);
@@ -620,18 +673,27 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.Exit:
                     tokenStream.Advance();
                     AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
-                    styleRootNode.AddChildNode(ParseRunNode(true, ParseCommandAttribute()));
+                    styleRootNode.AddChildNode(ParseRunNode(RunCommandType.Exit, ParseCommandAttribute()));
                     return true;
+
                 case StyleTokenType.Enter:
                     tokenStream.Advance();
                     AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
-                    styleRootNode.AddChildNode(ParseRunNode(false, ParseCommandAttribute()));
+                    styleRootNode.AddChildNode(ParseRunNode(RunCommandType.Enter, ParseCommandAttribute()));
                     return true;
+
+                case StyleTokenType.EnterExit:
+                    tokenStream.Advance();
+                    AssertTokenTypeAndAdvance(StyleTokenType.BracketClose);
+                    styleRootNode.AddChildNode(ParseRunNode(RunCommandType.EnterExit, ParseCommandAttribute()));
+                    return true;
+
                 default:
                     return false;
             }
         }
 
+        
         private RunAction ParseCommandAttribute() {
             StyleTokenType styleTokenType = tokenStream.Current.styleTokenType;
             tokenStream.Advance();
@@ -640,24 +702,25 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.Run: return RunAction.Run;
                 case StyleTokenType.Pause: return RunAction.Pause;
                 case StyleTokenType.Stop: return RunAction.Stop;
+
                 default:
-                    throw new ParseException(tokenStream.Previous, 
-                            $"The following command actions are supported: run, pause and stop. Found '{tokenStream.Previous.value}' instead.");
+                    throw new ParseException(tokenStream.Previous,
+                        $"The following command actions are supported: run, pause and stop. Found '{tokenStream.Previous.value}' instead.");
             }
         }
 
-        private RunNode ParseRunNode(bool isExit, RunAction runAction) {
+        private RunNode ParseRunNode(RunCommandType cmdType, RunAction runAction) {
             StyleToken runCommandToken = tokenStream.Current;
             CommandNode command;
             if (AdvanceIfTokenType(StyleTokenType.Animation)) {
-                command = StyleASTNodeFactory.AnimationCommandNode(ParseIdentifierInParentheses(), isExit, runAction);
-            } 
+                command = StyleASTNodeFactory.AnimationCommandNode(ParseIdentifierInParentheses(), cmdType, runAction);
+            }
             else if (AdvanceIfTokenType(StyleTokenType.Sound)) {
-                command = StyleASTNodeFactory.SoundCommandNode(ParseIdentifierInParentheses(), isExit, runAction);
+                command = StyleASTNodeFactory.SoundCommandNode(ParseIdentifierInParentheses(), cmdType, runAction);
             }
             else {
-                throw new ParseException(runCommandToken, 
-                        $"Only animation and sound run commands are supported. Found {runCommandToken}");
+                throw new ParseException(runCommandToken,
+                    $"Only animation and sound run commands are supported. Found {runCommandToken}");
             }
 
             command.WithLocation(tokenStream.Current);
@@ -676,9 +739,11 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.Identifier:
                     identifier = StyleASTNodeFactory.IdentifierNode(tokenStream.Current.value);
                     break;
+
                 case StyleTokenType.At:
                     identifier = ParseConstReference();
                     break;
+
                 default:
                     throw new ParseException(tokenStream.Current, "Was expecting an identifier or a reference.");
             }
@@ -708,10 +773,35 @@ namespace UIForia.Parsing.Style {
                     }
 
                     break;
+
                 case StyleTokenType.String:
+
                     propertyValue = StyleASTNodeFactory.StringLiteralNode(tokenStream.Current.value);
                     tokenStream.Advance();
+
+                    if (tokenStream.Current == StyleTokenType.BracesOpen) {
+                        TextUtil.StringBuilder.Clear();
+                        StyleLiteralNode n = (StyleLiteralNode) propertyValue;
+
+                        TextUtil.StringBuilder.Append("\"");
+                        TextUtil.StringBuilder.Append(n.rawValue);
+                        TextUtil.StringBuilder.Append("\" ");
+
+                        while (tokenStream.HasMoreTokens && tokenStream.Current != StyleTokenType.BracesClose) {
+                            TextUtil.StringBuilder.Append(tokenStream.Current.value);
+                            tokenStream.Advance();
+                        }
+
+                        TextUtil.StringBuilder.Append(tokenStream.Current.value);
+
+                        tokenStream.Advance();
+                        n.rawValue = TextUtil.StringBuilder.ToString();
+                        TextUtil.StringBuilder.Clear();
+
+                    }
+
                     break;
+
                 case StyleTokenType.Identifier:
                     string identifier = tokenStream.Current.value;
                     tokenStream.Advance();
@@ -724,16 +814,20 @@ namespace UIForia.Parsing.Style {
                     }
 
                     break;
+
                 case StyleTokenType.Rgba:
                     propertyValue = ParseRgba();
                     break;
+
                 case StyleTokenType.Rgb:
                     propertyValue = ParseRgb();
                     break;
+
                 case StyleTokenType.HashColor:
                     propertyValue = StyleASTNodeFactory.ColorNode(tokenStream.Current.value);
                     tokenStream.Advance();
                     break;
+
                 case StyleTokenType.Url:
                     tokenStream.Advance();
                     AssertTokenTypeAndAdvance(StyleTokenType.ParenOpen);
@@ -766,12 +860,15 @@ namespace UIForia.Parsing.Style {
 
                     propertyValue = StyleASTNodeFactory.UrlNode(url, spriteName);
                     break;
+
                 case StyleTokenType.At:
                     propertyValue = ParseConstReference();
                     break;
+
                 case StyleTokenType.Dollar:
                     propertyValue = ParseVariableReference();
                     break;
+
                 default:
                     throw new ParseException(propertyToken, "Expected a property value but found no valid token.");
             }
@@ -808,8 +905,10 @@ namespace UIForia.Parsing.Style {
             switch (styleToken.styleTokenType) {
                 case StyleTokenType.Identifier:
                     return StyleASTNodeFactory.UnitNode(value);
+
                 case StyleTokenType.Mod:
                     return StyleASTNodeFactory.UnitNode(value);
+
                 default:
                     throw new ParseException(styleToken, "Expected a token that looks like a unit but this didn't.");
             }
@@ -882,10 +981,13 @@ namespace UIForia.Parsing.Style {
             switch (literalType) {
                 case StyleTokenType.String:
                     return StyleASTNodeFactory.StringLiteralNode(value).WithLocation(currentToken);
+
                 case StyleTokenType.Number:
                     return StyleASTNodeFactory.NumericLiteralNode(value).WithLocation(currentToken);
+
                 case StyleTokenType.Boolean:
                     return StyleASTNodeFactory.BooleanLiteralNode(value).WithLocation(currentToken);
+
                 case StyleTokenType.Identifier:
                     return StyleASTNodeFactory.IdentifierNode(value).WithLocation(currentToken);
             }
@@ -924,6 +1026,7 @@ namespace UIForia.Parsing.Style {
                 case StyleTokenType.AttributeSpecifier:
                     ParseAttributeGroup();
                     break;
+
                 case StyleTokenType.Dollar:
                     ParseStyleExpression();
                     // todo add style expression

@@ -12,7 +12,24 @@ namespace UIForia.Parsing.Style.AstNodes {
             return propertyNode;
         }
     }
-    
+
+    public class MaterialPropertyNode : StyleNodeContainer {
+
+        public string value;
+        public string materialName;
+
+        public MaterialPropertyNode() {
+            type = StyleASTNodeType.MaterialProperty;
+        }
+
+
+        public override void Release() {
+            base.Release();
+          //  StyleASTNodeFactory.s_PropertyNodePool.Release(this);
+        }
+
+    }
+
     public class PropertyNode : StyleNodeContainer {
 
         public PropertyNode() {

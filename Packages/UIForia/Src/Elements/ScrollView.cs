@@ -1,5 +1,6 @@
 using UIForia.Attributes;
 using UIForia.Layout;
+using UIForia.Rendering;
 using UIForia.UIInput;
 using UnityEngine;
 
@@ -11,7 +12,8 @@ namespace UIForia.Elements {
         public float fadeTarget;
         public float fadeTime = 2f;
 
-        public float scrollSpeed = 3f;
+        public float scrollSpeedY = 48f;
+        public float scrollSpeedX = 16f;
         public float trackSize = 10f;
 
         public bool disableOverflowX;
@@ -37,6 +39,19 @@ namespace UIForia.Elements {
 
         internal UIElement verticalHandle;
         internal UIElement horizontalHandle;
+        
+        private float elapsedTotalTime;
+
+        private float fromScrollY;
+        private float toScrollY;
+        private bool isScrollingY;
+
+        private float fromScrollX;
+        private float toScrollX;
+        private bool isScrollingX;
+
+        private float accumulatedScrollSpeedY;
+        private float accumulatedScrollSpeedX;
 
         public override void OnEnable() {
             verticalHandle = children[2];
@@ -44,24 +59,30 @@ namespace UIForia.Elements {
         }
 
         public override void OnUpdate() {
-            scrollDeltaX *= 0.9f;
-            scrollDeltaY *= 0.9f;
+            if (isScrollingY) {
+                elapsedTotalTime += Time.unscaledDeltaTime;
 
-            if (scrollDeltaX < 0.0001) scrollDeltaX = 0;
-            if (scrollDeltaY < 0.0001) scrollDeltaY = 0;
+                float t = Mathf.Clamp01(Easing.Interpolate(elapsedTotalTime / 0.500f, EasingFunction.CubicEaseOut));
+                scrollPercentageY = Mathf.Lerp( fromScrollY, toScrollY, t);
+                isScrollingY = t < 1;
+            }
+            else if (isScrollingX) {
+                elapsedTotalTime += Time.unscaledDeltaTime;
 
-            scrollPercentageX = Mathf.Clamp01(scrollPercentageX + (Time.unscaledDeltaTime * scrollDeltaX * xDirection));
-            scrollPercentageY = Mathf.Clamp01(scrollPercentageY + (Time.unscaledDeltaTime * scrollDeltaY * yDirection));
+                float t = Mathf.Clamp01(Easing.Interpolate(elapsedTotalTime / 0.500f, EasingFunction.CubicEaseOut));
+                scrollPercentageX = Mathf.Lerp( fromScrollX, toScrollX, t);
+                isScrollingX = t < 1;
+            }
 
             if (!children[0].isEnabled) {
                 isOverflowingX = false;
                 isOverflowingY = false;
             }
             else {
-                Size currentChildrenSize = new Size(children[0].layoutResult.allocatedSize.width, children[0].layoutResult.allocatedSize.height);
+                Size currentChildrenSize = new Size(children[0].layoutResult.actualSize.width, children[0].layoutResult.allocatedSize.height);
 
-                isOverflowingX = currentChildrenSize.width > layoutResult.allocatedSize.width;
-                isOverflowingY = currentChildrenSize.height > layoutResult.allocatedSize.height;
+                isOverflowingX = currentChildrenSize.width > layoutResult.actualSize.width;
+                isOverflowingY = currentChildrenSize.height > layoutResult.actualSize.height;
 
                 if (!disableAutoScroll && currentChildrenSize != previousChildrenSize) {
                     ScrollToHorizontalPercent(0);
@@ -80,19 +101,45 @@ namespace UIForia.Elements {
         [OnMouseWheel]
         public void OnMouseWheel(MouseInputEvent evt) {
             if (verticalScrollingEnabled) {
-                scrollDeltaY = -evt.ScrollDelta.y * scrollSpeed;
-                yDirection = (int) Mathf.Sign(scrollDeltaY);
-                scrollDeltaY = Mathf.Abs(scrollDeltaY);
-                scrollPercentageY = Mathf.Clamp01(scrollPercentageY + (Time.unscaledDeltaTime * scrollDeltaY * yDirection));
-                evt.StopPropagation();
+                float actualContentHeight = children[0].layoutResult.actualSize.height;
+                float visibleContentHeight = layoutResult.ActualHeight;
+                if (!isScrollingY || (int) Mathf.Sign(evt.ScrollDelta.y) != (int) Mathf.Sign(fromScrollY - toScrollY)) {
+                    accumulatedScrollSpeedY = scrollSpeedY;
+                }
+                else {
+                    accumulatedScrollSpeedY *= 1.2f;
+                }
+                scrollDeltaY = -evt.ScrollDelta.y * accumulatedScrollSpeedY / (actualContentHeight - visibleContentHeight);
+                fromScrollY = scrollPercentageY;
+                if (scrollDeltaY != 0) {
+                    toScrollY = Mathf.Clamp01(fromScrollY + scrollDeltaY);
+                    if (fromScrollY != toScrollY) {
+                        evt.StopPropagation();
+                        elapsedTotalTime = 0;
+                        isScrollingY = true;
+                    }
+                }
             }
 
             if (horizontalScrollingEnabled) {
-                scrollDeltaX = evt.ScrollDelta.x * scrollSpeed;
-                xDirection = (int) Mathf.Sign(scrollDeltaX);
-                scrollDeltaX = Mathf.Abs(scrollDeltaX);
-                scrollPercentageX = Mathf.Clamp01(scrollPercentageX + (Time.unscaledDeltaTime * scrollDeltaX * xDirection));
-                evt.StopPropagation();
+                float actualContentWidth = children[0].layoutResult.actualSize.width;
+                float visibleContentWidth = layoutResult.ActualWidth;
+                if (!isScrollingX || (int) Mathf.Sign(-evt.ScrollDelta.x) != (int) Mathf.Sign(fromScrollX - toScrollX)) {
+                    accumulatedScrollSpeedX = scrollSpeedX;
+                }
+                else {
+                    accumulatedScrollSpeedX *= 1.2f;
+                }
+                scrollDeltaX = evt.ScrollDelta.x * accumulatedScrollSpeedX / (actualContentWidth - visibleContentWidth);
+                if (scrollDeltaX != 0) {
+                    fromScrollX = scrollPercentageX;
+                    toScrollX = Mathf.Clamp01(fromScrollX + scrollDeltaX);
+                    if (fromScrollX != toScrollX) {
+                        evt.StopPropagation();
+                        elapsedTotalTime = 0;
+                        isScrollingX = true;
+                    }
+                }
             }
         }
 
@@ -202,7 +249,7 @@ namespace UIForia.Elements {
             public override void Update() {
                 if ((orientation & ScrollbarOrientation.Vertical) != 0) {
                     float height = scrollView.layoutResult.ContentAreaHeight;
-
+    
                     height -= scrollView.verticalHandle.layoutResult.actualSize.height;
 
                     float y = Mathf.Clamp(MousePosition.y - (scrollView.layoutResult.screenPosition.y + scrollView.layoutResult.VerticalPaddingBorderStart) - baseOffset.y, 0, height);
@@ -220,13 +267,13 @@ namespace UIForia.Elements {
 
                     width -= scrollView.horizontalHandle.layoutResult.actualSize.width;
 
-                    float y = Mathf.Clamp(MousePosition.x - (scrollView.layoutResult.screenPosition.x  + scrollView.layoutResult.HorizontalPaddingBorderStart) - baseOffset.x, 0, width);
+                    float x = Mathf.Clamp(MousePosition.x - (scrollView.layoutResult.screenPosition.x  + scrollView.layoutResult.HorizontalPaddingBorderStart) - baseOffset.x, 0, width);
 
                     if (width == 0) {
                         scrollView.ScrollToHorizontalPercent(0);
                     }
                     else {
-                        scrollView.ScrollToHorizontalPercent(y / width);
+                        scrollView.ScrollToHorizontalPercent(x / width);
                     }
                 }
             }

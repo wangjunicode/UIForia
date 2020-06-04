@@ -1,0 +1,8 @@
+﻿<UITemplate>
+    <Style src="Documentation/Documentation.style" alias="theme"/>
+    <Style src="Documentation/DocumentationElements/SectionPanel.style"/>
+    <Contents style="section-panel">
+        <Heading1>{title}</Heading1>
+        <define:Children style="section-panel-content" />
+    </Contents>
+</UITemplate>

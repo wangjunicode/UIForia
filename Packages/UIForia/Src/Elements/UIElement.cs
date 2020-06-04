@@ -84,7 +84,7 @@ namespace UIForia.Elements {
         public LightList<UIElement> children; // todo -- replace w/ linked list & child count
 
         internal UIElementFlags flags;
-        internal UIElement parent;
+        public UIElement parent;
         internal TagNameIndex tagNameIndex;
 
         // todo -- maybe move a lot of this data to an internal representation of UIElement
@@ -420,6 +420,10 @@ namespace UIForia.Elements {
         internal void InternalDestroy() {
             LightList<UIElement>.Release(ref children);
             parent = null;
+        }
+
+        public MaterialInterface Material {
+            get => new MaterialInterface(this, application);
         }
 
         public bool IsAncestorOf(UIElement potentialParent) {

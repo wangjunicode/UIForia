@@ -24,6 +24,8 @@ namespace UIForia {
 
         DynamicTemplate[] DynamicTemplates { get; }
 
+        MaterialDatabase GetMaterialDatabase();
+
     }
 
 }

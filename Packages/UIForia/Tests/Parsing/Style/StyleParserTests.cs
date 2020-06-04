@@ -14,6 +14,30 @@ using UnityEngine;
 public class StyleParserTests {
 
     [Test]
+    public void ParseMaterialStyle() {
+        var nodes = StyleParser.Parse(@"
+            style simple {
+                Material = ""noise"" { 
+                    shake = 4;
+                };
+            }
+        ");
+
+        Assert.AreEqual(1, nodes.Count);
+        StyleRootNode rootNode = ((StyleRootNode) nodes[0]);
+        Assert.AreEqual("simple", rootNode.identifier);
+        Assert.AreEqual(null, rootNode.tagName);
+        Assert.AreEqual(1, rootNode.children.Count);
+        
+        var propertyNode = rootNode.children[0];
+        Assert.AreEqual(StyleASTNodeType.Property, propertyNode.type);
+        
+        PropertyNode typedPropertyNode = (((PropertyNode) propertyNode));
+        Assert.AreEqual("Material", typedPropertyNode.identifier);
+        Assert.AreEqual(StyleASTNodeType.StringLiteral, typedPropertyNode.children[0].type);
+    }
+    
+    [Test]
     public void ParseSimpleStyle() {
         var nodes = StyleParser.Parse(@"
             style simple {

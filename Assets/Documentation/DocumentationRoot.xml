@@ -8,55 +8,57 @@
                 <Div style="burger-patty" />
                 <Div style="burger-patty" />
             </Group>
-
+            
+            <Group style="custom-material"/>
+            
             <ScrollView style="navigation" attr:id="nav">
                 <Heading1>Choose a feature</Heading1>
                 <Anchor href="'/index'">Home</Anchor>
+                
                 <Anchor href="'/AlignmentDemo'">Alignment Demo</Anchor>
                 <Anchor href="'/AnimationDemo'">Animation</Anchor>
-                <Anchor href="'/SoundSystemDemo'">Sound Demo</Anchor>
                 <Anchor href="'/BindingsDemo'">Bindings</Anchor>
-                <Anchor href="'/input'">Input</Anchor>
-<!--                <Anchor href="'/inputEvents'">Input Events</Anchor>-->
                 <Anchor href="'/cursors'">Cursors</Anchor>
                 <Anchor href="'/FlexDemo'">FlexDemo</Anchor>
                 <Anchor href="'/GridDemo'">GridDemo</Anchor>
-                <Anchor href="'/RepeatALot'">Repeat Element</Anchor>
-                <Anchor href="'/ScrollDemo'">Scrolling</Anchor>
-                <Anchor href="'/TransclusionDemo'">Transclusion</Anchor>
-                <Anchor href="'/SelectDemo'">Select / DropDown</Anchor>
-                <Anchor href="'/StylePropertiesDemo'">Style Properties</Anchor>
+                <Anchor href="'/input'">Input</Anchor>
+<!--                <Anchor href="'/inputEvents'">Input Events</Anchor>-->
+                <Anchor href="'/PerformanceTest'">Performance Test</Anchor>
                 <Anchor href="'/RepeatExample'">Repeat Example</Anchor>
-                <Anchor href="'/Window'">Window System</Anchor>
-                <Anchor href="'/Checkbox'">Checkbox</Anchor>
+                <Anchor href="'/ScrollDemo'">Scrolling</Anchor>
+                <Anchor href="'/SelectDemo'">Select / DropDown</Anchor>
+                <Anchor href="'/SoundSystemDemo'">Sound Demo</Anchor>
+                <Anchor href="'/StylePropertiesDemo'">Style Properties</Anchor>
+                <Anchor href="'/TransclusionDemo'">Transclusion</Anchor>
 
             </ScrollView>
 
-            <ScrollView style="demo-panel" attr:router="demo" attr:defaultRoute="/index">
+            <ScrollView disableAutoScroll="true" style="demo-panel" attr:router="demo" attr:defaultRoute="/index">
 
-                <Group attr:route="/index">
-                    <Heading1>UIForia Documentation</Heading1>
-                    <Heading2>Hi, this is the demo.</Heading2>
-                    <Paragraph>Choose a demo from the menu on the left.</Paragraph>
-                </Group>
-
-                <AlignmentDemo attr:route="/AlignmentDemo"/>
-                <AnimationDemo attr:route="/AnimationDemo"/>
-                <SoundSystemDemo attr:route="/SoundSystemDemo"/>
-                <InputDemo attr:route="/input"/>
-<!--                <InputEventsDemo attr:route="/inputEvents"/>-->
-                <SelectDemo attr:route="/SelectDemo"/>
-                <BindingsDemo attr:route="/BindingsDemo"/>
-                <Cursors attr:route="/cursors"/>
-                <FlexDemo attr:route="/FlexDemo"/>
-                <GridDemo attr:route="/GridDemo"/>
-                <RepeatALot attr:route="/RepeatALot"/>
-                <ScrollDemo attr:route="/ScrollDemo"/>
-                <TransclusionDemo attr:route="/TransclusionDemo"/>
-                <RepeatExample attr:route="/RepeatExample"/>
-                <StylePropertiesDemo attr:route="/StylePropertiesDemo"/>
-                <WindowDemo attr:route="/Window"/>
-                <CheckboxDemo attr:route="/Checkbox"/>
+                <override:Children style="demo-panel-children">
+                    
+                    <Group style="demo-panel-route" attr:route="/index">
+                        <Heading1>UIForia Documentation</Heading1>
+                        <Heading2>Hi, this is the demo.</Heading2>
+                        <Paragraph>Choose a demo from the menu on the left.</Paragraph>
+                    </Group>
+    
+                    <AlignmentDemo style="demo-panel-route" attr:route="/AlignmentDemo"/>
+                    <AnimationDemo style="demo-panel-route" attr:route="/AnimationDemo"/>
+                    <BindingsDemo style="demo-panel-route" attr:route="/BindingsDemo"/>
+                    <Cursors style="demo-panel-route" attr:route="/cursors"/>
+                    <FlexDemo style="demo-panel-route" attr:route="/FlexDemo"/>
+                    <GridDemo style="demo-panel-route" attr:route="/GridDemo"/>
+                    <InputDemo style="demo-panel-route" attr:route="/input"/>
+    <!--                <InputEventsDemo style="demo-panel-route" attr:route="/inputEvents"/>-->
+                    <PerformanceTest style="demo-panel-route" attr:route="/PerformanceTest"/>
+                    <RepeatExample style="demo-panel-route" attr:route="/RepeatExample"/>
+                    <ScrollDemo style="demo-panel-route" attr:route="/ScrollDemo"/>
+                    <SelectDemo style="demo-panel-route" attr:route="/SelectDemo"/>
+                    <SoundSystemDemo style="demo-panel-route" attr:route="/SoundSystemDemo"/>
+                    <StylePropertiesDemo style="demo-panel-route" attr:route="/StylePropertiesDemo"/>
+                    <TransclusionDemo style="demo-panel-route" attr:route="/TransclusionDemo"/>
+                </override:Children>
                 
             </ScrollView>
 

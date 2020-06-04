@@ -1,11 +1,14 @@
+using System;
 using System.Diagnostics;
 using SVGX;
 using UIForia.Layout;
+using UIForia.Rendering.Vertigo;
 using UIForia.Systems;
 using UIForia.Util;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.UI;
 using Vertigo;
 
 namespace UIForia.Rendering {
@@ -38,6 +41,7 @@ namespace UIForia.Rendering {
 
     }
 
+    
     [DebuggerDisplay("{element.ToString()}")]
     public class StandardRenderBox : RenderBox {
 
@@ -67,6 +71,17 @@ namespace UIForia.Rendering {
         protected UIFixedLength cornerBevelBottomLeft;
         protected UIFixedLength cornerBevelBottomRight;
 
+        protected MeshType meshType;
+        protected float meshFillAmount;
+        protected MeshFillOrigin meshFillOrigin;
+        protected MeshFillDirection meshFillDirection;
+
+        public MaterialId materialId;
+        
+        private PooledMesh mesh;
+        private MaterialPropertyBlock propertyBlock;
+        private static readonly int s_Main = Shader.PropertyToID("_MainTex");
+        
         public StandardRenderBox() {
             this.uniqueId = "UIForia::StandardRenderBox";
             this.geometry = new UIForiaGeometry();
@@ -97,7 +112,14 @@ namespace UIForia.Rendering {
             cornerBevelBottomRight = element.style.CornerBevelBottomRight;
             cornerBevelBottomLeft = element.style.CornerBevelBottomLeft;
             shadowColor = element.style.ShadowColor;
+            materialId = element.style.Material;
             opacity = element.style.Opacity;
+
+            meshType = element.style.MeshType;
+            meshFillAmount = element.style.MeshFillAmount;
+            meshFillDirection = element.style.MeshFillDirection;
+            meshFillOrigin = element.style.MeshFillOrigin;
+
         }
 
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
@@ -105,80 +127,120 @@ namespace UIForia.Rendering {
             int count = propertyList.size;
 
             base.OnStylePropertyChanged(propertyList);
-            
+
             for (int i = 0; i < count; i++) {
                 ref StyleProperty property = ref properties[i];
 
                 switch (property.propertyId) {
+                    case StylePropertyId.MeshFillAmount:
+                        meshFillAmount = property.AsFloat;
+                        geometryNeedsUpdate = true;
+                        break;
+
+                    case StylePropertyId.MeshType:
+                        meshType = property.AsMeshType;
+                        geometryNeedsUpdate = true;
+                        break;
+
+                    case StylePropertyId.MeshFillDirection:
+                        meshFillDirection = property.AsMeshFillDirection;
+                        geometryNeedsUpdate = true;
+                        break;
+
+                    case StylePropertyId.MeshFillOrigin:
+                        meshFillOrigin = property.AsMeshFillOrigin;
+                        geometryNeedsUpdate = true;
+                        break;
+
+                    case StylePropertyId.Material:
+                        materialId = property.AsMaterialId;
+                        break;
+
                     case StylePropertyId.BackgroundTint:
                         backgroundTint = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BackgroundColor:
                         backgroundColor = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderColorTop:
                         borderColorTop = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderColorRight:
                         borderColorRight = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderColorBottom:
                         borderColorBottom = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderColorLeft:
                         borderColorLeft = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BackgroundImage:
                         backgroundImage = property.AsTexture;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderRadiusBottomLeft:
                         borderRadiusBottomLeft = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderRadiusBottomRight:
                         borderRadiusBottomRight = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderRadiusTopLeft:
                         borderRadiusTopLeft = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.BorderRadiusTopRight:
                         borderRadiusTopRight = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.Opacity:
                         opacity = property.AsFloat;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.CornerBevelTopLeft:
                         cornerBevelTopLeft = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.CornerBevelTopRight:
                         cornerBevelTopRight = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.CornerBevelBottomRight:
                         cornerBevelBottomRight = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.CornerBevelBottomLeft:
                         cornerBevelBottomLeft = property.AsUIFixedLength;
                         dataNeedsUpdate = true;
                         break;
+
                     case StylePropertyId.ShadowColor:
                         shadowColor = property.AsColor;
                         dataNeedsUpdate = true;
                         break;
-                    
+
                     case StylePropertyId.BackgroundFit:
                     case StylePropertyId.BackgroundImageScaleX:
                     case StylePropertyId.BackgroundImageScaleY:
@@ -195,6 +257,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.ShadowIntensity:
                         dataNeedsUpdate = true;
                         break;
+
 //                        shadowNeedsUpdate = true;
 //                        break;
                 }
@@ -208,44 +271,11 @@ namespace UIForia.Rendering {
 
             float width = size.width;
             float height = size.height;
-            float min = Mathf.Min(width, height);
-
-            float bevelTopLeft = ResolveFixedSize(element, min, cornerBevelTopLeft);
-            float bevelTopRight = ResolveFixedSize(element, min, cornerBevelTopRight);
-            float bevelBottomRight = ResolveFixedSize(element, min, cornerBevelBottomRight);
-            float bevelBottomLeft = ResolveFixedSize(element, min, cornerBevelBottomLeft);
-
-            float radiusTopLeft = ResolveFixedSize(element, min, borderRadiusTopLeft);
-            float radiusTopRight = ResolveFixedSize(element, min, borderRadiusTopRight);
-            float radiusBottomRight = ResolveFixedSize(element, min, borderRadiusBottomRight);
-            float radiusBottomLeft = ResolveFixedSize(element, min, borderRadiusBottomLeft);
 
             Vector2 pivotOffset = element.layoutResult.pivotOffset;
-            //new Vector2(-element.layoutBox.pivotX * size.width, -element.layoutBox.pivotY * size.height);
 
-            if (radiusBottomLeft > 0 ||
-                radiusBottomRight > 0 ||
-                radiusTopLeft > 0 ||
-                radiusTopRight > 0 ||
-                bevelTopRight > 0 ||
-                bevelTopLeft > 0 ||
-                bevelBottomLeft > 0 ||
-                bevelBottomRight > 0) {
-//                geometry.ClipCornerRect(size, new CornerDefinition() {
-//                    topLeftX = bevelTopLeft,
-//                    topLeftY = bevelTopLeft,
-//                    topRightX = bevelTopRight,
-//                    topRightY = bevelTopRight,
-//                    bottomRightX = bevelBottomRight,
-//                    bottomRightY = bevelBottomRight,
-//                    bottomLeftX = bevelBottomLeft,
-//                    bottomLeftY = bevelBottomLeft,
-//                });
-                geometry.FillRect(size.width, size.height, pivotOffset);
-            }
-            else {
-                geometry.FillRect(size.width, size.height, pivotOffset);
-            }
+            // geometry.FillRect(size.width, size.height);
+            geometry.FillMeshType(0, 0, size.width, size.height, meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
 
             if (!ReferenceEquals(backgroundImage, null)) {
                 Vector3[] positions = geometry.positionList.array;
@@ -277,7 +307,6 @@ namespace UIForia.Rendering {
                 // Now calculate the X,Y position of the upper-left corner (one of these will always be zero)
                 int posX = (int) ((width - (originalWidth * ratio)) / 2);
                 int posY = (int) ((height - (originalHeight * ratio)) / 2);
-
 
                 switch (element.style.BackgroundFit) {
                     case BackgroundFit.Fill:
@@ -436,9 +465,14 @@ namespace UIForia.Rendering {
             if (test > max) return max;
             return test;
         }
-        
+
         public override void PaintBackground(RenderContext ctx) {
-            
+
+            if (materialId.id != 0) {
+                RenderFromMaterial(ctx);
+                return;
+            }
+
             Size newSize = element.layoutResult.actualSize;
 
             if (geometryNeedsUpdate || (newSize != lastSize) || element.layoutResult.rebuildGeometry) {
@@ -453,7 +487,7 @@ namespace UIForia.Rendering {
                 dataNeedsUpdate = false;
             }
 
-            if (shadowColor.a > 0) {
+            if (shadowColor.a > 0 && opacity > 0) {
                 float min = math.min(element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
 
                 if (min <= 0) min = 0.0001f;
@@ -488,8 +522,8 @@ namespace UIForia.Rendering {
                 Vector2 size = element.layoutResult.actualSize + new Vector2(style.ShadowSizeX, style.ShadowSizeY) + new Vector2(style.ShadowIntensity, style.ShadowIntensity);
                 position -= new Vector2(style.ShadowSizeX, style.ShadowSizeY) * 0.5f;
                 position -= new Vector2(style.ShadowIntensity, style.ShadowIntensity) * 0.5f;
-                float x = 0; // todo -- pivot n stuff MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, viewWidth, viewHeight, style.ShadowOffsetX, element.layoutResult.actualSize.width);
-                float y = 0; // todo -- pivot n stuff MeasurementUtil.ResolveOffsetMeasurement(element.layoutBox, viewWidth, viewHeight, style.ShadowOffsetY, element.layoutResult.actualSize.height);
+                float x = MeasurementUtil.ResolveOffsetMeasurement(element, viewWidth, viewHeight, style.ShadowOffsetX, element.layoutResult.actualSize.width);
+                float y = MeasurementUtil.ResolveOffsetMeasurement(element, viewWidth, viewHeight, style.ShadowOffsetY, element.layoutResult.actualSize.height);
                 position.x += x;
                 position.y += y;
                 shadowGeometry.mainTexture = null;
@@ -531,6 +565,42 @@ namespace UIForia.Rendering {
             Matrix4x4 matrix = default;
             element.layoutResult.matrix.GetMatrix4x4(ref matrix);
             ctx.DrawBatchedGeometry(geometry, range, matrix, clipper);
+        }
+
+      
+        
+        public void RenderFromMaterial(RenderContext ctx) {
+
+            if (!element.application.materialDatabase.TryGetMaterial(materialId, out MaterialInfo info)) { 
+                return;
+            }
+
+            if (ReferenceEquals(mesh, null)) {
+                mesh = new PooledMesh(null);
+            }
+
+            Size size = element.layoutResult.actualSize;
+
+            propertyBlock = propertyBlock ?? new MaterialPropertyBlock();
+            
+            if (!ReferenceEquals(backgroundImage, null)) {
+                propertyBlock.SetTexture(s_Main, backgroundImage);
+            }
+            
+            element.application.materialDatabase.GetInstanceProperties(element.id, materialId, propertyBlock);
+            
+            // todo -- will want to set the properties that are expected by UI shaders
+            // clip rect is in world space it seems, I'm not sure how to replicate it. seems to be in 2 point form, x + height & width + y? seems odd
+            // propertyBlock.SetVector("_ClipRect", new Vector4(100, 100, 100, 100));
+            
+            geometry.Clear();
+            geometry.FillMeshType(0, 0, size.width, size.height, meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
+            geometry.ToMesh(mesh);
+            
+            Matrix4x4 matrix = default;
+            element.layoutResult.matrix.GetMatrix4x4(ref matrix);
+            ctx.DrawMesh(mesh.mesh, info.material, propertyBlock, matrix);
+
         }
 
     }

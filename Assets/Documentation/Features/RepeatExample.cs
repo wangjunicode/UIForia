@@ -1,26 +1,29 @@
-using System;
 using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.Util;
 
 namespace Documentation.Features {
     
     [Template("Documentation/Features/RepeatExample.xml")]
     public class RepeatExample : UIElement {
 
-        public List<ValueTuple<string, string>> dictionary;
+        public List<string> wordList;
 
-        public string GetAStyle() {
-            return "a";
-        }
+        public string newWord;
 
         public override void OnCreate() {
-            dictionary = new List<(string, string)>() {
-                ValueTuple.Create("Mein lieber Herr Gesangsverein!", "My dear mister singing club!"),
-                ValueTuple.Create("Ich habe Kohldampf!", "I'm having cabbage steam!")
+            wordList = new List<string>() {
+                "Hello"
             };
         }
-        
+
+        public void AddWord() {
+            if (string.IsNullOrWhiteSpace(newWord) || wordList.Contains(newWord)) {
+                return;
+            }
+
+            wordList.Add(newWord);
+            wordList.Sort();
+        }
     }
 }

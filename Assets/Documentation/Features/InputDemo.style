@@ -6,11 +6,3 @@ style <Label> {
         Cursor = url("Cursors/hand");
     }
 }
-
-style input {
-    Border = 2px;
-    BorderColor = black;
-    BackgroundColor = white;
-    PreferredWidth = 500px;
-    MarginBottom = 20px;
-}

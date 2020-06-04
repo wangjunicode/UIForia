@@ -163,6 +163,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 case "rgba": return new StyleToken(StyleTokenType.Rgba, identifierLowerCase, context.line, context.column);
                 case "rgb": return new StyleToken(StyleTokenType.Rgb, identifierLowerCase, context.line, context.column);
                 case "url": return new StyleToken(StyleTokenType.Url, identifierLowerCase, context.line, context.column);
+                case "enterexit": return new StyleToken(StyleTokenType.EnterExit, identifierLowerCase, context.line, context.column);
                 case "exit": return new StyleToken(StyleTokenType.Exit, identifierLowerCase, context.line, context.column);
                 case "enter": return new StyleToken(StyleTokenType.Enter, identifierLowerCase, context.line, context.column);
                 case "run": return new StyleToken(StyleTokenType.Run, identifierLowerCase, context.line, context.column);

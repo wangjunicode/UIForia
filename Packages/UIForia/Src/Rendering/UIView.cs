@@ -140,6 +140,8 @@ namespace UIForia.Rendering {
             return false;
         }
 
+        public bool HasFocus => Depth == application.views.Count - 1;
+
     }
 
 }

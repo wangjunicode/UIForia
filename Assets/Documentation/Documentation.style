@@ -1,5 +1,5 @@
 export const boringBackgroundColor = rgb(240, 230, 240);
-export const buttonBackgroundColor = rgb(200, 190, 80);
+export const buttonBackgroundColor = olivedrab;
 export const buttonBackgroundHoverColor = rgb(220, 195, 90);
 export const buttonBackgroundSelectedColor = rgb(220, 95, 190);
 export const buttonBackgroundSelectedHoverColor = rgb(220, 95, 190);
@@ -16,24 +16,56 @@ style root-container {
     PreferredSize = 1vw 1vh;
 }
 
+style custom-material {
+    PreferredSize = 200px 200px;
+    BackgroundColor = orange;
+    AlignX = Center Screen;
+    AlignY = Center Screen;
+    LayoutBehavior = Ignored;
+    ZIndex = 800;
+    BackgroundImage = url("icons/brush/brush_templates_seed");
+    
+    MeshType = FillRadial90;
+    
+    MeshFillAmount = 1f;
+    
+    Material = "Glitch2" {
+        _ShakeStrength = 4;
+    };
+       
+}
+
 style main-container {
     LayoutType = Grid;
     PreferredSize = 1pca;
     GridLayoutColTemplate = 1mx 1fr;
     GridLayoutRowTemplate = 1fr;
-    GridLayoutRowAlignment = Fit;    
+    GridLayoutRowAlignment = Fit;
     GridLayoutColAlignment = Fit;
     TextFontAsset = @fontGothamNarrowMedium;
+}
+
+style <Paragraph> {
+    LayoutFitHorizontal = Fill;
+    MarginBottom = 10px;
 }
 
 style <Heading1> {
     TextFontSize = 1.6em;
     MarginBottom = 1em;
-} 
+    LayoutFitHorizontal = Fill;
+}
 
 style <Heading2> {
     TextFontSize = 1.3em;
-    MarginBottom = 0.6em;
+    MarginBottom = 0.8em;
+    LayoutFitHorizontal = Fill;
+}
+
+style <Heading3> {
+    TextFontSize = 1.1em;
+    MarginBottom = 0.7em;
+    LayoutFitHorizontal = Fill;
 }
 
 style <Anchor> {
@@ -51,22 +83,24 @@ style <Anchor> {
 }
 
 style button-group {
-    LayoutType = Flex;
     FlexLayoutDirection = Horizontal;
     TextFontSize = 18px;
 }
 
 style button {
     Padding = 10px;
-    Margin = 10px;
     DistributeExtraSpace = CenterContent;
     BorderRadius = 3px;
     BackgroundColor = @buttonBackgroundColor;
-    TextColor = black;
+    TextColor = white;
     [hover] {
         BackgroundColor = @buttonBackgroundHoverColor;
         TextColor = black;
         Cursor = @cursorHand;
+    }
+    [attr:selected] {
+        BackgroundColor = @buttonBackgroundHoverColor;
+        TextColor = black;
     }
 }
 
@@ -79,6 +113,15 @@ style button-selected {
     }
 }
 
+
+style input {
+    Border = 2px;
+    BorderColor = black;
+    BackgroundColor = white;
+    PreferredWidth = 500px;
+    MarginBottom = 20px;
+}
+
 style navigation {
     Padding = 20px;
     BackgroundColor = white;
@@ -89,11 +132,19 @@ style navigation {
 }
 
 style demo-panel {
-    Padding = 20px;
+    Padding = 3px;
     BorderLeft = 2px;
     BorderColor = #2c2e53;
     BackgroundColor = @boringBackgroundColor;
     PreferredSize = 1pca;
+}
+
+style demo-panel-children {
+    Padding = 20px;
+}
+
+style demo-panel-route {
+    PreferredWidth = 1pca;
 }
 
 style burger {
@@ -123,6 +174,10 @@ style burger-patty {
 
 style mb20 {
     MarginBottom = 20px;
+}
+
+style mr10 {
+    MarginRight = 10px;
 }
 
 style parameter-list {

@@ -1,5 +1,6 @@
 using System;
 using UIForia.Elements;
+using UIForia.Parsing.Style;
 using UIForia.Rendering;
 
 namespace UIForia.Sound {
@@ -7,12 +8,12 @@ namespace UIForia.Sound {
 
         public UISoundData soundData;
 
-        public SoundRunCommand(bool isExit, RunAction runAction = RunAction.Run) {
-            IsExit = isExit;
+        public SoundRunCommand(RunCommandType cmdType, RunAction runAction = RunAction.Run) {
+            RunCommandType = cmdType;
             RunAction = runAction;
         }
 
-        public void Run(UIElement element) {
+        public void Run(UIElement element, RunCommandType direction) {
             switch (RunAction) {
                 case RunAction.Run:
                     element.application.SoundSystem.PlaySound(element, soundData);
@@ -31,8 +32,8 @@ namespace UIForia.Sound {
             }
         }
 
-        public bool IsExit { get; }
-        
+        public RunCommandType RunCommandType { get; set; }
+
         public RunAction RunAction { get; }
 
     }

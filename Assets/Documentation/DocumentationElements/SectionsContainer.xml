@@ -1,0 +1,20 @@
+﻿<UITemplate>
+    <Style src="Documentation/DocumentationElements/SectionsContainer.style" />
+    <Style src="Documentation/Documentation.style" alias="theme"/>
+    <Using namespace="Documentation.DocumentationElements"/>
+
+    <Contents style="sections-container">
+        
+        <Div style="section-nav">
+            <Heading2>Navigation</Heading2>
+            <ScrollView>
+                <Repeat list="sectionPanels">
+                    <Div style="section-link" mouse:click="$item.ScrollIntoView()">{$item.title}</Div>
+                </Repeat>
+            </ScrollView>
+        </Div>
+
+        <define:Children style="sections" id="section-content" require:type="SectionPanel" />
+
+    </Contents>
+</UITemplate>

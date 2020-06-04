@@ -7,10 +7,12 @@ using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
+using UIForia.Parsing.Style;
 using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
+using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Rendering {
 
@@ -34,7 +36,7 @@ namespace UIForia.Rendering {
         // reduce memory per-style
         // improve lookup time
         // support selectors
-        
+
         public UIStyleSet(UIElement element) {
             this.element = element;
             this.currentState = StyleState.Normal;
@@ -162,6 +164,16 @@ namespace UIForia.Rendering {
         private void ResetSharedStyles(LightList<UIStyleGroupContainer> updatedStyles) {
             int count = updatedStyles.Count;
             UIStyleGroupContainer[] updatedStyleArray = updatedStyles.array;
+
+            for (int i = 0; i < styleGroupContainers.size; i++) {
+
+                if (!updatedStyles.Contains(styleGroupContainers.array[i])) {
+                    for (int j = 0; j < styleGroupContainers.array[i].groups.Length; j++) {
+                        RunCommands(styleGroupContainers.array[i].groups[j].normal.runCommands, false);
+                    }
+                }
+
+            }
 
             availableStyles.Clear();
             styleGroupContainers.Clear();
@@ -292,7 +304,7 @@ namespace UIForia.Rendering {
 
             LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
             IStyleSystem styleSystem = element.application.styleSystem;
-            
+
             StyleEntry[] styleEntries = availableStyles.Array;
             for (int i = 0; i < availableStyles.Count; i++) {
                 StyleEntry entry = styleEntries[i];
@@ -328,11 +340,11 @@ namespace UIForia.Rendering {
             }
 
             for (int index = 0; index < runCommands.Count; index++) {
-                if (enter && !runCommands[index].IsExit) {
-                    runCommands[index].Run(element);
+                if (enter && (runCommands[index].RunCommandType & RunCommandType.Enter) != 0) {
+                    runCommands[index].Run(element, RunCommandType.Enter);
                 }
-                else if (!enter && runCommands[index].IsExit) {
-                    runCommands[index].Run(element);
+                else if (!enter &&  (runCommands[index].RunCommandType & RunCommandType.Exit) != 0) {
+                    runCommands[index].Run(element, RunCommandType.Exit);
                 }
             }
         }
@@ -409,6 +421,18 @@ namespace UIForia.Rendering {
 
         public bool IsInState(StyleState state) {
             return (currentState & state) != 0;
+        }
+
+        public bool IsHovered {
+            get => IsInState(StyleState.Hover);
+        }
+
+        public bool IsFocused {
+            get => IsInState(StyleState.Focused);
+        }
+
+        public bool IsActive {
+            get => IsInState(StyleState.Active);
         }
 
         public bool HasBaseStyles => styleGroupContainers.Count > 0;
@@ -669,7 +693,7 @@ namespace UIForia.Rendering {
             style.SetProperty(property);
 
             IStyleSystem styleSystem = element.application.styleSystem;
-            
+
             StyleProperty currentValue;
             if (TryGetPropertyValueInState(property.propertyId, currentState, out currentValue)) {
                 if (oldValue != currentValue) {
@@ -1021,18 +1045,23 @@ namespace UIForia.Rendering {
                 case StylePropertyId.PreferredWidth:
                     animationFlags |= AnimationFlags.PreferredWidth;
                     break;
+
                 case StylePropertyId.MinWidth:
                     animationFlags |= AnimationFlags.MinWidth;
                     break;
+
                 case StylePropertyId.MaxWidth:
                     animationFlags |= AnimationFlags.MaxWidth;
                     break;
+
                 case StylePropertyId.PreferredHeight:
                     animationFlags |= AnimationFlags.PreferredHeight;
                     break;
+
                 case StylePropertyId.MinHeight:
                     animationFlags |= AnimationFlags.MinHeight;
                     break;
+
                 case StylePropertyId.MaxHeight:
                     animationFlags |= AnimationFlags.MaxHeight;
                     break;
@@ -1047,10 +1076,11 @@ namespace UIForia.Rendering {
             }
 
             animatedProperties.Add(new AnimatedProperty(propertyId, v0, v1, time));
-           // styleSystem.SetStyleProperty(element, propertyId);
+            // styleSystem.SetStyleProperty(element, propertyId);
         }
 
         private LightList<UIStyle> selectorStyles;
+
         public void SetSelectorStyle(UIStyle matchStyle) {
             selectorStyles = selectorStyles ?? new LightList<UIStyle>();
         }

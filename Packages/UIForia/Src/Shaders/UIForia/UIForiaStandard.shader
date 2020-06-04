@@ -88,30 +88,27 @@ Shader "UIForia/Standard"
             
             v2f vert (appdata v) {
                 v2f o;
-                
                 int objectIndex = (int)v.texCoord1.w; // can be a byte, consider packing this if needed
 
                 float4 objectInfo = _ObjectData[objectIndex];
                 float4x4 transform = _TransformData[objectIndex];
                 
-                uint shapeType = ((uint) objectInfo.x >> 16) & (1 << 16) - 1;
+                uint shapeType = ((uint) objectInfo.x >> 16) & (1 << 16) - 1; // maps to ShapeType defines 
                 uint colorMode = ((uint) objectInfo.x) & 0xffff;
                 
                 half2 size = UnpackSize(Vert_PackedSize);
                 v.vertex = mul(transform, float4(v.vertex.xyz, 1));
                 
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.vertex = float4(UnityObjectToViewPos(v.vertex) / float3(0.5 * _ScreenParams.x, _ProjectionParams.x * 0.5 * _ScreenParams.y, 1.0), 1.0);
                 float4 screenPos = ComputeScreenPos(o.vertex);
                 o.texCoord0 = v.texCoord0;
                 o.color = _ColorData[objectIndex];
                 
                 // this only works for 'flower' configuration meshes, not for quads. use a flag for the quad
                 o.texCoord4 = float4(lerp(0, 1, v.texCoord0.x == 0.5 && v.texCoord0.y == 0.5), screenPos.xyw);
-             
                 
                 if(shapeType != ShapeType_Text) {
                     o.vertex = UIForiaPixelSnap(o.vertex); // pixel snap is bad for text rendering
-                    //o.vertex = UnityPixelSnap(o.vertex); // pixel snap is bad for text rendering
                     o.texCoord1 = float4(size.x, size.y, Vert_BorderRadii, objectIndex);
                     o.texCoord2 = float4(shapeType, colorMode, 0, 0);
                     o.texCoord3 = _MiscData[objectIndex];
@@ -186,12 +183,13 @@ Shader "UIForia/Standard"
             
             fixed4 frag (v2f i) : SV_Target {           
                 
-                float2 screenUV = i.texCoord4.yz / i.texCoord4.w;
+                float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y) * _DPIScale;
                 float4 clipRect = _ClipRects[(uint)i.texCoord1.w];
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];           
                 float opacity = _ObjectData[(uint)i.texCoord1.w].w;              
                 float4 cornerBevels = _CornerData[(uint)i.texCoord1.w];
-                
+                //return fixed4(i.texCoord0.y, i.texCoord0.y, i.texCoord0.y, 1);
+               // return fixed4(i.texCoord0.x, i.texCoord0.x, i.texCoord0.x, 1);
                 // todo -- returns cause branching here
                 // get rid of text and we can get rid of branching
                 
@@ -226,7 +224,7 @@ Shader "UIForia/Standard"
                         return mainColor;
                     }
                     
-                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, screenUV, clipRect, clipUvs, _DPIScale);
+                    mainColor = UIForiaAlphaClipColor(mainColor, _MaskTexture, clipPos, clipRect, clipUvs);
                     mainColor.rgb *= mainColor.a;
                     return mainColor;
                 }
@@ -262,8 +260,7 @@ Shader "UIForia/Standard"
                 float d = tex2D(_FontTexture, i.texCoord0.zw + i.texCoord3.xy).a * underlayScale;
                 underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
                 faceColor = lerp(faceColor, underlayColor, hasUnderlay);
-           //     faceColor.rgb *= faceColor.a;
-                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, screenUV, clipRect, clipUvs, _DPIScale);
+                faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, clipPos, clipRect, clipUvs);
                 return faceColor;               
 
             }

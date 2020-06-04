@@ -15,7 +15,8 @@ namespace UIForia.Animation {
         public UIElement target;
         public AnimationState status;
 
-        protected static readonly KeyFrameSorter KeyFrameSorter = new KeyFrameSorter();
+        protected static readonly StyleKeyFrameSorter s_StyleKeyFrameSorter = new StyleKeyFrameSorter();
+        protected static readonly MaterialKeyFrameSorter s_MaterialKeyFrameSorter = new MaterialKeyFrameSorter();
 
         protected StyleAnimation(UIElement target, AnimationData data) : base(data, data.triggers) {
             this.target = target;

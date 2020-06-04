@@ -187,6 +187,9 @@ namespace UIForia.Elements {
             char c = evt.character;
 
             if (evt.keyCode == KeyCode.Return) {
+                if (!InitKeyPress(evt)) {
+                    return;
+                }
                 HandleSubmit();
                 return;
             }
@@ -398,7 +401,7 @@ namespace UIForia.Elements {
         }
 
         [CustomPainter("UIForia::Input")]
-        internal class InputElementPainter : StandardRenderBox {
+        public class InputElementPainter : StandardRenderBox {
 
             public Path2D path = new Path2D();
 

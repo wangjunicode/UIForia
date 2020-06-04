@@ -1,77 +1,114 @@
-<?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Style path="Documentation/Features/StylePropertiesDemo.style"/>
     <Style src="Documentation/Documentation.style" alias="theme"/>
     <Using namespace="UIForia.Rendering"/>
 
-    <Contents style="container">
-
-        <Heading1 attr:id="property-visibility">Visibility</Heading1>
-        <Group style="section">
-            <Paragraph>
-                Visibility = [ Visible | Hidden | Always ]
-            </Paragraph>
-            <Heading2>Change the visibility here to:</Heading2>
-            <Group style="button-group">
-                <Button style="button {visibility == Visibility.Visible ? 'button-selected'}" mouse:click="OnChangeVisibility(Visibility.Visible)">Visible</Button>
-                <Button style="button {visibility == Visibility.Hidden ? 'button-selected' }" mouse:click="OnChangeVisibility(Visibility.Hidden)">Hidden</Button>
-                <Button style="button {visibility == Visibility.Always ? 'button-selected' }" mouse:click="OnChangeVisibility(Visibility.Always)">Always</Button>
-            </Group>
-            <Div style.visibility="visibility" style="visibility-test">
-                I am a demo thing.
-                <Div>
-                    I am a nested demo thing.
-                </Div>
-            </Div>
-        </Group>
+    <Contents>
         
-        <Group style="section">
-            <Heading2>Borders</Heading2>
-            <Paragraph>
-                Border = [ top: UIFixedLength, right: UIFixedLength, bottom: UIFixedLength, left: UIFixedLength ]
-            </Paragraph>
-            <Paragraph>
-                Border = [ top: UIFixedLength, left+right: UIFixedLength, bottom: UIFixedLength]
-            </Paragraph>
-            <Paragraph>
-                Border = [ top+bottom: UIFixedLength, left+right: UIFixedLength ]
-            </Paragraph>
-            <Paragraph>
-                Border = [ top+bottom+left+right: UIFixedLength ]
-            </Paragraph>
-            <Paragraph>
-                BorderLeft / BorderRight / BorderTop / BorderBottom
-            </Paragraph>
+        <SectionsContainer>
 
-            <Paragraph>Let's start with a simple border:</Paragraph>
-            <Div>
-                <Group style="simple-border">meh</Group>
-            </Div>
+            <SectionPanel title="'LayoutFit'">
+                <Paragraph>
+                    LayoutFit sets both LayoutFitHorizontal and LayoutFitVertical.
+                    In a flex layout with FlexLayoutDirection = Vertical you can make
+                    use of the Horizontal LayoutFit and vice versa.
+                </Paragraph>
+                <Div style="fit-horizontal-container">
+                    <Div style="fit-item fit-horizontal">item 1 fills</Div>
+                    <Div style="fit-item">item 2</Div>
+                    <Div style="fit-item">item 3</Div>
+                </Div>
+                <Div style="fit-vertical-container">
+                    <Div style="fit-item fit-vertical">item 1 fills</Div>
+                    <Div style="fit-item">item 2</Div>
+                    <Div style="fit-item">item 3</Div>
+                </Div>
+            </SectionPanel>
 
-            <Paragraph>Now what happens if we nest boxes with borders?</Paragraph>
-            <Div>
-                <Group style="simple-border"><Group style="simple-border">meh</Group></Group>
-            </Div>
-        </Group>
+            <SectionPanel title="'FitItems'">
+                <Paragraph>Applies LayoutFit to all children.</Paragraph>
+                <Div style="fit-items-horizontal">
+                    <Div style="fit-item">item 1</Div>
+                    <Div style="fit-item">item 2</Div>
+                    <Div style="fit-item">item 3</Div>
+                </Div>
+                <Div style="fit-items-vertical">
+                    <Div style="fit-item">item 1</Div>
+                    <Div style="fit-item">item 2</Div>
+                    <Div style="fit-item">item 3</Div>
+                </Div>
+            </SectionPanel>
+            <SectionPanel title="'Visibility'">
+                <Paragraph>
+                    Visibility = [ Visible | Hidden | Always ]
+                </Paragraph>
+                <Heading2>Change the visibility here to:</Heading2>
+                <Group style="button-group">
+                    <Button style="button {visibility == Visibility.Visible ? 'button-selected'}" mouse:click="OnChangeVisibility(Visibility.Visible)">Visible</Button>
+                    <Button style="button {visibility == Visibility.Hidden ? 'button-selected' }" mouse:click="OnChangeVisibility(Visibility.Hidden)">Hidden</Button>
+                    <Button style="button {visibility == Visibility.Always ? 'button-selected' }" mouse:click="OnChangeVisibility(Visibility.Always)">Always</Button>
+                </Group>
+                <Div style.visibility="visibility" style="visibility-test">
+                    I am a demo thing.
+                    <Div>
+                        I am a nested demo thing.
+                    </Div>
+                </Div>
+            </SectionPanel>
 
-        <Group style="section">
-            <Heading2>Corner Bevels</Heading2>
-            <Div style="bevel-demo">
-                
-                This box has different bevels on each corner.
-                
-            </Div>
-        </Group>
+            <SectionPanel title="'Borders'">
+                <Paragraph>
+                    Border = [ top: UIFixedLength, right: UIFixedLength, bottom: UIFixedLength, left: UIFixedLength ]
+                </Paragraph>
+                <Paragraph>
+                    Border = [ top: UIFixedLength, left+right: UIFixedLength, bottom: UIFixedLength]
+                </Paragraph>
+                <Paragraph>
+                    Border = [ top+bottom: UIFixedLength, left+right: UIFixedLength ]
+                </Paragraph>
+                <Paragraph>
+                    Border = [ top+bottom+left+right: UIFixedLength ]
+                </Paragraph>
+                <Paragraph>
+                    BorderLeft / BorderRight / BorderTop / BorderBottom
+                </Paragraph>
+    
+                <Paragraph>Let's start with a simple border:</Paragraph>
+                <Div>
+                    <Group style="simple-border">meh</Group>
+                </Div>
+    
+                <Paragraph>
+                    In order to avoid overflowing we set the size of the nested box to be 1pca.
+                </Paragraph>
+                <Div>
+                    <Group style="simple-border"><Group style="simple-border simple-border-nested">meh</Group></Group>
+                </Div>
+            </SectionPanel>
 
-        <Group style="section">
-            <Heading2>Pointer-Events</Heading2>
-            <Div style="pointer-demo">
-                
-                <Div style="pointer-none">Can't touch this</Div>
-                
-                The yellow box has a hover state that you will be unable to trigger!
-                
-            </Div>
-        </Group>
+            <SectionPanel title="'Corner Bevels'">
+                <Div style="bevel-demo">
+                    
+                    This box has different bevels on each corner.
+                    
+                </Div>
+            </SectionPanel>
+
+            <SectionPanel title="'Pointer-Events'">
+                <Paragraph>
+                    Usage: PointerEvents = [ Normal (default) | None ]; 
+                </Paragraph>
+                <Div style="pointer-demo">
+                    
+                    <Div style="pointer-none">Can't touch this
+                        <Div style="child-of-pointer-demo">
+                            Can't touch this either!
+                        </Div>
+                    </Div>
+                    
+                    The yellow box has a hover state that you will be unable to trigger!
+                </Div>
+            </SectionPanel>
+        </SectionsContainer>
     </Contents>
 </UITemplate>

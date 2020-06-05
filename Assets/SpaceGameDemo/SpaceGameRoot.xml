@@ -9,8 +9,8 @@
             <StartMenu style="container" />
         </SpacePanel>
         
-        <SpacePanel name="'Players'">
-            <StartMenu style="container" />
+        <SpacePanel name="'SinglePlayer'">
+            <SinglePlayer style="container" />
         </SpacePanel>
         
         <SpacePanel name="'JoinServer'">
@@ -20,6 +20,8 @@
         <SpacePanel name="'Settings'">
             <Settings style="container" />
         </SpacePanel>
+        
+        <SplashScreen />
         
     </Contents>
     

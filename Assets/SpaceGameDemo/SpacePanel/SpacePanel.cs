@@ -4,8 +4,7 @@ using UIForia.Elements;
 namespace SpaceGameDemo.SpacePanel {
     [Template("SpaceGameDemo/SpacePanel/SpacePanel.xml")]
     public class SpacePanel : UIElement {
-        public string currentActivePanel;
-
+        // Parameter / Property
         public string name;
 
         public string GetScreenState(string spacePanel) {

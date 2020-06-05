@@ -394,11 +394,12 @@ namespace UIForia.Animation {
                                 throw new NotImplementedException(propertyId + " can be animated but is not implemented");
                             }
 
-                            throw new InvalidArgumentException(propertyId + " is not a supported animation property");
+                            target.style.SetProperty(prev.value.styleProperty, StyleState.Normal);
+                            break;
                     }
 
                     if (progress >= 1f) {
-                        target.style.SetAnimatedProperty(nextStyleFrame.value.styleProperty);
+                        target.style.SetProperty(nextStyleFrame.value.styleProperty, StyleState.Normal);
                     }
 
                 }

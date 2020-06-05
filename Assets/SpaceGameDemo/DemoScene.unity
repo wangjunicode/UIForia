@@ -223,9 +223,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1934022039}
   - component: {fileID: 1934022038}
-  - component: {fileID: 1934022037}
-  - component: {fileID: 1934022035}
-  - component: {fileID: 1934022040}
   m_Layer: 0
   m_Name: Look_Camera
   m_TagString: MainCamera
@@ -233,22 +230,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &1934022035
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1934022034}
-  m_Enabled: 1
---- !u!124 &1934022037
-Behaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1934022034}
-  m_Enabled: 1
 --- !u!20 &1934022038
 Camera:
   m_ObjectHideFlags: 0
@@ -306,22 +287,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1934022040
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1934022034}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9a3e5f51e31f79c4fb340e92ffc286e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  speedNormal: 10
-  speedFast: 50
-  mouseSensitivityX: 5
-  mouseSensitivityY: 5
 --- !u!1 &2020966537
 GameObject:
   m_ObjectHideFlags: 0

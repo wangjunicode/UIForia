@@ -1,0 +1,34 @@
+﻿style splash-container {
+    PreferredSize = 1pca;
+    DistributeExtraSpace = CenterContent;
+    BackgroundColor = black;
+    TextColor = white;
+    [attr:animate="fadeOut"] {
+        run animation(fadeOut);
+    }
+}
+
+style <Panel> {
+    run animation(fadeInOut);
+}
+
+animation fadeInOut {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 3s;
+    }
+    [keyframes] {
+        0% { Opacity = 0; }
+        30% { Opacity = 1; }
+        80% { Opacity = 1; }
+        100% { Opacity = 0; }
+    }
+}
+
+animation fadeOut {
+    [options] { TimingFunction = QuadraticEaseInOut; }
+    [keyframes] { 
+        0% { Opacity = 1; }
+        100% { Opacity = 0; Visibility = Hidden; }
+    }
+}

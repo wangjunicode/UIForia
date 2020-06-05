@@ -1,0 +1,30 @@
+﻿<UITemplate>
+    <Style src="SpaceGameDemo/SinglePlayer/SinglePlayer.style" />
+    <Style src="SpaceGameDemo/Theme.style" alias="theme"/>
+
+    <Contents>
+        <Group style="menu">
+            <SpaceMenuItem label="'Back'" targetPanel="'StartMenu'" />
+        </Group>
+        <Panel style="main-content">
+            <SpacePanelHeader title="'Single Player'"/>
+            <Repeat list="ships" style="ship-list">
+                <Group style="ship-item">
+                    <Image Width="32" src="'Images/ship0' + $item.id + 'a/tile000'" />
+                    <Div mouse:click="SelectShip($item.id)">{$item.name}</Div>
+                </Group>
+            </Repeat>
+    
+            <Group style="ship-display">
+                <Div style="ship" attr:shipId="{selectedShip + 'a'}" />
+                <Div style="ship" attr:shipId="{selectedShip + 'b'}" />
+            </Group>
+
+            <Group style="radial">
+                <Group style="radial-fill" style:meshFillAmount="progress"/>
+                <Text style="progress-text"> {progressString}% </Text>
+            </Group>
+            <ConsoleCrawler />
+        </Panel>
+    </Contents>
+</UITemplate>

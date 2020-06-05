@@ -1,0 +1,136 @@
+﻿import "SpaceGameDemo/Theme.style" as theme;
+
+style ship-item {
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = CenterContent;
+    TextColor = white;
+    TextFontAsset = @theme.orbitron;
+    TextFontSize = 13px;
+}
+
+style ship-display {
+    FlexLayoutDirection = Horizontal;
+    AlignY = 90% Parent;
+}
+
+style ship {
+    PreferredSize = 256px;
+    Border = 1px;
+    BorderColor = white;
+    BorderRadius = 2px;
+    [attr:shipId="1a"] {
+        run animation(ship01a);
+    }
+    [attr:shipId="1b"] {
+        run animation(ship01b);
+    }
+    [attr:shipId="2a"] {
+        run animation(ship02a);
+    }
+    [attr:shipId="2b"] {
+        run animation(ship02b);
+    }
+    [attr:shipId="3a"] {
+        run animation(ship03a);
+    }
+    [attr:shipId="3b"] {
+        run animation(ship03b);
+    }
+    [attr:shipId="4a"] {
+        run animation(ship04a);
+    }
+    [attr:shipId="4b"] {
+        run animation(ship04b);
+    }
+}
+
+spritesheet ship01a {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship01a/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship01b {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship01b/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship02a {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship02a/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship02b {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship02b/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship03a {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship03a/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship03b {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship03b/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship04a {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship04a/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship04b {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship04b/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+style radial {
+    BackgroundImage = url("Images/HexagonBorder1");
+    PreferredSize = 110px 122.5px;
+    AlignY = 25% Parent;
+    AlignX = 90% Parent;
+    BackgroundTint = rgba(255, 255, 255, 100);
+}
+
+style radial-fill {
+    BackgroundImage = url("Images/HexagonBorder1Thick");
+    PreferredSize = 112px 124.5px;
+    AlignX = 0% Parent;
+    TransformPositionY = -1px;
+    MeshType = FillRadial360;
+    MeshFillAmount = 0.6;
+    BackgroundTint = red;
+    MeshFillOrigin = Origin360_Top;
+}
+
+style progress-text {
+    LayoutBehavior = Ignored;
+    AlignX = Center Parent;
+    AlignY = Center Parent;
+    TextColor = white;
+    TextFontAsset = @theme.orbitron;
+}

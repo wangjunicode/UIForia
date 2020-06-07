@@ -148,8 +148,8 @@ namespace UIForia.Compilers.Style {
                     }
                 },
 
-                {"gridlayoutcolalignment", (targetStyle, property, context) => targetStyle.GridLayoutColAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
-                {"gridlayoutrowalignment", (targetStyle, property, context) => targetStyle.GridLayoutRowAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
+                //{"gridlayoutcolalignment", (targetStyle, property, context) => targetStyle.GridLayoutColAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
+                //{"gridlayoutrowalignment", (targetStyle, property, context) => targetStyle.GridLayoutRowAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
                 {"gridlayoutdensity", (targetStyle, property, context) => targetStyle.GridLayoutDensity = MapEnum<GridLayoutDensity>(property.children[0], context)},
                 {"gridlayoutcoltemplate", (targetStyle, property, context) => targetStyle.GridLayoutColTemplate = MapGridLayoutTemplate(property, context)},
                 {"gridlayoutrowtemplate", (targetStyle, property, context) => targetStyle.GridLayoutRowTemplate = MapGridLayoutTemplate(property, context)},
@@ -223,8 +223,6 @@ namespace UIForia.Compilers.Style {
                 {"layouttype", (targetStyle, property, context) => targetStyle.LayoutType = MapEnum<LayoutType>(property.children[0], context)},
                 {"layoutbehavior", (targetStyle, property, context) => targetStyle.LayoutBehavior = MapEnum<LayoutBehavior>(property.children[0], context)},
                 {"zindex", (targetStyle, property, context) => targetStyle.ZIndex = (int) MapNumber(property.children[0], context)},
-                {"renderlayer", (targetStyle, property, context) => targetStyle.RenderLayer = MapEnum<RenderLayer>(property.children[0], context)},
-                {"renderlayeroffset", (targetStyle, property, context) => targetStyle.RenderLayerOffset = (int) MapNumber(property.children[0], context)},
                 {"layer", (targetStyle, property, context) => targetStyle.Layer = (int) MapNumber(property.children[0], context)},
 
                 // Text
@@ -767,10 +765,10 @@ namespace UIForia.Compilers.Style {
         }
 
         private static IReadOnlyList<GridTrackSize> MapGridLayoutTemplate(PropertyNode propertyNode, StyleCompileContext context) {
-            LightList<GridTrackSize> gridTrackSizes = LightList<GridTrackSize>.Get();
+            GridTrackSize[] gridTrackSizes = new GridTrackSize[propertyNode.children.Count];
             for (int index = 0; index < propertyNode.children.Count; index++) {
                 StyleASTNode trackSize = propertyNode.children[index];
-                gridTrackSizes.Add(MapGridTrackSize(trackSize, context));
+                gridTrackSizes[index] = MapGridTrackSize(trackSize, context);
             }
 
             return gridTrackSizes;
@@ -916,7 +914,7 @@ namespace UIForia.Compilers.Style {
 
                                 cellDefinition.growLimit = MapGridCellSize(arg3, context);
                                 cellDefinition.growFactor = (int) MapNumber(arg4, context);
-                                ;
+                                
                                 return new GridTrackSize(cellDefinition);
                             }
 
@@ -1451,19 +1449,15 @@ namespace UIForia.Compilers.Style {
                     return OffsetMeasurementUnit.AllocatedHeight;
 
                 case "cw":
+                case "caw":
                     return OffsetMeasurementUnit.ContentWidth;
 
                 case "ch":
+                case "cah":
                     return OffsetMeasurementUnit.ContentHeight;
 
                 case "em":
                     return OffsetMeasurementUnit.Em;
-
-                case "caw":
-                    return OffsetMeasurementUnit.ContentAreaWidth;
-
-                case "cah":
-                    return OffsetMeasurementUnit.ContentAreaHeight;
 
                 case "vw":
                     return OffsetMeasurementUnit.ViewportWidth;

@@ -15,7 +15,7 @@ namespace UIForia.Util.Unsafe {
         public int capacity;
         public KeyValuePair<long, TValue>[] data;
         
-        public UnmanagedLongMapDebugView(UnmanagedLongMap<TValue> target) {
+        public UnmanagedLongMapDebugView(LongMap<TValue> target) {
             if (target.mapState == null) {
                 size = default;
                 capacity = default;
@@ -32,17 +32,17 @@ namespace UIForia.Util.Unsafe {
     }
 
     [DebuggerTypeProxy(typeof(UnmanagedLongMapDebugView<>))]
-    public unsafe struct UnmanagedLongMap<TValue> : IDisposable where TValue : unmanaged {
+    public unsafe struct LongMap<TValue> : IDisposable where TValue : unmanaged {
 
         internal readonly UntypedLongMap* mapState;
 
-        public UnmanagedLongMap(UntypedLongMap* mapState) {
+        public LongMap(UntypedLongMap* mapState) {
             this.mapState = mapState->GetItemSize() == sizeof(TValue)
                 ? mapState
                 : default;
         }
 
-        public UnmanagedLongMap(int initialCapacity, Allocator allocator, float fillFactor = 0.75f) {
+        public LongMap(int initialCapacity, Allocator allocator, float fillFactor = 0.75f) {
             this.mapState = UntypedLongMap.Create<TValue>(initialCapacity, fillFactor, allocator);
         }
 

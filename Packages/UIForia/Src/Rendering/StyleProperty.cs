@@ -253,6 +253,7 @@ namespace UIForia.Rendering {
         public Overflow AsOverflow => (Overflow) int0;
         public ClipBehavior AsClipBehavior => (ClipBehavior) int0;
         public Color AsColor => new StyleColor(int0);
+        public Color32 AsColor32 => new StyleColor(int0);
 
         public FontAsset AsFont => (FontAsset) objectField;
         public Texture2D AsTexture => (Texture2D) objectField;
@@ -440,14 +441,6 @@ namespace UIForia.Rendering {
             return new StyleProperty(StylePropertyId.GridLayoutRowGap, rowGap);
         }
 
-        public static StyleProperty GridLayoutColAlignment(CrossAxisAlignment alignment) {
-            return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int) alignment);
-        }
-
-        public static StyleProperty GridLayoutRowAlignment(CrossAxisAlignment alignment) {
-            return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int) alignment);
-        }
-
         public static StyleProperty MarginTop(UIMeasurement marginTop) {
             return new StyleProperty(StylePropertyId.MarginTop, marginTop);
         }
@@ -538,14 +531,6 @@ namespace UIForia.Rendering {
 
         public static StyleProperty ZIndex(int zIndex) {
             return new StyleProperty(StylePropertyId.ZIndex, zIndex);
-        }
-
-        public static StyleProperty LayerOffset(int layerOffset) {
-            return new StyleProperty(StylePropertyId.RenderLayerOffset, layerOffset);
-        }
-
-        public static StyleProperty RenderLayer(RenderLayer renderLayer) {
-            return new StyleProperty(StylePropertyId.RenderLayer, (int) renderLayer);
         }
 
         public static StyleProperty Font(FontAsset fontAsset) {

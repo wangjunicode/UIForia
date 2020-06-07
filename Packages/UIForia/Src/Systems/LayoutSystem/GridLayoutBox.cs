@@ -53,9 +53,9 @@ namespace UIForia.Systems {
     public class GridLayoutBox : LayoutBox {
 
         private bool placementDirty;
-        internal readonly StructList<GridTrack> colTrackList;
-        internal readonly StructList<GridTrack> rowTrackList;
-        internal readonly StructList<GridPlacement> placementList;
+        internal readonly StructList<GridTrackOld> colTrackList;
+        internal readonly StructList<GridTrackOld> rowTrackList;
+        internal readonly StructList<GridPlacementOld> placementList;
         
         // todo -- cannot use static with multithreading!!!!!
         internal static readonly StructList<GridRegion> s_OccupiedAreas = new StructList<GridRegion>(32);
@@ -66,9 +66,9 @@ namespace UIForia.Systems {
         public int ColCount => colTrackList.size;
 
         public GridLayoutBox() {
-            this.placementList = new StructList<GridPlacement>();
-            this.colTrackList = new StructList<GridTrack>(4);
-            this.rowTrackList = new StructList<GridTrack>(4);
+            this.placementList = new StructList<GridPlacementOld>();
+            this.colTrackList = new StructList<GridTrackOld>(4);
+            this.rowTrackList = new StructList<GridTrackOld>(4);
         }
 
         public override bool CanProvideHorizontalBlockSize(LayoutBox layoutBox, out float blockSize) {
@@ -76,10 +76,10 @@ namespace UIForia.Systems {
             if (finalSizeResolutionMode) {
                 for (int i = 0; i < placementList.size; i++) {
                     if (placementList.array[i].layoutBox == layoutBox) {
-                        ref GridPlacement placement = ref placementList.array[i];
+                        ref GridPlacementOld placement = ref placementList.array[i];
 
                         for (int x = placement.x; x < placement.x + placement.width; x++) {
-                            ref GridTrack track = ref colTrackList.array[x];
+                            ref GridTrackOld track = ref colTrackList.array[x];
 
                             if ((track.cellDefinition.baseSize.unit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
                                 blockSize = 0;
@@ -108,10 +108,10 @@ namespace UIForia.Systems {
             else {
                 for (int i = 0; i < placementList.size; i++) {
                     if (placementList.array[i].layoutBox == layoutBox) {
-                        ref GridPlacement placement = ref placementList.array[i];
+                        ref GridPlacementOld placement = ref placementList.array[i];
 
                         for (int x = placement.x; x < placement.x + placement.width; x++) {
-                            ref GridTrack track = ref colTrackList.array[x];
+                            ref GridTrackOld track = ref colTrackList.array[x];
 
                             if ((track.cellDefinition.baseSize.unit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
                                 blockSize = 0;
@@ -159,10 +159,10 @@ namespace UIForia.Systems {
             if (finalSizeResolutionMode) {
                 for (int i = 0; i < placementList.size; i++) {
                     if (placementList.array[i].layoutBox == layoutBox) {
-                        ref GridPlacement placement = ref placementList.array[i];
+                        ref GridPlacementOld placement = ref placementList.array[i];
 
                         for (int y = placement.y; y < placement.y + placement.height; y++) {
-                            ref GridTrack track = ref rowTrackList.array[y];
+                            ref GridTrackOld track = ref rowTrackList.array[y];
 
                             if ((track.cellDefinition.baseSize.unit & (GridTemplateUnit.MaxContent | GridTemplateUnit.MinContent)) != 0) {
                                 blockSize = 0;
@@ -191,10 +191,10 @@ namespace UIForia.Systems {
             else {
                 for (int i = 0; i < placementList.size; i++) {
                     if (placementList.array[i].layoutBox == layoutBox) {
-                        ref GridPlacement placement = ref placementList.array[i];
+                        ref GridPlacementOld placement = ref placementList.array[i];
 
                         for (int y = placement.y; y < placement.y + placement.height; y++) {
-                            ref GridTrack track = ref rowTrackList.array[y];
+                            ref GridTrackOld track = ref rowTrackList.array[y];
 
                             // todo -- implement base units
                             // first pass uses base size
@@ -351,7 +351,7 @@ namespace UIForia.Systems {
 
         private void ComputeHorizontalFixedTrackSizes() {
             for (int i = 0; i < colTrackList.size; i++) {
-                ref GridTrack track = ref colTrackList.array[i];
+                ref GridTrackOld track = ref colTrackList.array[i];
                 track.resolvedBaseSize = ResolveFixedHorizontalCellSize(track.cellDefinition.baseSize);
                 track.resolvedGrowLimit = ResolveFixedHorizontalCellSize(track.cellDefinition.growLimit);
                 track.resolvedShrinkLimit = ResolveFixedHorizontalCellSize(track.cellDefinition.shrinkLimit);
@@ -364,7 +364,7 @@ namespace UIForia.Systems {
         /// </summary>
         private void ComputeVerticalFixedTrackSizes() {
             for (int i = 0; i < rowTrackList.size; i++) {
-                ref GridTrack track = ref rowTrackList.array[i];
+                ref GridTrackOld track = ref rowTrackList.array[i];
                 track.resolvedBaseSize = ResolveFixedVerticalCellSize(track.cellDefinition.baseSize);
                 track.resolvedGrowLimit = ResolveFixedVerticalCellSize(track.cellDefinition.growLimit);
                 track.resolvedShrinkLimit = ResolveFixedVerticalCellSize(track.cellDefinition.shrinkLimit);
@@ -383,19 +383,19 @@ namespace UIForia.Systems {
         /// </summary>
         private void ComputeContentWidthContributionSizes() {
             for (int i = 0; i < colTrackList.size; i++) {
-                ref GridTrack track = ref colTrackList.array[i];
+                ref GridTrackOld track = ref colTrackList.array[i];
                 track.minContentContribution = -1;
                 track.maxContentContribution = 0;
             }
 
             for (int i = 0; i < placementList.size; i++) {
-                ref GridPlacement placement = ref placementList.array[i];
+                ref GridPlacementOld placement = ref placementList.array[i];
 
                 int spannedIntrinsics = 0;
                 float width = placement.outputWidth;
 
                 for (int k = placement.x; k < placement.x + placement.width; k++) {
-                    ref GridTrack track = ref colTrackList.array[k];
+                    ref GridTrackOld track = ref colTrackList.array[k];
                     if (track.IsIntrinsic) {
                         spannedIntrinsics++;
                     }
@@ -414,7 +414,7 @@ namespace UIForia.Systems {
                 }
 
                 for (int k = placement.x; k < placement.x + placement.width; k++) {
-                    ref GridTrack track = ref colTrackList.array[k];
+                    ref GridTrackOld track = ref colTrackList.array[k];
 
                     if (track.maxContentContribution < placement.widthContributionSize) {
                         track.maxContentContribution = placement.widthContributionSize;
@@ -431,19 +431,19 @@ namespace UIForia.Systems {
         /// See ComputeContentWidthContributionSizes, use height instead of width 
         private void ComputeContentHeightContributionSizes() {
             for (int i = 0; i < rowTrackList.size; i++) {
-                ref GridTrack track = ref rowTrackList.array[i];
+                ref GridTrackOld track = ref rowTrackList.array[i];
                 track.minContentContribution = -1;
                 track.maxContentContribution = 0;
             }
 
             for (int i = 0; i < placementList.size; i++) {
-                ref GridPlacement placement = ref placementList.array[i];
+                ref GridPlacementOld placement = ref placementList.array[i];
 
                 int spannedIntrinsics = 0;
                 float height = placement.outputHeight;
 
                 for (int k = placement.y; k < placement.y + placement.height; k++) {
-                    ref GridTrack track = ref rowTrackList.array[k];
+                    ref GridTrackOld track = ref rowTrackList.array[k];
                     if (track.IsIntrinsic) {
                         spannedIntrinsics++;
                     }
@@ -462,7 +462,7 @@ namespace UIForia.Systems {
                 }
 
                 for (int k = placement.y; k < placement.y + placement.height; k++) {
-                    ref GridTrack track = ref rowTrackList.array[k];
+                    ref GridTrackOld track = ref rowTrackList.array[k];
 
                     if (track.maxContentContribution < placement.heightContributionSize) {
                         track.maxContentContribution = placement.heightContributionSize;
@@ -475,9 +475,9 @@ namespace UIForia.Systems {
             }
         }
 
-        private static void ResolveTrackSizes(StructList<GridTrack> tracks) {
+        private static void ResolveTrackSizes(StructList<GridTrackOld> tracks) {
             for (int i = 0; i < tracks.size; i++) {
-                ref GridTrack track = ref tracks.array[i];
+                ref GridTrackOld track = ref tracks.array[i];
 
                 if (track.IsIntrinsic) {
                     // fixed sizes will have already been figured out by now
@@ -509,22 +509,22 @@ namespace UIForia.Systems {
         }
 
         private void ComputeItemWidths() {
-            GridPlacement[] placements = placementList.array;
+            GridPlacementOld[] placements = placementList.array;
             int placementCount = placementList.size;
 
             for (int i = 0; i < placementCount; i++) {
-                ref GridPlacement placement = ref placements[i];
+                ref GridPlacementOld placement = ref placements[i];
                 placement.layoutBox.GetWidths(ref placement.widthData);
                 placement.outputWidth = placement.widthData.Clamped + placement.widthData.marginStart + placement.widthData.marginEnd;
             }
         }
 
         private void ComputeItemHeights() {
-            GridPlacement[] placements = placementList.array;
+            GridPlacementOld[] placements = placementList.array;
             int placementCount = placementList.size;
 
             for (int i = 0; i < placementCount; i++) {
-                ref GridPlacement placement = ref placements[i];
+                ref GridPlacementOld placement = ref placements[i];
                 placement.layoutBox.GetHeights(ref placement.heightData);
                 placement.outputHeight = placement.heightData.Clamped + placement.heightData.marginStart + placement.heightData.marginEnd;
             }
@@ -574,10 +574,9 @@ namespace UIForia.Systems {
             for (int i = 0; i < propertyCount; i++) {
                 ref StyleProperty property = ref propertyList[i];
                 switch (property.propertyId) {
-                    case StylePropertyId.GridLayoutColAlignment:
-                    case StylePropertyId.GridLayoutRowAlignment:
+                    // case StylePropertyId.GridLayoutColAlignment:
+                    // case StylePropertyId.GridLayoutRowAlignment:
                         // layout? not sure what to do here since we just need to adjust alignment, not re calc sizes
-                        break;
                     case StylePropertyId.GridLayoutDensity:
                     case StylePropertyId.GridLayoutDirection:
                         placementDirty = true;
@@ -658,7 +657,7 @@ namespace UIForia.Systems {
 
             // this ignores fr sizes on purpose, fr size is always 0 for content size
             for (int i = 0; i < colTrackList.size; i++) {
-                ref GridTrack track = ref colTrackList.array[i];
+                ref GridTrackOld track = ref colTrackList.array[i];
                 track.size = track.resolvedBaseSize;
                 retn += track.size;
             }
@@ -686,7 +685,7 @@ namespace UIForia.Systems {
                 // issues where the grid grew or shrunk in size since providing the initial block size on the initial run.
                 finalSizeResolutionMode = true;
                 for (int i = 0; i < deferredList.size; i++) {
-                    ref GridPlacement placement = ref placementList.array[deferredList.array[i]];
+                    ref GridPlacementOld placement = ref placementList.array[deferredList.array[i]];
                     placement.layoutBox.GetWidths(ref placement.widthData);
                     placement.outputWidth = placement.widthData.Clamped + placement.widthData.marginStart + placement.widthData.marginEnd;
                 }
@@ -696,9 +695,9 @@ namespace UIForia.Systems {
             }
 
             for (int i = 0; i < placementList.size; i++) {
-                ref GridPlacement placement = ref placementList.array[i];
-                ref GridTrack startTrack = ref colTrackList.array[placement.x];
-                ref GridTrack endTrack = ref colTrackList.array[placement.x + placement.width - 1];
+                ref GridPlacementOld placement = ref placementList.array[i];
+                ref GridTrackOld startTrack = ref colTrackList.array[placement.x];
+                ref GridTrackOld endTrack = ref colTrackList.array[placement.x + placement.width - 1];
                 float elementWidth = placement.outputWidth - placement.widthData.marginStart - placement.widthData.marginEnd;
                 float x = startTrack.position;
                 float layoutBoxWidth = (endTrack.position + endTrack.size) - x;
@@ -711,10 +710,10 @@ namespace UIForia.Systems {
             }
         }
 
-        private static void PositionTracks(StructList<GridTrack> trackList, float gap, float inset) {
+        private static void PositionTracks(StructList<GridTrackOld> trackList, float gap, float inset) {
             float offset = inset;
             for (int i = 0; i < trackList.size; i++) {
-                ref GridTrack track = ref trackList.array[i];
+                ref GridTrackOld track = ref trackList.array[i];
                 track.position = offset;
                 offset += gap + track.size;
             }
@@ -740,7 +739,7 @@ namespace UIForia.Systems {
 
             // this ignores fr sizes on purpose, fr size is always 0 for content size
             for (int i = 0; i < rowTrackList.size; i++) {
-                ref GridTrack track = ref rowTrackList.array[i];
+                ref GridTrackOld track = ref rowTrackList.array[i];
                 track.size = track.resolvedBaseSize;
                 retn += track.size;
             }
@@ -768,7 +767,7 @@ namespace UIForia.Systems {
                 // issues where the grid grew or shrunk in size since providing the initial block size on the initial run.
                 finalSizeResolutionMode = true;
                 for (int i = 0; i < deferredList.size; i++) {
-                    ref GridPlacement placement = ref placementList.array[deferredList.array[i]];
+                    ref GridPlacementOld placement = ref placementList.array[deferredList.array[i]];
                     placement.layoutBox.GetHeights(ref placement.heightData);
                     placement.outputHeight = placement.heightData.Clamped + placement.heightData.marginStart + placement.heightData.marginEnd;
                 }
@@ -778,9 +777,9 @@ namespace UIForia.Systems {
             }
 
             for (int i = 0; i < placementList.size; i++) {
-                ref GridPlacement placement = ref placementList.array[i];
-                ref GridTrack startTrack = ref rowTrackList.array[placement.y];
-                ref GridTrack endTrack = ref rowTrackList.array[placement.y + placement.height - 1];
+                ref GridPlacementOld placement = ref placementList.array[i];
+                ref GridTrackOld startTrack = ref rowTrackList.array[placement.y];
+                ref GridTrackOld endTrack = ref rowTrackList.array[placement.y + placement.height - 1];
                 float elementHeight = placement.outputHeight - placement.heightData.marginStart - placement.heightData.marginEnd;
                 float y = startTrack.position;
                 float layoutBoxHeight = (endTrack.position + endTrack.size) - y;
@@ -793,14 +792,14 @@ namespace UIForia.Systems {
             }
         }
 
-        private static float GrowStep(StructList<GridTrack> trackList, float remaining) {
+        private static float GrowStep(StructList<GridTrackOld> trackList, float remaining) {
             // get grow limits for each track
             // distribute space in 'virtual' fr units across things that still want to grow
             float desiredSpace = 0;
             int pieces = 0;
 
             for (int i = 0; i < trackList.size; i++) {
-                ref GridTrack track = ref trackList.array[i];
+                ref GridTrackOld track = ref trackList.array[i];
 
                 if (track.size < track.resolvedGrowLimit && track.cellDefinition.growFactor > 0) {
                     desiredSpace += track.resolvedGrowLimit - track.size;
@@ -822,7 +821,7 @@ namespace UIForia.Systems {
             float pieceSize = desiredSpace / pieces;
 
             for (int i = 0; i < trackList.size; i++) {
-                ref GridTrack track = ref trackList.array[i];
+                ref GridTrackOld track = ref trackList.array[i];
 
                 if (track.size < track.resolvedGrowLimit) {
                     track.size += pieceSize;
@@ -838,13 +837,13 @@ namespace UIForia.Systems {
             return allocatedSpace;
         }
 
-        private static float ShrinkStep(StructList<GridTrack> trackList, float overflow) {
+        private static float ShrinkStep(StructList<GridTrackOld> trackList, float overflow) {
             int pieces = 0;
 
             if (overflow >= 0) return 0;
 
             for (int i = 0; i < trackList.size; i++) {
-                ref GridTrack track = ref trackList.array[i];
+                ref GridTrackOld track = ref trackList.array[i];
 
                 if (track.size > track.resolvedShrinkLimit && track.cellDefinition.shrinkFactor > 0) {
                     pieces += track.cellDefinition.shrinkFactor;
@@ -860,7 +859,7 @@ namespace UIForia.Systems {
             float pieceSize = -overflow / pieces;
 
             for (int i = 0; i < trackList.size; i++) {
-                ref GridTrack track = ref trackList.array[i];
+                ref GridTrackOld track = ref trackList.array[i];
 
                 if (track.size > track.resolvedShrinkLimit) {
                     track.size -= pieceSize;
@@ -876,7 +875,7 @@ namespace UIForia.Systems {
             return allocatedSpace;
         }
 
-        private static float Grow(StructList<GridTrack> trackList, float remaining) {
+        private static float Grow(StructList<GridTrackOld> trackList, float remaining) {
             float allocated = 0;
             do {
                 allocated = GrowStep(trackList, remaining);
@@ -886,7 +885,7 @@ namespace UIForia.Systems {
             return remaining;
         }
 
-        private static float Shrink(StructList<GridTrack> trackList, float remaining) {
+        private static float Shrink(StructList<GridTrackOld> trackList, float remaining) {
             float allocated = 0;
             do {
                 allocated = ShrinkStep(trackList, remaining);
@@ -912,7 +911,7 @@ namespace UIForia.Systems {
                 GridItemPlacement width = child.element.style.GridItemWidth;
                 GridItemPlacement height = child.element.style.GridItemHeight;
 
-                GridPlacement placement = default;
+                GridPlacementOld placement = default;
 
                 placement.layoutBox = child;
                 placement.x = x.name != null ? ResolveHorizontalStart(x.name) : x.index;
@@ -944,7 +943,7 @@ namespace UIForia.Systems {
             PlaceRemainingItems(ref colSizeAutoPtr, autoColSizePattern, ref rowSizeAutoPtr, autoRowSizePattern);
         }
 
-        private static void GenerateExplicitTracksForAxis(IReadOnlyList<GridTrackSize> templateList, StructList<GridTrack> trackList) {
+        private static void GenerateExplicitTracksForAxis(IReadOnlyList<GridTrackSize> templateList, StructList<GridTrackOld> trackList) {
             int idx = 0;
 
             trackList.size = 0;
@@ -956,7 +955,7 @@ namespace UIForia.Systems {
 
                 switch (template.type) {
                     case GridTrackSizeType.Value:
-                        trackList.array[idx++] = new GridTrack(template.cell);
+                        trackList.array[idx++] = new GridTrackOld(template.cell);
                         break;
 
                     case GridTrackSizeType.MinMax:
@@ -1005,7 +1004,7 @@ namespace UIForia.Systems {
 
         private void PlaceBothAxisLocked() {
             for (int i = 0; i < placementList.size; i++) {
-                ref GridPlacement placement = ref placementList.array[i];
+                ref GridPlacementOld placement = ref placementList.array[i];
 
                 if (placement.y >= 0 && placement.x >= 0) {
                     GridRegion region = new GridRegion();
@@ -1022,7 +1021,7 @@ namespace UIForia.Systems {
             bool dense = element.style.GridLayoutDensity == GridLayoutDensity.Dense;
 
             for (int i = 0; i < placementList.size; i++) {
-                ref GridPlacement placement = ref placementList.array[i];
+                ref GridPlacementOld placement = ref placementList.array[i];
 
                 int x = placement.x;
                 int y = placement.y;
@@ -1081,10 +1080,10 @@ namespace UIForia.Systems {
             int maxColStartAndSpan = 0;
             int maxRowStartAndSpan = 0;
 
-            GridPlacement[] placements = placementList.array;
+            GridPlacementOld[] placements = placementList.array;
 
             for (int i = 0; i < placementList.size; i++) {
-                ref GridPlacement placement = ref placements[i];
+                ref GridPlacementOld placement = ref placements[i];
                 int colStart = placement.x;
                 int rowStart = placement.y;
                 int colSpan = placement.width;
@@ -1119,7 +1118,7 @@ namespace UIForia.Systems {
             int sparseStartY = 0; // purposefully not reading autoCursor value because that results in weird behavior for sparse grids (this is not the same as css!)
 
             for (int i = 0; i < placementList.size; i++) {
-                ref GridPlacement placement = ref placementList.array[i];
+                ref GridPlacementOld placement = ref placementList.array[i];
 
                 int width = placement.width;
                 int height = placement.height;
@@ -1236,7 +1235,7 @@ namespace UIForia.Systems {
             return true;
         }
 
-        private static void EnsureImplicitTrackCapacity(StructList<GridTrack> tracksList, int count, ref int autoSize, IReadOnlyList<GridTrackSize> autoSizes) {
+        private static void EnsureImplicitTrackCapacity(StructList<GridTrackOld> tracksList, int count, ref int autoSize, IReadOnlyList<GridTrackSize> autoSizes) {
             if (count >= tracksList.size) {
                 tracksList.EnsureCapacity(count);
 
@@ -1244,7 +1243,7 @@ namespace UIForia.Systems {
                 int toCreate = count - tracksList.size;
 
                 for (int i = 0; i < toCreate; i++) {
-                    tracksList.array[idx++] = new GridTrack(autoSizes[autoSize].cell);
+                    tracksList.array[idx++] = new GridTrackOld(autoSizes[autoSize].cell);
                     autoSize = (autoSize + 1) % autoSizes.Count;
                 }
 
@@ -1252,7 +1251,7 @@ namespace UIForia.Systems {
             }
         }
 
-        internal struct GridPlacement {
+        internal struct GridPlacementOld {
 
             public int x;
             public int y;
@@ -1277,7 +1276,7 @@ namespace UIForia.Systems {
 
         }
 
-        internal struct GridTrack {
+        internal struct GridTrackOld {
 
             public float position;
             public float size;
@@ -1289,7 +1288,7 @@ namespace UIForia.Systems {
             public float maxContentContribution;
             public float minContentContribution;
 
-            public GridTrack(in GridCellDefinition cellDefinition) {
+            public GridTrackOld(in GridCellDefinition cellDefinition) {
                 this.cellDefinition = cellDefinition;
                 this.position = 0;
                 this.size = 0;

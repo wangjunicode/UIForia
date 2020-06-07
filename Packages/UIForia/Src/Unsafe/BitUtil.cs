@@ -22,6 +22,12 @@ namespace UIForia.Util {
         }
 
         [DebuggerStepThrough]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int SetHighLowBits(uint high, uint low) {
+            return (int) ((high << 16) | (low & 0xffff));
+        }
+
+        [DebuggerStepThrough]
         public static int GetHighBits(int input) {
             return (input >> 16) & (1 << 16) - 1;
         }
@@ -228,7 +234,6 @@ namespace UIForia.Util {
             return -1;
         }
 
-     
     }
 
 }

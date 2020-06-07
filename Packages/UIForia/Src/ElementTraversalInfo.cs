@@ -33,6 +33,10 @@
             return info.depth == info.depth - 1 && ftbIndex < info.ftbIndex && btfIndex < info.btfIndex;
         }
 
+        public bool IsLaterInHierarchy(in ElementTraversalInfo info) {
+            return ftbIndex > info.ftbIndex;
+        }
+
     }
 
 }

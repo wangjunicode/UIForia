@@ -28,11 +28,12 @@ namespace TemplateBinding {
 
         [Test]
         public void SimpleBinding() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_BasicBindingOuter>();
-            TemplateBindingTest_BasicBindingInner inner = (TemplateBindingTest_BasicBindingInner) app.RootElement[0];
-            Assert.AreEqual(5, inner.intVal);
-            app.Update();
-            Assert.AreEqual(25, inner.intVal);
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_BasicBindingOuter>()) {
+                TemplateBindingTest_BasicBindingInner inner = (TemplateBindingTest_BasicBindingInner) app.RootElement[0];
+                Assert.AreEqual(5, inner.intVal);
+                app.Update();
+                Assert.AreEqual(25, inner.intVal);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_CreatedBinding.xml")]
@@ -55,18 +56,19 @@ namespace TemplateBinding {
 
         [Test]
         public void CreatedBinding() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_CreatedBindingOuter>();
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_CreatedBindingOuter>()) {
 
-            TemplateBindingTest_CreatedBindingOuter outer = (TemplateBindingTest_CreatedBindingOuter) app.RootElement;
-            TemplateBindingTest_CreatedBindingInner inner = (TemplateBindingTest_CreatedBindingInner) app.RootElement[0];
+                TemplateBindingTest_CreatedBindingOuter outer = (TemplateBindingTest_CreatedBindingOuter) app.RootElement;
+                TemplateBindingTest_CreatedBindingInner inner = (TemplateBindingTest_CreatedBindingInner) app.RootElement[0];
 
-            int original = outer.value;
+                int original = outer.value;
 
-            Assert.AreEqual(original, inner.intVal);
-            outer.value = 25;
-            app.Update();
-            Assert.AreEqual(original, inner.intVal);
-            Assert.AreEqual(25, outer.GetValue());
+                Assert.AreEqual(original, inner.intVal);
+                outer.value = 25;
+                app.Update();
+                Assert.AreEqual(original, inner.intVal);
+                Assert.AreEqual(25, outer.GetValue());
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_AttributeBinding.xml")]
@@ -78,18 +80,19 @@ namespace TemplateBinding {
 
         [Test]
         public void AttributeBinding() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_AttributeBinding>();
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_AttributeBinding>()) {
 
-            TemplateBindingTest_AttributeBinding outer = (TemplateBindingTest_AttributeBinding) app.RootElement;
-            UIElement inner = outer[0];
+                TemplateBindingTest_AttributeBinding outer = (TemplateBindingTest_AttributeBinding) app.RootElement;
+                UIElement inner = outer[0];
 
-            Assert.AreEqual("attr-value", inner.GetAttribute("someAttr"));
-            Assert.AreEqual("", inner.GetAttribute("dynamicAttr"));
+                Assert.AreEqual("attr-value", inner.GetAttribute("someAttr"));
+                Assert.AreEqual("", inner.GetAttribute("dynamicAttr"));
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("attr-value", inner.GetAttribute("someAttr"));
-            Assert.AreEqual("dynamic18", inner.GetAttribute("dynamicAttr"));
+                Assert.AreEqual("attr-value", inner.GetAttribute("someAttr"));
+                Assert.AreEqual("dynamic18", inner.GetAttribute("dynamicAttr"));
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_MouseBinding.xml")]
@@ -144,57 +147,58 @@ namespace TemplateBinding {
 
         [Test]
         public void MouseHandlerBinding() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_MouseBindingBinding>();
-            TemplateBindingTest_MouseBindingBinding e = (TemplateBindingTest_MouseBindingBinding) app.RootElement;
-            app.SetScreenSize(1000, 1000);
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_MouseBindingBinding>()) {
+                TemplateBindingTest_MouseBindingBinding e = (TemplateBindingTest_MouseBindingBinding) app.RootElement;
+                app.SetScreenSize(1000, 1000);
 
-            app.Update();
+                app.Update();
 
-            app.InputSystem.MouseDown(new Vector2(50, 50));
+                app.InputSystem.MouseDown(new Vector2(50, 50));
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("No Params Was Called", e.output_NoParams);
+                Assert.AreEqual("No Params Was Called", e.output_NoParams);
 
-            app.Update();
+                app.Update();
 
-            app.InputSystem.MouseDown(new Vector2(50, 150));
+                app.InputSystem.MouseDown(new Vector2(50, 150));
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("EvtParam was called 50, 150", e.output_EvtParam);
+                Assert.AreEqual("EvtParam was called 50, 150", e.output_EvtParam);
 
-            app.InputSystem.MouseDown(new Vector2(50, 250));
+                app.InputSystem.MouseDown(new Vector2(50, 250));
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("MixedParams was called 50, 250 param = 250", e.output_MixedParams);
+                Assert.AreEqual("MixedParams was called 50, 250 param = 250", e.output_MixedParams);
 
-            app.InputSystem.MouseDown(new Vector2(50, 350));
+                app.InputSystem.MouseDown(new Vector2(50, 350));
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("NoEvtParam was called str = string goes here param = 250", e.output_NoEvtParam);
+                Assert.AreEqual("NoEvtParam was called str = string goes here param = 250", e.output_NoEvtParam);
 
-            app.InputSystem.MouseDown(new Vector2(50, 450));
+                app.InputSystem.MouseDown(new Vector2(50, 450));
 
-            app.Update();
+                app.Update();
 
-            TemplateBindingTest_ThingWithMouseHandler thing = e["mousedownthing"] as TemplateBindingTest_ThingWithMouseHandler;
-            Assert.AreEqual("was down", thing.downNoParam);
-            Assert.AreEqual("down 450", thing.downParam);
+                TemplateBindingTest_ThingWithMouseHandler thing = e["mousedownthing"] as TemplateBindingTest_ThingWithMouseHandler;
+                Assert.AreEqual("was down", thing.downNoParam);
+                Assert.AreEqual("down 450", thing.downParam);
 
-            app.InputSystem.MouseDown(new Vector2(50, 550));
+                app.InputSystem.MouseDown(new Vector2(50, 550));
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(550, e.output_value);
+                Assert.AreEqual(550, e.output_value);
 
-            app.InputSystem.MouseDown(new Vector2(50, 650));
+                app.InputSystem.MouseDown(new Vector2(50, 650));
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(650, e.output_value);
+                Assert.AreEqual(650, e.output_value);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_KeyboardInput.xml")]
@@ -236,48 +240,49 @@ namespace TemplateBinding {
 
         [Test]
         public void KeyboardHandlerBinding() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_KeyboardBinding>();
-            TemplateBindingTest_KeyboardBinding e = (TemplateBindingTest_KeyboardBinding) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_KeyboardBinding>()) {
+                TemplateBindingTest_KeyboardBinding e = (TemplateBindingTest_KeyboardBinding) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('a', KeyState.DownThisFrame);
+                app.InputSystem.mockKeyboardManager.inputState.SetKeyState('a', KeyState.DownThisFrame);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("No Params Was Called", e.output_NoParams);
+                Assert.AreEqual("No Params Was Called", e.output_NoParams);
 
-            app.Update();
+                app.Update();
 
-            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('b', KeyState.DownThisFrame);
+                app.InputSystem.mockKeyboardManager.inputState.SetKeyState('b', KeyState.DownThisFrame);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("EvtParam was called b", e.output_EvtParam);
+                Assert.AreEqual("EvtParam was called b", e.output_EvtParam);
 
-            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('c', KeyState.DownThisFrame);
+                app.InputSystem.mockKeyboardManager.inputState.SetKeyState('c', KeyState.DownThisFrame);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("MixedParams was called c param = 5", e.output_MixedParams);
+                Assert.AreEqual("MixedParams was called c param = 5", e.output_MixedParams);
 
-            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('d', KeyState.DownThisFrame);
+                app.InputSystem.mockKeyboardManager.inputState.SetKeyState('d', KeyState.DownThisFrame);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual($"NoEvtParam was called str = string goes here param = {(int) 'd'}", e.output_NoEvtParam);
+                Assert.AreEqual($"NoEvtParam was called str = string goes here param = {(int) 'd'}", e.output_NoEvtParam);
 
-            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('e', KeyState.DownThisFrame);
+                app.InputSystem.mockKeyboardManager.inputState.SetKeyState('e', KeyState.DownThisFrame);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual('e', e.output_value);
+                Assert.AreEqual('e', e.output_value);
 
-            app.InputSystem.mockKeyboardManager.inputState.SetKeyState('f', KeyState.DownThisFrame);
+                app.InputSystem.mockKeyboardManager.inputState.SetKeyState('f', KeyState.DownThisFrame);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual('f', e.output_value2);
+                Assert.AreEqual('f', e.output_value2);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_ConditionalBinding.xml")]
@@ -324,15 +329,16 @@ namespace TemplateBinding {
 
         [Test]
         public void EventBinding_MethodGroup() {
-            MockApplication app = MockApplication.Setup<TestTemplateBinding_EventBinding_MethodGroup_Main>();
-            TestTemplateBinding_EventBinding_MethodGroup_Main e = (TestTemplateBinding_EventBinding_MethodGroup_Main) app.RootElement;
-            TestTemplateBinding_EventBinding_MethodGroup child = (TestTemplateBinding_EventBinding_MethodGroup) e[0];
+            using (MockApplication app = MockApplication.Setup<TestTemplateBinding_EventBinding_MethodGroup_Main>()) {
+                TestTemplateBinding_EventBinding_MethodGroup_Main e = (TestTemplateBinding_EventBinding_MethodGroup_Main) app.RootElement;
+                TestTemplateBinding_EventBinding_MethodGroup child = (TestTemplateBinding_EventBinding_MethodGroup) e[0];
 
-            app.Update();
+                app.Update();
 
-            child.Invoke();
+                child.Invoke();
 
-            Assert.AreEqual(1, e.called);
+                Assert.AreEqual(1, e.called);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_EventBinding.xml#access_expr")]
@@ -344,35 +350,37 @@ namespace TemplateBinding {
 
         [Test]
         public void EventBinding_DotAccess() {
-            MockApplication app = MockApplication.Setup<TestTemplateBinding_EventBinding_MethodGroup_AccessExpr>();
-            TestTemplateBinding_EventBinding_MethodGroup_AccessExpr e = (TestTemplateBinding_EventBinding_MethodGroup_AccessExpr) app.RootElement;
-            TestTemplateBinding_EventBinding_MethodGroup child = (TestTemplateBinding_EventBinding_MethodGroup) e[0];
+            using (MockApplication app = MockApplication.Setup<TestTemplateBinding_EventBinding_MethodGroup_AccessExpr>()) {
+                TestTemplateBinding_EventBinding_MethodGroup_AccessExpr e = (TestTemplateBinding_EventBinding_MethodGroup_AccessExpr) app.RootElement;
+                TestTemplateBinding_EventBinding_MethodGroup child = (TestTemplateBinding_EventBinding_MethodGroup) e[0];
 
-            e.thing = new Thing();
-            app.Update();
+                e.thing = new Thing();
+                app.Update();
 
-            child.Invoke();
+                child.Invoke();
 
-            Assert.AreEqual(1, e.thing.called);
+                Assert.AreEqual(1, e.thing.called);
+            }
         }
 
         [Test]
         public void ConditionBinding() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_ConditionalBinding>();
-            TemplateBindingTest_ConditionalBinding e = (TemplateBindingTest_ConditionalBinding) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_ConditionalBinding>()) {
+                TemplateBindingTest_ConditionalBinding e = (TemplateBindingTest_ConditionalBinding) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            UITextElement textElementTrue = e[0] as UITextElement;
-            UITextElement textElementFalse = e[1] as UITextElement;
-            Assert.IsTrue(textElementFalse.isEnabled);
-            Assert.IsTrue(textElementTrue.isDisabled);
-
-            e.condition = true;
-            app.Update();
-
-            Assert.IsTrue(textElementFalse.isDisabled);
-            Assert.IsTrue(textElementTrue.isEnabled);
+                UITextElement textElementTrue = e[0] as UITextElement;
+                UITextElement textElementFalse = e[1] as UITextElement;
+                Assert.IsTrue(textElementFalse.isEnabled);
+                Assert.IsTrue(textElementTrue.isDisabled);
+                
+                e.condition = true;
+                app.Update();
+                
+                Assert.IsTrue(textElementFalse.isDisabled);
+                Assert.IsTrue(textElementTrue.isEnabled);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_StyleBinding.xml")]
@@ -380,13 +388,14 @@ namespace TemplateBinding {
 
         [Test]
         public void StyleBinding() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleBinding>();
-            TemplateBindingTest_StyleBinding e = (TemplateBindingTest_StyleBinding) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleBinding>()) {
+                TemplateBindingTest_StyleBinding e = (TemplateBindingTest_StyleBinding) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
-            Assert.AreEqual(new OffsetMeasurement(53, OffsetMeasurementUnit.ViewportWidth), e[0].style.Hover.TransformPositionX);
+                Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
+                Assert.AreEqual(new OffsetMeasurement(53, OffsetMeasurementUnit.ViewportWidth), e[0].style.Hover.TransformPositionX);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_DynamicStyleBinding.xml")]
@@ -406,43 +415,44 @@ namespace TemplateBinding {
 
         [Test]
         public void DynamicStyleBinding() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_DynamicStyleBinding>();
-            TemplateBindingTest_DynamicStyleBinding e = (TemplateBindingTest_DynamicStyleBinding) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_DynamicStyleBinding>()) {
+                TemplateBindingTest_DynamicStyleBinding e = (TemplateBindingTest_DynamicStyleBinding) app.RootElement;
 
-            e.useDynamic = false;
+                e.useDynamic = false;
 
-            app.Update();
+                app.Update();
 
-            UIElement d0 = e[0];
+                UIElement d0 = e[0];
 
-            List<UIStyleGroupContainer> d0Styles = d0.style.GetBaseStyles();
-            Assert.AreEqual(2, d0Styles.Count);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-1"), d0Styles[0]);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[1]);
+                List<UIStyleGroupContainer> d0Styles = d0.style.GetBaseStyles();
+                Assert.AreEqual(2, d0Styles.Count);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-1"), d0Styles[0]);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[1]);
 
-            e.useDynamic = true;
+                e.useDynamic = true;
 
-            app.Update();
+                app.Update();
 
-            d0Styles = d0.style.GetBaseStyles();
+                d0Styles = d0.style.GetBaseStyles();
 
-            Assert.AreEqual(3, d0Styles.Count);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-1"), d0Styles[0]);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[1]);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("dynamicStyle"), d0Styles[2]);
+                Assert.AreEqual(3, d0Styles.Count);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-1"), d0Styles[0]);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[1]);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("dynamicStyle"), d0Styles[2]);
 
-            e.useDynamic = false;
-            e.styleList = new[] {"list-1", "list-2"};
+                e.useDynamic = false;
+                e.styleList = new[] {"list-1", "list-2"};
 
-            app.Update();
+                app.Update();
 
-            d0Styles = d0.style.GetBaseStyles();
+                d0Styles = d0.style.GetBaseStyles();
 
-            Assert.AreEqual(4, d0Styles.Count);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-1"), d0Styles[0]);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[1]);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("list-1"), d0Styles[2]);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("list-2"), d0Styles[3]);
+                Assert.AreEqual(4, d0Styles.Count);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-1"), d0Styles[0]);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[1]);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("list-1"), d0Styles[2]);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("list-2"), d0Styles[3]);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_UnresolvedDynamicStyle.xml")]
@@ -454,25 +464,26 @@ namespace TemplateBinding {
 
         [Test]
         public void DynamicStyleBinding_UnresolvedDynamic() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_UnresolvedDynamicStyle>();
-            TemplateBindingTest_UnresolvedDynamicStyle e = (TemplateBindingTest_UnresolvedDynamicStyle) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_UnresolvedDynamicStyle>()) {
+                TemplateBindingTest_UnresolvedDynamicStyle e = (TemplateBindingTest_UnresolvedDynamicStyle) app.RootElement;
 
-            e.val = 1;
-            app.Update();
+                e.val = 1;
+                app.Update();
 
-            UIElement d0 = e[0];
+                UIElement d0 = e[0];
 
-            List<UIStyleGroupContainer> d0Styles = d0.style.GetBaseStyles();
-            Assert.AreEqual(2, d0Styles.Count);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-1"), d0Styles[0]);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[1]);
+                List<UIStyleGroupContainer> d0Styles = d0.style.GetBaseStyles();
+                Assert.AreEqual(2, d0Styles.Count);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-1"), d0Styles[0]);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[1]);
 
-            e.val = 300;
+                e.val = 300;
 
-            app.Update();
-            d0Styles = d0.style.GetBaseStyles();
-            Assert.AreEqual(1, d0Styles.Count);
-            Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[0]);
+                app.Update();
+                d0Styles = d0.style.GetBaseStyles();
+                Assert.AreEqual(1, d0Styles.Count);
+                Assert.AreEqual(e.templateMetaData.ResolveStyleByName("style-2"), d0Styles[0]);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_ContextVariable.xml")]
@@ -483,20 +494,21 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariableBinding() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_ContextVariable>();
-            TemplateBindingTest_ContextVariable e = (TemplateBindingTest_ContextVariable) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_ContextVariable>()) {
+                TemplateBindingTest_ContextVariable e = (TemplateBindingTest_ContextVariable) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            UITextElement textElement = app.RootElement[0][0] as UITextElement;
+                UITextElement textElement = app.RootElement[0][0] as UITextElement;
 
-            Assert.AreEqual("answer = 25", textElement.text.Trim());
+                Assert.AreEqual("answer = 25", textElement.text.Trim());
 
-            UIElement nested = e["text-el"];
-            Assert.NotNull(nested);
+                UIElement nested = e["text-el"];
+                Assert.NotNull(nested);
 
-            UITextElement nestedTextEl = nested as UITextElement;
-            Assert.AreEqual("slot answer is = 50", nestedTextEl.text.Trim());
+                UITextElement nestedTextEl = nested as UITextElement;
+                Assert.AreEqual("slot answer is = 50", nestedTextEl.text.Trim());
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#out_of_scope")]
@@ -513,13 +525,14 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariable_UseAlias() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_ContextVariable_UseAlias>();
-            TemplateBindingTest_ContextVariable_UseAlias e = (TemplateBindingTest_ContextVariable_UseAlias) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_ContextVariable_UseAlias>()) {
+                TemplateBindingTest_ContextVariable_UseAlias e = (TemplateBindingTest_ContextVariable_UseAlias) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("var 0", GetText(e["outer"][0]));
-            Assert.AreEqual("var 0", GetText(e["nested"][0]));
+                Assert.AreEqual("var 0", GetText(e["outer"][0]));
+                Assert.AreEqual("var 0", GetText(e["nested"][0]));
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#use_alias_out_of_scope")]
@@ -569,12 +582,13 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariable_Expose_Slotted() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_ContextVariable_Expose_Slotted_Outer>();
-            TemplateBindingTest_ContextVariable_Expose_Slotted_Outer e = (TemplateBindingTest_ContextVariable_Expose_Slotted_Outer) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_ContextVariable_Expose_Slotted_Outer>()) {
+                TemplateBindingTest_ContextVariable_Expose_Slotted_Outer e = (TemplateBindingTest_ContextVariable_Expose_Slotted_Outer) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("var 0 + var 1hello", GetText(e["text"]));
+                Assert.AreEqual("var 0 + var 1hello", GetText(e["text"]));
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_LocalContextVariable.xml#expose_context_out_of_scope")]
@@ -599,54 +613,55 @@ namespace TemplateBinding {
 
         [Test]
         public void RepeatCount() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatCount>();
-            TemplateBindingTest_RepeatCount e = (TemplateBindingTest_RepeatCount) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatCount>()) {
+                TemplateBindingTest_RepeatCount e = (TemplateBindingTest_RepeatCount) app.RootElement;
 
-            e.count = 5;
+                e.count = 5;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(5, e[0].children.size);
-            Assert.AreEqual("repeat me 0", GetText(e[0][0]));
-            Assert.AreEqual("repeat me 1", GetText(e[0][1]));
-            Assert.AreEqual("repeat me 2", GetText(e[0][2]));
-            Assert.AreEqual("repeat me 3", GetText(e[0][3]));
-            Assert.AreEqual("repeat me 4", GetText(e[0][4]));
+                Assert.AreEqual(5, e[0].children.size);
+                Assert.AreEqual("repeat me 0", GetText(e[0][0]));
+                Assert.AreEqual("repeat me 1", GetText(e[0][1]));
+                Assert.AreEqual("repeat me 2", GetText(e[0][2]));
+                Assert.AreEqual("repeat me 3", GetText(e[0][3]));
+                Assert.AreEqual("repeat me 4", GetText(e[0][4]));
 
-            e.count = 7;
+                e.count = 7;
 
-            var e0 = e[0][0];
-            var e1 = e[0][1];
-            var e2 = e[0][2];
-            var e3 = e[0][3];
-            var e4 = e[0][4];
+                var e0 = e[0][0];
+                var e1 = e[0][1];
+                var e2 = e[0][2];
+                var e3 = e[0][3];
+                var e4 = e[0][4];
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(7, e[0].children.size);
-            Assert.AreEqual("repeat me 0", GetText(e[0][0]));
-            Assert.AreEqual("repeat me 1", GetText(e[0][1]));
-            Assert.AreEqual("repeat me 2", GetText(e[0][2]));
-            Assert.AreEqual("repeat me 3", GetText(e[0][3]));
-            Assert.AreEqual("repeat me 4", GetText(e[0][4]));
-            Assert.AreEqual("repeat me 5", GetText(e[0][5]));
-            Assert.AreEqual("repeat me 6", GetText(e[0][6]));
+                Assert.AreEqual(7, e[0].children.size);
+                Assert.AreEqual("repeat me 0", GetText(e[0][0]));
+                Assert.AreEqual("repeat me 1", GetText(e[0][1]));
+                Assert.AreEqual("repeat me 2", GetText(e[0][2]));
+                Assert.AreEqual("repeat me 3", GetText(e[0][3]));
+                Assert.AreEqual("repeat me 4", GetText(e[0][4]));
+                Assert.AreEqual("repeat me 5", GetText(e[0][5]));
+                Assert.AreEqual("repeat me 6", GetText(e[0][6]));
 
-            Assert.AreEqual(e0, e[0][0]);
-            Assert.AreEqual(e1, e[0][1]);
-            Assert.AreEqual(e2, e[0][2]);
-            Assert.AreEqual(e3, e[0][3]);
-            Assert.AreEqual(e4, e[0][4]);
+                Assert.AreEqual(e0, e[0][0]);
+                Assert.AreEqual(e1, e[0][1]);
+                Assert.AreEqual(e2, e[0][2]);
+                Assert.AreEqual(e3, e[0][3]);
+                Assert.AreEqual(e4, e[0][4]);
 
-            e.count = 2;
+                e.count = 2;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(2, e[0].children.size);
-            Assert.AreEqual("repeat me 0", GetText(e[0][0]));
-            Assert.AreEqual("repeat me 1", GetText(e[0][1]));
-            Assert.AreEqual(e0, e[0][0]);
-            Assert.AreEqual(e1, e[0][1]);
+                Assert.AreEqual(2, e[0].children.size);
+                Assert.AreEqual("repeat me 0", GetText(e[0][0]));
+                Assert.AreEqual("repeat me 1", GetText(e[0][1]));
+                Assert.AreEqual(e0, e[0][0]);
+                Assert.AreEqual(e1, e[0][1]);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_list")]
@@ -658,121 +673,123 @@ namespace TemplateBinding {
 
         [Test]
         public void RepeatList_ArrayData() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatList>();
-            TemplateBindingTest_RepeatList e = (TemplateBindingTest_RepeatList) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatList>()) {
+                TemplateBindingTest_RepeatList e = (TemplateBindingTest_RepeatList) app.RootElement;
 
-            e.data = new[] {
-                Vector3.zero,
-                Vector3.one,
-                Vector3.forward,
-                Vector3.back
-            };
+                e.data = new[] {
+                    Vector3.zero,
+                    Vector3.one,
+                    Vector3.forward,
+                    Vector3.back
+                };
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(4, e[0].children.size);
-            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
-            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
-            Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
-            Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
+                Assert.AreEqual(4, e[0].children.size);
+                Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+                Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+                Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
+                Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
 
-            UIElement c0 = e[0][0];
-            UIElement c1 = e[0][1];
-            UIElement c2 = e[0][2];
-            UIElement c3 = e[0][3];
+                UIElement c0 = e[0][0];
+                UIElement c1 = e[0][1];
+                UIElement c2 = e[0][2];
+                UIElement c3 = e[0][3];
 
-            e.data = new[] {
-                Vector3.zero,
-                Vector3.one,
-                Vector3.forward,
-                Vector3.back,
-                Vector3.left
-            };
+                e.data = new[] {
+                    Vector3.zero,
+                    Vector3.one,
+                    Vector3.forward,
+                    Vector3.back,
+                    Vector3.left
+                };
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(5, e[0].children.size);
-            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
-            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
-            Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
-            Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
-            Assert.AreEqual("repeat me " + Vector3.left, GetText(e[0][4]));
-            Assert.AreEqual(c0, e[0][0]);
-            Assert.AreEqual(c1, e[0][1]);
-            Assert.AreEqual(c2, e[0][2]);
-            Assert.AreEqual(c3, e[0][3]);
+                Assert.AreEqual(5, e[0].children.size);
+                Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+                Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+                Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
+                Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
+                Assert.AreEqual("repeat me " + Vector3.left, GetText(e[0][4]));
+                Assert.AreEqual(c0, e[0][0]);
+                Assert.AreEqual(c1, e[0][1]);
+                Assert.AreEqual(c2, e[0][2]);
+                Assert.AreEqual(c3, e[0][3]);
 
-            e.data = new[] {
-                Vector3.zero,
-                Vector3.one,
-            };
+                e.data = new[] {
+                    Vector3.zero,
+                    Vector3.one,
+                };
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(2, e[0].children.size);
-            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
-            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
-            Assert.AreEqual(c0, e[0][0]);
-            Assert.AreEqual(c1, e[0][1]);
+                Assert.AreEqual(2, e[0].children.size);
+                Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+                Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+                Assert.AreEqual(c0, e[0][0]);
+                Assert.AreEqual(c1, e[0][1]);
+            }
         }
 
         [Test]
         public void RepeatList_ListData() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatList>();
-            TemplateBindingTest_RepeatList e = (TemplateBindingTest_RepeatList) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatList>()) {
+                TemplateBindingTest_RepeatList e = (TemplateBindingTest_RepeatList) app.RootElement;
 
-            e.data = new List<Vector3>(new[] {
-                Vector3.zero,
-                Vector3.one,
-                Vector3.forward,
-                Vector3.back
-            });
+                e.data = new List<Vector3>(new[] {
+                    Vector3.zero,
+                    Vector3.one,
+                    Vector3.forward,
+                    Vector3.back
+                });
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(4, e[0].children.size);
-            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
-            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
-            Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
-            Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
+                Assert.AreEqual(4, e[0].children.size);
+                Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+                Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+                Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
+                Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
 
-            UIElement c0 = e[0][0];
-            UIElement c1 = e[0][1];
-            UIElement c2 = e[0][2];
-            UIElement c3 = e[0][3];
+                UIElement c0 = e[0][0];
+                UIElement c1 = e[0][1];
+                UIElement c2 = e[0][2];
+                UIElement c3 = e[0][3];
 
-            e.data.Add(Vector3.left);
+                e.data.Add(Vector3.left);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(5, e[0].children.size);
-            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
-            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
-            Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
-            Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
-            Assert.AreEqual("repeat me " + Vector3.left, GetText(e[0][4]));
-            Assert.AreEqual(c0, e[0][0]);
-            Assert.AreEqual(c1, e[0][1]);
-            Assert.AreEqual(c2, e[0][2]);
-            Assert.AreEqual(c3, e[0][3]);
+                Assert.AreEqual(5, e[0].children.size);
+                Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+                Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+                Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
+                Assert.AreEqual("repeat me " + Vector3.back, GetText(e[0][3]));
+                Assert.AreEqual("repeat me " + Vector3.left, GetText(e[0][4]));
+                Assert.AreEqual(c0, e[0][0]);
+                Assert.AreEqual(c1, e[0][1]);
+                Assert.AreEqual(c2, e[0][2]);
+                Assert.AreEqual(c3, e[0][3]);
 
-            e.data.RemoveAt(e.data.Count - 1);
-            e.data.RemoveAt(e.data.Count - 1);
-            e.data.RemoveAt(e.data.Count - 1);
+                e.data.RemoveAt(e.data.Count - 1);
+                e.data.RemoveAt(e.data.Count - 1);
+                e.data.RemoveAt(e.data.Count - 1);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(2, e[0].children.size);
-            Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
-            Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
-            Assert.AreEqual(c0, e[0][0]);
-            Assert.AreEqual(c1, e[0][1]);
+                Assert.AreEqual(2, e[0].children.size);
+                Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
+                Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
+                Assert.AreEqual(c0, e[0][0]);
+                Assert.AreEqual(c1, e[0][1]);
 
-            e.data.Clear();
+                e.data.Clear();
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(0, e[0].children.size);
+                Assert.AreEqual(0, e[0].children.size);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_list_key_fn")]
@@ -784,69 +801,70 @@ namespace TemplateBinding {
 
         [Test]
         public void RepeatList_KeyFn() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatList_Key>();
-            TemplateBindingTest_RepeatList_Key e = (TemplateBindingTest_RepeatList_Key) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatList_Key>()) {
+                TemplateBindingTest_RepeatList_Key e = (TemplateBindingTest_RepeatList_Key) app.RootElement;
 
-            e.data = new List<Vector3>(new[] {
-                new Vector3(1, 0, 0),
-                new Vector3(2, 0, 0),
-                new Vector3(3, 0, 0),
-            });
+                e.data = new List<Vector3>(new[] {
+                    new Vector3(1, 0, 0),
+                    new Vector3(2, 0, 0),
+                    new Vector3(3, 0, 0),
+                });
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(3, e[0].children.size);
-            Assert.AreEqual("repeat me 1", GetText(e[0][0]));
-            Assert.AreEqual("repeat me 2", GetText(e[0][1]));
-            Assert.AreEqual("repeat me 3", GetText(e[0][2]));
+                Assert.AreEqual(3, e[0].children.size);
+                Assert.AreEqual("repeat me 1", GetText(e[0][0]));
+                Assert.AreEqual("repeat me 2", GetText(e[0][1]));
+                Assert.AreEqual("repeat me 3", GetText(e[0][2]));
 
-            UIElement c0 = e[0][0];
-            UIElement c1 = e[0][1];
-            UIElement c2 = e[0][2];
+                UIElement c0 = e[0][0];
+                UIElement c1 = e[0][1];
+                UIElement c2 = e[0][2];
 
-            e.data.Insert(1, new Vector3(4, 0, 0));
+                e.data.Insert(1, new Vector3(4, 0, 0));
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(4, e[0].children.size);
-            Assert.AreEqual("repeat me 1", GetText(e[0][0]));
-            Assert.AreEqual("repeat me 4", GetText(e[0][1]));
-            Assert.AreEqual("repeat me 2", GetText(e[0][2]));
-            Assert.AreEqual("repeat me 3", GetText(e[0][3]));
+                Assert.AreEqual(4, e[0].children.size);
+                Assert.AreEqual("repeat me 1", GetText(e[0][0]));
+                Assert.AreEqual("repeat me 4", GetText(e[0][1]));
+                Assert.AreEqual("repeat me 2", GetText(e[0][2]));
+                Assert.AreEqual("repeat me 3", GetText(e[0][3]));
 
-            Assert.AreEqual(c0, e[0][0]);
-            Assert.AreEqual(c1, e[0][2]);
-            Assert.AreEqual(c2, e[0][3]);
+                Assert.AreEqual(c0, e[0][0]);
+                Assert.AreEqual(c1, e[0][2]);
+                Assert.AreEqual(c2, e[0][3]);
 
-            UIElement c3 = e[0][1];
+                UIElement c3 = e[0][1];
 
-            e.data.RemoveAt(2);
+                e.data.RemoveAt(2);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(3, e[0].children.size);
-            Assert.AreEqual("repeat me 1", GetText(e[0][0]));
-            Assert.AreEqual("repeat me 4", GetText(e[0][1]));
-            Assert.AreEqual("repeat me 3", GetText(e[0][2]));
+                Assert.AreEqual(3, e[0].children.size);
+                Assert.AreEqual("repeat me 1", GetText(e[0][0]));
+                Assert.AreEqual("repeat me 4", GetText(e[0][1]));
+                Assert.AreEqual("repeat me 3", GetText(e[0][2]));
 
-            Assert.AreEqual(c0, e[0][0]);
-            Assert.AreEqual(c3, e[0][1]);
-            Assert.AreEqual(c2, e[0][2]);
+                Assert.AreEqual(c0, e[0][0]);
+                Assert.AreEqual(c3, e[0][1]);
+                Assert.AreEqual(c2, e[0][2]);
 
-            // reorder data
-            e.data.RemoveAt(1);
-            e.data.Add(new Vector3(4, 0, 0));
+                // reorder data
+                e.data.RemoveAt(1);
+                e.data.Add(new Vector3(4, 0, 0));
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(3, e[0].children.size);
-            Assert.AreEqual("repeat me 1", GetText(e[0][0]));
-            Assert.AreEqual("repeat me 3", GetText(e[0][1]));
-            Assert.AreEqual("repeat me 4", GetText(e[0][2]));
+                Assert.AreEqual(3, e[0].children.size);
+                Assert.AreEqual("repeat me 1", GetText(e[0][0]));
+                Assert.AreEqual("repeat me 3", GetText(e[0][1]));
+                Assert.AreEqual("repeat me 4", GetText(e[0][2]));
 
-            Assert.AreEqual(c0, e[0][0]);
-            Assert.AreEqual(c2, e[0][1]);
-            Assert.AreEqual(c3, e[0][2]);
+                Assert.AreEqual(c0, e[0][0]);
+                Assert.AreEqual(c2, e[0][1]);
+                Assert.AreEqual(c3, e[0][2]);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_RepeatTemplate.xml#repeat_multi_child")]
@@ -858,17 +876,18 @@ namespace TemplateBinding {
 
         [Test]
         public void RepeatMultiChild() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatMultiChild>();
-            TemplateBindingTest_RepeatMultiChild e = (TemplateBindingTest_RepeatMultiChild) app.RootElement;
-            e.data = new[] {new Vector3(1, 2, 3), new Vector3(4, 5, 6)};
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_RepeatMultiChild>()) {
+                TemplateBindingTest_RepeatMultiChild e = (TemplateBindingTest_RepeatMultiChild) app.RootElement;
+                e.data = new[] {new Vector3(1, 2, 3), new Vector3(4, 5, 6)};
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(2, e[0].ChildCount);
-            Assert.AreEqual("repeat me 1", GetText(e[0][0][0][0]));
-            Assert.AreEqual("3", GetText(e[0][0][1][0]));
-            Assert.AreEqual("repeat me 4", GetText(e[0][1][0][0]));
-            Assert.AreEqual("6", GetText(e[0][1][1][0]));
+                Assert.AreEqual(2, e[0].ChildCount);
+                Assert.AreEqual("repeat me 1", GetText(e[0][0][0][0]));
+                Assert.AreEqual("3", GetText(e[0][0][1][0]));
+                Assert.AreEqual("repeat me 4", GetText(e[0][1][0][0]));
+                Assert.AreEqual("6", GetText(e[0][1][1][0]));
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_SyncBinding.xml#sync")]
@@ -904,30 +923,32 @@ namespace TemplateBinding {
 
         [Test]
         public void SyncBinding_Sync() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_SyncBinding_Sync>();
-            TemplateBindingTest_SyncBinding_Sync e = (TemplateBindingTest_SyncBinding_Sync) app.RootElement;
-            TemplateBindingTest_SyncBinding_FakeInput child = (TemplateBindingTest_SyncBinding_FakeInput) e[0];
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_SyncBinding_Sync>()) {
+                TemplateBindingTest_SyncBinding_Sync e = (TemplateBindingTest_SyncBinding_Sync) app.RootElement;
+                TemplateBindingTest_SyncBinding_FakeInput child = (TemplateBindingTest_SyncBinding_FakeInput) e[0];
 
-            e.syncedValue = "synced";
+                e.syncedValue = "synced";
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("synced__afterSync", child.value);
-            Assert.AreEqual("synced__afterSync", e.syncedValue);
+                Assert.AreEqual("synced__afterSync", child.value);
+                Assert.AreEqual("synced__afterSync", e.syncedValue);
+            }
         }
 
         [Test]
         public void SyncBinding_SyncNested() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_SyncBinding_SyncNested>();
-            TemplateBindingTest_SyncBinding_SyncNested e = (TemplateBindingTest_SyncBinding_SyncNested) app.RootElement;
-            TemplateBindingTest_SyncBinding_FakeInput child = (TemplateBindingTest_SyncBinding_FakeInput) e[0];
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_SyncBinding_SyncNested>()) {
+                TemplateBindingTest_SyncBinding_SyncNested e = (TemplateBindingTest_SyncBinding_SyncNested) app.RootElement;
+                TemplateBindingTest_SyncBinding_FakeInput child = (TemplateBindingTest_SyncBinding_FakeInput) e[0];
 
-            e.nested.syncedValue = "synced";
+                e.nested.syncedValue = "synced";
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("synced__afterSync", child.value);
-            Assert.AreEqual("synced__afterSync", e.nested.syncedValue);
+                Assert.AreEqual("synced__afterSync", child.value);
+                Assert.AreEqual("synced__afterSync", e.nested.syncedValue);
+            }
         }
 
 
@@ -944,27 +965,28 @@ namespace TemplateBinding {
 
         [Test]
         public void InnerContext_Styled() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_InnerContext_Outer>();
-            TemplateBindingTest_InnerContext_Outer e = (TemplateBindingTest_InnerContext_Outer) app.RootElement;
-            TemplateBindingTest_InnerContext_Inner child = (TemplateBindingTest_InnerContext_Inner) e[0];
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_InnerContext_Outer>()) {
+                TemplateBindingTest_InnerContext_Outer e = (TemplateBindingTest_InnerContext_Outer) app.RootElement;
+                TemplateBindingTest_InnerContext_Inner child = (TemplateBindingTest_InnerContext_Inner) e[0];
 
-            child.dynamicFromInner = "one";
+                child.dynamicFromInner = "one";
 
-            app.Update();
+                app.Update();
 
-            List<UIStyleGroupContainer> styles = child.style.GetBaseStyles();
+                List<UIStyleGroupContainer> styles = child.style.GetBaseStyles();
 
-            Assert.AreEqual(2, styles.Count);
-            Assert.AreEqual("one", styles[0].name);
-            Assert.AreEqual("from-outer", styles[1].name);
+                Assert.AreEqual(2, styles.Count);
+                Assert.AreEqual("one", styles[0].name);
+                Assert.AreEqual("from-outer", styles[1].name);
 
-            child.dynamicFromInner = "two";
+                child.dynamicFromInner = "two";
 
-            app.Update();
-            styles = child.style.GetBaseStyles();
-            Assert.AreEqual(2, styles.Count);
-            Assert.AreEqual("two", styles[0].name);
-            Assert.AreEqual("from-outer", styles[1].name);
+                app.Update();
+                styles = child.style.GetBaseStyles();
+                Assert.AreEqual(2, styles.Count);
+                Assert.AreEqual("two", styles[0].name);
+                Assert.AreEqual("from-outer", styles[1].name);
+            }
         }
 
         [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleNameOverload.xml")]
@@ -972,12 +994,13 @@ namespace TemplateBinding {
 
         [Test]
         public void ResolveStyleNameOverload() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleNameOverload>();
-            TemplateBindingTest_StyleNameOverload e = (TemplateBindingTest_StyleNameOverload) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleNameOverload>()) {
+                TemplateBindingTest_StyleNameOverload e = (TemplateBindingTest_StyleNameOverload) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
+                Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
+            }
         }
 
         [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleNameAliased.xml")]
@@ -985,12 +1008,13 @@ namespace TemplateBinding {
 
         [Test]
         public void ResolveStyleNameAliased() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleNameAliased>();
-            TemplateBindingTest_StyleNameAliased e = (TemplateBindingTest_StyleNameAliased) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleNameAliased>()) {
+                TemplateBindingTest_StyleNameAliased e = (TemplateBindingTest_StyleNameAliased) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(Color.blue, e[0].style.BackgroundColor);
+                Assert.AreEqual(Color.blue, e[0].style.BackgroundColor);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml")]
@@ -1018,15 +1042,16 @@ namespace TemplateBinding {
 
         [Test]
         public void OnChange() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_Outer>();
-            TemplateBindingTest_OnChange_Outer e = (TemplateBindingTest_OnChange_Outer) app.RootElement;
-            TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_Outer>()) {
+                TemplateBindingTest_OnChange_Outer e = (TemplateBindingTest_OnChange_Outer) app.RootElement;
+                TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
 
-            e.myValue = "baseVal";
+                e.myValue = "baseVal";
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("baseVal changed", e.myValueAfterChange);
+                Assert.AreEqual("baseVal changed", e.myValueAfterChange);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml#with_old_value")]
@@ -1044,16 +1069,17 @@ namespace TemplateBinding {
 
         [Test]
         public void OnChange_WithOldValue() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_WithOldValue>();
-            TemplateBindingTest_OnChange_WithOldValue e = (TemplateBindingTest_OnChange_WithOldValue) app.RootElement;
-            TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_WithOldValue>()) {
+                TemplateBindingTest_OnChange_WithOldValue e = (TemplateBindingTest_OnChange_WithOldValue) app.RootElement;
+                TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
 
-            e.myValue = "baseVal";
+                e.myValue = "baseVal";
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("baseVal__changed", child.value);
-            Assert.AreEqual("baseVal", e.oldValue);
+                Assert.AreEqual("baseVal__changed", child.value);
+                Assert.AreEqual("baseVal", e.oldValue);
+            }
         }
 
 
@@ -1071,16 +1097,17 @@ namespace TemplateBinding {
 
         [Test]
         public void OnChange_WithNewValue() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_WithNewValue>();
-            TemplateBindingTest_OnChange_WithNewValue e = (TemplateBindingTest_OnChange_WithNewValue) app.RootElement;
-            TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_WithNewValue>()) {
+                TemplateBindingTest_OnChange_WithNewValue e = (TemplateBindingTest_OnChange_WithNewValue) app.RootElement;
+                TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
 
-            e.myValue = "baseVal";
+                e.myValue = "baseVal";
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("baseVal__changed", child.value);
-            Assert.AreEqual("baseVal__changed", e.newValue);
+                Assert.AreEqual("baseVal__changed", child.value);
+                Assert.AreEqual("baseVal__changed", e.newValue);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_OnChange.xml#with_sync")]
@@ -1099,18 +1126,19 @@ namespace TemplateBinding {
 
         [Test]
         public void OnChange_WithSync() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_WithSync>();
-            TemplateBindingTest_OnChange_WithSync e = (TemplateBindingTest_OnChange_WithSync) app.RootElement;
-            TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_OnChange_WithSync>()) {
+                TemplateBindingTest_OnChange_WithSync e = (TemplateBindingTest_OnChange_WithSync) app.RootElement;
+                TemplateBindingTest_OnChange_Inner child = (TemplateBindingTest_OnChange_Inner) e[0];
 
-            e.myValue = "baseVal";
+                e.myValue = "baseVal";
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("baseVal__changed", e.myValue);
-            Assert.AreEqual("baseVal__changed", child.value);
-            Assert.AreEqual("baseVal__changed", e.newValue);
-            Assert.AreEqual("baseVal", e.oldValue);
+                Assert.AreEqual("baseVal__changed", e.myValue);
+                Assert.AreEqual("baseVal__changed", child.value);
+                Assert.AreEqual("baseVal__changed", e.newValue);
+                Assert.AreEqual("baseVal", e.oldValue);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_ResolveGenericType.xml")]
@@ -1134,11 +1162,12 @@ namespace TemplateBinding {
 
         [Test]
         public void ResolveGeneric() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_ResolveGeneric_Outer>();
-            TemplateBindingTest_ResolveGeneric_Outer e = (TemplateBindingTest_ResolveGeneric_Outer) app.RootElement;
-            Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[0]);
-            Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[1]);
-            Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<float>>(e[2]);
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_ResolveGeneric_Outer>()) {
+                TemplateBindingTest_ResolveGeneric_Outer e = (TemplateBindingTest_ResolveGeneric_Outer) app.RootElement;
+                Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[0]);
+                Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[1]);
+                Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<float>>(e[2]);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext.xml#level-2")]
@@ -1164,13 +1193,14 @@ namespace TemplateBinding {
 
         [Test]
         public void AttributeBoundFromCorrectSlotOrigin() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_ResolveSlotContext_2>();
-            TemplateBindingTest_ResolveSlotContext_2 e = (TemplateBindingTest_ResolveSlotContext_2) app.RootElement;
-            UIElement slotRoot = e[0][0][0];
-            app.Update();
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_ResolveSlotContext_2>()) {
+                TemplateBindingTest_ResolveSlotContext_2 e = (TemplateBindingTest_ResolveSlotContext_2) app.RootElement;
+                UIElement slotRoot = e[0][0][0];
+                app.Update();
 
-            Assert.AreEqual("level 1", slotRoot.GetAttribute("level-1"));
-            Assert.AreEqual("level 0", slotRoot.GetAttribute("level-0"));
+                Assert.AreEqual("level 1", slotRoot.GetAttribute("level-1"));
+                Assert.AreEqual("level 0", slotRoot.GetAttribute("level-0"));
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext_Expose.xml#main")]
@@ -1199,16 +1229,17 @@ namespace TemplateBinding {
 
         [Test]
         public void ExposeDataFromNestedSlots() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_ExposeFromSlot_Main>();
-            TemplateBindingTest_ExposeFromSlot_Main e = (TemplateBindingTest_ExposeFromSlot_Main) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_ExposeFromSlot_Main>()) {
+                TemplateBindingTest_ExposeFromSlot_Main e = (TemplateBindingTest_ExposeFromSlot_Main) app.RootElement;
 
-            UIChildrenElement slotRoot = e[0][0][0][0] as UIChildrenElement;
+                UIChildrenElement slotRoot = e[0][0][0][0] as UIChildrenElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("data from field in 0", GetText(slotRoot[0]));
-            Assert.AreEqual("data from field in 1", GetText(slotRoot[1]));
-            Assert.AreEqual("data from field in 2", GetText(slotRoot[2]));
+                Assert.AreEqual("data from field in 0", GetText(slotRoot[0]));
+                Assert.AreEqual("data from field in 1", GetText(slotRoot[1]));
+                Assert.AreEqual("data from field in 2", GetText(slotRoot[2]));
+            }
         }
 
         [Template("Data/TemplateBindings/Style/TemplateBindingTest_StyleFromNestedSlots.xml")]
@@ -1225,17 +1256,18 @@ namespace TemplateBinding {
 
         [Test]
         public void ApplyStylesFromNestedSlots() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleFromNestedSlots>();
-            TemplateBindingTest_StyleFromNestedSlots e = (TemplateBindingTest_StyleFromNestedSlots) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleFromNestedSlots>()) {
+                TemplateBindingTest_StyleFromNestedSlots e = (TemplateBindingTest_StyleFromNestedSlots) app.RootElement;
 
-            UIElement slotRoot = e[0][0][0][0];
+                UIElement slotRoot = e[0][0][0][0];
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingLeft);
-            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingRight);
-            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingTop);
-            Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingBottom);
+                Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingLeft);
+                Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingRight);
+                Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingTop);
+                Assert.AreEqual(new UIFixedLength(5f), slotRoot.style.PaddingBottom);
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_SlotInvalidUsage.xml#main")]
@@ -1270,18 +1302,19 @@ namespace TemplateBinding {
 
         [Test]
         public void DefineSlotInsideOverride() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_DefineSlotInsideOverride_Main>();
-            TemplateBindingTest_DefineSlotInsideOverride_Main e = (TemplateBindingTest_DefineSlotInsideOverride_Main) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_DefineSlotInsideOverride_Main>()) {
+                TemplateBindingTest_DefineSlotInsideOverride_Main e = (TemplateBindingTest_DefineSlotInsideOverride_Main) app.RootElement;
 
-            UIElement slotRoot = e[0][0][0][0];
-            UIElement div = slotRoot[0];
-            UIElement slotRoot2 = div[0];
+                UIElement slotRoot = e[0][0][0][0];
+                UIElement div = slotRoot[0];
+                UIElement slotRoot2 = div[0];
 
-            Assert.IsInstanceOf<UISlotBase>(slotRoot);
-            Assert.IsInstanceOf<UIDivElement>(div);
-            Assert.IsInstanceOf<UISlotBase>(slotRoot2);
-            Assert.IsInstanceOf<UITextElement>(slotRoot2[0]);
-            Assert.AreEqual("children go here", GetText(slotRoot2[0]));
+                Assert.IsInstanceOf<UISlotBase>(slotRoot);
+                Assert.IsInstanceOf<UIDivElement>(div);
+                Assert.IsInstanceOf<UISlotBase>(slotRoot2);
+                Assert.IsInstanceOf<UITextElement>(slotRoot2[0]);
+                Assert.AreEqual("children go here", GetText(slotRoot2[0]));
+            }
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_NestedRepeat.xml")]
@@ -1299,22 +1332,24 @@ namespace TemplateBinding {
 
         [Test]
         public void NestedRepeat() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_NestedRepeat>();
-            TemplateBindingTest_NestedRepeat e = (TemplateBindingTest_NestedRepeat) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_NestedRepeat>()) {
+                TemplateBindingTest_NestedRepeat e = (TemplateBindingTest_NestedRepeat) app.RootElement;
 
-            e.data = new List<NestedRepeatData>();
-            e.data.Add(new NestedRepeatData() {
-                data = new List<string>() {"one", "two", "three"}
-            });
-            app.Update();
+                e.data = new List<NestedRepeatData>();
+                e.data.Add(new NestedRepeatData() {
+                    data = new List<string>() {"one", "two", "three"}
+                });
+                
+                app.Update();
 
-            Assert.IsInstanceOf<UIRepeatElement<NestedRepeatData>>(e[0]);
-            Assert.IsInstanceOf<UIRepeatElement<string>>(e[0][0][0]);
-            var repeat = e[0][0][0];
-            Assert.AreEqual(3, repeat.ChildCount);
-            Assert.AreEqual("one", GetText(repeat[0]));
-            Assert.AreEqual("two", GetText(repeat[1]));
-            Assert.AreEqual("three", GetText(repeat[2]));
+                Assert.IsInstanceOf<UIRepeatElement<NestedRepeatData>>(e[0]);
+                Assert.IsInstanceOf<UIRepeatElement<string>>(e[0][0][0]);
+                var repeat = e[0][0][0];
+                Assert.AreEqual(3, repeat.ChildCount);
+                Assert.AreEqual("one", GetText(repeat[0]));
+                Assert.AreEqual("two", GetText(repeat[1]));
+                Assert.AreEqual("three", GetText(repeat[2]));
+            }
         }
 
         [Template("Data/TemplateBindings/Namespaces/TemplateBindingTest_Namespace_Outer.xml")]
@@ -1353,14 +1388,15 @@ namespace TemplateBinding {
 
         [Test]
         public void ResolveCorrectTypeInDifferentNamespaces() {
-            MockApplication app = MockApplication.Setup<TemplateBindingTest_Namespace_Resolve_Outer>();
-            TemplateBindingTest_Namespace_Resolve_Outer e = (TemplateBindingTest_Namespace_Resolve_Outer) app.RootElement;
-            TemplateBindingTest_Namespace_Resolve_Inner inner = e[0] as TemplateBindingTest_Namespace_Resolve_Inner;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_Namespace_Resolve_Outer>()) {
+                TemplateBindingTest_Namespace_Resolve_Outer e = (TemplateBindingTest_Namespace_Resolve_Outer) app.RootElement;
+                TemplateBindingTest_Namespace_Resolve_Inner inner = e[0] as TemplateBindingTest_Namespace_Resolve_Inner;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
-            Assert.IsNotNull(inner.color);
+                Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
+                Assert.IsNotNull(inner.color);
+            }
         }
 
         // [Test]

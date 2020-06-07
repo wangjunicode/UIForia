@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Exceptions;
+using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util;
@@ -245,165 +246,167 @@ namespace UIForia.Animation {
 
                     float t = Mathf.Clamp01(Easing.Interpolate(MathUtil.PercentOfRange(targetProgress, prev.time, nextStyleFrame.time), options.timingFunction.Value));
 
-                    switch (propertyId) {
-                        case StylePropertyId.TransformPivotX:
-                        case StylePropertyId.PaddingLeft:
-                        case StylePropertyId.PaddingRight:
-                        case StylePropertyId.BorderLeft:
-                        case StylePropertyId.BorderRight:
-                        case StylePropertyId.MarginLeft:
-                        case StylePropertyId.MarginRight: {
-                            float v0 = ResolveFixedWidth(target, viewport, prev.value.styleProperty.AsUIFixedLength);
-
-                            float v1 = ResolveFixedWidth(target, viewport, nextStyleFrame.value.styleProperty.AsUIFixedLength);
-                            target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
-                            break;
-                        }
-
-                        case StylePropertyId.TransformPivotY:
-                        case StylePropertyId.PaddingTop:
-                        case StylePropertyId.PaddingBottom:
-                        case StylePropertyId.BorderTop:
-                        case StylePropertyId.BorderBottom:
-                        case StylePropertyId.MarginTop:
-                        case StylePropertyId.TextFontSize:
-                        case StylePropertyId.MarginBottom: {
-                            float v0 = ResolveFixedHeight(target, viewport, prev.value.styleProperty.AsUIFixedLength);
-
-                            float v1 = ResolveFixedHeight(target, viewport, nextStyleFrame.value.styleProperty.AsUIFixedLength);
-                            target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
-                            break;
-                        }
-
-                        case StylePropertyId.PreferredWidth:
-                        case StylePropertyId.MinWidth:
-                        case StylePropertyId.MaxWidth: {
-
-                            float v0 = ResolveWidthMeasurement(target, viewport, prev.value.styleProperty.AsUIMeasurement);
-
-                            float v1 = ResolveWidthMeasurement(target, viewport, nextStyleFrame.value.styleProperty.AsUIMeasurement);
-
-                            //target.style.SetAnimatedMeasurementProperty(propertyId, prev.value.styleProperty, next.value.styleProperty, t);
-                            target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
-                            break;
-                        }
-
-                        case StylePropertyId.PreferredHeight:
-                        case StylePropertyId.MinHeight:
-                        case StylePropertyId.MaxHeight: {
-                            float v0 = ResolveHeightMeasurement(target, viewport, prev.value.styleProperty.AsUIMeasurement);
-
-                            float v1 = ResolveHeightMeasurement(target, viewport, nextStyleFrame.value.styleProperty.AsUIMeasurement);
-
-                            target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
-                            break;
-                        }
-
-                        case StylePropertyId.Opacity:
-                        case StylePropertyId.ShadowOpacity:
-                        case StylePropertyId.TextUnderlayDilate:
-                        case StylePropertyId.TextUnderlaySoftness:
-                        case StylePropertyId.TextUnderlayX:
-                        case StylePropertyId.TextUnderlayY:
-                        case StylePropertyId.TextFaceDilate:
-                        case StylePropertyId.TextGlowInner:
-                        case StylePropertyId.TextGlowOuter:
-                        case StylePropertyId.TextGlowOffset:
-                        case StylePropertyId.TextGlowPower:
-                        case StylePropertyId.TextOutlineSoftness:
-                        case StylePropertyId.TextOutlineWidth:
-
-                        case StylePropertyId.ShadowIntensity:
-                        case StylePropertyId.ShadowSizeX:
-                        case StylePropertyId.ShadowSizeY:
-                        case StylePropertyId.TransformScaleX:
-                        case StylePropertyId.TransformScaleY:
-                        case StylePropertyId.TransformRotation:
-                        case StylePropertyId.GridLayoutColGap:
-                        case StylePropertyId.GridLayoutRowGap: {
-                            float v0 = prev.value.styleProperty.AsFloat;
-
-                            float v1 = nextStyleFrame.value.styleProperty.AsFloat;
-
-                            target.style.SetAnimatedProperty(new StyleProperty(propertyId, Mathf.Lerp(v0, v1, t)));
-                            break;
-                        }
-
-                        case StylePropertyId.ShadowOffsetX:
-                        case StylePropertyId.TransformPositionX:
-                        case StylePropertyId.AlignmentOffsetX: {
-                            if (target.layoutBox != null) {
-                                float v0 = MeasurementUtil.ResolveOffsetMeasurement(elementSystem.layoutTable, target, viewParameters, prev.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.width);
-                                float v1 = MeasurementUtil.ResolveOffsetMeasurement(elementSystem.layoutTable, target, viewParameters, nextStyleFrame.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.width);
-
-                                target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
-                            }
-
-                            break;
-                        }
-
-                        case StylePropertyId.ShadowOffsetY:
-                        case StylePropertyId.TransformPositionY:
-                        case StylePropertyId.AlignmentOffsetY: {
-
-                            if (target.layoutBox != null) {
-                                float v0 = MeasurementUtil.ResolveOffsetMeasurement(elementSystem.layoutTable, target, viewParameters, prev.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.height);
-                                float v1 = MeasurementUtil.ResolveOffsetMeasurement(elementSystem.layoutTable, target, viewParameters, nextStyleFrame.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.height);
-                                target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
-                            }
-
-                            break;
-                        }
-
-                        case StylePropertyId.AlignmentOriginX: {
-
-                            if (target.layoutBox != null) {
-                                float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(elementSystem.layoutTable, target.layoutResult, viewParameters, target.style.AlignmentTargetX);
-                                float v0 = MeasurementUtil.ResolveOffsetMeasurement(elementSystem.layoutTable, target, viewParameters, prev.value.styleProperty.AsOffsetMeasurement, originSize);
-                                float v1 = MeasurementUtil.ResolveOffsetMeasurement(elementSystem.layoutTable, target, viewParameters, nextStyleFrame.value.styleProperty.AsOffsetMeasurement, originSize);
-                                target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
-                            }
-
-                            break;
-                        }
-
-                        case StylePropertyId.AlignmentOriginY: {
-
-                            if (target.layoutBox != null) {
-                                float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(elementSystem.layoutTable, target.layoutResult, viewParameters, target.style.AlignmentTargetY);
-                                float v0 = MeasurementUtil.ResolveOffsetMeasurement(elementSystem.layoutTable, target, viewParameters, prev.value.styleProperty.AsOffsetMeasurement, originSize);
-                                float v1 = MeasurementUtil.ResolveOffsetMeasurement(elementSystem.layoutTable, target, viewParameters, nextStyleFrame.value.styleProperty.AsOffsetMeasurement, originSize);
-                                target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
-                            }
-
-                            break;
-                        }
-
-                        case StylePropertyId.TextUnderlayColor:
-                        case StylePropertyId.TextGlowColor:
-                        case StylePropertyId.TextOutlineColor:
-                        case StylePropertyId.BorderColorTop:
-                        case StylePropertyId.BorderColorRight:
-                        case StylePropertyId.BorderColorBottom:
-                        case StylePropertyId.BorderColorLeft:
-                        case StylePropertyId.BackgroundColor:
-                        case StylePropertyId.BackgroundTint:
-                        case StylePropertyId.ShadowColor:
-                        case StylePropertyId.ShadowTint:
-                        case StylePropertyId.TextColor: {
-                            Color c0 = prev.value.styleProperty.AsColor;
-                            Color c1 = nextStyleFrame.value.styleProperty.AsColor;
-                            target.style.SetAnimatedProperty(new StyleProperty(propertyId, Color.Lerp(c0, c1, t)));
-                            break;
-                        }
-
-                        default:
-                            if (StyleUtil.CanAnimate(propertyId)) {
-                                throw new NotImplementedException(propertyId + " can be animated but is not implemented");
-                            }
-
-                            throw new InvalidArgumentException(propertyId + " is not a supported animation property");
-                    }
+                    LayoutResult layoutResult = default; // todo -- fix animations elementSystem.layoutResultTable[target.id];
+                    throw new NotImplementedException("Fix animations you beautiful man!");
+                    // switch (propertyId) {
+                    //     case StylePropertyId.TransformPivotX:
+                    //     case StylePropertyId.PaddingLeft:
+                    //     case StylePropertyId.PaddingRight:
+                    //     case StylePropertyId.BorderLeft:
+                    //     case StylePropertyId.BorderRight:
+                    //     case StylePropertyId.MarginLeft:
+                    //     case StylePropertyId.MarginRight: {
+                    //         float v0 = ResolveFixedWidth(target, viewport, prev.value.styleProperty.AsUIFixedLength);
+                    //
+                    //         float v1 = ResolveFixedWidth(target, viewport, nextStyleFrame.value.styleProperty.AsUIFixedLength);
+                    //         target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
+                    //         break;
+                    //     }
+                    //
+                    //     case StylePropertyId.TransformPivotY:
+                    //     case StylePropertyId.PaddingTop:
+                    //     case StylePropertyId.PaddingBottom:
+                    //     case StylePropertyId.BorderTop:
+                    //     case StylePropertyId.BorderBottom:
+                    //     case StylePropertyId.MarginTop:
+                    //     case StylePropertyId.TextFontSize:
+                    //     case StylePropertyId.MarginBottom: {
+                    //         float v0 = ResolveFixedHeight(target, viewport, prev.value.styleProperty.AsUIFixedLength);
+                    //
+                    //         float v1 = ResolveFixedHeight(target, viewport, nextStyleFrame.value.styleProperty.AsUIFixedLength);
+                    //         target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIFixedLength(Mathf.Lerp(v0, v1, t))));
+                    //         break;
+                    //     }
+                    //
+                    //     case StylePropertyId.PreferredWidth:
+                    //     case StylePropertyId.MinWidth:
+                    //     case StylePropertyId.MaxWidth: {
+                    //
+                    //         float v0 = ResolveWidthMeasurement(target, viewport, prev.value.styleProperty.AsUIMeasurement);
+                    //
+                    //         float v1 = ResolveWidthMeasurement(target, viewport, nextStyleFrame.value.styleProperty.AsUIMeasurement);
+                    //
+                    //         //target.style.SetAnimatedMeasurementProperty(propertyId, prev.value.styleProperty, next.value.styleProperty, t);
+                    //         target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
+                    //         break;
+                    //     }
+                    //
+                    //     case StylePropertyId.PreferredHeight:
+                    //     case StylePropertyId.MinHeight:
+                    //     case StylePropertyId.MaxHeight: {
+                    //         float v0 = ResolveHeightMeasurement(target, viewport, prev.value.styleProperty.AsUIMeasurement);
+                    //
+                    //         float v1 = ResolveHeightMeasurement(target, viewport, nextStyleFrame.value.styleProperty.AsUIMeasurement);
+                    //
+                    //         target.style.SetAnimatedProperty(new StyleProperty(propertyId, new UIMeasurement(Mathf.Lerp(v0, v1, t))));
+                    //         break;
+                    //     }
+                    //
+                    //     case StylePropertyId.Opacity:
+                    //     case StylePropertyId.ShadowOpacity:
+                    //     case StylePropertyId.TextUnderlayDilate:
+                    //     case StylePropertyId.TextUnderlaySoftness:
+                    //     case StylePropertyId.TextUnderlayX:
+                    //     case StylePropertyId.TextUnderlayY:
+                    //     case StylePropertyId.TextFaceDilate:
+                    //     case StylePropertyId.TextGlowInner:
+                    //     case StylePropertyId.TextGlowOuter:
+                    //     case StylePropertyId.TextGlowOffset:
+                    //     case StylePropertyId.TextGlowPower:
+                    //     case StylePropertyId.TextOutlineSoftness:
+                    //     case StylePropertyId.TextOutlineWidth:
+                    //
+                    //     case StylePropertyId.ShadowIntensity:
+                    //     case StylePropertyId.ShadowSizeX:
+                    //     case StylePropertyId.ShadowSizeY:
+                    //     case StylePropertyId.TransformScaleX:
+                    //     case StylePropertyId.TransformScaleY:
+                    //     case StylePropertyId.TransformRotation:
+                    //     case StylePropertyId.GridLayoutColGap:
+                    //     case StylePropertyId.GridLayoutRowGap: {
+                    //         float v0 = prev.value.styleProperty.AsFloat;
+                    //
+                    //         float v1 = nextStyleFrame.value.styleProperty.AsFloat;
+                    //
+                    //         target.style.SetAnimatedProperty(new StyleProperty(propertyId, Mathf.Lerp(v0, v1, t)));
+                    //         break;
+                    //     }
+                    //
+                    //     case StylePropertyId.ShadowOffsetX:
+                    //     case StylePropertyId.TransformPositionX:
+                    //     case StylePropertyId.AlignmentOffsetX: {
+                    //         if (target.layoutBox != null) {
+                    //             float v0 = MeasurementUtil.ResolveOffsetMeasurement(layoutResult, target, viewParameters, prev.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.width);
+                    //             float v1 = MeasurementUtil.ResolveOffsetMeasurement(layoutResult, target, viewParameters, nextStyleFrame.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.width);
+                    //
+                    //             target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                    //         }
+                    //
+                    //         break;
+                    //     }
+                    //
+                    //     case StylePropertyId.ShadowOffsetY:
+                    //     case StylePropertyId.TransformPositionY:
+                    //     case StylePropertyId.AlignmentOffsetY: {
+                    //
+                    //         if (target.layoutBox != null) {
+                    //             float v0 = MeasurementUtil.ResolveOffsetMeasurement(layoutResult, target, viewParameters, prev.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.height);
+                    //             float v1 = MeasurementUtil.ResolveOffsetMeasurement(layoutResult, target, viewParameters, nextStyleFrame.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.height);
+                    //             target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                    //         }
+                    //
+                    //         break;
+                    //     }
+                    //
+                    //     case StylePropertyId.AlignmentOriginX: {
+                    //
+                    //         if (target.layoutBox != null) {
+                    //             float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(elementSystem.layoutResultTable, target.layoutResult, viewParameters, target.style.AlignmentTargetX);
+                    //             float v0 = MeasurementUtil.ResolveOffsetMeasurement(layoutResult, target, viewParameters, prev.value.styleProperty.AsOffsetMeasurement, originSize);
+                    //             float v1 = MeasurementUtil.ResolveOffsetMeasurement(layoutResult, target, viewParameters, nextStyleFrame.value.styleProperty.AsOffsetMeasurement, originSize);
+                    //             target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                    //         }
+                    //
+                    //         break;
+                    //     }
+                    //
+                    //     case StylePropertyId.AlignmentOriginY: {
+                    //
+                    //         if (target.layoutBox != null) {
+                    //             float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(elementSystem.layoutResultTable, target.layoutResult, viewParameters, target.style.AlignmentTargetY);
+                    //             float v0 = MeasurementUtil.ResolveOffsetMeasurement(layoutResult, target, viewParameters, prev.value.styleProperty.AsOffsetMeasurement, originSize);
+                    //             float v1 = MeasurementUtil.ResolveOffsetMeasurement(layoutResult, target, viewParameters, nextStyleFrame.value.styleProperty.AsOffsetMeasurement, originSize);
+                    //             target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
+                    //         }
+                    //
+                    //         break;
+                    //     }
+                    //
+                    //     case StylePropertyId.TextUnderlayColor:
+                    //     case StylePropertyId.TextGlowColor:
+                    //     case StylePropertyId.TextOutlineColor:
+                    //     case StylePropertyId.BorderColorTop:
+                    //     case StylePropertyId.BorderColorRight:
+                    //     case StylePropertyId.BorderColorBottom:
+                    //     case StylePropertyId.BorderColorLeft:
+                    //     case StylePropertyId.BackgroundColor:
+                    //     case StylePropertyId.BackgroundTint:
+                    //     case StylePropertyId.ShadowColor:
+                    //     case StylePropertyId.ShadowTint:
+                    //     case StylePropertyId.TextColor: {
+                    //         Color c0 = prev.value.styleProperty.AsColor;
+                    //         Color c1 = nextStyleFrame.value.styleProperty.AsColor;
+                    //         target.style.SetAnimatedProperty(new StyleProperty(propertyId, Color.Lerp(c0, c1, t)));
+                    //         break;
+                    //     }
+                    //
+                    //     default:
+                    //         if (StyleUtil.CanAnimate(propertyId)) {
+                    //             throw new NotImplementedException(propertyId + " can be animated but is not implemented");
+                    //         }
+                    //
+                    //         throw new InvalidArgumentException(propertyId + " is not a supported animation property");
+                    // }
 
                     if (progress >= 1f) {
                         target.style.SetAnimatedProperty(nextStyleFrame.value.styleProperty);

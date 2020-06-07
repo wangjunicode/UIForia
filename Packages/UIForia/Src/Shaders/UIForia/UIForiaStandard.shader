@@ -181,8 +181,15 @@ Shader "UIForia/Standard"
                   
             }
             
-            fixed4 frag (v2f i) : SV_Target {           
-                
+            fixed4 fragTextDebug (v2f i) : SV_Target {     
+            
+               fixed4 textureColor = tex2D(_MainTexture, i.texCoord0.zw);
+               
+               return fixed4(textureColor.a, textureColor.a, textureColor.a, 1);
+               
+            }
+                  
+            fixed4 frag (v2f i) : SV_Target {         
                 float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y) * _DPIScale;
                 float4 clipRect = _ClipRects[(uint)i.texCoord1.w];
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];           
@@ -228,6 +235,7 @@ Shader "UIForia/Standard"
                     mainColor.rgb *= mainColor.a;
                     return mainColor;
                 }
+                return fragTextDebug(i);  
 
                 float outlineWidth = 0; //i.texCoord2.y;
                 float outlineSoftness = 0; //i.texCoord2.z;

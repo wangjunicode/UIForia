@@ -19,17 +19,7 @@
             
         </Group>
         
-        <Group style="table">
-            
-            <Group style="table-header">
-                    
-            </Group>
-            
-            <ScrollView style="table-scroll-view">
-                
-            </ScrollView>
-            
-        </Group>
+     
      
 
     </Contents>

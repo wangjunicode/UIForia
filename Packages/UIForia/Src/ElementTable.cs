@@ -1,4 +1,6 @@
-﻿using Unity.Burst;
+﻿using System.Diagnostics;
+using UIForia.Systems;
+using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace UIForia {
@@ -11,12 +13,13 @@ namespace UIForia {
     
         [NativeDisableUnsafePtrRestriction]
         public T* array;
-    
+
         public ElementTable(T* array) {
             this.array = array;
         }
     
         public ref T this[ElementId id] {
+            [DebuggerStepThrough]
             get => ref array[id.index];
         }
     

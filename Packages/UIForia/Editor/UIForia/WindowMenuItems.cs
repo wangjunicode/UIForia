@@ -1,3 +1,7 @@
+using System.IO;
+using System.Runtime.CompilerServices;
+using UIForia.Layout;
+using UIForia.Text;
 using UnityEditor;
 
 namespace UIForia.Editor {
@@ -13,7 +17,7 @@ namespace UIForia.Editor {
         private static void UIForiaLayoutHierarchy() {
             EditorWindow.GetWindow<UIForiaLayoutHierarchyWindow>("UIForia Layout Hierarchy");
         }
-        
+
         [MenuItem("Window/UIForia/UIForia Inspector")]
         private static void UIForiaInspector() {
             EditorWindow.GetWindow<UIForiaInspectorWindow>("UIForia Inspector");
@@ -25,6 +29,41 @@ namespace UIForia.Editor {
                 Application.RefreshAll();
             }
         }
+
+        [MenuItem("UIForia/Dev/Generate Code Templates")]
+        public static void GenerateInternalCodeTemplates() {
+            string templatePath = Path.Combine(GetPath(), "..", "Generated_List_Template.cs");
+            string outputPathRoot = Path.Combine(Application.GetSourceDirectory(), "Generated", "ListTypes");
+            string contents = File.ReadAllText(templatePath);
+            
+            ListTemplateGenerator.Generate<FlexTrack>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<TextLayoutSymbol>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<TextLineInfo>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<TextSymbol>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<char>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<float>(outputPathRoot, contents, "float");
+            ListTemplateGenerator.Generate<GridTrack>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<GridPlacement>(outputPathRoot, contents);
+            
+        }
+
+        private class ListTemplateGenerator {
+
+            public static void Generate<T>(string outputPath, string contents, string nameoverride = null) where T : struct {
+
+                contents = contents.Replace("// #NAMESPACES#", "using " + typeof(T).Namespace + ";");
+                contents = contents.Replace("public struct TTEMPLATE { }", "");
+                contents = contents.Replace("TTEMPLATE", nameoverride ?? typeof(T).Name);
+
+                File.WriteAllText(Path.Combine(outputPath, "List_" + (nameoverride ?? typeof(T).Name) + ".cs"), contents);
+            }
+
+        }
+
+        public static string GetPath([CallerFilePath] string path = "") {
+            return path;
+        }
+
     }
 
 }

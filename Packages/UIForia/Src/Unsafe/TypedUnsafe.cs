@@ -114,6 +114,10 @@ namespace UIForia.Util.Unsafe {
             return (T*) UnsafeUtility.Malloc(count * sizeof(T), UnsafeUtility.AlignOf<T>(), allocator);
         }
 
+        public static T* Malloc<T>(Allocator allocator) where T : unmanaged {
+            return (T*) UnsafeUtility.Malloc(sizeof(T), UnsafeUtility.AlignOf<T>(), allocator);
+        }
+
         public static T* MallocDefault<T>(Allocator allocator) where T : unmanaged {
             T* retn = (T*) UnsafeUtility.Malloc(sizeof(T), UnsafeUtility.AlignOf<T>(), allocator);
             UnsafeUtility.MemClear(retn, sizeof(T));
@@ -190,7 +194,7 @@ namespace UIForia.Util.Unsafe {
             return sizeof(T) * itemCount;
         }
 
-        public static Allocator GetTemporaryAllocator<T>(int max) where T : unmanaged {
+        public static Allocator GetTemporaryAllocatorLabel<T>(int max) where T : unmanaged {
             return sizeof(T) * max <= 1024 ? Allocator.Temp : Allocator.TempJob;
         }
 
@@ -329,9 +333,8 @@ namespace UIForia.Util.Unsafe {
             where T1 : unmanaged
             where T2 : unmanaged
             where T3 : unmanaged
-            where T4 : unmanaged 
-            where T5 : unmanaged 
-        {
+            where T4 : unmanaged
+            where T5 : unmanaged {
 
             long t0Size = sizeof(T0) * itemCount;
             long t1Size = sizeof(T1) * itemCount;
@@ -355,7 +358,6 @@ namespace UIForia.Util.Unsafe {
             return (byte*) ptr0;
         }
 
-        
         public static byte* ResizeSplitBuffer<T0, T1>(
             ref T0* ptr0,
             ref T1* ptr1,
@@ -483,7 +485,7 @@ namespace UIForia.Util.Unsafe {
 
             return retn;
         }
-        
+
         public static byte* ResizeSplitBuffer<T0, T1, T2, T3, T4, T5>(
             ref T0* ptr0,
             ref T1* ptr1,
@@ -500,7 +502,7 @@ namespace UIForia.Util.Unsafe {
             where T1 : unmanaged
             where T2 : unmanaged
             where T3 : unmanaged
-            where T4 : unmanaged 
+            where T4 : unmanaged
             where T5 : unmanaged {
 
             T0* oldPtr0 = ptr0;
@@ -528,7 +530,7 @@ namespace UIForia.Util.Unsafe {
 
         private static void GrowSplitBufferSection<T>(T* newPtr, T* oldPtr, int oldCount, int newCount, bool clearNewMemory) where T : unmanaged {
             if (oldPtr != null && oldCount > 0) {
-                MemCpy(newPtr, oldPtr, sizeof(T) * oldCount);
+                MemCpy(newPtr, oldPtr, oldCount);
             }
 
             if (clearNewMemory) {
@@ -539,12 +541,12 @@ namespace UIForia.Util.Unsafe {
         public static int ByteSize<T, T1>(int count) where T : unmanaged where T1 : unmanaged {
             return count * (sizeof(T) + sizeof(T1));
         }
-        
+
         public static int ByteSize<T, T1>(uint count) where T : unmanaged where T1 : unmanaged {
-            return (int)count * (sizeof(T) + sizeof(T1));
+            return (int) count * (sizeof(T) + sizeof(T1));
         }
-        
-        public static int ByteSize<T, T1>(T * a, T1 * b, int count) where T : unmanaged where T1 : unmanaged {
+
+        public static int ByteSize<T, T1>(T* a, T1* b, int count) where T : unmanaged where T1 : unmanaged {
             return count * (sizeof(T) + sizeof(T1));
         }
 

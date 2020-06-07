@@ -4,6 +4,7 @@ using Src.Systems;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
+using UnityEngine.Profiling;
 
 namespace UIForia.Systems {
 
@@ -13,31 +14,32 @@ namespace UIForia.Systems {
 
     }
 
-    public class StyleSystem : IStyleSystem {
+    public class StyleSystem  {
 
         private readonly Stack<UIElement> elementStack;
         private readonly StructList<ChangeSet> changeSets;
-
-        public StyleSystem() {
+        private ElementSystem elementSystem;
+        
+        public StyleSystem(ElementSystem elementSystem) {
+            this.elementSystem = elementSystem;
             this.elementStack = new Stack<UIElement>(16);
             this.changeSets = new StructList<ChangeSet>();
         }
 
         public void FlushChangeSets(ElementSystem elementSystem, LayoutSystem layoutSystem, RenderSystem renderSystem) {
-            
+            Profiler.BeginSample("StyleSystem::FlushChangeSets");
+
             // if disabled or destroyed, move on
             // if enabled this frame, move on
-
-            const UIElementFlags mask = ~UIElementFlags.EnableStateChanged | UIElementFlags.EnabledFlagSet;
             
             // todo -- dont even add things that were enabled / created this frame to the change set list
-            
+
             for (int idx = 1; idx < changeSets.size; idx++) {
-                
+
                 ref ChangeSet changeSet = ref changeSets.array[idx];
                 UIElementFlags flags = elementSystem.metaTable[changeSet.element.id].flags;
-                
-                if ((flags & mask) != (UIElementFlags.EnabledFlagSet)) {
+
+                if ((flags & UIElementFlags.EnabledFlagSet) != (UIElementFlags.EnabledFlagSet) || (flags & UIElementFlags.EnableStateChanged) != 0) {
                     changeSet.element.style.changeSetId = 0;
                     changeSet.changes.size = 0;
                     changeSet.element = null;
@@ -51,12 +53,12 @@ namespace UIForia.Systems {
             }
 
             for (int changeId = 1; changeId < changeSets.size; changeId++) {
-                
+
                 ChangeSet changeSet = changeSets.array[changeId];
 
                 layoutSystem.HandleStylePropertyUpdates(changeSet.element, changeSet.changes.array, changeSet.changes.size);
                 renderSystem.HandleStylePropertyUpdates(changeSet.element, changeSet.changes.array, changeSet.changes.size);
-                
+
                 // this is really only for text, find a better way
                 if (changeSet.element is IStyleChangeHandler changeHandler) {
                     StyleProperty[] properties = changeSet.changes.array;
@@ -67,17 +69,20 @@ namespace UIForia.Systems {
                 }
 
             }
-            
+
             for (int changeId = 1; changeId < changeSets.size; changeId++) {
                 ref ChangeSet changeSet = ref changeSets.array[changeId];
                 changeSet.element.style.changeSetId = 0;
                 changeSet.changes.size = 0;
                 changeSet.element = null;
             }
+
+            changeSets.size = 1; // start at size 1. DO NOT CLEAR, keeping array references
             
-            changeSets.size = 1; // start at size 1. DO NOT CLEAR, keeping array references 
+            Profiler.EndSample();
         }
 
+        // todo -- style attributes probably broken right now
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string attributeValue) {
             element.style.UpdateApplicableAttributeRules();
         }
@@ -85,36 +90,58 @@ namespace UIForia.Systems {
         // i need to know if an element had its enable state changed this frame
         private void AddToChangeSet(UIElement element, StyleProperty property) {
 
-            if (element.style.changeSetId == 0) {
-                element.style.changeSetId = changeSets.size;
-
-                SizedArray<StyleProperty> changeList = new SizedArray<StyleProperty>(8);
-                
-                changeList.Add(property);
-                
-                changeSets.Add(new ChangeSet() {
-                    element = element,
-                    changes = changeList
-                });
+            int changeId = element.style.changeSetId;
+            if (changeId == 0) {
+                changeId = changeSets.size;
+                element.style.changeSetId = changeId;
+                if (changeSets.array.Length > changeId && changeSets.array[changeId].changes.array != null) {
+                    changeSets.array[changeId].changes.Add(property);
+                    changeSets.array[changeId].element = element;
+                    changeSets.size++;
+                }
+                else {
+                    SizedArray<StyleProperty> changeList = new SizedArray<StyleProperty>(8);
+                    changeList.Add(property);
+                    changeSets.Add(new ChangeSet() {
+                        changes = changeList,
+                        element = element
+                    });
+                }
             }
             else {
-                changeSets.array[element.style.changeSetId].changes.Add(property);
+                changeSets.array[changeId].changes.Add(property);
             }
         }
 
-        public struct DeferredStyleInherit {
+        // sets property to either a default or inherited value
+        public void UnsetStyleProperty(UIElement element, StyleProperty property) {
+            
+            UIElementFlags flags = elementSystem.metaTable[element.id].flags;
 
-            public UIElement element;
-            public StyleProperty property;
+            if ((flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet) &&  (flags & UIElementFlags.EnableStateChanged) == 0) {
+                AddToChangeSet(element, property);
+            }
 
+            if (property.propertyId == StylePropertyId.TextFontSize) {
+                elementSystem.emTable[element.id] = default;
+            }
+            
         }
 
         public void SetStyleProperty(UIElement element, StyleProperty property) {
 
-            AddToChangeSet(element, property);
+            UIElementFlags flags = elementSystem.metaTable[element.id].flags;
 
+            if ((flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet) &&  (flags & UIElementFlags.EnableStateChanged) == 0) {
+                AddToChangeSet(element, property);
+            }
+            
+            if (property.propertyId == StylePropertyId.TextFontSize) {
+                elementSystem.emTable[element.id].styleValue = property.AsUIFixedLength;
+            }
+            
             // should probably just defer inheritance
-            if (!StyleUtil.IsInherited(property.propertyId) || element.children == null || element.children.Count == 0) {
+            if (!StyleUtil.IsInherited(property.propertyId) || element.ChildCount == 0) {
                 return;
             }
 
@@ -125,7 +152,7 @@ namespace UIForia.Systems {
                 StyleProperty parentProperty = new StyleProperty(property.propertyId);
 
                 while (ptr != null) {
-                    parentProperty = ptr.style.GetPropertyValue(property.propertyId);
+                    parentProperty = ptr.style.GetPropertyValue(property.propertyId, out bool isDefault);
                     if (parentProperty.hasValue) {
                         break;
                     }
@@ -150,11 +177,6 @@ namespace UIForia.Systems {
                 if (!descendant.style.SetInheritedStyle(property)) {
                     continue;
                 }
-
-                // todo -- we might want to cache font size lookups for em values, this would be the place 
-                // if (property.propertyId == StylePropertyId.TextFontSize) {
-                // do caching    
-                // }
 
                 AddToChangeSet(descendant, property);
 

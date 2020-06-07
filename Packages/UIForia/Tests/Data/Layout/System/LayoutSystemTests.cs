@@ -31,46 +31,48 @@ namespace LayoutSystem {
 
         [Test]
         public void Works() {
-            MockApplication app = MockApplication.Setup<LayoutTestThing>();
-            app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-            LayoutTestThing root = (LayoutTestThing) app.RootElement;
-            app.Update();
-            Assert.AreEqual(300, root.child0.layoutResult.actualSize.width);
-            Assert.AreEqual(100, root.child0.layoutResult.actualSize.height);
-            Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
-            Assert.AreEqual(100, root.child1.layoutResult.actualSize.width);
-            Assert.AreEqual(100, root.child1.layoutResult.actualSize.height);
+            using (MockApplication app = MockApplication.Setup<LayoutTestThing>()) {
+                app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+                LayoutTestThing root = (LayoutTestThing) app.RootElement;
+                app.Update();
+                Assert.AreEqual(300, root.child0.layoutResult.actualSize.width);
+                Assert.AreEqual(100, root.child0.layoutResult.actualSize.height);
+                Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
+                Assert.AreEqual(100, root.child1.layoutResult.actualSize.width);
+                Assert.AreEqual(100, root.child1.layoutResult.actualSize.height);
 
-            Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
-            Assert.AreEqual(100, root.child2.layoutResult.actualSize.width);
-            Assert.AreEqual(100, root.child2.layoutResult.actualSize.height);
+                Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
+                Assert.AreEqual(100, root.child2.layoutResult.actualSize.width);
+                Assert.AreEqual(100, root.child2.layoutResult.actualSize.height);
+            }
         }
 
         [Test]
         public void Updates() {
-            MockApplication app = MockApplication.Setup<LayoutTestThing>();
-            app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
-            LayoutTestThing root = (LayoutTestThing) app.RootElement;
-            app.Update();
-            Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
-            Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
-            Assert.AreEqual(100, root.child1.layoutResult.actualSize.width);
-            Assert.AreEqual(100, root.child1.layoutResult.actualSize.height);
+            using (MockApplication app = MockApplication.Setup<LayoutTestThing>()) {
+                app.SetViewportRect(new Rect(0, 0, 1000f, 1000f));
+                LayoutTestThing root = (LayoutTestThing) app.RootElement;
+                app.Update();
+                Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
+                Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
+                Assert.AreEqual(100, root.child1.layoutResult.actualSize.width);
+                Assert.AreEqual(100, root.child1.layoutResult.actualSize.height);
 
-            Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
-            Assert.AreEqual(100, root.child2.layoutResult.actualSize.width);
-            Assert.AreEqual(100, root.child2.layoutResult.actualSize.height);
+                Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
+                Assert.AreEqual(100, root.child2.layoutResult.actualSize.width);
+                Assert.AreEqual(100, root.child2.layoutResult.actualSize.height);
 
-            root.child2.style.SetPreferredWidth(200, StyleState.Normal);
-            app.Update();
-            Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
-            Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
-            Assert.AreEqual(100, root.child1.layoutResult.actualSize.width);
-            Assert.AreEqual(100, root.child1.layoutResult.actualSize.height);
+                root.child2.style.SetPreferredWidth(200, StyleState.Normal);
+                app.Update();
+                Assert.AreEqual(Vector2.zero, root.child0.layoutResult.localPosition);
+                Assert.AreEqual(new Vector2(0, 100), root.child1.layoutResult.localPosition);
+                Assert.AreEqual(100, root.child1.layoutResult.actualSize.width);
+                Assert.AreEqual(100, root.child1.layoutResult.actualSize.height);
 
-            Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
-            Assert.AreEqual(200, root.child2.layoutResult.actualSize.width);
-            Assert.AreEqual(100, root.child2.layoutResult.actualSize.height);
+                Assert.AreEqual(new Vector2(0, 200), root.child2.layoutResult.localPosition);
+                Assert.AreEqual(200, root.child2.layoutResult.actualSize.width);
+                Assert.AreEqual(100, root.child2.layoutResult.actualSize.height);
+            }
         }
 
         [Template("Data/Layout/System/LayoutSystemTest_General.xml#content_sized")]
@@ -78,10 +80,11 @@ namespace LayoutSystem {
 
         [Test]
         public void ContentSized() {
-            MockApplication app = MockApplication.Setup<LayoutSystemTest_Content>();
-            LayoutSystemTest_Content root = (LayoutSystemTest_Content) app.RootElement;
-            app.Update();
-            Assert.AreEqual(new Rect(0, 100, 300, 50), root[1].layoutResult.AllocatedRect);
+            using (MockApplication app = MockApplication.Setup<LayoutSystemTest_Content>()) {
+                LayoutSystemTest_Content root = (LayoutSystemTest_Content) app.RootElement;
+                app.Update();
+                Assert.AreEqual(new Rect(0, 100, 300, 50), root[1].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/System/LayoutSystemTest_General.xml#max_size_changes")]
@@ -89,31 +92,32 @@ namespace LayoutSystem {
 
         [Test]
         public void MaxSizeChanges() {
-            MockApplication app = MockApplication.Setup<LayoutSystemTest_MaxSizeChanges>();
-            LayoutSystemTest_MaxSizeChanges root = (LayoutSystemTest_MaxSizeChanges) app.RootElement;
-            app.Update();
-            Assert.AreEqual(new Rect(0, 100, 300, 50), root[1].layoutResult.AllocatedRect);
-            root[1].style.SetMaxWidth(150f, StyleState.Normal);
-            app.Update();
-            Assert.AreEqual(new Rect(0, 100, 150, 50), root[1].layoutResult.AllocatedRect);
+            using (MockApplication app = MockApplication.Setup<LayoutSystemTest_MaxSizeChanges>()) {
+                LayoutSystemTest_MaxSizeChanges root = (LayoutSystemTest_MaxSizeChanges) app.RootElement;
+                app.Update();
+                Assert.AreEqual(new Rect(0, 100, 300, 50), root[1].layoutResult.AllocatedRect);
+                root[1].style.SetMaxWidth(150f, StyleState.Normal);
+                app.Update();
+                Assert.AreEqual(new Rect(0, 100, 150, 50), root[1].layoutResult.AllocatedRect);
+            }
         }
-
 
         [Template("Data/Layout/System/LayoutSystemTest_General.xml#width_changes_to_content")]
         public class LayoutSystemTest_WidthChangesToContent : UIElement { }
 
         [Test]
         public void WidthSizeConstraintChangesToContent() {
-            MockApplication app = MockApplication.Setup<LayoutSystemTest_WidthChangesToContent>();
-            LayoutSystemTest_WidthChangesToContent root = (LayoutSystemTest_WidthChangesToContent) app.RootElement;
-            app.Update();
-            Assert.AreEqual(new Rect(0, 100, 400, 50), root[1].layoutResult.AllocatedRect);
-            root[1].style.SetMaxWidth(UIMeasurement.Content100, StyleState.Normal);
-            app.Update();
-            Assert.AreEqual(new Rect(0, 100, 300, 50), root[1].layoutResult.AllocatedRect);
-            root[1][0].style.SetPreferredWidth(150f, StyleState.Normal);
-            app.Update();
-            Assert.AreEqual(new Rect(0, 100, 150, 50), root[1].layoutResult.AllocatedRect);
+            using (MockApplication app = MockApplication.Setup<LayoutSystemTest_WidthChangesToContent>()) {
+                LayoutSystemTest_WidthChangesToContent root = (LayoutSystemTest_WidthChangesToContent) app.RootElement;
+                app.Update();
+                Assert.AreEqual(new Rect(0, 100, 400, 50), root[1].layoutResult.AllocatedRect);
+                root[1].style.SetMaxWidth(UIMeasurement.Content100, StyleState.Normal);
+                app.Update();
+                Assert.AreEqual(new Rect(0, 100, 300, 50), root[1].layoutResult.AllocatedRect);
+                root[1][0].style.SetPreferredWidth(150f, StyleState.Normal);
+                app.Update();
+                Assert.AreEqual(new Rect(0, 100, 150, 50), root[1].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/System/LayoutSystemTest_General.xml#height_changes_to_maxcontent")]
@@ -121,34 +125,35 @@ namespace LayoutSystem {
 
         [Test]
         public void HeightSizeConstraintChangesToMaxContent() {
-            MockApplication app = MockApplication.Setup<LayoutSystemTest_HeightChangesToMaxContent>();
-            LayoutSystemTest_HeightChangesToMaxContent root = (LayoutSystemTest_HeightChangesToMaxContent) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<LayoutSystemTest_HeightChangesToMaxContent>()) {
+                LayoutSystemTest_HeightChangesToMaxContent root = (LayoutSystemTest_HeightChangesToMaxContent) app.RootElement;
 
-            app.Update();
-            Assert.AreEqual(new Rect(0, 100, 400, 300), root[1].layoutResult.AllocatedRect);
+                app.Update();
+                Assert.AreEqual(new Rect(0, 100, 400, 300), root[1].layoutResult.AllocatedRect);
 
-            root[1].style.SetMaxHeight(UIMeasurement.Content100, StyleState.Normal);
-            app.Update();
+                root[1].style.SetMaxHeight(UIMeasurement.Content100, StyleState.Normal);
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 100, 400, 50), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 400, 50), root[1].layoutResult.AllocatedRect);
+            }
         }
-
 
         [Template("Data/Layout/System/LayoutSystemTest_General.xml#height_changes_to_mincontent")]
         public class LayoutSystemTest_HeightChangesToMinContent : UIElement { }
 
         [Test]
         public void HeightSizeConstraintChangesToMinContent() {
-            MockApplication app = MockApplication.Setup<LayoutSystemTest_HeightChangesToMinContent>();
-            LayoutSystemTest_HeightChangesToMinContent root = (LayoutSystemTest_HeightChangesToMinContent) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<LayoutSystemTest_HeightChangesToMinContent>()) {
+                LayoutSystemTest_HeightChangesToMinContent root = (LayoutSystemTest_HeightChangesToMinContent) app.RootElement;
 
-            app.Update();
-            Assert.AreEqual(new Rect(0, 100, 400, 300), root[1].layoutResult.AllocatedRect);
+                app.Update();
+                Assert.AreEqual(new Rect(0, 100, 400, 300), root[1].layoutResult.AllocatedRect);
 
-            root[1].style.SetMinHeight(UIMeasurement.Content100, StyleState.Normal);
-            app.Update();
+                root[1].style.SetMinHeight(UIMeasurement.Content100, StyleState.Normal);
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 100, 400, 500), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 400, 500), root[1].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/System/LayoutSystemTest_General.xml#child_enabled")]
@@ -156,16 +161,17 @@ namespace LayoutSystem {
 
         [Test]
         public void ChildEnabled() {
-            MockApplication app = MockApplication.Setup<LayoutSystemTest_ChildEnabled>();
-            app.Update();
-            LayoutSystemTest_ChildEnabled root = (LayoutSystemTest_ChildEnabled) app.RootElement;
-            Assert.IsFalse(root[1][0].isEnabled);
-            Assert.AreEqual(new Rect(0, 100, 200, 50), root[1].layoutResult.AllocatedRect);
-            root[1][0].SetEnabled(true);
-            Assert.IsTrue(root[1][0].isEnabled);
-            app.Update();
-            Assert.IsTrue(root[1][0].isEnabled);
-            Assert.AreEqual(new Rect(0, 100, 300, 100), root[1].layoutResult.AllocatedRect);
+            using (MockApplication app = MockApplication.Setup<LayoutSystemTest_ChildEnabled>()) {
+                app.Update();
+                LayoutSystemTest_ChildEnabled root = (LayoutSystemTest_ChildEnabled) app.RootElement;
+                Assert.IsFalse(root[1][0].isEnabled);
+                Assert.AreEqual(new Rect(0, 100, 200, 50), root[1].layoutResult.AllocatedRect);
+                root[1][0].SetEnabled(true);
+                Assert.IsTrue(root[1][0].isEnabled);
+                app.Update();
+                Assert.IsTrue(root[1][0].isEnabled);
+                Assert.AreEqual(new Rect(0, 100, 300, 100), root[1].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/System/LayoutSystemTest_General.xml#child_disabled")]
@@ -173,18 +179,19 @@ namespace LayoutSystem {
 
         [Test]
         public void ChildDisabled() {
-            MockApplication app = MockApplication.Setup<LayoutSystemTest_ChildDisabled>();
-            app.Update();
-            LayoutSystemTest_ChildDisabled root = (LayoutSystemTest_ChildDisabled) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<LayoutSystemTest_ChildDisabled>()) {
+                app.Update();
+                LayoutSystemTest_ChildDisabled root = (LayoutSystemTest_ChildDisabled) app.RootElement;
 
-            Assert.IsTrue(root[1][0].isEnabled);
-            Assert.AreEqual(new Rect(0, 100, 300, 100), root[1].layoutResult.AllocatedRect);
+                Assert.IsTrue(root[1][0].isEnabled);
+                Assert.AreEqual(new Rect(0, 100, 300, 100), root[1].layoutResult.AllocatedRect);
 
-            root[1][0].SetEnabled(false);
+                root[1][0].SetEnabled(false);
 
-            app.Update();
-            Assert.IsFalse(root[1][0].isEnabled);
-            Assert.AreEqual(new Rect(0, 100, 200, 50), root[1].layoutResult.AllocatedRect);
+                app.Update();
+                Assert.IsFalse(root[1][0].isEnabled);
+                Assert.AreEqual(new Rect(0, 100, 200, 50), root[1].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/System/LayoutSystemTest_General.xml#screen_pos_updated")]
@@ -192,155 +199,139 @@ namespace LayoutSystem {
 
         [Test]
         public void ScreenPositionsGetUpdated() {
-            MockApplication app = MockApplication.Setup<LayoutSystemTest_ScreenPositionUpdated>();
+            using (MockApplication app = MockApplication.Setup<LayoutSystemTest_ScreenPositionUpdated>()) {
 
-            LayoutSystemTest_ScreenPositionUpdated root = (LayoutSystemTest_ScreenPositionUpdated) app.RootElement;
-            UIElement nestedChild1 = root[1][0];
-            UIElement nestedChild2 = root[1][1];
-            app.Update();
+                LayoutSystemTest_ScreenPositionUpdated root = (LayoutSystemTest_ScreenPositionUpdated) app.RootElement;
+                UIElement nestedChild1 = root[1][0];
+                UIElement nestedChild2 = root[1][1];
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 000, 100, 100), root[0].layoutResult.ScreenRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 200), root[1].layoutResult.ScreenRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 100), nestedChild1.layoutResult.ScreenRect);
-            Assert.AreEqual(new Rect(0, 200, 100, 100), nestedChild2.layoutResult.ScreenRect);
-            Assert.AreEqual(new Rect(0, 300, 100, 100), root[2].layoutResult.ScreenRect);
+                Assert.AreEqual(new Rect(0, 000, 100, 100), root[0].layoutResult.ScreenRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 200), root[1].layoutResult.ScreenRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 100), nestedChild1.layoutResult.ScreenRect);
+                Assert.AreEqual(new Rect(0, 200, 100, 100), nestedChild2.layoutResult.ScreenRect);
+                Assert.AreEqual(new Rect(0, 300, 100, 100), root[2].layoutResult.ScreenRect);
 
-            nestedChild1.style.SetPreferredHeight(500f, StyleState.Normal);
-            app.Update();
-            Assert.AreEqual(new Rect(0, 000, 100, 100), root[0].layoutResult.ScreenRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 600), root[1].layoutResult.ScreenRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 500), nestedChild1.layoutResult.ScreenRect);
-            Assert.AreEqual(new Rect(0, 600, 100, 100), nestedChild2.layoutResult.ScreenRect);
-            Assert.AreEqual(new Rect(0, 700, 100, 100), root[2].layoutResult.ScreenRect);
+                nestedChild1.style.SetPreferredHeight(500f, StyleState.Normal);
+                app.Update();
+                Assert.AreEqual(new Rect(0, 000, 100, 100), root[0].layoutResult.ScreenRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 600), root[1].layoutResult.ScreenRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 500), nestedChild1.layoutResult.ScreenRect);
+                Assert.AreEqual(new Rect(0, 600, 100, 100), nestedChild2.layoutResult.ScreenRect);
+                Assert.AreEqual(new Rect(0, 700, 100, 100), root[2].layoutResult.ScreenRect);
+            }
         }
 
         [Test]
         public void RunWidthLayout() {
-            MockApplication app = MockApplication.Setup<BasicLayoutTest_GathersDirtyData>();
+            using (MockApplication app = MockApplication.Setup<BasicLayoutTest_GathersDirtyData>()) {
 
-            BasicLayoutTest_GathersDirtyData root = app.RootElement as BasicLayoutTest_GathersDirtyData;
+                BasicLayoutTest_GathersDirtyData root = app.RootElement as BasicLayoutTest_GathersDirtyData;
 
-            app.Update();
+                app.Update();
 
-            UIElement one = root[0];
-            UIElement two = root[1];
-            UIElement three = root[2];
+                UIElement one = root[0];
+                UIElement two = root[1];
+                UIElement three = root[2];
 
-            Assert.AreEqual(3, root.layoutBox.childCount);
-            Assert.AreEqual(100, one.layoutBox.finalWidth);
-            Assert.AreEqual(100, two.layoutBox.finalWidth);
-            Assert.AreEqual(100, three.layoutBox.finalWidth);
+                Assert.AreEqual(100, one.layoutResult.actualSize.width);
+                Assert.AreEqual(100, two.layoutResult.actualSize.width);
+                Assert.AreEqual(100, three.layoutResult.actualSize.width);
 
-            Assert.AreEqual(0, one.layoutResult.localPosition.x);
-            Assert.AreEqual(100, two.layoutResult.localPosition.x);
-            Assert.AreEqual(200, three.layoutResult.localPosition.x);
+                Assert.AreEqual(100, two.layoutResult.localPosition.x);
+                Assert.AreEqual(200, three.layoutResult.localPosition.x);
 
-            root.FindById("one").SetEnabled(false);
+                root.FindById("one").SetEnabled(false);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(2, root.layoutBox.childCount);
-            Assert.AreEqual(100, two.layoutBox.finalWidth);
-            Assert.AreEqual(100, three.layoutBox.finalWidth);
+                Assert.AreEqual(100, two.layoutResult.actualSize.width);
+                Assert.AreEqual(100, three.layoutResult.actualSize.width);
 
-            Assert.AreEqual(0, two.layoutResult.localPosition.x);
-            Assert.AreEqual(100, three.layoutResult.localPosition.x);
+                Assert.AreEqual(0, two.layoutResult.localPosition.x);
+                Assert.AreEqual(100, three.layoutResult.localPosition.x);
+            }
         }
 
         [Test]
         public void HandleEnableDisableElementWithContentAncestor() {
-            MockApplication app = MockApplication.Setup<BasicLayoutTest_ContentAncestor>();
-            BasicLayoutTest_ContentAncestor root = app.RootElement as BasicLayoutTest_ContentAncestor;
+            using (MockApplication app = MockApplication.Setup<BasicLayoutTest_ContentAncestor>()) {
+                BasicLayoutTest_ContentAncestor root = app.RootElement as BasicLayoutTest_ContentAncestor;
 
-            app.Update();
+                app.Update();
 
-            UIElement toggle = root["disable-me"];
-            UIElement wrapper = root[0];
+                UIElement toggle = root["disable-me"];
+                UIElement wrapper = root[0];
 
-            Assert.AreEqual(200, root.layoutBox.finalWidth);
-            Assert.AreEqual(200, wrapper.layoutBox.finalWidth);
-            Assert.AreEqual(100, toggle.layoutBox.finalWidth);
+                Assert.AreEqual(200, root.layoutResult.actualSize.width);
+                Assert.AreEqual(200, wrapper.layoutResult.actualSize.width);
+                Assert.AreEqual(100, toggle.layoutResult.actualSize.width);
 
-            toggle.SetEnabled(false);
+                toggle.SetEnabled(false);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(100, root.layoutBox.finalWidth);
-            Assert.AreEqual(100, wrapper.layoutBox.finalWidth);
+                Assert.AreEqual(100, root.layoutResult.actualSize.width);
+                Assert.AreEqual(100, wrapper.layoutResult.actualSize.width);
 
-            toggle.SetEnabled(true);
+                toggle.SetEnabled(true);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(200, root.layoutBox.finalWidth);
-            Assert.AreEqual(200, wrapper.layoutBox.finalWidth);
-            Assert.AreEqual(100, toggle.layoutBox.finalWidth);
+                Assert.AreEqual(200, root.layoutResult.actualSize.width);
+                Assert.AreEqual(200, wrapper.layoutResult.actualSize.width);
+                Assert.AreEqual(100, toggle.layoutResult.actualSize.width);
+            }
         }
 
         [Test]
         public void RespondToBlockSizeChange() {
-            MockApplication app = MockApplication.Setup<BasicLayoutTest_BlockSizeChanges>();
+            using (MockApplication app = MockApplication.Setup<BasicLayoutTest_BlockSizeChanges>()) {
 
-            UIElement viewRoot = app.RootElement;
+                UIElement viewRoot = app.RootElement;
 
-            BasicLayoutTest_BlockSizeChanges root = viewRoot as BasicLayoutTest_BlockSizeChanges;
+                BasicLayoutTest_BlockSizeChanges root = viewRoot as BasicLayoutTest_BlockSizeChanges;
 
-            UIElement blockProvider = root[0];
-            UIElement one = blockProvider[0];
-            UIElement two = blockProvider[1];
-            UIElement contentSize = blockProvider[2];
-            UIElement blockUser = contentSize[0];
+                UIElement blockProvider = root[0];
+                UIElement contentSize = blockProvider[0];
+                UIElement blockUser = contentSize[0];
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(3, blockProvider.layoutBox.childCount);
-            Assert.AreEqual(300, blockUser.layoutBox.finalWidth);
+                Assert.AreEqual(300, blockUser.layoutResult.actualSize.width);
 
-            blockProvider.style.SetPreferredWidth(200f, StyleState.Normal);
-            app.Update();
+                blockProvider.style.SetPreferredWidth(200f, StyleState.Normal);
+                app.Update();
+                Assert.AreEqual(200, blockProvider.layoutResult.actualSize.width);
+                Assert.AreEqual(200, blockUser.layoutResult.actualSize.width);
 
-//        Assert.IsTrue(root.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 1));
-//        Assert.IsTrue(blockProvider.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 1));
-//        Assert.IsTrue(contentSize.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 1));
-//        Assert.IsTrue(blockUser.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 1));
-//        Assert.IsFalse(one.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 1));
-//        Assert.IsFalse(two.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 1));
-//        
-            Assert.AreEqual(200, blockProvider.layoutBox.finalWidth);
-            Assert.AreEqual(200, blockUser.layoutBox.finalWidth);
-//        
-//        app.Update();
-//        
-//        Assert.IsFalse(root.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 2));
-//        Assert.IsFalse(blockProvider.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 2));
-//        Assert.IsFalse(contentSize.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 2));
-//        Assert.IsFalse(blockUser.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 2));
-//        Assert.IsFalse(one.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 2));
-//        Assert.IsFalse(two.layoutHistory.RanLayoutInFrame(LayoutDirection.Horizontal, 2));
+            }
         }
 
         [Test]
         public void UseViewBlockSize() {
-            MockApplication app = MockApplication.Setup<BasicLayoutTest_BlockSizeChanges>();
+            using (MockApplication app = MockApplication.Setup<BasicLayoutTest_BlockSizeChanges>()) {
 
-            UIElement viewRoot = app.RootElement;
+                UIElement viewRoot = app.RootElement;
 
-            BasicLayoutTest_BlockSizeChanges root = viewRoot as BasicLayoutTest_BlockSizeChanges;
+                BasicLayoutTest_BlockSizeChanges root = viewRoot as BasicLayoutTest_BlockSizeChanges;
 
-            UIElement blockProvider = root[0];
-            UIElement one = blockProvider[0];
-            UIElement two = blockProvider[1];
-            UIElement contentSize = blockProvider[2];
-            UIElement blockUser = contentSize[0];
+                UIElement blockProvider = root[0];
+                UIElement contentSize = blockProvider[0];
+                UIElement blockUser = contentSize[0];
+                app.Update();
 
-            app.GetView(0).SetSize(1920, 1080);
+                Assert.AreEqual(300, blockUser.layoutResult.actualSize.width);
 
-            blockProvider.style.SetPreferredWidth(new UIMeasurement(1f, UIMeasurementUnit.Content), StyleState.Normal);
 
-            app.Update();
+                app.GetView(0).SetSize(1920, 1080);
 
-            Assert.AreEqual(3, blockProvider.layoutBox.childCount);
-            Assert.AreEqual(1920, blockUser.layoutBox.finalWidth);
+                blockProvider.style.SetPreferredWidth(new UIMeasurement(1f, UIMeasurementUnit.Content), StyleState.Normal);
+
+                app.Update();
+
+                Assert.AreEqual(1920, blockUser.layoutResult.actualSize.width);
+            }
         }
 
         //     [Template("Data/Layout/System/LayoutSystemTest_Sorting.xml#sort_layers_ascending")]

@@ -1,75 +1,13 @@
 <UITemplate>
+    <Contents>
 
-    <Style>
+        <Text if="SomeCondition()">
+            Condition is true
+        </Text>
 
-     //   style container {
-     //       TextFontSize = 24px;
-     //       TextWhitespaceMode = PreserveNewLines;
-     //       TextColor = white;
-//
-     //   }
-        
-        style scroll-view {
-            PreferredSize = 1vw 1vh;
-            LayoutFitVertical = Shrink;
-        }
-        
-        style select {
-            TextFontSize = 18px;
-            PreferredWidth = 1vw;
-        }
-        
-        style expression {
-            TextColor = yellow;
-            MarginBottom = 12px;
-        }
-        
-        style mesh-test {
-            PreferredSize = 200px 200px;
-            // BackgroundColor = red;
-            // Material = "Red";
-            Border = 4px;
-            BorderColor = black;
-            //BackgroundImage = url("images/2");
-            BorderRadius = 50%;
-        }
-        style container {
-        FlexLayoutDirection = Horizontal;
-        PreferredSize = 300px, 100px;
-        }
-
-        style cell {
-        PreferredSize = 100px;
-        BackgroundColor = blue;
-        }
-    
-    </Style>
-
-    <Contents style="container">
-        <Group mouse:down="HandleClickedChild(0)" style="cell"/>
-        <Group mouse:down="HandleClickedChild(1)" style="cell"/>
-        <Group mouse:down="HandleClickedChild(2)" style="cell"/>
-        
-<!--        <Group style="mesh-test" -->
-<!--               style:meshType="meshTest.meshType"-->
-<!--               style:meshFillAmount="meshTest.meshFillAmount"-->
-<!--               style:meshFillOrigin="meshTest.meshFillOrigin"-->
-<!--               style:meshFillDirection="meshTest.meshFillDirection"-->
-<!--        />-->
-<!--        <Select style="select" sync:selectedValue="selected" options="options" onChange:selectedValue="OnValueChanged()"/>-->
-<!--        -->
-<!--        <Text style="expression">{expression} </Text>-->
-<!--        -->
-<!--        <ScrollView style="scroll-view">-->
-<!--            -->
-<!--            <Text>{compiledCode}</Text>-->
-
-<!--            <Text if="output != null">output is {output}</Text>-->
-
-<!--        </ScrollView>-->
+        <Text if="!SomeCondition()">
+            Condition is false
+        </Text>
 
     </Contents>
-
-   
-
 </UITemplate>

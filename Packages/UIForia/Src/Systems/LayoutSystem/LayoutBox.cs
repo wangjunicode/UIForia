@@ -16,6 +16,7 @@ namespace UIForia.Systems {
         public ElementId nextSiblingId;
         public ElementId prevSiblingId;
         public int childCount;
+        public LayoutBehavior behavior;
 
     }
     
@@ -91,7 +92,7 @@ namespace UIForia.Systems {
         }
 
         public int childCount {
-            get => elementSystem.layoutHierarchyTable[elementId].childCount;
+            get => 0; //layoutHierarchyTable[elementId].childCount;
         }
         
         protected virtual void OnInitialize() { }
@@ -131,57 +132,57 @@ namespace UIForia.Systems {
             float borderRight = MeasurementUtil.ResolveFixedSize(finalWidth, viewParameters, emSize, element.style.BorderRight);
 
             // write to layout result here? would need to flag layout result for changes anyway
-            ref LayoutResult layoutResult = ref element.layoutResult;
-
-            layoutResult.padding.left = paddingLeft;
-            layoutResult.padding.right = paddingRight;
-            layoutResult.border.left = borderLeft;
-            layoutResult.border.right = borderRight;
-
-            paddingBorderHorizontalStart = paddingLeft + borderLeft;
-            paddingBorderHorizontalEnd = paddingRight + borderRight;
+            // ref LayoutResult layoutResult = ref element.layoutResult;
+            //
+            // layoutResult.padding.left = paddingLeft;
+            // layoutResult.padding.right = paddingRight;
+            // layoutResult.border.left = borderLeft;
+            // layoutResult.border.right = borderRight;
+            //
+            // paddingBorderHorizontalStart = paddingLeft + borderLeft;
+            // paddingBorderHorizontalEnd = paddingRight + borderRight;
         }
 
         public void UpdateContentAreaHeight() {
             // flags &= ~LayoutBoxFlags.ContentAreaHeightChanged;
             Vector2 viewSize = element.View.Viewport.size;
-            float emSize = element.style.GetResolvedFontSize();
-            ref LayoutResult layoutResult = ref element.layoutResult;
-            // todo -- improve
-            
-            ViewParameters viewParameters = new ViewParameters();
-            viewParameters.viewWidth = viewSize.x;
-            viewParameters.viewHeight = viewSize.y;
-            
-            float paddingTop = MeasurementUtil.ResolveFixedSize(finalHeight, viewParameters, emSize, element.style.PaddingTop);
-            float paddingBottom = MeasurementUtil.ResolveFixedSize(finalHeight, viewParameters, emSize, element.style.PaddingBottom);
-            float borderTop = MeasurementUtil.ResolveFixedSize(finalHeight, viewParameters, emSize, element.style.BorderTop);
-            float borderBottom = MeasurementUtil.ResolveFixedSize(finalHeight, viewParameters, emSize, element.style.BorderBottom);
-
-            layoutResult.padding.top = paddingTop;
-            layoutResult.padding.bottom = paddingBottom;
-            layoutResult.border.top = borderTop;
-            layoutResult.border.bottom = borderBottom;
-
-            paddingBorderVerticalStart = paddingTop + borderTop;
-            paddingBorderVerticalEnd = paddingBottom + borderBottom;
+            // float emSize = element.style.GetResolvedFontSize();
+            // ref LayoutResult layoutResult = ref element.layoutResult;
+            // // todo -- improve
+            //
+            // ViewParameters viewParameters = new ViewParameters();
+            // viewParameters.viewWidth = viewSize.x;
+            // viewParameters.viewHeight = viewSize.y;
+            //
+            // float paddingTop = MeasurementUtil.ResolveFixedSize(finalHeight, viewParameters, emSize, element.style.PaddingTop);
+            // float paddingBottom = MeasurementUtil.ResolveFixedSize(finalHeight, viewParameters, emSize, element.style.PaddingBottom);
+            // float borderTop = MeasurementUtil.ResolveFixedSize(finalHeight, viewParameters, emSize, element.style.BorderTop);
+            // float borderBottom = MeasurementUtil.ResolveFixedSize(finalHeight, viewParameters, emSize, element.style.BorderBottom);
+            //
+            // layoutResult.padding.top = paddingTop;
+            // layoutResult.padding.bottom = paddingBottom;
+            // layoutResult.border.top = borderTop;
+            // layoutResult.border.bottom = borderBottom;
+            //
+            // paddingBorderVerticalStart = paddingTop + borderTop;
+            // paddingBorderVerticalEnd = paddingBottom + borderBottom;
         }
 
         public void ApplyLayoutHorizontalExplicit(float localX, float size, int frameId) {
-            ref LayoutResult layoutResult = ref element.layoutResult;
-
-            layoutResult.alignedPosition.x = localX;
-            layoutResult.allocatedPosition.x = localX;
-            layoutResult.actualSize.width = size;
-            layoutResult.allocatedSize.width = size;
-            layoutResult.margin.left = 0;
-            layoutResult.margin.right = 0;
-            if (size != finalWidth) {
-                flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                finalWidth = size;
-            }
-
-            UpdateContentAreaWidth();
+            // ref LayoutResult layoutResult = ref element.layoutResult;
+            //
+            // layoutResult.alignedPosition.x = localX;
+            // layoutResult.allocatedPosition.x = localX;
+            // layoutResult.actualSize.width = size;
+            // layoutResult.allocatedSize.width = size;
+            // layoutResult.margin.left = 0;
+            // layoutResult.margin.right = 0;
+            // if (size != finalWidth) {
+            //     flags |= LayoutBoxFlags.RequireLayoutHorizontal;
+            //     finalWidth = size;
+            // }
+            //
+            // UpdateContentAreaWidth();
         }
         
         public void ApplyLayoutHorizontal(float localX, float alignedPosition, in LayoutSize reportedSize, float size, float availableSize, LayoutFit defaultFit, int frameId) {
@@ -234,30 +235,30 @@ namespace UIForia.Systems {
             }
 
             // write to layout result here? would need to flag layout result for changes anyway
-            ref LayoutResult layoutResult = ref element.layoutResult;
-
-            float previousPosition = layoutResult.alignedPosition.x;
-
-            // todo -- layout result change flags (and maybe history entry if enabled)
-            layoutResult.alignedPosition.x = alignedPosition;
-            layoutResult.allocatedPosition.x = localX;
-            layoutResult.actualSize.width = newWidth;
-            layoutResult.allocatedSize.width = availableSize;
-            layoutResult.margin.left = reportedSize.marginStart;
-            layoutResult.margin.right = reportedSize.marginEnd;
-
-            // if ((flags & LayoutBoxFlags.RequireAlignmentHorizontal) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
-            //     flags |= LayoutBoxFlags.RequiresMatrixUpdate;
-            //     flags |= LayoutBoxFlags.RecomputeClipping;
+            // ref LayoutResult layoutResult = ref element.layoutResult;
+            //
+            // float previousPosition = layoutResult.alignedPosition.x;
+            //
+            // // todo -- layout result change flags (and maybe history entry if enabled)
+            // layoutResult.alignedPosition.x = alignedPosition;
+            // layoutResult.allocatedPosition.x = localX;
+            // layoutResult.actualSize.width = newWidth;
+            // layoutResult.allocatedSize.width = availableSize;
+            // layoutResult.margin.left = reportedSize.marginStart;
+            // layoutResult.margin.right = reportedSize.marginEnd;
+            //
+            // // if ((flags & LayoutBoxFlags.RequireAlignmentHorizontal) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
+            // //     flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+            // //     flags |= LayoutBoxFlags.RecomputeClipping;
+            // // }
+            //
+            // // todo -- should probably be when content area size changes, not just overall size
+            // if (newWidth != finalWidth) {
+            //     flags |= LayoutBoxFlags.RequireLayoutHorizontal;
+            //     finalWidth = newWidth;
             // }
-
-            // todo -- should probably be when content area size changes, not just overall size
-            if (newWidth != finalWidth) {
-                flags |= LayoutBoxFlags.RequireLayoutHorizontal;
-                finalWidth = newWidth;
-            }
-
-            UpdateContentAreaWidth();
+            //
+            // UpdateContentAreaWidth();
         }
 
         public void ApplyLayoutVertical(float localY, float alignedPosition, in LayoutSize reportedSize, float size, float availableSize, LayoutFit defaultFit, int frameId) {
@@ -299,17 +300,17 @@ namespace UIForia.Systems {
 
             // if aligned position changed -> flag for matrix recalc 
             // write to layout result here? would need to flag layout result for changes anyway
-            ref LayoutResult layoutResult = ref element.layoutResult;
+            LayoutResult layoutResult = default; //ref element.layoutResult;
 
             // todo -- layout result change flags (and maybe history entry if enabled)
 
             float previousPosition = layoutResult.alignedPosition.y;
 
-            layoutResult.alignedPosition.y = alignedPosition;
-            layoutResult.allocatedPosition.y = localY;
-
-            layoutResult.actualSize.height = newHeight;
-            layoutResult.allocatedSize.height = availableSize;
+            // layoutResult.alignedPosition.y = alignedPosition;
+            // layoutResult.allocatedPosition.y = localY;
+            //
+            // layoutResult.actualSize.height = newHeight;
+            // layoutResult.allocatedSize.height = availableSize;
             // layoutResult.pivot.y = newHeight * 0.5f; // todo -- resolve pivot
 
             // todo -- margin
@@ -328,14 +329,14 @@ namespace UIForia.Systems {
         }
 
         public void ApplyLayoutVerticalExplicit(float localY, float size, int frameId) {
-            ref LayoutResult layoutResult = ref element.layoutResult;
+            LayoutResult layoutResult = default; //ref element.layoutResult;
 
-            layoutResult.alignedPosition.y = localY;
-            layoutResult.allocatedPosition.y = localY;
-            layoutResult.actualSize.height = size;
-            layoutResult.allocatedSize.height = size;
-            layoutResult.margin.top = 0;
-            layoutResult.margin.bottom = 0;
+            // layoutResult.alignedPosition.y = localY;
+            // layoutResult.allocatedPosition.y = localY;
+            // layoutResult.actualSize.height = size;
+            // layoutResult.allocatedSize.height = size;
+            // layoutResult.margin.top = 0;
+            // layoutResult.margin.bottom = 0;
             if (size != finalHeight) {
                 flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                 finalHeight = size;
@@ -524,59 +525,61 @@ namespace UIForia.Systems {
         }
 
         public float ComputeBlockContentAreaWidth(float value) {
-            LayoutBox ptr = parent;
-            float paddingBorder = 0;
-
-            // ignored elements can use the output size of their parent since it has been resolved already
-            if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                LayoutResult parentResult = elementSystem.layoutTable[layoutParentId.index]; //element.layoutResult.layoutParent;
-                paddingBorder = parentResult.padding.left + parentResult.padding.right + parentResult.border.left + parentResult.border.right;
-                return Math.Max(0, (parentResult.actualSize.width - paddingBorder) * value);
-            }
-
-            while (ptr != null) {
-                paddingBorder += ptr.paddingBorderHorizontalStart + ptr.paddingBorderHorizontalEnd;
-
-                if (ptr.CanProvideHorizontalBlockSize(this, out float blockSize)) {
-                    // ignore padding on provided element
-                    paddingBorder -= (ptr.paddingBorderHorizontalStart + ptr.paddingBorderHorizontalEnd);
-                    return Math.Max(0, (blockSize - paddingBorder) * value);
-                }
-
-                if ((ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
-                    Assert.AreNotEqual(-1, ptr.finalWidth);
-                    return Math.Max(0, (ptr.finalWidth - paddingBorder) * value);
-                }
-
-                ptr = ptr.parent;
-            }
-
-            return Math.Max(0, (element.View.Viewport.width - paddingBorder) * value);
+            // LayoutBox ptr = parent;
+            // float paddingBorder = 0;
+            //
+            // // ignored elements can use the output size of their parent since it has been resolved already
+            // if ((flags & LayoutBoxFlags.Ignored) != 0) {
+            //     LayoutResult parentResult = elementSystem.layoutResultTable[layoutParentId]; //element.layoutResult.layoutParent;
+            //     paddingBorder = parentResult.padding.left + parentResult.padding.right + parentResult.border.left + parentResult.border.right;
+            //     return Math.Max(0, (parentResult.actualSize.width - paddingBorder) * value);
+            // }
+            //
+            // while (ptr != null) {
+            //     paddingBorder += ptr.paddingBorderHorizontalStart + ptr.paddingBorderHorizontalEnd;
+            //
+            //     if (ptr.CanProvideHorizontalBlockSize(this, out float blockSize)) {
+            //         // ignore padding on provided element
+            //         paddingBorder -= (ptr.paddingBorderHorizontalStart + ptr.paddingBorderHorizontalEnd);
+            //         return Math.Max(0, (blockSize - paddingBorder) * value);
+            //     }
+            //
+            //     if ((ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
+            //         Assert.AreNotEqual(-1, ptr.finalWidth);
+            //         return Math.Max(0, (ptr.finalWidth - paddingBorder) * value);
+            //     }
+            //
+            //     ptr = ptr.parent;
+            // }
+            //
+            // return Math.Max(0, (element.View.Viewport.width - paddingBorder) * value);
+            return default;
         }
 
         internal float ComputeBlockWidth(float value) {
-            if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                // LayoutResult parentResult = element.layoutResult.layoutParent;
-                LayoutResult parentResult = elementSystem.layoutTable[layoutParentId.index];
-                return Math.Max(0, parentResult.actualSize.width * value);
-            }
-
-            LayoutBox ptr = parent;
-
-            while (ptr != null) {
-                if (ptr.CanProvideHorizontalBlockSize(this, out float blockSize)) {
-                    return Math.Max(0, blockSize * value);
-                }
-
-                if ((ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
-                    Assert.AreNotEqual(-1, ptr.finalWidth);
-                    return Math.Max(0, ptr.finalWidth * value);
-                }
-
-                ptr = ptr.parent;
-            }
-
-            return Math.Max(0, element.View.Viewport.width * value);
+            // if ((flags & LayoutBoxFlags.Ignored) != 0) {
+            //     // LayoutResult parentResult = element.layoutResult.layoutParent;
+            //     LayoutResult parentResult = elementSystem.layoutResultTable[layoutParentId];
+            //     return Math.Max(0, parentResult.actualSize.width * value);
+            // }
+            //
+            // LayoutBox ptr = parent;
+            //
+            // while (ptr != null) {
+            //     if (ptr.CanProvideHorizontalBlockSize(this, out float blockSize)) {
+            //         return Math.Max(0, blockSize * value);
+            //     }
+            //
+            //     if ((ptr.flags & LayoutBoxFlags.WidthBlockProvider) != 0) {
+            //         Assert.AreNotEqual(-1, ptr.finalWidth);
+            //         return Math.Max(0, ptr.finalWidth * value);
+            //     }
+            //
+            //     ptr = ptr.parent;
+            // }
+            //
+            // return Math.Max(0, element.View.Viewport.width * value);
+            return default;
         }
 
         public virtual bool CanProvideHorizontalBlockSize(LayoutBox child, out float blockSize) {
@@ -590,62 +593,64 @@ namespace UIForia.Systems {
         }
 
         protected float ComputeBlockContentHeight(float value) {
-            LayoutBox ptr = parent;
-            float paddingBorder = 0;
-
-            // ignored elements can use the output size of their parent since it has been resolved already
-            if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                // LayoutResult parentResult = element.layoutResult.layoutParent;
-                LayoutResult parentResult = elementSystem.layoutTable[layoutParentId.index];
-                paddingBorder = parentResult.padding.top + parentResult.padding.bottom + parentResult.border.top + parentResult.border.bottom;
-                return Math.Max(0, (parentResult.actualSize.height - paddingBorder) * value);
-            }
-
-            while (ptr != null) {
-                paddingBorder += ptr.paddingBorderVerticalStart + ptr.paddingBorderVerticalEnd;
-
-                if (ptr.CanProvideVerticalBlockSize(this, out float blockSize)) {
-                    // ignore padding on provided element
-                    paddingBorder -= (ptr.paddingBorderVerticalStart + ptr.paddingBorderVerticalEnd);
-                    return Math.Max(0, (blockSize - paddingBorder) * value);
-                }
-
-                if ((ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0) {
-                    Assert.AreNotEqual(-1, ptr.finalHeight);
-                    return Math.Max(0, (ptr.finalHeight - paddingBorder) * value);
-                }
-
-                ptr = ptr.parent;
-            }
-
-            return Math.Max(0, (element.View.Viewport.height - paddingBorder) * value);
+            // LayoutBox ptr = parent;
+            // float paddingBorder = 0;
+            //
+            // // ignored elements can use the output size of their parent since it has been resolved already
+            // if ((flags & LayoutBoxFlags.Ignored) != 0) {
+            //     // LayoutResult parentResult = element.layoutResult.layoutParent;
+            //     LayoutResult parentResult = elementSystem.layoutResultTable[layoutParentId];
+            //     paddingBorder = parentResult.padding.top + parentResult.padding.bottom + parentResult.border.top + parentResult.border.bottom;
+            //     return Math.Max(0, (parentResult.actualSize.height - paddingBorder) * value);
+            // }
+            //
+            // while (ptr != null) {
+            //     paddingBorder += ptr.paddingBorderVerticalStart + ptr.paddingBorderVerticalEnd;
+            //
+            //     if (ptr.CanProvideVerticalBlockSize(this, out float blockSize)) {
+            //         // ignore padding on provided element
+            //         paddingBorder -= (ptr.paddingBorderVerticalStart + ptr.paddingBorderVerticalEnd);
+            //         return Math.Max(0, (blockSize - paddingBorder) * value);
+            //     }
+            //
+            //     if ((ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0) {
+            //         Assert.AreNotEqual(-1, ptr.finalHeight);
+            //         return Math.Max(0, (ptr.finalHeight - paddingBorder) * value);
+            //     }
+            //
+            //     ptr = ptr.parent;
+            // }
+            //
+            // return Math.Max(0, (element.View.Viewport.height - paddingBorder) * value);
+            return default;
         }
 
         internal float ComputeBlockHeight(float value) {
-            LayoutBox ptr = parent;
-
-            // ignored elements can use the output size of their parent since it has been resolved already
-            if ((flags & LayoutBoxFlags.Ignored) != 0) {
-                LayoutResult parentResult = elementSystem.layoutTable[layoutParentId.index];
-                // LayoutResult parentResult = element.layoutResult.layoutParent;
-                return Math.Max(0, (parentResult.actualSize.height) * value);
-            }
-
-            while (ptr != null) {
-                if (ptr.CanProvideVerticalBlockSize(this, out float blockSize)) {
-                    // ignore padding on provided element
-                    return Math.Max(0, blockSize * value);
-                }
-
-                if ((ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0) {
-                    Assert.AreNotEqual(-1, ptr.finalHeight);
-                    return Math.Max(0, ptr.finalHeight * value);
-                }
-
-                ptr = ptr.parent;
-            }
-
-            return Math.Max(0, element.View.Viewport.height * value);
+            // LayoutBox ptr = parent;
+            //
+            // // ignored elements can use the output size of their parent since it has been resolved already
+            // if ((flags & LayoutBoxFlags.Ignored) != 0) {
+            //     LayoutResult parentResult = elementSystem.layoutResultTable[layoutParentId];
+            //     // LayoutResult parentResult = element.layoutResult.layoutParent;
+            //     return Math.Max(0, (parentResult.actualSize.height) * value);
+            // }
+            //
+            // while (ptr != null) {
+            //     if (ptr.CanProvideVerticalBlockSize(this, out float blockSize)) {
+            //         // ignore padding on provided element
+            //         return Math.Max(0, blockSize * value);
+            //     }
+            //
+            //     if ((ptr.flags & LayoutBoxFlags.HeightBlockProvider) != 0) {
+            //         Assert.AreNotEqual(-1, ptr.finalHeight);
+            //         return Math.Max(0, ptr.finalHeight * value);
+            //     }
+            //
+            //     ptr = ptr.parent;
+            // }
+            //
+            // return Math.Max(0, element.View.Viewport.height * value);
+            return default;
         }
 
         public float ResolveHeight(in UIMeasurement measurement) {
@@ -718,9 +723,9 @@ namespace UIForia.Systems {
             size.marginStart = MeasurementUtil.ResolveFixedSize(0, viewParameters, emSize, element.style.MarginLeft);
             size.marginEnd = MeasurementUtil.ResolveFixedSize(0, viewParameters, emSize, element.style.MarginRight);
             // todo -- not sure this is right or desired
-            ref LayoutResult layoutResult = ref element.layoutResult;
-            layoutResult.margin.left = size.marginStart;
-            layoutResult.margin.right = size.marginEnd;
+            // ref LayoutResult layoutResult = ref element.layoutResult;
+            // layoutResult.margin.left = size.marginStart;
+            // layoutResult.margin.right = size.marginEnd;
         }
 
         public void GetHeights(ref LayoutSize size) {
@@ -735,16 +740,16 @@ namespace UIForia.Systems {
             size.marginStart = MeasurementUtil.ResolveFixedSize(0, viewParameters, emSize, element.style.MarginTop);
             size.marginEnd = MeasurementUtil.ResolveFixedSize(0, viewParameters, emSize, element.style.MarginBottom);
             // todo -- not sure this is right or desired
-            ref LayoutResult layoutResult = ref element.layoutResult;
-            layoutResult.margin.top = size.marginStart;
-            layoutResult.margin.bottom = size.marginEnd;
+            // ref LayoutResult layoutResult = ref element.layoutResult;
+            // layoutResult.margin.top = size.marginStart;
+            // layoutResult.margin.bottom = size.marginEnd;
         }
 
         public virtual void OnStyleChanged(StyleProperty[] propertyList, int propertyCount) { }
 
         public virtual void OnChildStyleChanged(LayoutBox child, StyleProperty[] propertyList, int propertyCount) { }
 
-        public void MarkContentParentsHorizontalDirty(int frameId, LayoutReason reason) {
+        public void MarkContentParentsHorizontalDirty() {
             LayoutBox ptr = parent;
 
             while (ptr != null) {
@@ -761,7 +766,7 @@ namespace UIForia.Systems {
             }
         }
 
-        public void MarkContentParentsVerticalDirty(int frameId, LayoutReason reason) {
+        public void MarkContentParentsVerticalDirty() {
             LayoutBox ptr = parent;
 
             while (ptr != null) {
@@ -781,16 +786,16 @@ namespace UIForia.Systems {
             return true;
         }
 
-        public void MarkForLayoutHorizontal(int frameId = -1) {
+        public void MarkForLayoutHorizontal() {
             flags |= LayoutBoxFlags.RequireLayoutHorizontal;
             cachedContentWidth = -1;
-            MarkContentParentsHorizontalDirty(frameId, LayoutReason.StyleSizeChanged);
+            MarkContentParentsHorizontalDirty();
         }
 
-        public void MarkForLayoutVertical(int frameId = -1) {
+        public void MarkForLayoutVertical() {
             flags |= LayoutBoxFlags.RequireLayoutVertical;
             cachedContentHeight = -1;
-            MarkContentParentsVerticalDirty(frameId, LayoutReason.StyleSizeChanged);
+            MarkContentParentsVerticalDirty();
         }
 
         public void UpdateBlockProviderWidth() {
@@ -910,28 +915,28 @@ namespace UIForia.Systems {
         }
 
         internal void GetChildren(LightList<LayoutBox> list) {
-            for (int i = 0; i < element.children.size; i++) {
-                var child = element.children.array[i];
-                if (!child.isEnabled) continue;
-                ref LayoutResult childLayoutResult = ref layoutSystem.elementSystem.layoutTable[child.id.index];
-                switch (child.style.LayoutBehavior) {
-                    case LayoutBehavior.Ignored:
-                        child.layoutBox.parent = this;
-                        childLayoutResult.layoutParent = element.id; // todo -- multiple ignore levels?
-                        // ignoredList.Add(child.layoutBox);
-                        break;
-
-                    case LayoutBehavior.TranscludeChildren:
-                        child.layoutBox.parent = this;
-                        childLayoutResult.layoutParent = element.id; // todo -- multiple ignore levels?
-                        child.layoutBox.GetChildren(list);
-                        break;
-
-                    default:
-                        list.Add(child.layoutBox);
-                        break;
-                }
-            }
+            // for (int i = 0; i < element.children.size; i++) {
+            //     var child = element.children.array[i];
+            //     if (!child.isEnabled) continue;
+            //     ref LayoutResult childLayoutResult = ref layoutSystem.elementSystem.layoutResultTable[child.id];
+            //     switch (child.style.LayoutBehavior) {
+            //         case LayoutBehavior.Ignored:
+            //             child.layoutBox.parent = this;
+            //           //  childLayoutResult.layoutParent = element.id; // todo -- multiple ignore levels?
+            //             // ignoredList.Add(child.layoutBox);
+            //             break;
+            //
+            //         case LayoutBehavior.TranscludeChildren:
+            //             child.layoutBox.parent = this;
+            //             //childLayoutResult.layoutParent = element.id; // todo -- multiple ignore levels?
+            //             child.layoutBox.GetChildren(list);
+            //             break;
+            //
+            //         default:
+            //             list.Add(child.layoutBox);
+            //             break;
+            //     }
+            // }
 
             // AwesomeLayoutBox ptr = firstChild;
             // while (ptr != null) {
@@ -1020,6 +1025,10 @@ namespace UIForia.Systems {
 
                 return f;
             }
+        }
+
+        public float ClampedWithMargin {
+            get => Clamped + marginStart + marginEnd;
         }
 
     }

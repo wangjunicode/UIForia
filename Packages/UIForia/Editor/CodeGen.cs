@@ -94,8 +94,6 @@ namespace UIForia.Editor {
             new PropertyGenerator<IReadOnlyList<GridTrackSize>>(StylePropertyId.GridLayoutRowAutoSize, ListPool<GridTrackSize>.Empty, InheritanceType.NotInherited, "new List<GridTrackSize>() {GridTrackSize.Default}"),
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutColGap, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.GridLayoutRowGap, 0),
-            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutColAlignment, GridAxisAlignment.Grow),
-            new PropertyGenerator<GridAxisAlignment>(StylePropertyId.GridLayoutRowAlignment, GridAxisAlignment.Grow),
             
             // Layout Alignment
             new PropertyGenerator<float>(StylePropertyId.AlignItemsHorizontal, 0),
@@ -196,12 +194,9 @@ namespace UIForia.Editor {
             new PropertyGenerator<LayoutType>(StylePropertyId.LayoutType, LayoutType.Flex),
             new PropertyGenerator<LayoutBehavior>(StylePropertyId.LayoutBehavior, LayoutBehavior.Normal),
             new AnimatedPropertyGenerator<int>(StylePropertyId.ZIndex, 0, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<int>(StylePropertyId.RenderLayerOffset, 0),
-            new AnimatedPropertyGenerator<RenderLayer>(StylePropertyId.RenderLayer, RenderLayer.Default),
             new AnimatedPropertyGenerator<int>(StylePropertyId.Layer, 0, InheritanceType.Inherited),
 
             // Shadow
-//            new PropertyGenerator<UnderlayType>(StylePropertyId.ShadowType, UnderlayType.Unset),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.ShadowColor, ColorUtil.UnsetValue), 
             new AnimatedPropertyGenerator<Color>(StylePropertyId.ShadowTint, ColorUtil.UnsetValue), 
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.ShadowOffsetX, 0),

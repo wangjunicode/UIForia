@@ -38,37 +38,6 @@ namespace UIForia.Systems {
 
     }
 
-    public struct LayoutMetaData {
-
-        public LayoutBehavior layoutBehavior;
-
-        public LayoutBoxFlags flags;
-
-        public LayoutFit horizontalFit;
-        public LayoutFit verticalFit;
-
-        public bool widthLayoutRoot; // not a leaf & horizontal fit = none (default?) && preferredWidth is pixels, ems, view unit, screen unit
-        public bool heightLayoutRoot;
-
-        // not content based size
-        public bool widthBlockProvider;
-        public bool heightBlockProvider;
-        public bool requiresRebuild;
-        public bool requireFullLayout;
-        public bool isWidthContentBased;
-        public bool isHeightContentBased;
-        public LayoutBoxId layoutBoxId;
-
-        public bool requireLayoutHorizontal {
-            get => (flags & LayoutBoxFlags.RequireLayoutHorizontal) != 0;
-        }
-
-        public bool requireLayoutVertical {
-            get => (flags & LayoutBoxFlags.RequireLayoutVertical) != 0;
-        }
-
-    }
-
     // this is crazy, but by using a struct as our array type, even though it just contains a reference, 
     // causes a massive performance increase. The reason is we avoid mono doing `Object.virt_stelemref_class_small_idepth`,
     // which is a complete undocumented part of mono that runs when you assign a reference type to an array slot.
@@ -133,9 +102,6 @@ namespace UIForia.Systems {
             this.layoutSystem = layoutSystem;
             this.view = view;
             this.rootElement = rootElement;
-            this.rootElement.layoutBox = new RootLayoutBox();
-            this.rootElement.layoutBox.Initialize(layoutSystem, layoutSystem.elementSystem, rootElement, 0);
-            layoutSystem.elementSystem.layoutBoxes[rootElement.id.index] = rootElement.layoutBox;
             this.hierarchyRebuildList = new LightList<UIElement>();
             this.ignoredList = new LightList<LayoutBox>();
             this.alignHorizontalList = new LightList<UIElement>();
@@ -260,118 +226,118 @@ namespace UIForia.Systems {
         // depending on layout, might need to re-layout
 
         private void ApplyHorizontalAlignments() {
-            InputSystem inputSystem = view.application.InputSystem;
-
-            float mouseX = inputSystem.MousePosition.x;
-
-            LayoutResult[] layoutTable = layoutSystem.elementSystem.layoutTable;
-            ElementId viewRootId = view.dummyRoot.id;
-
-            for (int i = 0; i < alignHorizontalList.size; i++) {
-                UIElement element = alignHorizontalList.array[i];
-                LayoutBox box = element.layoutBox;
-
-                // if box was aligned from a scroll view, continue
-
-                ref LayoutResult result = ref element.layoutResult;
-
-                // todo -- cache these values on layout box or make style reads fast
-                OffsetMeasurement originX = box.element.style.AlignmentOriginX;
-                OffsetMeasurement offsetX = box.element.style.AlignmentOffsetX;
-                AlignmentDirection direction = box.element.style.AlignmentDirectionX;
-                AlignmentTarget alignmentTargetX = element.style.AlignmentTargetX;
-                AlignmentBoundary alignmentBoundaryX = element.style.AlignmentBoundaryX;
-
-                float originBase = MeasurementUtil.ResolveOriginBaseX(layoutTable, result, viewParameters, alignmentTargetX, direction, mouseX);
-                float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(layoutTable, result, viewParameters, alignmentTargetX);
-                float originOffset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, originX, originSize);
-                float offset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, offsetX, box.finalWidth);
-
-                if (direction == AlignmentDirection.End) {
-                    result.alignedPosition.x = (originBase + originSize) - (originOffset + offset) - box.finalWidth;
-                }
-                else {
-                    result.alignedPosition.x = originBase + originOffset + offset;
-                }
-
-                if (alignmentBoundaryX != AlignmentBoundary.Unset) {
-                    switch (alignmentBoundaryX) {
-                        case AlignmentBoundary.View: {
-                            float viewPos = MeasurementUtil.GetXDistanceToView(layoutTable, viewRootId, result);
-                            if (result.alignedPosition.x < viewPos) {
-                                result.alignedPosition.x = viewPos;
-                            }
-
-                            if (result.alignedPosition.x + result.actualSize.width > viewParameters.viewWidth + viewPos) {
-                                result.alignedPosition.x = viewParameters.viewWidth + viewPos - result.actualSize.width;
-                            }
-
-                            break;
-                        }
-
-                        case AlignmentBoundary.Clipper: {
-                            float clipperPos = MeasurementUtil.GetXDistanceToClipper(layoutTable, result, result.clipper.element.id, viewParameters.applicationWidth, out float clipperWidth);
-
-                            if (result.alignedPosition.x < clipperPos) {
-                                result.alignedPosition.x = clipperPos;
-                            }
-
-                            if (result.alignedPosition.x + result.actualSize.width > clipperWidth + clipperPos) {
-                                result.alignedPosition.x = clipperWidth + clipperPos - result.actualSize.width;
-                            }
-
-                            break;
-                        }
-
-                        case AlignmentBoundary.Screen:
-                            float screenPos = MeasurementUtil.GetXDistanceToScreen(layoutTable, result);
-                            if (result.alignedPosition.x < screenPos) {
-                                result.alignedPosition.x = screenPos;
-                            }
-
-                            if (result.alignedPosition.x + result.actualSize.width > viewParameters.applicationWidth + screenPos) {
-                                result.alignedPosition.x = viewParameters.applicationWidth + screenPos - result.actualSize.width;
-                            }
-
-                            break;
-
-                        case AlignmentBoundary.Parent: {
-                            if (result.alignedPosition.x < 0) {
-                                result.alignedPosition.x = 0;
-                            }
-
-                            if (result.alignedPosition.x + result.actualSize.width > box.parent.finalWidth) {
-                                result.alignedPosition.x -= (result.alignedPosition.x + result.actualSize.width) - box.parent.finalWidth;
-                            }
-
-                            break;
-                        }
-
-                        case AlignmentBoundary.ParentContentArea: {
-                            if (result.alignedPosition.x < box.parent.paddingBorderHorizontalStart) {
-                                result.alignedPosition.x = box.parent.paddingBorderHorizontalStart;
-                            }
-
-                            float width = box.parent.finalWidth - box.parent.paddingBorderHorizontalEnd;
-                            if (result.alignedPosition.x + result.actualSize.width > width) {
-                                result.alignedPosition.x -= (result.alignedPosition.x + result.actualSize.width) - width;
-                            }
-
-                            break;
-                        }
-                    }
-                }
-
-                // todo -- this is caching problem! fix it!
-                //  if (!Mathf.Approximately(previousPosition, result.alignedPosition.x)) {
-                //   if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
-               
-                matrixUpdateList.Add(box.element);
-                //   }
-                // }
-            }
-
-            alignHorizontalList.Clear();
+            // InputSystem inputSystem = view.application.InputSystem;
+            //
+            // float mouseX = inputSystem.MousePosition.x;
+            //
+            // LayoutResult[] layoutTable = layoutSystem.elementSystem.layoutResultTable;
+            // ElementId viewRootId = view.dummyRoot.id;
+            //
+            // for (int i = 0; i < alignHorizontalList.size; i++) {
+            //     UIElement element = alignHorizontalList.array[i];
+            //     LayoutBox box = element.layoutBox;
+            //
+            //     // if box was aligned from a scroll view, continue
+            //
+            //     ref LayoutResult result = ref element.layoutResult;
+            //
+            //     // todo -- cache these values on layout box or make style reads fast
+            //     OffsetMeasurement originX = box.element.style.AlignmentOriginX;
+            //     OffsetMeasurement offsetX = box.element.style.AlignmentOffsetX;
+            //     AlignmentDirection direction = box.element.style.AlignmentDirectionX;
+            //     AlignmentTarget alignmentTargetX = element.style.AlignmentTargetX;
+            //     AlignmentBoundary alignmentBoundaryX = element.style.AlignmentBoundaryX;
+            //
+            //     float originBase = MeasurementUtil.ResolveOriginBaseX(layoutTable, result, viewParameters, alignmentTargetX, direction, mouseX);
+            //     float originSize = MeasurementUtil.ResolveOffsetOriginSizeX(layoutTable, result, viewParameters, alignmentTargetX);
+            //     float originOffset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, originX, originSize);
+            //     float offset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, offsetX, box.finalWidth);
+            //
+            //     if (direction == AlignmentDirection.End) {
+            //         result.alignedPosition.x = (originBase + originSize) - (originOffset + offset) - box.finalWidth;
+            //     }
+            //     else {
+            //         result.alignedPosition.x = originBase + originOffset + offset;
+            //     }
+            //
+            //     if (alignmentBoundaryX != AlignmentBoundary.Unset) {
+            //         switch (alignmentBoundaryX) {
+            //             case AlignmentBoundary.View: {
+            //                 float viewPos = MeasurementUtil.GetXDistanceToView(layoutTable, viewRootId, result);
+            //                 if (result.alignedPosition.x < viewPos) {
+            //                     result.alignedPosition.x = viewPos;
+            //                 }
+            //
+            //                 if (result.alignedPosition.x + result.actualSize.width > viewParameters.viewWidth + viewPos) {
+            //                     result.alignedPosition.x = viewParameters.viewWidth + viewPos - result.actualSize.width;
+            //                 }
+            //
+            //                 break;
+            //             }
+            //
+            //             case AlignmentBoundary.Clipper: {
+            //                 float clipperPos = MeasurementUtil.GetXDistanceToClipper(layoutTable, result, result.clipper.element.id, viewParameters.applicationWidth, out float clipperWidth);
+            //
+            //                 if (result.alignedPosition.x < clipperPos) {
+            //                     result.alignedPosition.x = clipperPos;
+            //                 }
+            //
+            //                 if (result.alignedPosition.x + result.actualSize.width > clipperWidth + clipperPos) {
+            //                     result.alignedPosition.x = clipperWidth + clipperPos - result.actualSize.width;
+            //                 }
+            //
+            //                 break;
+            //             }
+            //
+            //             case AlignmentBoundary.Screen:
+            //                 float screenPos = MeasurementUtil.GetXDistanceToScreen(layoutTable, result);
+            //                 if (result.alignedPosition.x < screenPos) {
+            //                     result.alignedPosition.x = screenPos;
+            //                 }
+            //
+            //                 if (result.alignedPosition.x + result.actualSize.width > viewParameters.applicationWidth + screenPos) {
+            //                     result.alignedPosition.x = viewParameters.applicationWidth + screenPos - result.actualSize.width;
+            //                 }
+            //
+            //                 break;
+            //
+            //             case AlignmentBoundary.Parent: {
+            //                 if (result.alignedPosition.x < 0) {
+            //                     result.alignedPosition.x = 0;
+            //                 }
+            //
+            //                 if (result.alignedPosition.x + result.actualSize.width > box.parent.finalWidth) {
+            //                     result.alignedPosition.x -= (result.alignedPosition.x + result.actualSize.width) - box.parent.finalWidth;
+            //                 }
+            //
+            //                 break;
+            //             }
+            //
+            //             case AlignmentBoundary.ParentContentArea: {
+            //                 if (result.alignedPosition.x < box.parent.paddingBorderHorizontalStart) {
+            //                     result.alignedPosition.x = box.parent.paddingBorderHorizontalStart;
+            //                 }
+            //
+            //                 float width = box.parent.finalWidth - box.parent.paddingBorderHorizontalEnd;
+            //                 if (result.alignedPosition.x + result.actualSize.width > width) {
+            //                     result.alignedPosition.x -= (result.alignedPosition.x + result.actualSize.width) - width;
+            //                 }
+            //
+            //                 break;
+            //             }
+            //         }
+            //     }
+            //
+            //     // todo -- this is caching problem! fix it!
+            //     //  if (!Mathf.Approximately(previousPosition, result.alignedPosition.x)) {
+            //     //   if ((box.flags & LayoutBoxFlags.RequiresMatrixUpdate) != 0) {
+            //    
+            //     matrixUpdateList.Add(box.element);
+            //     //   }
+            //     // }
+            // }
+            //
+            // alignHorizontalList.Clear();
         }
 
         private void ApplyVerticalAlignments() {
@@ -381,13 +347,13 @@ namespace UIForia.Systems {
             InputSystem inputSystem = view.application.InputSystem;
             ElementId viewRootId = view.dummyRoot.id;
 
-            LayoutResult[] layoutTable = layoutSystem.elementSystem.layoutTable;
+            LayoutResult[] layoutTable = default; //layoutSystem.elementSystem.layoutResultTable;
             float mouseY = inputSystem.MousePosition.y;
 
             for (int i = 0; i < alignVerticalList.size; i++) {
                 UIElement element = alignVerticalList.array[i];
                 LayoutBox box = element.layoutBox;
-                ref LayoutResult result = ref element.layoutResult;
+                LayoutResult result = default;// ref element.layoutResult;
 
                 // todo -- cache these values on layout box or make style reads fast
                 OffsetMeasurement originY = box.element.style.AlignmentOriginY;
@@ -396,89 +362,89 @@ namespace UIForia.Systems {
                 AlignmentTarget alignmentTargetY = element.style.AlignmentTargetY;
                 AlignmentBoundary alignmentBoundaryY = element.style.AlignmentBoundaryY;
 
-                float originBase = MeasurementUtil.ResolveOriginBaseY(layoutTable, result, view.position.y, alignmentTargetY, direction, mouseY);
-
-                float originSize = MeasurementUtil.ResolveOffsetOriginSizeY(layoutTable, result, viewParameters, alignmentTargetY);
-
-                float originOffset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, originY, originSize);
-
-                float offset = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, offsetY, box.finalHeight);
-
-                if (direction == AlignmentDirection.End) {
-                    result.alignedPosition.y = (originBase + originSize) - (originOffset + offset) - box.finalHeight;
-                }
-                else {
-                    result.alignedPosition.y = originBase + originOffset + offset;
-                }
-
-                if (alignmentBoundaryY != AlignmentBoundary.Unset) {
-                    switch (alignmentBoundaryY) {
-                        case AlignmentBoundary.View: {
-                            float viewPos = MeasurementUtil.GetYDistanceToView(layoutTable, viewRootId, result);
-                            if (result.alignedPosition.y < viewPos) {
-                                result.alignedPosition.y = viewPos;
-                            }
-
-                            if (result.alignedPosition.y + result.actualSize.height > viewParameters.viewHeight + viewPos) {
-                                result.alignedPosition.y = viewParameters.viewHeight + viewPos - result.actualSize.height;
-                            }
-
-                            break;
-                        }
-
-                        case AlignmentBoundary.Clipper: {
-                            float clipperPos = MeasurementUtil.GetYDistanceToClipper(layoutTable, result, result.clipper.element.id, viewParameters.applicationHeight, out float clipperHeight);
-
-                            if (result.alignedPosition.y < clipperPos) {
-                                result.alignedPosition.y = clipperPos;
-                            }
-
-                            if (result.alignedPosition.y + result.actualSize.height > clipperHeight + clipperPos) {
-                                result.alignedPosition.y = clipperHeight + clipperPos - result.actualSize.height;
-                            }
-
-                            break;
-                        }
-
-                        case AlignmentBoundary.Screen:
-
-                            float screenPos = MeasurementUtil.GetYDistanceToScreen(layoutTable, result);
-                            if (result.alignedPosition.y < screenPos) {
-                                result.alignedPosition.y = screenPos;
-                            }
-
-                            if (result.alignedPosition.y + result.actualSize.height > viewParameters.applicationHeight + screenPos) {
-                                result.alignedPosition.y = viewParameters.applicationHeight + screenPos - result.actualSize.height;
-                            }
-
-                            break;
-
-                        case AlignmentBoundary.Parent: {
-                            if (result.alignedPosition.y < 0) {
-                                result.alignedPosition.y = 0;
-                            }
-
-                            if (result.alignedPosition.y + result.actualSize.height > box.parent.finalHeight) {
-                                result.alignedPosition.y -= (result.alignedPosition.y + result.actualSize.height) - box.parent.finalHeight;
-                            }
-
-                            break;
-                        }
-
-                        case AlignmentBoundary.ParentContentArea: {
-                            if (result.alignedPosition.y < box.parent.paddingBorderVerticalStart) {
-                                result.alignedPosition.y = box.parent.paddingBorderVerticalStart;
-                            }
-
-                            float height = box.parent.finalHeight - box.parent.paddingBorderVerticalEnd;
-                            if (result.alignedPosition.y + result.actualSize.height > height) {
-                                result.alignedPosition.y -= (result.alignedPosition.y + result.actualSize.height) - height;
-                            }
-
-                            break;
-                        }
-                    }
-                }
+                // float originBase = default; //MeasurementUtil.ResolveOriginBaseY(layoutTable, result, view.position.y, alignmentTargetY, direction, mouseY);
+                //
+                // float originSize = default; //MeasurementUtil.ResolveOffsetOriginSizeY(layoutTable, result, viewParameters, alignmentTargetY);
+                //
+                // float originOffset = default; //MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, originY, originSize);
+                //
+                // float offset = default; //MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, offsetY, box.finalHeight);
+                //
+                // if (direction == AlignmentDirection.End) {
+                //     result.alignedPosition.y = (originBase + originSize) - (originOffset + offset) - box.finalHeight;
+                // }
+                // else {
+                //     result.alignedPosition.y = originBase + originOffset + offset;
+                // }
+                //
+                // if (alignmentBoundaryY != AlignmentBoundary.Unset) {
+                //     switch (alignmentBoundaryY) {
+                //         case AlignmentBoundary.View: {
+                //             float viewPos = MeasurementUtil.GetYDistanceToView(layoutTable, viewRootId, result);
+                //             if (result.alignedPosition.y < viewPos) {
+                //                 result.alignedPosition.y = viewPos;
+                //             }
+                //
+                //             if (result.alignedPosition.y + result.actualSize.height > viewParameters.viewHeight + viewPos) {
+                //                 result.alignedPosition.y = viewParameters.viewHeight + viewPos - result.actualSize.height;
+                //             }
+                //
+                //             break;
+                //         }
+                //
+                //         case AlignmentBoundary.Clipper: {
+                //             // float clipperPos = MeasurementUtil.GetYDistanceToClipper(layoutTable, result, result.clipper.element.id, viewParameters.applicationHeight, out float clipperHeight);
+                //             //
+                //             // if (result.alignedPosition.y < clipperPos) {
+                //             //     result.alignedPosition.y = clipperPos;
+                //             // }
+                //             //
+                //             // if (result.alignedPosition.y + result.actualSize.height > clipperHeight + clipperPos) {
+                //             //     result.alignedPosition.y = clipperHeight + clipperPos - result.actualSize.height;
+                //             // }
+                //
+                //             break;
+                //         }
+                //
+                //         case AlignmentBoundary.Screen:
+                //
+                //             float screenPos = MeasurementUtil.GetYDistanceToScreen(layoutTable, result);
+                //             if (result.alignedPosition.y < screenPos) {
+                //                 result.alignedPosition.y = screenPos;
+                //             }
+                //
+                //             if (result.alignedPosition.y + result.actualSize.height > viewParameters.applicationHeight + screenPos) {
+                //                 result.alignedPosition.y = viewParameters.applicationHeight + screenPos - result.actualSize.height;
+                //             }
+                //
+                //             break;
+                //
+                //         case AlignmentBoundary.Parent: {
+                //             if (result.alignedPosition.y < 0) {
+                //                 result.alignedPosition.y = 0;
+                //             }
+                //
+                //             if (result.alignedPosition.y + result.actualSize.height > box.parent.finalHeight) {
+                //                 result.alignedPosition.y -= (result.alignedPosition.y + result.actualSize.height) - box.parent.finalHeight;
+                //             }
+                //
+                //             break;
+                //         }
+                //
+                //         case AlignmentBoundary.ParentContentArea: {
+                //             if (result.alignedPosition.y < box.parent.paddingBorderVerticalStart) {
+                //                 result.alignedPosition.y = box.parent.paddingBorderVerticalStart;
+                //             }
+                //
+                //             float height = box.parent.finalHeight - box.parent.paddingBorderVerticalEnd;
+                //             if (result.alignedPosition.y + result.actualSize.height > height) {
+                //                 result.alignedPosition.y -= (result.alignedPosition.y + result.actualSize.height) - height;
+                //             }
+                //
+                //             break;
+                //         }
+                //     }
+                // }
 
                 // if (alignmentBoundary == AlignmentBoundary.ScreenEnd) {
                 //     
@@ -747,7 +713,7 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                ClipData ptr = layoutResult.clipper;
+                ClipData ptr = default; //layoutResult.clipper;
 
                 bool pointVisibleInClipperHierarchy = true;
 

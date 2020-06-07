@@ -1,13 +1,13 @@
-using TMPro;
+using System;
 
 namespace UIForia {
 
+    [Serializable]
     public struct TextKerningPair {
 
-        public uint firstGlyph;
-        public uint secondGlyph;
-        public GlyphValueRecord firstGlyphAdjustments;
-        public GlyphValueRecord secondGlyphAdjustments;
+        public int firstGlyph;
+        public int secondGlyph;
+        public float advance;
 
     }
 

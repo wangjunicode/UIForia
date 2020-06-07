@@ -8,8 +8,6 @@ namespace UIForia.Systems {
 
         IList<UIElement> QueryPoint(Vector2 point, IList<UIElement> retn);
 
-        LayoutRunner GetLayoutRunner(UIElement viewRoot);
-
     }
 
 }

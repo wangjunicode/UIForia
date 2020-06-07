@@ -2,17 +2,13 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Mono.Linq.Expressions;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
-using UIForia.Exceptions;
-using UIForia.Parsing;
 using UIForia.Util;
-using Debug = UnityEngine.Debug;
+using UnityEngine;
 
 namespace UIForia.Compilers {
 
@@ -103,39 +99,37 @@ namespace UIForia.Compilers {
                 templateMetaData[i].BuildSearchMap();
             }
 
-            Dictionary<int, Func<ConstructedElement>> constructorFnMap = new Dictionary<int, Func<ConstructedElement>>(37);
+            // Dictionary<int, Func<ConstructedElement>> constructorFnMap = new Dictionary<int, Func<ConstructedElement>>(37);
 
-            ConstructorInfo constructedTypeCtor = typeof(ConstructedElement).GetConstructor(new Type[] {typeof(int), typeof(UIElement)});
-            System.Diagnostics.Debug.Assert(constructedTypeCtor != null, nameof(constructedTypeCtor) + " != null");
-            Expression[] parameters = new Expression[2];
+            // ConstructorInfo constructedTypeCtor = typeof(ConstructedElement).GetConstructor(new Type[] {typeof(int), typeof(UIElement)});
+            // System.Diagnostics.Debug.Assert(constructedTypeCtor != null, nameof(constructedTypeCtor) + " != null");
+            // Expression[] parameters = new Expression[2];
 
             // todo -- this can be improved, cannot currently parallelize because the write target (constructorFnMap) is a dictionary which is not threadsafe
             // can convert the constructorFnMap to an array but would need a unique index for each type that is sequential
 
-            foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
-                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
-                    continue;
-                }
-
-                ConstructorInfo ctor = kvp.Key.GetConstructor(Type.EmptyTypes);
-
-                if (ctor == null) {
-                    throw new CompileException(kvp.Key + " must provide a default constructor in order to be used in templates");
-                }
-
-                parameters[0] = Expression.Constant(compiledTemplateData.GetTagNameId(kvp.Value.tagName));
-                parameters[1] = Expression.New(ctor);
-                Func<ConstructedElement> constructorFn = Expression.Lambda<Func<ConstructedElement>>(Expression.New(constructedTypeCtor, parameters)).Compile();
-                constructorFnMap[kvp.Value.id] = constructorFn;
-                GCHandle.Alloc(constructorFn);
-            }
+            // foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
+            //     if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
+            //         continue;
+            //     }
+            //
+            //     ConstructorInfo ctor = kvp.Key.GetConstructor(Type.EmptyTypes);
+            //
+            //     if (ctor == null) {
+            //         throw new CompileException(kvp.Key + " must provide a default constructor in order to be used in templates");
+            //     }
+            //
+            //     parameters[0] = Expression.Constant(compiledTemplateData.GetTagNameId(kvp.Value.tagName));
+            //     parameters[1] = Expression.New(ctor);
+            //     Func<ConstructedElement> constructorFn = Expression.Lambda<Func<ConstructedElement>>(Expression.New(constructedTypeCtor, parameters)).Compile();
+            //     constructorFnMap[kvp.Value.id] = constructorFn;
+            //     GCHandle.Alloc(constructorFn);
+            // }
 
             compiledTemplateData.bindings = bindings;
             compiledTemplateData.slots = slots;
             compiledTemplateData.templates = templates;
             compiledTemplateData.templateMetaData = templateMetaData;
-            compiledTemplateData.constructorFnMap = constructorFnMap;
-            compiledTemplateData.constructElement = (typeId) => compiledTemplateData.constructorFnMap[typeId].Invoke();
 
             // stopwatch.Stop();
             // Debug.Log("Loaded UIForia templates in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
@@ -186,7 +180,6 @@ namespace UIForia.Compilers {
                 compiledTemplateData.templateMetaData[i].compiledTemplateData = compiledTemplateData;
             }
 
-            compiledTemplateData.constructElement = loader.ConstructElement;
             compiledTemplateData.dynamicTemplates = loader.DynamicTemplates;
 
             return compiledTemplateData;

@@ -20,7 +20,7 @@ namespace UIForia.Elements {
 
         public LightList<UIElement> children; // todo -- replace w/ linked list & child count
 
-        private UIElementFlags flags;
+        internal UIElementFlags flags;
         internal UIElement parent;
 
         // todo -- maybe move a lot of this data to an internal representation of UIElement
@@ -54,7 +54,7 @@ namespace UIForia.Elements {
         public UIElement GetParent() {
             return parent;
         }
-        
+
         public IInputProvider Input => application.InputSystem; // todo -- remove
 
         public int ChildCount => children?.Count ?? 0;
@@ -96,7 +96,7 @@ namespace UIForia.Elements {
                 }
             }
         }
-        
+
         public bool isEnabled {
             get => (flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet;
         }
@@ -108,7 +108,7 @@ namespace UIForia.Elements {
         public bool isDestroyed {
             get => (flags & flags & UIElementFlags.Alive) == 0;
         }
-        
+
         public bool isDisabled {
             get => (flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet;
         }
@@ -131,8 +131,8 @@ namespace UIForia.Elements {
             application.DoDestroyElement(this);
         }
 
-        public ref LayoutResult layoutResult {
-            get => ref application.elementSystem.layoutTable[id.index];
+        public unsafe LayoutResult layoutResult {
+            get => new LayoutResult(id, application.layoutSystem.tablePointers);
         }
 
         public UIElement GetLastChild() {
@@ -244,6 +244,12 @@ namespace UIForia.Elements {
         }
 
         public bool internal__dontcallmeplease_SetEnabledIfBinding(bool enabled) {
+
+            if ((flags & UIElementFlags.Created) == 0) {
+                application.elementSystem.metaTable[id].flags &= ~UIElementFlags.Enabled;
+                flags = application.elementSystem.metaTable[id].flags;
+            }
+
             if (enabled && isSelfDisabled) {
                 application.DoEnableElement(this);
             }
@@ -255,10 +261,10 @@ namespace UIForia.Elements {
         }
 
         public void SetEnabled(bool enabled) {
-            if (enabled && isSelfDisabled) {
+            if (enabled) {
                 application.DoEnableElement(this);
             }
-            else if (!enabled && isSelfEnabled) {
+            else {
                 application.DoDisableElement(this);
             }
         }

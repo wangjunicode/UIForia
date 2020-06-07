@@ -2,6 +2,16 @@
 
 namespace UIForia.Layout {
 
+    public interface IGenericList {
+
+        int Capacity { get; set; }
+        
+        int Size { get; set; }
+        
+        int ItemSize { get; }
+
+    }
+
     public interface IListInterface {
 
         ref ListInterface GetListInterface();
@@ -10,7 +20,7 @@ namespace UIForia.Layout {
 
     }
 
-    public unsafe struct ListDebugView<T> where T : unmanaged {
+    internal unsafe struct ListDebugView<T> where T : unmanaged {
 
         public int size;
         public int capacity;

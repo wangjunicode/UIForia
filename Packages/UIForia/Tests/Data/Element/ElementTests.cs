@@ -31,39 +31,42 @@ namespace ElementTests {
 
         [Test]
         public void ProperDepth() {
-            MockApplication app = MockApplication.Setup<DepthThing>();
-            DepthThing root = (DepthThing) app.RootElement;
-            Assert.AreEqual(1, root.hierarchyDepth);
-            Assert.AreEqual(2, root.g1.hierarchyDepth);
-            Assert.AreEqual(3, root.g1_1.hierarchyDepth);
-            Assert.AreEqual(2, root.g2.hierarchyDepth);
-            Assert.AreEqual(3, root.g2_1.hierarchyDepth);
-            Assert.AreEqual(3, root.g2_2.hierarchyDepth);
+            using (MockApplication app = MockApplication.Setup<DepthThing>()) {
+                DepthThing root = (DepthThing) app.RootElement;
+                Assert.AreEqual(1, root.hierarchyDepth);
+                Assert.AreEqual(2, root.g1.hierarchyDepth);
+                Assert.AreEqual(3, root.g1_1.hierarchyDepth);
+                Assert.AreEqual(2, root.g2.hierarchyDepth);
+                Assert.AreEqual(3, root.g2_1.hierarchyDepth);
+                Assert.AreEqual(3, root.g2_2.hierarchyDepth);
+            }
         }
 
         [Test]
         public void ProperDepthNested() {
-            MockApplication app = MockApplication.Setup<DepthThing>();
-            DepthThing root = (DepthThing) app.RootElement;
-            DepthThingChild child = root.FindFirstByType<DepthThingChild>();
-            Assert.AreEqual(2, child.hierarchyDepth);
-            Assert.AreEqual(3, child.FindById("g1").hierarchyDepth);
-            Assert.AreEqual(4, child.FindById("g1_child1").hierarchyDepth);
-            Assert.AreEqual(3, child.FindById("g2").hierarchyDepth);
-            Assert.AreEqual(4, child.FindById("g2_child1").hierarchyDepth);
-            Assert.AreEqual(4, child.FindById("g2_child2").hierarchyDepth);
+            using (MockApplication app = MockApplication.Setup<DepthThing>()) {
+                DepthThing root = (DepthThing) app.RootElement;
+                DepthThingChild child = root.FindFirstByType<DepthThingChild>();
+                Assert.AreEqual(2, child.hierarchyDepth);
+                Assert.AreEqual(3, child.FindById("g1").hierarchyDepth);
+                Assert.AreEqual(4, child.FindById("g1_child1").hierarchyDepth);
+                Assert.AreEqual(3, child.FindById("g2").hierarchyDepth);
+                Assert.AreEqual(4, child.FindById("g2_child1").hierarchyDepth);
+                Assert.AreEqual(4, child.FindById("g2_child2").hierarchyDepth);
+            }
         }
 
         [Test]
         public void ProperSiblingIndex() {
-            MockApplication app = MockApplication.Setup<DepthThing>();
-            DepthThing root = (DepthThing) app.RootElement;
-            Assert.AreEqual(0, root.siblingIndex);
-            Assert.AreEqual(0, root.g1.siblingIndex);
-            Assert.AreEqual(0, root.g1_1.siblingIndex);
-            Assert.AreEqual(1, root.g2.siblingIndex);
-            Assert.AreEqual(0, root.g2_1.siblingIndex);
-            Assert.AreEqual(1, root.g2_2.siblingIndex);
+            using (MockApplication app = MockApplication.Setup<DepthThing>()) {
+                DepthThing root = (DepthThing) app.RootElement;
+                Assert.AreEqual(0, root.siblingIndex);
+                Assert.AreEqual(0, root.g1.siblingIndex);
+                Assert.AreEqual(0, root.g1_1.siblingIndex);
+                Assert.AreEqual(1, root.g2.siblingIndex);
+                Assert.AreEqual(0, root.g2_1.siblingIndex);
+                Assert.AreEqual(1, root.g2_2.siblingIndex);
+            }
         }
 
     }

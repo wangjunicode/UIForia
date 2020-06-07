@@ -9,10 +9,10 @@ namespace UIForia.Rendering {
         public static readonly StylePropertyId[] StylePropertyIdList;
         public static readonly List<StylePropertyId> InheritedProperties;
         
-        private static readonly IntMap<string> s_NameMap;
+        private static readonly IntMap_Deprecated<string> s_NameMap;
         
         static StyleUtil() {
-            s_NameMap = new IntMap<string>();
+            s_NameMap = new IntMap_Deprecated<string>();
             InheritedProperties = new List<StylePropertyId>();
             StylePropertyId[] values = (StylePropertyId[]) Enum.GetValues(typeof(StylePropertyId));
             StylePropertyId[] ignored = {

@@ -41,15 +41,6 @@ namespace Src.Systems {
         }
 
         private void DrawClipShapes(RenderContext ctx) {
-            return;
-            LightList<ClipData> clippers = view.application.LayoutSystem.GetLayoutRunner(view.dummyRoot).clipperList;
-            for (int i = 0; i < clippers.size; i++) {
-                ClipData clipData = clippers.array[i];
-                if (!clipData.isCulled && clipData.visibleBoxCount > 0) {
-                    // clipData.clipPath = clipData.renderBox?.GetClipShape();
-                    ctx.DrawClipData(clipData);
-                }
-            }
         }
 
         private void UpdateRenderBox(UIElement element) {
@@ -130,7 +121,7 @@ namespace Src.Systems {
                 RenderBox renderBox = currentElement.renderBox;
 
                 renderBox.culled = renderBox.element.layoutResult.isCulled;
-                renderBox.clipper = currentElement.layoutResult.clipper;
+                renderBox.clipper = null; //currentElement.layoutResult.clipper;
                 renderBox.traversalIndex = idx++;
 
                 if (!renderBox.culled && renderBox.visibility != Visibility.Hidden) {
@@ -164,6 +155,7 @@ namespace Src.Systems {
                             Debug.Assert(child.renderBox != null, "child.renderBox != null");
                             child.renderBox.Enable();
                         }
+                        // todo -- get rid of this
                         else if (child.enableStateChangedFrameId == frameId) {
                             UpdateRenderBox(child);
                             child.renderBox.Enable();

@@ -63,8 +63,6 @@ namespace UIForia.Rendering {
 		public static readonly IReadOnlyList<UIForia.Layout.LayoutTypes.GridTrackSize> GridLayoutRowAutoSize = new List<GridTrackSize>() {GridTrackSize.Default};
 		public const float GridLayoutColGap = 0f;
 		public const float GridLayoutRowGap = 0f;
-		public const GridAxisAlignment GridLayoutColAlignment = UIForia.Layout.GridAxisAlignment.Grow;
-		public const GridAxisAlignment GridLayoutRowAlignment = UIForia.Layout.GridAxisAlignment.Grow;
 		public const float AlignItemsHorizontal = 0f;
 		public const float AlignItemsVertical = 0f;
 		public const LayoutFit FitItemsVertical = UIForia.Layout.LayoutFit.Unset;
@@ -255,10 +253,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.GridLayoutColGap, 0f);
 				case StylePropertyId.GridLayoutRowGap:
 					 return new StyleProperty(StylePropertyId.GridLayoutRowGap, 0f);
-				case StylePropertyId.GridLayoutColAlignment:
-					 return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)UIForia.Layout.GridAxisAlignment.Grow);
-				case StylePropertyId.GridLayoutRowAlignment:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)UIForia.Layout.GridAxisAlignment.Grow);
 				case StylePropertyId.AlignItemsHorizontal:
 					 return new StyleProperty(StylePropertyId.AlignItemsHorizontal, 0f);
 				case StylePropertyId.AlignItemsVertical:
@@ -415,10 +409,6 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.LayoutBehavior, (int)UIForia.Layout.LayoutBehavior.Normal);
 				case StylePropertyId.ZIndex:
 					 return new StyleProperty(StylePropertyId.ZIndex, 0);
-				case StylePropertyId.RenderLayerOffset:
-					 return new StyleProperty(StylePropertyId.RenderLayerOffset, 0);
-				case StylePropertyId.RenderLayer:
-					 return new StyleProperty(StylePropertyId.RenderLayer, (int)UIForia.Rendering.RenderLayer.Default);
 				case StylePropertyId.Layer:
 					 return new StyleProperty(StylePropertyId.Layer, 0);
 				case StylePropertyId.ShadowColor:

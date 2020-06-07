@@ -8,8 +8,10 @@ using UIForia.Animation;
 using UIForia.Elements;
 using UIForia.Routing;
 using UIForia.Systems;
+using UIForia.Text;
 using UnityEngine;
 using Application = UIForia.Application;
+using LayoutSystem = UIForia.Systems.LayoutSystem;
 
 namespace Tests.Mocks {
 
@@ -20,15 +22,17 @@ namespace Tests.Mocks {
 
         protected MockApplication(bool isPreCompiled, TemplateSettings templateData, ResourceManager resourceManager, Action<UIElement> onRegister) : base(isPreCompiled, templateData, resourceManager, onRegister) { }
 
-        private static ElementSystem s_ElementSystem = new ElementSystem(32);
+        // temporary work around so we dont need to keep allocating lots of big buffers w/o releasing
+        
+        
         protected override void CreateSystems() {
-            styleSystem = new StyleSystem();
+            elementSystem = new ElementSystem(InitialElementCapacity);
+            styleSystem = new StyleSystem(elementSystem);
             renderSystem = new MockRenderSystem(Camera, this);
             routingSystem = new RoutingSystem();
             linqBindingSystem = new LinqBindingSystem();
-            elementSystem = s_ElementSystem;
-            elementSystem.Initialize();
-            layoutSystem = new MockLayoutSystem(this, elementSystem);
+            textSystem = new TextSystem(elementSystem, resourceManager);
+            layoutSystem = new MockLayoutSystem(this, elementSystem, textSystem);
             animationSystem = new AnimationSystem(elementSystem);
             inputSystem = new MockInputSystem(layoutSystem);
         }

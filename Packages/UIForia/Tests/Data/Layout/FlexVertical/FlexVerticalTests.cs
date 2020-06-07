@@ -15,85 +15,91 @@ namespace Layout {
 
         [Test]
         public void DistributeSpaceVertical_Default() {
-            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>()) {
+                FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 500, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 500, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 500, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 500, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 500, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 500, 100), root[2].layoutResult.AllocatedRect);
+            }
         }
 
         [Test]
         public void DistributeSpaceVertical_AfterContent() {
-            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
-            root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AfterContent, StyleState.Normal);
-            app.Update();
+            using (MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>()) {
+                FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
+                root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AfterContent, StyleState.Normal);
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 500, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 500, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 500, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 500, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 500, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 500, 100), root[2].layoutResult.AllocatedRect);
+            }
         }
 
         [Test]
         public void DistributeSpaceVertical_CenterContent() {
-            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>()) {
+                FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
 
-            root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.CenterContent, StyleState.Normal);
+                root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.CenterContent, StyleState.Normal);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 100, 500, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 500, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 300, 500, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 500, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 500, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 300, 500, 100), root[2].layoutResult.AllocatedRect);
+            }
         }
 
 
         [Test]
         public void DistributeSpaceVertical_BeforeContent() {
-            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>()) {
+                FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
 
-            root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.BeforeContent, StyleState.Normal);
-            app.Update();
+                root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.BeforeContent, StyleState.Normal);
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 200, 500, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 300, 500, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 400, 500, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 500, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 300, 500, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 400, 500, 100), root[2].layoutResult.AllocatedRect);
+            }
         }
 
         [Test]
         public void DistributeSpaceVertical_AroundContent() {
-            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>()) {
+                FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
 
-            // makes math cleaner
-            root.style.SetPreferredHeight(600f, StyleState.Normal);
-            root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AroundContent, StyleState.Normal);
+                // makes math cleaner
+                root.style.SetPreferredHeight(600f, StyleState.Normal);
+                root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AroundContent, StyleState.Normal);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 50, 500, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 250, 500, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 450, 500, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 50, 500, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 250, 500, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 450, 500, 100), root[2].layoutResult.AllocatedRect);
+            }
         }
 
         [Test]
         public void DistributeSpaceVertical_BetweenContent() {
-            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
-            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>()) {
+                FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
 
-            root.style.SetPreferredHeight(600f, StyleState.Normal);
-            root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.BetweenContent, StyleState.Normal);
+                root.style.SetPreferredHeight(600f, StyleState.Normal);
+                root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.BetweenContent, StyleState.Normal);
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 500, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 250, 500, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 500, 500, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 500, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 250, 500, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 500, 500, 100), root[2].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/FlexVertical/FlexVertical_GrowUnconstrained.xml")]
@@ -101,14 +107,15 @@ namespace Layout {
 
         [Test]
         public void GrowUnconstrained() {
-            MockApplication app = MockApplication.Setup<FlexVertical_GrowUnconstrained>();
-            FlexVertical_GrowUnconstrained root = (FlexVertical_GrowUnconstrained) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_GrowUnconstrained>()) {
+                FlexVertical_GrowUnconstrained root = (FlexVertical_GrowUnconstrained) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 200), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 100, 400), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 600, 100, 200), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 200), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 100, 400), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 600, 100, 200), root[2].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/FlexVertical/FlexVertical_GrowConstrained.xml")]
@@ -116,14 +123,15 @@ namespace Layout {
 
         [Test]
         public void GrowConstrained() {
-            MockApplication app = MockApplication.Setup<FlexVertical_GrowConstrained>();
-            FlexVertical_GrowConstrained root = (FlexVertical_GrowConstrained) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_GrowConstrained>()) {
+                FlexVertical_GrowConstrained root = (FlexVertical_GrowConstrained) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 350), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 350, 100, 200), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 550, 100, 350), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 350), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 350, 100, 200), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 550, 100, 350), root[2].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/FlexVertical/FlexVertical_GrowWithExtraSpace.xml")]
@@ -131,14 +139,15 @@ namespace Layout {
 
         [Test]
         public void GrowWithExtraSpace() {
-            MockApplication app = MockApplication.Setup<FlexVertical_GrowWithExtraSpace>();
-            FlexVertical_GrowWithExtraSpace root = (FlexVertical_GrowWithExtraSpace) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_GrowWithExtraSpace>()) {
+                FlexVertical_GrowWithExtraSpace root = (FlexVertical_GrowWithExtraSpace) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 200, 100, 300), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 500, 100, 200), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 700, 100, 300), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 100, 300), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 500, 100, 200), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 700, 100, 300), root[2].layoutResult.AllocatedRect);
+            }
         }
 
 
@@ -147,14 +156,15 @@ namespace Layout {
 
         [Test]
         public void RespectMarginVertical() {
-            MockApplication app = MockApplication.Setup<FlexVertical_RespectMarginVertical>();
-            FlexVertical_RespectMarginVertical root = (FlexVertical_RespectMarginVertical) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_RespectMarginVertical>()) {
+                FlexVertical_RespectMarginVertical root = (FlexVertical_RespectMarginVertical) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 10, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 310, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 1220, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 10, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 310, 100, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 1220, 100, 100), root[2].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/FlexVertical/FlexVertical_ShrinkUnconstrained.xml")]
@@ -162,14 +172,15 @@ namespace Layout {
 
         [Test]
         public void ShrinkUnconstrained() {
-            MockApplication app = MockApplication.Setup<FlexVertical_ShrinkUnconstrained>();
-            FlexVertical_ShrinkUnconstrained root = (FlexVertical_ShrinkUnconstrained) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_ShrinkUnconstrained>()) {
+                FlexVertical_ShrinkUnconstrained root = (FlexVertical_ShrinkUnconstrained) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 200), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 100, 200), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 400, 100, 200), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 200), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 100, 200), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 400, 100, 200), root[2].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/FlexVertical/FlexVertical_ShrinkConstrained.xml")]
@@ -177,14 +188,15 @@ namespace Layout {
 
         [Test]
         public void ShrinkConstrained() {
-            MockApplication app = MockApplication.Setup<FlexVertical_ShrinkConstrained>();
-            FlexVertical_ShrinkConstrained root = (FlexVertical_ShrinkConstrained) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_ShrinkConstrained>()) {
+                FlexVertical_ShrinkConstrained root = (FlexVertical_ShrinkConstrained) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 0,   100, 175), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 175, 100, 250), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 425, 100, 175), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 175), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 175, 100, 250), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 425, 100, 175), root[2].layoutResult.AllocatedRect);
+            }
         }
         
         [Template("Data/Layout/FlexVertical/FlexVertical_ShrinkWithOverflow.xml")]
@@ -192,14 +204,15 @@ namespace Layout {
 
         [Test]
         public void ShrinkWithOverflow() {
-            MockApplication app = MockApplication.Setup<FlexVertical_ShrinkWithOverflow>();
-            FlexVertical_ShrinkWithOverflow root = (FlexVertical_ShrinkWithOverflow) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<FlexVertical_ShrinkWithOverflow>()) {
+                FlexVertical_ShrinkWithOverflow root = (FlexVertical_ShrinkWithOverflow) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(new Rect(0, 0,   100, 250), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 250, 100, 250), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 500, 100, 250), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 250), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 250, 100, 250), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 500, 100, 250), root[2].layoutResult.AllocatedRect);
+            }
         }
 
     }

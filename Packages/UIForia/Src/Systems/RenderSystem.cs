@@ -72,14 +72,12 @@ namespace Src.Systems {
 
         public virtual void OnUpdate() {
             renderContext.Clear();
-
             // todo
             // views can have their own cameras.
             // if they do they are not batchable with other views. 
             // for now we can make batching not cross view boundaries, eventually that would be cool though
 
             camera.orthographicSize = Screen.height * 0.5f;
-
             for (int i = 0; i < renderOwners.size; i++) {
                 renderOwners.array[i].Render(renderContext);
             }

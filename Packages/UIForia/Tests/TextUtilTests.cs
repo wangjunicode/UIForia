@@ -1,10 +1,69 @@
 using NUnit.Framework;
 using UIForia.Text;
 using UIForia.Util;
-
+using Unity.Collections;
 
 [TestFixture]
 public class TextUtilTests {
+
+    [Test][Ignore("Todo -- implement")]
+    public void ParseModifiers() {
+        // string input = " hello <nobreak>there how are you</nobreak> today?";
+        //
+        // RichTextProcessor processor = new RichTextProcessor();
+        //
+        // BurstTextInfo info = new BurstTextInfo();
+        //
+        // TextInfoBufferSet bufferSet = new TextInfoBufferSet(Allocator.Persistent);
+        //
+        // info.textStyle.whitespaceMode = WhitespaceMode.Trim;
+        // info.SetText(input, ref bufferSet, processor);
+        //
+        // string result = info.GetString();
+        //
+        // Assert.AreEqual("hello there how are you today?", result);
+        //
+        // info.textStyle.whitespaceMode = WhitespaceMode.None;
+        // info.textStyle.textTransform = TextTransform.UpperCase;
+        // info.SetText(input, ref bufferSet, processor);
+        //
+        // Assert.AreEqual(" HELLO THERE HOW ARE YOU TODAY?", info.GetString());
+        //
+        // input = " hello <uppercase>there how are you</uppercase> today?";
+        //
+        // info.textStyle.textTransform = TextTransform.None;
+        // info.SetText(input, ref bufferSet, processor);
+        //
+        // Assert.AreEqual(" hello THERE HOW ARE YOU today?", info.GetString());
+        //
+        // input = " hello <uppercase>there how are you today?";
+        //
+        // info.textStyle.textTransform = TextTransform.None;
+        // info.SetText(input, ref bufferSet, processor);
+        //
+        // Assert.AreEqual(" hello THERE HOW ARE YOU TODAY?", info.GetString());
+        //
+        // input = " hello <titlecase>there how <uppercase>are <lowercase>you today?";
+        //
+        // info.textStyle.textTransform = TextTransform.None;
+        // info.SetText(input, ref bufferSet, processor);
+        //
+        // Assert.AreEqual(" hello There How ARE you today?", info.GetString());
+        //
+        // TextLayoutSymbol symbol = new TextLayoutSymbol() {
+        //     type = TextLayoutSymbolType.Word,
+        //     isBreakable = false,
+        //     wordInfo = new WordInfo() {
+        //         type = WordType.Normal,
+        //         charStart = 0,
+        //         charEnd = 5,
+        //     }
+        // };
+        //
+        // info.Dispose();
+        // bufferSet.Dispose();
+
+    }
 
     [Test]
     public void BreakCharacterGroupsIntoWords() {
@@ -170,7 +229,6 @@ public class TextUtilTests {
             Assert.AreEqual(expected[i], result.array[i]);
         }
     }
-
 
     [Test]
     public void Wrap_IdentityInput() {

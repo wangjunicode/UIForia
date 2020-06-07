@@ -19,7 +19,9 @@ namespace UIForia.Layout {
         Stack,
         Image,
         ScrollView,
-        Text
+        Text,
+
+        Root
 
     }
 

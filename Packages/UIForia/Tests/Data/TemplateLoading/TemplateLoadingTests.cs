@@ -21,9 +21,10 @@ namespace TemplateLoading {
 
         [Test]
         public void LoadNestedTemplate() {
-            MockApplication app = MockApplication.Setup<Outer>();
-            Assert.IsInstanceOf<Outer>(app.RootElement);
-            Assert.IsInstanceOf<Inner>(app.RootElement[0]);
+            using (MockApplication app = MockApplication.Setup<Outer>()) {
+                Assert.IsInstanceOf<Outer>(app.RootElement);
+                Assert.IsInstanceOf<Inner>(app.RootElement[0]);
+            }
         }
 
         [Template("Data/TemplateLoading/TemplateLoadingTest_LoadNestedTemplateDefault.xml")]
@@ -34,9 +35,10 @@ namespace TemplateLoading {
 
         [Test]
         public void LoadNestedTemplateDefault() {
-            MockApplication app = MockApplication.Setup<OuterDefault>();
-            Assert.IsInstanceOf<OuterDefault>(app.RootElement);
-            Assert.IsInstanceOf<InnerDefault>(app.RootElement[0]);
+            using (MockApplication app = MockApplication.Setup<OuterDefault>()) {
+                Assert.IsInstanceOf<OuterDefault>(app.RootElement);
+                Assert.IsInstanceOf<InnerDefault>(app.RootElement[0]);
+            }
         }
 
         [Template]
@@ -45,18 +47,20 @@ namespace TemplateLoading {
 
         [Test]
         public void ResolveUsingDefaultPath() {
-            MockApplication app = MockApplication.Setup<DefaultPathElement>();
-            Assert.IsInstanceOf<DefaultPathElement>(app.RootElement);
+            using (MockApplication app = MockApplication.Setup<DefaultPathElement>()) {
+                Assert.IsInstanceOf<DefaultPathElement>(app.RootElement);
+            }
         }
 
         public class DefaultPathElementNoAttr : UIElement { }
 
         [Test]
         public void ResolveUsingDefaultPathNoAttr() {
-            MockApplication app = MockApplication.Setup<DefaultPathElementNoAttr>();
-            Assert.IsInstanceOf<DefaultPathElementNoAttr>(app.RootElement);
-            UITextElement textElement = TestUtils.AssertInstanceOfAndReturn<UITextElement>(app.RootElement[0]);
-            Assert.AreEqual("Default Path! No Attr", textElement.text.Trim());
+            using (MockApplication app = MockApplication.Setup<DefaultPathElementNoAttr>()) {
+                Assert.IsInstanceOf<DefaultPathElementNoAttr>(app.RootElement);
+                UITextElement textElement = TestUtils.AssertInstanceOfAndReturn<UITextElement>(app.RootElement[0]);
+                Assert.AreEqual("Default Path! No Attr", textElement.text.Trim());
+            }
         }
 
         public class DefaultPathElementNoAttrNotFound : UIElement { }
@@ -98,22 +102,23 @@ namespace TemplateLoading {
 
         [Test]
         public void DistinctGenericTemplates() {
-            MockApplication app = MockApplication.Setup<TemplateLoadingTest_LoadGenericOuter>();
-            TemplateSettings settings = new TemplateSettings();
-            settings.applicationName = "DistinctGenericTemplates";
-            settings.assemblyName = GetType().Assembly.GetName().Name;
-            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
-            settings.codeFileExtension = "generated.xml.cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/DistinctGenericTemplates";
-            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
+            using (MockApplication app = MockApplication.Setup<TemplateLoadingTest_LoadGenericOuter>()) {
+                TemplateSettings settings = new TemplateSettings();
+                settings.applicationName = "DistinctGenericTemplates";
+                settings.assemblyName = GetType().Assembly.GetName().Name;
+                settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
+                settings.codeFileExtension = "generated.xml.cs";
+                settings.preCompiledTemplatePath = "Assets/UIForia_Generated/DistinctGenericTemplates";
+                settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
 
-            TemplateLoadingTest_LoadGenericOuter e = (TemplateLoadingTest_LoadGenericOuter) app.RootElement;
+                TemplateLoadingTest_LoadGenericOuter e = (TemplateLoadingTest_LoadGenericOuter) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("0.5", GetText(e[0][0]));
-            Assert.AreEqual("7", GetText(e[1][0]));
-            Assert.AreEqual("str", GetText(e[2][0]));
+                Assert.AreEqual("0.5", GetText(e[0][0]));
+                Assert.AreEqual("7", GetText(e[1][0]));
+                Assert.AreEqual("str", GetText(e[2][0]));
+            }
         }
 
         string GetText(UIElement element) {

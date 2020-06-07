@@ -8,72 +8,75 @@ namespace UIForia {
     [BurstCompile]
     public struct UpdateTraversalTable : IJob {
 
-        public ElementId rootId;
         public ElementTable<ElementMetaInfo> metaTable;
         public ElementTable<ElementTraversalInfo> traversalTable;
         public ElementTable<HierarchyInfo> hierarchyTable;
-        
+        public DataList<ElementId>.Shared rootIds;
+
         // this could be two jobs done in parallel however we'd have some false sharing contention
         // because of writes into the traversal table
-        
-        // todo -- if we end up using stack traversals a lot it might be better to store the stack externally
-        // so we dont keep resizing all the time. or maybe it doesn't matter, we'll need to test it out
-        
+
         public void Execute() {
 
             int ftbIndex = 0;
             int btfIndex = 0;
-            
+
             DataList<ElementId> stack = new DataList<ElementId>(512, Allocator.Temp);
 
-            stack[stack.size++] = rootId;
+            for (int rootIdx = 0; rootIdx < rootIds.size; rootIdx++) {
 
-            while (stack.size != 0) {
+                stack[stack.size++] = rootIds[rootIdx];
 
-                ElementId current = stack[--stack.size];
+                while (stack.size != 0) {
 
-                traversalTable[current].ftbIndex = ftbIndex++;
+                    ElementId current = stack[--stack.size];
 
-                int childCount = hierarchyTable[current].childCount;
+                    traversalTable[current].ftbIndex = ftbIndex++;
 
-                stack.EnsureAdditionalCapacity(childCount);
+                    int childCount = hierarchyTable[current].childCount;
 
-                ElementId childPtr = hierarchyTable[current].lastChildId;
+                    stack.EnsureAdditionalCapacity(childCount);
 
-                for (int i = 0; i < childCount; i++) {
+                    ElementId childPtr = hierarchyTable[current].lastChildId;
 
-                    if (!ElementSystem.IsDeadOrDisabled(childPtr, metaTable)) {
-                        stack.AddUnchecked(childPtr);
+                    for (int i = 0; i < childCount; i++) {
+
+                        if (!ElementSystem.IsDeadOrDisabled(childPtr, metaTable)) {
+                            stack.AddUnchecked(childPtr);
+                        }
+
+                        childPtr = hierarchyTable[childPtr].prevSiblingId;
+
                     }
 
-                    childPtr = hierarchyTable[childPtr].prevSiblingId;
-
                 }
-
             }
-            
-            stack[stack.size++] = rootId;
-            
-            while (stack.size != 0) {
 
-                ElementId current = stack[--stack.size];
+            for (int rootIdx = 0; rootIdx < rootIds.size; rootIdx++) {
 
-                traversalTable[current].btfIndex = btfIndex++;
+                stack[stack.size++] = rootIds[rootIdx];
 
-                int childCount = hierarchyTable[current].childCount;
+                while (stack.size != 0) {
 
-                ElementId childPtr = hierarchyTable[current].firstChildId;
+                    ElementId current = stack[--stack.size];
 
-                for (int i = 0; i < childCount; i++) {
+                    traversalTable[current].btfIndex = btfIndex++;
 
-                    if (!ElementSystem.IsDeadOrDisabled(childPtr, metaTable)) {
-                        stack.AddUnchecked(childPtr);
+                    int childCount = hierarchyTable[current].childCount;
+
+                    ElementId childPtr = hierarchyTable[current].firstChildId;
+
+                    for (int i = 0; i < childCount; i++) {
+
+                        if (!ElementSystem.IsDeadOrDisabled(childPtr, metaTable)) {
+                            stack.AddUnchecked(childPtr);
+                        }
+
+                        childPtr = hierarchyTable[childPtr].nextSiblingId;
+
                     }
 
-                    childPtr = hierarchyTable[childPtr].nextSiblingId;
-
                 }
-
             }
 
             stack.Dispose();

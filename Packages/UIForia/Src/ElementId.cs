@@ -1,9 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 
 namespace UIForia {
 
     [DebuggerDisplay("Index = {index} generation = {generation}")]
-    public struct ElementId {
+    public struct ElementId : IComparable<ElementId> {
 
         private const int ENTITY_INDEX_BITS = 24;
         private const int ENTITY_INDEX_MASK = (1 << ENTITY_INDEX_BITS) - 1;
@@ -22,11 +23,11 @@ namespace UIForia {
         }
 
         public int index {
-            get => (id & ENTITY_INDEX_MASK);
+            [DebuggerStepThrough] get => (id & ENTITY_INDEX_MASK);
         }
 
         public int generation {
-            get => ((id >> ENTITY_INDEX_BITS) & ENTITY_GENERATION_MASK);
+            [DebuggerStepThrough] get => ((id >> ENTITY_INDEX_BITS) & ENTITY_GENERATION_MASK);
         }
 
         public static ElementId Invalid {
@@ -59,6 +60,14 @@ namespace UIForia {
 
         public override int GetHashCode() {
             return id;
+        }
+
+        public int CompareTo(ElementId other) {
+            return id < other.id ? -1 : id > other.id ? 1 : 0;
+        }
+
+        public override string ToString() {
+            return $"Index = {index} generation = {generation}";
         }
 
     }

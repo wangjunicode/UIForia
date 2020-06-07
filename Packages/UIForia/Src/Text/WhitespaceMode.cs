@@ -6,6 +6,7 @@ namespace UIForia.Text {
     public enum WhitespaceMode {
 
         Unset = 0,
+        None = 0,
         CollapseWhitespace = 1 << 0,
         PreserveNewLines = 1 << 1,
         TrimStart = 1 << 2,
@@ -15,7 +16,7 @@ namespace UIForia.Text {
         TrimLineStart = 1 << 4, //allow lines to begin with whitespace
         NoWrap = 1 << 5,
 
-        CollapseWhitespaceAndTrim = Trim | CollapseWhitespace
+        CollapseWhitespaceAndTrim = Trim | CollapseWhitespace,
 
     }
 

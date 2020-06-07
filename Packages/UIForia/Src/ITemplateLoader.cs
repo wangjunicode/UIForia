@@ -20,8 +20,6 @@ namespace UIForia {
 
         Dictionary<string, int> TagNameIdMap { get; }
 
-        ConstructedElement ConstructElement(int typeId);
-
         DynamicTemplate[] DynamicTemplates { get; }
 
         MaterialDatabase GetMaterialDatabase();

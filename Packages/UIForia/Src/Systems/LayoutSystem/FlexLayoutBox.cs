@@ -1,17 +1,10 @@
-using System;
 using System.Diagnostics;
-using UIForia;
-using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Util;
-using UIForia.Util.Unsafe;
-using Unity.Collections;
 using UnityEngine;
 
 namespace UIForia.Systems {
-
 
     [DebuggerDisplay("{element.ToString()} | Flex")]
     public class FlexLayoutBox : LayoutBox {
@@ -157,7 +150,7 @@ namespace UIForia.Systems {
         public override void OnChildrenChanged() {
             items?.Clear();
 
-            ref LayoutHierarchyInfo layoutHierarchyInfo = ref layoutSystem.elementSystem.layoutHierarchyTable[elementId];
+            ref LayoutHierarchyInfo layoutHierarchyInfo = ref layoutSystem.layoutHierarchyTable[elementId];
 
             if (layoutHierarchyInfo.childCount == 0) {
                 return;
@@ -168,18 +161,18 @@ namespace UIForia.Systems {
             items.size = childCount;
             ElementId ptr = layoutHierarchyInfo.firstChildId;
 
-            for (int i = 0; i < childCount; i++) {
-
-                LayoutBox childBox = elementSystem.layoutBoxes[ptr.index];
-
-                items.array[i] = new FlexItem() {
-                    layoutBox = childBox,
-                    growPieces = childBox.element.style.FlexItemGrow,
-                    shrinkPieces = childBox.element.style.FlexItemShrink
-                };
-
-                ptr = layoutSystem.elementSystem.layoutHierarchyTable[ptr].nextSiblingId;
-            }
+            // for (int i = 0; i < childCount; i++) {
+            //
+            //     LayoutBox childBox = null; //layoutSy[ptr.index];
+            //
+            //     items.array[i] = new FlexItem() {
+            //         layoutBox = childBox,
+            //         growPieces = childBox.element.style.FlexItemGrow,
+            //         shrinkPieces = childBox.element.style.FlexItemShrink
+            //     };
+            //
+            //     // ptr = layoutSystem.elementSystem.layoutHierarchyTable[ptr].nextSiblingId;
+            // }
         }
 
         public override void RunLayoutHorizontal(int frameId) {
@@ -301,8 +294,9 @@ namespace UIForia.Systems {
                     offset += item.widthData.marginStart + item.widthData.marginEnd + gap;
                 }
 
-                MarkForLayoutVertical(frameId);
             }
+
+            MarkForLayoutVertical();
         }
 
         private void GrowHorizontal(ref Track track) {

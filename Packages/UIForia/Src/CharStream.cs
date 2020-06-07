@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using UIForia.Util.Unsafe;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -62,6 +64,14 @@ namespace UIForia.Util {
         public int IntPtr => (int) ptr;
         public char Last => data[dataEnd - 1];
 
+        public char Current {
+            get => data[ptr];
+        }
+
+        public char Next {
+            get => ptr + 1 < dataEnd ? data[ptr + 1] : '\0';
+        }
+
         public char this[uint idx] {
             get => data[idx];
         }
@@ -106,15 +116,20 @@ namespace UIForia.Util {
             }
 
             fixed (char* s = str) {
-                for (int i = 0; i < str.Length; i++) {
-                    if (data[ptr + i] != s[i]) {
-                        return false;
-                    }
+
+                if (UnsafeUtility.MemCmp(s, data + ptr, str.Length * 2) != 0) {
+                    return false;
                 }
+
+                Advance((uint) str.Length);
+                return true;
+                // for (int i = 0; i < str.Length; i++) {
+                //     if (data[ptr + i] != s[i]) {
+                //         return false;
+                //     }
+                // }
             }
 
-            Advance((uint) str.Length);
-            return true;
         }
 
         public bool TryMatchRange(in CharSpan charSpan) {
@@ -933,6 +948,86 @@ namespace UIForia.Util {
             return new string(data, (int) ptr, (int) (dataEnd - ptr));
         }
 
+        public bool TryParseXMLClose(out CharSpan identifier) {
+            if (ptr + 4 < dataEnd) {
+                identifier = default;
+                return false;
+            }
+
+            if (data[ptr] != '<' || data[ptr + 1] != '/') {
+                identifier = default;
+                return false;
+            }
+
+            while (ptr < dataEnd && char.IsWhiteSpace(data[ptr])) {
+                ptr++;
+            }
+
+            if (!TryParseIdentifier(out identifier, true, WhitespaceHandling.ConsumeAfter)) {
+                return false;
+            }
+
+            return TryParseCharacter('>');
+
+        }
+
+        public bool TryParseXMLAttribute(out CharSpan key, out CharSpan value, bool requireQuotes = false) {
+
+            uint start = ptr;
+
+            while (ptr < dataEnd && char.IsWhiteSpace(data[ptr])) {
+                ptr++;
+            }
+
+            if (!TryParseIdentifier(out key)) {
+                value = default;
+                ptr = start;
+                return false;
+            }
+
+            if (!TryParseCharacter('=')) {
+                value = default;
+                ptr = start;
+                return false;
+            }
+
+            if (requireQuotes) {
+                if (!TryParseCharacter('"')) {
+                    value = default;
+                    ptr = start;
+                    return false;
+                }
+
+                if (TryGetCharSpanTo('"', out value)) {
+                    return true;
+                }
+
+            }
+            // read until we hit a space, > or end of input
+            else if (TryGetCharSpanTo(' ', '>', out value)) {
+                return true;
+            }
+
+            ptr = start;
+            return false;
+
+        }
+
+        public bool TryParseXMLOpenTagIdentifier(out CharSpan identifier) {
+            if (data[ptr] != '<') {
+                identifier = default;
+                return false;
+            }
+
+            ptr++;
+            if (TryParseIdentifier(out identifier, true, WhitespaceHandling.ConsumeAfter)) {
+                return true;
+            }
+
+            return false;
+
+        }
+
         public bool TryMatchRangeIgnoreCase(string str, WhitespaceHandling whitespaceHandling = WhitespaceHandling.ConsumeAll) {
             uint start = ptr;
             if ((whitespaceHandling & WhitespaceHandling.ConsumeBefore) != 0) {
@@ -1297,6 +1392,10 @@ namespace UIForia.Util {
 
         public RangeInt GetContentRange() {
             return new RangeInt(rangeStart, rangeEnd - rangeEnd);
+        }
+
+        public bool TryParseColor(out Color32 color) {
+            return new CharStream(this).TryParseColorProperty(out color);
         }
 
     }

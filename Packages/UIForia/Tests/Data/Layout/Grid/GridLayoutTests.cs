@@ -15,17 +15,18 @@ namespace Layout {
 
         [Test]
         public void RowSize_MinContent() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_RowSize_MinContent>();
-            GridLayout_RowSize_MinContent root = (GridLayout_RowSize_MinContent) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_RowSize_MinContent>()) {
+                GridLayout_RowSize_MinContent root = (GridLayout_RowSize_MinContent) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 400), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 100, 400), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 400, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 400, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 500, 100, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 500, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 400), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 100, 400), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 400, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 400, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 500, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 500, 100, 100), root[5].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_ColSizeMaxContent.xml")]
@@ -33,18 +34,19 @@ namespace Layout {
 
         [Test]
         public void ColSize_MaxContent() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_ColSizeMaxContent>();
-            GridLayout_ColSizeMaxContent root = (GridLayout_ColSizeMaxContent) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_ColSizeMaxContent>()) {
+                GridLayout_ColSizeMaxContent root = (GridLayout_ColSizeMaxContent) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 600, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(600, 0, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(700, 0, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 600, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(600, 0, 100, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(700, 0, 100, 100), root[2].layoutResult.AllocatedRect);
 
-            Assert.AreEqual(new Rect(0, 100, 600, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(600, 100, 100, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(700, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 600, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(600, 100, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(700, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_ColSizeMinContent.xml")]
@@ -52,17 +54,18 @@ namespace Layout {
 
         [Test]
         public void ColSize_MinContent() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_ColSizeMinContent>();
-            GridLayout_ColSizeMinContent root = (GridLayout_ColSizeMinContent) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_ColSizeMinContent>()) {
+                GridLayout_ColSizeMinContent root = (GridLayout_ColSizeMinContent) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 400, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(400, 0, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(500, 0, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 400, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(400, 100, 100, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(500, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 400, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(400, 0, 100, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(500, 0, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 400, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(400, 100, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(500, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_GrowToMaxSize.xml")]
@@ -70,14 +73,15 @@ namespace Layout {
 
         [Test]
         public void GrowToMaxSize_NoFractions() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_GrowToMaxSize>();
-            mockView.Update();
-            GridLayout_GrowToMaxSize root = (GridLayout_GrowToMaxSize) mockView.RootElement;
-            Assert.AreEqual(1000, root.layoutResult.actualSize.width);
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_GrowToMaxSize>()) {
+                mockView.Update();
+                GridLayout_GrowToMaxSize root = (GridLayout_GrowToMaxSize) mockView.RootElement;
+                Assert.AreEqual(1000, root.layoutResult.actualSize.width);
 
-            Assert.AreEqual(0, root[0].layoutResult.allocatedPosition.x);
-            Assert.AreEqual(300, root[1].layoutResult.allocatedPosition.x);
-            Assert.AreEqual(700, root[2].layoutResult.allocatedPosition.x);
+                Assert.AreEqual(0, root[0].layoutResult.allocatedPosition.x);
+                Assert.AreEqual(300, root[1].layoutResult.allocatedPosition.x);
+                Assert.AreEqual(700, root[2].layoutResult.allocatedPosition.x);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_GrowToMaxSize_Fractional.xml")]
@@ -85,21 +89,22 @@ namespace Layout {
 
         [Test]
         public void GrowToMaxSize_Fractions() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_GrowToMaxSize_Fractional>();
-            GridLayout_GrowToMaxSize_Fractional root = (GridLayout_GrowToMaxSize_Fractional) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_GrowToMaxSize_Fractional>()) {
+                GridLayout_GrowToMaxSize_Fractional root = (GridLayout_GrowToMaxSize_Fractional) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(1000, root.layoutResult.actualSize.width);
+                Assert.AreEqual(1000, root.layoutResult.actualSize.width);
 
-            Assert.AreEqual(0, root[0].layoutResult.allocatedPosition.x);
-            Assert.AreEqual(400, root[0].layoutResult.allocatedSize.width);
+                Assert.AreEqual(0, root[0].layoutResult.allocatedPosition.x);
+                Assert.AreEqual(400, root[0].layoutResult.allocatedSize.width);
 
-            Assert.AreEqual(400, root[1].layoutResult.allocatedPosition.x);
-            Assert.AreEqual(400, root[1].layoutResult.allocatedSize.width);
+                Assert.AreEqual(400, root[1].layoutResult.allocatedPosition.x);
+                Assert.AreEqual(400, root[1].layoutResult.allocatedSize.width);
 
-            Assert.AreEqual(800, root[2].layoutResult.allocatedPosition.x);
-            Assert.AreEqual(200, root[2].layoutResult.allocatedSize.width);
+                Assert.AreEqual(800, root[2].layoutResult.allocatedPosition.x);
+                Assert.AreEqual(200, root[2].layoutResult.allocatedSize.width);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_ResolveMaxContentTrackSize.xml")]
@@ -107,23 +112,25 @@ namespace Layout {
 
         [Test]
         public void ResolveMaxContentTrackSize() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_ResolveMaxContentTrackSize>();
-            mockView.Update();
-            GridLayout_ResolveMaxContentTrackSize root = (GridLayout_ResolveMaxContentTrackSize) mockView.RootElement;
-            Assert.AreEqual(300, root.layoutResult.actualSize.width);
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_ResolveMaxContentTrackSize>()) {
+                mockView.Update();
+                GridLayout_ResolveMaxContentTrackSize root = (GridLayout_ResolveMaxContentTrackSize) mockView.RootElement;
+                Assert.AreEqual(300, root.layoutResult.actualSize.width);
 
-            Assert.AreEqual(0, root[0].layoutResult.allocatedPosition.x);
-            Assert.AreEqual(100, root[1].layoutResult.allocatedPosition.x);
-            Assert.AreEqual(0, root[2].layoutResult.allocatedPosition.x); // wraps to next line because prev was 2 wide
+                Assert.AreEqual(0, root[0].layoutResult.allocatedPosition.x);
+                Assert.AreEqual(100, root[1].layoutResult.allocatedPosition.x);
+                Assert.AreEqual(0, root[2].layoutResult.allocatedPosition.x); // wraps to next line because prev was 2 wide
+            }
         }
 
         [Test]
         public void ResolveMaxContentTrackSize_WithColGap() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_ResolveMaxContentTrackSize>();
-            GridLayout_ResolveMaxContentTrackSize root = (GridLayout_ResolveMaxContentTrackSize) mockView.RootElement;
-            root.style.SetGridLayoutColGap(10, StyleState.Normal);
-            mockView.Update();
-            Assert.AreEqual(320, root.layoutResult.actualSize.width);
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_ResolveMaxContentTrackSize>()) {
+                GridLayout_ResolveMaxContentTrackSize root = (GridLayout_ResolveMaxContentTrackSize) mockView.RootElement;
+                root.style.SetGridLayoutColGap(10, StyleState.Normal);
+                mockView.Update();
+                Assert.AreEqual(320, root.layoutResult.actualSize.width);
+            }
         }
 
 //        [Template("Data/Layout/Grid/GridLayout_ColCollapseMaxSizeContribution.xml")]
@@ -149,18 +156,19 @@ namespace Layout {
 
         [Test]
         public void ColMaxSizeContribution_NotCollapsed() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_ColMaxSizeContribution_NotCollapsed>();
-            GridLayout_ColMaxSizeContribution_NotCollapsed root = (GridLayout_ColMaxSizeContribution_NotCollapsed) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_ColMaxSizeContribution_NotCollapsed>()) {
+                GridLayout_ColMaxSizeContribution_NotCollapsed root = (GridLayout_ColMaxSizeContribution_NotCollapsed) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 200), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 300, 200, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 200, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 100, 100, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 200, 100, 100), root[5].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 100, 100, 100), root[6].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 200), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 300, 200, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 200, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 100, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 200, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 100, 100, 100), root[6].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_ExplicitPlaced_Flex.xml")]
@@ -168,14 +176,15 @@ namespace Layout {
 
         [Test]
         public void ExplicitPlaced_Flex() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_ExplicitPlaced_Flex>();
-            GridLayout_ExplicitPlaced_Flex root = mockView.RootElement as GridLayout_ExplicitPlaced_Flex;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_ExplicitPlaced_Flex>()) {
+                GridLayout_ExplicitPlaced_Flex root = mockView.RootElement as GridLayout_ExplicitPlaced_Flex;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(100, 0, 200, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(300, 100, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 400, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(300, 100, 100, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 400, 100), root[2].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_ImplicitRowUnplaced3x2.xml")]
@@ -183,17 +192,18 @@ namespace Layout {
 
         [Test]
         public void ImplicitRowPlaced3x2() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_ImplicitRowUnplaced3x2>();
-            GridLayout_ImplicitRowUnplaced3x2 root = mockView.RootElement as GridLayout_ImplicitRowUnplaced3x2;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_ImplicitRowUnplaced3x2>()) {
+                GridLayout_ImplicitRowUnplaced3x2 root = mockView.RootElement as GridLayout_ImplicitRowUnplaced3x2;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 100, 100, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 200, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 100, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 200, 100, 100), root[5].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_ImplicitColUnplaced3x2.xml")]
@@ -201,17 +211,18 @@ namespace Layout {
 
         [Test]
         public void ImplicitColUnplaced3x2() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_ImplicitColUnplaced3x2>();
-            GridLayout_ImplicitColUnplaced3x2 root = mockView.RootElement as GridLayout_ImplicitColUnplaced3x2;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_ImplicitColUnplaced3x2>()) {
+                GridLayout_ImplicitColUnplaced3x2 root = mockView.RootElement as GridLayout_ImplicitColUnplaced3x2;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 0, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 100, 100, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 100, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 0, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 100, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_AssignBasicPlacements.xml")]
@@ -219,22 +230,18 @@ namespace Layout {
 
         [Test]
         public void AssignBasicPlacements() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_AssignBasicPlacements>();
-            GridLayout_AssignBasicPlacements root = (GridLayout_AssignBasicPlacements) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_AssignBasicPlacements>()) {
+                GridLayout_AssignBasicPlacements root = (GridLayout_AssignBasicPlacements) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            GridLayoutBox box = (GridLayoutBox) root.layoutBox;
-
-            Assert.AreEqual(2, box.RowCount);
-            Assert.AreEqual(3, box.ColCount);
-
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 0, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 100, 100, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 100, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 0, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 100, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_VerticalSparse.xml")]
@@ -242,16 +249,17 @@ namespace Layout {
 
         [Test]
         public void VerticalSparse() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_VerticalSparse>();
-            GridLayout_VerticalSparse root = (GridLayout_VerticalSparse) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_VerticalSparse>()) {
+                GridLayout_VerticalSparse root = (GridLayout_VerticalSparse) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 300, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 200, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 200, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 300, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 200, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 200, 100, 100), root[4].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_VerticalDense.xml")]
@@ -259,16 +267,17 @@ namespace Layout {
 
         [Test]
         public void VerticalDense() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_VerticalDense>();
-            GridLayout_VerticalDense root = (GridLayout_VerticalDense) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_VerticalDense>()) {
+                GridLayout_VerticalDense root = (GridLayout_VerticalDense) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 300, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 200, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 300, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 200, 100, 100), root[4].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_HorizontalSparse.xml")]
@@ -276,16 +285,17 @@ namespace Layout {
 
         [Test]
         public void HorizontalSparse() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_HorizontalSparse>();
-            GridLayout_HorizontalSparse root = (GridLayout_HorizontalSparse) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_HorizontalSparse>()) {
+                GridLayout_HorizontalSparse root = (GridLayout_HorizontalSparse) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 100, 300), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 0, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 100, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 200, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 100, 300), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 0, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 100, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 200, 100, 100), root[4].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_HorizontalDense.xml")]
@@ -293,16 +303,17 @@ namespace Layout {
 
         [Test]
         public void HorizontalDense() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_HorizontalDense>();
-            GridLayout_HorizontalDense root = (GridLayout_HorizontalDense) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_HorizontalDense>()) {
+                GridLayout_HorizontalDense root = (GridLayout_HorizontalDense) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 100, 300), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 0, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 100, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 100, 300), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 0, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 100, 100, 100), root[4].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_Margin_OffsetFromLayoutBox.xml")]
@@ -310,18 +321,19 @@ namespace Layout {
 
         [Test]
         public void Margin_OffsetFromLayoutBox() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_Margin_OffsetFromLayoutBox>();
-            GridLayout_Margin_OffsetFromLayoutBox root = (GridLayout_Margin_OffsetFromLayoutBox) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_Margin_OffsetFromLayoutBox>()) {
+                GridLayout_Margin_OffsetFromLayoutBox root = (GridLayout_Margin_OffsetFromLayoutBox) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 0, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 100, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 0, 100, 100), root[2].layoutResult.AllocatedRect);
 
-            Assert.AreEqual(new Vector2(30, 0), root[0].layoutResult.alignedPosition);
-            Assert.AreEqual(new Vector2(100, 30), root[1].layoutResult.alignedPosition);
-            Assert.AreEqual(new Vector2(200, 0), root[2].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(30, 0), root[0].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(100, 30), root[1].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(200, 0), root[2].layoutResult.alignedPosition);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_RowLocked_ColumnFlow.xml")]
@@ -329,17 +341,18 @@ namespace Layout {
 
         [Test]
         public void RowLocked_ColumnFlow() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_RowLocked_ColumnFlow>();
-            GridLayout_RowLocked_ColumnFlow root = (GridLayout_RowLocked_ColumnFlow) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_RowLocked_ColumnFlow>()) {
+                GridLayout_RowLocked_ColumnFlow root = (GridLayout_RowLocked_ColumnFlow) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 100, 100, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 200, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 100, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 200, 100, 100), root[5].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_GapUsage.xml")]
@@ -347,17 +360,18 @@ namespace Layout {
 
         [Test]
         public void GapUsage() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_GapUsage>();
-            GridLayout_GapUsage root = (GridLayout_GapUsage) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_GapUsage>()) {
+                GridLayout_GapUsage root = (GridLayout_GapUsage) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(110, 0, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(220, 0, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 110, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(110, 110, 100, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(220, 110, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(110, 0, 100, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(220, 0, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 110, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(110, 110, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(220, 110, 100, 100), root[5].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_MixImplicitExplicit.xml")]
@@ -365,18 +379,19 @@ namespace Layout {
 
         [Test]
         public void MixImplicitExplicit() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_MixImplicitExplicit>();
-            GridLayout_MixImplicitExplicit root = (GridLayout_MixImplicitExplicit) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_MixImplicitExplicit>()) {
+                GridLayout_MixImplicitExplicit root = (GridLayout_MixImplicitExplicit) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 200, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 0, 200, 200), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 100, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(300, 0, 100, 200), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 100, 100), root[5].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 200, 100, 100), root[6].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 0, 200, 200), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 100, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(300, 0, 100, 200), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 200, 100, 100), root[6].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_ExplicitPlaced_MinWidth.xml")]
@@ -384,17 +399,18 @@ namespace Layout {
 
         [Test]
         public void ExplicitPlaced_MinWidth() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_ExplicitPlaced_MinWidth>();
-            GridLayout_ExplicitPlaced_MinWidth root = (GridLayout_ExplicitPlaced_MinWidth) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_ExplicitPlaced_MinWidth>()) {
+                GridLayout_ExplicitPlaced_MinWidth root = (GridLayout_ExplicitPlaced_MinWidth) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 50, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 0, 50, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(50, 0, 100, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(150, 0, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 50, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(50, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 50, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 50, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(50, 0, 100, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(150, 0, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 50, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(50, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_HorizontalBlockSize.xml")]
@@ -402,17 +418,18 @@ namespace Layout {
 
         [Test]
         public void HorizontalBlockSize() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_HorizontalBlockSize>();
-            GridLayout_HorizontalBlockSize root = (GridLayout_HorizontalBlockSize) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_HorizontalBlockSize>()) {
+                GridLayout_HorizontalBlockSize root = (GridLayout_HorizontalBlockSize) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 200, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 300, 100), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(300, 100, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 200, 100, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 200, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 200, 100), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 300, 100), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(300, 100, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 200, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 200, 100, 100), root[5].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_VerticalBlockSize.xml")]
@@ -420,17 +437,18 @@ namespace Layout {
 
         [Test]
         public void VerticalBlockSize() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_VerticalBlockSize>();
-            GridLayout_VerticalBlockSize root = (GridLayout_VerticalBlockSize) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_VerticalBlockSize>()) {
+                GridLayout_VerticalBlockSize root = (GridLayout_VerticalBlockSize) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 100, 100, 200), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 0, 100, 300), root[2].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(100, 300, 100, 100), root[3].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 0, 100, 100), root[4].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(200, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(0, 100, 100, 200), root[1].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 0, 100, 300), root[2].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(100, 300, 100, 100), root[3].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 0, 100, 100), root[4].layoutResult.AllocatedRect);
+                Assert.AreEqual(new Rect(200, 100, 100, 100), root[5].layoutResult.AllocatedRect);
+            }
         }
 
         [Template("Data/Layout/Grid/GridLayout_Align.xml")]
@@ -438,32 +456,33 @@ namespace Layout {
 
         [Test]
         public void Align() {
-            MockApplication mockView = MockApplication.Setup<GridLayout_Align>();
-            GridLayout_Align root = (GridLayout_Align) mockView.RootElement;
+            using (MockApplication mockView = MockApplication.Setup<GridLayout_Align>()) {
+                GridLayout_Align root = (GridLayout_Align) mockView.RootElement;
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Vector2(0, 0), root[0].layoutResult.alignedPosition);
-            Assert.AreEqual(new Vector2(100, 0), root[1].layoutResult.alignedPosition);
-            Assert.AreEqual(new Vector2(200, 0), root[2].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(0, 0), root[0].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(100, 0), root[1].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(200, 0), root[2].layoutResult.alignedPosition);
 
-            root.style.SetAlignItemsHorizontal(0.5f, StyleState.Normal);
-            root.style.SetAlignItemsVertical(0.5f, StyleState.Normal);
+                root.style.SetAlignItemsHorizontal(0.5f, StyleState.Normal);
+                root.style.SetAlignItemsVertical(0.5f, StyleState.Normal);
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Vector2(25, 25), root[0].layoutResult.alignedPosition);
-            Assert.AreEqual(new Vector2(125, 25), root[1].layoutResult.alignedPosition);
-            Assert.AreEqual(new Vector2(225, 25), root[2].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(25, 25), root[0].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(125, 25), root[1].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(225, 25), root[2].layoutResult.alignedPosition);
 
-            root.style.SetAlignItemsHorizontal(1f, StyleState.Normal);
-            root.style.SetAlignItemsVertical(1f, StyleState.Normal);
+                root.style.SetAlignItemsHorizontal(1f, StyleState.Normal);
+                root.style.SetAlignItemsVertical(1f, StyleState.Normal);
 
-            mockView.Update();
+                mockView.Update();
 
-            Assert.AreEqual(new Vector2(50, 50), root[0].layoutResult.alignedPosition);
-            Assert.AreEqual(new Vector2(150, 50), root[1].layoutResult.alignedPosition);
-            Assert.AreEqual(new Vector2(250, 50), root[2].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(50, 50), root[0].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(150, 50), root[1].layoutResult.alignedPosition);
+                Assert.AreEqual(new Vector2(250, 50), root[2].layoutResult.alignedPosition);
+            }
         }
 
     }

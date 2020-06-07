@@ -48,7 +48,7 @@ namespace UIForia.Compilers {
         internal static readonly DynamicStyleListTypeWrapper s_DynamicStyleListTypeWrapper = new DynamicStyleListTypeWrapper();
         internal static readonly RepeatKeyFnTypeWrapper s_RepeatKeyFnTypeWrapper = new RepeatKeyFnTypeWrapper();
 
-        internal static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod(nameof(Application.CreateElementFromPoolWithType));
+        internal static readonly MethodInfo s_CreateFromPool = typeof(Application).GetMethod(nameof(Application.CreateElementFromPool));
         internal static readonly MethodInfo s_LinqBindingNode_Get = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.Get), BindingFlags.Static | BindingFlags.Public);
         internal static readonly MethodInfo s_LinqBindingNode_GetSlotModifyNode = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetSlotModifyNode), BindingFlags.Static | BindingFlags.Public);
         internal static readonly MethodInfo s_LinqBindingNode_GetSlotNode = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetSlotNode), BindingFlags.Static | BindingFlags.Public);
@@ -73,8 +73,9 @@ namespace UIForia.Compilers {
 
         internal static readonly ConstructorInfo s_ElementAttributeCtor = typeof(ElementAttribute).GetConstructor(new[] {typeof(string), typeof(string)});
         internal static readonly FieldInfo s_ElementAttributeList = typeof(UIElement).GetField("attributes", BindingFlags.Public | BindingFlags.Instance);
-        internal static readonly FieldInfo s_TextElement_Text = typeof(UITextElement).GetField(nameof(UITextElement.text), BindingFlags.Instance | BindingFlags.Public);
+        // internal static readonly FieldInfo s_TextElement_Text = typeof(UITextElement).GetField(nameof(UITextElement.text), BindingFlags.Instance | BindingFlags.Public);
         internal static readonly MethodInfo s_TextElement_SetText = typeof(UITextElement).GetMethod(nameof(UITextElement.SetText), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_TextElement_SetTextFromCharacters = typeof(UITextElement).GetMethod(nameof(UITextElement.SetTextFromCharacters), BindingFlags.Instance | BindingFlags.Public);
 
         internal static readonly FieldInfo s_UIElement_StyleSet = typeof(UIElement).GetField(nameof(UIElement.style), BindingFlags.Instance | BindingFlags.Public);
         internal static readonly PropertyInfo s_UIElement_Application = typeof(UIElement).GetProperty(nameof(UIElement.application), BindingFlags.Instance | BindingFlags.Public);
@@ -83,7 +84,7 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_UIElement_OnAfterPropertyBindings = typeof(UIElement).GetMethod(nameof(UIElement.OnAfterPropertyBindings), BindingFlags.Instance | BindingFlags.Public);
         internal static readonly MethodInfo s_UIElement_SetAttribute = typeof(UIElement).GetMethod(nameof(UIElement.SetAttribute), BindingFlags.Instance | BindingFlags.Public);
         internal static readonly MethodInfo s_UIElement_SetEnabled = typeof(UIElement).GetMethod(nameof(UIElement.internal__dontcallmeplease_SetEnabledIfBinding), BindingFlags.Instance | BindingFlags.Public);
-        internal static readonly FieldInfo s_UIElement_Parent = typeof(UIElement).GetField(nameof(UIElement.parent), BindingFlags.Instance | BindingFlags.Public);
+        internal static readonly MethodInfo s_UIElement_Parent = typeof(UIElement).GetMethod(nameof(UIElement.GetParent), BindingFlags.Instance | BindingFlags.Public);
 
         internal static readonly MethodInfo s_StyleSet_InternalInitialize = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.internal_Initialize), BindingFlags.Instance | BindingFlags.Public);
         internal static readonly MethodInfo s_StyleSet_SetBaseStyles = typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.SetBaseStyles), BindingFlags.Instance | BindingFlags.Public);
@@ -119,6 +120,9 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_DynamicStyleList_Flatten = typeof(DynamicStyleList).GetMethod(nameof(DynamicStyleList.Flatten));
 
         internal static readonly Expression s_StringBuilderExpr = Expression.Field(null, typeof(StringUtil), nameof(StringUtil.s_CharStringBuilder));
+        internal static readonly Expression s_StringBuilderCharField = Expression.Field(s_StringBuilderExpr, typeof(CharStringBuilder).GetField(nameof(CharStringBuilder.characters)));
+        internal static readonly Expression s_StringBuilderSizeField = Expression.Field(s_StringBuilderExpr, typeof(CharStringBuilder).GetField(nameof(CharStringBuilder.size)));
+        
         internal static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
         internal static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
         internal static readonly MethodInfo s_StringBuilder_AppendString = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(string)});
@@ -774,10 +778,12 @@ namespace UIForia.Compilers {
 
             ctx.Assign(nodeExpr, CreateElement(ctx, textNode));
 
+            
             // ((UITextElement)element).text = "string value";
             if (textNode.textExpressionList != null && textNode.textExpressionList.size > 0) {
                 if (textNode.IsTextConstant()) {
-                    ctx.Assign(Expression.MakeMemberAccess(Expression.Convert(nodeExpr, typeof(UITextElement)), s_TextElement_Text), Expression.Constant(textNode.GetStringContent()));
+                    UnaryExpression textElement = Expression.Convert(nodeExpr, typeof(UITextElement));
+                    ctx.AddStatement(Expression.Call(textElement, s_TextElement_SetText, Expression.Constant(textNode.GetStringContent())));
                 }
             }
 
@@ -1947,7 +1953,6 @@ namespace UIForia.Compilers {
                 updateCompiler.AddNamespace("UIForia.Text");
                 StructList<TextExpression> expressionParts = textNode.textExpressionList;
 
-                MemberExpression textValueExpr = Expression.Field(updateCompiler.GetCastElement(), s_TextElement_Text);
                 updateCompiler.RawExpression(s_StringBuilderClear);
 
                 for (int i = 0; i < expressionParts.size; i++) {
@@ -2031,14 +2036,19 @@ namespace UIForia.Compilers {
 
                 // todo -- this needs to check the TextInfo for equality or whitespace mutations will be ignored and we will return false from equal!!!
                 Expression e = updateCompiler.GetCastElement();
-                Expression condition = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.EqualsString), new[] {typeof(string)}), textValueExpr);
-                condition = Expression.Equal(condition, Expression.Constant(false));
-                ConditionalExpression ifCheck = Expression.IfThen(condition, Expression.Block(ExpressionFactory.CallInstanceUnchecked(e, s_TextElement_SetText, s_StringBuilderToString)));
+                // MemberExpression textValueExpr = Expression.Field(updateCompiler.GetCastElement(), s_TextElement_Text);
+                // Expression condition = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.EqualsString), new[] {typeof(string)}), textValueExpr);
+                
+                updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(e, s_TextElement_SetTextFromCharacters, s_StringBuilderCharField, s_StringBuilderSizeField));
+                    
+                // condition = Expression.Equal(condition, Expression.Constant(false));
+                // ConditionalExpression ifCheck = Expression.IfThen(condition, Expression.Block(ExpressionFactory.CallInstanceUnchecked(e, s_TextElement_SetText, s_StringBuilderToString)));
 
-                updateCompiler.RawExpression(ifCheck);
+                // updateCompiler.RawExpression(ifCheck);
                 updateCompiler.RawExpression(s_StringBuilderClear);
             }
         }
+
 
         public static void CompileAssignContextVariable(UIForiaLinqCompiler compiler, in AttributeDefinition attr, Type contextVarType, int varId, string varPrefix = null, Expression value = null) {
             //ContextVariable<T> ctxVar = (ContextVariable<T>)__castElement.bindingNode.GetContextVariable(id);
@@ -2697,7 +2707,7 @@ namespace UIForia.Compilers {
                 // todo -- should return the parent but ignore intrinsic elements like RepeatMulitChildContainer
                 UIForiaLinqCompiler c = compiler as UIForiaLinqCompiler;
                 System.Diagnostics.Debug.Assert(c != null, nameof(c) + " != null");
-                return Expression.Field(c.GetElement(), s_UIElement_Parent);
+                return Expression.Call(c.GetElement(), s_UIElement_Parent);
             }
 
             if (aliasName == "evt") {
@@ -2739,7 +2749,7 @@ namespace UIForia.Compilers {
 
         private Expression CreateElement(CompilationContext ctx, ProcessedType processedType, Expression parentExpression, int childCount, int attrCount, int templateId) {
             return ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-                Expression.Constant(processedType.id),
+                Expression.New(processedType.GetConstructor()),
                 parentExpression,
                 Expression.Constant(childCount),
                 Expression.Constant(attrCount),

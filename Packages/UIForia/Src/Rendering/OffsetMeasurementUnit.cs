@@ -13,8 +13,6 @@ namespace UIForia {
         AllocatedHeight = UnitConstants.AllocatedHeight,
         ContentWidth = UnitConstants.ContentWidth,
         ContentHeight = UnitConstants.ContentHeight,
-        ContentAreaWidth = UnitConstants.ContentAreaWidth,
-        ContentAreaHeight = UnitConstants.ContentAreaHeight,
         ViewportWidth = UnitConstants.ViewportWidth,
         ViewportHeight = UnitConstants.ViewportHeight,
         ParentWidth = UnitConstants.ParentWidth,

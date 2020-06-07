@@ -20,13 +20,14 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_UseOverride() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Main>();
+            using (MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Main>()) {
 
-            Assert.IsInstanceOf<TemplateStructure_SlotOverride_Expand>(app.RootElement[0]);
-            Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0]);
-            Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0]);
-            UITextElement textElement = (UITextElement) app.RootElement[0][0][0];
-            Assert.AreEqual("Override successful", textElement.GetText().Trim());
+                Assert.IsInstanceOf<TemplateStructure_SlotOverride_Expand>(app.RootElement[0]);
+                Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0]);
+                Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0]);
+                UITextElement textElement = (UITextElement) app.RootElement[0][0][0];
+                Assert.AreEqual("Override successful", textElement.GetText().Trim());
+            }
         }
 
         [Template("Data/TemplateStructure/SlotOverride_Default/TemplateStructure_SlotOverrideDefault_Main.xml")]
@@ -37,11 +38,12 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_UseDefault() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverrideDefault_Main>();
-            Assert.IsInstanceOf<TemplateStructure_SlotOverrideDefault_Expand>(app.RootElement[0]);
-            Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0]);
-            UITextElement textElement = (UITextElement) app.RootElement[0][0][0];
-            Assert.AreEqual("Override failed", textElement.GetText().Trim());
+            using (MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverrideDefault_Main>()) {
+                Assert.IsInstanceOf<TemplateStructure_SlotOverrideDefault_Expand>(app.RootElement[0]);
+                Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0]);
+                UITextElement textElement = (UITextElement) app.RootElement[0][0][0];
+                Assert.AreEqual("Override failed", textElement.GetText().Trim());
+            }
         }
 
         [Template("Data/TemplateStructure/SlotOverride_Extern_OuterOverride/TemplateStructure_SlotOverrideExtern_Main.xml")]
@@ -55,13 +57,14 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverrideExtern_OuterOverride() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverrideExternOuterOverride_Main>();
-            Assert.IsInstanceOf<TemplateStructure_SlotOverrideExternOuterOverride_Exposer>(app.RootElement[0]);
-            Assert.IsInstanceOf<TemplateStructure_SlotOverrideExternOuterOverride_Definer>(app.RootElement[0][0]);
-            Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0][0]);
-            Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0][0]);
-            UITextElement textElement = (UITextElement) app.RootElement[0][0][0][0];
-            Assert.AreEqual("Override from outer layer", textElement.GetText().Trim());
+            using (MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverrideExternOuterOverride_Main>()) {
+                Assert.IsInstanceOf<TemplateStructure_SlotOverrideExternOuterOverride_Exposer>(app.RootElement[0]);
+                Assert.IsInstanceOf<TemplateStructure_SlotOverrideExternOuterOverride_Definer>(app.RootElement[0][0]);
+                Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0][0]);
+                Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0][0]);
+                UITextElement textElement = (UITextElement) app.RootElement[0][0][0][0];
+                Assert.AreEqual("Override from outer layer", textElement.GetText().Trim());
+            }
         }
 
         [Template("Data/TemplateStructure/SlotOverride_Extern_ExternDefault/TemplateStructure_SlotOverride_Extern_ExternDefault_Main.xml")]
@@ -75,13 +78,14 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_Extern_ExternDefault() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Extern_ExternDefault_Main>();
-            Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_ExternDefault_Exposer>(app.RootElement[0]);
-            Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_ExternDefault_Definer>(app.RootElement[0][0]);
-            Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0][0]);
-            Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0][0]);
-            UITextElement textElement = (UITextElement) app.RootElement[0][0][0][0];
-            Assert.AreEqual("Override from exposer layer", textElement.GetText().Trim());
+            using (MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Extern_ExternDefault_Main>()) {
+                Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_ExternDefault_Exposer>(app.RootElement[0]);
+                Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_ExternDefault_Definer>(app.RootElement[0][0]);
+                Assert.IsInstanceOf<UISlotOverride>(app.RootElement[0][0][0]);
+                Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0][0]);
+                UITextElement textElement = (UITextElement) app.RootElement[0][0][0][0];
+                Assert.AreEqual("Override from exposer layer", textElement.GetText().Trim());
+            }
         }
 
         [Template("Data/TemplateStructure/SlotOverride_Extern_DefinerDefault/TemplateStructure_SlotOverride_Extern_DefinerDefault_Main.xml")]
@@ -95,13 +99,14 @@ namespace TemplateStructure {
 
         [Test]
         public void TemplateStructure_SlotOverride_Extern_DefinerDefault() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Extern_DefinerDefault_Main>();
-            Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_DefinerDefault_Exposer>(app.RootElement[0]);
-            Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_DefinerDefault_Definer>(app.RootElement[0][0]);
-            Assert.IsInstanceOf<UISlotDefinition>(app.RootElement[0][0][0]);
-            Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0][0]);
-            UITextElement textElement = (UITextElement) app.RootElement[0][0][0][0];
-            Assert.AreEqual("Not overridden", textElement.GetText().Trim());
+            using (MockApplication app = MockApplication.Setup<TemplateStructure_SlotOverride_Extern_DefinerDefault_Main>()) {
+                Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_DefinerDefault_Exposer>(app.RootElement[0]);
+                Assert.IsInstanceOf<TemplateStructure_SlotOverride_Extern_DefinerDefault_Definer>(app.RootElement[0][0]);
+                Assert.IsInstanceOf<UISlotDefinition>(app.RootElement[0][0][0]);
+                Assert.IsInstanceOf<UITextElement>(app.RootElement[0][0][0][0]);
+                UITextElement textElement = (UITextElement) app.RootElement[0][0][0][0];
+                Assert.AreEqual("Not overridden", textElement.GetText().Trim());
+            }
         }
 
 
@@ -128,7 +133,7 @@ namespace TemplateStructure {
 
         [Test]
         public void SlotOverrideContext() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_RadioButtonTest>();
+            using(MockApplication app = MockApplication.Setup<TemplateStructure_RadioButtonTest>()) {}
         }
 
         [Template("Data/TemplateStructure/AliasStyles.xml")]
@@ -136,8 +141,9 @@ namespace TemplateStructure {
 
         [Test]
         public void AliasStyles() {
-            MockApplication app = MockApplication.Setup<TemplateStructure_AliasStyles>();
-            TemplateStructure_AliasStyles root = (TemplateStructure_AliasStyles) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateStructure_AliasStyles>()) {
+                TemplateStructure_AliasStyles root = (TemplateStructure_AliasStyles) app.RootElement;
+            }
         }
 
         [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#outer")]
@@ -153,12 +159,13 @@ namespace TemplateStructure {
 
         [Test]
         public void UseDefaultSlotContent() {
-            MockApplication app = MockApplication.Setup<TestTemplateStructure_UseDefaultSlotContent_Outer>();
-            TestTemplateStructure_UseDefaultSlotContent_Outer root = (TestTemplateStructure_UseDefaultSlotContent_Outer) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TestTemplateStructure_UseDefaultSlotContent_Outer>()) {
+                TestTemplateStructure_UseDefaultSlotContent_Outer root = (TestTemplateStructure_UseDefaultSlotContent_Outer) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("from default slot", GetText(root[1][0][0]));
+                Assert.AreEqual("from default slot", GetText(root[1][0][0]));
+            }
         }
 
         [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#outer_override")]
@@ -166,12 +173,13 @@ namespace TemplateStructure {
 
         [Test]
         public void OverrideSlotContent() {
-            MockApplication app = MockApplication.Setup<TestTemplateStructure_UseDefaultSlotContent_OuterOverride>();
-            TestTemplateStructure_UseDefaultSlotContent_OuterOverride root = (TestTemplateStructure_UseDefaultSlotContent_OuterOverride) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TestTemplateStructure_UseDefaultSlotContent_OuterOverride>()) {
+                TestTemplateStructure_UseDefaultSlotContent_OuterOverride root = (TestTemplateStructure_UseDefaultSlotContent_OuterOverride) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("from override slot", GetText(root[0][0][0]));
+                Assert.AreEqual("from override slot", GetText(root[0][0][0]));
+            }
         }
 
 
@@ -183,12 +191,13 @@ namespace TemplateStructure {
 
         [Test]
         public void UseDefaultChildren() {
-            MockApplication app = MockApplication.Setup<UseDefaultChildrenOuter>();
-            UseDefaultChildrenOuter root = (UseDefaultChildrenOuter) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<UseDefaultChildrenOuter>()) {
+                UseDefaultChildrenOuter root = (UseDefaultChildrenOuter) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("default children", GetText(root[0][0][0]));
+                Assert.AreEqual("default children", GetText(root[0][0][0]));
+            }
         }
 
         [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#override_children_outer")]
@@ -203,12 +212,13 @@ namespace TemplateStructure {
 
         [Test]
         public void OverrideDefaultChildren() {
-            MockApplication app = MockApplication.Setup<OverrideChildrenOuter>();
-            OverrideChildrenOuter root = (OverrideChildrenOuter) app.RootElement;
-            root.overrideBinding = "fromRoot";
-            app.Update();
+            using (MockApplication app = MockApplication.Setup<OverrideChildrenOuter>()) {
+                OverrideChildrenOuter root = (OverrideChildrenOuter) app.RootElement;
+                root.overrideBinding = "fromRoot";
+                app.Update();
 
-            Assert.AreEqual("fromRoot", GetText(root[0][0][0]));
+                Assert.AreEqual("fromRoot", GetText(root[0][0][0]));
+            }
         }
 
 
@@ -223,15 +233,16 @@ namespace TemplateStructure {
 
         [Test]
         public void ResolveGenericType() {
-            MockApplication app = MockApplication.Setup<ResolveGeneric>();
-            ResolveGeneric root = (ResolveGeneric) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<ResolveGeneric>()) {
+                ResolveGeneric root = (ResolveGeneric) app.RootElement;
 
-            app.Update();
+                app.Update();
 
-            Assert.IsInstanceOf<GenericThing1<int>>(root[0]);
-            Assert.IsInstanceOf<GenericThing1<float>>(root[1]);
-            Assert.IsInstanceOf<GenericThing1<List<string>>>(root[2]);
-            Assert.IsInstanceOf<GenericThing1<Dictionary<List<string>, int>>>(root[3]);
+                Assert.IsInstanceOf<GenericThing1<int>>(root[0]);
+                Assert.IsInstanceOf<GenericThing1<float>>(root[1]);
+                Assert.IsInstanceOf<GenericThing1<List<string>>>(root[2]);
+                Assert.IsInstanceOf<GenericThing1<Dictionary<List<string>, int>>>(root[3]);
+            }
         }
 
 
@@ -267,63 +278,65 @@ namespace TemplateStructure {
 
         [Test]
         public void ModifySlot_WithAttr() {
-            MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain>();
-            TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain root = (TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain) app.RootElement;
-            TestTemplateStructure_ModifySlot_RadioGroupWithAttr child = (TestTemplateStructure_ModifySlot_RadioGroupWithAttr) root[0];
+            using (MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain>()) {
+                TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain root = (TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain) app.RootElement;
+                TestTemplateStructure_ModifySlot_RadioGroupWithAttr child = (TestTemplateStructure_ModifySlot_RadioGroupWithAttr) root[0];
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual("true", child[0][0].GetAttribute("selected"));
-            Assert.AreEqual("false", child[0][1].GetAttribute("selected"));
-            Assert.AreEqual("false", child[0][2].GetAttribute("selected"));
+                Assert.AreEqual("true", child[0][0].GetAttribute("selected"));
+                Assert.AreEqual("false", child[0][1].GetAttribute("selected"));
+                Assert.AreEqual("false", child[0][2].GetAttribute("selected"));
 
-            child.index = 1;
-            app.Update();
+                child.index = 1;
+                app.Update();
 
-            Assert.AreEqual("false", child[0][0].GetAttribute("selected"));
-            Assert.AreEqual("true", child[0][1].GetAttribute("selected"));
-            Assert.AreEqual("false", child[0][2].GetAttribute("selected"));
+                Assert.AreEqual("false", child[0][0].GetAttribute("selected"));
+                Assert.AreEqual("true", child[0][1].GetAttribute("selected"));
+                Assert.AreEqual("false", child[0][2].GetAttribute("selected"));
+            }
         }
 
         [Test]
         public void ModifySlot_TypedWithField() {
-            MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_TypedWithFieldMain>();
-            TestTemplateStructure_ModifySlot_TypedWithFieldMain root = (TestTemplateStructure_ModifySlot_TypedWithFieldMain) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_TypedWithFieldMain>()) {
+                TestTemplateStructure_ModifySlot_TypedWithFieldMain root = (TestTemplateStructure_ModifySlot_TypedWithFieldMain) app.RootElement;
 
-            TestTemplateStructure_ModifySlot_TypedWithFieldInner inner = (TestTemplateStructure_ModifySlot_TypedWithFieldInner) root[0];
+                TestTemplateStructure_ModifySlot_TypedWithFieldInner inner = (TestTemplateStructure_ModifySlot_TypedWithFieldInner) root[0];
 
-            TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing c0 = inner[0][0] as TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing;
-            TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing c1 = inner[0][1] as TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing;
-            TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing c2 = inner[0][2] as TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing;
+                TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing c0 = inner[0][0] as TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing;
+                TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing c1 = inner[0][1] as TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing;
+                TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing c2 = inner[0][2] as TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing;
 
-            inner.value = 10;
+                inner.value = 10;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(c0.typedField, 0 * inner.value);
-            Assert.AreEqual(c1.typedField, 1 * inner.value);
-            Assert.AreEqual(c2.typedField, 2 * inner.value);
+                Assert.AreEqual(c0.typedField, 0 * inner.value);
+                Assert.AreEqual(c1.typedField, 1 * inner.value);
+                Assert.AreEqual(c2.typedField, 2 * inner.value);
 
-            inner.value = 20;
+                inner.value = 20;
 
-            app.Update();
+                app.Update();
 
-            Assert.AreEqual(c0.typedField, 0 * inner.value);
-            Assert.AreEqual(c1.typedField, 1 * inner.value);
-            Assert.AreEqual(c2.typedField, 2 * inner.value);
+                Assert.AreEqual(c0.typedField, 0 * inner.value);
+                Assert.AreEqual(c1.typedField, 1 * inner.value);
+                Assert.AreEqual(c2.typedField, 2 * inner.value);
+            }
         }
 
         [Test]
         public void ModifySlot_RequireGeneric() {
-            MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireGenericMain>();
-            TestTemplateStructure_ModifySlot_RequireGenericMain root = (TestTemplateStructure_ModifySlot_RequireGenericMain) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireGenericMain>()) {
+                TestTemplateStructure_ModifySlot_RequireGenericMain root = (TestTemplateStructure_ModifySlot_RequireGenericMain) app.RootElement;
 
-            TestTemplateStructure_ModifySlot_RequireGenericInner<string> inner = (TestTemplateStructure_ModifySlot_RequireGenericInner<string>) root[0];
+                TestTemplateStructure_ModifySlot_RequireGenericInner<string> inner = (TestTemplateStructure_ModifySlot_RequireGenericInner<string>) root[0];
 
-            TestTemplateStructure_ModifySlot_RequireGenericThing<string> c0 = inner[0][0] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
-            TestTemplateStructure_ModifySlot_RequireGenericThing<string> c1 = inner[0][1] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
-            TestTemplateStructure_ModifySlot_RequireGenericThing<string> c2 = inner[0][2] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
-
+                TestTemplateStructure_ModifySlot_RequireGenericThing<string> c0 = inner[0][0] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
+                TestTemplateStructure_ModifySlot_RequireGenericThing<string> c1 = inner[0][1] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
+                TestTemplateStructure_ModifySlot_RequireGenericThing<string> c2 = inner[0][2] as TestTemplateStructure_ModifySlot_RequireGenericThing<string>;
+            }
         }
 
         public static string GetText(UIElement element) {

@@ -1,0 +1,7 @@
+Font: Gotham Narrow  Pt. Size: 73
+Characters packed: 97/99
+
+Missing Characters
+----------------------------------------
+ID: 8203	Hex: 200B	Char [​]
+ID: 9633	Hex: 25A1	Char [□]

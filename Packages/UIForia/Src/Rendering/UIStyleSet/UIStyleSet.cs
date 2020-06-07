@@ -37,7 +37,7 @@ namespace UIForia.Rendering {
         }
 
     }
-    
+
     [DebuggerDisplay("id = {element.id} state = {currentState}")]
     public partial class UIStyleSet {
 
@@ -50,7 +50,7 @@ namespace UIForia.Rendering {
         private UIStyleGroup instanceStyle;
         internal readonly StructList<StyleEntry> availableStyles;
         internal readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
-        internal readonly IntMap<StyleProperty> propertyMap;
+        internal readonly IntMap_Deprecated<StyleProperty> propertyMap;
         internal int changeSetId;
 
         // idea -- for styles are inactive, sort them to the back of the available styles list,
@@ -66,7 +66,7 @@ namespace UIForia.Rendering {
             this.containedStates = StyleState.Normal;
             this.availableStyles = new StructList<StyleEntry>(4);
             this.styleGroupContainers = new LightList<UIStyleGroupContainer>(3);
-            this.propertyMap = new IntMap<StyleProperty>();
+            this.propertyMap = new IntMap_Deprecated<StyleProperty>();
             this.hasAttributeStyles = false;
         }
 
@@ -326,7 +326,6 @@ namespace UIForia.Rendering {
             }
 
             LightList<StylePropertyId> toUpdate = LightList<StylePropertyId>.Get();
-            IStyleSystem styleSystem = element.application.styleSystem;
 
             StyleEntry[] styleEntries = availableStyles.Array;
             for (int i = 0; i < availableStyles.Count; i++) {
@@ -366,7 +365,7 @@ namespace UIForia.Rendering {
                 if (enter && (runCommands[index].RunCommandType & RunCommandType.Enter) != 0) {
                     runCommands[index].Run(element, RunCommandType.Enter);
                 }
-                else if (!enter &&  (runCommands[index].RunCommandType & RunCommandType.Exit) != 0) {
+                else if (!enter && (runCommands[index].RunCommandType & RunCommandType.Exit) != 0) {
                     runCommands[index].Run(element, RunCommandType.Exit);
                 }
             }
@@ -408,6 +407,7 @@ namespace UIForia.Rendering {
                 return;
             }
 
+            // this is total shit. means every element has all inherited properties in it's map all the time. fix this!!!!!
             int count = StyleUtil.InheritedProperties.Count;
 
             UIStyleSet parentStyle = element.parent.style;
@@ -459,9 +459,7 @@ namespace UIForia.Rendering {
         }
 
         public bool HasBaseStyles => styleGroupContainers.Count > 0;
-
-        public float LineHeightSize => 16f; // todo -- wrong
-
+        
         // todo -- handle inherited?
         public bool IsDefined(StylePropertyId propertyId) {
             return propertyMap.ContainsKey((int) propertyId);
@@ -526,12 +524,29 @@ namespace UIForia.Rendering {
             availableStyles.Sort((a, b) => a.priority < b.priority ? 1 : -1);
         }
 
-        public StyleProperty GetPropertyValue(StylePropertyId propertyId) {
+        public StyleProperty GetPropertyValue(StylePropertyId propertyId, out bool isDefault) {
             // can't use ComputedStyle here because this is used to compute that value
-            return GetPropertyValueInState(propertyId, currentState);
+            return GetPropertyValueInState(propertyId, currentState, out isDefault);
         }
 
         // I think this won't return normal or inherited styles right now, should it?
+        private StyleProperty GetPropertyValueInState(StylePropertyId propertyId, StyleState state, out bool isDefault) {
+            for (int i = 0; i < availableStyles.Count; i++) {
+                if ((availableStyles[i].state & state) == 0) {
+                    continue;
+                }
+
+                StyleProperty property;
+                if (availableStyles[i].styleRunCommand.style.TryGetProperty(propertyId, out property)) {
+                    isDefault = false;
+                    return property;
+                }
+            }
+
+            isDefault = true;
+            return DefaultStyleValues_Generated.GetPropertyValue(propertyId);
+        }
+
         public StyleProperty GetPropertyValueInState(StylePropertyId propertyId, StyleState state) {
             for (int i = 0; i < availableStyles.Count; i++) {
                 if ((availableStyles[i].state & state) == 0) {
@@ -545,11 +560,10 @@ namespace UIForia.Rendering {
             }
 
             return DefaultStyleValues_Generated.GetPropertyValue(propertyId);
-//            return new StyleProperty(propertyId, IntUtil.UnsetValue, IntUtil.UnsetValue, FloatUtil.UnsetValue, null);
         }
 
-        // I think this won't return normal or inherited styles right now, should it?
-        public bool TryGetPropertyValueInState(StylePropertyId propertyId, StyleState state, out StyleProperty property) {
+        // This won't return inherited or default styles
+        private bool TryGetPropertyValueInState(StylePropertyId propertyId, StyleState state, out StyleProperty property) {
             for (int i = 0; i < availableStyles.Count; i++) {
                 if ((availableStyles[i].state & state) == 0) {
                     continue;
@@ -704,39 +718,49 @@ namespace UIForia.Rendering {
             return "Unknown";
         }
 
-        public void SetProperty(in StyleProperty property, StyleState state) {
-            
+        public void SetInstanceProperty(in StyleProperty property, StyleState state) {
+
             if (element.isDestroyed) return;
-            
+
             UIStyle style = GetOrCreateInstanceStyle(state);
+
+            // if state isnt active, set it and forget, just move on
             if ((state & currentState) == 0) {
                 style.SetProperty(property);
                 return;
             }
 
-            StyleProperty oldValue = GetPropertyValue(property.propertyId);
+            // the the currently active value
+            StyleProperty oldValue = GetPropertyValue(property.propertyId, out bool isDefault);
 
+            // set the instance style, might also remove the style if property has no value
             style.SetProperty(property);
 
-            IStyleSystem styleSystem = element.application.styleSystem;
+            StyleSystem styleSystem = element.application.styleSystem;
 
-            StyleProperty currentValue;
-            if (TryGetPropertyValueInState(property.propertyId, currentState, out currentValue)) {
+            // look up the new current value of the property. This is probably only run if we removed the property.
+            // if after removing the property we still have a value and the value is not equal to the one we just
+            // removed, we need to tell the style system to update and update our property map.
+            if (TryGetPropertyValueInState(property.propertyId, currentState, out StyleProperty currentValue)) {
                 if (oldValue != currentValue) {
                     propertyMap[(int) property.propertyId] = currentValue;
-                    styleSystem?.SetStyleProperty(element, currentValue);
+                    styleSystem.SetStyleProperty(element, currentValue);
                 }
             }
             else {
                 propertyMap.Remove((int) property.propertyId);
-                styleSystem?.SetStyleProperty(element, property);
+                styleSystem.UnsetStyleProperty(element, GetDefaultOrInheritedValue(property.propertyId));
             }
+
+            // i need to know where a property comes from, either inherited or not
+            // if not inherited and its a font size, update em table accordingly
+
         }
 
         public void SetAnimatedProperty(StyleProperty property) {
             if (StyleUtil.CanAnimate(property.propertyId)) {
                 //animatedProperties[property.propertyId] = animatedProperty;
-                SetProperty(property, StyleState.Normal); // todo -- need another priority group for this
+                SetInstanceProperty(property, StyleState.Normal); // todo -- need another priority group for this
             }
         }
 
@@ -815,25 +839,44 @@ namespace UIForia.Rendering {
 
         private void UpdatePropertyMap(LightList<StylePropertyId> toUpdate) {
             StylePropertyId[] propertyIdArray = toUpdate.Array;
-            IStyleSystem styleSystem = element.application.styleSystem;
+            StyleSystem styleSystem = element.application.styleSystem;
 
+            // for all properties we are updating
             for (int i = 0; i < toUpdate.Count; i++) {
                 StylePropertyId propertyId = propertyIdArray[i];
 
+                // get the current non inherited value 
                 StyleProperty oldValue = propertyMap[(int) propertyId];
+                
+                // search our styles for that property id
+                // if we found it and its the same, nothing to update
+                // if we found it and its different, update the property map with the new value, tell the style system
+                // if we didn't find it, this property was removed
+                //    lookup the default or inherited value
                 if (TryGetPropertyValueInState(propertyId, currentState, out StyleProperty property)) {
                     if (oldValue != property) {
                         propertyMap[(int) property.propertyId] = property;
-                        styleSystem?.SetStyleProperty(element, property);
+                        styleSystem.SetStyleProperty(element, property);
                     }
                 }
                 else {
                     propertyMap.Remove((int) propertyId);
-                    styleSystem?.SetStyleProperty(element, GetPropertyValue(propertyId));
+                    styleSystem.UnsetStyleProperty(element, GetDefaultOrInheritedValue(propertyId));
                 }
             }
 
             //styleSystem.SetStyleProperties(element, toUpdate);
+        }
+
+        private StyleProperty GetDefaultOrInheritedValue(StylePropertyId propertyId) {
+            if (StyleUtil.IsInherited(propertyId)) {
+                int key = BitUtil.SetHighLowBits(1, (int) propertyId);
+                if (propertyMap.TryGetValue(key, out StyleProperty property)) {
+                    return property;
+                }
+            }
+
+            return DefaultStyleValues_Generated.GetPropertyValue(propertyId);
         }
 
         public void SetGridLayoutColAutoSize(in GridTrackSize trackSize, StyleState state) {
@@ -1015,7 +1058,7 @@ namespace UIForia.Rendering {
             return new SVGXTextStyle() {
                 fontSize = GetResolvedFontSize(),
                 alignment = TextAlignment,
-                fontAsset = TextFontAsset,
+                fontAsset = default, //TextFontAsset,
                 fontStyle = TextFontStyle,
                 glowOffset = TextGlowOffset,
                 glowOuter = TextGlowOuter,
@@ -1034,7 +1077,7 @@ namespace UIForia.Rendering {
                 underlayDilate = TextUnderlayDilate,
             };
         }
-        
+
     }
 
     [Flags]

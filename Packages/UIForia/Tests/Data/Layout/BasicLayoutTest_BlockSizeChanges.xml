@@ -27,8 +27,6 @@
     <Contents style="container">
         
         <Div style="block-provider">
-            <Div style="box" attr:id="one"/>
-            <Div style="box" attr:id="two"/>    
             <Div attr:id="content-size" style="content-size">
                 <Div attr:id="block-user" style="block-user"/>
             </Div>

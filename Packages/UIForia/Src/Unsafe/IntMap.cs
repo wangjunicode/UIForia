@@ -36,10 +36,10 @@ namespace UIForia.Util.Unsafe {
         public TValue* GetOrCreate(int key) {
             return mapState->GetOrCreate<TValue>(key);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrCreateReference(int key) {
-            TValue * ptr= mapState->GetOrCreate<TValue>(key);
+            TValue* ptr = mapState->GetOrCreate<TValue>(key);
             return ref UnsafeUtilityEx.AsRef<TValue>(ptr);
         }
 
@@ -76,6 +76,22 @@ namespace UIForia.Util.Unsafe {
         public int size {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => mapState->GetSize();
+        }
+
+        public TValue GetOrDefault(int key) {
+            if (mapState->TryGetValue<TValue>(key, out TValue val)) {
+                return val;
+            }
+
+            return default;
+        }
+
+        public bool ContainsKey(int key) {
+            return mapState->TryGetValue<TValue>(key, out _);
+        }
+
+        public UntypedIntMap* GetState() {
+            return mapState;
         }
 
     }

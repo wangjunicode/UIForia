@@ -70,8 +70,8 @@ namespace UIForia.Editor {
 
             UIStyleSet style = selectedElement.style;
 
-            UIElementFlags flags = (UIElementFlags)UIForiaHierarchyWindow.s_SelectedApplication.elementSystem.metaTable[selectedElement.id].flags;
-            
+            UIElementFlags flags = (UIElementFlags) UIForiaHierarchyWindow.s_SelectedApplication.elementSystem.metaTable[selectedElement.id].flags;
+
             bool isSet = (flags & UIElementFlags.DebugLayout) != 0;
             if (EditorGUILayout.ToggleLeft("Debug Layout", isSet)) {
                 UIForiaHierarchyWindow.s_SelectedApplication.elementSystem.metaTable[selectedElement.id].flags |= UIElementFlags.DebugLayout;
@@ -212,6 +212,11 @@ namespace UIForia.Editor {
         }
 
         private void DrawElementInfo() {
+
+            if (!EditorApplication.isPlaying) {
+                return;
+            }
+
             List<ElementAttribute> attributes = selectedElement.GetAttributes();
             if (attributes != null) {
                 DrawAttributes(attributes);
@@ -231,14 +236,12 @@ namespace UIForia.Editor {
                 DrawLabel("Viewport", $"X: {selectedElement.View.Viewport.x}, Y: {selectedElement.View.Viewport.y}, W: {selectedElement.View.Viewport.width}, H: {selectedElement.View.Viewport.height}");
                 DrawVector2Value("Local Position", layoutResult.localPosition);
                 DrawVector2Value("Screen Position", layoutResult.screenPosition);
-                DrawVector2Value("Scale", layoutResult.scale);
+                // DrawVector2Value("Scale", layoutResult.scale);
                 DrawSizeValue("Allocated Size", layoutResult.allocatedSize);
                 DrawSizeValue("Actual Size", layoutResult.actualSize);
 
-                DrawLabel("Rotation", layoutResult.rotation.ToString());
+                // DrawLabel("Rotation", layoutResult.rotation.ToString());
                 DrawLabel("Content Rect", $"X: {contentRect.x}, Y: {contentRect.y}, W: {contentRect.width}, H: {contentRect.height}");
-
-                DrawLabel("Render Layer", selectedElement.style.RenderLayer.ToString());
 
                 GUILayout.Space(16);
 
@@ -246,12 +249,19 @@ namespace UIForia.Editor {
                 DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredWidth), false);
                 DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredHeight), false);
 
-                if (selectedElement.layoutBox != null) {
-                //    DrawLabel("Block Width Provider:", selectedElement.layoutBox.GetBlockWidthProvider() + " size: " + selectedElement.layoutBox.ComputeBlockWidth(1));
-                //    DrawLabel("Block Height Provider:", selectedElement.layoutBox.GetBlockHeightProvider() + " size: " + selectedElement.layoutBox.ComputeBlockHeight(1));
-                }
-
                 GUILayout.Space(16);
+
+                DrawLabel("Element Id", selectedElement.id.ToString());
+                DrawLabel("Layout Parent", app.layoutSystem.layoutHierarchyTable[selectedElement.id].parentId.ToString());
+                DrawLabel("Layout Next Sibling", app.layoutSystem.layoutHierarchyTable[selectedElement.id].nextSiblingId.ToString());
+                DrawLabel("Layout Prev Sibling", app.layoutSystem.layoutHierarchyTable[selectedElement.id].prevSiblingId.ToString());
+                DrawLabel("Layout First Child", app.layoutSystem.layoutHierarchyTable[selectedElement.id].firstChildId.ToString());
+                DrawLabel("Layout Last Child", app.layoutSystem.layoutHierarchyTable[selectedElement.id].lastChildId.ToString());
+                DrawLabel("Layout Child Count", app.layoutSystem.layoutHierarchyTable[selectedElement.id].childCount.ToString());
+
+                int index = app.layoutSystem.clipInfoTable[selectedElement.id].clipperIndex;
+                
+                DrawLabel("Clipper Index", index.ToString());
 
                 OffsetRect margin = selectedElement.layoutResult.margin;
                 DrawLabel("Margin Top", margin.top.ToString());
@@ -501,7 +511,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.MeshFillAmount:
                     return DrawFloat(property, isEditable);
-                
+
                 case StylePropertyId.Layer:
                     return DrawInt(property, isEditable);
 
@@ -588,10 +598,6 @@ namespace UIForia.Editor {
                 case StylePropertyId.GridLayoutRowGap:
                     return DrawFloat(property, isEditable);
 
-                case StylePropertyId.GridLayoutColAlignment:
-                case StylePropertyId.GridLayoutRowAlignment:
-                    return DrawEnumWithValue<GridAxisAlignment>(property, isEditable);
-
                 case StylePropertyId.FlexLayoutWrap:
                     return DrawEnumWithValue<LayoutWrap>(property, isEditable);
 
@@ -655,7 +661,6 @@ namespace UIForia.Editor {
                 case StylePropertyId.TextFontStyle:
                     // todo -- this needs to be an EnumFlags popup
                     return DrawEnumWithValue<FontStyle>(property, isEditable);
-                //                    return DrawEnum<Text.FontStyle>(property, isEditable);
 
                 case StylePropertyId.TextAlignment:
                     return DrawEnumWithValue<TextAlignment>(property, isEditable);
@@ -696,11 +701,7 @@ namespace UIForia.Editor {
                     return DrawEnumWithValue<LayoutBehavior>(property, isEditable);
 
                 case StylePropertyId.ZIndex:
-                case StylePropertyId.RenderLayerOffset:
                     return DrawInt(property, isEditable);
-
-                case StylePropertyId.RenderLayer:
-                    return DrawEnumWithValue<RenderLayer>(property, isEditable);
 
                 case StylePropertyId.ClipBehavior:
                     return DrawEnumWithValue<ClipBehavior>(property, isEditable);
@@ -872,7 +873,7 @@ namespace UIForia.Editor {
             GUILayout.BeginHorizontal();
             FontAsset fontAsset = property.AsFont;
 
-            TMP_FontAsset newFont = (TMP_FontAsset) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property), fontAsset.textMeshProFont, typeof(TMP_FontAsset), false);
+            FontAsset newFont = (FontAsset) EditorGUILayout.ObjectField(StyleUtil.GetPropertyName(property), fontAsset, typeof(TMP_FontAsset), false);
 
             GUI.enabled = true;
             GUILayout.EndHorizontal();

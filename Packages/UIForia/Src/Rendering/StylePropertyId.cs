@@ -42,8 +42,6 @@ namespace UIForia.Rendering {
         GridLayoutRowAutoSize,
         GridLayoutColGap,
         GridLayoutRowGap,
-        GridLayoutColAlignment,
-        GridLayoutRowAlignment,
 
         FlexLayoutWrap,
         FlexLayoutDirection,
@@ -121,8 +119,6 @@ namespace UIForia.Rendering {
         LayoutBehavior,
 
         ZIndex,
-        RenderLayer,
-        RenderLayerOffset,
         Layer,
 
         //ShadowType ,

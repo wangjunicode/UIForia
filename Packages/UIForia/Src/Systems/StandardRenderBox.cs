@@ -77,7 +77,7 @@ namespace UIForia.Rendering {
         protected MeshFillDirection meshFillDirection;
 
         public MaterialId materialId;
-        public LayoutResult[] layoutTable;
+        // public LayoutResult[] layoutTable;
         
         private PooledMesh mesh;
         private MaterialPropertyBlock propertyBlock;
@@ -273,7 +273,7 @@ namespace UIForia.Rendering {
             Vector2 pivotOffset = element.layoutResult.pivotOffset;
 
             // geometry.FillRect(size.width, size.height);
-            geometry.FillMeshType(0, 0, size.width, size.height, meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
+            geometry.FillMeshType(0, 0, width, height, meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
 
             if (!ReferenceEquals(backgroundImage, null)) {
                 Vector3[] positions = geometry.positionList.array;
@@ -528,8 +528,8 @@ namespace UIForia.Rendering {
                 Vector2 size = element.layoutResult.actualSize + new Vector2(style.ShadowSizeX, style.ShadowSizeY) + new Vector2(style.ShadowIntensity, style.ShadowIntensity);
                 position -= new Vector2(style.ShadowSizeX, style.ShadowSizeY) * 0.5f;
                 position -= new Vector2(style.ShadowIntensity, style.ShadowIntensity) * 0.5f;
-                float x = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, style.ShadowOffsetX, element.layoutResult.actualSize.width);
-                float y = MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, style.ShadowOffsetY, element.layoutResult.actualSize.height);
+                float x = 0; //MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, style.ShadowOffsetX, element.layoutResult.actualSize.width);
+                float y = 0; //MeasurementUtil.ResolveOffsetMeasurement(layoutTable, element, viewParameters, style.ShadowOffsetY, element.layoutResult.actualSize.height);
                 position.x += x;
                 position.y += y;
                 shadowGeometry.mainTexture = null;
@@ -568,12 +568,8 @@ namespace UIForia.Rendering {
                 return;
             }
 
-            Matrix4x4 matrix = default;
-            element.layoutResult.matrix.GetMatrix4x4(ref matrix);
-            ctx.DrawBatchedGeometry(geometry, range, matrix, clipper);
+            ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.GetWorldMatrix(), clipper);
         }
-
-      
         
         public void RenderFromMaterial(RenderContext ctx) {
 

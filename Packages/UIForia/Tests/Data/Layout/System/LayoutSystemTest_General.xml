@@ -19,6 +19,8 @@
         style height_changes_to_mincontent {
         PreferredSize = 300px 500px;
         }
+        
+        style marker {}
 
     </Style>
     <Contents>
@@ -54,7 +56,7 @@
 
     <Contents id="height_changes_to_maxcontent">
         <Group style="c"/>
-        <Group style:preferredWidth="400f" style:preferredHeight="300f">
+        <Group style="marker" style:preferredWidth="400f" style:preferredHeight="300f">
             <Group style="height_changes_to_maxcontent"/>
         </Group>
         <Group style="c"/>
@@ -62,7 +64,7 @@
 
     <Contents id="height_changes_to_mincontent">
         <Group style="c"/>
-        <Group style:preferredWidth="400f" style:preferredHeight="300f">
+        <Group style="marker" style:preferredWidth="400f" style:preferredHeight="300f">
             <Group style="height_changes_to_mincontent"/>
         </Group>
         <Group style="c"/>
@@ -71,7 +73,7 @@
     <Contents id="child_enabled">
         <Group style="c"/>
         <Group>
-            <Group if.once="false" style:preferredWidth="300f" style:preferredHeight="50f"/>
+            <Group  if.once="false" style:preferredWidth="300f" style:preferredHeight="50f"/>
             <Group style:preferredWidth="200f" style:preferredHeight="50f"/>
         </Group>
         <Group style:preferredWidth="100f" style:preferredHeight="100f"/>
@@ -80,7 +82,7 @@
      <Contents id="child_disabled">
         <Group style="c"/>
         <Group>
-            <Group style:preferredWidth="300f" style:preferredHeight="50f"/>
+            <Group style="marker" style:preferredWidth="300f" style:preferredHeight="50f"/>
             <Group style:preferredWidth="200f" style:preferredHeight="50f"/>
         </Group>
         <Group style:preferredWidth="100f" style:preferredHeight="100f"/>

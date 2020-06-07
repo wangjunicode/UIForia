@@ -13,8 +13,6 @@ namespace UIForia.Layout {
         LayoutBox,
         Parent,
         ParentContentArea,
-        Template,
-        TemplateContentArea,
         View,
         Screen,
         Mouse

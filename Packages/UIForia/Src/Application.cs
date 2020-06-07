@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Src.Systems;
 using UIForia.Animation;
 using UIForia.Compilers;
@@ -12,10 +13,14 @@ using UIForia.Routing;
 using UIForia.Sound;
 using UIForia.Systems;
 using UIForia.Systems.Input;
+using UIForia.Text;
 using UIForia.Util;
+using UIForia.Util.Unsafe;
+using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Profiling;
 using Debug = UnityEngine.Debug;
 
 namespace UIForia {
@@ -59,6 +64,8 @@ namespace UIForia {
 
         protected List<ISystem> systems;
 
+        internal DataList<ElementId>.Shared viewRootIds;
+
         public event Action<UIElement> onElementRegistered;
         public event Action onElementDestroyed;
         public event Action<UIElement> onElementEnabled;
@@ -91,20 +98,10 @@ namespace UIForia {
 
         public UIForiaSettings settings => Settings;
 
-        private int NextElementId => elementIdGenerator++;
-
         public TemplateMetaData[] zz_Internal_TemplateMetaData => templateData.templateMetaData;
 
         private TemplateSettings templateSettings;
         private bool isPreCompiled;
-
-        internal LightList<HierarchyChange> hierarchyChanges;
-
-        public struct HierarchyChange {
-
-            public ElementId elementId;
-
-        }
 
         protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
             this.isPreCompiled = isPreCompiled;
@@ -112,7 +109,9 @@ namespace UIForia {
             this.onElementRegistered = onElementRegistered;
             this.id = templateSettings.applicationName;
             this.resourceManager = resourceManager ?? new ResourceManager();
-            this.hierarchyChanges = new LightList<HierarchyChange>(64);
+            this.resourceManager.Initialize();
+
+            this.viewRootIds = new DataList<ElementId>.Shared(8, Allocator.Persistent);
 
             Applications.Add(this);
 #if UNITY_EDITOR
@@ -129,14 +128,15 @@ namespace UIForia {
 #endif
 
         protected virtual void CreateSystems() {
-            styleSystem = new StyleSystem();
-            elementSystem = new ElementSystem(1024);
+            elementSystem = new ElementSystem(InitialElementCapacity);
+            styleSystem = new StyleSystem(elementSystem);
+            textSystem = new TextSystem(elementSystem, resourceManager);
             renderSystem = new RenderSystem(Camera ?? Camera.current, this, elementSystem);
             routingSystem = new RoutingSystem();
             linqBindingSystem = new LinqBindingSystem();
             soundSystem = new UISoundSystem();
             animationSystem = new AnimationSystem(elementSystem);
-            layoutSystem = new LayoutSystem(this, elementSystem);
+            layoutSystem = new LayoutSystem(this, elementSystem, textSystem);
             inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
         }
 
@@ -144,7 +144,11 @@ namespace UIForia {
             systems = new List<ISystem>();
             views = new List<UIView>();
 
+            frameId = 1;
+
             CreateSystems();
+
+            textSystem.frameId = frameId;
 
             systems.Add(linqBindingSystem);
             systems.Add(routingSystem);
@@ -155,10 +159,6 @@ namespace UIForia {
             m_BeforeUpdateTaskSystem = new UITaskSystem();
             m_AfterUpdateTaskSystem = new UITaskSystem();
 
-            UIView view = null;
-
-            // Stopwatch timer = Stopwatch.StartNew();
-
             if (isPreCompiled) {
                 templateData = TemplateLoader.LoadPrecompiledTemplates(templateSettings);
             }
@@ -168,7 +168,12 @@ namespace UIForia {
 
             materialDatabase = templateData.materialDatabase;
 
-            view = new UIView(this, "Default", Matrix4x4.identity, new Size(Width, Height));
+            viewRootIds.size = 0;
+
+            UIView view = new UIView(views.Count, this, "Default", Matrix4x4.identity, new Size(Width, Height));
+
+            viewRootIds.Add(view.dummyRoot.id);
+
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this));
             view.Init(rootElement);
 
@@ -177,8 +182,6 @@ namespace UIForia {
             layoutSystem.OnViewAdded(view);
             renderSystem.OnViewAdded(view);
 
-            //timer.Stop();
-            //Debug.Log("Initialized UIForia application in " + timer.Elapsed.TotalSeconds.ToString("F2") + " seconds");
         }
 
         public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
@@ -186,14 +189,15 @@ namespace UIForia {
 
                 UIElement element = templateData.templates[dynamicTemplate.templateId].Invoke(null, new TemplateScope(this));
 
-                UIView view = new UIView(this, name, element, matrix, size);
+                UIView view = new UIView(views.Count, this, name, element, matrix, size);
+
+                viewRootIds.Add(view.dummyRoot.id);
 
                 view.Depth = views.Count;
                 views.Add(view);
 
                 layoutSystem.OnViewAdded(view);
                 renderSystem.OnViewAdded(view);
-
                 return view;
             }
 
@@ -223,9 +227,9 @@ namespace UIForia {
             }
         }
 
-        public IStyleSystem StyleSystem => styleSystem;
+        public StyleSystem StyleSystem => styleSystem;
         public IRenderSystem RenderSystem => renderSystem;
-        public ILayoutSystem LayoutSystem => layoutSystem;
+        public LayoutSystem LayoutSystem => layoutSystem;
         public InputSystem InputSystem => inputSystem;
         public RoutingSystem RoutingSystem => routingSystem;
         public UISoundSystem SoundSystem => soundSystem;
@@ -242,6 +246,14 @@ namespace UIForia {
         public float Width => UiApplicationSize.width / dpiScaleFactor;
 
         public float Height => UiApplicationSize.height / dpiScaleFactor;
+
+        private int initialElementCapacity;
+        public TextSystem textSystem;
+
+        public int InitialElementCapacity {
+            get => initialElementCapacity < 32 ? 32 : initialElementCapacity;
+            set => initialElementCapacity = value < 32 ? 32 : value;
+        }
 
         public void SetCamera(Camera camera) {
             Rect rect = camera.pixelRect;
@@ -329,6 +341,8 @@ namespace UIForia {
             // do nothing if already destroyed
 
             throw new NotImplementedException("Reimplement destroy");
+
+            // todo -- decrement view.activeElementCount
 
             ElementTable<ElementMetaInfo> metaTable = elementSystem.metaTable;
 
@@ -420,8 +434,11 @@ namespace UIForia {
             UIApplicationSize.height = (int) rect.height;
             UIApplicationSize.width = (int) rect.width;
 
+            viewRootIds.size = 0;
             for (int i = 0; i < views.Count; i++) {
-                views[i].Viewport = new Rect(0, 0, Width, Height);
+                // todo -- this is totally wrong! needs proper coords and size shouldn't always bee app size
+                views[i].Viewport = new Rect(0, 0, UIApplicationSize.width, UIApplicationSize.height);
+                viewRootIds.Add(views[i].dummyRoot.id);
             }
 
             inputSystem.OnUpdate();
@@ -438,36 +455,58 @@ namespace UIForia {
 
             bindingTimer.Stop();
 
-            elementSystem.FilterEnabledDisabledElements(views[0].dummyRoot.id); // todo -- not right?
-            animationSystem.OnUpdate();
-
             routingSystem.OnUpdate();
 
-            // lists also contain elements created this frame
+            animationSystem.OnUpdate();
+
+            // todo -- when more code lives in jobs a lot of this loop can be easily jobified without many sync points
+            
+            if (elementSystem.enabledElementsThisFrame.size > 0 || elementSystem.disabledElementsThisFrame.size > 0) {
+                new FilterEnabledDisabledElementsJob() {
+                    metaTable = elementSystem.metaTable,
+                    enabledElements = elementSystem.enabledElementsThisFrame,
+                    disabledElements = elementSystem.disabledElementsThisFrame
+                }.Run();
+            }
+
+            new UpdateTraversalTable() {
+                hierarchyTable = elementSystem.hierarchyTable,
+                metaTable = elementSystem.metaTable,
+                traversalTable = elementSystem.traversalTable,
+                rootIds = viewRootIds,
+            }.Run();
 
             if (elementSystem.disabledElementsThisFrame.size > 0) {
                 layoutSystem.HandleElementDisabled(elementSystem.disabledElementsThisFrame);
+                textSystem.HandleElementDisabled(elementSystem.disabledElementsThisFrame);
             }
 
             if (elementSystem.enabledElementsThisFrame.size > 0) {
                 layoutSystem.HandleElementEnabled(elementSystem.enabledElementsThisFrame);
+                textSystem.HandleElementEnabled(elementSystem.enabledElementsThisFrame);
             }
 
-            // styleSystem.FlushChangeSets(elementSystem, layoutSystem, renderSystem);
+            styleSystem.FlushChangeSets(elementSystem, layoutSystem, renderSystem);
 
-            // todo -- read changed data into layout/render thread
-            // layoutTimer.Restart();
+            textSystem.Update();
+
+            layoutTimer.Restart();
+            Profiler.BeginSample("UIForia::Layout");
             layoutSystem.RunLayout();
-            // layoutTimer.Stop();
-            //
-            // renderTimer.Restart();
-            // renderSystem.OnUpdate();
-            // renderTimer.Stop();
+            Profiler.EndSample();
+            layoutTimer.Stop();
+            
+            renderTimer.Restart();
+            Profiler.BeginSample("UIForia::Rendering");
+            renderSystem.OnUpdate();
+            Profiler.EndSample();
+            renderTimer.Stop();
 
             m_AfterUpdateTaskSystem.OnUpdate();
 
             elementSystem.CleanupFrame();
             frameId++;
+
             loopTimer.Stop();
         }
 
@@ -494,20 +533,31 @@ namespace UIForia {
         internal void DoEnableElement(UIElement element) {
 
             // if element is not enabled (ie has a disabled ancestor or is not alive), no-op 
-            if (!element.isAncestorEnabled || element.isDestroyed) {
+            if (element.isDestroyed) {
                 return;
             }
 
             ElementTable<ElementMetaInfo> metaTable = elementSystem.metaTable;
+
+            if (!element.isAncestorEnabled) {
+                element.isSelfEnabled = true;
+                metaTable[element.id].flags |= UIElementFlags.Enabled;
+                return;
+            }
+
+            UIView view = element.View;
 
             StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
             stack.array[stack.size++].element = element;
 
-            elementSystem.enabledElementsThisFrame.Add(element.id);
             element.isSelfEnabled = true;
+
             metaTable[element.id].flags |= UIElementFlags.Enabled | UIElementFlags.EnabledRoot;
+
+            UIElement[] instanceTable = elementSystem.instanceTable;
+            ElementTable<HierarchyInfo> hierarchyTable = elementSystem.hierarchyTable;
 
             // stack operations in the following code are inlined since this is a very hot path
             while (stack.size > 0) {
@@ -520,13 +570,14 @@ namespace UIForia {
                 child.isAncestorEnabled = true;
 
                 // if the element is itself disabled or destroyed, keep going
-                if ((metaInfo.flags & UIElementFlags.Enabled) == 0) {
+                if ((metaInfo.flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet) {
                     continue;
                 }
 
                 elementSystem.enabledElementsThisFrame.Add(child.id);
 
                 child.style.UpdateInheritedStyles(); // todo -- move this
+                view.activeElementCount++;
                 try {
                     child.OnEnable();
                 }
@@ -536,7 +587,7 @@ namespace UIForia {
 
                 // todo -- move this
                 // We need to run all runCommands now otherwise animations in [normal] style groups won't run after enabling.
-                child.style.RunCommands();
+                child.style.RunCommands(); // goes away with style system redesign
 
                 // register the flag set even if we get disabled via OnEnable, we just want to track that OnEnable was called at least once
                 metaInfo.flags |= UIElementFlags.HasBeenEnabled;
@@ -547,15 +598,19 @@ namespace UIForia {
                     int childCount = elementSystem.hierarchyTable[child.id].childCount;
                     child.enableStateChangedFrameId = frameId;
                     if (stack.size + childCount >= stack.array.Length) {
-                        Array.Resize(ref stack.array, stack.size + childCount + 16);
+                        Array.Resize(ref stack.array, stack.size + childCount + 32);
                     }
 
-                    UIElement ptr = child.GetLastChild();
+                    unsafe {
 
-                    while (ptr != null) {
-                        // inline stack push
-                        stack.array[stack.size++].element = ptr;
-                        ptr = ptr.GetPreviousSibling();
+                        UIElement ptr = instanceTable[hierarchyTable.array[child.id.index].lastChildId.index];
+
+                        while (ptr != null) {
+                            // inline stack push
+                            stack.array[stack.size++].element = ptr;
+                            ptr = instanceTable[hierarchyTable.array[ptr.id.index].prevSiblingId.index];
+
+                        }
                     }
 
                 }
@@ -572,26 +627,28 @@ namespace UIForia {
 
         public void DoDisableElement(UIElement element) {
             // if element is already disabled or destroyed, no op
-            if (element.isDisabled) {
+
+            if (element.isDestroyed || element.isSelfDisabled) {
                 return;
             }
 
-            bool wasDisabled = element.isDisabled;
+            if (!element.isAncestorEnabled) {
+                elementSystem.metaTable[element.id].flags &= ~UIElementFlags.Enabled;
+                element.isSelfEnabled = false;
+                return;
+            }
+
+            UIView view = element.View;
+
             ref ElementTable<ElementMetaInfo> metaTable = ref elementSystem.metaTable;
-            metaTable[element.id].flags &= ~UIElementFlags.Enabled;
-            metaTable[element.id].flags |= UIElementFlags.DisableRoot;
-            element.isSelfEnabled = false;
-
-            if (wasDisabled) {
-                return;
-            }
 
             // if element is now enabled we need to walk it's children
             // and set enabled ancestor flags until we find a self-disabled child
             StructStack<ElemRef> stack = StructStack<ElemRef>.Get();
             stack.array[stack.size++].element = element;
 
-            elementSystem.disabledElementsThisFrame.Add(element.id);
+            UIElement[] instanceTable = elementSystem.instanceTable;
+            ElementTable<HierarchyInfo> hierarchyTable = elementSystem.hierarchyTable;
 
             // stack operations in the following code are inlined since this is a very hot path
             while (stack.size > 0) {
@@ -606,12 +663,12 @@ namespace UIForia {
                 // if destroyed the whole subtree is also destroyed, do nothing.
                 // if already disabled the whole subtree is also disabled, do nothing.
 
-                if ((metaInfo.flags & (UIElementFlags.Alive | UIElementFlags.Enabled)) == 0) {
+                if ((metaInfo.flags & UIElementFlags.Enabled) == 0) {
                     continue;
                 }
 
                 elementSystem.disabledElementsThisFrame.Add(child.id);
-
+                view.activeElementCount--;
                 // todo -- profile not calling disable when it's not needed
                 // if (child.flags & UIElementFlags.RequiresEnableCall) {
                 try {
@@ -624,33 +681,38 @@ namespace UIForia {
 
                 // todo -- maybe do this on enable instead
                 if (child.style.currentState != StyleState.Normal) {
-                    // todo -- maybe just have a clear states method
-                    // todo -- change to ExitState(State.Hover|State.Active|State.Focus) and see if its better / faster
-                    child.style.ExitState(StyleState.Hover);
-                    child.style.ExitState(StyleState.Active);
-                    child.style.ExitState(StyleState.Focused);
+                    child.style.ExitState(StyleState.Hover | StyleState.Active | StyleState.Focused);
                 }
 
                 // if child is still disabled after OnDisable, traverse it's children
                 if (child.isDisabled) {
-                    UIElement[] children = child.children.array;
-                    int childCount = child.children.size;
-
+                    int childCount = elementSystem.hierarchyTable[child.id].childCount;
                     child.enableStateChangedFrameId = frameId;
-
                     if (stack.size + childCount >= stack.array.Length) {
-                        Array.Resize(ref stack.array, stack.size + childCount + 16);
+                        Array.Resize(ref stack.array, stack.size + childCount + 32);
                     }
 
-                    for (int i = childCount - 1; i >= 0; i--) {
-                        // inline stack push
-                        stack.array[stack.size++].element = children[i];
+                    unsafe {
+
+                        UIElement ptr = instanceTable[hierarchyTable.array[child.id.index].lastChildId.index];
+
+                        while (ptr != null) {
+                            // inline stack push
+                            stack.array[stack.size++].element = ptr;
+                            ptr = instanceTable[hierarchyTable.array[ptr.id.index].prevSiblingId.index];
+
+                        }
                     }
                 }
+
             }
 
             // was disabled in loop, need to reset it here
+            // set this after the loop so we dont have special cases inside it.
             element.isAncestorEnabled = true;
+            element.isSelfEnabled = false;
+            metaTable[element.id].flags &= ~UIElementFlags.Enabled;
+            metaTable[element.id].flags |= UIElementFlags.DisableRoot;
 
             StructStack<ElemRef>.Release(ref stack);
 
@@ -745,8 +807,6 @@ namespace UIForia {
                 ref ElementMetaInfo metaInfo = ref metaTable[current.id];
 
                 current.isAncestorEnabled = current.parent.isEnabled;
-                current.isAlive = true;
-                current.isSelfEnabled = true;
 
                 if (current.parent.isEnabled) {
                     metaInfo.flags |= UIElementFlags.AncestorEnabled;
@@ -855,18 +915,18 @@ namespace UIForia {
         }
 
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
-        public UIElement CreateElementFromPool(int typeId, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
+        public UIElement CreateElementFromPool(UIElement element, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
             // children get assigned in the template function but we need to setup the list here
-            ConstructedElement retn = templateData.ConstructElement(typeId);
-            UIElement element = retn.element;
+            // ConstructedElement retn = templateData.ConstructElement(typeId);
+            // UIElement element = retn.element;
 
             element.application = this;
             element.templateMetaData = templateData.templateMetaData[originTemplateId];
 
-            const UIElementFlags flags = UIElementFlags.Enabled | UIElementFlags.Alive;
+            const UIElementFlags flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
 
             element.id = elementSystem.CreateElement(element, parent?.hierarchyDepth + 1 ?? 0, -999, -999, flags);
-
+            element.flags = flags;
             element.style = new UIStyleSet(element);
             element.children = new LightList<UIElement>(childCount);
 
@@ -887,10 +947,6 @@ namespace UIForia {
 
         public TemplateMetaData GetTemplateMetaData(int metaDataId) {
             return templateData.templateMetaData[metaDataId];
-        }
-
-        public UIElement CreateElementFromPoolWithType(int typeId, UIElement parent, int childCount, int attrCount, int originTemplateId) {
-            return CreateElementFromPool(typeId, parent, childCount, attrCount, originTemplateId);
         }
 
         public static int ResolveSlotId(string slotName, StructList<SlotUsage> slotList, int defaultId, out UIElement contextRoot) {
@@ -921,7 +977,19 @@ namespace UIForia {
         }
 
         public void Dispose() {
+            viewRootIds.Dispose();
             elementSystem?.Dispose();
+            layoutSystem?.Dispose();
+            textSystem?.Dispose();
+            resourceManager?.Dispose();
+        }
+
+        private static string PathHack([CallerFilePath] string path = "") {
+            return path.Replace(nameof(Application) + ".cs", "");
+        }
+
+        internal static string GetSourceDirectory() {
+            return PathHack();
         }
 
     }

@@ -36,7 +36,7 @@ namespace SVGX {
 
     public struct SVGXTextStyle {
 
-        public FontAsset fontAsset;
+        public FontAssetInfo fontAsset;
 
         // todo -- merge values where possible
         public FontStyle? fontStyle;
@@ -60,17 +60,7 @@ namespace SVGX {
         public float? underlayDilate;
         public float? underlaySoftness;
         public float? faceDilate;
-
-        // todo use these instead of nullables
-        [Flags]
-        public enum SetFlags {
-
-            FontAsset = 1 << 0,
-            FontStyle = 1 << 1,
-            Alignment = 1 << 2,
-
-        }
-
+        
         public SVGXTextStyle(SVGXTextStyle toClone) {
             this.fontSize = toClone.fontSize;
             this.fontStyle = toClone.fontStyle;

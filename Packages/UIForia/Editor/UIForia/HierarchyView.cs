@@ -18,7 +18,7 @@ namespace UIForia.Editor {
 
         public LayoutHierarchyView(TreeViewState state, MultiColumnHeader multiColumnHeader) : base(state, multiColumnHeader) { }
 
-        private readonly IntMap<bool> m_ViewState = new IntMap<bool>();
+        private readonly IntMap_Deprecated<bool> m_ViewState = new IntMap_Deprecated<bool>();
 
         public bool needsReload;
         public event Action<UIElement> onSelectionChanged;
@@ -48,14 +48,13 @@ namespace UIForia.Editor {
 
             // todo -- maybe pool tree items
 
+            LayoutSystem layoutSystem = UIForiaHierarchyWindow.s_SelectedApplication.layoutSystem;
             ElementSystem elementSystem = UIForiaHierarchyWindow.s_SelectedApplication.elementSystem;
+
 
             TreeViewItem root = new TreeViewItem(-9999, -1);
 
-            var views = UIForiaHierarchyWindow.s_SelectedApplication.views;
-
-            List<UIElement> ignored = new List<UIElement>();
-            List<UIElement> transcluded = new List<UIElement>();
+            List<UIView> views = UIForiaHierarchyWindow.s_SelectedApplication.views;
 
             foreach (UIView uiView in views) {
                 if (uiView.RootElement == null) continue;
@@ -71,8 +70,7 @@ namespace UIForia.Editor {
                         continue;
                     }
 
-                    ref LayoutMetaData layoutMeta = ref elementSystem.layoutMetaDataTable[current.element.id];
-                    ref LayoutHierarchyInfo hierarchyInfo = ref elementSystem.layoutHierarchyTable[current.element.id];
+                    ref LayoutHierarchyInfo hierarchyInfo = ref layoutSystem.layoutHierarchyTable[current.element.id];
                     
                     
                     // if (layoutMeta.layoutBehavior == LayoutBehavior.Ignored) {
@@ -85,7 +83,7 @@ namespace UIForia.Editor {
                     
                     while (ptr != default) {
                         ElementTreeItem childItem = new ElementTreeItem(elementSystem.instanceTable[ptr.index]);
-                        ptr = elementSystem.layoutHierarchyTable[ptr].nextSiblingId;
+                        ptr = layoutSystem.layoutHierarchyTable[ptr].nextSiblingId;
                         current.AddChild(childItem);
                         stack.Push(childItem);
                     }
@@ -127,8 +125,7 @@ namespace UIForia.Editor {
             float rowWidth = args.rowRect.width;
             args.rowRect.x += indent;
             args.rowRect.width -= indent;
-            s_Content.text = item.element.GetDisplayName() + " (id = " + " " + item.element.id.index + " selfEnabled -> " + item.element.isSelfEnabled + ")";
-            // + elementSystem.traversalTable[item.element.id].ftbIndex + ")";
+            s_Content.text = item.element.GetDisplayName();
 
             if ((flags & UIElementFlags.DebugLayout) != 0) {
                 s_Content.text = "{Debug Layout} " + s_Content.text;
@@ -160,7 +157,7 @@ namespace UIForia.Editor {
 
         public UIView[] views;
 
-        private readonly IntMap<ViewState> m_ViewState;
+        private readonly IntMap_Deprecated<ViewState> m_ViewState;
 
         public bool needsReload;
         public event Action<UIElement> onSelectionChanged;
@@ -185,7 +182,7 @@ namespace UIForia.Editor {
 
         public HierarchyView(UIView[] views, TreeViewState state) : base(state) {
             this.views = views;
-            m_ViewState = new IntMap<ViewState>();
+            m_ViewState = new IntMap_Deprecated<ViewState>();
             needsReload = true;
         }
 
@@ -298,7 +295,7 @@ namespace UIForia.Editor {
             float rowWidth = args.rowRect.width;
             args.rowRect.x += indent;
             args.rowRect.width -= indent;
-            s_Content.text = item.element.GetDisplayName() + " (id = " + " " + item.element.id.index + " selfEnabled -> " + item.element.isSelfEnabled + ")";
+            s_Content.text = item.element.GetDisplayName();
 
             if (showLayoutStats) {
                 s_Content.text += $"w: {item.element.layoutBox.cacheHit}, {item.element.layoutBox.cacheMiss}";

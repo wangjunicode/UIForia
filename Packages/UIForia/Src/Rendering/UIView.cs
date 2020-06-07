@@ -52,8 +52,12 @@ namespace UIForia.Rendering {
 
         public bool focusOnMouseDown;
         public bool sizeChanged;
+        public int activeElementCount;
 
-        internal UIView(Application application, string name, Matrix4x4 matrix, Size size) {
+        internal int index;
+        
+        internal UIView(int index, Application application, string name, Matrix4x4 matrix, Size size) {
+            this.index = index;
             this.name = name;
             this.application = application;
             this.matrix = matrix;
@@ -70,7 +74,7 @@ namespace UIForia.Rendering {
             dummyRoot.isAncestorEnabled = true;
             dummyRoot.isSelfEnabled = true;
             dummyRoot.isAlive = true;
-            
+            this.activeElementCount = 1;
             this.sizeChanged = true;
         }
 
@@ -81,7 +85,8 @@ namespace UIForia.Rendering {
             application.InitializeElement(element);
         }
         
-        internal UIView(Application application, string name, UIElement element, Matrix4x4 matrix, Size size) {
+        internal UIView(int index, Application application, string name, UIElement element, Matrix4x4 matrix, Size size) {
+            this.index = index;
             this.name = name;
             this.application = application;
             this.matrix = matrix;
@@ -94,7 +99,7 @@ namespace UIForia.Rendering {
             this.dummyRoot.View = this;
             this.dummyRoot.children = new LightList<UIElement>(1);
             this.dummyRoot.id = application.elementSystem.CreateElement(dummyRoot, 0, -999, -999, UIElementFlags.EnabledFlagSet);
-            
+            this.activeElementCount = 1;
             dummyRoot.isAncestorEnabled = true;
             dummyRoot.isSelfEnabled = true;
             dummyRoot.isAlive = true;

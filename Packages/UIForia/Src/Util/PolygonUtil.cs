@@ -1,5 +1,6 @@
 using System;
 using UIForia.Systems;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Util {
@@ -17,7 +18,7 @@ namespace UIForia.Util {
 
             return (distP0P1 ^ distP1P2 ^ distP2P3 ^ distP3P0 ^ distP2P0 ^ distP1P3) == 0;
         }
-        
+
         public static bool PointInPolygon(in Vector2 point, Vector2[] polygon) {
             int indexer = polygon.Length - 1;
             bool inside = false;
@@ -86,6 +87,22 @@ namespace UIForia.Util {
             }
 
             return new Vector4(minX, minY, maxX, maxY);
+        }
+
+        public static unsafe float4 GetBounds(float2* p, int size) {
+            float minX = float.MaxValue;
+            float minY = float.MaxValue;
+            float maxX = float.MinValue;
+            float maxY = float.MinValue;
+            for (int b = 0; b < size; b++) {
+                Vector2 point = p[b];
+                if (point.x < minX) minX = point.x;
+                if (point.x > maxX) maxX = point.x;
+                if (point.y < minY) minY = point.y;
+                if (point.y > maxY) maxY = point.y;
+            }
+
+            return new float4(minX, minY, maxX, maxY);
         }
 
     }

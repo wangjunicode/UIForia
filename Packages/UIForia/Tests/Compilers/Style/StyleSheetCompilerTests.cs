@@ -20,7 +20,9 @@ public class StyleSheetCompilerTests {
 
     public static StyleSheetCompiler NewStyleSheetCompiler() {
         string path = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests");
-        return new StyleSheetCompiler(new StyleSheetImporter(path,  new ResourceManager()), new ResourceManager());
+        var resourceManager = new ResourceManager();
+        resourceManager.Initialize(); // this is leaking a small list every time, maybe we don't care for these tests
+        return new StyleSheetCompiler(new StyleSheetImporter(path,  resourceManager), resourceManager);
     }
 
     [Test]
@@ -349,27 +351,27 @@ style myStyle {
         Assert.AreEqual(new GridItemPlacement(5), containers[0].groups[0].normal.style.GridItemHeight);
     }
 
-    [Test]
-    public void CompileGridAxisAlignmentProperties() {
-        var nodes = StyleParser.Parse(@"
-
-const colSelfAlignment = Center;
-
-style myStyle {
-    GridLayoutColAlignment = Shrink;
-    GridLayoutRowAlignment = fit;
-}
-
-        ".Trim());
-
-        StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
-
-        var containers = styleSheet.styleGroupContainers;
-        Assert.AreEqual(1, containers.Length);
-
-        Assert.AreEqual(GridAxisAlignment.Shrink, containers[0].groups[0].normal.style.GridLayoutColAlignment);
-        Assert.AreEqual(GridAxisAlignment.Fit, containers[0].groups[0].normal.style.GridLayoutRowAlignment);
-    }
+//     [Test]
+//     public void CompileGridAxisAlignmentProperties() {
+//         var nodes = StyleParser.Parse(@"
+//
+// const colSelfAlignment = Center;
+//
+// style myStyle {
+//     GridLayoutColAlignment = Shrink;
+//     GridLayoutRowAlignment = fit;
+// }
+//
+//         ".Trim());
+//
+//         StyleSheet styleSheet = NewStyleSheetCompiler().Compile("test", nodes);
+//
+//         var containers = styleSheet.styleGroupContainers;
+//         Assert.AreEqual(1, containers.Length);
+//
+//         Assert.AreEqual(GridAxisAlignment.Shrink, containers[0].groups[0].normal.style.GridLayoutColAlignment);
+//         Assert.AreEqual(GridAxisAlignment.Fit, containers[0].groups[0].normal.style.GridLayoutRowAlignment);
+//     }
 
     [Test]
     public void CompileGridLayoutDensity() {
@@ -828,7 +830,7 @@ style trans4 { TransformPositionY = 15h; }
         Assert.AreEqual(4, styleGroup.Length);
 
         Assert.AreEqual(new OffsetMeasurement(20, OffsetMeasurementUnit.ScreenWidth), styleGroup[0].groups[0].normal.style.TransformPositionX);
-        Assert.AreEqual(new OffsetMeasurement(10, OffsetMeasurementUnit.ContentAreaHeight), styleGroup[0].groups[0].normal.style.TransformPositionY);
+        Assert.AreEqual(new OffsetMeasurement(10, OffsetMeasurementUnit.ContentHeight), styleGroup[0].groups[0].normal.style.TransformPositionY);
 
         Assert.AreEqual(new OffsetMeasurement(20, OffsetMeasurementUnit.ScreenWidth), styleGroup[1].groups[0].normal.style.TransformPositionX);
         Assert.AreEqual(new OffsetMeasurement(20, OffsetMeasurementUnit.ScreenWidth), styleGroup[1].groups[0].normal.style.TransformPositionY);
@@ -937,8 +939,7 @@ style anchoring {
     LayoutType = @layout;
     LayoutBehavior = Ignored;
     ZIndex = 3;
-    RenderLayer = Screen;
-    RenderLayerOffset = 22;
+    Layer = 22;
 }
 
         ".Trim());
@@ -947,8 +948,7 @@ style anchoring {
         var styleGroup = styleSheet.styleGroupContainers;
         Assert.AreEqual(LayoutBehavior.Ignored, styleGroup[0].groups[0].normal.style.LayoutBehavior);
         Assert.AreEqual(3, styleGroup[0].groups[0].normal.style.ZIndex);
-        Assert.AreEqual(RenderLayer.Screen, styleGroup[0].groups[0].normal.style.RenderLayer);
-        Assert.AreEqual(22, styleGroup[0].groups[0].normal.style.RenderLayerOffset);
+        Assert.AreEqual(22, styleGroup[0].groups[0].normal.style.Layer);
     }
 
     [Test]

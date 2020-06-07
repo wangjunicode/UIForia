@@ -33,9 +33,10 @@ namespace UIForia.Editor {
             if (!EditorApplication.isPlaying) {
                 return;
             }
+
             Repaint();
         }
-        
+
         public void OnGUI() {
             if (!EditorApplication.isPlaying) {
                 EditorGUILayout.LabelField("Enter play mode to inspect a UIForia Application");
@@ -322,14 +323,14 @@ namespace UIForia.Editor {
             needsReload = treeView.RunGUI();
 
             if (s_SelectedApplication != null && s_SelectedElementId != default) {
-                
+
                 if (Event.current.Equals(Event.KeyboardEvent("d"))) {
                     UIElement element = s_SelectedApplication.GetElement(s_SelectedElementId);
-                    element.SetEnabled(!element.isEnabled);
-                }    
-                
+                    element.SetEnabled(!element.isSelfEnabled);
+                }
+
             }
-            
+
             EditorGUILayout.EndVertical();
         }
 
@@ -387,9 +388,18 @@ namespace UIForia.Editor {
                 float x = result.screenPosition.x;
                 float y = result.screenPosition.y;
 
+                float allocatedXOffset = 0;
+                float allocatedYOffset = 0;
+
+                if (selectedElement.parent != null) {
+                    ElementId layoutParent = LayoutUtil.FindLayoutParent(selectedElement.id, s_SelectedApplication.elementSystem.hierarchyTable, s_SelectedApplication.layoutSystem.layoutHierarchyTable);
+                    allocatedXOffset = s_SelectedApplication.elementSystem.instanceTable[layoutParent.index].layoutResult.screenPosition.x;
+                    allocatedYOffset = s_SelectedApplication.elementSystem.instanceTable[layoutParent.index].layoutResult.screenPosition.y;
+                }
+
                 // allocatedX and Y: still not correct but closer to reality, mostly
-                float allocatedX = result.ScreenRect.x;
-                float allocatedY = result.ScreenRect.y;
+                float allocatedX = allocatedXOffset + result.allocatedPosition.x;
+                float allocatedY = allocatedYOffset + result.allocatedPosition.y;
                 float allocatedW = result.allocatedSize.width;
                 float allocatedH = result.allocatedSize.height;
 
@@ -497,28 +507,39 @@ namespace UIForia.Editor {
                 DrawVerticalDotted(contentX, contentColor);
                 DrawVerticalDotted(contentX + contentWidth, contentColor);
 
-                if (selectedElement.layoutBox is GridLayoutBox layoutBox) {
-                    path.SetTransform(SVGXMatrix.TRS(selectedElement.layoutResult.screenPosition + selectedElement.layoutResult.ContentRect.min, 0, Vector2.one).ToMatrix4x4());
-                    path.BeginPath();
-                    path.SetStrokeWidth(1);
-                    path.SetStroke(Color.black);
-
-                    StructList<GridLayoutBox.GridTrack> rows = layoutBox.rowTrackList;
-                    StructList<GridLayoutBox.GridTrack> cols = layoutBox.colTrackList;
-
-                    Rect contentRect = selectedElement.layoutResult.ContentRect;
-                    for (int i = 0; i < rows.Count; i++) {
-                        path.MoveTo(contentX, contentY + rows[i].position);
-                        path.LineTo(contentX + contentRect.width, contentY + rows[i].position);
-                    }
-
-                    for (int i = 0; i < cols.Count; i++) {
-                        path.MoveTo(contentX + cols[i].position, contentY);
-                        path.LineTo(contentX + cols[i].position, contentY + contentRect.height);
-                    }
-
-                    path.Stroke();
-                }
+                // OrientedBounds orientedBounds = s_SelectedApplication.layoutSystem.clipInfoTable[selectedElement.id].orientedBounds;
+                // path.BeginPath();
+                // path.SetStroke(Color.yellow);
+                // path.SetStrokeWidth(2);
+                //
+                // path.MoveTo(orientedBounds.p0.x, -orientedBounds.p0.y);
+                // path.LineTo(orientedBounds.p1.x, -orientedBounds.p1.y);
+                // path.EndPath();
+                // path.Stroke();
+                //
+                // path.BeginPath();
+                // path.SetStroke(Color.yellow);
+                // path.SetStrokeWidth(2);
+                // path.MoveTo(orientedBounds.p2.x, -orientedBounds.p2.y);
+                // path.LineTo(orientedBounds.p1.x, -orientedBounds.p1.y);
+                // path.Stroke();
+                // path.EndPath();
+                //
+                // path.BeginPath();
+                // path.SetStroke(Color.yellow);
+                // path.SetStrokeWidth(2);
+                // path.MoveTo(orientedBounds.p2.x, -orientedBounds.p2.y);
+                // path.LineTo(orientedBounds.p3.x, -orientedBounds.p3.y);
+                // path.Stroke();
+                // path.EndPath();
+                //
+                // path.BeginPath();
+                // path.SetStroke(Color.yellow);
+                // path.SetStrokeWidth(2);
+                // path.MoveTo(orientedBounds.p3.x, -orientedBounds.p3.y);
+                // path.LineTo(orientedBounds.p0.x, -orientedBounds.p0.y);
+                // path.Stroke();
+                // path.EndPath();
 
                 ctx.DrawPath(path);
             }

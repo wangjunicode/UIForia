@@ -20,12 +20,17 @@ namespace UIForia.Util.Unsafe {
             }
         }
 
-        public DataListDebugView(in DataList<T>.Shared target) {
-            this.size = target.size;
-            this.capacity = target.capacity;
-            this.data = new T[size];
-            for (int i = 0; i < size; i++) {
-                data[i] = target[i];
+        public unsafe DataListDebugView(DataList<T>.Shared target) {
+            if (target.state == null) {
+                this = default;
+            }
+            else {
+                this.size = target.size;
+                this.capacity = target.capacity;
+                this.data = new T[size];
+                for (int i = 0; i < size; i++) {
+                    data[i] = target[i];
+                }
             }
         }
 
@@ -85,6 +90,10 @@ namespace UIForia.Util.Unsafe {
             }
 
             return retn;
+        }
+
+        public Allocator GetAllocator() {
+            return TypedUnsafe.ConvertCompressedAllocator(allocator);
         }
 
         public void Add<T>(in T item) where T : unmanaged {
@@ -166,6 +175,10 @@ namespace UIForia.Util.Unsafe {
             typedArray[index] = typedArray[--size];
         }
 
+        public T GetLast<T>() where T : unmanaged {
+            return ((T*) array)[size - 1];
+        }
+
     }
 
     [AssertSize(16)]
@@ -228,7 +241,6 @@ namespace UIForia.Util.Unsafe {
             state.size = count;
         }
 
-   //     [DebuggerTypeProxy(typeof(DisposedDataListDebugView<>))]
         public struct Shared : IDisposable {
 
             [NativeDisableUnsafePtrRestriction] public DataListState* state;
@@ -284,7 +296,9 @@ namespace UIForia.Util.Unsafe {
                         state->Get<T>(i).Dispose();
                     }
 
+                    Allocator alloc = state->GetAllocator();
                     state->Dispose();
+                    TypedUnsafe.Dispose(state, alloc);
                 }
 
                 this = default;
@@ -293,6 +307,11 @@ namespace UIForia.Util.Unsafe {
             public void SetSize(int count, NativeArrayOptions clearMemory = NativeArrayOptions.UninitializedMemory) {
                 state->EnsureCapacity<T>(count, clearMemory);
                 state->size = count;
+            }
+
+            public void CopyFrom(DataList<T> dataList) {
+                SetSize(dataList.size);
+                TypedUnsafe.MemCpy((T*) state->array, dataList.GetArrayPointer(), dataList.size);
             }
 
         }
@@ -376,7 +395,23 @@ namespace UIForia.Util.Unsafe {
             return (T*) state.array;
         }
 
-        // [DebuggerTypeProxy(typeof(DataListDebugView<>))]
+        public void CopyFrom(DataList<T> dataList) {
+            SetSize(dataList.size);
+            TypedUnsafe.MemCpy((T*) state.array, dataList.GetArrayPointer(), dataList.size);
+        }
+
+        public void CopyFrom(T* items, int count) {
+            SetSize(count);
+            TypedUnsafe.MemCpy((T*) state.array, items, count);
+        }
+
+        public static DataList<T> FromState(in DataListState state) {
+            return new DataList<T>() {
+                state = state
+            };
+        }
+
+        [DebuggerTypeProxy(typeof(DataListDebugView<>))]
         public struct Shared : IDisposable {
 
             [NativeDisableUnsafePtrRestriction] public DataListState* state;
@@ -433,7 +468,9 @@ namespace UIForia.Util.Unsafe {
 
             public void Dispose() {
                 if (state != null) {
+                    Allocator alloc = state->GetAllocator();
                     state->Dispose();
+                    TypedUnsafe.Dispose(state, alloc);
                 }
 
                 this = default;
@@ -463,22 +500,60 @@ namespace UIForia.Util.Unsafe {
                 array[i] = array[--state->size];
             }
 
-            public void FilterSwapRemove<TFilter>(TFilter filter) where TFilter: IListFilter<T> {
-                T* array = (T*)state->array;
+            public void FilterSwapRemove<TFilter>(TFilter filter) where TFilter : IListFilter<T> {
+                T* array = (T*) state->array;
                 int itemCount = state->size;
-                
+
                 for (int i = 0; i < itemCount; i++) {
                     if (!filter.Filter(array[i])) {
                         array[i--] = array[--itemCount];
-                    }        
+                    }
                 }
 
                 state->size = itemCount;
 
             }
 
+            public void CopyFrom(DataList<T> dataList) {
+                SetSize(dataList.size);
+                TypedUnsafe.MemCpy((T*) state->array, dataList.GetArrayPointer(), dataList.size);
+            }
+
+            public void CopyFrom(T* item, int count) {
+                SetSize(count);
+                TypedUnsafe.MemCpy((T*) state->array, item, count);
+            }
+
+            public void ShiftRight(int startIndex, int count) {
+                EnsureAdditionalCapacity(count);
+                byte* array = (byte*) state->array;
+                UnsafeUtility.MemMove(array + ((startIndex + count) * sizeof(T)), array + (startIndex * sizeof(T)), count * sizeof(T));
+            }
+
+            public void Reverse() {
+                int max = size / 2;
+                for (int i = 0; i < max; i++) {
+                    T tmp = this[i];
+                    this[i] = this[size - i - 1];
+                    this[size - i - 1] = tmp;
+                }
+            }
+
         }
 
+        public ref T GetLast() {
+            return ref state.Get<T>(state.size - 1);
+        }
+
+        public void Reverse() {
+            int max = size / 2;
+            for (int i = 0; i < max; i++) {
+                T tmp = this[i];
+                this[i] = this[size - i - 1];
+                this[size - i - 1] = tmp;
+            }
+        }
+        
     }
 
 }

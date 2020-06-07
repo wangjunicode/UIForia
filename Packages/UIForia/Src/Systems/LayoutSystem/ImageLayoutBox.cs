@@ -11,7 +11,7 @@ namespace UIForia.Systems {
                 return imageElement.texture.width;
             }
 
-            return imageElement.Width;
+            return 0; //imageElement.Width;
         }
 
         protected override float ComputeContentHeight() {
@@ -20,7 +20,7 @@ namespace UIForia.Systems {
                 return imageElement.texture.height;
             }
 
-            return imageElement.Height;
+            return 0; //imageElement.Height;
         }
 
         public override void OnChildrenChanged() { }

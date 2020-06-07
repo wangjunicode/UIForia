@@ -9,17 +9,17 @@ namespace UIForia.Systems {
 
     public class TextLayoutBox : LayoutBox {
 
-        private TextInfo textInfo;
+        private TextInfoOld textInfoOld;
         public Action onTextContentChanged;
         private bool textAlreadyDirty;
         private bool ignoreUpdate;
 
         protected override void OnInitialize() {
-            onTextContentChanged = onTextContentChanged ?? HandleTextContentChanged;
-            textInfo = ((UITextElement) element).textInfo;
-            textInfo.onTextLayoutRequired += onTextContentChanged;
-            textAlreadyDirty = true;
-            flags |= (LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutHorizontal);
+            // onTextContentChanged = onTextContentChanged ?? HandleTextContentChanged;
+            // textInfo = ((UITextElement) element).textInfo;
+            // textInfo.onTextLayoutRequired += onTextContentChanged;
+            // textAlreadyDirty = true;
+            // flags |= (LayoutBoxFlags.RequireLayoutHorizontal | LayoutBoxFlags.RequireLayoutHorizontal);
         }
 
         private void HandleTextContentChanged() {
@@ -60,13 +60,13 @@ namespace UIForia.Systems {
         }
 
         protected override void OnDestroy() {
-            textInfo.onTextLayoutRequired -= onTextContentChanged;
+            textInfoOld.onTextLayoutRequired -= onTextContentChanged;
         }
 
         protected override float ComputeContentWidth() {
             ignoreUpdate = true;
             // by definition when computing width in the width pass we only care about its natural width
-            float retn = textInfo.ComputeContentWidth(float.MaxValue);
+            float retn = textInfoOld.ComputeContentWidth(float.MaxValue);
             ignoreUpdate = false;
             return retn;
         }
@@ -75,7 +75,7 @@ namespace UIForia.Systems {
             ignoreUpdate = true;
             
             // todo -- might need to subtract padding / border from this value
-            float retn = textInfo.ComputeHeightForWidth(finalWidth);
+            float retn = textInfoOld.ComputeHeightForWidth(finalWidth);
             ignoreUpdate = false;
 
             return retn;
@@ -87,10 +87,10 @@ namespace UIForia.Systems {
 
         public override void RunLayoutVertical(int frameId) {
             textAlreadyDirty = false;
-            textInfo.ForceLayout(); // might not need this
+            textInfoOld.ForceLayout(); // might not need this
             float topOffset = paddingBorderVerticalStart;
             float leftOffset = paddingBorderHorizontalStart;
-            textInfo.Layout(new Vector2(leftOffset, topOffset), finalWidth - paddingBorderHorizontalStart - paddingBorderHorizontalEnd);
+            textInfoOld.Layout(new Vector2(leftOffset, topOffset), finalWidth - paddingBorderHorizontalStart - paddingBorderHorizontalEnd);
         }
 
     }

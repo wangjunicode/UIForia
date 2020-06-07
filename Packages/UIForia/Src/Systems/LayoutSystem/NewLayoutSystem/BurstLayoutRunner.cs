@@ -1,66 +1,65 @@
-﻿using System;
+﻿using UIForia.ListTypes;
 using UIForia.Rendering;
 using UIForia.Systems;
+using UIForia.Text;
 
 namespace UIForia.Layout {
 
-    public unsafe struct BurstLayoutRunner {
+    internal unsafe struct BurstLayoutRunner {
 
         public ViewParameters viewParameters;
-        public LayoutSizeInfo* horizontalSizeInfoTable;
-        public LayoutSizeInfo* verticalSizeInfoTable;
-        public LayoutPassResult* horizontalLayoutResults;
+        public LayoutInfo* horizontalLayoutInfoTable;
+        public LayoutInfo* verticalLayoutInfoTable;
+        public LayoutBoxInfo* layoutBoxInfoTable;
         public LayoutBoxUnion* layoutBoxTable;
+        public List_TextLineInfo * lineInfoBuffer;
+        public BurstTextInfo* textInfoTable;
+        public LayoutHierarchyInfo * layoutHierarchyTable;
 
-        // called every frame to init data because pointers might have changed if element system resized
-        public void Setup(
-            in ViewParameters viewParameters,
-            ElementTable<LayoutSizeInfo> horizontalSizeInfoTable,
-            ElementTable<LayoutSizeInfo> verticalSizeInfoTable,
-            ElementTable<LayoutBoxUnion> layoutBoxTable,
-            ElementTable<LayoutPassResult> horizontalLayoutResults
-        ) {
-            this.viewParameters = viewParameters;
-            this.horizontalSizeInfoTable = horizontalSizeInfoTable.array;
-            this.verticalSizeInfoTable = verticalSizeInfoTable.array;
-            this.layoutBoxTable = layoutBoxTable.array;
-            this.horizontalLayoutResults = horizontalLayoutResults.array;
+        public ref LayoutHierarchyInfo GetLayoutHierarchy(ElementId elementId) {
+            return ref layoutHierarchyTable[elementId.index];
+        }
+        
+        public ref BurstTextInfo GetTextInfo(int id) {
+            return ref textInfoTable[id];
+        }
+        
+        public ref LayoutInfo GetHorizontalLayoutInfo(ElementId elementId) {
+            return ref horizontalLayoutInfoTable[elementId.index];
         }
 
-        public ref LayoutMetaData GetLayoutMetaData(ElementId elementId) {
-            throw new NotImplementedException();
+        public ref LayoutInfo GetVerticalLayoutInfo(ElementId elementId) {
+            return ref verticalLayoutInfoTable[elementId.index];
         }
 
-        public ref LayoutSizeInfo GetHorizontalSizeInfo(ElementId elementId) {
-            return ref horizontalSizeInfoTable[elementId.index];
-        }
-
-        public ref LayoutPassResult GetHorizontalLayoutResult(ElementId elementId) {
-            return ref horizontalLayoutResults[elementId.index];
+        public ref LayoutBoxInfo GetLayoutBoxInfo(ElementId elementId) {
+            return ref layoutBoxInfoTable[elementId.index];
         }
 
         public void ApplyLayoutHorizontal(ElementId elementId, float localX, float alignedPosition, float size, float availableSize, in BlockSize blockSize, LayoutFit defaultFit, float parentSize) {
 
-            ref LayoutSizeInfo layoutSizeInfo = ref GetHorizontalSizeInfo(elementId);
-            ref LayoutPassResult layoutPassResult = ref GetHorizontalLayoutResult(elementId);
+            ref LayoutInfo layoutInfo = ref GetHorizontalLayoutInfo(elementId);
+            ref LayoutBoxInfo layoutBoxInfo = ref GetLayoutBoxInfo(elementId);
 
-            LayoutFit fit = layoutSizeInfo.fit;
+            LayoutFit fit = layoutInfo.fit;
 
             if (fit == LayoutFit.Default || fit == LayoutFit.Unset) {
                 fit = defaultFit;
             }
 
-            float newWidth = size;
+            layoutInfo.parentBlockSize = blockSize;
+
+            float newSize = size;
             switch (fit) {
                 case LayoutFit.Unset:
                 case LayoutFit.None:
                 case LayoutFit.Default:
-                    newWidth = size;
+                    newSize = size;
                     break;
 
                 case LayoutFit.Grow:
                     if (availableSize > size) {
-                        newWidth = availableSize;
+                        newSize = availableSize;
                         alignedPosition = localX;
                     }
 
@@ -68,69 +67,133 @@ namespace UIForia.Layout {
 
                 case LayoutFit.Shrink:
                     if (availableSize < size) {
-                        newWidth = availableSize;
+                        newSize = availableSize;
                         alignedPosition = localX;
                     }
 
                     break;
 
                 case LayoutFit.Fill:
-                    newWidth = availableSize;
+                    newSize = availableSize;
                     alignedPosition = localX;
                     break;
 
                 case LayoutFit.FillParent: {
-                    newWidth = parentSize;
+                    newSize = parentSize;
                     alignedPosition = 0; //localX;
                     break;
                 }
 
             }
 
-            if (newWidth != layoutPassResult.actualSize) {
-                // require layout
-                // other flags? invalidate something?
-            }
+            layoutInfo.finalSize = newSize;
 
-            layoutSizeInfo.finalSize = newWidth;
-
-            layoutPassResult.actualSize = newWidth;
-            layoutPassResult.alignedPosition = alignedPosition;
-            layoutPassResult.allocatedPosition = alignedPosition;
-            layoutPassResult.allocatedSize = availableSize;
+            layoutBoxInfo.actualSize.x = newSize;
+            layoutBoxInfo.alignedPosition.x = alignedPosition;
+            layoutBoxInfo.allocatedPosition.x = localX;
+            layoutBoxInfo.allocatedSize.x = availableSize;
 
         }
 
-        public void GetWidths<T>(in T parent, in BlockSize blockSize, ElementId childId, ref LayoutSize size) where T : ILayoutHandler {
+        public void ApplyLayoutVertical(ElementId elementId, float localY, float alignedPosition, float size, float availableSize, in BlockSize blockSize, LayoutFit defaultFit, float parentSize) {
+            ref LayoutInfo layoutInfo = ref GetVerticalLayoutInfo(elementId);
+            ref LayoutBoxInfo layoutBoxInfo = ref GetLayoutBoxInfo(elementId);
+
+            LayoutFit fit = layoutInfo.fit;
+
+            if (fit == LayoutFit.Default || fit == LayoutFit.Unset) {
+                fit = defaultFit;
+            }
+
+            layoutInfo.parentBlockSize = blockSize;
+
+            float newSize = size;
+            switch (fit) {
+                case LayoutFit.Unset:
+                case LayoutFit.None:
+                case LayoutFit.Default:
+                    newSize = size;
+                    break;
+
+                case LayoutFit.Grow:
+                    if (availableSize > size) {
+                        newSize = availableSize;
+                        alignedPosition = localY;
+                    }
+
+                    break;
+
+                case LayoutFit.Shrink:
+                    if (availableSize < size) {
+                        newSize = availableSize;
+                        alignedPosition = localY;
+                    }
+
+                    break;
+
+                case LayoutFit.Fill:
+                    newSize = availableSize;
+                    alignedPosition = localY;
+                    break;
+
+                case LayoutFit.FillParent: {
+                    newSize = parentSize;
+                    alignedPosition = 0; //localY;
+                    break;
+                }
+
+            }
+
+            layoutInfo.finalSize = newSize;
+
+            layoutBoxInfo.actualSize.y = newSize;
+            layoutBoxInfo.alignedPosition.y = alignedPosition;
+            layoutBoxInfo.allocatedPosition.y = localY;
+            layoutBoxInfo.allocatedSize.y = availableSize;
+        }
+
+        public void GetWidths<T>(in T parent, in BlockSize blockSize, ElementId childId, out LayoutSize size) where T : ILayoutBox {
 
             // todo -- handle animated sizes
 
-            ref LayoutSizeInfo childSizeInfo = ref horizontalSizeInfoTable[childId.index];
-            size.preferred = ResolveWidth(parent, childId, blockSize, childSizeInfo.prefSize, ref childSizeInfo);
-            size.minimum = ResolveWidth(parent, childId, blockSize, childSizeInfo.minSize, ref childSizeInfo);
-            size.maximum = ResolveWidth(parent, childId, blockSize, childSizeInfo.maxSize, ref childSizeInfo);
-            size.marginStart = childSizeInfo.marginStart;
-            size.marginEnd = childSizeInfo.marginEnd;
+            ref LayoutInfo childInfo = ref horizontalLayoutInfoTable[childId.index];
+            size.preferred = ResolveWidth(parent, childId, blockSize, childInfo.prefSize, ref childInfo);
+            size.minimum = ResolveWidth(parent, childId, blockSize, childInfo.minSize, ref childInfo);
+            size.maximum = ResolveWidth(parent, childId, blockSize, childInfo.maxSize, ref childInfo);
+            size.marginStart = childInfo.marginStart;
+            size.marginEnd = childInfo.marginEnd;
         }
 
-        public float ResolveWidth<T>(in T parent, ElementId elementId, in BlockSize blockSize, in UIMeasurement measurement, ref LayoutSizeInfo sizeInfo) where T : ILayoutHandler {
+        public void GetHeights<T>(in T parent, in BlockSize blockSize, ElementId childId, out LayoutSize size) where T : ILayoutBox {
+
+            // todo -- handle animated sizes
+
+            ref LayoutInfo childInfo = ref verticalLayoutInfoTable[childId.index];
+            size.preferred = ResolveHeight(parent, childId, blockSize, childInfo.prefSize, ref childInfo);
+            size.minimum = ResolveHeight(parent, childId, blockSize, childInfo.minSize, ref childInfo);
+            size.maximum = ResolveHeight(parent, childId, blockSize, childInfo.maxSize, ref childInfo);
+            size.marginStart = childInfo.marginStart;
+            size.marginEnd = childInfo.marginEnd;
+        }
+
+        public float ResolveWidth<T>(in T parent, ElementId elementId, in BlockSize blockSize, in UIMeasurement measurement, ref LayoutInfo info) where T : ILayoutBox {
             float value = measurement.value;
 
             switch (measurement.unit) {
 
                 case UIMeasurementUnit.Auto: {
-                    return parent.ResolveAutoWidth(elementId, measurement.value);
+                    return parent.ResolveAutoWidth(ref this, elementId, measurement.value, blockSize);
                 }
 
                 case UIMeasurementUnit.Content: {
-                    return GetContentWidth(elementId, blockSize, measurement.value, ref sizeInfo);
+                    return GetContentWidth(elementId, blockSize, measurement.value, ref info);
                 }
 
                 case UIMeasurementUnit.Pixel:
                     return value;
 
                 case UIMeasurementUnit.Em: {
-                    float scaled = sizeInfo.emSize * value;
+                    float scaled = info.emSize * value;
                     return scaled > 0 ? scaled : 0;
                 }
 
@@ -156,24 +219,93 @@ namespace UIForia.Layout {
             return 0;
         }
 
-        private float GetContentWidth(ElementId layoutBoxId, BlockSize blockSize, float measurementValue, ref LayoutSizeInfo sizeInfo) {
+        public float ResolveHeight<T>(in T parent, ElementId elementId, in BlockSize blockSize, in UIMeasurement measurement, ref LayoutInfo info) where T : ILayoutBox {
+            float value = measurement.value;
 
-            if (sizeInfo.contentCache.cachedSize >= 0 && blockSize == sizeInfo.contentCache.blockSize) {
-                float val = sizeInfo.contentCache.cachedSize * measurementValue;
-                return val > 0 ? val : 0;
+            switch (measurement.unit) {
+
+                case UIMeasurementUnit.Auto: {
+                    return parent.ResolveAutoHeight(ref this, elementId, measurement.value, blockSize);
+                }
+
+                case UIMeasurementUnit.Content: {
+                    return GetContentHeight(elementId, blockSize, measurement.value, ref info);
+                }
+
+                case UIMeasurementUnit.Pixel:
+                    return value;
+
+                case UIMeasurementUnit.Em: {
+                    float scaled = info.emSize * value;
+                    return scaled > 0 ? scaled : 0;
+                }
+
+                case UIMeasurementUnit.ViewportWidth:
+                    return viewParameters.viewWidth * value;
+
+                case UIMeasurementUnit.ViewportHeight:
+                    return viewParameters.viewHeight * value;
+
+                case UIMeasurementUnit.BlockSize: {
+                    // ignored elements can use the output size of their parent since it has been resolved already
+                    float scaled = blockSize.outerSize * measurement.value;
+                    return scaled < 0 ? 0 : scaled;
+                }
+
+                case UIMeasurementUnit.Percentage:
+                case UIMeasurementUnit.ParentContentArea: {
+                    float scaled = blockSize.insetSize * measurement.value;
+                    return scaled < 0 ? 0 : scaled;
+                }
             }
+
+            return 0;
+        }
+
+        private float GetContentWidth(ElementId layoutBoxId, BlockSize blockSize, float measurementValue, ref LayoutInfo info) {
+
+            // todo -- need 2 or 3 levels of content cache because of fits / constraints
+            // if (info.contentCache.cachedSize >= 0 && blockSize == info.contentCache.blockSize) {
+            //     float val = info.contentCache.cachedSize * measurementValue;
+            //     return val > 0 ? val : 0;
+            // }
 
             float contentWidth = layoutBoxTable[layoutBoxId.index].ComputeContentWidth(ref this, blockSize);
 
-            contentWidth += sizeInfo.paddingBorderStart + sizeInfo.paddingBorderEnd;
-            sizeInfo.contentCache.cachedSize = contentWidth;
-            sizeInfo.contentCache.blockSize = blockSize;
+            contentWidth += info.paddingBorderStart + info.paddingBorderEnd;
+            info.contentCache.cachedSize = contentWidth;
+            info.contentCache.blockSize = blockSize;
 
             contentWidth *= measurementValue;
 
             if (contentWidth < 0) contentWidth = 0;
 
             return contentWidth;
+        }
+
+        private float GetContentHeight(ElementId layoutBoxId, BlockSize blockSize, float measurementValue, ref LayoutInfo info) {
+
+            // todo -- need 2 or 3 levels of content cache because of fits / constraints
+            // if (info.contentCache.cachedSize >= 0 && blockSize == info.contentCache.blockSize) {
+            //     float val = info.contentCache.cachedSize * measurementValue;
+            //     return val > 0 ? val : 0;
+            // }
+
+            float contentHeight = layoutBoxTable[layoutBoxId.index].ComputeContentHeight(ref this, blockSize);
+
+            contentHeight += info.paddingBorderStart + info.paddingBorderEnd;
+            info.contentCache.cachedSize = contentHeight;
+            info.contentCache.blockSize = blockSize;
+
+            contentHeight *= measurementValue;
+
+            if (contentHeight < 0) contentHeight = 0;
+
+            return contentHeight;
+        }
+
+        public float GetEmSize(ElementId elementId) {
+            return 0;
         }
 
     }

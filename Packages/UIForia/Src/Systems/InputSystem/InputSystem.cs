@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems.Input;
@@ -168,7 +170,7 @@ namespace UIForia.Systems {
         }
 
         public void ReleaseFocus(IFocusable target) {
-            if (m_FocusedElement.isDisabled || m_FocusedElement.isDestroyed) {          
+            if (m_FocusedElement.isDisabled || m_FocusedElement.isDestroyed) {
                 m_FocusedElement = null;
                 focusableIndex = -1;
                 onFocusChanged?.Invoke(target);
@@ -200,16 +202,16 @@ namespace UIForia.Systems {
                 tmp.Add(ptr);
                 ptr = ptr.parent;
             }
-            
+
             for (int i = tmp.size - 1; i >= 0; i--) {
                 LinqBindingNode bindingNode = tmp[i].bindingNode;
                 bindingNode?.updateBindings?.Invoke(bindingNode.root, bindingNode.element);
                 // UnityEngine.Debug.Log($"{new string(' ', bindingNode.element.hierarchyDepth * 4)}pre-binding" + bindingNode.element.GetDisplayName());
             }
-            
+
             tmp.Release();
         }
-        
+
         private void RunWriteBindings(UIElement element) {
             UIElement start = element;
 
@@ -220,16 +222,16 @@ namespace UIForia.Systems {
                 tmp.Add(ptr);
                 ptr = ptr.parent;
             }
-            
+
             for (int i = 0; i < tmp.size; i++) {
                 LinqBindingNode bindingNode = tmp[i].bindingNode;
                 bindingNode?.lateBindings?.Invoke(bindingNode.root, bindingNode.element);
                 // UnityEngine.Debug.Log($"{new string(' ', bindingNode.element.hierarchyDepth * 4)}pre-binding" + bindingNode.element.GetDisplayName());
             }
-            
+
             tmp.Release();
         }
-        
+
         public virtual void OnUpdate() {
 
             m_KeyboardState = keyboardInputManager.UpdateKeyboardInputState();
@@ -300,6 +302,9 @@ namespace UIForia.Systems {
             }
         }
 
+        private LightList<UIElement> ancestorBuffer = new LightList<UIElement>();
+        private LightList<UIElement> queryResults = new LightList<UIElement>();
+
         private void ProcessMouseInput() {
             // if element does not have state requested -> hover flag, drag listener, pointer events = none, don't add
             // buckets feel like a lot of overhead
@@ -312,24 +317,18 @@ namespace UIForia.Systems {
             // if dragging only attempt intersections with elements who have drag responders
             // if not dragging only attempt intersections with elements who have hover state (if mouse is present) or drag create or mouse / touch interactions
 
-            LightList<UIElement> queryResults = (LightList<UIElement>) layoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
+            queryResults.QuickClear();
+
+            layoutSystem.QueryPoint(mouseState.mousePosition, queryResults);
 
             // todo -- bug!
             var traversalTable = layoutSystem.elementSystem.traversalTable;
-            queryResults.Sort((a, b) => {
-                int viewDepthComparison = b.View.Depth - a.View.Depth;
-                if (viewDepthComparison != 0) return viewDepthComparison;
-                // if (b.layoutBox.zIndex != a.layoutBox.zIndex) {
-                //     return b.layoutBox.zIndex - a.layoutBox.zIndex;
-                // }
-                //
-                return traversalTable[a.id].ftbIndex - traversalTable[b.id].ftbIndex;
-                // return b.layoutBox.traversalIndex - a.layoutBox.traversalIndex;
 
-            });
+            queryResults.Sort((a, b) => traversalTable[b.id].ftbIndex - traversalTable[a.id].ftbIndex);
 
             if (!IsDragging) {
-                LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
+
+                ancestorBuffer.QuickClear();
 
                 if (queryResults.size > 0) {
                     /*
@@ -337,17 +336,18 @@ namespace UIForia.Systems {
                      * This makes no sense for drag events but a lot for every other.
                      */
                     UIElement firstElement = queryResults[0];
-                    ancestorElements.Add(firstElement);
+                    ancestorBuffer.Add(firstElement);
 
                     for (int index = 1; index < queryResults.size; index++) {
                         UIElement element = queryResults[index];
-                        if (IsParentOf(element, firstElement)) {
-                            ancestorElements.Add(element);
+                        if (traversalTable[element.id].IsAncestorOf(traversalTable[firstElement.id])) {
+                            ancestorBuffer.Add(element);
                         }
                     }
 
-                    LightList<UIElement>.Release(ref queryResults);
-                    queryResults = ancestorElements;
+                    queryResults.size = 0;
+                    queryResults.AddRange(ancestorBuffer);
+
                 }
             }
 
@@ -435,7 +435,6 @@ namespace UIForia.Systems {
                 }
             }
 
-            LightList<UIElement>.Release(ref queryResults);
         }
 
         private static bool IsParentOf(UIElement element, UIElement child) {
@@ -534,7 +533,7 @@ namespace UIForia.Systems {
                 for (int creatorIndex = 0; creatorIndex < element.inputHandlers.dragCreators.size; creatorIndex++) {
                     InputHandlerGroup.DragCreatorData data = element.inputHandlers.dragCreators.array[creatorIndex];
 
-                    currentDragEvent = data.handler.Invoke( new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, m_KeyboardState.modifiersThisFrame, false, element));
+                    currentDragEvent = data.handler.Invoke(new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, m_KeyboardState.modifiersThisFrame, false, element));
 
                     if (currentDragEvent != null) {
                         currentDragEvent.StartTime = Time.realtimeSinceStartup;
@@ -592,14 +591,14 @@ namespace UIForia.Systems {
 
             currentDragEvent.CurrentEventType = eventType;
             currentDragEvent.source = m_EventPropagator;
-            
+
             m_EventPropagator.Reset(mouseState);
 
             LightList<Action<DragEvent>> captureList = LightList<Action<DragEvent>>.Get();
 
             for (int i = 0; i < elements.Count; i++) {
                 UIElement element = elements[i];
-                
+
                 if (element.isDestroyed || element.isDisabled) {
                     continue;
                 }
@@ -692,9 +691,9 @@ namespace UIForia.Systems {
             m_ElementsThisFrame.Remove(element);
 
             m_MouseDownElements.Remove(element);
-                
+
             m_KeyboardEventTree.RemoveHierarchy(element);
-            
+
         }
 
         internal void BlurOnDisableOrDestroy() {
@@ -761,6 +760,7 @@ namespace UIForia.Systems {
                             ran = true;
                             RunBindings(element);
                         }
+
                         Action<KeyboardInputEvent> keyHandler = handler.handlerFn as Action<KeyboardInputEvent>;
                         Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
                         keyHandler.Invoke(evt);
@@ -769,7 +769,7 @@ namespace UIForia.Systems {
                     if (ran) {
                         RunWriteBindings(element);
                     }
-                    
+
                     return !evt.stopPropagation;
                 });
             }
@@ -908,7 +908,6 @@ namespace UIForia.Systems {
             else if (mouseState.isLeftMouseDown || mouseState.isRightMouseDown || mouseState.isMiddleMouseDown) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseHeldDown);
             }
-
 
             RunMouseEvents(m_ElementsThisFrame,
                 mouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);

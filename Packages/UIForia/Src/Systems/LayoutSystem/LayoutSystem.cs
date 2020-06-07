@@ -2,117 +2,101 @@ using System;
 using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Layout;
+using UIForia.Layout.LayoutTypes;
+using UIForia.ListTypes;
 using UIForia.Rendering;
+using UIForia.Text;
+using UIForia.UIInput;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Assertions;
-
-// ReSharper disable RedundantCaseLabel
 
 namespace UIForia.Systems {
 
-    public struct LayoutBoxId {
-
-        public int instanceId;
-        public LayoutBoxType layoutBoxType;
-
-    }
-
-    public class LayoutSystem : ILayoutSystem, IDisposable {
+    public unsafe class LayoutSystem : IDisposable {
 
         internal Application application;
-        private LightList<LayoutRunner> runners;
-        public ElementSystem elementSystem;
 
-        private SizedArray<TextLayoutBox> textLayoutPool;
-        private SizedArray<FlexLayoutBox> flexLayoutPool;
-        private SizedArray<GridLayoutBox> gridLayoutPool;
-        private SizedArray<ImageLayoutBox> imageLayoutPool;
-        private SizedArray<RootLayoutBox> rootLayoutPool;
-        private SizedArray<StackLayoutBox> stackLayoutPool;
-        private SizedArray<ScrollViewLayoutBox> scrollLayoutPool;
-        private SizedArray<TranscludedLayoutBox> transcludedLayoutPool;
+        internal TextSystem textSystem;
+        internal ElementSystem elementSystem;
 
+        // maybe this stuff should be per layout box and not per element. saves a lot of memory potentially since we only care about enabled stuff
 
-        public LayoutSystem(Application application, ElementSystem elementSystem) {
-            this.application = application;
-            this.elementSystem = elementSystem;
-            this.runners = new LightList<LayoutRunner>();
+        internal ElementTable<LayoutBoxUnion> layoutBoxTable;
+        internal ElementTable<LayoutInfo> horizontalLayoutInfoTable;
+        internal ElementTable<LayoutInfo> verticalLayoutInfoTable;
+        internal ElementTable<PaddingBorderMargin> paddingBorderMarginTable;
+        internal ElementTable<LayoutBoxInfo> layoutResultTable;
+        internal ElementTable<LayoutHierarchyInfo> layoutHierarchyTable;
+        internal ElementTable<TransformInfo> transformInfoTable;
+        internal ElementTable<AlignmentInfo> alignmentInfoHorizontal;
+        internal ElementTable<AlignmentInfo> alignmentInfoVertical;
+        internal ElementTable<float4x4> localMatrices;
+        internal ElementTable<float4x4> worldMatrices;
+        internal ElementTable<ClipInfo> clipInfoTable;
 
-            this.textLayoutPool = new SizedArray<TextLayoutBox>(32);
-            this.flexLayoutPool = new SizedArray<FlexLayoutBox>(32);
-            this.gridLayoutPool = new SizedArray<GridLayoutBox>(16);
-            this.imageLayoutPool = new SizedArray<ImageLayoutBox>(16);
-            this.rootLayoutPool = new SizedArray<RootLayoutBox>(4);
-            this.stackLayoutPool = new SizedArray<StackLayoutBox>(16);
-            this.scrollLayoutPool = new SizedArray<ScrollViewLayoutBox>(16);
-            this.transcludedLayoutPool = new SizedArray<TranscludedLayoutBox>(16);
+        public DataList<Clipper>.Shared clippers;
+        public DataList<float2>.Shared clipperIntersections;
+        internal DataList<QueryResult>.Shared queryBuffer;
 
-            application.onViewsSorted += uiViews => { runners.Sort((a, b) => Array.IndexOf(uiViews, b.rootElement.View) - Array.IndexOf(uiViews, a.rootElement.View)); };
+        private LightList<LayoutContext> layoutContexts;
+
+        private int elementCapacity;
+        private byte* layoutBackingStore;
+        private byte* positionBackingStore;
+
+        public LayoutDataTables* tablePointers;
+
+        internal DataList<ElementId>.Shared childrenChangedList;
+
+        internal DataList<GridTrackSize> gridColTemplateBuffer;
+        internal DataList<GridTrackSize> gridRowTemplateBuffer;
+        internal DataList<GridTrackSize> gridColAutoSizeBuffer;
+        internal DataList<GridTrackSize> gridRowAutoSizeBuffer;
+        internal List_GridTrack.Shared gridColTrackBuffer;
+        internal List_GridTrack.Shared gridRowTrackBuffer;
+        internal DataList<ElementId> gridPlaceList;
+
+        public struct LayoutDataTables {
+
+            public float4x4* localMatrices;
+            public float4x4* worldMatrices;
+            public LayoutBoxInfo* layoutBoxInfo;
+
         }
 
-        // set box to null when disabling? should be cheap to grab a new one from pool at that point when re-enabling
-        // just need to re-initialize styles which I think wont be that expensive
+        public LayoutSystem(Application application, ElementSystem elementSystem, TextSystem textSystem) {
+            this.application = application;
+            this.textSystem = textSystem;
+            this.elementSystem = elementSystem;
+            this.layoutContexts = new LightList<LayoutContext>();
+            this.tablePointers = TypedUnsafe.Malloc<LayoutDataTables>(Allocator.Persistent);
+            this.gridPlaceList = new DataList<ElementId>(16, Allocator.Persistent);
+            this.clippers = new DataList<Clipper>.Shared(16, Allocator.Persistent);
+            this.clipperIntersections = new DataList<float2>.Shared(128, Allocator.Persistent);
+            this.queryBuffer = new DataList<QueryResult>.Shared(16, Allocator.Persistent);
+
+            *tablePointers = default;
+            ResizeBackingStore(application.InitialElementCapacity);
+            worldMatrices.array[0] = float4x4.identity;
+
+            this.childrenChangedList = new DataList<ElementId>.Shared(32, Allocator.Persistent);
+
+//            application.onViewsSorted += uiViews => { runners.Sort((a, b) => Array.IndexOf(uiViews, b.rootElement.View) - Array.IndexOf(uiViews, a.rootElement.View)); };
+        }
+
         // also triggered for destroy
         public void HandleElementDisabled(DataList<ElementId>.Shared disabledElements) {
 
             for (int i = 0; i < disabledElements.size; i++) {
 
-                UIElement element = elementSystem.instanceTable[disabledElements[i].index];
-
-                if (element.layoutBox != null) {
-                    // add to pool
-                    LayoutBox layoutBox = element.layoutBox;
-                    element.layoutBox = null;
-                    layoutBox.Destroy();
-
-                    switch (layoutBox) {
-
-                        case FlexLayoutBox flexLayoutBox:
-                            flexLayoutPool.Add(flexLayoutBox);
-                            break;
-
-                        case GridLayoutBox gridLayoutBox:
-                            gridLayoutPool.Add(gridLayoutBox);
-                            break;
-
-                        case ImageLayoutBox imageLayoutBox:
-                            imageLayoutPool.Add(imageLayoutBox);
-                            break;
-
-                        case RootLayoutBox rootLayoutBox:
-                            rootLayoutPool.Add(rootLayoutBox);
-                            break;
-
-                        case ScrollViewLayoutBox scrollViewLayoutBox:
-                            scrollLayoutPool.Add(scrollViewLayoutBox);
-                            break;
-
-                        case StackLayoutBox stackLayoutBox:
-                            stackLayoutPool.Add(stackLayoutBox);
-                            break;
-
-                        case TextLayoutBox textLayoutBox:
-                            textLayoutPool.Add(textLayoutBox);
-                            break;
-
-                        case TranscludedLayoutBox transcludedLayoutBox:
-                            // todo -- I think i can kill this
-                            transcludedLayoutPool.Add(transcludedLayoutBox);
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-
-                    }
-
-                }
-
-                elementSystem.layoutBoxes[element.id.index] = null;
+                // maybe only actually dispose if destroyed, keep disabled ones around?
+                // styles are unlikely to change much
+                // add to free list if using one and not 1-1 with elements
+                layoutBoxTable[disabledElements[i]].Dispose();
 
             }
 
@@ -137,72 +121,62 @@ namespace UIForia.Systems {
             // as a pre-process step before running layout. I don't need to search for them here.
             for (int i = 0; i < roots.size; i++) {
                 ElementId elementId = roots[i];
-                ref LayoutHierarchyInfo layoutInfo = ref elementSystem.layoutHierarchyTable[elementId];
-                ref LayoutMetaData metaData = ref elementSystem.layoutMetaDataTable[elementId];
+                ref LayoutHierarchyInfo layoutInfo = ref layoutHierarchyTable[elementId];
 
-                if (metaData.layoutBehavior == LayoutBehavior.Ignored) {
-                    // no-op, no work to do if we were already ignored
-                }
-                else if (metaData.layoutBehavior == LayoutBehavior.TranscludeChildren) {
-                    // todo -- Mark parent for layout here
+                if (layoutInfo.behavior == LayoutBehavior.TranscludeChildren) {
                     // if was transcluded, need to remove all children from parent and mark that parent for layout. needs to handle multiple transclusion levels
-                    throw new NotImplementedException();
+                    LayoutUtil.Untransclude(elementId, elementSystem.traversalTable, elementSystem.hierarchyTable, layoutHierarchyTable);
+                    LayoutUtil.UnlinkFromParent(elementId, layoutHierarchyTable);
                 }
-                else {
+                else if (layoutInfo.behavior == LayoutBehavior.Normal) {
+                    LayoutUtil.UnlinkFromParent(elementId, layoutHierarchyTable);
+                }
 
-                    // maybe need to worry about the sibling also being disabled
-                    if (layoutInfo.prevSiblingId != default && elementSystem.IsEnabled(layoutInfo.prevSiblingId)) {
-                        ref LayoutHierarchyInfo prevSiblingInfo = ref elementSystem.layoutHierarchyTable[layoutInfo.prevSiblingId];
-                        prevSiblingInfo.nextSiblingId = layoutInfo.nextSiblingId;
-                    }
-
-                    if (layoutInfo.nextSiblingId != default && elementSystem.IsEnabled(layoutInfo.nextSiblingId)) {
-                        ref LayoutHierarchyInfo nextSiblingInfo = ref elementSystem.layoutHierarchyTable[layoutInfo.nextSiblingId];
-                        nextSiblingInfo.prevSiblingId = layoutInfo.prevSiblingId;
-                    }
-
-                    if (layoutInfo.parentId != default) {
-                        ref LayoutHierarchyInfo parentInfo = ref elementSystem.layoutHierarchyTable[layoutInfo.parentId];
-                        parentInfo.childCount--;
-                        if (parentInfo.firstChildId == elementId) {
-                            parentInfo.firstChildId = layoutInfo.nextSiblingId;
-                        }
-
-                        if (parentInfo.lastChildId == elementId) {
-                            parentInfo.lastChildId = layoutInfo.prevSiblingId;
-                        }
-                    }
-
-                    // todo -- Mark parent for layout here
-
+                if (layoutInfo.parentId != default) {
+                    childrenChangedList.Add(layoutInfo.parentId);
                 }
 
                 layoutInfo = default;
+
             }
 
         }
 
-
-      
-
         // also triggered for create
         public void HandleElementEnabled(DataList<ElementId>.Shared enabledElements) {
+
+            int maxIndex = enabledElements[0].index;
+
+            for (int i = 0; i < enabledElements.size; i++) {
+                if (enabledElements[i].index > maxIndex) {
+                    maxIndex = enabledElements[i].index;
+                }
+            }
+
+            if (maxIndex >= elementCapacity) {
+                ResizeBackingStore(maxIndex);
+            }
 
             for (int i = 0; i < enabledElements.size; i++) {
 
                 UIElement element = elementSystem.instanceTable[enabledElements[i].index];
-                elementSystem.layoutHierarchyTable[element.id] = default;
+                layoutHierarchyTable[element.id] = default;
 
                 // this point styles are all final for the frame because we ignore changesets for elements enabled this frame
-                ref LayoutBoxUnion layoutBoxUnion = ref elementSystem.layoutBoxTable[element.id];
-                layoutBoxUnion.Initialize(element);
+                ref LayoutHierarchyInfo hierarchyInfo = ref layoutHierarchyTable[element.id];
+                ref LayoutBoxUnion layoutBox = ref layoutBoxTable[element.id];
+                ref LayoutInfo horizontalLayoutInfo = ref horizontalLayoutInfoTable[element.id];
+                ref LayoutInfo verticalLayoutInfo = ref verticalLayoutInfoTable[element.id];
+                ref ClipInfo clipInfo = ref clipInfoTable[element.id];
 
-                if (layoutBoxUnion.layoutType == LayoutBoxType.Text) {
-                    // todo -- add to list for text change detection, we'll poll every frame to check for updates to content or styles that matter
-                }
+                layoutBox.Initialize(this, element);
 
                 UIStyleSet style = element.style;
-                TransformInfo transformInfo = new TransformInfo() {
+
+                hierarchyInfo.behavior = style.LayoutBehavior;
+                // todo -- maybe skip for transclusion since we never do the layout
+
+                transformInfoTable[element.id] = new TransformInfo() {
                     positionX = style.TransformPositionX,
                     positionY = style.TransformPositionY,
                     scaleX = style.TransformScaleX,
@@ -213,7 +187,7 @@ namespace UIForia.Systems {
                 };
 
                 // only create if needed, allocate an id. how do I recycle it? when pooling the box probably
-                AlignmentInfo alignmentInfoHorizontal = new AlignmentInfo() {
+                alignmentInfoHorizontal[element.id] = new AlignmentInfo() {
                     origin = style.AlignmentOriginX,
                     offset = style.AlignmentOffsetX,
                     direction = style.AlignmentDirectionX,
@@ -222,7 +196,7 @@ namespace UIForia.Systems {
                 };
 
                 // only create if needed, allocate an id
-                AlignmentInfo alignmentInfoVertical = new AlignmentInfo() {
+                alignmentInfoVertical[element.id] = new AlignmentInfo() {
                     origin = style.AlignmentOriginY,
                     offset = style.AlignmentOffsetY,
                     direction = style.AlignmentDirectionY,
@@ -230,360 +204,784 @@ namespace UIForia.Systems {
                     boundary = style.AlignmentBoundaryY
                 };
 
-                LayoutBehavior behavior = style.LayoutBehavior;
-                ref LayoutMetaData meta = ref elementSystem.layoutMetaDataTable[element.id];
-                meta.layoutBehavior = behavior;
-                meta.horizontalFit = style.FitItemsHorizontal;
-                meta.verticalFit = style.FitItemsVertical;
-                meta.requiresRebuild = true;
-                meta.isWidthContentBased = style.PreferredWidth.IsContentBased;
-                meta.isHeightContentBased = style.PreferredHeight.IsContentBased;
-                meta.widthBlockProvider = false;
-                meta.heightBlockProvider = false;
+                ref PaddingBorderMargin paddingBorderMargin = ref paddingBorderMarginTable[element.id];
 
-                // if (TransformNotIdentity) {
-                // transformList.Add(transformInfo);
-                // }
+                paddingBorderMargin.marginTop = style.MarginTop;
+                paddingBorderMargin.marginRight = style.MarginRight;
+                paddingBorderMargin.marginBottom = style.MarginBottom;
+                paddingBorderMargin.marginLeft = style.MarginLeft;
 
-                // if require horizontal align
-                // horizontal align.add()
-                // if require vertial align
-                // vertical align.add()
+                paddingBorderMargin.borderTop = style.BorderTop;
+                paddingBorderMargin.borderRight = style.BorderRight;
+                paddingBorderMargin.borderBottom = style.BorderBottom;
+                paddingBorderMargin.borderLeft = style.BorderLeft;
 
+                paddingBorderMargin.paddingTop = style.PaddingTop;
+                paddingBorderMargin.paddingRight = style.PaddingRight;
+                paddingBorderMargin.paddingBottom = style.PaddingBottom;
+                paddingBorderMargin.paddingLeft = style.PaddingLeft;
+
+                horizontalLayoutInfo.fit = style.LayoutFitHorizontal;
+                horizontalLayoutInfo.prefSize = style.PreferredWidth;
+                horizontalLayoutInfo.minSize = style.MinWidth;
+                horizontalLayoutInfo.maxSize = style.MaxWidth;
+                horizontalLayoutInfo.parentBlockSize = default;
+                horizontalLayoutInfo.isBlockProvider = !horizontalLayoutInfo.prefSize.IsContentBased;
+
+                verticalLayoutInfo.fit = style.LayoutFitVertical;
+                verticalLayoutInfo.prefSize = style.PreferredHeight;
+                verticalLayoutInfo.minSize = style.MinHeight;
+                verticalLayoutInfo.maxSize = style.MaxHeight;
+                verticalLayoutInfo.parentBlockSize = default;
+                verticalLayoutInfo.isBlockProvider = !verticalLayoutInfo.prefSize.IsContentBased;
+
+                clipInfo.overflow = style.OverflowX;
+                clipInfo.visibility = style.Visibility;
+                clipInfo.pointerEvents = style.PointerEvents;
+                clipInfo.clipBehavior = style.ClipBehavior;
+                clipInfo.clipBounds = style.ClipBounds;
+                clipInfo.isMouseQueryHandler = element is IPointerQueryHandler;
             }
 
-            DataList<ElementId>.Shared roots = new DataList<ElementId>.Shared(32, Allocator.TempJob);
+            DataList<ElementId>.Shared rootList = new DataList<ElementId>.Shared(32, Allocator.Temp);
+            DataList<ElementId>.Shared ignoredLayoutList = new DataList<ElementId>.Shared(32, Allocator.Temp);
 
             if (enabledElements.size > 1) {
                 new FindHierarchyRootElements() {
                     elements = enabledElements,
                     traversalTable = elementSystem.traversalTable,
                     metaTable = elementSystem.metaTable,
-                    roots = roots,
+                    roots = rootList,
                     mask = UIElementFlags.EnabledRoot
                 }.Run();
             }
             else {
-                roots.Add(enabledElements[0]);
+                rootList.Add(enabledElements[0]);
             }
 
-            // distribute these into corresponding layout runners after gathering into this list
-            DataList<ElementId>.Shared ignoredLayoutList = new DataList<ElementId>.Shared(32, Allocator.TempJob);
-
             new HierarchyBuildJob() {
-                roots = roots,
+                roots = rootList,
                 layoutIgnoredList = ignoredLayoutList,
                 hierarchyTable = elementSystem.hierarchyTable,
                 metaTable = elementSystem.metaTable,
-                layoutHierarchyTable = elementSystem.layoutHierarchyTable,
-                layoutMetaTable = elementSystem.layoutMetaDataTable
+                layoutHierarchyTable = layoutHierarchyTable,
             }.Run();
 
-            for (int i = 0; i < enabledElements.size; i++) {
-                // LayoutBox layoutBox = elementSystem.layoutBoxes[enabledElements[i].index];
-                // LayoutHierarchyInfo layoutInfo = elementSystem.layoutHierarchyTable[enabledElements[i]];
-                //
-                // // out of bounds lookups are fine here since 0 is always invalid and will just return null
-                // layoutBox.firstChild = elementSystem.layoutBoxes[layoutInfo.firstChildId.index];
-                // layoutBox.parent = elementSystem.layoutBoxes[layoutInfo.parentId.index];
-                // layoutBox.nextSibling = elementSystem.layoutBoxes[layoutInfo.nextSiblingId.index];
-                // layoutBox.layoutParentId = layoutInfo.parentId;
+            // todo -- maybe better to just return the transclusion list and handle it outside of the job, lots can go wrong with transclusion
 
-                elementSystem.layoutBoxTable[enabledElements[i]].OnChildrenChanged(enabledElements[i], this);
-                
+            // could technically be done in parallel.
+
+            // ignored elements are still in this list
+            for (int i = 0; i < enabledElements.size; i++) {
+
+                ElementId elementId = enabledElements[i];
+
+                ref LayoutHierarchyInfo layoutHierarchyInfo = ref layoutHierarchyTable[elementId];
+
+                // this feels out of place
+                layoutResultTable[elementId].layoutParentId = layoutHierarchyInfo.parentId;
+
+                if (layoutHierarchyInfo.behavior == LayoutBehavior.Normal) {
+                    layoutBoxTable[enabledElements[i]].OnChildrenChanged(this);
+                }
+
             }
 
-            for (int i = 0; i < roots.size; i++) {
-                // todo -- tell root parents children changed & mark for layout
-                LayoutHierarchyInfo layoutInfo = elementSystem.layoutHierarchyTable[roots[i]];
-                elementSystem.layoutBoxTable[layoutInfo.parentId].OnChildrenChanged(layoutInfo.parentId, this);
-                
+            for (int i = 0; i < rootList.size; i++) {
+                ElementId elementId = rootList[i];
+                ref LayoutHierarchyInfo layoutInfo = ref layoutHierarchyTable[elementId];
+                switch (layoutInfo.behavior) {
+
+                    case LayoutBehavior.Normal:
+                        ElementId parentId = LayoutUtil.FindLayoutParent(elementId, elementSystem.hierarchyTable, layoutHierarchyTable);
+                        LayoutUtil.Insert(parentId, elementId, elementSystem.traversalTable, layoutHierarchyTable);
+                        childrenChangedList.Add(layoutInfo.parentId);
+                        break;
+
+                    case LayoutBehavior.Ignored:
+                        UIElement element = elementSystem.instanceTable[elementId.index];
+                        GetLayoutContext(element.View).AddToIgnoredList(element.id);
+                        break;
+
+                    case LayoutBehavior.TranscludeChildren:
+                        childrenChangedList.Add(layoutInfo.parentId);
+                        LayoutUtil.TranscludeUnattached(elementId, layoutHierarchyTable, elementSystem.traversalTable);
+                        break;
+                }
+            }
+
+            for (int i = 0; i < ignoredLayoutList.size; i++) {
+                UIElement element = elementSystem.instanceTable[ignoredLayoutList[i].index];
+                GetLayoutContext(element.View).AddToIgnoredList(element.id);
             }
 
             ignoredLayoutList.Dispose();
-            roots.Dispose();
+            rootList.Dispose();
         }
 
-        /// <summary>
-        /// This job takes all the elements that were enabled or created this frame and finds
-        /// the highest (lowest depth) element for all hierarchies.
-        /// </summary>
-        [BurstCompile]
-        private unsafe struct FindHierarchyRootElements : IJob {
-
-            public DataList<ElementId>.Shared elements;
-            public ElementTable<ElementTraversalInfo> traversalTable;
-            public ElementTable<ElementMetaInfo> metaTable;
-            public DataList<ElementId>.Shared roots;
-            public UIElementFlags mask;
-
-            public void Execute() {
-
-                for (int i = 0; i < elements.size; i++) {
-
-                    if ((metaTable[elements[i]].flags & mask) != 0) {
-                        roots.Add(elements[i]);
-                    }
-
-                }
-
-                ElementId* buffer = stackalloc ElementId[roots.size];
-
-                int bufferSize = 0;
-
-                buffer[bufferSize++] = roots[0];
-
-                for (int i = 1; i < roots.size; i++) {
-
-                    ref ElementTraversalInfo element = ref traversalTable[roots[i]];
-
-                    bool add = true;
-                    for (int j = 0; j < bufferSize; j++) {
-                        ElementId target = buffer[j];
-                        // if what is in the buffer is a descendent of 'this', replace the thing in the buffer
-                        if (traversalTable[target].IsDescendentOf(element)) {
-                            element = ref traversalTable[target];
-                            buffer[j] = target;
-                            add = false;
-                        }
-                    }
-
-                    if (add) {
-                        buffer[bufferSize++] = roots[i];
-                    }
-                }
-
-            }
-
-        }
-
-        // only called for elements that were not enabled this frame
-        public void HandleStylePropertyUpdates(UIElement element, StyleProperty[] properties, int propertyCount) {
-            // bool checkAlignHorizontal = false;
-            // bool updateAlignVertical = false;
-            // bool updateTransform = false;
-            //
-            // ElementTable<ElementMetaInfo> metaTable = elementSystem.metaTable;
-            // ref ElementMetaInfo metaInfo = ref metaTable[element.id];
-            //
-            // for (int i = 0; i < propertyCount; i++) {
-            //     ref StyleProperty property = ref properties[i];
-            //     switch (property.propertyId) {
-            //         case StylePropertyId.ClipBehavior:
-            //
-            //             element.layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
-            //             //element.layoutBox.clipBehavior = property.AsClipBehavior;
-            //
-            //             break;
-            //
-            //         case StylePropertyId.ClipBounds:
-            //             //element.layoutBox.clipBounds = property.AsClipBounds;
-            //
-            //             break;
-            //
-            //         case StylePropertyId.OverflowX:
-            //         case StylePropertyId.OverflowY:
-            //             element.layoutBox.UpdateClipper();
-            //             break;
-            //
-            //         case StylePropertyId.LayoutType:
-            //             ChangeLayoutBox(element, property.AsLayoutType);
-            //             break;
-            //
-            //         case StylePropertyId.LayoutBehavior:
-            //             metaInfo.flags |= UIElementFlags.LayoutTypeOrBehaviorDirty;
-            //             break;
-            //
-            //         case StylePropertyId.TransformRotation: {
-            //             //element.layoutBox.transformRotation = property.AsFloat;
-            //
-            //             updateTransform = true;
-            //             break;
-            //         }
-            //
-            //         case StylePropertyId.TransformPositionX: {
-            //             //element.layoutBox.transformPositionX = property.AsOffsetMeasurement;
-            //
-            //             updateTransform = true;
-            //             break;
-            //         }
-            //
-            //         case StylePropertyId.TransformPositionY: {
-            //             //element.layoutBox.transformPositionY = property.AsOffsetMeasurement;
-            //
-            //             updateTransform = true;
-            //             break;
-            //         }
-            //
-            //         case StylePropertyId.TransformScaleX: {
-            //             //element.layoutBox.transformScaleX = property.AsFloat;
-            //
-            //             updateTransform = true;
-            //             break;
-            //         }
-            //
-            //         case StylePropertyId.TransformScaleY: {
-            //             //element.layoutBox.transformScaleY = property.AsFloat;
-            //
-            //             updateTransform = true;
-            //             break;
-            //         }
-            //
-            //         case StylePropertyId.TransformPivotX: {
-            //             //element.layoutBox.transformPivotX = property.AsUIFixedLength;
-            //
-            //             updateTransform = true;
-            //             break;
-            //         }
-            //
-            //         case StylePropertyId.TransformPivotY:
-            //             //element.layoutBox.transformPivotY = property.AsUIFixedLength;
-            //
-            //             updateTransform = true;
-            //             break;
-            //
-            //         case StylePropertyId.AlignmentTargetX:
-            //         case StylePropertyId.AlignmentOriginX:
-            //         case StylePropertyId.AlignmentOffsetX:
-            //         case StylePropertyId.AlignmentDirectionX:
-            //         case StylePropertyId.AlignmentBoundaryX:
-            //             checkAlignHorizontal = true;
-            //             break;
-            //
-            //         case StylePropertyId.AlignmentTargetY:
-            //         case StylePropertyId.AlignmentOriginY:
-            //         case StylePropertyId.AlignmentOffsetY:
-            //         case StylePropertyId.AlignmentDirectionY:
-            //         case StylePropertyId.AlignmentBoundaryY:
-            //             updateAlignVertical = true;
-            //             break;
-            //
-            //         case StylePropertyId.MinWidth:
-            //         case StylePropertyId.MaxWidth:
-            //         case StylePropertyId.PreferredWidth:
-            //             element.layoutBox.UpdateBlockProviderWidth();
-            //             element.layoutBox.MarkForLayoutHorizontal();
-            //             break;
-            //
-            //         case StylePropertyId.MinHeight:
-            //         case StylePropertyId.MaxHeight:
-            //         case StylePropertyId.PreferredHeight:
-            //             element.layoutBox.UpdateBlockProviderHeight();
-            //             element.layoutBox.MarkForLayoutVertical();
-            //             break;
-            //
-            //         case StylePropertyId.PaddingLeft:
-            //         case StylePropertyId.PaddingRight:
-            //         case StylePropertyId.BorderLeft:
-            //         case StylePropertyId.BorderRight:
-            //             element.layoutBox.flags |= LayoutBoxFlags.ContentAreaWidthChanged;
-            //             break;
-            //
-            //         case StylePropertyId.PaddingTop:
-            //         case StylePropertyId.PaddingBottom:
-            //         case StylePropertyId.BorderTop:
-            //         case StylePropertyId.BorderBottom:
-            //             if (element.layoutBox != null) {
-            //                 element.layoutBox.flags |= LayoutBoxFlags.ContentAreaHeightChanged;
-            //             }
-            //
-            //             break;
-            //
-            //         case StylePropertyId.LayoutFitHorizontal:
-            //             // metaInfo.flags |= UIElementFlags.LayoutFitWidthDirty;
-            //             break;
-            //
-            //         case StylePropertyId.LayoutFitVertical:
-            //             //metaInfo.flags |= UIElementFlags.LayoutFitHeightDirty;
-            //             break;
-            //
-            //         case StylePropertyId.ZIndex:
-            //             //element.layoutBox.zIndex = property.AsInt;
-            //             break;
-            //     }
-            // }
-            //
-            // if (updateTransform) {
-            //     float rotation = element.style.TransformRotation;
-            //     float scaleX = element.style.TransformScaleX;
-            //     float scaleY = element.style.TransformScaleY;
-            //     float positionX = element.style.TransformPositionX.value;
-            //     float positionY = element.style.TransformPositionY.value;
-            //
-            //     if (rotation != 0 || scaleX != 1 || scaleY != 1 || positionX != 0 || positionY != 0) {
-            //         metaInfo.flags |= UIElementFlags.LayoutTransformNotIdentity;
-            //     }
-            //     else {
-            //         metaInfo.flags &= ~UIElementFlags.LayoutTransformNotIdentity;
-            //     }
-            //
-            //     element.layoutBox.flags |= LayoutBoxFlags.TransformDirty;
-            // }
-            //
-            // LayoutBox layoutBox = element.layoutBox;
-            // if (checkAlignHorizontal) {
-            //     layoutBox.UpdateRequiresHorizontalAlignment();
-            // }
-            //
-            // if (updateAlignVertical) {
-            //     layoutBox.UpdateRequiresVerticalAlignment();
-            // }
-            //
-            // layoutBox.OnStyleChanged(properties, propertyCount);
-            // // don't need to null check since root box will never have a style changed
-            // layoutBox.OnChildStyleChanged(element.layoutBox, properties, propertyCount);
-        }
-
-        public void RunLayout() {
-            
-            for (int i = 0; i < burstRunners.size; i++) {
-                burstRunners[i].RunLayout();
-            }
-
-            for (int i = 0; i < runners.size; i++) {
-                runners[i].RunLayout();
-            }
-        }
-
-        private LightList<LayoutRunner2> burstRunners = new LightList<LayoutRunner2>();
-        
-        public void OnViewAdded(UIView view) {
-            burstRunners.Add(new LayoutRunner2(view, this));
-            runners.Add(new LayoutRunner(this, view, view.dummyRoot));
-        }
-
-        // todo -- re-instate this
-        public void OnViewRemoved(UIView view) {
-            for (int i = 0; i < runners.size; i++) {
-                if (runners[i].rootElement == view.dummyRoot) {
-                    runners.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        public IList<UIElement> QueryPoint(Vector2 point, IList<UIElement> retn) {
-            for (int i = 0; i < runners.size; i++) {
-                runners[i].QueryPoint(point, retn);
-            }
-
-            return retn;
-        }
-
-        public LayoutRunner GetLayoutRunner(UIElement viewRoot) {
-            for (int i = 0; i < runners.size; i++) {
-                if (runners.array[i].rootElement == viewRoot) {
-                    return runners.array[i];
+        private LayoutContext GetLayoutContext(UIView view) {
+            for (int i = 0; i < layoutContexts.size; i++) {
+                if (layoutContexts[i].view == view) {
+                    return layoutContexts[i];
                 }
             }
 
             return null;
         }
 
-        public void Dispose() {
-            for (int i = 0; i < burstRunners.size; i++) {
-                burstRunners[i].Dispose();
+        // only called for elements that were not enabled this frame
+        // todo -- totally burstable when styles are blittable
+        public void HandleStylePropertyUpdates(UIElement element, StyleProperty[] properties, int propertyCount) {
+
+            ref LayoutInfo horizontalLayoutInfo = ref horizontalLayoutInfoTable[element.id];
+            ref LayoutInfo verticalLayoutInfo = ref verticalLayoutInfoTable[element.id];
+            ref PaddingBorderMargin layoutPropertyEntry = ref paddingBorderMarginTable[element.id];
+            ref AlignmentInfo horizontalAlignmentInfo = ref alignmentInfoHorizontal[element.id];
+            ref AlignmentInfo verticalAlignmentInfo = ref alignmentInfoVertical[element.id];
+
+            for (int i = 0; i < propertyCount; i++) {
+
+                ref StyleProperty property = ref properties[i];
+
+                switch (property.propertyId) {
+
+                    case StylePropertyId.PreferredWidth:
+                        horizontalLayoutInfo.prefSize = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MaxWidth:
+                        horizontalLayoutInfo.maxSize = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MinWidth:
+                        horizontalLayoutInfo.minSize = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.PreferredHeight:
+                        verticalLayoutInfo.prefSize = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MaxHeight:
+                        verticalLayoutInfo.maxSize = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.MinHeight:
+                        verticalLayoutInfo.minSize = property.AsUIMeasurement;
+                        break;
+
+                    case StylePropertyId.AlignmentBoundaryX:
+                        horizontalAlignmentInfo.boundary = property.AsAlignmentBoundary;
+                        break;
+
+                    case StylePropertyId.AlignmentTargetX:
+                        horizontalAlignmentInfo.target = property.AsAlignmentTarget;
+                        break;
+
+                    case StylePropertyId.AlignmentOriginX:
+                        horizontalAlignmentInfo.origin = property.AsOffsetMeasurement;
+                        break;
+
+                    case StylePropertyId.AlignmentOffsetX:
+                        horizontalAlignmentInfo.offset = property.AsOffsetMeasurement;
+                        break;
+
+                    case StylePropertyId.AlignmentDirectionX:
+                        horizontalAlignmentInfo.direction = property.AsAlignmentDirection;
+                        break;
+
+                    case StylePropertyId.AlignmentBoundaryY:
+                        verticalAlignmentInfo.boundary = property.AsAlignmentBoundary;
+                        break;
+
+                    case StylePropertyId.AlignmentTargetY:
+                        verticalAlignmentInfo.target = property.AsAlignmentTarget;
+                        break;
+
+                    case StylePropertyId.AlignmentOriginY:
+                        verticalAlignmentInfo.origin = property.AsOffsetMeasurement;
+                        break;
+
+                    case StylePropertyId.AlignmentOffsetY:
+                        verticalAlignmentInfo.offset = property.AsOffsetMeasurement;
+                        break;
+
+                    case StylePropertyId.AlignmentDirectionY:
+                        verticalAlignmentInfo.direction = property.AsAlignmentDirection;
+                        break;
+
+                    case StylePropertyId.TransformRotation:
+                        transformInfoTable[element.id].rotation = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.TransformPositionX:
+                        transformInfoTable[element.id].positionX = property.AsOffsetMeasurement;
+                        break;
+
+                    case StylePropertyId.TransformPositionY:
+                        transformInfoTable[element.id].positionY = property.AsOffsetMeasurement;
+                        break;
+
+                    case StylePropertyId.TransformPivotX:
+                        transformInfoTable[element.id].pivotX = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.TransformPivotY:
+                        transformInfoTable[element.id].pivotY = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.TransformScaleX:
+                        transformInfoTable[element.id].scaleX = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.TransformScaleY:
+                        transformInfoTable[element.id].scaleY = property.AsFloat;
+                        break;
+
+                    case StylePropertyId.MarginTop:
+                        layoutPropertyEntry.marginTop = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.MarginRight:
+                        layoutPropertyEntry.marginRight = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.MarginBottom:
+                        layoutPropertyEntry.marginBottom = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.MarginLeft:
+                        layoutPropertyEntry.marginLeft = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderTop:
+                        layoutPropertyEntry.borderTop = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderRight:
+                        layoutPropertyEntry.borderRight = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderBottom:
+                        layoutPropertyEntry.borderRight = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.BorderLeft:
+                        layoutPropertyEntry.borderLeft = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.PaddingTop:
+                        layoutPropertyEntry.paddingTop = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.PaddingRight:
+                        layoutPropertyEntry.paddingRight = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.PaddingBottom:
+                        layoutPropertyEntry.paddingBottom = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.PaddingLeft:
+                        layoutPropertyEntry.paddingBottom = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.LayoutBehavior:
+                        LayoutBehavior previousBehavior = layoutHierarchyTable[element.id].behavior;
+                        LayoutBehavior newBehavior = property.AsLayoutBehavior;
+
+                        if (previousBehavior == newBehavior) {
+                            continue;
+                        }
+
+                        ElementId p = LayoutUtil.FindLayoutParent(element.id, elementSystem.hierarchyTable, layoutHierarchyTable);
+
+                        if (previousBehavior == LayoutBehavior.Ignored) {
+                            GetLayoutContext(element.View).RemoveFromIgnoredList(element.id);
+                            LayoutUtil.Insert(p, element.id, elementSystem.traversalTable, layoutHierarchyTable);
+                        }
+                        else if (previousBehavior == LayoutBehavior.TranscludeChildren) {
+                            LayoutUtil.Untransclude(element.id, elementSystem.traversalTable, elementSystem.hierarchyTable, layoutHierarchyTable);
+                            p = layoutHierarchyTable[element.id].parentId;
+                            childrenChangedList.Add(element.id);
+                        }
+
+                        if (newBehavior == LayoutBehavior.Ignored) {
+                            GetLayoutContext(element.View).AddToIgnoredList(element.id);
+                            LayoutUtil.UnlinkFromParent(element.id, layoutHierarchyTable);
+                        }
+                        else if (newBehavior == LayoutBehavior.TranscludeChildren) {
+                            LayoutUtil.Transclude(element.id, layoutHierarchyTable);
+                            layoutResultTable[element.id] = default;
+                        }
+
+                        childrenChangedList.Add(p);
+
+                        layoutHierarchyTable[element.id].behavior = newBehavior;
+                        break;
+
+                }
+
             }
+
+            layoutBoxTable[element.id].OnStylePropertiesChanged(this, element, properties, propertyCount);
+
+            ElementId parentId = layoutHierarchyTable[element.id].parentId;
+            if (parentId != default) {
+                layoutBoxTable[parentId].OnChildStyleChanged(this, element.id, properties, propertyCount);
+            }
+
+        }
+
+        public void RunLayout() {
+
+            // clipping / culling
+
+            // cannot be parallel atm. can be a job though
+            for (int i = 0; i < gridPlaceList.size; i++) {
+                layoutBoxTable[gridPlaceList[i]].grid.RunPlacement(this);
+            }
+
+            gridPlaceList.size = 0;
+
+            if (childrenChangedList.size > 1) {
+
+                new RemoveListDuplicates() {
+                    list = childrenChangedList
+                }.Run();
+
+            }
+
+            for (int i = 0; i < childrenChangedList.size; i++) {
+                layoutBoxTable[childrenChangedList[i]].OnChildrenChanged(this);
+            }
+
+            childrenChangedList.size = 0;
+
+            float applicationWidth = application.Width;
+            float applicationHeight = application.Height;
+            NativeArray<JobHandle> layoutHandles = new NativeArray<JobHandle>(layoutContexts.size, Allocator.Temp);
+
+            clippers.size = 0;
+
+            // never
+            clippers.Add(new Clipper() {
+                aabb = new float4(0, 0, 99999, 99999),
+                intersectionRange = new RangeInt(0, 4)
+            });
+
+            // screen
+            clippers.Add(new Clipper() {
+                // todo -- maybe not the right value since unity likes to change the screen size randomly with focus 
+                aabb = new float4(0, 0, Screen.width, Screen.height),
+                parentIndex = 0,
+                intersectionRange = new RangeInt(4, 4),
+                isCulled = false
+            });
+
+            clipperIntersections.SetSize(8);
+            clipperIntersections[0] = new float2(0, 0);
+            clipperIntersections[1] = new float2(99999, 0);
+            clipperIntersections[2] = new float2(99999, 99999);
+            clipperIntersections[3] = new float2(0, 99999);
+
+            clipperIntersections[4] = new float2(0, 0);
+            clipperIntersections[5] = new float2(Screen.width, 0);
+            clipperIntersections[6] = new float2(Screen.width, Screen.height);
+            clipperIntersections[7] = new float2(0, Screen.height);
+
+            JobHandle constructClippers = new ConstructClippersJob() {
+                clipInfoTable = clipInfoTable,
+                clipperOutputList = clippers,
+                layoutHierarchyTable = layoutHierarchyTable,
+                viewRootIds = application.viewRootIds
+            }.Schedule();
+
+            for (int i = 0; i < layoutContexts.size; i++) {
+
+                ref LayoutContext layoutContext = ref layoutContexts.array[i];
+
+                UIView view = layoutContexts[i].view;
+                ElementId viewRootId = view.dummyRoot.id;
+                int activeElementCount = view.activeElementCount;
+
+                ViewParameters viewParameters = new ViewParameters() {
+                    viewX = view.position.x,
+                    viewY = view.position.y,
+                    viewWidth = view.Viewport.width,
+                    viewHeight = view.Viewport.height,
+                    applicationWidth = applicationWidth,
+                    applicationHeight = applicationHeight
+                };
+
+                layoutResultTable[viewRootId].actualSize = new float2(viewParameters.viewWidth, viewParameters.viewHeight);
+
+                layoutContext.elementList.EnsureCapacity(activeElementCount);
+                layoutContext.parentList.EnsureCapacity(activeElementCount);
+                layoutContext.elementList.size = 0;
+                layoutContext.parentList.size = 0;
+
+                layoutContext.runner->lineInfoBuffer = layoutContext.lineBuffer;
+                layoutContext.runner->layoutHierarchyTable = layoutHierarchyTable.array;
+                layoutContext.runner->layoutBoxInfoTable = layoutResultTable.array;
+                layoutContext.runner->textInfoTable = textSystem.textInfoMap.GetArrayPointer();
+                layoutContext.runner->viewParameters = viewParameters;
+                layoutContext.runner->layoutBoxTable = layoutBoxTable.array;
+                layoutContext.runner->horizontalLayoutInfoTable = horizontalLayoutInfoTable.array;
+                layoutContext.runner->verticalLayoutInfoTable = verticalLayoutInfoTable.array;
+
+                JobHandle emTableHandle = new UpdateEmTable() {
+                    rootId = viewRootId,
+                    activeElementCount = activeElementCount,
+                    emTable = elementSystem.emTable,
+                    hierarchyTable = elementSystem.hierarchyTable,
+                    metaTable = elementSystem.metaTable,
+                    viewWidth = viewParameters.viewWidth,
+                    viewHeight = viewParameters.viewHeight
+                }.Schedule();
+
+                JobHandle flatten = new FlattenLayoutTree() {
+                    viewRootId = viewRootId,
+                    elementList = layoutContext.elementList,
+                    parentList = layoutContext.parentList,
+                    ignoredList = layoutContext.ignoredList,
+                    traversalTable = elementSystem.traversalTable,
+                    layoutHierarchyTable = layoutHierarchyTable,
+                    viewActiveElementCount = activeElementCount
+                }.Schedule();
+
+                // parallel for large views
+                JobHandle updatePaddingMarginBorder = VertigoScheduler.Await(emTableHandle, flatten).ThenParallel(new UpdatePaddingBorderMargin() {
+                    parallel = new ParallelParams(activeElementCount, 250),
+                    elementList = layoutContext.elementList,
+                    emTable = elementSystem.emTable,
+                    propertyTable = paddingBorderMarginTable,
+                    verticalLayoutInfo = verticalLayoutInfoTable,
+                    horizontalLayoutInfo = horizontalLayoutInfoTable,
+                    layoutResultTable = layoutResultTable,
+                    viewParameters = viewParameters
+                });
+
+                // possible to be parallel for big tree with ignored, fixed, and no fit
+                JobHandle horizontalLayout = VertigoScheduler.Await(updatePaddingMarginBorder).Then(new RunLayoutHorizontal() {
+                    runner = layoutContext.runner,
+                    elementList = layoutContext.elementList,
+                    layoutBoxTable = layoutBoxTable
+                });
+
+                // parallel for big list
+                JobHandle horizontalAlignment = VertigoScheduler.Await(horizontalLayout).ThenParallel(new ApplyHorizontalAlignments() {
+                    parallel = new ParallelParams(activeElementCount, 250),
+                    alignmentTable = alignmentInfoHorizontal,
+                    elementList = layoutContext.elementList,
+                    mousePosition = application.inputSystem.MousePosition.x,
+                    viewParameters = viewParameters,
+                    viewRootId = viewRootId,
+                    layoutBoxInfoTable = layoutResultTable
+                });
+
+                // possible to be parallel for big tree with ignored, fixed, and no fit
+                JobHandle verticalLayout = VertigoScheduler.Await(horizontalLayout).Then(new RunLayoutVertical() {
+                    runner = layoutContext.runner,
+                    elementList = layoutContext.elementList,
+                    layoutBoxTable = layoutBoxTable
+                });
+
+                // parallel for big list
+                JobHandle verticalAlignment = VertigoScheduler.Await(verticalLayout).ThenParallel(new ApplyVerticalAlignments() {
+                    parallel = new ParallelParams(activeElementCount, 250),
+                    alignmentTable = alignmentInfoVertical,
+                    elementList = layoutContext.elementList,
+                    mousePosition = application.inputSystem.MousePosition.y,
+                    viewParameters = viewParameters,
+                    viewRootId = viewRootId,
+                    layoutBoxInfoTable = layoutResultTable
+                });
+
+                // parallel if big list element count, single if small, order doesnt matter
+                JobHandle buildLocalMatrices = VertigoScheduler.Await(horizontalAlignment, verticalAlignment).ThenParallel(new BuildLocalMatrices() {
+                    parallel = new ParallelParams(activeElementCount, 250),
+                    elementList = layoutContext.elementList,
+                    localMatrices = localMatrices,
+                    parentList = layoutContext.parentList,
+                    viewParameters = viewParameters,
+                    transformInfoTable = transformInfoTable,
+                    layoutBoxInfoTable = layoutResultTable
+                });
+
+                JobHandle buildWorldMatrices = VertigoScheduler.Await(buildLocalMatrices).Then(new BuildWorldMatrices() {
+                    elementList = layoutContext.elementList,
+                    localMatrices = localMatrices,
+                    parentList = layoutContext.parentList,
+                    worldMatrices = worldMatrices
+                });
+
+                layoutHandles[i] = VertigoScheduler.Await(buildWorldMatrices).ThenParallel(new ComputeOrientedBounds() {
+                    parallel = new ParallelParams(activeElementCount, 250),
+                    elementList = layoutContext.elementList,
+                    worldMatrices = worldMatrices,
+                    clipInfoTable = clipInfoTable,
+                    layoutResultTable = layoutResultTable
+                });
+
+                JobHandle.ScheduleBatchedJobs();
+            }
+
+            // todo -- this can be parallel if we find the view indices and then count how many were added per view to get the ranges
+            JobHandle updateClippers = VertigoScheduler.Await(constructClippers, JobHandle.CombineDependencies(layoutHandles)).Then(new UpdateClippers() {
+                clipperList = clippers,
+                intersectionResults = clipperIntersections,
+                clipInfoTable = clipInfoTable,
+                layoutResultTable = layoutResultTable
+            });
+
+            NativeArray<JobHandle> cullingHandles = new NativeArray<JobHandle>(layoutContexts.size, Allocator.Temp);
+
+            for (int i = 0; i < layoutContexts.size; i++) {
+                cullingHandles[i] = VertigoScheduler.Await(updateClippers).ThenParallel(new ComputeElementCulling() {
+                    parallel = new ParallelParams(layoutContexts[i].view.activeElementCount, 250),
+                    clipperList = clippers,
+                    layoutResultTable = layoutResultTable,
+                    elementList = layoutContexts[i].elementList,
+                    clipInfoTable = clipInfoTable
+                });
+            }
+
+            JobHandle.CompleteAll(cullingHandles);
+
+            cullingHandles.Dispose();
+            layoutHandles.Dispose();
+
+        }
+
+        public void OnViewAdded(UIView view) {
+            layoutContexts.Add(new LayoutContext(view, this));
+        }
+
+        // todo -- re-instate this
+        public void OnViewRemoved(UIView view) { }
+
+        private static DataList<GridTrackSize> BufferGridTemplate(ref DataList<GridTrackSize> trackList, IReadOnlyList<GridTrackSize> template) {
+            if (trackList.GetArrayPointer() == null) {
+                trackList = new DataList<GridTrackSize>(Mathf.Max(8, template.Count * 2), Allocator.Persistent);
+            }
+
+            trackList.SetSize(template.Count);
+            for (int i = 0; i < template.Count; i++) {
+                trackList[i] = template[i];
+            }
+
+            return trackList;
+        }
+
+        public DataList<GridTrackSize> BufferGridColTemplate(IReadOnlyList<GridTrackSize> template) {
+            return BufferGridTemplate(ref gridColTemplateBuffer, template);
+        }
+
+        public DataList<GridTrackSize> BufferGridRowTemplate(IReadOnlyList<GridTrackSize> template) {
+            return BufferGridTemplate(ref gridRowTemplateBuffer, template);
+        }
+
+        public DataList<GridTrackSize> BufferGridColAutoSize(IReadOnlyList<GridTrackSize> template) {
+            return BufferGridTemplate(ref gridColAutoSizeBuffer, template);
+        }
+
+        public DataList<GridTrackSize> BufferGridRowAutoSize(IReadOnlyList<GridTrackSize> template) {
+            return BufferGridTemplate(ref gridRowAutoSizeBuffer, template);
+        }
+
+        public List_GridTrack.Shared GetGridColTrackBuffer() {
+            if (gridColTrackBuffer.state == null) {
+                gridColTrackBuffer = new List_GridTrack.Shared(16, Allocator.Persistent);
+            }
+
+            return gridColTrackBuffer;
+        }
+
+        public List_GridTrack.Shared GetGridRowTrackBuffer() {
+            if (gridRowTrackBuffer.state == null) {
+                gridRowTrackBuffer = new List_GridTrack.Shared(16, Allocator.Persistent);
+            }
+
+            return gridRowTrackBuffer;
+        }
+
+        public void EnqueueGridForPlacement(ElementId elementId) {
+            for (int i = 0; i < gridPlaceList.size; i++) {
+                if (gridPlaceList[i] == elementId) {
+                    return;
+                }
+            }
+
+            gridPlaceList.Add(elementId);
+        }
+
+        // don't want a list of members here since id only ever use it for this query function
+
+        internal struct QueryResult {
+
+            public ElementId elementId;
+            public bool requiresCustomHandling;
+
+        }
+
+        public void QueryPoint(float2 point, IList<UIElement> retn) {
+
+            if (!new Rect(0, 0, Screen.width, Screen.height).Contains(point)) {
+                return;
+            }
+
+            queryBuffer.size = 0;
+
+            for (int i = 0; i < layoutContexts.size; i++) {
+                new QueryPointJob() {
+                    clippers = clippers,
+                    point = point,
+                    retn = queryBuffer,
+                    clipInfoTable = clipInfoTable,
+                    elementList = layoutContexts[i].elementList,
+                    viewRootId = layoutContexts[i].view.dummyRoot.id
+                }.Run();
+            }
+
+            for (int i = 0; i < queryBuffer.size; i++) {
+
+                UIElement instance = elementSystem.instanceTable[queryBuffer[i].elementId.index];
+
+                if (queryBuffer[i].requiresCustomHandling) {
+                    if (instance is IPointerQueryHandler handler && handler.ContainsPoint(point)) {
+                        retn.Add(instance);
+                    }
+                }
+                else {
+                    retn.Add(instance);
+                }
+            }
+
+        }
+
+        internal struct QueryPointJob : IJob {
+
+            public float2 point;
+            public DataList<Clipper>.Shared clippers;
+            public DataList<QueryResult>.Shared retn;
+            public ElementTable<ClipInfo> clipInfoTable;
+            public DataList<ElementId>.Shared elementList;
+            public ElementId viewRootId;
+
+            public void Execute() {
+
+                DataList<bool> containsPoint = new DataList<bool>(clippers.size, Allocator.Temp);
+                containsPoint[0] = true; // never clipper
+                containsPoint[1] = true; // screen clipper
+
+                int viewStart = 2;
+                int viewEnd = clippers.size;
+
+                for (int i = 2; i < clippers.size; i++) {
+                    if (clippers[i].elementId == viewRootId) {
+                        viewStart = i;
+                        viewEnd = i + clippers[i].subClipperCount;
+                        break;
+                    }
+                }
+
+                for (int i = viewStart; i < viewEnd; i++) {
+                    ClipInfo clipInfo = clipInfoTable[clippers[i].elementId];
+                    containsPoint[i] = !clippers[i].isCulled && PolygonUtil.PointInOrientedBounds(point, clipInfo.orientedBounds);
+                }
+
+                for (int i = 0; i < elementList.size; i++) {
+
+                    ClipInfo clipInfo = clipInfoTable[elementList[i]];
+                    Clipper clipper = clippers[clipInfo.clipperIndex];
+
+                    if (clipper.isCulled || !containsPoint[clipInfo.clipperIndex] || clipInfo.visibility == Visibility.Hidden || clipInfo.pointerEvents == PointerEvents.None) {
+                        continue;
+                    }
+
+                    if (clipInfo.isMouseQueryHandler) {
+                        retn.Add(new QueryResult() {elementId = elementList[i], requiresCustomHandling = true});
+                        continue;
+                    }
+
+                    if (PolygonUtil.PointInOrientedBounds(point, clipInfo.orientedBounds)) {
+                        retn.Add(new QueryResult() {elementId = elementList[i]});
+                    }
+
+                }
+
+                containsPoint.Dispose();
+            }
+
+        }
+
+        public void Dispose() {
+
+            for (int i = 0; i < elementCapacity; i++) {
+                if (layoutBoxTable.array[i].layoutType != LayoutBoxType.Unset) {
+                    layoutBoxTable.array[i].Dispose();
+                }
+            }
+
+            TypedUnsafe.Dispose(layoutBackingStore, Allocator.Persistent);
+            TypedUnsafe.Dispose(positionBackingStore, Allocator.Persistent);
+
+            clipperIntersections.Dispose();
+            clippers.Dispose();
+            childrenChangedList.Dispose();
+            queryBuffer.Dispose();
+            gridPlaceList.Dispose();
+            gridColTemplateBuffer.Dispose();
+            gridRowTemplateBuffer.Dispose();
+            gridColAutoSizeBuffer.Dispose();
+            gridRowAutoSizeBuffer.Dispose();
+            gridColTrackBuffer.Dispose();
+            gridRowTrackBuffer.Dispose();
+
+            for (int i = 0; i < layoutContexts.size; i++) {
+                layoutContexts[i].Dispose();
+            }
+
+            layoutContexts.Clear();
+        }
+
+        private void ResizeBackingStore(int newCapacity) {
+
+            // maybe resize in steps of 512? dunno what a good size is, app dependent
+            newCapacity = BitUtil.EnsurePowerOfTwo(newCapacity);
+            layoutBackingStore = TypedUnsafe.ResizeSplitBuffer(
+                ref layoutResultTable.array,
+                ref horizontalLayoutInfoTable.array,
+                ref verticalLayoutInfoTable.array,
+                ref layoutHierarchyTable.array,
+                ref layoutBoxTable.array,
+                ref paddingBorderMarginTable.array,
+                elementCapacity,
+                newCapacity,
+                Allocator.Persistent,
+                true
+            );
+
+            positionBackingStore = TypedUnsafe.ResizeSplitBuffer(
+                ref clipInfoTable.array,
+                ref transformInfoTable.array,
+                ref alignmentInfoHorizontal.array,
+                ref alignmentInfoVertical.array,
+                ref localMatrices.array,
+                ref worldMatrices.array,
+                elementCapacity,
+                newCapacity,
+                Allocator.Persistent,
+                true
+            );
+
+            *tablePointers = new LayoutDataTables() {
+                layoutBoxInfo = layoutResultTable.array,
+                localMatrices = localMatrices.array,
+                worldMatrices = worldMatrices.array
+            };
+
+            elementCapacity = newCapacity;
         }
 
     }

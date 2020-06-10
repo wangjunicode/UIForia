@@ -6,18 +6,40 @@ style ship-item {
     TextColor = white;
     TextFontAsset = @theme.orbitron;
     TextFontSize = 13px;
+    BackgroundColor = rgba(120, 120, 120, 120);
+    PreferredWidth = 330px;
+    Padding = 4px;
+    MarginBottom = 1px;
+    CornerBevelBottomRight = 5px;
+    
+    [hover] {
+        Cursor = @theme.cursorHover;
+        BackgroundColor = @theme.orangeHover;
+    }
 }
 
 style ship-display {
+    PaddingTop = 8px;
+    AlignY = 100% Parent;
+    AlignX = 0, Parent;
+    LayoutFitHorizontal = Fill;
+}
+
+style ship-title {
+    MarginBottom = 8px;
+}
+
+style ship-wrapper {
     FlexLayoutDirection = Horizontal;
-    AlignY = 90% Parent;
+    LayoutFitHorizontal = Fill;
 }
 
 style ship {
-    PreferredSize = 256px;
+    PreferredSize = 128px;
     Border = 1px;
     BorderColor = white;
-    BorderRadius = 2px;
+    BorderRadius = 12px;
+    MarginRight = 4px;
     [attr:shipId="1a"] {
         run animation(ship01a);
     }
@@ -111,8 +133,8 @@ spritesheet ship04b {
 style radial {
     BackgroundImage = url("Images/HexagonBorder1");
     PreferredSize = 110px 122.5px;
-    AlignY = 25% Parent;
-    AlignX = 90% Parent;
+    //AlignY = 25% Parent;
+    AlignX = 100% Parent;
     BackgroundTint = rgba(255, 255, 255, 100);
 }
 
@@ -134,3 +156,136 @@ style progress-text {
     TextColor = white;
     TextFontAsset = @theme.orbitron;
 }
+
+style tab-container {
+    TextColor = white;
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = BeforeContent;
+    PreferredHeight = 42px;
+}
+
+style tab-item {
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = CenterContent;
+    PreferredHeight = 30px;
+    Border = 1px;
+    BorderColor = white;
+    BorderRadiusTopLeft = 12px;
+    BorderRadiusTopRight = 12px;
+    Padding = 4px 8px;
+    TextColor = white;
+    TextFontSize = 14px;
+    [hover] {
+        Padding = 8px 16px;
+        BackgroundColor = @theme.orangeHover;
+        TextColor = white;
+        Cursor = @theme.cursorHover;
+    }
+    [attr:selected="selected"] {
+        [enter] run animation(expand-tab);
+        [exit] run animation(collapse-tab);
+    }
+}
+
+animation expand-tab {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 300ms;
+    }
+    
+    [keyframes] {
+        100% {
+            TextFontSize = 18px;
+            Padding = 8px 16px;
+            PreferredHeight = 42px;
+            BackgroundColor = rgba(251, 176, 59, 200);
+            TextColor = rgb(84, 60, 22);
+        }
+    }
+}
+
+animation collapse-tab {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 300ms;
+    }
+    
+    [keyframes] {
+        100% {
+            TextFontSize = 14px;
+            Padding = 4px 8px;
+            PreferredHeight = 30px;
+            TextColor = white;
+            TextFontSize = 14px;
+            BackgroundColor = clear;
+        }
+    }
+}
+
+style settings-panel {
+    BackgroundColor = rgba(0, 0, 0, 120);
+    LayoutFit = Fill;
+    FlexItemGrow = 1;
+    BorderRadiusBottomLeft = 12px;
+    BorderRadiusBottomRight = 12px;
+    Padding = 8px;
+    Border = 1px;
+    BorderColor = white;
+}
+
+style inventory-panel {
+    LayoutType = Grid;
+    GridLayoutColTemplate = 1fr 1fr;
+    GridLayoutColGap = 4;
+    GridLayoutRowTemplate = 1fr;
+}
+
+style item-list {
+    LayoutFit = Fill;
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutWrap = WrapHorizontal;
+    
+}
+
+style item {
+    Border = 1px;
+    BorderRadius = 4px;
+    BorderColor = white;
+    TextFontSize = 11px;
+    Padding = 4px 2px;
+    FlexItemShrink = 1;
+    PreferredSize = 64px;
+    Margin = 4px;
+    DistributeExtraSpace = CenterContent;
+}
+
+style item-text {
+    PreferredWidth = 1pca;
+    TextAlignment = Center;
+}
+
+style item-image {
+    LayoutBehavior = Ignored;
+    AlignY = Center Parent;
+    AlignX = Center Parent;
+    Opacity = 0.25;
+}
+
+style available-items {
+    FlexItemGrow = 1;
+    Padding = 4px;
+    LayoutFit = Fill;
+    [hover] {
+        BackgroundColor = rgba(220, 120, 120, 40);
+    }
+}
+
+style inventory {
+    Padding = 4px;
+    FlexItemGrow = 1;
+    LayoutFit = Fill;
+    [hover] {
+        BackgroundColor = rgba(220, 120, 120, 40);
+    }
+}
+

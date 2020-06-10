@@ -2,11 +2,19 @@
 export const orbitronBold = url("Fonts/Orbitron/Orbitron-Bold SDF");
 
 export const orange = #fbb03b;
+export const orangeHover = rgba(251, 176, 59, 70);
+
+export const defaultCursor = url("Images/arrow");
+export const cursorHover = url("Images/arrow_red");
 
 style container {
     PreferredSize = 1pca;
     Padding = 30px 60px;
     FlexLayoutDirection = Horizontal;
+    TextColor = white;
+    TextFontAsset = @orbitron;
+    TextFontSize = 12px;
+    Cursor = @defaultCursor;
 }
 
 style main-content {
@@ -18,4 +26,15 @@ style main-content {
 
 style menu {
     AlignY = End ParentContentArea;
+}
+
+style mh1 {
+    MarginLeft = 8px;
+    MarginRight = 8px;
+}
+
+style <Heading2> {
+    MarginTop = 4px;
+    MarginBottom = 8px;
+    TextFontSize = 16px;
 }

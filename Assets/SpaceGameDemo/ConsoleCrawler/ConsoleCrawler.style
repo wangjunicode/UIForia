@@ -1,11 +1,8 @@
 ﻿import "SpaceGameDemo/Theme.style" as theme;
 
 style console-notification {
-    LayoutBehavior = Ignored;
     PreferredSize = 1px;
-    BorderRadius = 3px;
-    AlignY = 90% Parent;
-    AlignX = 90% Parent;
+    BorderRadius = 12px;
     Overflow = Hidden;
     Padding = 4px;
     run animation(console-action);
@@ -41,13 +38,13 @@ animation console-action {
             PreferredWidth = 200px;
         }
         8% {
-            PreferredHeight = 300px;
+            PreferredHeight = 128px;
             PreferredWidth = 200px;
             Border = 1px;
             BorderColor = rgba(240, 240, 240, 120);
         }
         94% {
-            PreferredHeight = 300px;
+            PreferredHeight = 128px;
         }
         97% { 
             PreferredHeight = 1px;

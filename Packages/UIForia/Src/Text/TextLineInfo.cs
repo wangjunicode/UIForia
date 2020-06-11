@@ -25,11 +25,11 @@ namespace UIForia.Text {
         // maybe kill these?
         
         // maybe kill this?
-        public int wordEnd;
+       //  public int wordEnd;
         public int globalCharacterStartIndex;
         public int globalCharacterEndIndex;
-        
-        public int LastWordIndex => wordEnd - 1;
+
+        public int LastWordIndex => 0;
 
         public TextLineInfo(int wordStart, int wordCount, float width) : this() {
             this.wordStart = wordStart;
@@ -39,7 +39,6 @@ namespace UIForia.Text {
 
         public TextLineInfo(int wordStart, float width = 0) {
             this.wordStart = wordStart;
-            this.wordEnd = 0;
             this.x = 0;
             this.y = 0;
             this.width = width;

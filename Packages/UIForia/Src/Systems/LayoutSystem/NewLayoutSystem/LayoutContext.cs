@@ -3,6 +3,7 @@ using UIForia.Elements;
 using UIForia.ListTypes;
 using UIForia.Rendering;
 using UIForia.Systems;
+using UIForia.Text;
 using UIForia.UIInput;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
@@ -21,6 +22,8 @@ namespace UIForia.Layout {
         internal DataList<ElementId>.Shared elementList;
         internal List_TextLineInfo* lineBuffer;
         public DataList<ElementId>.Shared ignoredList;
+        public int transclusionCount;
+        public DataList<TextChange>.Shared textChangeBuffer;
 
         public LayoutContext(UIView view, LayoutSystem layoutSystem) {
             this.view = view;
@@ -30,7 +33,7 @@ namespace UIForia.Layout {
             this.elementList = new DataList<ElementId>.Shared(32, Allocator.Persistent);
             this.parentList = new DataList<ElementId>.Shared(32, Allocator.Persistent);
             this.ignoredList = new DataList<ElementId>.Shared(8, Allocator.Persistent);
-
+            this.textChangeBuffer = new DataList<TextChange>.Shared(16, Allocator.Persistent);
             lineBuffer = TypedUnsafe.Malloc<List_TextLineInfo>(Allocator.Persistent);
             *lineBuffer = new List_TextLineInfo(16, Allocator.Persistent);
 
@@ -57,6 +60,10 @@ namespace UIForia.Layout {
 
         }
 
+        public int ActiveElementCount {
+            get => view.activeElementCount - transclusionCount;
+        }
+
         public void Dispose() {
             if (lineBuffer != null) {
                 lineBuffer->Dispose();
@@ -66,6 +73,7 @@ namespace UIForia.Layout {
             ignoredList.Dispose();
             elementList.Dispose();
             parentList.Dispose();
+            textChangeBuffer.Dispose();
             TypedUnsafe.Dispose(runner, Allocator.Persistent);
         }
 

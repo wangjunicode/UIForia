@@ -10,11 +10,10 @@ namespace UIForia.Text {
 
         [FieldOffset(0)] public TextSymbolType type;
         [FieldOffset(4)] public BurstCharInfo charInfo;
-        [FieldOffset(4)] public UIFixedLength space;
+        [FieldOffset(4)] public UIFixedLength length;
         [FieldOffset(4)] public Color32 color;
         [FieldOffset(4)] public TextTransform textTransform;
         [FieldOffset(4)] public int fontId;
-        [FieldOffset(4)] public float fontSize;
 
         public bool ConvertToLayoutSymbol(out TextLayoutSymbol symbol) {
             switch (type) {
@@ -33,7 +32,7 @@ namespace UIForia.Text {
                 case TextSymbolType.HorizontalSpace:
                     symbol = new TextLayoutSymbol() {
                         type = TextLayoutSymbolType.HorizontalSpace,
-                        space = space
+                        space = length
                     };
                     return true;
 
@@ -53,7 +52,7 @@ namespace UIForia.Text {
                     return "No Break - Pop";
 
                 case TextSymbolType.HorizontalSpace:
-                    return "Horizontal Space " + space;
+                    return "Horizontal Space " + length;
 
                 case TextSymbolType.ColorPush:
                     return "Color - Push (" + color + ")";

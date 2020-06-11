@@ -138,33 +138,35 @@ namespace Src.Systems {
                     
                 }
 
-                if (wrapperList.size + (currentElement.children.size * 2) >= wrapperList.array.Length) {
-                    wrapperList.EnsureAdditionalCapacity(currentElement.children.size * 2);
+                int childCount = currentElement.ChildCount;
+                if (wrapperList.size + (childCount * 2) >= wrapperList.array.Length) {
+                    wrapperList.EnsureAdditionalCapacity(childCount * 2);
                 }
 
-                if (elemRefStack.size + currentElement.children.size >= elemRefStack.array.Length) {
-                    elemRefStack.EnsureAdditionalCapacity(currentElement.children.size);
+                if (elemRefStack.size + childCount >= elemRefStack.array.Length) {
+                    elemRefStack.EnsureAdditionalCapacity(childCount);
                 }
 
-                for (int i = currentElement.children.size - 1; i >= 0; i--) {
-                    UIElement child = currentElement.children.array[i];
-                    if ((elementSystem.metaTable[child.id].flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
+                var ptr = currentElement.GetLastChild();
+                while (ptr != null) {
+                    if ((elementSystem.metaTable[ptr.id].flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
                         // todo change check on painter
-                        if (child.renderBox == null) {
-                            CreateRenderBox(child);
-                            Debug.Assert(child.renderBox != null, "child.renderBox != null");
-                            child.renderBox.Enable();
+                        if (ptr.renderBox == null) {
+                            CreateRenderBox(ptr);
+                            Debug.Assert(ptr.renderBox != null, "ptr.renderBox != null");
+                            ptr.renderBox.Enable();
                         }
                         // todo -- get rid of this
-                        else if (child.enableStateChangedFrameId == frameId) {
-                            UpdateRenderBox(child);
-                            child.renderBox.Enable();
+                        else if (ptr.enableStateChangedFrameId == frameId) {
+                            UpdateRenderBox(ptr);
+                            ptr.renderBox.Enable();
                         }
 
-                        elemRefStack.array[elemRefStack.size++].element = child;
+                        elemRefStack.array[elemRefStack.size++].element = ptr;
                     }
-
+                    ptr = ptr.GetPreviousSibling();
                 }
+                
             }
 
             

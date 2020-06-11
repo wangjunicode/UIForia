@@ -68,7 +68,6 @@ namespace UIForia.Rendering {
             // this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
             this.dummyRoot.style = new UIStyleSet(dummyRoot);
             this.dummyRoot.View = this;
-            this.dummyRoot.children = new LightList<UIElement>(1);
             this.dummyRoot.id = application.elementSystem.CreateElement(dummyRoot, 0, -999, -999, UIElementFlags.EnabledFlagSet);
             
             dummyRoot.isAncestorEnabled = true;
@@ -80,7 +79,6 @@ namespace UIForia.Rendering {
 
         internal void Init(UIElement element) {
             element.parent = dummyRoot;
-            dummyRoot.children.Add(element);
             application.elementSystem.AddChild(dummyRoot.id, element.id);
             application.InitializeElement(element);
         }
@@ -97,7 +95,6 @@ namespace UIForia.Rendering {
             // this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
             this.dummyRoot.style = new UIStyleSet(dummyRoot);
             this.dummyRoot.View = this;
-            this.dummyRoot.children = new LightList<UIElement>(1);
             this.dummyRoot.id = application.elementSystem.CreateElement(dummyRoot, 0, -999, -999, UIElementFlags.EnabledFlagSet);
             this.activeElementCount = 1;
             dummyRoot.isAncestorEnabled = true;
@@ -106,7 +103,6 @@ namespace UIForia.Rendering {
             
             // probably need some setup here
             element.parent = dummyRoot;
-            dummyRoot.children.Add(element);
             
             application.elementSystem.AddChild(dummyRoot.id, element.id);
             

@@ -27,33 +27,29 @@ namespace UIForia.Text {
         internal int freeList;
         internal int frameId;
         internal ElementSystem elementSystem;
-        internal ResourceManager resourceManager;
 
         internal DataList<TextChange>.Shared changedElementIds;
         internal DataList<TextSymbol>.Shared inputSymbolBuffer;
         internal DataList<BurstTextInfo>.Shared textInfoMap;
         internal DataList<TextLayoutSymbol>.Shared layoutBuffer;
 
-        public TextSystem(ElementSystem elementSystem, ResourceManager resourceManager) {
+        public TextSystem(ElementSystem elementSystem) {
             this.elementSystem = elementSystem;
-            this.resourceManager = resourceManager;
             this.textInfoMap = new DataList<BurstTextInfo>.Shared(128, Allocator.Persistent);
             this.changedElementIds = new DataList<TextChange>.Shared(32, Allocator.Persistent);
             this.layoutBuffer = new DataList<TextLayoutSymbol>.Shared(128, Allocator.Persistent);
             this.inputSymbolBuffer = new DataList<TextSymbol>.Shared(128, Allocator.Persistent);
             textInfoMap.size++;
         }
-        
-        public void HandleElementDisabled(DataList<ElementId>.Shared disabledElements) {
-        }
-        
+
+        public void HandleElementDisabled(DataList<ElementId>.Shared disabledElements) { }
+
         public void HandleElementEnabled(DataList<ElementId>.Shared enabledElements) {
 
             for (int i = 0; i < enabledElements.size; i++) {
                 UIElement element = elementSystem.instanceTable[enabledElements[i].index];
                 if (element is UITextElement textElement) {
                     ref BurstTextInfo textInfo = ref textInfoMap[textElement.textInfoId];
-                    textInfo.requiresTextTransform = false;
                     textInfo.textStyle = new TextStyle() {
                         alignment = element.style.TextAlignment,
                         faceDilate = element.style.TextFaceDilate,
@@ -73,7 +69,8 @@ namespace UIForia.Text {
                         underlaySoftness = element.style.TextUnderlaySoftness,
                         underlayX = element.style.TextUnderlayX,
                         underlayY = element.style.TextUnderlayY,
-                        whitespaceMode = element.style.TextWhitespaceMode
+                        whitespaceMode = element.style.TextWhitespaceMode,
+                        lineHeight = element.style.TextLineHeight
                     };
 
                     if (textElement.lastUpdateFrame != frameId) {
@@ -123,6 +120,11 @@ namespace UIForia.Text {
                         requiresRefresh = true;
                         break;
 
+                    case StylePropertyId.TextLineHeight:
+                        textInfo.textStyle.lineHeight = property.AsFloat;
+                        requiresRefresh = true;
+                        break;
+                    
                     case StylePropertyId.TextWhitespaceMode:
                         textInfo.textStyle.whitespaceMode = property.AsWhitespaceMode;
                         requiresRefresh = true;
@@ -180,6 +182,9 @@ namespace UIForia.Text {
                         break;
 
                 }
+                
+                
+                
             }
 
             if (requiresRefresh && textElement.lastUpdateFrame != frameId) {
@@ -189,52 +194,65 @@ namespace UIForia.Text {
 
         }
 
-        public void Update() {
+        public void CleanupFrame() {
 
-            //if (changedElementIds.size == 0) {
-            //     return;
+            // new RemoveDeadElementsJob() {
+            //     metaTable = elementSystem.metaTable,
+            //     textChanges = changedElementIds
+            // }.Run();
+            //
+            // for (int i = 0; i < changedElementIds.size; i++) {
+            //
+            //     ref BurstTextInfo textInfo = ref textInfoMap[changedElementIds[i].textInfoId];
+            //
+            //     if (textInfo.requiresTextTransform || textInfo.textStyle.textTransform != TextTransform.None) {
+            //         TextUtil.TransformText(textInfo.textStyle.textTransform, textInfo.symbolList.array, textInfo.symbolList.size);
+            //     }
+            //
             // }
+            //
+            // // from here on out its all burst
+            //
+            // new ProcessWhitespaceJob() {
+            //     buffer = inputSymbolBuffer,
+            //     textChanges = changedElementIds,
+            //     textInfoMap = textInfoMap
+            // }.Run();
+            //
+            // new CreateLayoutSymbols() {
+            //     buffer = layoutBuffer,
+            //     textChanges = changedElementIds,
+            //     textInfoMap = textInfoMap
+            // }.Run();
+            //
+            // new ComputeWordSizes() {
+            //     changes = changedElementIds,
+            //     textInfoMap = textInfoMap,
+            //     fontAssetMap = resourceManager.fontAssetMap
+            // }.Execute();
 
-            new RemoveDeadElementsJob() {
-                metaTable = elementSystem.metaTable,
-                textChanges = changedElementIds
-            }.Run();
+            changedElementIds.size = 0;
 
-            //  if (changedElementIds.size == 0) {
-            //     return;
-            // }
+        }
 
-            for (int i = 0; i < changedElementIds.size; i++) {
+        //Not burst job because we need access to the 'char' class for transformation
+        public struct UpdateTextTransformJob : IJob {
 
-                ref BurstTextInfo textInfo = ref textInfoMap[changedElementIds[i].textInfoId];
+            internal DataList<BurstTextInfo>.Shared textInfoMap;
+            internal DataList<TextChange>.Shared changedElementIds;
 
-                if (textInfo.requiresTextTransform || textInfo.textStyle.textTransform != TextTransform.None) {
-                    TextUtil.TransformText(textInfo.textStyle.textTransform, textInfo.symbolList.array, textInfo.symbolList.size);
+            public void Execute() {
+                for (int i = 0; i < changedElementIds.size; i++) {
+
+                    ref BurstTextInfo textInfo = ref textInfoMap[changedElementIds[i].textInfoId];
+
+                   // if (textInfo.requiresTextTransform || textInfo.textStyle.textTransform != TextTransform.None) {
+                        TextUtil.TransformText(textInfo.textStyle.textTransform, textInfo.symbolList.array, textInfo.symbolList.size);
+                   // }
+
                 }
 
             }
-
-            // from here on out its all burst
-
-            new ProcessWhitespaceJob() {
-                buffer = inputSymbolBuffer,
-                textChanges = changedElementIds,
-                textInfoMap = textInfoMap
-            }.Run();
-
-            new CreateLayoutSymbols() {
-                buffer = layoutBuffer,
-                textChanges = changedElementIds,
-                textInfoMap = textInfoMap
-            }.Run();
-
-            new ComputeWordSizes() {
-                changes = changedElementIds,
-                textInfoMap = textInfoMap,
-                fontAssetMap = resourceManager.fontAssetMap
-            }.Execute();
-
-            changedElementIds.size = 0;
 
         }
 
@@ -309,9 +327,21 @@ namespace UIForia.Text {
             layoutBuffer.Dispose();
         }
 
+        internal void GetTextChangesForView(ElementId viewRootId, DataList<TextChange>.Shared textChangeBuffer) {
+            textChangeBuffer.size = 0;
+
+            ElementTraversalInfo info = elementSystem.traversalTable[viewRootId];
+
+            for (int i = 0; i < changedElementIds.size; i++) {
+
+                if (info.IsAncestorOf(elementSystem.traversalTable[changedElementIds[i].elementId])) {
+                    textChangeBuffer.Add(changedElementIds[i]);
+                }
+
+            }
+
+        }
 
     }
-
-    // todo -- parallel for range
 
 }

@@ -27,7 +27,7 @@ namespace UIForia.Text {
                 
                 ComputeSizeInfo sizeInfo = new ComputeSizeInfo();
 
-                measureState.Initialize(textInfo.textStyle, fontAssetMap[textInfo.textStyle.fontAssetId]);
+                // measureState.Initialize(textInfo.textStyle, fontAssetMap[textInfo.textStyle.fontAssetId]);
                 
                 RecomputeFontInfo(ref measureState, ref sizeInfo);
                 
@@ -46,6 +46,8 @@ namespace UIForia.Text {
 
                 }
             }
+
+            measureState.Dispose();
 
         }
 
@@ -128,7 +130,7 @@ namespace UIForia.Text {
                         break;
 
                     case TextSymbolType.FontSizePush:
-                        measureState.PushFontSize(textSymbol.fontSize);
+                        // measureState.PushFontSize(textSymbol.fontSize);
                         RecomputeFontInfo(ref measureState, ref sizeInfo);
                         break;
 
@@ -223,7 +225,7 @@ namespace UIForia.Text {
 
             ref FontAssetInfo fontAsset = ref state.fontAssetInfo;
 
-            float fontSize = state.fontSize.value; // todo -- support em etc
+            float fontSize = state.fontSize; 
             
             float smallCapsMultiplier = (state.textTransform == TextTransform.SmallCaps) ? 0.8f : 1f;
             float fontScale = fontSize * smallCapsMultiplier / fontAsset.faceInfo.PointSize * fontAsset.faceInfo.Scale;

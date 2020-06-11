@@ -16,6 +16,8 @@ namespace UIForia {
         // this could be two jobs done in parallel however we'd have some false sharing contention
         // because of writes into the traversal table
 
+        // todo -- runs slow in managed, inline all the things and pre-allocate max size stack based on total number of active elements in application
+        
         public void Execute() {
 
             int ftbIndex = 0;

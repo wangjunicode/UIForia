@@ -41,7 +41,7 @@ namespace UIForia.Layout {
 
         public void RunVertical(BurstLayoutRunner* runner) {
             ref BurstTextInfo textInfo = ref runner->GetTextInfo(textElementInfoIndex);
-            RunLayoutVertical_WordsOnly(ref textInfo);
+            RunLayoutVertical_WordsOnly(ref UnsafeUtilityEx.AsRef<BurstLayoutRunner>(runner), ref textInfo);
         }
 
         public float ComputeContentWidth(ref BurstLayoutRunner runner, in BlockSize blockSize) {
@@ -64,19 +64,30 @@ namespace UIForia.Layout {
 
         public float ComputeContentHeight(ref BurstLayoutRunner layoutRunner, in BlockSize blockSize) {
             ref BurstTextInfo textInfo = ref layoutRunner.GetTextInfo(textElementInfoIndex);
-            RunLayoutVertical_WordsOnly(ref textInfo);
+            RunLayoutVertical_WordsOnly(ref  layoutRunner, ref textInfo);
             ref List_TextLineInfo lineInfoList = ref textInfo.lineInfoList;
 
             return lineInfoList.GetLast().y + lineInfoList.GetLast().height;
         }
 
-        private void RunLayoutVertical_WordsOnly(ref BurstTextInfo textInfo) {
+        private void RunLayoutVertical_WordsOnly(ref BurstLayoutRunner runner, ref BurstTextInfo textInfo) {
             ref List_TextLayoutSymbol layoutSymbolList = ref textInfo.layoutSymbolList;
 
             float lineOffset = 0;
 
             ref List_TextLineInfo lineInfoList = ref textInfo.lineInfoList;
 
+            int fontAssetId = textInfo.textStyle.fontAssetId;
+
+            ref FontAssetInfo fontAsset = ref runner.GetFontAsset(fontAssetId);
+
+            float fontSize = runner.GetResolvedFontSize(elementId);
+            
+            float smallCapsMultiplier = (textInfo.textStyle.textTransform == TextTransform.SmallCaps) ? 0.8f : 1f;
+            float fontScale = fontSize * smallCapsMultiplier / fontAsset.faceInfo.PointSize * fontAsset.faceInfo.Scale;
+            
+            float lineHeight = textInfo.textStyle.lineHeight * fontAsset.faceInfo.LineHeight * fontScale;
+            
             // need to compute a line height for each line
             for (int i = 0; i < lineInfoList.size; i++) {
                 ref TextLineInfo lineInfo = ref lineInfoList[i];
@@ -88,7 +99,7 @@ namespace UIForia.Layout {
 
                 lineInfo.height = max;
                 lineInfo.y = lineOffset;
-                lineOffset += lineInfo.height; // + gap / modifiers / etc
+                lineOffset += lineHeight;
                 for (int w = lineInfo.wordStart; w < end; w++) {
                     layoutSymbolList.array[w].wordInfo.y = lineInfo.y;
                 }
@@ -144,7 +155,7 @@ namespace UIForia.Layout {
 
                         // if whitespace overruns end of line, start a new one and add it to that line
                         if (cursorX + wordInfo.width > width) {
-                            buffer.Add(new TextLineInfo(i, 1, cursorX));
+                            buffer.Add(new TextLineInfo(wordStart, wordCount, cursorX));
                             wordStart = i + 1;
                             wordCount = 1;
                             cursorX = wordInfo.width;
@@ -184,7 +195,7 @@ namespace UIForia.Layout {
                                 wordCount = 1;
                             }
                             else {
-                                buffer.Add(new TextLineInfo(i, 1, width));
+                                buffer.Add(new TextLineInfo(wordStart, 1, width));
                                 cursorX = 0;
                                 wordStart = i + 1;
                                 wordCount = 0;
@@ -192,7 +203,7 @@ namespace UIForia.Layout {
 
                         }
                         // next word is too long, break it onto the next line
-                        else if (cursorX + wordInfo.width > width) {
+                        else if (cursorX + wordInfo.width >= width + 0.5f) {
                             buffer.Add(new TextLineInfo(wordStart, wordCount, cursorX));
                             wordStart = i;
                             wordCount = 1;

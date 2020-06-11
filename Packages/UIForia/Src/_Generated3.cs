@@ -128,6 +128,7 @@ namespace UIForia.Rendering {
 		public const float TextUnderlayDilate = 0f;
 		public const float TextUnderlaySoftness = 0f;
 		public const float TextFaceDilate = 0f;
+		public const float TextLineHeight = 1.4f;
 		public const UnderlayType TextUnderlayType = UIForia.Rendering.UnderlayType.Unset;
 		public const TextTransform TextTransform = UIForia.Text.TextTransform.None;
 		public const WhitespaceMode TextWhitespaceMode = UIForia.Text.WhitespaceMode.CollapseWhitespaceAndTrim;
@@ -141,8 +142,6 @@ namespace UIForia.Rendering {
 		public const LayoutType LayoutType = UIForia.Layout.LayoutType.Flex;
 		public const LayoutBehavior LayoutBehavior = UIForia.Layout.LayoutBehavior.Normal;
 		public const int ZIndex = 0;
-		public const int RenderLayerOffset = 0;
-		public const RenderLayer RenderLayer = UIForia.Rendering.RenderLayer.Default;
 		public const int Layer = 0;
 		public static readonly Color ShadowColor = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color ShadowTint = new Color(-1f, -1f, -1f, -1f);
@@ -383,6 +382,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextUnderlaySoftness, 0f);
 				case StylePropertyId.TextFaceDilate:
 					 return new StyleProperty(StylePropertyId.TextFaceDilate, 0f);
+				case StylePropertyId.TextLineHeight:
+					 return new StyleProperty(StylePropertyId.TextLineHeight, 1.4f);
 				case StylePropertyId.TextUnderlayType:
 					 return new StyleProperty(StylePropertyId.TextUnderlayType, (int)UIForia.Rendering.UnderlayType.Unset);
 				case StylePropertyId.TextTransform:

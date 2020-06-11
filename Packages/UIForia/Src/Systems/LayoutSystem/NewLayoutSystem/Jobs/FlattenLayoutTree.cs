@@ -18,65 +18,79 @@ namespace UIForia.Layout {
         public int viewActiveElementCount;
 
         public void Execute() {
-            
+
             if (viewActiveElementCount <= 0) {
                 return;
             }
 
             Allocator stackAllocator = TypedUnsafe.GetTemporaryAllocatorLabel<ElementId>(viewActiveElementCount);
             DataList<ElementId> stack = new DataList<ElementId>(viewActiveElementCount, stackAllocator);
-            
+
             elementList.EnsureCapacity(viewActiveElementCount);
             parentList.EnsureCapacity(viewActiveElementCount);
 
             stack.Add(viewRootId);
 
-            while (stack.size != 0) {
-                ElementId current = stack[--stack.size];
+            // inlining a lot of this because outside of burst this was slow
+            
+            ElementId* s = stack.GetArrayPointer();
+            LayoutHierarchyInfo* layoutHTable = layoutHierarchyTable.array;
+            int stackSize = 1;
+            ElementId* elist = elementList.GetArrayPointer();
+            ElementId* plist = parentList.GetArrayPointer();
+            int eSize = 0;
+            int pSize = 0;
 
-                ref LayoutHierarchyInfo hierarchyInfo = ref layoutHierarchyTable[current];
+            const int ENTITY_INDEX_BITS = 24;
+            const int ENTITY_INDEX_MASK = (1 << ENTITY_INDEX_BITS) - 1;
+
+            while (stackSize != 0) {
+                ElementId current = s[--stackSize];
+
+                ref LayoutHierarchyInfo hierarchyInfo = ref layoutHTable[current.id & ENTITY_INDEX_MASK];
 
                 if (hierarchyInfo.behavior != LayoutBehavior.Normal) {
                     continue;
                 }
 
-                elementList.AddUnchecked(current);
-                parentList.AddUnchecked(hierarchyInfo.parentId);
+                elist[eSize++] = current;
+                plist[pSize++] = hierarchyInfo.parentId;
 
                 ElementId childPtr = hierarchyInfo.lastChildId;
 
                 while (childPtr != default) {
-                    stack.AddUnchecked(childPtr);
-                    childPtr = layoutHierarchyTable[childPtr].prevSiblingId;
+                    s[stackSize++] = childPtr;
+                    childPtr = layoutHTable[childPtr.id & ENTITY_INDEX_MASK].prevSiblingId;
                 }
 
             }
-
+            
             if (ignoredList.size > 1) {
                 NativeSortExtension.Sort(ignoredList.GetArrayPointer(), ignoredList.size, new ElementFTBHierarchySort(traversalTable));
             }
 
             for (int i = 0; i < ignoredList.size; i++) {
-                stack.Add(ignoredList[i]);
+                s[stackSize++] = ignoredList[i];
 
-                while (stack.size != 0) {
-                    ElementId current = stack[--stack.size];
+                while (stackSize != 0) {
+                    ElementId current = s[--stackSize];
 
-                    ref LayoutHierarchyInfo hierarchyInfo = ref layoutHierarchyTable[current];
-                    
-                    elementList.AddUnchecked(current);
-                    parentList.AddUnchecked(hierarchyInfo.parentId);
+                    ref LayoutHierarchyInfo hierarchyInfo = ref layoutHTable[current.id & ENTITY_INDEX_MASK];
+
+                    elist[eSize++] = current;
+                    plist[pSize++] = hierarchyInfo.parentId;
 
                     ElementId childPtr = hierarchyInfo.lastChildId;
 
                     while (childPtr != default) {
-                        stack.AddUnchecked(childPtr);
-                        childPtr = layoutHierarchyTable[childPtr].prevSiblingId;
+                        s[stackSize++] = childPtr;
+                        childPtr = layoutHTable[childPtr.id & ENTITY_INDEX_MASK].prevSiblingId;
                     }
                 }
 
             }
-
+            elementList.size = eSize;
+            parentList.size = pSize;
             stack.Dispose();
         }
 

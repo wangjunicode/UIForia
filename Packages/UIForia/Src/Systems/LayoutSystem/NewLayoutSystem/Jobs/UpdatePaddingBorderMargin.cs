@@ -33,12 +33,14 @@ namespace UIForia.Layout {
 
                 ElementId elementId = elementList[i];
 
-                ref PaddingBorderMargin properties = ref propertyTable.array[elementId.index];
-                ref LayoutInfo verticalInfo = ref verticalLayoutInfo.array[elementId.index];
-                ref LayoutInfo horizontalInfo = ref horizontalLayoutInfo.array[elementId.index];
-                ref LayoutBoxInfo layoutResult = ref layoutResultTable.array[elementId.index];
-                
-                float emSize = emTable.array[elementId.index].resolvedValue;
+                int index = elementId.index;
+
+                ref PaddingBorderMargin properties = ref propertyTable.array[index];
+                ref LayoutInfo verticalInfo = ref verticalLayoutInfo.array[index];
+                ref LayoutInfo horizontalInfo = ref horizontalLayoutInfo.array[index];
+                ref LayoutBoxInfo layoutResult = ref layoutResultTable.array[index];
+
+                float emSize = emTable.array[index].resolvedValue;
 
                 verticalInfo.emSize = emSize;
                 horizontalInfo.emSize = emSize;
@@ -57,35 +59,52 @@ namespace UIForia.Layout {
                 float paddingBottom = MeasurementUtil.ResolveFixedLayoutSize(viewParameters, emSize, properties.paddingBottom);
                 float paddingRight = MeasurementUtil.ResolveFixedLayoutSize(viewParameters, emSize, properties.paddingRight);
                 float paddingLeft = MeasurementUtil.ResolveFixedLayoutSize(viewParameters, emSize, properties.paddingLeft);
-                
+
                 // todo -- still doesn't handle animated case, will need to store each property twice with animation info :(
-                
+
                 verticalInfo.marginStart = marginTop;
                 verticalInfo.marginEnd = marginBottom;
-                horizontalInfo.marginStart = marginLeft;
-                horizontalInfo.marginEnd = marginRight;
-
-                horizontalInfo.paddingBorderStart = paddingLeft + borderLeft;
-                horizontalInfo.paddingBorderEnd = paddingRight + borderRight;
                 verticalInfo.paddingBorderStart = paddingTop + borderTop;
                 verticalInfo.paddingBorderEnd = paddingBottom + borderBottom;
+                
+                if (horizontalInfo.marginStart != marginLeft || horizontalInfo.marginEnd != marginRight) {
+                    LayoutUtil.MarkForContentSizeChange(elementId, default, horizontalLayoutInfo);
+                }
+                
+                if (verticalInfo.marginStart != marginTop || verticalInfo.marginEnd != marginBottom) {
+                    LayoutUtil.MarkForContentSizeChange(elementId, default, verticalLayoutInfo);
+                }
 
+                if (horizontalInfo.paddingBorderStart != paddingLeft + borderLeft || horizontalInfo.paddingBorderEnd != paddingRight + borderRight) {
+                    
+                }
+                
+                horizontalInfo.marginStart = marginLeft;
+                horizontalInfo.marginEnd = marginRight;
+                horizontalInfo.paddingBorderStart = paddingLeft + borderLeft;
+                horizontalInfo.paddingBorderEnd = paddingRight + borderRight;
+
+                // if padding border changed -> content width changed
+                // if margin changed -> tell parent
+                
+                
+                // if these aren't used frequently I can skip this step and just re-compute when needed on demand
+                // this is about 25% of the run time of the job
                 layoutResult.margin.top = marginTop;
                 layoutResult.margin.right = marginRight;
                 layoutResult.margin.bottom = marginBottom;
                 layoutResult.margin.left = marginLeft;
-
+                
                 layoutResult.border.top = borderTop;
                 layoutResult.border.right = borderRight;
                 layoutResult.border.bottom = borderBottom;
                 layoutResult.border.left = borderLeft;
-
+                
                 layoutResult.padding.top = paddingTop;
                 layoutResult.padding.right = paddingRight;
                 layoutResult.padding.bottom = paddingBottom;
                 layoutResult.padding.left = paddingLeft;
 
-                
             }
 
         }

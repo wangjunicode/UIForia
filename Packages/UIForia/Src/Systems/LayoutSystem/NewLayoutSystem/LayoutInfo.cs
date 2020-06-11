@@ -21,6 +21,9 @@ namespace UIForia.Layout {
         public LayoutFit fit;
 
         public bool isBlockProvider;
+        public bool requiresLayout;
+        public bool isContentBased;
+        public bool requiresContentSizeLayout;
 
         public float ContentAreaSize {
             get => finalSize - (paddingBorderStart + paddingBorderEnd);

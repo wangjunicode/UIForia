@@ -24,6 +24,10 @@ namespace UIForia.Systems {
 
         private void Run(int start, int end) {
 
+            // todo -- compute oriented bounds for clippers in this job so it can run in parallel with building world matrices
+            // we duplicate work but who cares, parallel benefit is big
+            // will take longer but parallel trade off gains us ~0.2ms by not waiting on the world matrix job
+            
             // skip screen and never clippers
             start = start < 2 ? 2 : start;
 

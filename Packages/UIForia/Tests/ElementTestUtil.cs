@@ -50,12 +50,16 @@ namespace Tests {
                 Assert.Fail("Child Count did not match at depth: " + depth);
             }
 
-            for (int i = 0; i < element.ChildCount; i++) {
-                if (element.children[i].GetType() != assertRoot.childTypes[i].parentType) {
-                    Assert.Fail($"Types did not match for child number {i} at depth {depth}. {element.children[i].GetType()} is not {assertRoot.childTypes[i].parentType}");
+            var ptr = element.GetFirstChild();
+            int i = 0;
+            while (ptr != null) {
+                if (ptr.GetType() != assertRoot.childTypes[i].parentType) {
+                    Assert.Fail($"Types did not match for child number {i} at depth {depth}. {ptr.GetType()} is not {assertRoot.childTypes[i].parentType}");
                 }
 
-                AssertHierarchy(element.children[i], assertRoot.childTypes[i], depth + 1);
+                AssertHierarchy(ptr, assertRoot.childTypes[i], depth + 1);
+                ptr = ptr.GetNextSibling();
+                i++;
             }
         }
 
@@ -67,38 +71,48 @@ namespace Tests {
                     Assert.IsTrue(element.isDisabled);
                     Assert.IsFalse(element.isEnabled);
                     break;
+
                 case TestEnableFlags.DisabledSelf:
                     Assert.IsTrue(element.isSelfDisabled);
                     Assert.IsFalse(element.isSelfEnabled);
                     break;
+
                 case TestEnableFlags.DisabledAncestor:
                     Assert.IsTrue(element.isDisabled);
                     Assert.IsTrue(element.isSelfEnabled);
                     Assert.IsFalse(element.isEnabled);
                     break;
+
                 case TestEnableFlags.Enabled:
                     Assert.IsTrue(element.isEnabled);
                     Assert.IsTrue(element.isSelfEnabled);
                     Assert.IsFalse(element.isSelfDisabled);
                     break;
+
                 case TestEnableFlags.EnabledAncestor:
                     break;
+
                 case TestEnableFlags.EnabledSelf:
                     Assert.IsTrue(element.isSelfEnabled);
                     break;
             }
 
-            if (element.children.Count != assertRoot.childTypes.Length) {
+            if (element.ChildCount != assertRoot.childTypes.Length) {
                 Assert.Fail("Child Count did not match at depth: " + depth);
             }
 
-            for (int i = 0; i < element.children.Count; i++) {
-                if (element.children[i].GetType() != assertRoot.childTypes[i].parentType) {
+            UIElement ptr = element.GetFirstChild();
+            int i = 0;
+            while (ptr != null) {
+                if (ptr.GetType() != assertRoot.childTypes[i].parentType) {
                     Assert.Fail("Types did not match for child number " + i + " at depth " + depth);
                 }
 
-                AssertHierarchy(element.children[i], assertRoot.childTypes[i], depth + 1);
+                AssertHierarchy(ptr, assertRoot.childTypes[i], depth + 1);
+                ptr = ptr.GetNextSibling();
+                i++;
             }
+           
         }
 
     }

@@ -24,7 +24,7 @@ namespace UIForia.Layout {
                 ref LayoutHierarchyInfo layoutHierarchyInfo = ref runner->GetLayoutHierarchy(current);
 
                 if (layoutHierarchyInfo.behavior == LayoutBehavior.Ignored) {
-                    
+
                     ref LayoutInfo parentLayoutInfo = ref runner->GetHorizontalLayoutInfo(layoutHierarchyInfo.parentId);
 
                     BlockSize blockSize = new BlockSize(parentLayoutInfo.finalSize, parentLayoutInfo.ContentAreaSize);
@@ -35,7 +35,11 @@ namespace UIForia.Layout {
 
                 }
 
-                layoutBoxTable[current].RunLayoutHorizontal(runner);
+                ref LayoutInfo layoutInfo = ref runner->GetHorizontalLayoutInfo(current);
+               // if (layoutInfo.requiresLayout) {
+                    layoutBoxTable[current].RunLayoutHorizontal(runner);
+                    layoutInfo.requiresLayout = false;
+               // }
             }
         }
 
@@ -59,7 +63,7 @@ namespace UIForia.Layout {
                 ref LayoutHierarchyInfo layoutHierarchyInfo = ref runner->GetLayoutHierarchy(current);
 
                 if (layoutHierarchyInfo.behavior == LayoutBehavior.Ignored) {
-                    
+
                     ref LayoutInfo parentLayoutInfo = ref runner->GetVerticalLayoutInfo(layoutHierarchyInfo.parentId);
 
                     BlockSize blockSize = new BlockSize(parentLayoutInfo.finalSize, parentLayoutInfo.ContentAreaSize);
@@ -70,7 +74,13 @@ namespace UIForia.Layout {
 
                 }
 
-                layoutBoxTable[current].RunLayoutVertical(runner);
+                ref LayoutInfo layoutInfo = ref runner->GetVerticalLayoutInfo(current);
+
+               // if (layoutInfo.requiresLayout) {
+                    layoutBoxTable[current].RunLayoutVertical(runner);
+                    layoutInfo.requiresLayout = false;
+               // }
+
             }
 
         }

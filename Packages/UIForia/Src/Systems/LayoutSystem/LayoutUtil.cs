@@ -5,6 +5,22 @@ namespace UIForia.Systems {
 
     public static class LayoutUtil {
 
+        public static void MarkForContentSizeChange(ElementId elementId, ElementTable<LayoutHierarchyInfo> layoutHierarchyTable, ElementTable<LayoutInfo> layoutInfo) {
+
+            return;
+            ElementId parentId = layoutHierarchyTable[elementId].parentId;
+
+            while (parentId != default) {
+                // todo -- also stop after encountering ignored
+                if (!layoutInfo[parentId].isContentBased || layoutInfo[parentId].requiresContentSizeLayout) {
+                    break;
+                }
+
+                parentId = layoutHierarchyTable[parentId].parentId;
+            }
+
+        }
+
         public static void UnlinkFromParent(ElementId elementId, ElementTable<LayoutHierarchyInfo> layoutHierarchyTable) {
             ref LayoutHierarchyInfo layoutInfo = ref layoutHierarchyTable[elementId];
 
@@ -226,7 +242,7 @@ namespace UIForia.Systems {
                 layoutHierarchyTable[ptr].parentId = hierarchyInfo.parentId;
                 ptr = layoutHierarchyTable[ptr].nextSiblingId;
             }
-            
+
             ref LayoutHierarchyInfo parentHierarchyInfo = ref layoutHierarchyTable[hierarchyInfo.parentId];
 
             ElementTraversalInfo elementTraversalInfo = traversalTable[elementId];
@@ -258,7 +274,7 @@ namespace UIForia.Systems {
                     firstChildInfo.prevSiblingId = parentHierarchyInfo.lastChildId;
                     parentHierarchyInfo.childCount += hierarchyInfo.childCount;
                     parentHierarchyInfo.lastChildId = hierarchyInfo.lastChildId;
-                   
+
                 }
                 else {
                     ref LayoutHierarchyInfo prevSibling = ref layoutHierarchyTable[forwardPtr];

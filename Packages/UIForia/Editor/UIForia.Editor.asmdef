@@ -2,7 +2,8 @@
     "name": "UIForia.Editor",
     "references": [
         "UIForia.Src",
-        "Unity.TextMeshPro"
+        "Unity.TextMeshPro",
+        "Unity.Mathematics"
     ],
     "includePlatforms": [
         "Editor"

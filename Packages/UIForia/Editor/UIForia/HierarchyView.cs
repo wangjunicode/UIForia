@@ -35,7 +35,7 @@ namespace UIForia.Editor {
             elementStyleNormal.textColor = UIForiaEditorTheme.elementStyleNormal;
             s_ElementNameStyle.normal = elementNameNormal;
         }
-        
+
         public bool RunGUI() {
             Reload();
             ExpandAll();
@@ -51,7 +51,6 @@ namespace UIForia.Editor {
             LayoutSystem layoutSystem = UIForiaHierarchyWindow.s_SelectedApplication.layoutSystem;
             ElementSystem elementSystem = UIForiaHierarchyWindow.s_SelectedApplication.elementSystem;
 
-
             TreeViewItem root = new TreeViewItem(-9999, -1);
 
             List<UIView> views = UIForiaHierarchyWindow.s_SelectedApplication.views;
@@ -61,7 +60,7 @@ namespace UIForia.Editor {
                 if (uiView.RootElement.isDisabled) continue;
 
                 ElementTreeItem firstChild = new ElementTreeItem(uiView.RootElement);
-                
+
                 stack.Push(firstChild);
 
                 while (stack.Count > 0) {
@@ -71,8 +70,7 @@ namespace UIForia.Editor {
                     }
 
                     ref LayoutHierarchyInfo hierarchyInfo = ref layoutSystem.layoutHierarchyTable[current.element.id];
-                    
-                    
+
                     // if (layoutMeta.layoutBehavior == LayoutBehavior.Ignored) {
                     //     ignored.Add(current.element);
                     //     continue;
@@ -80,7 +78,7 @@ namespace UIForia.Editor {
                     // else if (layoutMeta.layoutBehavior == LayoutBehavior.TranscludeChildren) { }
 
                     ElementId ptr = hierarchyInfo.firstChildId;
-                    
+
                     while (ptr != default) {
                         ElementTreeItem childItem = new ElementTreeItem(elementSystem.instanceTable[ptr.index]);
                         ptr = layoutSystem.layoutHierarchyTable[ptr].nextSiblingId;
@@ -193,6 +191,8 @@ namespace UIForia.Editor {
         protected override TreeViewItem BuildRoot() {
             Stack<ElementTreeItem> stack = StackPool<ElementTreeItem>.Get();
 
+            List<UIElement> ownChildren = new List<UIElement>(32);
+
             // todo -- maybe pool tree items
 
             TreeViewItem root = new TreeViewItem(-9999, -1);
@@ -212,12 +212,13 @@ namespace UIForia.Editor {
                     }
 
                     UIElement element = current.element;
+                    ownChildren.Clear();
 
-                    List<UIElement> ownChildren = element.GetChildren();
+                    UIElement childptr = element.GetFirstChild();
 
-                    if (ownChildren.Count == 0) {
-                        ListPool<UIElement>.Release(ref ownChildren);
-                        continue;
+                    while (childptr != null) {
+                        ownChildren.Add(childptr);
+                        childptr = childptr.GetNextSibling();
                     }
 
                     for (int i = 0; i < ownChildren.Count; i++) {
@@ -298,7 +299,7 @@ namespace UIForia.Editor {
             s_Content.text = item.element.GetDisplayName();
 
             if (showLayoutStats) {
-                s_Content.text += $"w: {item.element.layoutBox.cacheHit}, {item.element.layoutBox.cacheMiss}";
+              //  s_Content.text += $"w: {item.element.layoutBox.cacheHit}, {item.element.layoutBox.cacheMiss}";
             }
 
             if (item.element.isEnabled && item.element.renderBox != null) {

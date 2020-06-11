@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
@@ -173,8 +174,14 @@ namespace UIForia.Systems {
 
                 UIStyleSet style = element.style;
 
+                horizontalLayoutInfo.requiresLayout = true;
+                verticalLayoutInfo.requiresLayout = true;
+
                 hierarchyInfo.behavior = style.LayoutBehavior;
                 // todo -- maybe skip for transclusion since we never do the layout
+                if (hierarchyInfo.behavior == LayoutBehavior.TranscludeChildren) {
+                    GetLayoutContext(element.View).transclusionCount++;
+                }
 
                 transformInfoTable[element.id] = new TransformInfo() {
                     positionX = style.TransformPositionX,
@@ -501,6 +508,7 @@ namespace UIForia.Systems {
                         }
                         else if (previousBehavior == LayoutBehavior.TranscludeChildren) {
                             LayoutUtil.Untransclude(element.id, elementSystem.traversalTable, elementSystem.hierarchyTable, layoutHierarchyTable);
+                            GetLayoutContext(element.View).transclusionCount--;
                             p = layoutHierarchyTable[element.id].parentId;
                             childrenChangedList.Add(element.id);
                         }
@@ -512,6 +520,7 @@ namespace UIForia.Systems {
                         else if (newBehavior == LayoutBehavior.TranscludeChildren) {
                             LayoutUtil.Transclude(element.id, layoutHierarchyTable);
                             layoutResultTable[element.id] = default;
+                            GetLayoutContext(element.View).transclusionCount++;
                         }
 
                         childrenChangedList.Add(p);
@@ -532,9 +541,15 @@ namespace UIForia.Systems {
 
         }
 
-        public void RunLayout() {
+        public void MarkForChildrenUpdate(ElementId id) {
 
-            // clipping / culling
+            if ((elementSystem.metaTable[id].flags & UIElementFlags.EnableStateChanged) == 0) {
+                childrenChangedList.Add(id);
+            }
+
+        }
+
+        public void RunLayout() {
 
             // cannot be parallel atm. can be a job though
             for (int i = 0; i < gridPlaceList.size; i++) {
@@ -560,6 +575,7 @@ namespace UIForia.Systems {
             float applicationWidth = application.Width;
             float applicationHeight = application.Height;
             NativeArray<JobHandle> layoutHandles = new NativeArray<JobHandle>(layoutContexts.size, Allocator.Temp);
+            NativeArray<JobHandle> verticalAlignHandles = new NativeArray<JobHandle>(layoutContexts.size, Allocator.Temp);
 
             clippers.size = 0;
 
@@ -602,7 +618,7 @@ namespace UIForia.Systems {
 
                 UIView view = layoutContexts[i].view;
                 ElementId viewRootId = view.dummyRoot.id;
-                int activeElementCount = view.activeElementCount;
+                int activeElementCount = layoutContext.ActiveElementCount;
 
                 ViewParameters viewParameters = new ViewParameters() {
                     viewX = view.position.x,
@@ -628,6 +644,15 @@ namespace UIForia.Systems {
                 layoutContext.runner->layoutBoxTable = layoutBoxTable.array;
                 layoutContext.runner->horizontalLayoutInfoTable = horizontalLayoutInfoTable.array;
                 layoutContext.runner->verticalLayoutInfoTable = verticalLayoutInfoTable.array;
+                layoutContext.runner->emTable = elementSystem.emTable.array;
+                layoutContext.runner->fontAssetMap = application.ResourceManager.fontAssetMap.GetArrayPointer();
+                
+                // dont expect lots and lots of text updates per frame, a few dozen at most
+                // still nice to be parallel
+                // something needs to own the text data then
+                // per-view text system?
+                // give data to layout context?
+                // kind of is a layout thing
 
                 JobHandle emTableHandle = new UpdateEmTable() {
                     rootId = viewRootId,
@@ -638,6 +663,21 @@ namespace UIForia.Systems {
                     viewWidth = viewParameters.viewWidth,
                     viewHeight = viewParameters.viewHeight
                 }.Schedule();
+
+                textSystem.GetTextChangesForView(viewRootId, layoutContext.textChangeBuffer);
+
+                JobHandle textTransformUpdates = new TextSystem.UpdateTextTransformJob() {
+                    changedElementIds = layoutContext.textChangeBuffer,
+                    textInfoMap = textSystem.textInfoMap
+                }.Schedule();
+
+                JobHandle textLayoutUpdates = VertigoScheduler.Await(emTableHandle, textTransformUpdates).ThenParallel(new UpdateTextLayoutJob() {
+                    parallel = new ParallelParams(layoutContext.textChangeBuffer.size, 10),
+                    emTable = elementSystem.emTable,
+                    textChanges = layoutContext.textChangeBuffer,
+                    fontAssetMap = application.ResourceManager.fontAssetMap,
+                    textInfoMap = textSystem.textInfoMap
+                });
 
                 JobHandle flatten = new FlattenLayoutTree() {
                     viewRootId = viewRootId,
@@ -662,7 +702,7 @@ namespace UIForia.Systems {
                 });
 
                 // possible to be parallel for big tree with ignored, fixed, and no fit
-                JobHandle horizontalLayout = VertigoScheduler.Await(updatePaddingMarginBorder).Then(new RunLayoutHorizontal() {
+                JobHandle horizontalLayout = VertigoScheduler.Await(textLayoutUpdates, updatePaddingMarginBorder).Then(new RunLayoutHorizontal() {
                     runner = layoutContext.runner,
                     elementList = layoutContext.elementList,
                     layoutBoxTable = layoutBoxTable
@@ -696,6 +736,7 @@ namespace UIForia.Systems {
                     viewRootId = viewRootId,
                     layoutBoxInfoTable = layoutResultTable
                 });
+                verticalAlignHandles[i] = verticalAlignment;
 
                 // parallel if big list element count, single if small, order doesnt matter
                 JobHandle buildLocalMatrices = VertigoScheduler.Await(horizontalAlignment, verticalAlignment).ThenParallel(new BuildLocalMatrices() {
@@ -726,8 +767,10 @@ namespace UIForia.Systems {
                 JobHandle.ScheduleBatchedJobs();
             }
 
+            JobHandle layoutCompleted = JobHandle.CombineDependencies(layoutHandles);
             // todo -- this can be parallel if we find the view indices and then count how many were added per view to get the ranges
-            JobHandle updateClippers = VertigoScheduler.Await(constructClippers, JobHandle.CombineDependencies(layoutHandles)).Then(new UpdateClippers() {
+            // todo -- can start this while we compute local matrices if this job re-computes local and world matrices, big savings!
+            JobHandle updateClippers = VertigoScheduler.Await(constructClippers, layoutCompleted, JobHandle.CombineDependencies(verticalAlignHandles)).Then(new UpdateClippers() {
                 clipperList = clippers,
                 intersectionResults = clipperIntersections,
                 clipInfoTable = clipInfoTable,
@@ -737,8 +780,8 @@ namespace UIForia.Systems {
             NativeArray<JobHandle> cullingHandles = new NativeArray<JobHandle>(layoutContexts.size, Allocator.Temp);
 
             for (int i = 0; i < layoutContexts.size; i++) {
-                cullingHandles[i] = VertigoScheduler.Await(updateClippers).ThenParallel(new ComputeElementCulling() {
-                    parallel = new ParallelParams(layoutContexts[i].view.activeElementCount, 250),
+                cullingHandles[i] = VertigoScheduler.Await(updateClippers, layoutCompleted).ThenParallel(new ComputeElementCulling() {
+                    parallel = new ParallelParams(layoutContexts[i].ActiveElementCount, 250),
                     clipperList = clippers,
                     layoutResultTable = layoutResultTable,
                     elementList = layoutContexts[i].elementList,
@@ -750,7 +793,7 @@ namespace UIForia.Systems {
 
             cullingHandles.Dispose();
             layoutHandles.Dispose();
-
+            verticalAlignHandles.Dispose();
         }
 
         public void OnViewAdded(UIView view) {
@@ -826,7 +869,7 @@ namespace UIForia.Systems {
 
         public void QueryPoint(float2 point, IList<UIElement> retn) {
 
-            if (!new Rect(0, 0, Screen.width, Screen.height).Contains(point)) {
+            if (!new Rect(0, 0, application.Width, application.Height).Contains(point)) {
                 return;
             }
 
@@ -870,6 +913,7 @@ namespace UIForia.Systems {
 
             public void Execute() {
 
+                if (clippers.size < 2) return;
                 DataList<bool> containsPoint = new DataList<bool>(clippers.size, Allocator.Temp);
                 containsPoint[0] = true; // never clipper
                 containsPoint[1] = true; // screen clipper

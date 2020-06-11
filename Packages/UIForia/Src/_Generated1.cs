@@ -803,6 +803,13 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetInstanceProperty(new StyleProperty(StylePropertyId.TextFaceDilate, value), state); }
         }
         
+        public float TextLineHeight {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextLineHeight, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetInstanceProperty(new StyleProperty(StylePropertyId.TextLineHeight, value), state); }
+        }
+        
         public UIForia.Rendering.UnderlayType TextUnderlayType {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.TextUnderlayType, state).AsUnderlayType; }
@@ -893,7 +900,6 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             set { m_StyleSet.SetInstanceProperty(new StyleProperty(StylePropertyId.ZIndex, value), state); }
         }
-        
         
         public int Layer {
             [System.Diagnostics.DebuggerStepThrough]
@@ -1761,6 +1767,13 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.TextFaceDilate, value)); }
         }
             
+        public float TextLineHeight {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.TextLineHeight); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.TextLineHeight, value)); }
+        }
+            
         public UIForia.Rendering.UnderlayType TextUnderlayType {
             [System.Diagnostics.DebuggerStepThrough]
             get { return (UIForia.Rendering.UnderlayType)FindEnumProperty(StylePropertyId.TextUnderlayType); }
@@ -1851,7 +1864,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.ZIndex, value)); }
         }
-
+            
         public int Layer {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindIntProperty(StylePropertyId.Layer); }
@@ -2974,6 +2987,16 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public float TextLineHeight { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.TextLineHeight, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextLineHeight), out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.TextLineHeight;
+                }
+            }
+
             public UIForia.Rendering.UnderlayType TextUnderlayType { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -4090,6 +4113,14 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.TextFaceDilate, state).AsFloat;
         }
         
+        public void SetTextLineHeight(in float? value, StyleState state) {
+            SetInstanceProperty(new StyleProperty(StylePropertyId.TextLineHeight, value), state);
+        }
+
+        public float GetTextLineHeight(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.TextLineHeight, state).AsFloat;
+        }
+        
         public void SetTextUnderlayType(in UIForia.Rendering.UnderlayType? value, StyleState state) {
             SetInstanceProperty(new StyleProperty(StylePropertyId.TextUnderlayType, (int)value), state);
         }
@@ -4193,7 +4224,7 @@ namespace UIForia.Rendering {
         public int GetZIndex(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.ZIndex, state).AsInt;
         }
-
+        
         public void SetLayer(in int? value, StyleState state) {
             SetInstanceProperty(new StyleProperty(StylePropertyId.Layer, value), state);
         }
@@ -4497,6 +4528,8 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.TextUnderlaySoftness, TextUnderlaySoftness);
 				case StylePropertyId.TextFaceDilate:
 					 return new StyleProperty(StylePropertyId.TextFaceDilate, TextFaceDilate);
+				case StylePropertyId.TextLineHeight:
+					 return new StyleProperty(StylePropertyId.TextLineHeight, TextLineHeight);
 				case StylePropertyId.TextUnderlayType:
 					 return new StyleProperty(StylePropertyId.TextUnderlayType, (int)TextUnderlayType);
 				case StylePropertyId.TextTransform:
@@ -4523,7 +4556,7 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.LayoutBehavior, (int)LayoutBehavior);
 				case StylePropertyId.ZIndex:
 					 return new StyleProperty(StylePropertyId.ZIndex, ZIndex);
-                case StylePropertyId.Layer:
+				case StylePropertyId.Layer:
 					 return new StyleProperty(StylePropertyId.Layer, Layer);
 				case StylePropertyId.ShadowColor:
 					 return new StyleProperty(StylePropertyId.ShadowColor, ShadowColor);
@@ -4666,6 +4699,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextUnderlayDilate: return typeof(System.Single);
                     case StylePropertyId.TextUnderlaySoftness: return typeof(System.Single);
                     case StylePropertyId.TextFaceDilate: return typeof(System.Single);
+                    case StylePropertyId.TextLineHeight: return typeof(System.Single);
                     case StylePropertyId.TextUnderlayType: return typeof(UIForia.Rendering.UnderlayType);
                     case StylePropertyId.TextTransform: return typeof(UIForia.Text.TextTransform);
                     case StylePropertyId.TextWhitespaceMode: return typeof(UIForia.Text.WhitespaceMode);
@@ -4679,7 +4713,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.LayoutType: return typeof(UIForia.Layout.LayoutType);
                     case StylePropertyId.LayoutBehavior: return typeof(UIForia.Layout.LayoutBehavior);
                     case StylePropertyId.ZIndex: return typeof(System.Int32);
-                                case StylePropertyId.Layer: return typeof(System.Int32);
+                    case StylePropertyId.Layer: return typeof(System.Int32);
                     case StylePropertyId.ShadowColor: return typeof(UnityEngine.Color);
                     case StylePropertyId.ShadowTint: return typeof(UnityEngine.Color);
                     case StylePropertyId.ShadowOffsetX: return typeof(UIForia.OffsetMeasurement);
@@ -4770,6 +4804,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextUnderlayDilate: return true;
                     case StylePropertyId.TextUnderlaySoftness: return true;
                     case StylePropertyId.TextFaceDilate: return true;
+                    case StylePropertyId.TextLineHeight: return true;
                     case StylePropertyId.TransformPositionX: return true;
                     case StylePropertyId.TransformPositionY: return true;
                     case StylePropertyId.TransformPivotX: return true;
@@ -4822,6 +4857,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextUnderlayDilate: return true;
                     case StylePropertyId.TextUnderlaySoftness: return true;
                     case StylePropertyId.TextFaceDilate: return true;
+                    case StylePropertyId.TextLineHeight: return true;
                     case StylePropertyId.TextUnderlayType: return true;
                     case StylePropertyId.TextTransform: return true;
                     case StylePropertyId.TextWhitespaceMode: return true;

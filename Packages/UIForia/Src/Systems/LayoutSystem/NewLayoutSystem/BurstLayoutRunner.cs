@@ -15,6 +15,8 @@ namespace UIForia.Layout {
         public List_TextLineInfo * lineInfoBuffer;
         public BurstTextInfo* textInfoTable;
         public LayoutHierarchyInfo * layoutHierarchyTable;
+        public FontAssetInfo * fontAssetMap;
+        public EmValue* emTable;
 
         public ref LayoutHierarchyInfo GetLayoutHierarchy(ElementId elementId) {
             return ref layoutHierarchyTable[elementId.index];
@@ -144,6 +146,10 @@ namespace UIForia.Layout {
 
             }
 
+            if (newSize != layoutInfo.finalSize) {
+                    
+            }
+            
             layoutInfo.finalSize = newSize;
 
             layoutBoxInfo.actualSize.y = newSize;
@@ -306,6 +312,14 @@ namespace UIForia.Layout {
 
         public float GetEmSize(ElementId elementId) {
             return 0;
+        }
+
+        public ref FontAssetInfo GetFontAsset(int fontAssetId) {
+            return ref fontAssetMap[fontAssetId];
+        }
+
+        public float GetResolvedFontSize(ElementId elementId) {
+            return emTable[elementId.index].resolvedValue;
         }
 
     }

@@ -40,10 +40,10 @@ namespace UIForia.Systems {
             float alignedPosition = originBase + originOffset + (contentWidth * -scrollOffsetPercentage);
             firstChild.ApplyLayoutHorizontalExplicit(alignedPosition, contentWidth, frameId);
 
-            LayoutBox verticalTrack = element.children.array[1].layoutBox;
-            LayoutBox verticalHandle = element.children.array[2].layoutBox;
-            LayoutBox horizontalTrack = element.children.array[3].layoutBox;
-            LayoutBox horizontalHandle = element.children.array[4].layoutBox;
+            LayoutBox verticalTrack = default; // element.children.array[1].layoutBox;
+            LayoutBox verticalHandle = default; // element.children.array[2].layoutBox;
+            LayoutBox horizontalTrack = default; // element.children.array[3].layoutBox;
+            LayoutBox horizontalHandle = default; // element.children.array[4].layoutBox;
 
             float trackSize = Mathf.Max(5f, scrollView.trackSize);
             
@@ -86,10 +86,10 @@ namespace UIForia.Systems {
             firstChild.ApplyLayoutVerticalExplicit(alignedPosition, contentHeight, frameId);
 
 
-            LayoutBox verticalTrack = element.children.array[1].layoutBox;
-            LayoutBox verticalHandle = element.children.array[2].layoutBox;
-            LayoutBox horizontalTrack = element.children.array[3].layoutBox;
-            LayoutBox horizontalHandle = element.children.array[4].layoutBox;
+            LayoutBox verticalTrack = default; // element.children.array[1].layoutBox;
+            LayoutBox verticalHandle = default; // element.children.array[2].layoutBox;
+            LayoutBox horizontalTrack = default; // element.children.array[3].layoutBox;
+            LayoutBox horizontalHandle = default; // element.children.array[4].layoutBox;
 
             float trackSize = Mathf.Max(5f, scrollView.trackSize);
             float verticalHeight = scrollView.verticalScrollingEnabled ? contentAreaHeight - trackSize : contentAreaHeight;

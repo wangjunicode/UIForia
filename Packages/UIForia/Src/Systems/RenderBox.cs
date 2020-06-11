@@ -6,19 +6,9 @@ using UnityEngine;
 
 namespace UIForia.Rendering {
 
-    public struct PolyRect {
+    public interface IUnityInspector {
 
-        public Vector2 p0;
-        public Vector2 p1;
-        public Vector2 p2;
-        public Vector2 p3;
-
-        public PolyRect(in Vector2 p0, in Vector2 p1, in Vector2 p2, in Vector2 p3) {
-            this.p0 = p0;
-            this.p1 = p1;
-            this.p2 = p2;
-            this.p3 = p3;
-        }
+        void OnGUI();
 
     }
 
@@ -71,6 +61,7 @@ namespace UIForia.Rendering {
                             element.layoutResult.actualSize.height - border.bottom - padding.bottom
                         );
                     }
+
                     case ClipBounds.BorderBox:
                         return new RenderBounds(0, 0, element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
                 }
@@ -90,7 +81,6 @@ namespace UIForia.Rendering {
 
         public virtual void OnDestroy() { }
 
-
         public virtual void OnStylePropertyChanged(StyleProperty[] propertyList, int propertyCount) {
             for (int i = 0; i < propertyCount; i++) {
                 ref StyleProperty property = ref propertyList[i];
@@ -98,21 +88,27 @@ namespace UIForia.Rendering {
                     case StylePropertyId.Material:
                         // materialInfo = property.AsString;
                         break;
+
                     case StylePropertyId.OverflowX:
                         overflowX = property.AsOverflow;
                         break;
+
                     case StylePropertyId.OverflowY:
                         overflowY = property.AsOverflow;
                         break;
+
                     case StylePropertyId.ZIndex:
                         zIndex = property.AsInt;
                         break;
+
                     case StylePropertyId.Layer:
                         layer = property.AsInt;
                         break;
+
                     case StylePropertyId.ClipBehavior:
                         clipBehavior = property.AsClipBehavior;
                         break;
+
                     case StylePropertyId.Visibility:
                         visibility = property.AsVisibility;
                         break;
@@ -129,14 +125,19 @@ namespace UIForia.Rendering {
                 case UIFixedUnit.Unset:
                 case UIFixedUnit.Pixel:
                     return length.value;
+
                 case UIFixedUnit.Percent:
                     return baseSize * length.value;
+
                 case UIFixedUnit.Em:
                     return element.style.GetResolvedFontSize() * length.value;
+
                 case UIFixedUnit.ViewportWidth:
                     return element.View.Viewport.width * length.value;
+
                 case UIFixedUnit.ViewportHeight:
                     return element.View.Viewport.height * length.value;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }

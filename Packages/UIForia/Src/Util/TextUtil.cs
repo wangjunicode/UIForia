@@ -350,7 +350,7 @@ namespace UIForia.Text {
             return new Vector3(ratioA, ratioB, ratioC);
         }
 
-        public static unsafe void ProcessWhiteSpace(WhitespaceMode whitespaceMode, TextSymbol* symbols, int inputSize, ref DataList<TextSymbol>.Shared buffer) {
+        public static unsafe void ProcessWhiteSpace(WhitespaceMode whitespaceMode, TextSymbol* symbols, int inputSize, ref DataList<TextSymbol> buffer) {
             // changing whitespace is very rare, not worth caching pre-transform 
             bool collapseSpaceAndTab = (whitespaceMode & WhitespaceMode.CollapseWhitespace) != 0;
             bool preserveNewLine = (whitespaceMode & WhitespaceMode.PreserveNewLines) != 0;
@@ -525,7 +525,7 @@ namespace UIForia.Text {
 
         }
 
-        public static unsafe void CreateLayoutSymbols(TextSymbol* symbolList, int symbolListSize, DataList<TextLayoutSymbol>.Shared layoutBuffer) {
+        public static unsafe void CreateLayoutSymbols(TextSymbol* symbolList, int symbolListSize, ref DataList<TextLayoutSymbol> layoutBuffer) {
 
             WordInfo currentWord = new WordInfo();
             WordType previousType = WordType.Normal;
@@ -629,6 +629,9 @@ namespace UIForia.Text {
                         if (symbol.ConvertToLayoutSymbol(out TextLayoutSymbol layoutSymbol)) {
                             layoutSymbol.type |= isBreakable;
                             layoutBuffer.AddUnchecked(layoutSymbol);
+                        }
+                        else {
+                           currentWord.charEnd++;
                         }
 
                         continue;

@@ -31,7 +31,7 @@ namespace Tests.Mocks {
             renderSystem = new MockRenderSystem(Camera, this);
             routingSystem = new RoutingSystem();
             linqBindingSystem = new LinqBindingSystem();
-            textSystem = new TextSystem(elementSystem, resourceManager);
+            textSystem = new TextSystem(elementSystem);
             layoutSystem = new MockLayoutSystem(this, elementSystem, textSystem);
             animationSystem = new AnimationSystem(elementSystem);
             inputSystem = new MockInputSystem(layoutSystem);

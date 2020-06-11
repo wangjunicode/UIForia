@@ -76,7 +76,7 @@ namespace UIForia.Elements {
                 int diff = count - prevCount;
                 for (int i = 0; i < diff; i++) {
                     UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
-                    
+
                     ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", prevCount + i);
 
                     child.bindingNode.CreateLocalContextVariable(indexVariable);
@@ -103,17 +103,16 @@ namespace UIForia.Elements {
     public sealed class UIRepeatElement<T> : UIRepeatElement {
 
         public IList<T> list;
-        private IList<T> previousList;
-        private int previousSize;
         public Func<T, RepeatItemKey> keyFn;
-        private bool skipUpdate;
-
         private int prevRangeStart;
         private int prevRangeEnd;
 
         [UsedImplicitly] public int start;
         [UsedImplicitly] public int end = int.MaxValue;
-        private RepeatIndex[] keys;
+
+        // todo -- use sized array instead
+        private StructList<RepeatIndex> availableChildren;
+        private StructList<RepeatIndex> lastFrameChildren;
 
         public override void OnUpdate() {
             int rangeStart = start;
@@ -138,10 +137,6 @@ namespace UIForia.Elements {
             prevRangeStart = rangeStart;
             prevRangeEnd = rangeEnd;
         }
-
-        private StructList<RepeatIndex> availableChildren;
-        private StructList<RepeatIndex> lastFrameChildren;
-        private LightList<UIElement> childrenSwapList;
 
         private void UpdateWithKeyFunc(int rangeStart, int rangeEnd) {
             // build list of children
@@ -177,10 +172,8 @@ namespace UIForia.Elements {
 
                 if (keypair.element == null) {
                     UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
-                    ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
-                    ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);
-                    child.bindingNode.CreateLocalContextVariable(itemVariable);
-                    child.bindingNode.CreateLocalContextVariable(indexVariable);
+                    child.bindingNode.CreateLocalContextVariable(new ContextVariable<int>(indexVarId, "index", default));
+                    child.bindingNode.CreateLocalContextVariable(new ContextVariable<T>(itemVarId, "item", default));
                     keypair.element = child;
                 }
 
@@ -189,23 +182,57 @@ namespace UIForia.Elements {
 
             while (availableChildren.size > 0) {
                 // set parent to null avoids child reshuffle
-                availableChildren.array[availableChildren.size - 1].element.parent = null;
                 availableChildren.array[availableChildren.size - 1].element.Destroy();
                 availableChildren.size--;
             }
 
-            children.Clear();
+            // todo -- i think this api should be available to users somehow without exposing the internal tables
 
-            children.EnsureCapacity(lastFrameChildren.size);
-            children.size = lastFrameChildren.size;
-
-            for (int i = 0; i < lastFrameChildren.size; i++) {
-                UIElement child = lastFrameChildren.array[i].element;
-                child.siblingIndex = i;
-                children.array[i] = child;
-                ((ContextVariable<T>) child.bindingNode.GetContextVariable(itemVarId)).value = list[rangeStart + i];
-                ((ContextVariable<int>) child.bindingNode.GetContextVariable(indexVarId)).value = rangeStart + i;
+            ElementSystem elementSystem = application.elementSystem;
+            ref HierarchyInfo hierarchyInfo = ref elementSystem.hierarchyTable[id];
+            if (lastFrameChildren.size == 0) {
+                hierarchyInfo.firstChildId = default;
+                hierarchyInfo.lastChildId = default;
             }
+            else {
+
+                hierarchyInfo.firstChildId = lastFrameChildren[0].element.id;
+                hierarchyInfo.lastChildId = lastFrameChildren[lastFrameChildren.size - 1].element.id;
+
+                bool needsLayoutUpdate = false;
+
+                ElementId previous = default;
+
+                for (int i = 0; i < lastFrameChildren.size - 1; i++) {
+                    UIElement child = lastFrameChildren.array[i].element;
+
+                    if (child.siblingIndex != i) {
+                        needsLayoutUpdate = true;
+                    }
+
+                    child._siblingIndex = i;
+                    elementSystem.hierarchyTable[child.id].nextSiblingId = lastFrameChildren[i + 1].element.id;
+                    elementSystem.hierarchyTable[child.id].prevSiblingId = previous;
+
+                    ((ContextVariable<T>) child.bindingNode.GetContextVariable(itemVarId)).value = list[rangeStart + i];
+                    ((ContextVariable<int>) child.bindingNode.GetContextVariable(indexVarId)).value = rangeStart + i;
+                    previous = child.id;
+                }
+
+                UIElement lastChild = lastFrameChildren[lastFrameChildren.size - 1].element;
+                ((ContextVariable<T>) lastChild.bindingNode.GetContextVariable(itemVarId)).value = list[rangeStart + lastFrameChildren.size - 1];
+                ((ContextVariable<int>) lastChild.bindingNode.GetContextVariable(indexVarId)).value = rangeStart + lastFrameChildren.size - 1;
+
+                elementSystem.hierarchyTable[hierarchyInfo.firstChildId].prevSiblingId = default;
+                elementSystem.hierarchyTable[hierarchyInfo.lastChildId].prevSiblingId = previous;
+                elementSystem.hierarchyTable[hierarchyInfo.lastChildId].nextSiblingId = default;
+
+                if (needsLayoutUpdate) {
+                    application.layoutSystem.MarkForChildrenUpdate(id);
+                }
+
+            }
+
         }
 
         private void UpdateWithoutKeyFunc(int rangeStart, int rangeEnd) {
@@ -221,41 +248,45 @@ namespace UIForia.Elements {
                     for (int i = 0; i < diff; i++) {
                         UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
 
-                        
-                        ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
-                        ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);
-
-                        child.bindingNode.CreateLocalContextVariable(itemVariable);
-                        child.bindingNode.CreateLocalContextVariable(indexVariable);
+                        child.bindingNode.CreateLocalContextVariable(new ContextVariable<T>(itemVarId, "item", default));
+                        child.bindingNode.CreateLocalContextVariable(new ContextVariable<int>(indexVarId, "index", default));
                     }
                 }
                 else {
-                    int diff = prevCount - currCount;
-                    for (int i = 0; i < diff; i++) {
-                        children.array[children.size - 1].Destroy();
+
+                    UIElement destroyPtr = FindChildAt(currCount);
+
+                    while (destroyPtr != null) {
+                        UIElement next = destroyPtr.GetNextSibling();
+                        destroyPtr.Destroy();
+                        destroyPtr = next;
                     }
+                    
                 }
             }
 
-            for (int i = 0; i < children.size; i++) {
-                UIElement child = children.array[i];
-                child.siblingIndex = i;
+            UIElement childptr = GetFirstChild();
+            int idx = 0;
+            while (childptr != null) {
+                childptr.siblingIndex = idx;
 
-                ContextVariable ptr = child.bindingNode.localVariable;
-                
+                ContextVariable ptr = childptr.bindingNode.localVariable;
+
                 while (ptr != null) {
-                    
+
                     if (ptr.id == itemVarId) {
-                        ((ContextVariable<T>) ptr).value = list[rangeStart + i];
+                        ((ContextVariable<T>) ptr).value = list[rangeStart + idx];
                     }
 
                     if (ptr.id == indexVarId) {
-                        ((ContextVariable<int>) ptr).value = rangeStart + i;
+                        ((ContextVariable<int>) ptr).value = rangeStart + idx;
                     }
 
                     ptr = ptr.next;
                 }
-                
+
+                idx++;
+                childptr = childptr.GetNextSibling();
             }
         }
 

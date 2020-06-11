@@ -185,7 +185,7 @@ Shader "UIForia/Standard"
             
                fixed4 textureColor = tex2D(_MainTexture, i.texCoord0.zw);
                
-               return fixed4(textureColor.a, textureColor.a, textureColor.a, 1);
+               return fixed4(textureColor.a, textureColor.a, textureColor.a, textureColor.a);
                
             }
                   

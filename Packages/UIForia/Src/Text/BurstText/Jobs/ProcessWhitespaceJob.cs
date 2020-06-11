@@ -12,19 +12,19 @@ namespace UIForia.Text {
         public DataList<TextSymbol>.Shared buffer;
 
         public void Execute() {
-            for (int i = 0; i < textChanges.size; i++) {
-
-                ref BurstTextInfo textInfo = ref textInfoMap[textChanges[i].textInfoId];
-
-                buffer.size = 0;
-
-                TextUtil.ProcessWhiteSpace(textInfo.textStyle.whitespaceMode, textInfo.symbolList.array, textInfo.symbolList.size, ref buffer);
-
-                if (buffer.size != textInfo.symbolList.size) {
-                    textInfo.symbolList.CopyFrom(buffer.GetArrayPointer(), buffer.size);
-                }
-
-            }
+            // for (int i = 0; i < textChanges.size; i++) {
+            //
+            //     ref BurstTextInfo textInfo = ref textInfoMap[textChanges[i].textInfoId];
+            //
+            //     buffer.size = 0;
+            //
+            //     TextUtil.ProcessWhiteSpace(textInfo.textStyle.whitespaceMode, textInfo.symbolList.array, textInfo.symbolList.size, ref buffer);
+            //
+            //     if (buffer.size != textInfo.symbolList.size) {
+            //         textInfo.symbolList.CopyFrom(buffer.GetArrayPointer(), buffer.size);
+            //     }
+            //
+            // }
         }
 
     }

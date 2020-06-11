@@ -46,6 +46,7 @@ namespace UIForia.Layout {
                     break;
 
                 case LayoutBoxType.ScrollView:
+                    scroll.OnInitialize(layoutSystem, element);
                     break;
 
                 case LayoutBoxType.Text:
@@ -110,6 +111,7 @@ namespace UIForia.Layout {
                     break;
 
                 case LayoutBoxType.ScrollView:
+                    scroll.OnChildrenChanged(layoutSystem);
                     break;
 
                 case LayoutBoxType.Text:

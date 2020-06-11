@@ -58,8 +58,6 @@ namespace UIForia {
         internal LinqBindingSystem linqBindingSystem;
         internal ElementSystem elementSystem;
 
-        private int elementIdGenerator;
-
         protected ResourceManager resourceManager;
 
         protected List<ISystem> systems;
@@ -130,7 +128,7 @@ namespace UIForia {
         protected virtual void CreateSystems() {
             elementSystem = new ElementSystem(InitialElementCapacity);
             styleSystem = new StyleSystem(elementSystem);
-            textSystem = new TextSystem(elementSystem, resourceManager);
+            textSystem = new TextSystem(elementSystem);
             renderSystem = new RenderSystem(Camera ?? Camera.current, this, elementSystem);
             routingSystem = new RoutingSystem();
             linqBindingSystem = new LinqBindingSystem();
@@ -150,11 +148,9 @@ namespace UIForia {
 
             textSystem.frameId = frameId;
 
-            systems.Add(linqBindingSystem);
             systems.Add(routingSystem);
             systems.Add(inputSystem);
             systems.Add(animationSystem);
-            systems.Add(renderSystem);
 
             m_BeforeUpdateTaskSystem = new UITaskSystem();
             m_AfterUpdateTaskSystem = new UITaskSystem();
@@ -306,8 +302,6 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnDestroy();
             m_BeforeUpdateTaskSystem.OnDestroy();
 
-            elementIdGenerator = 0;
-
             Initialize();
 
             onRefresh?.Invoke();
@@ -337,47 +331,44 @@ namespace UIForia {
             element.View.application.DoDestroyElement(element);
         }
 
-        internal void DoDestroyElement(UIElement element, bool removingChildren = false) {
+        internal void DoDestroyElement(UIElement element) {
             // do nothing if already destroyed
-
-            throw new NotImplementedException("Reimplement destroy");
-
-            // todo -- decrement view.activeElementCount
-
+            
             ElementTable<ElementMetaInfo> metaTable = elementSystem.metaTable;
 
-            if ((metaTable[element.id].flags & UIElementFlags.Alive) == 0) {
+            if (!elementSystem.IsAlive(element.id)) {
                 return;
             }
 
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
-            LightList<UIElement> toInternalDestroy = LightList<UIElement>.Get();
-
+            
+            UIView view = element.View;
+            
             stack.Push(element);
 
-            while (stack.Count > 0) {
+            while (stack.size > 0) {
                 UIElement current = stack.array[--stack.size];
 
                 ref ElementMetaInfo metaInfo = ref metaTable[current.id];
 
-                if (metaInfo.generation != current.id.generation && (metaInfo.flags & UIElementFlags.Alive) == 0) {
+                // if already dead, continue
+                if (metaInfo.generation != current.id.generation) {
                     continue;
                 }
 
-                metaInfo.flags &= ~(UIElementFlags.Alive);
-
                 current.isAlive = false;
 
-                // todo -- tick generation
-
+                view.activeElementCount--;
+                elementSystem.disabledElementsThisFrame.Add(current.id);
+                elementSystem.DestroyElement(current.id, current.id == element.id);
+                
                 current.OnDestroy();
-                toInternalDestroy.Add(current);
 
                 // UIElement[] children = current.children.array;
                 int childCount = current.ChildCount;
 
                 if (stack.size + childCount >= stack.array.Length) {
-                    Array.Resize(ref stack.array, stack.size + childCount + 16);
+                    Array.Resize(ref stack.array, stack.size + childCount + 32);
                 }
 
                 UIElement ptr = current.GetLastChild();
@@ -387,31 +378,13 @@ namespace UIForia {
                     ptr = ptr.GetPreviousSibling();
                 }
 
-                //for (int i = childCount - 1; i >= 0; i--) {
-                //}
             }
-
-            if (element.parent != null && !removingChildren) {
-
-                elementSystem.RemoveChild(element.parent.id, element.id);
-
-                // todo -- remove when children are gone
-                element.parent.children.Remove(element);
-                for (int i = 0; i < element.parent.children.Count; i++) {
-                    element.parent.children[i].siblingIndex = i;
-                }
-
-            }
+            
 
             for (int i = 0; i < systems.Count; i++) {
                 systems[i].OnElementDestroyed(element);
             }
 
-            for (int i = 0; i < toInternalDestroy.size; i++) {
-                toInternalDestroy[i].InternalDestroy();
-            }
-
-            LightList<UIElement>.Release(ref toInternalDestroy);
             LightStack<UIElement>.Release(ref stack);
 
             onElementDestroyed?.Invoke();
@@ -444,7 +417,6 @@ namespace UIForia {
             inputSystem.OnUpdate();
             m_BeforeUpdateTaskSystem.OnUpdate();
 
-            linqBindingSystem.BeginFrame();
             bindingTimer.Reset();
             bindingTimer.Start();
 
@@ -460,7 +432,7 @@ namespace UIForia {
             animationSystem.OnUpdate();
 
             // todo -- when more code lives in jobs a lot of this loop can be easily jobified without many sync points
-            
+
             if (elementSystem.enabledElementsThisFrame.size > 0 || elementSystem.disabledElementsThisFrame.size > 0) {
                 new FilterEnabledDisabledElementsJob() {
                     metaTable = elementSystem.metaTable,
@@ -488,14 +460,13 @@ namespace UIForia {
 
             styleSystem.FlushChangeSets(elementSystem, layoutSystem, renderSystem);
 
-            textSystem.Update();
 
             layoutTimer.Restart();
             Profiler.BeginSample("UIForia::Layout");
             layoutSystem.RunLayout();
             Profiler.EndSample();
             layoutTimer.Stop();
-            
+
             renderTimer.Restart();
             Profiler.BeginSample("UIForia::Rendering");
             renderSystem.OnUpdate();
@@ -505,6 +476,8 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnUpdate();
 
             elementSystem.CleanupFrame();
+            textSystem.CleanupFrame();
+
             frameId++;
 
             loopTimer.Stop();
@@ -721,29 +694,7 @@ namespace UIForia {
         }
 
         public UIElement GetElement(ElementId elementId) {
-            LightStack<UIElement> stack = LightStack<UIElement>.Get();
-
-            for (int i = 0; i < views.Count; i++) {
-                stack.Push(views[i].RootElement);
-
-                while (stack.size > 0) {
-                    UIElement element = stack.PopUnchecked();
-
-                    if (element.id == elementId) {
-                        LightStack<UIElement>.Release(ref stack);
-                        return element;
-                    }
-
-                    if (element.children == null) continue;
-
-                    for (int j = 0; j < element.children.size; j++) {
-                        stack.Push(element.children.array[j]);
-                    }
-                }
-            }
-
-            LightStack<UIElement>.Release(ref stack);
-            return null;
+            return elementSystem.instanceTable[elementId.index];
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) {
@@ -829,12 +780,12 @@ namespace UIForia {
                     }
                 }
 
-                UIElement[] children = current.children.array;
-                int childCount = current.children.size;
-                // reverse this? inline stack push
-                for (int i = 0; i < childCount; i++) {
-                    children[i].siblingIndex = i;
-                    elemRefStack.Push(new ElemRef() {element = children[i]});
+                UIElement ptr = current.GetFirstChild();
+                int idx = 0;
+                while (ptr != null) {
+                    ptr.siblingIndex = idx++;
+                    elemRefStack.Push(new ElemRef() {element = ptr});
+                    ptr = ptr.GetNextSibling();
                 }
             }
 
@@ -876,10 +827,11 @@ namespace UIForia {
                         enabledElementCount++;
                     }
 
-                    if (element.children == null) continue;
+                    UIElement ptr = element.GetFirstChild();
 
-                    for (int j = 0; j < element.children.size; j++) {
-                        stack.Push(element.children.array[j]);
+                    while (ptr != null) {
+                        stack.Push(ptr);
+                        ptr = ptr.GetNextSibling();
                     }
                 }
             }
@@ -928,7 +880,6 @@ namespace UIForia {
             element.id = elementSystem.CreateElement(element, parent?.hierarchyDepth + 1 ?? 0, -999, -999, flags);
             element.flags = flags;
             element.style = new UIStyleSet(element);
-            element.children = new LightList<UIElement>(childCount);
 
             if (attributeCount > 0) {
                 element.attributes = new StructList<ElementAttribute>(attributeCount);
@@ -938,7 +889,6 @@ namespace UIForia {
             element.parent = parent;
 
             if (parent != null) {
-                parent.children.Add(element);
                 elementSystem.AddChild(parent.id, element.id);
             }
 

@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using UIForia.Elements;
+using UIForia.Systems;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
@@ -30,19 +32,20 @@ namespace UIForia.Layout {
             if (activeElementCount <= 0) {
                 return;
             }
-            
+
             DataList<EmEntry> stack = new DataList<EmEntry>(activeElementCount, Allocator.Temp);
 
             stack[stack.size++] = new EmEntry() {
                 elementId = rootId,
                 resolveParentFontSize = 18f // default
             };
+            EmEntry* s = stack.GetArrayPointer();
+            int stackSize = 1;
+            while (stackSize != 0) {
 
-            while (stack.size != 0) {
+                EmEntry current = stack[--stackSize];
 
-                EmEntry current = stack[--stack.size];
-
-                ref EmValue emValue = ref emTable.array[current.elementId.index];
+                ref EmValue emValue = ref emTable.array[current.elementId.id & ElementId.ENTITY_INDEX_MASK];
 
                 if (emValue.styleValue == default) {
                     emValue.resolvedValue = current.resolveParentFontSize;
@@ -75,20 +78,23 @@ namespace UIForia.Layout {
 
                 }
 
-                int childCount = hierarchyTable.array[current.elementId.index].childCount;
+                int childCount = hierarchyTable.array[current.elementId.id & ElementId.ENTITY_INDEX_MASK].childCount;
 
-                ElementId childPtr = hierarchyTable.array[current.elementId.index].lastChildId;
+                ElementId childPtr = hierarchyTable.array[current.elementId.id & ElementId.ENTITY_INDEX_MASK].lastChildId;
 
                 for (int i = 0; i < childCount; i++) {
 
-                    if (!ElementSystem.IsDeadOrDisabled(childPtr, metaTable)) {
-                        stack.AddUnchecked(new EmEntry() {
+                    if (!(metaTable.array[childPtr.id & ElementId.ENTITY_INDEX_MASK].generation != childPtr.generation ||
+                          (metaTable.array[childPtr.id & ElementId.ENTITY_INDEX_MASK].flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet)
+                        ) {
+
+                        s[stackSize++] = new EmEntry() {
                             elementId = childPtr,
                             resolveParentFontSize = emValue.resolvedValue
-                        });
+                        };
                     }
 
-                    childPtr = hierarchyTable.array[childPtr.index].prevSiblingId;
+                    childPtr = hierarchyTable.array[childPtr.id & ElementId.ENTITY_INDEX_MASK].prevSiblingId;
 
                 }
 

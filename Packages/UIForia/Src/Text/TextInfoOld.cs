@@ -197,7 +197,7 @@ namespace UIForia.Text {
                     CharInfo[] chars = span.charInfoList.array;
 
                     int wordStart = s == spanStart ? lines[lineIndex].wordStart : 0;
-                    int wordEnd = s == spanEnd - 1 ? lines[lineIndex].wordEnd : span.wordInfoList.size;
+                    int wordEnd = 0; // s == spanEnd - 1 ? lines[lineIndex].wordEnd : span.wordInfoList.size;
 
                     for (int w = wordStart; w < wordEnd; w++) {
                         ref WordInfo wordInfo = ref words[w];
@@ -267,7 +267,7 @@ namespace UIForia.Text {
                         case WordType.Whitespace:
                             if (allowWrapping && currentLine.width + wordInfo.width > width) {
                                 //currentLine.spanEnd = spanIndex;
-                                currentLine.wordEnd = w;
+                                // currentLine.wordEnd = w;
                                 lines.Add(currentLine);
                                 lineOffset += currentLine.height;
                                 currentLine = new TextLineInfo(spanIndex, w + 1);
@@ -286,7 +286,7 @@ namespace UIForia.Text {
                             break;
 
                         case WordType.NewLine:
-                            currentLine.wordEnd = w;
+                            // currentLine.wordEnd = w;
                             // currentLine.spanEnd = spanIndex;
                             lines.Add(currentLine);
                             lineOffset += currentLine.height;
@@ -300,7 +300,7 @@ namespace UIForia.Text {
                             if (allowWrapping && wordInfo.width > width) {
                                 if (currentLine.wordCount > 0) {
                                     //       currentLine.spanEnd = spanIndex;
-                                    currentLine.wordEnd = w;
+                                    // currentLine.wordEnd = w;
                                     lineOffset += currentLine.height;
                                     lines.Add(currentLine);
                                 }
@@ -309,7 +309,7 @@ namespace UIForia.Text {
                                 currentLine.y = lineOffset;
                                 currentLine.wordCount = 1;
                                 //  currentLine.spanEnd = spanIndex;
-                                currentLine.wordEnd = w + 1;
+                                // currentLine.wordEnd = w + 1;
                                 if (wordInfo.height > currentLine.height) currentLine.height = wordInfo.height;
 
                                 lineOffset += currentLine.height;
@@ -320,7 +320,7 @@ namespace UIForia.Text {
                             }
                             // if word is too long for the current line, break to next line
                             else if (allowWrapping && wordInfo.width + currentLine.width > width + 0.5f) {
-                                currentLine.wordEnd = w;
+                                // currentLine.wordEnd = w;
                                 lines.Add(currentLine);
                                 lineOffset += currentLine.height;
                                 currentLine = new TextLineInfo(w, wordInfo.width);
@@ -346,7 +346,7 @@ namespace UIForia.Text {
             }
 
             if (currentLine.wordCount > 0) {
-                currentLine.wordEnd = spans[spanCount - 1].wordInfoList.size;
+                // currentLine.wordEnd = spans[spanCount - 1].wordInfoList.size;
                 lines.Add(currentLine);
             }
 

@@ -1,5 +1,4 @@
-﻿using SVGX;
-using UIForia.Systems;
+﻿using UIForia.Systems;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
@@ -64,6 +63,7 @@ namespace UIForia.Layout {
 
                     // todo -- i have no idea how to get rotation around a pivot working
                     localMatrices[elementId] = local; // math.mul(pivot, math.mul(local, math.inverse(pivot)));
+
                 }
             }
             else {
@@ -144,6 +144,7 @@ namespace UIForia.Layout {
                         inversePivot.c0 * localxPivot.c3.x + inversePivot.c1 * localxPivot.c3.y + inversePivot.c2 * localxPivot.c3.z + inversePivot.c3 * localxPivot.c3.w
                     );
                 }
+
             }
         }
 

@@ -177,6 +177,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextUnderlayDilate, 0f, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextUnderlaySoftness, 0f, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextFaceDilate, 0f, InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.TextLineHeight, 1.4f, InheritanceType.Inherited),
             new PropertyGenerator<UnderlayType>(StylePropertyId.TextUnderlayType, UnderlayType.Unset, InheritanceType.Inherited),
             new PropertyGenerator<TextTransform>(StylePropertyId.TextTransform, TextTransform.None, InheritanceType.Inherited),
             new PropertyGenerator<WhitespaceMode>(StylePropertyId.TextWhitespaceMode, WhitespaceMode.CollapseWhitespace | WhitespaceMode.Trim, InheritanceType.Inherited),
@@ -412,7 +413,7 @@ namespace UIForia.Rendering {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.__NAME__, state).As__CAST_TYPE__; }
             [System.Diagnostics.DebuggerStepThrough]
-            set { m_StyleSet.SetProperty(__CONSTRUCTOR__, state); }
+            set { m_StyleSet.SetInstanceProperty(__CONSTRUCTOR__, state); }
         }
         ";
 

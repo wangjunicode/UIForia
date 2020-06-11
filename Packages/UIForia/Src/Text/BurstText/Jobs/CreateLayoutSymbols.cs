@@ -14,20 +14,20 @@ namespace UIForia.Text {
         public DataList<TextLayoutSymbol>.Shared buffer;
 
         public void Execute() {
-            for (int i = 0; i < textChanges.size; i++) {
-
-                ref BurstTextInfo textInfo = ref textInfoMap[textChanges[i].textInfoId];
-
-                buffer.size = 0;
-                TextUtil.CreateLayoutSymbols(textInfo.symbolList.array, textInfo.symbolList.size, buffer);
-
-                if (textInfo.layoutSymbolList.array == null) {
-                    textInfo.layoutSymbolList = new List_TextLayoutSymbol(buffer.size, Allocator.Persistent);
-                }
-
-                textInfo.layoutSymbolList.CopyFrom(buffer.GetArrayPointer(), buffer.size);
-
-            }
+            // for (int i = 0; i < textChanges.size; i++) {
+            //
+            //     ref BurstTextInfo textInfo = ref textInfoMap[textChanges[i].textInfoId];
+            //
+            //     buffer.size = 0;
+            //     TextUtil.CreateLayoutSymbols(textInfo.symbolList.array, textInfo.symbolList.size, buffer);
+            //
+            //     if (textInfo.layoutSymbolList.array == null) {
+            //         textInfo.layoutSymbolList = new List_TextLayoutSymbol(buffer.size, Allocator.Persistent);
+            //     }
+            //
+            //     textInfo.layoutSymbolList.CopyFrom(buffer.GetArrayPointer(), buffer.size);
+            //
+            // }
         }
 
     }

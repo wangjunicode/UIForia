@@ -217,6 +217,10 @@ namespace UIForia.Editor {
                 return;
             }
 
+            if (selectedElement.renderBox is IUnityInspector inspector) {
+                inspector.OnGUI();
+            }
+            
             List<ElementAttribute> attributes = selectedElement.GetAttributes();
             if (attributes != null) {
                 DrawAttributes(attributes);

@@ -167,10 +167,13 @@ namespace UIForia.Systems {
                 property = parentProperty;
             }
 
-            for (int i = 0; i < element.children.Count; i++) {
-                elementStack.Push(element.children[i]);
+            UIElement p = element.GetFirstChild();
+            
+            while (p != null) {
+                elementStack.Push(p);
+                p = p.GetNextSibling();
             }
-
+            
             while (elementStack.Count > 0) {
                 UIElement descendant = elementStack.Pop();
 
@@ -180,13 +183,13 @@ namespace UIForia.Systems {
 
                 AddToChangeSet(descendant, property);
 
-                if (descendant.children == null) {
-                    continue;
+                p = descendant.GetFirstChild();
+                
+                while (p != null) {
+                    elementStack.Push(p);
+                    p = p.GetNextSibling();
                 }
 
-                for (int i = 0; i < descendant.children.Count; i++) {
-                    elementStack.Push(descendant.children[i]);
-                }
             }
         }
 

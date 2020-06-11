@@ -620,7 +620,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(5, e[0].children.size);
+                Assert.AreEqual(5, e[0].ChildCount);
                 Assert.AreEqual("repeat me 0", GetText(e[0][0]));
                 Assert.AreEqual("repeat me 1", GetText(e[0][1]));
                 Assert.AreEqual("repeat me 2", GetText(e[0][2]));
@@ -637,7 +637,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(7, e[0].children.size);
+                Assert.AreEqual(7, e[0].ChildCount);
                 Assert.AreEqual("repeat me 0", GetText(e[0][0]));
                 Assert.AreEqual("repeat me 1", GetText(e[0][1]));
                 Assert.AreEqual("repeat me 2", GetText(e[0][2]));
@@ -656,7 +656,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(2, e[0].children.size);
+                Assert.AreEqual(2, e[0].ChildCount);
                 Assert.AreEqual("repeat me 0", GetText(e[0][0]));
                 Assert.AreEqual("repeat me 1", GetText(e[0][1]));
                 Assert.AreEqual(e0, e[0][0]);
@@ -685,7 +685,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(4, e[0].children.size);
+                Assert.AreEqual(4, e[0].ChildCount);
                 Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
                 Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
                 Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
@@ -706,7 +706,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(5, e[0].children.size);
+                Assert.AreEqual(5, e[0].ChildCount);
                 Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
                 Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
                 Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
@@ -724,7 +724,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(2, e[0].children.size);
+                Assert.AreEqual(2, e[0].ChildCount);
                 Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
                 Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
                 Assert.AreEqual(c0, e[0][0]);
@@ -746,7 +746,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(4, e[0].children.size);
+                Assert.AreEqual(4, e[0].ChildCount);
                 Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
                 Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
                 Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
@@ -761,7 +761,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(5, e[0].children.size);
+                Assert.AreEqual(5, e[0].ChildCount);
                 Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
                 Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
                 Assert.AreEqual("repeat me " + Vector3.forward, GetText(e[0][2]));
@@ -778,7 +778,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(2, e[0].children.size);
+                Assert.AreEqual(2, e[0].ChildCount);
                 Assert.AreEqual("repeat me " + Vector3.zero, GetText(e[0][0]));
                 Assert.AreEqual("repeat me " + Vector3.one, GetText(e[0][1]));
                 Assert.AreEqual(c0, e[0][0]);
@@ -788,7 +788,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(0, e[0].children.size);
+                Assert.AreEqual(0, e[0].ChildCount);
             }
         }
 
@@ -812,7 +812,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(3, e[0].children.size);
+                Assert.AreEqual(3, e[0].ChildCount);
                 Assert.AreEqual("repeat me 1", GetText(e[0][0]));
                 Assert.AreEqual("repeat me 2", GetText(e[0][1]));
                 Assert.AreEqual("repeat me 3", GetText(e[0][2]));
@@ -825,7 +825,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(4, e[0].children.size);
+                Assert.AreEqual(4, e[0].ChildCount);
                 Assert.AreEqual("repeat me 1", GetText(e[0][0]));
                 Assert.AreEqual("repeat me 4", GetText(e[0][1]));
                 Assert.AreEqual("repeat me 2", GetText(e[0][2]));
@@ -841,7 +841,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(3, e[0].children.size);
+                Assert.AreEqual(3, e[0].ChildCount);
                 Assert.AreEqual("repeat me 1", GetText(e[0][0]));
                 Assert.AreEqual("repeat me 4", GetText(e[0][1]));
                 Assert.AreEqual("repeat me 3", GetText(e[0][2]));
@@ -856,7 +856,7 @@ namespace TemplateBinding {
 
                 app.Update();
 
-                Assert.AreEqual(3, e[0].children.size);
+                Assert.AreEqual(3, e[0].ChildCount);
                 Assert.AreEqual("repeat me 1", GetText(e[0][0]));
                 Assert.AreEqual("repeat me 3", GetText(e[0][1]));
                 Assert.AreEqual("repeat me 4", GetText(e[0][2]));

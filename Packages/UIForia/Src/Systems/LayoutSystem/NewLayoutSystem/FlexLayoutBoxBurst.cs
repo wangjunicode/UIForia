@@ -31,7 +31,9 @@ namespace UIForia.Layout {
         public List_FlexTrack wrappedTracks;
 
         public void RunHorizontal(BurstLayoutRunner* runner) {
-            if (items.size == 0) return;
+            if (items.size == 0) {
+                return;
+            }
 
             if (direction == LayoutDirection.Horizontal) {
                 if (layoutWrap == LayoutWrap.WrapHorizontal) {

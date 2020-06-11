@@ -3,100 +3,145 @@
     <Style path="Documentation/Features/FlexDemo.style"/>
     <Style src="Documentation/Documentation.style" alias="theme"/>
 
+    <Using namespace="UIForia.Text"/>
+    <Style>
+        
+        style container {
+            PreferredSize = 1vw 1vh;
+            BackgroundColor = white;
+        }
+        
+        
+        style shape-kit {
+            Painter = "ShapeKitTest";
+            PreferredSize = 300px;
+            AlignX = Center Screen;
+            AlignY = Center Screen;
+            BackgroundColor = blue;
+        }
+        
+    </Style>
     <Contents style="container">
 
-        <ScrollView style="container">
+        <Div style="shape-kit"/>
+        
+<!--        <Div style="container">-->
 
-            <Div style="flex-demo">
-                <Heading3>Flex-Start</Heading3>
-                <Group style="flex-demo-content flex-start horizontal">
-                    <Div style="flex-item">Item 1</Div>
-                    <Div style="flex-item">Item 2</Div>
-                    <Div style="flex-item">Item 3</Div>
-                    <Div style="flex-item">Item 4</Div>
-                    <Div style="flex-item">Item 5</Div>
-                </Group>
-            </Div>
-            <Div style="flex-demo">
-                <Heading3>Flex-End</Heading3>
-                <Div style="flex-demo-content flex-end horizontal">
-                    <Div style="flex-item">Item 1</Div>
-                    <Div style="flex-item">Item 2</Div>
-                    <Div style="flex-item">Item 3</Div>
-                    <Div style="flex-item">Item 4</Div>
-                    <Div style="flex-item">Item 5</Div>
-                </Div>
-            </Div>
+<!--            <Div style="flex-demo">-->
+                
+<!--                <Text processor="UIForia.RichText" style="text" >-->
+<!--                    It is a period of civil war.-->
+<!--                    Rebel spaceships, striking-->
+<!--                    from a hidden base, have won-->
+<!--                    their first victory against-->
+<!--                    the evil Galactic Empire.-->
 
-            <Div style="flex-demo">
-                <Heading3>Flex-Center</Heading3>
-                <Div style="flex-demo-content flex-center horizontal">
-                    <Div style="flex-item">Item 1</Div>
-                    <Div style="flex-item">Item 2</Div>
-                    <Div style="flex-item">Item 3</Div>
-                    <Div style="flex-item">Item 4</Div>
-                    <Div style="flex-item">Item 5</Div>
-                </Div>
-            </Div>
+<!--                    During the battle, Rebel-->
+<!--                    spies managed to steal secret-->
+<!--                    plans to the Empire's-->
+<!--                    ultimate weapon, the DEATH-->
+<!--                    STAR, an armored space-->
+<!--                    station with enough power to-->
+<!--                    destroy an entire planet.-->
 
-            <Div style="flex-demo">
-                <Heading3>Flex-Space-Between</Heading3>
-                <Div style="flex-demo-content flex-space-between horizontal">
-                    <Div style="flex-item">Item 1</Div>
-                    <Div style="flex-item">Item 2</Div>
-                    <Div style="flex-item">Item 3</Div>
-                    <Div style="flex-item">Item 4</Div>
-                    <Div style="flex-item">Item 5</Div>
-                </Div>
-            </Div>
+<!--                    Pursued by the Empire's-->
+<!--                    sinister agents, Princess-->
+<!--                    Leia races home aboard her-->
+<!--                    starship, custodian of the-->
+<!--                    stolen plans that can save-->
+<!--                    her people and restore-->
+<!--                    freedom to the galaxy.....-->
+                    
+<!--                </Text>-->
+                
+<!--                <Group style="flex-demo-content flex-start horizontal">-->
+<!--                    <Div style="flex-item">Item 1</Div>-->
+<!--                    <Div style="flex-item">Item 2</Div>-->
+<!--                    <Div style="flex-item">Item 3</Div>-->
+<!--                    <Div style="flex-item">Item 4</Div>-->
+<!--                    <Div style="flex-item">Item 5</Div>-->
+<!--                </Group>-->
+<!--            </Div>-->
+<!--            <Div style="flex-demo">-->
+<!--                <Heading3>Flex-End</Heading3>-->
+<!--                <Div style="flex-demo-content flex-end horizontal">-->
+<!--                    <Div style="flex-item">Item 1</Div>-->
+<!--                    <Div style="flex-item">Item 2</Div>-->
+<!--                    <Div style="flex-item">Item 3</Div>-->
+<!--                    <Div style="flex-item">Item 4</Div>-->
+<!--                    <Div style="flex-item">Item 5</Div>-->
+<!--                </Div>-->
+<!--            </Div>-->
 
-            <Div style="flex-demo">
-                <Heading3>Flex-Space-Around</Heading3>
-                <Div style="flex-demo-content flex-space-around horizontal">
-                    <Div style="flex-item">Item 1</Div>
-                    <Div style="flex-item">Item 2</Div>
-                    <Div style="flex-item">Item 3</Div>
-                    <Div style="flex-item">Item 4</Div>
-                    <Div style="flex-item">Item 5</Div>
-                </Div>
-            </Div>
+<!--            <Div style="flex-demo">-->
+<!--                <Heading3>Flex-Center</Heading3>-->
+<!--                <Div style="flex-demo-content flex-center horizontal">-->
+<!--                    <Div style="flex-item">Item 1</Div>-->
+<!--                    <Div style="flex-item">Item 2</Div>-->
+<!--                    <Div style="flex-item">Item 3</Div>-->
+<!--                    <Div style="flex-item">Item 4</Div>-->
+<!--                    <Div style="flex-item">Item 5</Div>-->
+<!--                </Div>-->
+<!--            </Div>-->
 
-            <Div style="flex-demo">
-                <Heading3>Flex-Grow</Heading3>
-                <Div style="flex-demo-content flex-stretch horizontal">
-                    <Div style="flex-item">Grow 0</Div>
-                    <Div style="flex-item flex-grow-1">Grow 1</Div>
-                    <Div style="flex-item flex-grow-2">Grow 2</Div>
-                    <Div style="flex-item flex-grow-1">Grow 1</Div>
-                    <Div style="flex-item">Grow 0</Div>
-                </Div>
-            </Div>
+<!--            <Div style="flex-demo">-->
+<!--                <Heading3>Flex-Space-Between</Heading3>-->
+<!--                <Div style="flex-demo-content flex-space-between horizontal">-->
+<!--                    <Div style="flex-item">Item 1</Div>-->
+<!--                    <Div style="flex-item">Item 2</Div>-->
+<!--                    <Div style="flex-item">Item 3</Div>-->
+<!--                    <Div style="flex-item">Item 4</Div>-->
+<!--                    <Div style="flex-item">Item 5</Div>-->
+<!--                </Div>-->
+<!--            </Div>-->
 
-            <Div style="flex-demo">
-                <Heading3>Very tricky flex layout</Heading3>
-                <Div style="flex-demo-content">
-                    <Div style="flex-demo-content-child1">
-                        <Div style="flex-item">Item 1</Div>
-                    </Div>
-                    <Div style="flex-demo-content-child">
-                        <Div style="flex-item">Item 1</Div>
-                    </Div>
-                </Div>
+<!--            <Div style="flex-demo">-->
+<!--                <Heading3>Flex-Space-Around</Heading3>-->
+<!--                <Div style="flex-demo-content flex-space-around horizontal">-->
+<!--                    <Div style="flex-item">Item 1</Div>-->
+<!--                    <Div style="flex-item">Item 2</Div>-->
+<!--                    <Div style="flex-item">Item 3</Div>-->
+<!--                    <Div style="flex-item">Item 4</Div>-->
+<!--                    <Div style="flex-item">Item 5</Div>-->
+<!--                </Div>-->
+<!--            </Div>-->
 
-                <Heading3>Hover over a child to trigger a content size change. Should affect the parent</Heading3>
-                <Div style="flex-parent">
-                    <Div style="flex-content-child-grow">
-                        <Div style="flex-item-grow">Item 1</Div>
-                    </Div>
-                    <Div attr:check-me="check-me" style="flex-content-child-grow">
-                        <Div style="flex-item-grow">Item 1</Div>
-                    </Div>
-                    <Div style="flex-content-child-grow">
-                        <Div style="flex-item-grow">Item 1</Div>
-                    </Div>
-                </Div>
-            </Div>
-        </ScrollView>
+<!--            <Div style="flex-demo">-->
+<!--                <Heading3>Flex-Grow</Heading3>-->
+<!--                <Div style="flex-demo-content flex-stretch horizontal">-->
+<!--                    <Div style="flex-item">Grow 0</Div>-->
+<!--                    <Div style="flex-item flex-grow-1">Grow 1</Div>-->
+<!--                    <Div style="flex-item flex-grow-2">Grow 2</Div>-->
+<!--                    <Div style="flex-item flex-grow-1">Grow 1</Div>-->
+<!--                    <Div style="flex-item">Grow 0</Div>-->
+<!--                </Div>-->
+<!--            </Div>-->
+
+<!--            <Div style="flex-demo">-->
+<!--                <Heading3>Very tricky flex layout</Heading3>-->
+<!--                <Div style="flex-demo-content">-->
+<!--                    <Div style="flex-demo-content-child1">-->
+<!--                        <Div style="flex-item">Item 1</Div>-->
+<!--                    </Div>-->
+<!--                    <Div style="flex-demo-content-child">-->
+<!--                        <Div style="flex-item">Item 1</Div>-->
+<!--                    </Div>-->
+<!--                </Div>-->
+
+<!--                <Heading3>Hover over a child to trigger a content size change. Should affect the parent</Heading3>-->
+<!--                <Div style="flex-parent">-->
+<!--                    <Div style="flex-content-child-grow">-->
+<!--                        <Div style="flex-item-grow">Item 1</Div>-->
+<!--                    </Div>-->
+<!--                    <Div attr:check-me="check-me" style="flex-content-child-grow">-->
+<!--                        <Div style="flex-item-grow">Item 1</Div>-->
+<!--                    </Div>-->
+<!--                    <Div style="flex-content-child-grow">-->
+<!--                        <Div style="flex-item-grow">Item 1</Div>-->
+<!--                    </Div>-->
+<!--                </Div>-->
+<!--            </Div>-->
+<!--        </Div>-->
 
     </Contents>
 </UITemplate>

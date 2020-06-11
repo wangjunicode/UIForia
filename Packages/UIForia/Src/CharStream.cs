@@ -1104,6 +1104,72 @@ namespace UIForia.Util {
             return new LineInfo(line, col);
         }
 
+        public bool TryParseFixedLength(out UIFixedLength fixedLength, bool allowUnitless) {
+            uint start = ptr;
+            if (TryParseFloat(out float value)) {
+                bool gotUnit = TryParseFixedLengthUnit(out UIFixedUnit unit);
+                if (gotUnit || allowUnitless) {
+                    fixedLength = new UIFixedLength(value, unit);
+                    return true;
+                }
+            }
+
+            ptr = start;
+            fixedLength = default;
+            return false;
+        }
+
+        public bool TryParseFixedLengthUnit(out UIFixedUnit fixedUnit) {
+
+            while (ptr < dataEnd && char.IsWhiteSpace(data[ptr])) {
+                ptr++;
+            }
+
+            if (ptr >= dataEnd) {
+                fixedUnit = default;
+                return false;
+            }
+
+            if (data[ptr] == '%') {
+                fixedUnit = UIFixedUnit.Percent;
+                ptr++;
+                return true;
+            }
+
+            if (ptr + 1 >= dataEnd) {
+                fixedUnit = default;
+                ptr += 2;
+                return false;
+            }
+
+            if (data[ptr] == 'e' && data[ptr + 1] == 'm') {
+                fixedUnit = UIFixedUnit.Em;
+                ptr += 2;
+                return true;
+            }
+
+            if (data[ptr] == 'p' && data[ptr + 1] == 'x') {
+                fixedUnit = UIFixedUnit.Pixel;
+                ptr += 2;
+                return true;
+            }
+
+            if (data[ptr] == 'v' && data[ptr + 1] == 'w') {
+                fixedUnit = UIFixedUnit.ViewportWidth;
+                ptr += 2;
+                return true;
+            }
+
+            if (data[ptr] == 'v' && data[ptr + 1] == 'h') {
+                fixedUnit = UIFixedUnit.ViewportHeight;
+                ptr += 2;
+                return true;
+            }
+
+            fixedUnit = default;
+            return false;
+        }
+
     }
 
     [Flags]

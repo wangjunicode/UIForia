@@ -5,7 +5,6 @@ using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEngine.Assertions;
 
 namespace UIForia {
 
@@ -170,12 +169,15 @@ namespace UIForia {
             parentInfo.childCount--;
         }
 
-        public void DestroyElement(ElementId elementId) {
+        public void DestroyElement(ElementId elementId, bool unlinkFromParent) {
             ref ElementMetaInfo meta = ref metaTable.array[elementId.index];
             meta.generation++;
             meta.flags = default;
             meta.__padding__ = default;
             indexQueue.Enqueue(elementId.index);
+            if (unlinkFromParent) {
+                UnlinkFromParent(elementId);
+            }
         }
 
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -197,11 +199,61 @@ namespace UIForia {
         }
 
         public static bool IsDeadOrDisabled(ElementId elementId, ElementTable<ElementMetaInfo> metaTable) {
-            return metaTable[elementId].generation != elementId.generation || (metaTable[elementId].flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet;
+            return metaTable.array[elementId.id & ElementId.ENTITY_INDEX_MASK].generation != elementId.generation || (metaTable.array[elementId.id & ElementId.ENTITY_INDEX_MASK].flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet;
+        }
+
+        private void UnlinkFromParent(ElementId elementId) {
+            // Unlink
+            ref HierarchyInfo hierarchyInfo = ref hierarchyTable[elementId];
+            ElementId parentId = hierarchyInfo.parentId;
+            if (parentId == default) {
+                return;
+            }
+            ref HierarchyInfo parentInfo = ref hierarchyTable[parentId];
+
+            if (parentInfo.firstChildId == elementId) {
+                parentInfo.firstChildId = hierarchyInfo.nextSiblingId;
+            }
+
+            if (parentInfo.lastChildId == elementId) {
+                parentInfo.lastChildId = hierarchyInfo.prevSiblingId;
+            }
+
+            if (hierarchyInfo.nextSiblingId != default) {
+                hierarchyTable[hierarchyInfo.nextSiblingId].prevSiblingId = hierarchyInfo.prevSiblingId;
+            }
+
+            if (hierarchyInfo.prevSiblingId != default) {
+                hierarchyTable[hierarchyInfo.prevSiblingId].nextSiblingId = hierarchyInfo.nextSiblingId;
+            }
+
+            parentInfo.childCount--;
         }
 
         public int SetSiblingIndex(ElementId id, int value) {
-            throw new NotImplementedException();
+            // ref HierarchyInfo hierarchyInfo = ref hierarchyTable[id];
+            // ElementId parentId = hierarchyInfo.parentId;
+            // ref HierarchyInfo parentInfo = ref hierarchyTable[parentId];
+            //
+            // if (value < 0) value = 0;
+            // if (value >= parentInfo.childCount) {
+            //     value = parentInfo.childCount - 1;
+            // }
+            //
+
+            // ElementId ptr = parentInfo.firstChildId;
+            //
+            // int idx = 0;
+            // while (idx != value) {
+            //     ptr = hierarchyTable[];
+            //     idx++;
+            // }
+            //
+            // // Find location
+            // // Insert
+
+            return value;
+
         }
 
         public void Dispose() {
@@ -319,6 +371,23 @@ namespace UIForia {
             return default;
 
         }
+
+        public void ReorderChildren(ElementId parent, IList<IElementIdProvider> lastFrameChildren) {
+
+            for (int i = 0; i < lastFrameChildren.Count; i++) {
+                ref HierarchyInfo hierarchyInfo = ref hierarchyTable[lastFrameChildren[i].ElementId];
+                if (hierarchyInfo.parentId != parent) {
+                    continue;
+                }
+            }
+
+        }
+
+    }
+
+    public interface IElementIdProvider {
+
+        ElementId ElementId { get; }
 
     }
 

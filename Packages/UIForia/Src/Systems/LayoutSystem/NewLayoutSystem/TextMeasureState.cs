@@ -1,4 +1,5 @@
-﻿using UIForia.Text;
+﻿using System;
+using UIForia.Text;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
 
@@ -17,10 +18,11 @@ namespace UIForia.Layout {
         UnderlayDilate,
         UnderlaySoftness,
 
+        FontSize
 
     }
 
-    internal struct TextMeasureState {
+    internal struct TextMeasureState : IDisposable {
 
         private struct FloatPair {
 
@@ -35,25 +37,23 @@ namespace UIForia.Layout {
         }
 
         private DataList<FontStyle> fontStyleStack;
-        private DataList<UIFixedLength> fontSizeStack;
         private DataList<FontAssetInfo> fontStack;
         private DataList<FloatPair> floatList;
         public TextScript scriptStyle;
 
         public TextMeasureState(Allocator allocator) : this() {
             fontStack = new DataList<FontAssetInfo>(8, allocator);
-            fontSizeStack = new DataList<UIFixedLength>(8, Allocator.Temp);
             fontStyleStack = new DataList<FontStyle>(8, Allocator.Temp);
             floatList = new DataList<FloatPair>(16, Allocator.Temp);
         }
 
-        public void Initialize(in TextStyle textStyle, in FontAssetInfo fontAssetInfo) {
-            fontSizeStack.size = 0;
+        public void Initialize(float baseFontSize, in TextStyle textStyle, in FontAssetInfo fontAssetInfo) {
             fontStyleStack.size = 0;
             floatList.size = 0;
             fontStack.size = 0;
-            fontSizeStack.Add(textStyle.fontSize);
             fontStack.Add(fontAssetInfo);
+
+            floatList.Add(new FloatPair(TextStyleType.FontSize, baseFontSize));
 
             if (textStyle.faceDilate != 0) {
                 floatList.Add(new FloatPair(TextStyleType.FaceDilate, textStyle.faceDilate));
@@ -152,7 +152,7 @@ namespace UIForia.Layout {
         }
 
         private float FindFloat(TextStyleType type, float defaultValue) {
-            for (int i = floatList.size = 1; i >= 0; i--) {
+            for (int i = floatList.size - 1; i >= 0; i--) {
                 if (floatList[i].type == type) {
                     return floatList[i].value;
                 }
@@ -161,8 +161,8 @@ namespace UIForia.Layout {
             return defaultValue;
         }
 
-        public UIFixedLength fontSize {
-            get => fontSizeStack.GetLast();
+        public float fontSize {
+            get => FindFloat(TextStyleType.FontSize, 18);
         }
 
         public FontStyle fontStyle {
@@ -183,14 +183,35 @@ namespace UIForia.Layout {
             }
         }
 
-        public void PushFontSize(float fontSize) {
-            fontSizeStack.Add(fontSize);
+        public void PushFontSize(UIFixedLength newFontSize, float viewportWidth, float viewportHeight) {
+            switch (newFontSize.unit) {
+
+                default:
+                case UIFixedUnit.Unset:
+                case UIFixedUnit.Pixel:
+                    PushFloat(TextStyleType.FontSize, newFontSize.value);
+                    break;
+
+                case UIFixedUnit.Percent:
+                    PushFloat(TextStyleType.FontSize, newFontSize.value * fontSize * 100);
+                    break;
+
+                case UIFixedUnit.Em:
+                    PushFloat(TextStyleType.FontSize, newFontSize.value * fontSize);
+                    break;
+
+                case UIFixedUnit.ViewportWidth:
+                    PushFloat(TextStyleType.FontSize, viewportWidth * fontSize);
+                    break;
+
+                case UIFixedUnit.ViewportHeight:
+                    PushFloat(TextStyleType.FontSize, viewportHeight * fontSize);
+                    break;
+            }
         }
 
         public void PopFontSize() {
-            if (fontSizeStack.size > 0) {
-                fontSizeStack.size--;
-            }
+            PopFloat(TextStyleType.FontSize);
         }
 
         public void PushFontStyle(FontStyle fontStyle) {
@@ -199,6 +220,12 @@ namespace UIForia.Layout {
 
         public void PopFontStyle() {
             fontStyleStack.size--;
+        }
+
+        public void Dispose() {
+            fontStack.Dispose();
+            fontStyleStack.Dispose();
+            floatList.Dispose();
         }
 
     }

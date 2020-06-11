@@ -12,7 +12,7 @@ namespace Documentation.DocumentationElements {
         public int activationRange = -1;
         private Camera cameraSystem;
         public override void OnEnable() {
-            element = GetChild(0);
+            element = GetFirstChild();
             cameraSystem = GameObject.Find("Camera").GetComponent<Camera>();
         }
 

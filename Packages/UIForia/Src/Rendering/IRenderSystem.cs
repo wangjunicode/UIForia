@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UIForia.Rendering {
 
-    public interface IRenderSystem : ISystem {
+    public interface IRenderSystem {
 
         event Action<RenderContext> DrawDebugOverlay2;
 

@@ -2,7 +2,6 @@
 using Unity.Burst;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace UIForia.Layout {
 
@@ -47,13 +46,15 @@ namespace UIForia.Layout {
             float4x4* loc = localMatrices.array;
             float4x4* wrld = worldMatrices.array;
 
-            for (int i = 0; i < elementList.size; i++) {
+            int size = elementList.size;
+            
+            for (int i = 0; i < size; i++) {
 
                 ElementId elementId = elementListPtr[i];
                 ElementId parentId = parentListPtr[i];
 
-                ref float4x4 left = ref loc[elementId.index];
-                ref float4x4 right = ref wrld[parentId.index];
+                ref float4x4 left = ref loc[elementId.id & ElementId.ENTITY_INDEX_MASK];
+                ref float4x4 right = ref wrld[parentId.id & ElementId.ENTITY_INDEX_MASK];
 
                 float4x4 m = new float4x4(
                     1, 0, 0, 0,
@@ -71,7 +72,7 @@ namespace UIForia.Layout {
                 m.c3.x = left.c0.x * right.c3.x + left.c1.x * right.c3.y + left.c3.x;
                 m.c3.y = left.c0.y * right.c3.x + left.c1.y * right.c3.y + left.c3.y;
 
-                wrld[elementId.index] = m;
+                wrld[elementId.id & ElementId.ENTITY_INDEX_MASK] = m;
 
             }
         }

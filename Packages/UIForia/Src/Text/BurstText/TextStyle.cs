@@ -28,6 +28,7 @@ namespace UIForia.Text {
         public float underlaySoftness;
         public float faceDilate;
         public TextScript scriptStyle;
+        public float lineHeight;
 
     }
 

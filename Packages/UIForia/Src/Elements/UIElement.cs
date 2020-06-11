@@ -18,13 +18,10 @@ namespace UIForia.Elements {
 
         public InputHandlerGroup inputHandlers; // todo -- internal with accessor
 
-        public LightList<UIElement> children; // todo -- replace w/ linked list & child count
-
         internal UIElementFlags flags;
         internal UIElement parent;
 
         // todo -- maybe move a lot of this data to an internal representation of UIElement
-        internal LayoutBox layoutBox;
         internal RenderBox renderBox;
         public UIStyleSet style; // todo -- make internal with accessor
         public LinqBindingNode bindingNode; // todo -- make internal with accessor
@@ -36,7 +33,7 @@ namespace UIForia.Elements {
         public UIView View { get; internal set; }
         public Application application { get; internal set; }
         public int hierarchyDepth { get; internal set; }
-        private int _siblingIndex;
+        internal int _siblingIndex;
 
         public int siblingIndex {
             get => _siblingIndex;
@@ -57,7 +54,7 @@ namespace UIForia.Elements {
 
         public IInputProvider Input => application.InputSystem; // todo -- remove
 
-        public int ChildCount => children?.Count ?? 0;
+        public int ChildCount => application.elementSystem.hierarchyTable[id].childCount;
 
         public bool __internal_isEnabledAndNeedsUpdate => (flags & UIElementFlags.EnabledFlagSetWithUpdate) == (UIElementFlags.EnabledFlagSetWithUpdate);
 
@@ -269,44 +266,36 @@ namespace UIForia.Elements {
             }
         }
 
-        public UIElement GetChild(int index) {
-            if (children == null || (uint) index >= (uint) children.Count) {
-                return null;
-            }
-
-            return children[index];
-        }
-
         public UIElement FindById(string elementId) {
             return FindById<UIElement>(elementId);
         }
 
         [PublicAPI]
         public T FindById<T>(string elementId) where T : UIElement {
+
             LightStack<UIElement> elementStack = LightStack<UIElement>.Get();
+
             elementStack.Push(this);
+
             while (elementStack.size > 0) {
                 UIElement element = elementStack.array[--elementStack.size];
 
-                if (element.children == null) {
+                UIElement ptr = element.GetLastChild();
+
+                if (ptr == null) {
                     continue;
                 }
 
-                elementStack.EnsureAdditionalCapacity(element.children.size);
-
-                for (int i = element.children.size - 1; i >= 0; i--) {
-                    UIElement child = element.children.array[i];
-
-                    // todo -- need to figure out if we should descend into children. probably want to scrap this whole method and do something better with selectors
-                    // if (child.templateMetaData == element.templateMetaData) {
-                    if (child is T castChild && child.GetAttribute("id") == elementId) {
+                while (ptr != null) {
+                    if (ptr is T castChild && ptr.GetAttribute("id") == elementId) {
                         LightStack<UIElement>.Release(ref elementStack);
                         return castChild;
                     }
-                    // }
 
-                    elementStack.array[elementStack.size++] = child;
+                    elementStack.Push(ptr);
+                    ptr = ptr.GetPreviousSibling();
                 }
+
             }
 
             LightStack<UIElement>.Release(ref elementStack);
@@ -316,23 +305,26 @@ namespace UIForia.Elements {
 
         [PublicAPI]
         public T FindFirstByType<T>() where T : UIElement {
-            if (children == null) {
-                return null;
-            }
 
-            for (int i = 0; i < children.Count; i++) {
-                if (children[i] is T) {
-                    return (T) children[i];
+            UIElement ptr = GetFirstChild();
+
+            while (ptr != null) {
+
+                if (ptr is T castElement) {
+                    return castElement;
                 }
 
-                if (children[i] is UIChildrenElement) {
+                if (ptr is UIChildrenElement) {
+                    ptr = ptr.GetNextSibling();
                     continue;
                 }
 
-                UIElement childResult = children[i].FindFirstByType<T>();
+                UIElement childResult = ptr.FindFirstByType<T>();
                 if (childResult != null) {
                     return (T) childResult;
                 }
+
+                ptr = ptr.GetNextSibling();
             }
 
             return null;
@@ -340,20 +332,22 @@ namespace UIForia.Elements {
 
         public List<T> FindByType<T>(List<T> retn = null) where T : UIElement {
             retn = retn ?? new List<T>();
-            if (children == null) {
-                return retn;
-            }
 
-            for (int i = 0; i < children.Count; i++) {
-                if (children[i] is T) {
-                    retn.Add((T) children[i]);
+            UIElement ptr = GetFirstChild();
+
+            while (ptr != null) {
+
+                if (ptr is T castElement) {
+                    retn.Add(castElement);
                 }
 
-                if (children[i] is UIChildrenElement) {
+                if (ptr is UIChildrenElement) {
+                    ptr = ptr.GetNextSibling();
                     continue;
                 }
 
-                children[i].FindByType(retn);
+                ptr.FindByType(retn);
+                ptr = ptr.GetNextSibling();
             }
 
             return retn;
@@ -458,27 +452,6 @@ namespace UIForia.Elements {
         public IHierarchical Element => this;
         public IHierarchical Parent => parent;
 
-        // todo -- remove
-        public List<UIElement> GetChildren(List<UIElement> retn = null) {
-            retn = retn ?? ListPool<UIElement>.Get();
-
-            if (children == null) {
-                return retn;
-            }
-
-            UIElement[] childArray = children.Array;
-            for (int i = 0; i < children.Count; i++) {
-                retn.Add(childArray[i]);
-            }
-
-            return retn;
-        }
-
-        internal void InternalDestroy() {
-            LightList<UIElement>.Release(ref children);
-            parent = null;
-        }
-
         public MaterialInterface Material {
             get => new MaterialInterface(this, application);
         }
@@ -500,8 +473,9 @@ namespace UIForia.Elements {
             return false;
         }
 
-        public UIElement this[int i] {
-            get { return GetChild(i); }
+        // for testing convienence now
+        internal UIElement this[int i] {
+            get { return FindChildAt(i); }
         }
 
         public UIElement this[string id] {
@@ -545,6 +519,11 @@ namespace UIForia.Elements {
             }
 
             return null;
+        }
+
+        public void SetSiblingIndex(int i) {
+            if (_siblingIndex == i) return;
+            _siblingIndex = application.elementSystem.SetSiblingIndex(id, i);
         }
 
     }

@@ -6,6 +6,8 @@ namespace UIForia.Rendering {
         private readonly UIStyleSet m_StyleSet;
         public readonly StyleState state;
 
+        public void SetProperty(StyleProperty propertyId, StyleState state) { }
+
         internal UIStyleSetStateProxy(UIStyleSet styleSet, StyleState state) {
             this.m_StyleSet = styleSet;
             this.state = state;

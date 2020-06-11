@@ -170,17 +170,17 @@ namespace UIForia.Systems {
                 return;
             }
 
-            if (element.layoutBox != null) {
-                element.layoutBox.Invalidate();
-            }
+            // if (element.layoutBox != null) {
+            //     element.layoutBox.Invalidate();
+            // }
 
-            if (element.children == null) {
-                return;
-            }
-
-            for (int i = 0; i < element.children.size; i++) {
-                InvalidateAll(element.children[i]);
-            }
+            // if (element.children == null) {
+            //     return;
+            // }
+            //
+            // for (int i = 0; i < element.children.size; i++) {
+            //     InvalidateAll(element.children[i]);
+            // }
         }
 
         // i need to know the hierarchy changes, add or remove non ignored child -> causes layout & content size invalidation
@@ -352,7 +352,7 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < alignVerticalList.size; i++) {
                 UIElement element = alignVerticalList.array[i];
-                LayoutBox box = element.layoutBox;
+                LayoutBox box = default; // element.layoutBox;
                 LayoutResult result = default;// ref element.layoutResult;
 
                 // todo -- cache these values on layout box or make style reads fast
@@ -560,7 +560,7 @@ namespace UIForia.Systems {
             // save size checks later while traversing
             // todo find the real number of elements (huge repeats) to use the inlined boxRefStack.Push variant during layout again
 
-            PerformLayoutStep(rootElement.layoutBox);
+            // PerformLayoutStep(rootElement.layoutBox);
 
             // for (int i = 0; i < ignoredList.size; i++) {
             //     LayoutBox ignoredBox = ignoredList.array[i];
@@ -709,9 +709,9 @@ namespace UIForia.Systems {
                 LayoutResult layoutResult = element.layoutResult;
 
                 // todo - for some reason the layoutbox can be null. matt, pls fix k thx bye
-                if (layoutResult.isCulled || element.layoutBox == null) {
-                    continue;
-                }
+                // if (layoutResult.isCulled || element.layoutBox == null) {
+                    // continue;
+                // }
 
                 ClipData ptr = default; //layoutResult.clipper;
 

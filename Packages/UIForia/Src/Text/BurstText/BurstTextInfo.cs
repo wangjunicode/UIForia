@@ -126,20 +126,19 @@ namespace UIForia.Text {
         public string GetDebuggerView() {
             return type.ToString();
         }
+
     }
 
-
     public unsafe struct TextInfoDebugView {
-        
 
         public string outputText;
 
         public TextLayoutSymbol[] layoutSymbols;
         public string[] layoutSymbolStrings;
-        
+
         public TextInfoDebugView(BurstTextInfo target) {
             outputText = MakeOutputText(target.symbolList);
-            
+
             if (target.layoutSymbolList.array != null) {
                 layoutSymbols = new TextLayoutSymbol[target.layoutSymbolList.size];
                 for (int i = 0; i < target.layoutSymbolList.size; i++) {
@@ -160,24 +159,26 @@ namespace UIForia.Text {
                 switch (layoutSymbol.array[i].type & ~TextLayoutSymbolType.IsBreakable) {
 
                     case TextLayoutSymbolType.Word: {
-                        
+
                         builder.Clear();
-                        
+
                         ref WordInfo wordInfo = ref layoutSymbol.array[i].wordInfo;
                         for (int j = wordInfo.charStart; j < wordInfo.charEnd; j++) {
-                            
+
                             if (targetSymbolList[j].type == TextSymbolType.Character) {
                                 builder.Append((char) targetSymbolList[j].charInfo.character);
                             }
-                            
+
                         }
 
                         retn[i] = builder.ToString();
                         if (!layoutSymbol.array[i].isBreakable) {
                             retn[i] += " (Non Breaking)";
                         }
+
                         break;
                     }
+
                     case TextLayoutSymbolType.HorizontalSpace:
                     case TextLayoutSymbolType.LineHeightPush:
                     case TextLayoutSymbolType.LineHeightPop:
@@ -194,9 +195,9 @@ namespace UIForia.Text {
                         if (!layoutSymbol.array[i].isBreakable) {
                             retn[i] += " (Non Breaking)";
                         }
+
                         break;
 
-                   
                 }
             }
 
@@ -215,28 +216,21 @@ namespace UIForia.Text {
             return builder.ToString();
         }
 
-        public struct TextLayoutSymbolDebug {
-
-            
-
-        }
+        public struct TextLayoutSymbolDebug { }
 
     }
 
     [StructLayout(LayoutKind.Sequential)]
     [DebuggerTypeProxy(typeof(TextInfoDebugView))]
-    public unsafe struct BurstTextInfo : IDisposable {
+    public struct BurstTextInfo : IDisposable {
 
-        // todo -- store in single larger buffer
         internal List_Char characterList;
         internal List_TextSymbol symbolList;
-
         internal List_TextLayoutSymbol layoutSymbolList;
         internal List_TextLineInfo lineInfoList;
 
         public bool requiresTextTransform;
         public TextStyle textStyle;
-        public int nextFreeId;
 
         // parser pushes character instructions into output stream
         // strip whitespace accordingly
@@ -245,90 +239,6 @@ namespace UIForia.Text {
         // measure those
         // layout knows how to handle word stream
         // renderer only handles character stream
-
-        public void SetText(string text, ref TextInfoBufferSet textInfoBufferSet, ITextProcessor processor = null) {
-
-            textInfoBufferSet.SetText(text, processor);
-
-            // TextUtil.ProcessWhiteSpace(textStyle.whitespaceMode,
-            //     textInfoBufferSet.inputSymbolBuffer.GetArrayPointer(),
-            //     textInfoBufferSet.inputSymbolBuffer.size,
-            //     ref textInfoBufferSet.outputSymbolBuffer
-            // );
-
-            // if (textStyle.textTransform != TextTransform.None || textInfoBufferSet.requiresTextTransform) {
-            //     TextUtil.TransformText(textStyle.textTransform, ref textInfoBufferSet.outputSymbolBuffer);
-            // }
-
-            // TextUtil.CreateLayoutSymbols(textInfoBufferSet.inputSymbolBuffer, ref textInfoBufferSet.layoutBuffer);
-
-            // todo -- merge chars, text symbols and layout symbols into single buffer
-
-            // if (symbolList.array == null) {
-            //     symbolList = new List_TextSymbol(textInfoBufferSet.outputSymbolBuffer.size, Allocator.Persistent);
-            // }
-            //
-            // if (layoutSymbolList.array == null) {
-            //     layoutSymbolList = new List_TextLayoutSymbol(textInfoBufferSet.layoutBuffer.size, Allocator.Persistent);
-            // }
-            //
-            // if (characterList.array == null) {
-            //     characterList = new List_Char(textInfoBufferSet.originalInput.Length, Allocator.Persistent);
-            // }
-            //
-            // symbolList.CopyFrom(textInfoBufferSet.outputSymbolBuffer.GetArrayPointer(), textInfoBufferSet.outputSymbolBuffer.size);
-            //
-            // layoutSymbolList.CopyFrom(textInfoBufferSet.layoutBuffer.GetArrayPointer(), textInfoBufferSet.layoutBuffer.size);
-            //
-            // fixed (char* charptr = text) {
-            //     TypedUnsafe.MemCpy(characterList.array, charptr, text.Length);
-            //     characterList.size = text.Length;
-            // }
-
-        }
-
-        public void Dispose() { }
-
-        // first we take the input string and find all the modifiers from it
-        // this gives us a smaller buffer
-        // next need to handle processing the whitespace, includes line break modifiers
-        // between those modifications we'll end up with a smaller buffer and other modifications needs to have their indices updated
-        // next run through and transform characters if needed, must be managed code
-        // when handling whitespace, why applying whitespace modification need to go through remaining modifiers and alter their char index according to how much whitespace we collapsed in that run
-
-        // now break into words
-        // this will include no-break
-
-        // Process whitespace -> maybe needs to be managed due to text transform
-        // apply text transform -> needs managed code :(
-
-        // here on out is all burstable
-        // break into words
-        // delimters 
-        // resolve char infos
-        // resolve kerning info
-        // compute sizes
-
-        // do i want two streams of characters here?
-        // char info -> character / sprite / element
-        // need a list of char info for rendering & sizing anyway
-        // but if inject characters then i need to update all the modifier indices that come after that
-        // actually can do that with an offset integer probably so not expensive just need to consistent
-
-        // i need to convert my raw char stream into char infos
-        // i should be able to freely edit the modifier positions here
-        // i should also be able to apply white space collapse 
-        // also lookup kerning info
-
-        // i think we have two paths here, a faster one for when there are no modifications and then this one
-
-        // this is the setup step
-        // can i really create inline elements? i think its pretty cool
-        // better might be to define 'blocks' and render an element into that space
-        // would rather do this processing in burst job which means I cannot create an element there
-        // i could post-process to create the elements though and just leave a marker in the text 
-        // at process time
-        // in the rare case we need it, job.Run() should be fine for measuring text
 
         public string GetString() {
             TextUtil.StringBuilder.Clear();
@@ -340,6 +250,13 @@ namespace UIForia.Text {
             }
 
             return TextUtil.StringBuilder.ToString();
+        }
+
+        public void Dispose() {
+            characterList.Dispose();
+            symbolList.Dispose();
+            layoutSymbolList.Dispose();
+            lineInfoList.Dispose();
         }
 
     }

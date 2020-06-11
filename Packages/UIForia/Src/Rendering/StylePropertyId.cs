@@ -104,6 +104,7 @@ namespace UIForia.Rendering {
         TextWhitespaceMode,
         TextFaceDilate,
         TextOutlineSoftness,
+        TextLineHeight,
         CaretColor,
         SelectionBackgroundColor,
         SelectionTextColor,

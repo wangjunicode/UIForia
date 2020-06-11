@@ -6,10 +6,10 @@ namespace UIForia {
     [DebuggerDisplay("Index = {index} generation = {generation}")]
     public struct ElementId : IComparable<ElementId> {
 
-        private const int ENTITY_INDEX_BITS = 24;
-        private const int ENTITY_INDEX_MASK = (1 << ENTITY_INDEX_BITS) - 1;
-        private const int ENTITY_GENERATION_BITS = 8;
-        private const int ENTITY_GENERATION_MASK = (1 << ENTITY_GENERATION_BITS) - 1;
+        internal const int ENTITY_INDEX_BITS = 24;
+        internal const int ENTITY_INDEX_MASK = (1 << ENTITY_INDEX_BITS) - 1;
+        internal const int ENTITY_GENERATION_BITS = 8;
+        internal const int ENTITY_GENERATION_MASK = (1 << ENTITY_GENERATION_BITS) - 1;
 
         public readonly int id;
 

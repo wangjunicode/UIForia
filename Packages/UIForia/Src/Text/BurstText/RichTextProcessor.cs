@@ -1,13 +1,8 @@
-﻿using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using UIForia.Util;
+﻿using UIForia.Util;
 using UIForia.Util.Unsafe;
 using UnityEngine;
 
 namespace UIForia.Text {
-
-   
 
     public struct TextSymbolStream {
 
@@ -27,7 +22,7 @@ namespace UIForia.Text {
                 }
             });
         }
-
+        
         public void PushTextTransform(TextTransform textTransform) {
             if (textTransform == TextTransform.None) {
                 return;
@@ -71,6 +66,25 @@ namespace UIForia.Text {
             });
         }
 
+        public void PushFontSize(UIFixedLength fontSize) {
+            stream.Add(new TextSymbol() {
+                type = TextSymbolType.FontSizePush,
+                length = fontSize
+            });
+        }
+
+        public void PopFontSize() {
+            stream.Add(new TextSymbol() {
+                type = TextSymbolType.FontSizePop,
+            });
+        }
+
+    }
+
+    public static class TextProcessors {
+
+        public static RichTextProcessor RichText = new RichTextProcessor();
+
     }
 
     public class RichTextProcessor : ITextProcessor {
@@ -81,45 +95,61 @@ namespace UIForia.Text {
 
                 uint start = stream.Ptr;
 
-                if (stream != '<') {
+                if (stream != '[') {
                     textSymbolStream.AddCharacter(stream.Current);
                     stream.Advance();
                 }
                 else if (stream.Next == '/') {
                     stream.Advance(2);
-                    if (stream.TryMatchRange("nobreak>")) {
+                    if (stream.TryMatchRange("nobreak]")) {
                         textSymbolStream.PopNoBreak();
                     }
-                    else if (stream.TryMatchRange("uppercase>")) {
+                    else if (stream.TryMatchRange("size]")) {
+                        textSymbolStream.PopFontSize();
+                    }
+                    else if (stream.TryMatchRange("uppercase]")) {
                         textSymbolStream.PopTextTransform();
                     }
-                    else if (stream.TryMatchRange("titlecase>")) {
+                    else if (stream.TryMatchRange("titlecase]")) {
                         textSymbolStream.PopTextTransform();
                     }
-                    else if (stream.TryMatchRange("lowercase>")) {
+                    else if (stream.TryMatchRange("lowercase]")) {
                         textSymbolStream.PopTextTransform();
                     }
                     else {
-                        stream.RewindTo(start);
+                        stream.RewindTo(start + 1);
                         textSymbolStream.AddCharacter(stream.Current);
                     }
                 }
                 else {
                     stream.Advance();
-                    if (stream.TryMatchRange("nobreak>")) {
+                    if (stream.TryMatchRange("nobreak]")) {
                         textSymbolStream.PushNoBreak();
                     }
-                    else if (stream.TryMatchRange("uppercase>")) {
+                    else if (stream.TryMatchRange("size") && stream.TryParseCharacter('=')) {
+
+                        //[size=3.4em]
+                        //[size=46px]
+
+                        if (stream.TryParseFixedLength(out UIFixedLength value, true) && stream.TryParseCharacter(']')) {
+                            textSymbolStream.PushFontSize(value);
+                            continue;
+                        }
+
+                        stream.RewindTo(start + 1);
+                        textSymbolStream.AddCharacter(stream.Current);
+                    }
+                    else if (stream.TryMatchRange("uppercase]")) {
                         textSymbolStream.PushTextTransform(TextTransform.UpperCase);
                     }
-                    else if (stream.TryMatchRange("titlecase>")) {
+                    else if (stream.TryMatchRange("titlecase]")) {
                         textSymbolStream.PushTextTransform(TextTransform.TitleCase);
                     }
-                    else if (stream.TryMatchRange("lowercase>")) {
+                    else if (stream.TryMatchRange("lowercase]")) {
                         textSymbolStream.PushTextTransform(TextTransform.LowerCase);
                     }
                     else {
-                        stream.RewindTo(start);
+                        stream.RewindTo(start + 1);
                         textSymbolStream.AddCharacter(stream.Current);
                     }
                 }

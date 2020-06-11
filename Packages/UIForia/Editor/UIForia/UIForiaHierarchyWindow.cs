@@ -273,7 +273,7 @@ namespace UIForia.Editor {
             string[] names = new string[Application.Applications.Count + 1];
             names[0] = "None";
 
-            int oldIdx = 0;
+            int oldIdx = Application.Applications.Count >= 1 ? 1 : 0; 
 
             for (int i = 1; i < names.Length; i++) {
                 names[i] = Application.Applications[i - 1].id;

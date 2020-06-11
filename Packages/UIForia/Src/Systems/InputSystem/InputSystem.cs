@@ -293,9 +293,8 @@ namespace UIForia.Systems {
                         if (dragEventBranch == null) {
                             bindingUpdateList.Add(rootElementBranch);
                             rootElementBranch = rootElementBranch.parent;
-                        }
-                    
-                        if (rootElementBranch == null) {
+                        } 
+                        else if (rootElementBranch == null) {
                             bindingUpdateList.Add(dragEventBranch);
                             dragEventBranch = dragEventBranch.parent;
                         }

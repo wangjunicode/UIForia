@@ -25,6 +25,22 @@
                         <Div>{$item.name}</Div>
                     </Group>
                 </Repeat>
+                <Input style="input" sync:value="nickname" placeholder="'Choose your nickname'" />
+            
+                <Div style="blinking-things">
+                    
+                    <Div style="rotation-wrapper">
+                        <Div style="round rotating-left">
+                            <Div style="round rotating-right">
+                                <Div style="round rotating-left">
+                                    <Div style="round rotating-right">
+                                <Div style="thingy pulse round"/>
+                                    </Div>
+                                </Div>
+                            </Div>
+                        </Div>
+                    </Div>
+                </Div>
             </Panel>
 
             <Panel if="tab == TabItem.Items" style="settings-panel inventory-panel">

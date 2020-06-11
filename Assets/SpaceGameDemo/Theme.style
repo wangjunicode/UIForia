@@ -38,3 +38,9 @@ style <Heading2> {
     MarginBottom = 8px;
     TextFontSize = 16px;
 }
+
+style input {
+    BackgroundColor = grey;
+    PreferredSize = 320px 32px;
+    Padding = 4px 8px;
+}

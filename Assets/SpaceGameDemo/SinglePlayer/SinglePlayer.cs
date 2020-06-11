@@ -56,6 +56,9 @@ namespace SpaceGameDemo.SinglePlayer {
         // Property
         public int upgradePoints = 39;
         
+        // Property
+        public string nickname;
+
         private float speed = 0.1f;
 
         public override void OnUpdate() {

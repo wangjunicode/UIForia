@@ -289,3 +289,94 @@ style inventory {
     }
 }
 
+style thingy {
+
+    BackgroundColor = rgba(200, 20, 20, 1);
+    PreferredSize = 1pca;
+//    AlignX = 0px 20px ParentContentArea End;
+//    AlignY = 0px 20px ParentContentArea End;
+    ShadowColor = rgba(200, 20, 20, 1);
+    ShadowIntensity = 10;
+}
+
+style pulse {
+    run animation(pulse);
+}
+
+animation pulse {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 4s;
+        Iterations = infinite;
+    }
+    
+    [keyframes] {
+        0%, 33%, 66%, 100% {
+            ShadowIntensity = 30;
+            PreferredSize = 20px;
+
+        } 
+        17%, 50%, 80% {
+            ShadowIntensity = 10;
+            PreferredSize = 10px;
+        } 
+    }
+}
+
+style blinking-things {
+    AlignY = 0, 20px, Parent End;
+    AlignX = 0, 20px, Parent End;
+}
+
+style rotation-wrapper {
+    PreferredSize = 70px;
+}
+
+style rotating-left {
+    PreferredSize = 1pca;
+    BorderColor = rgba(200, 20, 20, 200);
+    BorderLeft = 2px;
+    BorderTop = 2px;
+    Padding = 3px;
+    run animation(rotate-left);
+}
+
+animation rotate-left {
+    [options] {
+        Iterations = infinite;
+        Duration = 7s;
+    }
+    
+    [keyframes] {
+        0% { TransformRotation = 0; } 
+        30% { TransformRotation = 360; }
+        100% { TransformRotation = 720; }
+    }
+}
+
+style rotating-right {
+    PreferredSize = 1pca;
+    BorderLeft = 1px;
+    BorderTop = 1px;
+    Padding = 3px;
+    BorderColor = @theme.orangeHover;
+    run animation(rotate-right);
+}
+
+animation rotate-right {
+    [options] {
+        Iterations = infinite;
+        Duration = 12s;
+    }
+    
+    [keyframes] {
+        0% { TransformRotation = 0; } 
+        30% { TransformRotation = -360; }
+        100% { TransformRotation = -720; }
+    }
+}
+
+style round {
+    BorderRadius = 50%;
+    DistributeExtraSpace = CenterContent;
+}

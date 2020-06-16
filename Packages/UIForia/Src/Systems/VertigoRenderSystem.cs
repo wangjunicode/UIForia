@@ -14,11 +14,11 @@ namespace Src.Systems {
 
         // todo -- this doesn't actually pool right now
         public RenderBox GetCustomPainter(string painterId) {
-            
+
             if (painterId == "self") {
                 return new SelfPaintedRenderBox();
             }
-            
+
             if (Application.s_CustomPainters.TryGetValue(painterId, out Type boxType)) {
                 return (RenderBox) Activator.CreateInstance(boxType);
             }
@@ -91,7 +91,7 @@ namespace Src.Systems {
 
             // todo
             // views can have their own cameras.
-            // if they do they are not batchable with other views. 
+            // if they do they are not batchable with other views.
             // for now we can make batching not cross view boundaries, eventually that would be cool though
 
             camera.orthographicSize = Screen.height * 0.5f;
@@ -145,6 +145,10 @@ namespace Src.Systems {
             }
         }
 
+        public RenderContext GetRenderContext()
+        {
+            return renderContext;
+        }
     }
 
     internal struct SVGXFillStyle {
@@ -177,7 +181,7 @@ namespace Src.Systems {
         };
 
     }
-    
+
     internal struct SVGXStrokeStyle {
 
         public PaintMode paintMode;
@@ -191,7 +195,7 @@ namespace Src.Systems {
         public Vertigo.LineJoin lineJoin;
         public Vertigo.LineCap lineCap;
         public float miterLimit;
-        
+
         public static SVGXStrokeStyle Default => new SVGXStrokeStyle() {
             paintMode = PaintMode.Color,
             encodedColor = VertigoUtil.ColorToFloat(Color.black),

@@ -32,11 +32,11 @@ namespace UIForia {
             get => dpiScaleFactor;
             set => dpiScaleFactor = value;
         }
-        
+
         public static SizeInt UiApplicationSize => UIApplicationSize;
-        
+
         public static List<Application> Applications = new List<Application>();
-        
+
         internal Stopwatch layoutTimer = new Stopwatch();
         internal Stopwatch renderTimer = new Stopwatch();
         internal Stopwatch bindingTimer = new Stopwatch();
@@ -78,15 +78,10 @@ namespace UIForia {
         private UITaskSystem m_BeforeUpdateTaskSystem;
         private UITaskSystem m_AfterUpdateTaskSystem;
 
-        public static readonly UIForiaSettings Settings;
+        public static UIForiaSettings Settings;
 
         static Application() {
-            ArrayPool<UIElement>.SetMaxPoolSize(64);
             s_CustomPainters = new Dictionary<string, Type>();
-            Settings = Resources.Load<UIForiaSettings>("UIForiaSettings");
-            if (Settings == null) {
-                throw new Exception("UIForiaSettings are missing. Use the UIForia/Create UIForia Settings to create it");
-            }
         }
 
         public UIForiaSettings settings => Settings;
@@ -104,7 +99,11 @@ namespace UIForia {
             this.onElementRegistered = onElementRegistered;
             this.id = templateSettings.applicationName;
             this.resourceManager = resourceManager ?? new ResourceManager();
-            
+            Settings = Settings ? Settings : Resources.Load<UIForiaSettings>("UIForiaSettings");
+            if (Settings == null) {
+                throw new Exception("UIForiaSettings are missing. Use the UIForia/Create UIForia Settings to create it");
+            }
+
             Applications.Add(this);
 #if UNITY_EDITOR
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnEditorReload;
@@ -159,7 +158,7 @@ namespace UIForia {
             }
 
             materialDatabase = templateData.materialDatabase;
-            
+
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this));
 
             view = new UIView(this, "Default", rootElement, Matrix4x4.identity, new Size(Width, Height));
@@ -285,7 +284,6 @@ namespace UIForia {
             m_AfterUpdateTaskSystem.OnDestroy();
             m_BeforeUpdateTaskSystem.OnDestroy();
 
-
             elementIdGenerator = 0;
 
             Initialize();
@@ -397,7 +395,6 @@ namespace UIForia {
             for (int i = 0; i < views.Count; i++) {
                 views[i].Viewport = new Rect(0, 0, Width, Height);
             }
-
 
             inputSystem.OnUpdate();
             m_BeforeUpdateTaskSystem.OnUpdate();
@@ -798,9 +795,11 @@ namespace UIForia {
                     onElementRegistered?.Invoke(current);
                     try {
                         current.OnCreate();
-                    } catch (Exception e){
+                    }
+                    catch (Exception e) {
                         Debug.Log(e);
                     }
+
                     view.ElementRegistered(current);
                 }
 

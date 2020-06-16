@@ -5,13 +5,13 @@ using UnityEngine.Rendering.Universal;
 
 namespace Src.Systems {
 
-    internal class VertigoRenderPass : ScriptableRenderPass {
+    internal class UIForiaRenderPass : ScriptableRenderPass {
 
         private static readonly string _ProfilerTag = "UIForia Main Command Buffer";
 
         private RenderContext _renderContext;
 
-        public VertigoRenderPass(RenderContext renderContext) {
+        public UIForiaRenderPass(RenderContext renderContext) {
             renderPassEvent = RenderPassEvent.AfterRendering;
             _renderContext = renderContext;
         }
@@ -25,14 +25,14 @@ namespace Src.Systems {
 
     }
 
-    public class VertigoRenderSystemSRP : ScriptableRendererFeature {
+    public class UIForiaRenderSystemSRP : ScriptableRendererFeature {
 
         public override void Create() { }
 
         public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData) {
             foreach (Application application in Application.Applications) {
                 if (application.Camera == renderingData.cameraData.camera) {
-                    renderer.EnqueuePass(new VertigoRenderPass(application.renderSystem.GetRenderContext()));
+                    renderer.EnqueuePass(new UIForiaRenderPass(application.renderSystem.GetRenderContext()));
                 }
             }
         }

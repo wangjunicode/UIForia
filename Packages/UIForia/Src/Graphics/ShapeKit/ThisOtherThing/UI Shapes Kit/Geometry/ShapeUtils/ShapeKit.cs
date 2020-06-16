@@ -37,7 +37,8 @@ namespace ThisOtherThing.UI.ShapeUtils {
         private DrawMode drawMode;
         private float dpiScale;
         private ShadowData shadowData;
-
+        private PointsData scratchPointData;
+        
         public ShapeKit(Allocator allocator) : this() {
             this.dpiScale = 1f;
             this.baseAA = 1.25f;
@@ -103,6 +104,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             cornerBuffer.Dispose();
             unitPositionBuffer.Dispose();
             positionBuffer.Dispose();
+            scratchPointData.Dispose();
         }
 
     }

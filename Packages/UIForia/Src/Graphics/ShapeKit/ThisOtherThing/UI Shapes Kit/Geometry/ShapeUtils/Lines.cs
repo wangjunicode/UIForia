@@ -35,13 +35,24 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        public void AddLine(ref UIVertexHelper vh, ref List_float2 positions, LineProperties lineProperties, float2 positionOffset, Color32 color) {
-            PointsData scratchPointData = PointsData.Create(allocator);
-            AddLine(ref vh, ref positions, lineProperties, positionOffset, color, ref scratchPointData);
+        public void AddLine(ref UIVertexHelper vh, ref List_float2 positions, LineProperties lineProperties, Color32 color, float2 positionOffset = default) {
+
+            if (positions.array == null || positions.size < 2) {
+                return;
+            }
+
+            if (scratchPointData.positionBuffer == null) {
+                scratchPointData = PointsData.Create(allocator);
+            }
+
+            AddLine(ref vh, ref positions, lineProperties, color, positionOffset, ref scratchPointData);
             scratchPointData.Clear();
         }
 
-        public void AddLine(ref UIVertexHelper vh, ref List_float2 positions, LineProperties lineProperties, float2 positionOffset, Color32 color, ref PointsData pointsData) {
+        public void AddLine(ref UIVertexHelper vh, ref List_float2 positions, LineProperties lineProperties, Color32 color, float2 positionOffset, ref PointsData pointsData) {
+            if (positions.array == null || positions.size < 2) {
+                return;
+            }
 
             pointsData.isClosed = lineProperties.closed && positions.size > 2;
 
@@ -53,10 +64,10 @@ namespace ThisOtherThing.UI.ShapeUtils {
             float halfLineWeight = lineProperties.weight * 0.5f;
 
             if (pointsData.generateRoundedCaps) {
-                pointsData.roundedCapResolution = GetLineCapResolution(lineProperties.weight * 0.5f, lineProperties.roundedCapResolution);
+                pointsData.totalCapCount = GetLineCapResolution(lineProperties.weight * 0.5f, lineProperties.roundedCapResolution);
             }
 
-            if (!SetLineData(ref positions, default, ref pointsData)) {
+            if (!SetLineData(ref positions, lineProperties.roundingData, ref pointsData)) {
                 return;
             }
 
@@ -104,7 +115,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
             vh.AddVert(tmpPos, color, uv);
 
-            for (int i = 1; i < pointsData.NumPositions - 1; i++) {
+            for (int i = 1; i < pointsData.totalPositionCount - 1; i++) {
                 uv.x = uvXMin + pointsData.normalizedPositionDistances[i] * uvXLength;
                 uv.y = 0.0f;
 
@@ -126,7 +137,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
 
             // add end vertices
-            int endIndex = pointsData.NumPositions - 1;
+            int endIndex = pointsData.totalPositionCount - 1;
             uv.x = uvXMin + pointsData.normalizedPositionDistances[endIndex] * uvXLength;
             uv.y = 0.0f;
 
@@ -178,7 +189,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
                 color.a = 0;
 
-                int outerBaseIndex = numVertices + pointsData.NumPositions * 2;
+                int outerBaseIndex = numVertices + pointsData.totalPositionCount * 2;
 
                 if (lineProperties.closed) {
                     outerBaseIndex += 2;
@@ -199,7 +210,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
                 vh.AddVert(tmpPos, color, uv);
 
-                for (int i = 1; i < pointsData.NumPositions; i++) {
+                for (int i = 1; i < pointsData.totalPositionCount; i++) {
                     uv.x = uvXMin + pointsData.normalizedPositionDistances[i] * uvXLength;
                     uv.y = 0.0f;
 
@@ -225,7 +236,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 }
 
                 if (lineProperties.closed) {
-                    int lastIndex = pointsData.NumPositions;
+                    int lastIndex = pointsData.totalPositionCount;
 
                     uv.x = 1.0f;
                     uv.y = 0.0f;
@@ -263,10 +274,10 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
         private void AddStartCap(ref UIVertexHelper vh, ref List_float2 positions, LineProperties lineProperties, float2 positionOffset, Color32 color, float4 uv, float uvXMin, float uvXLength, PointsData pointsData) {
             int currentVertCount = vh.currentVertCount;
-            int startIndex = currentVertCount - pointsData.NumPositions * 2;
+            int startIndex = currentVertCount - pointsData.totalPositionCount * 2;
 
             if (edgeGradientData.isActive) {
-                startIndex -= pointsData.NumPositions * 2;
+                startIndex -= pointsData.totalPositionCount * 2;
             }
 
             float3 tmpPos2 = default;
@@ -303,7 +314,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
                         0,
                         lineProperties,
                         color,
-                        pointsData.NumPositions,
+                        pointsData.totalPositionCount,
                         currentVertCount
                     );
 
@@ -318,7 +329,8 @@ namespace ThisOtherThing.UI.ShapeUtils {
                         pointsData.positionNormals[0],
                         lineProperties,
                         color,
-                        pointsData.NumPositions,
+                        pointsData.totalPositionCount,
+                        pointsData.totalCapCount,
                         pointsData.StartCapOffsets,
                         pointsData.StartCapUVs,
                         uvXMin,
@@ -334,10 +346,10 @@ namespace ThisOtherThing.UI.ShapeUtils {
             int startIndex = currentVertCount;
 
             if (edgeGradientData.isActive) {
-                startIndex -= pointsData.NumPositions * 2;
+                startIndex -= pointsData.totalPositionCount * 2;
             }
 
-            int lastPositionIndex = pointsData.NumPositions - 1;
+            int lastPositionIndex = pointsData.totalPositionCount - 1;
 
             float3 tmpPos2 = default;
 
@@ -357,7 +369,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
                     startIndex -= 6;
 
-                    AddProjectedCap(ref vh, false, startIndex, tmpPos2, pointsData.positionNormals[lastPositionIndex], pointsData.endCapOffset, 1, lineProperties, color, pointsData.NumPositions, currentVertCount);
+                    AddProjectedCap(ref vh, false, startIndex, tmpPos2, pointsData.positionNormals[lastPositionIndex], pointsData.endCapOffset, 1, lineProperties, color, pointsData.totalPositionCount, currentVertCount);
 
                     break;
 
@@ -365,14 +377,14 @@ namespace ThisOtherThing.UI.ShapeUtils {
 #if CENTER_ROUNDED_CAPS
 					startIndex -= pointsData.RoundedCapResolution + 3;
 #else
-                    startIndex -= pointsData.roundedCapResolution + 2;
+                    startIndex -= pointsData.totalCapCount + 2;
 #endif
 
                     if (edgeGradientData.isActive) {
-                        startIndex -= pointsData.roundedCapResolution;
+                        startIndex -= pointsData.totalCapCount;
                     }
 
-                    AddRoundedCap(ref vh, false, startIndex, tmpPos2, pointsData.positionNormals[lastPositionIndex], lineProperties, color, pointsData.NumPositions, pointsData.EndCapOffsets, pointsData.EndCapUVs, uvXMin, uvXLength, currentVertCount);
+                    AddRoundedCap(ref vh, false, startIndex, tmpPos2, pointsData.positionNormals[lastPositionIndex], lineProperties, color, pointsData.totalPositionCount, pointsData.totalCapCount, pointsData.EndCapOffsets, pointsData.EndCapUVs, uvXMin, uvXLength, currentVertCount);
 
                     break;
             }
@@ -411,7 +423,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             vh.AddTriangle(firstVertIndex, baseIndex + invertIndices, baseIndex + 1 - invertIndices);
             vh.AddTriangle(firstVertIndex + invertIndices, baseIndex + 1, firstVertIndex + 1 - invertIndices);
 
-            int antiAliasedIndex = firstVertIndex + pointsData.NumPositions * 2;
+            int antiAliasedIndex = firstVertIndex + pointsData.totalPositionCount * 2;
 
             if (invertIndices != 0) {
                 vh.AddTriangle(firstVertIndex, baseIndex, antiAliasedIndex);
@@ -503,8 +515,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        private void AddRoundedCap(ref UIVertexHelper vh, bool isStart, int firstVertIndex, in float3 position, float2 normal, in LineProperties lineProperties, Color32 color, int numPositions, in List_float2 capOffsets, in List_float2 uvOffsets, float uvXMin, float uvXLength,
-            int currentVertCount) {
+        private void AddRoundedCap(ref UIVertexHelper vh, bool isStart, int firstVertIndex, in float3 position, float2 normal, in LineProperties lineProperties, Color32 color, int numPositions, int capCount, float2* capOffsets, float2* uvOffsets, float uvXMin, float uvXLength, int currentVertCount) {
             int baseIndex = currentVertCount;
 
             float centerDistance = GetCenterDistance(lineProperties);
@@ -530,7 +541,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 #endif
 
             float3 tmpPos = default;
-            for (int i = 0; i < capOffsets.size; i++) {
+            for (int i = 0; i < capCount; i++) {
                 tmpPos.x = position.x + normal.x * innerOffset + capOffsets[i].x * capOffsetAmount;
                 tmpPos.y = position.y + normal.y * innerOffset + capOffsets[i].y * capOffsetAmount;
 
@@ -559,7 +570,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 				vh.AddTriangle(baseIndex, baseIndex + capOffsets.Length - 1, baseIndex + capOffsets.Length);
 				vh.AddTriangle(baseIndex, baseIndex + capOffsets.Length, firstVertIndex + 1);
 #else
-                vh.AddTriangle(baseIndex + capOffsets.size - 1, firstVertIndex + 1, firstVertIndex);
+                vh.AddTriangle(baseIndex + capCount - 1, firstVertIndex + 1, firstVertIndex);
 #endif
             }
             else {
@@ -584,7 +595,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
                 int antiAliasedIndex = firstVertIndex + numPositions * 2;
 
-                for (int i = 0; i < capOffsets.size; i++) {
+                for (int i = 0; i < capCount; i++) {
                     tmpPos.x = position.x + normal.x * innerOffset + capOffsets[i].x * capOffsetAmount;
                     tmpPos.y = position.y + normal.y * innerOffset + capOffsets[i].y * capOffsetAmount;
 
@@ -600,24 +611,24 @@ namespace ThisOtherThing.UI.ShapeUtils {
                     vh.AddVert(tmpPos, color, uv);
 
                     if (i > 0) {
-                        vh.AddTriangle(baseIndex + i - 1, baseIndex + capOffsets.size + i - 1, baseIndex + i);
-                        vh.AddTriangle(baseIndex + capOffsets.size + i, baseIndex + i, baseIndex + capOffsets.size + i - 1);
+                        vh.AddTriangle(baseIndex + i - 1, baseIndex + capCount + i - 1, baseIndex + i);
+                        vh.AddTriangle(baseIndex + capCount + i, baseIndex + i, baseIndex + capCount + i - 1);
                     }
                 }
 
                 if (!isStart) {
                     vh.AddTriangle(baseIndex, firstVertIndex + 1, antiAliasedIndex + 1);
-                    vh.AddTriangle(antiAliasedIndex + 1, baseIndex + capOffsets.size, baseIndex);
+                    vh.AddTriangle(antiAliasedIndex + 1, baseIndex + capCount, baseIndex);
 
-                    vh.AddTriangle(baseIndex + capOffsets.size * 2 - 1, antiAliasedIndex, firstVertIndex);
-                    vh.AddTriangle(baseIndex + capOffsets.size - 1, baseIndex + capOffsets.size * 2 - 1, firstVertIndex);
+                    vh.AddTriangle(baseIndex + capCount * 2 - 1, antiAliasedIndex, firstVertIndex);
+                    vh.AddTriangle(baseIndex + capCount - 1, baseIndex + capCount * 2 - 1, firstVertIndex);
                 }
                 else {
-                    vh.AddTriangle(firstVertIndex + 1, baseIndex + capOffsets.size - 1, baseIndex + capOffsets.size * 2 - 1);
-                    vh.AddTriangle(antiAliasedIndex + 1, firstVertIndex + 1, baseIndex + capOffsets.size * 2 - 1);
+                    vh.AddTriangle(firstVertIndex + 1, baseIndex + capCount - 1, baseIndex + capCount * 2 - 1);
+                    vh.AddTriangle(antiAliasedIndex + 1, firstVertIndex + 1, baseIndex + capCount * 2 - 1);
 
                     vh.AddTriangle(antiAliasedIndex, baseIndex, firstVertIndex);
-                    vh.AddTriangle(baseIndex + capOffsets.size, baseIndex, antiAliasedIndex);
+                    vh.AddTriangle(baseIndex + capCount, baseIndex, antiAliasedIndex);
                 }
             }
         }

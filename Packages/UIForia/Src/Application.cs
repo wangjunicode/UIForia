@@ -284,15 +284,15 @@ namespace UIForia {
 
             Stopwatch stopwatch = Stopwatch.StartNew();
 
+            for (int i = views.Count - 1; i >= 0; i--) {
+                views[i].Destroy();
+            }
+
             foreach (ISystem system in systems) {
                 system.OnDestroy();
             }
 
             elementSystem.Dispose();
-
-            for (int i = views.Count - 1; i >= 0; i--) {
-                views[i].Destroy();
-            }
 
             resourceManager.Reset();
 
@@ -333,7 +333,7 @@ namespace UIForia {
 
         internal void DoDestroyElement(UIElement element) {
             // do nothing if already destroyed
-            
+
             ElementTable<ElementMetaInfo> metaTable = elementSystem.metaTable;
 
             if (!elementSystem.IsAlive(element.id)) {
@@ -341,9 +341,9 @@ namespace UIForia {
             }
 
             LightStack<UIElement> stack = LightStack<UIElement>.Get();
-            
+
             UIView view = element.View;
-            
+
             stack.Push(element);
 
             while (stack.size > 0) {
@@ -361,7 +361,7 @@ namespace UIForia {
                 view.activeElementCount--;
                 elementSystem.disabledElementsThisFrame.Add(current.id);
                 elementSystem.DestroyElement(current.id, current.id == element.id);
-                
+
                 current.OnDestroy();
 
                 // UIElement[] children = current.children.array;
@@ -379,7 +379,6 @@ namespace UIForia {
                 }
 
             }
-            
 
             for (int i = 0; i < systems.Count; i++) {
                 systems[i].OnElementDestroyed(element);
@@ -459,7 +458,6 @@ namespace UIForia {
             }
 
             styleSystem.FlushChangeSets(elementSystem, layoutSystem, renderSystem);
-
 
             layoutTimer.Restart();
             Profiler.BeginSample("UIForia::Layout");

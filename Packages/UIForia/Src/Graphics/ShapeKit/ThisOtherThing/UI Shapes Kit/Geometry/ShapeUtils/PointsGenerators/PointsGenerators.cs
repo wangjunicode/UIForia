@@ -11,13 +11,13 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 case PointListGeneratorType.Custom:
                     break;
 
-                case PointListGeneratorType.Rect:
-                    SetPointsRect(ref positions, data);
-                    break;
+                // case PointListGeneratorType.Rect:
+                //     SetPointsRect(ref positions, data);
+                //     break;
 
-                case PointListGeneratorType.Round:
-                    SetPointsRound(ref positions, data);
-                    break;
+                // case PointListGeneratorType.Round:
+                //     SetPointsRound(ref positions, data);
+                //     break;
 
                 case PointListGeneratorType.RadialGraph:
                     SetPointsRadialGraph(ref positions, data);
@@ -27,13 +27,13 @@ namespace ThisOtherThing.UI.ShapeUtils {
                     SetPointsLineGraph(ref positions, data);
                     break;
 
-                case PointListGeneratorType.AngleLine:
-                    SetPointsAngleLine(ref positions, data);
-                    break;
+                // case PointListGeneratorType.AngleLine:
+                //     SetPointsAngleLine(ref positions, data);
+                //     break;
 
-                case PointListGeneratorType.Star:
-                    SetPointsStar(ref positions, data);
-                    break;
+                // case PointListGeneratorType.Star:
+                //     SetPointsStar(ref positions, data);
+                //     break;
 
                 case PointListGeneratorType.Gear:
                     SetPointsGear(ref positions, data);
@@ -41,7 +41,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        public static void SetPointsRect(ref List_float2 positions, PointListGeneratorData data) {
+        public static void SetPointsRect(ref List_float2 positions, RectPointListData data) {
 
             positions.SetSize(4);
 
@@ -81,11 +81,15 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        public static void SetPointsRound(ref List_float2 positions, in PointListGeneratorData data) {
+        public static void SetPointsRound(ref List_float2 positions, in RoundPointListData data) {
+            if (data.length <= 0) return;
+
             float absLength = math.abs(data.length);
 
-            int numFullSteps = (int)(math.ceil(data.resolution * absLength));
-            float partStepAmount = 1.0f + ((data.resolution * absLength) - numFullSteps);
+            int startResolution = ShapeKit.ResolveEllipseResolution(new float2(data.width * 0.5f, data.height * 0.5f), data.resolution); // * 2;
+
+            int numFullSteps = (int) (math.ceil(startResolution * absLength));
+            float partStepAmount = 1.0f + ((startResolution * absLength) - numFullSteps);
 
             bool addPartialStep = partStepAmount >= 0.0001f;
 
@@ -95,13 +99,13 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 resolution++;
             }
 
-            if (data.centerPoint) {
+            if (data.useCenterPoint) {
                 resolution++;
             }
 
             positions.SetSize(resolution);
 
-            if (data.centerPoint) {
+            if (data.useCenterPoint) {
                 positions.array[resolution - 1].x = data.center.x;
                 positions.array[resolution - 1].y = data.center.y;
             }
@@ -110,13 +114,18 @@ namespace ThisOtherThing.UI.ShapeUtils {
             float halfHeight = math.max(0.001f, data.height * 0.5f);
 
             float angle = data.startOffset * GeoUtils.TwoPI;
-            float angleIncrement = (GeoUtils.TwoPI) / data.resolution;
+            float angleIncrement = (GeoUtils.TwoPI) / startResolution;
 
-            if (data.skipLastPosition) {
-                angleIncrement = (GeoUtils.TwoPI) / ((float) data.resolution + 1);
+            if (data.skipLastPoint) {
+                angleIncrement = (GeoUtils.TwoPI) / ((float) startResolution + 1);
             }
 
-            angleIncrement *= math.sign(data.direction);
+            int direction = -1;
+            if (data.direction == ArcDirection.Forward) {
+                direction = 1;
+            }
+
+            angleIncrement *= direction;
 
             float relCompletion;
 
@@ -144,7 +153,9 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        public static unsafe void SetPointsRadialGraph(ref List_float2 positions, PointListGeneratorData data) {
+        public static void SetPointsRadialGraph(ref List_float2 positions, PointListGeneratorData data) {
+            if (data.length <= 0) return;
+
             int resolution = data.FloatValues.Length;
 
             if (data.FloatValues.Length < 3)
@@ -168,7 +179,9 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        public static unsafe void SetPointsLineGraph(ref List_float2 positions, PointListGeneratorData data) {
+        public static void SetPointsLineGraph(ref List_float2 positions, PointListGeneratorData data) {
+            if (data.length <= 0) return;
+
             int resolution = data.FloatValues.Length;
 
             if (data.FloatValues.Length < 2) {
@@ -207,11 +220,12 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        public static unsafe void SetPointsAngleLine(ref List_float2 positions, PointListGeneratorData data) {
+        public static void SetPointsAngleLine(ref List_float2 positions, PointListAngleLineData data) {
+            if (data.length <= 0) return;
+
             positions.SetSize(2);
 
-            float xDir = Mathf.Sin(data.angle * GeoUtils.TwoPI);
-            float yDir = Mathf.Cos(data.angle * GeoUtils.TwoPI);
+            math.sincos(data.angle * GeoUtils.TwoPI, out float xDir, out float yDir);
 
             float startOffset = data.length * data.startOffset;
 
@@ -222,8 +236,11 @@ namespace ThisOtherThing.UI.ShapeUtils {
             positions.array[1].y = data.center.y + yDir * (data.length + startOffset);
         }
 
-        public static unsafe void SetPointsStar(ref List_float2 positions, PointListGeneratorData data) {
-            int resolution = data.resolution * 2;
+        public static void SetPointsStar(ref List_float2 positions, in PointListStarData data) {
+
+            if (data.length <= 0) return;
+            
+            int resolution = (data.resolution < 2 ? 2 : data.resolution) * 2;
 
             positions.SetSize(resolution);
 
@@ -233,25 +250,31 @@ namespace ThisOtherThing.UI.ShapeUtils {
             float outerRadiusX = data.width;
             float outerRadiusY = data.height;
 
-            float innerRadiusX = data.endRadius * outerRadiusX;
-            float innerRadiusY = data.endRadius * outerRadiusX;
+            float spikeAmount = data.spikeAmount <= 0 ? 0.5f : data.spikeAmount;
+
+            float innerRadiusX = spikeAmount * outerRadiusX;
+            float innerRadiusY = spikeAmount * outerRadiusX;
 
             for (int i = 0; i < resolution; i += 2) {
                 // add outer point
-                positions.array[i].x = data.center.x + math.sin(angle) * outerRadiusX;
-                positions.array[i].y = data.center.y + math.cos(angle) * outerRadiusY;
+                math.sincos(angle, out float s, out float c);
+                positions.array[i].x = data.center.x + s * outerRadiusX;
+                positions.array[i].y = data.center.y + c * outerRadiusY;
 
                 angle += angleIncrement;
+                math.sincos(angle, out s, out c);
 
                 // add inner point
-                positions.array[i + 1].x = data.center.x + math.sin(angle) * innerRadiusX;
-                positions.array[i + 1].y = data.center.y + math.cos(angle) * innerRadiusY;
+                positions.array[i + 1].x = data.center.x + s * innerRadiusX;
+                positions.array[i + 1].y = data.center.y + c * innerRadiusY;
 
                 angle += angleIncrement;
             }
         }
 
         public static unsafe void SetPointsGear(ref List_float2 positions, PointListGeneratorData data) {
+            if (data.length <= 0) return;
+
             int resolution = data.resolution * 4;
 
             positions.SetSize(resolution);
@@ -290,6 +313,51 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 angle += angleIncrement;
             }
         }
+
+    }
+
+    public struct PointListStarData {
+
+        public int resolution;
+        public float startOffset;
+        public float length;
+        public float width;
+        public float height;
+        public float spikeAmount;
+        public float2 center;
+
+    }
+
+    public struct PointListAngleLineData {
+
+        public float angle;
+        public float length;
+        public float startOffset;
+        public float2 center;
+
+    }
+
+    public struct RectPointListData {
+
+        public float width;
+        public float height;
+        public float startOffset;
+        public float2 center;
+
+    }
+
+    public struct RoundPointListData {
+
+        public float length;
+        public RoundingResolution resolution;
+        public bool useCenterPoint;
+        public bool skipLastPoint;
+        public float2 center;
+        public float width;
+        public float height;
+        public ArcDirection direction;
+        public float startOffset;
+        public float endRadius;
 
     }
 

@@ -8,6 +8,7 @@
         public float weight;
 
         public RoundingResolution roundedCapResolution;
+        public PointListProperties roundingData;
 
     }
 

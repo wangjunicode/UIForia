@@ -39,7 +39,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 positions.Add(positionArray[inputNumPositions - 1]);
             }
 
-            lineData.NumPositions = positions.size;
+            lineData.totalPositionCount = positions.size;
         }
 
         private static void CheckMinPointDistances(ref List_float2 inPositions, ref List_float2 outPositions, float minDistance, bool isClosed) {
@@ -217,16 +217,16 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        private bool SetLineData(ref List_float2 positions, PointListProperties pointListProperties, ref PointsData lineData) {
+        private bool SetLineData(ref List_float2 positions, in PointListProperties pointListProperties, ref PointsData lineData) {
             if (positions.array == null) {
                 return false;
             }
 
             SetPositions(ref positions, pointListProperties, ref lineData);
 
-            int numPositions = lineData.NumPositions;
+            int numPositions = lineData.totalPositionCount;
 
-            lineData.EnsureCapacity(numPositions);
+            lineData.EnsurePositionCapacity(numPositions);
 
             int numPositionsMinusOne = numPositions - 1;
 
@@ -330,19 +330,22 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
 
             if (lineData.generateRoundedCaps) {
+                
+                lineData.EnsureCapCapacity(lineData.totalCapCount);
+                
                 SetRoundedCapPointData(
-                    Mathf.Atan2(-lineData.positionNormals[0].x, -lineData.positionNormals[0].y),
-                    ref lineData.StartCapOffsets,
-                    ref lineData.StartCapUVs,
-                    lineData.roundedCapResolution,
+                    math.atan2(-lineData.positionNormals[0].x, -lineData.positionNormals[0].y),
+                    lineData.StartCapOffsets,
+                    lineData.StartCapUVs,
+                    lineData.totalCapCount,
                     true
                 );
 
                 SetRoundedCapPointData(
-                    Mathf.Atan2(lineData.positionNormals[numPositionsMinusOne].x, lineData.positionNormals[numPositionsMinusOne].y),
-                    ref lineData.EndCapOffsets,
-                    ref lineData.EndCapUVs,
-                    lineData.roundedCapResolution,
+                    math.atan2(lineData.positionNormals[numPositionsMinusOne].x, lineData.positionNormals[numPositionsMinusOne].y),
+                    lineData.EndCapOffsets,
+                    lineData.EndCapUVs,
+                    lineData.totalCapCount,
                     false
                 );
             }
@@ -356,22 +359,15 @@ namespace ThisOtherThing.UI.ShapeUtils {
             return true;
         }
 
-        private static void SetRoundedCapPointData(float centerAngle, ref List_float2 offsets, ref List_float2 uvs, int resolution, bool isStart) {
+        private static void SetRoundedCapPointData(float centerAngle, float2 * offsets, float2 * uvs, int resolution, bool isStart) {
             float angleIncrement = Mathf.PI / (resolution + 1);
             float baseAngle = centerAngle;
-
-            offsets.SetSize(resolution);
-            uvs.SetSize(resolution);
-            // if (offsets == null || offsets.Length != resolution) {
-                // offsets = new float2[resolution];
-                // uvs = new float2[resolution];
-            // }
 
             baseAngle += angleIncrement;
 
             for (int i = 0; i < resolution; i++) {
                 float angle = baseAngle + (angleIncrement * i);
-
+                
                 offsets[i].x = math.sin(angle);
                 offsets[i].y = math.cos(angle);
 

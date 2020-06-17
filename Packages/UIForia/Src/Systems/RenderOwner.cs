@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Src.Systems;
 using UIForia;
 using UIForia.Elements;
 using UIForia.Rendering;
@@ -7,7 +8,7 @@ using UIForia.Systems;
 using UIForia.Util;
 using Debug = System.Diagnostics.Debug;
 
-namespace Src.Systems {
+namespace UIForia.Graphics {
 
     public class RenderOwner {
 
@@ -23,7 +24,7 @@ namespace Src.Systems {
         public RenderOwner(UIView view, ElementSystem elementSystem) {
             this.view = view;
             this.elementSystem = elementSystem;
-            this.painterPool = new RenderBoxPool();
+            this.painterPool = new RenderBoxPool(view.application.ResourceManager);
             this.view.dummyRoot.renderBox = new RootRenderBox();
             this.view.dummyRoot.renderBox.element = view.dummyRoot;
             this.elemRefStack = new StructStack<ElemRef>(32);

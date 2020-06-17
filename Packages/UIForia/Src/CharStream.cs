@@ -41,6 +41,13 @@ namespace UIForia.Util {
             this.ptr = dataStart;
         }
 
+        public CharStream(char* source, int start, int end) : this() {
+            this.data = source;
+            this.dataStart = (uint) start;
+            this.dataEnd = (uint) end;
+            this.ptr = dataStart;
+        }
+
         public CharStream(char* source, uint start, uint end) : this() {
             this.data = source;
             this.dataStart = start;
@@ -366,6 +373,23 @@ namespace UIForia.Util {
             return false;
         }
 
+        public bool TryGetStreamUntil(char terminator, out CharStream span) {
+            uint i = ptr;
+            while (i < dataEnd) {
+                char c = data[i];
+                if (c == terminator) {
+                    span = new CharStream(data, (ushort) ptr, (ushort) i);
+                    ptr = i;
+                    return true;
+                }
+
+                i++;
+            }
+
+            span = default;
+            return false;
+        }
+
         public bool TryGetStreamUntil(out CharSpan span, char c1, char c2 = '\0', char c3 = '\0') {
             uint i = ptr;
             while (i < dataEnd) {
@@ -588,62 +612,62 @@ namespace UIForia.Util {
 
             uint start = ptr;
 
-            unsafe {
-                // oh, you thought C# strings were immutable? How cute :)
+            // oh, you thought C# strings were immutable? :)
 
-                // writing a float.Parse function is hard and error prone so I want to the use the C# built in one.
-                // Somebody at Microsoft thought it would be a good idea to only support parsing float from strings though
-                // and didn't consider the character range use case that we need. So I take a string, set its contents
-                // to my data, pass that string to float.TryParse, and use the result. 
-                int cnt = 0;
-                fixed (char* charptr = s_ScratchBuffer) {
-                    uint idx = start;
-                    int dotIndex = -1;
-                    if (data[ptr] == '-') {
-                        charptr[cnt++] = '-';
-                        idx++;
-                    }
+            // writing a float.Parse function is hard and error prone so I want to the use the C# built in one.
+            // Somebody at Microsoft thought it would be a good idea to only support parsing float from strings though
+            // and didn't consider the character range use case that we need. So I take a string, set its contents
+            // to my data, pass that string to float.TryParse, and use the result. 
+            int cnt = 0;
+            fixed (char* charptr = s_ScratchBuffer) {
+                uint idx = start;
+                int dotIndex = -1;
+                if (data[ptr] == '-') {
+                    charptr[cnt++] = '-';
+                    idx++;
+                }
 
-                    // read until end or whitespace
-                    while (idx < dataEnd && cnt < s_ScratchBufferLength) {
-                        char c = data[idx];
-                        if (c < '0' || c > '9') {
-                            if (c == '.' && dotIndex == -1) {
-                                dotIndex = (int) idx;
-                                charptr[cnt++] = c;
-                                idx++;
-                                continue;
-                            }
-
-                            break;
+                // read until end or whitespace
+                while (idx < dataEnd && cnt < s_ScratchBufferLength) {
+                    char c = data[idx];
+                    if (c < '0' || c > '9') {
+                        if (c == '.' && dotIndex == -1) {
+                            dotIndex = (int) idx;
+                            charptr[cnt++] = c;
+                            idx++;
+                            continue;
                         }
 
-                        charptr[cnt++] = c;
-                        idx++;
+                        break;
                     }
 
-                    bool retn = float.TryParse(s_ScratchBuffer, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out value);
-
-                    // reset the scratch buffer so the next call has valid state.
-                    // treat our charptr as long * so that we can clear it in fewer operations (char = 16 bits, long = 64)
-                    // avoiding divide, also avoiding Math.Ceil call
-                    // instead just clamp to bufferSize / sizeof(long) which happens to be 16
-                    int longCnt = (int) (cnt * 0.25f) + 1;
-                    long* longptr = (long*) charptr;
-
-                    if (longCnt > 16) longCnt = 16;
-
-                    for (int i = 0; i < longCnt; i++) {
-                        longptr[i] = 0;
-                    }
-
-                    if (retn) {
-                        Advance((uint) cnt);
-                    }
-
-                    return retn;
+                    charptr[cnt++] = c;
+                    idx++;
                 }
+
+                bool retn = float.TryParse(s_ScratchBuffer, NumberStyles.Float | NumberStyles.AllowThousands, CultureInfo.InvariantCulture, out value);
+
+                // reset the scratch buffer so the next call has valid state.
+                // treat our charptr as long * so that we can clear it in fewer operations (char = 16 bits, long = 64)
+                // avoiding divide, also avoiding Math.Ceil call
+                // instead just clamp to bufferSize / sizeof(long) which happens to be 16
+                int longCnt = (int) (cnt * 0.25f) + 1;
+                long* longptr = (long*) charptr;
+
+                if (longCnt > 16) longCnt = 16;
+
+                for (int i = 0; i < longCnt; i++) {
+                    longptr[i] = 0;
+                }
+
+                if (retn) {
+                    Advance((uint) cnt);
+                    TryParseCharacter('f');
+                }
+
+                return retn;
             }
+
         }
 
         public bool TryParseUInt(out uint intVal) {

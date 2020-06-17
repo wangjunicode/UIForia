@@ -23,9 +23,7 @@ namespace UIForia.Parsing.Expressions {
 
             TypeBodyNode retn = new TypeBodyNode();
 
-            int cnt = 0;
-            while (tokenStream.HasMoreTokens && cnt < 10000) {
-                cnt++;
+            while (tokenStream.HasMoreTokens) {
                 ExpressionToken current = tokenStream.Current;
 
                 ASTNode node = null;
@@ -268,6 +266,32 @@ namespace UIForia.Parsing.Expressions {
             return retn;
         }
 
+        public BlockNode ParseMethodBody(string source) {
+            tokenStream = new TokenStream(ExpressionTokenizer.Tokenize(source));
+            
+            BlockNode retn = new BlockNode();
+
+            while (tokenStream.HasMoreTokens) {
+                ASTNode statement = null;
+
+                int current = tokenStream.CurrentIndex;
+
+                if (!ParseStatement(ref statement)) {
+                    retn.Release();
+                    tokenStream.Restore();
+                    return null;
+                }
+
+                if (current == tokenStream.CurrentIndex) {
+                    throw new ParseException("fail recurse");
+                }
+
+                retn.statements.Add(statement);
+            }
+
+            return retn;
+        }
+        
         private bool ParseLocalVariableDeclaration(ref ASTNode node) {
             ExpressionParser parser = default;
             TypeLookup typeLookup = default;

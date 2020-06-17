@@ -19,6 +19,7 @@ namespace UIForia.Compilers.Style {
             this.constants = constants;
             this.styleGroupContainers = styleGroupContainers;
             this.animations = animations;
+            this.sounds = sounds;
         }
 
         internal StyleSheet(int id, StyleConstant[] constants, UIStyleGroupContainer[] styleGroupContainers, AnimationData[] animations, UISoundData[] sounds) {

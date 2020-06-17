@@ -15,7 +15,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             AddRectQuadIndices(ref vh);
         }
         
-        public void AddRect(ref UIVertexHelper vh, Vector2 center, float width, float height, Color32 color) {
+        public void AddRect(ref UIVertexHelper vh, float2 center, float width, float height, Color32 color) {
             AddRectVertRing(ref vh, center, width, height, color, width, height);
             AddRectQuadIndices(ref vh);
         }

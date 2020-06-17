@@ -3,14 +3,25 @@ using UIForia.Util;
 namespace UIForia.Parsing.Style.AstNodes {
 
     internal static partial class StyleASTNodeFactory {
-        
+
         internal static readonly ObjectPool<PropertyNode> s_PropertyNodePool = new ObjectPool<PropertyNode>();
-        
+
         internal static PropertyNode PropertyNode(string propertyName) {
             PropertyNode propertyNode = s_PropertyNodePool.Get();
             propertyNode.identifier = propertyName;
             return propertyNode;
         }
+
+    }
+
+    public class PainterPropertyNode : StyleASTNode {
+
+        public string painterName;
+        public string propertyName;
+        public string propertyValue;
+
+        public override void Release() { }
+
     }
 
     public class MaterialPropertyNode : StyleNodeContainer {
@@ -20,12 +31,6 @@ namespace UIForia.Parsing.Style.AstNodes {
 
         public MaterialPropertyNode() {
             type = StyleASTNodeType.MaterialProperty;
-        }
-
-
-        public override void Release() {
-            base.Release();
-          //  StyleASTNodeFactory.s_PropertyNodePool.Release(this);
         }
 
     }
@@ -40,5 +45,7 @@ namespace UIForia.Parsing.Style.AstNodes {
             base.Release();
             StyleASTNodeFactory.s_PropertyNodePool.Release(this);
         }
+
     }
+
 }

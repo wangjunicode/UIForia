@@ -87,7 +87,16 @@ namespace UIForia.Parsing.Style.Tokenizer {
         Pause,
         Stop,
 
-        EnterExit
+        EnterExit,
+
+        PainterName,
+        PainterBody,
+
+        PainterVariableReference,
+
+        PainterVariableName,
+
+        PainterVariableValue
 
     }
 }

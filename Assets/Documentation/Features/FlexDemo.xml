@@ -13,11 +13,35 @@
         
         
         style shape-kit {
-            Painter = "ShapeKitTest";
+            Painter = "ShapePainter"; //"ShapeKitTest";
             PreferredSize = 300px;
             AlignX = Center Screen;
             AlignY = Center Screen;
             BackgroundColor = blue;
+        
+            painter:ShapePainter.sizeMod = 0.3f;
+            
+        }
+
+        painter ShapePainter {
+        
+            [variables] {
+                float sizeMod = 0.1f;
+            }
+            
+            [draw:bg] {
+                SetColor(red);
+                
+                // if(GetAttribute("x")) {
+                //    SetLocalFloat("f", Animate(float, curveInfo, progress));
+                // }
+        
+                // FillText(TextProcessor.RichText, 'this is my text', width, height);
+        
+               //  FillRect($sizeMod * elementWidth, elementHeight);
+               // DrawDefault();
+            }
+        
         }
         
     </Style>

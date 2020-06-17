@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using SVGX;
+using UIForia.Compilers.Style;
 using UIForia.Layout;
 using UIForia.Rendering.Vertigo;
 using UIForia.Systems;
@@ -10,6 +11,7 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 using Vertigo;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Rendering {
 
@@ -41,7 +43,6 @@ namespace UIForia.Rendering {
 
     }
 
-    
     [DebuggerDisplay("{element.ToString()}")]
     public class StandardRenderBox : RenderBox {
 

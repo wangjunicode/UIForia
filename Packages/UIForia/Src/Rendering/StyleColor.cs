@@ -19,7 +19,7 @@ namespace UIForia.Rendering {
             this.b = (byte) (Mathf.Clamp01(color.b) * byte.MaxValue);
             this.a = (byte) (Mathf.Clamp01(color.a) * byte.MaxValue);
         }
-        
+
         public StyleColor(in Color32 color) {
             this.rgba = 0;
             this.r = color.r;
@@ -64,6 +64,8 @@ namespace UIForia.Rendering {
         public static StyleColor LerpUnclamped(StyleColor a, StyleColor b, float t) {
             return new StyleColor((byte) (a.r + (b.r - a.r) * t), (byte) (a.g + (b.g - a.g) * t), (byte) (a.b + (b.b - a.b) * t), (byte) (a.a + (b.a - a.a) * t));
         }
+
+        
 
     }
 

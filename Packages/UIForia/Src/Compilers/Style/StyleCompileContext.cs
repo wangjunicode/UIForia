@@ -82,10 +82,6 @@ namespace UIForia.Compilers.Style {
             return result;
         }
 
-        public static StyleCompileContext Create(StyleSheetImporter styleSheetImporter) {
-            throw new NotImplementedException();
-        }
-
     }
 
 }

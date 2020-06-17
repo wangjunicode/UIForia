@@ -2,6 +2,7 @@ using System;
 using Src.Systems;
 using SVGX;
 using UIForia.Extensions;
+using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Rendering.Vertigo;
 using UIForia.Text;
@@ -11,76 +12,6 @@ using UnityEngine.Rendering;
 using Object = UnityEngine.Object;
 
 namespace UIForia.Rendering {
-
-    internal struct SVGXDrawCall {
-
-        public int styleIdx;
-        public Material material;
-        public GeometryRange geometryRange;
-
-        public readonly DrawCallType type;
-        public readonly int transformIdx;
-        public readonly RangeInt shapeRange;
-        public RangeInt objectRange;
-        public int renderStateId;
-
-        public SVGXDrawCall(DrawCallType type, int styleIdx, int transformIdx, in RangeInt shapeRange) {
-            this.type = type;
-            this.renderStateId = -1;
-            this.shapeRange = shapeRange;
-            this.transformIdx = transformIdx;
-            this.styleIdx = styleIdx;
-            this.material = null;
-            this.geometryRange = default;
-            this.objectRange = default;
-        }
-
-    }
-
-    public struct FontData {
-
-        public FontAsset fontAsset;
-        public float gradientScale;
-        public float scaleRatioA;
-        public float scaleRatioB;
-        public float scaleRatioC;
-        public int textureWidth;
-        public int textureHeight;
-
-    }
-
-    internal enum RenderOperationType {
-
-        DrawBatch,
-        PushRenderTexture,
-        ClearRenderTextureRegion,
-        BlitRenderTexture,
-        SetScissorRect,
-        SetCameraViewMatrix,
-        SetCameraProjectionMatrix,
-
-        PopRenderTexture
-
-    }
-
-    internal struct RenderOperation {
-
-        public int batchIndex;
-        public RenderOperationType operationType;
-        public RenderTexture renderTexture;
-        public SimpleRectPacker.PackedRect rect;
-        public Color color;
-
-        public RenderOperation(int batchIndex) {
-            this.batchIndex = batchIndex;
-            this.operationType = RenderOperationType.DrawBatch;
-
-            this.rect = default;
-            this.renderTexture = null;
-            this.color = default;
-        }
-
-    }
 
     public class RenderContext {
 
@@ -99,6 +30,8 @@ namespace UIForia.Rendering {
 
         private Batch currentBatch;
 
+        public ShapeContext shapeContext;
+        
         private readonly MeshPool uiforiaMeshPool;
         private readonly UIForiaMaterialPool uiforiaMaterialPool;
         private readonly UIForiaMaterialPool pathMaterialPool;
@@ -154,6 +87,7 @@ namespace UIForia.Rendering {
             this.texturePacker = new TexturePacker(atlasWidth, atlasHeight);
             this.propertyBlock = new MaterialPropertyBlock();
             this.meshesToRelease = new LightList<PooledMesh>();
+            this.shapeContext = new ShapeContext();
         }
 
         public void DrawMesh(Mesh mesh, Material material, MaterialPropertyBlock propertyBlock, in Matrix4x4 transform) {
@@ -970,15 +904,6 @@ namespace UIForia.Rendering {
             uiforiaMaterialPool.Destroy();
         }
 
-//        public RenderTargetIdentifier GetNextRenderTarget() {
-//            return renderTargetStack.Peek();
-//        }
-
-        // need to ping pong if target texture is the same one used by the area
-        public Texture GetTextureFromArea(RenderArea area, RenderTargetIdentifier? outputTarget = null) {
-            return area.renderTexture; //.Peek();
-        }
-
         public void DrawPath(Path2D path) {
             // path drawing always breaks batch for now
             path.UpdateGeometry();
@@ -1108,6 +1033,10 @@ namespace UIForia.Rendering {
 
                 triangleList.size += triangleCount;
             }
+        }
+
+        public void DrawShapeContext() {
+            
         }
 
     }

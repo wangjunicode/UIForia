@@ -2028,18 +2028,18 @@ namespace UIForia.Compilers {
         }
 
         private Expression VisitLocalVariable(LocalVariableNode node) {
-            Type variableType = null;
+            Type variableType;
 
             if (node.typeLookup.typeName == null) {
                 if (node.value == null) {
-                    throw new CompileException("undefined var");
+                    throw new CompileException("undefined variable");
                 }
 
                 variableType = GetExpressionType(node.value);
             }
             else {
                 // todo -- generics probably need invoking type passed in
-                variableType = TypeProcessor.ResolveType(node.typeLookup, namespaces, null);
+                variableType = TypeProcessor.ResolveType(node.typeLookup, namespaces);
             }
 
             ParameterExpression variable = AddVariable(variableType, node.name);
@@ -2047,7 +2047,7 @@ namespace UIForia.Compilers {
                 Assign(variable, Visit(variableType, node.value));
             }
 
-            return variable;
+            return null; //variable;
 
         }
 
@@ -2104,7 +2104,7 @@ namespace UIForia.Compilers {
                     }
 
                     BlockExpression thenBlock = PopBlock();
-                    
+
                     if (i == node.elseIfStatements.Length - 1 && node.elseBlock != null) {
                         PushBlock();
                         StatementList(node.elseBlock);
@@ -2162,7 +2162,7 @@ namespace UIForia.Compilers {
         private Expression Visit(Type targetType, ASTNode node) {
             Expression retn = VisitUnchecked(targetType, node);
 
-            if (targetType != null && retn.Type != targetType) {
+            if (retn != null && targetType != null && retn.Type != targetType) {
                 try {
                     retn = Expression.Convert(retn, targetType);
                 }
@@ -2384,17 +2384,104 @@ namespace UIForia.Compilers {
                     return Expression.NotEqual(left, right);
                 }
 
-                case OperatorType.GreaterThan:
+                case OperatorType.GreaterThan: {
+                    if (left.Type == typeof(byte)) {
+                        if (right.Type == typeof(int)) {
+                            return Expression.GreaterThan(Expression.Convert(left, typeof(int)), right);
+
+                        }
+
+                        if (right.Type == typeof(float)) {
+                            return Expression.GreaterThan(Expression.Convert(left, typeof(float)), right);
+                        }
+                    }
+                    else if (right.Type == typeof(byte)) {
+                        if (right.Type == typeof(int)) {
+                            return Expression.GreaterThan(Expression.Convert(right, typeof(int)), left);
+
+                        }
+
+                        if (right.Type == typeof(float)) {
+                            return Expression.GreaterThan(Expression.Convert(right, typeof(float)), left);
+                        }
+                    }
+
                     return Expression.GreaterThan(left, right);
+                }
 
-                case OperatorType.GreaterThanEqualTo:
+                case OperatorType.GreaterThanEqualTo: {
+                    if (left.Type == typeof(byte)) {
+                        if (right.Type == typeof(int)) {
+                            return Expression.GreaterThanOrEqual(Expression.Convert(left, typeof(int)), right);
+
+                        }
+
+                        if (right.Type == typeof(float)) {
+                            return Expression.GreaterThanOrEqual(Expression.Convert(left, typeof(float)), right);
+                        }
+                    }
+                    else if (right.Type == typeof(byte)) {
+                        if (right.Type == typeof(int)) {
+                            return Expression.GreaterThanOrEqual(Expression.Convert(right, typeof(int)), left);
+
+                        }
+
+                        if (right.Type == typeof(float)) {
+                            return Expression.GreaterThanOrEqual(Expression.Convert(right, typeof(float)), left);
+                        }
+                    }
+
                     return Expression.GreaterThanOrEqual(left, right);
+                }
 
-                case OperatorType.LessThan:
+                case OperatorType.LessThan: {
+                    if (left.Type == typeof(byte)) {
+                        if (right.Type == typeof(int)) {
+                            return Expression.LessThan(Expression.Convert(left, typeof(int)), right);
+
+                        }
+
+                        if (right.Type == typeof(float)) {
+                            return Expression.LessThan(Expression.Convert(left, typeof(float)), right);
+                        }
+                    }
+                    else if (right.Type == typeof(byte)) {
+                        if (right.Type == typeof(int)) {
+                            return Expression.LessThan(Expression.Convert(right, typeof(int)), left);
+
+                        }
+
+                        if (right.Type == typeof(float)) {
+                            return Expression.LessThan(Expression.Convert(right, typeof(float)), left);
+                        }
+                    }
+   
                     return Expression.LessThan(left, right);
+                }
 
-                case OperatorType.LessThanEqualTo:
+                case OperatorType.LessThanEqualTo: {
+                    if (left.Type == typeof(byte)) {
+                        if (right.Type == typeof(int)) {
+                            return Expression.LessThanOrEqual(Expression.Convert(left, typeof(int)), right);
+
+                        }
+
+                        if (right.Type == typeof(float)) {
+                            return Expression.LessThanOrEqual(Expression.Convert(left, typeof(float)), right);
+                        }
+                    }
+                    else if (right.Type == typeof(byte)) {
+                        if (right.Type == typeof(int)) {
+                            return Expression.LessThanOrEqual(Expression.Convert(right, typeof(int)), left);
+
+                        }
+
+                        if (right.Type == typeof(float)) {
+                            return Expression.LessThanOrEqual(Expression.Convert(right, typeof(float)), left);
+                        }
+                    }
                     return Expression.LessThanOrEqual(left, right);
+                }
 
                 case OperatorType.And:
                     return Expression.AndAlso(left, right);

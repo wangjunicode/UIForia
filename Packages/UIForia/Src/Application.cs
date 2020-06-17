@@ -108,7 +108,6 @@ namespace UIForia {
             this.id = templateSettings.applicationName;
             this.resourceManager = resourceManager ?? new ResourceManager();
             this.resourceManager.Initialize();
-
             this.viewRootIds = new DataList<ElementId>.Shared(8, Allocator.Persistent);
 
             Applications.Add(this);
@@ -214,8 +213,7 @@ namespace UIForia {
                     }
 
                     if (s_CustomPainters.ContainsKey(paintAttr.name)) {
-                        throw new Exception(
-                            $"Failed to register a custom painter with the name {paintAttr.name} from type {type.FullName} because it was already registered.");
+                        throw new Exception($"Failed to register a custom painter with the name {paintAttr.name} from type {type.FullName} because it was already registered.");
                     }
 
                     s_CustomPainters.Add(paintAttr.name, type);
@@ -920,10 +918,6 @@ namespace UIForia {
             scope.Release();
         }
 
-        public static void SetCustomPainters(Dictionary<string, Type> dictionary) {
-            s_CustomPainters = dictionary;
-        }
-
         public void Dispose() {
             viewRootIds.Dispose();
             elementSystem?.Dispose();
@@ -939,6 +933,7 @@ namespace UIForia {
         internal static string GetSourceDirectory() {
             return PathHack();
         }
+
 
     }
 

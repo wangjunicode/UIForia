@@ -104,6 +104,19 @@ namespace UIForia.Parsing.Style {
                     tokenStream.Advance();
                     break;
 
+                case StyleTokenType.PainterName:
+                    StyleToken initialStyleToken = tokenStream.Current;
+                    tokenStream.Advance();
+                    StyleToken contentsToken = tokenStream.Current;
+                    tokenStream.Advance();
+                    PainterDefinitionNode painterDefinition = new PainterDefinitionNode() {
+                        painterName = initialStyleToken.value,
+                        shapeBody = contentsToken.value
+                    };
+                    painterDefinition.WithLocation(initialStyleToken);
+                    nodes.Add(painterDefinition);
+                    break;
+
                 default:
                     throw new ParseException(tokenStream.Current, $"Did not expect token {tokenStream.Current.value} of type {tokenStream.Current.styleTokenType} here at line");
             }
@@ -203,9 +216,7 @@ namespace UIForia.Parsing.Style {
                 else if (identifier == "options") {
                     ParseAnimationOptions(rootNode);
                 }
-                else if (identifier == "triggers") {
-                    
-                }
+                else if (identifier == "triggers") { }
             }
         }
 
@@ -508,6 +519,11 @@ namespace UIForia.Parsing.Style {
                         ParseProperty(styleRootNode);
                         break;
 
+                    case StyleTokenType.PainterVariableReference: {
+                        ParsePainterVariable(styleRootNode);
+                        break;
+                    }
+
                     case StyleTokenType.Run:
                         tokenStream.Advance();
                         styleRootNode.AddChildNode(ParseRunNode(RunCommandType.Enter, RunAction.Run));
@@ -546,6 +562,24 @@ namespace UIForia.Parsing.Style {
                         throw new ParseException(tokenStream.Current, "Expected either a boolean group operator (not / and), the start" + " of a group (an open bracket) or a regular property identifier but found " + tokenStream.Current.styleTokenType + " with value " + tokenStream.Current.value);
                 }
             }
+        }
+
+        private void ParsePainterVariable(StyleNodeContainer styleRootNode) {
+            string painterName = tokenStream.Current.value;
+            tokenStream.Advance();
+            string propertyName = tokenStream.Current.value;
+            tokenStream.Advance();
+            string propertyValue = tokenStream.Current.value;
+            tokenStream.Advance();
+
+            PainterPropertyNode painterNode = new PainterPropertyNode {
+                painterName = painterName,
+                propertyName = propertyName,
+                propertyValue = propertyValue,
+            };
+
+            styleRootNode.AddChildNode(painterNode);
+
         }
 
         private void ParseStateOrAttributeGroup(StyleNodeContainer styleRootNode) {
@@ -693,7 +727,6 @@ namespace UIForia.Parsing.Style {
             }
         }
 
-        
         private RunAction ParseCommandAttribute() {
             StyleTokenType styleTokenType = tokenStream.Current.styleTokenType;
             tokenStream.Advance();

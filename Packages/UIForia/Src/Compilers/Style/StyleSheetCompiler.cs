@@ -1,8 +1,9 @@
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using UIForia.Animation;
 using UIForia.Exceptions;
-using UIForia.Parsing.Style;
+using UIForia.Graphics;
+using UIForia.Parsing;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Sound;
@@ -20,25 +21,27 @@ namespace UIForia.Compilers.Style {
         private LightList<UIStyleGroup> scratchGroupList;
 
         private static readonly UIStyle s_ScratchStyle = new UIStyle();
+        private Dictionary<string, StylePainterDefinition> painterCache;
+        private ShapeCompiler shapeCompiler;
+        private int idGenerator;
+
+        private StructList<PainterVariableDeclaration> painterVariableBuffer;
 
         public StyleSheetCompiler(StyleSheetImporter styleSheetImporter, ResourceManager resourceManager) {
             this.styleSheetImporter = styleSheetImporter;
             this.resourceManager = resourceManager;
+            this.painterCache = new Dictionary<string, StylePainterDefinition>();
             this.scratchGroupList = new LightList<UIStyleGroup>(32);
+            this.painterVariableBuffer = new StructList<PainterVariableDeclaration>();
+            this.idGenerator = 1000;
+            this.shapeCompiler = new ShapeCompiler();
         }
-
-        // public StyleSheet Compile(string filePath, string contents) {
-        //     return Compile(filePath, StyleParser.Parse(contents));
-        // }
 
         // todo -- deprecate, use other method
         public StyleSheet Compile(string filePath, LightList<StyleASTNode> rootNodes, MaterialDatabase materialDatabase = default) {
             try {
                 context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes, materialDatabase);
                 context.resourceManager = resourceManager;
-
-                //       context = new StyleCompileContext(); // todo resolve constants. should be done a per file level, should store all used constants without needing to later reference other files
-                // StyleCompileContext.Create(styleSheetImporter) //new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
             }
             catch (CompileException e) {
                 e.SetFileName(filePath);
@@ -117,11 +120,145 @@ namespace UIForia.Compilers.Style {
                         styleSheet.styleGroupContainers[containerIndex].styleSheet = styleSheet;
                         containerIndex++;
                         break;
+
+                    case PainterDefinitionNode painterNode:
+                        CompilePainterNode(painterNode);
+                        break;
+
                 }
             }
 
             context.Release();
             return styleSheet;
+        }
+
+        private bool TryParsePainterVariableBlock(ref CharStream stream, out PainterVariableDeclaration[] painterVariables) {
+
+            painterVariableBuffer.Clear();
+
+            painterVariables = default;
+
+            // type name = defaultValue;
+            while (stream.HasMoreTokens) {
+
+                stream.ConsumeWhiteSpaceAndComments();
+
+                if (!stream.TryGetStreamUntil(';', out CharStream lineStream)) {
+                    return false;
+                }
+
+                stream.Advance();
+                stream.ConsumeWhiteSpaceAndComments();
+
+                if (!lineStream.TryParseIdentifier(out CharSpan typeNameSpan, false)) {
+                    return false;
+                }
+
+                if (!lineStream.TryParseIdentifier(out CharSpan propertyName, false)) {
+                    return false;
+                }
+
+                if (HasDuplicateVariableName(painterVariableBuffer, propertyName)) {
+                    return false;
+                }
+
+                if (!lineStream.TryParseCharacter('=')) {
+                    return false;
+                }
+
+                // float, int, Color, Color32, material, texture2d, Vector3, Vector2, Matrix, string, enums
+
+                string typeName = typeNameSpan.ToString();
+
+                Type propertyType = null;
+
+                if (typeName == "float") {
+                    propertyType = typeof(float);
+                    if (lineStream.TryParseFloat(out float floatValue)) {
+                        painterVariableBuffer.Add(new PainterVariableDeclaration(propertyType, propertyName.ToString(), floatValue));
+                    }
+                }
+                else if (typeName == "color") { }
+                else if (typeName == "vector2") { }
+                else if (typeName == "texture") { }
+                else if (typeName == "int") { }
+                else {
+                    return false;
+                }
+
+            }
+
+            painterVariables = painterVariableBuffer.ToArray();
+            return true;
+        }
+
+        private static bool HasDuplicateVariableName(StructList<PainterVariableDeclaration> buffer, CharSpan propertyName) {
+            for (int i = 0; i < buffer.size; i++) {
+                if (buffer.array[i].name == propertyName) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private unsafe void CompilePainterNode(PainterDefinitionNode painterNode) {
+
+            if (painterCache.ContainsKey(painterNode.painterName)) {
+                throw new CompileException("Duplicate painter with name: " + painterNode.painterName);
+            }
+
+            PainterVariableDeclaration[] variables = null;
+
+            fixed (char* ptr = painterNode.shapeBody) {
+                CharStream stream = new CharStream(ptr, 0, (uint) painterNode.shapeBody.Length);
+
+                if (stream.TryMatchRangeIgnoreCase("[variables]")) {
+
+                    if (!stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
+                        throw new CompileException("Expected a { } delimited body block after [variables]");
+                    }
+
+                    if (!TryParsePainterVariableBlock(ref bodyStream, out variables)) {
+                        throw new CompileException("Failed to compile painter variable block");
+                    }
+
+                }
+                else if (stream.TryMatchRangeIgnoreCase("[draw:bg]")) {
+
+                    // want buffer this so we can handle variables first
+                    if (!stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
+                        throw new CompileException("Expected a { } delimited body block after [draw:bg]");
+                    }
+
+                    CharSpan span = new CharSpan(bodyStream);
+                    span = span.Trim();
+                    try {
+                        shapeCompiler.Compile(span.ToString());
+                    }
+                    catch (Exception e) {
+                        Debug.Log(e);
+                    }
+
+                }
+
+            }
+
+            if (variables != null) {
+                for (int i = 0; i < variables.Length; i++) {
+                    variables[i].propertyId = idGenerator++;
+                }
+            }
+
+            painterCache.Add(painterNode.painterName, new StylePainterDefinition() {
+                definedVariables = variables
+            });
+
+            resourceManager.AddStylePainter(painterNode.painterName, new StylePainterDefinition() {
+                fileName = context.fileName,
+                definedVariables = variables
+            });
+
         }
 
         private AnimationData CompileSpriteSheetAnimation(SpriteSheetNode node, AnimationData[] styleSheetAnimations, UISoundData[] uiSoundData) {
@@ -190,7 +327,7 @@ namespace UIForia.Compilers.Style {
                                     switch (propertyInfo.propertyType) {
 
                                         case MaterialPropertyType.Color:
-                                            
+
                                             if (stream.TryParseColorProperty(out Color32 color)) {
                                                 kfv = new MaterialKeyFrameValue(materialId, propertyInfo.propertyId, new MaterialPropertyValue2() {colorValue = color});
                                             }
@@ -201,6 +338,7 @@ namespace UIForia.Compilers.Style {
                                             if (stream.TryParseFloat(out float floatVal)) {
                                                 kfv = new MaterialKeyFrameValue(materialId, propertyInfo.propertyId, new MaterialPropertyValue2() {floatValue = floatVal});
                                             }
+
                                             break;
 
                                         case MaterialPropertyType.Vector:
@@ -452,8 +590,18 @@ namespace UIForia.Compilers.Style {
             for (int index = 0; index < root.children.Count; index++) {
                 StyleASTNode node = root.children[index];
                 switch (node) {
-                    case SelectNode selectNode:
+
+                    case PainterPropertyNode painterPropertyNode: {
+
+                        if (painterCache.TryGetValue(painterPropertyNode.painterName, out StylePainterDefinition painterDefinition)) {
+                            StylePropertyMappers.MapPainterProperty(targetGroup.normal.style, painterPropertyNode, painterDefinition);
+                        }
+                        else {
+                            throw new CompileException($"Unable to find a painter with name: {painterPropertyNode.painterName}. If the painter exists, make sure its imported.");
+                        }
+
                         break;
+                    }
 
                     case PropertyNode propertyNode:
                         // add to normal ui style set

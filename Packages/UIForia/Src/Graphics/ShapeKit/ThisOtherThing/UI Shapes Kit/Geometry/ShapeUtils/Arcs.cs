@@ -54,7 +54,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        public void AddSector(ref UIVertexHelper vh, Vector2 center, Vector2 radius, ArcProperties arcProperties, Color32 color) {
+        public void AddSector(ref UIVertexHelper vh, float2 center, float2 radius, ArcProperties arcProperties, Color32 color) {
             if (arcProperties.length <= 0.0f) {
                 return;
             }
@@ -123,7 +123,8 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
             if (arcProperties.length >= 1.0f) {
                 capsExtensionLength = 0.0f;
-                tmpOffsetCenter = center;
+                tmpOffsetCenter.x  = center.x;
+                tmpOffsetCenter.y = center.y;
             }
 
             float4 uv = default; // todo -- need to map these according to positions

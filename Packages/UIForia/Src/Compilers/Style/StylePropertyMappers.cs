@@ -277,12 +277,11 @@ namespace UIForia.Compilers.Style {
                 {"shadowopacity", (targetStyle, property, context) => targetStyle.ShadowOpacity = MapNumber(property, context)},
 
                 {"material", (targetStyle, property, context) => targetStyle.Material = MapMaterial(property, context)},
-                
-                {"meshtype", (targetStyle, property, context) => targetStyle.MeshType = MapEnum<MeshType>(property.children[0], context) },
-                {"meshfilldirection", (targetStyle, property, context) => targetStyle.MeshFillDirection = MapEnum<MeshFillDirection>(property.children[0], context) },
-                {"meshfillorigin", (targetStyle, property, context) => targetStyle.MeshFillOrigin = MapEnum<MeshFillOrigin>(property.children[0], context) },
-                {"meshfillamount", (targetStyle, property, context) => targetStyle.MeshFillAmount = MapNumber(property.children[0], context) },
-                
+
+                {"meshtype", (targetStyle, property, context) => targetStyle.MeshType = MapEnum<MeshType>(property.children[0], context)},
+                {"meshfilldirection", (targetStyle, property, context) => targetStyle.MeshFillDirection = MapEnum<MeshFillDirection>(property.children[0], context)},
+                {"meshfillorigin", (targetStyle, property, context) => targetStyle.MeshFillOrigin = MapEnum<MeshFillOrigin>(property.children[0], context)},
+                {"meshfillamount", (targetStyle, property, context) => targetStyle.MeshFillAmount = MapNumber(property.children[0], context)},
 
             };
 
@@ -613,11 +612,13 @@ namespace UIForia.Compilers.Style {
                 return customPainter;
             }
 
-            if (string.IsNullOrEmpty(customPainter) || !Application.HasCustomPainter(customPainter)) {
-                Debug.Log($"Could not find your custom painter {customPainter} in file {context.fileName}.");
+            if (string.IsNullOrEmpty(customPainter) || Application.HasCustomPainter(customPainter) || context.resourceManager.TryGetStylePainter(customPainter, out _)) {
+                return customPainter;
             }
 
-            return customPainter;
+            Debug.Log($"Could not find your custom painter {customPainter} in file {context.fileName}.");
+
+            return default;
         }
 
         private static FontStyle MapTextFontStyle(PropertyNode property, StyleCompileContext context) {
@@ -914,7 +915,7 @@ namespace UIForia.Compilers.Style {
 
                                 cellDefinition.growLimit = MapGridCellSize(arg3, context);
                                 cellDefinition.growFactor = (int) MapNumber(arg4, context);
-                                
+
                                 return new GridTrackSize(cellDefinition);
                             }
 
@@ -1963,6 +1964,44 @@ namespace UIForia.Compilers.Style {
             public string Path;
             public string SpriteName;
 
+        }
+
+        public static unsafe void MapPainterProperty(UIStyle targetStyle, PainterPropertyNode painterPropertyNode, in StylePainterDefinition painterDefinition) {
+
+            for (int i = 0; i < painterDefinition.definedVariables.Length; i++) {
+                if (painterPropertyNode.propertyName != painterDefinition.definedVariables[i].name) {
+                    continue;
+                }
+
+                PainterVariableDeclaration def = painterDefinition.definedVariables[i];
+
+                fixed (char* charptr = painterPropertyNode.propertyValue) {
+
+                    CharStream stream = new CharStream(charptr, 0, (uint) painterPropertyNode.propertyValue.Length);
+
+                    stream.ConsumeWhiteSpaceAndComments();
+
+                    if (def.type == typeof(float)) {
+                        if (stream.TryParseFloat(out float floatValue)) {
+                            targetStyle.SetProperty(new StyleProperty((StylePropertyId) def.propertyId, floatValue));
+                        }
+                    }
+                    else if (def.type == typeof(int)) {
+                        if (stream.TryParseInt(out int intVal)) {
+                            targetStyle.SetProperty(new StyleProperty((StylePropertyId) def.propertyId, intVal));
+                        }
+                    }
+                    else {
+                        throw new CompileException($"Tried to set a painter variable '{painterPropertyNode.propertyName}' but {painterPropertyNode.painterName} failed to parse value {painterPropertyNode.propertyValue}");
+
+                    }
+                }
+
+                return;
+
+            }
+
+            throw new CompileException($"Tried to set a painter variable '{painterPropertyNode.propertyName}' but {painterPropertyNode.painterName} does not define it.");
         }
 
     }

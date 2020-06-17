@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Compilers.Style;
+using UIForia.Exceptions;
+using UIForia.Rendering;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
@@ -19,55 +22,55 @@ namespace UIForia {
 
         }
 
-        // todo -- add cursors / animations / maybe style sheets
-        private readonly IntMap_Deprecated<AssetEntry<Texture2D>> s_TextureMap;
-        private readonly IntMap_Deprecated<AssetEntry<SpriteAtlas>> s_SpriteAtlasMap;
-        private readonly Dictionary<string, FontAsset> s_FontMap;
-        private readonly IntMap_Deprecated<AssetEntry<AudioClip>> s_AudioMap;
+        private readonly IntMap_Deprecated<AssetEntry<Texture2D>> textureMap;
+        private readonly IntMap_Deprecated<AssetEntry<SpriteAtlas>> spriteAtlasMap;
+        private readonly Dictionary<string, FontAsset> fontMap;
+        private readonly IntMap_Deprecated<AssetEntry<AudioClip>> audioMap;
+        private readonly Dictionary<string, StylePainterDefinition> stylePainters;
 
         public ResourceManager() {
-            s_TextureMap = new IntMap_Deprecated<AssetEntry<Texture2D>>();
-            s_SpriteAtlasMap = new IntMap_Deprecated<AssetEntry<SpriteAtlas>>();
-            s_FontMap = new Dictionary<string, FontAsset>();
-            s_AudioMap = new IntMap_Deprecated<AssetEntry<AudioClip>>();
+            stylePainters = new Dictionary<string, StylePainterDefinition>();
+            textureMap = new IntMap_Deprecated<AssetEntry<Texture2D>>();
+            spriteAtlasMap = new IntMap_Deprecated<AssetEntry<SpriteAtlas>>();
+            fontMap = new Dictionary<string, FontAsset>();
+            audioMap = new IntMap_Deprecated<AssetEntry<AudioClip>>();
         }
 
         public void Reset() {
-            s_TextureMap.Clear();
-            s_SpriteAtlasMap.Clear();
-            s_FontMap.Clear();
-            s_AudioMap.Clear();
+            textureMap.Clear();
+            spriteAtlasMap.Clear();
+            fontMap.Clear();
+            audioMap.Clear();
         }
 
         public Texture2D AddTexture(string path, Texture2D texture) {
-            return AddResource(path, texture, s_TextureMap);
+            return AddResource(path, texture, textureMap);
         }
 
         public Texture2D AddTexture(Texture2D texture) {
-            return AddResource(texture, s_TextureMap);
+            return AddResource(texture, textureMap);
         }
-        
+
         public AudioClip AddAudioClip(AudioClip clip) {
-            return AddResource(clip, s_AudioMap);
+            return AddResource(clip, audioMap);
         }
 
         public Texture2D GetTexture(string path) {
-            return GetResource(path, s_TextureMap);
+            return GetResource(path, textureMap);
         }
 
         internal DataList<FontAssetInfo>.Shared fontAssetMap;
-        
+
         internal void Initialize() {
             fontAssetMap = new DataList<FontAssetInfo>.Shared(16, Allocator.Persistent);
             FontAsset font = FontAsset.defaultFontAsset;
             font.id = 0;
             fontAssetMap.Add(font.GetFontInfo());
         }
-      
 
         public FontAsset GetFont(string path, bool tryReloading = false) {
             // will be present & null if loaded but not resolved
-            if (s_FontMap.TryGetValue(path, out FontAsset fontAsset)) {
+            if (fontMap.TryGetValue(path, out FontAsset fontAsset)) {
                 if (fontAsset != null) {
                     return fontAsset;
                 }
@@ -80,19 +83,19 @@ namespace UIForia {
             FontAsset retn = Resources.Load<FontAsset>(path);
 
             if (retn == null) {
-                s_FontMap.Add(path, null);
+                fontMap.Add(path, null);
                 return null;
             }
 
             retn.id = fontAssetMap.size;
             fontAssetMap.Add(retn.GetFontInfo());
-            s_FontMap.Add(path, retn);
-            retn.id = s_FontMap.Count;
+            fontMap.Add(path, retn);
+            retn.id = fontMap.Count;
             return retn;
         }
 
         public AudioClip GetAudioClip(string path) {
-            return GetResource(path, s_AudioMap);
+            return GetResource(path, audioMap);
         }
 
         private T AddResource<T>(string path, T resource, IntMap_Deprecated<AssetEntry<T>> map) where T : Object {
@@ -204,6 +207,22 @@ namespace UIForia {
             fontAssetMap.Dispose();
         }
 
+        public void AddStylePainter(string painterName, StylePainterDefinition stylePainterDefinition) {
+            if (Application.HasCustomPainter(painterName)) {
+                throw new CompileException("Painter with name: " + painterName + " was already registered");
+            }
+
+            if (stylePainters.TryGetValue(painterName, out StylePainterDefinition existing)) {
+                throw new CompileException("Painter with name " + painterName + " was already registered from " + existing.fileName);
+            }
+
+            stylePainters.Add(painterName, stylePainterDefinition);
+
+        }
+
+        public bool TryGetStylePainter(string customPainter, out StylePainterDefinition painterDefinition) {
+            return stylePainters.TryGetValue(customPainter, out painterDefinition);
+        }
 
     }
 

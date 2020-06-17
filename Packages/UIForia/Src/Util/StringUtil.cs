@@ -23,10 +23,10 @@ namespace UIForia.Util {
             return target;
         }
 
-        public static int FindMatchingIndex(string input, char open, char close) {
+        public static int FindMatchingIndex(string input, char open, char close, int startOffset = 0) {
             int start = -1;
 
-            for (int i = 0; i < input.Length; i++) {
+            for (int i = startOffset; i < input.Length; i++) {
                 if (input[i] == open) {
                     start = i;
                     break;

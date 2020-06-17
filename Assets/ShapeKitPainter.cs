@@ -3,14 +3,12 @@ using ThisOtherThing.UI;
 using ThisOtherThing.UI.ShapeUtils;
 using UIForia;
 using UIForia.Graphics.ShapeKit;
-using UIForia.ListTypes;
 using UIForia.Rendering;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Profiling;
-using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
 
 namespace DefaultNamespace {
@@ -57,7 +55,7 @@ namespace DefaultNamespace {
             Profiler.EndSample();
             start.Stop();
             vh.FillMesh(mesh);
-            Debug.Log("time: " + start.Elapsed.TotalMilliseconds.ToString("F3") + " vertices: " + mesh.vertexCount);
+         //   Debug.Log("time: " + start.Elapsed.TotalMilliseconds.ToString("F3") + " vertices: " + mesh.vertexCount);
 
             ctx.DrawMesh(mesh, material, mat);
         }

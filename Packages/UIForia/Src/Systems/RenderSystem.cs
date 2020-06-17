@@ -1,17 +1,21 @@
 using System;
-using SVGX;
-using UIForia;
+using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Graphics;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Vertigo;
-using Application = UIForia.Application;
 
-namespace Src.Systems {
+namespace UIForia.Systems {
 
     public class RenderBoxPool {
+
+        private ResourceManager resourceManager;
+
+        public RenderBoxPool(ResourceManager resourceManager) {
+            this.resourceManager = resourceManager;
+        }
 
         // todo -- this doesn't actually pool right now
         public RenderBox GetCustomPainter(string painterId) {
@@ -22,6 +26,14 @@ namespace Src.Systems {
 
             if (Application.s_CustomPainters.TryGetValue(painterId, out Type boxType)) {
                 return (RenderBox) Activator.CreateInstance(boxType);
+            }
+
+            if (resourceManager.TryGetStylePainter(painterId, out StylePainterDefinition painter)) {
+
+                StylePainterRenderBox stylePainterRenderBox = new StylePainterRenderBox();
+                stylePainterRenderBox.painterDefinition = painter;
+                return stylePainterRenderBox;
+
             }
 
             return null;
@@ -35,9 +47,9 @@ namespace Src.Systems {
         private CommandBuffer commandBuffer;
         private RenderContext renderContext;
         internal LightList<RenderOwner> renderOwners;
-        
+
         private ElementSystem elementSystem;
-        
+
         public RenderSystem(Camera camera, Application application, ElementSystem elementSystem) {
             this.elementSystem = elementSystem;
             this.camera = camera;
@@ -105,16 +117,6 @@ namespace Src.Systems {
             }
         }
 
-        public void OnElementEnabled(UIElement element) { }
-
-        public void OnElementDisabled(UIElement element) { }
-
-        public void OnElementDestroyed(UIElement element) { }
-
-        public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
-
-        public void OnElementCreated(UIElement element) { }
-
         public void SetCamera(Camera camera) {
             if (this.camera != null) {
                 this.camera.RemoveCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
@@ -130,7 +132,6 @@ namespace Src.Systems {
         public void HandleStylePropertyUpdates(UIElement element, StyleProperty[] propertyList, int propertyCount) {
             if (element.renderBox == null) return;
 
-
             for (int i = 0; i < propertyCount; i++) {
                 ref StyleProperty property = ref propertyList[i];
                 switch (property.propertyId) {
@@ -142,66 +143,6 @@ namespace Src.Systems {
 
             element.renderBox.OnStylePropertyChanged(propertyList, propertyCount);
         }
-
-    }
-
-    internal struct SVGXFillStyle {
-
-        public PaintMode paintMode;
-        public float encodedColor;
-        public Texture texture;
-        public SVGXMatrix uvTransform;
-        public float opacity;
-        public float encodedTint;
-        public int gradientId;
-        public Color32 shadowColor;
-        public float shadowIntensity;
-        public float shadowOffsetX;
-        public float shadowOffsetY;
-        public float shadowSizeX;
-        public float shadowSizeY;
-        public Color32 shadowTint;
-        public float shadowOpacity;
-
-        public static SVGXFillStyle Default => new SVGXFillStyle() {
-            paintMode = PaintMode.Color,
-            encodedColor = VertigoUtil.ColorToFloat(Color.black),
-            texture = null,
-            uvTransform = SVGXMatrix.identity,
-            opacity = 1f,
-            encodedTint = VertigoUtil.ColorToFloat(Color.clear),
-            gradientId = -1,
-            shadowOpacity = 1
-        };
-
-    }
-
-    internal struct SVGXStrokeStyle {
-
-        public PaintMode paintMode;
-        public float encodedColor;
-        public Texture texture;
-        public SVGXMatrix uvTransform;
-        public float opacity;
-        public float encodedTint;
-        public int gradientId;
-        public float strokeWidth;
-        public Vertigo.LineJoin lineJoin;
-        public Vertigo.LineCap lineCap;
-        public float miterLimit;
-
-        public static SVGXStrokeStyle Default => new SVGXStrokeStyle() {
-            paintMode = PaintMode.Color,
-            encodedColor = VertigoUtil.ColorToFloat(Color.black),
-            texture = null,
-            uvTransform = SVGXMatrix.identity,
-            opacity = 1f,
-            encodedTint = VertigoUtil.ColorToFloat(Color.clear),
-            gradientId = -1,
-            lineJoin = Vertigo.LineJoin.Miter,
-            lineCap = Vertigo.LineCap.Butt,
-            miterLimit = 10f
-        };
 
     }
 

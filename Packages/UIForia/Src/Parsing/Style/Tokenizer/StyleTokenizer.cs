@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UIForia.Exceptions;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Parsing.Style.Tokenizer {
@@ -114,6 +115,57 @@ namespace UIForia.Parsing.Style.Tokenizer {
             TryConsumeWhiteSpace(context);
         }
 
+        private static bool TryReadIdentifier(TokenizerContext context, out string identifier) {
+            if (context.IsConsumed()) {
+                identifier = default;
+                return false;
+            }
+
+            int start = context.ptr;
+            char first = context.input[context.ptr];
+            if (!char.IsLetter(first) && first != '_' && first != '$') {
+                identifier = default;
+                return false;
+            }
+
+            context.Save();
+
+            while (context.HasMore()) {
+                char character = context.input[context.ptr];
+
+                if (!(char.IsLetterOrDigit(character) || character == '_' || character == '-' || character == '$')) {
+                    break;
+                }
+
+                context.Advance();
+            }
+
+            int length = context.ptr - start;
+            identifier = context.input.Substring(start, length);
+            return true;
+        }
+
+        private static string ReadUntilSemiColon(TokenizerContext context) {
+            if (context.IsConsumed()) {
+                return null;
+            }
+
+            int start = context.ptr;
+
+            while (context.HasMore()) {
+                char character = context.input[context.ptr];
+
+                if (character == ';') {
+                    return context.input.Substring(start, context.ptr - start);
+                }
+
+                context.Advance();
+            }
+
+            return null;
+
+        }
+
         private static void TryReadIdentifier(TokenizerContext context, List<StyleToken> output) {
             if (context.IsConsumed()) return;
             int start = context.ptr;
@@ -134,6 +186,66 @@ namespace UIForia.Parsing.Style.Tokenizer {
 
             int length = context.ptr - start;
             string identifier = context.input.Substring(start, length);
+            if (identifier == "painter") {
+                TryConsumeWhiteSpace(context);
+                if (TryReadIdentifier(context, out identifier)) {
+                    // push until found matching close }
+                    TryConsumeWhiteSpace(context);
+                    if (context.input[context.ptr] == '{') {
+                        int idx = StringUtil.FindMatchingIndex(context.input, '{', '}', context.ptr);
+                        int diff = idx - context.ptr;
+                        string contents = context.input.Substring(context.ptr + 1, diff - 2);
+                        context.Advance(diff);
+                        output.Add(new StyleToken(StyleTokenType.PainterName, identifier, context.line, context.column));
+                        output.Add(new StyleToken(StyleTokenType.PainterBody, contents, context.line, context.column));
+                        TryConsumeWhiteSpace(context);
+                        return;
+                    }
+                }
+                else if (context.input[context.ptr] == ':') {
+                    context.Advance();
+                    if (!TryReadIdentifier(context, out identifier)) {
+                        throw new ParseException("Failed to tokenizer painter declaration, expected a valid painter name after 'painter:'");
+                    }
+
+                    if (context.input[context.ptr] != '.') {
+                        throw new ParseException($"Failed to tokenizer painter declaration, expected a dot after 'painter:{identifier}'");
+                    }
+
+                    context.Advance();
+                    TryConsumeWhiteSpace(context);
+
+                    if (!TryReadIdentifier(context, out string propertyName)) {
+                        throw new ParseException($"Failed to tokenizer painter declaration, expected a valid identifier after 'painter:{identifier}.'");
+                    }
+
+                    TryConsumeWhiteSpace(context);
+                    
+                    if (context.input[context.ptr] != '=') {
+                        throw new ParseException($"Failed to tokenizer painter declaration, expected an '=' after 'painter:{identifier}.{propertyName}'");
+                    }
+
+                    TryConsumeWhiteSpace(context);
+                    context.Advance();
+
+                    string value = ReadUntilSemiColon(context);
+
+                    if (value == null) {
+                        throw new ParseException($"Failed to tokenizer painter declaration, expected a value terminated by a semicolon after 'painter:{identifier}.{propertyName}' = ");
+                    }
+                    context.Advance();
+
+                    output.Add(new StyleToken(StyleTokenType.PainterVariableReference, identifier, context.line, context.column));
+                    output.Add(new StyleToken(StyleTokenType.PainterVariableName, propertyName, context.line, context.column));
+                    output.Add(new StyleToken(StyleTokenType.PainterVariableValue, value, context.line, context.column));
+                    TryConsumeWhiteSpace(context);
+                    return;
+                }
+                else {
+                    context.Restore();
+                }
+            }
+
             context.Restore();
             output.Add(TransformIdentifierToTokenType(context, identifier));
             context.Advance(length);
@@ -169,6 +281,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 case "run": return new StyleToken(StyleTokenType.Run, identifierLowerCase, context.line, context.column);
                 case "pause": return new StyleToken(StyleTokenType.Pause, identifierLowerCase, context.line, context.column);
                 case "stop": return new StyleToken(StyleTokenType.Stop, identifierLowerCase, context.line, context.column);
+
                 default: {
                     return new StyleToken(StyleTokenType.Identifier, identifier, context.line, context.column);
                 }

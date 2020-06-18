@@ -32,44 +32,28 @@ namespace UIForia.Compilers.Style {
                 {"pointerevents", (targetStyle, property, context) => targetStyle.PointerEvents = MapEnum<PointerEvents>(property.children[0], context)},
 
                 // Alignment
+                {"alignmenttarget", (targetStyle, property, context) => MapAlignmentTarget(targetStyle, property, context)},
                 {"alignmenttargetx", (targetStyle, property, context) => targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(property.children[0], context)},
-                {"alignmenttargety", (targetStyle, property, context) => targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[0], context)}, {
-                    "alignmenttarget", (targetStyle, property, context) => {
-                        if (property.children.size == 1) {
-                            AlignmentTarget target = MapEnum<AlignmentTarget>(property.children[0], context);
-                            targetStyle.AlignmentTargetX = target;
-                            targetStyle.AlignmentTargetY = target;
-                        }
-                        else {
-                            targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(property.children[0], context);
-                            targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[1], context);
-                        }
-                    }
-                },
+                {"alignmenttargety", (targetStyle, property, context) => targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[0], context)}, 
+
+                {"alignmentorigin", (targetStyle, property, context) => MapAlignmentOrigin(targetStyle, property, context)},
                 {"alignmentoriginx", (targetStyle, property, context) => targetStyle.AlignmentOriginX = MapOffsetMeasurement(property.children[0], context)},
                 {"alignmentoriginy", (targetStyle, property, context) => targetStyle.AlignmentOriginY = MapOffsetMeasurement(property.children[0], context)},
+
+                {"alignmentoffset", (targetStyle, property, context) => MapAlignmentOffset(targetStyle, property, context)},
                 {"alignmentoffsetx", (targetStyle, property, context) => targetStyle.AlignmentOffsetX = MapOffsetMeasurement(property.children[0], context)},
                 {"alignmentoffsety", (targetStyle, property, context) => targetStyle.AlignmentOffsetY = MapOffsetMeasurement(property.children[0], context)},
+
+                {"alignmentdirection", (targetStyle, property, context) => MapAlignmentDirection(targetStyle, property, context)},
                 {"alignmentdirectionx", (targetStyle, property, context) => targetStyle.AlignmentDirectionX = MapEnum<AlignmentDirection>(property.children[0], context)},
                 {"alignmentdirectiony", (targetStyle, property, context) => targetStyle.AlignmentDirectionY = MapEnum<AlignmentDirection>(property.children[0], context)},
+
                 {"alignx", (targetStyle, property, context) => MapAlignmentX(targetStyle, property, context)},
                 {"aligny", (targetStyle, property, context) => MapAlignmentY(targetStyle, property, context)},
+
+                {"alignmentboundary", (targetStyle, property, context) => MapAlignmentBoundary(targetStyle, property, context)},
                 {"alignmentboundaryx", (targetStyle, property, context) => targetStyle.AlignmentBoundaryX = MapEnum<AlignmentBoundary>(property.children[0], context)},
-                {"alignmentboundaryy", (targetStyle, property, context) => targetStyle.AlignmentBoundaryY = MapEnum<AlignmentBoundary>(property.children[0], context)}, {
-                    "alignmentboundary", (targetStyle, property, context) => {
-                        if (property.children.size == 1) {
-                            AlignmentBoundary value = MapEnum<AlignmentBoundary>(property.children[0], context);
-                            targetStyle.AlignmentBoundaryX = value;
-                            targetStyle.AlignmentBoundaryY = value;
-                        }
-                        else {
-                            targetStyle.AlignmentBoundaryX = MapEnum<AlignmentBoundary>(property.children[0], context);
-                            ;
-                            targetStyle.AlignmentBoundaryY = MapEnum<AlignmentBoundary>(property.children[1], context);
-                            ;
-                        }
-                    }
-                },
+                {"alignmentboundaryy", (targetStyle, property, context) => targetStyle.AlignmentBoundaryY = MapEnum<AlignmentBoundary>(property.children[0], context)},
 
                 {"layoutfit", (targetStyle, property, context) => MapLayoutFit(targetStyle, property, context)},
                 {"layoutfithorizontal", (targetStyle, property, context) => targetStyle.LayoutFitHorizontal = MapEnum<LayoutFit>(property.children[0], context)},
@@ -82,8 +66,8 @@ namespace UIForia.Compilers.Style {
                 {"backgroundimageoffsety", (targetStyle, property, context) => targetStyle.BackgroundImageOffsetY = MapFixedLength(property.children[0], context)},
                 {"backgroundimagescalex", (targetStyle, property, context) => targetStyle.BackgroundImageScaleX = MapNumber(property.children[0], context)},
                 {"backgroundimagescaley", (targetStyle, property, context) => targetStyle.BackgroundImageScaleY = MapNumber(property.children[0], context)},
-                {"backgroundimagetilex", (targetStyle, property, context) => targetStyle.BackgroundImageTileX = MapNumber(property.children[0], context)},
-                {"backgroundimagetiley", (targetStyle, property, context) => targetStyle.BackgroundImageTileY = MapNumber(property.children[0], context)},
+                {"backgroundimagetilex", (targetStyle, property, context) => targetStyle.BackgroundImageTileX = MapNumberOrPixels(property.children[0], context)},
+                {"backgroundimagetiley", (targetStyle, property, context) => targetStyle.BackgroundImageTileY = MapNumberOrPixels(property.children[0], context)},
                 {"backgroundimagerotation", (targetStyle, property, context) => targetStyle.BackgroundImageRotation = MapNumber(property.children[0], context)},
                 {"backgroundimage", (targetStyle, property, context) => targetStyle.BackgroundImage = MapTexture(property.children[0], context)},
                 {"backgroundfit", (targetStyle, property, context) => targetStyle.BackgroundFit = MapEnum<BackgroundFit>(property.children[0], context)},
@@ -127,26 +111,11 @@ namespace UIForia.Compilers.Style {
                 {"cornerbevelbottomright", (targetStyle, property, context) => targetStyle.CornerBevelBottomRight = MapFixedLength(property.children[0], context)},
                 {"cornerbevelbottomleft", (targetStyle, property, context) => targetStyle.CornerBevelBottomLeft = MapFixedLength(property.children[0], context)},
 
+                {"griditem", (targetStyle, property, context) => MapGridItemPlacement(targetStyle, property, context)},
                 {"griditemx", (targetStyle, property, context) => targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context)},
                 {"griditemy", (targetStyle, property, context) => targetStyle.GridItemY = MapGridItemPlacement(property.children[0], context)},
                 {"griditemwidth", (targetStyle, property, context) => targetStyle.GridItemWidth = MapGridItemPlacement(property.children[0], context)},
-                {"griditemheight", (targetStyle, property, context) => targetStyle.GridItemHeight = MapGridItemPlacement(property.children[0], context)}, {
-                    "griditem", (targetStyle, property, context) => {
-                        if (property.children.size == 2) {
-                            targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context);
-                            targetStyle.GridItemY = MapGridItemPlacement(property.children[1], context);
-                        }
-                        else if (property.children.size == 4) {
-                            targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context);
-                            targetStyle.GridItemY = MapGridItemPlacement(property.children[1], context);
-                            targetStyle.GridItemWidth = MapGridItemPlacement(property.children[2], context);
-                            targetStyle.GridItemHeight = MapGridItemPlacement(property.children[3], context);
-                        }
-                        else {
-                            throw new CompileException(context.fileName, property, $"Invalid GridItem style {property}.");
-                        }
-                    }
-                },
+                {"griditemheight", (targetStyle, property, context) => targetStyle.GridItemHeight = MapGridItemPlacement(property.children[0], context)},
 
                 {"gridlayoutcolalignment", (targetStyle, property, context) => targetStyle.GridLayoutColAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
                 {"gridlayoutrowalignment", (targetStyle, property, context) => targetStyle.GridLayoutRowAlignment = MapEnum<GridAxisAlignment>(property.children[0], context)},
@@ -156,8 +125,8 @@ namespace UIForia.Compilers.Style {
                 {"gridlayoutdirection", (targetStyle, property, context) => targetStyle.GridLayoutDirection = MapEnum<LayoutDirection>(property.children[0], context)},
                 {"gridlayoutcolautosize", (targetStyle, property, context) => targetStyle.GridLayoutColAutoSize = MapGridLayoutTemplate(property, context)},
                 {"gridlayoutrowautosize", (targetStyle, property, context) => targetStyle.GridLayoutRowAutoSize = MapGridLayoutTemplate(property, context)},
-                {"gridlayoutcolgap", (targetStyle, property, context) => targetStyle.GridLayoutColGap = MapNumber(property.children[0], context)},
-                {"gridlayoutrowgap", (targetStyle, property, context) => targetStyle.GridLayoutRowGap = MapNumber(property.children[0], context)},
+                {"gridlayoutcolgap", (targetStyle, property, context) => targetStyle.GridLayoutColGap = MapNumberOrPixels(property.children[0], context)},
+                {"gridlayoutrowgap", (targetStyle, property, context) => targetStyle.GridLayoutRowGap = MapNumberOrPixels(property.children[0], context)},
 
                 {"alignitemshorizontal", (targetStyle, property, context) => targetStyle.AlignItemsHorizontal = MapItemAlignment(property.children[0], context)},
                 {"alignitemsvertical", (targetStyle, property, context) => targetStyle.AlignItemsVertical = MapItemAlignment(property.children[0], context)},
@@ -269,10 +238,10 @@ namespace UIForia.Compilers.Style {
 
                 // Shadows
                 //    {"shadowtype", (targetStyle, property, context) => targetStyle.ShadowType = MapEnum<UnderlayType>(property.children[0], context)},
-                {"shadowoffsetx", (targetStyle, property, context) => targetStyle.ShadowOffsetX = MapNumber(property.children[0], context)},
-                {"shadowoffsety", (targetStyle, property, context) => targetStyle.ShadowOffsetY = MapNumber(property.children[0], context)},
-                {"shadowsizex", (targetStyle, property, context) => targetStyle.ShadowSizeX = MapNumber(property.children[0], context)},
-                {"shadowsizey", (targetStyle, property, context) => targetStyle.ShadowSizeY = MapNumber(property.children[0], context)},
+                {"shadowoffsetx", (targetStyle, property, context) => targetStyle.ShadowOffsetX = MapNumberOrPixels(property.children[0], context)},
+                {"shadowoffsety", (targetStyle, property, context) => targetStyle.ShadowOffsetY = MapNumberOrPixels(property.children[0], context)},
+                {"shadowsizex", (targetStyle, property, context) => targetStyle.ShadowSizeX = MapNumberOrPixels(property.children[0], context)},
+                {"shadowsizey", (targetStyle, property, context) => targetStyle.ShadowSizeY = MapNumberOrPixels(property.children[0], context)},
                 {"shadowintensity", (targetStyle, property, context) => targetStyle.ShadowIntensity = MapNumber(property.children[0], context)},
                 {"shadowcolor", (targetStyle, property, context) => targetStyle.ShadowColor = MapColor(property.children[0], context)},
                 {"shadowtint", (targetStyle, property, context) => targetStyle.ShadowTint = MapColor(property.children[0], context)},
@@ -287,6 +256,66 @@ namespace UIForia.Compilers.Style {
                 
 
             };
+
+        private static void MapAlignmentTarget(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            if (property.children.size == 1) {
+                AlignmentTarget target = MapEnum<AlignmentTarget>(property.children[0], context);
+                targetStyle.AlignmentTargetX = target;
+                targetStyle.AlignmentTargetY = target;
+            }
+            else {
+                targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(property.children[0], context);
+                targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[1], context);
+            }
+        }
+
+        private static void MapAlignmentOffset(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            if (property.children.size == 1) {
+                OffsetMeasurement measurement = MapOffsetMeasurement(property.children[0], context);
+                targetStyle.AlignmentOffsetX = measurement;
+                targetStyle.AlignmentOffsetY = measurement;
+            }
+            else {
+                targetStyle.AlignmentOffsetX = MapOffsetMeasurement(property.children[0], context);
+                targetStyle.AlignmentOffsetY = MapOffsetMeasurement(property.children[1], context);
+            }
+        }
+
+        private static void MapAlignmentOrigin(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            if (property.children.size == 1) {
+                OffsetMeasurement measurement = MapOffsetMeasurement(property.children[0], context);
+                targetStyle.AlignmentOriginX = measurement;
+                targetStyle.AlignmentOriginY = measurement;
+            }
+            else {
+                targetStyle.AlignmentOriginX = MapOffsetMeasurement(property.children[0], context);
+                targetStyle.AlignmentOriginY = MapOffsetMeasurement(property.children[1], context);
+            }
+        }
+
+        private static void MapAlignmentDirection(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            if (property.children.size == 1) {
+                AlignmentDirection value = MapEnum<AlignmentDirection>(property.children[0], context);
+                targetStyle.AlignmentDirectionX = value;
+                targetStyle.AlignmentDirectionY = value;
+            }
+            else {
+                targetStyle.AlignmentDirectionX = MapEnum<AlignmentDirection>(property.children[0], context);
+                targetStyle.AlignmentDirectionY = MapEnum<AlignmentDirection>(property.children[1], context);
+            }
+        }
+
+        private static void MapAlignmentBoundary(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            if (property.children.size == 1) {
+                AlignmentBoundary value = MapEnum<AlignmentBoundary>(property.children[0], context);
+                targetStyle.AlignmentBoundaryX = value;
+                targetStyle.AlignmentBoundaryY = value;
+            }
+            else {
+                targetStyle.AlignmentBoundaryX = MapEnum<AlignmentBoundary>(property.children[0], context);
+                targetStyle.AlignmentBoundaryY = MapEnum<AlignmentBoundary>(property.children[1], context);
+            }
+        }
 
         // "materialName" { [type] [identifier] = [value] }
         // when using style database, we need to know per-module what the materials are already. should be easy
@@ -705,6 +734,22 @@ namespace UIForia.Compilers.Style {
             }
 
             return new CursorStyle(null, MapTexture(property.children[0], context), new Vector2(hotSpotX, hotSpotY));
+        }
+
+        private static void MapGridItemPlacement(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            if (property.children.size == 2) {
+                targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context);
+                targetStyle.GridItemY = MapGridItemPlacement(property.children[1], context);
+            }
+            else if (property.children.size == 4) {
+                targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context);
+                targetStyle.GridItemY = MapGridItemPlacement(property.children[1], context);
+                targetStyle.GridItemWidth = MapGridItemPlacement(property.children[2], context);
+                targetStyle.GridItemHeight = MapGridItemPlacement(property.children[3], context);
+            }
+            else {
+                throw new CompileException(context.fileName, property, $"Invalid GridItem style {property}.");
+            }
         }
 
         private static GridItemPlacement MapGridItemPlacement(StyleASTNode node, StyleCompileContext context) {
@@ -1228,6 +1273,31 @@ namespace UIForia.Compilers.Style {
             }
 
             throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
+        }
+
+        private static float MapNumberOrPixels(StyleASTNode value, StyleCompileContext context) {
+            value = context.GetValueForReference(value);
+            switch (value) {
+                case MeasurementNode measurementNode:
+                    if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
+                        if (measurementNode.unit.value != "px") {
+                            throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or pixel value: {value}.");
+                        }
+
+                        return measurementValue;
+                    }
+
+                    break;
+
+                case StyleLiteralNode literalNode:
+                    if (TryParseFloat(literalNode.rawValue, out float literalValue)) {
+                        return literalValue;
+                    }
+
+                    break;
+            }
+
+            throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or pixel value: {value}.");
         }
 
         private static UIFixedLength MapFixedLength(StyleASTNode value, StyleCompileContext context) {

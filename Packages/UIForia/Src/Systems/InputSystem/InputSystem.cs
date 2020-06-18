@@ -765,11 +765,12 @@ namespace UIForia.Systems {
         }
 
         protected void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
+            m_EventPropagator.Reset(mouseState);
             // GenericInputEvent keyEvent = new GenericInputEvent(eventType, modifiers, m_EventPropagator, character, keyCode, m_FocusedElement != null);
-            KeyboardInputEvent keyInputEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, m_FocusedElement != null);
+            KeyboardInputEvent keyInputEvent = new KeyboardInputEvent(m_EventPropagator, eventType, keyCode, character, modifiers, m_FocusedElement != null);
             if (m_FocusedElement == null) {
                 m_KeyboardEventTree.ConditionalTraversePreOrder(keyInputEvent, (item, evt) => {
-                    if (evt.stopPropagation) return false;
+                    if (m_EventPropagator.shouldStopPropagation) return false;
 
                     UIElement element = (UIElement) item.Element;
                     if (element.isDestroyed || element.isDisabled) {
@@ -781,7 +782,7 @@ namespace UIForia.Systems {
                     bool ran = false;
                     LightList<UIElement> elementsToUpdate = null;
                     for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
-                        if (evt.stopPropagation) break;
+                        if (m_EventPropagator.shouldStopPropagation) break;
                         ref InputHandlerGroup.HandlerData handler = ref evtHandlerGroup.eventHandlers.array[i];
                         if (!ShouldRun(handler, evt)) {
                             continue;
@@ -801,7 +802,7 @@ namespace UIForia.Systems {
                         RunWriteBindingsAndReleaseList(elementsToUpdate);
                     }
                     
-                    return !evt.stopPropagation;
+                    return !m_EventPropagator.shouldStopPropagation;
                 });
             }
 

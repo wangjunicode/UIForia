@@ -16,21 +16,19 @@ This is where you put the style definitions for this template. Styles can either
 
 ```
     <UITemplate>
-        
         <Style>
-            
             style my-style {
                 BackgroundColor = red;
             }
-            
         </Style>
         
         <Style path="path/to/file.style"/>
         
         <Style path"path/to/other/file.style" as="util"/>
-        
     </UITemplate>
 ```
+
+
 
 <!--## Writing XML Templates-->
 <!--Using XML markup, you can define the hierarchical structure of the user interface.-->

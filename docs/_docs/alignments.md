@@ -1,6 +1,6 @@
 ---
 title: Alignment
-description: How to use the Aligment properties
+description: How to use the Alignment properties
 layout: page
 showInMain: true
 order: 25
@@ -113,6 +113,29 @@ AlignmentOrigin = 20px;
 ```
  
 Note: `AlignmentDirection` **cannot** be used in animations!
+
+## AlignmentBoundary
+```
+AlignmentBoundaryX = [Unset (default) | Screen | Parent | ParentContentArea | Clipper | View]
+AlignmentBoundaryY = [Unset (default) | Screen | Parent | ParentContentArea | Clipper | View]
+```
+There is also a shorthand for this property that accepts one or two parameters:
+`AlignmentBoundary = [AlignmentBoundaryXY]`
+
+`AlignmentBoundary = [AlignmentBoundaryX] [AlignmentBoundaryY]`
+
+The AlignmentBoundary can be used to clamp the location of the aligned element to the specified
+bounds:
+
+| value             | description                                                                                                                                                |
+|:------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Unset             | The default, no bounds clamping happens.                                                                                                                   |
+| Parent            | The aligned element will not leave the parent's layout box.                                                                                                |
+| ParentContentArea | This one will keep the element within the parent's [content box](/docs/layout/#box-model).                                                                 |
+| View              | The aligned element will not leave the view.                                                                                                               |
+| Screen            | The aligned element will not leave the screen.                                                                                                             |
+| Clipper           | Refers to the next element in the hierarchy that clips this element. A parent that defines `Overflow = Hidden;` for example. Ultimately the view / screen. |
+
 
 ## AlignX AlignY
 `AlignX = AlignmentOrigin [AlignmentOffset] [AlignmentTarget] [AlignmentDirection]`

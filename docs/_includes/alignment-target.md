@@ -8,3 +8,4 @@ Here's a list currently supported targets:
 | ParentContentArea | Target the parent's [content box](/docs/layout/#box-model).                                                                          |
 | View              | Target the view. Does not affect parent transforms!                                                                                  |
 | Screen            | Target the screen. Does not affect parent transforms!                                                                                |
+| Mouse             | The element will be offset from the current mouse position.                                                                          |

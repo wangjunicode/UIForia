@@ -349,8 +349,7 @@ animation rotate-left {
     
     [keyframes] {
         0% { TransformRotation = 0; } 
-        30% { TransformRotation = 360; }
-        100% { TransformRotation = 720; }
+        100% { TransformRotation = 360; }
     }
 }
 
@@ -366,13 +365,12 @@ style rotating-right {
 animation rotate-right {
     [options] {
         Iterations = infinite;
-        Duration = 12s;
+        Duration = 3.5s;
     }
     
     [keyframes] {
         0% { TransformRotation = 0; } 
-        30% { TransformRotation = -360; }
-        100% { TransformRotation = -720; }
+        100% { TransformRotation = -360; }
     }
 }
 

@@ -40,7 +40,7 @@ style <Heading2> {
 }
 
 style input {
-    BackgroundColor = grey;
+    BackgroundColor = rgb(80, 80, 80);
     PreferredSize = 320px 32px;
     Padding = 4px 8px;
 }

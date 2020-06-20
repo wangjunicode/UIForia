@@ -37,6 +37,7 @@ namespace SpaceGameDemo.SinglePlayer {
     [Template("SpaceGameDemo/SinglePlayer/SinglePlayer.xml")]
     public class SinglePlayer : UIElement {
         public int selectedShip = 1;
+        public int selectedPilot = 1;
         public List<ShipData> ships;
         // Property
         public float progress;
@@ -90,6 +91,10 @@ namespace SpaceGameDemo.SinglePlayer {
 
         public void SelectShip(int id) {
             selectedShip = id;
+        }
+
+        public void SelectPilot(int pilot) {
+            selectedPilot = pilot;
         }
 
         public DragEvent OnDragCreateItem(MouseInputEvent evt, InventoryItem item) {

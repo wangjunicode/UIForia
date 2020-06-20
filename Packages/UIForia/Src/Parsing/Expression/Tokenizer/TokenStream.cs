@@ -135,8 +135,11 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
                 // find paren open, recurse
 
                 if (expressionToken == ExpressionTokenType.ParenOpen) {
+                    Save();
+                    Set(CurrentIndex + i);
                     i = FindMatchingIndex(ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose);
 //                    level++;
+                    Restore();
                 }
                 else if (expressionToken == ExpressionTokenType.ParenClose) {
 //                    level--;

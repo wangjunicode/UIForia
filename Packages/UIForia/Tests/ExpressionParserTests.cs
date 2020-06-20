@@ -362,6 +362,18 @@ public class ExpressionParserTests {
     }
 
     [Test]
+    public void Parse_Ternary_With_New() {
+        ASTNode root = ExpressionParser.Parse("{x ? new OffsetMeasurement((float) 1 / (float) 2, OffsetMeasurementUnit.Percent)}");
+        OperatorNode ternary = AssertInstanceOfAndReturn<OperatorNode>(root);
+        Assert.AreEqual(OperatorType.TernaryCondition, ternary.operatorType);
+        OperatorNode selection = AssertInstanceOfAndReturn<OperatorNode>(ternary.right);
+        Assert.IsInstanceOf<IdentifierNode>(ternary.left);
+        Assert.AreEqual(OperatorType.TernarySelection, selection.operatorType);
+        Assert.IsInstanceOf<NewExpressionNode>(selection.left);
+        Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(selection.right).rawValue);
+    }
+
+    [Test]
     public void Parse_Ternary_NestedExpression() {
         ASTNode root = ExpressionParser.Parse("{x ? y + z : 1}");
         OperatorNode ternary = AssertInstanceOfAndReturn<OperatorNode>(root);

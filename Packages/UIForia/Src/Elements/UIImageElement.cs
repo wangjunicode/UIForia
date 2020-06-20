@@ -22,6 +22,9 @@ namespace UIForia.Elements {
         public void OnSrcChanged() {
             if (src != null) {
                 texture = application.ResourceManager.GetTexture(src);
+                if (texture == null) {
+                    Debug.Log($"Cannot find image resource {src}");
+                }
             }
 
             SetupBackground();
@@ -33,6 +36,10 @@ namespace UIForia.Elements {
         }
 
         private void SetupBackground() {
+            if (texture == null) {
+                return;
+            }
+
             style.SetBackgroundImage(texture, StyleState.Normal);
             if (Width > 0) {
                 style.SetPreferredHeight(Width * texture.height / texture.width, StyleState.Normal);

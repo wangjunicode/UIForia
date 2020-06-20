@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UIForia.Animation;
 using UIForia.Exceptions;
 using UIForia.Graphics;
-using UIForia.Parsing;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Sound;
@@ -22,8 +21,10 @@ namespace UIForia.Compilers.Style {
 
         private static readonly UIStyle s_ScratchStyle = new UIStyle();
         private Dictionary<string, StylePainterDefinition> painterCache;
-        private ShapeCompiler shapeCompiler;
+        private StylePainterCompiler stylePainterCompiler;
         private int idGenerator;
+
+        private int painterFunctionIdGenerator;
 
         private StructList<PainterVariableDeclaration> painterVariableBuffer;
 
@@ -34,7 +35,7 @@ namespace UIForia.Compilers.Style {
             this.scratchGroupList = new LightList<UIStyleGroup>(32);
             this.painterVariableBuffer = new StructList<PainterVariableDeclaration>();
             this.idGenerator = 1000;
-            this.shapeCompiler = new ShapeCompiler();
+            this.stylePainterCompiler = new StylePainterCompiler();
         }
 
         // todo -- deprecate, use other method
@@ -210,34 +211,82 @@ namespace UIForia.Compilers.Style {
 
             PainterVariableDeclaration[] variables = null;
 
+            bool hasVariables = false;
+            bool hasbg = false;
+            bool hasFg = false;
+
+            int bgPainterId = -1;
+            int fgPainterId = -1;
+
+            string drawBgFn = null;
+            string drawFgFn = null;
+
             fixed (char* ptr = painterNode.shapeBody) {
                 CharStream stream = new CharStream(ptr, 0, (uint) painterNode.shapeBody.Length);
 
-                if (stream.TryMatchRangeIgnoreCase("[variables]")) {
+                while (stream.HasMoreTokens) {
+                    uint start = stream.Ptr;
 
-                    if (!stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
-                        throw new CompileException("Expected a { } delimited body block after [variables]");
+                    if (stream.TryMatchRangeIgnoreCase("[variables]")) {
+
+                        if (hasVariables) {
+                            throw new CompileException("Duplicate [variables] section in style painter");
+                        }
+
+                        hasVariables = true;
+
+                        if (!stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
+                            throw new CompileException("Expected a { } delimited body block after [variables]");
+                        }
+
+                        if (!TryParsePainterVariableBlock(ref bodyStream, out variables)) {
+                            throw new CompileException("Failed to compile painter variable block");
+                        }
+
+                    }
+                    else if (stream.TryMatchRangeIgnoreCase("[draw:background]")) {
+
+                        if (hasbg) {
+                            throw new CompileException("Duplicate [draw:background] section in style painter");
+                        }
+
+                        hasbg = true;
+                        // want buffer this so we can handle variables first
+                        if (!stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
+                            throw new CompileException("Expected a { } delimited body block after [draw:background]");
+                        }
+
+                        bgPainterId = painterFunctionIdGenerator++;
+
+                        CharSpan span = new CharSpan(bodyStream);
+                        span = span.Trim();
+                        drawBgFn = span.ToString();
+
+                    }
+                    else if (stream.TryMatchRangeIgnoreCase("[draw:foreground]")) {
+
+                        if (hasFg) {
+                            throw new CompileException("Duplicate [draw:foreground] section in style painter");
+                        }
+
+                        hasFg = true;
+                        // want buffer this so we can handle variables first
+                        if (!stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
+                            throw new CompileException("Expected a { } delimited body block after [draw:foreground]");
+                        }
+
+                        fgPainterId = painterFunctionIdGenerator++;
+
+                        CharSpan span = new CharSpan(bodyStream);
+                        span = span.Trim();
+                        drawFgFn = span.ToString();
+
                     }
 
-                    if (!TryParsePainterVariableBlock(ref bodyStream, out variables)) {
-                        throw new CompileException("Failed to compile painter variable block");
-                    }
+                    stream.ConsumeWhiteSpaceAndComments();
 
-                }
-                else if (stream.TryMatchRangeIgnoreCase("[draw:bg]")) {
-
-                    // want buffer this so we can handle variables first
-                    if (!stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
-                        throw new CompileException("Expected a { } delimited body block after [draw:bg]");
-                    }
-
-                    CharSpan span = new CharSpan(bodyStream);
-                    span = span.Trim();
-                    try {
-                        shapeCompiler.Compile(span.ToString());
-                    }
-                    catch (Exception e) {
-                        Debug.Log(e);
+                    if (start == stream.Ptr) {
+                        throw new CompileException("Failed to parse painter " + painterNode.painterName);
                     }
 
                 }
@@ -256,7 +305,12 @@ namespace UIForia.Compilers.Style {
 
             resourceManager.AddStylePainter(painterNode.painterName, new StylePainterDefinition() {
                 fileName = context.fileName,
-                definedVariables = variables
+                painterName = painterNode.painterName,
+                definedVariables = variables,
+                drawBgSrc = drawBgFn,
+                drawFgSrc = drawFgFn,
+                backgroundFnIndex = bgPainterId,
+                foregroundFnIndex = fgPainterId
             });
 
         }

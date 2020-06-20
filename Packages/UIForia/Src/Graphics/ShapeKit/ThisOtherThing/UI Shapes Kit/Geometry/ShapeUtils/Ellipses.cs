@@ -123,10 +123,10 @@ namespace ThisOtherThing.UI.ShapeUtils {
             vh.EnsureAdditionalVertexCapacity(4 + (6 * resolution));
             vh.EnsureAdditionalTriangleCapacity(3 * (4 + (6 * resolution)));
 
-            int vertexCount = vh.vertexCount;
+            int vertexCount = numVertices;
             int vertexStart = vertexCount;
 
-            ref float4 tmpUVPos = ref vh.uv0[vertexCount];
+            ref float4 tmpUVPos = ref vh.texCoord[vertexCount];
             ref float3 tmpVertPos = ref vh.positions[vertexCount];
 
             tmpUVPos.x = 0.5f;
@@ -136,7 +136,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             tmpVertPos.y = center.y;
 
             vertexCount++;
-            tmpUVPos = ref vh.uv0[vertexCount];
+            tmpUVPos = ref vh.texCoord[vertexCount];
             tmpVertPos = ref vh.positions[vertexCount];
             // vh.AddVert(new float3(center.x, center.y, 0), color, tmpUVPos);
 
@@ -149,7 +149,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             tmpUVPos.y = (unitPositionBuffer.array[0].y * edgeGradientData.innerScale + 1.0f) * 0.5f;
 
             vertexCount++;
-            tmpUVPos = ref vh.uv0[vertexCount];
+            tmpUVPos = ref vh.texCoord[vertexCount];
             tmpVertPos = ref vh.positions[vertexCount];
             // vh.AddVert(tmpVertPos, color, tmpUVPos);
 
@@ -163,7 +163,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 // vh.AddVert(tmpVertPos, color, tmpUVPos);
 
                 vertexCount++;
-                tmpUVPos = ref vh.uv0[vertexCount];
+                tmpUVPos = ref vh.texCoord[vertexCount];
                 tmpVertPos = ref vh.positions[vertexCount];
                 vh.AddTriangleUnchecked(numVertices, numVertices + i, numVertices + i + 1);
             }
@@ -189,7 +189,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 tmpUVPos.y = (unitPositionBuffer.array[0].y + 1.0f) * 0.5f;
                 //vh.AddVert(tmpVertPos, color, tmpUVPos);
                 vertexCount++;
-                tmpUVPos = ref vh.uv0[vertexCount];
+                tmpUVPos = ref vh.texCoord[vertexCount];
                 tmpVertPos = ref vh.positions[vertexCount];
                 for (int i = 1; i < resolution; i++) {
                     tmpVertPos.x = center.x + unitPositionBuffer.array[i].x * radius.x;
@@ -201,7 +201,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
                     // vh.AddVert(tmpVertPos, color, tmpUVPos);
 
                     vertexCount++;
-                    tmpUVPos = ref vh.uv0[vertexCount];
+                    tmpUVPos = ref vh.texCoord[vertexCount];
                     tmpVertPos = ref vh.positions[vertexCount];
 
                     vh.AddTriangleUnchecked(numVertices + i + 1, outerFirstIndex + i, outerFirstIndex + i + 1);
@@ -223,7 +223,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 vh.colors[i] = color;
             }
 
-            vh.vertexCount = vertexCount;
+            vh.AddVertexCount(vertexCount - vertexStart);
 
         }
 
@@ -329,7 +329,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             int vertexStart = vertexCount;
 
             ref float3 tmpVertPos = ref vh.positions[vertexCount];
-            ref float4 uv = ref vh.uv0[vertexCount];
+            ref float4 uv = ref vh.texCoord[vertexCount];
 
             for (int i = 0; i < resolution; i++) {
                 float uvX = i / uvMaxResolution;
@@ -343,7 +343,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
                 vertexCount++;
                 tmpVertPos = ref vh.positions[vertexCount];
-                uv = ref vh.uv0[vertexCount];
+                uv = ref vh.texCoord[vertexCount];
 
                 tmpVertPos.x = center.x + unitPositionBuffer.array[i].x * tmpOuterRadius.x;
                 tmpVertPos.y = center.y + unitPositionBuffer.array[i].y * tmpOuterRadius.y;
@@ -353,7 +353,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
                 vertexCount++;
                 tmpVertPos = ref vh.positions[vertexCount];
-                uv = ref vh.uv0[vertexCount];
+                uv = ref vh.texCoord[vertexCount];
                 // vh.AddVert(tmpVertPos, color, uv);
 
                 if (i > 0) {
@@ -374,7 +374,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
                 vertexCount++;
                 tmpVertPos = ref vh.positions[vertexCount];
-                uv = ref vh.uv0[vertexCount];
+                uv = ref vh.texCoord[vertexCount];
                 // vh.AddVert(tmpVertPos, color, uv);
 
                 tmpVertPos.x = center.x + unitPositionBuffer.array[0].x * tmpOuterRadius.x;
@@ -385,7 +385,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
                 vertexCount++;
                 tmpVertPos = ref vh.positions[vertexCount];
-                uv = ref vh.uv0[vertexCount];
+                uv = ref vh.texCoord[vertexCount];
                 // vh.AddVert(tmpVertPos, color, uv);
 
                 baseIndex = startVertex + resolution * 2;
@@ -420,7 +420,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
                     vertexCount++;
                     tmpVertPos = ref vh.positions[vertexCount];
-                    uv = ref vh.uv0[vertexCount];
+                    uv = ref vh.texCoord[vertexCount];
                     // vh.AddVert(tmpVertPos, color, uv);
 
                     uv.x = uvX;
@@ -432,7 +432,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
                     vertexCount++;
                     tmpVertPos = ref vh.positions[vertexCount];
-                    uv = ref vh.uv0[vertexCount];
+                    uv = ref vh.texCoord[vertexCount];
 
                     //vh.AddVert(tmpVertPos, color, uv);
 
@@ -462,7 +462,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
                     vertexCount++;
                     tmpVertPos = ref vh.positions[vertexCount];
-                    uv = ref vh.uv0[vertexCount];
+                    uv = ref vh.texCoord[vertexCount];
 
                     uv.x = 1.0f;
                     uv.y = 1.0f;
@@ -473,7 +473,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
                     // vh.AddVert(tmpVertPos, color, uv);
                     vertexCount++;
                     tmpVertPos = ref vh.positions[vertexCount];
-                    uv = ref vh.uv0[vertexCount];
+                    uv = ref vh.texCoord[vertexCount];
 
                     edgesBaseIndex = baseIndex + resolution * 2;
                     innerBaseIndex = startVertex + resolution * 2;
@@ -499,7 +499,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 vh.colors[i] = color;
             }
 
-            vh.vertexCount = vertexCount;
+            vh.AddVertexCount(vertexCount - startVertex);
 
         }
 

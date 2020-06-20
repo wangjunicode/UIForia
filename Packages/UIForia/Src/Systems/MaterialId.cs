@@ -27,6 +27,11 @@ namespace UIForia.Rendering {
             return new MaterialId(materialId);
         }
 
+        
+        public static readonly MaterialId UIForiaText = new MaterialId(1); 
+        public static readonly MaterialId UIForiaShape = new MaterialId(2); 
+        public static readonly MaterialId UIForiaEffect = new MaterialId(3); 
+        public static readonly MaterialId UIForiaTextEffect = new MaterialId(4); 
     }
 
 }

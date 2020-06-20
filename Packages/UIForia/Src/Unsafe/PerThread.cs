@@ -13,7 +13,6 @@ namespace UIForia.Util.Unsafe {
 
     }
 
-
     public interface IPerThread<T> : IDisposable where T : unmanaged, IPerThreadCompatible {
 
         ref T GetForThread(int threadIndex);
@@ -52,7 +51,7 @@ namespace UIForia.Util.Unsafe {
     public unsafe struct PerThread<T> : IPerThread<T>, IDisposable where T : unmanaged, IPerThreadCompatible {
 
         public readonly Allocator allocator;
-        
+
         private readonly int itemCount;
         [NativeDisableUnsafePtrRestriction] private T* perThreadData;
 
@@ -89,10 +88,11 @@ namespace UIForia.Util.Unsafe {
             if (perThreadData == null) return;
             for (int i = 0; i < itemCount; i++) {
                 if (perThreadData[i].IsInitialized) {
-                    perThreadData->Dispose();
+                    perThreadData[i].Dispose();
                 }
             }
 
+            perThreadData->Dispose();
             TypedUnsafe.Dispose(perThreadData, Allocator.Persistent);
         }
 
@@ -100,7 +100,7 @@ namespace UIForia.Util.Unsafe {
             if (perThreadData == null) return;
             for (int i = 0; i < itemCount; i++) {
                 if (perThreadData[i].IsInitialized) {
-                    perThreadData->Dispose();
+                    perThreadData[i].Dispose();
                 }
             }
 
@@ -135,10 +135,10 @@ namespace UIForia.Util.Unsafe {
             return new PerThread<T>(1, allocator);
         }
 
-        public static PerThread<T> Single(T * ptr, Allocator allocator) {
-                return new PerThread<T>(ptr, 1, allocator);
+        public static PerThread<T> Single(T* ptr, Allocator allocator) {
+            return new PerThread<T>(ptr, 1, allocator);
         }
-        
+
         public static PerThread<T> Single(ref T ptr, Allocator allocator) {
             fixed (T* data = &ptr) {
                 return new PerThread<T>(data, 1, allocator);

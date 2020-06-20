@@ -38,6 +38,7 @@ namespace UIForia.Systems {
 
                 if (clipper.isCulled || layoutResult.actualSize.x * layoutResult.actualSize.y == 0) {
                     layoutResult.isCulled = true;
+                    clipInfo.isCulled = true;
                 }
                 else {
 
@@ -68,9 +69,12 @@ namespace UIForia.Systems {
                     if (orientedBounds.p2.y > yMax) yMax = orientedBounds.p2.y;
                     if (orientedBounds.p3.y > yMax) yMax = orientedBounds.p3.y;
 
+                    // todo -- store aligned bounds 
+                    
                     bool overlappingOrContains = xMax >= clipper.aabb.x && xMin <= clipper.aabb.z && yMax >= clipper.aabb.y && yMin <= clipper.aabb.w;
 
-                    layoutResultTable[elementId].isCulled = !overlappingOrContains;
+                    layoutResult.isCulled = !overlappingOrContains;
+                    clipInfo.isCulled = !overlappingOrContains;
 
                 }
 

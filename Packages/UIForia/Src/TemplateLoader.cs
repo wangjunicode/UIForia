@@ -2,11 +2,15 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using Mono.Linq.Expressions;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
+using UIForia.Exceptions;
+using UIForia.Graphics;
 using UIForia.Util;
 using UnityEngine;
 
@@ -25,6 +29,41 @@ namespace UIForia.Compilers {
             Func<UIElement, UIElement, TemplateScope, UIElement>[] slots = new Func<UIElement, UIElement, TemplateScope, UIElement>[compiledTemplateData.compiledSlots.size];
             TemplateMetaData[] templateMetaData = new TemplateMetaData[compiledTemplateData.compiledTemplates.size];
             OrderablePartitioner<Tuple<int, int>> partition;
+
+            KeyValuePair<string, StylePainterDefinition>[] array = templateSettings.resourceManager.stylePainters.ToArray();
+
+            StylePainterCompiler stylePainterCompiler = new StylePainterCompiler();
+
+            for (int i = 0; i < array.Length; i++) {
+                StylePainterDefinition painterDefinition = array[i].Value;
+
+              //  try {
+                    if (painterDefinition.drawBgSrc != null) {
+                        LambdaExpression lambdaExpression = stylePainterCompiler.Compile(painterDefinition, painterDefinition.drawBgSrc);
+                        if (lambdaExpression != null) {
+                            Debug.Log(lambdaExpression.ToCSharpCode());
+                            painterDefinition.paintBackground = (Action<StylePainterContext>) lambdaExpression.Compile();
+                        }
+                    }
+              //  }
+              //  catch (Exception e) {
+              //      throw new CompileException("Error compiling custom painter: " + e.Message);
+              //  }
+
+              //  try {
+                    if (painterDefinition.drawFgSrc != null) {
+                        LambdaExpression lambdaExpression = stylePainterCompiler.Compile(painterDefinition, painterDefinition.drawFgSrc);
+                        if (lambdaExpression != null) {
+                            painterDefinition.paintForeground = (Action<StylePainterContext>) lambdaExpression.Compile();
+                        }
+                    }
+              //  }
+               // catch (Exception e) {
+               //     throw new CompileException("Error compiling custom painter: " + e.Message);
+               // }
+
+                templateSettings.resourceManager.stylePainters[array[i].Key] = painterDefinition;
+            }
 
             if (templateMetaData.Length < 10) {
                 for (int i = 0; i < templateMetaData.Length; i++) {
@@ -99,33 +138,6 @@ namespace UIForia.Compilers {
                 templateMetaData[i].BuildSearchMap();
             }
 
-            // Dictionary<int, Func<ConstructedElement>> constructorFnMap = new Dictionary<int, Func<ConstructedElement>>(37);
-
-            // ConstructorInfo constructedTypeCtor = typeof(ConstructedElement).GetConstructor(new Type[] {typeof(int), typeof(UIElement)});
-            // System.Diagnostics.Debug.Assert(constructedTypeCtor != null, nameof(constructedTypeCtor) + " != null");
-            // Expression[] parameters = new Expression[2];
-
-            // todo -- this can be improved, cannot currently parallelize because the write target (constructorFnMap) is a dictionary which is not threadsafe
-            // can convert the constructorFnMap to an array but would need a unique index for each type that is sequential
-
-            // foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
-            //     if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
-            //         continue;
-            //     }
-            //
-            //     ConstructorInfo ctor = kvp.Key.GetConstructor(Type.EmptyTypes);
-            //
-            //     if (ctor == null) {
-            //         throw new CompileException(kvp.Key + " must provide a default constructor in order to be used in templates");
-            //     }
-            //
-            //     parameters[0] = Expression.Constant(compiledTemplateData.GetTagNameId(kvp.Value.tagName));
-            //     parameters[1] = Expression.New(ctor);
-            //     Func<ConstructedElement> constructorFn = Expression.Lambda<Func<ConstructedElement>>(Expression.New(constructedTypeCtor, parameters)).Compile();
-            //     constructorFnMap[kvp.Value.id] = constructorFn;
-            //     GCHandle.Alloc(constructorFn);
-            // }
-
             compiledTemplateData.bindings = bindings;
             compiledTemplateData.slots = slots;
             compiledTemplateData.templates = templates;
@@ -158,7 +170,7 @@ namespace UIForia.Compilers {
             Dictionary<string, StyleSheet> styleSheetMap = new Dictionary<string, StyleSheet>(128);
 
             MaterialDatabase materialDatabase = loader.GetMaterialDatabase();
-            
+
             for (int i = 0; i < files.Length; i++) {
                 StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i], materialDatabase);
                 styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);

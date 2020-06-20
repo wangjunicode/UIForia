@@ -11,6 +11,7 @@ using UIForia.Sound;
 using UIForia.Text;
 using UIForia.UIInput;
 using UIForia.Util;
+using Unity.Mathematics;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
@@ -1981,7 +1982,19 @@ namespace UIForia.Compilers.Style {
 
                     stream.ConsumeWhiteSpaceAndComments();
 
-                    if (def.type == typeof(float)) {
+                    if (def.type.IsEnum) {
+                        if (stream.TryParseIdentifier(out CharSpan span)) {
+                            try {
+                                // todo -- implement TryParseEnum to support | combinations
+                                object val = Enum.Parse(def.type, span.ToString());
+                                targetStyle.SetProperty(new StyleProperty((StylePropertyId) def.propertyId, (int) val));
+                            }
+                            catch (Exception e) {
+                                throw new Exception("Failed to parse enum value: " + span);
+                            }
+                        }
+                    }
+                    else if (def.type == typeof(float)) {
                         if (stream.TryParseFloat(out float floatValue)) {
                             targetStyle.SetProperty(new StyleProperty((StylePropertyId) def.propertyId, floatValue));
                         }
@@ -1990,6 +2003,18 @@ namespace UIForia.Compilers.Style {
                         if (stream.TryParseInt(out int intVal)) {
                             targetStyle.SetProperty(new StyleProperty((StylePropertyId) def.propertyId, intVal));
                         }
+                    }
+                    else if (def.type == typeof(Color32)) {
+                        if (stream.TryParseColorProperty(out Color32 color)) {
+                            targetStyle.SetProperty(new StyleProperty((StylePropertyId) def.propertyId, color));
+                        }
+                    }
+                    else if (def.type == typeof(float2)) {
+                        throw new NotImplementedException("Todo -- implement float2 parsing");
+                    }
+                    else if (typeof(Texture).IsAssignableFrom(typeof(Texture))) {
+                        throw new NotImplementedException("Todo -- implement texture parsing");
+
                     }
                     else {
                         throw new CompileException($"Tried to set a painter variable '{painterPropertyNode.propertyName}' but {painterPropertyNode.painterName} failed to parse value {painterPropertyNode.propertyValue}");

@@ -8,6 +8,7 @@ using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
+using UIForia.Rendering;
 using UIForia.UIInput;
 using UIForia.Util;
 using UnityEngine;
@@ -394,7 +395,7 @@ namespace TemplateBinding {
                 app.Update();
 
                 Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
-                Assert.AreEqual(new OffsetMeasurement(53, OffsetMeasurementUnit.ViewportWidth), e[0].style.Hover.TransformPositionX);
+                Assert.AreEqual(new OffsetMeasurement(53, OffsetMeasurementUnit.ViewportWidth), e[0].style.GetPropertyValueInState(StylePropertyId.TransformPositionX, StyleState.Hover));
             }
         }
 

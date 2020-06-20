@@ -91,8 +91,7 @@ namespace UIForia.Graphics {
 
             element.renderBox = painter;
         }
-
-
+        
         private struct RenderOperationWrapper {
 
             public RenderBox renderBox;
@@ -131,7 +130,7 @@ namespace UIForia.Graphics {
                     backgroundOp.renderBox = renderBox;
                     backgroundOp.renderOperation = DrawCommandType.BackgroundTransparent;
 
-                    if (renderBox.hasForeground) {
+                    if (renderBox.HasForeground) {
                         ref RenderOperationWrapper foreground = ref wrapperList.array[wrapperList.size++];
                         foreground.renderBox = renderBox;
                         foreground.renderOperation = DrawCommandType.ForegroundTransparent;
@@ -148,7 +147,7 @@ namespace UIForia.Graphics {
                     elemRefStack.EnsureAdditionalCapacity(childCount);
                 }
 
-                var ptr = currentElement.GetLastChild();
+                UIElement ptr = currentElement.GetLastChild();
                 while (ptr != null) {
                     if ((elementSystem.metaTable[ptr.id].flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
                         // todo change check on painter

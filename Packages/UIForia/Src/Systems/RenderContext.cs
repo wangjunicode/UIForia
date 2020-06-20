@@ -30,7 +30,7 @@ namespace UIForia.Rendering {
 
         private Batch currentBatch;
 
-        public ShapeContext shapeContext;
+        public StylePainterContext stylePainterContext;
         
         private readonly MeshPool uiforiaMeshPool;
         private readonly UIForiaMaterialPool uiforiaMaterialPool;
@@ -87,7 +87,7 @@ namespace UIForia.Rendering {
             this.texturePacker = new TexturePacker(atlasWidth, atlasHeight);
             this.propertyBlock = new MaterialPropertyBlock();
             this.meshesToRelease = new LightList<PooledMesh>();
-            this.shapeContext = new ShapeContext();
+            this.stylePainterContext = new StylePainterContext();
         }
 
         public void DrawMesh(Mesh mesh, Material material, MaterialPropertyBlock propertyBlock, in Matrix4x4 transform) {

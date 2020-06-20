@@ -1,5 +1,4 @@
 ﻿using System;
-using UIForia.Elements;
 using UIForia.Graphics;
 
 namespace UIForia.Compilers.Style {
@@ -7,9 +6,14 @@ namespace UIForia.Compilers.Style {
     public struct StylePainterDefinition {
         
         public string fileName;
+        public string painterName;
         public PainterVariableDeclaration[] definedVariables;
-        public Action<ShapeContext, UIElement> paintBackground;
-        public Action<ShapeContext, UIElement> paintForeground;
+        public Action<StylePainterContext> paintBackground;
+        public Action<StylePainterContext> paintForeground;
+        public string drawBgSrc;
+        public string drawFgSrc;
+        public int backgroundFnIndex;
+        public int foregroundFnIndex;
 
     }
 

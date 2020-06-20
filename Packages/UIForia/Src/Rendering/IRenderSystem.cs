@@ -6,7 +6,7 @@ namespace UIForia.Rendering {
 
     public interface IRenderSystem {
 
-        event Action<RenderContext> DrawDebugOverlay2;
+        event Action<RenderContext> DrawDebugOverlay;
 
         void SetCamera(Camera camera);
 

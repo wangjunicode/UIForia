@@ -7,24 +7,6 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
     public unsafe partial struct ShapeKit {
 
-        private static void GetDirectionAndBaseAngle(in ArcProperties arcProperties, ref float baseAngle, out float direction) {
-            switch (arcProperties.direction) {
-                case ArcDirection.Backward:
-                    direction = -1f;
-                    break;
-
-                default:
-                case ArcDirection.Centered:
-                    direction = 1.0f;
-                    baseAngle -= arcProperties.length;
-                    break;
-
-                case ArcDirection.Forward:
-                    direction = 1f;
-                    break;
-            }
-        }
-
         public void AddArc(ref UIVertexHelper vh, float width, float height, in ArcProperties arcProperties) {
 
             float baseAngle = arcProperties.baseAngle;
@@ -85,16 +67,17 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
             float endSegmentAngle = adjustedBaseAngle + ((Mathf.PI * 2.0f) * arcProperties.length) * direction;
 
-            Vector3 endSegmentUnitPosition = new Vector3(
+            float2 endSegmentUnitPosition = new float2(
                 math.sin(endSegmentAngle),
                 math.cos(endSegmentAngle)
             );
 
-            Vector3 endTangent = new Vector3(
+            float2 endTangent = new float2(
                 endSegmentUnitPosition.y * direction,
                 endSegmentUnitPosition.x * -direction
             );
-            Vector3 startTangent = new Vector3(
+            
+            float2 startTangent = new float2(
                 math.cos(adjustedBaseAngle) * -direction,
                 math.sin(adjustedBaseAngle) * direction
             );
@@ -103,14 +86,15 @@ namespace ThisOtherThing.UI.ShapeUtils {
             float lengthScaler = 1.0f / math.sin(Mathf.PI * arcProperties.length);
             lengthScaler = Mathf.Min(4.0f, lengthScaler);
 
-            Vector3 centerNormal = new Vector3(
+            float3 centerNormal = new float3(
                 -math.sin(centerAngle) * lengthScaler,
-                -math.cos(centerAngle) * lengthScaler
+                -math.cos(centerAngle) * lengthScaler,
+                0
             );
 
             int numVertices = vh.currentVertCount;
-            Vector2 tmpOuterRadius = default;
-            Vector3 tmpOffsetCenter = default;
+            float2 tmpOuterRadius = default;
+            float3 tmpOffsetCenter = default;
 
             tmpOuterRadius.x = (radius.x + edgeGradientData.shadowOffset) * edgeGradientData.innerScale;
             tmpOuterRadius.y = (radius.y + edgeGradientData.shadowOffset) * edgeGradientData.innerScale;
@@ -123,7 +107,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
             if (arcProperties.length >= 1.0f) {
                 capsExtensionLength = 0.0f;
-                tmpOffsetCenter.x  = center.x;
+                tmpOffsetCenter.x = center.x;
                 tmpOffsetCenter.y = center.y;
             }
 
@@ -154,7 +138,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             // add last partial segment
             tmpPosition.x = tmpOffsetCenter.x + endSegmentUnitPosition.x * tmpOuterRadius.x + endTangent.x * capsExtensionLength;
             tmpPosition.y = tmpOffsetCenter.y + endSegmentUnitPosition.y * tmpOuterRadius.y + endTangent.y * capsExtensionLength;
-            tmpPosition.z = tmpOffsetCenter.z + endTangent.z * capsExtensionLength;
+            
             vh.AddVert(tmpPosition, color, uv);
 
             if (isReversed) {
@@ -174,7 +158,9 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 tmpPosition.x = center.x + unitPositionBuffer.array[0].x * radius.x;
                 tmpPosition.y = center.y + unitPositionBuffer.array[0].y * radius.y;
                 tmpPosition.z = 0.0f;
+                
                 vh.AddVert(tmpPosition, color, uv);
+                
                 for (int i = 1; i <= resolution; i++) {
                     if (i < resolution) {
                         tmpPosition.x = center.x + unitPositionBuffer.array[i].x * radius.x;
@@ -596,6 +582,24 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 // outer
                 vh.AddTriangle(currentVertCount - 7, innerBaseIndex + 4, numVertices + 1);
                 vh.AddTriangle(currentVertCount - 7, numVertices + 1, currentVertCount - 3);
+            }
+        }
+
+        private static void GetDirectionAndBaseAngle(in ArcProperties arcProperties, ref float baseAngle, out float direction) {
+            switch (arcProperties.direction) {
+                case ArcDirection.Backward:
+                    direction = -1f;
+                    break;
+
+                default:
+                case ArcDirection.Centered:
+                    direction = 1.0f;
+                    baseAngle -= arcProperties.length;
+                    break;
+
+                case ArcDirection.Forward:
+                    direction = 1f;
+                    break;
             }
         }
 

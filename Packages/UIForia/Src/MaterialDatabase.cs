@@ -107,6 +107,22 @@ namespace UIForia {
         // static materials (the ones we overrode in styles, if any)
         // instance materials (the ones we override per element (also animations) )
 
+        internal bool HasFloatProperty(in MaterialInfo materialInfo, string key) {
+            return false;
+        }
+
+        internal bool HasTextureProperty(in MaterialInfo materialInfo, string key) {
+            return false;
+        }
+        
+        internal bool HasVectorProperty(in MaterialInfo materialInfo, string key) {
+            return false;
+        }
+        
+        internal bool HasColorProperty(in MaterialInfo materialInfo, string key) {
+            return false;
+        }
+        
         public MaterialId CreateStaticMaterialOverride(MaterialId baseId, IList<MaterialValueOverride> propertyOverrides) {
 
             // get the base material (for now always a defined one)

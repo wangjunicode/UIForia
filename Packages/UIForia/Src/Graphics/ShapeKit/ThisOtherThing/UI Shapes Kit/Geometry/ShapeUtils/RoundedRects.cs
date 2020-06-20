@@ -74,45 +74,6 @@ namespace ThisOtherThing.UI.ShapeUtils {
             return new RangeInt(startSize, resolution);
         }
 
-        private static void SetUnitPosition(ref Vector2[] unitPositions, int resolution, float baseAngle, bool makeSharpCorner) {
-            bool needsUpdate = false;
-
-            if (unitPositions == null || unitPositions.Length != resolution) {
-
-                unitPositions = new Vector2[resolution];
-
-                for (int i = 0; i < unitPositions.Length; i++) {
-                    unitPositions[i] = GeoUtils.ZeroV2;
-                }
-
-                needsUpdate = true;
-            }
-
-            if (needsUpdate) {
-                float angleIncrement = GeoUtils.HalfPI / (resolution - 1.0f);
-                float angle;
-
-                if (makeSharpCorner) {
-                    angle = baseAngle + GeoUtils.HalfPI * 0.5f;
-                    float length = k_Sqrt2;
-                    math.sincos(angle, out float s, out float c);
-
-                    for (int i = 0; i < resolution; i++) {
-                        unitPositions[i].x = s * length;
-                        unitPositions[i].y = c * length;
-                    }
-                }
-                else {
-                    for (int i = 0; i < resolution; i++) {
-                        angle = baseAngle + angleIncrement * i;
-                        math.sincos(angle, out float s, out float c);
-                        unitPositions[i].x = s;
-                        unitPositions[i].y = c;
-                    }
-                }
-            }
-        }
-
         public void AddRoundedRect(ref UIVertexHelper vh, Vector2 position, float width, float height, in Corner corner, Color32 color) {
             CornerProperties cornerProperties = new CornerProperties() {
                 topLeft = corner,

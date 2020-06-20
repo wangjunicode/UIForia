@@ -21,6 +21,7 @@ using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Profiling;
+using UnityEngine.Rendering;
 using Debug = UnityEngine.Debug;
 
 namespace UIForia {
@@ -128,12 +129,12 @@ namespace UIForia {
             elementSystem = new ElementSystem(InitialElementCapacity);
             styleSystem = new StyleSystem(elementSystem);
             textSystem = new TextSystem(elementSystem);
-            renderSystem = new RenderSystem(Camera ?? Camera.current, this, elementSystem);
             routingSystem = new RoutingSystem();
             linqBindingSystem = new LinqBindingSystem();
             soundSystem = new UISoundSystem();
             animationSystem = new AnimationSystem(elementSystem);
             layoutSystem = new LayoutSystem(this, elementSystem, textSystem);
+            renderSystem = new RenderSystem(this, layoutSystem, elementSystem);
             inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
         }
 
@@ -448,11 +449,13 @@ namespace UIForia {
             if (elementSystem.disabledElementsThisFrame.size > 0) {
                 layoutSystem.HandleElementDisabled(elementSystem.disabledElementsThisFrame);
                 textSystem.HandleElementDisabled(elementSystem.disabledElementsThisFrame);
+                renderSystem.HandleElementsDisabled(elementSystem.disabledElementsThisFrame);
             }
 
             if (elementSystem.enabledElementsThisFrame.size > 0) {
                 layoutSystem.HandleElementEnabled(elementSystem.enabledElementsThisFrame);
                 textSystem.HandleElementEnabled(elementSystem.enabledElementsThisFrame);
+                renderSystem.HandleElementsEnabled(elementSystem.enabledElementsThisFrame);
             }
 
             styleSystem.FlushChangeSets(elementSystem, layoutSystem, renderSystem);
@@ -934,6 +937,9 @@ namespace UIForia {
             return PathHack();
         }
 
+        public void Render(Camera camera, CommandBuffer commandBuffer) {
+            renderSystem.Render(camera, commandBuffer);
+        }
 
     }
 

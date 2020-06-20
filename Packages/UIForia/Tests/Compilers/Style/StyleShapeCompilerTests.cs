@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using UIForia.Graphics;
 
 namespace Tests.Compilers.Style {
@@ -8,13 +9,7 @@ namespace Tests.Compilers.Style {
         [Test]
         public void Works() {
 
-            new ShapeCompiler().Compile(@"
-
-                SetColor(StyleColor.magenta);
-                SetPosition(20, 20);
-                FillRect(100, 100);
-                
-            ");
+            throw new Exception("Nope, not working");
 
         }
 

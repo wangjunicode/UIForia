@@ -1,6 +1,5 @@
 using UIForia.ListTypes;
 using Unity.Collections;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace ThisOtherThing.UI.ShapeUtils {
@@ -24,6 +23,8 @@ namespace ThisOtherThing.UI.ShapeUtils {
         private List_float2 unitPositionBuffer;
         private List_float2 cornerBuffer;
         private List_float2 positionBuffer;
+        private PointsData scratchPointData;
+
         private float lastEllipseBaseAngle;
         private float lastEllipseDirection;
         private EdgeGradientData edgeGradientData;
@@ -37,7 +38,6 @@ namespace ThisOtherThing.UI.ShapeUtils {
         private DrawMode drawMode;
         private float dpiScale;
         private ShadowData shadowData;
-        private PointsData scratchPointData;
         
         public ShapeKit(Allocator allocator) : this() {
             this.dpiScale = 1f;

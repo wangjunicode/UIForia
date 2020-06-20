@@ -1,40 +1,11 @@
-﻿using System;
-using UIForia.Util.Unsafe;
+﻿using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Mathematics;
+using UnityEngine;
 
 namespace UIForia {
-
-    public unsafe struct MergePerThreadPageLists<T> : IJob where T : unmanaged {
-
-        public BufferList<T> outputList;
-        public PagedList<T>.PerThread perThreadLists;
-        public bool disposeOnCompletion;
-
-        public void Execute() {
-            perThreadLists.ToUnmanagedList(outputList);
-            if (disposeOnCompletion) {
-                perThreadLists.Dispose();
-            }
-        }
-
-    }
-
-    public unsafe struct MergePerThreadPageSplitBuffers<T, U> : IJob where T : unmanaged where U : unmanaged {
-
-        public SplitBuffer<T, U> outputList;
-        public PagedSplitBufferList<T, U>.PerThread perThreadLists;
-        public bool disposeOnCompletion;
-
-        public void Execute() {
-            perThreadLists.ToSplitBuffer(outputList);
-            if (disposeOnCompletion) {
-                perThreadLists.Dispose();
-            }
-        }
-
-    }
 
     public struct ParallelParams {
 
@@ -48,8 +19,7 @@ namespace UIForia {
 
         public unsafe struct Deferred {
 
-            [NativeDisableUnsafePtrRestriction]
-            public readonly int* itemCount;
+            [NativeDisableUnsafePtrRestriction] public readonly int* itemCount;
             public readonly int minBatchSize;
 
             public Deferred(int* itemCount, int minBatchSize) {
@@ -57,6 +27,11 @@ namespace UIForia {
                 this.minBatchSize = minBatchSize;
             }
 
+            public Deferred(HeapAllocated<int> itemCount, int minBatchSize) {
+                this.itemCount = itemCount.ptr;
+                this.minBatchSize = minBatchSize;
+            }
+            
         }
 
     }

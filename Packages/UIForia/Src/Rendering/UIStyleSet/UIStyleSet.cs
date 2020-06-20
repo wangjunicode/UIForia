@@ -72,11 +72,6 @@ namespace UIForia.Rendering {
 
         public StyleState CurrentState => currentState;
 
-        public UIStyleSetStateProxy Normal => new UIStyleSetStateProxy(this, StyleState.Normal);
-        public UIStyleSetStateProxy Hover => new UIStyleSetStateProxy(this, StyleState.Hover);
-        public UIStyleSetStateProxy Focus => new UIStyleSetStateProxy(this, StyleState.Focused);
-        public UIStyleSetStateProxy Active => new UIStyleSetStateProxy(this, StyleState.Active);
-
         internal List<UIStyleGroupContainer> GetBaseStyles() {
             List<UIStyleGroupContainer> retn = ListPool<UIStyleGroupContainer>.Get();
             for (int i = 0; i < styleGroupContainers.Count; i++) {
@@ -718,7 +713,7 @@ namespace UIForia.Rendering {
             return "Unknown";
         }
 
-        public void SetInstanceProperty(in StyleProperty property, StyleState state) {
+        public void SetProperty(in StyleProperty property, StyleState state) {
 
             if (element.isDestroyed) return;
 
@@ -760,7 +755,7 @@ namespace UIForia.Rendering {
         public void SetAnimatedProperty(StyleProperty property) {
             if (StyleUtil.CanAnimate(property.propertyId)) {
                 //animatedProperties[property.propertyId] = animatedProperty;
-                SetInstanceProperty(property, StyleState.Normal); // todo -- need another priority group for this
+                SetProperty(property, StyleState.Normal); // todo -- need another priority group for this
             }
         }
 

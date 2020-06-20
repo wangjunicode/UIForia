@@ -14,7 +14,7 @@ namespace UIForia {
 
     public sealed class ResourceManager : IDisposable {
 
-        private struct AssetEntry<T> where T : Object {
+        internal struct AssetEntry<T> where T : Object {
 
             public T asset;
             public int id;
@@ -22,11 +22,11 @@ namespace UIForia {
 
         }
 
-        private readonly IntMap_Deprecated<AssetEntry<Texture2D>> textureMap;
-        private readonly IntMap_Deprecated<AssetEntry<SpriteAtlas>> spriteAtlasMap;
-        private readonly Dictionary<string, FontAsset> fontMap;
-        private readonly IntMap_Deprecated<AssetEntry<AudioClip>> audioMap;
-        private readonly Dictionary<string, StylePainterDefinition> stylePainters;
+        internal readonly IntMap_Deprecated<AssetEntry<Texture2D>> textureMap;
+        internal readonly IntMap_Deprecated<AssetEntry<SpriteAtlas>> spriteAtlasMap;
+        internal readonly Dictionary<string, FontAsset> fontMap;
+        internal readonly IntMap_Deprecated<AssetEntry<AudioClip>> audioMap;
+        internal readonly Dictionary<string, StylePainterDefinition> stylePainters;
 
         public ResourceManager() {
             stylePainters = new Dictionary<string, StylePainterDefinition>();
@@ -41,6 +41,7 @@ namespace UIForia {
             spriteAtlasMap.Clear();
             fontMap.Clear();
             audioMap.Clear();
+            stylePainters.Clear();
         }
 
         public Texture2D AddTexture(string path, Texture2D texture) {
@@ -60,6 +61,8 @@ namespace UIForia {
         }
 
         internal DataList<FontAssetInfo>.Shared fontAssetMap;
+        
+        private static readonly PainterVariableDeclaration[] s_EmptyVariables = {};
 
         internal void Initialize() {
             fontAssetMap = new DataList<FontAssetInfo>.Shared(16, Allocator.Persistent);
@@ -216,6 +219,7 @@ namespace UIForia {
                 throw new CompileException("Painter with name " + painterName + " was already registered from " + existing.fileName);
             }
 
+            stylePainterDefinition.definedVariables = stylePainterDefinition.definedVariables ?? s_EmptyVariables;
             stylePainters.Add(painterName, stylePainterDefinition);
 
         }

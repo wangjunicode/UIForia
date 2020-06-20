@@ -7,25 +7,23 @@ namespace ThisOtherThing.UI.ShapeUtils {
     public partial struct ShapeKit {
 
         public void AddRect(ref UIVertexHelper vh, Rect rect, Color32 color) {
-            float width = rect.width;
-            float height = rect.height;
-            float2 center = rect.center;
-            center.y = -center.y;
-            AddRectVertRing(ref vh, center, width, height, color, width, height);
-            AddRectQuadIndices(ref vh);
-        }
-        
-        public void AddRect(ref UIVertexHelper vh, float2 center, float width, float height, Color32 color) {
-            AddRectVertRing(ref vh, center, width, height, color, width, height);
-            AddRectQuadIndices(ref vh);
+            AddRect(ref vh, rect.x, rect.y, rect.width, rect.height, color);
         }
 
-        public void AddRect(ref UIVertexHelper vh, Vector2 center, float width, float height, Color32 color, EdgeGradientData edgeGradientData) {
+        public void AddRect(ref UIVertexHelper vh, float2 position, float width, float height, Color32 color) {
+            AddRect(ref vh, position.x, position.y, width, height, color);
+        }
+
+        public void AddRect(ref UIVertexHelper vh, float x, float y, float width, float height, Color32 color) {
 
             width += edgeGradientData.shadowOffset * 2.0f;
             height += edgeGradientData.shadowOffset * 2.0f;
 
-            float innerOffset = Mathf.Min(width, height) * (1.0f - edgeGradientData.innerScale);
+            float2 center = default;
+            center.x = x + (width * 0.5f);
+            center.y = -(y + (height * 0.5f));
+
+            float innerOffset = (width < height ? width : height) * (1.0f - edgeGradientData.innerScale);
 
             AddRectVertRing(ref vh, center, width - innerOffset, height - innerOffset, color, width, height);
 
@@ -41,7 +39,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        private static void AddRectRing(ref UIVertexHelper vh, OutlineProperties outlineProperties, Vector2 center, float width, float height, Color32 color, EdgeGradientData edgeGradientData) {
+        private void AddRectRing(ref UIVertexHelper vh, OutlineProperties outlineProperties, Vector2 center, float width, float height, Color32 color) {
             byte alpha = color.a;
             float outerDistance = GetOuterDistance(outlineProperties);
             float centerDistance = GetCenterDistance(outlineProperties);

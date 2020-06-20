@@ -2,6 +2,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using UIForia.Layout;
 using UIForia.Text;
+using UIForia.Util.Unsafe;
 using Unity.Mathematics;
 using UnityEditor;
 using UnityEngine;
@@ -52,6 +53,7 @@ namespace UIForia.Editor {
             ListTemplateGenerator.Generate<int>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<Color>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<Color32>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<BytePage>(outputPathRoot, contents);
             
         }
 

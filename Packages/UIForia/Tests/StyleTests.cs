@@ -461,8 +461,7 @@ public class StyleTests {
     public void Inherit_FontSize() {
         using (MockApplication app = MockApplication.Setup<StyleSetTestThing>()) {
             StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
-            UIStyleSetStateProxy normal = root.style.Normal;
-            normal.TextFontSize = 8;
+            root.style.SetProperty(new StyleProperty(StylePropertyId.TextFontSize,  8f), StyleState.Normal);
             app.Update();
             Assert.AreEqual(new UIFixedLength(8), root.FindById("group1").style.TextFontSize);
             Assert.AreEqual(new UIFixedLength(8), root.FindById("group2").style.TextFontSize);
@@ -481,8 +480,7 @@ public class StyleTests {
     public void Inherit_TextColor() {
         using (MockApplication app = MockApplication.Setup<StyleSetTestThing>()) {
             StyleSetTestThing root = (StyleSetTestThing) app.RootElement;
-            UIStyleSetStateProxy normal = root.style.Normal;
-            normal.TextColor = Color.red;
+            root.style.SetProperty(new StyleProperty(StylePropertyId.TextColor,  Color.red), StyleState.Normal);
             app.Update();
             Assert.AreEqual(Color.red, root.FindById("group1").style.TextColor);
             Assert.AreEqual(Color.red, root.FindById("group2").style.TextColor);

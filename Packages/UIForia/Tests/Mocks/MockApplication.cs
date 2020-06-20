@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Src.Systems;
 using UIForia;
 using UIForia.Animation;
 using UIForia.Elements;
@@ -11,7 +10,6 @@ using UIForia.Systems;
 using UIForia.Text;
 using UnityEngine;
 using Application = UIForia.Application;
-using LayoutSystem = UIForia.Systems.LayoutSystem;
 
 namespace Tests.Mocks {
 
@@ -28,11 +26,11 @@ namespace Tests.Mocks {
         protected override void CreateSystems() {
             elementSystem = new ElementSystem(InitialElementCapacity);
             styleSystem = new StyleSystem(elementSystem);
-            renderSystem = new MockRenderSystem(Camera, this);
             routingSystem = new RoutingSystem();
             linqBindingSystem = new LinqBindingSystem();
             textSystem = new TextSystem(elementSystem);
             layoutSystem = new MockLayoutSystem(this, elementSystem, textSystem);
+            renderSystem = new MockRenderSystem(this);
             animationSystem = new AnimationSystem(elementSystem);
             inputSystem = new MockInputSystem(layoutSystem);
         }
@@ -101,7 +99,7 @@ namespace Tests.Mocks {
             // do nothing
         }
 
-        public MockRenderSystem(Camera camera, Application application) : base(camera, application, application.elementSystem) { }
+        public MockRenderSystem(Application application) : base(application, application.layoutSystem, application.elementSystem) { }
 
     }
 

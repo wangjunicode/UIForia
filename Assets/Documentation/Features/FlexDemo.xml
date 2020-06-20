@@ -4,21 +4,19 @@
     <Style src="Documentation/Documentation.style" alias="theme"/>
 
     <Using namespace="UIForia.Text"/>
+    <Using namespace="UnityEngine"/>
+    
     <Style>
         
-        style container {
+        style container2 {
             PreferredSize = 1vw 1vh;
             BackgroundColor = white;
         }
         
-        
         style shape-kit {
             Painter = "ShapePainter"; //"ShapeKitTest";
-            PreferredSize = 300px;
-            AlignX = Center Screen;
-            AlignY = Center Screen;
+            PreferredSize = 100px;
             BackgroundColor = blue;
-        
             painter:ShapePainter.sizeMod = 0.3f;
             
         }
@@ -29,24 +27,38 @@
                 float sizeMod = 0.1f;
             }
             
-            [draw:bg] {
-                SetColor(red);
-                
-                // if(GetAttribute("x")) {
-                //    SetLocalFloat("f", Animate(float, curveInfo, progress));
-                // }
+            [draw:background] {
         
-                // FillText(TextProcessor.RichText, 'this is my text', width, height);
+                float halfWidth = elementWidth * 0.5f;
+                float halfHeight = elementHeight * 0.5f;
         
-               //  FillRect($sizeMod * elementWidth, elementHeight);
-               // DrawDefault();
+                Color32 hoverColor = style.IsHovered ? green : red;
+        
+                $size = 34;
+                //var f = ctx.GetFloat(value)
+        
+                SetColor(hoverColor);
+                FillRect(0, 0, halfWidth, halfHeight);
+        
+                SetColor(saturate(red, 20));
+                FillRect(halfWidth, 0, halfWidth, halfHeight);
+        
+                SetColor(desaturate(red, 20));
+                FillRect(0, halfHeight, halfWidth, halfHeight);
+        
+                SetColor(lighten(red, 20));
+                FillRect(halfWidth, halfHeight, halfWidth, halfHeight);
             }
         
         }
         
     </Style>
-    <Contents style="container">
+    <Contents style="container2">
 
+        <Div style="shape-kit"/>
+        <Div style="shape-kit" style:backgroundColor="Color.red"/>
+        <Div style="shape-kit"/>
+        <Div style="shape-kit" style:backgroundColor="Color.yellow"/>
         <Div style="shape-kit"/>
         
 <!--        <Div style="container">-->

@@ -1,5 +1,6 @@
 using System;
 using UIForia.Elements;
+using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Util;
 using UnityEngine;
@@ -40,13 +41,19 @@ namespace UIForia.Rendering {
         public Overflow overflowY;
         public ClipBehavior clipBehavior;
         public bool culled;
-        public bool hasForeground;
         public int zIndex;
         public int layer;
         protected Path2D clipPath;
         internal ClipData clipper;
         public bool didRender;
         public int traversalIndex;
+
+        private bool hasForeground;
+        
+        public virtual bool HasForeground {
+            get => hasForeground;
+            set => hasForeground = value;
+        }
 
         public virtual RenderBounds RenderBounds {
             get {
@@ -117,6 +124,10 @@ namespace UIForia.Rendering {
         }
 
         public abstract void PaintBackground(RenderContext ctx);
+
+        public virtual void PaintBackground2(RenderContext2 ctx) { }
+        
+        public virtual void PaintForeground2(RenderContext2 ctx) { }
 
         public virtual void PaintForeground(RenderContext ctx) { }
 

@@ -50,10 +50,10 @@ Shader "UIForia/Standard"
             float4 _FontScales;
             float4 _FontTextureSize;
             
-            float4 _ColorData[BATCH_SIZE];
-            float4 _MiscData[BATCH_SIZE];
+            float4 _ColorData[BATCH_SIZE]; // packed color data, used
+            float4 _MiscData[BATCH_SIZE]; // underlay data, can drop this
             float4 _ObjectData[BATCH_SIZE];
-            float4 _CornerData[BATCH_SIZE];
+            float4 _CornerData[BATCH_SIZE]; // bevel data, can drop
             float4 _ClipUVs[BATCH_SIZE];
             float4 _ClipRects[BATCH_SIZE];
             float4x4 _TransformData[BATCH_SIZE];

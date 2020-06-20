@@ -326,7 +326,7 @@ namespace UIForia.Systems {
             rootList.Dispose();
         }
 
-        private LayoutContext GetLayoutContext(UIView view) {
+        internal LayoutContext GetLayoutContext(UIView view) {
             for (int i = 0; i < layoutContexts.size; i++) {
                 if (layoutContexts[i].view == view) {
                     return layoutContexts[i];

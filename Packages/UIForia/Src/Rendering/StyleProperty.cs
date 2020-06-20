@@ -5,6 +5,8 @@ using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Text;
 using UIForia.UIInput;
+using Unity.Collections.LowLevel.Unsafe;
+using Unity.Mathematics;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
@@ -298,6 +300,13 @@ namespace UIForia.Rendering {
 
         public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
         public AlignmentDirection AsAlignmentDirection => (AlignmentDirection) int0;
+
+        public float2 AsFloat2 {
+            get {
+                long cheating = longVal;
+                return UnsafeUtilityEx.As<long, float2>(ref cheating);
+            }
+        }
 
         public static bool operator ==(in StyleProperty a, in StyleProperty b) {
             return a.propertyId == b.propertyId &&

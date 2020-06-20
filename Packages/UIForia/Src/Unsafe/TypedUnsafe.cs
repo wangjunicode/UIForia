@@ -150,6 +150,10 @@ namespace UIForia.Util.Unsafe {
             return itemCount;
         }
 
+        public static int Kilobytes(int count) {
+            return count * 1024;
+        }
+
         public static void Resize<T>(ref T* ptr, int oldSize, int newSize, Allocator allocator) where T : unmanaged {
             if (newSize < oldSize) return;
             if (newSize <= 0) return;

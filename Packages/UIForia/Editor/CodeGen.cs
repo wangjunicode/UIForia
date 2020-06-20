@@ -277,7 +277,7 @@ __REPLACE_StyleUtil__IsInherited
 
             string retn = "";
             for (int i = 0; i < properties.Length; i++) {
-                retn += InflatePropertyTemplate(properties[i]);
+                retn += InflateUIStyleSetProperties(properties[i]);
             }
 
             template = template.Replace("__REPLACE__UIStyleSetStateProxy__", retn);

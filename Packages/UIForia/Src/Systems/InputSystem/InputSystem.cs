@@ -926,7 +926,11 @@ namespace UIForia.Systems {
 
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseDown);
             }
-            else if (mouseState.isLeftMouseUpThisFrame || mouseState.isMiddleMouseUpThisFrame) {
+            else if (mouseState.isLeftMouseDown || mouseState.isRightMouseDown || mouseState.isMiddleMouseDown) {
+                RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseHeldDown);
+            }
+
+            if (mouseState.isLeftMouseUpThisFrame || mouseState.isMiddleMouseUpThisFrame) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
                 if (mouseState.clickCount > 0) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseClick);
@@ -938,10 +942,6 @@ namespace UIForia.Systems {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseContext);
                 }
             }
-            else if (mouseState.isLeftMouseDown || mouseState.isRightMouseDown || mouseState.isMiddleMouseDown) {
-                RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseHeldDown);
-            }
-
 
             RunMouseEvents(m_ElementsThisFrame,
                 mouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);

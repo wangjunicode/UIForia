@@ -21,10 +21,11 @@
                 <Group style="choose-ship-container">
                     <Heading2>Choose your space ship</Heading2>
                     <Repeat list="ships" style="ship-list">
-                        <Group style="ship-item" mouse:click="SelectShip($item.id)">
-                            <Image Width="32" src="'Images/ship0' + $item.id + 'a/tile000'" />
-                            <Div>{$item.name}</Div>
-                        </Group>
+                        <SpaceMenuItem style="ship-item" mouse:click="SelectShip($item.id)" label="$item.name">
+                            <override:Children style="ship-icon">
+                                <Image Width="32" src="'Images/ship0' + $item.id + 'a/tile000'" />
+                            </override:Children>
+                        </SpaceMenuItem>
                     </Repeat>
                 </Group>
 
@@ -33,19 +34,19 @@
                     <Group style="hire-container">
                         <Div style="avatar-container" mouse:click="SelectPilot(1)">
                             <Div style="avatar-background" attr:selected="{selectedPilot == 1}">
-                                <Image Height="175" src="'Images/player1'" />
+                                <Image style="pilot" Height="175" src="'Images/player1'" />
                             </Div>
                             Timmy
                         </Div>
                         <Div style="avatar-container" mouse:click="SelectPilot(2)">
                             <Div style="avatar-background" attr:selected="{selectedPilot == 2}">
-                                <Image Height="175" src="'Images/player2'" />
+                                <Image style="pilot" Height="175" src="'Images/player2'" />
                             </Div>
                             Cat
                         </Div>
                         <Div style="avatar-container" mouse:click="SelectPilot(3)">
                             <Div style="avatar-background" attr:selected="{selectedPilot == 3}">
-                                <Image Height="175" src="'Images/player3'" />
+                                <Image style="pilot" Height="175" src="'Images/player3'" />
                             </Div>
                             Ziggy
                         </Div>

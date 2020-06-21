@@ -1,7 +1,7 @@
 ﻿<UITemplate>
     <Style src="SpaceGameDemo/SplashScreen/SplashScreen.style"/>
-    <Contents style="splash-container">
-        <Panel>
+    <Contents style="splash-container" attr:animate="{animate}">
+        <Panel attr:animate="{animate}">
             Made with
             <Image Width="401" Height="105" src="'Images/uiforia_logo_white@2x'" />
         </Panel>

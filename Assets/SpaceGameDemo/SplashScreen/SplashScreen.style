@@ -9,19 +9,34 @@
 }
 
 style <Panel> {
-    run animation(fadeInOut);
+    Opacity = 0;
+    AlignY = Center Screen;
+    run animation(fadeIn);
+    [attr:animate="fadeOut"] {
+        run animation(fadeOutPanel);
+    }
 }
 
-animation fadeInOut {
+animation fadeIn {
     [options] {
         TimingFunction = QuadraticEaseInOut;
-        Duration = 3s;
+        Duration = 700ms;
     }
     [keyframes] {
-        0% { Opacity = 0; }
-        30% { Opacity = 1; }
-        80% { Opacity = 1; }
-        100% { Opacity = 0; }
+        100% { Opacity = 1; } 
+    }
+}
+
+animation fadeOutPanel {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 800ms;
+    }
+    [keyframes] {
+        100% {
+            Opacity = 0;
+            AlignY = 15% Screen;
+        }
     }
 }
 

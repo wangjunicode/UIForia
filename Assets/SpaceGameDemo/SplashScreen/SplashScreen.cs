@@ -6,20 +6,31 @@ namespace SpaceGameDemo.SplashScreen {
     
     [Template("SpaceGameDemo/SplashScreen/SplashScreen.xml")]
     public class SplashScreen : UIElement {
+        
+        // Parameter
+        public float hideAfter = 5f;
+        
         // Property
         public float progress;
+        
+        // Property
+        public string animate;
 
         private bool timeIsUp;
-        
+
+        public override void OnEnable() {
+            animate = string.Empty;
+        }
+
         public override void OnUpdate() {
             if (timeIsUp) {
                 return;
             }
 
             progress += Time.deltaTime;
-            if (progress > 4) {
+            if (progress > hideAfter) {
                 timeIsUp = true;
-                SetAttribute("animate", "fadeOut");
+                animate = "fadeOut";
             }
         }
     }

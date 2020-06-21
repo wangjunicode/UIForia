@@ -18,7 +18,7 @@ style ship-item {
     TextFontSize = 13px;
     BackgroundColor = rgba(120, 120, 120, 120);
     PreferredWidth = 330px;
-    Padding = 4px;
+    Padding = 8px;
     MarginBottom = 1px;
     MarginRight = 1px;
     CornerBevelBottomRight = 5px;
@@ -27,6 +27,10 @@ style ship-item {
         Cursor = @theme.cursorHover;
         BackgroundColor = @theme.orangeHover;
     }
+}
+
+style ship-icon {
+    AlignY = Center ParentContentArea;
 }
 
 style ship-display {
@@ -339,6 +343,7 @@ animation pulse {
 }
 
 style blinking-things {
+    LayoutBehavior = Ignored;
     AlignY = 0, 20px, Parent End;
     AlignX = 0, 20px, Parent End;
     LayoutFitHorizontal = Shrink;
@@ -402,16 +407,39 @@ style hire-container {
 
 style avatar-background {
     BackgroundColor = rgb(90, 90, 90);
-    Border = 2px;
-    BorderColor = black;
     BorderRadius = 4px;
     MarginRight = 10px;
     MarginBottom = 4px;
+    Overflow = Hidden;
     [attr:selected="True"] {
         BackgroundColor = white;
     }
     [hover] {
         BackgroundColor = rgb(200, 200, 0);
+    }
+}
+
+style pilot {
+    [hover] {
+        TransformScale = 1.1;
+    }
+    [active] {
+        run animation(select-pilot);
+    }
+}
+
+animation select-pilot {
+    [options] {
+        TimingFunction = QuadraticEaseOut;
+        Duration = 300ms;
+    }
+    
+    [keyframes] {
+        25%, 75% { BackgroundTint = rgba(20, 20, 0, 240); }
+        50% { BackgroundTint = rgba(220, 220, 0, 240); }
+        100% { BackgroundTint = rgba(255, 255, 255, 255); }
+        // 15%, 45% { BackgroundTint = rgba(220, 20, 0, 210); }
+//        60%, 100% { BackgroundTint = rgba(0, 0, 0, 0); }
     }
 }
 

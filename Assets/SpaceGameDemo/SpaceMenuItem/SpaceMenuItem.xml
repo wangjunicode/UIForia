@@ -7,8 +7,8 @@
         <Div style="menu-background {$parent.style.IsHovered ? 'menu-background-hover' }"/>
         <Div style="menu-sidetab {$parent.style.IsHovered ? 'menu-sidetab-hover' }"/>
         <Div style="menu-sidetab {$parent.style.IsActive ? 'menu-hightlight-active' }"/>
-    
+
+        <define:Children />
         <Text style="menu-text">{label}</Text>
-        
     </Contents>
 </UITemplate>

@@ -113,6 +113,186 @@ namespace SpaceGameDemo {
                     ping = 10,
                     isFavorite = false
                 },
+                new ServerItem() {
+                    title = "[EPIC] EPIC GAME!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "# FREE COOKIES! FOR EVERYONE",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[TDM] 24/7 TDM! JOIN NOW!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "# FREE COOKIES! FOR EVERYONE",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[EPIC] EPIC GAME!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[TDM] 24/7 TDM! JOIN NOW!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[EPIC] EPIC GAME!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "# FREE COOKIES! FOR EVERYONE",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[TDM] 24/7 TDM! JOIN NOW!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[EPIC] EPIC GAME!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[EPIC] EPIC GAME!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "# FREE COOKIES! FOR EVERYONE",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[TDM] 24/7 TDM! JOIN NOW!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "# FREE COOKIES! FOR EVERYONE",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[EPIC] EPIC GAME!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[TDM] 24/7 TDM! JOIN NOW!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[EPIC] EPIC GAME!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "# FREE COOKIES! FOR EVERYONE",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[TDM] 24/7 TDM! JOIN NOW!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
+                new ServerItem() {
+                    title = "[EPIC] EPIC GAME!",
+                    players = 16,
+                    maxPlayers = 22,
+                    gameType = "TDM",
+                    map = "Deep Space",
+                    ping = 10,
+                    isFavorite = false
+                },
             };
         }
 

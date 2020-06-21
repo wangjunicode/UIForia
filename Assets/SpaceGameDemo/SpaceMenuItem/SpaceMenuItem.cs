@@ -14,7 +14,12 @@ namespace SpaceGameDemo {
         public string targetPanel;
 
         [OnMouseClick]
-        public void LookAtNext() => GetSpacePanelController().LookAtRandomSpace(targetPanel, this);
+        public void LookAtNext() {
+            if (targetPanel != null) {
+                GetSpacePanelController().LookAtRandomSpace(targetPanel, this);
+            }
+        }
+
     }
 
 }

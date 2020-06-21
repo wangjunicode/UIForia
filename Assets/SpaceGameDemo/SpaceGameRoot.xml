@@ -21,7 +21,7 @@
             <Settings style="container" />
         </SpacePanel>
         
-<!--        <SplashScreen />-->
+        <SplashScreen />
         
     </Contents>
     

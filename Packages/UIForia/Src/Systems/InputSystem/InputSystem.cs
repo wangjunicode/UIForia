@@ -302,7 +302,7 @@ namespace UIForia.Systems {
                 }
             }
             
-            bindingUpdateList.Sort((e1, e2) => e1.layoutBox.traversalIndex > e2.layoutBox.traversalIndex ? -1 : 1);
+            bindingUpdateList.Sort((e1, e2) => e1.layoutBox?.traversalIndex > e2.layoutBox?.traversalIndex ? -1 : 1);
 
             return bindingUpdateList;
         }

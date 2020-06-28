@@ -129,6 +129,14 @@ namespace Src.Systems {
                 renderBox.clipper = currentElement.layoutResult.clipper;
                 renderBox.traversalIndex = idx++;
 
+                if (wrapperList.size + (currentElement.children.size * 2) >= wrapperList.array.Length) {
+                    wrapperList.EnsureAdditionalCapacity(currentElement.children.size * 2);
+                }
+
+                if (elemRefStack.size + currentElement.children.size >= elemRefStack.array.Length) {
+                    elemRefStack.EnsureAdditionalCapacity(currentElement.children.size);
+                }
+
                 if (!renderBox.culled && renderBox.visibility != Visibility.Hidden) {
                     
                     ref RenderOperationWrapper backgroundOp = ref wrapperList.array[wrapperList.size++];
@@ -141,14 +149,6 @@ namespace Src.Systems {
                         foreground.renderOperation = DrawCommandType.ForegroundTransparent;
                     }
                     
-                }
-
-                if (wrapperList.size + (currentElement.children.size * 2) >= wrapperList.array.Length) {
-                    wrapperList.EnsureAdditionalCapacity(currentElement.children.size * 2);
-                }
-
-                if (elemRefStack.size + currentElement.children.size >= elemRefStack.array.Length) {
-                    elemRefStack.EnsureAdditionalCapacity(currentElement.children.size);
                 }
 
                 for (int i = currentElement.children.size - 1; i >= 0; i--) {

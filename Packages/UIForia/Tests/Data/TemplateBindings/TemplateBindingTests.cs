@@ -504,7 +504,7 @@ namespace TemplateBinding {
 
         [Test]
         public void LocalContextVariable() {
-            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<TemplateBindingTest_ContextVariableOutOfScope>(nameof(TemplateBindingTest_ContextVariableOutOfScope)); });
+            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<TemplateBindingTest_ContextVariableOutOfScope>(); });
             Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("cvar0").Message));
         }
 
@@ -548,7 +548,7 @@ namespace TemplateBinding {
 
         [Test]
         public void ContextVariable_NonExposed_NotAvailable() {
-            CompileException exception = Assert.Throws<CompileException>(() => MockApplication.Setup<TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer>(nameof(TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer)));
+            CompileException exception = Assert.Throws<CompileException>(() => MockApplication.Setup<TemplateBindingTest_ContextVariable_NonExposed_NotAvailable_Outer>());
             Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("thing").Message));
         }
 
@@ -585,7 +585,7 @@ namespace TemplateBinding {
         }
 
         [Test]
-        public void ContextVariable_Expose_OutOfScope() {
+        public void ContextVariable_Expose_OutOfScope() {    
             CompileException exception = Assert.Throws<CompileException>(() => MockApplication.Setup<TemplateBindingTest_ContextVariable_Expose_OutOfScope>());
             Assert.IsTrue(exception.Message.Contains(CompileException.UnknownAlias("variable0").Message));
         }

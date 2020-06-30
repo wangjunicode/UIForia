@@ -12,14 +12,25 @@ namespace UIForia {
         public string assemblyName;
         public string outputPath;
         public string codeFileExtension;
-        public string preCompiledTemplatePath;
+        /// <summary>
+        /// Set this property to your application's script directory that all your [Template("path")] paths are relative to.
+        /// If you follow our naming convention all your UIForia template classes will have a namespace that reflects your
+        /// actual directory structure (relative to this base path).
+        /// </summary>
         public string templateResolutionBasePath;
+        
+        /// <summary>
+        /// Optional style base path relative to your #templateResolutionBasePath.
+        /// All style paths in your templates will be relative to templateResolutionBasePath + styleBasePath.
+        /// </summary>
+        public string styleBasePath;
         public string applicationName;
-        public string templateRoot;
         public Type rootType;
         public ResourceManager resourceManager;
         public Func<Type, string, string> filePathResolver;
         public List<Type> dynamicallyCreatedTypes;
+        // todo - support more file formats
+        public readonly string templateFileExtension = ".xml";
 
         public MaterialReference[] materialAssets;
 
@@ -27,9 +38,9 @@ namespace UIForia {
             this.applicationName = "DefaultApplication";
             this.assemblyName = "UIForia.Application";
             this.outputPath = Path.Combine(UnityEngine.Application.dataPath, "__UIForiaGenerated__");
-            this.preCompiledTemplatePath = "Assets/__UIForiaGenerated__";
             this.codeFileExtension = "cs";
             this.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
+            this.styleBasePath = string.Empty;
         }
 
         public string StrippedApplicationName => Regex.Replace(applicationName, @"\s", "" );

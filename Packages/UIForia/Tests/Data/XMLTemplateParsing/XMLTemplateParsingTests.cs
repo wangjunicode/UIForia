@@ -18,7 +18,6 @@ namespace TemplateParsing_XML {
             settings.assemblyName = GetType().Assembly.GetName().Name;
             settings.outputPath = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
             settings.codeFileExtension = "cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
             settings.templateResolutionBasePath = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests");
             return settings;
         }

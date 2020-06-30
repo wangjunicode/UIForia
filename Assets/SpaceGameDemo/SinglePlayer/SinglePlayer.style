@@ -1,4 +1,4 @@
-﻿import "SpaceGameDemo/Theme.style" as theme;
+﻿import "Theme.style" as theme;
 
 style ship-list {
     FlexLayoutDirection = Horizontal;

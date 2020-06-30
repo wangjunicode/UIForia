@@ -1,5 +1,5 @@
 ﻿<UITemplate>
-    <Style src="SpaceGameDemo/ConsoleCrawler/ConsoleCrawler.style"/>
+    <Style src="ConsoleCrawler/ConsoleCrawler.style"/>
     <Contents style="console-notification">
             <Panel style="scroll-text">
                 Turmoil has engulfed the

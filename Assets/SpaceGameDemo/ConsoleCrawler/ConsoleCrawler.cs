@@ -3,7 +3,7 @@ using UIForia.Elements;
 
 namespace SpaceGameDemo.ConsoleCrawler {
     
-    [Template("SpaceGameDemo/ConsoleCrawler/ConsoleCrawler.xml")]
+    [Template]
     public class ConsoleCrawler : UIElement {
         
     }

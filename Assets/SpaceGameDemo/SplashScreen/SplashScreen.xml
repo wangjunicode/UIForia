@@ -1,5 +1,5 @@
 ﻿<UITemplate>
-    <Style src="SpaceGameDemo/SplashScreen/SplashScreen.style"/>
+    <Style src="SplashScreen/SplashScreen.style"/>
     <Contents style="splash-container" attr:animate="{animate}">
         <Panel attr:animate="{animate}">
             Made with

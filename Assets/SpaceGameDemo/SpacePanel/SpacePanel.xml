@@ -1,5 +1,5 @@
 ﻿<UITemplate>
-    <Style src="SpaceGameDemo/SpacePanel/SpacePanel.style" />
+    <Style src="SpacePanel/SpacePanel.style" />
     <Contents style="space-panel" attr:state="{GetScreenState(name)}">
         <define:Children/>
     </Contents>

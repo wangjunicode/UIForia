@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using UIForia.Attributes;
 using UIForia.Exceptions;
 using UIForia.Util;
@@ -19,43 +20,75 @@ namespace UIForia.Parsing {
             this.templateMap = new Dictionary<string, LightList<TemplateRootNode>>(37);
         }
 
-        public string ResolveDefaultFilePath(ProcessedType processedType) {
+        private string ResolveTemplateFilePath(ProcessedType processedType) {
+            TemplateAttribute templateAttr = processedType.templateAttr;
+            if (templateAttr.templateType == TemplateType.Internal) {
+                return templateAttr.filePath;
+            }
+            
             if (settings.filePathResolver != null) {
-                return settings.filePathResolver(processedType.rawType, processedType.templateAttr.templateId);
+                return settings.filePathResolver(processedType.rawType, templateAttr.templateId);
             }
 
-            // expected is templateroot/typename/typename.xml if template id == null
-            // or templateroot/typename/typename/typename.xml#templateid
-            string namespaceName = processedType.rawType.Namespace;
+            string namespacePath = processedType.rawType.Namespace;
  
-            if (namespaceName != null && namespaceName.Contains(".")) {
-                namespaceName = namespaceName.Replace(".", Path.PathSeparator.ToString());
+            if (namespacePath != null && namespacePath.Contains(".")) {
+                namespacePath = namespacePath.Replace(".", Path.DirectorySeparatorChar.ToString());
             }
 
-            string basePath;
+            string xmlPath;
             
-            basePath = namespaceName == null 
-                ? Path.Combine(settings.templateRoot, processedType.rawType.Name, processedType.rawType.Name) 
-                : Path.Combine(settings.templateRoot, namespaceName, processedType.rawType.Name, processedType.rawType.Name);
-            
-            // todo -- support more extensions
-            string xmlPath = Path.GetFullPath(Path.Combine(settings.templateResolutionBasePath, basePath + ".xml"));
-            
+            // Special behavior for template attributes with no file path parameter. We figure out the whole path
+            // based on a convention that looks for a given template like:
+            //     namespace My.Name.Space { [Template] public class MyElement : UIElement ... }
+            // right here:
+            // basepath + My/Name/Space/ClassName.xml
+            if (templateAttr.templateType == TemplateType.DefaultFile) {
+                
+                string basePath = namespacePath == null 
+                    ? processedType.rawType.Name
+                    : Path.Combine(namespacePath, processedType.rawType.Name);
+
+                string relativePath = basePath + settings.templateFileExtension;
+                xmlPath = Path.GetFullPath(Path.Combine(settings.templateResolutionBasePath, relativePath));
+                if (!File.Exists(xmlPath)) {
+                    throw new TemplateNotFoundException(processedType, xmlPath);
+                }
+
+                return relativePath;
+            }
+
+            // first we try to find the template based on the resolution base path + a guessed namespace path 
+            if (namespacePath != null) {
+                
+                // namespace My.Name.Space.MyElement { [Template("MyElement.xml#id")] }
+                // basepath + My/Name/Space/MyElement/MyElement.xml
+                // templateRootNamespace = My/Name/Space
+                xmlPath = Path.GetFullPath(Path.Combine(settings.templateResolutionBasePath, namespacePath, templateAttr.filePath));
+                if (File.Exists(xmlPath)) {
+                    return Path.Combine(namespacePath, templateAttr.filePath);
+                }
+            }
+
+            // namespace My.Name.Space.MyElement { [Template("My/Name/Space/MyElement/MyElement.xml#id")] }
+            // basepath + My/Name/Space/MyElement/MyElement.xml
+            // templateRootNamespace = My/Name/Space
+            // ------
+            // If the previous method didn't find a template we probably have a full path in the template attribute.
+            // This should be the mode that is compatible with non-convention paths and namespaces
+            xmlPath = Path.GetFullPath(Path.Combine(settings.templateResolutionBasePath, templateAttr.filePath));
             if (File.Exists(xmlPath)) {
-                basePath += ".xml";
-            }
-            else {
-                throw new TemplateNotFoundException(processedType, xmlPath);
+                return templateAttr.filePath;
             }
             
-            return basePath;
+            throw new TemplateNotFoundException(processedType, xmlPath);
         }
 
         public TemplateRootNode GetParsedTemplate(ProcessedType processedType) {
             TemplateAttribute templateAttr = processedType.templateAttr;
 
-            if (templateAttr.fullPathId == null && templateAttr.templateType == TemplateType.DefaultFile) {
-                templateAttr.filePath = ResolveDefaultFilePath(processedType);
+            templateAttr.filePath = ResolveTemplateFilePath(processedType);
+            if (templateAttr.fullPathId == null) {
                 templateAttr.fullPathId = templateAttr.templateId == null
                     ? templateAttr.filePath
                     : templateAttr.filePath + "#" + templateAttr.templateId;

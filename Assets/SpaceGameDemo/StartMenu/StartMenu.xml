@@ -1,5 +1,5 @@
 ﻿<UITemplate>
-    <Style src="SpaceGameDemo/StartMenu/StartMenu.style" />
+    <Style src="StartMenu/StartMenu.style" />
     <Contents>
         <Image Width="401" Height="105" src="'Images/uiforia_logo_white@2x'" style="logo" />
 

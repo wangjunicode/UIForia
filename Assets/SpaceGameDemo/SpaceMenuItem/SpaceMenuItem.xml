@@ -1,6 +1,6 @@
 ﻿<UITemplate>
     
-    <Style src="SpaceGameDemo/SpaceMenuItem/SpaceMenuItem.style" />
+    <Style src="SpaceMenuItem/SpaceMenuItem.style" />
     
     <Contents style="menu-entry">
     

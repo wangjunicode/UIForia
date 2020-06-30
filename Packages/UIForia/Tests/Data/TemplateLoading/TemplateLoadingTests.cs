@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using NUnit.Framework;
@@ -9,7 +10,7 @@ using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing;
 
-namespace TemplateLoading {
+namespace Data.TemplateLoading {
 
     public class TemplateLoadingTests {
 
@@ -26,10 +27,10 @@ namespace TemplateLoading {
             Assert.IsInstanceOf<Inner>(app.RootElement[0]);
         }
 
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadNestedTemplateDefault.xml")]
+        [Template("TemplateLoadingTest_LoadNestedTemplateDefault.xml")]
         public class OuterDefault : UIElement { }
 
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadNestedTemplateDefault.xml#inner")]
+        [Template("TemplateLoadingTest_LoadNestedTemplateDefault.xml#inner")]
         public class InnerDefault : UIElement { }
 
         [Test]
@@ -41,8 +42,7 @@ namespace TemplateLoading {
 
         [Template]
         public class DefaultPathElement : UIElement { }
-
-
+        
         [Test]
         public void ResolveUsingDefaultPath() {
             MockApplication app = MockApplication.Setup<DefaultPathElement>();
@@ -66,18 +66,18 @@ namespace TemplateLoading {
             TemplateNotFoundException ex = Assert.Throws<TemplateNotFoundException>(() => { MockApplication.Setup<DefaultPathElementNoAttrNotFound>(); });
         }
 
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadGeneric.xml")]
+        [Template("TemplateLoadingTest_LoadGeneric.xml")]
         public class TemplateLoadingTest_LoadGenericOuter : UIElement { }
 
         [GenericElementTypeResolvedBy(nameof(value))]
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadGeneric.xml#generic")]
+        [Template("TemplateLoadingTest_LoadGeneric.xml#generic")]
         public class TemplateLoadingTest_Generic<T> : UIElement {
 
             public T value;
 
         }
 
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadGeneric.xml#generic")]
+        [Template("TemplateLoadingTest_LoadGeneric.xml#generic")]
         public class TemplateLoadingTest_Generic2<T, U> : UIElement {
 
             public T value0;
@@ -99,14 +99,6 @@ namespace TemplateLoading {
         [Test]
         public void DistinctGenericTemplates() {
             MockApplication app = MockApplication.Setup<TemplateLoadingTest_LoadGenericOuter>();
-            TemplateSettings settings = new TemplateSettings();
-            settings.applicationName = "DistinctGenericTemplates";
-            settings.assemblyName = GetType().Assembly.GetName().Name;
-            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
-            settings.codeFileExtension = "generated.xml.cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/DistinctGenericTemplates";
-            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
-
             TemplateLoadingTest_LoadGenericOuter e = (TemplateLoadingTest_LoadGenericOuter) app.RootElement;
 
             app.Update();
@@ -116,9 +108,60 @@ namespace TemplateLoading {
             Assert.AreEqual("str", GetText(e[2][0]));
         }
 
+        [Template]
+        public class CustomPathElement : UIElement { }
+
+        [Test]
+        public void CustomLoaderTemplates() {
+            TemplateSettings settings = MockApplication.GetDefaultSettings<CustomPathElement>("CustomLoaderTemplates");
+            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
+            settings.styleBasePath = "Data.TemplateLoading";
+            settings.filePathResolver = (type, templateId) => {
+                // throwing a bit of random totally custom path resolution code in here. this should just demonstrate that you have full power
+                string customElementPath = type.Name.Replace("Element", "");
+                return Path.Combine(
+                    settings.templateResolutionBasePath, 
+                    settings.styleBasePath.Replace('.', Path.DirectorySeparatorChar),
+                    customElementPath, 
+                    customElementPath + ".xml");
+            };
+            
+            MockApplication app = MockApplication.Setup<CustomPathElement>(settings);
+
+            app.Update();           
+            Assert.IsInstanceOf<CustomPathElement>(app.RootElement);
+
+        }
+
+        [Template("Data/TemplateLoading/DefaultPathElement.xml")]
+        public class DefaultPathElementWithExplicitPath : UIElement { }
+
+        [Test]
+        public void TestDefaultPathElementWithExplicitPath() {
+            MockApplication app = MockApplication.Setup<DefaultPathElementWithExplicitPath>();
+
+            app.Update();           
+            Assert.IsInstanceOf<DefaultPathElementWithExplicitPath>(app.RootElement);
+        }
+        
+        [Template("DefaultPathElement.xml")]
+        public class DefaultPathElementWithExplicitPathRelativeFromRootNamespace : UIElement { }
+
+        [Test]
+        public void TestDefaultPathElementWithExplicitPathRelativeFromRootNamespace() {
+            TemplateSettings settings = MockApplication.GetDefaultSettings<DefaultPathElementWithExplicitPathRelativeFromRootNamespace>("DefaultPathElementWithExplicitPathRelativeFromRootNamespace");
+            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
+            settings.styleBasePath = "Data";
+
+            MockApplication app = MockApplication.Setup<DefaultPathElementWithExplicitPathRelativeFromRootNamespace>(settings);
+
+            app.Update();           
+            Assert.IsInstanceOf<DefaultPathElementWithExplicitPathRelativeFromRootNamespace>(app.RootElement);
+        }
+
         string GetText(UIElement element) {
             UITextElement textEl = element as UITextElement;
-            return textEl.text.Trim();
+            return textEl?.text.Trim();
         }
 
     }

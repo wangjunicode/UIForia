@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Compilers.Style;
@@ -62,7 +63,7 @@ namespace UIForia {
             this.compiledSlots = new LightList<CompiledSlot>();
             this.compiledTemplates = new LightList<CompiledTemplate>(128);
             this.compiledBindings = new LightList<CompiledBinding>(128);
-            this.styleImporter = new StyleSheetImporter(templateSettings.templateResolutionBasePath, templateSettings.resourceManager);
+            this.styleImporter = new StyleSheetImporter(Path.Combine(templateSettings.templateResolutionBasePath, templateSettings.styleBasePath), templateSettings.resourceManager);
             this.tagNameIdMap = new Dictionary<string, int>();
             this.nextTagNameId = 1;
         }

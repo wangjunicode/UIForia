@@ -12,6 +12,7 @@ namespace UIForia {
         public new Camera camera;
         public Application application;
         public bool usePreCompiledTemplates;
+        public string styleBasePath;
         
         [HideInInspector] public string applicationName = "Game App 2";
 
@@ -22,9 +23,9 @@ namespace UIForia {
             settings.assemblyName = "Assembly-CSharp";
             settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated2");
             settings.codeFileExtension = "generated.cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated2/" + applicationName;
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
-            
+            settings.styleBasePath = styleBasePath ?? string.Empty;
+
             return settings;
         }
 

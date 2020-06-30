@@ -1,5 +1,5 @@
 ﻿<UITemplate>
-    <Style src="SpaceGameDemo/Toggle/Toggle.style"/>
+    <Style src="Toggle/Toggle.style"/>
     <Contents style="toggle-container">
         <Div style="toggle">
             <Image style="cross" src="'Images/cross_small'" if="value" />

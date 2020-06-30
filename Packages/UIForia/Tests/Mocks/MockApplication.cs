@@ -35,35 +35,28 @@ namespace Tests.Mocks {
             s_UsePreCompiledTemplates = shouldGenerate;
         }
         
-        public static TemplateSettings GetDefaultSettings(string appName) {
+        public static TemplateSettings GetDefaultSettings<T>(string appName) {
             TemplateSettings settings = new TemplateSettings();
             settings.applicationName = appName;
-            settings.templateRoot = "Data";
             settings.assemblyName = typeof(MockApplication).Assembly.GetName().Name;
             settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
             settings.codeFileExtension = "generated.xml.cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
+            settings.rootType = typeof(T);
             return settings;
         }
 
-        public static MockApplication Setup<T>(string appName = null, List<Type> dynamicTemplateTypes = null) where T : UIElement {
+        public static MockApplication Setup<T>(TemplateSettings settings = null) where T : UIElement {
+            string appName = settings?.applicationName;
             if (appName == null) {
                 StackTrace stackTrace = new StackTrace();
                 appName = stackTrace.GetFrame(1).GetMethod().Name;
             }
 
-            TemplateSettings settings = new TemplateSettings();
-            settings.applicationName = appName;
-            settings.templateRoot = "Data";
-            settings.assemblyName = typeof(MockApplication).Assembly.GetName().Name;
-            settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests", "UIForiaGenerated");
-            settings.codeFileExtension = ".generated.xml.cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated/" + appName;
-            settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath, "..", "Packages", "UIForia", "Tests");
-            settings.rootType = typeof(T);
-            settings.dynamicallyCreatedTypes = dynamicTemplateTypes;
-            
+            if (settings == null) {
+                settings = GetDefaultSettings<T>(appName);
+            }
+
             if (s_GenerateCode) {
                 TemplateCodeGenerator.Generate(typeof(T), settings);
             }

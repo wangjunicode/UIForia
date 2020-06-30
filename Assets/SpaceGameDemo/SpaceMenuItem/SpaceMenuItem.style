@@ -1,4 +1,4 @@
-﻿import "SpaceGameDemo/Theme.style" as theme;
+﻿import "Theme.style" as theme;
 
 style menu-entry {
     PreferredSize = 300px 32px;

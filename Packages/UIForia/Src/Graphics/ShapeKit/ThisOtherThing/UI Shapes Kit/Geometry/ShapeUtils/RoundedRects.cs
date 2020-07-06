@@ -74,14 +74,14 @@ namespace ThisOtherThing.UI.ShapeUtils {
             return new RangeInt(startSize, resolution);
         }
 
-        public void AddRoundedRect(ref UIVertexHelper vh, Vector2 position, float width, float height, in Corner corner, Color32 color) {
+        public void AddRoundedRect(ref UIVertexHelper vh, float2 position, float width, float height, in Corner corner, Color32 color) {
             CornerProperties cornerProperties = new CornerProperties() {
                 topLeft = corner,
                 topRight = corner,
                 bottomLeft = corner,
                 bottomRight = corner
             };
-            AddRoundedRect(ref vh, new Vector2(position.x + width * 0.5f, position.y + height * 0.5f), width, height, cornerProperties, color);
+            AddRoundedRect(ref vh, new float2(position.x + width * 0.5f, position.y + height * 0.5f), width, height, cornerProperties, color);
         }
 
         public void AddRoundedRect(ref UIVertexHelper vh, in Rect rect, in Corner corner, Color32 color) {

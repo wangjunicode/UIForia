@@ -13,7 +13,7 @@ namespace UIForia.Layout {
         public LayoutBoxInfo* layoutBoxInfoTable;
         public LayoutBoxUnion* layoutBoxTable;
         public List_TextLineInfo * lineInfoBuffer;
-        public BurstTextInfo* textInfoTable;
+        public TextInfo* textInfoTable;
         public LayoutHierarchyInfo * layoutHierarchyTable;
         public FontAssetInfo * fontAssetMap;
         public EmValue* emTable;
@@ -22,7 +22,7 @@ namespace UIForia.Layout {
             return ref layoutHierarchyTable[elementId.index];
         }
         
-        public ref BurstTextInfo GetTextInfo(int id) {
+        public ref TextInfo GetTextInfo(int id) {
             return ref textInfoTable[id];
         }
         

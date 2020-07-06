@@ -1,85 +1,125 @@
 ﻿using System;
-using UIForia.Graphics.ShapeKit;
+using System.Runtime.InteropServices;
 using UIForia.Systems;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 
 namespace UIForia.Graphics {
 
-    public enum VertexFormat {
+    [Flags]
+    internal enum DrawInfoFlags {
 
-        DefaultUI,
-        UIForiaText,
-        UIForiaShape,
-        Custom
-
-    }
-
-
-    public unsafe struct VertexLayout {
-
-        public VertexChannelFormat texCoord0;
-        public VertexChannelFormat texCoord1;
-        public VertexChannelFormat texCoord2;
-        public VertexChannelFormat texCoord3;
-        
-        public VertexChannelFormat texCoord4;
-        public VertexChannelFormat texCoord5;
-        public VertexChannelFormat texCoord6;
-        public VertexChannelFormat texCoord7;
-        
-        public VertexChannelFormat tangent;
-        public VertexChannelFormat normal;
-        public VertexChannelFormat color;
-        public VertexChannelFormat padding;
-
-        public static bool Equal(VertexLayout a, VertexLayout b) {
-            return UnsafeUtility.MemCmp(&a, &b, sizeof(VertexLayout)) == 0;
-        }
-
-        public static readonly VertexLayout UIForiaDefault = new VertexLayout() {
-            color = VertexChannelFormat.Float1,
-            texCoord0 = VertexChannelFormat.Float4,
-        };
+        InitialBatchSet = 1 << 0,
+        HasMaterialOverrides = 1 << 1,
+        HasNonTextureOverrides = 1 << 2,
+        FinalBatchSet = 1 << 3,
+        Hidden = 1 << 4
 
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct DrawInfo {
 
-        public DrawType type; // flags?
-        public int materialKeyIndex;
-        public int renderCallIdx; // can use a larger number space and combine localDrawIdx with this
+        // todo -- split this into multiple structs  
+        // batching data
+        // flags / is-batch-set 
+        // material
+        // properties
+        // maybe vertex layout
+        // overflow bounds
+        // clipper id
+        // maybe aabb
+
+        // sorting data
+        // local index, render call id
+
+        // geometry data
+        // geometry
+        // matrix
+        // shape data
+        // 
+
+        public DrawType type;
+        public DrawInfoFlags flags;
+
+        public int renderCallId;
         public int localDrawIdx;
-        public int batchId;
 
-        public UIVertexHelper* shapeGeometrySource;
-        public ShapeRange shapeRange;
-        public byte* shapeData;
-        public byte* modifiedVertexData;
-        public float4x4 * matrix;
+        public int materialOverrideCount;
+
+        public GeometryInfo* geometryInfo;
+
         public VertexLayout vertexLayout;
+        public MaterialId materialId;
 
-        public byte* GetChannel(VertexChannel channel) {
+        public AxisAlignedBounds2D aabb;
+        public byte* shapeData;
+        public float4x4* matrix;
+        public MaterialPropertyOverride* materialOverrideValues;
+        public ElementId elementId;
+        public OverflowBounds* overflowBounds;
+        public int overflowBoundRenderIndex;
 
-            if ((type & DrawType.Shape) != 0) {
+        public void* GetChannel(VertexChannel channel) {
+
+            if ((type & (DrawType.SDFText | DrawType.Shape)) != 0) {
 
                 switch (channel) {
 
                     case VertexChannel.Position:
-                        return (byte*) (shapeGeometrySource->positions + shapeRange.vertexRange.start);
+                        return (byte*) geometryInfo->positions;
 
                     case VertexChannel.Color:
-                        return (byte*) (shapeGeometrySource->colors + shapeRange.vertexRange.start);
+                        return (byte*) geometryInfo->colors;
 
                     case VertexChannel.TextureCoord0:
-                        return (byte*) (shapeGeometrySource->texCoord + shapeRange.vertexRange.start);
+                        return (byte*) geometryInfo->texCoord0;
+
+                    case VertexChannel.TextureCoord1:
+                        if (geometryInfo->vertexLayout.texCoord1 != VertexChannelFormat.Off) {
+                            return geometryInfo->texCoord1;
+                        }
+
+                        break;
 
                     case VertexChannel.Normal:
-                    case VertexChannel.Tangent:
-                    case VertexChannel.TextureCoord1:
-                    case VertexChannel.TextureCoord2:
-                    case VertexChannel.TextureCoord3:
-                    case VertexChannel.TextureCoord4:
+                        if (geometryInfo->vertexLayout.normal != VertexChannelFormat.Off) {
+                            return geometryInfo->normal;
+                        }
+
+                        break;
+
+                    case VertexChannel.Tangent: {
+                        if (geometryInfo->vertexLayout.tangent != VertexChannelFormat.Off) {
+                            return geometryInfo->tangent;
+                        }
+
+                        break;
+                    }
+
+                    case VertexChannel.TextureCoord2: {
+                        if (geometryInfo->vertexLayout.texCoord2 != VertexChannelFormat.Off) {
+                            return geometryInfo->texCoord2;
+                        }
+
+                        break;
+                    }
+
+                    case VertexChannel.TextureCoord3: {
+                        if (geometryInfo->vertexLayout.texCoord3 != VertexChannelFormat.Off) {
+                            return geometryInfo->texCoord3;
+                        }
+
+                        break;
+                    }
+
+                    case VertexChannel.TextureCoord4: {
+                        if (geometryInfo->vertexLayout.texCoord4 != VertexChannelFormat.Off) {
+                            return geometryInfo->texCoord3;
+                        }
+
+                        break;
+                    }
+
                     case VertexChannel.TextureCoord5:
                     case VertexChannel.TextureCoord6:
                     case VertexChannel.TextureCoord7:
@@ -94,9 +134,9 @@ namespace UIForia.Graphics {
         }
 
         public int* GetTriangles() {
-            
-            if ((type & DrawType.Shape) != 0) {
-                return shapeGeometrySource->triangles + shapeRange.triangleRange.start;
+
+            if ((type & (DrawType.SDFText | DrawType.Shape)) != 0) {
+                return geometryInfo->triangles;
             }
 
             return null;

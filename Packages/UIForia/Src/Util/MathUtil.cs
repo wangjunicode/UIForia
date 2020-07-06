@@ -8,6 +8,23 @@ namespace UIForia.Util {
             return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
         }
         
+        public static byte Float01ToByte(float value) {
+            if (value < 0) value = 0;
+            else if (value > 1) value = 1;
+            return (byte) (value * 255f);
+        }
+        
+        public static byte FloatMinus1To1ToByte(float value) {
+            if (value < -1) {
+                value = -1;
+            }
+            else if (value > 1) {
+                value = 1;
+            }
+
+            return (byte) RemapRange(value, -1, 1, 0, 255);
+        }
+        
         public static float PercentOfRange(float v, float bottom, float top) {
             float div = top - bottom;
             return div == 0 ? 0 : (v - bottom) / div;
@@ -56,6 +73,14 @@ namespace UIForia.Util {
         public static bool Between(float val, float min, float max) {
             return val >= min && val <= max;
         }
+
+        public static float Clamp01(float val) {
+            if (val < 0) return 0;
+            if (val > 1) return 1;
+            return val;
+        }
+
+       
 
     }
 

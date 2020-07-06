@@ -291,113 +291,113 @@ namespace UIForia.Compilers.Style {
         private static unsafe MaterialId MapMaterial(PropertyNode node, StyleCompileContext context) {
 
             return new MaterialId();
-            if (!(node.children[0] is StyleLiteralNode literalNode) || literalNode.type != StyleASTNodeType.StringLiteral) {
-                return default;
-            }
-
-            fixed (char* charptr = literalNode.rawValue) {
-                CharStream stream = new CharStream(charptr, 0, (uint) literalNode.rawValue.Length);
-                stream.TryParseCharacter('"');
-
-                if (!stream.TryParseIdentifier(out CharSpan idSpan)) {
-                    throw new Exception($"Expected a valid identifier for material style value. Found: " + literalNode.rawValue);
-                }
-
-                if (!context.materialDatabase.TryGetBaseMaterialId(idSpan, out MaterialId materialId)) {
-                    throw new Exception($"Cannot find a material registered by name {idSpan}. " + context.fileName);
-                }
-
-                stream.TryParseCharacter('"');
-
-                stream.ConsumeWhiteSpaceAndComments();
-
-                if (!stream.HasMoreTokens) {
-                    return materialId;
-                }
-
-                if (!stream.TryGetSubStream('{', '}', out CharStream propertyStream)) {
-                    return default;
-                }
-
-                LightList<MaterialValueOverride> valueList = LightList<MaterialValueOverride>.Get();
-
-                context.materialDatabase.TryGetMaterial(materialId, out MaterialInfo materialInfo);
-
-                while (propertyStream.HasMoreTokens) {
-                    propertyStream.ConsumeWhiteSpaceAndComments();
-                    // property = value
-                    bool isValid = true;
-
-                    if (!propertyStream.TryParseIdentifier(out CharSpan propertySpan)) {
-                        throw new Exception($"Expected to find a valid property name identifier in material style property {idSpan}");
-                    }
-
-                    // if (!materialInfo.material.HasProperty(propertySpan.ToString())) {
-                    //     Debug.Log($"material does not define property with the name '{propertySpan}'");
-                    //     isValid = false;
-                    // }
-
-                    if (!propertyStream.TryParseCharacter('=')) {
-                        throw new Exception($"Expected to find an = sign after material property {propertySpan}");
-                    }
-
-                    if (!context.materialDatabase.TryGetMaterialProperty(materialId, propertySpan, out MaterialPropertyInfo info)) {
-                        Debug.Log($"material {idSpan} doesn't define property {propertySpan}");
-                        isValid = false;
-                    }
-
-                    if (!propertyStream.TryGetDelimitedSubstream(';', out CharStream valueStream)) {
-                        return default;
-                    }
-
-                    switch (info.propertyType) {
-
-                        case MaterialPropertyType.Color:
-
-                            if (valueStream.TryParseColorProperty(out Color32 color) && isValid) {
-                                valueList.Add(new MaterialValueOverride() {
-                                    propertyId = info.propertyId,
-                                    propertyType = MaterialPropertyType.Color,
-                                    value = new MaterialPropertyValue2() {colorValue = color}
-                                });
-                            }
-
-                            break;
-
-                        case MaterialPropertyType.Float:
-
-                            if (valueStream.TryParseFloat(out float value) && isValid) {
-                                valueList.Add(new MaterialValueOverride() {
-                                    propertyId = info.propertyId,
-                                    propertyType = MaterialPropertyType.Float,
-                                    value = new MaterialPropertyValue2() {floatValue = value}
-                                });
-                            }
-
-                            break;
-
-                        case MaterialPropertyType.Vector:
-                            break;
-
-                        case MaterialPropertyType.Range:
-                            break;
-
-                        case MaterialPropertyType.Texture:
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                }
-
-                materialId = context.materialDatabase.CreateStaticMaterialOverride(materialId, valueList);
-
-                valueList.Release();
-
-                return materialId;
-
-            }
+            // if (!(node.children[0] is StyleLiteralNode literalNode) || literalNode.type != StyleASTNodeType.StringLiteral) {
+            //     return default;
+            // }
+            //
+            // fixed (char* charptr = literalNode.rawValue) {
+            //     CharStream stream = new CharStream(charptr, 0, (uint) literalNode.rawValue.Length);
+            //     stream.TryParseCharacter('"');
+            //
+            //     if (!stream.TryParseIdentifier(out CharSpan idSpan)) {
+            //         throw new Exception($"Expected a valid identifier for material style value. Found: " + literalNode.rawValue);
+            //     }
+            //
+            //     if (!context.materialDatabase.TryGetBaseMaterialId(idSpan, out MaterialId materialId)) {
+            //         throw new Exception($"Cannot find a material registered by name {idSpan}. " + context.fileName);
+            //     }
+            //
+            //     stream.TryParseCharacter('"');
+            //
+            //     stream.ConsumeWhiteSpaceAndComments();
+            //
+            //     if (!stream.HasMoreTokens) {
+            //         return materialId;
+            //     }
+            //
+            //     if (!stream.TryGetSubStream('{', '}', out CharStream propertyStream)) {
+            //         return default;
+            //     }
+            //
+            //     LightList<MaterialValueOverride> valueList = LightList<MaterialValueOverride>.Get();
+            //
+            //     context.materialDatabase.TryGetMaterial(materialId, out MaterialInfo materialInfo);
+            //
+            //     while (propertyStream.HasMoreTokens) {
+            //         propertyStream.ConsumeWhiteSpaceAndComments();
+            //         // property = value
+            //         bool isValid = true;
+            //
+            //         if (!propertyStream.TryParseIdentifier(out CharSpan propertySpan)) {
+            //             throw new Exception($"Expected to find a valid property name identifier in material style property {idSpan}");
+            //         }
+            //
+            //         // if (!materialInfo.material.HasProperty(propertySpan.ToString())) {
+            //         //     Debug.Log($"material does not define property with the name '{propertySpan}'");
+            //         //     isValid = false;
+            //         // }
+            //
+            //         if (!propertyStream.TryParseCharacter('=')) {
+            //             throw new Exception($"Expected to find an = sign after material property {propertySpan}");
+            //         }
+            //
+            //         if (!context.materialDatabase.TryGetMaterialProperty(materialId, propertySpan, out MaterialPropertyInfo info)) {
+            //             Debug.Log($"material {idSpan} doesn't define property {propertySpan}");
+            //             isValid = false;
+            //         }
+            //
+            //         if (!propertyStream.TryGetDelimitedSubstream(';', out CharStream valueStream)) {
+            //             return default;
+            //         }
+            //
+            //         switch (info.propertyType) {
+            //
+            //             case MaterialPropertyType.Color:
+            //
+            //                 if (valueStream.TryParseColorProperty(out Color32 color) && isValid) {
+            //                     valueList.Add(new MaterialValueOverride() {
+            //                         propertyId = info.propertyId,
+            //                         propertyType = MaterialPropertyType.Color,
+            //                         value = new MaterialPropertyValue2() {colorValue = color}
+            //                     });
+            //                 }
+            //
+            //                 break;
+            //
+            //             case MaterialPropertyType.Float:
+            //
+            //                 if (valueStream.TryParseFloat(out float value) && isValid) {
+            //                     valueList.Add(new MaterialValueOverride() {
+            //                         propertyId = info.propertyId,
+            //                         propertyType = MaterialPropertyType.Float,
+            //                         value = new MaterialPropertyValue2() {floatValue = value}
+            //                     });
+            //                 }
+            //
+            //                 break;
+            //
+            //             case MaterialPropertyType.Vector:
+            //                 break;
+            //
+            //             case MaterialPropertyType.Range:
+            //                 break;
+            //
+            //             case MaterialPropertyType.Texture:
+            //                 break;
+            //
+            //             default:
+            //                 throw new ArgumentOutOfRangeException();
+            //         }
+            //
+            //     }
+            //
+            //     materialId = context.materialDatabase.CreateStaticMaterialOverride(materialId, valueList);
+            //
+            //     valueList.Release();
+            //
+            //     return materialId;
+            //
+            // }
         }
 
         private static void MapLayoutFit(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {

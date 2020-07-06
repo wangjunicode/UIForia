@@ -75,7 +75,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            return (MaterialId) 0;
+            return new MaterialId(0);
         }
         
         private OffsetMeasurement FindOffsetMeasurementProperty(StylePropertyId propertyId) {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TMPro;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
@@ -11,26 +12,26 @@ namespace UIForia {
     [Serializable]
     public struct FaceInfo {
 
-        public float PointSize;
-        public float Scale;
+        public float pointSize;
+        public float scale;
         public int CharacterCount;
-        public float LineHeight;
-        public float Baseline;
-        public float Ascender;
-        public float CapHeight;
-        public float Descender;
-        public float CenterLine;
+        public float lineHeight;
+        public float baseline;
+        public float ascender;
+        public float capHeight;
+        public float descender;
+        public float centerLine;
         public float SuperscriptOffset;
         public float SubscriptOffset;
         public float SubSize;
-        public float Underline;
-        public float UnderlineThickness;
-        public float strikethrough;
+        public float underlineOffset;
+        public float underlineThickness;
+        public float strikethroughOffset;
         public float strikethroughThickness;
-        public float TabWidth;
-        public float Padding;
-        public float AtlasWidth;
-        public float AtlasHeight;
+        public float tabWidth;
+        public float padding;
+        public float atlasWidth;
+        public float atlasHeight;
 
     }
 
@@ -38,8 +39,10 @@ namespace UIForia {
     public struct UIForiaGlyph {
 
         public int codepoint;
-        public float x;
-        public float y;
+        public float uvX;
+        public float uvY;
+        public int uvWidth;
+        public int uvHeight;
         public float width;
         public float height;
         public float xOffset;
@@ -49,37 +52,6 @@ namespace UIForia {
 
     }
 
-    // [Serializable]
-    // public class DEPRECATE_TMP_Glyph {
-    //
-    //     public int id;
-    //     public float x;
-    //     public float y;
-    //     public float width;
-    //     public float height;
-    //     public float xOffset;
-    //     public float yOffset;
-    //     public float xAdvance;
-    //     public float scale;
-    //
-    //     public static DEPRECATE_TMP_Glyph Clone(DEPRECATE_TMP_Glyph source) {
-    //         DEPRECATE_TMP_Glyph copy = new DEPRECATE_TMP_Glyph();
-    //
-    //         copy.id = source.id;
-    //         copy.x = source.x;
-    //         copy.y = source.y;
-    //         copy.width = source.width;
-    //         copy.height = source.height;
-    //         copy.xOffset = source.xOffset;
-    //         copy.yOffset = source.yOffset;
-    //         copy.xAdvance = source.xAdvance;
-    //         copy.scale = source.scale;
-    //
-    //         return copy;
-    //     }
-    //
-    // }
-
     public unsafe struct FontAssetInfo {
 
         public FaceInfo faceInfo;
@@ -88,6 +60,7 @@ namespace UIForia {
         public UntypedIntMap* kerningMapState; // holds actual kerning value
         public int atlasWidth;
         public int atlasHeight;
+        public int atlasTextureId;
 
         public float boldStyle;
         public float normalStyle;
@@ -116,7 +89,10 @@ namespace UIForia {
 
     }
 
+    [CreateAssetMenu(fileName = "Font", menuName = "UIForia/FontAsset", order = 1)]
     public class FontAsset : ScriptableObject {
+
+        public TMP_FontAsset convertFrom;
 
         internal int id;
         public float gradientScale; // sdf padding + 1
@@ -140,13 +116,70 @@ namespace UIForia {
 
         public TextKerningPair[] kerningPairs;
         public UIForiaGlyph[] textGlyphList;
+        private static readonly int s_WeightBold = Shader.PropertyToID("_WeightBold");
+        private static readonly int s_WeightNormal = Shader.PropertyToID("_WeightNormal");
+        private static readonly int s_GradientScale = Shader.PropertyToID("_GradientScale");
 
+        public void ConvertFromTMP() {
+            atlas = (Texture2D)convertFrom.material.mainTexture;
+            boldSpacing = convertFrom.boldSpacing;
+            boldStyle = convertFrom.boldStyle;
+            weightBold = convertFrom.material.GetFloat(s_WeightBold);
+            weightNormal = convertFrom.material.GetFloat(s_WeightNormal);
+            normalStyle = convertFrom.normalStyle;
+            normalSpacingOffset = convertFrom.normalSpacingOffset;
+            gradientScale = convertFrom.material.GetFloat(s_GradientScale);
+            italicStyle = convertFrom.italicStyle;
+            tabSize = convertFrom.tabSize;
+            
+            faceInfo = new FaceInfo() {
+                pointSize = convertFrom.faceInfo.pointSize,
+                lineHeight = convertFrom.faceInfo.lineHeight,
+                strikethroughOffset = convertFrom.faceInfo.strikethroughOffset,
+                ascender = convertFrom.faceInfo.ascentLine,
+                descender = convertFrom.faceInfo.descentLine,
+                baseline = convertFrom.faceInfo.baseline,
+                padding = convertFrom.atlasPadding,
+                scale = convertFrom.faceInfo.scale,
+                strikethroughThickness = convertFrom.faceInfo.strikethroughThickness,
+                underlineOffset = convertFrom.faceInfo.underlineOffset,
+                underlineThickness = convertFrom.faceInfo.underlineThickness,
+                atlasWidth = atlas.width,
+                atlasHeight = atlas.height,
+                capHeight = convertFrom.faceInfo.capLine,
+                centerLine = convertFrom.faceInfo.meanLine,
+                tabWidth = convertFrom.faceInfo.tabWidth
+            };
+            List<TMP_Character> table = convertFrom.characterTable;
+            textGlyphList = new UIForiaGlyph[table.Count];
+            for (int i = 0; i < table.Count; i++) {
+                TMP_Character g = table[i];
+                textGlyphList[i] = new UIForiaGlyph() {
+                    codepoint = (int) g.unicode,
+                    width = g.glyph.metrics.width,
+                    height = g.glyph.metrics.height,
+                    uvX = g.glyph.glyphRect.x,
+                    uvY = g.glyph.glyphRect.y,
+                    uvWidth = g.glyph.glyphRect.width,
+                    uvHeight = g.glyph.glyphRect.height,
+                    xAdvance = g.glyph.metrics.horizontalAdvance,
+                    xOffset = g.glyph.metrics.horizontalBearingX,
+                    yOffset = g.glyph.metrics.horizontalBearingY,
+                    scale = 1,
+                };
+            }
+        }
+        
         public void OnEnable() {
+            if (convertFrom != null) {
+                ConvertFromTMP();
+            }
             BuildCharacterDictionary();
         }
 
         public unsafe FontAssetInfo GetFontInfo() {
             return new FontAssetInfo() {
+                atlasTextureId = atlas.GetHashCode(),
                 glyphMapState = characterDictionary.GetState(),
                 kerningMapState = kerningDictionary.GetState(),
                 atlasWidth = atlas.width,
@@ -166,7 +199,7 @@ namespace UIForia {
         private void BuildCharacterDictionary() {
 
             if (textGlyphList == null) return;
-            
+
             characterDictionary = new IntMap<UIForiaGlyph>(textGlyphList.Length + 10, Allocator.Persistent);
 
             for (int i = 0; i < textGlyphList.Length; i++) {
@@ -179,20 +212,20 @@ namespace UIForia {
             // make sure we have a space character
             if (characterDictionary.TryGetReference(32, ref temp_charInfo)) {
                 temp_charInfo.width = temp_charInfo.xAdvance;
-                temp_charInfo.height = faceInfo.Ascender - faceInfo.Descender;
-                temp_charInfo.yOffset = faceInfo.Ascender;
+                temp_charInfo.height = faceInfo.ascender - faceInfo.descender;
+                temp_charInfo.yOffset = faceInfo.ascender;
                 temp_charInfo.scale = 1;
             }
             else {
                 temp_charInfo = new UIForiaGlyph();
                 temp_charInfo.codepoint = 32;
-                temp_charInfo.x = 0;
-                temp_charInfo.y = 0;
-                temp_charInfo.width = faceInfo.Ascender / 5;
-                temp_charInfo.height = faceInfo.Ascender - faceInfo.Descender;
+                temp_charInfo.uvX = 0;
+                temp_charInfo.uvY = 0;
+                temp_charInfo.width = faceInfo.ascender / 5;
+                temp_charInfo.height = faceInfo.ascender - faceInfo.descender;
                 temp_charInfo.xOffset = 0;
-                temp_charInfo.yOffset = faceInfo.Ascender;
-                temp_charInfo.xAdvance = faceInfo.PointSize / 4;
+                temp_charInfo.yOffset = faceInfo.ascender;
+                temp_charInfo.xAdvance = faceInfo.pointSize / 4;
                 temp_charInfo.scale = 1;
                 characterDictionary.Add(32, temp_charInfo);
             }
@@ -225,8 +258,8 @@ namespace UIForia {
 
                 ref UIForiaGlyph lineFeed = ref characterDictionary.GetOrCreateReference(10);
                 lineFeed.codepoint = 10;
-                lineFeed.x = 0;
-                lineFeed.y = 0;
+                lineFeed.uvX = 0;
+                lineFeed.uvY = 0;
                 lineFeed.width = 10;
                 lineFeed.height = characterDictionary.GetOrDefault(32).height;
                 lineFeed.xOffset = 0;
@@ -248,8 +281,8 @@ namespace UIForia {
 
                 tab = new UIForiaGlyph();
                 tab.codepoint = 9;
-                tab.x = copy.x;
-                tab.y = copy.y;
+                tab.uvX = copy.uvX;
+                tab.uvY = copy.uvY;
                 tab.width = copy.width * tabSize + (copy.xAdvance - copy.width) * (tabSize - 1);
                 tab.height = copy.height;
                 tab.xOffset = copy.xOffset;
@@ -259,21 +292,21 @@ namespace UIForia {
             }
 
             // Tab Width is using the same xAdvance as space (32).
-            faceInfo.TabWidth = characterDictionary.GetOrDefault(9).xAdvance;
+            faceInfo.tabWidth = characterDictionary.GetOrDefault(9).xAdvance;
 
             // Set Cap Height
-            if (faceInfo.CapHeight == 0 && characterDictionary.ContainsKey(72)) {
-                faceInfo.CapHeight = characterDictionary.GetOrDefault(72).yOffset;
+            if (faceInfo.capHeight == 0 && characterDictionary.ContainsKey(72)) {
+                faceInfo.capHeight = characterDictionary.GetOrDefault(72).yOffset;
             }
 
             // Adjust Font Scale for compatibility reasons
-            if (faceInfo.Scale == 0) {
-                faceInfo.Scale = 1.0f;
+            if (faceInfo.scale == 0) {
+                faceInfo.scale = 1.0f;
             }
 
             // Set Strikethrough Offset (if needed)
-            if (faceInfo.strikethrough == 0) {
-                faceInfo.strikethrough = faceInfo.CapHeight / 2.5f;
+            if (faceInfo.strikethroughOffset == 0) {
+                faceInfo.strikethroughOffset = faceInfo.capHeight / 2.5f;
             }
 
             kerningDictionary = new IntMap<float>(kerningPairs?.Length ?? 0, Allocator.Persistent);
@@ -291,7 +324,7 @@ namespace UIForia {
         public static FontAsset defaultFontAsset {
             get {
                 if (defaultAsset != null) return defaultAsset;
-                defaultAsset = Resources.Load<FontAsset>("UIForiaDefaultFont SDF");
+                defaultAsset = Resources.Load<FontAsset>("Fonts/VarelaRound-Regular SDF"); // todo -- improve this
                 return defaultAsset;
             }
         }

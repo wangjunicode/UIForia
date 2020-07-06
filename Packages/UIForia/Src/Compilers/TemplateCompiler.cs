@@ -14,6 +14,7 @@ using UIForia.Systems;
 using UIForia.Templates;
 using UIForia.UIInput;
 using UIForia.Util;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Debug = UnityEngine.Debug;
 
@@ -72,7 +73,9 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_TemplateScope_Clone = typeof(TemplateScope).GetMethod(nameof(TemplateScope.Clone));
 
         internal static readonly ConstructorInfo s_ElementAttributeCtor = typeof(ElementAttribute).GetConstructor(new[] {typeof(string), typeof(string)});
+
         internal static readonly FieldInfo s_ElementAttributeList = typeof(UIElement).GetField("attributes", BindingFlags.Public | BindingFlags.Instance);
+
         // internal static readonly FieldInfo s_TextElement_Text = typeof(UITextElement).GetField(nameof(UITextElement.text), BindingFlags.Instance | BindingFlags.Public);
         internal static readonly MethodInfo s_TextElement_SetText = typeof(UITextElement).GetMethod(nameof(UITextElement.SetText), BindingFlags.Instance | BindingFlags.Public);
         internal static readonly MethodInfo s_TextElement_SetTextFromCharacters = typeof(UITextElement).GetMethod(nameof(UITextElement.SetTextFromCharacters), BindingFlags.Instance | BindingFlags.Public);
@@ -122,7 +125,7 @@ namespace UIForia.Compilers {
         internal static readonly Expression s_StringBuilderExpr = Expression.Field(null, typeof(StringUtil), nameof(StringUtil.s_CharStringBuilder));
         internal static readonly Expression s_StringBuilderCharField = Expression.Field(s_StringBuilderExpr, typeof(CharStringBuilder).GetField(nameof(CharStringBuilder.characters)));
         internal static readonly Expression s_StringBuilderSizeField = Expression.Field(s_StringBuilderExpr, typeof(CharStringBuilder).GetField(nameof(CharStringBuilder.size)));
-        
+
         internal static readonly Expression s_StringBuilderClear = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("Clear"));
         internal static readonly Expression s_StringBuilderToString = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod("ToString", Type.EmptyTypes));
         internal static readonly MethodInfo s_StringBuilder_AppendString = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(string)});
@@ -139,9 +142,11 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_StringBuilder_AppendSByte = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(sbyte)});
         internal static readonly MethodInfo s_StringBuilder_AppendBool = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(bool)});
         internal static readonly MethodInfo s_StringBuilder_AppendChar = typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.Append), new[] {typeof(char)});
-        private MaterialDatabase materialDatabase;
 
-        private TemplateCompiler(TemplateSettings settings, MaterialDatabase materialDatabase) {
+        private TemplateSettings settings;
+
+        private TemplateCompiler(TemplateSettings settings) {
+            this.settings = settings;
             this.templateCache = new TemplateCache(settings);
             this.templateMap = new Dictionary<Type, CompiledTemplate>();
             this.templateData = new CompiledTemplateData(settings);
@@ -150,8 +155,7 @@ namespace UIForia.Compilers {
             this.enabledCompiler = new UIForiaLinqCompiler();
             this.lateCompiler = new UIForiaLinqCompiler();
             this.typeResolver = new UIForiaLinqCompiler();
-            this.materialDatabase = materialDatabase;
-            
+
             Func<string, LinqCompiler, Expression> resolveAlias = ResolveAlias;
 
             this.createdCompiler.resolveAlias = resolveAlias;
@@ -164,16 +168,12 @@ namespace UIForia.Compilers {
         }
 
         public static CompiledTemplateData CompileTemplates(Type appRootType, TemplateSettings templateSettings) {
-            
+
             TypeProcessor.ClearDynamics();
             
-            MaterialDatabase materialDatabase = MaterialAssetBuilder.BuildMaterialDatabase(templateSettings.materialAssets);
-            
-            TemplateCompiler instance = new TemplateCompiler(templateSettings, materialDatabase);
-                
+            TemplateCompiler instance = new TemplateCompiler(templateSettings);
+
             CompiledTemplateData compiledTemplateData = instance.CompileRoot(appRootType, templateSettings.dynamicallyCreatedTypes);
-            
-            compiledTemplateData.materialDatabase = materialDatabase;
             
             return compiledTemplateData;
         }
@@ -278,7 +278,7 @@ namespace UIForia.Compilers {
             for (int i = 0; i < templateRootNode.templateShell.styles.size; i++) {
                 ref StyleDefinition styleDef = ref templateRootNode.templateShell.styles.array[i];
 
-                StyleSheet sheet = templateData.ImportStyleSheet(styleDef, materialDatabase);
+                StyleSheet sheet = templateData.ImportStyleSheet(styleDef);
 
                 if (sheet != null) {
                     ctx.AddStyleSheet(styleDef.alias, sheet);
@@ -436,7 +436,6 @@ namespace UIForia.Compilers {
 
             return nodeExpr;
         }
-
 
         private Expression CompileRepeatList(CompilationContext ctx, RepeatNode repeatNode) {
             ParameterExpression nodeExpr = ctx.ElementExpr;
@@ -778,7 +777,6 @@ namespace UIForia.Compilers {
 
             ctx.Assign(nodeExpr, CreateElement(ctx, textNode));
 
-            
             // ((UITextElement)element).text = "string value";
             if (textNode.textExpressionList != null && textNode.textExpressionList.size > 0) {
                 if (textNode.IsTextConstant()) {
@@ -1081,18 +1079,14 @@ namespace UIForia.Compilers {
 
                 CompileRemainingChangeHandlerStores(templateNode.processedType.rawType, changeHandlerDefinitions);
 
-                CompileEnabledThisFrame(templateNode.processedType);
-                
                 CompileAfterPropertyUpdates(templateNode.processedType);
-                
+
                 CompileAttributeBindings(attributes);
 
                 CompileInstanceStyleBindings(attributes);
 
                 CompileStyleBindings(ctx, templateNode.tagName, attributes);
-
-                // CompileAfterStyleBindings();
-
+                
                 CompileInputHandlers(templateNode.processedType, attributes);
 
                 CompileCheckChangeHandlers(changeHandlerDefinitions);
@@ -1111,13 +1105,6 @@ namespace UIForia.Compilers {
 
             retn.contextModifications = contextModifications;
             return retn;
-        }
-
-        private void CompileEnabledThisFrame(ProcessedType processed) {
-            if (processed.requiresOnEnable) {
-               // ParameterExpression element = updateCompiler.GetElement();
-                
-            }    
         }
 
         private void CompileCheckChangeHandlers(StructList<ChangeHandlerDefinition> changeHandlers) {
@@ -1354,7 +1341,7 @@ namespace UIForia.Compilers {
         }
 
         private void CompileContextVariable(in AttributeDefinition attr, ref StructList<ContextAliasActions> contextModifications) {
-           
+
             createdCompiler.SetupAttributeData(attr);
             SetImplicitContext(createdCompiler, attr);
 
@@ -1434,7 +1421,115 @@ namespace UIForia.Compilers {
                 if (attr.type == AttributeType.InstanceStyle) {
                     CompileInstanceStyleBinding(updateCompiler, attr);
                 }
+
+                if (attr.type == AttributeType.PainterVar) {
+                    CompilePainterBinding(updateCompiler, attr);
+                }
             }
+        }
+
+        private void CompilePainterBinding(UIForiaLinqCompiler compiler, AttributeDefinition attr) {
+            StyleState styleState = StyleState.Normal;
+
+            if ((attr.flags & AttributeFlags.StyleStateActive) == AttributeFlags.StyleStateActive) {
+                styleState = StyleState.Active;
+            }
+            else if ((attr.flags & AttributeFlags.StyleStateFocus) == AttributeFlags.StyleStateFocus) {
+                styleState = StyleState.Focused;
+            }
+            else if ((attr.flags & AttributeFlags.StyleStateHover) == AttributeFlags.StyleStateHover) {
+                styleState = StyleState.Hover;
+            }
+
+            ParameterExpression castElement = updateCompiler.GetCastElement();
+
+            MemberExpression styleExpr = Expression.Field(castElement, s_UIElement_StyleSet);
+
+            compiler.BeginIsolatedSection();
+
+            compiler.SetupAttributeData(attr);
+
+            SetImplicitContext(compiler, attr);
+
+            compiler.CommentNewLineBefore($"style.{attr.key}=\"{attr.value}\"");
+
+            int idx = attr.key.IndexOf(".");
+            if (idx == -1) { }
+
+            string painterName = attr.key.Substring(0, idx);
+            string propertyName = attr.key.Substring(idx + 1);
+
+            if (settings.resourceManager.TryGetStylePainter(painterName, out StylePainterDefinition painterDefinition)) { }
+
+            bool found = false;
+            for (int v = 0; v < painterDefinition.definedVariables.Length; v++) {
+                ref PainterVariableDeclaration variable = ref painterDefinition.definedVariables[v];
+
+                if (variable.name == propertyName) {
+                    found = true;
+
+                    // style.SetInstanceProperty((StylePropertyId)id, 
+                    UnaryExpression propertyIdExpression = Expression.Convert(
+                        Expression.Constant(variable.propertyId),
+                        typeof(StylePropertyId)
+                    );
+
+                    Expression arg;
+                    ConstructorInfo ctor;
+
+                    Expression value = compiler.TypedValue(variable.type, attr.value);
+
+                    if (variable.type.IsEnum) {
+                        ctor = typeof(StyleProperty).GetConstructor(new Type[] {
+                            typeof(StylePropertyId),
+                            typeof(int)
+                        });
+                        arg = Expression.Convert(value, typeof(int));
+                    }
+                    else if (variable.type == typeof(float)) {
+                        ctor =  typeof(StyleProperty).GetConstructor(new Type[] {
+                            typeof(StylePropertyId),
+                            typeof(float)
+                        });
+                        arg = value;
+                    }
+                    else if (variable.type == typeof(Color32)) {
+                        ctor = typeof(StyleProperty).GetConstructor(new Type[] {
+                            typeof(StylePropertyId),
+                            typeof(Color32)
+                        });
+                        arg = value;
+                    }
+                    else if (variable.type == typeof(Texture)) {
+                        ctor = typeof(StyleProperty).GetConstructor(new Type[] {
+                            typeof(StylePropertyId),
+                            typeof(Texture)
+                        });
+                        arg = value;
+                    }
+                    else {
+                        throw new CompileException("Invalid expression type in painter expression");
+                    }
+
+                    updateCompiler.RawExpression(
+                        Expression.Call(styleExpr, typeof(UIStyleSet).GetMethod(nameof(UIStyleSet.SetProperty)),
+                            Expression.New(ctor, propertyIdExpression, arg),
+                            Expression.Constant(styleState)
+                        )
+                    );
+
+                    break;
+
+                }
+
+            }
+
+            compiler.EndIsolatedSection();
+
+            if (!found) {
+                throw new CompileException($"Unable to find painter variable for painter {painterDefinition.painterName} with the name {propertyName}");
+            }
+
         }
 
         private struct StyleExpression {
@@ -1448,7 +1543,6 @@ namespace UIForia.Compilers {
 
         private void CompileStyleBindings(CompilationContext ctx, string tagName, StructList<AttributeDefinition> attributes) {
             LightList<StyleRefInfo> styleIds = LightList<StyleRefInfo>.Get();
-
 
             StyleSheetReference[] styleRefs = ctx.innerTemplate?.templateMetaData.styleReferences;
 
@@ -1604,7 +1698,6 @@ namespace UIForia.Compilers {
                 Expression templateContext = Expression.ArrayIndex(templateMetaDataExpr, Expression.Constant(styleExpression.templateMetaData.id));
                 for (int k = 0; k < expressionList.size; k++) {
                     TextExpression textExpression = expressionList.array[k];
-
 
                     if (textExpression.isExpression) {
                         Expression dynamicStyleList = updateCompiler.TypeWrapStatement(s_DynamicStyleListTypeWrapper, typeof(DynamicStyleList), textExpression.text);
@@ -2038,9 +2131,9 @@ namespace UIForia.Compilers {
                 Expression e = updateCompiler.GetCastElement();
                 // MemberExpression textValueExpr = Expression.Field(updateCompiler.GetCastElement(), s_TextElement_Text);
                 // Expression condition = ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, typeof(CharStringBuilder).GetMethod(nameof(CharStringBuilder.EqualsString), new[] {typeof(string)}), textValueExpr);
-                
+
                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(e, s_TextElement_SetTextFromCharacters, s_StringBuilderCharField, s_StringBuilderSizeField));
-                    
+
                 // condition = Expression.Equal(condition, Expression.Constant(false));
                 // ConditionalExpression ifCheck = Expression.IfThen(condition, Expression.Block(ExpressionFactory.CallInstanceUnchecked(e, s_TextElement_SetText, s_StringBuilderToString)));
 
@@ -2048,7 +2141,6 @@ namespace UIForia.Compilers {
                 updateCompiler.RawExpression(s_StringBuilderClear);
             }
         }
-
 
         public static void CompileAssignContextVariable(UIForiaLinqCompiler compiler, in AttributeDefinition attr, Type contextVarType, int varId, string varPrefix = null, Expression value = null) {
             //ContextVariable<T> ctxVar = (ContextVariable<T>)__castElement.bindingNode.GetContextVariable(id);
@@ -2273,7 +2365,6 @@ namespace UIForia.Compilers {
                         compiler.CallStatic(s_EventUtil_Subscribe, compiler.GetCastElement(), Expression.Constant(attr.key), evtFn);
                         closure.Release();
                         LightList<Parameter>.Release(ref parameters);
-
 
                         return;
                     }
@@ -2681,7 +2772,6 @@ namespace UIForia.Compilers {
             updateCompiler.Assign(valueField, value);
         }
 
-
         private Expression ResolveAlias(string aliasName, LinqCompiler compiler) {
             if (aliasName == "oldValue") {
                 if (changeHandlerPreviousValue == null) {
@@ -2779,9 +2869,11 @@ namespace UIForia.Compilers {
                         case '<':
                             depth++;
                             break;
+
                         case '>':
                             depth--;
                             break;
+
                         case ',': {
                             if (depth == 0) {
                                 strings.Add(replaceSpec.Substring(rangeStart, ptr));
@@ -2822,7 +2914,6 @@ namespace UIForia.Compilers {
                 Type createdType = ReflectionUtil.CreateGenericType(processedType.rawType, resolvedTypes);
                 return TypeProcessor.AddResolvedGenericElementType(createdType, processedType.templateAttr, processedType.tagName);
             }
-
 
             typeResolver.Reset();
             resolvingTypeOnly = true;

@@ -12,11 +12,23 @@ namespace UIForia.Graphics {
         public RenderContext2 ctx;
         internal UIElement _element;
         internal PainterVariableDeclaration[] _variables;
+        
+        private static readonly int s_MainTextureKey = Shader.PropertyToID("_MainTex");
 
         public UIStyleSetProxy style {
             get => new UIStyleSetProxy(_element.style);
         }
 
+        public void SetMainTexture(Texture texture) {
+            ctx.SetMaterialTexture(s_MainTextureKey, texture);
+        }
+
+        public void SetClipRect(float x, float y, float width, float height) { }
+
+        public void debugger() {
+            System.Diagnostics.Debugger.Break();
+        }
+        
         public Color32 lighten(Color32 color, float amount = 10) {
             HSLColor hsl = HSLColor.FromRGB(color.r, color.g, color.b);
             hsl.l += amount / 100;

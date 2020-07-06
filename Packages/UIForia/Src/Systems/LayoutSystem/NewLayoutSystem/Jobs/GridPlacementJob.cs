@@ -8,7 +8,7 @@ using Unity.Jobs;
 namespace UIForia.Layout {
 
     [BurstCompile]
-    public struct GridPlacementJob : IJob {
+    internal struct GridPlacementJob : IJob {
 
         public List_GridTrack.Shared colTrackList;
         public List_GridTrack.Shared rowTrackList;

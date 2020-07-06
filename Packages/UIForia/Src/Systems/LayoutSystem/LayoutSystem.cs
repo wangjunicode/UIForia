@@ -60,6 +60,7 @@ namespace UIForia.Systems {
         internal List_GridTrack.Shared gridColTrackBuffer;
         internal List_GridTrack.Shared gridRowTrackBuffer;
         internal DataList<ElementId> gridPlaceList;
+        internal DataList<OverflowBounds>.Shared clipperBoundsList;
 
         public struct LayoutDataTables {
 
@@ -79,7 +80,8 @@ namespace UIForia.Systems {
             this.clippers = new DataList<Clipper>.Shared(16, Allocator.Persistent);
             this.clipperIntersections = new DataList<float2>.Shared(128, Allocator.Persistent);
             this.queryBuffer = new DataList<QueryResult>.Shared(16, Allocator.Persistent);
-
+            this.clipperBoundsList = new DataList<OverflowBounds>.Shared(16, Allocator.Persistent);
+            
             *tablePointers = default;
             ResizeBackingStore(application.InitialElementCapacity);
             worldMatrices.array[0] = float4x4.identity;
@@ -672,6 +674,8 @@ namespace UIForia.Systems {
                 }.Schedule();
 
                 JobHandle textLayoutUpdates = VertigoScheduler.Await(emTableHandle, textTransformUpdates).ThenParallel(new UpdateTextLayoutJob() {
+                    viewportWidth = viewParameters.viewWidth,
+                    viewportHeight = viewParameters.viewHeight,
                     parallel = new ParallelParams(layoutContext.textChangeBuffer.size, 10),
                     emTable = elementSystem.emTable,
                     textChanges = layoutContext.textChangeBuffer,
@@ -774,6 +778,7 @@ namespace UIForia.Systems {
                 clipperList = clippers,
                 intersectionResults = clipperIntersections,
                 clipInfoTable = clipInfoTable,
+                clipperBoundsList = clipperBoundsList,
                 layoutResultTable = layoutResultTable
             });
 
@@ -832,7 +837,7 @@ namespace UIForia.Systems {
             return BufferGridTemplate(ref gridRowAutoSizeBuffer, template);
         }
 
-        public List_GridTrack.Shared GetGridColTrackBuffer() {
+        internal List_GridTrack.Shared GetGridColTrackBuffer() {
             if (gridColTrackBuffer.state == null) {
                 gridColTrackBuffer = new List_GridTrack.Shared(16, Allocator.Persistent);
             }
@@ -840,7 +845,7 @@ namespace UIForia.Systems {
             return gridColTrackBuffer;
         }
 
-        public List_GridTrack.Shared GetGridRowTrackBuffer() {
+        internal List_GridTrack.Shared GetGridRowTrackBuffer() {
             if (gridRowTrackBuffer.state == null) {
                 gridRowTrackBuffer = new List_GridTrack.Shared(16, Allocator.Persistent);
             }
@@ -980,6 +985,7 @@ namespace UIForia.Systems {
             gridColAutoSizeBuffer.Dispose();
             gridRowAutoSizeBuffer.Dispose();
             gridColTrackBuffer.Dispose();
+            clipperBoundsList.Dispose();
             gridRowTrackBuffer.Dispose();
 
             for (int i = 0; i < layoutContexts.size; i++) {

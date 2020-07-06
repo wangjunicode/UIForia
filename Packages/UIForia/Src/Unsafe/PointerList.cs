@@ -186,6 +186,7 @@ namespace UIForia.Util.Unsafe {
 
         public int size {
             get => state.size;
+            set => state.size = value;
         }
 
     }

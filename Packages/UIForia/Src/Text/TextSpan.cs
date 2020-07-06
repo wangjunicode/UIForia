@@ -398,9 +398,9 @@ namespace UIForia.Text {
             TextDisplayData textDisplayData = GetTextDisplayData();
 
             float smallCapsMultiplier = (textTransform == TextTransform.SmallCaps) ? 0.8f : 1f;
-            float fontScale = fontSize * smallCapsMultiplier / fontAsset.faceInfo.PointSize * fontAsset.faceInfo.Scale;
+            float fontScale = fontSize * smallCapsMultiplier / fontAsset.faceInfo.pointSize * fontAsset.faceInfo.scale;
 
-            Vector3 ratios = TextUtil.ComputeRatios(textDisplayData);
+            Vector3 ratios = default; //TextUtil.ComputeRatios(textDisplayData);
 
             scaleRatioA = ratios.x;
             scaleRatioB = ratios.y;
@@ -414,7 +414,7 @@ namespace UIForia.Text {
             int atlasWidth = fontAsset.atlas.width;
             int atlasHeight = fontAsset.atlas.height;
 
-            float fontAscender = fontAsset.faceInfo.Ascender;
+            float fontAscender = fontAsset.faceInfo.ascender;
 
             if ((fontStyle & FontStyle.Bold) != 0) {
                 stylePadding = fontAsset.boldStyle / 4.0f * gradientScale * scaleRatioA;
@@ -439,13 +439,13 @@ namespace UIForia.Text {
 
             FontAsset currentFontAsset = fontAsset;
 
-            float fontBaseLineOffset = currentFontAsset.faceInfo.Baseline * fontScale * fontScaleMultiplier * currentFontAsset.faceInfo.Scale;
+            float fontBaseLineOffset = currentFontAsset.faceInfo.baseline * fontScale * fontScaleMultiplier * currentFontAsset.faceInfo.scale;
 
             // fontBaseLineOffset = 0; //+= currentFontAsset.faceInfo.SuperscriptOffset * fontScale * fontScaleMultiplier;
 
             // I am not sure if using a standard line height for words is correct. TMP does not use the font info, it uses max char ascender & descender for a line
             // seems to me that this would produce weird results with multiline text
-            float lineHeight = (fontAsset.faceInfo.Ascender - fontAsset.faceInfo.Descender) * fontScale;
+            float lineHeight = (fontAsset.faceInfo.ascender - fontAsset.faceInfo.descender) * fontScale;
 
             CharInfo[] characters = characterList.array;
             WordInfo[] words = wordInfoList.array;

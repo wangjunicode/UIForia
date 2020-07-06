@@ -166,7 +166,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
 
         }
 
-        private static void TryReadIdentifier(TokenizerContext context, List<StyleToken> output) {
+        private static unsafe void TryReadIdentifier(TokenizerContext context, List<StyleToken> output) {
             if (context.IsConsumed()) return;
             int start = context.ptr;
             char first = context.input[context.ptr];
@@ -220,7 +220,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
                     }
 
                     TryConsumeWhiteSpace(context);
-                    
+
                     if (context.input[context.ptr] != '=') {
                         throw new ParseException($"Failed to tokenizer painter declaration, expected an '=' after 'painter:{identifier}.{propertyName}'");
                     }
@@ -233,6 +233,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
                     if (value == null) {
                         throw new ParseException($"Failed to tokenizer painter declaration, expected a value terminated by a semicolon after 'painter:{identifier}.{propertyName}' = ");
                     }
+
                     context.Advance();
 
                     output.Add(new StyleToken(StyleTokenType.PainterVariableReference, identifier, context.line, context.column));
@@ -244,6 +245,52 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 else {
                     context.Restore();
                 }
+            }
+            else if (identifier == "material") {
+
+                // material name : [resource|addressable]('path/to/asset') [;| {...}]
+                fixed (char* charptr = context.input) {
+                    CharStream stream = new CharStream(charptr, context.ptr, context.input.Length);
+                    stream.ConsumeWhiteSpaceAndComments();
+
+                    if (stream.TryParseIdentifier(out CharSpan materialName)) {
+
+                        if (stream.TryParseCharacter(':')) {
+
+                            if (!stream.TryParseIdentifier(out CharSpan loadMethodName)) { }
+
+                            if (!stream.TryGetSubStream('(', ')', out CharStream loadPathStream)) { }
+
+                            if (!loadPathStream.TryParseDoubleQuotedString(out CharSpan loadPath) && loadPathStream.TryParseSingleQuotedString(out loadPath)) { }
+
+                            if (stream.TryParseCharacter(';')) {
+                                output.Add(new StyleToken(StyleTokenType.MaterialDefinition, materialName.ToString(), context.line, context.column));
+                                output.Add(new StyleToken(StyleTokenType.MaterialDefinitionLoadType, loadMethodName.ToString(), context.line, context.column));
+                                output.Add(new StyleToken(StyleTokenType.MaterialDefinitionLoadPath, loadPath.ToString(), context.line, context.column));
+                                output.Add(new StyleToken(StyleTokenType.MaterialDefinitionBody, null, context.line, context.column));
+                                context.ptr = stream.IntPtr;
+                                TryConsumeWhiteSpace(context);
+                                return;
+
+                            }
+
+                            if (stream.TryGetSubStream('{', '}', out CharStream bodyStream)) {
+                                output.Add(new StyleToken(StyleTokenType.MaterialDefinition, materialName.ToString(), context.line, context.column));
+                                output.Add(new StyleToken(StyleTokenType.MaterialDefinitionLoadType, loadMethodName.ToString(), context.line, context.column));
+                                output.Add(new StyleToken(StyleTokenType.MaterialDefinitionLoadPath, loadPath.ToString(), context.line, context.column));
+                                output.Add(new StyleToken(StyleTokenType.MaterialDefinitionBody, bodyStream.ToString(), context.line, context.column));
+                                context.ptr = stream.IntPtr;
+                                TryConsumeWhiteSpace(context);
+                                return;
+                            }
+
+                        }
+
+                    }
+
+                    context.ptr = stream.IntPtr;
+                }
+
             }
 
             context.Restore();

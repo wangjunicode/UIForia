@@ -55,7 +55,6 @@ namespace UIForia {
        // public readonly Dictionary<Type, int> templateTypeMap = new Dictionary<Type, int>();
         public TemplateSettings templateSettings;
         public Dictionary<int, Func<ConstructedElement>> constructorFnMap;
-        public MaterialDatabase materialDatabase;
 
         public CompiledTemplateData(TemplateSettings templateSettings) {
             this.templateSettings = templateSettings;
@@ -103,8 +102,8 @@ namespace UIForia {
             return binding;
         }
 
-        public StyleSheet ImportStyleSheet(in StyleDefinition styleDefinition, MaterialDatabase materialDatabase) {
-            return styleImporter.Import(styleDefinition, materialDatabase, true);
+        public StyleSheet ImportStyleSheet(in StyleDefinition styleDefinition) {
+            return styleImporter.Import(styleDefinition, true);
         }
 
         public bool TryGetTemplate<T>(out DynamicTemplate retn) where T : UIElement {

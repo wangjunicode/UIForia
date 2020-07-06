@@ -44,7 +44,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Rendering.MaterialId Material { 
+            public UIForia.MaterialId Material { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -1303,7 +1303,7 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.Painter, value)); }
         }
             
-        public UIForia.Rendering.MaterialId Material {
+        public UIForia.MaterialId Material {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindMaterialIdProperty(StylePropertyId.Material); }
             [System.Diagnostics.DebuggerStepThrough]
@@ -2279,7 +2279,7 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.Rendering.MaterialId Material { 
+            public UIForia.MaterialId Material { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
@@ -3539,11 +3539,11 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.Painter, state).AsString;
         }
         
-        public void SetMaterial(in UIForia.Rendering.MaterialId? value, StyleState state) {
+        public void SetMaterial(in UIForia.MaterialId? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.Material, value), state);
         }
 
-        public UIForia.Rendering.MaterialId GetMaterial(StyleState state) {
+        public UIForia.MaterialId GetMaterial(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.Material, state).AsMaterialId;
         }
         
@@ -4603,6 +4603,7 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.ShadowOpacity, state).AsFloat;
         }
         
+
         public StyleProperty GetComputedStyleProperty(StylePropertyId propertyId) {
         			switch(propertyId) {
 				case StylePropertyId.Visibility:
@@ -4879,7 +4880,7 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.ShadowIntensity, ShadowIntensity);
 				case StylePropertyId.ShadowOpacity:
 					 return new StyleProperty(StylePropertyId.ShadowOpacity, ShadowOpacity);
-				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
+				default: return default;
 				}  
         }
 
@@ -4894,7 +4895,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.Opacity: return typeof(System.Single);
                     case StylePropertyId.Cursor: return typeof(UIForia.Rendering.CursorStyle);
                     case StylePropertyId.Painter: return typeof(System.String);
-                    case StylePropertyId.Material: return typeof(UIForia.Rendering.MaterialId);
+                    case StylePropertyId.Material: return typeof(UIForia.MaterialId);
                     case StylePropertyId.MeshType: return typeof(UIForia.Rendering.MeshType);
                     case StylePropertyId.MeshFillDirection: return typeof(UIForia.Rendering.MeshFillDirection);
                     case StylePropertyId.MeshFillOrigin: return typeof(UIForia.Rendering.MeshFillOrigin);

@@ -39,7 +39,7 @@ namespace UIForia.Editor.FontLoading {
 
         public class FontCreatorCreatorWindow : EditorWindow {
 
-            [MenuItem("Window/UIForia/Font Asset Creator", false, 2025)]
+            [MenuItem("Window/UIForia/Font Asset Creator (TMP)", false, 2025)]
             public static void ShowFontAtlasCreatorWindow() {
                 FontCreatorCreatorWindow window = GetWindow<FontCreatorCreatorWindow>();
                 window.titleContent = new GUIContent("Font Asset Creator");
@@ -84,7 +84,6 @@ namespace UIForia.Editor.FontLoading {
             float m_RenderingProgress;
             bool m_IsRenderingDone;
             bool m_IsProcessing;
-            bool m_IsGenerationDisabled;
             bool m_IsGenerationCancelled;
 
             Object m_SourceFontFile;
@@ -543,7 +542,7 @@ namespace UIForia.Editor.FontLoading {
                     EditorGUILayout.HelpBox(m_WarningMessage, MessageType.Warning);
                 }
 
-                GUI.enabled = m_SourceFontFile != null && !m_IsProcessing && !m_IsGenerationDisabled; // Enable Preview if we are not already rendering a font.
+                GUI.enabled = m_SourceFontFile != null && !m_IsProcessing; // Enable Preview if we are not already rendering a font.
                 if (GUILayout.Button("Generate Font Atlas") && m_CharacterSequence.Length != 0 && GUI.enabled) {
                     if (!m_IsProcessing && m_SourceFontFile != null) {
                         DestroyImmediate(m_FontAtlas);
@@ -873,7 +872,7 @@ namespace UIForia.Editor.FontLoading {
 
                 fontAsset.faceInfo = GetFaceInfo(m_FontFaceInfo);
                 fontAsset.textGlyphList = GetGlyphInfo(m_FontGlyphInfo);
-                fontAsset.kerningPairs = GetKerningTable(AssetDatabase.GetAssetPath(m_SourceFontFile), (int) fontAsset.faceInfo.PointSize, fontAsset.textGlyphList);
+                fontAsset.kerningPairs = GetKerningTable(AssetDatabase.GetAssetPath(m_SourceFontFile), (int) fontAsset.faceInfo.pointSize, fontAsset.textGlyphList);
 
                 fontAsset.atlas = m_FontAtlas;
                 m_FontAtlas.name = tex_FileName + " Atlas";
@@ -927,24 +926,24 @@ namespace UIForia.Editor.FontLoading {
                 FaceInfo face = new FaceInfo();
 
                 //face.Name = ftFace.name;
-                face.PointSize = ftFace.pointSize;
-                face.Padding = ftFace.padding;
-                face.LineHeight = ftFace.lineHeight;
-                face.CapHeight = 0;
-                face.Baseline = 0;
-                face.Ascender = ftFace.ascender;
-                face.Descender = ftFace.descender;
-                face.CenterLine = ftFace.centerLine;
-                face.Underline = ftFace.underline;
-                face.UnderlineThickness = ftFace.underlineThickness == 0 ? 5 : ftFace.underlineThickness; // Set Thickness to 5 if TTF value is Zero.
-                face.strikethrough = (face.Ascender + face.Descender) / 2.75f;
-                face.strikethroughThickness = face.UnderlineThickness;
-                face.SuperscriptOffset = face.Ascender;
-                face.SubscriptOffset = face.Underline;
+                face.pointSize = ftFace.pointSize;
+                face.padding = ftFace.padding;
+                face.lineHeight = ftFace.lineHeight;
+                face.capHeight = 0;
+                face.baseline = 0;
+                face.ascender = ftFace.ascender;
+                face.descender = ftFace.descender;
+                face.centerLine = ftFace.centerLine;
+                face.underlineOffset = ftFace.underline;
+                face.underlineThickness = ftFace.underlineThickness == 0 ? 5 : ftFace.underlineThickness; // Set Thickness to 5 if TTF value is Zero.
+                face.strikethroughOffset = (face.ascender + face.descender) / 2.75f;
+                face.strikethroughThickness = face.underlineThickness;
+                face.SuperscriptOffset = face.ascender;
+                face.SubscriptOffset = face.underlineOffset;
                 face.SubSize = 0.5f;
                 //face.CharacterCount = ft_face.characterCount;
-                face.AtlasWidth = ftFace.atlasWidth;
-                face.AtlasHeight = ftFace.atlasHeight;
+                face.atlasWidth = ftFace.atlasWidth;
+                face.atlasHeight = ftFace.atlasHeight;
 
                 return face;
             }
@@ -962,8 +961,8 @@ namespace UIForia.Editor.FontLoading {
 
                     UIForiaGlyph g = new UIForiaGlyph {
                         codepoint = ftGlyphs[i].id,
-                        x = ftGlyphs[i].x,
-                        y = ftGlyphs[i].y,
+                        uvX = ftGlyphs[i].x,
+                        uvY = ftGlyphs[i].y,
                         width = ftGlyphs[i].width,
                         height = ftGlyphs[i].height,
                         xOffset = ftGlyphs[i].xOffset,

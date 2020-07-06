@@ -37,11 +37,11 @@ namespace UIForia.Util {
             return inside;
         }
 
-        public static bool PointInOrientedBounds(in Vector2 point, in OrientedBounds bounds) {
+        public static bool PointInOrientedBounds(in float2 point, in OrientedBounds bounds) {
             return PointInTriangle(point, bounds.p0, bounds.p1, bounds.p2) || PointInTriangle(point, bounds.p2, bounds.p3, bounds.p0);
         }
 
-        public static bool PointInTriangle(in Vector2 test, in Vector2 p0, in Vector2 p1, in Vector2 p2) {
+        public static bool PointInTriangle(in float2 test, in float2 p0, in float2 p1, in float2 p2) {
             float s = p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * test.x + (p0.x - p2.x) * test.y;
             float t = p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * test.x + (p1.x - p0.x) * test.y;
 

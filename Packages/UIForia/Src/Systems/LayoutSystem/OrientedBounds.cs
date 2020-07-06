@@ -1,25 +1,20 @@
 using UIForia.Util;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Systems {
 
     public struct OrientedBounds {
 
-        public Vector2 p0;
-        public Vector2 p1;
-        public Vector2 p2;
-        public Vector2 p3;
+        public float2 p0;
+        public float2 p1;
+        public float2 p2;
+        public float2 p3;
 
-        private static readonly Vector2[] s_PolygonHolder = new Vector2[4];
-        
-        public bool ContainsPoint(Vector2 point) {
-            s_PolygonHolder[0] = p0;
-            s_PolygonHolder[1] = p1;
-            s_PolygonHolder[2] = p2;
-            s_PolygonHolder[3] = p3; 
-            return PolygonUtil.PointInPolygon(point, s_PolygonHolder, 4);
+        public bool ContainsPoint(float2 point) {
+            return PolygonUtil.PointInTriangle(point, p0, p1, p2) || PolygonUtil.PointInTriangle(point, p0, p2, p3);
         }
-
+        
     }
 
 }

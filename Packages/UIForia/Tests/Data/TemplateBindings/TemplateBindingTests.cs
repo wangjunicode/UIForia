@@ -7,6 +7,7 @@ using UIForia.Attributes;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
+using UIForia.Graphics;
 using UIForia.Parsing;
 using UIForia.Rendering;
 using UIForia.UIInput;
@@ -384,6 +385,37 @@ namespace TemplateBinding {
             }
         }
 
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_StyleBinding.xml#painter_properties")]
+        public class TemplateBindingTest_StyleBindingPainter : UIElement {
+
+            public float GetFloat() {
+                return 42;
+            }
+
+        }
+        
+        [Test]
+        public void StyleBindingPainter() {
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleBindingPainter>()) {
+                TemplateBindingTest_StyleBindingPainter e = (TemplateBindingTest_StyleBindingPainter) app.RootElement;
+
+                app.ResourceManager.TryGetStylePainter("test-painter", out StylePainterDefinition painterDefinition);
+                int propertyId = painterDefinition.definedVariables[0].propertyId;
+                
+                app.Update();
+
+                // e[0].style.SetPainterFloatProperty(painterName, )
+                
+                StyleProperty value = e[0].style.GetPropertyValue((StylePropertyId)propertyId, out bool isDefault);
+                
+                Assert.AreEqual(value.AsFloat, 42f);
+                
+                // Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
+                // Assert.AreEqual(new OffsetMeasurement(53, OffsetMeasurementUnit.ViewportWidth), e[0].style.GetPropertyValueInState(StylePropertyId.TransformPositionX, StyleState.Hover));
+            }
+        }
+        
         [Template("Data/TemplateBindings/TemplateBindingTest_StyleBinding.xml")]
         public class TemplateBindingTest_StyleBinding : UIElement { }
 

@@ -2,11 +2,28 @@
     
     <Using namespace="UnityEngine"/>
     <Using namespace="UIForia"/>
-    
+    <Style>
+        
+        painter test-painter {
+        
+            [variables] {
+                float floatValue = 32;
+            }
+        
+        }
+        
+    </Style>
     <Contents>
 
         <Div style:backgroundColor="Color.red" style:hover.TransformPositionX="new OffsetMeasurement(53, OffsetMeasurementUnit.ViewportWidth)"/>
         
+    </Contents>
+
+
+    <Contents id="painter_properties">
+
+        <Div painter:test-painter.floatValue="GetFloat()"/>
+
     </Contents>
     
 </UITemplate>

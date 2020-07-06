@@ -35,7 +35,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        public void AddLine(ref UIVertexHelper vh, ref List_float2 positions, LineProperties lineProperties, Color32 color, float2 positionOffset = default) {
+        internal void AddLine(ref UIVertexHelper vh, ref List_float2 positions, LineProperties lineProperties, Color32 color, float2 positionOffset = default) {
 
             if (positions.array == null || positions.size < 2) {
                 return;
@@ -49,7 +49,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             scratchPointData.Clear();
         }
 
-        public void AddLine(ref UIVertexHelper vh, ref List_float2 positions, LineProperties lineProperties, Color32 color, float2 positionOffset, ref PointsData pointsData) {
+        internal void AddLine(ref UIVertexHelper vh, ref List_float2 positions, LineProperties lineProperties, Color32 color, float2 positionOffset, ref PointsData pointsData) {
             if (positions.array == null || positions.size < 2) {
                 return;
             }

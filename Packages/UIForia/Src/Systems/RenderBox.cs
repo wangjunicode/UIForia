@@ -2,6 +2,7 @@ using System;
 using UIForia.Elements;
 using UIForia.Graphics;
 using UIForia.Layout;
+using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 
@@ -34,7 +35,7 @@ namespace UIForia.Rendering {
         internal string uniqueId;
 
         protected internal UIElement element;
-
+        public UIEffect effect;
         public float opacity;
         public Visibility visibility;
         public Overflow overflowX;
@@ -47,9 +48,13 @@ namespace UIForia.Rendering {
         internal ClipData clipper;
         public bool didRender;
         public int traversalIndex;
-
+        internal RenderContext2 bgRenderContext;
+        internal RenderContext2 fgRenderContext;
+        internal RangeInt bgRenderRange;
+        internal RangeInt fgRenderRange;
         private bool hasForeground;
-        
+        public MaterialId materialId;
+
         public virtual bool HasForeground {
             get => hasForeground;
             set => hasForeground = value;
@@ -84,6 +89,7 @@ namespace UIForia.Rendering {
             layer = element.style.Layer;
             clipBehavior = element.style.ClipBehavior;
             visibility = element.style.Visibility;
+            materialId = element.style.Material;
         }
 
         public virtual void OnDestroy() { }
@@ -211,6 +217,10 @@ namespace UIForia.Rendering {
         }
 
         public virtual void Enable() { }
+
+        public string GetName() {
+            return "painter-name";
+        }
 
     }
 

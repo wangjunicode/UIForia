@@ -203,6 +203,11 @@ namespace UIForia {
         public static SchedulerStep Await<T>(T job) where T : struct, IJob {
             return new SchedulerStep(job.Schedule());
         }
+        
+        public static SchedulerStep Run<T>(T job) where T : struct, IJob {
+            job.Run();
+            return default;
+        }
 
     }
 

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UIForia.Animation;
 using UIForia.Exceptions;
-using UIForia.Graphics;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Rendering;
 using UIForia.Sound;
@@ -21,10 +20,9 @@ namespace UIForia.Compilers.Style {
 
         private static readonly UIStyle s_ScratchStyle = new UIStyle();
         private Dictionary<string, StylePainterDefinition> painterCache;
-        private StylePainterCompiler stylePainterCompiler;
-        private int idGenerator;
 
         private int painterFunctionIdGenerator;
+        private int customPropertyCount;
 
         private StructList<PainterVariableDeclaration> painterVariableBuffer;
 
@@ -34,14 +32,16 @@ namespace UIForia.Compilers.Style {
             this.painterCache = new Dictionary<string, StylePainterDefinition>();
             this.scratchGroupList = new LightList<UIStyleGroup>(32);
             this.painterVariableBuffer = new StructList<PainterVariableDeclaration>();
-            this.idGenerator = 1000;
-            this.stylePainterCompiler = new StylePainterCompiler();
         }
 
+        public int NextCustomPropertyId {
+            get => StyleUtil.CustomPropertyStart + (customPropertyCount++);
+        }
+        
         // todo -- deprecate, use other method
-        public StyleSheet Compile(string filePath, LightList<StyleASTNode> rootNodes, MaterialDatabase materialDatabase = default) {
+        public StyleSheet Compile(string filePath, LightList<StyleASTNode> rootNodes) {
             try {
-                context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes, materialDatabase);
+                context = new StyleSheetConstantImporter(styleSheetImporter).CreateContext(rootNodes);
                 context.resourceManager = resourceManager;
             }
             catch (CompileException e) {
@@ -125,7 +125,10 @@ namespace UIForia.Compilers.Style {
                     case PainterDefinitionNode painterNode:
                         CompilePainterNode(painterNode);
                         break;
-
+                    
+                    case MaterialDefinitionNode materialDefinitionNode:
+                        CompileMaterialNode(materialDefinitionNode);
+                        break;
                 }
             }
 
@@ -133,6 +136,37 @@ namespace UIForia.Compilers.Style {
             return styleSheet;
         }
 
+        private unsafe void CompileMaterialNode(MaterialDefinitionNode matNode) {
+            
+            if (matNode.body == null) {
+                
+                StructList<MaterialPropertyDefinition> properties = StructList<MaterialPropertyDefinition>.Get();
+                
+                if (!resourceManager.TryGetMaterialProperties(matNode.loadMethod, matNode.assetLoadPath, properties)) {
+                    throw new CompileException($"Could not find or load a material named {matNode.materialName} at {context.fileName} {matNode.line}:{matNode.column}");
+                }
+
+                for (int i = 0; i < properties.size; i++) {
+                    properties.array[i].stylePropertyId = NextCustomPropertyId;
+                }
+                
+                resourceManager.materialDatabase.TryRegisterMaterial(new MaterialDefinition() {
+                    keywords = null,
+                    properties = properties.ToArray(),
+                    assetPath = matNode.assetLoadPath,
+                    loadMethod = matNode.loadMethod,
+                    materialName = matNode.materialName
+                });
+                
+                properties.Release();
+                return;
+            }
+
+            fixed (char* charptr = matNode.body) {
+                CharStream stream = new CharStream(charptr, 0, matNode.body.Length);
+            }    
+        }
+        
         private bool TryParsePainterVariableBlock(ref CharStream stream, out PainterVariableDeclaration[] painterVariables) {
 
             painterVariableBuffer.Clear();
@@ -167,8 +201,6 @@ namespace UIForia.Compilers.Style {
                     return false;
                 }
 
-                // float, int, Color, Color32, material, texture2d, Vector3, Vector2, Matrix, string, enums
-
                 string typeName = typeNameSpan.ToString();
 
                 Type propertyType = null;
@@ -179,11 +211,45 @@ namespace UIForia.Compilers.Style {
                         painterVariableBuffer.Add(new PainterVariableDeclaration(propertyType, propertyName.ToString(), floatValue));
                     }
                 }
-                else if (typeName == "color") { }
-                else if (typeName == "vector2") { }
-                else if (typeName == "texture") { }
-                else if (typeName == "int") { }
+                else if (typeName == "color") {
+                    propertyType = typeof(Color32);
+                    if (lineStream.TryParseColorProperty(out Color32 color)) {
+                        painterVariableBuffer.Add(new PainterVariableDeclaration(propertyType, propertyName.ToString(), color));
+                    }
+                }
+                else if (typeName == "float2") {
+                    throw new NotImplementedException("");
+                }
+                else if (typeName == "Material") {
+                    throw new NotImplementedException("");
+                }
+                else if (typeName == "Texture") {
+                    propertyType = typeof(Texture);
+                    if (TryParseTextureVariable(ref lineStream, out TextureDefinition textureDef)) {
+                        if (textureDef.textureName == null) {
+                            painterVariableBuffer.Add(new PainterVariableDeclaration(propertyType, propertyName.ToString(), (Texture2D)null));
+                        }
+                        else if (textureDef.spriteName == null) {
+                            Texture texture = resourceManager.GetTexture(textureDef.textureName);
+                            painterVariableBuffer.Add(new PainterVariableDeclaration(propertyType, propertyName.ToString(), texture));
+                        }
+                        else {
+                            throw new NotImplementedException("Sprite sheets are not yet supported");
+                           // Texture texture = resourceManager.GetTexture(textureDef.textureName);
+                           // painterVariableBuffer.Add(new PainterVariableDeclaration(propertyType, propertyName.ToString(), texture));
+                        }
+                    }
+                }
+                else if (typeName == "int") {
+                    propertyType = typeof(int);
+                    if (lineStream.TryParseInt(out int intValue)) {
+                        painterVariableBuffer.Add(new PainterVariableDeclaration(propertyType, propertyName.ToString(), intValue));
+                    }
+                }
                 else {
+                    throw new NotImplementedException("");
+                    // if type is enum
+                    // try resolve type name
                     return false;
                 }
 
@@ -191,6 +257,45 @@ namespace UIForia.Compilers.Style {
 
             painterVariables = painterVariableBuffer.ToArray();
             return true;
+        }
+
+        private static bool TryParseTextureVariable(ref CharStream stream, out TextureDefinition textureDef) {
+            if (stream.TryParseIdentifier(out CharSpan identifier)) {
+
+                if (identifier == "null" || identifier == "default") {
+                    stream.ConsumeWhiteSpaceAndComments();
+                    if (stream.HasMoreTokens) {
+                        throw new ParseException($"Failed to parse texture definition from painter. Expected end of stream after '{identifier}'");
+                    }
+
+                    textureDef = default;
+                    return true;
+                }
+
+                if (identifier == "url") {
+                    if (!stream.TryGetSubStream('(', ')', out CharStream contents)) {
+                        throw new ParseException("Failed to parse texture definition from painter. Expected a matching pair of ( ) after the 'url' keyword");
+                    }
+
+                    if (contents.TryParseDoubleQuotedString(out CharSpan textureName) || contents.TryParseSingleQuotedString(out textureName)) {
+                        textureDef = new TextureDefinition() {
+                            textureName = textureName.ToString(),
+                            spriteName = null
+                        };
+                        return true;
+                    }
+                    
+                }
+
+                // Texture texture = sprite("sheetName:spriteName");
+                if (identifier == "sprite") { }
+
+                throw new ParseException($"Failed to parse texture definition from painter. {stream} is invalid.");
+
+            }
+
+            textureDef = default;
+            return false;
         }
 
         private static bool HasDuplicateVariableName(StructList<PainterVariableDeclaration> buffer, CharSpan propertyName) {
@@ -295,7 +400,7 @@ namespace UIForia.Compilers.Style {
 
             if (variables != null) {
                 for (int i = 0; i < variables.Length; i++) {
-                    variables[i].propertyId = idGenerator++;
+                    variables[i].propertyId = NextCustomPropertyId;
                 }
             }
 
@@ -366,54 +471,7 @@ namespace UIForia.Compilers.Style {
                     if (keyFrameProperty is PropertyNode propertyNode) {
                         StylePropertyMappers.MapProperty(s_ScratchStyle, propertyNode, context);
                     }
-                    else if (keyFrameProperty is MaterialPropertyNode materialPropertyNode) {
-
-                        string materialName = materialPropertyNode.materialName;
-
-                        if (context.materialDatabase.TryGetBaseMaterialId(materialName, out MaterialId materialId)) {
-
-                            if (context.materialDatabase.TryGetMaterialProperty(materialId, materialPropertyNode.identifier, out MaterialPropertyInfo propertyInfo)) {
-
-                                fixed (char* charptr = materialPropertyNode.value) {
-
-                                    CharStream stream = new CharStream(charptr, 0, (uint) materialPropertyNode.value.Length);
-                                    MaterialKeyFrameValue kfv = default;
-                                    switch (propertyInfo.propertyType) {
-
-                                        case MaterialPropertyType.Color:
-
-                                            if (stream.TryParseColorProperty(out Color32 color)) {
-                                                kfv = new MaterialKeyFrameValue(materialId, propertyInfo.propertyId, new MaterialPropertyValue2() {colorValue = color});
-                                            }
-
-                                            break;
-
-                                        case MaterialPropertyType.Float:
-                                            if (stream.TryParseFloat(out float floatVal)) {
-                                                kfv = new MaterialKeyFrameValue(materialId, propertyInfo.propertyId, new MaterialPropertyValue2() {floatValue = floatVal});
-                                            }
-
-                                            break;
-
-                                        case MaterialPropertyType.Vector:
-                                            break;
-
-                                        case MaterialPropertyType.Range:
-                                            break;
-
-                                        case MaterialPropertyType.Texture:
-                                            break;
-
-                                        default:
-                                            throw new ArgumentOutOfRangeException();
-                                    }
-
-                                }
-                            }
-
-                        }
-
-                    }
+                    
                 }
 
                 StructList<StyleKeyFrameValue> styleKeyValues = new StructList<StyleKeyFrameValue>(s_ScratchStyle.PropertyCount);

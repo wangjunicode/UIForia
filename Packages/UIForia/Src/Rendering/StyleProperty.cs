@@ -50,7 +50,7 @@ namespace UIForia.Rendering {
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, in MaterialId materialId) : this() {
             this.propertyId = propertyId;
-            this.longVal = materialId.id;
+            this.longVal = materialId.index;
             this.flags = 1;
         }
 
@@ -58,7 +58,7 @@ namespace UIForia.Rendering {
         public StyleProperty(StylePropertyId propertyId, in MaterialId? materialId) : this() {
             this.propertyId = propertyId;
             if (materialId.HasValue) {
-                this.int0 = (int) materialId.Value;
+                this.int0 = materialId.Value.index;
                 this.flags = 1;
             }
         }
@@ -246,7 +246,7 @@ namespace UIForia.Rendering {
         public MeshFillOrigin AsMeshFillOrigin => (MeshFillOrigin) int0;
         public MeshFillDirection AsMeshFillDirection => (MeshFillDirection) int0;
 
-        public MaterialId AsMaterialId => (MaterialId) longVal;
+        public MaterialId AsMaterialId => new MaterialId(int0);
         public int AsInt => int0;
         public float AsFloat => float0;
         public GridAxisAlignment AsGridAxisAlignment => (GridAxisAlignment) int0;

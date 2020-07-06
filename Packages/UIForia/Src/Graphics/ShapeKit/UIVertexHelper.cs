@@ -6,13 +6,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Graphics.ShapeKit {
-
-    public struct ShapeRange {
-
-        public RangeInt vertexRange;
-        public RangeInt triangleRange;
-
-    }
+    
 
     public unsafe struct UIVertexHelper : IDisposable {
 
@@ -26,35 +20,31 @@ namespace UIForia.Graphics.ShapeKit {
         public Color32* colors;
         public int* triangles;
 
-        // private NativeArray<float3> positionArray;
-        // private NativeArray<float4> uvArray;
-        // private NativeArray<Color32> colorArray;
-        // private NativeArray<int> trianglesArray;
-
-        private int currentShapeVertexStart;
-        private int currentShapeTriangleStart;
-
         private int vertexCapacity;
         private int triangleCapacity;
 
-        public void BeginShape() {
-            currentShapeTriangleStart = triangleCount;
-            currentShapeVertexStart = vertexCount;
-            shapeMode = true;
-        }
+        public static UIVertexHelper Create(Allocator allocator) {
 
-        public ShapeRange EndShape() {
-            shapeMode = false;
-            return new ShapeRange() {
-                vertexRange = new RangeInt(currentShapeVertexStart, vertexCount - currentShapeVertexStart),
-                triangleRange = new RangeInt(currentShapeTriangleStart, triangleCount - currentShapeTriangleStart)
+            TypedUnsafe.MallocSplitBuffer(out float3* positions, out float4* texCoords, out Color32* colors, 128, allocator);
+
+            int* triangles = TypedUnsafe.Malloc<int>(256, allocator);
+
+            return new UIVertexHelper() {
+                allocator = allocator,
+
+                colors = colors,
+                positions = positions,
+                triangles = triangles,
+                texCoord = texCoords,
+                triangleCount = 0,
+                vertexCount = 0,
+                triangleCapacity = 256,
+                vertexCapacity = 128
             };
         }
-
-        public bool shapeMode;
-
+        
         public int currentVertCount {
-            get => shapeMode ? vertexCount - currentShapeVertexStart : vertexCount;
+            get => vertexCount;
         }
 
         public int TotalVertexCount {
@@ -65,8 +55,12 @@ namespace UIForia.Graphics.ShapeKit {
             get => triangleCount;
         }
 
-        public void AddVertexCount(int additional) {
-            vertexCount += additional;
+        public void AddVertexCount(int count) {
+            vertexCount += count;
+        }
+
+        public void AddTriangleCount(int count) {
+            triangleCount += count;
         }
 
         public void Dispose() {
@@ -126,8 +120,8 @@ namespace UIForia.Graphics.ShapeKit {
         }
 
         public void AddTriangle(int a, int b, int c) {
-            if (triangleCount + 3 > triangleCapacity) {
-                TypedUnsafe.Resize(ref triangles, triangleCapacity, math.max(128, triangleCapacity * 2), allocator);
+            if (triangleCount + 3 >= triangleCapacity) {
+                EnsureAdditionalTriangleCapacity(3);
             }
 
             triangles[triangleCount++] = a;
@@ -138,29 +132,6 @@ namespace UIForia.Graphics.ShapeKit {
         public void Clear() {
             vertexCount = 0;
             triangleCount = 0;
-            shapeMode = false;
-            currentShapeTriangleStart = 0;
-            currentShapeVertexStart = 0;
-        }
-
-        public static UIVertexHelper Create(Allocator allocator) {
-
-            TypedUnsafe.MallocSplitBuffer(out float3* positions, out float4* texCoords, out Color32* colors, 128, allocator);
-
-            int* triangles = TypedUnsafe.Malloc<int>(256, allocator);
-
-            return new UIVertexHelper() {
-                allocator = allocator,
-
-                colors = colors,
-                positions = positions,
-                triangles = triangles,
-                texCoord = texCoords,
-                triangleCount = 0,
-                vertexCount = 0,
-                triangleCapacity = 256,
-                vertexCapacity = 128
-            };
         }
 
         public void FillMesh(Mesh mesh) {
@@ -170,11 +141,20 @@ namespace UIForia.Graphics.ShapeKit {
             NativeArray<float4> uvArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<float4>(texCoord, vertexCount, allocator);
             NativeArray<Color32> colorArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Color32>(colors, vertexCount, allocator);
             NativeArray<int> trianglesArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(triangles, triangleCount, allocator);
+            NativeArray<int> dummy = new NativeArray<int>(1, Allocator.Temp);
+
+            AtomicSafetyHandle safetyHandle = NativeArrayUnsafeUtility.GetAtomicSafetyHandle(dummy);
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref positionArray, safetyHandle);
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref uvArray, safetyHandle);
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref colorArray, safetyHandle);
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref trianglesArray, safetyHandle);
 
             mesh.SetVertices(positionArray, 0, vertexCount);
             mesh.SetUVs(0, uvArray, 0, vertexCount);
             mesh.SetColors(colorArray, 0, vertexCount);
             mesh.SetIndices(trianglesArray, 0, triangleCount, MeshTopology.Triangles, 0, false);
+            dummy.Dispose();
+
         }
 
         public void EnsureAdditionalVertexCapacity(int add) {
@@ -191,13 +171,16 @@ namespace UIForia.Graphics.ShapeKit {
         }
 
         public void EnsureAdditionalTriangleCapacity(int size) {
-            if (triangleCount + size <= triangleCapacity) {
+            if (triangleCount + size < triangleCapacity) {
                 return;
             }
 
             int addSize = math.max((triangleCount + size) * 2, triangleCapacity * 2);
+            int* newptr = (int*) UnsafeUtility.Malloc(addSize * sizeof(int), 4, allocator);
+            UnsafeUtility.MemCpy(newptr, triangles, sizeof(int) * triangleCount);
+            UnsafeUtility.Free(triangles, allocator);
 
-            TypedUnsafe.Resize(ref triangles, triangleCapacity, addSize, allocator);
+            triangles = newptr;
             triangleCapacity = addSize;
         }
 

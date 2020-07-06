@@ -4,6 +4,20 @@ using System.Diagnostics;
 
 namespace UIForia.Util {
 
+    internal unsafe interface IBasicList<T> where T: unmanaged {
+
+        void SetSize(int size);
+
+        void Add(in T item);
+
+        void AddUnchecked(in T item);
+        
+        // void EnsureCapacity(int size);
+        //
+        // T* GetArrayPointer();
+
+    }
+
     [DebuggerTypeProxy(typeof(StructList<>))]
     internal class StructListDebugView<T> where T : struct {
 
@@ -620,6 +634,11 @@ namespace UIForia.Util {
             System.Array.Copy(array, 0, retn.array, 0, size);
             retn.size = size;
             return retn;
+        }
+
+        public void SetSize(int length) {
+            EnsureCapacity(length);
+            size = length;
         }
 
     }

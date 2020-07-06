@@ -14,6 +14,21 @@ namespace ThisOtherThing.UI.ShapeUtils {
             AddRect(ref vh, position.x, position.y, width, height, color);
         }
 
+        public void AddQuad(ref UIVertexHelper vh, float x, float y, float width, float height, Color32 color) {
+            width += edgeGradientData.shadowOffset * 2.0f;
+            height += edgeGradientData.shadowOffset * 2.0f;
+
+            float2 center = default;
+            center.x = x + (width * 0.5f);
+            center.y = -(y + (height * 0.5f));
+
+            float innerOffset = (width < height ? width : height) * (1.0f - edgeGradientData.innerScale);
+
+            AddRectVertRing(ref vh, center, width - innerOffset, height - innerOffset, color, width, height);
+
+            AddRectQuadIndices(ref vh);
+        }
+
         public void AddRect(ref UIVertexHelper vh, float x, float y, float width, float height, Color32 color) {
 
             width += edgeGradientData.shadowOffset * 2.0f;
@@ -32,14 +47,15 @@ namespace ThisOtherThing.UI.ShapeUtils {
             if (edgeGradientData.isActive) {
                 color.a = 0;
 
-                GeoUtils.AddOffset(ref width, ref height, edgeGradientData.sizeAdd);
+                width += edgeGradientData.sizeAdd * 2.0f;
+                height += edgeGradientData.sizeAdd * 2.0f;
 
                 AddRectVertRing(ref vh, center, width, height, color, width - edgeGradientData.sizeAdd * 2.0f, height - edgeGradientData.sizeAdd * 2.0f, true);
 
             }
         }
 
-        private void AddRectRing(ref UIVertexHelper vh, OutlineProperties outlineProperties, Vector2 center, float width, float height, Color32 color) {
+        private void AddRectRing(ref UIVertexHelper vh, OutlineProperties outlineProperties, float2 center, float width, float height, Color32 color) {
             byte alpha = color.a;
             float outerDistance = GetOuterDistance(outlineProperties);
             float centerDistance = GetCenterDistance(outlineProperties);
@@ -72,35 +88,54 @@ namespace ThisOtherThing.UI.ShapeUtils {
             }
         }
 
-        private static void AddRectVertRing(ref UIVertexHelper vh, Vector2 center, float width, float height, Color32 color, float totalWidth, float totalHeight, bool addRingIndices = false) {
+        private unsafe static void AddRectVertRing(ref UIVertexHelper vh, float2 center, float width, float height, Color32 color, float totalWidth, float totalHeight, bool addRingIndices = false) {
             float uvXInset = 0.5f - width / totalWidth * 0.5f;
             float uvYInset = 0.5f - height / totalHeight * 0.5f;
 
-            Vector3 tmpPos = default;
-            Vector2 tmpUVPos = default;
+            float3 tmpPos = default;
+            float4 tmpUVPos = default;
 
             // TL
             tmpPos.x = center.x - width * 0.5f;
             tmpPos.y = center.y + height * 0.5f;
             tmpUVPos.x = uvXInset;
             tmpUVPos.y = 1.0f - uvYInset;
+
+            vh.EnsureAdditionalVertexCapacity(4);
+            
+            // int vCount = vh.currentVertCount;
+            //vh.positions[vCount] = tmpPos;
+            //vh.texCoord[vCount] = tmpUVPos;
+            //vh.colors[vCount] = color;
+            //
             vh.AddVert(tmpPos, color, tmpUVPos);
 
             // TR
             tmpPos.x += width;
             tmpUVPos.x = 1.0f - uvXInset;
             vh.AddVert(tmpPos, color, tmpUVPos);
-
+            // vh.positions[vCount + 1] = tmpPos;
+            // vh.texCoord[vCount + 1] = tmpUVPos;
+            // vh.colors[vCount + 1] = color;
+            
             // BR
             tmpPos.y -= height;
             tmpUVPos.y = uvYInset;
             vh.AddVert(tmpPos, color, tmpUVPos);
-
+            //vh.positions[vCount + 2] = tmpPos;
+            //vh.texCoord[vCount + 2] = tmpUVPos;
+            //vh.colors[vCount + 2] = color;
+            
             // BL
             tmpPos.x -= width;
             tmpUVPos.x = uvXInset;
-            vh.AddVert(tmpPos, color, tmpUVPos);
-
+             vh.AddVert(tmpPos, color, tmpUVPos);
+            //vh.positions[vCount + 3] = tmpPos;
+            //vh.texCoord[vCount + 3] = tmpUVPos;
+            //vh.colors[vCount + 3] = color;
+            
+            //vh.AddVertexCount(4);
+            
             if (addRingIndices) {
                 int baseIndex = vh.currentVertCount - 8;
 
@@ -125,7 +160,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             vh.AddTriangle(baseIndex + 3, baseIndex + 1, baseIndex + 2);
         }
 
-        public void AddVerticalTwoColorRect(ref UIVertexHelper vh, Vector3 topLeft, float height, float width, Color32 topColor, Color32 bottomColor, Vector2 uv) {
+        public void AddVerticalTwoColorRect(ref UIVertexHelper vh, float3 topLeft, float height, float width, Color32 topColor, Color32 bottomColor, float2 uv) {
             int numVertices = vh.currentVertCount;
 
             vh.AddVert(topLeft, topColor, uv); // TL
@@ -137,7 +172,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             vh.AddTriangle(numVertices + 2, numVertices + 1, numVertices + 3);
         }
 
-        public void AddHorizontalTwoColorRect(ref UIVertexHelper vh, Vector3 topLeft, float height, float width, Color32 leftColor, Color32 rightColor, Vector2 uv) {
+        public void AddHorizontalTwoColorRect(ref UIVertexHelper vh, float3 topLeft, float height, float width, Color32 leftColor, Color32 rightColor, float2 uv) {
             int numVertices = vh.currentVertCount;
 
             vh.AddVert(topLeft, leftColor, uv); // TL

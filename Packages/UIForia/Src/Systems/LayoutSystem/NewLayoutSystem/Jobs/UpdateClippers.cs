@@ -17,7 +17,8 @@ namespace UIForia.Systems {
         public ElementTable<ClipInfo> clipInfoTable;
         public ElementTable<LayoutBoxInfo> layoutResultTable;
         public DataList<float2>.Shared intersectionResults;
-
+        public DataList<OverflowBounds>.Shared clipperBoundsList;
+        
         public void Execute() {
             Run(2, clipperList.size);
         }
@@ -37,6 +38,12 @@ namespace UIForia.Systems {
 
             DataList<float2> subjectBuffer = new DataList<float2>(4, Allocator.Temp);
 
+            clipperBoundsList.size = 0;
+            // todo -- i think this is wrong. 1 for screen, 1 for never
+            
+            clipperBoundsList.Add(default);
+            clipperBoundsList.Add(default);
+            
             for (int i = start; i < end; i++) {
 
                 ref Clipper clipper = ref clipperList[i];
@@ -67,10 +74,36 @@ namespace UIForia.Systems {
                 subjectBuffer[3] = bounds.p3;
                 subjectBuffer.size = 4;
 
-                RangeInt parentIntersectionRange = clipperList[clipper.parentIndex].intersectionRange;
-
+                ElementId parentElementId = clipperList[clipper.parentIndex].elementId;
+                ref ClipInfo parentClipInfo = ref clipInfoTable[parentElementId];
                 int rangeStart = intersectionResults.size;
                 outputBuffer.size = 0;
+
+                if (parentClipInfo.orientedBounds.ContainsPoint(bounds.p0) &&
+                    parentClipInfo.orientedBounds.ContainsPoint(bounds.p1) &&
+                    parentClipInfo.orientedBounds.ContainsPoint(bounds.p2) &&
+                    parentClipInfo.orientedBounds.ContainsPoint(bounds.p3)) {
+                    clipInfo.fullyContainedByParentClipper = true;
+                    clipInfo.isCulled = false;
+                    clipper.intersectionRange = new RangeInt(rangeStart, 4);
+                    intersectionResults.EnsureAdditionalCapacity(4);
+                    intersectionResults.Add(bounds.p0);
+                    intersectionResults.Add(bounds.p1);
+                    intersectionResults.Add(bounds.p2);
+                    intersectionResults.Add(bounds.p3);
+                    
+                    clipper.aabb = PolygonUtil.GetBounds(intersectionResults.GetArrayPointer() + clipper.intersectionRange.start, clipper.intersectionRange.length);
+                    clipper.overflowBoundsIndex = clipperBoundsList.size;
+                    clipperBoundsList.Add(new OverflowBounds() {
+                        p0 = bounds.p0,
+                        p1 = bounds.p1,
+                        p2 = bounds.p2,
+                        p3 = bounds.p3,
+                    });
+                    continue;
+                }
+                   
+                RangeInt parentIntersectionRange = clipperList[clipper.parentIndex].intersectionRange;
 
                 SutherlandHodgman.GetIntersectedPolygon(
                     subjectBuffer,
@@ -84,6 +117,25 @@ namespace UIForia.Systems {
                 if (outputBuffer.size > 0) {
                     intersectionResults.EnsureAdditionalCapacity(outputBuffer.size);
                     TypedUnsafe.MemCpy(intersectionResults.GetArrayPointer() + intersectionResults.size, outputBuffer.GetArrayPointer(), outputBuffer.size);
+                    if (outputBuffer.size == 3) {
+                        // if the clip output is a triangle 
+                        clipper.overflowBoundsIndex = clipperBoundsList.size;
+                        clipperBoundsList.Add(new OverflowBounds() {
+                            p0 = outputBuffer[0],
+                            p1 = outputBuffer[1],
+                            p2 = outputBuffer[2],
+                            p3 = outputBuffer[1],
+                        });
+                    }
+                    else if (outputBuffer.size == 4) {
+                        clipper.overflowBoundsIndex = clipperBoundsList.size;
+                        clipperBoundsList.Add(new OverflowBounds() {
+                            p0 = outputBuffer[0],
+                            p1 = outputBuffer[1],
+                            p2 = outputBuffer[2],
+                            p3 = outputBuffer[3],
+                        });
+                    }
                 }
 
                 clipper.intersectionRange = new RangeInt(rangeStart, outputBuffer.size);

@@ -10,11 +10,13 @@ namespace UIForia.Layout {
         public float4 aabb;
         public int parentIndex;
         public ElementId elementId;
+        public int overflowBoundsIndex;
 
         /// <summary>
         /// Only used for view clippers, lets me find the parallel segments of the clipper list by view
         /// </summary>
         public int subClipperCount;
+
 
     }
 

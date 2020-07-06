@@ -1,28 +1,28 @@
 ﻿using UIForia.Graphics;
+using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Jobs;
+using UnityEngine;
 
 namespace UIForia.Systems {
 
-    public unsafe struct MergeRenderContexts_Managed : IJob {
+    internal unsafe struct MergeRenderContexts_Managed : IJob {
 
-        public HeapAllocated<int> drawListSizePtr;
-        public GCHandle<RenderContextInfo> outputHandle;
+        public DataList<DrawInfo>.Shared drawList;
+        public GCHandleList<Mesh> meshListHandle;
+        public DataList<MaskInfo>.Shared maskList;
         public PerThreadObjectPool<RenderContext2> contextPoolHandle;
-        public DataList<ContextOffsets> contextOffsets;
 
         public void Execute() {
 
             ThreadSafePool<RenderContext2> pool = contextPoolHandle.GetPool();
-            RenderContextInfo renderContextInfo = outputHandle.Get();
-
+            LightList<Mesh> meshList = meshListHandle.Get();
+            
+            meshList.QuickClear();
+            
             int drawListSize = 0;
-            int shapeInfoListSize = 0;
             int meshListSize = 0;
-            int materialListSize = 0;
-            int transformListSize = 0;
-            int propertyOverrideSize = 0;
-            int textureIdSize = 0;
+            int maskListSize = 0;
             
             for (int i = 0; i < pool.perThreadData.Length; i++) {
                 RenderContext2 renderContext = pool.perThreadData[i];
@@ -31,34 +31,15 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                contextOffsets[i] = new ContextOffsets() {
-                    drawListOffset = drawListSize,
-                    materialListOffset = materialListSize,
-                    meshListOffset = meshListSize,
-                    propertyOverrideOffset = propertyOverrideSize,
-                    textureIdOffset = textureIdSize,
-                    transformListOffset = transformListSize,
-                    shapeInfoListOffset = shapeInfoListSize
-                };
-
-                shapeInfoListSize += renderContext.shapeInfoList.size;
                 drawListSize += renderContext.drawList.size;
                 meshListSize += renderContext.meshList.size;
-                materialListSize += renderContext.materialList.size;
-                transformListSize += renderContext.transformList.size;
-                propertyOverrideSize += renderContext.propertyOverrides.size;
-                textureIdSize += renderContext.textureIds.size;
-
+                maskListSize += renderContext.maskInfoList.size;
+                
             }
 
-            renderContextInfo.drawList.EnsureCapacity(drawListSize);
-            renderContextInfo.propertyOverrides.EnsureCapacity(propertyOverrideSize);
-            renderContextInfo.textureIds.EnsureCapacity(textureIdSize);
-            renderContextInfo.transformList.EnsureCapacity(transformListSize);
-            renderContextInfo.shapeInfoList.EnsureCapacity(shapeInfoListSize);
-
-            renderContextInfo.materialList.EnsureCapacity(materialListSize);
-            renderContextInfo.meshList.EnsureCapacity(meshListSize);
+            drawList.EnsureCapacity(drawListSize);
+            meshList.EnsureCapacity(meshListSize);
+            maskList.EnsureCapacity(maskListSize);
 
             for (int i = 0; i < pool.perThreadData.Length; i++) {
                 RenderContext2 renderContext = pool.perThreadData[i];
@@ -67,19 +48,12 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                renderContextInfo.drawList.AddRange(renderContext.drawList.GetArrayPointer(), renderContext.drawList.size);
-                renderContextInfo.propertyOverrides.AddRange(renderContext.propertyOverrides.GetArrayPointer(), renderContext.propertyOverrides.size);
-                renderContextInfo.textureIds.AddRange(renderContext.textureIds.GetArrayPointer(), renderContext.textureIds.size);
-                renderContextInfo.transformList.AddRange(renderContext.transformList.GetArrayPointer(), renderContext.transformList.size);
-                renderContextInfo.shapeInfoList.AddRange(renderContext.shapeInfoList.GetArrayPointer(), renderContext.shapeInfoList.size);
-
-                renderContextInfo.materialList.AddRange(renderContext.materialList);
-                renderContextInfo.meshList.AddRange(renderContext.meshList);
+                drawList.AddRange(renderContext.drawList.array, renderContext.drawList.size);
+                meshList.AddRange(renderContext.meshList);
+                maskList.AddRange(renderContext.maskInfoList.GetArrayPointer(), renderContext.maskInfoList.size);
 
             }
-
-            drawListSizePtr.Set(drawListSize);
-
+            
         }
 
     }

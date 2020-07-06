@@ -150,6 +150,11 @@ namespace UIForia.Util.Unsafe {
             return itemCount;
         }
 
+        
+        public static int Megabytes(int count) {
+            return count * 1024 * 1024;
+        }
+        
         public static int Kilobytes(int count) {
             return count * 1024;
         }
@@ -553,6 +558,7 @@ namespace UIForia.Util.Unsafe {
         public static int ByteSize<T, T1>(T* a, T1* b, int count) where T : unmanaged where T1 : unmanaged {
             return count * (sizeof(T) + sizeof(T1));
         }
+
 
     }
 

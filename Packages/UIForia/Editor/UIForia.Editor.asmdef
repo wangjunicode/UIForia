@@ -3,7 +3,8 @@
     "references": [
         "UIForia.Src",
         "Unity.TextMeshPro",
-        "Unity.Mathematics"
+        "Unity.Mathematics",
+        "Unity.TextCore.FontEngine.Tools"
     ],
     "includePlatforms": [
         "Editor"

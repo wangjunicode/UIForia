@@ -6,6 +6,7 @@ using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
+using UIForia.Systems;
 using UIForia.Text;
 using UIForia.UIInput;
 using UIForia.Util;
@@ -229,13 +230,20 @@ namespace UIForia.Editor {
             GUI.enabled = true;
             LayoutResult layoutResult = selectedElement.layoutResult;
             float labelWidth = EditorGUIUtility.labelWidth;
-            EditorGUIUtility.labelWidth = 100;
+            EditorGUIUtility.labelWidth = 200;
 
             Rect contentRect = layoutResult.ContentRect;
 
             DrawLabel("Enabled", selectedElement.isEnabled.ToString());
             if (selectedElement.isEnabled) {
                 DrawLabel("Culled", selectedElement.layoutResult.isCulled.ToString());
+                
+                if (selectedElement.renderBox != null && selectedElement.renderBox.overflowX != Overflow.Visible) {
+                    DrawLabel("Clipper", true.ToString());
+                    ClipInfo clipInfo = selectedElement.application.layoutSystem.clipInfoTable[selectedElement.id];
+                    DrawLabel("Fully Contained In Parent Clipper", clipInfo.fullyContainedByParentClipper.ToString());
+                }
+                
                 DrawLabel("View", selectedElement.View.name);
                 DrawLabel("Viewport", $"X: {selectedElement.View.Viewport.x}, Y: {selectedElement.View.Viewport.y}, W: {selectedElement.View.Viewport.width}, H: {selectedElement.View.Viewport.height}");
                 DrawVector2Value("Local Position", layoutResult.localPosition);
@@ -723,22 +731,15 @@ namespace UIForia.Editor {
                     return DrawEnumWithValue<PointerEvents>(property, isEditable);
 
                 default:
-                    Debug.Log(property.propertyId.ToString() + " has no inspector");
+                    if ((int)property.propertyId < StyleUtil.CustomPropertyStart) {
+                        Debug.Log(property.propertyId.ToString() + " has no inspector");
+                    }
+
                     return StyleProperty.Unset(property.propertyId);
             }
         }
 
         private static StyleProperty DrawMaterial(in StyleProperty property) {
-            if (property.AsMaterialId.id == 0) {
-                s_Content.text = "Material";
-                GUI.enabled = false;
-                EditorGUILayout.TextField(s_Content, "None");
-                GUI.enabled = true;
-                return property;
-            }
-
-            if (UIForiaHierarchyWindow.s_SelectedApplication.materialDatabase.TryGetMaterial(property.AsMaterialId, out MaterialInfo info)) { }
-
             return property;
 
         }

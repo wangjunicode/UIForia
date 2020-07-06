@@ -8,15 +8,14 @@ namespace UIForia.Rendering {
 
         public static readonly StylePropertyId[] StylePropertyIdList;
         public static readonly List<StylePropertyId> InheritedProperties;
-        
+
         private static readonly IntMap_Deprecated<string> s_NameMap;
-        
+
         static StyleUtil() {
             s_NameMap = new IntMap_Deprecated<string>();
             InheritedProperties = new List<StylePropertyId>();
             StylePropertyId[] values = (StylePropertyId[]) Enum.GetValues(typeof(StylePropertyId));
-            StylePropertyId[] ignored = {
-            };
+            StylePropertyId[] ignored = { };
             int idx = 0;
             StylePropertyIdList = new StylePropertyId[values.Length - ignored.Length];
             for (int i = 0; i < values.Length; i++) {
@@ -25,25 +24,26 @@ namespace UIForia.Rendering {
                 }
 
                 StylePropertyIdList[idx++] = values[i];
-                s_NameMap.Add((int)values[i], values[i].ToString());
+                s_NameMap.Add((int) values[i], values[i].ToString());
                 if (IsInherited(values[i])) {
                     InheritedProperties.Add(values[i]);
                 }
             }
         }
 
+        public static readonly int CustomPropertyStart = 1000;
+        
         public static string GetPropertyName(StyleProperty property) {
             string name;
             s_NameMap.TryGetValue((int) property.propertyId, out name);
             return name;
         }
-        
+
         public static string GetPropertyName(StylePropertyId propertyId) {
             string name;
             s_NameMap.TryGetValue((int) propertyId, out name);
             return name;
         }
-        
 
     }
 

@@ -104,6 +104,25 @@ namespace UIForia.Parsing.Style {
                     tokenStream.Advance();
                     break;
 
+                case StyleTokenType.MaterialDefinition:
+                    StyleToken materialName = tokenStream.Current;
+                    tokenStream.Advance();
+                    StyleToken loadMethod = tokenStream.Current;
+                    tokenStream.Advance();
+                    StyleToken loadPath = tokenStream.Current;
+                    tokenStream.Advance();
+                    StyleToken body = tokenStream.Current;
+                    tokenStream.Advance();
+                    MaterialDefinitionNode materialDefinitionNode = new MaterialDefinitionNode() {
+                        materialName = materialName,
+                        body = body,
+                        loadMethod = loadMethod == "resources" ? AssetLoadMethod.Resources : AssetLoadMethod.Addressable,
+                        assetLoadPath = loadPath
+                    };
+                    materialDefinitionNode.WithLocation(materialName);
+                    nodes.Add(materialDefinitionNode);
+                    break;
+
                 case StyleTokenType.PainterName:
                     StyleToken initialStyleToken = tokenStream.Current;
                     tokenStream.Advance();

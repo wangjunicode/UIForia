@@ -30,7 +30,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.Opacity, 1, InheritanceType.Inherited),
             new PropertyGenerator<CursorStyle>(StylePropertyId.Cursor, null),
             new PropertyGenerator<string>(StylePropertyId.Painter, string.Empty),
-            new AnimatedPropertyGenerator<MaterialId>(StylePropertyId.Material, default, InheritanceType.NotInherited, "(MaterialId)0"), 
+            new AnimatedPropertyGenerator<MaterialId>(StylePropertyId.Material, default, InheritanceType.NotInherited, "new MaterialId(0)"), 
             
             // Mesh
             new PropertyGenerator<MeshType>(StylePropertyId.MeshType, MeshType.Simple), 
@@ -218,7 +218,7 @@ using UIForia.Util;
 
 namespace UIForia.Rendering {
     
-    public partial struct UIStyleSetStateProxy {
+    public partial struct UIStyleSetProxy {
         __REPLACE__UIStyleSetStateProxy__
     }
 
@@ -377,7 +377,7 @@ namespace UIForia.Rendering {
                 code += $"\t\t\t\t\t return {properties[i].StyleSetGetComputed};\n";
             }
 
-            code += "\t\t\t\tdefault: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);\n";
+            code += "\t\t\t\tdefault: return default;\n";
             code += "\t\t\t\t}";
             return code;
         }
@@ -462,7 +462,7 @@ namespace UIForia.Rendering {
                 code += $"\t\t\t\t\t return {properties[i].AsStyleProperty};\n";
             }
 
-            code += "\t\t\t\tdefault: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);\n";
+            code += "\t\t\t\tdefault: return default;\n";
             code += "\t\t\t\t}\n}";
             return code;
         }

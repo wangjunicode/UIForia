@@ -18,7 +18,9 @@ namespace UIForia.Layout {
         UnderlayDilate,
         UnderlaySoftness,
 
-        FontSize
+        FontSize,
+
+        FontStyle
 
     }
 
@@ -36,25 +38,28 @@ namespace UIForia.Layout {
 
         }
 
-        private DataList<FontStyle> fontStyleStack;
         private DataList<FontAssetInfo> fontStack;
         private DataList<FloatPair> floatList;
         public TextScript scriptStyle;
+        public float viewportWidth;
+        public float viewportHeight;
 
         public TextMeasureState(Allocator allocator) : this() {
             fontStack = new DataList<FontAssetInfo>(8, allocator);
-            fontStyleStack = new DataList<FontStyle>(8, Allocator.Temp);
-            floatList = new DataList<FloatPair>(16, Allocator.Temp);
+            floatList = new DataList<FloatPair>(16, allocator);
         }
 
         public void Initialize(float baseFontSize, in TextStyle textStyle, in FontAssetInfo fontAssetInfo) {
-            fontStyleStack.size = 0;
             floatList.size = 0;
             fontStack.size = 0;
             fontStack.Add(fontAssetInfo);
 
             floatList.Add(new FloatPair(TextStyleType.FontSize, baseFontSize));
 
+            if (textStyle.fontStyle != 0) {
+                floatList.Add(new FloatPair(TextStyleType.FontStyle, (int)textStyle.fontStyle));
+            }
+            
             if (textStyle.faceDilate != 0) {
                 floatList.Add(new FloatPair(TextStyleType.FaceDilate, textStyle.faceDilate));
             }
@@ -166,7 +171,7 @@ namespace UIForia.Layout {
         }
 
         public FontStyle fontStyle {
-            get => fontStyleStack.GetLast();
+            get => (FontStyle)(int)FindFloat(TextStyleType.FontStyle, 0);
         }
 
         public ref FontAssetInfo fontAssetInfo {
@@ -183,7 +188,7 @@ namespace UIForia.Layout {
             }
         }
 
-        public void PushFontSize(UIFixedLength newFontSize, float viewportWidth, float viewportHeight) {
+        public void PushFontSize(UIFixedLength newFontSize) {
             switch (newFontSize.unit) {
 
                 default:
@@ -215,16 +220,15 @@ namespace UIForia.Layout {
         }
 
         public void PushFontStyle(FontStyle fontStyle) {
-            fontStyleStack.Add(fontStyle);
+            PushFloat(TextStyleType.FontStyle, (int)fontStyle);
         }
 
         public void PopFontStyle() {
-            fontStyleStack.size--;
+            PopFloat(TextStyleType.FontStyle);
         }
 
         public void Dispose() {
             fontStack.Dispose();
-            fontStyleStack.Dispose();
             floatList.Dispose();
         }
 

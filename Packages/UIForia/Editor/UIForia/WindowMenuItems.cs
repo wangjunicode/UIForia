@@ -1,5 +1,6 @@
 using System.IO;
 using System.Runtime.CompilerServices;
+using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Text;
 using UIForia.Util.Unsafe;
@@ -54,6 +55,7 @@ namespace UIForia.Editor {
             ListTemplateGenerator.Generate<Color>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<Color32>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<BytePage>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<DrawInfo>(outputPathRoot, contents);
             
         }
 

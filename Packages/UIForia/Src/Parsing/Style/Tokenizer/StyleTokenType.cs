@@ -92,10 +92,13 @@ namespace UIForia.Parsing.Style.Tokenizer {
         PainterName,
         PainterBody,
 
+        MaterialDefinition,
+        MaterialDefinitionLoadType,
+        MaterialDefinitionLoadPath,
+        MaterialDefinitionBody,
+        
         PainterVariableReference,
-
         PainterVariableName,
-
         PainterVariableValue
 
     }

@@ -10,12 +10,15 @@ using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+
 // #NAMESPACES#
 
 namespace UIForia.ListTypes {
 
+    public struct TTEMPLATE { }
+
     [DebuggerTypeProxy(typeof(DebugView_TTEMPLATE))]
-    public unsafe struct List_TTEMPLATE {
+    internal unsafe struct List_TTEMPLATE : IBasicList<TTEMPLATE> {
 
         public int size;
         private ushort capacityShiftBits;
@@ -36,7 +39,7 @@ namespace UIForia.ListTypes {
             }
 
         }
-        
+
         private void Initialize(int capacity, Allocator allocator, bool clearMemory) {
             this.allocator = TypedUnsafe.CompressAllocatorToUShort(allocator);
             capacity = BitUtil.EnsurePowerOfTwo(capacity > k_MinCapacity ? capacity : k_MinCapacity);
@@ -46,9 +49,14 @@ namespace UIForia.ListTypes {
                 UnsafeUtility.MemClear(array, sizeof(TTEMPLATE) * capacity);
             }
         }
-        
+
         public ref TTEMPLATE this[int index] {
             get => ref array[index];
+        }
+
+        public void SetSize(int size) {
+            EnsureCapacity(size);
+            this.size = size;
         }
 
         public void Add(in TTEMPLATE item) {
@@ -67,6 +75,15 @@ namespace UIForia.ListTypes {
             EnsureAdditionalCapacity(itemCount);
             TypedUnsafe.MemCpy(array + size, items, itemCount);
             size += itemCount;
+        }
+
+        public void EnsureCapacity(int desiredCapacity, Allocator allocator, bool clearMemory = false) {
+            if (array == null) {
+                Initialize(desiredCapacity, allocator, clearMemory);
+            }
+            else {
+                EnsureCapacity(desiredCapacity, clearMemory);
+            }
         }
 
         public void EnsureCapacity(int desiredCapacity, bool clearMemory = false) {
@@ -105,10 +122,10 @@ namespace UIForia.ListTypes {
             EnsureCapacity(count, clearMemory);
             size = count;
         }
-        
+
         public void SetSize(int count, Allocator allocator, bool clearMemory = false) {
             if (array == null) {
-               Initialize(count, allocator, clearMemory);
+                Initialize(count, allocator, clearMemory);
             }
             else {
                 EnsureCapacity(count, clearMemory);
@@ -116,7 +133,7 @@ namespace UIForia.ListTypes {
 
             size = count;
         }
-        
+
         public ref TTEMPLATE Get(int index) {
             return ref array[index];
         }
@@ -154,7 +171,7 @@ namespace UIForia.ListTypes {
             size = count;
             TypedUnsafe.MemCpy(array, data, size);
         }
-        
+
         public void CopyFrom(TTEMPLATE* data, int count, Allocator allocator) {
             if (array == null) {
                 Initialize(count, allocator, false);
@@ -162,10 +179,11 @@ namespace UIForia.ListTypes {
             else {
                 EnsureCapacity(count);
             }
+
             size = count;
             TypedUnsafe.MemCpy(array, data, size);
         }
-        
+
         [DebuggerTypeProxy(typeof(DataListDebugView<>))]
         public struct Shared : IDisposable {
 
@@ -264,8 +282,6 @@ namespace UIForia.ListTypes {
             }
 
         }
-
-        public struct TTEMPLATE { }
 
         public struct DebugView_TTEMPLATE {
 

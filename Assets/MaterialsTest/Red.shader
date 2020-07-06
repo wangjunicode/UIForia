@@ -3,6 +3,7 @@
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        _FVal("FVal", Float) = 1
     }
     SubShader
     {

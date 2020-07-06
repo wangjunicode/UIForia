@@ -72,8 +72,6 @@ namespace UIForia {
         public event Action<UIView> onViewRemoved;
         public event Action onRefresh;
 
-        public MaterialDatabase materialDatabase;
-
         internal CompiledTemplateData templateData;
 
         internal int frameId;
@@ -161,8 +159,6 @@ namespace UIForia {
             else {
                 templateData = TemplateLoader.LoadRuntimeTemplates(templateSettings.rootType, templateSettings);
             }
-
-            materialDatabase = templateData.materialDatabase;
 
             viewRootIds.size = 0;
 
@@ -294,8 +290,7 @@ namespace UIForia {
             elementSystem.Dispose();
 
             resourceManager.Reset();
-
-            materialDatabase.Destroy();
+            renderSystem.Dispose();
             templateData.Destroy();
 
             m_AfterUpdateTaskSystem.OnDestroy();
@@ -321,6 +316,7 @@ namespace UIForia {
                 views[i].Destroy();
             }
 
+            
             onElementEnabled = null;
             onElementDestroyed = null;
             onElementRegistered = null;
@@ -927,6 +923,7 @@ namespace UIForia {
             layoutSystem?.Dispose();
             textSystem?.Dispose();
             resourceManager?.Dispose();
+            renderSystem?.Dispose();
         }
 
         private static string PathHack([CallerFilePath] string path = "") {
@@ -937,8 +934,8 @@ namespace UIForia {
             return PathHack();
         }
 
-        public void Render(Camera camera, CommandBuffer commandBuffer) {
-            renderSystem.Render(camera, commandBuffer);
+        public void Render(float surfaceWidth, float surfaceHeight, CommandBuffer commandBuffer) {
+            renderSystem.Render(surfaceWidth, surfaceHeight, commandBuffer);
         }
 
     }

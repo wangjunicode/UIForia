@@ -8,40 +8,7 @@ using Unity.Jobs;
 using UnityEngine;
 
 namespace UIForia.Graphics {
-    
-    [BurstCompile]
-    public struct SplitLargeBatchesJob : IJob {
 
-        public DataList<Batch>.Shared inputBatchList;
-        public DataList<int> inputBatchMembers;
-        
-        public DataList<Batch>.Shared outputBatchList;
-        public DataList<int> outputBatchMembers;
-        
-        public void Execute() {
-
-            for (int i = 0; i < inputBatchList.size; i++) {
-                
-                // get members()
-                // foreach member id
-                // look up the shape info if shape type
-                // if current vertex count + shape size > vertex limit
-                // split batch by adding new batch with lastId + 1
-                
-            }
-            
-            
-        }
-
-    }
-
-    public struct RenderRange {
-
-        public RangeInt transparentRange;
-        public RangeInt opaqueRange;
-
-    }
-    
     [BurstCompile]
     internal unsafe struct GetRenderRangesJobs : IJob {
 
@@ -91,12 +58,12 @@ namespace UIForia.Graphics {
                 ref DrawInfo drawInfoA = ref drawInfoList[x];
                 ref DrawInfo drawInfoB = ref drawInfoList[y];
 
-                if (drawInfoA.renderCallIdx == drawInfoB.renderCallIdx) {
+                if (drawInfoA.renderCallId == drawInfoB.renderCallId) {
                     return drawInfoA.localDrawIdx - drawInfoB.localDrawIdx;
                 }
 
-                ref RenderCallInfo a = ref renderCallInfo[drawInfoA.renderCallIdx];
-                ref RenderCallInfo b = ref renderCallInfo[drawInfoB.renderCallIdx];
+                ref RenderCallInfo a = ref renderCallInfo[drawInfoA.renderCallId];
+                ref RenderCallInfo b = ref renderCallInfo[drawInfoB.renderCallId];
 
                 if (a.renderOp != b.renderOp) {
                     return a.renderOp - b.renderOp;

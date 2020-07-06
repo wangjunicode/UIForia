@@ -91,6 +91,36 @@ namespace UIForia.Util.Unsafe {
             return ptr;
         }
 
+        public T* AllocateCleared<T>(int count = 1) where T : unmanaged {
+
+            int byteSize = count * sizeof(T);
+
+            if (pages.size == 0) {
+                CreatePage(basePageByteSize > byteSize ? basePageByteSize : byteSize);
+            }
+
+            ref BytePage bytePage = ref pages.array[pages.size - 1];
+
+            if (bytePage.size + byteSize >= bytePage.capacity) {
+
+                int capacity = basePageByteSize > byteSize ? basePageByteSize : byteSize;
+                pages.Add(new BytePage() {
+                    capacity = capacity,
+                    size = 0,
+                    array = (byte*) UnsafeUtility.Malloc(capacity, 4, pageAllocator)
+                });
+                bytePage = ref pages[pages.size - 1];
+
+            }
+
+            T* ptr = (T*) (bytePage.array + bytePage.size);
+
+            UnsafeUtility.MemClear(ptr, byteSize);
+
+            bytePage.size += byteSize;
+            return ptr;
+        }
+
         public T* Allocate<T>(int count = 1) where T : unmanaged {
 
             int byteSize = count * sizeof(T);

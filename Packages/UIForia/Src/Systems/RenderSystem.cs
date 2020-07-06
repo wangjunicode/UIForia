@@ -4,108 +4,28 @@ using ThisOtherThing.UI;
 using ThisOtherThing.UI.ShapeUtils;
 using UIForia.Elements;
 using UIForia.Graphics;
+using UIForia.Graphics.ShapeKit;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Batch = UIForia.Graphics.Batch;
 
 namespace UIForia.Systems {
 
-    public struct RenderInfo {
-
-        public int renderBoxId;
-        public bool drawForeground;
-        public int zIndex;
-        public int layer;
-
-    }
-
-    // gather render commands into buffer
-    // run them all together in burst land, generate meshes etc
-
-    public enum DrawMode {
-
-        Opaque,
-        Transparent,
-        Shadow
-
-    }
-
-    // somehow need to handle batching and clipping
-    // if uiforia shader or material has property 'uiforia compatible', we encode the uiforia data into attributes
-    // otherwise things like opacity, clip, mask uvs, etc, need to come come in from elsewhere
-
-    public enum VertexComponent {
-
-        X,
-        Y,
-        Z,
-        W
-
-    }
-
-    public enum VertexChannelFormat {
-
-        Off = 0,
-        Float1 = 4,
-        Float2 = 8,
-        Float3 = 12,
-        Float4 = 16,
-
-    }
-
-    [Flags]
-    public enum VertexChannel {
-
-        Position = 0,
-        Normal = 1 << 0,
-        Color = 1 << 1,
-        Tangent = 1 << 2,
-        TextureCoord0 = 1 << 3,
-        TextureCoord1 = 1 << 4,
-        TextureCoord2 = 1 << 5,
-        TextureCoord3 = 1 << 6,
-        TextureCoord4 = 1 << 7,
-        TextureCoord5 = 1 << 8,
-        TextureCoord6 = 1 << 9,
-        TextureCoord7 = 1 << 10,
-
-    }
-
-    public struct RectData {
-
-        public ShapeMode type;
-        public float x;
-        public float y;
-        public float width;
-        public float height;
-        public Color32 color;
-        public EdgeGradientData edgeGradient;
-
-    }
-    
-    public struct RoundedRectData {
-
-        public ShapeMode type;
-        public float x;
-        public float y;
-        public float width;
-        public float height;
-        public Color32 color;
-        public CornerProperties cornerProperties;
-        public EdgeGradientData edgeGradient;
-
-    }
-    
     public unsafe class RenderSystem : IRenderSystem, IDisposable {
+
+        public event Action<RenderContext> DrawDebugOverlay;
 
         private ElementSystem elementSystem;
         private LayoutSystem layoutSystem;
@@ -114,46 +34,42 @@ namespace UIForia.Systems {
         private RenderBox[] renderBoxTable;
         private DataList<ElementId> renderedElementIds;
         private DataList<RenderCallInfo>.Shared renderCallList;
+        private ResourceManager resourceManager;
         private int elementCapacity;
-
-        public event Action<RenderContext> DrawDebugOverlay;
+        private LightList<Mesh> meshList;
         private LightList<Mesh> batchMeshList;
-        private LightList<Mesh> userMeshList;
-        private LightList<Material> materialList;
-        private StructList<CommandBufferCommand> commandList;
+        private LightList<Mesh> maskMeshList;
         private JobHandle renderHandle;
         private MaterialPropertyBlock mpb;
         private ThreadSafePool<RenderContext2> renderContextPool;
 
-        internal RenderContextInfo renderContextInfo;
-
         private PersistentData persistentData;
-
-        private RenderContextInfo collectedRenderInfo;
+        private Dictionary<int, Texture> textureMap;
+        private LightList<RenderTexture> maskTextures;
+        private CommandBuffer maskCommandBuffer;
 
         public RenderSystem(Application application, LayoutSystem layoutSystem, ElementSystem elementSystem) {
             this.elementSystem = elementSystem;
             this.renderBoxPool = new RenderBoxPool(application.ResourceManager);
+            this.resourceManager = application.ResourceManager;
             this.layoutSystem = layoutSystem;
-
-            // todo -- ensure we dispose correctly
+            this.meshList = new LightList<Mesh>();
             this.renderedElementIds = new DataList<ElementId>(128, Allocator.Persistent);
             this.renderCallList = new DataList<RenderCallInfo>.Shared(64, Allocator.Persistent);
-
+            this.textureMap = new Dictionary<int, Texture>();
             this.batchMeshList = new LightList<Mesh>(32);
-            this.materialList = new LightList<Material>();
-            this.userMeshList = new LightList<Mesh>();
-            this.commandList = new StructList<CommandBufferCommand>();
-
+            this.maskMeshList = new LightList<Mesh>();
+            this.maskCommandBuffer = new CommandBuffer();
+            this.maskCommandBuffer.name = "UIForia Mask Generator";
+            this.maskTextures = new LightList<RenderTexture>();
             this.renderContextPool = new ThreadSafePool<RenderContext2>(
                 JobsUtility.MaxJobThreadCount,
-                () => new RenderContext2(application.materialDatabase),
+                () => new RenderContext2(this, application.ResourceManager),
                 (ctx) => ctx.Clear()
             );
 
             this.mpb = new MaterialPropertyBlock();
 
-            renderContextInfo = new RenderContextInfo();
             InitPersistentData();
             // application.onViewsSorted += uiViews => { renderOwners.Sort((o1, o2) => o1.view.Depth.CompareTo(o2.view.Depth)); };
         }
@@ -206,10 +122,10 @@ namespace UIForia.Systems {
 
                 if (renderBox == null) {
                     if (instance is UITextElement) {
-                        renderBox = new TextRenderBox();
+                        renderBox = new TextRenderBox2();
                     }
                     else {
-                        renderBox = new StandardRenderBox();
+                        renderBox = new StandardRenderBox2();
                     }
                 }
 
@@ -218,7 +134,9 @@ namespace UIForia.Systems {
                 renderInfoTable[elementId] = new RenderInfo() {
                     layer = instance.style.Layer,
                     zIndex = instance.style.ZIndex,
-                    drawForeground = renderBox.HasForeground
+                    drawForeground = renderBox.HasForeground,
+                    hasBackgroundEffect = false,
+                    hasForegroundEffect = false
                 };
 
                 instance.renderBox = renderBox; // todo -- remove link
@@ -247,31 +165,36 @@ namespace UIForia.Systems {
         }
 
         private void InitPersistentData() {
+
             persistentData = new PersistentData() {
+                maskElementList = new DataList<MaskInfo>.Shared(16, Allocator.Persistent),
+                maskTargetList = new DataList<MaskTarget>.Shared(16, Allocator.Persistent),
+                maskGeometryAllocator = new PagedByteAllocator(TypedUnsafe.Kilobytes(16), Allocator.Persistent, Allocator.TempJob),
+                meshListHandle = new GCHandleList<Mesh>(meshList),
+                drawList = new DataList<DrawInfo>.Shared(32, Allocator.Persistent),
+                effectUsageList = new DataList<EffectUsage>.Shared(8, Allocator.Persistent),
                 perViewElementList = new DataList<ElementList>(4, Allocator.Persistent),
                 contextPoolHandle = new PerThreadObjectPool<RenderContext2>(renderContextPool),
                 renderBoxTableHandle = new GCHandleArray<RenderBox>(renderBoxTable),
-                renderContextInfoHandle = new GCHandle<RenderContextInfo>(renderContextInfo),
-                renderRanges = new DataList<RangeInt>.Shared(8, Allocator.Persistent),
-                contextOffsets = new DataList<ContextOffsets>(JobsUtility.MaxJobThreadCount, Allocator.Persistent),
-                drawOrder = new DataList<int>.Shared(32, Allocator.Persistent),
-                rangeCount = new HeapAllocated<int>(0),
-                drawListSize = new HeapAllocated<int>(0),
-                renderCallListSize = new HeapAllocated<int>(0),
+                renderContextInfoHandle = new GCHandle<RenderSystem>(this),
                 batchList = new DataList<Batch>.Shared(16, Allocator.Persistent),
                 batchMemberList = new DataList<int>.Shared(32, Allocator.Persistent),
                 shapeBuffer = new PerThread<ShapeDataBuffer>(Allocator.Persistent),
                 renderCommands = new DataList<RenderCommand>.Shared(64, Allocator.Persistent),
                 perThreadGeometryBuffer = new PerThread<GeometryBuffer>(Allocator.Persistent),
-                dummyArray = new NativeArray<int>(1, Allocator.Persistent),
+                dummyArray = new NativeArray<int>(1, Allocator.Persistent), // this used to get an Atomic Safety handle for meshes
+                boundsAllocator = new PagedByteAllocator(TypedUnsafe.Kilobytes(1), Allocator.Persistent, Allocator.TempJob),
+
+                textureMapHandle = new GCHandle<Dictionary<int, Texture>>(textureMap)
             };
         }
 
         public virtual void OnUpdate() {
-
             // todo -- hook this up to the layout system's job scheduling
-
+            renderContextPool.Clear();
             persistentData.Clear();
+            textureMap.Clear();
+            resourceManager.GetFontTextures(textureMap);
             List<UIView> views = layoutSystem.application.views;
 
             persistentData.perViewElementList.SetSize(views.Count);
@@ -287,107 +210,93 @@ namespace UIForia.Systems {
 
             }
 
-            JobHandle gatherRenderedElements = VertigoScheduler.Await(new GatherRenderedElements() {
+            JobHandle gatherRenderedElements = VertigoScheduler.Run(new GatherRenderedElements() {
                 elementLists = persistentData.perViewElementList,
+                effectUsages = persistentData.effectUsageList,
                 traversalTable = elementSystem.traversalTable,
                 clipInfoTable = layoutSystem.clipInfoTable,
                 renderCallList = renderCallList,
                 renderInfoTable = renderInfoTable,
-                renderCallListSize = persistentData.renderCallListSize
             });
 
             // assumes we are able to call all painters in parallel, this miiiight backfire
-            JobHandle invokePainters = VertigoScheduler.Await(gatherRenderedElements).ThenDeferParallel(new CallPainters_Managed() {
-                    defer = new ParallelParams.Deferred(persistentData.renderCallListSize, 50),
+            JobHandle invokePainters = VertigoScheduler.Await(gatherRenderedElements).ThenParallel(new CallPainters_Managed() {
+                    parallel = new ParallelParams(renderCallList.size, 32),
                     renderCallList = renderCallList,
                     matrices = layoutSystem.worldMatrices,
                     renderContextPool = persistentData.contextPoolHandle,
-                    renderBoxTableHandle = persistentData.renderBoxTableHandle
+                    renderBoxTableHandle = persistentData.renderBoxTableHandle,
+                    clipInfoTable = layoutSystem.clipInfoTable,
+                    clipperBoundsList = layoutSystem.clipperBoundsList
                 })
                 .Then(new MergeRenderContexts_Managed() {
-                    drawListSizePtr = persistentData.drawListSize,
+                    maskList = persistentData.maskElementList,
                     contextPoolHandle = persistentData.contextPoolHandle,
-                    contextOffsets = persistentData.contextOffsets,
-                    outputHandle = persistentData.renderContextInfoHandle
+                    drawList = persistentData.drawList,
+                    meshListHandle = persistentData.meshListHandle,
                 });
 
-            JobHandle renderRange = VertigoScheduler.Await(invokePainters).Then(new GetRenderRangesJobs() {
-                drawList = renderContextInfo.drawList,
-                drawOrder = persistentData.drawOrder,
-                renderRanges = persistentData.renderRanges,
-                renderCallList = renderCallList
-            });
+            invokePainters.Complete();
 
-            // shape baking will happen across threads
-            // i need to put the data somewhere
-            // one option is to store pointers into per-thread paged lists
-            // if more vertex data than page size we're in trouble
-            // 2nd option is store pointer base + offset
             JobHandle shapeBaking = VertigoScheduler.Await(invokePainters)
-                .ThenDeferParallel(new BakeShapes() {
-                    defer = new ParallelParams.Deferred(persistentData.drawListSize, 20),
-                    drawList = renderContextInfo.drawList,
+                .ThenParallel(new BakeShapes() {
+                    parallel = new ParallelParams(persistentData.drawList.size, 10),
+                    fontAssetMap = resourceManager.fontAssetMap,
+                    drawList = persistentData.drawList,
                     perThread_ShapeBuffer = persistentData.shapeBuffer
                 });
 
-            // await(shapeBaking).Then(ApplyVertexModifiers())
-
-            // this should generate render commands
-            // some commands have the type 'batch draw' which is handled by batch
-            // can setup a 'pre-req' dependency which ensures batch's clip state is valid before drawing
-
-            JobHandle transparentPass = VertigoScheduler.Await(renderRange)
-                .Then(new TransparentRenderPassJob() {
-                    drawList = renderContextInfo.drawList,
-                    batchList = persistentData.batchList,
-                    batchMemberList = persistentData.batchMemberList,
-                    renderCommands = persistentData.renderCommands
-                    // textureIds = default,
-                    // clipInfoTable = layoutSystem.clipInfoTable,
+            JobHandle applyEffects = VertigoScheduler.Await(shapeBaking)
+                .Then(new ApplyEffects_Managed() {
+                    // I'm not sure if this can be parallel yet, I think so
+                    effectUsageList = persistentData.effectUsageList,
+                    renderBoxTableHandle = persistentData.renderBoxTableHandle
                 });
 
-            // renderHandle = JobHandle.CombineDependencies(shapeBaking, transparentPass);
+            JobHandle gatherTextures = VertigoScheduler.Await(applyEffects).Then(new GatherTextures_Managed() {
+                contextPoolHandle = persistentData.contextPoolHandle,
+                textureMapHandle = persistentData.textureMapHandle
+            });
+
+            JobHandle buildMaskAtlas = VertigoScheduler.Await(applyEffects).Then(new BuildMaskElementAtlasJob() {
+                maskElementList = persistentData.maskElementList,
+                maskTargetList = persistentData.maskTargetList,
+                batchList = persistentData.batchList,
+                pagedByteAllocator = persistentData.maskGeometryAllocator
+            });
+
+            JobHandle transparentPass = VertigoScheduler.Await(applyEffects, invokePainters, buildMaskAtlas)
+                .Then(new TransparentRenderPassJob() {
+                    drawList = persistentData.drawList,
+                    batchList = persistentData.batchList,
+                    batchMemberList = persistentData.batchMemberList,
+                    renderCommands = persistentData.renderCommands,
+                    boundsAllocator = persistentData.boundsAllocator,
+                });
+
+            // transparentPass.Complete();
 
             // todo -- enable parallel deferred by batch list
-            renderHandle = VertigoScheduler.Await(transparentPass, shapeBaking).Then(new BuildBatchGeometryJob() {
-                drawList = renderContextInfo.drawList,
+            JobHandle buildGeometry = VertigoScheduler.Await(transparentPass, shapeBaking).Then(new BuildBatchGeometryJob() {
+                drawList = persistentData.drawList,
                 batchList = persistentData.batchList,
                 batchMemberList = persistentData.batchMemberList,
                 perThread_GeometryBuffer = persistentData.perThreadGeometryBuffer
             });
 
-            // need to output render commands and sort them
-
-            // need meshes -> single threaded, but maybe thats ok
-            // mesh table already populated
-            // just need to convert my already built shape buffers into meshes 
-            // this means triangle indices need updating
-            // probably part of building the geometry though
-            // so the single threaded part is just hydrating the data
-            // should already know how many meshes i'll need based purely on vertex count
-            // maybe do an allocate meshes pass single threaded then do the rest in parallel
-            // can toss them in a list and generate the commands i parallel
-
-            //.Then(new MergeRenderContexts(){});
-            //.Then(GetRenderRanges(), BakeShapes(), TransparentRenderPass(), OpaqueRenderPass())
-            //.ThenParallel(BuildBatchGeometry()) // may add new batches. we'll need to sort the batch list at the end 
-            //.Then(GatherAndSortBatchList(), PopulateBatchMeshes())
-            //.Then(GenerateRenderCommands) 
-
-            //todo -- remove sync point
-
+            renderHandle = JobHandle.CombineDependencies(gatherTextures, buildGeometry);
             renderHandle.Complete();
+            PopulateBatchMeshes();
+            renderHandle = default;
 
-            renderContextInfo.Clear();
-            renderContextPool.Clear();
         }
 
+       
+        
         // this could be parallel except mesh api won't allow it :(
         private void PopulateBatchMeshes() {
-
+            Profiler.BeginSample("Populate Batch Meshes");
             DataList<Batch>.Shared batchList = persistentData.batchList;
-
-            batchMeshList.EnsureCapacity(batchList.size);
 
             for (int batchIndex = 0; batchIndex < batchList.size; batchIndex++) {
                 ref Batch batch = ref batchList[batchIndex];
@@ -400,7 +309,30 @@ namespace UIForia.Systems {
 
                 Mesh mesh = batchMeshList[batchIndex];
 
-                batchMeshList[batchIndex].Clear();
+                mesh.Clear();
+
+                // mesh.SetVertexBufferParams(batchList[0].vertexCount, layout);
+                //
+                // DataList<Vert>.Shared vertBuffer = new DataList<Vert>.Shared(batchList[0].vertexCount, Allocator.Temp);
+                // vertBuffer.size = batchList[0].vertexCount;
+                //
+                // new GetVertexDataJob() {
+                //     vertBuffer = vertBuffer,
+                //     batch = batch,
+                // }.Execute();
+                //
+                // NativeArray<Vert> vertArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vert>(vertBuffer.GetArrayPointer(), vertBuffer.size, Allocator.None);
+                //
+                // NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref vertArray, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(persistentData.dummyArray));
+                //
+                // mesh.SetVertexBufferData(vertArray, 0, 0, batch.vertexCount,  0, MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices | MeshUpdateFlags.DontNotifyMeshUsers | MeshUpdateFlags.DontResetBoneBounds);
+                // mesh.SetIndexBufferParams(batch.triangleCount, IndexFormat.UInt32);
+                // NativeArray<int> triangleArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(batch.triangles, batch.triangleCount, Allocator.None);
+                // NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref triangleArray, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(persistentData.dummyArray));
+                // mesh.SetIndexBufferData(triangleArray, 0, 0, triangleArray.Length);
+                //
+                // mesh.SetSubMesh(0, new SubMeshDescriptor(0, triangleArray.Length, MeshTopology.Triangles));
+                // vertBuffer.Dispose();
 
                 for (int i = 0; i < batch.vertexChannelCount; i++) {
 
@@ -441,40 +373,125 @@ namespace UIForia.Systems {
                 mesh.SetIndices(triangleArray, 0, triangleArray.Length, MeshTopology.Triangles, 0, false);
 
             }
-            // todo -- need to consider how we destroy the meshes, probably just run through on destruction and call destroy if not null regardless of size
 
+            // todo -- need to consider how we destroy the meshes, probably just run through on destruction and call destroy if not null regardless of size
+            Profiler.EndSample();
         }
 
-        // todo -- get rid of camera, just don't know how to compute the matrices by hand
-        public void Render(Camera camera, CommandBuffer commandBuffer) {
-            renderHandle.Complete();
-            PopulateBatchMeshes();
-            renderHandle = default;
-            
-            // todo -- the only thing I really need from the camera is the matrices
-            // I should be able to compute those without a camera reference if I was smarterer
-            
-            DataList<RenderCommand>.Shared renderCommands = persistentData.renderCommands;
-            camera.orthographicSize = Screen.height * 0.5f;
-            Matrix4x4 cameraMatrix = camera.cameraToWorldMatrix;
-            commandBuffer.SetViewProjectionMatrices(cameraMatrix, camera.projectionMatrix);
-            Vector3 cameraOrigin = camera.transform.position;
-            cameraOrigin.x -= 0.5f * (Application.UiApplicationSize.width);
-            cameraOrigin.y += 0.5f * (Application.UiApplicationSize.height); 
-            cameraOrigin.x -= 0.5f;
-            cameraOrigin.y += (0.5f); // for some reason editor needs this minor adjustment
-            cameraOrigin.z += 2;
 
-            Matrix4x4 origin = Matrix4x4.TRS(cameraOrigin, Quaternion.identity, Vector3.one);
+        // todo -- get rid of camera, just don't know how to compute the matrices by hand
+        public void Render(float surfaceWidth, float surfaceHeight, CommandBuffer commandBuffer) {
+
+            float halfWidth = surfaceWidth * 0.5f;
+            float halfHeight = surfaceHeight * 0.5f;
+            DataList<RenderCommand>.Shared renderCommands = persistentData.renderCommands;
+            commandBuffer.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.Ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, -100, 100));
+
+            int batchListIdx = 0;
+
+            Matrix4x4 origin = Matrix4x4.TRS(new Vector3(-halfWidth, halfHeight, 0), Quaternion.identity, Vector3.one);
+
+            maskTextures.EnsureCapacity(persistentData.maskTargetList.size);
+
+            // todo -- release dead textures if have too many
+
+            for (int i = 0; i < persistentData.maskTargetList.size; i++) {
+
+                if (ReferenceEquals(maskTextures.array[i], null)) {
+                    maskTextures.array[i] = new RenderTexture(new RenderTextureDescriptor {
+                        useMipMap = false,
+                        volumeDepth = 1,
+                        msaaSamples = 1,
+                        width = 2048, // todo -- size
+                        height = 2048, // todo -- size
+                        dimension = TextureDimension.Tex2D,
+                        colorFormat = RenderTextureFormat.ARGB32,
+                        depthBufferBits = 0,
+                        stencilFormat = GraphicsFormat.None
+                    });
+                }
+
+            }
+
+            maskCommandBuffer.Clear();
+            
+            for (int i = 0; i < persistentData.maskTargetList.size; i++) {
+
+                if (persistentData.maskTargetList[i].drawRange.length == 0) {
+                    continue;
+                }
+
+                ref MaskTarget maskTarget = ref persistentData.maskTargetList[i];
+                
+                textureMap[-(1000 + i)] = maskTextures.array[i];
+
+                maskCommandBuffer.SetRenderTarget(maskTextures.array[i]);
+                maskCommandBuffer.ClearRenderTarget(true, true, Color.black, 0);
+                
+
+                float halfMaskWidth = maskTextures.array[i].width * 0.5f;
+                float halfMaskHeight = maskTextures.array[i].height * 0.5f;
+                
+                Matrix4x4 maskOrigin = Matrix4x4.TRS(new Vector3(-halfMaskWidth, halfMaskHeight, 0), Quaternion.identity, Vector3.one);
+
+                maskCommandBuffer.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.Ortho(
+                    -halfMaskWidth,
+                    halfMaskWidth,
+                    -halfMaskHeight,
+                    halfMaskHeight,
+                    -100,
+                    100
+                ));
+
+                for (int b = maskTarget.drawRange.start; b < maskTarget.drawRange.length; b++) {
+                    // ref MaskDrawCall mask = ref persistentData.maskDrawCallList[b];
+                    //
+                    // Material material = resourceManager.GetMaterialInstance(mask.materialId);
+                    // Mesh mesh = batchMeshList[b];
+                    //
+                    // maskCommandBuffer.DrawMesh(mesh, maskOrigin, material, 0, 0, null);
+
+                }
+                
+
+            }
+
+            if (persistentData.maskTargetList.size > 0) {
+                UnityEngine.Graphics.ExecuteCommandBuffer(maskCommandBuffer);
+            }
+
             for (int i = 0; i < renderCommands.size; i++) {
-                
+
                 ref RenderCommand cmd = ref renderCommands[i];
-                
                 switch (cmd.type) {
-                    
-                    case RenderCommandType.Batch:
-                        Mesh mesh = batchMeshList[0];
-                        commandBuffer.DrawMesh(mesh, origin, Resources.Load<Material>("UIForiaShape"));
+                    case RenderCommandType.ShapeBatch:
+                        Mesh mesh = batchMeshList[batchListIdx++];
+                        int batchIndex = cmd.batchIndex;
+                        ref Batch batch = ref persistentData.batchList[batchIndex];
+
+                        // todo -- when i implement addressables, this should be done as close to the start of frame as possible 
+                        Material material = resourceManager.GetMaterialInstance(batch.materialId);
+
+                        Matrix4x4 matrix;
+
+                        bool isUIForiaMaterial = batch.HasUIForiaMaterial();
+
+                        if (batch.memberIdRange.length == 1) {
+                            matrix = *persistentData.drawList[persistentData.batchMemberList[batch.memberIdRange.start]].matrix;
+                            matrix *= origin;
+                        }
+                        else {
+                            matrix = origin;
+                        }
+
+                        if (batch.propertyOverrideCount > 0 || isUIForiaMaterial) {
+                            SetupMaterialPropertyBlock(batch, isUIForiaMaterial);
+                            commandBuffer.DrawMesh(mesh, matrix, material, 0, 0, mpb);
+                        }
+                        else {
+                            commandBuffer.DrawMesh(mesh, matrix, material);
+                        }
+
                         break;
 
                     // case CommandType.DrawMesh: {
@@ -516,55 +533,81 @@ namespace UIForia.Systems {
                 }
             }
 
-            // foreach cmd -> add to buffer
         }
 
-        //
-        // public void OnReset() {
-        //     commandBuffer.Clear();
-        //     for (int i = 0; i < renderOwners.size; i++) {
-        //         renderOwners[i].Destroy();
-        //     }
-        //
-        //     renderOwners.QuickClear();
-        //     renderContext.clipContext.Destroy();
-        //     renderContext.clipContext = new ClipContext(Application.Settings);
-        // }
+        private static readonly List<Vector4> s_OverflowClippers = new List<Vector4>(3 * 4);
+        private static readonly int s_ClippersKey = Shader.PropertyToID("_OverflowClippers");
 
-        // public virtual void OnUpdate() {
-        //     renderContext.Clear();
-        //     // todo
-        //     // views can have their own cameras.
-        //     // if they do they are not batchable with other views. 
-        //     // for now we can make batching not cross view boundaries, eventually that would be cool though
-        //
-        //     camera.orthographicSize = Screen.height * 0.5f;
-        //     for (int i = 0; i < renderOwners.size; i++) {
-        //         renderOwners.array[i].Render(renderContext);
-        //     }
-        //
-        //     DrawDebugOverlay2?.Invoke(renderContext);
-        //     renderContext.Render(camera, commandBuffer);
-        // }
+        private void SetupMaterialPropertyBlock(in Batch batch, bool isUIForiaMaterial) {
+            mpb.Clear();
 
-        public void OnDestroy() {
+            if (isUIForiaMaterial) {
 
-            Dispose();
+                s_OverflowClippers.Clear();
+                OverflowBounds bounds = new OverflowBounds() {
+                    p0 = new float2(0, 0),
+                    p1 = new float2(2000, 0),
+                    p2 = new float2(2000, 2000),
+                    p3 = new float2(0, 2000),
+                };
+                s_OverflowClippers.Add(new Vector4(bounds.p0.x, bounds.p0.y, bounds.p1.x, bounds.p1.y));
+                s_OverflowClippers.Add(new Vector4(bounds.p2.x, bounds.p2.y, bounds.p3.x, bounds.p3.y));
+                // for (int i = 0; i < batch.clipperCount; i++) {
+                //     ref OverflowBounds bounds = ref batch.clippers[i];
+                //     s_OverflowClippers.Add(new Vector4(bounds.p0.x, bounds.p0.y, bounds.p1.x, bounds.p1.y));
+                //     s_OverflowClippers.Add(new Vector4(bounds.p2.x, bounds.p2.y, bounds.p3.x, bounds.p3.y));
+                //     s_OverflowClippers.Add(new Vector4(bounds.p4.x, bounds.p4.y, bounds.p5.x, bounds.p5.y));
+                // }
 
+                mpb.SetVectorArray(s_ClippersKey, s_OverflowClippers);
+            }
+
+            for (int i = 0; i < batch.propertyOverrideCount; i++) {
+                ref MaterialPropertyOverride property = ref batch.propertyOverrides[i];
+
+                switch (property.propertyType) {
+
+                    case MaterialPropertyType.Color:
+                        mpb.SetColor(property.shaderPropertyId, property.value.colorValue);
+                        break;
+
+                    case MaterialPropertyType.Float:
+                        mpb.SetFloat(property.shaderPropertyId, property.value.floatValue);
+                        break;
+
+                    case MaterialPropertyType.Vector:
+                        mpb.SetVector(property.shaderPropertyId, property.value.vectorValue);
+                        break;
+
+                    case MaterialPropertyType.Texture:
+                        if (textureMap.TryGetValue(property.value.textureId, out Texture texture)) {
+                            mpb.SetTexture(property.shaderPropertyId, texture);
+                        }
+
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+            }
         }
 
         public void OnViewAdded(UIView view) {
+            if (elementCapacity < view.dummyRoot.id.index) {
+                if (elementCapacity == 0) {
+                    ResizeBackingStore(32);
+                }
+                else {
+                    ResizeBackingStore(view.dummyRoot.id.index * 2);
+                }
+            }
+
+            renderInfoTable[view.dummyRoot.id] = default;
             // renderOwners.Add(new RenderOwner(view, elementSystem));
         }
 
-        public void OnViewRemoved(UIView view) {
-            // for (int i = 0; i < renderOwners.size; i++) {
-            //     if (renderOwners.array[i].view == view) {
-            //         renderOwners.RemoveAt(i);
-            //         return;
-            //     }
-            // }
-        }
+        public void OnViewRemoved(UIView view) { }
 
         public void SetCamera(Camera camera) {
             // if (this.camera != null) {
@@ -579,14 +622,24 @@ namespace UIForia.Systems {
         }
 
         public void Dispose() {
+            renderHandle.Complete();
 
             renderedElementIds.Dispose();
 
             renderCallList.Dispose();
-
+            
+            // clear releases contexts to queue, need this to dispose them
+            renderContextPool.Clear();
+            
+            foreach (RenderContext2 renderContext2 in renderContextPool.queue) {
+                renderContext2.Dispose();
+            }
+            
             TypedUnsafe.Dispose(renderInfoTable.array, Allocator.Persistent);
             persistentData.Dispose();
-
+            for (int i = 0; i < maskTextures.size; i++) {
+                maskTextures[i].Release();
+            }
         }
 
         private void SetMeshChannel(Mesh mesh, VertexChannelDesc desc, NativeArray<float4> array) {
@@ -650,25 +703,22 @@ namespace UIForia.Systems {
             if (channel < 0 || channel > 7) {
                 return;
             }
+
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(persistentData.dummyArray));
             mesh.SetUVs(channel, array, 0, array.Length);
         }
 
         private struct PersistentData : IDisposable {
 
-            public DataList<RangeInt>.Shared renderRanges;
+            public DataList<EffectUsage>.Shared effectUsageList;
             public DataList<ElementList> perViewElementList;
-            public DataList<ContextOffsets> contextOffsets;
 
             public PerThreadObjectPool<RenderContext2> contextPoolHandle;
 
             public GCHandleArray<RenderBox> renderBoxTableHandle;
-            public GCHandle<RenderContextInfo> renderContextInfoHandle;
+            public GCHandle<RenderSystem> renderContextInfoHandle;
+            public GCHandle<Dictionary<int, Texture>> textureMapHandle;
 
-            public HeapAllocated<int> rangeCount;
-            public HeapAllocated<int> drawListSize;
-            public HeapAllocated<int> renderCallListSize;
-            public DataList<int>.Shared drawOrder;
             public PerThread<ShapeDataBuffer> shapeBuffer;
             public DataList<Batch>.Shared batchList;
             public DataList<int>.Shared batchMemberList;
@@ -676,52 +726,60 @@ namespace UIForia.Systems {
             public PerThread<GeometryBuffer> perThreadGeometryBuffer;
             public NativeArray<int> dummyArray;
 
+            public PagedByteAllocator boundsAllocator;
+            public PagedByteAllocator maskGeometryAllocator;
+
+            public DataList<DrawInfo>.Shared drawList;
+            public GCHandleList<Mesh> meshListHandle;
+
+            public DataList<MaskInfo>.Shared maskElementList;
+            public DataList<MaskTarget>.Shared maskTargetList;
+
             public void Dispose() {
+                maskElementList.Dispose();
+                maskTargetList.Dispose();
+                drawList.Dispose();
+                meshListHandle.Dispose();
+                maskGeometryAllocator.Dispose();
+                effectUsageList.Dispose();
+                boundsAllocator.Dispose();
                 batchList.Dispose();
+                textureMapHandle.Dispose();
                 perThreadGeometryBuffer.Dispose();
                 batchMemberList.Dispose();
                 shapeBuffer.Dispose();
-                drawOrder.Dispose();
                 perViewElementList.Dispose();
-                contextOffsets.Dispose();
                 contextPoolHandle.Dispose();
                 renderBoxTableHandle.Dispose();
                 renderContextInfoHandle.Dispose();
-                renderRanges.Dispose();
-                rangeCount.Dispose();
-                drawListSize.Dispose();
                 renderCommands.Dispose();
-                renderCallListSize.Dispose();
                 this = default;
             }
 
             public void Clear() {
-                shapeBuffer.Clear();
-                perThreadGeometryBuffer.Clear();
+
+                drawList.size = 0;
+                maskElementList.size = 0;
+                maskTargetList.size = 0;
+                effectUsageList.size = 0;
                 renderCommands.size = 0;
                 batchMemberList.size = 0;
                 batchList.size = 0;
-                rangeCount.Set(0);
-                drawListSize.Set(0);
-                renderCallListSize.Set(0);
-                renderRanges.size = 0;
                 perViewElementList.size = 0;
-                drawOrder.size = 0;
+
+                shapeBuffer.Clear();
+                boundsAllocator.Clear();
+                maskGeometryAllocator.Clear();
+                perThreadGeometryBuffer.Clear();
             }
 
         }
 
-    }
-
-    public struct ContextOffsets {
-
-        public int drawListOffset;
-        public int propertyOverrideOffset;
-        public int textureIdOffset;
-        public int transformListOffset;
-        public int shapeInfoListOffset;
-        public int materialListOffset;
-        public int meshListOffset;
+        internal bool TryGetCachedDrawInfo(in ShapeCacheId shapeCacheId, out DrawInfo* drawInfo, out int count) {
+            drawInfo = null;
+            count = 0;
+            return false;
+        }
 
     }
 

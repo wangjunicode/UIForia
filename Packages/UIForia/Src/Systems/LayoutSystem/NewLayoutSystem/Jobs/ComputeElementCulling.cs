@@ -3,6 +3,7 @@ using UIForia.Layout;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Systems {
@@ -75,6 +76,7 @@ namespace UIForia.Systems {
 
                     layoutResult.isCulled = !overlappingOrContains;
                     clipInfo.isCulled = !overlappingOrContains;
+                    clipInfo.aabb = new AxisAlignedBounds2D(xMin, yMin, xMax, yMax);
 
                 }
 

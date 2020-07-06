@@ -1,13 +1,86 @@
 using UIForia.Elements;
+using UIForia.Graphics;
 using UIForia.Text;
 using UIForia.Util;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 using Vertigo;
-using FontStyle = UIForia.Text.FontStyle;
 
 namespace UIForia.Rendering {
+
+    public unsafe class TextRenderBox2 : RenderBox, IUnityInspector {
+
+        public override void PaintBackground(RenderContext ctx) { }
+
+        public float underlayX = 0;
+        public float underlayY = 0;
+        public float underlaySoftness = 0;
+        public float underlayDilate = 0;
+        public float faceDilate = 0;
+        public float glowOffset;
+        public float glowOuter;
+        public float glowInner;
+        public float glowPower;
+        public float outlineWidth;
+        public float outlineSoftness;
+
+        public float SliderGUI(string label, float value, float min, float max) {
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PrefixLabel(label);
+            value = EditorGUILayout.Slider(value, min, max);
+            EditorGUILayout.EndHorizontal();
+            return value;
+        }
+
+        public override void PaintBackground2(RenderContext2 ctx) {
+
+            if (!((UITextElement) element).TryGetTextInfo(out TextInfo textInfo)) {
+                return;
+            }
+
+            MaterialId materialId = element.style.Material;
+
+            if (materialId.index != 0) {
+                ctx.SetMaterial(materialId);
+                // todo -- set material overrides here, should be gathered in enable/property change
+            }
+            else {
+                ctx.SetMaterial(MaterialId.UIForiaSDFText);
+                // the default uiforia material already behaves correctly for text, no need to update it
+            }
+
+            // textInfo.textStyle.underlayDilate = underlayDilate;
+            // textInfo.textStyle.underlaySoftness = underlaySoftness;
+            // textInfo.textStyle.underlayX = underlayX;
+            // textInfo.textStyle.underlayY = underlayY;
+            // textInfo.textStyle.outlineSoftness = outlineSoftness;
+            // textInfo.textStyle.outlineWidth = outlineWidth;
+            // textInfo.textStyle.glowInner = glowInner;
+            // textInfo.textStyle.glowPower = glowPower;
+            // textInfo.textStyle.glowOuter = glowOuter;
+            // textInfo.textStyle.glowOffset = glowOffset;
+
+            // ctx.DrawCachedText(ref cacheId, textInfo);
+            
+            ctx.DrawSDFText(textInfo);
+
+        }
+
+        public void OnGUI() {
+            underlayX = SliderGUI("Underlay X", underlayX, -1, 1);
+            underlayY = SliderGUI("Underlay Y", underlayY, -1, 1);
+            underlaySoftness = SliderGUI("Underlay Softness", underlaySoftness, 0, 1);
+            underlayDilate = SliderGUI("Underlay Dilate", underlayDilate, 0, 1);
+            outlineSoftness = SliderGUI("Outline Softness", outlineSoftness, 0, 1);
+            outlineWidth = SliderGUI("Outline Width", outlineWidth, 0, 1);
+            glowInner = SliderGUI("Glow Inner", glowInner, 0, 1);
+            glowOuter = SliderGUI("Glow Outer", glowOuter, 0, 1);
+            glowPower = SliderGUI("Glow Power", glowPower, 0, 1);
+            glowOffset = SliderGUI("Glow Offset", glowOffset, -1, 1);
+        }
+
+    }
 
     public class TextRenderBox : RenderBox {
 
@@ -220,7 +293,7 @@ namespace UIForia.Rendering {
 
             UITextElement textElement = (UITextElement) element;
 
-            BurstTextInfo textInfo = element.application.textSystem.textInfoMap[textElement.textInfoId];
+            TextInfo textInfo = element.application.textSystem.textInfoMap[textElement.textInfoId];
 
             geometry.Clear();
 
@@ -327,11 +400,11 @@ namespace UIForia.Rendering {
             // else {
             // }
             // weight = fontData.fontAsset.weightNormal;
-            
-             int shapeType = BitUtil.SetHighLowBits((int) ShapeType.Text, 0);
-             geometry.objectData = new Vector4(shapeType, default, weight, element.style.Opacity);
+
+            int shapeType = BitUtil.SetHighLowBits((int) ShapeType.Text, 0);
+            geometry.objectData = new Vector4(shapeType, default, weight, element.style.Opacity);
             GeometryRange range = new GeometryRange(0, geometry.positionList.size, 0, geometry.triangleList.size);
-            geometry.mainTexture = FontAsset.defaultFontAsset.atlas;// element.application.ResourceManager.GetFontById("").atlas;
+            geometry.mainTexture = FontAsset.defaultFontAsset.atlas; // element.application.ResourceManager.GetFontById("").atlas;
             ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.GetWorldMatrix(), clipper);
 
             return;

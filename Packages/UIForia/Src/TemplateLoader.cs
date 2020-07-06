@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Mono.Linq.Expressions;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
-using UIForia.Exceptions;
 using UIForia.Graphics;
 using UIForia.Util;
 using UnityEngine;
@@ -41,7 +40,6 @@ namespace UIForia.Compilers {
                     if (painterDefinition.drawBgSrc != null) {
                         LambdaExpression lambdaExpression = stylePainterCompiler.Compile(painterDefinition, painterDefinition.drawBgSrc);
                         if (lambdaExpression != null) {
-                            Debug.Log(lambdaExpression.ToCSharpCode());
                             painterDefinition.paintBackground = (Action<StylePainterContext>) lambdaExpression.Compile();
                         }
                     }
@@ -169,10 +167,8 @@ namespace UIForia.Compilers {
             LightList<UIStyleGroupContainer> styleList = new LightList<UIStyleGroupContainer>(128);
             Dictionary<string, StyleSheet> styleSheetMap = new Dictionary<string, StyleSheet>(128);
 
-            MaterialDatabase materialDatabase = loader.GetMaterialDatabase();
-
             for (int i = 0; i < files.Length; i++) {
-                StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i], materialDatabase);
+                StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i]);
                 styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
 
                 for (int j = 0; j < sheet.styleGroupContainers.Length; j++) {

@@ -10,56 +10,175 @@
         
         style container2 {
             PreferredSize = 1vw 1vh;
-            BackgroundColor = white;
+            FlexLayoutWrap = WrapHorizontal;
+            FlexLayoutDirection = Horizontal;
+            // BackgroundColor = white;
+          //  TransformRotation = 10;
+          //  AlignX = Start Screen;
+            TextFontSize = 12;
+            TextFaceDilate = 0;
+            TextOutlineWidth = 0;
+            TextOutlineSoftness = 0;
+            TextUnderlayDilate = 0;
+            TextUnderlaySoftness = 0;
+            TextUnderlayX = 0;
+            TextUnderlayY = 0;
+            TextGlowOffset = 0;
+            TextGlowPower = 0;
+            TextGlowInner = 0;
+            TextGlowOuter = 0;
+            TextOutlineColor = white;
+<!--            TextFontStyle = Underline;-->
         }
         
         style shape-kit {
-            Painter = "ShapePainter"; //"ShapeKitTest";
+            // Painter = "ShapePainter"; 
             PreferredSize = 100px;
             BackgroundColor = blue;
-            painter:ShapePainter.sizeMod = 0.3f;
-            
+            // material = "materialName"
+        
+            // painter:ShapePainter.sizeMod = 0.3f;
+            // material:materialName.field = x;
         }
 
-        painter ShapePainter {
+        material UIForiaShape : resources("UIForiaShape");
+
+        // material Dissolve : resources("red") {
+        // 
+        //     IsUIForiaBatchable = true;
+        // 
+        //     [keywords] {
+        //         IncludeUI;
+        //         Thing;
+        //         Colorful;
+        //     }
+        // 
+        //     [properties] {
+        //         
+        //     }
+        // 
+        // }
         
-            [variables] {
-                float sizeMod = 0.1f;
-            }
-            
-            [draw:background] {
+        // painter ShapePainter {
+        // 
+        //     [variables] {
+        //         float sizeMod = 0.1f;
+        //         float size = 50f;
+        //         Texture texture = url("icon_1");
+        //         Texture texture2 = url("icon_2");
+        //         Texture texture3 = url("icon_3");
+        //         Texture texture4 = url("icon_4");
+        //     }
+        // 
+        //     [draw:background] {
+        // 
+        //         float halfWidth = elementWidth * 0.5f;
+        //         float halfHeight = elementHeight * 0.5f;
+        // 
+        //         Color32 hoverColor = saturate(style.IsHovered ? green : red, 30);
+        // 
+        //         SetMainTexture($texture);
+        //         FillRect(0, 0, halfWidth, halfHeight);
+        //         
+        //         SetMainTexture($texture2);
+        //         FillRect(halfWidth, 0, halfWidth, halfHeight);
+        // 
+        //         // SetColor(hoverColor);
+        //         SetMainTexture($texture3);
+        //         FillRect(0, halfHeight, halfWidth, halfHeight);
+        // 
+        //       //  SetMainTexture($texture4);
+        //         FillRect(halfWidth, halfHeight, halfWidth, halfHeight);
+        // 
+        //     }
+        // 
+        // }
         
-                float halfWidth = elementWidth * 0.5f;
-                float halfHeight = elementHeight * 0.5f;
-        
-                Color32 hoverColor = style.IsHovered ? green : red;
-        
-                $size = 34;
-                //var f = ctx.GetFloat(value)
-        
-                SetColor(hoverColor);
-                FillRect(0, 0, halfWidth, halfHeight);
-        
-                SetColor(saturate(red, 20));
-                FillRect(halfWidth, 0, halfWidth, halfHeight);
-        
-                SetColor(desaturate(red, 20));
-                FillRect(0, halfHeight, halfWidth, halfHeight);
-        
-                SetColor(lighten(red, 20));
-                FillRect(halfWidth, halfHeight, halfWidth, halfHeight);
-            }
-        
+        style regular {
+            PreferredSize = 100px;
+            BackgroundColor = red;
         }
         
+        style clipper {
+            PreferredSize = 300px;
+            BackgroundColor = yellow;
+            Overflow = Hidden;
+        }
+        
+        style nested-clipper {
+            PreferredSize = 200px;
+            BackgroundColor = green;
+            Overflow = Hidden;
+        }
+
     </Style>
     <Contents style="container2">
+        
+<!--        <Div style="shape-kit"/>-->
+        <Text>
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+            Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 
-        <Div style="shape-kit"/>
-        <Div style="shape-kit" style:backgroundColor="Color.red"/>
-        <Div style="shape-kit"/>
-        <Div style="shape-kit" style:backgroundColor="Color.yellow"/>
-        <Div style="shape-kit"/>
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+
+            Why do we use it?
+            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).
+
+
+            U</Text>
+<!--        <Text>UIForia is the fucking greatest!</Text>-->
+<!--        <Text>UIForia is the fucking greatest!</Text>-->
+<!--        <Text>UIForia is the fucking greatest!</Text>-->
+<!--        <Text>UIForia is the fucking greatest!</Text>-->
+
+<!--        <Div style="clipper">-->
+<!--            <Div style="nested-clipper">-->
+<!--                <Div style="regular"/>-->
+<!--            </Div>-->
+<!--        </Div>-->
+        
         
 <!--        <Div style="container">-->
 

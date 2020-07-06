@@ -539,6 +539,9 @@ namespace UIForia.Rendering {
             }
 
             isDefault = true;
+            if ((int) propertyId >= StyleUtil.CustomPropertyStart) {
+                return StyleProperty.Unset(propertyId);
+            }
             return DefaultStyleValues_Generated.GetPropertyValue(propertyId);
         }
 
@@ -553,7 +556,9 @@ namespace UIForia.Rendering {
                     return property;
                 }
             }
-
+            if ((int) propertyId >= StyleUtil.CustomPropertyStart) {
+                return StyleProperty.Unset(propertyId);
+            }
             return DefaultStyleValues_Generated.GetPropertyValue(propertyId);
         }
 
@@ -713,6 +718,11 @@ namespace UIForia.Rendering {
             return "Unknown";
         }
 
+        public void SetPainterProperty(in StyleProperty property, StyleState state) {
+            
+        }
+        
+        //Set instance property
         public void SetProperty(in StyleProperty property, StyleState state) {
 
             if (element.isDestroyed) return;
@@ -871,6 +881,9 @@ namespace UIForia.Rendering {
                 }
             }
 
+            if ((int) propertyId >= StyleUtil.CustomPropertyStart) {
+                return StyleProperty.Unset(propertyId);
+            }
             return DefaultStyleValues_Generated.GetPropertyValue(propertyId);
         }
 

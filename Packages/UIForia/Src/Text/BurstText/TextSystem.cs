@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using UIForia.Elements;
-using UIForia.ListTypes;
 using UIForia.Rendering;
-using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Jobs;
@@ -28,17 +25,15 @@ namespace UIForia.Text {
         internal int frameId;
         internal ElementSystem elementSystem;
 
+        internal DataList<TextInfo>.Shared textInfoMap;
         internal DataList<TextChange>.Shared changedElementIds;
-        internal DataList<TextSymbol>.Shared inputSymbolBuffer;
-        internal DataList<BurstTextInfo>.Shared textInfoMap;
         internal DataList<TextLayoutSymbol>.Shared layoutBuffer;
 
         public TextSystem(ElementSystem elementSystem) {
             this.elementSystem = elementSystem;
-            this.textInfoMap = new DataList<BurstTextInfo>.Shared(128, Allocator.Persistent);
+            this.textInfoMap = new DataList<TextInfo>.Shared(128, Allocator.Persistent, NativeArrayOptions.ClearMemory);
             this.changedElementIds = new DataList<TextChange>.Shared(32, Allocator.Persistent);
             this.layoutBuffer = new DataList<TextLayoutSymbol>.Shared(128, Allocator.Persistent);
-            this.inputSymbolBuffer = new DataList<TextSymbol>.Shared(128, Allocator.Persistent);
             textInfoMap.size++;
         }
 
@@ -49,7 +44,7 @@ namespace UIForia.Text {
             for (int i = 0; i < enabledElements.size; i++) {
                 UIElement element = elementSystem.instanceTable[enabledElements[i].index];
                 if (element is UITextElement textElement) {
-                    ref BurstTextInfo textInfo = ref textInfoMap[textElement.textInfoId];
+                    ref TextInfo textInfo = ref textInfoMap[textElement.textInfoId];
                     textInfo.textStyle = new TextStyle() {
                         alignment = element.style.TextAlignment,
                         faceDilate = element.style.TextFaceDilate,
@@ -58,11 +53,13 @@ namespace UIForia.Text {
                         fontStyle = element.style.TextFontStyle,
                         glowColor = element.style.TextGlowColor,
                         glowOffset = element.style.TextGlowOffset,
+                        glowInner = element.style.TextGlowInner,
+                        glowPower = element.style.TextGlowPower,
                         glowOuter = element.style.TextGlowOuter,
                         outlineColor = element.style.TextOutlineColor,
                         outlineSoftness = element.style.TextOutlineSoftness,
                         outlineWidth = element.style.TextOutlineWidth,
-                        textColor = element.style.TextColor,
+                        faceColor = element.style.TextColor,
                         textTransform = element.style.TextTransform,
                         underlayColor = element.style.TextUnderlayColor,
                         underlayDilate = element.style.TextUnderlayDilate,
@@ -94,7 +91,7 @@ namespace UIForia.Text {
                 return;
             }
 
-            ref BurstTextInfo textInfo = ref textInfoMap[textElement.textInfoId];
+            ref TextInfo textInfo = ref textInfoMap[textElement.textInfoId];
 
             bool requiresRefresh = false;
             for (int i = 0; i < propertyCount; i++) {
@@ -124,7 +121,7 @@ namespace UIForia.Text {
                         textInfo.textStyle.lineHeight = property.AsFloat;
                         requiresRefresh = true;
                         break;
-                    
+
                     case StylePropertyId.TextWhitespaceMode:
                         textInfo.textStyle.whitespaceMode = property.AsWhitespaceMode;
                         requiresRefresh = true;
@@ -135,7 +132,7 @@ namespace UIForia.Text {
                         break;
 
                     case StylePropertyId.TextColor:
-                        textInfo.textStyle.textColor = property.AsColor32;
+                        textInfo.textStyle.faceColor = property.AsColor32;
                         break;
 
                     case StylePropertyId.TextGlowColor:
@@ -149,6 +146,16 @@ namespace UIForia.Text {
 
                     case StylePropertyId.TextGlowOuter:
                         textInfo.textStyle.glowOuter = property.AsFloat;
+                        requiresRefresh = true;
+                        break;
+
+                    case StylePropertyId.TextGlowInner:
+                        textInfo.textStyle.glowInner = property.AsFloat;
+                        requiresRefresh = true;
+                        break;
+
+                    case StylePropertyId.TextGlowPower:
+                        textInfo.textStyle.glowPower = property.AsFloat;
                         requiresRefresh = true;
                         break;
 
@@ -182,9 +189,7 @@ namespace UIForia.Text {
                         break;
 
                 }
-                
-                
-                
+
             }
 
             if (requiresRefresh && textElement.lastUpdateFrame != frameId) {
@@ -195,60 +200,23 @@ namespace UIForia.Text {
         }
 
         public void CleanupFrame() {
-
-            // new RemoveDeadElementsJob() {
-            //     metaTable = elementSystem.metaTable,
-            //     textChanges = changedElementIds
-            // }.Run();
-            //
-            // for (int i = 0; i < changedElementIds.size; i++) {
-            //
-            //     ref BurstTextInfo textInfo = ref textInfoMap[changedElementIds[i].textInfoId];
-            //
-            //     if (textInfo.requiresTextTransform || textInfo.textStyle.textTransform != TextTransform.None) {
-            //         TextUtil.TransformText(textInfo.textStyle.textTransform, textInfo.symbolList.array, textInfo.symbolList.size);
-            //     }
-            //
-            // }
-            //
-            // // from here on out its all burst
-            //
-            // new ProcessWhitespaceJob() {
-            //     buffer = inputSymbolBuffer,
-            //     textChanges = changedElementIds,
-            //     textInfoMap = textInfoMap
-            // }.Run();
-            //
-            // new CreateLayoutSymbols() {
-            //     buffer = layoutBuffer,
-            //     textChanges = changedElementIds,
-            //     textInfoMap = textInfoMap
-            // }.Run();
-            //
-            // new ComputeWordSizes() {
-            //     changes = changedElementIds,
-            //     textInfoMap = textInfoMap,
-            //     fontAssetMap = resourceManager.fontAssetMap
-            // }.Execute();
-
             changedElementIds.size = 0;
-
         }
 
         //Not burst job because we need access to the 'char' class for transformation
         public struct UpdateTextTransformJob : IJob {
 
-            internal DataList<BurstTextInfo>.Shared textInfoMap;
+            internal DataList<TextInfo>.Shared textInfoMap;
             internal DataList<TextChange>.Shared changedElementIds;
 
             public void Execute() {
                 for (int i = 0; i < changedElementIds.size; i++) {
 
-                    ref BurstTextInfo textInfo = ref textInfoMap[changedElementIds[i].textInfoId];
+                    ref TextInfo textInfo = ref textInfoMap[changedElementIds[i].textInfoId];
 
-                   // if (textInfo.requiresTextTransform || textInfo.textStyle.textTransform != TextTransform.None) {
+                    if (textInfo.requiresTextTransform || textInfo.textStyle.textTransform != TextTransform.None) {
                         TextUtil.TransformText(textInfo.textStyle.textTransform, textInfo.symbolList.array, textInfo.symbolList.size);
-                   // }
+                    }
 
                 }
 
@@ -262,49 +230,9 @@ namespace UIForia.Text {
                 uiTextElement.textInfoId = GetNextTextId();
             }
 
-            bool requiresTextTransform = false;
-            bool processedStream = false;
+            ref TextInfo textInfo = ref textInfoMap[uiTextElement.textInfoId];
 
-            int length = uiTextElement.text.Length;
-
-            fixed (char* charptr = uiTextElement.text) {
-                if (uiTextElement._processor != null) {
-                    CharStream stream = new CharStream(charptr, 0, (uint) length);
-                    TextSymbolStream symbolStream = new TextSymbolStream(inputSymbolBuffer);
-
-                    processedStream = uiTextElement._processor.Process(stream, ref symbolStream);
-
-                    requiresTextTransform = symbolStream.requiresTextTransform;
-                    inputSymbolBuffer = symbolStream.stream;
-                }
-
-                if (!processedStream) {
-                    inputSymbolBuffer.SetSize(length);
-
-                    TextSymbol* array = inputSymbolBuffer.GetArrayPointer();
-                    TypedUnsafe.MemClear(array, length);
-
-                    for (int i = 0; i < length; i++) {
-                        array[i].type = TextSymbolType.Character;
-                        array[i].charInfo.character = charptr[i];
-                    }
-
-                }
-            }
-
-            ref BurstTextInfo textInfo = ref textInfoMap[uiTextElement.textInfoId];
-            textInfo.requiresTextTransform = requiresTextTransform;
-
-            if (textInfo.symbolList.array == null) {
-                textInfo.symbolList = new List_TextSymbol(inputSymbolBuffer.size, Allocator.Persistent);
-            }
-            else {
-                textInfo.symbolList.EnsureCapacity(inputSymbolBuffer.size);
-            }
-
-            textInfo.symbolList.CopyFrom(inputSymbolBuffer.GetArrayPointer(), inputSymbolBuffer.size);
-
-            inputSymbolBuffer.size = 0;
+            TextInfo.UpdateText(ref textInfo, uiTextElement.text, uiTextElement._processor);
 
             if (uiTextElement.lastUpdateFrame != frameId) {
                 uiTextElement.lastUpdateFrame = frameId;
@@ -323,7 +251,6 @@ namespace UIForia.Text {
         public void Dispose() {
             textInfoMap.Dispose();
             changedElementIds.Dispose();
-            inputSymbolBuffer.Dispose();
             layoutBuffer.Dispose();
         }
 

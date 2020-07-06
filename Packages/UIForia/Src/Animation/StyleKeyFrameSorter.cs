@@ -11,13 +11,5 @@ namespace UIForia.Animation {
 
     }
     
-    public class MaterialKeyFrameSorter : IComparer<ProcessedMaterialKeyFrame> {
-
-        public int Compare(ProcessedMaterialKeyFrame x, ProcessedMaterialKeyFrame y) {
-            if (x.time == y.time) return 0;
-            return x.time > y.time ? 1 : -1;
-        }
-
-    }
 
 }

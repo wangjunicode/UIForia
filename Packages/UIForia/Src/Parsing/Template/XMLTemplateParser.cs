@@ -429,13 +429,13 @@ namespace UIForia.Parsing {
                     for (int i = 0; i < astNode.nodes.size; i++) {
                         ASTNode n = astNode.nodes.array[i];
                         if (n is FieldNode fieldNode) {
-                            
+
                             ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldNode.typeLookup, fieldNode.name, fieldNode.isStatic);
 
                             fieldDefinitions.Add(fieldDefinition);
                         }
                         else if (n is MethodNode methodNode) {
-                                
+
                             ReflectionUtil.MethodDefinition methodDefinition = new ReflectionUtil.MethodDefinition() {
                                 arguments = methodNode.signatureList,
                                 returnType = methodNode.returnTypeLookup,
@@ -443,7 +443,7 @@ namespace UIForia.Parsing {
                                 methodName = methodNode.name,
                                 isStatic = methodNode.isStatic,
                             };
-                            
+
                             methodDefinitions.Add(methodDefinition);
                         }
                     }
@@ -606,6 +606,24 @@ namespace UIForia.Parsing {
                     attributeType = AttributeType.InstanceStyle;
                     name = name.Substring("style.".Length);
                 }
+
+            }
+            else if (prefix.Contains("painter.")) {
+                attributeType = AttributeType.PainterVar;
+                if (prefix.Contains(".hover")) {
+                    flags |= AttributeFlags.StyleStateHover;
+
+                }
+                else if (prefix.Contains(".active")) {
+                    flags |= AttributeFlags.StyleStateActive;
+
+                }
+                else if (prefix.Contains(".focus")) {
+                    flags |= AttributeFlags.StyleStateFocus;
+                }
+                else {
+                    throw CompileException.UnknownStyleState(new AttributeNodeDebugData(templateShell.filePath, tagName, new TemplateLineInfo(line, column), value), name.Split('.')[0]);
+                }
             }
             else {
                 switch (prefix) {
@@ -618,6 +636,12 @@ namespace UIForia.Parsing {
                             flags |= AttributeFlags.Const;
                         }
 
+                        break;
+                    }
+
+                    case "painter": {
+                        // painter:painterName.value="expr";
+                        attributeType = AttributeType.PainterVar;
                         break;
                     }
 

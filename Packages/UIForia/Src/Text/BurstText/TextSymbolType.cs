@@ -22,9 +22,12 @@
         FontStylePush,
         FontStylePop,
         
-        
         TextTransformPush,
-        TextTransformPop
+        TextTransformPop,
+
+        MaterialPush,
+        MaterialPop,
+        Sprite
 
     }
   

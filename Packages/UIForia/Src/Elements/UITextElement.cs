@@ -213,6 +213,16 @@ namespace UIForia.Elements {
             throw new NotImplementedException();
         }
 
+        internal bool TryGetTextInfo(out TextInfo textInfo) {
+            if (textInfoId != 0) {
+                textInfo = application.textSystem.textInfoMap[textInfoId];
+                return true;
+            }
+
+            textInfo = default;
+            return false;
+        }
+
     }
 
 }

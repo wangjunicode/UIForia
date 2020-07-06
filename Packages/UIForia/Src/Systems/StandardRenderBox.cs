@@ -1,14 +1,20 @@
 using System;
 using System.Diagnostics;
 using SVGX;
+using ThisOtherThing.UI.ShapeUtils;
 using UIForia.Compilers.Style;
+using UIForia.Graphics;
+using UIForia.Graphics.ShapeKit;
 using UIForia.Layout;
 using UIForia.Rendering.Vertigo;
 using UIForia.Systems;
 using UIForia.Util;
+using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
+using UnityEngine.Rendering;
 using UnityEngine.UI;
 using Vertigo;
 using Debug = UnityEngine.Debug;
@@ -39,6 +45,43 @@ namespace UIForia.Rendering {
             base.PaintBackground(ctx);
             //  imageGeometry.mainTexture = ((UIImageElement) element).texture;
             // ctx.DrawBatchedGeometry(imageGeometry, new GeometryRange(0, 4, 0, 6), element.layoutResult.matrix.ToMatrix4x4());
+        }
+
+    }
+
+    [DebuggerDisplay("{element.ToString()}")]
+    public class StandardRenderBox2 : RenderBox {
+
+      
+        public override void OnInitialize() {
+      
+        }
+
+        public override void PaintBackground2(RenderContext2 ctx) {
+            Color32 backgroundColor = element.style.BackgroundColor;
+            Texture backgroundImage = element.style.BackgroundImage;
+            
+            if (backgroundColor.a <= 0 && ReferenceEquals(backgroundImage, null)) {
+                //if (borderColorTop.a + borderColorBottom.a + borderColorLeft.a + borderColorRight.a == 0) {
+                    didRender = false;
+                //}
+                return;
+            }
+            
+            Size size = element.layoutResult.actualSize;
+            ctx.SetColor(element.style.BackgroundColor);
+            ctx.FillRect(new float2(0, 0), new float2(size.width, size.height));
+
+            MaskId maskId = ctx.GetLastShape().CreateMask(MaskType.SoftGeometry, MaskVisibility.Hidden);
+
+            ctx.SetMask(maskId);
+            
+            ctx.FillRoundRect(new float2(0, 0), new float2(size.width, size.height), Corner.Bevel(3));
+
+        }
+
+        public override void PaintBackground(RenderContext ctx) {
+            
         }
 
     }
@@ -467,10 +510,10 @@ namespace UIForia.Rendering {
 
         public override void PaintBackground(RenderContext ctx) {
 
-            if (materialId.id != 0) {
-                RenderFromMaterial(ctx);
-                return;
-            }
+            // if (materialId.id != 0) {
+            //     RenderFromMaterial(ctx);
+            //     return;
+            // }
 
             Size newSize = element.layoutResult.actualSize;
 
@@ -574,35 +617,35 @@ namespace UIForia.Rendering {
         
         public void RenderFromMaterial(RenderContext ctx) {
 
-            if (!element.application.materialDatabase.TryGetMaterial(materialId, out MaterialInfo info)) { 
-                return;
-            }
-
-            if (ReferenceEquals(mesh, null)) {
-                mesh = new PooledMesh(null);
-            }
-
-            Size size = element.layoutResult.actualSize;
-
-            propertyBlock = propertyBlock ?? new MaterialPropertyBlock();
-            
-            if (!ReferenceEquals(backgroundImage, null)) {
-                propertyBlock.SetTexture(s_Main, backgroundImage);
-            }
-            
-            element.application.materialDatabase.GetInstanceProperties(element.id, materialId, propertyBlock);
-            
-            // todo -- will want to set the properties that are expected by UI shaders
-            // clip rect is in world space it seems, I'm not sure how to replicate it. seems to be in 2 point form, x + height & width + y? seems odd
-            // propertyBlock.SetVector("_ClipRect", new Vector4(100, 100, 100, 100));
-            
-            geometry.Clear();
-            geometry.FillMeshType(0, 0, size.width, size.height, meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
-            geometry.ToMesh(mesh);
-            
-            Matrix4x4 matrix = default;
-            element.layoutResult.matrix.GetMatrix4x4(ref matrix);
-            ctx.DrawMesh(mesh.mesh, info.material, propertyBlock, matrix);
+            // if (!element.application.materialDatabase.TryGetMaterial(materialId, out MaterialInfo info)) { 
+            //     return;
+            // }
+            //
+            // if (ReferenceEquals(mesh, null)) {
+            //     mesh = new PooledMesh(null);
+            // }
+            //
+            // Size size = element.layoutResult.actualSize;
+            //
+            // propertyBlock = propertyBlock ?? new MaterialPropertyBlock();
+            //
+            // if (!ReferenceEquals(backgroundImage, null)) {
+            //     propertyBlock.SetTexture(s_Main, backgroundImage);
+            // }
+            //
+            // element.application.materialDatabase.GetInstanceProperties(element.id, materialId, propertyBlock);
+            //
+            // // todo -- will want to set the properties that are expected by UI shaders
+            // // clip rect is in world space it seems, I'm not sure how to replicate it. seems to be in 2 point form, x + height & width + y? seems odd
+            // // propertyBlock.SetVector("_ClipRect", new Vector4(100, 100, 100, 100));
+            //
+            // geometry.Clear();
+            // geometry.FillMeshType(0, 0, size.width, size.height, meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
+            // geometry.ToMesh(mesh);
+            //
+            // Matrix4x4 matrix = default;
+            // element.layoutResult.matrix.GetMatrix4x4(ref matrix);
+            // ctx.DrawMesh(mesh.mesh, info.material, propertyBlock, matrix);
 
         }
 

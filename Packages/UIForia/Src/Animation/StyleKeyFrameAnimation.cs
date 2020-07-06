@@ -15,45 +15,12 @@ namespace UIForia.Animation {
 
         private ElementSystem elementSystem;
         private LightList<ProcessedStyleKeyFrameGroup> processedStyleFrameGroups;
-        private LightList<ProcessedMaterialKeyFrameGroup> processedMaterialFrameGroups;
 
         public StyleKeyFrameAnimation(ElementSystem elementSystem, UIElement target, AnimationData data) : base(target, data) {
             this.elementSystem = elementSystem;
             ProcessStyleKeyFrames(data.frames);
-            ProcessMaterialKeyFrames(data.materialFrames);
         }
-
-        private void ProcessMaterialKeyFrames(IList<MaterialAnimationKeyFrame> frames) {
-            if (frames == null || frames.Count == 0) {
-                return;
-            }
-
-            processedMaterialFrameGroups = new LightList<ProcessedMaterialKeyFrameGroup>();
-            // todo -- ensure we release lists where we need to
-            // todo -- dont use a list each processed frame group, use a single list sorted sensibly
-            for (int i = 0; i < frames.Count; i++) {
-                MaterialAnimationKeyFrame f = frames[i];
-                MaterialKeyFrameValue[] properties = f.properties;
-
-                for (int j = 0; j < f.properties.Length; j++) {
-                    AddMaterialKeyFrame(f.key, properties[j]);
-                }
-
-            }
-
-            for (int i = 0; i < processedMaterialFrameGroups.Count; i++) {
-
-                MaterialPropertyId property = processedMaterialFrameGroups[i].materialIdPair;
-
-                LightList<ProcessedMaterialKeyFrame> processedKeyFrames = processedMaterialFrameGroups[i].frames;
-
-                processedKeyFrames.Sort(s_MaterialKeyFrameSorter);
-
-                if (processedKeyFrames[0].time != 0f) {
-                    processedKeyFrames.Insert(0, new ProcessedMaterialKeyFrame(0f, default));
-                }
-            }
-        }
+        
 
         public void ProcessStyleKeyFrames(IList<StyleAnimationKeyFrame> frames) {
             if (frames == null || frames.Count == 0) {
@@ -79,24 +46,7 @@ namespace UIForia.Animation {
                 }
             }
         }
-
-        private void AddMaterialKeyFrame(float time, MaterialKeyFrameValue property) {
-
-            for (int i = 0; i < processedStyleFrameGroups.Count; i++) {
-
-                ref ProcessedMaterialKeyFrameGroup p = ref processedMaterialFrameGroups.array[i];
-
-                if (p.materialIdPair.materialId.baseId == property.materialId.baseId && p.materialIdPair.propertyId == property.propertyId) {
-                    // p.frames.Add(new ProcessedMaterialKeyFrame(time));
-                    return;
-                }
-            }
-
-            LightList<ProcessedMaterialKeyFrame> list = LightList<ProcessedMaterialKeyFrame>.Get();
-            // list.Add(new ProcessedMaterialKeyFrame(time));
-            processedMaterialFrameGroups.Add(new ProcessedMaterialKeyFrameGroup(new MaterialPropertyId(property.materialId, property.propertyId), list));
-        }
-
+        
         private void AddKeyFrame(float time, StyleKeyFrameValue property) {
 
             for (int i = 0; i < processedStyleFrameGroups.Count; i++) {
@@ -149,74 +99,7 @@ namespace UIForia.Animation {
             }
 
             Rect viewport = target.View.Viewport;
-
-            if (processedMaterialFrameGroups != null) {
-
-                ProcessedMaterialKeyFrameGroup[] materialGroups = processedMaterialFrameGroups.array;
-
-                for (int i = 0; i < processedMaterialFrameGroups.size; i++) {
-
-                    ProcessedMaterialKeyFrame[] frames = materialGroups[i].frames.array;
-                    int frameCount = materialGroups[i].frames.size;
-
-                    ProcessedMaterialKeyFrame prev = frames[0];
-                    ProcessedMaterialKeyFrame nextMaterialFrame = frames[frameCount - 1];
-
-                    for (int j = 1; j < frameCount; j++) {
-                        if (frames[j].time > targetProgress) {
-                            prev = frames[j - 1];
-                            nextMaterialFrame = frames[j];
-                            break;
-                        }
-                    }
-
-                    if (isReversed) {
-                        ProcessedMaterialKeyFrame tmp = prev;
-                        prev = nextMaterialFrame;
-                        nextMaterialFrame = tmp;
-                    }
-
-                    float t = Mathf.Clamp01(Easing.Interpolate(MathUtil.PercentOfRange(targetProgress, prev.time, nextMaterialFrame.time), options.timingFunction.Value));
-
-                    switch (prev.materialProperty.propertyType) {
-
-                        case MaterialPropertyType.Color:
-                            Color c0 = prev.materialProperty.value.colorValue;
-                            Color c1 = nextMaterialFrame.materialProperty.value.colorValue;
-                            // target.Material.SetColor(
-                            //     materialGroups[i].materialIdPair.materialId,
-                            //     materialGroups[i].materialIdPair.propertyId,
-                            //     progress >= 1 ? c1 : Color.Lerp(c0, c1, t)
-                            // );
-                            break;
-
-                        case MaterialPropertyType.Float:
-                            float f0 = prev.materialProperty.value.floatValue;
-                            float f1 = nextMaterialFrame.materialProperty.value.floatValue;
-                            // target.Material.SetFloat(
-                            //     materialGroups[i].materialIdPair.materialId,
-                            //     materialGroups[i].materialIdPair.propertyId,
-                            //     progress >= 1 ? f1 : Mathf.Lerp(f0, f1, t)
-                            // );
-                            break;
-
-                        case MaterialPropertyType.Vector:
-                            break;
-
-                        case MaterialPropertyType.Range:
-                            break;
-
-                        case MaterialPropertyType.Texture:
-                            break;
-
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-
-                }
-
-            }
-
+            
             if (processedStyleFrameGroups != null) {
 
                 ProcessedStyleKeyFrameGroup[] styleGroups = processedStyleFrameGroups.array;

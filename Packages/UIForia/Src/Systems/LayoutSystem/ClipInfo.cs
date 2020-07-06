@@ -15,6 +15,8 @@ namespace UIForia.Systems {
         public OrientedBounds orientedBounds;
         public bool isMouseQueryHandler;
         public bool isCulled;
+        public AxisAlignedBounds2D aabb;
+        public bool fullyContainedByParentClipper;
 
     }
 

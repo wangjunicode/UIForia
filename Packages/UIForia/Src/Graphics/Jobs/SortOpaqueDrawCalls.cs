@@ -17,12 +17,12 @@ namespace UIForia.Graphics {
 
         public int Compare(DrawInfo x, DrawInfo y) {
 
-            if (x.renderCallIdx == y.renderCallIdx) {
-                return x.localDrawIdx - y.localDrawIdx;
-            }
+            // if (x.renderCallId == y.renderCallId) {
+            //     return x.localDrawIdx - y.localDrawIdx;
+            // }
 
-            ref RenderCallInfo a = ref renderCallInfo[x.renderCallIdx];
-            ref RenderCallInfo b = ref renderCallInfo[y.renderCallIdx];
+            ref RenderCallInfo a = ref renderCallInfo[x.renderCallId];
+            ref RenderCallInfo b = ref renderCallInfo[y.renderCallId];
 
             if (a.renderOp != b.renderOp) {
                 return a.renderOp - b.renderOp;

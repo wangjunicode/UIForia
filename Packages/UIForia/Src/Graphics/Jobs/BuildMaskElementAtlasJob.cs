@@ -42,6 +42,7 @@ namespace UIForia.Graphics {
 
         public void Execute() {
 
+            return;
             float width = 256;
             float height = 256;
 

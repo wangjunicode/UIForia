@@ -1,4 +1,5 @@
-﻿using UIForia.Util.Unsafe;
+﻿using UIForia.Systems;
+using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -110,7 +111,6 @@ namespace UIForia {
             public SchedulerStep ThenParallelForRangeDefer<T>(int* size, int minBatchCount, T job) where T : struct, IJobParallelForDeferBatched {
                 return new SchedulerStep(job.Schedule(size, minBatchCount, handle));
             }
-
         }
 
         public static SchedulerStep ParallelFor<T>(T job) where T : struct, IVertigoParallelFor {

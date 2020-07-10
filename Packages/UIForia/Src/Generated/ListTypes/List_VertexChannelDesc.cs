@@ -11,24 +11,24 @@ using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-using Unity.Mathematics;
+using UIForia.Graphics;
 
 namespace UIForia.ListTypes {
 
     
 
-    [DebuggerTypeProxy(typeof(DebugView_float2))]
-    public unsafe struct List_float2 : IBasicList<float2> {
+    [DebuggerTypeProxy(typeof(DebugView_VertexChannelDesc))]
+    internal unsafe struct List_VertexChannelDesc : IBasicList<VertexChannelDesc> {
 
         public int size;
         private ushort capacityShiftBits;
         private AllocatorUShort allocator;
 
-        [NativeDisableUnsafePtrRestriction] public float2* array;
+        [NativeDisableUnsafePtrRestriction] public VertexChannelDesc* array;
 
         private const int k_MinCapacity = 4;
 
-        public List_float2(int initialCapacity, Allocator allocator, bool clearMemory = false) {
+        public List_VertexChannelDesc(int initialCapacity, Allocator allocator, bool clearMemory = false) {
             this.allocator = TypedUnsafe.CompressAllocatorToUShort(allocator);
             this.size = 0;
             this.capacityShiftBits = 0;
@@ -43,14 +43,14 @@ namespace UIForia.ListTypes {
         private void Initialize(int capacity, Allocator allocator, bool clearMemory) {
             this.allocator = TypedUnsafe.CompressAllocatorToUShort(allocator);
             capacity = BitUtil.EnsurePowerOfTwo(capacity > k_MinCapacity ? capacity : k_MinCapacity);
-            this.array = (float2*) UnsafeUtility.Malloc(sizeof(float2) * capacity, UnsafeUtility.AlignOf<float2>(), allocator);
+            this.array = (VertexChannelDesc*) UnsafeUtility.Malloc(sizeof(VertexChannelDesc) * capacity, UnsafeUtility.AlignOf<VertexChannelDesc>(), allocator);
             this.capacityShiftBits = (ushort) BitUtil.GetPowerOfTwoBitIndex((uint) capacity);
             if (clearMemory) {
-                UnsafeUtility.MemClear(array, sizeof(float2) * capacity);
+                UnsafeUtility.MemClear(array, sizeof(VertexChannelDesc) * capacity);
             }
         }
 
-        public ref float2 this[int index] {
+        public ref VertexChannelDesc this[int index] {
             get => ref array[index];
         }
 
@@ -59,7 +59,7 @@ namespace UIForia.ListTypes {
             this.size = size;
         }
 
-        public void Add(in float2 item) {
+        public void Add(in VertexChannelDesc item) {
             if (size + 1 >= (1 << capacityShiftBits)) {
                 EnsureCapacity(size + 1);
             }
@@ -67,11 +67,11 @@ namespace UIForia.ListTypes {
             array[size++] = item;
         }
 
-        public void AddUnchecked(in float2 item) {
+        public void AddUnchecked(in VertexChannelDesc item) {
             array[size++] = item;
         }
 
-        public void AddRange(float2* items, int itemCount) {
+        public void AddRange(VertexChannelDesc* items, int itemCount) {
             EnsureAdditionalCapacity(itemCount);
             TypedUnsafe.MemCpy(array + size, items, itemCount);
             size += itemCount;
@@ -96,8 +96,8 @@ namespace UIForia.ListTypes {
             capacity = BitUtil.EnsurePowerOfTwo(desiredCapacity < k_MinCapacity ? k_MinCapacity : desiredCapacity);
             Allocator fullAllocator = TypedUnsafe.ConvertCompressedAllocator(allocator);
 
-            long bytesToMalloc = sizeof(float2) * capacity;
-            void* newPointer = UnsafeUtility.Malloc(bytesToMalloc, UnsafeUtility.AlignOf<float2>(), fullAllocator);
+            long bytesToMalloc = sizeof(VertexChannelDesc) * capacity;
+            void* newPointer = UnsafeUtility.Malloc(bytesToMalloc, UnsafeUtility.AlignOf<VertexChannelDesc>(), fullAllocator);
 
             if (clearMemory) {
                 byte* bytePtr = (byte*) newPointer;
@@ -105,13 +105,13 @@ namespace UIForia.ListTypes {
             }
 
             if (array != default) {
-                int bytesToCopy = size * sizeof(float2);
+                int bytesToCopy = size * sizeof(VertexChannelDesc);
                 UnsafeUtility.MemCpy(newPointer, array, bytesToCopy);
                 UnsafeUtility.Free(array, fullAllocator);
             }
 
             capacityShiftBits = (ushort) BitUtil.GetPowerOfTwoBitIndex((uint) capacity);
-            array = (float2*) newPointer;
+            array = (VertexChannelDesc*) newPointer;
         }
 
         public void EnsureAdditionalCapacity(int additional) {
@@ -134,11 +134,11 @@ namespace UIForia.ListTypes {
             size = count;
         }
 
-        public ref float2 Get(int index) {
+        public ref VertexChannelDesc Get(int index) {
             return ref array[index];
         }
 
-        public void Set(in float2 item, int index) {
+        public void Set(in VertexChannelDesc item, int index) {
             array[index] = item;
         }
 
@@ -154,7 +154,7 @@ namespace UIForia.ListTypes {
             this = default;
         }
 
-        public float2* GetPointer(int index) {
+        public VertexChannelDesc* GetPointer(int index) {
             return array + index;
         }
 
@@ -162,17 +162,17 @@ namespace UIForia.ListTypes {
             array[index] = array[--size];
         }
 
-        public float2 GetLast() {
+        public VertexChannelDesc GetLast() {
             return array[size - 1];
         }
 
-        public void CopyFrom(float2* data, int count) {
+        public void CopyFrom(VertexChannelDesc* data, int count) {
             EnsureCapacity(count);
             size = count;
             TypedUnsafe.MemCpy(array, data, size);
         }
 
-        public void CopyFrom(float2* data, int count, Allocator allocator) {
+        public void CopyFrom(VertexChannelDesc* data, int count, Allocator allocator) {
             if (array == null) {
                 Initialize(count, allocator, false);
             }
@@ -187,18 +187,18 @@ namespace UIForia.ListTypes {
         [DebuggerTypeProxy(typeof(DataListDebugView<>))]
         public struct Shared : IDisposable {
 
-            [NativeDisableUnsafePtrRestriction] public List_float2* state;
+            [NativeDisableUnsafePtrRestriction] public List_VertexChannelDesc* state;
 
             public Shared(int initialCapacity, Allocator allocator, bool clear = false) {
-                this.state = TypedUnsafe.Malloc<List_float2>(1, allocator);
-                *this.state = new List_float2(initialCapacity, allocator, clear);
+                this.state = TypedUnsafe.Malloc<List_VertexChannelDesc>(1, allocator);
+                *this.state = new List_VertexChannelDesc(initialCapacity, allocator, clear);
             }
 
-            public void Add(in float2 item) {
+            public void Add(in VertexChannelDesc item) {
                 state->Add(item);
             }
 
-            public void AddRange(float2* items, int itemCount) {
+            public void AddRange(VertexChannelDesc* items, int itemCount) {
                 state->AddRange(items, itemCount);
             }
 
@@ -210,11 +210,11 @@ namespace UIForia.ListTypes {
                 state->EnsureAdditionalCapacity(additional);
             }
 
-            public ref float2 GetReference(int index) {
+            public ref VertexChannelDesc GetReference(int index) {
                 return ref state->Get(index);
             }
 
-            public float2* GetPointer(int index) {
+            public VertexChannelDesc* GetPointer(int index) {
                 return state->GetPointer(index);
             }
 
@@ -227,11 +227,11 @@ namespace UIForia.ListTypes {
                 get => state->Capacity;
             }
 
-            public ref float2 this[int index] {
+            public ref VertexChannelDesc this[int index] {
                 get => ref state->Get(index);
             }
 
-            public void Set(in float2 item, int index) {
+            public void Set(in VertexChannelDesc item, int index) {
                 state->Set(item, index);
             }
 
@@ -250,11 +250,11 @@ namespace UIForia.ListTypes {
                 state->size = count;
             }
 
-            public float2* GetArrayPointer() {
+            public VertexChannelDesc* GetArrayPointer() {
                 return state->array;
             }
 
-            public void AddUnchecked(in float2 item) {
+            public void AddUnchecked(in VertexChannelDesc item) {
                 state->AddUnchecked(item);
             }
 
@@ -268,7 +268,7 @@ namespace UIForia.ListTypes {
                 state->array[i] = state->array[--state->size];
             }
 
-            public void FilterSwapRemove<TFilter>(TFilter filter) where TFilter : IListFilter<float2> {
+            public void FilterSwapRemove<TFilter>(TFilter filter) where TFilter : IListFilter<VertexChannelDesc> {
                 int itemCount = state->size;
 
                 for (int i = 0; i < itemCount; i++) {
@@ -283,25 +283,25 @@ namespace UIForia.ListTypes {
 
         }
 
-        public struct DebugView_float2 {
+        public struct DebugView_VertexChannelDesc {
 
             public int size;
             public int capacity;
-            public float2[] data;
+            public VertexChannelDesc[] data;
 
-            public DebugView_float2(List_float2 target) {
+            public DebugView_VertexChannelDesc(List_VertexChannelDesc target) {
                 this.size = target.size;
                 this.capacity = target.Capacity;
-                this.data = new float2[size];
+                this.data = new VertexChannelDesc[size];
                 for (int i = 0; i < size; i++) {
                     data[i] = target[i];
                 }
             }
 
-            public DebugView_float2(List_float2.Shared target) {
+            public DebugView_VertexChannelDesc(List_VertexChannelDesc.Shared target) {
                 this.size = target.size;
                 this.capacity = target.capacity;
-                this.data = new float2[size];
+                this.data = new VertexChannelDesc[size];
                 for (int i = 0; i < size; i++) {
                     data[i] = target[i];
                 }

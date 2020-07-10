@@ -56,6 +56,7 @@ namespace UIForia.Editor {
             ListTemplateGenerator.Generate<Color32>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<BytePage>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<DrawInfo>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<VertexChannelDesc>(outputPathRoot, contents);
             
         }
 

@@ -14,10 +14,8 @@ using UnityEngine;
 
 namespace UIForia.Graphics {
 
-    [Flags]
-    public enum DrawType {
+    public enum ShapeType {
 
-        Mesh = 1 << 0,
         Rect = 1 << 1,
         RoundedRect = 1 << 2,
         Arc = 1 << 3,
@@ -26,13 +24,28 @@ namespace UIForia.Graphics {
         Ellipse = 1 << 6,
         SDFText = 1 << 8,
 
+    }
+
+    [Flags]
+    public enum DrawType {
+
+        Mesh = 1 << 0,
+        Shape = 1 << 1,
+
         PushClipRect = 1 << 9,
         PushClipShape = 1 << 10,
         SetRenderTarget = 1 << 11,
 
-        Shape = Rect | RoundedRect | Arc | Polygon | Line | Ellipse,
+        PopClipShape = 1 << 12,
+        
+        PushClipTexture,
+        PopClipper,
+        PushClipScope,
+
+        // Shape = Rect | RoundedRect | Arc | Polygon | Line | Ellipse,
 
         StateChange = PushClipShape | PushClipRect | SetRenderTarget,
+
 
     }
 
@@ -60,14 +73,10 @@ namespace UIForia.Graphics {
 
         internal int id;
         private RenderContext2 ctx;
-        
+
         internal ShapeId(RenderContext2 ctx, int id) {
             this.id = id;
             this.ctx = ctx;
-        }
-
-        public MaskId CreateMask(MaskType maskType, MaskVisibility visibility = MaskVisibility.Visible) {
-            return ctx.MakeMask(this, maskType, visibility);
         }
 
     }
@@ -128,7 +137,6 @@ namespace UIForia.Graphics {
         private DataList<MaterialPropertyOverride> materialValueOverrides;
         private MaterialPropertyOverride* currentOverrideProperties;
         private DrawInfoFlags currentFlagSet;
-        private OverflowBounds* overflowBounds;
         internal Dictionary<int, Texture> textureMap;
 
         internal LightList<Mesh> meshList;
@@ -364,7 +372,8 @@ namespace UIForia.Graphics {
             }
 
             drawList.Add(new DrawInfo() {
-                type = DrawType.RoundedRect,
+                type = DrawType.Shape,
+                shapeType = ShapeType.RoundedRect,
                 flags = currentFlagSet,
                 vertexLayout = VertexLayout.UIForiaDefault,
                 matrix = defaultMatrix,
@@ -373,7 +382,6 @@ namespace UIForia.Graphics {
                 materialOverrideCount = materialValueOverrides.size,
                 renderCallId = renderCallId,
                 localDrawIdx = localDrawIdx++,
-                overflowBounds = overflowBounds,
                 shapeData = (byte*) stackBuffer.Allocate(new RoundedRectData() {
                     type = ShapeMode.Fill | ShapeMode.AA,
                     x = position.x,
@@ -387,14 +395,33 @@ namespace UIForia.Graphics {
             });
         }
 
-        public void FillRect(float2 position, float2 size) {
+        public struct StencilScope : IDisposable {
 
+            private RenderContext2 ctx;
+
+            internal StencilScope(RenderContext2 ctx) {
+                this.ctx = ctx;
+            }
+
+            public void Dispose() {
+                ctx.PopStencilClipShape();
+            }
+
+        }
+
+        public StencilScope PushStencilScope() {
+            PushStencilClipShape();
+            return new StencilScope(this);
+        }
+
+        public void FillRect(float x, float y, float width, float height) {
             if (hasPendingMaterialOverrides) {
                 CommitMaterialModifications();
             }
 
             drawList.Add(new DrawInfo() {
-                type = DrawType.Rect,
+                type = DrawType.Shape,
+                shapeType = ShapeType.Rect,
                 flags = currentFlagSet,
                 vertexLayout = VertexLayout.UIForiaDefault,
                 matrix = defaultMatrix,
@@ -403,19 +430,20 @@ namespace UIForia.Graphics {
                 materialOverrideCount = materialValueOverrides.size,
                 renderCallId = renderCallId,
                 localDrawIdx = localDrawIdx++,
-                overflowBounds = overflowBounds,
                 shapeData = (byte*) stackBuffer.Allocate(new RectData() {
                     type = ShapeMode.Fill | ShapeMode.AA,
-                    x = position.x,
-                    y = position.y,
-                    width = size.x,
-                    height = size.y,
+                    x = x,
+                    y = y,
+                    width = width,
+                    height = height,
                     color = color,
                     edgeGradient = new EdgeGradientData() { }
                 })
             });
+        }
 
-            // todo -- AA ring should be handled separately so it ends up in transparent regardless of body queue
+        public void FillRect(float2 position, float2 size) {
+            FillRect(position.x, position.y, size.x, size.y);
         }
 
         public enum MaskInteraction {
@@ -547,7 +575,7 @@ namespace UIForia.Graphics {
 
                 };
 
-                AxisAlignedBounds2D bounds = ComputeAABBFromBounds(*overflowBounds);
+                AxisAlignedBounds2D bounds = default; // todo -- figure out how to handle text overflow so i dont generate tons of lines that will just be clipped. ComputeAABBFromBounds(*overflowBounds);
 
                 for (int i = 0; i < textInfo.lineInfoList.size; i++) {
                     ref TextLineInfo lineInfo = ref textInfo.lineInfoList[i];
@@ -600,18 +628,19 @@ namespace UIForia.Graphics {
                     if (p2.y > yMax) yMax = p2.y;
                     if (p3.y > yMax) yMax = p3.y;
 
-                    bool overlappingOrContains = xMax >= bounds.xMin && xMin <= bounds.xMax && yMax >= bounds.yMin && yMin <= bounds.yMax;
-
-                    if (!overlappingOrContains) {
-                        continue;
-                    }
+                    // bool overlappingOrContains = xMax >= bounds.xMin && xMin <= bounds.xMax && yMax >= bounds.yMin && yMin <= bounds.yMax;
+                    //
+                    // if (!overlappingOrContains) {
+                    //     continue;
+                    // }
 
                     textSpan.symbolStart = textInfo.layoutSymbolList[lineWordStart].wordInfo.charStart;
                     textSpan.symbolEnd = textInfo.layoutSymbolList[lineWordEnd - 1].wordInfo.charEnd;
                     textSpan.materialFeatureSet = GetTextFeatureSet(textSpan);
 
                     drawList.Add(new DrawInfo() {
-                        type = DrawType.SDFText,
+                        type = DrawType.Shape,
+                        shapeType = ShapeType.SDFText,
                         flags = currentFlagSet,
                         materialId = activeMaterialId,
                         vertexLayout = VertexLayout.UIForiaSDFText,
@@ -620,7 +649,6 @@ namespace UIForia.Graphics {
                         materialOverrideCount = materialValueOverrides.size,
                         renderCallId = renderCallId,
                         localDrawIdx = localDrawIdx++,
-                        overflowBounds = overflowBounds,
                         shapeData = (byte*) stackBuffer.Allocate(textSpan)
                     });
 
@@ -745,7 +773,6 @@ namespace UIForia.Graphics {
             this.activeMaterialId = materialId;
             this.SetMaterial(activeMaterialId);
             this.defaultMatrix = matrix;
-            this.overflowBounds = overflowBounds;
             this.color.r = 255;
             this.color.g = 255;
             this.color.b = 255;
@@ -761,7 +788,7 @@ namespace UIForia.Graphics {
         }
 
         public Graphics.ShapeId GetLastShape() {
-            
+
             if (drawList.size == 0) {
                 throw new Exception("No draw calls");
             }
@@ -770,28 +797,35 @@ namespace UIForia.Graphics {
 
         }
 
-        public void SetMask(MaskId mask) {
-            
-        }
-        
-        internal MaskId MakeMask(Graphics.ShapeId shapeId, MaskType maskType, MaskVisibility visibility) {
-            ref DrawInfo drawInfo = ref drawList[shapeId.id];
-            // if I allocate the geometry info now then it wont move and i can use it
+        public void PushStencilClipShape(bool renderClipShape = false) {
+            // todo -- dont allow if this is the first call in the painter
 
-            if (visibility == MaskVisibility.Hidden) {
+            ref DrawInfo drawInfo = ref drawList[drawList.size - 1];
+
+            if ((drawInfo.type & DrawType.PushClipShape) != 0) {
+                return;
+            }
+
+            drawInfo.type |= DrawType.PushClipShape;
+
+            if (!renderClipShape) {
                 drawInfo.flags |= DrawInfoFlags.Hidden;
             }
-            
-            // todo -- for text masks I might need more data about the text 
-            // might also need multiple draw calls just like colored text
-            MaskInfo mask = new MaskInfo() {
-                geometry = drawInfo.geometryInfo,
-                bounds = drawInfo.aabb, // todo -- dont know this yet, maybe store it on the geometry info instead
-                maskType = maskType,
-            };
-            
-            maskInfoList.Add(mask);
-            return new MaskId(maskInfoList.size - 1);
+
+        }
+
+        public void PopStencilClipShape() {
+
+            ref DrawInfo drawInfo = ref drawList[drawList.size - 1];
+
+            if ((drawInfo.type & DrawType.PushClipShape) != 0) {
+                return;
+            }
+
+            drawList.Add(new DrawInfo() {
+                type = DrawType.PopClipShape
+            });
+
         }
 
     }

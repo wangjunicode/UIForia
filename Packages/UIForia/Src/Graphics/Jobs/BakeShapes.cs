@@ -1,9 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices;
-using ThisOtherThing.UI.ShapeUtils;
+﻿using ThisOtherThing.UI.ShapeUtils;
 using UIForia.Graphics;
 using UIForia.Graphics.ShapeKit;
-using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
@@ -12,7 +9,6 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Profiling;
 using FontStyle = UIForia.Text.FontStyle;
 
 namespace UIForia.Systems {
@@ -68,13 +64,9 @@ namespace UIForia.Systems {
 
                 ref DrawInfo drawInfo = ref drawList[i];
 
-                if ((drawInfo.type & (DrawType.SDFText | DrawType.Shape)) == 0) {
-                    continue;
-                }
+                switch (drawInfo.shapeType) {
 
-                switch (drawInfo.type) {
-
-                    case DrawType.SDFText: {
+                    case ShapeType.SDFText: {
                         BakeSDFText(ref buffer.byteAllocator, ref drawInfo);
 
                         vh.Clear();
@@ -82,7 +74,7 @@ namespace UIForia.Systems {
                         break;
                     }
 
-                    case DrawType.Rect: {
+                    case ShapeType.Rect: {
 
                         RectData* rectData = (RectData*) drawInfo.shapeData;
 
@@ -95,37 +87,37 @@ namespace UIForia.Systems {
 
                         vh.Clear();
 
-                        drawInfo.aabb = ComputeAABB(rectData->x, rectData->y, rectData->width, rectData->height, drawInfo.matrix);
+                        drawInfo.geometryInfo->bounds = ComputeAABB(rectData->x, rectData->y, rectData->width, rectData->height, drawInfo.matrix);
 
                         break;
                     }
 
-                    case DrawType.RoundedRect: {
+                    case ShapeType.RoundedRect: {
                         RoundedRectData* rectData = (RoundedRectData*) drawInfo.shapeData;
 
                         shapeKit.SetDpiScale(1f); // remove
                         shapeKit.SetAntiAliasWidth(1.25f); // fix
 
-                        shapeKit.AddRoundedRect(ref vh, new float2(rectData->x, rectData->y), rectData->width, rectData->height, rectData->cornerProperties, rectData->color);
+                        shapeKit.AddRoundedRect(ref vh, rectData->x, rectData->y, rectData->width, rectData->height, rectData->cornerProperties, rectData->color);
 
                         GeometryFromVertexHelper(ref buffer.byteAllocator, ref vh, ref drawInfo);
 
                         vh.Clear();
 
-                        drawInfo.aabb = ComputeAABB(rectData->x, rectData->y, rectData->width, rectData->height, drawInfo.matrix);
+                        drawInfo.geometryInfo->bounds= ComputeAABB(rectData->x, rectData->y, rectData->width, rectData->height, drawInfo.matrix);
                         break;
                     }
 
-                    case DrawType.Arc:
+                    case ShapeType.Arc:
                         break;
 
-                    case DrawType.Polygon:
+                    case ShapeType.Polygon:
                         break;
 
-                    case DrawType.Line:
+                    case ShapeType.Line:
                         break;
 
-                    case DrawType.Ellipse:
+                    case ShapeType.Ellipse:
                         break;
 
                 }
@@ -182,7 +174,7 @@ namespace UIForia.Systems {
             float stylePadding;
             float weight;
 
-            if ((spanInfo.fontStyle & Text.FontStyle.Bold) != 0) {
+            if ((spanInfo.fontStyle & FontStyle.Bold) != 0) {
                 weight = fontAssetInfo.weightBold;
                 stylePadding = fontAssetInfo.boldStyle / 4.0f * fontAssetInfo.gradientScale * scaleRatios.x;
                 if (stylePadding + padding > fontAssetInfo.gradientScale) {
@@ -457,7 +449,7 @@ namespace UIForia.Systems {
             float yMin = float.MinValue;
             float yMax = float.MaxValue;
 
-            drawInfo.aabb = new AxisAlignedBounds2D(xMin, yMin, xMax, yMax);
+            drawInfo.geometryInfo->bounds = new AxisAlignedBounds2D(xMin, yMin, xMax, yMax);
 
             float4* tex1Float = texCoord1;
             uint4* text1Uint = (uint4*) tex1Float;
@@ -509,7 +501,6 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < vertexCount; i++) {
                 colors[i] = color;
-
             }
 
             for (int i = 0; i < vertexCount; i++) {

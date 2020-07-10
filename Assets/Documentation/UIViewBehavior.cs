@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Data;
 using System.IO;
-using ThisOtherThing.UI;
-using ThisOtherThing.UI.ShapeUtils;
 using UIForia.Elements;
-using UIForia.Graphics.ShapeKit;
-using Unity.Collections;
 using Unity.Jobs.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -39,7 +34,7 @@ namespace UIForia {
             type = Type.GetType(typeName);
             if (type == null) return;
 
-            JobsUtility.JobWorkerCount = JobsUtility.JobWorkerMaximumCount;
+            JobsUtility.JobWorkerCount = 5; //JobsUtility.JobWorkerMaximumCount;
             TemplateSettings settings = GetTemplateSettings(type);
 
             // cmd = new CommandBuffer();

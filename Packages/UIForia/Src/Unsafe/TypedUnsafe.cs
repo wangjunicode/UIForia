@@ -1,4 +1,5 @@
 using System;
+using UIForia.Graphics;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
@@ -150,11 +151,10 @@ namespace UIForia.Util.Unsafe {
             return itemCount;
         }
 
-        
         public static int Megabytes(int count) {
             return count * 1024 * 1024;
         }
-        
+
         public static int Kilobytes(int count) {
             return count * 1024;
         }
@@ -559,6 +559,9 @@ namespace UIForia.Util.Unsafe {
             return count * (sizeof(T) + sizeof(T1));
         }
 
+        public static ref T AsRef<T>(T* target) where T : unmanaged {
+            return ref UnsafeUtilityEx.AsRef<T>(target);
+        }
 
     }
 

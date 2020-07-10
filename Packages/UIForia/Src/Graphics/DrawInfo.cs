@@ -39,29 +39,29 @@ namespace UIForia.Graphics {
         // 
 
         public DrawType type;
+        public ShapeType shapeType;
         public DrawInfoFlags flags;
 
         public int renderCallId;
         public int localDrawIdx;
-
+        public int stencilIndex;
+        public int clipRectIndex;
         public int materialOverrideCount;
 
         public GeometryInfo* geometryInfo;
 
-        public VertexLayout vertexLayout;
+        public VertexLayout vertexLayout; // todo -- this is big, move it
         public MaterialId materialId;
 
-        public AxisAlignedBounds2D aabb;
         public byte* shapeData;
         public float4x4* matrix;
         public MaterialPropertyOverride* materialOverrideValues;
         public ElementId elementId;
-        public OverflowBounds* overflowBounds;
-        public int overflowBoundRenderIndex;
+        public AxisAlignedBounds2D intersectedBounds;
 
         public void* GetChannel(VertexChannel channel) {
 
-            if ((type & (DrawType.SDFText | DrawType.Shape)) != 0) {
+            if (type == DrawType.Shape) {
 
                 switch (channel) {
 
@@ -134,12 +134,7 @@ namespace UIForia.Graphics {
         }
 
         public int* GetTriangles() {
-
-            if ((type & (DrawType.SDFText | DrawType.Shape)) != 0) {
-                return geometryInfo->triangles;
-            }
-
-            return null;
+            return geometryInfo->triangles;
         }
 
     }

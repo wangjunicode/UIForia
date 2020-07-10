@@ -1,17 +1,15 @@
 ﻿using UIForia.Systems;
-using UIForia.Text;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEngine.Profiling;
 
 namespace UIForia.Graphics {
-
+    
     [BurstCompile]
-    internal unsafe struct BuildBatchGeometryJob : IJob, IVertigoParallelDeferred {
+    internal unsafe struct BuildBatchGeometryJob : IJob {
 
         public DataList<Batch>.Shared batchList;
         public DataList<DrawInfo>.Shared drawList;
@@ -20,12 +18,6 @@ namespace UIForia.Graphics {
         public PerThread<GeometryBuffer> perThread_GeometryBuffer;
 
         [NativeSetThreadIndex] public int threadIndex;
-
-        public ParallelParams.Deferred defer { get; set; }
-
-        public void Execute(int start, int end) {
-            Run(start, end);
-        }
 
         public void Execute() {
             Run(0, batchList.size);
@@ -43,7 +35,7 @@ namespace UIForia.Graphics {
             for (int batchIdx = start; batchIdx < end; batchIdx++) {
 
                 ref Batch batch = ref batchArray[batchIdx];
-              //  Profiler.BeginSample("Count data");
+                //  Profiler.BeginSample("Count data");
 
                 // todo -- if transforming vertices, check if the matrix has rotation / scale before blinding doing big matrix operations
 
@@ -62,7 +54,7 @@ namespace UIForia.Graphics {
 
                 }
 
-             //   Profiler.EndSample();
+                //   Profiler.EndSample();
 
                 int* trianglePtr = geometryBuffer.data.Allocate<int>(triangleCount);
                 GetVertexChannels(ref vertexChannelList, batch.vertexLayout, ref geometryBuffer, vertexCount);
@@ -76,9 +68,8 @@ namespace UIForia.Graphics {
                 batch.vertexCount = vertexCount;
 
                 // todo -- maybe i should tell drawInfo its vertex/triangle offset in batch
-               // Profiler.BeginSample("Write geometry data");
+                // Profiler.BeginSample("Write geometry data");
 
-               int cpyCount = 0;
                 for (int vcIdx = 0; vcIdx < vertexChannelList.size; vcIdx++) {
 
                     ref VertexChannelDesc channelDesc = ref vertexChannelDesc[vcIdx];
@@ -86,7 +77,6 @@ namespace UIForia.Graphics {
                     byte* geometry = (byte*) channelDesc.ptr;
 
                     for (int i = batchStart; i < batchEnd; i++) {
-                        cpyCount++;
                         ref DrawInfo drawInfo = ref drawInfoArray[batchMemberArray[i]];
                         int drawVertexCount = drawInfo.geometryInfo->vertexCount;
                         byte* dataPtr = (byte*) drawInfo.GetChannel(channelDesc.channel);
@@ -96,10 +86,10 @@ namespace UIForia.Graphics {
 
                 }
 
-                // Profiler.EndSample();
-                
+                //Profiler.EndSample();
+
                 int vOffset = 0;
-               // Profiler.BeginSample("Make triangles");
+                // Profiler.BeginSample("Make triangles");
                 for (int i = batchStart; i < batchEnd; i++) {
                     ref DrawInfo drawInfo = ref drawInfoArray[batchMemberArray[i]];
                     int* triangles = drawInfo.GetTriangles();
@@ -107,11 +97,11 @@ namespace UIForia.Graphics {
                     for (int t = 0; t < drawTriangleCount; t++) {
                         trianglePtr[t] = triangles[t] + vOffset;
                     }
-                
+
                     vOffset += drawInfo.geometryInfo->vertexCount;
                     trianglePtr += drawTriangleCount;
                 }
-                
+
                 // Profiler.EndSample();
                 // Profiler.BeginSample("World Transform");
                 if (batchEnd - batchStart > 1) {
@@ -119,21 +109,21 @@ namespace UIForia.Graphics {
                     for (int i = batchStart; i < batchEnd; i++) {
                         ref DrawInfo drawInfo = ref drawInfoArray[batchMemberArray[i]];
                         int count = drawInfo.geometryInfo->vertexCount;
-                
+
                         float4x4 matrix = *drawInfo.matrix;
-                
+
                         // todo -- this obviously wont apply transformations
                         // todo -- dont pay for 3d transform when we only need a translation offset, check if matrix is translation only
                         for (int j = 0; j < count; j++) {
                             positions[j].x += matrix.c3.x; // = math.transform(matrix, positions[j]);
                             positions[j].y += matrix.c3.y; // = math.transform(matrix, positions[j]);
                         }
-                
+
                         positions += count;
-                
+
                     }
                 }
-                
+
                 // Profiler.EndSample();
 
                 // // if(batch.batchType == BatchType.Shape && batch.HasUIForiaMaterial()) {
@@ -266,6 +256,15 @@ namespace UIForia.Graphics {
                 VertexChannelFormat format = layout.texCoord7;
                 output[output.size++] = new VertexChannelDesc() {
                     channel = VertexChannel.TextureCoord7,
+                    format = format,
+                    ptr = buffer.data.Allocate<byte>((int) format * vertexCount)
+                };
+            }
+
+            if (layout.tangent != VertexChannelFormat.Off) {
+                VertexChannelFormat format = layout.tangent;
+                output[output.size++] = new VertexChannelDesc() {
+                    channel = VertexChannel.Tangent,
                     format = format,
                     ptr = buffer.data.Allocate<byte>((int) format * vertexCount)
                 };

@@ -2,6 +2,7 @@
 
 namespace UIForia.Graphics {
 
+
     public unsafe struct VertexChannelDesc {
 
         public VertexChannel channel;

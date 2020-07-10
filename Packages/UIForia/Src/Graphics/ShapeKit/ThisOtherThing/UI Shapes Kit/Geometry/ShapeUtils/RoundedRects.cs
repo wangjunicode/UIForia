@@ -81,7 +81,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 bottomLeft = corner,
                 bottomRight = corner
             };
-            AddRoundedRect(ref vh, new float2(position.x + width * 0.5f, position.y + height * 0.5f), width, height, cornerProperties, color);
+            AddRoundedRect(ref vh, position.x, position.y, width, height, cornerProperties, color);
         }
 
         public void AddRoundedRect(ref UIVertexHelper vh, in Rect rect, in Corner corner, Color32 color) {
@@ -91,12 +91,12 @@ namespace ThisOtherThing.UI.ShapeUtils {
                 bottomLeft = corner,
                 bottomRight = corner
             };
-            AddRoundedRect(ref vh, rect.center, rect.width, rect.height, cornerProperties, color);
+            AddRoundedRect(ref vh, rect.x, rect.y, rect.width, rect.height, cornerProperties, color);
         }
 
-        public void AddRoundedRect(ref UIVertexHelper vh, Vector2 center, float width, float height, in CornerProperties cornerProperties, Color32 color) {
+        public void AddRoundedRect(ref UIVertexHelper vh, float x, float y, float width, float height, in CornerProperties cornerProperties, Color32 color) {
 
-            center.y = -center.y;
+            float2 center = new float2(x + width * 0.5f, -(y + height * 0.5f));
 
             int numVertices = vh.currentVertCount;
 
@@ -109,7 +109,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             float bottomRight = math.clamp(cornerProperties.bottomRight.radius, 0, constraint);
             float bottomLeft = math.clamp(cornerProperties.bottomLeft.radius, 0, constraint);
 
-            vh.AddVert(center, color, new Vector2(0.5f, 0.5f));
+            vh.AddVert(new float3(center.x, center.y, 0), color, new float4(0.5f, 0.5f, 0, 0));
 
             float sizeSub = math.min(height, width);
             sizeSub *= 1.0f - edgeGradientData.innerScale;
@@ -305,7 +305,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
         
         private void AddRoundedRectVerticesRing(
             ref UIVertexHelper vh,
-            Vector2 center,
+            float2 center,
             float width,
             float height,
             float fullWidth,

@@ -401,7 +401,7 @@ namespace UIForia.Rendering {
             // }
             // weight = fontData.fontAsset.weightNormal;
 
-            int shapeType = BitUtil.SetHighLowBits((int) ShapeType.Text, 0);
+            int shapeType = BitUtil.SetHighLowBits((int) 0, 0);
             geometry.objectData = new Vector4(shapeType, default, weight, element.style.Opacity);
             GeometryRange range = new GeometryRange(0, geometry.positionList.size, 0, geometry.triangleList.size);
             geometry.mainTexture = FontAsset.defaultFontAsset.atlas; // element.application.ResourceManager.GetFontById("").atlas;

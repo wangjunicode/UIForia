@@ -1,5 +1,4 @@
 ﻿using UIForia.Graphics;
-using UIForia.Graphics.ShapeKit;
 using UIForia.Rendering;
 using UIForia.Util.Unsafe;
 using Unity.Collections.LowLevel.Unsafe;
@@ -54,12 +53,14 @@ namespace UIForia.Systems {
 
                 int drawIdx = ctx.drawList.size;
                 if (renderCallList[i].renderOp == 0) {
+                    // todo -- if clipper via styles, set that up here
                     ctx.Setup(materialId, overflowBounds, i, matrices.array + elementId.index);
                     box.PaintBackground2(ctx);
                     box.bgRenderContext = ctx;
                     box.bgRenderRange = new RangeInt(drawIdx, ctx.drawList.size);
                 }
                 else {
+                    // todo -- if clipper via styles, tear it down here
                     ctx.Setup(materialId, overflowBounds, i, matrices.array + elementId.index);
                     box.PaintForeground2(ctx);
                     box.fgRenderContext = ctx;

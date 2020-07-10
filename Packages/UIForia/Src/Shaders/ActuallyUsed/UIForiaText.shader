@@ -49,7 +49,7 @@
                 float4 vertex : POSITION;
                 float4 uv0 : TEXCOORD0;
                 float4 uv1 : TEXCOORD1;
-                float4 underlay : TEXCOORD2;
+                // float4 underlay : TEXCOORD2;
                 fixed4 color : COLOR;
             };
 
@@ -131,9 +131,10 @@
 			    float2 faceUV = float2(0, 0); //TRANSFORM_TEX(textureUV, _FaceTex);
 			    float2 outlineUV = float2(0, 0); //TRANSFORM_TEX(textureUV, _OutlineTex);
  
-                uint packedDilateSoftness = asuint(v.underlay.z);
-                half underlayDilate = v.underlay.z; // remap(((packedDilateSoftness >> 0) & 0xff) * 1.0, 0, 65535, 0, 1);
-                half underlaySoftness = v.underlay.w; //remap(((packedDilateSoftness >> 16) & 0xff) * 1.0, 0, 65535, 0, 1);
+ float4 underlay = float4(0, 0, 0, 0);
+                uint packedDilateSoftness = 0; //asuint(v.underlay.z);
+                half underlayDilate = 0; //v.underlay.z; // remap(((packedDilateSoftness >> 0) & 0xff) * 1.0, 0, 65535, 0, 1);
+                half underlaySoftness = 0; //v.underlay.w; //remap(((packedDilateSoftness >> 16) & 0xff) * 1.0, 0, 65535, 0, 1);
  
 			    float bScale = scale;
 			    bScale /= 1 + (underlaySoftness * bScale);

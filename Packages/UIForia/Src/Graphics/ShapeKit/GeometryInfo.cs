@@ -17,6 +17,8 @@ namespace UIForia.Graphics {
         public Color32* colors;
         public int* triangles;
 
+        public void* interleaved;
+        
         public void* normal;
         public void* tangent;
 

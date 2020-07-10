@@ -1,8 +1,8 @@
 using UIForia.Rendering.Vertigo;
 using UIForia.Systems;
 using UIForia.Util;
-using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace UIForia.Rendering {
 
@@ -41,7 +41,9 @@ namespace UIForia.Graphics {
 
         public int overflowBoundCount;
         public OverflowBounds* overflowBounds;
-
+        public byte* geometryInterleaved;
+        public StencilState stencilState;
+        
         public bool HasUIForiaMaterial() {
             return true;
         }

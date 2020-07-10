@@ -1,23 +1,20 @@
-using System;
 using System.Diagnostics;
-using SVGX;
 using ThisOtherThing.UI.ShapeUtils;
-using UIForia.Compilers.Style;
 using UIForia.Graphics;
-using UIForia.Graphics.ShapeKit;
 using UIForia.Layout;
 using UIForia.Rendering.Vertigo;
 using UIForia.Systems;
 using UIForia.Util;
+using UIForia.Util.Unsafe;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
-using UnityEngine.Rendering;
-using UnityEngine.UI;
 using Vertigo;
 using Debug = UnityEngine.Debug;
+using Random = UnityEngine.Random;
 
 namespace UIForia.Rendering {
 
@@ -52,37 +49,182 @@ namespace UIForia.Rendering {
     [DebuggerDisplay("{element.ToString()}")]
     public class StandardRenderBox2 : RenderBox {
 
-      
+        private DataList<TextureRef> textures;
+        private Color[] colors;
+
+        [BurstCompile]
+        private unsafe struct Job : IJob {
+
+            public DataList<TextureRef> textures;
+
+            public void Execute() {
+
+                for (int i = 0; i < textures.size; i++) {
+                    textures[i].channel = -1;
+                }
+
+                NativeSortExtension.Sort(textures.GetArrayPointer(), textures.size);
+
+                int unplaced = new AtlasPacker() {width = 2048, height = 2048}.Pack(textures, 0);
+
+                if (unplaced > 0) {
+                    unplaced = new AtlasPacker() {width = 2048, height = 2048}.Pack(textures, 1);
+                }
+                else {
+                    return;
+                }
+
+                if (unplaced > 0) {
+                    unplaced = new AtlasPacker() {width = 2048, height = 2048}.Pack(textures, 2);
+                }
+                else {
+                    return;
+                }
+
+                if (unplaced > 0) {
+                    unplaced = new AtlasPacker() {width = 2048, height = 2048}.Pack(textures, 3);
+                }
+
+            }
+
+        }
+
         public override void OnInitialize() {
-      
+            // textures = new DataList<TextureRef>(128, Allocator.Persistent);
+            // colors = new Color[128];
+            //
+            // for (int i = 0; i < 128; i++) {
+            //     colors[i] = new Color(
+            //         Random.Range(0f, 1f),
+            //         Random.Range(0f, 1f),
+            //         Random.Range(0f, 1f)
+            //     );
+            //     textures.Add(new TextureRef() {
+            //         id = i,
+            //         width = Random.Range(16, 256),
+            //         height = Random.Range(16, 256)
+            //     });
+            // }
+            //
+            // new Job() {
+            //     textures = textures
+            // }.Run();
+            //
+            // Stopwatch s = Stopwatch.StartNew();
+            //
+            // new Job() {
+            //     textures = textures
+            // }.Run();
+            //
+            // s.Stop();
+            // Debug.Log("packed in: " + s.Elapsed.TotalMilliseconds);
+            //
+            // int unplaced = 0;
+            // for (int i = 0; i < textures.size; i++) {
+            //     if (textures[i].channel == -1) {
+            //         unplaced++;
+            //     }
+            // }
+            //
+            // Debug.Log("Failed to pack: " + unplaced);
+
         }
 
         public override void PaintBackground2(RenderContext2 ctx) {
             Color32 backgroundColor = element.style.BackgroundColor;
             Texture backgroundImage = element.style.BackgroundImage;
-            
-            if (backgroundColor.a <= 0 && ReferenceEquals(backgroundImage, null)) {
-                //if (borderColorTop.a + borderColorBottom.a + borderColorLeft.a + borderColorRight.a == 0) {
-                    didRender = false;
-                //}
-                return;
+
+            // if (backgroundColor.a <= 0 && ReferenceEquals(backgroundImage, null)) {
+            //     //if (borderColorTop.a + borderColorBottom.a + borderColorLeft.a + borderColorRight.a == 0) {
+            //     didRender = false;
+            //     //}
+            //     return;
+            // }
+            ctx.SetMaterial(MaterialId.UIForiaShape);
+
+            float y = 0;
+
+            ctx.SetColor(Color.yellow);
+            ctx.FillRect(new float2(0, y), new float2(300, 100));
+
+            y += 125;
+            ctx.SetColor(Color.white);
+            ctx.FillRect(new float2(0, y), new float2(700, 120));
+
+            using (RenderContext2.StencilScope _ = ctx.PushStencilScope()) {
+                ctx.SetColor(Color.green);
+                ctx.FillRect(0, y, 200, 100);
+                ctx.FillRect(0, y, 200, 300);
+                
+                ctx.PushStencilClipShape();
+                {
+                    ctx.SetColor(Color.red);
+                    ctx.FillRect(new float2(0, y), new float2(100, 100));
+                }
+
+                ctx.PopStencilClipShape();
+
+                ctx.SetColor(Color.green);
+                ctx.FillRect(new float2(440, y), new float2(200, 100));
+                y += 125;
             }
-            
-            Size size = element.layoutResult.actualSize;
-            ctx.SetColor(element.style.BackgroundColor);
-            ctx.FillRect(new float2(0, 0), new float2(size.width, size.height));
 
-            MaskId maskId = ctx.GetLastShape().CreateMask(MaskType.SoftGeometry, MaskVisibility.Hidden);
+            ctx.FillRect(0, y, 700, 120);
 
-            ctx.SetMask(maskId);
-            
-            ctx.FillRoundRect(new float2(0, 0), new float2(size.width, size.height), Corner.Bevel(3));
+            ctx.PushStencilClipShape();
+            {
+
+                ctx.SetColor(Color.green);
+                ctx.FillRect(new float2(0, y), new float2(200, 100));
+                ctx.FillRect(new float2(0, y), new float2(200, 100));
+
+                ctx.PushStencilClipShape();
+                {
+                    ctx.SetColor(Color.red);
+                    ctx.FillRect(new float2(0, y), new float2(100, 100));
+                }
+
+                ctx.PopStencilClipShape();
+
+                ctx.SetColor(Color.green);
+                ctx.FillRect(new float2(440, y), new float2(200, 100));
+                y += 125;
+
+            }
+            ctx.PopStencilClipShape();
+
+            ctx.SetColor(Color.yellow);
+            ctx.FillRect(new float2(0, y), new float2(300, 100));
+
+            // ctx.FillRect(new float2(50, 50), new float2(100, 100));
+            //
+            // ctx.PushClipShape();
+            // { }
+            // ctx.PopClipShape();
+            //
+            // ctx.SetColor(Color.red);
+            // ctx.FillRect(new float2(50, 50), new float2(100, 100));
+
+            // ctx.PopClipShape();
+
+            // for (int i = 0; i < textures.size; i++) {
+            //     ctx.SetColor(colors[i]);
+            //     ctx.FillRect(new float2(textures[i].textureX, textures[i].textureY), new float2(textures[i].width, textures[i].height));
+            // }
+            // ctx.FillRect();
+            // Size size = element.layoutResult.actualSize;
+            // ctx.SetColor(element.style.BackgroundColor);
+            // ctx.FillRect(new float2(0, 0), new float2(size.width, size.height));
+            //
+            // MaskId maskId = ctx.GetLastShape().CreateMask(MaskType.SoftGeometry, MaskVisibility.Hidden);
+            //
+            // ctx.SetMask(maskId);
+            //
+            // ctx.FillRoundRect(new float2(0, 0), new float2(size.width, size.height), Corner.Bevel(3));
 
         }
 
-        public override void PaintBackground(RenderContext ctx) {
-            
-        }
+        public override void PaintBackground(RenderContext ctx) { }
 
     }
 
@@ -122,11 +264,11 @@ namespace UIForia.Rendering {
 
         public MaterialId materialId;
         // public LayoutResult[] layoutTable;
-        
+
         private PooledMesh mesh;
         private MaterialPropertyBlock propertyBlock;
         private static readonly int s_Main = Shader.PropertyToID("_MainTex");
-        
+
         public StandardRenderBox() {
             this.uniqueId = "UIForia::StandardRenderBox";
             this.geometry = new UIForiaGeometry();
@@ -487,7 +629,7 @@ namespace UIForia.Rendering {
 
             geometry.packedColors = c;
 
-            int val = BitUtil.SetHighLowBits((int) ShapeType.RoundedRect, (int) colorMode);
+            int val = BitUtil.SetHighLowBits((int) 0, (int) colorMode);
 
             float viewWidth = element.View.Viewport.width;
             float viewHeight = element.View.Viewport.height;
@@ -530,14 +672,14 @@ namespace UIForia.Rendering {
             }
 
             if (shadowColor.a > 0 && opacity > 0) {
-                
+
                 ViewParameters viewParameters = new ViewParameters() {
                     viewWidth = element.View.Viewport.width,
                     viewHeight = element.View.Viewport.height,
                     applicationWidth = element.application.Width,
                     applicationHeight = element.application.Height
                 };
-                
+
                 float min = math.min(element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
 
                 if (min <= 0) min = 0.0001f;
@@ -577,7 +719,7 @@ namespace UIForia.Rendering {
                 position.x += x;
                 position.y += y;
                 shadowGeometry.mainTexture = null;
-                int val = BitUtil.SetHighLowBits((int) ShapeType.RoundedRect, paintMode);
+                int val = BitUtil.SetHighLowBits((int) 0, paintMode);
                 shadowGeometry.objectData = geometry.objectData;
                 shadowGeometry.objectData.x = val;
                 shadowGeometry.objectData.y = VertigoUtil.PackSizeVector(size);
@@ -614,7 +756,7 @@ namespace UIForia.Rendering {
 
             ctx.DrawBatchedGeometry(geometry, range, element.layoutResult.GetWorldMatrix(), clipper);
         }
-        
+
         public void RenderFromMaterial(RenderContext ctx) {
 
             // if (!element.application.materialDatabase.TryGetMaterial(materialId, out MaterialInfo info)) { 

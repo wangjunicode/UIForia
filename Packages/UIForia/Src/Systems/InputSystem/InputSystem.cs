@@ -576,6 +576,10 @@ namespace UIForia.Systems {
                 }
             }
 
+            if (currentDragEvent == null) {
+                IsDragging = false;
+            }
+
             // todo -- capture phase
         }
 

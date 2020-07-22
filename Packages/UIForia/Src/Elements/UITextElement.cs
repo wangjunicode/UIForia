@@ -16,6 +16,26 @@ namespace UIForia.Elements {
         internal int textInfoId;
         internal int lastUpdateFrame;
 
+        internal ManagedTextInfo textInfoManaged;
+
+        public void SetTextInfo(ManagedTextInfo textInfo) {
+            if (textInfo == textInfoManaged) {
+                return;
+            }
+
+            if (textInfo != null) {
+                if (textInfo.textSystem != application.textSystem) {
+                    
+                }
+            }
+
+            if (textInfo == null) {
+                if (textInfoManaged != null) {
+                    
+                }
+            }
+        }
+        
         // setting this and text in same frame will run update twice, improve this
         public ITextProcessor processor {
             get => _processor;

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.IO;
 using UIForia.Elements;
+using UIForia.Graphics;
+using UIForia.Text;
 using Unity.Jobs.LowLevel.Unsafe;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -31,12 +34,13 @@ namespace UIForia {
         }
 
         public void Start() {
+#if UNITY_EDITOR
+            AssertSize.AssertSizes();
+#endif
             type = Type.GetType(typeName);
             if (type == null) return;
 
-            JobsUtility.JobWorkerCount = 5; //JobsUtility.JobWorkerMaximumCount;
             TemplateSettings settings = GetTemplateSettings(type);
-
             // cmd = new CommandBuffer();
             // cmd.name = "DrawTest";
             // renderTexture = new RenderTexture(1024, 1024, 24, RenderTextureFormat.ARGB32);
@@ -63,9 +67,64 @@ namespace UIForia {
         private RenderTexture renderTexture;
         private Mesh mesh;
         private Mesh coverMesh;
+        
+        struct TextMaterialInfo {
+                
+            float zPosition;
+            uint faceColor;
+            uint outlineColor;
+            uint glowColor;
+            uint underlayColor;
+            
+            byte opacity;
+            byte outlineWidth;
+            byte outlineSoftness;
+            byte faceDilate;
+                
+            byte glowOffset;
+            byte glowOuter;
+            byte glowInner;
+            byte glowPower;
+                
+            ushort underlayX;
+            ushort underlayY;
+            ushort underlayDilate;
+            ushort underlaySoftness;
+            
+            
+                
+        }
+        public struct Character {
 
-        private unsafe void Update() {
-            if (type == null) return;
+            // public int glyphRenderId; // could lookup, maybe no need to store per character. trade off is a dictionary or array lookup before rendering
+            public ushort flags;
+            public ushort codepoint;
+            public float2 position;
+
+            public ushort effectId;
+            public ushort matrixId;
+            public ushort vertexId;
+            public ushort materialId; 
+
+            // computable
+      //      public int wordIndex;
+      //      public ushort lineIndex;
+      //      public ushort charIndexInWord;
+
+        }
+        
+        unsafe void OnPreRender() {
+            unsafe {
+               // Debug.Log(sizeof(BurstCharInfo));
+            }
+            if (application != null && commandBuffer != null) {
+                commandBuffer.Clear();
+                application.Render(camera.pixelWidth, camera.pixelHeight, commandBuffer);
+            }
+            
+        }
+
+        private void Update() {
 
             if (application != null) {
                 if (commandBuffer == null) {
@@ -76,8 +135,7 @@ namespace UIForia {
 
                 application.DPIScaleFactor = 1; // todo -- remove this
                 application.Update();
-                commandBuffer.Clear();
-                application.Render(camera.pixelWidth, camera.pixelHeight, commandBuffer);
+
             }
 
             // cmd.Clear();

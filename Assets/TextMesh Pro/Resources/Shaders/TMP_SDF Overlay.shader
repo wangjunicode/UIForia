@@ -303,7 +303,6 @@ SubShader {
 		#if UNITY_UI_ALPHACLIP
 			clip(faceColor.a - 0.001);
 		#endif
-  		
 			return faceColor * input.color.a;
 		}
 

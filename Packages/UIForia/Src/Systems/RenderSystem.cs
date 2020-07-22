@@ -1,24 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Threading;
-using ThisOtherThing.UI;
-using ThisOtherThing.UI.ShapeUtils;
 using UIForia.Elements;
 using UIForia.Graphics;
-using UIForia.Graphics.ShapeKit;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
-using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Experimental.Rendering;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Batch = UIForia.Graphics.Batch;
@@ -170,16 +163,14 @@ namespace UIForia.Systems {
 
             persistentData = new PersistentData() {
                 clipperBoundsList = new DataList<AxisAlignedBounds2D>.Shared(32, Allocator.Persistent),
+                stencilDrawList = new DataList<DrawInfo>.Shared(16, Allocator.Persistent),
                 stencilList = new DataList<StencilInfo>.Shared(32, Allocator.Persistent),
-                maskElementList = new DataList<MaskInfo>.Shared(16, Allocator.Persistent),
-                maskTargetList = new DataList<MaskTarget>.Shared(16, Allocator.Persistent),
-                maskGeometryAllocator = new PagedByteAllocator(TypedUnsafe.Kilobytes(16), Allocator.Persistent, Allocator.TempJob),
+                processedDrawList = new DataList<ProcessedDrawInfo>.Shared(32, Allocator.Persistent),
                 meshListHandle = new GCHandleList<Mesh>(meshList),
                 drawList = new DataList<DrawInfo>.Shared(32, Allocator.Persistent),
-                effectUsageList = new DataList<EffectUsage>.Shared(8, Allocator.Persistent),
                 perViewElementList = new DataList<ElementList>(4, Allocator.Persistent),
                 contextPoolHandle = new PerThreadObjectPool<RenderContext2>(renderContextPool),
-                renderBoxTableHandle = new GCHandleArray<RenderBox>(renderBoxTable),
+               // renderBoxTableHandle = new GCHandleArray<RenderBox>(renderBoxTable),
                 renderContextInfoHandle = new GCHandle<RenderSystem>(this),
                 batchList = new DataList<Batch>.Shared(16, Allocator.Persistent),
                 batchMemberList = new DataList<int>.Shared(32, Allocator.Persistent),
@@ -194,7 +185,6 @@ namespace UIForia.Systems {
         }
 
         public virtual void OnUpdate() {
-
             // todo -- hook this up to the layout system's job scheduling
             renderContextPool.Clear();
             persistentData.Clear();
@@ -215,17 +205,16 @@ namespace UIForia.Systems {
 
             }
 
-            JobHandle gatherRenderedElements = VertigoScheduler.Run(new GatherRenderedElements() {
+            JobHandle gatherRenderedElements = UIForiaScheduler.Run(new GatherRenderedElements() {
                 elementLists = persistentData.perViewElementList,
-                effectUsages = persistentData.effectUsageList,
                 traversalTable = elementSystem.traversalTable,
                 clipInfoTable = layoutSystem.clipInfoTable,
                 renderCallList = renderCallList,
                 renderInfoTable = renderInfoTable,
             });
 
-            // assumes we are able to call all painters in parallel, this miiiight backfire
-            JobHandle invokePainters = VertigoScheduler.Await(gatherRenderedElements).ThenParallel(new CallPainters_Managed() {
+            // assumes we are able to call all painters in parallel, this miiiight backfire. probably should run user painters on main thread and burst the built ins
+            JobHandle invokePainters = UIForiaScheduler.Await(gatherRenderedElements).ThenParallel(new CallPainters_Managed() {
                     parallel = new ParallelParams(renderCallList.size, 32),
                     renderCallList = renderCallList,
                     matrices = layoutSystem.worldMatrices,
@@ -235,7 +224,7 @@ namespace UIForia.Systems {
                     clipperBoundsList = layoutSystem.clipperBoundsList
                 })
                 .Then(new MergeRenderContexts_Managed() {
-                    maskList = persistentData.maskElementList,
+                    // maskList = persistentData.maskElementList,
                     contextPoolHandle = persistentData.contextPoolHandle,
                     drawList = persistentData.drawList,
                     meshListHandle = persistentData.meshListHandle,
@@ -243,7 +232,7 @@ namespace UIForia.Systems {
 
             invokePainters.Complete();
 
-            JobHandle shapeBaking = VertigoScheduler.Await(invokePainters)
+            JobHandle shapeBaking = UIForiaScheduler.Await(invokePainters)
                 .ThenParallel(new BakeShapes() {
                     parallel = new ParallelParams(persistentData.drawList.size, 10),
                     fontAssetMap = resourceManager.fontAssetMap,
@@ -251,50 +240,43 @@ namespace UIForia.Systems {
                     perThread_ShapeBuffer = persistentData.shapeBuffer
                 });
 
-            JobHandle applyEffects = VertigoScheduler.Await(shapeBaking)
-                .Then(new ApplyEffects_Managed() {
-                    // I'm not sure if this can be parallel yet, I think so
-                    effectUsageList = persistentData.effectUsageList,
-                    renderBoxTableHandle = persistentData.renderBoxTableHandle
-                });
-
-            JobHandle gatherTextures = VertigoScheduler.Await(applyEffects).Then(new GatherTextures_Managed() {
+            JobHandle gatherTextures = UIForiaScheduler.Await(shapeBaking).Then(new GatherTextures_Managed() {
                 contextPoolHandle = persistentData.contextPoolHandle,
                 textureMapHandle = persistentData.textureMapHandle
             });
 
-            // JobHandle bakeClipping = VertigoScheduler.Await(applyEffects).Then(new BuildClipData() {
-            //     drawList = persistentData.drawList,
-            //     screenWidth = layoutSystem.application.Width,
-            //     screenHeight = layoutSystem.application.Height
-            // });
-            //
-            // JobHandle buildMaskAtlas = VertigoScheduler.Await(bakeClipping).Then(new BuildMaskElementAtlasJob() {
-            //     maskElementList = persistentData.maskElementList,
-            //     maskTargetList = persistentData.maskTargetList,
-            //     batchList = persistentData.batchList,
-            //     pagedByteAllocator = persistentData.maskGeometryAllocator
-            // });
-
-            JobHandle assignClippers = VertigoScheduler.Await(applyEffects)
-                .Then(new AssignClippers() {
+            JobHandle condenseDrawList = UIForiaScheduler.Await(shapeBaking)
+                .Then(new ProcessDrawList() {
                     drawList = persistentData.drawList,
-                    stencilList = persistentData.stencilList,
+                    stencilDrawList = persistentData.stencilDrawList,
+                    stencilDataList = persistentData.stencilList,
                     surfaceWidth = layoutSystem.application.Width,
                     surfaceHeight = layoutSystem.application.Height,
-                    clipperBoundsList = persistentData.clipperBoundsList
-                });
-
-            JobHandle transparentPass = VertigoScheduler.Await(applyEffects)
-                .Then(new TransparentRenderPassJob() {
+                    clipperBoundsList = persistentData.clipperBoundsList,
+                    processedDrawList = persistentData.processedDrawList
+                })
+                .Then(new CreateDrawCalls() {
                     drawList = persistentData.drawList,
-                    batchList = persistentData.batchList,
                     batchMemberList = persistentData.batchMemberList,
+                    batchList = persistentData.batchList,
                     renderCommands = persistentData.renderCommands,
-                    boundsAllocator = persistentData.boundsAllocator,
+                    stencilList = persistentData.stencilList,
+                    clipperBoundsList = persistentData.clipperBoundsList,
+                    processedDrawList = persistentData.processedDrawList,
+                    boundsAllocator = persistentData.boundsAllocator
                 });
 
-            transparentPass.Complete();
+            // JobHandle transparentPass = VertigoScheduler.Await(applyEffects)
+            //     .Then(new TransparentRenderPassJob() {
+            //         drawList = persistentData.drawList,
+            //         batchList = persistentData.batchList,
+            //         batchMemberList = persistentData.batchMemberList,
+            //         renderCommands = persistentData.renderCommands,
+            //         boundsAllocator = persistentData.boundsAllocator,
+            //     });
+
+            // todo -- remove this, ask unity why worker jobs are slower
+            condenseDrawList.Complete();
 
             // JobHandle buildGeometry = VertigoScheduler.Await( transparentPass, shapeBaking).Then(new BuildBatchGeometryJob() {
             //     drawList = persistentData.drawList,
@@ -303,14 +285,14 @@ namespace UIForia.Systems {
             //     perThread_GeometryBuffer = persistentData.perThreadGeometryBuffer
             // });
 
-            new BuildBatchGeometryJob() {
+            new BuildBatchGeometryJob2() {
                 drawList = persistentData.drawList,
                 batchList = persistentData.batchList,
                 batchMemberList = persistentData.batchMemberList,
                 perThread_GeometryBuffer = persistentData.perThreadGeometryBuffer
             }.Run();
 
-            renderHandle = JobHandle.CombineDependencies(gatherTextures, transparentPass);
+            renderHandle = JobHandle.CombineDependencies(gatherTextures, condenseDrawList);
             renderHandle.Complete();
             PopulateBatchMeshes();
             renderHandle = default;
@@ -383,7 +365,9 @@ namespace UIForia.Systems {
                 }
 
                 NativeArray<int> triangleArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(batch.triangles, batch.triangleCount, Allocator.None);
+                #if UNITY_EDITOR
                 NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref triangleArray, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(persistentData.dummyArray));
+                #endif
                 mesh.SetIndices(triangleArray, 0, triangleArray.Length, MeshTopology.Triangles, 0, false);
 
             }
@@ -408,10 +392,15 @@ namespace UIForia.Systems {
 
                 ref RenderCommand cmd = ref renderCommands[i];
                 switch (cmd.type) {
-                    case RenderCommandType.ShapeBatch:
+                    case RenderCommandType.ElementBatch:
                         Mesh mesh = batchMeshList[batchListIdx++];
                         int batchIndex = cmd.batchIndex;
                         ref Batch batch = ref persistentData.batchList[batchIndex];
+
+                        commandBuffer.SetGlobalInt(s_StencilComp, (int) batch.stencilState.compareFunctionFront);
+                        commandBuffer.SetGlobalInt(s_StencilOp, (int) batch.stencilState.passOperationFront);
+                        commandBuffer.SetGlobalInt(s_Stencil, batch.stencilRefValue);
+                        commandBuffer.SetGlobalInt(s_ColorMask, (int) batch.colorMask);
 
                         // todo -- when i implement addressables, this should be done as close to the start of frame as possible 
                         Material material = resourceManager.GetMaterialInstance(batch.materialId);
@@ -481,6 +470,10 @@ namespace UIForia.Systems {
 
         private static readonly List<Vector4> s_OverflowClippers = new List<Vector4>(3 * 4);
         private static readonly int s_ClippersKey = Shader.PropertyToID("_OverflowClippers");
+        private static readonly int s_StencilComp = Shader.PropertyToID("_StencilComp");
+        private static readonly int s_StencilOp = Shader.PropertyToID("_StencilOp");
+        private static readonly int s_Stencil = Shader.PropertyToID("_Stencil");
+        private static readonly int s_ColorMask = Shader.PropertyToID("_ColorMask");
 
         private void SetupMaterialPropertyBlock(in Batch batch, bool isUIForiaMaterial) {
             mpb.Clear();
@@ -587,8 +580,9 @@ namespace UIForia.Systems {
         }
 
         private void SetMeshChannel(Mesh mesh, VertexChannelDesc desc, NativeArray<float4> array) {
+            #if UNITY_EDITOR
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(persistentData.dummyArray));
-
+#endif
             switch (desc.channel) {
 
                 case VertexChannel.Color:
@@ -621,7 +615,9 @@ namespace UIForia.Systems {
         }
 
         private void SetMeshChannel(Mesh mesh, in VertexChannelDesc desc, NativeArray<float3> array) {
+            #if UNITY_EDITOR
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(persistentData.dummyArray));
+            #endif
             switch (desc.channel) {
 
                 case VertexChannel.Position:
@@ -638,7 +634,10 @@ namespace UIForia.Systems {
         }
 
         private void SetMeshChannel(Mesh mesh, NativeArray<Color32> array) {
+#if UNITY_EDITOR
+
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(persistentData.dummyArray));
+            #endif
             mesh.SetColors(array, 0, array.Length);
         }
 
@@ -648,13 +647,14 @@ namespace UIForia.Systems {
                 return;
             }
 
+            #if UNITY_EDITOR
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(persistentData.dummyArray));
+            #endif
             mesh.SetUVs(channel, array, 0, array.Length);
         }
 
         private struct PersistentData : IDisposable {
 
-            public DataList<EffectUsage>.Shared effectUsageList;
             public DataList<ElementList> perViewElementList;
 
             public PerThreadObjectPool<RenderContext2> contextPoolHandle;
@@ -671,25 +671,22 @@ namespace UIForia.Systems {
             public NativeArray<int> dummyArray;
 
             public PagedByteAllocator boundsAllocator;
-            public PagedByteAllocator maskGeometryAllocator;
 
             public DataList<DrawInfo>.Shared drawList;
             public GCHandleList<Mesh> meshListHandle;
 
-            public DataList<MaskInfo>.Shared maskElementList;
-            public DataList<MaskTarget>.Shared maskTargetList;
             public DataList<StencilInfo>.Shared stencilList;
             public DataList<AxisAlignedBounds2D>.Shared clipperBoundsList;
+            public DataList<ProcessedDrawInfo>.Shared processedDrawList;
+            public DataList<DrawInfo>.Shared stencilDrawList;
 
             public void Dispose() {
+                processedDrawList.Dispose();
+                stencilDrawList.Dispose();
                 stencilList.Dispose();
                 clipperBoundsList.Dispose();
-                maskElementList.Dispose();
-                maskTargetList.Dispose();
                 drawList.Dispose();
                 meshListHandle.Dispose();
-                maskGeometryAllocator.Dispose();
-                effectUsageList.Dispose();
                 boundsAllocator.Dispose();
                 batchList.Dispose();
                 textureMapHandle.Dispose();
@@ -705,12 +702,11 @@ namespace UIForia.Systems {
             }
 
             public void Clear() {
+                stencilDrawList.size = 0;
+                processedDrawList.size = 0;
                 stencilList.size = 0;
                 clipperBoundsList.size = 0;
                 drawList.size = 0;
-                maskElementList.size = 0;
-                maskTargetList.size = 0;
-                effectUsageList.size = 0;
                 renderCommands.size = 0;
                 batchMemberList.size = 0;
                 batchList.size = 0;
@@ -718,7 +714,6 @@ namespace UIForia.Systems {
 
                 shapeBuffer.Clear();
                 boundsAllocator.Clear();
-                maskGeometryAllocator.Clear();
                 perThreadGeometryBuffer.Clear();
             }
 

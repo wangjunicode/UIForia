@@ -1,5 +1,4 @@
 using UIForia.Rendering.Vertigo;
-using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -26,9 +25,9 @@ namespace UIForia.Graphics {
 
     public unsafe struct Batch {
 
-        public BatchType batchType;
-        public RangeInt memberIdRange;
         public int meshId;
+        
+        public RangeInt memberIdRange;
         public VertexLayout vertexLayout;
         public int vertexChannelCount;
         public int vertexCount;
@@ -36,64 +35,25 @@ namespace UIForia.Graphics {
         public VertexChannelDesc* geometry;
         public int* triangles;
         public MaterialId materialId;
+        
         public MaterialPropertyOverride* propertyOverrides;
         public int propertyOverrideCount;
 
-        public int overflowBoundCount;
-        public OverflowBounds* overflowBounds;
-        public byte* geometryInterleaved;
-        public StencilState stencilState;
+        public int clipRectCount;
+        public AxisAlignedBounds2D* clipRects;
         
+        public byte stencilRefValue;
+        public StencilState stencilState;
+        public ColorWriteMask colorMask;
+        
+        public MaterialPermutation materialPermutation;
+        public BatchType type;
+        public int indirectArgOffset;
+
         public bool HasUIForiaMaterial() {
             return true;
         }
-
-        // public float3* GetPositions() {
-        //
-        //     for (int i = 0; i < vertexChannelCount; i++) {
-        //         VertexChannelDesc channelDesc = *(geometry + i);
-        //         if (channelDesc.channel == VertexChannel.Position) {
-        //             return (float3*) channelDesc.ptr;
-        //         }
-        //     }
-        //
-        //     return null;
-        //
-        // }
-        //
-        // public float4* GetTexCoord0() {
-        //     for (int i = 0; i < vertexChannelCount; i++) {
-        //         VertexChannelDesc channelDesc = *(geometry + i);
-        //         if (channelDesc.channel == VertexChannel.TextureCoord0) {
-        //             return (float4*) channelDesc.ptr;
-        //         }
-        //     }
-        //
-        //     return null;
-        // }
-        //
-        // public float4* GetTexCoord1() {
-        //     for (int i = 0; i < vertexChannelCount; i++) {
-        //         VertexChannelDesc channelDesc = *(geometry + i);
-        //         if (channelDesc.channel == VertexChannel.TextureCoord1) {
-        //             return (float4*) channelDesc.ptr;
-        //         }
-        //     }
-        //
-        //     return null;
-        // }
-        //
-        // public Color32* GetColors() {
-        //     for (int i = 0; i < vertexChannelCount; i++) {
-        //         VertexChannelDesc channelDesc = *(geometry + i);
-        //         if (channelDesc.channel == VertexChannel.Color) {
-        //             return (Color32*) channelDesc.ptr;
-        //         }
-        //     }
-        //
-        //     return null;
-        // }
-
+        
     }
 
 }

@@ -27,5 +27,22 @@ namespace UIForia.Graphics {
         }
 
     }
+    
+    public struct AxisAlignedBounds2DUShort {
+
+        public ushort xMin;
+        public ushort yMin;
+        public ushort xMax;
+        public ushort yMax;
+
+        public AxisAlignedBounds2DUShort(ushort xMin, ushort yMin, ushort xMax, ushort yMax) {
+            this.xMin = xMin;
+            this.yMin = yMin;
+            this.xMax = xMax;
+            this.yMax = yMax;
+        }
+        
+
+    }
 
 }

@@ -57,6 +57,7 @@ namespace UIForia.Editor {
             ListTemplateGenerator.Generate<BytePage>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<DrawInfo>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<VertexChannelDesc>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<UIForiaVertex>(outputPathRoot, contents);
             
         }
 

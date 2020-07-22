@@ -16,9 +16,7 @@ namespace UIForia.Rendering {
         }
 
         StylePainterContext stylePainterContext = new StylePainterContext();
-
-        public override void PaintBackground(RenderContext ctx) { }
-
+        
         public override void PaintBackground2(RenderContext2 ctx) {
 
             if (painterDefinition.paintBackground != null) {

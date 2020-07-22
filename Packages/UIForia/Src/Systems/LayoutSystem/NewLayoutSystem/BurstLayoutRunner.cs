@@ -12,20 +12,20 @@ namespace UIForia.Layout {
         public LayoutInfo* verticalLayoutInfoTable;
         public LayoutBoxInfo* layoutBoxInfoTable;
         public LayoutBoxUnion* layoutBoxTable;
-        public List_TextLineInfo * lineInfoBuffer;
+        public List_TextLineInfo* lineInfoBuffer;
         public TextInfo* textInfoTable;
-        public LayoutHierarchyInfo * layoutHierarchyTable;
-        public FontAssetInfo * fontAssetMap;
+        public LayoutHierarchyInfo* layoutHierarchyTable;
+        public FontAssetInfo* fontAssetMap;
         public EmValue* emTable;
 
         public ref LayoutHierarchyInfo GetLayoutHierarchy(ElementId elementId) {
             return ref layoutHierarchyTable[elementId.index];
         }
-        
+
         public ref TextInfo GetTextInfo(int id) {
             return ref textInfoTable[id];
         }
-        
+
         public ref LayoutInfo GetHorizontalLayoutInfo(ElementId elementId) {
             return ref horizontalLayoutInfoTable[elementId.index];
         }
@@ -88,6 +88,10 @@ namespace UIForia.Layout {
 
             }
 
+            if (newSize != layoutInfo.finalSize) {
+                layoutBoxInfo.sizeChanged = true;
+            }
+
             layoutInfo.finalSize = newSize;
 
             layoutBoxInfo.actualSize.x = newSize;
@@ -147,9 +151,9 @@ namespace UIForia.Layout {
             }
 
             if (newSize != layoutInfo.finalSize) {
-                    
+                layoutBoxInfo.sizeChanged = true;
             }
-            
+
             layoutInfo.finalSize = newSize;
 
             layoutBoxInfo.actualSize.y = newSize;

@@ -129,11 +129,15 @@ namespace UIForia.Rendering {
             }
         }
 
-        public abstract void PaintBackground(RenderContext ctx);
+       
 
+        public virtual void PaintBackground3(RenderContext3 ctx) {
+        }
+        
         public virtual void PaintBackground2(RenderContext2 ctx) { }
         
         public virtual void PaintForeground2(RenderContext2 ctx) { }
+        public virtual void PaintForeground3(RenderContext3 ctx) { }
 
         public virtual void PaintForeground(RenderContext ctx) { }
 
@@ -221,6 +225,8 @@ namespace UIForia.Rendering {
         public string GetName() {
             return "painter-name";
         }
+
+        public virtual void OnSizeChanged(Size size) {}
 
     }
 

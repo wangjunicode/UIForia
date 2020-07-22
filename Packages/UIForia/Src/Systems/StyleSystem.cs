@@ -26,7 +26,7 @@ namespace UIForia.Systems {
             this.changeSets = new StructList<ChangeSet>();
         }
 
-        public void FlushChangeSets(ElementSystem elementSystem, LayoutSystem layoutSystem, RenderSystem renderSystem) {
+        public void FlushChangeSets(ElementSystem elementSystem, LayoutSystem layoutSystem, RenderSystem2 renderSystem) {
             Profiler.BeginSample("StyleSystem::FlushChangeSets");
 
             // if disabled or destroyed, move on

@@ -93,7 +93,7 @@ namespace UIForia.Layout {
         }
 
         public Matrix4x4 GetWorldMatrix() {
-            return layoutSystemTablePointers->worldMatrices[elementId.index];;
+            return layoutSystemTablePointers->worldMatrices[elementId.index];
         }
 
         public Rect ContentRect => new Rect(

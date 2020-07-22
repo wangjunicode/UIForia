@@ -115,110 +115,110 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
         private void AddUndecoratedText(int quadCount, ref UIVertexHelper vh, ref TextInfo textInfo, float2 position) {
             // this does NOT handle strike through / underline / highlight / mark
-            int triangleCount = quadCount * 6;
-            int vertexCount = quadCount * 4;
-
-            int vertexIndex = 0;
-
-            vh.EnsureAdditionalVertexCapacity(vertexCount);
-            vh.EnsureAdditionalTriangleCapacity(triangleCount);
-
-            int currentVertexCount = vh.currentVertCount;
-
-            Color32 color = textInfo.textStyle.faceColor;
-            float3* positions = vh.positions + currentVertexCount;
-            float4* texCoords = vh.texCoord + currentVertexCount;
-            Color32* colors = vh.colors + currentVertexCount;
-            int* triangles = vh.triangles + vh.TotalTriangleCount;
-
-            for (int i = 0; i < textInfo.layoutSymbolList.size; i++) {
-
-                ref WordInfo wordInfo = ref textInfo.layoutSymbolList[i].wordInfo;
-                int charStart = wordInfo.charStart;
-                int charEnd = wordInfo.charEnd;
-
-                for (int j = charStart; j < charEnd; j++) {
-
-                    ref BurstCharInfo charInfo = ref textInfo.symbolList.array[j].charInfo;
-
-                    ref float3 p0 = ref positions[vertexIndex + 0];
-                    ref float3 p1 = ref positions[vertexIndex + 1];
-                    ref float3 p2 = ref positions[vertexIndex + 2];
-                    ref float3 p3 = ref positions[vertexIndex + 3];
-
-                    ref float4 uv0 = ref texCoords[vertexIndex + 0];
-                    ref float4 uv1 = ref texCoords[vertexIndex + 1];
-                    ref float4 uv2 = ref texCoords[vertexIndex + 2];
-                    ref float4 uv3 = ref texCoords[vertexIndex + 3];
-
-                    float charX = position.x + wordInfo.x + charInfo.topLeft.x;
-                    float charY = position.y + wordInfo.y + charInfo.topLeft.y;
-
-                    float charWidth = charInfo.bottomRight.x - charInfo.topLeft.x;
-                    float charHeight = charInfo.bottomRight.y - charInfo.topLeft.y;
-
-                    p0.x = charX + charInfo.shearTop;
-                    p0.y = -charY;
-                    p0.z = 0;
-
-                    p1.x = charX + charWidth + charInfo.shearTop;
-                    p1.y = -charY;
-                    p1.z = 0;
-
-                    p2.x = charX + charWidth + charInfo.shearBottom;
-                    p2.y = -(charY + charHeight);
-                    p2.z = 0;
-
-                    p3.x = charX + charInfo.shearBottom;
-                    p3.y = -(charY + charHeight);
-                    p3.z = 0;
-
-                    uv0.x = charInfo.topLeftUv.x;
-                    uv0.y = charInfo.bottomRightUv.y;
-                    uv0.z = charInfo.topLeftUv.x;
-                    uv0.w = charInfo.bottomRightUv.y;
-
-                    uv1.x = charInfo.bottomRightUv.x;
-                    uv1.y = charInfo.bottomRightUv.y;
-                    uv1.z = charInfo.bottomRightUv.x;
-                    uv1.w = charInfo.bottomRightUv.y;
-
-                    uv2.x = charInfo.bottomRightUv.x;
-                    uv2.y = charInfo.topLeftUv.y;
-                    uv2.z = charInfo.bottomRightUv.x;
-                    uv2.w = charInfo.topLeftUv.y;
-
-                    uv3.x = charInfo.topLeftUv.x;
-                    uv3.y = charInfo.topLeftUv.y;
-                    uv3.z = charInfo.topLeftUv.x;
-                    uv3.w = charInfo.topLeftUv.y;
-
-                    vertexIndex += 4;
-                }
-
-            }
-
-            // should vectorize
-            for (int i = 0; i < vertexCount; i++) {
-                colors[i] = color;
-            }
-
-            vh.AddVertexCount(vertexCount);
-
-            int startVertex = vh.currentVertCount;
-
-            int triIdx = 0;
-            for (int i = 0; i < vertexCount; i += 4) {
-                triangles[triIdx + 0] = startVertex + i + 0;
-                triangles[triIdx + 1] = startVertex + i + 1;
-                triangles[triIdx + 2] = startVertex + i + 2;
-                triangles[triIdx + 3] = startVertex + i + 2;
-                triangles[triIdx + 4] = startVertex + i + 3;
-                triangles[triIdx + 5] = startVertex + i + 0;
-                triIdx += 6;
-            }
-
-            vh.AddTriangleCount(triangleCount);
+            // int triangleCount = quadCount * 6;
+            // int vertexCount = quadCount * 4;
+            //
+            // int vertexIndex = 0;
+            //
+            // vh.EnsureAdditionalVertexCapacity(vertexCount);
+            // vh.EnsureAdditionalTriangleCapacity(triangleCount);
+            //
+            // int currentVertexCount = vh.currentVertCount;
+            //
+            // Color32 color = textInfo.textStyle.faceColor;
+            // float3* positions = vh.positions + currentVertexCount;
+            // float4* texCoords = vh.texCoord + currentVertexCount;
+            // Color32* colors = vh.colors + currentVertexCount;
+            // int* triangles = vh.triangles + vh.TotalTriangleCount;
+            //
+            // for (int i = 0; i < textInfo.layoutSymbolList.size; i++) {
+            //
+            //     ref WordInfo wordInfo = ref textInfo.layoutSymbolList[i].wordInfo;
+            //     int charStart = wordInfo.charStart;
+            //     int charEnd = wordInfo.charEnd;
+            //
+            //     for (int j = charStart; j < charEnd; j++) {
+            //
+            //         ref BurstCharInfo charInfo = ref textInfo.symbolList.array[j].charInfo;
+            //
+            //         ref float3 p0 = ref positions[vertexIndex + 0];
+            //         ref float3 p1 = ref positions[vertexIndex + 1];
+            //         ref float3 p2 = ref positions[vertexIndex + 2];
+            //         ref float3 p3 = ref positions[vertexIndex + 3];
+            //
+            //         ref float4 uv0 = ref texCoords[vertexIndex + 0];
+            //         ref float4 uv1 = ref texCoords[vertexIndex + 1];
+            //         ref float4 uv2 = ref texCoords[vertexIndex + 2];
+            //         ref float4 uv3 = ref texCoords[vertexIndex + 3];
+            //
+            //         float charX = position.x + wordInfo.x + charInfo.topLeft.x;
+            //         float charY = position.y + wordInfo.y + charInfo.topLeft.y;
+            //
+            //         float charWidth = charInfo.bottomRight.x - charInfo.topLeft.x;
+            //         float charHeight = charInfo.bottomRight.y - charInfo.topLeft.y;
+            //
+            //         p0.x = charX + charInfo.shearTop;
+            //         p0.y = -charY;
+            //         p0.z = 0;
+            //
+            //         p1.x = charX + charWidth + charInfo.shearTop;
+            //         p1.y = -charY;
+            //         p1.z = 0;
+            //
+            //         p2.x = charX + charWidth + charInfo.shearBottom;
+            //         p2.y = -(charY + charHeight);
+            //         p2.z = 0;
+            //
+            //         p3.x = charX + charInfo.shearBottom;
+            //         p3.y = -(charY + charHeight);
+            //         p3.z = 0;
+            //
+            //         uv0.x = charInfo.topLeftUv.x;
+            //         uv0.y = charInfo.bottomRightUv.y;
+            //         uv0.z = charInfo.topLeftUv.x;
+            //         uv0.w = charInfo.bottomRightUv.y;
+            //
+            //         uv1.x = charInfo.bottomRightUv.x;
+            //         uv1.y = charInfo.bottomRightUv.y;
+            //         uv1.z = charInfo.bottomRightUv.x;
+            //         uv1.w = charInfo.bottomRightUv.y;
+            //
+            //         uv2.x = charInfo.bottomRightUv.x;
+            //         uv2.y = charInfo.topLeftUv.y;
+            //         uv2.z = charInfo.bottomRightUv.x;
+            //         uv2.w = charInfo.topLeftUv.y;
+            //
+            //         uv3.x = charInfo.topLeftUv.x;
+            //         uv3.y = charInfo.topLeftUv.y;
+            //         uv3.z = charInfo.topLeftUv.x;
+            //         uv3.w = charInfo.topLeftUv.y;
+            //
+            //         vertexIndex += 4;
+            //     }
+            //
+            // }
+            //
+            // // should vectorize
+            // for (int i = 0; i < vertexCount; i++) {
+            //     colors[i] = color;
+            // }
+            //
+            // vh.AddVertexCount(vertexCount);
+            //
+            // int startVertex = vh.currentVertCount;
+            //
+            // int triIdx = 0;
+            // for (int i = 0; i < vertexCount; i += 4) {
+            //     triangles[triIdx + 0] = startVertex + i + 0;
+            //     triangles[triIdx + 1] = startVertex + i + 1;
+            //     triangles[triIdx + 2] = startVertex + i + 2;
+            //     triangles[triIdx + 3] = startVertex + i + 2;
+            //     triangles[triIdx + 4] = startVertex + i + 3;
+            //     triangles[triIdx + 5] = startVertex + i + 0;
+            //     triIdx += 6;
+            // }
+            //
+            // vh.AddTriangleCount(triangleCount);
         }
 
         // ShapeKit.ApplyVertexModifier(ref T modifier) {}

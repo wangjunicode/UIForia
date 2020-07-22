@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using ThisOtherThing.UI.ShapeUtils;
 using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Rendering.Vertigo;
@@ -13,8 +12,6 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using Vertigo;
-using Debug = UnityEngine.Debug;
-using Random = UnityEngine.Random;
 
 namespace UIForia.Rendering {
 
@@ -38,19 +35,11 @@ namespace UIForia.Rendering {
             imageGeometry = new UIForiaGeometry();
         }
 
-        public override void PaintBackground(RenderContext ctx) {
+        public void PaintBackground(RenderContext ctx) {
             base.PaintBackground(ctx);
             //  imageGeometry.mainTexture = ((UIImageElement) element).texture;
             // ctx.DrawBatchedGeometry(imageGeometry, new GeometryRange(0, 4, 0, 6), element.layoutResult.matrix.ToMatrix4x4());
         }
-
-    }
-
-    [DebuggerDisplay("{element.ToString()}")]
-    public class StandardRenderBox2 : RenderBox {
-
-        private DataList<TextureRef> textures;
-        private Color[] colors;
 
         [BurstCompile]
         private unsafe struct Job : IJob {
@@ -89,142 +78,227 @@ namespace UIForia.Rendering {
 
         }
 
+    }
+
+    [DebuggerDisplay("{element.ToString()}")]
+    public class StandardRenderBox2 : RenderBox {
+
+        private ElementStyle elementStyle;
+
+        private bool drawShadow;
+        private bool drawOutline;
+        private bool drawBackground;
+
+        // remove?
+        private float width;
+        private float height;
+
+        public ElementMaterialInfo elementMaterialInfo;
+
         public override void OnInitialize() {
-            // textures = new DataList<TextureRef>(128, Allocator.Persistent);
-            // colors = new Color[128];
-            //
-            // for (int i = 0; i < 128; i++) {
-            //     colors[i] = new Color(
-            //         Random.Range(0f, 1f),
-            //         Random.Range(0f, 1f),
-            //         Random.Range(0f, 1f)
-            //     );
-            //     textures.Add(new TextureRef() {
-            //         id = i,
-            //         width = Random.Range(16, 256),
-            //         height = Random.Range(16, 256)
-            //     });
-            // }
-            //
-            // new Job() {
-            //     textures = textures
-            // }.Run();
-            //
-            // Stopwatch s = Stopwatch.StartNew();
-            //
-            // new Job() {
-            //     textures = textures
-            // }.Run();
-            //
-            // s.Stop();
-            // Debug.Log("packed in: " + s.Elapsed.TotalMilliseconds);
-            //
-            // int unplaced = 0;
-            // for (int i = 0; i < textures.size; i++) {
-            //     if (textures[i].channel == -1) {
-            //         unplaced++;
-            //     }
-            // }
-            //
-            // Debug.Log("Failed to pack: " + unplaced);
+
+            elementStyle = new ElementStyle() {
+                backgroundColor = element.style.BackgroundColor,
+                backgroundTint = element.style.BackgroundTint,
+                backgroundImage = element.style.BackgroundImage,
+                opacity = element.style.Opacity,
+                bgFit = element.style.BackgroundFit,
+                uvTransform = new UVTransform() {
+                    uvRotation = element.style.BackgroundImageRotation,
+                    uvOffsetX = element.style.BackgroundImageOffsetX.value, // fix
+                    uvOffsetY = element.style.BackgroundImageOffsetY.value, // fix
+                    uvScaleX = element.style.BackgroundImageScaleX,
+                    uvScaleY = element.style.BackgroundImageScaleY,
+                    uvTileX = element.style.BackgroundImageTileX,
+                    uvTileY = element.style.BackgroundImageTileY,
+                },
+                meshStyle = new ElementMeshStyle() {
+                    meshType = element.style.MeshType,
+                    fillAmount = element.style.MeshFillAmount,
+                    fillDirection = element.style.MeshFillDirection,
+                    fillOrigin = element.style.MeshFillOrigin,
+                },
+                shadowStyle = new ElementShadowStyle() {
+                    shadowBlur = 0,
+                    shadowSpread = 0,
+                    shadowOffsetX = 0,
+                    shadowOffsetY = 0,
+                    shadowColor = default,
+                },
+                // borderSize = default,
+                outlineWidth = 0,
+
+                gradientId = -1,
+                maskTexture = -1,
+                maskUvs = default,
+
+                outlineColor = element.style.BorderColorTop,
+                shinePower = 0,
+                shineX = 0,
+                shineY = 0,
+
+                uvBounds = new Rect(0, 0, 1, 1),
+                bevelTopLeft = element.style.CornerBevelTopLeft.value, // fix
+                bevelTopRight = element.style.CornerBevelTopRight.value,
+                bevelBottomRight = element.style.CornerBevelBottomRight.value,
+                bevelBottomLeft = element.style.CornerBevelBottomLeft.value,
+
+                radiusTopLeft = element.style.BorderRadiusTopLeft.value, // fix
+                radiusTopRight = element.style.BorderRadiusTopRight.value, // fix
+                radiusBottomRight = element.style.BorderRadiusBottomRight.value, // fix
+                radiusBottomLeft = element.style.BorderRadiusBottomLeft.value, // fix
+            };
+
+            elementMaterialInfo.opacity = elementStyle.opacity;
+            elementMaterialInfo.backgroundColor = elementStyle.backgroundColor;
+            elementMaterialInfo.backgroundTint = elementStyle.backgroundTint;
+            elementMaterialInfo.outlineColor = elementStyle.outlineColor;
+            elementMaterialInfo.outlineTint = Color.white;
+            elementMaterialInfo.outlineWidth = 0;
+
+            ColorMode colorMode = ColorMode.None;
+
+            if (!ReferenceEquals(elementStyle.backgroundImage, null)) {
+                colorMode |= ColorMode.Texture;
+            }
+
+            if (elementMaterialInfo.backgroundTint.a > 0) {
+                colorMode |= ColorMode.TextureTint;
+            }
+
+            if (elementMaterialInfo.backgroundColor.a > 0) {
+                colorMode |= ColorMode.Color;
+            }
+
+            // if keeping aspect ratio
+            // could include a letterbox color in packed colors
+            colorMode |= ColorMode.LetterBoxTexture;
+
+            elementMaterialInfo.bodyColorMode = colorMode;
+            elementMaterialInfo.outlineColorMode = default;
+            elementMaterialInfo.zPosition = 0;
+
+            Texture bgTexture = element.style.BackgroundImage;
+
+            elementStyle.backgroundImageId = !ReferenceEquals(bgTexture, null) ? bgTexture.GetInstanceID() : 0;
+            drawBackground = elementStyle.backgroundImageId != 0 || elementStyle.backgroundColor.a * elementStyle.opacity >= 0.01f;
 
         }
 
-        public override void PaintBackground2(RenderContext2 ctx) {
-            Color32 backgroundColor = element.style.BackgroundColor;
-            Texture backgroundImage = element.style.BackgroundImage;
+        // send with style update, do this after layout finishes
+        // sync point but i had that anyway
 
-            // if (backgroundColor.a <= 0 && ReferenceEquals(backgroundImage, null)) {
-            //     //if (borderColorTop.a + borderColorBottom.a + borderColorLeft.a + borderColorRight.a == 0) {
-            //     didRender = false;
-            //     //}
-            //     return;
-            // }
-            ctx.SetMaterial(MaterialId.UIForiaShape);
+        private float ResolveBevelOrRounding(float baseValue, UIFixedLength length) {
 
-            float y = 0;
+            switch (length.unit) {
 
-            ctx.SetColor(Color.yellow);
-            ctx.FillRect(new float2(0, y), new float2(300, 100));
+                default:
+                    return length.value;
 
-            y += 125;
-            ctx.SetColor(Color.white);
-            ctx.FillRect(new float2(0, y), new float2(700, 120));
-
-            using (RenderContext2.StencilScope _ = ctx.PushStencilScope()) {
-                ctx.SetColor(Color.green);
-                ctx.FillRect(0, y, 200, 100);
-                ctx.FillRect(0, y, 200, 300);
-                
-                ctx.PushStencilClipShape();
-                {
-                    ctx.SetColor(Color.red);
-                    ctx.FillRect(new float2(0, y), new float2(100, 100));
-                }
-
-                ctx.PopStencilClipShape();
-
-                ctx.SetColor(Color.green);
-                ctx.FillRect(new float2(440, y), new float2(200, 100));
-                y += 125;
+                case UIFixedUnit.Percent:
+                    return length.value * baseValue;
             }
-
-            ctx.FillRect(0, y, 700, 120);
-
-            ctx.PushStencilClipShape();
-            {
-
-                ctx.SetColor(Color.green);
-                ctx.FillRect(new float2(0, y), new float2(200, 100));
-                ctx.FillRect(new float2(0, y), new float2(200, 100));
-
-                ctx.PushStencilClipShape();
-                {
-                    ctx.SetColor(Color.red);
-                    ctx.FillRect(new float2(0, y), new float2(100, 100));
-                }
-
-                ctx.PopStencilClipShape();
-
-                ctx.SetColor(Color.green);
-                ctx.FillRect(new float2(440, y), new float2(200, 100));
-                y += 125;
-
-            }
-            ctx.PopStencilClipShape();
-
-            ctx.SetColor(Color.yellow);
-            ctx.FillRect(new float2(0, y), new float2(300, 100));
-
-            // ctx.FillRect(new float2(50, 50), new float2(100, 100));
-            //
-            // ctx.PushClipShape();
-            // { }
-            // ctx.PopClipShape();
-            //
-            // ctx.SetColor(Color.red);
-            // ctx.FillRect(new float2(50, 50), new float2(100, 100));
-
-            // ctx.PopClipShape();
-
-            // for (int i = 0; i < textures.size; i++) {
-            //     ctx.SetColor(colors[i]);
-            //     ctx.FillRect(new float2(textures[i].textureX, textures[i].textureY), new float2(textures[i].width, textures[i].height));
-            // }
-            // ctx.FillRect();
-            // Size size = element.layoutResult.actualSize;
-            // ctx.SetColor(element.style.BackgroundColor);
-            // ctx.FillRect(new float2(0, 0), new float2(size.width, size.height));
-            //
-            // MaskId maskId = ctx.GetLastShape().CreateMask(MaskType.SoftGeometry, MaskVisibility.Hidden);
-            //
-            // ctx.SetMask(maskId);
-            //
-            // ctx.FillRoundRect(new float2(0, 0), new float2(size.width, size.height), Corner.Bevel(3));
 
         }
 
-        public override void PaintBackground(RenderContext ctx) { }
+        public override void OnSizeChanged(Size size) {
+            // re-compute radius & bevel
+
+            width = size.width;
+            height = size.height;
+
+            float min = size.width < size.height ? size.width : size.height;
+
+            if (min <= 0) min = 0.0001f;
+
+            float halfMin = min * 0.5f;
+            float minScale = 1f / min;
+
+            float resolvedBorderRadiusTopLeft = Mathf.Clamp(ResolveBevelOrRounding(min, element.style.BorderRadiusTopLeft), 0, halfMin) * minScale;
+            float resolvedBorderRadiusTopRight = Mathf.Clamp(ResolveBevelOrRounding(min, element.style.BorderRadiusTopRight), 0, halfMin) * minScale;
+            float resolvedBorderRadiusBottomLeft = Mathf.Clamp(ResolveBevelOrRounding(min, element.style.BorderRadiusBottomRight), 0, halfMin) * minScale;
+            float resolvedBorderRadiusBottomRight = Mathf.Clamp(ResolveBevelOrRounding(min, element.style.BorderRadiusBottomLeft), 0, halfMin) * minScale;
+
+            byte r0 = (byte) (((resolvedBorderRadiusTopLeft * 1000)) * 0.5f);
+            byte r1 = (byte) (((resolvedBorderRadiusTopRight * 1000)) * 0.5f);
+            byte r2 = (byte) (((resolvedBorderRadiusBottomLeft * 1000)) * 0.5f);
+            byte r3 = (byte) (((resolvedBorderRadiusBottomRight * 1000)) * 0.5f);
+
+            // float resolvedCornerBevelTopLeft = ResolveBevelOrRounding(halfMin, element.style.CornerBevelTopLeft);
+            // float resolvedCornerBevelTopRight = ResolveBevelOrRounding(halfMin, element.style.CornerBevelTopRight);
+            // float resolvedCornerBevelBottomRight = ResolveBevelOrRounding(halfMin, element.style.CornerBevelBottomRight);
+            // float resolvedCornerBevelBottomLeft = ResolveBevelOrRounding(halfMin, element.style.CornerBevelBottomLeft);
+
+            elementMaterialInfo.bevel0 = 0;
+            elementMaterialInfo.bevel1 = 0;
+            elementMaterialInfo.bevel2 = 0;
+            elementMaterialInfo.bevel3 = 0;
+            elementMaterialInfo.radius0 = r0;
+            elementMaterialInfo.radius1 = r1;
+            elementMaterialInfo.radius2 = r2;
+            elementMaterialInfo.radius3 = r3;
+            elementMaterialInfo.size.x = size.width;
+            elementMaterialInfo.size.y = size.height;
+        }
+
+        public override void Enable() { }
+
+        public override void OnStylePropertyChanged(StyleProperty[] propertyList, int propertyCount) {
+            for (int i = 0; i < propertyCount; i++) {
+                ref StyleProperty property = ref propertyList[i];
+                switch (property.propertyId) {
+                    case StylePropertyId.BackgroundColor:
+                        elementStyle.backgroundColor = property.AsColor32;
+                        elementMaterialInfo.backgroundColor = elementStyle.backgroundColor;
+                        break;
+
+                    case StylePropertyId.BackgroundImage:
+                        Texture2D bgTexture = property.AsTexture;
+                        elementStyle.backgroundImageId = !ReferenceEquals(bgTexture, null) ? bgTexture.GetInstanceID() : 0;
+                        break;
+                }
+            }
+
+            drawBackground = elementStyle.backgroundImageId != 0 || elementStyle.backgroundColor.a * elementStyle.opacity >= 0.01f;
+
+        }
+
+        public override void PaintBackground2(RenderContext2 ctx) { }
+
+        public override void PaintBackground3(RenderContext3 ctx) {
+            SDFMeshDesc desc = default;
+            desc.x = 0;
+            desc.y = 0;
+            desc.width = width;
+            desc.height = height;
+
+            AxisAlignedBounds2D bounds2D = new AxisAlignedBounds2D(0, 0, width, height);
+
+            if (drawBackground) {
+
+                if (elementStyle.backgroundImageId != 0) {
+                    ctx.AddTexture(elementStyle.backgroundImage);
+                }
+
+                ctx.DrawElementBodyInternal(desc, bounds2D, new ElementMaterialSetup() {
+                    materialInfo = elementMaterialInfo,
+                    bodyTexture = new TextureUsage() {
+                        textureId = elementStyle.backgroundImageId,
+                    },
+                    outlineTexture = new TextureUsage() {
+                        textureId = 0
+                    }
+                });
+            }
+            // else if (drawOutline) {
+            //     ctx.DrawElementBodyInternal(desc, new ShapeMaterialInfo(), new AxisAlignedBounds2D(0, 0, width, height));
+            // }
+
+            if (drawShadow) {
+                // apply spread to width & height
+            }
+
+        }
 
     }
 
@@ -283,6 +357,8 @@ namespace UIForia.Rendering {
         }
 
         public override void Enable() {
+            // renderSystem.GetTextureId();
+            // renderSystem.GetTextureId();
             borderColorTop = element.style.BorderColorTop;
             borderColorRight = element.style.BorderColorRight;
             borderColorBottom = element.style.BorderColorBottom;
@@ -650,7 +726,7 @@ namespace UIForia.Rendering {
             return test;
         }
 
-        public override void PaintBackground(RenderContext ctx) {
+        public void PaintBackground(RenderContext ctx) {
 
             // if (materialId.id != 0) {
             //     RenderFromMaterial(ctx);

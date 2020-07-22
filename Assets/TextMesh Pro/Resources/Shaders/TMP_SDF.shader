@@ -170,7 +170,7 @@ SubShader {
 			float bold = step(input.texcoord1.y, 0);
 
 			float4 vert = input.position;
-			vert.x += _VertexOffsetX;
+		    vert.x += _VertexOffsetX;
 			vert.y += _VertexOffsetY;
 
 			float4 vPosition = UnityObjectToClipPos(vert);
@@ -178,11 +178,13 @@ SubShader {
 			float2 pixelSize = vPosition.w;
 			pixelSize /= float2(_ScaleX, _ScaleY) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
 			float scale = rsqrt(dot(pixelSize, pixelSize));
+			float baseScale = scale;
 			scale *= abs(input.texcoord1.y) * _GradientScale * (_Sharpness + 1);
 			if (UNITY_MATRIX_P[3][3] == 0) scale = lerp(abs(scale) * (1 - _PerspectiveFilter), scale, abs(dot(UnityObjectToWorldNormal(input.normal.xyz), normalize(WorldSpaceViewDir(vert)))));
 
 			float weight = lerp(_WeightNormal, _WeightBold, bold) / 4.0;
 			weight = (weight + _FaceDilate) * _ScaleRatioA * 0.5;
+			
 
 			float bias =(.5 - weight) + (.5 / scale);
 
@@ -208,7 +210,6 @@ SubShader {
 			float x = -(_UnderlayOffsetX * _ScaleRatioC) * _GradientScale / _TextureWidth;
 			float y = -(_UnderlayOffsetY * _ScaleRatioC) * _GradientScale / _TextureHeight;
 			float2 bOffset = float2(x, y);
-						output.debug = float4(firstDivide, second, third, bBias);
 
 		#endif
 
@@ -221,7 +222,7 @@ SubShader {
 			float2 faceUV = TRANSFORM_TEX(textureUV, _FaceTex);
 			float2 outlineUV = TRANSFORM_TEX(textureUV, _OutlineTex);
 
-			
+			output.debug = float4(vert.x, vert.y, 0, 0);
 			output.position = vPosition;
 			float charScale =  abs(input.texcoord1.y) * _GradientScale * (_Sharpness + 1);
 			output.color = input.color;
@@ -242,7 +243,6 @@ SubShader {
 		fixed4 PixShader(pixel_t input) : SV_Target
 		{
 			UNITY_SETUP_INSTANCE_ID(input);
-
 			float c = tex2D(_MainTex, input.atlas).a;
 		
 		#ifndef UNDERLAY_ON
@@ -254,19 +254,19 @@ SubShader {
 			float	weight	= input.param.w;
 			float	sd = (bias - c) * scale;
 			
-			float outline = (_OutlineWidth * _ScaleRatioA) * scale;
-			float softness = (_OutlineSoftness * _ScaleRatioA) * scale;
+			float outline = 0; //(_OutlineWidth * _ScaleRatioA) * scale;
+			float softness = 0; //(_OutlineSoftness * _ScaleRatioA) * scale;
 
 			half4 faceColor = _FaceColor;
 			half4 outlineColor = _OutlineColor;
 
-			faceColor.rgb *= input.color.rgb;
+			//faceColor.rgb *= input.color.rgb;
 			
-			faceColor *= tex2D(_FaceTex, input.textures.xy + float2(_FaceUVSpeedX, _FaceUVSpeedY) * _Time.y);
-			outlineColor *= tex2D(_OutlineTex, input.textures.zw + float2(_OutlineUVSpeedX, _OutlineUVSpeedY) * _Time.y);
+			//faceColor *= tex2D(_FaceTex, input.textures.xy + float2(_FaceUVSpeedX, _FaceUVSpeedY) * _Time.y);
+			//outlineColor *= tex2D(_OutlineTex, input.textures.zw + float2(_OutlineUVSpeedX, _OutlineUVSpeedY) * _Time.y);
 
 			faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
-    
+			return faceColor;
 		#if BEVEL_ON
 			float3 dxy = float3(0.5 / _TextureWidth, 0.5 / _TextureHeight, 0);
 			float3 n = GetSurfaceNormal(input.atlas, weight, dxy);
@@ -306,6 +306,7 @@ SubShader {
 			half2 m = saturate((_ClipRect.zw - _ClipRect.xy - abs(input.mask.xy)) * input.mask.zw);
 			faceColor *= m.x * m.y;
 		#endif
+		
 
 		#if UNITY_UI_ALPHACLIP
 			clip(faceColor.a - 0.001);

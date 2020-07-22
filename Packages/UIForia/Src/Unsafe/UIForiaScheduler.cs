@@ -55,7 +55,7 @@ namespace UIForia {
 
     }
 
-    public class VertigoScheduler {
+    public class UIForiaScheduler {
 
         public unsafe struct SchedulerStep {
 
@@ -208,6 +208,7 @@ namespace UIForia {
             job.Run();
             return default;
         }
+
 
     }
 

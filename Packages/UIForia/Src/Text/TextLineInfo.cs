@@ -12,8 +12,6 @@ namespace UIForia.Text {
         public int wordStart;
         public int wordCount; 
         
-
-        
         public Rect LineRect => new Rect(x, y, width, height);
 
         // indices 

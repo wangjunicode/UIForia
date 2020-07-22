@@ -1,4 +1,4 @@
-﻿using Unity.Mathematics;
+﻿using UIForia.Graphics;
 using UnityEngine;
 
 namespace UIForia.Layout {
@@ -7,10 +7,9 @@ namespace UIForia.Layout {
 
         public bool isCulled;
         public RangeInt intersectionRange;
-        public float4 aabb;
+        public AxisAlignedBounds2D aabb;
         public int parentIndex;
         public ElementId elementId;
-        public int overflowBoundsIndex;
 
         /// <summary>
         /// Only used for view clippers, lets me find the parallel segments of the clipper list by view

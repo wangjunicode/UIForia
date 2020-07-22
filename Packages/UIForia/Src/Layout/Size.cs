@@ -80,6 +80,10 @@ namespace UIForia.Layout {
 
         public static Size Unset => new Size(FloatUtil.UnsetValue, FloatUtil.UnsetValue);
 
+        public override string ToString() {
+            return "Width: " + width + " Height: " + height;
+        }
+
     }
 
 }

@@ -1,5 +1,6 @@
 ﻿namespace UIForia.Text {
 
+    // cannot be a flag since user can define their own types
     public enum TextSymbolType {
 
         Character,
@@ -27,7 +28,11 @@
 
         MaterialPush,
         MaterialPop,
-        Sprite
+        Sprite,
+
+        EffectPush,
+
+        EffectPop
 
     }
   

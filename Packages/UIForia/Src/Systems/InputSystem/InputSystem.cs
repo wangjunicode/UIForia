@@ -545,8 +545,13 @@ namespace UIForia.Systems {
                     }
                 }
             }
-
+            
+            if (currentDragEvent == null) {
+                IsDragging = false;
+            }
+            
             // todo -- capture phase
+            
         }
 
         private void EndDrag(InputEventType evtType) {

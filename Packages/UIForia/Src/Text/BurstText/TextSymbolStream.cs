@@ -1,11 +1,11 @@
 ﻿using UIForia.Util;
-using UIForia.Util.Unsafe;
 using UnityEngine;
 
 namespace UIForia.Text {
 
     public struct TextSymbolStream {
 
+        internal LightList<TextEffect> textEffects;
         internal StructList<TextSymbol> stream;
         internal bool requiresTextTransform;
         internal bool requiresRenderProcessing;
@@ -14,6 +14,7 @@ namespace UIForia.Text {
             this.stream = stream;
             this.requiresTextTransform = false;
             this.requiresRenderProcessing = false;
+            this.textEffects = LightList<TextEffect>.Get();
         }
 
         public void AddCharacter(char character) {
@@ -23,6 +24,24 @@ namespace UIForia.Text {
                     character = character
                 }
             });
+        }
+
+        public void PushTextEffect(TextEffect textEffect) {
+            if (textEffect != null) {
+                textEffects.Add(textEffect);
+                stream.Add(new TextSymbol() {
+                    type = TextSymbolType.EffectPush,
+                    effectId = textEffects.size
+                });
+            }
+        }
+        
+        public void PopTextEffect() {
+            if (textEffects.size > 0) {
+                stream.Add(new TextSymbol() {
+                    type = TextSymbolType.EffectPop
+                });    
+            }
         }
         
         public void PushTextTransform(TextTransform textTransform) {

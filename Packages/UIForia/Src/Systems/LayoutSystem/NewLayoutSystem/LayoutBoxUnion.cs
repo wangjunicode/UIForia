@@ -132,7 +132,7 @@ namespace UIForia.Layout {
                 default:
                 case LayoutBoxType.Unset:
                 case LayoutBoxType.Flex:
-                    flex.RunHorizontal(runner);
+                   flex.RunHorizontal(runner);
                     break;
 
                 case LayoutBoxType.Grid:
@@ -160,7 +160,7 @@ namespace UIForia.Layout {
                     break;
 
                 case LayoutBoxType.Root:
-                    root.RunHorizontal(runner);
+                     root.RunHorizontal(runner);
                     break;
             }
         }

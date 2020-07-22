@@ -1,6 +1,6 @@
 ﻿namespace UIForia.Systems {
 
-    public enum VertexChannelFormat {
+    public enum VertexChannelFormat : byte {
 
         Off = 0,
         Float1 = 4,

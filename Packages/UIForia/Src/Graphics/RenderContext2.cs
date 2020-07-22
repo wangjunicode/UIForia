@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using ThisOtherThing.UI;
 using ThisOtherThing.UI.ShapeUtils;
+using UIForia.Layout;
 using UIForia.ListTypes;
+using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Text;
 using UIForia.Util;
@@ -16,6 +18,7 @@ namespace UIForia.Graphics {
 
     public enum ShapeType {
 
+        None = 0,
         Rect = 1 << 1,
         RoundedRect = 1 << 2,
         Arc = 1 << 3,
@@ -31,21 +34,18 @@ namespace UIForia.Graphics {
 
         Mesh = 1 << 0,
         Shape = 1 << 1,
+        Callback = 1 << 2,
 
         PushClipRect = 1 << 9,
-        PushClipShape = 1 << 10,
-        SetRenderTarget = 1 << 11,
 
-        PopClipShape = 1 << 12,
-        
-        PushClipTexture,
         PopClipper,
         PushClipScope,
 
         // Shape = Rect | RoundedRect | Arc | Polygon | Line | Ellipse,
 
-        StateChange = PushClipShape | PushClipRect | SetRenderTarget,
+        BeginStencilClip,
 
+        PushStencilClip
 
     }
 
@@ -58,16 +58,7 @@ namespace UIForia.Graphics {
         [FieldOffset(0)] public Vector4 vectorValue;
 
     }
-
-    public struct MaskId {
-
-        internal int id;
-
-        internal MaskId(int id) {
-            this.id = id;
-        }
-
-    }
+    
 
     public struct ShapeId {
 
@@ -80,27 +71,7 @@ namespace UIForia.Graphics {
         }
 
     }
-
-    public struct ShapeInterface {
-
-        private RenderContext2 ctx;
-        private int frameId;
-
-        private bool Validate() {
-            return ctx.frameId == frameId;
-        }
-
-        public void GetTexCoord0(ShapeId shapeId, List<Vector4> texCoords) {
-            if (!Validate()) {
-                // throw
-            }
-
-            // ctx.drawList[shapeId.index].shapeGeometrySource
-
-        }
-
-    }
-
+    
     public struct MaterialPropertyOverride : IComparable<MaterialPropertyOverride> {
 
         public int shaderPropertyId;
@@ -110,6 +81,110 @@ namespace UIForia.Graphics {
         public int CompareTo(MaterialPropertyOverride other) {
             return shaderPropertyId - other.shaderPropertyId;
         }
+
+    }
+
+    public struct TextureUsage {
+
+        public int textureId;
+        public AxisAlignedBounds2DUShort uvRect; // could be ushort because pixels aligned on ints and only need max ~4k per axis
+        public UVTransform uvTransform;
+
+    }
+
+    public struct GradientUsage {
+
+        public int gradientId;
+        public float rotation;
+        public int type;
+
+    }
+
+    public struct ElementMeshStyle {
+
+        public float2 size;
+        public float4 borderSize;
+        public MeshType meshType;
+        public MeshFillDirection fillDirection;
+        public MeshFillOrigin fillOrigin;
+        public float fillAmount;
+        public float outlineWidth; // shared with material for sdf case
+
+    }
+
+    public struct UVTransform {
+
+        // could maybe pack these in ushorts using 8.8 fixed point, dont need to be really high precision
+        public float uvOffsetX;
+        public float uvOffsetY;
+        public float uvScaleX;
+        public float uvScaleY;
+        
+        public float uvTileX;
+        public float uvTileY;
+        public float uvRotation; // could be ushort 
+        public float padding; // align on sizeof(float4)
+
+    }
+
+    public struct ElementShadowStyle {
+
+        public Color32 shadowColor;
+        public float shadowOffsetX;
+        public float shadowOffsetY;
+        public float shadowSizeX;
+        public float shadowSizeY;
+        public float shadowSpread;
+        public float shadowBlur;
+
+    }
+
+    public struct ElementStyle {
+
+        public float opacity;
+
+        public ElementMeshStyle meshStyle;
+        public UVTransform uvTransform;
+        public ElementShadowStyle shadowStyle;
+
+        public Color32 backgroundColor;
+        public Color32 backgroundTint;
+        public Color32 outlineColor;
+
+        public float4 maskUvs;
+        public int maskTexture;
+
+        public float outlineWidth; // (softness would be cool!) ask andres about this and inner/outer shadow
+
+        public Rect uvBounds;
+
+        public Texture backgroundImage;
+        public BackgroundFit bgFit;
+
+        public Color32 borerColorTop;
+        public Color32 borerColorRight;
+        public Color32 borerColorBottom;
+        public Color32 borerColorLeft;
+
+        public UIFixedLength bevelTopLeft;
+        public UIFixedLength bevelTopRight;
+        public UIFixedLength bevelBottomRight;
+        public UIFixedLength bevelBottomLeft;
+
+        public UIFixedLength radiusTopLeft;
+        public UIFixedLength radiusTopRight;
+        public UIFixedLength radiusBottomRight;
+        public UIFixedLength radiusBottomLeft;
+
+        public float shineX;
+        public float shineY;
+        public float shinePower;
+
+        public int toneEffect;
+        public float toneFactor;
+
+        public int gradientId;
+        public int backgroundImageId;
 
     }
 
@@ -142,9 +217,9 @@ namespace UIForia.Graphics {
         internal LightList<Mesh> meshList;
         internal List_DrawInfo drawList;
         internal StructList<DeferredTextInfo> deferredTextList;
-        internal DataList<MaskInfo> maskInfoList;
 
         private RenderSystem renderSystem;
+        private int stencilClipStart;
 
         internal RenderContext2(RenderSystem renderSystem, ResourceManager resourceManager) {
             this.renderSystem = renderSystem;
@@ -156,23 +231,21 @@ namespace UIForia.Graphics {
             this.stackBuffer = new PagedByteAllocator(TypedUnsafe.Kilobytes(16), Allocator.Persistent, Allocator.TempJob);
             this.materialValueOverrides = new DataList<MaterialPropertyOverride>(16, Allocator.Persistent);
             this.textureMap = new Dictionary<int, Texture>();
-            this.maskInfoList = new DataList<MaskInfo>(8, Allocator.Persistent);
         }
 
         internal void Dispose() {
             stackBuffer.Dispose();
             drawList.Dispose();
-            maskInfoList.Dispose();
         }
 
         internal void Clear() {
+            stencilClipStart = 0;
             drawList.size = 0;
-            maskInfoList.size = 0;
             meshList.Clear();
             stackBuffer.Clear();
             textureMap.Clear();
         }
-
+        
         public void SetMaterial(MaterialId materialId) {
             activeMaterialId = materialId;
             materialValueOverrides.size = 0;
@@ -294,6 +367,7 @@ namespace UIForia.Graphics {
 
         public bool SetMaterialTexture(int shaderKey, Texture texture) {
 
+            // todo -- may only work if exposed via property which is not what I want
             if (!materialDatabase.HasTextureProperty(activeMaterialId, shaderKey)) {
                 return false;
             }
@@ -355,9 +429,30 @@ namespace UIForia.Graphics {
 
         }
 
-        public void FillRoundRect(float2 position, float2 size, in Corner corner) {
+        public void PushClipRect(Rect rect) {
 
-            FillRoundRect(position, size, new CornerProperties() {
+            AxisAlignedBounds2D bounds = default;
+
+            // todo -- get rid fo math.transform, its slow
+            float3 topLeft = math.transform(*defaultMatrix, new float3(rect.xMin, rect.yMin, 0));
+            float3 bottomRight = math.transform(*defaultMatrix, new float3(rect.xMax, rect.yMax, 0));
+
+            bounds.xMin = topLeft.x;
+            bounds.yMin = topLeft.y;
+            bounds.xMax = bottomRight.x;
+            bounds.yMax = bottomRight.y;
+
+            drawList.Add(new DrawInfo() {
+                type = DrawType.PushClipRect,
+                matrix = defaultMatrix,
+                shapeData = stackBuffer.Allocate(bounds)
+            });
+
+        }
+
+        public void FillRoundRect(float x, float y, float width, float height, in Corner corner) {
+
+            FillRoundRect(x, y, width, height, new CornerProperties() {
                 topLeft = corner,
                 topRight = corner,
                 bottomLeft = corner,
@@ -366,7 +461,7 @@ namespace UIForia.Graphics {
 
         }
 
-        public void FillRoundRect(float2 position, float2 size, in CornerProperties cornerProperties) {
+        public void FillRoundRect(float x, float y, float width, float height, in CornerProperties cornerProperties) {
             if (hasPendingMaterialOverrides) {
                 CommitMaterialModifications();
             }
@@ -375,19 +470,19 @@ namespace UIForia.Graphics {
                 type = DrawType.Shape,
                 shapeType = ShapeType.RoundedRect,
                 flags = currentFlagSet,
-                vertexLayout = VertexLayout.UIForiaDefault,
+                vertexLayout = VertexLayout.UIForiaDefault, // todo -- compute via geometry instead
                 matrix = defaultMatrix,
                 materialId = activeMaterialId,
                 materialOverrideValues = currentOverrideProperties,
                 materialOverrideCount = materialValueOverrides.size,
                 renderCallId = renderCallId,
                 localDrawIdx = localDrawIdx++,
-                shapeData = (byte*) stackBuffer.Allocate(new RoundedRectData() {
+                shapeData = stackBuffer.Allocate(new RoundedRectData() {
                     type = ShapeMode.Fill | ShapeMode.AA,
-                    x = position.x,
-                    y = position.y,
-                    width = size.x,
-                    height = size.y,
+                    x = x,
+                    y = y,
+                    width = width,
+                    height = height,
                     color = color,
                     edgeGradient = new EdgeGradientData() { },
                     cornerProperties = cornerProperties
@@ -404,13 +499,13 @@ namespace UIForia.Graphics {
             }
 
             public void Dispose() {
-                ctx.PopStencilClipShape();
+                ctx.PopClip();
             }
 
         }
 
         public StencilScope PushStencilScope() {
-            PushStencilClipShape();
+            PushStencilClip();
             return new StencilScope(this);
         }
 
@@ -444,31 +539,6 @@ namespace UIForia.Graphics {
 
         public void FillRect(float2 position, float2 size) {
             FillRect(position.x, position.y, size.x, size.y);
-        }
-
-        public enum MaskInteraction {
-
-            Normal,
-            Inverted
-
-        }
-
-        public struct ShapeId {
-
-            public long id;
-            private int frameId;
-            private RenderContext2 ctx;
-
-            private bool Validate() {
-                if (ctx.frameId != frameId) {
-                    return false;
-                }
-
-                return true;
-            }
-
-            public void CreateMask() { }
-
         }
 
         public void DrawSDFText(in TextInfo textInfo) {
@@ -568,7 +638,7 @@ namespace UIForia.Graphics {
                     underlaySoftness = textInfo.textStyle.underlaySoftness,
 
                     faceDilate = textInfo.textStyle.faceDilate,
-                    faceSoftness = textInfo.textStyle.faceSofteness,
+                    faceSoftness = textInfo.textStyle.faceSoftness,
 
                     outlineUVScroll = textInfo.textStyle.outlineUVScrollSpeed,
                     outlineUVOffset = textInfo.textStyle.outlineUVOffset
@@ -767,7 +837,7 @@ namespace UIForia.Graphics {
         }
         // todo -- figure out what can be packed into byte / ushort
 
-        internal void Setup(MaterialId materialId, OverflowBounds* overflowBounds, int renderCallId, float4x4* matrix) {
+        internal void Setup(MaterialId materialId,  int renderCallId, float4x4* matrix) {
             this.localDrawIdx = 0;
             this.renderCallId = renderCallId;
             this.activeMaterialId = materialId;
@@ -787,47 +857,209 @@ namespace UIForia.Graphics {
             return new MaterialWriter();
         }
 
-        public Graphics.ShapeId GetLastShape() {
+        public ShapeId GetLastShape() {
 
             if (drawList.size == 0) {
                 throw new Exception("No draw calls");
             }
 
-            return new Graphics.ShapeId(this, drawList.size - 1);
+            return new ShapeId(this, drawList.size - 1);
 
         }
 
-        public void PushStencilClipShape(bool renderClipShape = false) {
-            // todo -- dont allow if this is the first call in the painter
-
-            ref DrawInfo drawInfo = ref drawList[drawList.size - 1];
-
-            if ((drawInfo.type & DrawType.PushClipShape) != 0) {
-                return;
-            }
-
-            drawInfo.type |= DrawType.PushClipShape;
-
-            if (!renderClipShape) {
-                drawInfo.flags |= DrawInfoFlags.Hidden;
-            }
-
-        }
-
-        public void PopStencilClipShape() {
-
-            ref DrawInfo drawInfo = ref drawList[drawList.size - 1];
-
-            if ((drawInfo.type & DrawType.PushClipShape) != 0) {
-                return;
-            }
+        public void BeginStencilClip() {
+            stencilClipStart = drawList.size;
 
             drawList.Add(new DrawInfo() {
-                type = DrawType.PopClipShape
+                type = DrawType.BeginStencilClip
             });
 
         }
 
+        public void BeginSoftMask() {
+
+            // drawList.Add(new DrawInfo() {
+            //     type = DrawType.BeginSoftMask
+            // });
+
+        }
+
+        private void AddDrawInfo(in DrawInfo drawInfo) {
+
+            drawList.Add(drawInfo);
+        }
+
+        public struct StencilClipInfo {
+
+            public bool isVisible;
+            public int drawInfoCount;
+
+        }
+
+        public void PopClip() {
+            drawList.Add(new DrawInfo() {
+                type = DrawType.PopClipper
+            });
+        }
+
+        public void PushStencilClip(bool renderClipShape = false) {
+            if (stencilClipStart < 0) {
+                return;
+            }
+
+            if (drawList.size - stencilClipStart == 0) {
+                stencilClipStart = -1;
+                return;
+            }
+
+            drawList.Add(new DrawInfo() {
+                type = DrawType.PushStencilClip,
+                localDrawIdx = localDrawIdx++,
+                renderCallId = renderCallId,
+                shapeType = ShapeType.None,
+                shapeData = stackBuffer.Allocate(new StencilClipInfo() {
+                    isVisible = renderClipShape,
+                    drawInfoCount = drawList.size - stencilClipStart
+                })
+            });
+
+        }
+
+        // make sure we align on sizeof(float4)
+        public struct SDFShapeMaterialInfo {
+
+            public byte radiusTopLeft;
+            public byte radiusTopRight;
+            public byte radiusBottomRight;
+            public byte radiusBottomLeft;
+
+            public byte bevelTopLeft;
+            public byte bevelTopRight;
+            public byte bevelBottomRight;
+            public byte bevelBottomLeft;
+
+            public float opacity;
+            public float outlineWidth;
+            
+            // uv transforms in alternate buffer, these are just indices. 99% of the time will be 0 (the no-op transform)
+            public ushort bodyUVTransformIdx;
+            public ushort outlineUVTransformIdx;
+            
+            public Color32 outlineColor;
+            public Color32 backgroundColor;
+            public Color32 backgroundTint;
+            public float2 size;
+            
+            public float4x4 transform; // move, compress or drop this
+
+        }
+        
+        // todo make this not suck, only percent and px really makes sense. not really sure about px with dpi scale for this either
+        public static float ResolveFixedSize(float baseSize, UIFixedLength length) {
+            switch (length.unit) {
+                default:
+                case UIFixedUnit.Unset:
+                case UIFixedUnit.Pixel:
+                case UIFixedUnit.Em:
+                case UIFixedUnit.ViewportWidth:
+                case UIFixedUnit.ViewportHeight:
+                    return length.value;
+
+                case UIFixedUnit.Percent:
+                    return baseSize * length.value;
+            }
+        }
+
+        // shape baking options
+        // do it now
+        // allocate & figure it out later
+        // just need to know how many shapes we have up front, their local bounds (transform later in burst), and their shape descriptor info, and material settings
+
+        public struct RectShapeData { }
+
+        public struct TextShapeDesc { }
+
+        public void DrawElement(in Matrix4x4 matrix, Size size, ElementStyle elementStyle) {
+            
+            // 3 things we might draw
+            //  - border box
+            //  - body / outline
+            //  - shadow
+            // check and draw border
+            // cache before calling for internals
+            
+            bool drawBody = (elementStyle.backgroundColor.a / 255f) * elementStyle.opacity >= 0.01f || !ReferenceEquals(elementStyle.backgroundImage, null);
+            bool drawOutline = (elementStyle.outlineWidth > 0 && elementStyle.outlineColor.a * elementStyle.opacity >= 0.01f);
+
+            // todo -- branch for non sdf shape type
+
+            float min = size.width < size.height ? size.width : size.height;
+
+            if (min <= 0) min = 0.0001f;
+
+            float halfMin = min * 0.5f;
+
+            float resolvedBorderRadiusTopLeft = ResolveFixedSize(min, elementStyle.radiusTopLeft);
+            float resolvedBorderRadiusTopRight = ResolveFixedSize(min, elementStyle.radiusTopRight);
+            float resolvedBorderRadiusBottomLeft = ResolveFixedSize(min, elementStyle.radiusBottomLeft);
+            float resolvedBorderRadiusBottomRight = ResolveFixedSize(min, elementStyle.radiusBottomRight);
+
+            // move to shader?
+            float minScale = 1f / min;
+            resolvedBorderRadiusTopLeft = Mathf.Clamp(resolvedBorderRadiusTopLeft, 0, halfMin) * minScale;
+            resolvedBorderRadiusTopRight = Mathf.Clamp(resolvedBorderRadiusTopRight, 0, halfMin) * minScale;
+            resolvedBorderRadiusBottomLeft = Mathf.Clamp(resolvedBorderRadiusBottomLeft, 0, halfMin) * minScale;
+            resolvedBorderRadiusBottomRight = Mathf.Clamp(resolvedBorderRadiusBottomRight, 0, halfMin) * minScale;
+
+            byte b0 = (byte) (((resolvedBorderRadiusTopLeft * 1000)) * 0.5f);
+            byte b1 = (byte) (((resolvedBorderRadiusTopRight * 1000)) * 0.5f);
+            byte b2 = (byte) (((resolvedBorderRadiusBottomLeft * 1000)) * 0.5f);
+            byte b3 = (byte) (((resolvedBorderRadiusBottomRight * 1000)) * 0.5f);
+            if (drawBody || drawOutline) {
+                
+            }
+
+            if (drawBody && drawOutline) {
+                
+            }
+            else if (drawBody) {
+                DrawInfo drawInfo = new DrawInfo();
+                drawInfo.matrix = default;
+                drawInfo.type = DrawType.Shape;
+                drawInfo.shapeType = ShapeType.Rect;
+                drawInfo.geometryInfo = stackBuffer.Allocate<GeometryInfo>();
+                drawInfo.materialId = MaterialId.UIForiaShape;
+                drawInfo.materialOverrideCount = 0;
+                drawInfo.materialOverrideValues = default; // textures go here
+                drawInfo.renderCallId = renderCallId;
+                drawInfo.localDrawIdx = localDrawIdx++;
+                // shapeList.Add(drawInfoIdx);
+                // shapeList.Add(drawInfoIdx);
+            }
+            else if (drawOutline) {
+                
+            }
+            
+            if ((elementStyle.shadowStyle.shadowColor.a * elementStyle.opacity >= 0.01f)) {
+                // draw shadow
+            }
+            
+        }
+
+    }
+
+    [Flags]
+    public enum ColorMode : byte {
+
+        None = 0,
+        Color = 1 << 0,
+        Texture = 1 << 1,
+        TextureTint = 1 << 2,
+        LetterBoxTexture = 1 << 3,
+        LinearGradient = 1 << 4,
+        RadialGradient = 1 << 5,
+        CornerGradient = 1 << 6
+            
     }
 
     public enum MaskVisibility {
@@ -844,16 +1076,6 @@ namespace UIForia.Graphics {
         HardGeometry, // not including AA
         Material, // user material 
         Texture
-
-    }
-
-    public struct TextInfoRenderData {
-
-        internal List_TextSymbol symbolList;
-        internal List_TextLayoutSymbol layoutSymbolList;
-        internal List_TextLineInfo lineInfoList;
-        internal float resolvedFontSize;
-        internal Rect alignedTextBounds;
 
     }
 

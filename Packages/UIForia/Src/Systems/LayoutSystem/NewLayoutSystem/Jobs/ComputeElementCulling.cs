@@ -1,11 +1,8 @@
-﻿using System.Diagnostics;
-using UIForia.Graphics;
+﻿using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Jobs;
-using Unity.Mathematics;
-using UnityEngine;
 
 namespace UIForia.Systems {
 
@@ -72,8 +69,8 @@ namespace UIForia.Systems {
                     if (orientedBounds.p3.y > yMax) yMax = orientedBounds.p3.y;
 
                     // todo -- store aligned bounds 
-                    
-                    bool overlappingOrContains = xMax >= clipper.aabb.x && xMin <= clipper.aabb.z && yMax >= clipper.aabb.y && yMin <= clipper.aabb.w;
+
+                    bool overlappingOrContains = xMax >= clipper.aabb.xMin && xMin <= clipper.aabb.xMax && yMax >= clipper.aabb.yMin && yMin <= clipper.aabb.yMax;
 
                     layoutResult.isCulled = !overlappingOrContains;
                     clipInfo.isCulled = !overlappingOrContains;

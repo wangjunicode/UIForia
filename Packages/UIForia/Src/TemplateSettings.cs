@@ -4,7 +4,6 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UIForia.Elements;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace UIForia {
@@ -34,7 +33,7 @@ namespace UIForia {
         
         // todo -- remove this dirty hack!
         static TemplateSettings() {
-            s_InternalNonStreamingPath = Path.Combine(PackageInfo.FindForAssembly(Assembly.GetAssembly(typeof(UIElement))).resolvedPath, "Src");
+            s_InternalNonStreamingPath = null; //Path.Combine(PackageInfo.FindForAssembly(Assembly.GetAssembly(typeof(UIElement))).resolvedPath, "Src");
         }
 
         private static readonly string s_InternalNonStreamingPath;

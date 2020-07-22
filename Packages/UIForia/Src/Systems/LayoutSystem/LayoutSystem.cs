@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UIForia.Elements;
+using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.ListTypes;
@@ -10,6 +11,7 @@ using UIForia.Text;
 using UIForia.UIInput;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -60,7 +62,7 @@ namespace UIForia.Systems {
         internal List_GridTrack.Shared gridColTrackBuffer;
         internal List_GridTrack.Shared gridRowTrackBuffer;
         internal DataList<ElementId> gridPlaceList;
-        internal DataList<OverflowBounds>.Shared clipperBoundsList;
+        internal DataList<AxisAlignedBounds2D>.Shared clipperBoundsList;
 
         public struct LayoutDataTables {
 
@@ -80,8 +82,8 @@ namespace UIForia.Systems {
             this.clippers = new DataList<Clipper>.Shared(16, Allocator.Persistent);
             this.clipperIntersections = new DataList<float2>.Shared(128, Allocator.Persistent);
             this.queryBuffer = new DataList<QueryResult>.Shared(16, Allocator.Persistent);
-            this.clipperBoundsList = new DataList<OverflowBounds>.Shared(16, Allocator.Persistent);
-            
+            this.clipperBoundsList = new DataList<AxisAlignedBounds2D>.Shared(16, Allocator.Persistent);
+
             *tablePointers = default;
             ResizeBackingStore(application.InitialElementCapacity);
             worldMatrices.array[0] = float4x4.identity;
@@ -552,7 +554,6 @@ namespace UIForia.Systems {
         }
 
         public void RunLayout() {
-
             // cannot be parallel atm. can be a job though
             for (int i = 0; i < gridPlaceList.size; i++) {
                 layoutBoxTable[gridPlaceList[i]].grid.RunPlacement(this);
@@ -583,14 +584,14 @@ namespace UIForia.Systems {
 
             // never
             clippers.Add(new Clipper() {
-                aabb = new float4(0, 0, 99999, 99999),
+                aabb = new AxisAlignedBounds2D(float.MinValue, float.MinValue, float.MaxValue, float.MaxValue),
                 intersectionRange = new RangeInt(0, 4)
             });
 
             // screen
             clippers.Add(new Clipper() {
                 // todo -- maybe not the right value since unity likes to change the screen size randomly with focus 
-                aabb = new float4(0, 0, Screen.width, Screen.height),
+                aabb = new AxisAlignedBounds2D(0, 0, Screen.width, Screen.height),
                 parentIndex = 0,
                 intersectionRange = new RangeInt(4, 4),
                 isCulled = false
@@ -613,7 +614,7 @@ namespace UIForia.Systems {
                 layoutHierarchyTable = layoutHierarchyTable,
                 viewRootIds = application.viewRootIds
             }.Schedule();
-
+            
             for (int i = 0; i < layoutContexts.size; i++) {
 
                 ref LayoutContext layoutContext = ref layoutContexts.array[i];
@@ -648,7 +649,7 @@ namespace UIForia.Systems {
                 layoutContext.runner->verticalLayoutInfoTable = verticalLayoutInfoTable.array;
                 layoutContext.runner->emTable = elementSystem.emTable.array;
                 layoutContext.runner->fontAssetMap = application.ResourceManager.fontAssetMap.GetArrayPointer();
-                
+
                 // dont expect lots and lots of text updates per frame, a few dozen at most
                 // still nice to be parallel
                 // something needs to own the text data then
@@ -669,11 +670,11 @@ namespace UIForia.Systems {
                 textSystem.GetTextChangesForView(viewRootId, layoutContext.textChangeBuffer);
 
                 JobHandle textTransformUpdates = new TextSystem.UpdateTextTransformJob() {
-                    changedElementIds = layoutContext.textChangeBuffer,
-                    textInfoMap = textSystem.textInfoMap
+                   changedElementIds = layoutContext.textChangeBuffer,
+                   textInfoMap = textSystem.textInfoMap
                 }.Schedule();
 
-                JobHandle textLayoutUpdates = VertigoScheduler.Await(emTableHandle, textTransformUpdates).ThenParallel(new UpdateTextLayoutJob() {
+                JobHandle textLayoutUpdates = UIForiaScheduler.Await(emTableHandle, textTransformUpdates).ThenParallel(new UpdateTextLayoutJob() {
                     viewportWidth = viewParameters.viewWidth,
                     viewportHeight = viewParameters.viewHeight,
                     parallel = new ParallelParams(layoutContext.textChangeBuffer.size, 10),
@@ -682,7 +683,7 @@ namespace UIForia.Systems {
                     fontAssetMap = application.ResourceManager.fontAssetMap,
                     textInfoMap = textSystem.textInfoMap
                 });
-
+                
                 JobHandle flatten = new FlattenLayoutTree() {
                     viewRootId = viewRootId,
                     elementList = layoutContext.elementList,
@@ -692,9 +693,9 @@ namespace UIForia.Systems {
                     layoutHierarchyTable = layoutHierarchyTable,
                     viewActiveElementCount = activeElementCount
                 }.Schedule();
-
+                
                 // parallel for large views
-                JobHandle updatePaddingMarginBorder = VertigoScheduler.Await(emTableHandle, flatten).ThenParallel(new UpdatePaddingBorderMargin() {
+                JobHandle updatePaddingMarginBorder = UIForiaScheduler.Await(emTableHandle, flatten).ThenParallel(new UpdatePaddingBorderMargin() {
                     parallel = new ParallelParams(activeElementCount, 250),
                     elementList = layoutContext.elementList,
                     emTable = elementSystem.emTable,
@@ -704,16 +705,16 @@ namespace UIForia.Systems {
                     layoutResultTable = layoutResultTable,
                     viewParameters = viewParameters
                 });
-
+                
                 // possible to be parallel for big tree with ignored, fixed, and no fit
-                JobHandle horizontalLayout = VertigoScheduler.Await(textLayoutUpdates, updatePaddingMarginBorder).Then(new RunLayoutHorizontal() {
+                JobHandle horizontalLayout = UIForiaScheduler.Await(textLayoutUpdates, updatePaddingMarginBorder).Then(new RunLayoutHorizontal() {
                     runner = layoutContext.runner,
                     elementList = layoutContext.elementList,
                     layoutBoxTable = layoutBoxTable
                 });
-
+                
                 // parallel for big list
-                JobHandle horizontalAlignment = VertigoScheduler.Await(horizontalLayout).ThenParallel(new ApplyHorizontalAlignments() {
+                JobHandle horizontalAlignment = UIForiaScheduler.Await(horizontalLayout).ThenParallel(new ApplyHorizontalAlignments() {
                     parallel = new ParallelParams(activeElementCount, 250),
                     alignmentTable = alignmentInfoHorizontal,
                     elementList = layoutContext.elementList,
@@ -722,16 +723,16 @@ namespace UIForia.Systems {
                     viewRootId = viewRootId,
                     layoutBoxInfoTable = layoutResultTable
                 });
-
+                
                 // possible to be parallel for big tree with ignored, fixed, and no fit
-                JobHandle verticalLayout = VertigoScheduler.Await(horizontalLayout).Then(new RunLayoutVertical() {
+                JobHandle verticalLayout = UIForiaScheduler.Await(horizontalLayout).Then(new RunLayoutVertical() {
                     runner = layoutContext.runner,
                     elementList = layoutContext.elementList,
                     layoutBoxTable = layoutBoxTable
                 });
-
+                
                 // parallel for big list
-                JobHandle verticalAlignment = VertigoScheduler.Await(verticalLayout).ThenParallel(new ApplyVerticalAlignments() {
+                JobHandle verticalAlignment = UIForiaScheduler.Await(verticalLayout).ThenParallel(new ApplyVerticalAlignments() {
                     parallel = new ParallelParams(activeElementCount, 250),
                     alignmentTable = alignmentInfoVertical,
                     elementList = layoutContext.elementList,
@@ -741,9 +742,9 @@ namespace UIForia.Systems {
                     layoutBoxInfoTable = layoutResultTable
                 });
                 verticalAlignHandles[i] = verticalAlignment;
-
+                
                 // parallel if big list element count, single if small, order doesnt matter
-                JobHandle buildLocalMatrices = VertigoScheduler.Await(horizontalAlignment, verticalAlignment).ThenParallel(new BuildLocalMatrices() {
+                JobHandle buildLocalMatrices = UIForiaScheduler.Await(horizontalAlignment, verticalAlignment).ThenParallel(new BuildLocalMatrices() {
                     parallel = new ParallelParams(activeElementCount, 250),
                     elementList = layoutContext.elementList,
                     localMatrices = localMatrices,
@@ -752,40 +753,40 @@ namespace UIForia.Systems {
                     transformInfoTable = transformInfoTable,
                     layoutBoxInfoTable = layoutResultTable
                 });
-
-                JobHandle buildWorldMatrices = VertigoScheduler.Await(buildLocalMatrices).Then(new BuildWorldMatrices() {
+                
+                JobHandle buildWorldMatrices = UIForiaScheduler.Await(buildLocalMatrices).Then(new BuildWorldMatrices() {
                     elementList = layoutContext.elementList,
                     localMatrices = localMatrices,
                     parentList = layoutContext.parentList,
                     worldMatrices = worldMatrices
                 });
-
-                layoutHandles[i] = VertigoScheduler.Await(buildWorldMatrices).ThenParallel(new ComputeOrientedBounds() {
+                
+                layoutHandles[i] = UIForiaScheduler.Await(buildWorldMatrices).ThenParallel(new ComputeOrientedBounds() {
                     parallel = new ParallelParams(activeElementCount, 250),
                     elementList = layoutContext.elementList,
                     worldMatrices = worldMatrices,
                     clipInfoTable = clipInfoTable,
                     layoutResultTable = layoutResultTable
                 });
-
+          
                 JobHandle.ScheduleBatchedJobs();
             }
-
+          
             JobHandle layoutCompleted = JobHandle.CombineDependencies(layoutHandles);
             // todo -- this can be parallel if we find the view indices and then count how many were added per view to get the ranges
             // todo -- can start this while we compute local matrices if this job re-computes local and world matrices, big savings!
-            JobHandle updateClippers = VertigoScheduler.Await(constructClippers, layoutCompleted, JobHandle.CombineDependencies(verticalAlignHandles)).Then(new UpdateClippers() {
+            JobHandle updateClippers = UIForiaScheduler.Await(constructClippers, layoutCompleted, JobHandle.CombineDependencies(verticalAlignHandles)).Then(new UpdateClippers() {
                 clipperList = clippers,
                 intersectionResults = clipperIntersections,
                 clipInfoTable = clipInfoTable,
                 clipperBoundsList = clipperBoundsList,
                 layoutResultTable = layoutResultTable
             });
-
+            
             NativeArray<JobHandle> cullingHandles = new NativeArray<JobHandle>(layoutContexts.size, Allocator.Temp);
-
+            
             for (int i = 0; i < layoutContexts.size; i++) {
-                cullingHandles[i] = VertigoScheduler.Await(updateClippers, layoutCompleted).ThenParallel(new ComputeElementCulling() {
+                cullingHandles[i] = UIForiaScheduler.Await(updateClippers, layoutCompleted).ThenParallel(new ComputeElementCulling() {
                     parallel = new ParallelParams(layoutContexts[i].ActiveElementCount, 250),
                     clipperList = clippers,
                     layoutResultTable = layoutResultTable,
@@ -793,10 +794,10 @@ namespace UIForia.Systems {
                     clipInfoTable = clipInfoTable
                 });
             }
-
+            
             JobHandle.CompleteAll(cullingHandles);
-
-            cullingHandles.Dispose();
+          
+           cullingHandles.Dispose();
             layoutHandles.Dispose();
             verticalAlignHandles.Dispose();
         }
@@ -907,6 +908,7 @@ namespace UIForia.Systems {
 
         }
 
+        [BurstCompile]
         internal struct QueryPointJob : IJob {
 
             public float2 point;

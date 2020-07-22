@@ -405,7 +405,7 @@ namespace UIForia.Elements {
 
             public Path2D path = new Path2D();
 
-            public override void PaintBackground(RenderContext ctx) {
+            public  void PaintBackground(RenderContext ctx) {
                 base.PaintBackground(ctx);
 
                 UIInputElement inputElement = (UIInputElement) element;

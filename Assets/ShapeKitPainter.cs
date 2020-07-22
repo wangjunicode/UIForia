@@ -37,7 +37,7 @@ namespace DefaultNamespace {
             vh.Dispose(); // todo -- this probably leaks right now
         }
 
-        public override void PaintBackground(RenderContext ctx) {
+        public void PaintBackground(RenderContext ctx) {
             float width = element.layoutResult.actualSize.width;
             float height = element.layoutResult.actualSize.height;
             Rect pixelRect = new Rect(0, 0, width, height);
@@ -649,10 +649,12 @@ namespace DefaultNamespace {
         }
 
         public float SliderGUI(string label, float value, float min, float max) {
+            #if UNITY_EDITOR
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(label);
             value = EditorGUILayout.Slider(value, min, max);
             EditorGUILayout.EndHorizontal();
+            #endif
             return value;
         }
 

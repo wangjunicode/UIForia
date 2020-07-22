@@ -36,6 +36,20 @@ namespace UIForia {
 
     }
 
+    internal struct GPUGlyphInfo {
+
+        public float atlasX;
+        public float atlasY;
+        public float atlasWidth;
+        public float atlasHeight;
+
+        public float xOffset;
+        public float yOffset;
+        public float width;
+        public float height;
+
+    }
+    
     public sealed class ResourceManager : IDisposable {
 
         internal struct AssetEntry<T> where T : Object {
@@ -45,13 +59,18 @@ namespace UIForia {
 
         }
 
+
+        public event Action<FontAsset> onFontAdded;
+
         internal readonly IntMap_Deprecated<AssetEntry<Texture2D>> textureMap;
         internal readonly IntMap_Deprecated<AssetEntry<SpriteAtlas>> spriteAtlasMap;
         internal readonly Dictionary<string, FontAsset> fontMap;
         internal readonly IntMap_Deprecated<AssetEntry<AudioClip>> audioMap;
         internal readonly Dictionary<string, StylePainterDefinition> stylePainters;
         internal readonly LightList<Texture> fontTextures;
-
+        internal DataList<GPUGlyphInfo> renderedCharacterInfoList;
+        internal DataList<GPUFontInfo> gpuFontInfoList;
+        
         internal MaterialDatabase2 materialDatabase;
         internal DataList<FontAssetInfo>.Shared fontAssetMap;
 
@@ -65,6 +84,9 @@ namespace UIForia {
             audioMap = new IntMap_Deprecated<AssetEntry<AudioClip>>();
             materialDatabase = new MaterialDatabase2();
             fontTextures = new LightList<Texture>();
+            gpuFontInfoList = new DataList<GPUFontInfo>(8, Allocator.Persistent);
+            renderedCharacterInfoList = new DataList<GPUGlyphInfo>(1024, Allocator.Persistent);
+            renderedCharacterInfoList.size = 1; // 0 is invalid
         }
 
         public void Reset() {
@@ -74,6 +96,9 @@ namespace UIForia {
             fontMap.Clear();
             audioMap.Clear();
             stylePainters.Clear();
+            renderedCharacterInfoList.size = 1; // 0 is invalid
+            gpuFontInfoList.size = 0;
+            onFontAdded = null;
             Initialize();
         }
 
@@ -93,15 +118,57 @@ namespace UIForia {
             return GetResource(path, textureMap);
         }
 
+        internal void GatherGPUFontInfo(FontAsset fontAsset) {
+            
+            GPUFontInfo fontInfo = new GPUFontInfo();
+            fontInfo.normalStyle = fontAsset.normalStyle;
+            fontInfo.gradientScale = fontAsset.gradientScale;
+            fontInfo.padding = fontAsset.faceInfo.padding;
+            fontInfo.scale = fontAsset.faceInfo.scale;
+            fontInfo.boldStyle = fontAsset.boldStyle;
+            fontInfo.italicStyle = fontAsset.italicStyle;
+            fontInfo.weightNormal = fontAsset.weightNormal;
+            fontInfo.weightBold = fontAsset.weightBold;
+            fontInfo.pointSize = fontAsset.faceInfo.pointSize;
+            
+            // todo -- I need to update this if I atlas fonts together
+            fontInfo.atlasWidth = fontAsset.atlas.width;
+            fontInfo.atlasHeight = fontAsset.atlas.height;
+            
+            gpuFontInfoList.Add(fontInfo);
+            
+            int offset = renderedCharacterInfoList.size;
+            
+            for (int i = 0; i < fontAsset.textGlyphList.Length; i++) {
+                ref UIForiaGlyph glyph = ref fontAsset.textGlyphList[i];
+                if (glyph.uvWidth > 0 && glyph.uvHeight > 0) {
+                    glyph.renderBufferIndex = offset++;
+                    renderedCharacterInfoList.Add(new GPUGlyphInfo() {
+                        width = glyph.width,
+                        height = glyph.height,
+                        xOffset = glyph.xOffset,
+                        yOffset = glyph.yOffset,
+                        atlasX = glyph.uvX,
+                        atlasY = glyph.uvY,
+                        atlasWidth = glyph.uvWidth,
+                        atlasHeight = glyph.uvHeight
+                    });
+                }
+                else {
+                    glyph.renderBufferIndex = 0;
+                }
+            }
+        }
+
         internal void Initialize() {
             fontAssetMap = new DataList<FontAssetInfo>.Shared(16, Allocator.Persistent);
             FontAsset font = FontAsset.defaultFontAsset;
             font.id = 0;
-            font.OnEnable();
+            font.Initialize(this);
             fontAssetMap.Add(font.GetFontInfo());
             fontTextures.Add(font.atlas);
             fontMap.Add(font.name, font);
-            
+            onFontAdded?.Invoke(font);
             StructList<MaterialPropertyDefinition> properties = StructList<MaterialPropertyDefinition>.Get();
 
             // todo -- having built in stuff in resources sucks, move them
@@ -146,8 +213,11 @@ namespace UIForia {
                 fontMap.Add(path, null);
                 return null;
             }
+            
+            onFontAdded?.Invoke(retn);
 
             retn.id = fontAssetMap.size;
+            retn.Initialize(this);
             fontAssetMap.Add(retn.GetFontInfo());
             fontTextures.Add(retn.atlas);
             fontMap.Add(path, retn);
@@ -306,10 +376,11 @@ namespace UIForia {
                     default:
                         throw new ArgumentOutOfRangeException(nameof(type), type, null);
                 }
-#endif
             }
+#endif
 
-            throw new NotImplementedException("Todo -- read material property data from pre-compiled code");
+            return false;
+            //throw new NotImplementedException("Todo -- read material property data from pre-compiled code");
         }
 
         internal void GetFontTextures(Dictionary<int, Texture> dictionary) {

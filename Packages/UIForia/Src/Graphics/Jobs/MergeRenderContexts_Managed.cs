@@ -10,7 +10,6 @@ namespace UIForia.Systems {
 
         public DataList<DrawInfo>.Shared drawList;
         public GCHandleList<Mesh> meshListHandle;
-        public DataList<MaskInfo>.Shared maskList;
         public PerThreadObjectPool<RenderContext2> contextPoolHandle;
 
         public void Execute() {
@@ -22,7 +21,6 @@ namespace UIForia.Systems {
             
             int drawListSize = 0;
             int meshListSize = 0;
-            int maskListSize = 0;
             
             for (int i = 0; i < pool.perThreadData.Length; i++) {
                 RenderContext2 renderContext = pool.perThreadData[i];
@@ -33,13 +31,11 @@ namespace UIForia.Systems {
 
                 drawListSize += renderContext.drawList.size;
                 meshListSize += renderContext.meshList.size;
-                maskListSize += renderContext.maskInfoList.size;
                 
             }
 
             drawList.EnsureCapacity(drawListSize);
             meshList.EnsureCapacity(meshListSize);
-            maskList.EnsureCapacity(maskListSize);
 
             for (int i = 0; i < pool.perThreadData.Length; i++) {
                 RenderContext2 renderContext = pool.perThreadData[i];
@@ -50,7 +46,6 @@ namespace UIForia.Systems {
 
                 drawList.AddRange(renderContext.drawList.array, renderContext.drawList.size);
                 meshList.AddRange(renderContext.meshList);
-                maskList.AddRange(renderContext.maskInfoList.GetArrayPointer(), renderContext.maskInfoList.size);
 
             }
             

@@ -15,7 +15,7 @@ namespace UIForia.Graphics {
 
     public enum RenderCommandType {
 
-        ShapeBatch,
+        ElementBatch,
         ShapeEffectBatch,
         Mesh,
         MeshBatch,
@@ -25,7 +25,19 @@ namespace UIForia.Graphics {
         CreateRenderTarget,
         PushRenderTexture,
         ClearRenderTarget,
-        MaskAtlasBatch
+        MaskAtlasBatch,
+
+        UpdateClipRectBuffer,
+
+        SetClipRectBuffer,
+
+        Callback,
+
+        SetTextDataBuffer,
+
+        SetShapeDatabuffer,
+
+        SetGradientDataBuffer
 
     }
 
@@ -54,7 +66,7 @@ namespace UIForia.Graphics {
 
         None,
         Text,
-        Shape,
+        Element,
         Mesh,
         TextEffect,
         ShapeEffect,
@@ -63,20 +75,16 @@ namespace UIForia.Graphics {
 
     }
 
-    internal struct StencilInfo {
+    public enum StencilSetupState {
 
-        public int drawInfoIndex;
-        public int popIndex;
-        public int clipperDepth;
-        public int stencilDepth;
-        public int parentIndex;
-        public bool isOpen;
-        public bool isClosed;
-        public bool isPopped;
-        public AxisAlignedBounds2D aabb;
-        public int textureId;
+        Uninitialized,
+        Pushed,
+        Closed,
+        Popped
 
     }
+    
+
 
     [BurstCompile]
     internal unsafe struct TransparentRenderPassJob : IJob {
@@ -160,7 +168,7 @@ namespace UIForia.Graphics {
                     case DrawType.PushClipRect:
                         break;
 
-                    case DrawType.PushClipShape:
+                    case DrawType.PushStencilClip:
                         // if is clip rect -> aabb only 
                         // else use geometry / texture 
                         stencilList.Add(new StencilInfo() {
@@ -168,18 +176,14 @@ namespace UIForia.Graphics {
                             clipperDepth = 0,
                         });
                         break;
+                    
 
-                    case DrawType.SetRenderTarget:
-                        break;
-
-                    case DrawType.PopClipShape:
-                        break;
+         
                 }
 
-                if ((drawInfo.type & DrawType.PushClipShape) != 0) {
+                if ((drawInfo.type & DrawType.PushStencilClip) != 0) {
                     clipperStack.Add(stencilList.size);
                 }
-                else if ((drawInfo.type & DrawType.PopClipShape) != 0) { }
                 else if ((drawInfo.type & DrawType.Shape) != 0) { }
 
                 // if totally outside clipper, remove it
@@ -210,7 +214,7 @@ namespace UIForia.Graphics {
                 ref DrawInfoRef drawInfoRef = ref refList[ptr];
                 ref DrawInfo drawInfo = ref drawList[drawInfoRef.drawIndex];
 
-                if ((drawInfo.type & DrawType.PushClipShape) != 0) {
+                if ((drawInfo.type & DrawType.PushStencilClip) != 0) {
                     switch (currentBatchType) {
                         default:
                         case BatchType.None:
@@ -219,7 +223,7 @@ namespace UIForia.Graphics {
                         case BatchType.Text:
                             break;
 
-                        case BatchType.Shape:
+                        case BatchType.Element:
                             EndShapeBatch();
                             // scan through the unrendered list
                             // any shape that would be batch compatible 
@@ -243,15 +247,15 @@ namespace UIForia.Graphics {
                     switch (currentBatchType) {
                         default:
                         case BatchType.None:
-                            BeginBatch(BatchType.Shape, ptr, ref drawInfo);
+                            BeginBatch(BatchType.Element, ptr, ref drawInfo);
                             break;
 
                         case BatchType.Text:
                             break;
 
-                        case BatchType.Shape:
+                        case BatchType.Element:
                             if (!CanBatchShape(drawInfo)) {
-                                BeginBatch(BatchType.Shape, ptr, ref drawInfo);
+                                BeginBatch(BatchType.Element, ptr, ref drawInfo);
                             }
                             else {
                                 memberBuffer.Add(drawInfoRef.drawIndex);
@@ -301,13 +305,13 @@ namespace UIForia.Graphics {
                     // ill need to init the stencil for the batch somewhere, somehow
                     // also not sure how to handle displaying mask, todo for later
 
-                    for (int d = currentStencil.drawInfoIndex; d < currentStencil.popIndex; d++) {
+                    for (int d = currentStencil.pushIndex; d < currentStencil.popIndex; d++) {
 
                         ref DrawInfo drawInfo = ref drawInfoArray[d];
 
-                        if ((drawInfo.type & DrawType.PushClipShape) != 0) {
+                        if ((drawInfo.type & DrawType.PushStencilClip) != 0) {
 
-                            if (d == currentStencil.drawInfoIndex) {
+                            if (d == currentStencil.pushIndex) {
                                 continue; // todo -- handle showing mask graphic
                             }
 
@@ -321,10 +325,7 @@ namespace UIForia.Graphics {
                             continue;
                         }
 
-                        if ((drawInfo.type & DrawType.PopClipShape) != 0) {
-                            continue; // should never hit this i think
-                        }
-
+            
                         // otherwise its a shape that we want to render. We know it hasn't been rendered yet
 
                         drawInfoIndices.Add(d);
@@ -374,12 +375,12 @@ namespace UIForia.Graphics {
                 int drawIdx = indices.array[i];
                 ref DrawInfo drawInfo = ref drawInfoArray[drawIdx];
 
-                if ((drawInfo.flags & DrawInfoFlags.InitialBatchSet) != 0) {
+                if ((drawInfo.flags & DrawInfoFlags.BatchSet) != 0) {
                     continue;
                 }
 
                 // for now dont draw mask
-                if ((drawInfo.type & DrawType.PushClipShape) != 0) {
+                if ((drawInfo.type & DrawType.PushStencilClip) != 0) {
                     continue;
                 }
 
@@ -388,14 +389,14 @@ namespace UIForia.Graphics {
                     switch (currentBatchType) {
                         default:
                         case BatchType.None:
-                            BeginBatch(BatchType.Shape, drawIdx, ref drawInfo);
+                            BeginBatch(BatchType.Element, drawIdx, ref drawInfo);
                             break;
 
-                        case BatchType.Shape when !CanBatchShape(drawInfo):
-                            BeginBatch(BatchType.Shape, drawIdx, ref drawInfo);
+                        case BatchType.Element when !CanBatchShape(drawInfo):
+                            BeginBatch(BatchType.Element, drawIdx, ref drawInfo);
                             continue;
 
-                        case BatchType.Shape:
+                        case BatchType.Element:
                             memberBuffer.Add(drawIdx);
                             break;
                     }
@@ -410,7 +411,7 @@ namespace UIForia.Graphics {
 
         private static int FindStencilIndexForDrawInfo(in DataList<StencilInfo> stencilList, int start, int targetDrawInfoIndex) {
             for (int i = start; i < stencilList.size; i++) {
-                if (stencilList[i].drawInfoIndex == targetDrawInfoIndex) {
+                if (stencilList[i].pushIndex == targetDrawInfoIndex) {
                     return i;
                 }
             }
@@ -466,29 +467,29 @@ namespace UIForia.Graphics {
                 clipperDepth = 0,
                 parentIndex = -1,
                 popIndex = drawList.size,
-                drawInfoIndex = 0
+                pushIndex = 0
             });
 
             for (int i = 0; i < size; i++) {
 
                 ref DrawInfo drawInfo = ref drawInfoArray[i];
 
-                if ((drawInfo.type & DrawType.PushClipShape) != 0) {
+                if ((drawInfo.type & DrawType.PushStencilClip) != 0) {
                     stencilList.Add(new StencilInfo() {
                         aabb = drawInfo.geometryInfo->bounds,
                         clipperDepth = stencilStack.size,
                         parentIndex = stencilStack[stencilStack.size - 1],
                         popIndex = -1,
-                        drawInfoIndex = i
+                        pushIndex = i
                     });
                     stencilStack.Add(stencilList.size - 1);
                 }
-                else if ((drawInfo.type & DrawType.PopClipShape) != 0) {
-                    int lastIdx = stencilStack.GetLast();
-                    ref StencilInfo stencil = ref stencilList[lastIdx];
-                    stencil.popIndex = i;
-                    stencilStack.size--;
-                }
+                // else if ((drawInfo.type & DrawType.PopClipShape) != 0) {
+                //     int lastIdx = stencilStack.GetLast();
+                //     ref StencilInfo stencil = ref stencilList[lastIdx];
+                //     stencil.popIndex = i;
+                //     stencilStack.size--;
+                // }
 
             }
 
@@ -504,8 +505,7 @@ namespace UIForia.Graphics {
         // if not using texture stencil and I can verify that a shape is 100% contained by its stencil, it can be added to a different stencil group too
 
         public void Execute() {
-            Execute2();
-            return;
+
             int size = drawList.size;
             overflowBounds = new PointerList<OverflowBounds>(8, Allocator.Temp);
             memberBuffer = new List_Int32(32, Allocator.Temp);
@@ -515,7 +515,7 @@ namespace UIForia.Graphics {
 
                 ref DrawInfo drawInfo = ref drawInfoArray[i];
 
-                if ((drawInfo.flags & (DrawInfoFlags.InitialBatchSet | DrawInfoFlags.FinalBatchSet)) != 0) {
+                if ((drawInfo.flags & (DrawInfoFlags.BatchSet | DrawInfoFlags.FinalBatchSet)) != 0) {
                     continue;
                 }
 
@@ -542,13 +542,13 @@ namespace UIForia.Graphics {
                 else if ((drawInfo.type & DrawType.Shape) != 0) {
 
                     if (currentBatchType == BatchType.None) {
-                        BeginBatch(BatchType.Shape, i, ref drawInfo);
+                        BeginBatch(BatchType.Element, i, ref drawInfo);
                     }
-                    else if (currentBatchType == BatchType.Shape) {
+                    else if (currentBatchType == BatchType.Element) {
 
                         if (!CanBatchShape(drawInfo)) {
                             EndBatch();
-                            BeginBatch(BatchType.Shape, i, ref drawInfo);
+                            BeginBatch(BatchType.Element, i, ref drawInfo);
                             continue;
                         }
 
@@ -557,7 +557,7 @@ namespace UIForia.Graphics {
                     }
                     else {
                         EndBatch();
-                        BeginBatch(BatchType.Shape, i, ref drawInfo);
+                        BeginBatch(BatchType.Element, i, ref drawInfo);
                     }
 
                 }
@@ -590,20 +590,17 @@ namespace UIForia.Graphics {
 
                 ref DrawInfo drawInfo = ref drawList[i];
 
-                if ((drawInfo.flags & (DrawInfoFlags.InitialBatchSet | DrawInfoFlags.FinalBatchSet)) != 0) {
+                if ((drawInfo.flags & (DrawInfoFlags.BatchSet | DrawInfoFlags.FinalBatchSet)) != 0) {
                     continue;
                 }
 
-                if ((drawInfo.type & DrawType.StateChange) != 0) {
-                    break;
-                }
-
+              
                 if (!IsKnownMaterial(drawInfo.materialId)) {
                     break;
                 }
 
                 if (CanBatchSDFText(drawInfo) && IntersectionTest(drawInfo, lastInBatch + 1, i)) {
-                    drawInfo.flags |= DrawInfoFlags.InitialBatchSet;
+                    drawInfo.flags |= DrawInfoFlags.BatchSet;
                     memberBuffer.Add(i);
                 }
 
@@ -630,7 +627,7 @@ namespace UIForia.Graphics {
                 }
 
                 if (CanBatchShape(drawInfo) && IntersectionTest(drawInfo, lastInBatch + 1, i)) {
-                    drawInfo.flags |= DrawInfoFlags.InitialBatchSet;
+                    drawInfo.flags |= DrawInfoFlags.BatchSet;
                     memberBuffer.Add(i);
                 }
 
@@ -645,7 +642,7 @@ namespace UIForia.Graphics {
                     EndTextBatch();
                     break;
 
-                case BatchType.Shape: {
+                case BatchType.Element: {
                     EndShapeBatch();
                     break;
                 }
@@ -981,7 +978,7 @@ namespace UIForia.Graphics {
                     //     }
                     //     else if (boundsIndex == -1) {
                     //         continue;
-                    //     }
+                    //     }  
                     //
                     // }
 
@@ -1004,7 +1001,7 @@ namespace UIForia.Graphics {
 
             batchList.Add(new Batch() {
                 vertexLayout = vertexLayout,
-                batchType = BatchType.Text, // todo -- or text effect!
+                // batchType = BatchType.Text, // todo -- or text effect!
                 memberIdRange = currentBatchRange,
                 materialId = new MaterialId(activeMaterialId),
                 propertyOverrides = materialOverrides,
@@ -1024,13 +1021,13 @@ namespace UIForia.Graphics {
         private void EndShapeBatchSection(VertexLayout vertexLayout, RangeInt currentBatchRange) {
 
             renderCommands.Add(new RenderCommand() {
-                type = RenderCommandType.ShapeBatch,
+                type = RenderCommandType.ElementBatch,
                 batchIndex = batchList.size
             });
 
             batchList.Add(new Batch() {
                 vertexLayout = vertexLayout,
-                batchType = BatchType.Shape,
+                // batchType = BatchType.Shape,
                 memberIdRange = currentBatchRange,
                 materialId = new MaterialId(activeMaterialId),
                 propertyOverrides = materialOverrides,
@@ -1062,7 +1059,7 @@ namespace UIForia.Graphics {
             for (int i = orderedBatchEndIndex + 1; i < testIndex; i++) {
                 ref DrawInfo test = ref drawList[drawInfoIndices[i]];
 
-                if ((test.flags & DrawInfoFlags.InitialBatchSet) != 0 || (test.type & DrawType.Shape) == 0) {
+                if ((test.flags & DrawInfoFlags.BatchSet) != 0 || (test.type & DrawType.Shape) == 0) {
                     continue;
                 }
 

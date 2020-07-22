@@ -15,7 +15,7 @@ namespace UIForia.Systems {
         public DataList<RenderCallInfo>.Shared renderCallList;
         public ElementTable<float4x4> matrices;
         public ElementTable<ClipInfo> clipInfoTable;
-        public DataList<OverflowBounds>.Shared clipperBoundsList;
+        public DataList<AxisAlignedBounds2D>.Shared clipperBoundsList;
 
         [NativeSetThreadIndex] public int threadIndex;
 
@@ -44,24 +44,18 @@ namespace UIForia.Systems {
 
                 MaterialId materialId = box.materialId;
 
-                OverflowBounds* overflowBounds = default;
-                int clipperIndex = clipInfoTable[elementId].clipperIndex;
-
-                if (clipperIndex >= 2) {
-                    overflowBounds = clipperBoundsList.GetArrayPointer() + clipperIndex;
-                }
-
                 int drawIdx = ctx.drawList.size;
+                
                 if (renderCallList[i].renderOp == 0) {
                     // todo -- if clipper via styles, set that up here
-                    ctx.Setup(materialId, overflowBounds, i, matrices.array + elementId.index);
+                    ctx.Setup(materialId, i, matrices.array + elementId.index);
                     box.PaintBackground2(ctx);
                     box.bgRenderContext = ctx;
                     box.bgRenderRange = new RangeInt(drawIdx, ctx.drawList.size);
                 }
                 else {
                     // todo -- if clipper via styles, tear it down here
-                    ctx.Setup(materialId, overflowBounds, i, matrices.array + elementId.index);
+                    ctx.Setup(materialId, i, matrices.array + elementId.index);
                     box.PaintForeground2(ctx);
                     box.fgRenderContext = ctx;
                     box.fgRenderRange = new RangeInt(drawIdx, ctx.drawList.size);

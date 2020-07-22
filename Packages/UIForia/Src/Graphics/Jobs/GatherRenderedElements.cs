@@ -16,7 +16,6 @@ namespace UIForia.Systems {
     public unsafe struct GatherRenderedElements : IJob {
 
         public DataList<ElementList> elementLists;
-        public DataList<EffectUsage>.Shared effectUsages;
         public ElementTable<ElementTraversalInfo> traversalTable;
         public ElementTable<ClipInfo> clipInfoTable;
         public ElementTable<RenderInfo> renderInfoTable;
@@ -50,13 +49,6 @@ namespace UIForia.Systems {
                         renderOp = 0
                     });
 
-                    if (renderInfo.hasBackgroundEffect) {
-                        effectUsages.Add(new EffectUsage() {
-                            elementId = elementId,
-                            isForeground = false
-                        });
-                    }
-
                     if (renderInfo.drawForeground) {
                         renderCallList.Add(new RenderCallInfo() {
                             layer = renderInfo.layer,
@@ -66,12 +58,6 @@ namespace UIForia.Systems {
                             renderOp = 1
                         });
 
-                        if (renderInfo.hasForegroundEffect) {
-                            effectUsages.Add(new EffectUsage() {
-                                elementId = elementId,
-                                isForeground = false
-                            });
-                        }
                     }
 
                 }

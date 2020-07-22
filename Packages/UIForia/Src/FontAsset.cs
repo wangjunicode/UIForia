@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 using TMPro;
 using UIForia.Util;
@@ -49,6 +50,30 @@ namespace UIForia {
         public float yOffset;
         public float xAdvance;
         public float scale;
+        public int renderBufferIndex;
+
+    }
+
+    // todo -- pad properly
+    // note -- must match shader version 
+    [StructLayout(LayoutKind.Sequential)]
+    public struct GPUFontInfo {
+
+        public float gradientScale;
+        public float normalStyle;
+        public float boldStyle;
+        public float italicStyle;
+        
+        public float weightNormal;
+        public float weightBold;
+        public float pointSize;
+        public float scale;
+        
+        public float padding;
+        public float atlasWidth;
+        public float atlasHeight;
+        
+        public float __unused;
 
     }
 
@@ -69,6 +94,7 @@ namespace UIForia {
         public float normalSpacingOffset;
         public float weightNormal;
         public float weightBold;
+        public int id;
 
         public float GetKerning(int char0, int char1) {
             if (kerningMapState->TryGetValue(BitUtil.SetHighLowBits(char0, char1), out float value)) {
@@ -80,6 +106,16 @@ namespace UIForia {
 
         public bool TryGetGlyph(int charcode, out UIForiaGlyph glyph) {
             if (glyphMapState->TryGetValue(charcode, out glyph)) {
+                return true;
+            }
+
+            glyph = default;
+            return false;
+        }
+
+        public bool TryGetUnderlineGlyph(out UIForiaGlyph glyph) {
+            // 95 is the underline character code
+            if (glyphMapState->TryGetValue(95, out glyph)) {
                 return true;
             }
 
@@ -120,8 +156,9 @@ namespace UIForia {
         private static readonly int s_WeightNormal = Shader.PropertyToID("_WeightNormal");
         private static readonly int s_GradientScale = Shader.PropertyToID("_GradientScale");
 
-        public void ConvertFromTMP() {
-            atlas = (Texture2D)convertFrom.material.mainTexture;
+        internal void ConvertFromTMP() {
+            convertFrom.ReadFontAssetDefinition();
+            atlas = (Texture2D) convertFrom.material.mainTexture;
             boldSpacing = convertFrom.boldSpacing;
             boldStyle = convertFrom.boldStyle;
             weightBold = convertFrom.material.GetFloat(s_WeightBold);
@@ -131,7 +168,7 @@ namespace UIForia {
             gradientScale = convertFrom.material.GetFloat(s_GradientScale);
             italicStyle = convertFrom.italicStyle;
             tabSize = convertFrom.tabSize;
-            
+
             faceInfo = new FaceInfo() {
                 pointSize = convertFrom.faceInfo.pointSize,
                 lineHeight = convertFrom.faceInfo.lineHeight,
@@ -150,10 +187,13 @@ namespace UIForia {
                 centerLine = convertFrom.faceInfo.meanLine,
                 tabWidth = convertFrom.faceInfo.tabWidth
             };
+
             List<TMP_Character> table = convertFrom.characterTable;
             textGlyphList = new UIForiaGlyph[table.Count];
+
             for (int i = 0; i < table.Count; i++) {
                 TMP_Character g = table[i];
+
                 textGlyphList[i] = new UIForiaGlyph() {
                     codepoint = (int) g.unicode,
                     width = g.glyph.metrics.width,
@@ -168,17 +208,22 @@ namespace UIForia {
                     scale = 1,
                 };
             }
+
         }
-        
-        public void OnEnable() {
+
+        internal void Initialize(ResourceManager resourceManager) {
             if (convertFrom != null) {
                 ConvertFromTMP();
             }
+
+            resourceManager.GatherGPUFontInfo(this);
+
             BuildCharacterDictionary();
         }
 
         public unsafe FontAssetInfo GetFontInfo() {
             return new FontAssetInfo() {
+                id = id,
                 atlasTextureId = atlas.GetHashCode(),
                 glyphMapState = characterDictionary.GetState(),
                 kerningMapState = kerningDictionary.GetState(),

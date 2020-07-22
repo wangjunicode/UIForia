@@ -1,6 +1,7 @@
 ﻿using System;
 using UIForia.Elements;
 using UIForia.Rendering;
+using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Jobs;
@@ -28,13 +29,35 @@ namespace UIForia.Text {
         internal DataList<TextInfo>.Shared textInfoMap;
         internal DataList<TextChange>.Shared changedElementIds;
         internal DataList<TextLayoutSymbol>.Shared layoutBuffer;
+        internal LightList<TextEffect> textEffectTable;
+        internal StructList<int> textEffectFreeList;
 
         public TextSystem(ElementSystem elementSystem) {
             this.elementSystem = elementSystem;
             this.textInfoMap = new DataList<TextInfo>.Shared(128, Allocator.Persistent, NativeArrayOptions.ClearMemory);
             this.changedElementIds = new DataList<TextChange>.Shared(32, Allocator.Persistent);
             this.layoutBuffer = new DataList<TextLayoutSymbol>.Shared(128, Allocator.Persistent);
+            this.textEffectTable = new LightList<TextEffect>();
+            this.textEffectFreeList = new StructList<int>();
             textInfoMap.size++;
+        }
+
+        internal int RegisterTextEffect(TextEffect effect) {
+            if (textEffectFreeList.size > 0) {
+                int idx = textEffectFreeList.array[--textEffectTable.size];
+                textEffectTable[idx] = effect;
+                return idx;
+            }
+
+            textEffectTable.Add(effect);
+            return textEffectTable.size - 1;
+        }
+
+        internal void DeregisterTextEffect(int effectId) {
+            if (effectId > 0 && effectId < textEffectTable.size) {
+                textEffectTable[effectId] = null;
+                textEffectFreeList.Add(effectId);
+            }
         }
 
         public void HandleElementDisabled(DataList<ElementId>.Shared disabledElements) { }

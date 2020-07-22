@@ -304,36 +304,36 @@ namespace UIForia.Systems {
                 ref float4 uv0_br = ref texCoord0[vertexIndex + 2];
                 ref float4 uv0_bl = ref texCoord0[vertexIndex + 3];
 
-                float charX = wordInfo.x + (charInfo.topLeft.x - padding);
-                float charY = wordInfo.y + (charInfo.topLeft.y - padding);
+                float charX = wordInfo.x + (charInfo.position.x - padding);
+                float charY = wordInfo.y + (charInfo.position.y - padding);
 
-                float charWidth = (charInfo.bottomRight.x - charInfo.topLeft.x) + (padding * 2);
-                float charHeight = (charInfo.bottomRight.y - charInfo.topLeft.y) + (padding * 2);
-
-                p0.x = charX + (charInfo.shearTop);
-                p0.y = -charY;
-                p0.z = 0;
-
-                p1.x = charX + charWidth + (charInfo.shearTop);
-                p1.y = -charY;
-                p1.z = 0;
-
-                p2.x = charX + charWidth + (charInfo.shearBottom);
-                p2.y = -(charY + charHeight);
-                p2.z = 0;
-
-                p3.x = charX + (charInfo.shearBottom);
-                p3.y = -(charY + charHeight);
-                p3.z = 0;
-
-                uv0_tl.x = (charInfo.topLeftUv.x - padding) * widthMultiplier;
-                uv0_tl.y = (charInfo.bottomRightUv.y + padding) * heightMultiplier;
-                uv0_tr.x = (charInfo.bottomRightUv.x + padding) * widthMultiplier;
-                uv0_tr.y = uv0_tl.y;
-                uv0_br.x = uv0_tr.x;
-                uv0_br.y = (charInfo.topLeftUv.y - padding) * heightMultiplier;
-                uv0_bl.x = uv0_tl.x;
-                uv0_bl.y = uv0_br.y;
+                // float charWidth = (charInfo.bottomRight.x - charInfo.topLeft.x) + (padding * 2);
+                // float charHeight = (charInfo.bottomRight.y - charInfo.topLeft.y) + (padding * 2);
+                //
+                // p0.x = charX + (charInfo.shearTop);
+                // p0.y = -charY;
+                // p0.z = 0;
+                //
+                // p1.x = charX + charWidth + (charInfo.shearTop);
+                // p1.y = -charY;
+                // p1.z = 0;
+                //
+                // p2.x = charX + charWidth + (charInfo.shearBottom);
+                // p2.y = -(charY + charHeight);
+                // p2.z = 0;
+                //
+                // p3.x = charX + (charInfo.shearBottom);
+                // p3.y = -(charY + charHeight);
+                // p3.z = 0;
+                //
+                // uv0_tl.x = (charInfo.topLeftUv.x - padding) * widthMultiplier;
+                // uv0_tl.y = (charInfo.bottomRightUv.y + padding) * heightMultiplier;
+                // uv0_tr.x = (charInfo.bottomRightUv.x + padding) * widthMultiplier;
+                // uv0_tr.y = uv0_tl.y;
+                // uv0_br.x = uv0_tr.x;
+                // uv0_br.y = (charInfo.topLeftUv.y - padding) * heightMultiplier;
+                // uv0_bl.x = uv0_tl.x;
+                // uv0_bl.y = uv0_br.y;
 
                 vertexIndex += 4;
 
@@ -356,7 +356,7 @@ namespace UIForia.Systems {
                 float3 start = positions[0];
                 float3 end = positions[2];
 
-                fontAssetInfo.TryGetGlyph(95, out UIForiaGlyph underlineGlyph);
+                fontAssetInfo.TryGetUnderlineGlyph(out UIForiaGlyph underlineGlyph);
 
                 float segmentWidth = underlineGlyph.width * 0.5f * elementScale;
 

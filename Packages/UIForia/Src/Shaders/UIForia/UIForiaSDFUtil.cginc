@@ -401,7 +401,7 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     r += (top * right) * radii.y;
     r += (bottom * left) * radii.z;
     r += (bottom * right) * radii.w;
-    retn.radius = (r * 2) / 1000; // radius comes in as a byte representing 0 to 50 of our width, remap 0 - 250 to 0 - 0.5
+    retn.radius = (r * 2) / 1000; // radius comes in as a byte representing 0 to 50% of our min(width, height), remap 0 - 250 to 0 - 0.5
     
     half2 topLeftBorderSize = UnpackSize(packedBorderSizes.x);
     half2 bottomRightBorderSize = UnpackSize(packedBorderSizes.y);
@@ -499,8 +499,6 @@ inline fixed4 MeshBorderAA(fixed4 mainColor, float2 size, float distFromCenter) 
      
      return mainColor;
 }
-
-
             
 inline fixed4 ComputeColor(float packedBg, float packedTint, int colorMode, float2 texCoord, sampler2D _MainTexture) {
 

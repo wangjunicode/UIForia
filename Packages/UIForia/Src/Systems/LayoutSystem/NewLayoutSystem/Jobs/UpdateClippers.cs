@@ -1,4 +1,5 @@
-﻿using UIForia.Layout;
+﻿using UIForia.Graphics;
+using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
@@ -17,7 +18,10 @@ namespace UIForia.Systems {
         public ElementTable<ClipInfo> clipInfoTable;
         public ElementTable<LayoutBoxInfo> layoutResultTable;
         public DataList<float2>.Shared intersectionResults;
-        public DataList<OverflowBounds>.Shared clipperBoundsList;
+        public DataList<AxisAlignedBounds2D>.Shared clipperBoundsList;
+        
+        public float screenWidth;
+        public float screenHeight;
         
         public void Execute() {
             Run(2, clipperList.size);
@@ -41,8 +45,8 @@ namespace UIForia.Systems {
             clipperBoundsList.size = 0;
             // todo -- i think this is wrong. 1 for screen, 1 for never
             
-            clipperBoundsList.Add(default);
-            clipperBoundsList.Add(default);
+            clipperBoundsList.Add(new AxisAlignedBounds2D(float.MinValue, float.MinValue, float.MaxValue, float.MaxValue));
+            clipperBoundsList.Add(new AxisAlignedBounds2D(0, 0, screenWidth, screenHeight));
             
             for (int i = start; i < end; i++) {
 
@@ -92,14 +96,9 @@ namespace UIForia.Systems {
                     intersectionResults.Add(bounds.p2);
                     intersectionResults.Add(bounds.p3);
                     
-                    clipper.aabb = PolygonUtil.GetBounds(intersectionResults.GetArrayPointer() + clipper.intersectionRange.start, clipper.intersectionRange.length);
-                    clipper.overflowBoundsIndex = clipperBoundsList.size;
-                    clipperBoundsList.Add(new OverflowBounds() {
-                        p0 = bounds.p0,
-                        p1 = bounds.p1,
-                        p2 = bounds.p2,
-                        p3 = bounds.p3,
-                    });
+                    clipper.aabb = PolygonUtil.GetBounds2D(intersectionResults.GetArrayPointer() + clipper.intersectionRange.start, clipper.intersectionRange.length);
+
+                    clipperBoundsList.Add(clipper.aabb);
                     continue;
                 }
                    
@@ -117,25 +116,26 @@ namespace UIForia.Systems {
                 if (outputBuffer.size > 0) {
                     intersectionResults.EnsureAdditionalCapacity(outputBuffer.size);
                     TypedUnsafe.MemCpy(intersectionResults.GetArrayPointer() + intersectionResults.size, outputBuffer.GetArrayPointer(), outputBuffer.size);
-                    if (outputBuffer.size == 3) {
-                        // if the clip output is a triangle 
-                        clipper.overflowBoundsIndex = clipperBoundsList.size;
-                        clipperBoundsList.Add(new OverflowBounds() {
-                            p0 = outputBuffer[0],
-                            p1 = outputBuffer[1],
-                            p2 = outputBuffer[2],
-                            p3 = outputBuffer[1],
-                        });
-                    }
-                    else if (outputBuffer.size == 4) {
-                        clipper.overflowBoundsIndex = clipperBoundsList.size;
-                        clipperBoundsList.Add(new OverflowBounds() {
-                            p0 = outputBuffer[0],
-                            p1 = outputBuffer[1],
-                            p2 = outputBuffer[2],
-                            p3 = outputBuffer[3],
-                        });
-                    }
+                    
+                    // if (outputBuffer.size == 3) {
+                    //     // if the clip output is a triangle 
+                    //     clipper.overflowBoundsIndex = clipperBoundsList.size;
+                    //     clipperBoundsList.Add(new OverflowBounds() {
+                    //         p0 = outputBuffer[0],
+                    //         p1 = outputBuffer[1],
+                    //         p2 = outputBuffer[2],
+                    //         p3 = outputBuffer[1],
+                    //     });
+                    // }
+                    // else if (outputBuffer.size == 4) {
+                    //     clipper.overflowBoundsIndex = clipperBoundsList.size;
+                    //     clipperBoundsList.Add(new OverflowBounds() {
+                    //         p0 = outputBuffer[0],
+                    //         p1 = outputBuffer[1],
+                    //         p2 = outputBuffer[2],
+                    //         p3 = outputBuffer[3],
+                    //     });
+                    // }
                 }
 
                 clipper.intersectionRange = new RangeInt(rangeStart, outputBuffer.size);
@@ -145,7 +145,7 @@ namespace UIForia.Systems {
                     continue;
                 }
 
-                clipper.aabb = PolygonUtil.GetBounds(intersectionResults.GetArrayPointer() + clipper.intersectionRange.start, clipper.intersectionRange.length);
+                clipper.aabb = PolygonUtil.GetBounds2D(intersectionResults.GetArrayPointer() + clipper.intersectionRange.start, clipper.intersectionRange.length);
 
             }
 

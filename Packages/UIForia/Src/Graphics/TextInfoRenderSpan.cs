@@ -60,6 +60,7 @@ namespace UIForia.Graphics {
 
     }
     
+
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct TextInfoRenderSpan {
 

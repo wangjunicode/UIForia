@@ -1,6 +1,5 @@
 ﻿namespace UIForia {
 
-    [AssertSize(16)]
     public struct ElementTraversalInfo {
 
         public int depth;

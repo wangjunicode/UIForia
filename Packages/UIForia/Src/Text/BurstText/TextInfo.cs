@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using UIForia.Layout;
 using UIForia.ListTypes;
+using UIForia.Rendering;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
@@ -156,14 +157,16 @@ namespace UIForia.Text {
         internal List_TextSymbol symbolList;
         internal List_TextLayoutSymbol layoutSymbolList;
         internal List_TextLineInfo lineInfoList;
-
-        internal bool requiresTextTransform;
         internal TextStyle textStyle;
+
+        internal bool spanDirty;
+        internal bool requiresTextTransform;
         internal bool requiresRenderProcessing;
 
         [ThreadStatic] internal static StructList<TextSymbol> inputSymbolBuffer;
         internal bool isRenderDecorated;
         internal float resolvedFontSize;
+        public bool isRichText;
 
         public static TextInfo Create(string text, in TextStyle style, in DataList<FontAssetInfo>.Shared fontAssetMap) {
 
@@ -228,9 +231,9 @@ namespace UIForia.Text {
             ComputeSizeInfo sizeInfo = new ComputeSizeInfo();
             measureState.Initialize(emSize, textInfo.textStyle, fontAssetMap[textInfo.textStyle.fontAssetId]);
             TextUtil.RecomputeFontInfo(ref measureState, ref sizeInfo);
-            
+
             textInfo.resolvedFontSize = measureState.fontSize;
-            
+
             for (int i = 0; i < textInfo.layoutSymbolList.size; i++) {
 
                 ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList[i];
@@ -269,6 +272,10 @@ namespace UIForia.Text {
                     requiresTextTransform = symbolStream.requiresTextTransform;
                     requiresRenderProcessing = symbolStream.requiresRenderProcessing;
                     inputSymbolBuffer = symbolStream.stream;
+                    if (symbolStream.textEffects.size > 0) {
+                        
+                    }
+                    symbolStream.textEffects.Release();
                 }
 
                 if (!processedStream) {
@@ -422,13 +429,13 @@ namespace UIForia.Text {
                 ref TextLineInfo lineInfo = ref lineInfoList[i];
                 int end = lineInfo.wordStart + lineInfo.wordCount;
                 float max = 0;
-                
+
                 for (int w = lineInfo.wordStart; w < end; w++) {
-                    
+
                     if (textInfo.layoutSymbolList.array[w].wordInfo.height > max) {
                         max = textInfo.layoutSymbolList.array[w].wordInfo.height;
                     }
-                    
+
                 }
 
                 lineInfo.height = lineHeight;
@@ -467,29 +474,104 @@ namespace UIForia.Text {
 
     }
 
-    public unsafe struct FontMap {
+    public struct TextVertexOverride {
 
-        internal int size;
-        internal FontAssetInfo* map;
+        public float2 topLeft;
+        public float2 topRight;
+        public float2 bottomRight;
+        public float2 bottomLeft;
 
     }
 
-    public class TextLayout {
+    public unsafe struct CharacterInterface {
 
-        private DataList<FontAssetInfo>.Shared fontAssetMap;
-        private float baseEmSize;
+        public readonly float2 position;
+        public readonly int character;
+        public readonly int charIndex;
+        public readonly int symbolIndex;
+        public readonly CharacterFlags flags;
 
-        public TextLayout(float baseEmSize = 18f) {
-            this.baseEmSize = baseEmSize;
+        internal ManagedTextSpanInfo span;
+
+        internal CharacterInterface(ManagedTextSpanInfo span, float2 position, int character, int charIndex, int symbolIndex, CharacterFlags flags) {
+            this.span = span;
+            this.position = position;
+            this.character = character;
+            this.charIndex = charIndex;
+            this.symbolIndex = symbolIndex;
+            this.flags = flags;
         }
 
-        public void SetEmSize(float emSize) {
-            this.baseEmSize = emSize;
+        public int ComputeLineIndex() {
+            return 0;
         }
 
-        public void Layout(ref TextInfo textInfo, float maxWidth = float.MaxValue) {
-            TextInfo.RunLayoutHorizontal_WordsOnly(ref textInfo, ref textInfo.lineInfoList, maxWidth);
-            // TextInfo.RunLayoutVertical_WordsOnly(fontAssetMap[textInfo.textStyle.fontAssetId], baseEmSize, ref textInfo);
+        public int ComputeWordIndex() {
+            return 0;
+        }
+
+        public int ComputeWordCharIndex() {
+            return 0;
+        }
+
+        private int GetOrCreateVertexOverrides() {
+            ref BurstCharInfo characterInfo = ref span.unmanagedSpanInfo->symbolList.array[symbolIndex].charInfo;
+            if (characterInfo.vertexIdx == 0) {
+                characterInfo.vertexIdx = span.textInfo.AllocateVertexId();
+            }
+
+            return characterInfo.vertexIdx;
+        }
+
+        public void SetVertexOffsets(float2 topLeft, float2 topRight, float2 bottomRight, float2 bottomLeft) {
+            ref TextVertexOverride vertices = ref span.textInfo.vertexOverrides[GetOrCreateVertexOverrides()];
+            vertices.topLeft = topLeft;
+            vertices.topRight = topRight;
+            vertices.bottomRight = bottomRight;
+            vertices.bottomLeft = bottomLeft;
+        }
+
+        public void RotateVertices(float2 offset) { }
+
+        public void RotateVertices(float2 offset, float2 pivot) { }
+
+        public void OffsetVertices(float2 offset) {
+            ref TextVertexOverride vertices = ref span.textInfo.vertexOverrides[GetOrCreateVertexOverrides()];
+            vertices.topLeft += offset;
+            vertices.topRight += offset;
+            vertices.bottomRight += offset;
+            vertices.bottomLeft += offset;
+
+        }
+
+    }
+
+    public abstract class TextEffect {
+        
+        public virtual void OnPush() { }
+
+        public virtual void OnPop() { }
+
+        public virtual void OnApplyEffect(ref CharacterInterface characterInterface) { }
+
+        public virtual void ApplyEffect(ref CharacterInterface characterInterface) {
+            
+//            characterInterface.isRevealed;
+//            characterInterface.isRevealing;
+//            
+//            characterInterface.RotateVertices(45, characterInterface.GetTopLine());
+//            characterInterface.SetMaterial();
+//            characterInterface.SetGlowColor();
+//            
+//            characterInterface.span.Insert();
+//            
+//            // layout start = lock
+//            // render end = unlock
+//            
+//            characterInterface.SetDisplayedGlyph('a');
+            
+            // span.GetCharacterAt(i).SetEffect(somecomputed);
+            // [underline color=x]
         }
 
     }

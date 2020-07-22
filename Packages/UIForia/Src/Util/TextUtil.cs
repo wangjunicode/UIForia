@@ -711,6 +711,49 @@ namespace UIForia.Text {
 
         }
 
+        public struct TextRatioData {
+
+            public float outlineWidth;
+            public float outlineSoftness;
+            public float faceDilate;
+            public float glowOffset;
+            public float glowOuter;
+            public float underlayX;
+            public float underlayY;
+            public float underlaySoftness;
+            public float underlayDilate;
+
+        }
+
+        internal static float3 ComputeRatios(in FontAssetInfo fontAsset, in TextRatioData textStyle) {
+            float gradientScale = fontAsset.gradientScale;
+            float faceDilate = textStyle.faceDilate;
+            float outlineThickness = textStyle.outlineWidth;
+            float outlineSoftness = textStyle.outlineSoftness;
+            float weight = (fontAsset.weightNormal > fontAsset.weightBold ? fontAsset.weightNormal : fontAsset.weightBold) / 4f;
+            float ratioA_t = math.max(1, weight + faceDilate + outlineThickness + outlineSoftness);
+            float ratioA = (gradientScale - 1f) / (gradientScale * ratioA_t);
+
+            float glowOffset = textStyle.glowOffset;
+            float glowOuter = textStyle.glowOuter;
+            float ratioBRange = (weight + faceDilate) * (gradientScale - 1f);
+
+            float ratioB_t = glowOffset + glowOuter > 1 ? glowOffset + glowOuter : 1;
+            float ratioB = math.max(0, gradientScale - 1 - ratioBRange) / (gradientScale * ratioB_t);
+            if (ratioB < 0) ratioB = 0;
+            float underlayOffsetX = textStyle.underlayX;
+            float underlayOffsetY = textStyle.underlayY;
+            float underlayDilate = textStyle.underlayDilate;
+            float underlaySoftness = textStyle.underlaySoftness;
+
+            float ratioCRange = (weight + faceDilate) * (gradientScale - 1);
+            float ratioC_t = math.max(1, math.max(math.abs(underlayOffsetX), math.abs(underlayOffsetY)) + underlayDilate + underlaySoftness);
+
+            float ratioC = math.max(0, gradientScale - 1f - ratioCRange) / (gradientScale * ratioC_t);
+
+            return new float3(ratioA, ratioB, ratioC);
+        }
+        
         internal static float3 ComputeRatios(in FontAssetInfo fontAsset, in TextInfoRenderSpan textStyle) {
             float gradientScale = fontAsset.gradientScale;
             float faceDilate = textStyle.faceDilate;
@@ -801,8 +844,13 @@ namespace UIForia.Text {
                             continue; // todo -- handle missing glyphs somehow
                         }
 
+                        // do i have a seperate thing for actually rendered char infos?
+                        // with material idx and stuff?
+                        // i need to iterate characters anyway
+                        // is it easier to just add a 'skip-render' flag?
                         textSymbol.charInfo.wordIndex = wordIndex;
-
+                        textSymbol.charInfo.renderBufferIndex = (ushort)glyph.renderBufferIndex;
+                        
                         // if (sizeInfo.monospacing != 0) {
                         //     xAdvance += (sizeInfo.monospacing - monoAdvance + ((sizeInfo.characterSpacing + sizeInfo.normalSpacingOffset) * currentElementScale));
                         // }
@@ -812,22 +860,23 @@ namespace UIForia.Text {
                             kerningAdvance = fontAssetMap[sizeInfo.fontAssetId].GetKerning(textSymbol.charInfo.character, symbolList[charIndex + 1].charInfo.character);
                         }
 
-                        textSymbol.charInfo.topLeft.x = xAdvance + (glyph.xOffset * currentElementScale);
-                        textSymbol.charInfo.topLeft.y = sizeInfo.fontBaseLineOffset + ((sizeInfo.fontAscender - glyph.yOffset) * currentElementScale);
+                        textSymbol.charInfo.position.x = xAdvance + (glyph.xOffset * currentElementScale);
+                        textSymbol.charInfo.position.y = sizeInfo.fontBaseLineOffset + (sizeInfo.fontAscender * currentElementScale);// + ((sizeInfo.fontAscender - glyph.yOffset) * currentElementScale);
+                        float bottom = textSymbol.charInfo.position.y + (glyph.height * currentElementScale);
+                        // todo -- remove uvs, shear, and bottomRight. look these up in the shader instead
+                        // textSymbol.charInfo.bottomRight.x = textSymbol.charInfo.topLeft.x + (glyph.width * currentElementScale);
+                        // textSymbol.charInfo.bottomRight.y = textSymbol.charInfo.topLeft.y + (glyph.height * currentElementScale);
+                        //
+                        // textSymbol.charInfo.topLeftUv.x = glyph.uvX;
+                        // textSymbol.charInfo.topLeftUv.y = glyph.uvY;
+                        // textSymbol.charInfo.bottomRightUv.x = glyph.uvX + glyph.uvWidth;
+                        // textSymbol.charInfo.bottomRightUv.y = glyph.uvY + glyph.uvHeight;
 
-                        textSymbol.charInfo.bottomRight.x = textSymbol.charInfo.topLeft.x + (glyph.width * currentElementScale);
-                        textSymbol.charInfo.bottomRight.y = textSymbol.charInfo.topLeft.y + (glyph.height * currentElementScale);
-
-                        textSymbol.charInfo.topLeftUv.x = glyph.uvX;
-                        textSymbol.charInfo.topLeftUv.y = glyph.uvY;
-                        textSymbol.charInfo.bottomRightUv.x = glyph.uvX + glyph.uvWidth;
-                        textSymbol.charInfo.bottomRightUv.y = glyph.uvY + glyph.uvHeight;
-
-                        float topShear = sizeInfo.shear * (glyph.yOffset * currentElementScale);
-                        float bottomShear = sizeInfo.shear * ((glyph.yOffset - glyph.height) * currentElementScale);
-                        
-                        textSymbol.charInfo.shearTop = topShear;
-                        textSymbol.charInfo.shearBottom = bottomShear;
+                        // float topShear = sizeInfo.shear * (glyph.yOffset * currentElementScale);
+                        // float bottomShear = sizeInfo.shear * ((glyph.yOffset - glyph.height) * currentElementScale);
+                        //
+                        // textSymbol.charInfo.shearTop = topShear;
+                        // textSymbol.charInfo.shearBottom = bottomShear;
 
                         // todo -- im not sure kerning is correct here, it has very small values and I think it might be an x position adjustment or need to be scaled 
 
@@ -839,7 +888,7 @@ namespace UIForia.Text {
 
                         xAdvance += w;
 
-                        maxHeight = math.max(maxHeight, textSymbol.charInfo.bottomRight.y - textSymbol.charInfo.topLeft.y);
+                        maxHeight = math.max(maxHeight, bottom - textSymbol.charInfo.position.y);
 
                         break;
                     }

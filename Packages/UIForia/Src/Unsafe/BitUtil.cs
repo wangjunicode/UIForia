@@ -1,9 +1,6 @@
-using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using UIForia.Util.Unsafe;
-using Unity.Collections;
 
 namespace UIForia.Util {
 
@@ -20,7 +17,12 @@ namespace UIForia.Util {
         public static int SetHighLowBits(int high, int low) {
             return (high << 16) | (low & 0xffff);
         }
-
+        
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int SetHigh1Low3(int high, int low) {
+            return (high << 24) | (low & 0xffffff);
+        }
+        
         [DebuggerStepThrough]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int SetHighLowBits(uint high, uint low) {

@@ -16,6 +16,7 @@ namespace UIForia.Layout {
         public float emSize;
         public ElementId clipperId;
         public bool isCulled;
+        internal bool sizeChanged;
 
         public float allocatedWidth {
             get => allocatedSize.x;

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Src.Systems;
 using UIForia.Animation;
 using UIForia.Compilers;
 using UIForia.Elements;
@@ -51,7 +50,7 @@ namespace UIForia {
         public readonly string id;
         internal StyleSystem styleSystem;
         internal LayoutSystem layoutSystem;
-        internal RenderSystem renderSystem;
+        internal RenderSystem2 renderSystem;
         internal InputSystem inputSystem;
         internal RoutingSystem routingSystem;
         internal AnimationSystem animationSystem;
@@ -132,7 +131,7 @@ namespace UIForia {
             soundSystem = new UISoundSystem();
             animationSystem = new AnimationSystem(elementSystem);
             layoutSystem = new LayoutSystem(this, elementSystem, textSystem);
-            renderSystem = new RenderSystem(this, layoutSystem, elementSystem);
+            renderSystem = new RenderSystem2(this, layoutSystem, elementSystem);
             inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
         }
 

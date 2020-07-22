@@ -14,7 +14,7 @@ namespace UIForia.Util.Unsafe {
         public int size;
         public int capacity;
         public KeyValuePair<long, TValue>[] data;
-        
+
         public UnmanagedLongMapDebugView(LongMap<TValue> target) {
             if (target.mapState == null) {
                 size = default;
@@ -72,6 +72,12 @@ namespace UIForia.Util.Unsafe {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool TryRemove(long key, out TValue oldValue) {
             return mapState->TryRemove<TValue>(key, out oldValue);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref TValue GetOrCreateReference(long key) {
+            TValue* ptr = mapState->GetOrCreate<TValue>(key);
+            return ref UnsafeUtilityEx.AsRef<TValue>(ptr);
         }
 
         public int size {
@@ -132,7 +138,7 @@ namespace UIForia.Util.Unsafe {
         public int GetSize() {
             return (int) size;
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetCapacity() {
             return (int) capacity;
@@ -165,7 +171,7 @@ namespace UIForia.Util.Unsafe {
             // free value is stored right after the retn pointer because it's size and type is unknown. 
             // (we cannot store it in the UntypedMap because it is not known at compile time and UntypedMap cannot be generic
             // because then it would not be an unmanaged type what we could get a pointer to)
-            
+
             // this does mean we cannot have UntypedLongMap without making it a pointer. todo -- improve this, better to tack it onto the data pointer
             T* freeValue = (T*) (retn + 1);
             *freeValue = default;
@@ -180,6 +186,139 @@ namespace UIForia.Util.Unsafe {
 
         public bool Contains<T>(long key) where T : unmanaged {
             return TryGetValue(key, out T _);
+        }
+
+        public T* GetOrCreate<T>(long key) where T : unmanaged {
+
+            if (!TryGetPointer(key, out T* value)) {
+                Add(key, default, out value);
+            }
+
+            return value;
+        }
+        
+        public bool TryGetPointer<T>(long key, out T* value) where T : unmanaged {
+            if (key == k_FreeKey) {
+
+                T* pFreeValue = GetFreeValue<T>();
+
+                if (m_hasFreeKey) {
+                    value = pFreeValue;
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            uint idx = GetStartIndex(key);
+
+            // pointer to a cell's key
+            long* currentCell = (long*) (m_data + (idx * itemSize));
+
+            if (*currentCell == k_FreeKey) {
+                value = default;
+                return false;
+            }
+
+            if (*currentCell == key) {
+                // values are at offset of currentCell in bytes + sizeof(long)
+                // then cast to value type and dereference.
+                value = (T*) (currentCell + 1);
+                return true;
+            }
+
+            while (true) {
+                idx = GetNextIndex(idx);
+                currentCell = (long*) (m_data + (idx * itemSize));
+                if (*currentCell == k_FreeKey) {
+                    value = default;
+                    return false;
+                }
+
+                if (*currentCell == key) {
+                    value = (T*) (currentCell + 1);
+                    return true;
+                }
+            }
+        }
+
+        public T Add<T>(long key, in T value, out T* ptr) where T : unmanaged {
+            if (key == k_FreeKey) {
+
+                T* pFreeValue = GetFreeValue<T>();
+
+                if (m_hasFreeKey) {
+                    T ret = *pFreeValue;
+                    *pFreeValue = value;
+                    ptr = pFreeValue;
+                    return ret;
+                }
+
+                size++;
+                m_hasFreeKey = true;
+                *pFreeValue = value;
+                ptr = pFreeValue;
+                return default;
+
+            }
+
+            uint idx = GetStartIndex(key);
+            long* c = (long*) (m_data + (idx * itemSize));
+
+            //end of chain already
+            if (*c == k_FreeKey) {
+                *c = key;
+                T* typedEntry = (T*) (c + 1);
+                *typedEntry = value;
+                ptr = typedEntry;
+                uint threshold = (uint) (capacity * fillFactor);
+                if (size >= threshold) {
+                    Rehash<T>(); //size is set inside
+                }
+                else {
+                    size++;
+                }
+
+                return default;
+            }
+
+            //we check FREE prior to this call
+            if (*c == key) {
+                T* typedEntry = (T*) (c + 1);
+                T retn = *typedEntry;
+                *typedEntry = value;
+                ptr = typedEntry;
+                return retn;
+            }
+
+            while (true) {
+                idx = GetNextIndex(idx);
+                c = (long*) (m_data + (idx * itemSize));
+                if (*c == k_FreeKey) {
+                    *c = key;
+                    T* typedEntry = (T*) (c + 1);
+                    *typedEntry = value;
+                    ptr = typedEntry;
+                    uint threshold = (uint) (capacity * fillFactor);
+                    if (size >= threshold) {
+                        Rehash<T>(); //size is set inside
+                    }
+                    else {
+                        size++;
+                    }
+
+                    return default;
+                }
+
+                if (*c == key) {
+                    T* typedEntry = (T*) (c + 1);
+                    T retn = *typedEntry;
+                    *typedEntry = value;
+                    ptr = typedEntry;
+                    return retn;
+                }
+            }
         }
 
         public bool TryGetValue<T>(long key, out T value) where T : unmanaged {
@@ -238,7 +377,7 @@ namespace UIForia.Util.Unsafe {
         }
 
         [BurstDiscard]
-        public int CopyKeyValuePairs<T>(KeyValuePair<long, T>[] kvpList) where T: unmanaged {
+        public int CopyKeyValuePairs<T>(KeyValuePair<long, T>[] kvpList) where T : unmanaged {
 
             int idx = 0;
             for (int i = 0; i < capacity; i++) {
@@ -246,11 +385,12 @@ namespace UIForia.Util.Unsafe {
                 if (*c == k_FreeKey) {
                     continue;
                 }
-                kvpList[idx++] = new KeyValuePair<long, T>(*c, *(T*)(c + 1)); 
+
+                kvpList[idx++] = new KeyValuePair<long, T>(*c, *(T*) (c + 1));
             }
 
             if (m_hasFreeKey) {
-                kvpList[idx++] = new KeyValuePair<long, T>(k_FreeKey, *GetFreeValue<T>()); 
+                kvpList[idx++] = new KeyValuePair<long, T>(k_FreeKey, *GetFreeValue<T>());
             }
 
             return idx;
@@ -384,7 +524,7 @@ namespace UIForia.Util.Unsafe {
         public bool Remove<T>(long key) where T : unmanaged {
             return TryRemove(key, out T _);
         }
-        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Remove<T>(long key, out T value) where T : unmanaged {
             return TryRemove(key, out value);

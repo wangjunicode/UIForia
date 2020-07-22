@@ -14,11 +14,11 @@ namespace UIForia.Rendering {
 
     public class SelfPaintedRenderBox : RenderBox {
 
-        public override void PaintBackground(RenderContext ctx) {
-            if (element is IElementBackgroundPainter bgPainter) {
-                bgPainter.PaintBackground(ctx);
-            }
-        }
+        // public override void PaintBackground(RenderContext ctx) {
+        //     if (element is IElementBackgroundPainter bgPainter) {
+        //         bgPainter.PaintBackground(ctx);
+        //     }
+        // }
 
         public override void PaintForeground(RenderContext ctx) {
             if (element is IElementForegroundPainter fgPainter) {

@@ -55,7 +55,9 @@ namespace UIForia.Text {
         public float characterOffsetY;
         
         public float characterScale;
-        public float faceSofteness;
+        public float faceSoftness;
+        public int faceTextureId;
+        public int outlineTextureId;
 
     }
 

@@ -288,7 +288,7 @@ namespace UIForia.Graphics {
 
                 switch (cmd.renderOperation) {
                     case DrawCommandType.BackgroundTransparent:
-                        cmd.renderBox.PaintBackground(renderContext);
+                       // cmd.renderBox.PaintBackground(renderContext);
                         break;
 
                     case DrawCommandType.ForegroundTransparent:

@@ -2,17 +2,57 @@
 using System.Runtime.InteropServices;
 using UIForia.Systems;
 using Unity.Mathematics;
+using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace UIForia.Graphics {
 
     [Flags]
     internal enum DrawInfoFlags {
 
-        InitialBatchSet = 1 << 0,
+        BatchSet = 1 << 0,
         HasMaterialOverrides = 1 << 1,
         HasNonTextureOverrides = 1 << 2,
         FinalBatchSet = 1 << 3,
         Hidden = 1 << 4
+
+    }
+
+    internal unsafe struct StencilInfo {
+
+        public StencilSetupState drawState;
+        public int pushIndex;
+        public int popIndex;
+        public int clipperDepth;
+        public int stencilDepth;
+        public int parentIndex;
+        public AxisAlignedBounds2D aabb;
+        public bool isHidden;
+        public MaterialId materialId;
+        public MaterialPropertyOverride* propertyOverrides;
+        public int propertyOverrideCount;
+        public VertexLayout vertexLayout;
+        public StencilState state;
+        
+        public byte refValue;
+        public byte childRefValue;
+        public RangeInt drawInfoRange;
+
+    }
+    
+    internal unsafe struct ProcessedDrawInfo {
+
+        public int drawInfoIndex;
+        public DrawType type;
+        public int stencilIndex;
+        public int clipRectIndex;
+        public MaterialId materialId;
+        public AxisAlignedBounds2D intersectedBounds;
+        public int prevIndex;
+        public int nextIndex;
+        public int materialPropertySetId;
+        
+        public VertexLayout vertexLayout; 
 
     }
 
@@ -53,11 +93,11 @@ namespace UIForia.Graphics {
         public VertexLayout vertexLayout; // todo -- this is big, move it
         public MaterialId materialId;
 
-        public byte* shapeData;
+        public void* shapeData;
         public float4x4* matrix;
         public MaterialPropertyOverride* materialOverrideValues;
-        public ElementId elementId;
         public AxisAlignedBounds2D intersectedBounds;
+        public int propertySetId;
 
         public void* GetChannel(VertexChannel channel) {
 

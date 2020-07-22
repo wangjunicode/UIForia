@@ -47,12 +47,17 @@ namespace UIForia {
 
         internal readonly int index;
 
+        public byte perObjectFloats;
+        public byte useGradientBuffer;
+        public byte usePerObjectBuffer;
+        public byte useClipBuffer;
+        
         public static readonly MaterialId UIForiaShape = new MaterialId(1);
         public static readonly MaterialId UIForiaSDFText = new MaterialId(2);
         public static MaterialId UIForiaSDFTextEffect = new MaterialId(3);
         public static MaterialId UIForiaSoftGeometryMask = new MaterialId(4);
 
-        internal MaterialId(int index) {
+        internal MaterialId(int index) : this() {
             this.index = index;
         }
 

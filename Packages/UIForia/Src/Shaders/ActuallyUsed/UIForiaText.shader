@@ -21,7 +21,11 @@
     }
     SubShader
     {
-        Tags { "RenderType"="Transparent" }
+        Tags { 
+            "RenderType"="Transparent" 
+            "UIFoira::SupportClipRectBuffer"="TEXCOORD1.x"
+            "UIForia::SupportMaterialBuffer"="8"
+        }
         LOD 100
 
         Pass {
@@ -37,7 +41,7 @@
             }
             
             CGPROGRAM
-
+            
             #pragma vertex vert
             #pragma fragment frag
             #pragma target 3.0
@@ -63,6 +67,12 @@
                 nointerpolation fixed4 outline : TEXCOORD5; // zw unused?
                 nointerpolation float4 glow : TEXCOORD6;
             };
+            
+            float4 _gUIForiaMaskUVBuffer[32];
+            float4 _gUIForiaClipRectBuffer[128];
+            float4 _gUIForiaGradientBuffer[128];
+            float4 _gUIForiaTextDataBuffer[128];
+            float4 _gUIForiaShapeDataBuffer[128];
 
             fixed4 _TextureSampleAdd;
             fixed4 _Color;
@@ -84,26 +94,13 @@
                        
             #define Vert_PackedUV v.uv0.z
             
-            float remap(float s, float a1, float a2, float b1, float b2) {
-                return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
-            }
-            
-            half remapHalf(half s, half a1, half a2, half b1, half b2) {
-                return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
-            }
-            
-            float4 GetGlowColor(float d, float scale, float4 glowColor, float glowOffset, float glowInner, float glowOuter, float glowPower) {
-                float glow = d - glowOffset * 0.5 * scale;
-                float t = lerp(glowInner, glowOuter, step(0.0, glow)) * 0.5 * scale;
-                glow = saturate(abs(glow/(1.0 + t)));
-                glow = 1.0 - pow(glow, glowPower);
-                glow *= sqrt(min(1.0, t)); // Fade off glow thinner than 1 screen pixel
-                return float4(glowColor.rgb, saturate(glowColor.a * glow * 2));
-            }
 
+            int _ObjectOffset;
+            
             v2f vert (appdata v, out float4 vertex : SV_POSITION) {
                 v2f o;
-                                
+              
+    
                 float4 screenPos = ComputeScreenPos(v.vertex);
                 vertex = UnityObjectToClipPos(v.vertex);
                 o.worldPosition = screenPos;
@@ -158,19 +155,6 @@
                 return o;
             }
 
-            fixed4 GetTextColor(half d, fixed4 faceColor, fixed4 outlineColor, half outline, half softness) {
-                half faceAlpha = 1 - saturate((d - outline * 0.5 + softness * 0.5) / (1.0 + softness));
-                half outlineAlpha = saturate((d + outline * 0.5)) * sqrt(min(1.0, outline));
-            
-                faceColor.rgb *= faceColor.a;
-                outlineColor.rgb *= outlineColor.a;
-            
-                faceColor = lerp(faceColor, outlineColor, outlineAlpha);
-            
-                faceColor *= faceAlpha;
-            
-                return faceColor;
-            }
 
             fixed4 frag (v2f i, UNITY_VPOS_TYPE screenPos : VPOS) : SV_Target {
                 half opacity = 1;

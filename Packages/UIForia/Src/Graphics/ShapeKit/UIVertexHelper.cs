@@ -142,13 +142,13 @@ namespace UIForia.Graphics.ShapeKit {
             NativeArray<Color32> colorArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Color32>(colors, vertexCount, allocator);
             NativeArray<int> trianglesArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(triangles, triangleCount, allocator);
             NativeArray<int> dummy = new NativeArray<int>(1, Allocator.Temp);
-
+#if UNITY_EDITOR
             AtomicSafetyHandle safetyHandle = NativeArrayUnsafeUtility.GetAtomicSafetyHandle(dummy);
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref positionArray, safetyHandle);
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref uvArray, safetyHandle);
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref colorArray, safetyHandle);
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref trianglesArray, safetyHandle);
-
+#endif
             mesh.SetVertices(positionArray, 0, vertexCount);
             mesh.SetUVs(0, uvArray, 0, vertexCount);
             mesh.SetColors(colorArray, 0, vertexCount);

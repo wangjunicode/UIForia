@@ -1,86 +1,12 @@
+using System.Collections.Generic;
 using UIForia.Elements;
-using UIForia.Graphics;
 using UIForia.Text;
 using UIForia.Util;
 using Unity.Mathematics;
-using UnityEditor;
 using UnityEngine;
 using Vertigo;
 
 namespace UIForia.Rendering {
-
-    public unsafe class TextRenderBox2 : RenderBox, IUnityInspector {
-
-        public override void PaintBackground(RenderContext ctx) { }
-
-        public float underlayX = 0;
-        public float underlayY = 0;
-        public float underlaySoftness = 0;
-        public float underlayDilate = 0;
-        public float faceDilate = 0;
-        public float glowOffset;
-        public float glowOuter;
-        public float glowInner;
-        public float glowPower;
-        public float outlineWidth;
-        public float outlineSoftness;
-
-        public float SliderGUI(string label, float value, float min, float max) {
-            EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.PrefixLabel(label);
-            value = EditorGUILayout.Slider(value, min, max);
-            EditorGUILayout.EndHorizontal();
-            return value;
-        }
-
-        public override void PaintBackground2(RenderContext2 ctx) {
-
-            if (!((UITextElement) element).TryGetTextInfo(out TextInfo textInfo)) {
-                return;
-            }
-
-            MaterialId materialId = element.style.Material;
-
-            if (materialId.index != 0) {
-                ctx.SetMaterial(materialId);
-                // todo -- set material overrides here, should be gathered in enable/property change
-            }
-            else {
-                ctx.SetMaterial(MaterialId.UIForiaSDFText);
-                // the default uiforia material already behaves correctly for text, no need to update it
-            }
-
-            // textInfo.textStyle.underlayDilate = underlayDilate;
-            // textInfo.textStyle.underlaySoftness = underlaySoftness;
-            // textInfo.textStyle.underlayX = underlayX;
-            // textInfo.textStyle.underlayY = underlayY;
-            // textInfo.textStyle.outlineSoftness = outlineSoftness;
-            // textInfo.textStyle.outlineWidth = outlineWidth;
-            // textInfo.textStyle.glowInner = glowInner;
-            // textInfo.textStyle.glowPower = glowPower;
-            // textInfo.textStyle.glowOuter = glowOuter;
-            // textInfo.textStyle.glowOffset = glowOffset;
-
-            // ctx.DrawCachedText(ref cacheId, textInfo);
-            
-            ctx.DrawSDFText(textInfo);
-
-        }
-
-        public void OnGUI() {
-            underlayX = SliderGUI("Underlay X", underlayX, -1, 1);
-            underlayY = SliderGUI("Underlay Y", underlayY, -1, 1);
-            underlaySoftness = SliderGUI("Underlay Softness", underlaySoftness, 0, 1);
-            underlayDilate = SliderGUI("Underlay Dilate", underlayDilate, 0, 1);
-            outlineSoftness = SliderGUI("Outline Softness", outlineSoftness, 0, 1);
-            outlineWidth = SliderGUI("Outline Width", outlineWidth, 0, 1);
-            glowInner = SliderGUI("Glow Inner", glowInner, 0, 1);
-            glowOuter = SliderGUI("Glow Outer", glowOuter, 0, 1);
-            glowPower = SliderGUI("Glow Power", glowPower, 0, 1);
-            glowOffset = SliderGUI("Glow Offset", glowOffset, -1, 1);
-        }
-
-    }
 
     public class TextRenderBox : RenderBox {
 
@@ -289,7 +215,7 @@ namespace UIForia.Rendering {
             fontData.textureHeight = fontAsset.atlas.height;
         }
 
-        public override void PaintBackground(RenderContext ctx) {
+        public  void PaintBackground(RenderContext ctx) {
 
             UITextElement textElement = (UITextElement) element;
 
@@ -312,18 +238,18 @@ namespace UIForia.Rendering {
                     for (int charIndex = wordInfo.charStart; charIndex < wordInfo.charEnd; charIndex++) {
                         ref TextSymbol textSymbol = ref textInfo.symbolList[charIndex];
 
-                        float charX = wordInfo.x + textSymbol.charInfo.topLeft.x;
-                        float charY = wordInfo.y + textSymbol.charInfo.topLeft.y;
+                        float charX = wordInfo.x + textSymbol.charInfo.position.x;
+                        float charY = wordInfo.y + textSymbol.charInfo.position.y;
 
-                        float charWidth = textSymbol.charInfo.bottomRight.x - textSymbol.charInfo.topLeft.x;
-                        float charHeight = textSymbol.charInfo.bottomRight.y - textSymbol.charInfo.topLeft.y;
-
-                        int vertIdx = geometry.positionList.size;
-
-                        geometry.positionList.Add(new Vector3(charX + textSymbol.charInfo.shearTop, -charY));
-                        geometry.positionList.Add(new Vector3(charX + charWidth + textSymbol.charInfo.shearTop, -charY));
-                        geometry.positionList.Add(new Vector3(charX + charWidth + textSymbol.charInfo.shearBottom, -(charY + charHeight)));
-                        geometry.positionList.Add(new Vector3(charX + textSymbol.charInfo.shearBottom, -(charY + charHeight)));
+                        // float charWidth = textSymbol.charInfo.bottomRight.x - textSymbol.charInfo.topLeft.x;
+                        // float charHeight = textSymbol.charInfo.bottomRight.y - textSymbol.charInfo.topLeft.y;
+                        //
+                        // int vertIdx = geometry.positionList.size;
+                        //
+                        // geometry.positionList.Add(new Vector3(charX + textSymbol.charInfo.shearTop, -charY));
+                        // geometry.positionList.Add(new Vector3(charX + charWidth + textSymbol.charInfo.shearTop, -charY));
+                        // geometry.positionList.Add(new Vector3(charX + charWidth + textSymbol.charInfo.shearBottom, -(charY + charHeight)));
+                        // geometry.positionList.Add(new Vector3(charX + textSymbol.charInfo.shearBottom, -(charY + charHeight)));
 
                         geometry.texCoordList0.Add(default);
                         geometry.texCoordList0.Add(default);
@@ -339,49 +265,49 @@ namespace UIForia.Rendering {
                         Vector4[] texCoord0 = geometry.texCoordList0.array;
                         Vector4[] texCoord1 = geometry.texCoordList1.array;
                         int[] triangles = geometry.triangleList.array;
+                        //
+                        // ref Vector4 uv0 = ref texCoord0[vertIdx + 0];
+                        // ref Vector4 uv1 = ref texCoord0[vertIdx + 1];
+                        // ref Vector4 uv2 = ref texCoord0[vertIdx + 2];
+                        // ref Vector4 uv3 = ref texCoord0[vertIdx + 3];
+                        // //
+                        // uv0.x = faceTextureUVTopLeft.x;
+                        // uv0.y = faceTextureUVBottomRight.y;
+                        // uv0.z = textSymbol.charInfo.topLeftUv.x;
+                        // uv0.w = textSymbol.charInfo.bottomRightUv.y;
+                        //
+                        // uv1.x = faceTextureUVBottomRight.x;
+                        // uv1.y = faceTextureUVBottomRight.y;
+                        // uv1.z = textSymbol.charInfo.bottomRightUv.x;
+                        // uv1.w = textSymbol.charInfo.bottomRightUv.y;
+                        //
+                        // uv2.x = faceTextureUVBottomRight.x;
+                        // uv2.y = faceTextureUVTopLeft.y;
+                        // uv2.z = textSymbol.charInfo.bottomRightUv.x;
+                        // uv2.w = textSymbol.charInfo.topLeftUv.y;
+                        //
+                        // uv2.x = faceTextureUVTopLeft.x;
+                        // uv2.y = faceTextureUVTopLeft.y;
+                        // uv3.z = textSymbol.charInfo.topLeftUv.x;
+                        // uv3.w = textSymbol.charInfo.topLeftUv.y;
 
-                        ref Vector4 uv0 = ref texCoord0[vertIdx + 0];
-                        ref Vector4 uv1 = ref texCoord0[vertIdx + 1];
-                        ref Vector4 uv2 = ref texCoord0[vertIdx + 2];
-                        ref Vector4 uv3 = ref texCoord0[vertIdx + 3];
-
-                        uv0.x = faceTextureUVTopLeft.x;
-                        uv0.y = faceTextureUVBottomRight.y;
-                        uv0.z = textSymbol.charInfo.topLeftUv.x;
-                        uv0.w = textSymbol.charInfo.bottomRightUv.y;
-
-                        uv1.x = faceTextureUVBottomRight.x;
-                        uv1.y = faceTextureUVBottomRight.y;
-                        uv1.z = textSymbol.charInfo.bottomRightUv.x;
-                        uv1.w = textSymbol.charInfo.bottomRightUv.y;
-
-                        uv2.x = faceTextureUVBottomRight.x;
-                        uv2.y = faceTextureUVTopLeft.y;
-                        uv2.z = textSymbol.charInfo.bottomRightUv.x;
-                        uv2.w = textSymbol.charInfo.topLeftUv.y;
-
-                        uv2.x = faceTextureUVTopLeft.x;
-                        uv2.y = faceTextureUVTopLeft.y;
-                        uv3.z = textSymbol.charInfo.topLeftUv.x;
-                        uv3.w = textSymbol.charInfo.topLeftUv.y;
-
-                        uv0 = ref texCoord1[vertIdx + 0];
-                        uv1 = ref texCoord1[vertIdx + 1];
-                        uv2 = ref texCoord1[vertIdx + 2];
-                        uv3 = ref texCoord1[vertIdx + 3];
-
-                        uv0.x = 1;
-                        uv1.x = 1;
-                        uv2.x = 1;
-                        uv3.x = 1;
-
-                        geometry.triangleList.Add(vertIdx + 0);
-                        geometry.triangleList.Add(vertIdx + 1);
-                        geometry.triangleList.Add(vertIdx + 2);
-
-                        geometry.triangleList.Add(vertIdx + 2);
-                        geometry.triangleList.Add(vertIdx + 3);
-                        geometry.triangleList.Add(vertIdx + 0);
+                        // uv0 = ref texCoord1[vertIdx + 0];
+                        // uv1 = ref texCoord1[vertIdx + 1];
+                        // uv2 = ref texCoord1[vertIdx + 2];
+                        // uv3 = ref texCoord1[vertIdx + 3];
+                        //
+                        // uv0.x = 1;
+                        // uv1.x = 1;
+                        // uv2.x = 1;
+                        // uv3.x = 1;
+                        //
+                        // geometry.triangleList.Add(vertIdx + 0);
+                        // geometry.triangleList.Add(vertIdx + 1);
+                        // geometry.triangleList.Add(vertIdx + 2);
+                        //
+                        // geometry.triangleList.Add(vertIdx + 2);
+                        // geometry.triangleList.Add(vertIdx + 3);
+                        // geometry.triangleList.Add(vertIdx + 0);
                     }
                 }
 

@@ -1,11 +1,14 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using UIForia.Extensions;
 using UnityEngine;
 
 namespace UIForia.Text {
 
-     [StructLayout(LayoutKind.Explicit)]
-     [DebuggerDisplay("{DebuggerView()}")]
+    [StructLayout(LayoutKind.Explicit)]
+    [DebuggerDisplay("{DebuggerView()}")]
     public struct TextSymbol {
 
         [FieldOffset(0)] public TextSymbolType type;
@@ -14,8 +17,50 @@ namespace UIForia.Text {
         [FieldOffset(4)] public Color32 color;
         [FieldOffset(4)] public TextTransform textTransform;
         [FieldOffset(4)] public int fontId;
+        [FieldOffset(4)] public int effectId;
 
-        public bool ConvertToLayoutSymbol(out TextLayoutSymbol symbol) {
+        private static readonly Dictionary<string, TextSymbolType> s_SymbolMap = new Dictionary<string, TextSymbolType>();
+
+        public static TextSymbolType GetOrCreateSymbolType(string symbolName) {
+            if (s_SymbolMap.TryGetValue(symbolName, out TextSymbolType symbolType)) {
+                return symbolType;
+            }
+
+            s_SymbolMap.Add(symbolName, (TextSymbolType) (256 + s_SymbolMap.Count));
+            return (TextSymbolType) (256 + s_SymbolMap.Count);
+        }
+
+        public unsafe void SetData<T>(T data) where T : unmanaged {
+            if (sizeof(T) > sizeof(BurstCharInfo)) {
+                throw new Exception($"When setting symbol data the data struct can be no larger than {sizeof(BurstCharInfo)}. {typeof(T).GetTypeName()} is {sizeof(T)} bytes and cannot be used.");
+            }
+
+            charInfo = *(BurstCharInfo*) (void*) &data;
+        }
+
+        public unsafe void SetSymbolData<T>(uint symbolType, T data) where T : unmanaged {
+            if (sizeof(T) > sizeof(BurstCharInfo)) {
+                throw new Exception($"When setting symbol data the data struct can be no larger than {sizeof(BurstCharInfo)}. {typeof(T).GetTypeName()} is {sizeof(T)} bytes and cannot be used.");
+            }
+
+            if (symbolType < 256) {
+                throw new Exception($"When defining your own symbol type, the symbolTypeId must be greater than 256. {symbolType} is not");
+            }
+
+            charInfo = *(BurstCharInfo*) (void*) &data;
+        }
+
+        public unsafe T GetData<T>() where T : unmanaged {
+            if (sizeof(T) > sizeof(BurstCharInfo)) {
+                return default;
+            }
+
+            // not sure how to avoid this copy since cant take address of struct member
+            BurstCharInfo c = charInfo;
+            return *(T*) (void*) &c;
+        }
+
+        internal bool ConvertToLayoutSymbol(out TextLayoutSymbol symbol) {
             switch (type) {
 
                 default:
@@ -67,6 +112,16 @@ namespace UIForia.Text {
                     return "Text Transform - Pop";
 
                 default:
+                    if ((uint) type > 256) {
+                        foreach (KeyValuePair<string, TextSymbolType> kvp in s_SymbolMap) {
+                            if (kvp.Value == type) {
+                                return kvp.Key;
+                            }
+                        }
+
+                        return "Unknown Symbol";
+                    }
+                    
                     return type.ToString();
             }
         }

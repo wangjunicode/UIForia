@@ -7,8 +7,6 @@ namespace Src.Systems {
 
         public override RenderBounds RenderBounds => new RenderBounds(0, 0, element.View.Viewport.width, element.View.Viewport.height);
 
-        public override void PaintBackground(RenderContext ctx) { }
-
     }
 
 }

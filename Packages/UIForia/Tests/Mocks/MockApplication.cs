@@ -84,7 +84,7 @@ namespace Tests.Mocks {
 
     }
 
-    public class MockRenderSystem : RenderSystem {
+    public class MockRenderSystem : RenderSystem2 {
 
         public override void OnUpdate() {
             // do nothing

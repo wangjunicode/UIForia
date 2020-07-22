@@ -15,7 +15,8 @@
             // BackgroundColor = white;
           //  TransformRotation = 10;
           //  AlignX = Start Screen;
-            TextFontSize = 12;
+        Padding = 50px;
+            TextFontSize = 36;
             TextFaceDilate = 0;
             TextOutlineWidth = 0;
             TextOutlineSoftness = 0;
@@ -96,7 +97,7 @@
         
         style regular {
             PreferredSize = 100px;
-            BackgroundColor = red;
+            Margin = 10px;
         }
         
         style clipper {
@@ -111,11 +112,35 @@
             Overflow = Hidden;
         }
 
+        style red {
+            BackgroundColor = Red;
+            BorderRadiusTopLeft = 50%;
+            BorderRadiusTopRight = 50%;
+            BorderRadiusBottomRight = 50%;
+            BorderRadiusBottomLeft = 50%;
+            PreferredWidth = 300px;
+        }
+        
+        style green {
+            // BackgroundColor = Green;
+            PreferredSize = 300px;
+            BackgroundImage = url("images/2");
+        }
+        
+        style blue {
+            BackgroundColor = Blue;
+        }
+
     </Style>
     <Contents style="container2">
-        
-<!--        <Div style="shape-kit"/>-->
+
+<!--        <Div style="regular red"/>-->
+<!--        <Div style="regular green"/>-->
+<!--        <Div style="regular red"/>-->
+
         <Text>
+
+                        UIForia is the fucking greatest
 <!--            Lorem Ipsum is simply dummy text of the printing and typesetting industry.-->
 <!--            Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.-->
 

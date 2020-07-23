@@ -74,7 +74,7 @@ namespace UIForia {
 
             File.WriteAllText(initPath, template);
 
-            GenerateDynamicTypes(path, dynamicElementTypes);
+           // GenerateDynamicTypes(path, dynamicElementTypes);
         }
 
         private static string GenerateCustomPainterTypes() {
@@ -88,147 +88,147 @@ namespace UIForia {
             return retn;
         }
 
-        public static string PrintDynamicTypeOutput(Type type) {
-            ProcessedType processedType = TypeProcessor.GetProcessedType(type);
-            StringBuilder stringBuilder = new StringBuilder();
+        // public static string PrintDynamicTypeOutput(Type type) {
+        //     ProcessedType processedType = TypeProcessor.GetProcessedType(type);
+        //     StringBuilder stringBuilder = new StringBuilder();
+        //
+        //     string output = TemplateConstants.DynamicElement;
+        //     GetTypeOutput(processedType, stringBuilder);
+        //     output = output.Replace("::CLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType));
+        //     output = output.Replace("::BASECLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType.BaseType));
+        //     output = output.Replace("::TYPE_BODY::", stringBuilder.ToString());
+        //
+        //     return output;
+        // }
+        //
+        // private static void GenerateDynamicTypes(string path, List<ProcessedType> dynamicElementTypes) {
+        //     StringBuilder typeBuilder = new StringBuilder(128);
+        //
+        //     for (int i = 0; i < dynamicElementTypes.Count; i++) {
+        //         ProcessedType processedType = dynamicElementTypes[i];
+        //
+        //         string output = TemplateConstants.DynamicElement;
+        //
+        //         output = output.Replace("::CLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType));
+        //         output = output.Replace("::BASECLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType.BaseType));
+        //         GetTypeOutput(processedType, typeBuilder);
+        //         typeBuilder.Clear();
+        //
+        //         string file = Path.Combine(path, processedType.templateAttr.filePath);
+        //
+        //         file = Path.ChangeExtension(file, "");
+        //         file = file.Substring(0, file.Length - 1);
+        //         file += "_class_" + processedType.templateAttr.templateId;
+        //         file += ".cs";
+        //
+        //         Directory.CreateDirectory(Path.GetDirectoryName(file));
+        //         output = output.Replace("::TYPE_BODY::", typeBuilder.ToString());
+        //
+        //         File.WriteAllText(file, output);
+        //     }
+        // }
 
-            string output = TemplateConstants.DynamicElement;
-            GetTypeOutput(processedType, stringBuilder);
-            output = output.Replace("::CLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType));
-            output = output.Replace("::BASECLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType.BaseType));
-            output = output.Replace("::TYPE_BODY::", stringBuilder.ToString());
+        // private static void GetTypeOutput(ProcessedType processedType, StringBuilder typeBuilder) {
+        //
+        //     ClassBuilder.TypeData data = ClassBuilder.GetDynamicTypeData(processedType.rawType);
+        //
+        //     FieldInfo[] fields = processedType.rawType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+        //
+        //     for (int f = 0; f < fields.Length; f++) {
+        //         bool isStatic = fields[f].IsStatic;
+        //
+        //         ClassBuilder.FieldData fieldData = data.GetFieldData(fields[f].Name);
+        //
+        //         typeBuilder.Append(s_Indent8);
+        //         typeBuilder.Append("public ");
+        //
+        //         if (isStatic) {
+        //             typeBuilder.Append("static ");
+        //         }
+        //
+        //         typeBuilder.Append(TypeNameGenerator.GetTypeName(fields[f].FieldType));
+        //         typeBuilder.Append(" ");
+        //         typeBuilder.Append(fields[f].Name);
+        //
+        //         // todo -- check for default value
+        //         if (fieldData.lambdaValue != null) {
+        //             typeBuilder.Append(" = ");
+        //             typeBuilder.AppendLine(fieldData.lambdaValue.ToTemplateBodyFunction());
+        //         }
+        //         else {
+        //             typeBuilder.AppendLine(";");
+        //         }
+        //     }
+        //
+        //     typeBuilder.AppendLine();
+        //     typeBuilder.AppendLine();
+        //
+        //     for (int m = 0; m < data.methodData.size; m++) {
+        //         ref ClassBuilder.MethodData methodData = ref data.methodData.array[m];
+        //
+        //         // attributes
+        //
+        //         typeBuilder.Append(s_Indent8);
+        //         typeBuilder.Append("public ");
+        //
+        //         if (methodData.isStatic) {
+        //             typeBuilder.Append("static ");
+        //         }
+        //
+        //         typeBuilder.Append(TypeNameGenerator.GetTypeName(methodData.returnType));
+        //         typeBuilder.Append(" ");
+        //         typeBuilder.Append(methodData.methodName);
+        //         typeBuilder.Append("(");
+        //
+        //         PrintMethodSignature(methodData.signature, typeBuilder);
+        //
+        //         typeBuilder.AppendLine(") {");
+        //         typeBuilder.Append(s_Indent12);
+        //
+        //         if (methodData.returnType != null && methodData.returnType != typeof(void)) {
+        //             typeBuilder.Append("return ");
+        //         }
+        //
+        //         typeBuilder.Append("__");
+        //         typeBuilder.Append(methodData.methodName);
+        //         typeBuilder.Append("(");
+        //
+        //         PrintMethodArgumentsSignature(methodData.isStatic, methodData.signature, typeBuilder);
+        //
+        //         typeBuilder.AppendLine(");");
+        //         typeBuilder.Append(s_Indent8);
+        //         typeBuilder.AppendLine("}\n");
+        //     }
+        //
+        // }
 
-            return output;
-        }
-
-        private static void GenerateDynamicTypes(string path, List<ProcessedType> dynamicElementTypes) {
-            StringBuilder typeBuilder = new StringBuilder(128);
-
-            for (int i = 0; i < dynamicElementTypes.Count; i++) {
-                ProcessedType processedType = dynamicElementTypes[i];
-
-                string output = TemplateConstants.DynamicElement;
-
-                output = output.Replace("::CLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType));
-                output = output.Replace("::BASECLASS_NAME::", TypeNameGenerator.GetTypeName(processedType.rawType.BaseType));
-                GetTypeOutput(processedType, typeBuilder);
-                typeBuilder.Clear();
-
-                string file = Path.Combine(path, processedType.templateAttr.filePath);
-
-                file = Path.ChangeExtension(file, "");
-                file = file.Substring(0, file.Length - 1);
-                file += "_class_" + processedType.templateAttr.templateId;
-                file += ".cs";
-
-                Directory.CreateDirectory(Path.GetDirectoryName(file));
-                output = output.Replace("::TYPE_BODY::", typeBuilder.ToString());
-
-                File.WriteAllText(file, output);
-            }
-        }
-
-        private static void GetTypeOutput(ProcessedType processedType, StringBuilder typeBuilder) {
-
-            ClassBuilder.TypeData data = ClassBuilder.GetDynamicTypeData(processedType.rawType);
-
-            FieldInfo[] fields = processedType.rawType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-            for (int f = 0; f < fields.Length; f++) {
-                bool isStatic = fields[f].IsStatic;
-
-                ClassBuilder.FieldData fieldData = data.GetFieldData(fields[f].Name);
-
-                typeBuilder.Append(s_Indent8);
-                typeBuilder.Append("public ");
-
-                if (isStatic) {
-                    typeBuilder.Append("static ");
-                }
-
-                typeBuilder.Append(TypeNameGenerator.GetTypeName(fields[f].FieldType));
-                typeBuilder.Append(" ");
-                typeBuilder.Append(fields[f].Name);
-
-                // todo -- check for default value
-                if (fieldData.lambdaValue != null) {
-                    typeBuilder.Append(" = ");
-                    typeBuilder.AppendLine(fieldData.lambdaValue.ToTemplateBodyFunction());
-                }
-                else {
-                    typeBuilder.AppendLine(";");
-                }
-            }
-
-            typeBuilder.AppendLine();
-            typeBuilder.AppendLine();
-
-            for (int m = 0; m < data.methodData.size; m++) {
-                ref ClassBuilder.MethodData methodData = ref data.methodData.array[m];
-
-                // attributes
-
-                typeBuilder.Append(s_Indent8);
-                typeBuilder.Append("public ");
-
-                if (methodData.isStatic) {
-                    typeBuilder.Append("static ");
-                }
-
-                typeBuilder.Append(TypeNameGenerator.GetTypeName(methodData.returnType));
-                typeBuilder.Append(" ");
-                typeBuilder.Append(methodData.methodName);
-                typeBuilder.Append("(");
-
-                PrintMethodSignature(methodData.signature, typeBuilder);
-
-                typeBuilder.AppendLine(") {");
-                typeBuilder.Append(s_Indent12);
-
-                if (methodData.returnType != null && methodData.returnType != typeof(void)) {
-                    typeBuilder.Append("return ");
-                }
-
-                typeBuilder.Append("__");
-                typeBuilder.Append(methodData.methodName);
-                typeBuilder.Append("(");
-
-                PrintMethodArgumentsSignature(methodData.isStatic, methodData.signature, typeBuilder);
-
-                typeBuilder.AppendLine(");");
-                typeBuilder.Append(s_Indent8);
-                typeBuilder.AppendLine("}\n");
-            }
-
-        }
-
-        private static void PrintMethodArgumentsSignature(bool isStatic, ClassBuilder.ResolvedParameter[] parameters, StringBuilder stringBuilder) {
-            if (!isStatic) {
-                stringBuilder.Append("this");
-            }
-
-            if (parameters == null || parameters.Length == 0) {
-                return;
-            }
-
-            for (int i = 0; i < parameters.Length; i++) {
-                stringBuilder.Append(", ");
-                stringBuilder.Append(parameters[i].name);
-            }
-        }
-
-        private static void PrintMethodSignature(ClassBuilder.ResolvedParameter[] parameters, StringBuilder stringBuilder) {
-            if (parameters == null || parameters.Length == 0) return;
-
-            for (int i = 0; i < parameters.Length; i++) {
-                TypeNameGenerator.GetTypeName(parameters[i].type, stringBuilder);
-                stringBuilder.Append(" ");
-                stringBuilder.Append(parameters[i].name);
-                if (i != parameters.Length - 1) {
-                    stringBuilder.Append(", ");
-                }
-            }
-        }
+        // private static void PrintMethodArgumentsSignature(bool isStatic, ClassBuilder.ResolvedParameter[] parameters, StringBuilder stringBuilder) {
+        //     if (!isStatic) {
+        //         stringBuilder.Append("this");
+        //     }
+        //
+        //     if (parameters == null || parameters.Length == 0) {
+        //         return;
+        //     }
+        //
+        //     for (int i = 0; i < parameters.Length; i++) {
+        //         stringBuilder.Append(", ");
+        //         stringBuilder.Append(parameters[i].name);
+        //     }
+        // }
+        //
+        // private static void PrintMethodSignature(ClassBuilder.ResolvedParameter[] parameters, StringBuilder stringBuilder) {
+        //     if (parameters == null || parameters.Length == 0) return;
+        //
+        //     for (int i = 0; i < parameters.Length; i++) {
+        //         TypeNameGenerator.GetTypeName(parameters[i].type, stringBuilder);
+        //         stringBuilder.Append(" ");
+        //         stringBuilder.Append(parameters[i].name);
+        //         if (i != parameters.Length - 1) {
+        //             stringBuilder.Append(", ");
+        //         }
+        //     }
+        // }
 
         private static string GenerateTemplateLoadCode(CompiledTemplateData compiledTemplateData) {
             LightList<CompiledTemplate> compiledTemplates = compiledTemplateData.compiledTemplates;

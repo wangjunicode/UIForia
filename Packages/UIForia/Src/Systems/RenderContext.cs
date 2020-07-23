@@ -8,6 +8,7 @@ using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.TextCore.LowLevel;
 using Object = UnityEngine.Object;
 
 namespace UIForia.Rendering {
@@ -393,7 +394,6 @@ namespace UIForia.Rendering {
             // currentBatch.uiforiaData.objectData0.array[currentBatch.uiforiaData.objectData0.size++] = geometry.objectData;
             // currentBatch.uiforiaData.objectData1.array[currentBatch.uiforiaData.objectData1.size++] = geometry.miscData;
             // currentBatch.uiforiaData.cornerData.array[currentBatch.uiforiaData.cornerData.size++] = geometry.cornerData;
-
             if (clipper != null) {
                 // todo break batch if changed
                 currentBatch.uiforiaData.clipTexture = !ReferenceEquals(clipper.clipTexture, null) ? clipper.clipTexture : currentBatch.uiforiaData.clipTexture;

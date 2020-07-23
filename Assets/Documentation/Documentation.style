@@ -29,10 +29,7 @@ style custom-material {
     
     MeshFillAmount = 1f;
     
-    Material = "Glitch2" {
-        _ShakeStrength = 4;
-    };
-       
+   
 }
 
 style main-container {

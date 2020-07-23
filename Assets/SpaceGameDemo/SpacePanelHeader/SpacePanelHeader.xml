@@ -1,5 +1,5 @@
 ﻿<UITemplate>
-    <Style src="SpacePanelHeader/SpacePanelHeader.style"/>
+    <Style src="SpaceGameDemo/SpacePanelHeader/SpacePanelHeader.style"/>
     <Contents>
         <Group style="bread-crumb">
             <Text mouse:click="GoToStartMenu()">Start</Text>

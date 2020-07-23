@@ -1,7 +1,7 @@
 ﻿<UITemplate>
     
-<!--    <Style src="SpaceGameRoot.style"/>-->
-<!--    <Style src="Theme.style" alias="theme"/>-->
+    <Style src="SpaceGameDemo/SpaceGameRoot.style"/>
+    <Style src="SpaceGameDemo/Theme.style" alias="theme"/>
     
     <Contents>
         

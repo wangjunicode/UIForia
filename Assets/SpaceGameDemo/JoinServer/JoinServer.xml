@@ -1,7 +1,7 @@
 ﻿<UITemplate>
 
-    <Style src="JoinServer/JoinServer.style"/>
-    <Style src="Theme.style" alias="theme"/>
+    <Style src="SpaceGameDemo/JoinServer/JoinServer.style"/>
+    <Style src="SpaceGameDemo/Theme.style" alias="theme"/>
 
     <Contents>
         <Group style="menu">

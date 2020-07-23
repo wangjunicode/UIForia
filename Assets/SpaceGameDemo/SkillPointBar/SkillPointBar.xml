@@ -1,5 +1,5 @@
 ﻿<UITemplate>
-    <Style src="SkillPointBar/SkillPointBar.style" />
+    <Style src="SpaceGameDemo/SkillPointBar/SkillPointBar.style" />
     <Using namespace="UIForia.Rendering" />
     <Using namespace="UIForia.Layout" />
     <Contents style="skill-bar-container">

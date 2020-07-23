@@ -1,6 +1,6 @@
 ﻿<UITemplate>
-    <Style src="Settings/Settings.style"/>
-    <Style src="Theme.style" alias="theme"/>
+    <Style src="SpaceGameDemo/Settings/Settings.style"/>
+    <Style src="SpaceGameDemo/Theme.style" alias="theme"/>
     <Contents>
 
         <Group style="menu">

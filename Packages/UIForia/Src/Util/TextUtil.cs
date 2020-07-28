@@ -257,7 +257,7 @@ namespace UIForia.Text {
             padding.y = padding.y < 1 ? padding.y : 1;
             padding.z = padding.z < 1 ? padding.z : 1;
             padding.w = padding.w < 1 ? padding.w : 1;
-            
+
             padding *= gradientScale;
 
             // Set UniformPadding to the maximum value of any of its components.
@@ -269,45 +269,49 @@ namespace UIForia.Text {
         }
 
         internal static float GetPadding(float gradientScale, in TextMeasureState textStyle, in float3 ratios) {
-            float4 padding = default;
 
-            float scaleRatio_A = ratios.x;
-            float scaleRatio_B = ratios.y;
-            float scaleRatio_C = ratios.z;
+            // not using cpu side padding anymore, gpu will apply proper padding.
 
-            float faceDilate = textStyle.faceDilate * scaleRatio_A;
-            float faceSoftness = textStyle.outlineSoftness * scaleRatio_A;
-            float outlineThickness = textStyle.outlineWidth * scaleRatio_A;
-
-            float uniformPadding = outlineThickness + faceSoftness + faceDilate;
-
-            float glowOffset = textStyle.glowOffset * scaleRatio_B;
-            float glowOuter = textStyle.glowOuter * scaleRatio_B;
-
-            uniformPadding = math.max(uniformPadding, faceDilate + glowOffset + glowOuter);
-
-            float offsetX = textStyle.underlayX * scaleRatio_C;
-            float offsetY = textStyle.underlayY * scaleRatio_C;
-            float dilate = textStyle.underlayDilate * scaleRatio_C;
-            float softness = textStyle.underlaySoftness * scaleRatio_C;
-
-            // tmp does a max check here with 0, I don't think we need it though
-            padding.x = faceDilate + dilate + softness - offsetX;
-            padding.y = faceDilate + dilate + softness - offsetY;
-            padding.z = faceDilate + dilate + softness + offsetX;
-            padding.w = faceDilate + dilate + softness + offsetY;
-
-            padding = math.max(padding, uniformPadding);
-
-            padding = math.min(padding, 1);
-            padding *= gradientScale;
-
-            // Set UniformPadding to the maximum value of any of its components.
-            uniformPadding = math.max(padding.x, padding.y);
-            uniformPadding = math.max(padding.z, uniformPadding);
-            uniformPadding = math.max(padding.w, uniformPadding);
-
-            return uniformPadding + 1.25f;
+            // float4 padding = default;
+            //
+            // float scaleRatio_A = ratios.x;
+            // float scaleRatio_B = ratios.y;
+            // float scaleRatio_C = ratios.z;
+            //
+            // float faceDilate = textStyle.faceDilate * scaleRatio_A;
+            // float faceSoftness = textStyle.outlineSoftness * scaleRatio_A;
+            // float outlineThickness = textStyle.outlineWidth * scaleRatio_A;
+            //
+            // float uniformPadding = outlineThickness + faceSoftness + faceDilate;
+            //
+            // float glowOffset = textStyle.glowOffset * scaleRatio_B;
+            // float glowOuter = textStyle.glowOuter * scaleRatio_B;
+            //
+            // uniformPadding = math.max(uniformPadding, faceDilate + glowOffset + glowOuter);
+            //
+            // float offsetX = textStyle.underlayX * scaleRatio_C;
+            // float offsetY = textStyle.underlayY * scaleRatio_C;
+            // float dilate = textStyle.underlayDilate * scaleRatio_C;
+            // float softness = textStyle.underlaySoftness * scaleRatio_C;
+            //
+            // // tmp does a max check here with 0, I don't think we need it though
+            // padding.x = faceDilate + dilate + softness - offsetX;
+            // padding.y = faceDilate + dilate + softness - offsetY;
+            // padding.z = faceDilate + dilate + softness + offsetX;
+            // padding.w = faceDilate + dilate + softness + offsetY;
+            //
+            // padding = math.max(padding, uniformPadding);
+            //
+            // padding = math.min(padding, 1);
+            // padding *= gradientScale;
+            //
+            // // Set UniformPadding to the maximum value of any of its components.
+            // uniformPadding = math.max(padding.x, padding.y);
+            // uniformPadding = math.max(padding.z, uniformPadding);
+            // uniformPadding = math.max(padding.w, uniformPadding);
+            //
+            // return uniformPadding + 1.25f;
+            return 0;
         }
 
         public static float GetPadding(in TextDisplayData textStyle, in Vector3 ratios) {
@@ -432,6 +436,7 @@ namespace UIForia.Text {
 
                 if (collapsing) {
                     if (!isWhiteSpace) {
+                        symbol.charInfo.flags |= CharacterFlags.Visible;
                         buffer.AddUnchecked(symbol);
                         collapsing = false;
                     }
@@ -441,6 +446,7 @@ namespace UIForia.Text {
                     buffer.AddUnchecked(symbol);
                 }
                 else {
+                    symbol.charInfo.flags |= CharacterFlags.Visible;
                     buffer.AddUnchecked(symbol);
                 }
             }
@@ -565,7 +571,7 @@ namespace UIForia.Text {
             currentWord.charStart = 0;
             currentWord.charEnd = 0;
 
-            TextLayoutSymbolType isBreakable = TextLayoutSymbolType.IsBreakable;
+            bool isBreakable = true; //TextLayoutSymbolType.IsBreakable;
 
             for (int i = 0; i < symbolListSize; i++) {
 
@@ -592,7 +598,8 @@ namespace UIForia.Text {
                             if (type == WordType.NewLine) {
 
                                 layoutBuffer.AddUnchecked(new TextLayoutSymbol() {
-                                    type = TextLayoutSymbolType.Word | isBreakable,
+                                    type = TextLayoutSymbolType.Word,
+                                    isBreakable = isBreakable,
                                     wordInfo = currentWord
                                 });
 
@@ -606,7 +613,8 @@ namespace UIForia.Text {
                         }
                         else {
                             layoutBuffer.AddUnchecked(new TextLayoutSymbol() {
-                                type = TextLayoutSymbolType.Word | isBreakable,
+                                type = TextLayoutSymbolType.Word,
+                                isBreakable = isBreakable,
                                 wordInfo = currentWord
                             });
                             currentWord.type = type;
@@ -619,16 +627,16 @@ namespace UIForia.Text {
                     }
 
                     case TextSymbolType.NoBreakPush:
-                        isBreakable = 0;
+                        isBreakable = true; //0;
                         break;
 
                     case TextSymbolType.NoBreakPop:
-                        isBreakable = TextLayoutSymbolType.IsBreakable;
+                        isBreakable = false; //TextLayoutSymbolType.IsBreakable;
                         break;
 
                     default:
                         if (symbol.ConvertToLayoutSymbol(out TextLayoutSymbol layoutSymbol)) {
-                            layoutSymbol.type |= isBreakable;
+                            layoutSymbol.isBreakable = isBreakable;
                             layoutBuffer.AddUnchecked(layoutSymbol);
                         }
                         else {
@@ -642,7 +650,8 @@ namespace UIForia.Text {
 
             if (currentWord.charEnd > 0) {
                 layoutBuffer.AddUnchecked(new TextLayoutSymbol() {
-                    type = TextLayoutSymbolType.Word | isBreakable,
+                    type = TextLayoutSymbolType.Word,
+                    isBreakable = isBreakable,
                     wordInfo = currentWord
                 });
             }
@@ -658,28 +667,29 @@ namespace UIForia.Text {
             float smallCapsMultiplier = (state.textTransform == TextTransform.SmallCaps) ? 0.8f : 1f;
             float fontScale = fontSize * smallCapsMultiplier / fontAsset.faceInfo.pointSize * fontAsset.faceInfo.scale;
 
-            float3 sdfRatios = ComputeRatios(state.fontAssetInfo, state);
+            // todo -- I think i need to bring back the ratio computation here... if I do then I can't support per-character material overrides without a layout
+            
+            //float3 sdfRatios = ComputeRatios(state.fontAssetInfo, state);
 
-            float padding = GetPadding(fontAsset.gradientScale, state, sdfRatios);
-            float gradientScale = fontAsset.gradientScale;
+            // float padding = GetPadding(fontAsset.gradientScale, state, sdfRatios);
+            //  float gradientScale = fontAsset.gradientScale;
             float boldAdvanceMultiplier = 1;
-            float stylePadding;
 
             // dont need style padding here
             if ((state.fontStyle & FontStyle.Bold) != 0) {
-                stylePadding = state.fontAssetInfo.boldStyle / 4.0f * gradientScale * sdfRatios.x;
-                if (stylePadding + padding > gradientScale) {
-                    padding = gradientScale - stylePadding;
-                }
+                // stylePadding = state.fontAssetInfo.boldStyle / 4.0f * gradientScale * sdfRatios.x;
+                // if (stylePadding + padding > gradientScale) {
+                //     padding = gradientScale - stylePadding;
+                // }
 
                 boldAdvanceMultiplier = 1 + state.fontAssetInfo.boldSpacing * 0.01f;
             }
-            else {
-                stylePadding = fontAsset.normalStyle / 4.0f * gradientScale;
-                if (stylePadding + padding > gradientScale) {
-                    padding = gradientScale - stylePadding;
-                }
-            }
+            // else {
+            //     stylePadding = fontAsset.normalStyle / 4.0f * gradientScale;
+            //     if (stylePadding + padding > gradientScale) {
+            //         padding = gradientScale - stylePadding;
+            //     }
+            // }
 
             float fontScaleMultiplier = state.scriptStyle == TextScript.SuperScript || state.scriptStyle == TextScript.SubScript
                 ? fontAsset.faceInfo.SubSize
@@ -687,23 +697,22 @@ namespace UIForia.Text {
 
             float fontBaseLineOffset = fontAsset.faceInfo.baseline * fontScale * fontScaleMultiplier * fontAsset.faceInfo.scale;
 
-            sizeInfo.padding = padding;
-            sizeInfo.stylePadding = stylePadding;
+            // sizeInfo.padding = padding;
+            //sizeInfo.stylePadding = stylePadding;
             sizeInfo.monospacing = 0;
-            
+
             // will need to check for a real italic font, probably I just want to ensure italic fonts have an italic style of 0
-            if ((state.fontStyle & FontStyle.Italic) != 0) {
-                sizeInfo.shear = fontAsset.italicStyle * 0.01f;
-            }
-            else {
-                sizeInfo.shear = 0;
-            }
+            // if ((state.fontStyle & FontStyle.Italic) != 0) {
+            //     sizeInfo.shear = fontAsset.italicStyle * 0.01f;
+            // }
+            // else {
+            //     sizeInfo.shear = 0;
+            // }
 
             sizeInfo.atlasWidth = fontAsset.atlasWidth;
             sizeInfo.atlasHeight = fontAsset.atlasHeight;
             sizeInfo.fontAscender = fontAsset.faceInfo.ascender;
             sizeInfo.fontDescender = fontAsset.faceInfo.descender;
-            sizeInfo.characterSpacing = 0;
             sizeInfo.fontScale = fontScale;
             sizeInfo.boldAdvanceMultiplier = boldAdvanceMultiplier;
             sizeInfo.fontScaleMultiplier = fontScaleMultiplier;
@@ -753,7 +762,7 @@ namespace UIForia.Text {
 
             return new float3(ratioA, ratioB, ratioC);
         }
-        
+
         internal static float3 ComputeRatios(in FontAssetInfo fontAsset, in TextInfoRenderSpan textStyle) {
             float gradientScale = fontAsset.gradientScale;
             float faceDilate = textStyle.faceDilate;
@@ -788,33 +797,34 @@ namespace UIForia.Text {
             // B = glow 
             // C = underlay
 
-            float gradientScale = fontAsset.gradientScale;
-            float faceDilate = textStyle.faceDilate;
+            // float gradientScale = fontAsset.gradientScale;
+            // float faceDilate = textStyle.faceDilate;
+            //
+            // float outlineThickness = textStyle.outlineWidth;
+            // float outlineSoftness = textStyle.outlineSoftness;
+            // float weight = math.max(fontAsset.weightNormal, fontAsset.weightBold) / 4f;
+            // float ratioA_t = math.max(1, weight + faceDilate + outlineThickness + outlineSoftness);
+            // float ratioA = (gradientScale - 1f) / (gradientScale * ratioA_t);
+            //
+            // float glowOffset = textStyle.glowOffset;
+            // float glowOuter = textStyle.glowOuter;
+            // float ratioBRange = (weight + faceDilate) * (gradientScale - 1f);
+            //
+            // float ratioB_t = math.max(1, glowOffset + glowOuter);
+            // float ratioB = math.max(0, gradientScale - 1 - ratioBRange) / (gradientScale * ratioB_t);
+            //
+            // float underlayOffsetX = textStyle.underlayX;
+            // float underlayOffsetY = textStyle.underlayY;
+            // float underlayDilate = textStyle.underlayDilate;
+            // float underlaySoftness = textStyle.underlaySoftness;
+            //
+            // float ratioCRange = (weight + faceDilate) * (gradientScale - 1);
+            // float ratioC_t = math.max(1, math.max(math.abs(underlayOffsetX), math.abs(underlayOffsetY)) + underlayDilate + underlaySoftness);
+            //
+            // float ratioC = math.max(0, gradientScale - 1f - ratioCRange) / (gradientScale * ratioC_t);
 
-            float outlineThickness = textStyle.outlineWidth;
-            float outlineSoftness = textStyle.outlineSoftness;
-            float weight = math.max(fontAsset.weightNormal, fontAsset.weightBold) / 4f;
-            float ratioA_t = math.max(1, weight + faceDilate + outlineThickness + outlineSoftness);
-            float ratioA = (gradientScale - 1f) / (gradientScale * ratioA_t);
-
-            float glowOffset = textStyle.glowOffset;
-            float glowOuter = textStyle.glowOuter;
-            float ratioBRange = (weight + faceDilate) * (gradientScale - 1f);
-
-            float ratioB_t = math.max(1, glowOffset + glowOuter);
-            float ratioB = math.max(0, gradientScale - 1 - ratioBRange) / (gradientScale * ratioB_t);
-
-            float underlayOffsetX = textStyle.underlayX;
-            float underlayOffsetY = textStyle.underlayY;
-            float underlayDilate = textStyle.underlayDilate;
-            float underlaySoftness = textStyle.underlaySoftness;
-
-            float ratioCRange = (weight + faceDilate) * (gradientScale - 1);
-            float ratioC_t = math.max(1, math.max(math.abs(underlayOffsetX), math.abs(underlayOffsetY)) + underlayDilate + underlaySoftness);
-
-            float ratioC = math.max(0, gradientScale - 1f - ratioCRange) / (gradientScale * ratioC_t);
-
-            return new float3(ratioA, ratioB, ratioC);
+            // return new float3(ratioA, ratioB, ratioC);
+            return new float3(1, 1, 1);
         }
 
         internal static void MeasureWord(in DataList<FontAssetInfo>.Shared fontAssetMap, int wordIndex, ref WordInfo wordInfo, in List_TextSymbol symbolList, ref ComputeSizeInfo sizeInfo, ref TextMeasureState measureState) {
@@ -823,13 +833,8 @@ namespace UIForia.Text {
             int start = wordInfo.charStart;
             int end = wordInfo.charEnd;
 
-            // todo -- I don't need to re-layout if padding changes. move the uv and vertex computation elsewhere;
-            // I only need to recompute width and height here
-            // the overall width of the text doesn't change if padding changed
-            // style padding is important since its driven by bold, that requires re-layout
-            // but I do need to re-render the mesh for sure since ill update the uvs
-            // one option is to defer the uv computation until actually rendering
-            // then layout doesn't care about most of the properties changing
+            wordInfo.maxAscender = 0;
+
             float currentElementScale = sizeInfo.fontScale * sizeInfo.fontScaleMultiplier;
 
             for (int charIndex = start; charIndex < end; charIndex++) {
@@ -840,17 +845,12 @@ namespace UIForia.Text {
 
                     case TextSymbolType.Character: {
 
-                        if (!fontAssetMap[sizeInfo.fontAssetId].TryGetGlyph(textSymbol.charInfo.character, out UIForiaGlyph glyph)) {
+                        if (!fontAssetMap[sizeInfo.fontAssetId].TryGetGlyphIndex(textSymbol.charInfo.character, out int glyphIdx)) {
                             continue; // todo -- handle missing glyphs somehow
                         }
 
-                        // do i have a seperate thing for actually rendered char infos?
-                        // with material idx and stuff?
-                        // i need to iterate characters anyway
-                        // is it easier to just add a 'skip-render' flag?
-                        textSymbol.charInfo.wordIndex = wordIndex;
-                        textSymbol.charInfo.renderBufferIndex = (ushort)glyph.renderBufferIndex;
-                        
+                        ref UIForiaGlyph glyph = ref fontAssetMap[sizeInfo.fontAssetId].GetGlyphRef(glyphIdx);
+
                         // if (sizeInfo.monospacing != 0) {
                         //     xAdvance += (sizeInfo.monospacing - monoAdvance + ((sizeInfo.characterSpacing + sizeInfo.normalSpacingOffset) * currentElementScale));
                         // }
@@ -860,31 +860,31 @@ namespace UIForia.Text {
                             kerningAdvance = fontAssetMap[sizeInfo.fontAssetId].GetKerning(textSymbol.charInfo.character, symbolList[charIndex + 1].charInfo.character);
                         }
 
+                        float ascender = sizeInfo.fontAscender * currentElementScale;
                         textSymbol.charInfo.position.x = xAdvance + (glyph.xOffset * currentElementScale);
-                        textSymbol.charInfo.position.y = sizeInfo.fontBaseLineOffset + (sizeInfo.fontAscender * currentElementScale);// + ((sizeInfo.fontAscender - glyph.yOffset) * currentElementScale);
+                        textSymbol.charInfo.position.y = sizeInfo.fontBaseLineOffset + (sizeInfo.fontAscender - glyph.yOffset) * currentElementScale;
+                        textSymbol.charInfo.scale = currentElementScale;
+                        textSymbol.charInfo.fontAssetId = (ushort)sizeInfo.fontAssetId;
+                        textSymbol.charInfo.glyphIndex = (ushort) glyphIdx;
+                        textSymbol.charInfo.wordIndex = (ushort) wordIndex;
+
+                        //(sizeInfo.fontAscender * currentElementScale); 
+                        // Debug.Log(((char)textSymbol.charInfo.character) + " asc: "+ (sizeInfo.fontAscender * currentElementScale));
+                        // + ((sizeInfo.fontAscender - glyph.yOffset) * currentElementScale);
                         float bottom = textSymbol.charInfo.position.y + (glyph.height * currentElementScale);
-                        // todo -- remove uvs, shear, and bottomRight. look these up in the shader instead
+                        wordInfo.maxAscender = wordInfo.maxAscender > ascender ? wordInfo.maxAscender : ascender;
                         // textSymbol.charInfo.bottomRight.x = textSymbol.charInfo.topLeft.x + (glyph.width * currentElementScale);
                         // textSymbol.charInfo.bottomRight.y = textSymbol.charInfo.topLeft.y + (glyph.height * currentElementScale);
-                        //
-                        // textSymbol.charInfo.topLeftUv.x = glyph.uvX;
-                        // textSymbol.charInfo.topLeftUv.y = glyph.uvY;
-                        // textSymbol.charInfo.bottomRightUv.x = glyph.uvX + glyph.uvWidth;
-                        // textSymbol.charInfo.bottomRightUv.y = glyph.uvY + glyph.uvHeight;
 
                         // float topShear = sizeInfo.shear * (glyph.yOffset * currentElementScale);
                         // float bottomShear = sizeInfo.shear * ((glyph.yOffset - glyph.height) * currentElementScale);
-                        //
-                        // textSymbol.charInfo.shearTop = topShear;
-                        // textSymbol.charInfo.shearBottom = bottomShear;
 
                         // todo -- im not sure kerning is correct here, it has very small values and I think it might be an x position adjustment or need to be scaled 
 
                         float w = (glyph.xAdvance
                                    * sizeInfo.boldAdvanceMultiplier
-                                   + sizeInfo.characterSpacing
                                    + sizeInfo.normalSpacingOffset
-                                   + kerningAdvance) * currentElementScale;
+                                   + kerningAdvance) * currentElementScale + sizeInfo.characterSpacing;
 
                         xAdvance += w;
 
@@ -895,6 +895,7 @@ namespace UIForia.Text {
 
                     // todo -- loop until we hit a character again before recomputing
                     case TextSymbolType.FontPush: {
+                        // this feels really wrong! beware
                         if (textSymbol.fontId >= 1 && textSymbol.fontId < fontAssetMap.size) {
                             measureState.PushFont(fontAssetMap[textSymbol.fontId]);
                             RecomputeFontInfo(ref measureState, ref sizeInfo);
@@ -905,31 +906,37 @@ namespace UIForia.Text {
 
                     case TextSymbolType.FontPop:
                         measureState.PopFont();
-                        TextUtil.RecomputeFontInfo(ref measureState, ref sizeInfo);
+                        RecomputeFontInfo(ref measureState, ref sizeInfo);
                         break;
 
                     case TextSymbolType.FontSizePush:
                         measureState.PushFontSize(textSymbol.length);
-                        TextUtil.RecomputeFontInfo(ref measureState, ref sizeInfo);
+                        RecomputeFontInfo(ref measureState, ref sizeInfo);
+                        currentElementScale = sizeInfo.fontScale * sizeInfo.fontScaleMultiplier;
                         break;
 
                     case TextSymbolType.FontSizePop:
                         measureState.PopFontSize();
-                        TextUtil.RecomputeFontInfo(ref measureState, ref sizeInfo);
+                        RecomputeFontInfo(ref measureState, ref sizeInfo);
+                        currentElementScale = sizeInfo.fontScale * sizeInfo.fontScaleMultiplier;
                         break;
 
-                    case TextSymbolType.NoBreakPush:
-                    case TextSymbolType.NoBreakPop:
                     case TextSymbolType.HorizontalSpace: {
+                        // I think this does nothing, spacing should have been handled in word creation
+                        // todo -- I need to resolve the space size here
                         break;
                     }
 
-                    case TextSymbolType.ColorPush:
-                    case TextSymbolType.ColorPop:
-                    case TextSymbolType.TextTransformPush:
-                    case TextSymbolType.TextTransformPop:
-                    default:
+                    case TextSymbolType.CharSpacingPush: {
+                        sizeInfo.characterSpacing = measureState.PushCharSpacing(textSymbol.length);
                         break;
+                    }
+
+                    case TextSymbolType.CharSpacingPop: {
+                        measureState.TryPopCharSpacing(out sizeInfo.characterSpacing);
+                        break;
+                    }
+
                 }
 
             }
@@ -938,83 +945,6 @@ namespace UIForia.Text {
             wordInfo.height = maxHeight;
         }
 
-        internal struct TextRenderState : IDisposable {
-
-            public Color32 color;
-            public FontStyle fontStyle;
-
-            public List_float underlayX;
-            public List_float underlayY;
-            public List_float underlayDilate;
-            public List_float underlaySoftness;
-
-            public void GetSpan(out TextInfoRenderSpan span) {
-                span = default;
-            }
-            
-            public void PushFontStyle(FontStyle fontStyle) { }
-
-            public void PushVertexColorQuad(Color32 c0, Color32 c1, Color32 c2, Color32 c3) {
-                
-            }
-
-            public void PushVertexColor(Color32 color) { }
-
-            public void PushFontAsset(int fontAssetId) { }
-
-            public void PushFaceTexture(int textureId) { }
-            
-            public void PushOutlineTexture(int textureId) { }
-
-            public void PushUnderlayX(float underlayX) { }
-            
-            public void PushUnderlayY(float underlayY) { }
-            
-            public void PushUnderlaySoftness(float underlayY) { }
-            
-            public void PushUnderlayDilate(float underlayY) { }
-
-            public void PushGlowPower(float underlayX) { }
-            
-            public void PushGlowInner(float underlayY) { }
-            
-            public void PushGlowOuter(float underlayY) { }
-            
-            public void PushGlowOffset(float underlayY) { }
-
-            public void Dispose() {
-                
-            }
-
-        }
-
-        internal static void GetRenderSpans(ref TextInfo textInfo, int lineIndex, ref TextRenderState renderState) {
-            TextLineInfo line = textInfo.lineInfoList[lineIndex];
-            int wordStart = line.wordStart;
-            int wordEnd = wordStart + line.wordCount;
-
-            int charStart = textInfo.layoutSymbolList[wordStart].wordInfo.charStart;
-            int charEnd = textInfo.layoutSymbolList[wordEnd].wordInfo.charEnd;
-
-            for (int charIdx = charStart; charIdx < charEnd; charIdx++) {
-                ref TextSymbol symbol = ref textInfo.symbolList[charIdx];
-
-                if (symbol.type == TextSymbolType.FontPush) {
-                    // layoutSystem.application.resourceManager.GetFontAssetInfo(symbol.fontId);
-                }
-
-                if (symbol.type == TextSymbolType.FontPop) {
-                    // fontstack.Pop();
-                }
-
-                if (symbol.type == TextSymbolType.MaterialPush) { }
-
-                if (symbol.type == TextSymbolType.MaterialPop) { }
-
-                if (symbol.type == TextSymbolType.Sprite) { }
-
-            }
-        }
     }
 
     internal struct ComputeSizeInfo {
@@ -1030,7 +960,6 @@ namespace UIForia.Text {
         public float boldAdvanceMultiplier;
         public float atlasWidth;
         public float atlasHeight;
-        public float shear;
         public float monospacing;
         public float characterSpacing;
         public float normalSpacingOffset;

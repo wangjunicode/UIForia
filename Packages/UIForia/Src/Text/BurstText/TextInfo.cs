@@ -3,6 +3,8 @@ using System.Collections;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using UIForia.Elements;
+using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.ListTypes;
 using UIForia.Rendering;
@@ -10,11 +12,12 @@ using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace UIForia.Text {
 
     [Flags]
-    public enum TextLayoutSymbolType {
+    public enum TextLayoutSymbolType : ushort {
 
         Word = 1 << 0,
         HorizontalSpace = 1 << 1,
@@ -30,7 +33,7 @@ namespace UIForia.Text {
         AlignPush = 1 << 11,
         IndentPop = 1 << 12,
 
-        IsBreakable = 1 << 31
+        //IsBreakable = 1 << 31
 
     }
 
@@ -39,20 +42,23 @@ namespace UIForia.Text {
     public struct TextLayoutSymbol {
 
         [FieldOffset(0)] public TextLayoutSymbolType type;
-        [FieldOffset(4)] public UIFixedLength space;
+        [FieldOffset(2)] public bool isBreakable;
         [FieldOffset(4)] public WordInfo wordInfo;
+        [FieldOffset(4)] public UIFixedLength space;
+        [FieldOffset(8)] public float width;
+        [FieldOffset(12)] public float height;
 
-        public bool isBreakable {
-            get => (type & TextLayoutSymbolType.IsBreakable) != 0;
-            set {
-                if (value) {
-                    type |= TextLayoutSymbolType.IsBreakable;
-                }
-                else {
-                    type &= ~TextLayoutSymbolType.IsBreakable;
-                }
-            }
-        }
+        // public bool isBreakable {
+        //     get => (type & TextLayoutSymbolType.IsBreakable) != 0;
+        //     set {
+        //         if (value) {
+        //             type |= TextLayoutSymbolType.IsBreakable;
+        //         }
+        //         else {
+        //             type &= ~TextLayoutSymbolType.IsBreakable;
+        //         }
+        //     }
+        // }
 
         public string GetDebuggerView() {
             return type.ToString();
@@ -87,7 +93,7 @@ namespace UIForia.Text {
             string[] retn = new string[layoutSymbol.size];
             StringBuilder builder = new StringBuilder(32);
             for (int i = 0; i < layoutSymbol.size; i++) {
-                switch (layoutSymbol.array[i].type & ~TextLayoutSymbolType.IsBreakable) {
+                switch (layoutSymbol.array[i].type) {
 
                     case TextLayoutSymbolType.Word: {
 
@@ -149,24 +155,40 @@ namespace UIForia.Text {
 
     }
 
+    
+    public enum TextInfoFlags {
+
+        HasRichText = 1 << 0,
+        RequiresRichTextLayout = 1 << 1
+
+    }
+
     [StructLayout(LayoutKind.Sequential)]
     [DebuggerTypeProxy(typeof(TextInfoDebugView))]
     public struct TextInfo : IDisposable {
 
-        internal List_Char characterList;
         internal List_TextSymbol symbolList;
         internal List_TextLayoutSymbol layoutSymbolList;
-        internal List_TextLineInfo lineInfoList;
-        internal TextStyle textStyle;
+        internal List_TextLineInfo lineInfoList; // theres a chance I dont need to store this
+        internal List_TextRenderRange renderRangeList;
 
-        internal bool spanDirty;
+        internal List_TextMaterialInfo materialBuffer;
+
+        internal TextStyle textStyle; // todo -- deprecate this
+
+        internal int renderingCharacterCount;
+
+        // todo -- flags
+        internal bool isRichText;
+        internal bool requiresRichLayout;
         internal bool requiresTextTransform;
         internal bool requiresRenderProcessing;
+        internal bool isRenderDecorated;
 
         [ThreadStatic] internal static StructList<TextSymbol> inputSymbolBuffer;
-        internal bool isRenderDecorated;
         internal float resolvedFontSize;
-        public bool isRichText;
+        public TextMaterialInfo textMaterial;
+        private TextInfoFlags flags;
 
         public static TextInfo Create(string text, in TextStyle style, in DataList<FontAssetInfo>.Shared fontAssetMap) {
 
@@ -227,6 +249,21 @@ namespace UIForia.Text {
             textInfo.layoutSymbolList.CopyFrom(layoutBuffer.GetArrayPointer(), layoutBuffer.size);
         }
 
+        internal static unsafe void CountRenderedCharacters(ref TextInfo textInfo) {
+            int cnt = 0;
+
+            for (int s = 0; s < textInfo.symbolList.size; s++) {
+                // todo -- also handle disabled characters
+                if (textInfo.symbolList.array[s].type == TextSymbolType.Character) {
+                    if ((textInfo.symbolList.array[s].charInfo.flags & CharacterFlags.Visible) != 0) {
+                        cnt++;
+                    }
+                }
+            }
+
+            textInfo.renderingCharacterCount = cnt;
+        }
+
         internal static void ComputeSize(DataList<FontAssetInfo>.Shared fontAssetMap, ref TextInfo textInfo, float emSize, ref TextMeasureState measureState) {
             ComputeSizeInfo sizeInfo = new ComputeSizeInfo();
             measureState.Initialize(emSize, textInfo.textStyle, fontAssetMap[textInfo.textStyle.fontAssetId]);
@@ -238,7 +275,7 @@ namespace UIForia.Text {
 
                 ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList[i];
 
-                TextLayoutSymbolType type = layoutSymbol.type & ~TextLayoutSymbolType.IsBreakable;
+                TextLayoutSymbolType type = layoutSymbol.type;
 
                 if (type == TextLayoutSymbolType.Word) {
                     TextUtil.MeasureWord(fontAssetMap, i, ref layoutSymbol.wordInfo, textInfo.symbolList, ref sizeInfo, ref measureState);
@@ -253,6 +290,7 @@ namespace UIForia.Text {
         public static unsafe void UpdateText(ref TextInfo textInfo, string text, ITextProcessor processor = null) {
             bool requiresTextTransform = false;
             bool requiresRenderProcessing = false;
+            bool requiresRichTextLayout = false;
             bool processedStream = false;
 
             if (inputSymbolBuffer == null) {
@@ -265,17 +303,18 @@ namespace UIForia.Text {
             fixed (char* charptr = text) {
                 if (processor != null) {
                     CharStream stream = new CharStream(charptr, 0, (uint) length);
-                    TextSymbolStream symbolStream = new TextSymbolStream(inputSymbolBuffer);
+                    LightList<TextEffect> textEffects = LightList<TextEffect>.Get();
+                    TextSymbolStream symbolStream = new TextSymbolStream(textEffects, inputSymbolBuffer);
 
                     processedStream = processor.Process(stream, ref symbolStream);
 
                     requiresTextTransform = symbolStream.requiresTextTransform;
                     requiresRenderProcessing = symbolStream.requiresRenderProcessing;
+                    requiresRichTextLayout = symbolStream.requiresRichTextLayout;
                     inputSymbolBuffer = symbolStream.stream;
-                    if (symbolStream.textEffects.size > 0) {
-                        
-                    }
-                    symbolStream.textEffects.Release();
+                    if (symbolStream.textEffects.size > 0) { }
+
+                    textEffects.Release();
                 }
 
                 if (!processedStream) {
@@ -295,12 +334,171 @@ namespace UIForia.Text {
 
             textInfo.requiresTextTransform = requiresTextTransform;
             textInfo.requiresRenderProcessing = requiresRenderProcessing;
+            if (requiresRichTextLayout) {
+                textInfo.flags |= TextInfoFlags.RequiresRichTextLayout;
+            }
+
             textInfo.symbolList.SetSize(inputSymbolBuffer.size, Allocator.Persistent);
 
             fixed (TextSymbol* inputPtr = inputSymbolBuffer.array) {
                 textInfo.symbolList.CopyFrom(inputPtr, inputSymbolBuffer.size);
             }
 
+        }
+
+        internal static unsafe void RunLayoutHorizontal_RichText<T>(ref TextInfo textInfo, ref T buffer, float width) where T : IBasicList<TextLineInfo> {
+            ref List_TextLayoutSymbol layoutSymbolList = ref textInfo.layoutSymbolList;
+
+            buffer.SetSize(0);
+
+            WhitespaceMode whitespaceMode = textInfo.textStyle.whitespaceMode;
+            bool trimStart = (whitespaceMode & WhitespaceMode.TrimLineStart) != 0;
+
+            int wordStart = 0;
+            int wordCount = 0;
+            float cursorX = 0;
+
+            for (int i = 0; i < layoutSymbolList.size; i++) {
+                ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList.array[i];
+                TextLayoutSymbolType type = layoutSymbol.type;
+                //& ~TextLayoutSymbolType.IsBreakable);
+
+                switch (type) {
+
+                    case TextLayoutSymbolType.Word: {
+                        ref WordInfo wordInfo = ref layoutSymbol.wordInfo;
+
+                        if (!layoutSymbol.isBreakable) {
+                            wordCount++;
+                            cursorX += wordInfo.width;
+                            continue;
+                        }
+
+                        switch (wordInfo.type) {
+
+                            case WordType.Whitespace: {
+
+                                // if whitespace overruns end of line, start a new one and add it to that line
+                                if (cursorX + wordInfo.width > width) {
+                                    buffer.Add(new TextLineInfo(wordStart, wordCount, cursorX));
+                                    wordStart = i;
+                                    wordCount = 1;
+                                    cursorX = 0; //wordInfo.width; there may be cases in which we want to keep this whitespace
+                                }
+                                else {
+                                    if (wordCount != 0) {
+                                        wordCount++;
+                                        cursorX += wordInfo.width;
+                                    }
+                                    else if (trimStart && wordStart == i) {
+                                        wordStart++;
+                                    }
+                                }
+
+                                break;
+                            }
+
+                            case WordType.NewLine:
+                                buffer.Add(new TextLineInfo(wordStart, wordCount, cursorX));
+                                cursorX = 0;
+                                wordStart = i + 1;
+                                wordCount = 0;
+                                break;
+
+                            case WordType.Normal:
+
+                                // single word is longer than the line.
+                                // Finish current line,
+                                // start a new one,
+                                // then complete the new one
+                                if (wordInfo.width > width) {
+
+                                    if (wordCount != 0) {
+                                        buffer.Add(new TextLineInfo(wordStart, wordCount, cursorX));
+                                        cursorX = 0;
+                                        wordStart = i;
+                                        wordCount = 1;
+                                    }
+                                    else {
+                                        buffer.Add(new TextLineInfo(wordStart, 1, width));
+                                        cursorX = 0;
+                                        wordStart = i + 1;
+                                        wordCount = 0;
+                                    }
+
+                                }
+                                // next word is too long, break it onto the next line
+                                else if (cursorX + wordInfo.width >= width + 0.5f) {
+                                    buffer.Add(new TextLineInfo(wordStart, wordCount, cursorX));
+                                    wordStart = i;
+                                    wordCount = 1;
+                                    cursorX = wordInfo.width;
+                                }
+                                else {
+                                    // we fit, just add to cursor position and word count
+                                    cursorX += wordInfo.width;
+                                    wordCount++;
+                                }
+
+                                break;
+
+                            case WordType.SoftHyphen:
+                                // if word is too long for current line,
+                                // split it on the hyphen
+                                // if still too long, walk back and keep splitting unless there isnt a hyphen a found
+                                break;
+
+                        }
+
+                        break;
+                    }
+
+                    case TextLayoutSymbolType.HorizontalSpace:
+                        cursorX += layoutSymbol.space.value;
+                        layoutSymbol.width = layoutSymbol.space.value; // todo -- use resolved size
+                        wordCount++;
+                        break;
+
+                    case TextLayoutSymbolType.LineHeightPush:
+                        break;
+
+                    case TextLayoutSymbolType.LineHeightPop:
+                        break;
+
+                    case TextLayoutSymbolType.LineIndentPush:
+                        break;
+
+                    case TextLayoutSymbolType.LineIndentPop:
+                        break;
+
+                    case TextLayoutSymbolType.MarginLeftPush:
+                        break;
+
+                    case TextLayoutSymbolType.MarginLeftPop:
+                        break;
+
+                    case TextLayoutSymbolType.MarginRightPush:
+                        break;
+
+                    case TextLayoutSymbolType.MarginRightPop:
+                        break;
+
+                    case TextLayoutSymbolType.IndentPush:
+                        break;
+
+                    case TextLayoutSymbolType.AlignPush:
+                        break;
+
+                    case TextLayoutSymbolType.IndentPop:
+                        break;
+
+                }
+
+            }
+
+            if (wordCount != 0) {
+                buffer.Add(new TextLineInfo(wordStart, wordCount, cursorX));
+            }
         }
 
         internal static unsafe void RunLayoutHorizontal_WordsOnly<T>(ref TextInfo textInfo, ref T buffer, float width) where T : IBasicList<TextLineInfo> {
@@ -319,7 +517,7 @@ namespace UIForia.Text {
             for (int i = 0; i < layoutSymbolList.size; i++) {
                 ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList.array[i];
                 ref WordInfo wordInfo = ref layoutSymbol.wordInfo;
-                bool isBreakable = (layoutSymbol.type & TextLayoutSymbolType.IsBreakable) != 0;
+                bool isBreakable = layoutSymbol.isBreakable;
 
                 if (!isBreakable) {
                     wordCount++;
@@ -411,6 +609,63 @@ namespace UIForia.Text {
 
         }
 
+        internal static unsafe void RunLayoutVertical_RichText(in FontAssetInfo fontAsset, float fontSize, ref TextInfo textInfo) {
+            // for (int i = 0; i < layoutSymbolList.size; i++) {
+            //     ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList.array[i];
+            //     TextLayoutSymbolType type = (layoutSymbol.type & ~TextLayoutSymbolType.IsBreakable);
+            //
+            //     switch (type) {
+            //
+            //         case TextLayoutSymbolType.Word: {
+            //
+            //             break;
+            //         }
+            //
+            //         case TextLayoutSymbolType.HorizontalSpace:
+            //
+            //             break;
+            //
+            //         case TextLayoutSymbolType.LineHeightPush:
+            //             break;
+            //
+            //         case TextLayoutSymbolType.LineHeightPop:
+            //             break;
+            //
+            //         case TextLayoutSymbolType.LineIndentPush:
+            //             break;
+            //
+            //         case TextLayoutSymbolType.LineIndentPop:
+            //             break;
+            //
+            //         case TextLayoutSymbolType.MarginLeftPush:
+            //             break;
+            //
+            //         case TextLayoutSymbolType.MarginLeftPop:
+            //             break;
+            //
+            //         case TextLayoutSymbolType.MarginRightPush:
+            //             break;
+            //
+            //         case TextLayoutSymbolType.MarginRightPop:
+            //             break;
+            //
+            //         case TextLayoutSymbolType.IndentPush:
+            //             break;
+            //
+            //         case TextLayoutSymbolType.AlignPush:
+            //             break;
+            //
+            //         case TextLayoutSymbolType.IndentPop:
+            //             break;
+            //
+            //         case TextLayoutSymbolType.IsBreakable:
+            //             break;
+            //
+            //     }
+            //
+            // }
+        }
+
         internal static unsafe void RunLayoutVertical_WordsOnly(in FontAssetInfo fontAsset, float fontSize, ref TextInfo textInfo) {
             ref List_TextLayoutSymbol layoutSymbolList = ref textInfo.layoutSymbolList;
 
@@ -432,8 +687,16 @@ namespace UIForia.Text {
 
                 for (int w = lineInfo.wordStart; w < end; w++) {
 
-                    if (textInfo.layoutSymbolList.array[w].wordInfo.height > max) {
+                    ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList.array[w];
+                    ref WordInfo wordInfo = ref textInfo.layoutSymbolList.array[w].wordInfo;
+                    if (wordInfo.height > max) {
                         max = textInfo.layoutSymbolList.array[w].wordInfo.height;
+                    }
+
+                    ushort lineIdx = (ushort) i;
+                    // assign line index to character symbols
+                    for (int c = wordInfo.charStart; c < wordInfo.charEnd; c++) {
+                        textInfo.symbolList.array[c].charInfo.lineIndex = lineIdx;
                     }
 
                 }
@@ -444,6 +707,9 @@ namespace UIForia.Text {
                 for (int w = lineInfo.wordStart; w < end; w++) {
                     layoutSymbolList.array[w].wordInfo.y = lineInfo.y;
                 }
+
+                // baseline defined by tallest symbol on line's lower position? doesnt handle 
+                // 
             }
 
         }
@@ -461,15 +727,11 @@ namespace UIForia.Text {
         }
 
         public void Dispose() {
-            characterList.Dispose();
             symbolList.Dispose();
             layoutSymbolList.Dispose();
             lineInfoList.Dispose();
-        }
-
-        public void Layout(DataList<FontAssetInfo>.Shared fontAssetMap, float maxWidth = float.MaxValue) {
-            RunLayoutHorizontal_WordsOnly(ref this, ref lineInfoList, maxWidth);
-            // RunLayoutVertical_WordsOnly(fontAssetMap[textStyle.fontAssetId], 18, ref this);
+            renderRangeList.Dispose();
+            materialBuffer.Dispose();
         }
 
     }
@@ -483,79 +745,105 @@ namespace UIForia.Text {
 
     }
 
-    public unsafe struct CharacterInterface {
+    public interface IUIForiaRichTextEffect {
 
-        public readonly float2 position;
-        public readonly int character;
-        public readonly int charIndex;
-        public readonly int symbolIndex;
-        public readonly CharacterFlags flags;
+        bool TryParseRichTextAttributes(CharStream stream);
 
-        internal ManagedTextSpanInfo span;
+    }
 
-        internal CharacterInterface(ManagedTextSpanInfo span, float2 position, int character, int charIndex, int symbolIndex, CharacterFlags flags) {
-            this.span = span;
-            this.position = position;
-            this.character = character;
-            this.charIndex = charIndex;
-            this.symbolIndex = symbolIndex;
-            this.flags = flags;
+    // todo -- reemove this crap
+    public static class Tween {
+
+        public static float EaseIn(float t) {
+            return t * t;
         }
 
-        public int ComputeLineIndex() {
-            return 0;
+        public static float Flip(float x) {
+            return 1 - x;
         }
 
-        public int ComputeWordIndex() {
-            return 0;
+        public static float Square(float t) {
+            return t * t;
         }
 
-        public int ComputeWordCharIndex() {
-            return 0;
+        public static float EaseOut(float t) {
+            return Flip(Square(Flip(t)));
         }
 
-        private int GetOrCreateVertexOverrides() {
-            ref BurstCharInfo characterInfo = ref span.unmanagedSpanInfo->symbolList.array[symbolIndex].charInfo;
-            if (characterInfo.vertexIdx == 0) {
-                characterInfo.vertexIdx = span.textInfo.AllocateVertexId();
+        public static float EaseInOut(float t) {
+            return Mathf.Lerp(EaseIn(t), EaseOut(t), t);
+        }
+
+        #region BounceOut
+
+        public static float BounceOut(float t) {
+            /*
+            License of the original method/algorithm, modified later for C#.
+          
+            ------------------------Start------------------------
+            The MIT License
+
+            Copyright (c) 2010-2012 Tween.js authors.
+            
+            Easing equations Copyright (c) 2001 Robert Penner http:/robertpenner.com/ easing/
+            
+            Permission is hereby granted, free of charge, to any person obtaining a copy
+            of this software and associated documentation files (the "Software"), to deal
+            in the Software without restriction, including without limitation the rights
+            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+            copies of the Software, and to permit persons to whom the Software is
+            furnished to do so, subject to the following conditions:
+            
+            The above copyright notice and this permission notice shall be included in
+            all copies or substantial portions of the Software.
+            
+            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+            THE SOFTWARE.
+
+            ------------------------End------------------------
+            */
+
+            if (t < (1f / 2.75f)) {
+                return 7.5625f * t * t;
             }
-
-            return characterInfo.vertexIdx;
+            else if (t < (2f / 2.75f)) {
+                return 7.5625f * (t -= (1.5f / 2.75f)) * t + 0.75f;
+            }
+            else if (t < (2.5f / 2.75f)) {
+                return 7.5625f * (t -= (2.25f / 2.75f)) * t + 0.9375f;
+            }
+            else {
+                return 7.5625f * (t -= (2.625f / 2.75f)) * t + 0.984375f;
+            }
         }
 
-        public void SetVertexOffsets(float2 topLeft, float2 topRight, float2 bottomRight, float2 bottomLeft) {
-            ref TextVertexOverride vertices = ref span.textInfo.vertexOverrides[GetOrCreateVertexOverrides()];
-            vertices.topLeft = topLeft;
-            vertices.topRight = topRight;
-            vertices.bottomRight = bottomRight;
-            vertices.bottomLeft = bottomLeft;
-        }
-
-        public void RotateVertices(float2 offset) { }
-
-        public void RotateVertices(float2 offset, float2 pivot) { }
-
-        public void OffsetVertices(float2 offset) {
-            ref TextVertexOverride vertices = ref span.textInfo.vertexOverrides[GetOrCreateVertexOverrides()];
-            vertices.topLeft += offset;
-            vertices.topRight += offset;
-            vertices.bottomRight += offset;
-            vertices.bottomLeft += offset;
-
-        }
+        #endregion
 
     }
 
     public abstract class TextEffect {
-        
-        public virtual void OnPush() { }
+
+        internal UITextElement textElement;
+
+        public virtual void OnTextChanged() { }
+
+        public virtual void OnTextLayout() { }
+
+        public virtual void OnVisualsChanged() { }
+
+        public virtual void OnPush(float4x4 worldMatrix, UITextElement element) { }
 
         public virtual void OnPop() { }
 
         public virtual void OnApplyEffect(ref CharacterInterface characterInterface) { }
 
         public virtual void ApplyEffect(ref CharacterInterface characterInterface) {
-            
+
 //            characterInterface.isRevealed;
 //            characterInterface.isRevealing;
 //            
@@ -569,7 +857,7 @@ namespace UIForia.Text {
 //            // render end = unlock
 //            
 //            characterInterface.SetDisplayedGlyph('a');
-            
+
             // span.GetCharacterAt(i).SetEffect(somecomputed);
             // [underline color=x]
         }

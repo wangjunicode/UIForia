@@ -15,36 +15,33 @@ namespace UIForia.Graphics {
     
     ///<summary>
     /// must be aligned on 16 byte boundaries for shader performance
+    /// Could step this up to 64 if I needed to, might have to with masking Pie values for elements
     /// </summary>
     [AssertSize(48)]
     [StructLayout(LayoutKind.Sequential)]
-    public struct TextMaterialInfo {
+    public unsafe struct TextMaterialInfo {
 
         public Color32 faceColor;
         public Color32 outlineColor;
         public Color32 glowColor;
         public Color32 underlayColor;
 
-        public byte outlineWidth;
-        public byte outlineSoftness;
-        public byte underlayDilate;
-        public byte underlaySoftness;
-
+        public ushort faceDilate; 
+        public ushort underlayDilate;
+        
         public float underlayX;
         public float underlayY;
 
-        public byte glowOffset;
         public byte glowPower;
         public byte glowInner;
         public byte glowOuter;
-
-        public float alphaClip;
-
-        public float zPosition;
-        public float opacity;
-
-        public ushort scale;
-        public ushort weight;
+        public byte underlaySoftness;
+        
+        public ushort glowOffset;
+        public byte outlineWidth;
+        public byte outlineSoftness;
+        
+        private fixed byte padding[12];
 
     }
 
@@ -57,12 +54,14 @@ namespace UIForia.Graphics {
 
         public Color32 backgroundColor;
         
-        public float2 size;
-        public float zPosition;
+        // try to remove per-object data from materials. These are intended to be re-used by many element where possible
+        public float2 size; // doesnt belong here
+        public float zPosition; // doesnt belong here
 
         public Color32 backgroundTint;
         public Color32 outlineColor;
-        public Color32 outlineTint;
+        public Color32 outlineTint; // might not need or want this, assumes we are using an outline texture which I dont currently have implemented
+                                    // would also want a texture transform for outline which I dont have atm
 
         // float4 hdrIntensities?
         public byte radius0;
@@ -75,13 +74,31 @@ namespace UIForia.Graphics {
         public byte bevel2;
         public byte bevel3;
 
-        public float opacity;
-        public float outlineWidth;
+        public byte pieDirection;
+        public byte pieOpenAmount;
+        public byte pieRotation;
+        public byte pieRadius; // probably needs to be bigger
+        public half2 pieOffset;
+        
+        public byte opacity;        // probably doesnt belong here
+        public byte outlineWidth;
+        
         public ColorMode bodyColorMode;
         public ColorMode outlineColorMode;
 
-        // 2 bytes free here 
-        public ushort padding;
+        // by putting these here we also free up texCoords in the actual vertices
+        // could either encode some of the data there or re-purpose those
+        // not sure I love these here, consider a seperate buffer
+        // maybe a generic float4 buffer will suffice
+        // public half uvOffsetX;
+        // public half uvOffsetY;
+        // public half uvScaleX;
+        // public half uvScaleY;
+        //
+        // public half uvTileX;
+        // public half uvTileY;
+        // public half uvRotation;
+        
 
     }
 

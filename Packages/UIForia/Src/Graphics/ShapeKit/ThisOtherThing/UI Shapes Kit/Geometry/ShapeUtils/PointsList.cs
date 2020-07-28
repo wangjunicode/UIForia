@@ -4,7 +4,7 @@ using Unity.Mathematics;
 
 namespace ThisOtherThing.UI.ShapeUtils {
 
-    public unsafe partial struct ShapeKit {
+    internal unsafe partial struct ShapeKit {
 
         private void SetPositions(ref List_float2 positions, in PointListProperties pointListProperties, ref PointsData lineData) {
 

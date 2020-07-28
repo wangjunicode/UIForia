@@ -526,6 +526,10 @@ namespace UIForia.Elements {
             _siblingIndex = application.elementSystem.SetSiblingIndex(id, i);
         }
 
+        public static float FracTime {
+            get => UnityEngine.Time.realtimeSinceStartup % 1;
+        }
+        
     }
 
 }

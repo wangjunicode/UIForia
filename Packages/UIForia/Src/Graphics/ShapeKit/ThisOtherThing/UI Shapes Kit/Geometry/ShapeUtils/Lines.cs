@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace ThisOtherThing.UI.ShapeUtils {
 
-    public unsafe partial struct ShapeKit {
+    internal unsafe partial struct ShapeKit {
 
         private static int GetLineCapResolution(float radius, RoundingResolution roundingResolution) {
 

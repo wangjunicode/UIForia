@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace ThisOtherThing.UI.ShapeUtils {
 
-    public unsafe partial struct ShapeKit : IDisposable {
+    internal unsafe partial struct ShapeKit : IDisposable {
 
         private static readonly float k_Sqrt2 = Mathf.Sqrt(2.0f);
 

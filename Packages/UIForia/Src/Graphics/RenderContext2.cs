@@ -84,6 +84,13 @@ namespace UIForia.Graphics {
 
     }
 
+    public struct TextureReference {
+
+        public int textureId;
+        public AxisAlignedBounds2DUShort uvRect;
+
+    }
+
     public struct TextureUsage {
 
         public int textureId;
@@ -112,18 +119,31 @@ namespace UIForia.Graphics {
 
     }
 
-    public struct UVTransform {
+    public struct UVTransformPadded {
 
-        // could maybe pack these in ushorts using 8.8 fixed point, dont need to be really high precision
-        public float uvOffsetX;
-        public float uvOffsetY;
-        public float uvScaleX;
-        public float uvScaleY;
+        public half uvOffsetX;
+        public half uvOffsetY;
+        public half uvScaleX;
+        public half uvScaleY;
         
-        public float uvTileX;
-        public float uvTileY;
+        public half uvTileX;
+        public half uvTileY;
         public float uvRotation; // could be ushort 
         public float padding; // align on sizeof(float4)
+
+    }
+
+    public struct UVTransform {
+        // could easily be halfs since I dont really need precision
+        // could maybe pack these in ushorts using 8.8 fixed point, dont need to be really high precision
+        public half uvOffsetX;
+        public half uvOffsetY;
+        public half uvScaleX;
+        public half uvScaleY;
+        
+        public half uvTileX;
+        public half uvTileY;
+        public half uvRotation;
 
     }
 
@@ -564,10 +584,6 @@ namespace UIForia.Graphics {
                         if (symbol.type == TextSymbolType.FontPop) {
                             // fontstack.Pop();
                         }
-
-                        if (symbol.type == TextSymbolType.MaterialPush) { }
-
-                        if (symbol.type == TextSymbolType.MaterialPop) { }
 
                         if (symbol.type == TextSymbolType.Sprite) { }
 

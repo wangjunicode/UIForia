@@ -15,7 +15,7 @@ namespace UIForia.Text {
 
         internal ElementTable<EmValue> emTable;
         internal DataList<TextChange>.Shared textChanges;
-        internal DataList<TextInfo>.Shared textInfoMap;
+        internal DataList<TextInfo> textInfoMap;
         internal DataList<FontAssetInfo>.Shared fontAssetMap;
 
         public ParallelParams parallel { get; set; }
@@ -64,25 +64,10 @@ namespace UIForia.Text {
 
             }
             
-            for (int i = 0; i < end; i++) {
-                ElementId elementId = textChanges[i].elementId;
-                ref TextInfo textInfo = ref textInfoMap[textChanges[i].textInfoId];
+            for (int i = start; i < end; i++) {
 
-                // need to find the right time to run this
-                // ill need to run this when text changes i guess
-                // but also set textures / font assets on change
-                // if its a span and it change we currently re-run everything anyway
-                // i dont want to keep it that way though. should be able to 
-                // programatically grab spans and change styles, add text, whatever
-                // probably also use different rich processors 
-                // right now i care about getting data setup to render it. so lets just rebuild in the painter every frame for now
-                
-                // span != rich text
-                // span is accessible via code
-                // rich text is not, just runs a traversal to build a text range
-                // i think this is easy to support, just push a material info + fontInfo for spans
+                TextInfo.CountRenderedCharacters(ref textInfoMap[textChanges[i].textInfoId]);
 
-                
             }
             
             symbolBuffer.Dispose();

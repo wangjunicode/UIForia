@@ -79,6 +79,14 @@ namespace UIForia.Util {
             get => ptr + 1 < dataEnd ? data[ptr + 1] : '\0';
         }
 
+        public char Previous {
+            get {
+                int i = (int) ptr - 1;
+                int ds = (int) dataStart;
+                return i >= ds ? data[i] : '\0';
+            } 
+        }
+        
         public char this[uint idx] {
             get => data[idx];
         }
@@ -373,6 +381,29 @@ namespace UIForia.Util {
             return false;
         }
 
+        public bool TryGetStreamUntil(char terminator, out CharStream span, char escape) {
+            int i = (int)ptr;
+            char prev = '\0';
+            if (i - 1 >= dataStart) {
+                prev = data[i - 1];
+            }
+            
+            while (i < dataEnd) {
+                char c = data[i];
+                if (c == terminator && prev != escape) {
+                    span = new CharStream(data, (ushort) ptr, (ushort) i);
+                    ptr = (uint)i;
+                    return true;
+                }
+
+                prev = c;
+                i++;
+            }
+
+            span = default;
+            return false;
+        }
+        
         public bool TryGetStreamUntil(char terminator, out CharStream span) {
             uint i = ptr;
             while (i < dataEnd) {

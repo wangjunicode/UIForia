@@ -7,6 +7,17 @@
 #define ColorMode_LetterBoxTexture (1 << 3)
 #define Deg2Rad 0.01745329
 #define PI 3.1415926535897932384626433832795
+#define RED fixed4(1, 0, 0, 1)
+#define GREEN fixed4(0, 1, 0, 1)
+#define BLUE fixed4(0, 0, 1, 1)
+#define WHITE fixed4(1, 1, 1, 1)
+#define BLACK fixed4(0, 0, 0, 1)
+
+#define TEXT_DISPLAY_FLAG_INVERT_HORIZONTAL_BIT (1 << 0)
+#define TEXT_DISPLAY_FLAG_INVERT_VERTICAL_BIT (1 << 1)
+#define TEXT_DISPLAY_FLAG_ITALIC_BIT (1 << 2)
+#define TEXT_DISPLAY_FLAG_BOLD_BIT (1 << 3)
+#define TEXT_DISPLAY_FLAG_UNDERLAY_INNER_BIT (1 << 4)
 
 struct AxisAlignedBounds2D {
     float xMin;
@@ -15,20 +26,28 @@ struct AxisAlignedBounds2D {
     float yMax;
 };
 
-int UnpackMatrixId(int2 indices) {
-    return asuint(indices.x) & 0xffff;
+int UnpackMatrixId(uint4 indices) {
+    return indices.x & 0xffff;
 }
 
-int UnpackMaterialId(int2 indices) {
-    return (asuint(indices.x) >> 16) & (1 << 16) - 1; 
+int UnpackEffectIdx(uint4 indices) {
+    return indices.w;
 }
-      
-int UnpackUVTransformId(int2 indices) {
-    return asuint(indices.y) & 0xffff;
+
+int UnpackMaterialId(uint4 indices) {
+    return indices.y & 0xffff; //(asuint(indices.y) >> 16) & (1 << 16) - 1; 
+}
+     
+int UnpackUVTransformId(uint4 indices) {
+    return 0; // asuint(indices.y) & 0xffff;
 }
          
-int UnpackClipRectId(int2 indices) {
-    return (asuint(indices.y) >> 16) & (1 << 16) - 1; 
+uint UnpackGlyphIdx(uint4 indices) {
+    return (indices.z >> 16) & (1 << 16) - 1; 
+}
+         
+int UnpackClipRectId(int4 indices) {
+    return (indices.x >> 16) & (1 << 16) - 1; 
 }
             
 uint ExtractByte(uint value, int byteIndex) {
@@ -82,12 +101,25 @@ fixed4 UIForiaColorSpace(fixed4 color) {
     #endif
 }
 
+uint GetByteN(uint value, int n) {
+    return ((value >> 8 * n) & 0xff);
+}
+        
 float4 UnpackColor(uint input) {
     return float4(
         uint((input >> 0) & 0xff) / float(0xff),
         uint((input >> 8) & 0xff) / float(0xff),
         uint((input >> 16) & 0xff) / float(0xff),
         uint((input >> 24) & 0xff) / float(0xff)
+    );
+}
+
+float4 UnpackColor32(uint input) {
+    return float4(
+        uint((input >> 24) & 0xff) / float(0xff),
+        uint((input >> 16) & 0xff) / float(0xff),
+        uint((input >> 8) & 0xff) / float(0xff),
+        uint((input >> 0) & 0xff) / float(0xff)
     );
 }
 
@@ -225,41 +257,85 @@ struct GPUFontInfo {
     float pointSize;
     float scale;
     
-    float padding;   
+    int glyphOffset;
     float atlasWidth;
     float atlasHeight;
-    
-    float __unused; // for sizeof(float4) alignment 
+    float ascender;
 };
+
+struct TextMaterialInfoDecompressed {
+
+    float faceDilate;
+    float outlineWidth;
+    float outlineSoftness;
+    
+    float glowPower;
+    float glowInner;
+    float glowOuter;
+    float glowOffset;
+    
+    float underlayDilate;
+    float underlaySoftness;
+    float underlayX;
+    float underlayY;
+};
+// float remap(float s, float a1, float a2, float b1, float b2) {
+//     return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
+// }
+//
+//uint UnpackGlyphIdx(uint4 indices) {
+//    return (indices.z >> 16) & (1 << 16) - 1; 
+//}
+//         
+//int UnpackClipRectId(int4 indices) {
+//    return (indices.x >> 16) & (1 << 16) - 1; 
+//}
+
 
 
 // layout must EXACTLY match TextMaterialInfo in C#
 struct TextMaterialInfo {
     
-    float zPosition;
     uint faceColor;
     uint outlineColor;
     uint glowColor;
     uint underlayColor;
-    float opacity;
     
-    float outlineWidth;
-    float outlineSoftness;
-    float faceDilate;
-    
-    float glowOffset;
-    float glowOuter;
-    float glowInner;
-    float glowPower;
+    uint faceUnderlayDilate;
     
     float underlayX;
     float underlayY;
-    float underlayDilate;
-    float underlaySoftness;
     
+    uint glowPIOUnderlayS;
+    uint glowOffsetOutlineWS;
+    
+    uint unused0;
+    uint unused1;
+    uint unused2;
 };
             
-float3 ComputeSDFTextScaleRatios(in GPUFontInfo fontInfo, in TextMaterialInfo textStyle) {
+TextMaterialInfoDecompressed DecompressTextMaterialInfo(in TextMaterialInfo textMaterialInfo) {
+
+    TextMaterialInfoDecompressed retn;
+    uint faceDilate = (textMaterialInfo.faceUnderlayDilate) & 0xffff;
+    uint underDilate = (textMaterialInfo.faceUnderlayDilate >> 16) & (1 << 16) - 1;
+    retn.faceDilate = remap(faceDilate, 0, (float)0xffff, -1, 1);
+    retn.outlineWidth = GetByteN(textMaterialInfo.glowOffsetOutlineWS, 2) / (float)0xff;
+    retn.outlineSoftness = GetByteN(textMaterialInfo.glowOffsetOutlineWS, 3) / (float)0xff;
+    retn.glowPower = 0;
+    retn.glowInner = 0;
+    retn.glowOuter = 0;
+    retn.glowOffset = 0;
+    retn.underlaySoftness = GetByteN(textMaterialInfo.glowPIOUnderlayS, 3) / (float)0xff;
+    retn.underlayDilate = remap(underDilate, 0, (float)0xffff, -1, 1);
+    retn.underlayX = textMaterialInfo.underlayX;
+    retn.underlayY = textMaterialInfo.underlayY;
+    
+    return retn;
+ 
+}
+
+float3 ComputeSDFTextScaleRatios(in GPUFontInfo fontInfo, in TextMaterialInfoDecompressed textStyle) {
     float gradientScale = fontInfo.gradientScale;
     float faceDilate = textStyle.faceDilate;
     float outlineThickness = textStyle.outlineWidth;
@@ -288,7 +364,7 @@ float3 ComputeSDFTextScaleRatios(in GPUFontInfo fontInfo, in TextMaterialInfo te
     return float3(ratioA, ratioB, ratioC);
 }
             
-float GetTextSDFPadding(float gradientScale, in TextMaterialInfo textStyle, in float3 ratios) {
+float GetTextSDFPadding(float gradientScale, in TextMaterialInfoDecompressed textStyle, in float3 ratios) {
     float4 padding = float4(0, 0, 0, 0);
 
     float scaleRatio_A = ratios.x;
@@ -309,7 +385,7 @@ float GetTextSDFPadding(float gradientScale, in TextMaterialInfo textStyle, in f
 
     float offsetX = textStyle.underlayX * scaleRatio_C;
     float offsetY = textStyle.underlayY * scaleRatio_C;
-    float dilate = textStyle.underlayDilate * scaleRatio_C;
+    float dilate =  textStyle.underlayDilate * scaleRatio_C;
     float softness = textStyle.underlaySoftness * scaleRatio_C;
 
     // tmp does a max check here with 0, I don't think we need it though

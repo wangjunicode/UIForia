@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ThisOtherThing.UI.ShapeUtils {
 
-    public partial struct ShapeKit {
+    internal partial struct ShapeKit {
 
         public void AddRect(ref UIVertexHelper vh, Rect rect, Color32 color) {
             AddRect(ref vh, rect.x, rect.y, rect.width, rect.height, color);

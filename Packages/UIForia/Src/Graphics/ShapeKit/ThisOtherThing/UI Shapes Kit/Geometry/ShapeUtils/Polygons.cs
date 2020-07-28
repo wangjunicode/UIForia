@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ThisOtherThing.UI.ShapeUtils {
 
-    public unsafe partial struct ShapeKit {
+    internal unsafe partial struct ShapeKit {
 
         public void AddPolygon(ref UIVertexHelper vh, ref List_float2 positions, PolygonProperties polygonProperties, PointListProperties pointListProperties, float2 positionOffset, Color32 color) {
             if (scratchPointData.positionBuffer == null) {

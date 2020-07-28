@@ -125,7 +125,7 @@ namespace UIForia {
         protected virtual void CreateSystems() {
             elementSystem = new ElementSystem(InitialElementCapacity);
             styleSystem = new StyleSystem(elementSystem);
-            textSystem = new TextSystem(elementSystem);
+            textSystem = new TextSystem(this, elementSystem);
             routingSystem = new RoutingSystem();
             linqBindingSystem = new LinqBindingSystem();
             soundSystem = new UISoundSystem();
@@ -384,6 +384,8 @@ namespace UIForia {
         }
 
         public void Update() {
+            frameId++;
+            textSystem.frameId = frameId;
             // input queries against last frame layout
             inputSystem.Read();
             loopTimer.Reset();
@@ -461,6 +463,10 @@ namespace UIForia {
             Profiler.EndSample();
             layoutTimer.Stop();
 
+            Profiler.BeginSample("UIForia::TextAnimation");
+            textSystem.AnimateText();
+            Profiler.EndSample();
+            
             renderTimer.Restart();
             Profiler.BeginSample("UIForia::Rendering");
             renderSystem.OnUpdate();

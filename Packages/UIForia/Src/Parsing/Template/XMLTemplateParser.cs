@@ -310,9 +310,6 @@ namespace UIForia.Parsing {
             else if (typeof(UITextElement).IsAssignableFrom(processedType.rawType)) {
                 node = new TextNode(templateRoot, parent, string.Empty, processedType, attributes, templateLineInfo);
             }
-            else if (typeof(UITextSpanElement).IsAssignableFrom(processedType.rawType)) {
-                throw new NotImplementedException();
-            }
             else if (typeof(UITerminalElement).IsAssignableFrom(processedType.rawType)) {
                 node = new TerminalNode(templateRoot, parent, processedType, attributes, templateLineInfo);
             }
@@ -340,7 +337,7 @@ namespace UIForia.Parsing {
                     continue;
                 }
 
-                node.processedType = node.processedType ?? CreateDynamicElementType(templateShell, node);
+              //  node.processedType = node.processedType ?? CreateDynamicElementType(templateShell, node);
 
                 return node.processedType;
             }
@@ -383,93 +380,93 @@ namespace UIForia.Parsing {
             return TypeProcessor.ResolveTagName(tagName, namespacePath, templateShell.referencedNamespaces);
         }
 
-        private static ProcessedType CreateDynamicElementType(TemplateShell templateShell, RawTemplateContent node) {
-            XElement rootNode = node.elementDefinition;
-
-            if (!IsValidIdentifier(node.templateId)) {
-                throw new ParseException($"Expected a valid identifier for template id but `{node.templateId}` is not valid. Please use only letters or numbers (except for first character)");
-            }
-
-            XAttribute generics = rootNode.GetAttribute("generic");
-
-            Type type;
-            if (generics != null) {
-                string[] genericNames = generics.Value.Split(StringUtil.s_SplitComma, StringSplitOptions.RemoveEmptyEntries);
-
-                ReflectionUtil.GenericTypeDefinition[] genericTypeDefinitions = new ReflectionUtil.GenericTypeDefinition[genericNames.Length];
-
-                for (int i = 0; i < genericNames.Length; i++) {
-                    genericNames[i] = genericNames[i].Trim();
-                    if (!IsValidIdentifier(genericNames[i])) {
-                        throw new ParseException("Invalid generic name: " + genericNames[i] + ". Please use only letters or numbers (except for first character)");
-                    }
-
-                    genericTypeDefinitions[i].name = genericNames[i];
-                }
-
-                List<ReflectionUtil.FieldDefinition> fieldDefinitions = new List<ReflectionUtil.FieldDefinition>();
-
-                string typeName = node.templateId + "_" + Guid.NewGuid().ToString().Replace("-", "_");
-
-                type = ReflectionUtil.CreateGenericRuntimeType(typeName, typeof(UIElement), genericTypeDefinitions, fieldDefinitions, templateShell.referencedNamespaces);
-            }
-            else {
-                List<ReflectionUtil.FieldDefinition> fieldDefinitions = new List<ReflectionUtil.FieldDefinition>();
-                List<ReflectionUtil.MethodDefinition> methodDefinitions = new List<ReflectionUtil.MethodDefinition>();
-
-                XCData cdata = rootNode.GetCDataChild();
-
-                if (cdata != null) {
-                    string contents = cdata.Value.Trim();
-                    var typeBodyParser = new TypeBodyParser();
-                    IXmlLineInfo lineInfo = cdata;
-
-                    TypeBodyNode astNode = typeBodyParser.Parse(contents, templateShell.filePath, lineInfo.LineNumber);
-
-                    for (int i = 0; i < astNode.nodes.size; i++) {
-                        ASTNode n = astNode.nodes.array[i];
-                        if (n is FieldNode fieldNode) {
-
-                            ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldNode.typeLookup, fieldNode.name, fieldNode.isStatic);
-
-                            fieldDefinitions.Add(fieldDefinition);
-                        }
-                        else if (n is MethodNode methodNode) {
-
-                            ReflectionUtil.MethodDefinition methodDefinition = new ReflectionUtil.MethodDefinition() {
-                                arguments = methodNode.signatureList,
-                                returnType = methodNode.returnTypeLookup,
-                                body = methodNode.body,
-                                methodName = methodNode.name,
-                                isStatic = methodNode.isStatic,
-                            };
-
-                            methodDefinitions.Add(methodDefinition);
-                        }
-                    }
-                }
-
-                string typeName = node.templateId + "_" + Guid.NewGuid().ToString().Replace("-", "_");
-
-                type = ReflectionUtil.CreateType(typeName, typeof(UIElement), fieldDefinitions, methodDefinitions, templateShell.referencedNamespaces);
-            }
-
-            TemplateAttribute templateAttribute = new TemplateAttribute(TemplateType.File, templateShell.filePath + "#" + node.templateId);
-
-            ProcessedType processedType = new ProcessedType(type, templateAttribute, node.templateId) {
-                IsUnresolvedGeneric = generics != null
-            };
-
-            if (generics == null) {
-                processedType.Reference();
-            }
-
-            TypeProcessor.AddDynamicElementType(processedType);
-
-            processedType.isDynamic = true;
-
-            return processedType;
-        }
+        // private static ProcessedType CreateDynamicElementType(TemplateShell templateShell, RawTemplateContent node) {
+        //     XElement rootNode = node.elementDefinition;
+        //
+        //     if (!IsValidIdentifier(node.templateId)) {
+        //         throw new ParseException($"Expected a valid identifier for template id but `{node.templateId}` is not valid. Please use only letters or numbers (except for first character)");
+        //     }
+        //
+        //     XAttribute generics = rootNode.GetAttribute("generic");
+        //
+        //     Type type;
+        //     if (generics != null) {
+        //         string[] genericNames = generics.Value.Split(StringUtil.s_SplitComma, StringSplitOptions.RemoveEmptyEntries);
+        //
+        //         ReflectionUtil.GenericTypeDefinition[] genericTypeDefinitions = new ReflectionUtil.GenericTypeDefinition[genericNames.Length];
+        //
+        //         for (int i = 0; i < genericNames.Length; i++) {
+        //             genericNames[i] = genericNames[i].Trim();
+        //             if (!IsValidIdentifier(genericNames[i])) {
+        //                 throw new ParseException("Invalid generic name: " + genericNames[i] + ". Please use only letters or numbers (except for first character)");
+        //             }
+        //
+        //             genericTypeDefinitions[i].name = genericNames[i];
+        //         }
+        //
+        //         List<ReflectionUtil.FieldDefinition> fieldDefinitions = new List<ReflectionUtil.FieldDefinition>();
+        //
+        //         string typeName = node.templateId + "_" + Guid.NewGuid().ToString().Replace("-", "_");
+        //
+        //         type = ReflectionUtil.CreateGenericRuntimeType(typeName, typeof(UIElement), genericTypeDefinitions, fieldDefinitions, templateShell.referencedNamespaces);
+        //     }
+        //     else {
+        //         List<ReflectionUtil.FieldDefinition> fieldDefinitions = new List<ReflectionUtil.FieldDefinition>();
+        //         List<ReflectionUtil.MethodDefinition> methodDefinitions = new List<ReflectionUtil.MethodDefinition>();
+        //
+        //         XCData cdata = rootNode.GetCDataChild();
+        //
+        //         if (cdata != null) {
+        //             string contents = cdata.Value.Trim();
+        //             var typeBodyParser = new TypeBodyParser();
+        //             IXmlLineInfo lineInfo = cdata;
+        //
+        //             TypeBodyNode astNode = typeBodyParser.Parse(contents, templateShell.filePath, lineInfo.LineNumber);
+        //
+        //             for (int i = 0; i < astNode.nodes.size; i++) {
+        //                 ASTNode n = astNode.nodes.array[i];
+        //                 if (n is FieldNode fieldNode) {
+        //
+        //                     ReflectionUtil.FieldDefinition fieldDefinition = new ReflectionUtil.FieldDefinition(fieldNode.typeLookup, fieldNode.name, fieldNode.isStatic);
+        //
+        //                     fieldDefinitions.Add(fieldDefinition);
+        //                 }
+        //                 else if (n is MethodNode methodNode) {
+        //
+        //                     ReflectionUtil.MethodDefinition methodDefinition = new ReflectionUtil.MethodDefinition() {
+        //                         arguments = methodNode.signatureList,
+        //                         returnType = methodNode.returnTypeLookup,
+        //                         body = methodNode.body,
+        //                         methodName = methodNode.name,
+        //                         isStatic = methodNode.isStatic,
+        //                     };
+        //
+        //                     methodDefinitions.Add(methodDefinition);
+        //                 }
+        //             }
+        //         }
+        //
+        //         string typeName = node.templateId + "_" + Guid.NewGuid().ToString().Replace("-", "_");
+        //
+        //         type = ReflectionUtil.CreateType(typeName, typeof(UIElement), fieldDefinitions, methodDefinitions, templateShell.referencedNamespaces);
+        //     }
+        //
+        //     TemplateAttribute templateAttribute = new TemplateAttribute(TemplateType.File, templateShell.filePath + "#" + node.templateId);
+        //
+        //     ProcessedType processedType = new ProcessedType(type, templateAttribute, node.templateId) {
+        //         IsUnresolvedGeneric = generics != null
+        //     };
+        //
+        //     if (generics == null) {
+        //         processedType.Reference();
+        //     }
+        //
+        //     TypeProcessor.AddDynamicElementType(processedType);
+        //
+        //     processedType.isDynamic = true;
+        //
+        //     return processedType;
+        // }
 
         private static bool IsValidIdentifier(string input) {
             char first = input[0];

@@ -5,7 +5,7 @@ using Unity.Collections;
 
 namespace UIForia.Systems {
 
-    public unsafe struct ShapeDataBuffer : IPerThreadCompatible {
+    internal unsafe struct ShapeDataBuffer : IPerThreadCompatible {
 
         private Allocator allocator;
 

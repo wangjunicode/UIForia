@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace ThisOtherThing.UI.ShapeUtils {
 
-    public static unsafe class PointsGenerator {
+    internal static unsafe class PointsGenerator {
 
         public static void SetPoints(ref List_float2 positions, PointListGeneratorData data) {
             switch (data.pointListGeneratorType) {

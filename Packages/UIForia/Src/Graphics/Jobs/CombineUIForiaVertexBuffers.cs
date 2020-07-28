@@ -14,79 +14,64 @@ namespace UIForia.Graphics {
 
         public DataList<UIForiaVertex>.Shared elementVertexList;
         public DataList<UIForiaVertex>.Shared textVertexList;
-        
-        public DataList<int>.Shared elementTriangleList;
-        public DataList<int>.Shared textTriangleList;
-        
+
         public List_Int32 matrixIdList;
         public List_Int32 clipRectIdList;
-        public List_Int32 materialIdList;
 
         public void Execute() {
-
-            int elementVertexOffset = textVertexList.size;
-            int elementTriangleOffset = textTriangleList.size;
 
             textVertexList.EnsureAdditionalCapacity(elementVertexList.size);
             textVertexList.AddRange(elementVertexList.GetArrayPointer(), elementVertexList.size);
 
-            textTriangleList.EnsureAdditionalCapacity(elementTriangleList.size);
-            textTriangleList.AddRange(elementTriangleList.GetArrayPointer(), elementTriangleList.size);
-
             UIForiaVertex* vertices = textVertexList.GetArrayPointer();
-            int* triangles = textTriangleList.GetArrayPointer();
-
-            const MeshInfoType targetType = MeshInfoType.Element | MeshInfoType.Text;
 
             for (int i = 0; i < meshList.size; i++) {
 
                 ref MeshInfo meshInfo = ref meshList[i];
 
-                if ((meshInfo.type & targetType) == 0) {
-                    continue;
+                // todo -- reimplement elements here
+                if (meshInfo.type == MeshInfoType.Text) {
+                    int start = meshInfo.vertexStart;
+                    int end = start + meshInfo.vertexCount;
+
+                    int matrixId = matrixIdList.array[i];
+                    int clipRectId = clipRectIdList.array[i];
+                    uint clipAndMatrix = (uint)BitUtil.SetHighLowBits(clipRectId, matrixId);
+                    
+                    for (int v = start; v < end; v++) {
+                        vertices[v].indices.x = clipAndMatrix;
+                    }
                 }
-
-                ushort materialId = (ushort) materialIdList.array[i];
-                ushort matrixId = (ushort) matrixIdList.array[i];
-                ushort clipRectId = (ushort) clipRectIdList.array[i];
-
-                int vertexOffset = 0;
-
-                if (meshInfo.type == MeshInfoType.Element) {
-                    vertexOffset = elementVertexOffset;
-                }
-
-                int start = meshInfo.vertexStart + vertexOffset;
-                int end = start + meshInfo.vertexCount;
-
-                int2 indices = new int2(BitUtil.SetHighLowBits(materialId, matrixId), BitUtil.SetHighLowBits(clipRectId, 0));
-
-                for (int v = start; v < end; v++) {
-                    vertices[v].indices = indices;
-                }
-            }
-            
-            // since we appended the element list to the text list we need to add an
-            // offset to all of the element triangles so they point to the right place
-            
-            for (int i = 0; i < meshList.size; i++) {
-
-                ref MeshInfo meshInfo = ref meshList[i];
-
-                if (meshInfo.type != MeshInfoType.Element) {
-                    continue;
-                }
-
-                // need to update these so the index building job has the correct offset
-                meshInfo.vertexStart += elementVertexOffset;
-                meshInfo.triangleStart += elementTriangleOffset;
                 
-                int start = meshInfo.triangleStart;
-                int end = start + meshInfo.triangleCount;
-                
-                for (int t = start; t < end; t++) {
-                    triangles[t] += elementVertexOffset;
-                }
+                // if ((meshInfo.type & targetType) == 0) {
+                //     continue;
+                // }
+                //
+                // // not a lot of need for materialIdList I think
+                // // text handles it differently anyway
+                // // and elements are 1-1 and maaaybe dont even use deduplication
+                //
+                // ushort materialId = (ushort) materialIdList.array[i];
+                // ushort matrixId = (ushort) matrixIdList.array[i];
+                // ushort clipRectId = (ushort) clipRectIdList.array[i];
+                //
+                // int vertexOffset = 0;
+                //
+                // if (meshInfo.type == MeshInfoType.Element) {
+                //     vertexOffset = elementVertexOffset;
+                // }
+                //
+                // int start = meshInfo.vertexStart + vertexOffset;
+                // int end = start + meshInfo.vertexCount;
+                //
+                // // i need to squeeze uv transform in somewhere. 
+                // // maybe use the texture coords and look it up later elsewhere?
+                // // or use an int3 for indices.. can afford the space for sure
+                // int2 indices = new int2(BitUtil.SetHighLowBits(materialId,  0), BitUtil.SetHighLowBits(clipRectId, matrixId));
+                //
+                // for (int v = start; v < end; v++) {
+                //     vertices[v].indices = indices;
+                // }
             }
 
         }

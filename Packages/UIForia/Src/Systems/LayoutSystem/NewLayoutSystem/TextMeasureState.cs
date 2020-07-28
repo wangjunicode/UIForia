@@ -19,8 +19,9 @@ namespace UIForia.Layout {
         UnderlaySoftness,
 
         FontSize,
+        FontStyle,
 
-        FontStyle
+        CharSpacing
 
     }
 
@@ -57,84 +58,13 @@ namespace UIForia.Layout {
             floatList.Add(new FloatPair(TextStyleType.FontSize, baseFontSize));
 
             if (textStyle.fontStyle != 0) {
-                floatList.Add(new FloatPair(TextStyleType.FontStyle, (int)textStyle.fontStyle));
-            }
-            
-            if (textStyle.faceDilate != 0) {
-                floatList.Add(new FloatPair(TextStyleType.FaceDilate, textStyle.faceDilate));
+                floatList.Add(new FloatPair(TextStyleType.FontStyle, (int) textStyle.fontStyle));
             }
 
-            if (textStyle.outlineWidth != 0) {
-                floatList.Add(new FloatPair(TextStyleType.OutlineWidth, textStyle.outlineWidth));
-            }
-
-            if (textStyle.outlineSoftness != 0) {
-                floatList.Add(new FloatPair(TextStyleType.OutlineSoftness, textStyle.outlineSoftness));
-            }
-
-            if (textStyle.glowOffset != 0) {
-                floatList.Add(new FloatPair(TextStyleType.GlowOffset, textStyle.glowOffset));
-            }
-
-            if (textStyle.glowOuter != 0) {
-                floatList.Add(new FloatPair(TextStyleType.GlowOuter, textStyle.glowOuter));
-            }
-
-            if (textStyle.underlayDilate != 0) {
-                floatList.Add(new FloatPair(TextStyleType.UnderlayDilate, textStyle.underlayDilate));
-            }
-
-            if (textStyle.underlaySoftness != 0) {
-                floatList.Add(new FloatPair(TextStyleType.UnderlaySoftness, textStyle.underlaySoftness));
-            }
-
-            if (textStyle.underlayX != 0) {
-                floatList.Add(new FloatPair(TextStyleType.UnderlayX, textStyle.underlayX));
-            }
-
-            if (textStyle.underlayY != 0) {
-                floatList.Add(new FloatPair(TextStyleType.UnderlayY, textStyle.underlayX));
-            }
         }
 
         public TextTransform textTransform {
             get => TextTransform.None; // todo
-        }
-
-        public float faceDilate {
-            get => FindFloat(TextStyleType.FaceDilate, 0);
-        }
-
-        public float outlineWidth {
-            get => FindFloat(TextStyleType.OutlineWidth, 0);
-        }
-
-        public float outlineSoftness {
-            get => FindFloat(TextStyleType.OutlineSoftness, 0);
-        }
-
-        public float glowOffset {
-            get => FindFloat(TextStyleType.GlowOffset, 0);
-        }
-
-        public float glowOuter {
-            get => FindFloat(TextStyleType.GlowOuter, 0);
-        }
-
-        public float underlayX {
-            get => FindFloat(TextStyleType.UnderlayX, 0);
-        }
-
-        public float underlayY {
-            get => FindFloat(TextStyleType.UnderlayY, 0);
-        }
-
-        public float underlayDilate {
-            get => FindFloat(TextStyleType.UnderlayDilate, 0);
-        }
-
-        public float underlaySoftness {
-            get => FindFloat(TextStyleType.UnderlaySoftness, 0);
         }
 
         public void PushFloat(TextStyleType type, float value) {
@@ -171,7 +101,7 @@ namespace UIForia.Layout {
         }
 
         public FontStyle fontStyle {
-            get => (FontStyle)(int)FindFloat(TextStyleType.FontStyle, 0);
+            get => (FontStyle) (int) FindFloat(TextStyleType.FontStyle, 0);
         }
 
         public ref FontAssetInfo fontAssetInfo {
@@ -188,7 +118,7 @@ namespace UIForia.Layout {
             }
         }
 
-        public void PushFontSize(UIFixedLength newFontSize) {
+        public float PushFontSize(UIFixedLength newFontSize) {
             switch (newFontSize.unit) {
 
                 default:
@@ -213,6 +143,64 @@ namespace UIForia.Layout {
                     PushFloat(TextStyleType.FontSize, viewportHeight * fontSize);
                     break;
             }
+
+            return floatList[floatList.size - 1].value;
+        }
+
+        public float PushCharSpacing(UIFixedLength length) {
+            float size = 0;
+            switch (length.unit) {
+
+                default:
+                case UIFixedUnit.Unset:
+                case UIFixedUnit.Pixel:
+                    size = length.value;
+                    break;
+
+                case UIFixedUnit.Percent:
+                    size = length.value * fontSize * 100;
+                    break;
+
+                case UIFixedUnit.Em:
+                    size = length.value * fontSize;
+                    break;
+
+                case UIFixedUnit.ViewportWidth:
+                    size = viewportWidth * fontSize;
+                    break;
+
+                case UIFixedUnit.ViewportHeight:
+                    size = viewportHeight * fontSize;
+                    break;
+            }
+
+            PushFloat(TextStyleType.CharSpacing, size);
+            return size;
+
+        }
+
+        private bool TryPopFloat(TextStyleType type, out float currentValue, float defaultValue) {
+            if (floatList.size >= 1 && floatList[floatList.size - 1].type == type) {
+                floatList.size--;
+                currentValue = FindFloat(type, defaultValue);
+                return true;
+            }
+
+            // instead of removing from the list, just mark the last one as invalid
+            for (int i = floatList.size - 2; i >= 0; i--) {
+                if (floatList[i].type == type) {
+                    floatList[i].type = TextStyleType.Invalid;
+                    currentValue = FindFloat(type, defaultValue);
+                    return true;
+                }
+            }
+
+            currentValue = defaultValue;
+            return false;
+        }
+
+        public bool TryPopCharSpacing(out float currentValue) {
+            return TryPopFloat(TextStyleType.CharSpacing, out currentValue, 0);
         }
 
         public void PopFontSize() {
@@ -220,7 +208,7 @@ namespace UIForia.Layout {
         }
 
         public void PushFontStyle(FontStyle fontStyle) {
-            PushFloat(TextStyleType.FontStyle, (int)fontStyle);
+            PushFloat(TextStyleType.FontStyle, (int) fontStyle);
         }
 
         public void PopFontStyle() {

@@ -2,18 +2,19 @@ using UnityEngine;
 
 namespace UIForia.Util {
 
+
     public static class MathUtil {
 
         public static float RemapRange(float s, float a1, float a2, float b1, float b2) {
             return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
         }
-        
+
         public static byte Float01ToByte(float value) {
             if (value < 0) value = 0;
             else if (value > 1) value = 1;
             return (byte) (value * 255f);
         }
-        
+
         public static byte FloatMinus1To1ToByte(float value) {
             if (value < -1) {
                 value = -1;
@@ -23,6 +24,17 @@ namespace UIForia.Util {
             }
 
             return (byte) RemapRange(value, -1, 1, 0, 255);
+        }
+
+        public static ushort FloatMinus1To1ToUshort(float value) {
+            if (value < -1) {
+                value = -1;
+            }
+            else if (value > 1) {
+                value = 1;
+            }
+
+            return (ushort) RemapRange(value, -1, 1, 0, ushort.MaxValue);
         }
         
         public static float PercentOfRange(float v, float bottom, float top) {
@@ -43,7 +55,7 @@ namespace UIForia.Util {
 
             return !(u < 0.0f) && !(u > 1.0f) && !(v < 0.0f) && !(v > 1.0f);
         }
-        
+
         public static bool LineSegmentsIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector3 p4, out Vector2 intersection) {
             intersection = Vector2.zero;
 
@@ -80,7 +92,9 @@ namespace UIForia.Util {
             return val;
         }
 
-       
+        public static float UShortToFloatOneMinusOne(ushort value) {
+            return RemapRange(value, 0, ushort.MaxValue, -1f, 1f);
+        }
 
     }
 

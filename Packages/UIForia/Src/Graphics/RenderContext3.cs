@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UIForia.ListTypes;
 using UIForia.Rendering;
+using UIForia.Text;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
@@ -23,14 +25,15 @@ namespace UIForia.Graphics {
         internal StructList<CommandBufferCallback> callbacks;
         internal Dictionary<int, Texture> textureMap;
         internal ResourceManager resourceManager;
-        
+        private TextMaterialInfo* textMaterialPtr;
+
         public RenderContext3(ResourceManager resourceManager) {
             this.resourceManager = resourceManager;
-            textureMap = new Dictionary<int, Texture>(32);
-            callbacks = new StructList<CommandBufferCallback>(4);
-            dummyMatrix = new HeapAllocated<float4x4>(float4x4.identity);
-            drawList = new DataList<DrawInfo2>(64, Allocator.Persistent);
-            stackAllocator = new PagedByteAllocator(TypedUnsafe.Kilobytes(16), Allocator.Persistent, Allocator.Persistent);
+            this.textureMap = new Dictionary<int, Texture>(32);
+            this.callbacks = new StructList<CommandBufferCallback>(4);
+            this.dummyMatrix = new HeapAllocated<float4x4>(float4x4.identity);
+            this.drawList = new DataList<DrawInfo2>(64, Allocator.Persistent);
+            this.stackAllocator = new PagedByteAllocator(TypedUnsafe.Kilobytes(16), Allocator.Persistent, Allocator.Persistent);
         }
         
         public void Setup(MaterialId materialId, int renderIndex, float4x4* transform) {
@@ -83,94 +86,47 @@ namespace UIForia.Graphics {
             });
         }
 
-        // textInfoId -> needed for bounds
-        // materialInfo, get idx by pointer in list or map 
-        // effectData -> need to only upload some of them. think it makes a lot of sense to use a free-list 
-        // need to know if bounds are reliable, or need to compute using effect offsets/rotations/etc. best to call them unreliable I think
-        // need to use skip-render 
-        // foreach character
-        //     if !character.isRenderable
-        //        continue
-        //     bounds = cmp(bounds, computeVertices());
-        // or if character.hasTransformEffect -> make its own draw info. probably wont be too many
-
-
-            
-            // effects are either enabled for a span or they are not
-            // effects can be enabled for a material probably and are then applied per character
-            // or they get applied per character directly
-            
-            // either way I need
-                // use effects or dont
-                // compute bounds
-                // generate/send geometry only for rendered characters
-                // mapping of effect struct to character (use free-list)
-                // material id on characters
-                // layout position of character
-                // bake geometry for characters
-                // fastest way would be saving per-character geometry up front
-                // will worry about sdf offsets in the shader but i guess theres no reason not to accept real geometry
-                // only when effects enabled? 
-                // i guess im trying to save a bunch of floats that I dont need to persist
-            
-            // CharSpan.SetEffectsEnabled();
-            // // kind of ok with effects being thickk since most text is not effect based
-            // // will need to compute bounds probably, dont see how to avoid it
-            // // only store data for renderable characters
-            // // might mean keeping a render index for characters 
-            // CharSpan.GetCharacter(i);
-            // if (renderable) {
-            //     continue
-            // }
-            //
-            // CharSpan.SetCharacterAt(i, v);
-            // CharSpan.SetSymbolAt(i, xx);
-            //
-            // for (int i = 0; i < textRenderInfo.size; i++) {
-            //     
-            //     if (!CharacterInfo.isRenderable) {
-            //         continue;
-            //     }
-            //
-            //     CharSpan.renderedCharacters.add(i);
-            //     CharSpan.effects[i] = new TextEffectInfo() {
-            //         matrix = matrix,
-            //         colorFade = 0.5f,
-            //         pivot = new float2(x, y)
-            //     };
-            //     // 6 + 2 = 8 floats 
-            //     // verse 8 floats for vertices
-            //         
-            // }
-
-
         public struct TextMeshDesc {
 
             public int count;
-            public RenderedCharacterInfo* textRenderInfo;
+            public TextSymbol* textRenderInfo;
+            public TextMaterialInfo * materialPtr;
+            public int fontAssetId;
+            public int start;
 
         }
         
-        internal void DrawSingleSpanUniformTextInternal(RenderedCharacterInfo * textRenderInfo, int count, in AxisAlignedBounds2D bounds, in TextMaterialSetup materialSetup) {
-
+        internal void DrawTextCharacters(TextRenderRange textRenderRange) {
+            
+            TextMaterialSetup textMaterialSetup = new TextMaterialSetup();
+            
+            textMaterialSetup.faceTexture = textRenderRange.texture0;
+            textMaterialSetup.outlineTexture = textRenderRange.texture1;
+            // todo this feels a bit brittle
+            textMaterialSetup.fontTextureId = resourceManager.fontAssetMap[textRenderRange.fontAssetId].atlasTextureId;
+                
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
-                drawType = DrawType2.UIForiaText, // todo -- generate geometry instead if material id is not what we expect
+                drawType = DrawType2.UIForiaText, 
                 materialId = MaterialId.UIForiaSDFText,
-                localBounds = bounds,
+                localBounds = textRenderRange.localBounds,
                 // could consider making these different allocators to keep similar types together
-                materialData = stackAllocator.Allocate(materialSetup), 
+                materialData = stackAllocator.Allocate(textMaterialSetup), 
                 shapeData = stackAllocator.Allocate(new TextMeshDesc() {
-                    textRenderInfo = textRenderInfo,
-                    count = count
+                    materialPtr = textMaterialPtr,
+                    fontAssetId = textRenderRange.fontAssetId,
+                    textRenderInfo = textRenderRange.symbols,
+                    start =  textRenderRange.characterRange.start,
+                    count = textRenderRange.characterRange.length
                 }),
                 drawSortId = new DrawSortId() {
                     localRenderIdx = localDrawId++,
                     baseRenderIdx = renderIndex
                 }
             });
+            
         }
-
+        
         public void Clear() {
             textureMap.Clear();
             drawList.size = 0;
@@ -186,6 +142,16 @@ namespace UIForia.Graphics {
 
         public int GetFontTextureId(int textStyleFontAssetId) {
             return resourceManager.GetFontTextureId(textStyleFontAssetId);
+        }
+
+        // todo -- if I am ABSOLUTELY sure nothing nefarious can happen to the material array while I'm prepping for render then I can avoid this copy/alloc
+        internal void SetTextMaterials(in List_TextMaterialInfo textInfoMaterialBuffer) {
+            if (textInfoMaterialBuffer.array != null) {
+                textMaterialPtr = stackAllocator.Allocate(textInfoMaterialBuffer.array, textInfoMaterialBuffer.size);
+            }
+            else {
+                textMaterialPtr = null;
+            }
         }
 
     }

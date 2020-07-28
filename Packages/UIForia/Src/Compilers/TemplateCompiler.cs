@@ -2815,7 +2815,7 @@ namespace UIForia.Compilers {
 
                 return currentEvent;
             }
-
+            
             if (aliasName == "root" || aliasName == "this") {
                 return ((UIForiaLinqCompiler) compiler).GetCastRoot();
             }

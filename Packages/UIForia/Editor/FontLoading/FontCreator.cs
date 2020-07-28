@@ -871,8 +871,9 @@ namespace UIForia.Editor.FontLoading {
                 }
 
                 fontAsset.faceInfo = GetFaceInfo(m_FontFaceInfo);
-                fontAsset.textGlyphList = GetGlyphInfo(m_FontGlyphInfo);
-                fontAsset.kerningPairs = GetKerningTable(AssetDatabase.GetAssetPath(m_SourceFontFile), (int) fontAsset.faceInfo.pointSize, fontAsset.textGlyphList);
+                throw new NotImplementedException("Todo -- reimplement font creator");
+                //fontAsset.textGlyphList = GetGlyphInfo(m_FontGlyphInfo);
+                // fontAsset.kerningPairs = GetKerningTable(AssetDatabase.GetAssetPath(m_SourceFontFile), (int) fontAsset.faceInfo.pointSize, fontAsset.textGlyphList);
 
                 fontAsset.atlas = m_FontAtlas;
                 m_FontAtlas.name = tex_FileName + " Atlas";

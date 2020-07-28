@@ -110,45 +110,31 @@ namespace UIForia.Graphics {
 
         public TextureUsage faceTexture;
         public TextureUsage outlineTexture;
-        public TextMaterialInfo materialInfo;
         public int fontTextureId;
+        public bool requiresMaterialScan;
+        public int defaultMaterialIdx;
 
     }
 
+    // note -- it is important that these stay aligned on sizeof(float4) boundaries
     [AssertSize(32)]
     [StructLayout(LayoutKind.Sequential)]
     public struct UIForiaVertex {
 
-        // i could drop indices by splitting the actual index buffer values,
-        // but that imposes limits on material and vertex count because id
-        // split the 32 bit range into something like 22 & 10
-
-        // i dont need a z value for position, its always 0
-        // to support 3d id either bake the zinto the material data or the transform matrix
         public float2 position;
+
         public float2 texCoord0;
-        public float2 texCoord1; // theres a small chance I don't need this channel at all
-        public int2 indices;
+
+        // public int2 texCoord1;
+        public uint4 indices;
 
         public UIForiaVertex(float x, float y) {
             position.x = x;
             position.y = y;
             texCoord0 = default;
-            texCoord1 = default;
+            //texCoord1 = default;
             indices = default;
         }
-
-    }
-
-    public unsafe struct SDFTextMeshDesc {
-
-        public void* meshDataList;
-        public bool requiresBaking;
-        public int fontAssetId;
-        public int symbolStart;
-        public int symbolEnd;
-        public FontStyle fontStyle;
-        public float fontSize;
 
     }
 
@@ -191,15 +177,19 @@ namespace UIForia.Systems {
         private int elementCapacity;
         private JobHandle renderHandle;
 
-        private GraphicsBuffer indexBuffer;
-        private ComputeBuffer indirectArgsBuffer;
-        private ComputeBuffer vertexBuffer;
-        private ComputeBuffer matrixBuffer;
-        private ComputeBuffer clipBuffer;
-        private ComputeBuffer materialBuffer;
+        private GraphicsBuffer[] indexBuffers;
+
         private ComputeBuffer glyphBuffer;
         private ComputeBuffer fontBuffer;
         private bool needsFontUpload;
+
+        private ComputeBuffer[] vertexBuffers;
+        private ComputeBuffer[] matrixBuffers;
+        private ComputeBuffer[] float4Buffers;
+        private ComputeBuffer[] materialBuffers;
+        private ComputeBuffer[] indirectArgBuffers;
+
+        private int frameId;
 
         public RenderSystem2(Application application, LayoutSystem layoutSystem, ElementSystem elementSystem) {
             this.elementSystem = elementSystem;
@@ -210,20 +200,18 @@ namespace UIForia.Systems {
             this.mpb = new MaterialPropertyBlock();
             this.renderContext = new RenderContext3(resourceManager);
 
-            this.indexBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Index, 1024, sizeof(int));
-            this.vertexBuffer = new ComputeBuffer(1024, sizeof(UIForiaVertex), ComputeBufferType.Structured);
-            this.clipBuffer = new ComputeBuffer(16, sizeof(AxisAlignedBounds2D), ComputeBufferType.Structured); // could be cbuffer;
-            this.matrixBuffer = new ComputeBuffer(256, sizeof(float4x4), ComputeBufferType.Structured); // could be cbuffer, its small enough
-            this.materialBuffer = new ComputeBuffer(256, sizeof(UIForiaMaterialInfo), ComputeBufferType.Structured); // could be cbuffer, its small enough
-
             this.glyphBuffer = new ComputeBuffer(512, sizeof(GPUGlyphInfo), ComputeBufferType.Structured); // todo -- try as constant
             this.fontBuffer = new ComputeBuffer(8, sizeof(GPUFontInfo), ComputeBufferType.Structured); // todo -- try as constant
-            this.indirectArgsBuffer = new ComputeBuffer(16, sizeof(IndirectArg), ComputeBufferType.IndirectArguments);
 
-            materialBuffer.name = "UIForia::MaterialBuffer";
-            matrixBuffer.name = "UIForia::MatrixBuffer";
-            vertexBuffer.name = "UIForia::VertexBuffer";
-            clipBuffer.name = "UIForia::ClipBuffer";
+            this.vertexBuffers = new ComputeBuffer[2];
+            this.matrixBuffers = new ComputeBuffer[2];
+            this.float4Buffers = new ComputeBuffer[2];
+            this.materialBuffers = new ComputeBuffer[2];
+            this.indirectArgBuffers = new ComputeBuffer[2];
+            this.indexBuffers = new GraphicsBuffer[2];
+            
+            fontBuffer.name = "UIForia::FontBuffer";
+            glyphBuffer.name = "UIForia::GlyphBuffer";
             unsafeData.Initialize(this);
             resourceManager.onFontAdded += HandleFontAdded;
 
@@ -239,21 +227,37 @@ namespace UIForia.Systems {
 
         public void Dispose() {
 
-            indexBuffer.Dispose();
-            vertexBuffer.Dispose();
-            matrixBuffer.Dispose();
+            vertexBuffers[0]?.Dispose();
+            vertexBuffers[1]?.Dispose();
+
+            matrixBuffers[0]?.Dispose();
+            matrixBuffers[1]?.Dispose();
+
+            materialBuffers[0]?.Dispose();
+            materialBuffers[1]?.Dispose();
+
+            float4Buffers[0]?.Dispose();
+            float4Buffers[1]?.Dispose();
+            
+            indirectArgBuffers[0]?.Dispose();
+            indirectArgBuffers[1]?.Dispose();
+            
+            indexBuffers[0]?.Dispose();
+            indexBuffers[1]?.Dispose();
+
             glyphBuffer.Dispose();
-            clipBuffer.Dispose();
-            materialBuffer.Dispose();
-            indirectArgsBuffer.Dispose();
+            fontBuffer.Dispose();
 
             unsafeData.Dispose();
         }
 
         public virtual void OnUpdate() {
+            frameId++;
 
             unsafeData.Clear();
             renderContext.Clear();
+
+            unsafeData.float4Buffer.size = 1; // 0 is invalid index
 
             resourceManager.GetFontTextures(renderContext.textureMap);
 
@@ -312,28 +316,25 @@ namespace UIForia.Systems {
 
             });
 
-            NativeArray<JobHandle> preProcessHandles = new NativeArray<JobHandle>(5, Allocator.Temp);
+            NativeArray<JobHandle> preProcessHandles = new NativeArray<JobHandle>(4, Allocator.Temp);
             NativeArray<JobHandle> shapeBakingHandles = new NativeArray<JobHandle>(3, Allocator.Temp);
 
+            // this needs to happen either after text, or output to a separate material buffer
             shapeBakingHandles[0] = UIForiaScheduler.Run(new BakeUIForiaElements() {
                 drawList = unsafeData.drawList,
-                triangleList = unsafeData.elementTriangleList,
                 vertexList = unsafeData.elementVertexList,
                 meshInfoList = unsafeData.meshInfoList
             });
 
+            // might want to do this after culling finishes
+            // otherwise I'm uploading data for potentially culled render groups
             shapeBakingHandles[1] = UIForiaScheduler.Run(new BakeUIForiaText() {
                 drawList = unsafeData.drawList,
-                triangleList = unsafeData.textTriangleList,
                 vertexList = unsafeData.textVertexList,
-                meshInfoList = unsafeData.meshInfoList
-            });
-
-            shapeBakingHandles[2] = UIForiaScheduler.Run(new BakeUIForiaShapes() {
-                drawList = unsafeData.drawList,
-                triangleList = unsafeData.shapeTriangleList,
-                vertexList = unsafeData.shapeVertexList,
-                meshInfoList = unsafeData.meshInfoList
+                meshInfoList = unsafeData.meshInfoList,
+                materialBuffer = unsafeData.materialBuffer,
+                float4Buffer = unsafeData.float4Buffer,
+                textEffectBuffer = application.textSystem.textEffectVertexInfoTable
             });
 
             preProcessHandles[0] = UIForiaScheduler.Run(new BuildMaterialPermutations() {
@@ -342,17 +343,7 @@ namespace UIForia.Systems {
                 materialPermutationIdList = unsafeData.materialPermutationIds,
             });
 
-            preProcessHandles[1] = UIForiaScheduler.Run(new BuildUVTransforms() {
-                drawList = unsafeData.drawList
-            });
-
-            preProcessHandles[2] = UIForiaScheduler.Run(new BuildUIForiaMaterialBuffer() {
-                drawList = unsafeData.drawList,
-                materialBuffer = unsafeData.materialBuffer,
-                materialIdList = unsafeData.materialIdList
-            });
-
-            preProcessHandles[4] = UIForiaScheduler.Run(new BuildMatrixBuffer() {
+            preProcessHandles[3] = UIForiaScheduler.Run(new BuildMatrixBuffer() {
                 drawList = unsafeData.drawList,
                 matrixBuffer = unsafeData.matrixBuffer,
                 matrixIndices = unsafeData.matrixIdList
@@ -382,13 +373,10 @@ namespace UIForia.Systems {
             new CombineUIForiaVertexBuffers() {
 
                 textVertexList = unsafeData.textVertexList,
-                textTriangleList = unsafeData.textTriangleList,
 
                 elementVertexList = unsafeData.elementVertexList,
-                elementTriangleList = unsafeData.elementTriangleList,
 
                 meshList = unsafeData.meshInfoList,
-                materialIdList = unsafeData.materialIdList,
                 matrixIdList = unsafeData.matrixIdList,
                 clipRectIdList = unsafeData.clipRectIdList
 
@@ -407,6 +395,7 @@ namespace UIForia.Systems {
             //         renderTraversalList = unsafeData.renderTraversalList
             //     });
             // .Then(new BuildDynamicBatchGeometry());
+
             new BuildRenderPasses() {
                 drawList = unsafeData.drawList,
                 batchList = unsafeData.batchList,
@@ -418,6 +407,7 @@ namespace UIForia.Systems {
                 clipperBoundsList = unsafeData.clipRectBuffer,
                 renderTraversalList = unsafeData.renderTraversalList
             }.Run();
+
             // renderHandle = JobHandle.CombineDependencies(uiforiaShapeBaking, renderPassHandle);
             new BuildIndexBuffer() {
                 indirectArgs = unsafeData.indirectArgBuffer,
@@ -425,8 +415,8 @@ namespace UIForia.Systems {
                 batchList = unsafeData.batchList,
                 batchMemberList = unsafeData.batchMemberList,
                 indexBuffer = unsafeData.uiforiaIndexBuffer,
-                combinedTriangleList = unsafeData.textTriangleList // use text list as the merged one, its naturally larger anyway
             }.Run();
+
             // renderHandle = UIForiaScheduler.Await(renderHandle).Then(new BuildIndexBuffer() {
             //     indirectArgs = unsafeData.indirectArgBuffer,
             //     meshInfoList = unsafeData.meshInfoList,
@@ -453,7 +443,7 @@ namespace UIForia.Systems {
 
         private static readonly int s_VertexBufferKey = Shader.PropertyToID("_UIForiaVertexBuffer");
         private static readonly int s_MatrixBufferKey = Shader.PropertyToID("_UIForiaMatrixBuffer");
-        private static readonly int s_ClipRectBufferKey = Shader.PropertyToID("_UIForiaClipRectBuffer");
+        private static readonly int s_Float4BufferKey = Shader.PropertyToID("_UIForiaFloat4Buffer");
         private static readonly int s_MaterialBufferKey = Shader.PropertyToID("_UIForiaMaterialBuffer");
         private static readonly int s_OriginMatrixKey = Shader.PropertyToID("_UIForiaOriginMatrix");
         private static readonly int s_FontDataBufferKey = Shader.PropertyToID("_UIForiaFontBuffer");
@@ -463,8 +453,33 @@ namespace UIForia.Systems {
         private static readonly int s_MainTextureKey = Shader.PropertyToID("_MainTex");
         private static readonly int s_OutlineTextureKey = Shader.PropertyToID("_OutlineTex");
 
+        
+        private void UpdateComputeBufferData<T>(DataList<T>.Shared list, string bufferName, ComputeBuffer[] buffers, int idx, ComputeBufferType bufferType = ComputeBufferType.Structured) where T : unmanaged {
+            ComputeBuffer buffer = buffers[idx];
+            if (buffer == null || list.size > buffer.count) {
+                buffer?.Dispose();
+                buffer = new ComputeBuffer(list.capacity, sizeof(T), bufferType);
+                buffer.name = bufferName + idx;
+                buffers[idx] = buffer;
+            }
+
+            NativeArray<T> array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+                list.GetArrayPointer(),
+                list.size,
+                Allocator.None
+            );
+#if UNITY_EDITOR
+            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(unsafeData.dummyArray));
+#endif
+
+            buffers[idx].SetData(array, 0, 0, list.size);
+
+        }
+        
         public void Render(float surfaceWidth, float surfaceHeight, CommandBuffer commandBuffer) {
             // renderHandle.Complete();
+
+            int bufferIdx = frameId % 2;
 
             if (needsFontUpload) {
                 needsFontUpload = false;
@@ -472,33 +487,33 @@ namespace UIForia.Systems {
                 unsafeData.glyphBuffer.size = 0;
                 unsafeData.glyphBuffer.EnsureCapacity(resourceManager.renderedCharacterInfoList.size);
                 unsafeData.glyphBuffer.AddRange(resourceManager.renderedCharacterInfoList.GetArrayPointer(), resourceManager.renderedCharacterInfoList.size);
-                
+
                 unsafeData.fontBuffer.size = 0;
                 unsafeData.fontBuffer.EnsureCapacity(resourceManager.gpuFontInfoList.size);
                 unsafeData.fontBuffer.AddRange(resourceManager.gpuFontInfoList.GetArrayPointer(), resourceManager.gpuFontInfoList.size);
-                
+
                 if (glyphBuffer == null || glyphBuffer.count < unsafeData.glyphBuffer.size) {
                     glyphBuffer?.Dispose();
                     glyphBuffer = new ComputeBuffer(unsafeData.glyphBuffer.capacity, sizeof(GPUGlyphInfo), ComputeBufferType.Structured);
                 }
-                
+
                 if (fontBuffer == null || fontBuffer.count < unsafeData.fontBuffer.size) {
                     fontBuffer?.Dispose();
                     fontBuffer = new ComputeBuffer(unsafeData.fontBuffer.capacity, sizeof(GPUFontInfo), ComputeBufferType.Structured);
                 }
-                
+
                 NativeArray<GPUGlyphInfo> glyphArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<GPUGlyphInfo>(
                     unsafeData.glyphBuffer.GetArrayPointer(),
                     unsafeData.glyphBuffer.size,
                     Allocator.None
                 );
-                
+
                 NativeArray<GPUFontInfo> fontArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<GPUFontInfo>(
                     unsafeData.fontBuffer.GetArrayPointer(),
                     unsafeData.fontBuffer.size,
                     Allocator.None
                 );
-                
+
 #if UNITY_EDITOR
                 NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref glyphArray, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(unsafeData.dummyArray));
                 NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref fontArray, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(unsafeData.dummyArray));
@@ -508,30 +523,24 @@ namespace UIForia.Systems {
 
             }
 
-            if (unsafeData.uiforiaIndexBuffer.size > indexBuffer.count) {
-                indexBuffer.Dispose();
-                indexBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Index, unsafeData.uiforiaIndexBuffer.capacity, sizeof(int));
-            }
-
-            if (unsafeData.materialBuffer.size > materialBuffer.count) {
-                materialBuffer.Dispose();
-                materialBuffer = new ComputeBuffer(unsafeData.materialBuffer.capacity, sizeof(UIForiaMaterialInfo), ComputeBufferType.Structured);
-            }
-
-            if (unsafeData.textVertexList.size > vertexBuffer.count) {
-                vertexBuffer.Dispose();
-                vertexBuffer = new ComputeBuffer(unsafeData.textVertexList.capacity, sizeof(UIForiaVertex), ComputeBufferType.Structured);
-            }
-
-            if (unsafeData.indirectArgBuffer.size > indirectArgsBuffer.count) {
-                indirectArgsBuffer.Dispose();
-                indexBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Index, unsafeData.indirectArgBuffer.capacity, sizeof(int));
-            }
-
+            UpdateComputeBufferData(unsafeData.materialBuffer, "UIForia::MaterialBuffer", materialBuffers, bufferIdx);
+            UpdateComputeBufferData(unsafeData.textVertexList, "UIForia::VertexBuffer", vertexBuffers, bufferIdx);
             // todo -- convert to float3x2 to save on upload cost in 2d case, and maybe a quat, vec3, vec3 for 3d?
-            if (unsafeData.matrixBuffer.size > matrixBuffer.count) {
-                matrixBuffer.Dispose();
-                matrixBuffer = new ComputeBuffer(unsafeData.matrixBuffer.capacity, sizeof(float4x4), ComputeBufferType.Structured);
+            UpdateComputeBufferData(unsafeData.matrixBuffer, "UIForia::MatrixBuffer", matrixBuffers, bufferIdx);
+            UpdateComputeBufferData(unsafeData.float4Buffer, "UIForia::Float4Buffer", float4Buffers, bufferIdx);
+            UpdateComputeBufferData(unsafeData.indirectArgBuffer, "UIForia::IndirectArgBuffer", indirectArgBuffers, bufferIdx, ComputeBufferType.IndirectArguments);
+            
+            ComputeBuffer vertexBuffer = vertexBuffers[bufferIdx];
+            ComputeBuffer matrixBuffer = matrixBuffers[bufferIdx];
+            ComputeBuffer materialBuffer = materialBuffers[bufferIdx];
+            ComputeBuffer float4Buffer = float4Buffers[bufferIdx];
+            ComputeBuffer argBuffer = indirectArgBuffers[bufferIdx];
+            GraphicsBuffer indexBuffer = indexBuffers[bufferIdx];
+
+            if (indexBuffer == null || unsafeData.uiforiaIndexBuffer.size > indexBuffer.count) {
+                indexBuffer?.Dispose();
+                indexBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Index, unsafeData.uiforiaIndexBuffer.capacity, sizeof(int));
+                indexBuffers[bufferIdx] = indexBuffer;
             }
 
             NativeArray<int> triangleArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<int>(
@@ -540,43 +549,12 @@ namespace UIForia.Systems {
                 Allocator.None
             );
 
-            NativeArray<UIForiaVertex> vertexArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<UIForiaVertex>(
-                unsafeData.textVertexList.GetArrayPointer(),
-                unsafeData.textVertexList.size,
-                Allocator.None
-            );
-
-            NativeArray<IndirectArg> argArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<IndirectArg>(
-                unsafeData.indirectArgBuffer.GetArrayPointer(),
-                unsafeData.indirectArgBuffer.size,
-                Allocator.None
-            );
-
-            NativeArray<float4x4> matrixArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<float4x4>(
-                unsafeData.matrixBuffer.GetArrayPointer(),
-                unsafeData.matrixBuffer.size,
-                Allocator.None
-            );
-
-            NativeArray<UIForiaMaterialInfo> materialArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<UIForiaMaterialInfo>(
-                unsafeData.materialBuffer.GetArrayPointer(),
-                unsafeData.materialBuffer.size,
-                Allocator.None
-            );
 
 #if UNITY_EDITOR
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref triangleArray, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(unsafeData.dummyArray));
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref vertexArray, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(unsafeData.dummyArray));
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref matrixArray, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(unsafeData.dummyArray));
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref argArray, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(unsafeData.dummyArray));
-            NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref materialArray, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(unsafeData.dummyArray));
 #endif
 
             indexBuffer.SetData(triangleArray, 0, 0, unsafeData.uiforiaIndexBuffer.size);
-            vertexBuffer.SetData(vertexArray, 0, 0, unsafeData.textVertexList.size);
-            matrixBuffer.SetData(matrixArray, 0, 0, unsafeData.matrixBuffer.size);
-            materialBuffer.SetData(materialArray, 0, 0, unsafeData.materialBuffer.size);
-            indirectArgsBuffer.SetData(argArray, 0, 0, unsafeData.indirectArgBuffer.size);
 
             RenderCommand* renderCommands = unsafeData.renderCommands.GetArrayPointer();
             int renderCommandCount = unsafeData.renderCommands.size;
@@ -588,10 +566,9 @@ namespace UIForia.Systems {
 
             commandBuffer.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.Ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, -100, 100));
 
-            // todo -- need to double buffer these
-            commandBuffer.SetGlobalBuffer(s_VertexBufferKey, vertexBuffer);
             commandBuffer.SetGlobalBuffer(s_MatrixBufferKey, matrixBuffer);
-            commandBuffer.SetGlobalBuffer(s_ClipRectBufferKey, clipBuffer);
+            commandBuffer.SetGlobalBuffer(s_VertexBufferKey, vertexBuffer);
+            commandBuffer.SetGlobalBuffer(s_Float4BufferKey, float4Buffer);
             commandBuffer.SetGlobalBuffer(s_MaterialBufferKey, materialBuffer);
             commandBuffer.SetGlobalBuffer(s_FontDataBufferKey, fontBuffer);
             commandBuffer.SetGlobalBuffer(s_GlyphBufferKey, glyphBuffer);
@@ -619,7 +596,7 @@ namespace UIForia.Systems {
                             mpb.SetTexture(s_OutlineTextureKey, texture);
                         }
 
-                        commandBuffer.DrawProceduralIndirect(indexBuffer, Matrix4x4.identity, material, 0, MeshTopology.Triangles, indirectArgsBuffer, sizeof(IndirectArg) * batch.indirectArgOffset, mpb);
+                        commandBuffer.DrawProceduralIndirect(indexBuffer, Matrix4x4.identity, material, 0, MeshTopology.Triangles, argBuffer, sizeof(IndirectArg) * batch.indirectArgOffset, mpb);
 
                         break;
                     }
@@ -652,7 +629,7 @@ namespace UIForia.Systems {
                             mpb.SetTexture(s_FontTextureKey, texture);
                         }
 
-                        commandBuffer.DrawProceduralIndirect(indexBuffer, Matrix4x4.identity, material, 0, MeshTopology.Triangles, indirectArgsBuffer, sizeof(IndirectArg) * batch.indirectArgOffset, mpb);
+                        commandBuffer.DrawProceduralIndirect(indexBuffer, Matrix4x4.identity, material, 0, MeshTopology.Triangles, argBuffer, sizeof(IndirectArg) * batch.indirectArgOffset, mpb);
 
                         break;
                     }
@@ -835,6 +812,7 @@ namespace UIForia.Systems {
             public ElementTable<RenderInfo> renderInfoTable;
             public DataList<AxisAlignedBounds2D> transformedBounds;
             public DataList<int>.Shared uiforiaIndexBuffer;
+            public DataList<float4>.Shared float4Buffer;
 
             public DataList<RenderCommand>.Shared renderCommands;
             public DataList<Batch>.Shared batchList;
@@ -850,10 +828,8 @@ namespace UIForia.Systems {
             public DataList<AxisAlignedBounds2D>.Shared clipRectBuffer;
             public DataList<RenderTraversalInfo> renderTraversalList;
             public DataList<StencilInfo>.Shared stencilDataList;
-            public DataList<int>.Shared elementTriangleList;
             public DataList<UIForiaVertex>.Shared elementVertexList;
             public DataList<MeshInfo> meshInfoList;
-            public DataList<int>.Shared textTriangleList;
             public DataList<UIForiaVertex>.Shared textVertexList;
             public DataList<UIForiaVertex>.Shared shapeVertexList;
             public DataList<int>.Shared shapeTriangleList;
@@ -879,6 +855,7 @@ namespace UIForia.Systems {
                 this.drawList = new DataList<DrawInfo2>.Shared(64, Allocator.Persistent);
                 this.transformedBounds = new DataList<AxisAlignedBounds2D>(64, Allocator.Persistent);
                 this.matrixBuffer = new DataList<float4x4>.Shared(32, Allocator.Persistent);
+                this.float4Buffer = new DataList<float4>.Shared(32, Allocator.Persistent);
 
                 this.uiforiaIndexBuffer = new DataList<int>.Shared(1024, Allocator.Persistent);
 
@@ -891,10 +868,8 @@ namespace UIForia.Systems {
                 this.materialIdList = new List_Int32(64, Allocator.Persistent);
                 this.materialBuffer = new DataList<UIForiaMaterialInfo>.Shared(64, Allocator.Persistent);
 
-                this.elementTriangleList = new DataList<int>.Shared(6 * 64, Allocator.Persistent);
                 this.elementVertexList = new DataList<UIForiaVertex>.Shared(4 * 64, Allocator.Persistent);
 
-                this.textTriangleList = new DataList<int>.Shared(6 * 64, Allocator.Persistent);
                 this.textVertexList = new DataList<UIForiaVertex>.Shared(4 * 64, Allocator.Persistent);
 
                 this.shapeVertexList = new DataList<UIForiaVertex>.Shared(16, Allocator.Persistent);
@@ -906,7 +881,7 @@ namespace UIForia.Systems {
             public void Clear() {
                 Profiler.BeginSample("Clear Render Setup");
                 renderCommands.size = 0;
-
+                float4Buffer.size = 0;
                 indirectArgBuffer.size = 0;
                 uiforiaIndexBuffer.size = 0;
 
@@ -914,10 +889,8 @@ namespace UIForia.Systems {
                 shapeTriangleList.size = 0;
                 shapeVertexList.size = 0;
                 materialIdList.size = 0;
-                textTriangleList.size = 0;
                 textVertexList.size = 0;
                 meshInfoList.size = 0;
-                elementTriangleList.size = 0;
                 elementVertexList.size = 0;
                 stencilDataList.size = 0;
                 clipRectIdList.size = 0;
@@ -941,12 +914,11 @@ namespace UIForia.Systems {
                 glyphBuffer.Dispose();
                 meshInfoList.Dispose();
                 dummyArray.Dispose();
+                float4Buffer.Dispose();
                 indirectArgBuffer.Dispose();
                 materialIdList.Dispose();
 
                 textVertexList.Dispose();
-                textTriangleList.Dispose();
-                elementTriangleList.Dispose();
                 elementVertexList.Dispose();
 
                 materialBuffer.Dispose();

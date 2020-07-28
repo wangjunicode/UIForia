@@ -1,98 +1,92 @@
-﻿using UIForia.Rendering;
+﻿using UIForia.Elements;
+using UIForia.Rendering;
 using UIForia.Util;
+using UIForia.Util.Unsafe;
+using Unity.Mathematics;
+using UnityEngine;
 
 namespace UIForia.Text {
 
     internal class TextEffectAnimator {
 
-        private LightList<TextEffect> textEffectStack;
-        private TextSystem textSystem;
+        internal LightList<TextEffect> textEffectStack;
+        internal TextSystem textSystem;
+        internal BounceTextEffect bounce = new BounceTextEffect();
+        internal DataList<FontAssetInfo>.Shared fontAssetMap;
 
         public TextEffectAnimator(TextSystem textSystem) {
             this.textSystem = textSystem;
             this.textEffectStack = new LightList<TextEffect>();
         }
 
-        private unsafe void AnimationStep(ManagedTextSpanInfo span) {
+        public unsafe void Animate(in float4x4 worldMatrix, ref TextInfo textInfo, UITextElement textElement) {
 
-            if (span.textEffects != null && span.textEffects.size > 0) {
-                textEffectStack.AddRange(span.textEffects);
+            //if (textInfo.textEffects != null && textInfo.textEffects.size > 0) {
+            //    textEffectStack.AddRange(textInfo.textEffects);
+            //}
+
+            textEffectStack.size = 0;
+            int size = textInfo.symbolList.size;
+            TextSymbol* array = textInfo.symbolList.array;
+
+            int charIdx = 0;
+
+            // todo -- temp
+            if (textElement.id.index == 4) {
+                textEffectStack.Add(bounce);
             }
 
-            int pushCount = 0;
-            int charIdx = 0;
+            bounce.OnPush(worldMatrix, textElement);
             
-            // todo -- flag span as having / not having rich text effects in order to skip it
+            CharacterInterface characterInterface = default;
+            characterInterface.fontAssetMap = fontAssetMap.GetArrayPointer();
+            characterInterface.textSystem = textSystem;
+            fixed (TextInfo* textInfoPtr = &textInfo) {
+                characterInterface.textInfo = textInfoPtr;
+            }
 
-            for (int i = 0; i < span.unmanagedSpanInfo->symbolList.size; i++) {
-
-                ref TextSymbol textSymbol = ref span.unmanagedSpanInfo->symbolList.array[i];
+            for (int i = 0; i < size; i++) {
+                ref TextSymbol textSymbol = ref array[i];
 
                 if (textSymbol.type == TextSymbolType.EffectPush) {
+                    TextEffect effect = textSystem.textEffectTable.array[textSymbol.effectId];
+                    effect.OnPush(worldMatrix, textElement);
+                    continue;
+                }
 
-                    if (textSymbol.effectId > 0 && textSymbol.effectId < textSystem.textEffectTable.size) {
-                        textEffectStack.Add(textSystem.textEffectTable.array[textSymbol.effectId]);
-                        pushCount++;
+                if (textSymbol.type == TextSymbolType.EffectPop) {
+                    if (textEffectStack.size > 0) {
+                        TextEffect effect = textEffectStack.array[--textEffectStack.size];
+                        effect.OnPop();
+                    }
+
+                    continue;
+                }
+
+                if (textEffectStack.size == 0 || textSymbol.type != TextSymbolType.Character || (textSymbol.charInfo.flags & CharacterFlags.Visible) == 0) {
+                    continue;
+                }
+
+                fixed (BurstCharInfo* ptr = &textSymbol.charInfo) {
+
+                    characterInterface.charptr = ptr;
+                    characterInterface.charIndex = charIdx;
+                    characterInterface.vertexPtr = null;
+                    
+                    // material id stored in effect data? 
+                    // on the one hand thats kind of nice and encapsulated
+                    // on the other hand it requires a full material data if all i want to override is styled properties
+                    // could make material idx 2 ushorts, a base and an override
+                    
+                    for (int eidx = 0; eidx < textEffectStack.size; eidx++) {
+                        textEffectStack.array[eidx].ApplyEffect(ref characterInterface);
                     }
 
                 }
-                else if (textSymbol.type == TextSymbolType.EffectPop) {
-                    if (pushCount > 0) {
-                        pushCount--;
-                        textEffectStack.size--;
-                    }
-                }
-                else if (textSymbol.type == TextSymbolType.Character) {
 
-                    ref BurstCharInfo burstCharInfo = ref textSymbol.charInfo;
-
-                    if ((burstCharInfo.flags & CharacterFlags.Renderable) != 0 && textEffectStack.size > 0) {
-
-                        CharacterInterface characterInterface = new CharacterInterface(span, burstCharInfo.position, burstCharInfo.character, charIdx, i, burstCharInfo.flags);
-
-                        for (int evtIdx = 0; evtIdx < textEffectStack.size; evtIdx++) {
-                            textEffectStack.array[evtIdx].ApplyEffect(ref characterInterface);
-                        }
-
-                    }
-
-                    charIdx++;
-                }
+                charIdx++;
 
             }
-
-            ManagedTextSpanInfo ptr = span.firstChild;
-            
-            while (ptr != null) {
-                AnimationStep(ptr);             
-                ptr = ptr.nextSibling;
-            }
-            
-            textEffectStack.size -= pushCount;
-            
-            if (span.textEffects != null && span.textEffects.size > 0) {
-                textEffectStack.size -= span.textEffects.size;
-            }
-            
-        }
-
-        public void Animate(ManagedTextInfo textInfo) {
-
-            if (textInfo.textEffects != null && textInfo.textEffects.size > 0) {
-                textEffectStack.AddRange(textInfo.textEffects);
-            }
-
-            ManagedTextSpanInfo ptr = textInfo.firstSpan;
-
-            while (ptr != null) {
-
-                AnimationStep(ptr);
-
-                ptr = ptr.nextSibling;
-
-            }
-            
-            textEffectStack.QuickClear();
 
         }
 

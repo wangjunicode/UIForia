@@ -23,19 +23,31 @@ namespace UIForia.Layout {
 
             float width = layoutInfo.finalSize - layoutInfo.paddingBorderStart - layoutInfo.paddingBorderStart;
 
-            TextInfo.RunLayoutHorizontal_WordsOnly(ref textInfo, ref buffer, math.max(0, width));
+            if (textInfo.isRichText) {
+                TextInfo.RunLayoutHorizontal_RichText(ref textInfo, ref buffer, math.max(0, width));
+            }
+            else {
+                TextInfo.RunLayoutHorizontal_WordsOnly(ref textInfo, ref buffer, math.max(0, width));
+            }
 
             textInfo.lineInfoList.CopyFrom(buffer.array, buffer.size, Allocator.Persistent);
 
-            // // now I need to handle alignment 
+            // now I need to handle alignment 
             
             for (int i = 0; i < buffer.size; i++) {
                 TextLineInfo lineInfo = buffer[i];
                 float position = 0;
                 for (int w = lineInfo.wordStart; w < lineInfo.wordStart + lineInfo.wordCount; w++) {
                     ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList.array[w];
-                    layoutSymbol.wordInfo.x = position;
-                    position += layoutSymbol.wordInfo.width;
+                    TextLayoutSymbolType type = layoutSymbol.type;
+                    
+                    if (type == TextLayoutSymbolType.Word) {
+                        layoutSymbol.wordInfo.x = position;
+                        position += layoutSymbol.wordInfo.width;
+                    }
+                    else if (type == TextLayoutSymbolType.HorizontalSpace) {
+                        position += layoutSymbol.width;
+                    }
                 }
             }
         }
@@ -47,53 +59,43 @@ namespace UIForia.Layout {
             float fontSize = runner->GetResolvedFontSize(elementId);
 
             TextInfo.RunLayoutVertical_WordsOnly(fontAsset, fontSize, ref textInfo);
-
-            // for (int i = 0; i < textInfo.lineInfoList.size; i++) {
-            //     ref TextLineInfo lineInfo = ref textInfo.lineInfoList[i];
-            //
-            //     int first = -1;
-            //
-            //     // dont need line indices if all im doing is building rendered character infos
-            //     // if text changes, ill run layout
-            //     // if something affecting size changes, (font, font size, style, etc) ill run layout
-            //     // better to build render info now while i know I have to do it rather than every frame
-            //
-            //     // for (int w = lineInfo.wordStart; w < lineInfo.wordStart + lineInfo.wordCount; w++) {
-            //     //     ref TextLayoutSymbol wordInfo = ref textInfo.layoutSymbolList[w];
-            //     //     if (wordInfo.type == TextLayoutSymbolType.Word) {
-            //     //
-            //     //         if (first < 0) {
-            //     //             first = wordInfo.wordInfo.charStart;
-            //     //             lineInfo.globalCharacterStartIndex = wordInfo.wordInfo.charStart;
-            //     //         }
-            //     //
-            //     //         lineInfo.globalCharacterEndIndex = wordInfo.wordInfo.charEnd;
-            //     //
-            //     //         for (int c = wordInfo.wordInfo.charStart; c < wordInfo.wordInfo.charEnd; c++) {
-            //     //             ref BurstCharInfo charInfo = ref textInfo.symbolList[c].charInfo;
-            //     //             // textInfo.renderedCharacters.Add(new TextRenderBox2.CharRenderInfo() {
-            //     //             //     position = new float2(charInfo.topLeft.x + wordInfo.wordInfo.x, charInfo.topLeft.y + wordInfo.wordInfo.x),
-            //     //             //     glyphIndex = charInfo.glyphIndex,
-            //     //             //     lineIndex = 0, // can move this to lines now 
-            //     //             //     materialIndex = 0, // compute later? already computed by text engine?
-            //     //             //     
-            //     //             // });
-            //     //             charInfo.lineIndex = (ushort) i;
-            //     //         }
-            //     //
-            //     //     }
-            //     //
-            //     // }
-            //
-            // }
-
+            
+            for (int i = 0; i < textInfo.lineInfoList.size; i++) {
+                TextLineInfo lineInfo =  textInfo.lineInfoList.array[i];
+                float maxAscender = 0;
+                for (int w = lineInfo.wordStart; w < lineInfo.wordStart + lineInfo.wordCount; w++) {
+                    ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList.array[w];
+                    TextLayoutSymbolType type = layoutSymbol.type;
+                    if (type == TextLayoutSymbolType.Word) {
+                        maxAscender = maxAscender > layoutSymbol.wordInfo.maxAscender ?maxAscender : layoutSymbol.wordInfo.maxAscender; 
+                    }
+                }
+                
+                for (int w = lineInfo.wordStart; w < lineInfo.wordStart + lineInfo.wordCount; w++) {
+                    ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList.array[w];
+                    TextLayoutSymbolType type = layoutSymbol.type;
+                    if (type == TextLayoutSymbolType.Word) {
+                        for (int c = layoutSymbol.wordInfo.charStart; c < layoutSymbol.wordInfo.charEnd; c++) {
+                            ref TextSymbol symbol = ref textInfo.symbolList.array[c];
+                            if (symbol.type == TextSymbolType.Character) {
+                                // todo -- need to offset the render y position by diff of line ascenders to handle multiple fonts or multiple sizes on a line 
+                                // symbol.charInfo.renderPosition.y += (maxAscender - );
+                                symbol.charInfo.renderPosition.x = layoutSymbol.wordInfo.x + symbol.charInfo.position.x;
+                                symbol.charInfo.renderPosition.y = layoutSymbol.wordInfo.y + symbol.charInfo.position.y;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public float ComputeContentWidth(ref BurstLayoutRunner runner, in BlockSize blockSize) {
             ref List_TextLineInfo buffer = ref UnsafeUtilityEx.AsRef<List_TextLineInfo>(runner.lineInfoBuffer);
             ref TextInfo textInfo = ref runner.GetTextInfo(textElementInfoIndex);
 
-            TextInfo.RunLayoutHorizontal_WordsOnly(ref textInfo, ref buffer, blockSize.insetSize);
+            //TextInfo.RunLayoutHorizontal_WordsOnly(ref textInfo, ref buffer, blockSize.insetSize);
+            TextInfo.RunLayoutHorizontal_RichText(ref textInfo, ref buffer, blockSize.insetSize);
+            
 
             float max = 0;
 

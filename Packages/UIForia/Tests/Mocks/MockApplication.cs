@@ -29,7 +29,7 @@ namespace Tests.Mocks {
             styleSystem = new StyleSystem(elementSystem);
             routingSystem = new RoutingSystem();
             linqBindingSystem = new LinqBindingSystem();
-            textSystem = new TextSystem(elementSystem);
+            textSystem = new TextSystem(this, elementSystem);
             layoutSystem = new MockLayoutSystem(this, elementSystem, textSystem);
             renderSystem = new MockRenderSystem(this);
             animationSystem = new AnimationSystem(elementSystem);

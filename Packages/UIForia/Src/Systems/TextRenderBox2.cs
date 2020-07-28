@@ -1,4 +1,5 @@
-﻿using UIForia.Elements;
+﻿using System;
+using UIForia.Elements;
 using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Text;
@@ -14,11 +15,7 @@ using UnityEngine.Profiling;
 namespace UIForia.Rendering {
 
     public unsafe class TextRenderBox2 : RenderBox, IUnityInspector {
-
-        internal TextStyleBuffer styleBuffer;
-        internal DataList<TextMeshSpanInfo> textRenderSpans; // only used if text has multiple render spans
-
-        private DataList<RenderedCharacterInfo>.Shared renderCharList;
+        
 
         // remove?
         private float width;
@@ -26,14 +23,13 @@ namespace UIForia.Rendering {
 
         public override void OnInitialize() {
             base.OnInitialize();
-            renderCharList = new DataList<RenderedCharacterInfo>.Shared(0, Allocator.Persistent);
         }
 
         // todo -- might be an issue if in-use by render system
         ~TextRenderBox2() {
-            renderCharList.Dispose();
         }
 
+        // todo -- move to the text system let that handle this except for non text specific stuff
         public override void OnStylePropertyChanged(StyleProperty[] propertyList, int propertyCount) {
             base.OnStylePropertyChanged(propertyList, propertyCount);
 
@@ -43,15 +39,15 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TextFontAsset:
                     case StylePropertyId.Opacity:
                     case StylePropertyId.TextColor:
-                        styleBuffer.faceColor = property.AsColor32;
+                      //  styleBuffer.faceColor = property.AsColor32;
                         break;
 
                     case StylePropertyId.TextFaceDilate:
-                        styleBuffer.faceDilate = property.AsFloat;
+                      //  styleBuffer.faceDilate = property.AsFloat;
                         break;
 
                     case StylePropertyId.TextUnderlayColor:
-                        styleBuffer.underlayColor = property.AsColor32;
+                      //  styleBuffer.underlayColor = property.AsColor32;
                         break;
 
                     case StylePropertyId.TextUnderlayX:
@@ -97,46 +93,7 @@ namespace UIForia.Rendering {
             width = size.width;
             height = size.height;
         }
-
-        [BurstCompile]
-        public struct GatherJob : IJob {
-
-            public DataList<RenderedCharacterInfo>.Shared renderList;
-            [NativeDisableUnsafePtrRestriction] public TextInfo* textInfo;
-
-            public void Execute() {
-                int s = textInfo->symbolList.size;
-                TextSymbol* symbolList = textInfo->symbolList.array;
-                TextLayoutSymbol* layoutList = textInfo->layoutSymbolList.array;
-                RenderedCharacterInfo* v = renderList.GetArrayPointer();
-                int idx = 0;
-
-                for (int i = 0; i < s; i++) {
-
-                    ref BurstCharInfo charInfo = ref symbolList[i].charInfo;
-
-                    if (charInfo.renderBufferIndex <= 0) {
-                        continue;
-                    }
-
-                    float x = charInfo.position.x + layoutList[charInfo.wordIndex].wordInfo.x;
-                    float y = charInfo.position.y + layoutList[charInfo.wordIndex].wordInfo.y;
-
-                    v[idx++] = (new RenderedCharacterInfo() {
-                        position = new float2(x, y),
-                        // width = charInfo.bottomRight.x - charInfo.topLeft.x,
-                        // height = charInfo.bottomRight.y - charInfo.topLeft.y,
-                        materialIndex = 0,
-                        textureIndex = 0,
-                        renderedGlyphIndex = charInfo.renderBufferIndex
-                    });
-
-                }
-
-                renderList.size = idx;
-            }
-
-        }
+        
 
         public override void PaintBackground3(RenderContext3 ctx) {
 
@@ -152,37 +109,34 @@ namespace UIForia.Rendering {
                 return;
             }
 
-            Graphics.TextMaterialInfo materialInfo = default;
-            materialInfo.opacity = 1;
-            materialInfo.scale = 1;
-            materialInfo.weight = 0; // todo -- use font style instead
-            materialInfo.glowColor = textInfo.textStyle.glowColor;
-            materialInfo.faceColor = textInfo.textStyle.faceColor;
-            materialInfo.outlineColor = textInfo.textStyle.outlineColor;
-            materialInfo.zPosition = 0;
-            materialInfo.outlineWidth = 0; //textInfo.textStyle.outlineWidth;
-            Profiler.BeginSample("Build Render List");
+            ctx.SetTextMaterials(textInfo.materialBuffer);
+            for (int i = 0; i < textInfo.renderRangeList.size; i++) {
+                ref TextRenderRange render = ref textInfo.renderRangeList[i];
+                
+                // todo -- should definitely do a broadphase cull here 
+                // bool overlappingOrContains = xMax >= clipper.aabb.xMin && xMin <= clipper.aabb.xMax && yMax >= clipper.aabb.yMin && yMin <= clipper.aabb.yMax;
 
-            if (renderCharList.size == 0) {
+                switch (render.type) {
 
-                renderCharList.size = 0;
-                renderCharList.EnsureCapacity(textInfo.symbolList.size); // todo -- buffer this so we dont over alloc, also dont update every frame
+                    case TextRenderType.Characters:
+                        ctx.DrawTextCharacters(render);
+                        break;
 
-                new GatherJob() {
-                    renderList = renderCharList,
-                    textInfo = &textInfo,
-                }.Run();
+                    case TextRenderType.Underline:
+                        break;
+
+                    case TextRenderType.Sprite:
+                        break;
+
+                    case TextRenderType.Image:
+                        break;
+
+                    case TextRenderType.Element:
+                        break;
+                }
 
             }
 
-            Profiler.EndSample();
-
-            ctx.DrawSingleSpanUniformTextInternal(renderCharList.GetArrayPointer(), renderCharList.size, new AxisAlignedBounds2D(0, 0, width, height), new TextMaterialSetup() {
-                materialInfo = materialInfo,
-                faceTexture = new TextureUsage(),
-                outlineTexture = new TextureUsage(),
-                fontTextureId = ctx.GetFontTextureId(textInfo.textStyle.fontAssetId)
-            });
 
         }
 
@@ -201,16 +155,6 @@ namespace UIForia.Rendering {
 
     }
 
-    public struct RenderedCharacterInfo {
 
-        public float2 position;
-        public uint renderedGlyphIndex;
-        public uint materialIndex;
-        public uint textureIndex;
-        public float width;
-        public float height;
-        public int effectIndex;
-
-    }
 
 }

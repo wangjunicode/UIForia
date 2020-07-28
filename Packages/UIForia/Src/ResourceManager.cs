@@ -49,7 +49,7 @@ namespace UIForia {
         public float height;
 
     }
-    
+
     public sealed class ResourceManager : IDisposable {
 
         internal struct AssetEntry<T> where T : Object {
@@ -58,7 +58,6 @@ namespace UIForia {
             public int id;
 
         }
-
 
         public event Action<FontAsset> onFontAdded;
 
@@ -70,7 +69,7 @@ namespace UIForia {
         internal readonly LightList<Texture> fontTextures;
         internal DataList<GPUGlyphInfo> renderedCharacterInfoList;
         internal DataList<GPUFontInfo> gpuFontInfoList;
-        
+
         internal MaterialDatabase2 materialDatabase;
         internal DataList<FontAssetInfo>.Shared fontAssetMap;
 
@@ -119,44 +118,40 @@ namespace UIForia {
         }
 
         internal void GatherGPUFontInfo(FontAsset fontAsset) {
-            
+
             GPUFontInfo fontInfo = new GPUFontInfo();
             fontInfo.normalStyle = fontAsset.normalStyle;
             fontInfo.gradientScale = fontAsset.gradientScale;
-            fontInfo.padding = fontAsset.faceInfo.padding;
+            fontInfo.glyphOffset = renderedCharacterInfoList.size;
             fontInfo.scale = fontAsset.faceInfo.scale;
             fontInfo.boldStyle = fontAsset.boldStyle;
             fontInfo.italicStyle = fontAsset.italicStyle;
             fontInfo.weightNormal = fontAsset.weightNormal;
             fontInfo.weightBold = fontAsset.weightBold;
             fontInfo.pointSize = fontAsset.faceInfo.pointSize;
-            
+            fontInfo.ascender = fontAsset.faceInfo.ascender;
+
             // todo -- I need to update this if I atlas fonts together
             fontInfo.atlasWidth = fontAsset.atlas.width;
             fontInfo.atlasHeight = fontAsset.atlas.height;
-            
+
             gpuFontInfoList.Add(fontInfo);
-            
-            int offset = renderedCharacterInfoList.size;
-            
-            for (int i = 0; i < fontAsset.textGlyphList.Length; i++) {
-                ref UIForiaGlyph glyph = ref fontAsset.textGlyphList[i];
-                if (glyph.uvWidth > 0 && glyph.uvHeight > 0) {
-                    glyph.renderBufferIndex = offset++;
-                    renderedCharacterInfoList.Add(new GPUGlyphInfo() {
-                        width = glyph.width,
-                        height = glyph.height,
-                        xOffset = glyph.xOffset,
-                        yOffset = glyph.yOffset,
-                        atlasX = glyph.uvX,
-                        atlasY = glyph.uvY,
-                        atlasWidth = glyph.uvWidth,
-                        atlasHeight = glyph.uvHeight
-                    });
-                }
-                else {
-                    glyph.renderBufferIndex = 0;
-                }
+            uint offset = (uint) renderedCharacterInfoList.size;
+
+            for (int i = 0; i < fontAsset.glyphList.size; i++) {
+                ref UIForiaGlyph glyph = ref fontAsset.glyphList[i];
+                glyph.renderBufferIndex = offset++;
+                // todo -- we have 2 glyph buffers right now, 1 per font and 1 global for gpu submission. try to not do this
+                renderedCharacterInfoList.Add(new GPUGlyphInfo() {
+                    width = glyph.width,
+                    height = glyph.height,
+                    xOffset = glyph.xOffset,
+                    yOffset = glyph.yOffset,
+                    atlasX = glyph.uvX,
+                    atlasY = glyph.uvY,
+                    atlasWidth = glyph.uvWidth,
+                    atlasHeight = glyph.uvHeight
+                });
             }
         }
 
@@ -213,7 +208,7 @@ namespace UIForia {
                 fontMap.Add(path, null);
                 return null;
             }
-            
+
             onFontAdded?.Invoke(retn);
 
             retn.id = fontAssetMap.size;

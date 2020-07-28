@@ -51,7 +51,7 @@ namespace UIForia.Util {
         private static readonly List<GenericTypeEntry> generics = new List<GenericTypeEntry>();
         private static readonly List<DelegateEntry> staticDelegates = new List<DelegateEntry>();
         private static readonly List<DelegateEntry> openDelegates = new List<DelegateEntry>();
-        private static ClassBuilder classBuilder;
+        // private static ClassBuilder classBuilder;
 
         private static readonly Dictionary<Type, List<LinqAccessor>> linqDelegates = new Dictionary<Type, List<LinqAccessor>>();
 
@@ -1258,24 +1258,24 @@ namespace UIForia.Util {
         }
 
 
-        public static Type CreateType(string id, Type baseType, IList<FieldDefinition> fields, IList<MethodDefinition> methods, IList<string> namespaces) {
-            if (classBuilder == null) classBuilder = new ClassBuilder();
-            return classBuilder.CreateRuntimeType(id, baseType, fields, methods, namespaces);
-        }
-
-        public static Type CreateGenericRuntimeType(string id, Type baseType, GenericTypeDefinition[] genericsArgs, IList<FieldDefinition> fields, IList<string> namespaces) {
-            if (classBuilder == null) classBuilder = new ClassBuilder();
-            return classBuilder.CreateGenericRuntimeType(id, baseType, genericsArgs, fields, namespaces);
-        }
-
-        public static bool TryCreateInstance<T>(string id, out T instance) {
-            if (classBuilder == null) {
-                instance = default;
-                return false;
-            }
-
-            return classBuilder.TryCreateInstance(id, out instance);
-        }
+        // public static Type CreateType(string id, Type baseType, IList<FieldDefinition> fields, IList<MethodDefinition> methods, IList<string> namespaces) {
+        //     if (classBuilder == null) classBuilder = new ClassBuilder();
+        //     return classBuilder.CreateRuntimeType(id, baseType, fields, methods, namespaces);
+        // }
+        //
+        // public static Type CreateGenericRuntimeType(string id, Type baseType, GenericTypeDefinition[] genericsArgs, IList<FieldDefinition> fields, IList<string> namespaces) {
+        //     if (classBuilder == null) classBuilder = new ClassBuilder();
+        //     return classBuilder.CreateGenericRuntimeType(id, baseType, genericsArgs, fields, namespaces);
+        // }
+        //
+        // public static bool TryCreateInstance<T>(string id, out T instance) {
+        //     if (classBuilder == null) {
+        //         instance = default;
+        //         return false;
+        //     }
+        //
+        //     return classBuilder.TryCreateInstance(id, out instance);
+        // }
 
         public struct FieldDefinition {
 

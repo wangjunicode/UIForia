@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ThisOtherThing.UI.ShapeUtils {
 
-    public unsafe partial struct ShapeKit {
+    internal unsafe partial struct ShapeKit {
 
         public void AddArc(ref UIVertexHelper vh, float width, float height, in ArcProperties arcProperties) {
 

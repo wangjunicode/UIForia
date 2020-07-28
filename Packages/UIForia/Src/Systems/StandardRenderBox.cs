@@ -104,13 +104,13 @@ namespace UIForia.Rendering {
                 opacity = element.style.Opacity,
                 bgFit = element.style.BackgroundFit,
                 uvTransform = new UVTransform() {
-                    uvRotation = element.style.BackgroundImageRotation,
-                    uvOffsetX = element.style.BackgroundImageOffsetX.value, // fix
-                    uvOffsetY = element.style.BackgroundImageOffsetY.value, // fix
-                    uvScaleX = element.style.BackgroundImageScaleX,
-                    uvScaleY = element.style.BackgroundImageScaleY,
-                    uvTileX = element.style.BackgroundImageTileX,
-                    uvTileY = element.style.BackgroundImageTileY,
+                    // uvRotation = element.style.BackgroundImageRotation,
+                    //uvOffsetX = element.style.BackgroundImageOffsetX.value, // fix
+                    //uvOffsetY = element.style.BackgroundImageOffsetY.value, // fix
+                    //uvScaleX = element.style.BackgroundImageScaleX,
+                    //uvScaleY = element.style.BackgroundImageScaleY,
+                    //uvTileX = element.style.BackgroundImageTileX,
+                    //uvTileY = element.style.BackgroundImageTileY,
                 },
                 meshStyle = new ElementMeshStyle() {
                     meshType = element.style.MeshType,
@@ -149,7 +149,7 @@ namespace UIForia.Rendering {
                 radiusBottomLeft = element.style.BorderRadiusBottomLeft.value, // fix
             };
 
-            elementMaterialInfo.opacity = elementStyle.opacity;
+            elementMaterialInfo.opacity = 255; //elementStyle.opacity;
             elementMaterialInfo.backgroundColor = elementStyle.backgroundColor;
             elementMaterialInfo.backgroundTint = elementStyle.backgroundTint;
             elementMaterialInfo.outlineColor = elementStyle.outlineColor;

@@ -2,6 +2,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using UIForia.Graphics;
 using UIForia.Layout;
+using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util.Unsafe;
 using Unity.Mathematics;
@@ -58,6 +59,9 @@ namespace UIForia.Editor {
             ListTemplateGenerator.Generate<DrawInfo>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<VertexChannelDesc>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<UIForiaVertex>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<TextRenderRange>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<UIForiaGlyph>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<TextMaterialInfo>(outputPathRoot, contents);
             
         }
 

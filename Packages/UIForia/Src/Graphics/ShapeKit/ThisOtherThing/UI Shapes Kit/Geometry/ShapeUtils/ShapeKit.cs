@@ -22,7 +22,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
 
     }
 
-    public unsafe partial struct ShapeKit {
+    internal unsafe partial struct ShapeKit {
 
         private List_float2 unitPositionBuffer;
         private List_float2 cornerBuffer;

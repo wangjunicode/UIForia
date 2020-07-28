@@ -63,12 +63,15 @@
 
                 uint radius;
                 uint bevel;
-
+                uint meshPie;
+                float2 meshPieOffset;
+                
                 float opacity;
                 float outlineWidth;
                 uint colorModeAndUnused;
             };
         
+            // todo -- this format is wrong since I changed text, fix it!
             struct UIForiaVertex {
                 float2 position;
                 float2 texCoord0; // sdf uvs (inset by half a pixel)
@@ -85,6 +88,8 @@
             float _UIForiaDPIScale;
             float4x4 _UIForiaOriginMatrix;
             
+            // todo -- none of this stuff works atm
+            
             StructuredBuffer<float4x4> _UIForiaMatrixBuffer;            
             StructuredBuffer<UIForiaVertex> _UIForiaVertexBuffer;            
             StructuredBuffer<AxisAlignedBounds2D> _UIForiaClipRectBuffer;            
@@ -93,8 +98,8 @@
             v2f vert (appdata v) {
                v2f o;
                UIForiaVertex vertex = _UIForiaVertexBuffer[v.vid];
-               int matrixIndex = UnpackMatrixId(vertex.indices);
-               int materialIndex = UnpackMaterialId(vertex.indices);
+               int matrixIndex = 0; //UnpackMatrixId(vertex.indices);
+               int materialIndex = 0; //UnpackMaterialId(vertex.indices);
                
                ElementMaterialInfo material = _UIForiaMaterialBuffer[materialIndex];
                

@@ -68,7 +68,6 @@ namespace UIForia.Systems {
                     if (orientedBounds.p2.y > yMax) yMax = orientedBounds.p2.y;
                     if (orientedBounds.p3.y > yMax) yMax = orientedBounds.p3.y;
 
-                    // todo -- store aligned bounds 
 
                     bool overlappingOrContains = xMax >= clipper.aabb.xMin && xMin <= clipper.aabb.xMax && yMax >= clipper.aabb.yMin && yMin <= clipper.aabb.yMax;
 

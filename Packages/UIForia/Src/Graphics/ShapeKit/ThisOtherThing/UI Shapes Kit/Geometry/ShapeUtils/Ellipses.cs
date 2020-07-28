@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace ThisOtherThing.UI.ShapeUtils {
 
-    public unsafe partial struct ShapeKit {
+    internal unsafe partial struct ShapeKit {
 
         private static float2 GetRadius(float width, float height, EllipseFitting fitting) {
             width *= 0.5f;

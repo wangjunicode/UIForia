@@ -15,8 +15,10 @@ using Unity.Mathematics;
 
 namespace UIForia.ListTypes {
 
+    
+
     [DebuggerTypeProxy(typeof(DebugView_float2))]
-    public unsafe struct List_float2 : IBasicList<float2> {
+    internal unsafe struct List_float2 : IBasicList<float2> {
 
         public int size;
         private ushort capacityShiftBits;

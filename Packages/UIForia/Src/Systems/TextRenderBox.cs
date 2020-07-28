@@ -225,7 +225,7 @@ namespace UIForia.Rendering {
 
             for (int i = 0; i < textInfo.layoutSymbolList.size; i++) {
 
-                if ((textInfo.layoutSymbolList[i].type & ~TextLayoutSymbolType.IsBreakable) == TextLayoutSymbolType.Word) {
+                if ((textInfo.layoutSymbolList[i].type ) == TextLayoutSymbolType.Word) {
                     ref WordInfo wordInfo = ref textInfo.layoutSymbolList[i].wordInfo;
 
                     if (wordInfo.type != WordType.Normal) {

@@ -614,7 +614,7 @@ namespace UIForia.Systems {
                 layoutHierarchyTable = layoutHierarchyTable,
                 viewRootIds = application.viewRootIds
             }.Schedule();
-            
+
             for (int i = 0; i < layoutContexts.size; i++) {
 
                 ref LayoutContext layoutContext = ref layoutContexts.array[i];
@@ -670,8 +670,8 @@ namespace UIForia.Systems {
                 textSystem.GetTextChangesForView(viewRootId, layoutContext.textChangeBuffer);
 
                 JobHandle textTransformUpdates = new TextSystem.UpdateTextTransformJob() {
-                   changedElementIds = layoutContext.textChangeBuffer,
-                   textInfoMap = textSystem.textInfoMap
+                    changedElementIds = layoutContext.textChangeBuffer,
+                    textInfoMap = textSystem.textInfoMap
                 }.Schedule();
 
                 JobHandle textLayoutUpdates = UIForiaScheduler.Await(emTableHandle, textTransformUpdates).ThenParallel(new UpdateTextLayoutJob() {
@@ -683,7 +683,7 @@ namespace UIForia.Systems {
                     fontAssetMap = application.ResourceManager.fontAssetMap,
                     textInfoMap = textSystem.textInfoMap
                 });
-                
+
                 JobHandle flatten = new FlattenLayoutTree() {
                     viewRootId = viewRootId,
                     elementList = layoutContext.elementList,
@@ -693,7 +693,7 @@ namespace UIForia.Systems {
                     layoutHierarchyTable = layoutHierarchyTable,
                     viewActiveElementCount = activeElementCount
                 }.Schedule();
-                
+
                 // parallel for large views
                 JobHandle updatePaddingMarginBorder = UIForiaScheduler.Await(emTableHandle, flatten).ThenParallel(new UpdatePaddingBorderMargin() {
                     parallel = new ParallelParams(activeElementCount, 250),
@@ -705,14 +705,14 @@ namespace UIForia.Systems {
                     layoutResultTable = layoutResultTable,
                     viewParameters = viewParameters
                 });
-                
+
                 // possible to be parallel for big tree with ignored, fixed, and no fit
                 JobHandle horizontalLayout = UIForiaScheduler.Await(textLayoutUpdates, updatePaddingMarginBorder).Then(new RunLayoutHorizontal() {
                     runner = layoutContext.runner,
                     elementList = layoutContext.elementList,
                     layoutBoxTable = layoutBoxTable
                 });
-                
+
                 // parallel for big list
                 JobHandle horizontalAlignment = UIForiaScheduler.Await(horizontalLayout).ThenParallel(new ApplyHorizontalAlignments() {
                     parallel = new ParallelParams(activeElementCount, 250),
@@ -723,14 +723,14 @@ namespace UIForia.Systems {
                     viewRootId = viewRootId,
                     layoutBoxInfoTable = layoutResultTable
                 });
-                
+
                 // possible to be parallel for big tree with ignored, fixed, and no fit
                 JobHandle verticalLayout = UIForiaScheduler.Await(horizontalLayout).Then(new RunLayoutVertical() {
                     runner = layoutContext.runner,
                     elementList = layoutContext.elementList,
                     layoutBoxTable = layoutBoxTable
                 });
-                
+
                 // parallel for big list
                 JobHandle verticalAlignment = UIForiaScheduler.Await(verticalLayout).ThenParallel(new ApplyVerticalAlignments() {
                     parallel = new ParallelParams(activeElementCount, 250),
@@ -742,7 +742,7 @@ namespace UIForia.Systems {
                     layoutBoxInfoTable = layoutResultTable
                 });
                 verticalAlignHandles[i] = verticalAlignment;
-                
+
                 // parallel if big list element count, single if small, order doesnt matter
                 JobHandle buildLocalMatrices = UIForiaScheduler.Await(horizontalAlignment, verticalAlignment).ThenParallel(new BuildLocalMatrices() {
                     parallel = new ParallelParams(activeElementCount, 250),
@@ -753,14 +753,16 @@ namespace UIForia.Systems {
                     transformInfoTable = transformInfoTable,
                     layoutBoxInfoTable = layoutResultTable
                 });
-                
+
+                // todo -- merge with local matrix building, its likely much faster
                 JobHandle buildWorldMatrices = UIForiaScheduler.Await(buildLocalMatrices).Then(new BuildWorldMatrices() {
                     elementList = layoutContext.elementList,
                     localMatrices = localMatrices,
                     parentList = layoutContext.parentList,
                     worldMatrices = worldMatrices
                 });
-                
+
+                // todo -- merge with matrix building, its likely much faster
                 layoutHandles[i] = UIForiaScheduler.Await(buildWorldMatrices).ThenParallel(new ComputeOrientedBounds() {
                     parallel = new ParallelParams(activeElementCount, 250),
                     elementList = layoutContext.elementList,
@@ -768,11 +770,12 @@ namespace UIForia.Systems {
                     clipInfoTable = clipInfoTable,
                     layoutResultTable = layoutResultTable
                 });
-          
+
                 JobHandle.ScheduleBatchedJobs();
             }
-          
+
             JobHandle layoutCompleted = JobHandle.CombineDependencies(layoutHandles);
+
             // todo -- this can be parallel if we find the view indices and then count how many were added per view to get the ranges
             // todo -- can start this while we compute local matrices if this job re-computes local and world matrices, big savings!
             JobHandle updateClippers = UIForiaScheduler.Await(constructClippers, layoutCompleted, JobHandle.CombineDependencies(verticalAlignHandles)).Then(new UpdateClippers() {
@@ -782,9 +785,9 @@ namespace UIForia.Systems {
                 clipperBoundsList = clipperBoundsList,
                 layoutResultTable = layoutResultTable
             });
-            
+
             NativeArray<JobHandle> cullingHandles = new NativeArray<JobHandle>(layoutContexts.size, Allocator.Temp);
-            
+
             for (int i = 0; i < layoutContexts.size; i++) {
                 cullingHandles[i] = UIForiaScheduler.Await(updateClippers, layoutCompleted).ThenParallel(new ComputeElementCulling() {
                     parallel = new ParallelParams(layoutContexts[i].ActiveElementCount, 250),
@@ -794,10 +797,31 @@ namespace UIForia.Systems {
                     clipInfoTable = clipInfoTable
                 });
             }
-            
+
             JobHandle.CompleteAll(cullingHandles);
-          
-           cullingHandles.Dispose();
+            
+            // // todo -- find a better place for this stuff to happen
+            new UpdateTextRenderRanges() {
+                textInfoMap = textSystem.textInfoMap,
+                fontAssetMap = application.ResourceManager.fontAssetMap,
+                rangeSizeLimit = 200,
+                activeTextElementIds = textSystem.activeTextElementIds
+            }.Run();
+            
+            new UpdateTextMaterialBuffersJob() {
+                textInfoMap = textSystem.textInfoMap,
+                activeTextElementIds = textSystem.activeTextElementIds
+            }.Run();
+            
+            textSystem.UpdateEffects();
+            
+            new UpdateTextRenderBounds() {
+                textInfoMap = textSystem.textInfoMap,
+                activeTextElementIds = textSystem.activeTextElementIds,
+                fontAssetMap = application.ResourceManager.fontAssetMap
+            }.Run();
+            
+            cullingHandles.Dispose();
             layoutHandles.Dispose();
             verticalAlignHandles.Dispose();
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using UIForia.Rendering;
+using UIForia.Text;
 using UnityEngine;
 
 namespace UIForia {
@@ -57,10 +58,18 @@ namespace UIForia {
         public MaterialPropertyType propertyType;
 
     }
-    
+
     public class UIForiaAssets : MonoBehaviour {
 
+        public float centerX;
+        public float centerY;
+
         public MaterialReference[] materialReferences;
+
+        private void Update() {
+
+
+        }
 
     }
 

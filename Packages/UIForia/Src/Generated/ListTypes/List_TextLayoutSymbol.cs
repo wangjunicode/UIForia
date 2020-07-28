@@ -15,7 +15,6 @@ using UIForia.Text;
 
 namespace UIForia.ListTypes {
 
-    
 
     [DebuggerTypeProxy(typeof(DebugView_TextLayoutSymbol))]
     internal unsafe struct List_TextLayoutSymbol : IBasicList<TextLayoutSymbol> {

@@ -63,7 +63,7 @@ namespace UIForia {
 
     }
 
-    internal struct TextMaterialInfo {
+    internal struct CPUTextMaterialInfo {
 
         public MaterialId materialId;
         public TextMaterialFeatures features;
@@ -80,10 +80,10 @@ namespace UIForia {
 
         private static readonly MaterialPropertyDefinition[] s_EmptyPropertyArray = { };
 
-        internal StructList<TextMaterialInfo> textMaterialList;
+        internal StructList<CPUTextMaterialInfo> textMaterialList;
         public MaterialDatabase2() {
             this.materialMap = new MaterialInfo[16];
-            this.textMaterialList = new StructList<TextMaterialInfo>();
+            this.textMaterialList = new StructList<CPUTextMaterialInfo>();
             this.nameMap = new Dictionary<string, int>();
             this.materialCount = 1; // skip 0 index
         }
@@ -130,7 +130,7 @@ namespace UIForia {
                 loadState = AssetLoadState.Loaded
             };
 
-            textMaterialList.Add(new TextMaterialInfo() {
+            textMaterialList.Add(new CPUTextMaterialInfo() {
                 features = features,
                 materialId = materialId
             });

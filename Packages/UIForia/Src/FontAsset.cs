@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using TMPro;
+using UIForia.ListTypes;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
@@ -50,7 +51,7 @@ namespace UIForia {
         public float yOffset;
         public float xAdvance;
         public float scale;
-        public int renderBufferIndex;
+        public uint renderBufferIndex;
 
     }
 
@@ -63,17 +64,16 @@ namespace UIForia {
         public float normalStyle;
         public float boldStyle;
         public float italicStyle;
-        
+
         public float weightNormal;
         public float weightBold;
         public float pointSize;
         public float scale;
-        
-        public float padding;
+
+        public int glyphOffset;
         public float atlasWidth;
         public float atlasHeight;
-        
-        public float __unused;
+        public float ascender;
 
     }
 
@@ -81,8 +81,9 @@ namespace UIForia {
 
         public FaceInfo faceInfo;
         public float gradientScale;
-        public UntypedIntMap* glyphMapState; // holds index to glyphs list
-        public UntypedIntMap* kerningMapState; // holds actual kerning value
+        internal UntypedIntMap* glyphMapState; // holds index to glyphs list
+        internal UntypedIntMap* kerningMapState; // holds actual kerning value
+        internal UIForiaGlyph* glyphList;
         public int atlasWidth;
         public int atlasHeight;
         public int atlasTextureId;
@@ -104,8 +105,13 @@ namespace UIForia {
             return 0;
         }
 
+        public bool TryGetGlyphIndex(int charcode, out int glyphIdx) {
+            return glyphMapState->TryGetValue(charcode, out glyphIdx);
+        }
+
         public bool TryGetGlyph(int charcode, out UIForiaGlyph glyph) {
-            if (glyphMapState->TryGetValue(charcode, out glyph)) {
+            if (glyphMapState->TryGetValue(charcode, out int glyphIdx)) {
+                glyph = glyphList[glyphIdx];
                 return true;
             }
 
@@ -115,12 +121,11 @@ namespace UIForia {
 
         public bool TryGetUnderlineGlyph(out UIForiaGlyph glyph) {
             // 95 is the underline character code
-            if (glyphMapState->TryGetValue(95, out glyph)) {
-                return true;
-            }
+            return TryGetGlyph(95, out glyph);
+        }
 
-            glyph = default;
-            return false;
+        public ref UIForiaGlyph GetGlyphRef(int glyphIdx) {
+            return ref glyphList[glyphIdx];
         }
 
     }
@@ -147,11 +152,13 @@ namespace UIForia {
 
         private static FontAsset defaultAsset;
 
-        [NonSerialized] public IntMap<float> kerningDictionary;
-        [NonSerialized] public IntMap<UIForiaGlyph> characterDictionary;
+        [NonSerialized] internal IntMap<float> kerningDictionary;
+        [NonSerialized] internal IntMap<int> characterDictionary;
+        [NonSerialized] internal List_UIForiaGlyph glyphList;
 
         public TextKerningPair[] kerningPairs;
-        public UIForiaGlyph[] textGlyphList;
+
+        //public UIForiaGlyph[] textGlyphList;
         private static readonly int s_WeightBold = Shader.PropertyToID("_WeightBold");
         private static readonly int s_WeightNormal = Shader.PropertyToID("_WeightNormal");
         private static readonly int s_GradientScale = Shader.PropertyToID("_GradientScale");
@@ -189,12 +196,12 @@ namespace UIForia {
             };
 
             List<TMP_Character> table = convertFrom.characterTable;
-            textGlyphList = new UIForiaGlyph[table.Count];
+            glyphList = new List_UIForiaGlyph(table.Count, Allocator.Persistent);
 
             for (int i = 0; i < table.Count; i++) {
                 TMP_Character g = table[i];
 
-                textGlyphList[i] = new UIForiaGlyph() {
+                glyphList[i] = new UIForiaGlyph() {
                     codepoint = (int) g.unicode,
                     width = g.glyph.metrics.width,
                     height = g.glyph.metrics.height,
@@ -208,6 +215,8 @@ namespace UIForia {
                     scale = 1,
                 };
             }
+
+            glyphList.size = table.Count;
 
         }
 
@@ -227,6 +236,7 @@ namespace UIForia {
                 atlasTextureId = atlas.GetHashCode(),
                 glyphMapState = characterDictionary.GetState(),
                 kerningMapState = kerningDictionary.GetState(),
+                glyphList = glyphList.array,
                 atlasWidth = atlas.width,
                 atlasHeight = atlas.height,
                 boldSpacing = boldSpacing,
@@ -243,23 +253,22 @@ namespace UIForia {
 
         private void BuildCharacterDictionary() {
 
-            if (textGlyphList == null) return;
+            characterDictionary = new IntMap<int>(glyphList.size + 10, Allocator.Persistent);
 
-            characterDictionary = new IntMap<UIForiaGlyph>(textGlyphList.Length + 10, Allocator.Persistent);
-
-            for (int i = 0; i < textGlyphList.Length; i++) {
-                UIForiaGlyph glyph = textGlyphList[i];
-                characterDictionary.Add(glyph.codepoint, glyph);
+            for (int i = 0; i < glyphList.size; i++) {
+                characterDictionary.Add(glyphList[i].codepoint, i);
             }
 
             UIForiaGlyph temp_charInfo = default;
+            int glyphIdx = 0;
 
             // make sure we have a space character
-            if (characterDictionary.TryGetReference(32, ref temp_charInfo)) {
-                temp_charInfo.width = temp_charInfo.xAdvance;
-                temp_charInfo.height = faceInfo.ascender - faceInfo.descender;
-                temp_charInfo.yOffset = faceInfo.ascender;
-                temp_charInfo.scale = 1;
+            if (characterDictionary.TryGetReference(32, ref glyphIdx)) {
+                ref UIForiaGlyph g = ref glyphList[glyphIdx];
+                g.width = g.xAdvance;
+                g.height = faceInfo.ascender - faceInfo.descender;
+                g.yOffset = faceInfo.ascender;
+                g.scale = 1;
             }
             else {
                 temp_charInfo = new UIForiaGlyph();
@@ -272,59 +281,71 @@ namespace UIForia {
                 temp_charInfo.yOffset = faceInfo.ascender;
                 temp_charInfo.xAdvance = faceInfo.pointSize / 4;
                 temp_charInfo.scale = 1;
-                characterDictionary.Add(32, temp_charInfo);
+                characterDictionary.Add(32, glyphList.size);
+                glyphList.Add(temp_charInfo);
             }
 
             // Add Non-Breaking Space (160)
-            if (!characterDictionary.TryGetValue(160, out temp_charInfo)) {
-                ref UIForiaGlyph g = ref characterDictionary.GetOrCreateReference(32);
+            if (!characterDictionary.TryGetValue(160, out glyphIdx)) {
+                characterDictionary.Add(160, glyphList.size);
+                characterDictionary.TryGetValue(32, out int spaceIdx);
+                UIForiaGlyph g = glyphList[spaceIdx];
                 g.codepoint = 160;
+                glyphList.Add(g);
             }
 
             // Add Zero Width Space (8203)
-            if (!characterDictionary.TryGetReference(8203, ref temp_charInfo)) {
-                characterDictionary.TryGetValue(32, out temp_charInfo);
+            if (!characterDictionary.TryGetValue(8203, out glyphIdx)) {
+                characterDictionary.TryGetValue(32, out int spaceIdx);
+                temp_charInfo = glyphList[spaceIdx];
                 temp_charInfo.codepoint = 8203;
                 temp_charInfo.width = 0;
                 temp_charInfo.xAdvance = 0;
-                characterDictionary.Add(8203, temp_charInfo);
+                characterDictionary.Add(8203, glyphList.size);
+                glyphList.Add(temp_charInfo);
             }
 
             //Add Zero Width no-break space (8288)
             if (!characterDictionary.ContainsKey(8288)) {
-                ref UIForiaGlyph zwnbsp = ref characterDictionary.GetOrCreateReference(8288);
+                characterDictionary.Add(8288, glyphList.size);
+                UIForiaGlyph zwnbsp = default;
                 zwnbsp.codepoint = 8288;
-                zwnbsp.width = 0;
-                zwnbsp.xAdvance = 0;
+                glyphList.Add(zwnbsp);
             }
 
             // Add Linefeed (10)
-            if (characterDictionary.ContainsKey(10) == false) {
+            if (!characterDictionary.ContainsKey(10)) {
 
-                ref UIForiaGlyph lineFeed = ref characterDictionary.GetOrCreateReference(10);
+                characterDictionary.TryGetValue(32, out int spaceIdx);
+                UIForiaGlyph lineFeed = default;
                 lineFeed.codepoint = 10;
                 lineFeed.uvX = 0;
                 lineFeed.uvY = 0;
                 lineFeed.width = 10;
-                lineFeed.height = characterDictionary.GetOrDefault(32).height;
+                lineFeed.height = glyphList[spaceIdx].height;
                 lineFeed.xOffset = 0;
-                lineFeed.yOffset = characterDictionary.GetOrDefault(32).yOffset;
+                lineFeed.yOffset = glyphList[spaceIdx].yOffset;
                 lineFeed.xAdvance = 0;
                 lineFeed.scale = 1;
 
+                characterDictionary.Add(10, glyphList.size);
+                glyphList.Add(lineFeed);
+
                 if (!characterDictionary.ContainsKey(13)) {
                     lineFeed.codepoint = 13;
-                    characterDictionary.Add(13, lineFeed);
+                    characterDictionary.Add(13, glyphList.size);
+                    glyphList.Add(lineFeed);
+
                 }
             }
 
             // Add characterDictionary Character to Dictionary. Tab is Tab Size * Space Character Width.
-            if (characterDictionary.ContainsKey(9) == false) {
+            if (!characterDictionary.ContainsKey(9)) {
+                characterDictionary.TryGetValue(32, out int spaceIdx);
 
-                UIForiaGlyph copy = characterDictionary.GetOrDefault(32);
-                ref UIForiaGlyph tab = ref characterDictionary.GetOrCreateReference(9);
+                UIForiaGlyph copy = glyphList[spaceIdx];
 
-                tab = new UIForiaGlyph();
+                UIForiaGlyph tab = new UIForiaGlyph();
                 tab.codepoint = 9;
                 tab.uvX = copy.uvX;
                 tab.uvY = copy.uvY;
@@ -334,14 +355,16 @@ namespace UIForia {
                 tab.yOffset = copy.yOffset;
                 tab.xAdvance = copy.xAdvance * tabSize;
                 tab.scale = 1;
+                characterDictionary.Add(9, glyphList.size);
+                glyphList.Add(tab);
             }
 
             // Tab Width is using the same xAdvance as space (32).
-            faceInfo.tabWidth = characterDictionary.GetOrDefault(9).xAdvance;
+            faceInfo.tabWidth = glyphList[characterDictionary.GetOrDefault(9)].xAdvance;
 
             // Set Cap Height
             if (faceInfo.capHeight == 0 && characterDictionary.ContainsKey(72)) {
-                faceInfo.capHeight = characterDictionary.GetOrDefault(72).yOffset;
+                faceInfo.capHeight = glyphList[characterDictionary.GetOrDefault(72)].yOffset;
             }
 
             // Adjust Font Scale for compatibility reasons
@@ -386,13 +409,14 @@ namespace UIForia {
             /// <param name="fontAsset"></param>
             /// <returns></returns>
             public static int[] GetCharactersArray(FontAsset fontAsset) {
-                int[] characters = new int[fontAsset.textGlyphList.Length];
+                throw new NotImplementedException("Reimplement this when finally removing TMP");
+                // int[] characters = new int[fontAsset.textGlyphList.Length];
 
-                for (int i = 0; i < fontAsset.textGlyphList.Length; i++) {
-                    characters[i] = fontAsset.textGlyphList[i].codepoint;
-                }
+                // for (int i = 0; i < fontAsset.textGlyphList.Length; i++) {
+                // characters[i] = fontAsset.textGlyphList[i].codepoint;
+                // }
 
-                return characters;
+                // return characters;
             }
 
             /// <summary>
@@ -401,13 +425,15 @@ namespace UIForia {
             /// <param name="fontAsset"></param>
             /// <returns></returns>
             public static string GetCharacters(FontAsset fontAsset) {
-                string characters = string.Empty;
-                StringBuilder builder = new StringBuilder(fontAsset.textGlyphList.Length);
-                for (int i = 0; i < fontAsset.textGlyphList.Length; i++) {
-                    builder.Append((char) fontAsset.textGlyphList[i].codepoint);
-                }
+                throw new NotImplementedException("Reimplement this when finally removing TMP");
 
-                return builder.ToString();
+                // string characters = string.Empty;
+                // StringBuilder builder = new StringBuilder(fontAsset.textGlyphList.Length);
+                // for (int i = 0; i < fontAsset.textGlyphList.Length; i++) {
+                //     builder.Append((char) fontAsset.textGlyphList[i].codepoint);
+                // }
+                //
+                // return builder.ToString();
             }
 
         }

@@ -3,10 +3,69 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using UIForia.Extensions;
+using UIForia.Graphics;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Text {
 
+    public struct UnderlayInfo {
+
+        private Color32 color;
+        private float offsetX;
+        private float offsetY;
+        private ushort flags;
+        private byte dilate;
+        private byte softness;
+
+        public void SetSoftness(byte softness) {
+            this.softness = MathUtil.Float01ToByte(softness);
+            flags |= 5;
+        }
+
+        public byte GetSoftness(byte softness) {
+            return (flags & 5) == 0 ? softness : this.softness;
+        }
+        
+        public void SetDilate(float dilate) {
+            this.dilate = MathUtil.Float01ToByte(dilate);
+            flags |= 4;
+        }
+
+        public byte GetDilate(byte dilate) {
+            return (flags & 4) == 0 ? dilate : this.dilate;
+        }
+
+        public void SetOffsetX(float x) {
+            offsetX = x;
+            flags |= 2;
+        }
+        
+        public void SetOffsetY(float y) {
+            offsetY = y;
+            flags |= 3;
+        }
+
+        public float GetOffsetX(float x) {
+            return (flags & 2) == 0 ? x : offsetX;
+        }
+        
+        public float GetOffsetY(float y) {
+            return (flags & 3) == 0 ? y : offsetY;
+        }
+        
+        public void SetColor(in Color32 color) {
+            this.color = color;
+            this.flags |= 1;
+        }
+        
+        public Color32 GetColor(in Color32 defaultValue) {
+            return (flags & 1) == 0 ? defaultValue : color;
+        }
+        
+    }
+    
+    [AssertSize(32)]
     [StructLayout(LayoutKind.Explicit)]
     [DebuggerDisplay("{DebuggerView()}")]
     public struct TextSymbol {
@@ -18,6 +77,9 @@ namespace UIForia.Text {
         [FieldOffset(4)] public TextTransform textTransform;
         [FieldOffset(4)] public int fontId;
         [FieldOffset(4)] public int effectId;
+        [FieldOffset(4)] public float floatValue;
+        [FieldOffset(4)] public UnderlayInfo underlay;
+        [FieldOffset(4)] public TextureUsage textureSetup;
 
         private static readonly Dictionary<string, TextSymbolType> s_SymbolMap = new Dictionary<string, TextSymbolType>();
 

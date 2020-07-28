@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Text;
+using UIForia.Util;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 
@@ -16,25 +18,7 @@ namespace UIForia.Elements {
         internal int textInfoId;
         internal int lastUpdateFrame;
 
-        internal ManagedTextInfo textInfoManaged;
-
-        public void SetTextInfo(ManagedTextInfo textInfo) {
-            if (textInfo == textInfoManaged) {
-                return;
-            }
-
-            if (textInfo != null) {
-                if (textInfo.textSystem != application.textSystem) {
-                    
-                }
-            }
-
-            if (textInfo == null) {
-                if (textInfoManaged != null) {
-                    
-                }
-            }
-        }
+        internal IList<TextEffect> __textEffects;
         
         // setting this and text in same frame will run update twice, improve this
         public ITextProcessor processor {

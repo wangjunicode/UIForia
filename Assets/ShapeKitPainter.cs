@@ -51,7 +51,7 @@ namespace DefaultNamespace {
 
             // DrawEllipse(ref vh, pixelRect, backgroundColor);
             Profiler.BeginSample("Draw");
-            DrawEllipseStroke(ref vh, pixelRect, backgroundColor);
+         //   DrawEllipseStroke(ref vh, pixelRect, backgroundColor);
             Profiler.EndSample();
             start.Stop();
             vh.FillMesh(mesh);
@@ -65,179 +65,179 @@ namespace DefaultNamespace {
         public float shadowSoftness;
         public float shadowSize;
 
-        public void DrawEllipseStroke(ref UIVertexHelper vh, Rect pixelRect, Color fillColor) {
-
-            using (ShapeKit shapeKit = new ShapeKit(Allocator.Temp)) {
-                // shapeKit.AddCircle(ref vh, pixelRect, fillColor);
-                // shapeKit.AddCircle(ref vh, pixelRect, fillColor);
-
-                // pixelRect.width = 50;
-                // pixelRect.height = 50;
-                // shapeKit.AddRing(ref vh, pixelRect, 5f, fillColor);
-                //
-                // shapeKit.AddRect(ref vh, new Rect(100, 100, 100, 100), Color.yellow);
-                //
-                // shapeKit.AddRoundedRect(ref vh, new Rect(0, 0, 300, 300), Corner.Round(16), Color.red);
-                shapeKit.AddSector(ref vh, new Vector2(150, -150), new Vector2(150, 150), new ArcProperties() {
-                    length = length,
-                    direction = ArcDirection.Forward,
-                    baseAngle = 90
-                }, Color.blue);
-                
-                // shapeKit.SetShadow(new ShadowData() {
-                //     size = shadowSize,
-                //     softness = shadowSoftness,
-                // });
-                //
-                // shapeKit.SetDrawMode(DrawMode.Shadow);
-                //
-                // shapeKit.AddSectorOutline(ref vh, new Vector2(150, -150), new Vector2(150, 150), new ArcProperties() {
-                //     direction = ArcDirection.Forward,
-                //     length = 0.3f
-                // }, new OutlineProperties(4f), color);
-
-                // shapeKit.AddArc(ref vh, new Vector2(150, -150), new Vector2(150, 150), new ArcProperties() {
-                //     direction = ArcDirection.Forward,
-                //     length = 0.3f
-                // });
-
-                // List_float2 positions = new List_float2(128, Allocator.Temp);
-                //
-                // PointsGenerator.SetPointsRound(ref positions, new RoundPointListData() {
-                //     width = pixelRect.width,
-                //     height = pixelRect.height,
-                //     length = 0.5f,
-                //     direction = ArcDirection.Backward,
-                //     startOffset = 0.25f,
-                //     center = new float2(pixelRect.width * 0.5f, -pixelRect.height * 0.5f),
-                //     skipLastPoint = true,
-                // });
-                //
-                // PointsGenerator.SetPointsRect(ref positions, new RectPointListData() {
-                //     width = pixelRect.width,
-                //     height = pixelRect.height,
-                //     startOffset = 3,
-                //     center = new float2(pixelRect.width * 0.5f, -pixelRect.height * 0.5f),
-                // });
-                //
-                // // generate point from center, length, angle
-                // PointsGenerator.SetPointsAngleLine(ref positions, new PointListAngleLineData() {
-                //     angle = 0.33f,
-                //     length = 300f,
-                //     center = new float2(pixelRect.width * 0.5f, -pixelRect.height * 0.5f),
-                // });
-                //
-                // PointsGenerator.SetPointsStar(ref positions, new PointListStarData() {
-                //     width = 50, //pixelRect.width,
-                //     height = 50, // pixelRect.height,
-                //     spikeAmount = spikeAmount,
-                //     resolution = 5,
-                //     length = length,
-                //     center = new float2(0, 0) //pixelRect.width * 0.5f, -pixelRect.height * 0.5f),
-                // });
-                // //
-                // shapeKit.SetShadow(new ShadowData() {
-                //     size = shadowSize,
-                //     softness = shadowSoftness
-                // });
-                // shapeKit.SetDrawMode(DrawMode.Shadow);
-                // shapeKit.AddLine(ref vh,
-                //     ref positions,
-                //     new LineProperties() {
-                //         closed = true,
-                //         weight = lineWeight,
-                //         capType = LineCapTypes.Round,
-                //         lineType = LineType.Center,
-                //         roundedCapResolution = new RoundingResolution() {
-                //             resolutionType = ResolutionType.Calculated,
-                //             maxDistance = 2
-                //         }
-                //     },
-                //     color
-                // );
-
-                // shapeKit.SetDrawMode(DrawMode.Normal);
-                // shapeKit.AddLine(ref vh,
-                //     ref positions,
-                //     new LineProperties() {
-                //         closed = true,
-                //         weight = lineWeight,
-                //         capType = LineCapTypes.Round,
-                //         lineType = LineType.Center,
-                //         roundingData = new PointListProperties() {
-                //             roundingDistance = roundingDistance,
-                //             maxAngle = maxAngle,
-                //             rounding = new RoundingResolution() {
-                //                 resolutionType = ResolutionType.Calculated,
-                //                 maxDistance = 4f
-                //             }
-                //         },
-                //         roundedCapResolution = new RoundingResolution() {
-                //             resolutionType = ResolutionType.Calculated,
-                //             maxDistance = 2
-                //         }
-                //     },
-                //     Color.red
-                // );
-                // PointsGenerator.SetPointsStar(ref positions, new PointListStarData() {
-                //     width = 50, //pixelRect.width,
-                //     height = 50, // pixelRect.height,
-                //     spikeAmount = spikeAmount,
-                //     resolution = 5,
-                //     length = length,
-                //     center = new float2(pixelRect.width * 0.5f, -pixelRect.height * 0.5f),
-                // });
-                // shapeKit.AddPolygon(
-                //     ref vh,
-                //     ref positions,
-                //     new PolygonProperties() {
-                //         polygonCenterType = PolygonCenterTypes.Calculated,
-                //     },
-                //     new PointListProperties() {
-                //         roundingDistance = roundingDistance,
-                //         rounding = new RoundingResolution() {
-                //             maxDistance = 1,
-                //             resolutionType = ResolutionType.Calculated
-                //         }
-                //     },
-                //     default,
-                //     Color.red
-                // );
-
-                // PointsGenerator.SetPoints(ref positions, new PointListGeneratorData() {
-                //     pointListGeneratorType = PointListGeneratorType.Round,
-                //     width = 180,
-                //     height = 180,
-                //     resolution = ShapeKit.ResolveEllipseResolution(pixelRect.size * 0.5f, default),
-                //     length = 0.5f,
-                //     direction = 1f,
-                //     startOffset = 0f, // base angle *0.5f
-                //     centerPoint = false,
-                //     center = new float2(90, -90),
-                //     skipLastPosition = true,
-                //     endRadius = 0,
-                // });
-                // shapeKit.AddLine(ref vh,
-                //     ref positions,
-                //     new LineProperties() {
-                //         closed = false,
-                //         weight = 15f,
-                //         capType = LineCapTypes.Round,
-                //         lineType = LineType.Center,
-                //         roundedCapResolution = new RoundingResolution() {
-                //             resolutionType = ResolutionType.Calculated,
-                //             maxDistance = 2
-                //         }
-                //     },
-                //     default,
-                //     Color.blue,
-                //     ref pointsData
-                // );
-                //
-                // positions.Dispose();
-
-            }
-        }
+        // public void DrawEllipseStroke(ref UIVertexHelper vh, Rect pixelRect, Color fillColor) {
+        //
+        //     using (ShapeKit shapeKit = new ShapeKit(Allocator.Temp)) {
+        //         // shapeKit.AddCircle(ref vh, pixelRect, fillColor);
+        //         // shapeKit.AddCircle(ref vh, pixelRect, fillColor);
+        //
+        //         // pixelRect.width = 50;
+        //         // pixelRect.height = 50;
+        //         // shapeKit.AddRing(ref vh, pixelRect, 5f, fillColor);
+        //         //
+        //         // shapeKit.AddRect(ref vh, new Rect(100, 100, 100, 100), Color.yellow);
+        //         //
+        //         // shapeKit.AddRoundedRect(ref vh, new Rect(0, 0, 300, 300), Corner.Round(16), Color.red);
+        //         shapeKit.AddSector(ref vh, new Vector2(150, -150), new Vector2(150, 150), new ArcProperties() {
+        //             length = length,
+        //             direction = ArcDirection.Forward,
+        //             baseAngle = 90
+        //         }, Color.blue);
+        //         
+        //         // shapeKit.SetShadow(new ShadowData() {
+        //         //     size = shadowSize,
+        //         //     softness = shadowSoftness,
+        //         // });
+        //         //
+        //         // shapeKit.SetDrawMode(DrawMode.Shadow);
+        //         //
+        //         // shapeKit.AddSectorOutline(ref vh, new Vector2(150, -150), new Vector2(150, 150), new ArcProperties() {
+        //         //     direction = ArcDirection.Forward,
+        //         //     length = 0.3f
+        //         // }, new OutlineProperties(4f), color);
+        //
+        //         // shapeKit.AddArc(ref vh, new Vector2(150, -150), new Vector2(150, 150), new ArcProperties() {
+        //         //     direction = ArcDirection.Forward,
+        //         //     length = 0.3f
+        //         // });
+        //
+        //         // List_float2 positions = new List_float2(128, Allocator.Temp);
+        //         //
+        //         // PointsGenerator.SetPointsRound(ref positions, new RoundPointListData() {
+        //         //     width = pixelRect.width,
+        //         //     height = pixelRect.height,
+        //         //     length = 0.5f,
+        //         //     direction = ArcDirection.Backward,
+        //         //     startOffset = 0.25f,
+        //         //     center = new float2(pixelRect.width * 0.5f, -pixelRect.height * 0.5f),
+        //         //     skipLastPoint = true,
+        //         // });
+        //         //
+        //         // PointsGenerator.SetPointsRect(ref positions, new RectPointListData() {
+        //         //     width = pixelRect.width,
+        //         //     height = pixelRect.height,
+        //         //     startOffset = 3,
+        //         //     center = new float2(pixelRect.width * 0.5f, -pixelRect.height * 0.5f),
+        //         // });
+        //         //
+        //         // // generate point from center, length, angle
+        //         // PointsGenerator.SetPointsAngleLine(ref positions, new PointListAngleLineData() {
+        //         //     angle = 0.33f,
+        //         //     length = 300f,
+        //         //     center = new float2(pixelRect.width * 0.5f, -pixelRect.height * 0.5f),
+        //         // });
+        //         //
+        //         // PointsGenerator.SetPointsStar(ref positions, new PointListStarData() {
+        //         //     width = 50, //pixelRect.width,
+        //         //     height = 50, // pixelRect.height,
+        //         //     spikeAmount = spikeAmount,
+        //         //     resolution = 5,
+        //         //     length = length,
+        //         //     center = new float2(0, 0) //pixelRect.width * 0.5f, -pixelRect.height * 0.5f),
+        //         // });
+        //         // //
+        //         // shapeKit.SetShadow(new ShadowData() {
+        //         //     size = shadowSize,
+        //         //     softness = shadowSoftness
+        //         // });
+        //         // shapeKit.SetDrawMode(DrawMode.Shadow);
+        //         // shapeKit.AddLine(ref vh,
+        //         //     ref positions,
+        //         //     new LineProperties() {
+        //         //         closed = true,
+        //         //         weight = lineWeight,
+        //         //         capType = LineCapTypes.Round,
+        //         //         lineType = LineType.Center,
+        //         //         roundedCapResolution = new RoundingResolution() {
+        //         //             resolutionType = ResolutionType.Calculated,
+        //         //             maxDistance = 2
+        //         //         }
+        //         //     },
+        //         //     color
+        //         // );
+        //
+        //         // shapeKit.SetDrawMode(DrawMode.Normal);
+        //         // shapeKit.AddLine(ref vh,
+        //         //     ref positions,
+        //         //     new LineProperties() {
+        //         //         closed = true,
+        //         //         weight = lineWeight,
+        //         //         capType = LineCapTypes.Round,
+        //         //         lineType = LineType.Center,
+        //         //         roundingData = new PointListProperties() {
+        //         //             roundingDistance = roundingDistance,
+        //         //             maxAngle = maxAngle,
+        //         //             rounding = new RoundingResolution() {
+        //         //                 resolutionType = ResolutionType.Calculated,
+        //         //                 maxDistance = 4f
+        //         //             }
+        //         //         },
+        //         //         roundedCapResolution = new RoundingResolution() {
+        //         //             resolutionType = ResolutionType.Calculated,
+        //         //             maxDistance = 2
+        //         //         }
+        //         //     },
+        //         //     Color.red
+        //         // );
+        //         // PointsGenerator.SetPointsStar(ref positions, new PointListStarData() {
+        //         //     width = 50, //pixelRect.width,
+        //         //     height = 50, // pixelRect.height,
+        //         //     spikeAmount = spikeAmount,
+        //         //     resolution = 5,
+        //         //     length = length,
+        //         //     center = new float2(pixelRect.width * 0.5f, -pixelRect.height * 0.5f),
+        //         // });
+        //         // shapeKit.AddPolygon(
+        //         //     ref vh,
+        //         //     ref positions,
+        //         //     new PolygonProperties() {
+        //         //         polygonCenterType = PolygonCenterTypes.Calculated,
+        //         //     },
+        //         //     new PointListProperties() {
+        //         //         roundingDistance = roundingDistance,
+        //         //         rounding = new RoundingResolution() {
+        //         //             maxDistance = 1,
+        //         //             resolutionType = ResolutionType.Calculated
+        //         //         }
+        //         //     },
+        //         //     default,
+        //         //     Color.red
+        //         // );
+        //
+        //         // PointsGenerator.SetPoints(ref positions, new PointListGeneratorData() {
+        //         //     pointListGeneratorType = PointListGeneratorType.Round,
+        //         //     width = 180,
+        //         //     height = 180,
+        //         //     resolution = ShapeKit.ResolveEllipseResolution(pixelRect.size * 0.5f, default),
+        //         //     length = 0.5f,
+        //         //     direction = 1f,
+        //         //     startOffset = 0f, // base angle *0.5f
+        //         //     centerPoint = false,
+        //         //     center = new float2(90, -90),
+        //         //     skipLastPosition = true,
+        //         //     endRadius = 0,
+        //         // });
+        //         // shapeKit.AddLine(ref vh,
+        //         //     ref positions,
+        //         //     new LineProperties() {
+        //         //         closed = false,
+        //         //         weight = 15f,
+        //         //         capType = LineCapTypes.Round,
+        //         //         lineType = LineType.Center,
+        //         //         roundedCapResolution = new RoundingResolution() {
+        //         //             resolutionType = ResolutionType.Calculated,
+        //         //             maxDistance = 2
+        //         //         }
+        //         //     },
+        //         //     default,
+        //         //     Color.blue,
+        //         //     ref pointsData
+        //         // );
+        //         //
+        //         // positions.Dispose();
+        //
+        //     }
+        // }
 
         public static void DrawEllipse(ref UIVertexHelper vh, Rect pixelRect, Color fillColor) {
 
@@ -256,44 +256,12 @@ namespace DefaultNamespace {
                 edgeGradientData.Reset();
             }
 
-            using (ShapeKit shapeKit = new ShapeKit(Allocator.Temp)) {
-                shapeKit.AddCircle(ref vh, pixelRect, ellipseProperties, fillColor);
-            }
+            // using (ShapeKit shapeKit = new ShapeKit(Allocator.Temp)) {
+            //     shapeKit.AddCircle(ref vh, pixelRect, ellipseProperties, fillColor);
+            // }
         }
 
-        public static void DrawRect(ref UIVertexHelper vh, Rect pixelRect, Color fillColor) {
-
-            EdgeGradientData edgeGradientData = new EdgeGradientData();
-
-            AntiAliasingProperties antiAliasingProperties = new AntiAliasingProperties() {
-                AntiAliasing = 1.25f
-            };
-
-            if (antiAliasingProperties.Adjusted > 0.0f) {
-                edgeGradientData.SetActiveData(1.0f, 0.0f, antiAliasingProperties.Adjusted);
-            }
-            else {
-                edgeGradientData.Reset();
-            }
-
-            using (ShapeKit shapeKit = new ShapeKit(Allocator.Temp)) {
-
-                edgeGradientData.SetActiveData(1.0f, 10.0f, antiAliasingProperties.Adjusted);
-
-                shapeKit.AddRoundedRectOutline(
-                    ref vh,
-                    new Vector2(pixelRect.center.x, -pixelRect.center.y),
-                    pixelRect.width * 2f,
-                    pixelRect.height,
-                    new OutlineProperties() {type = LineType.Outer, weight = 3f},
-                    new CornerProperties() {
-                        bottomLeft = Corner.Round(55f)
-                    },
-                    Color.yellow
-                );
-            }
-        }
-
+        
         public static void DrawPolygon(ref UIVertexHelper vh, Rect pixelRect, Color fillColor) {
 
             AntiAliasingProperties antiAliasingProperties = new AntiAliasingProperties() {

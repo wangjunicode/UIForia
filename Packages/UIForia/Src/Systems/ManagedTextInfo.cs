@@ -28,7 +28,6 @@ namespace UIForia.Rendering {
         internal static ConcurrentQueue<IntPtr> s_ReleaseQueue = new ConcurrentQueue<IntPtr>();
         internal LightList<TextEffect> textEffects;
         internal LightList<TextEffect> textEffectTable;
-        public ManagedTextSpanInfo firstSpan;
         internal TextSystem textSystem;
 
         ~ManagedTextInfo() {

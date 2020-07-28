@@ -9,12 +9,14 @@ namespace UIForia.Text {
         internal StructList<TextSymbol> stream;
         internal bool requiresTextTransform;
         internal bool requiresRenderProcessing;
+        internal bool requiresRichTextLayout;
 
-        internal TextSymbolStream(StructList<TextSymbol> stream) {
+        internal TextSymbolStream(LightList<TextEffect> textEffects, StructList<TextSymbol> stream) {
             this.stream = stream;
+            this.textEffects = textEffects;
             this.requiresTextTransform = false;
             this.requiresRenderProcessing = false;
-            this.textEffects = LightList<TextEffect>.Get();
+            this.requiresRichTextLayout = false;
         }
 
         public void AddCharacter(char character) {
@@ -23,6 +25,19 @@ namespace UIForia.Text {
                 charInfo = new BurstCharInfo() {
                     character = character
                 }
+            });
+        }
+
+        public void PushCharacterSpacing(UIFixedLength characterSpacing) {
+            stream.Add(new TextSymbol() {
+                type = TextSymbolType.CharSpacingPush,
+                length = characterSpacing
+            });
+        }
+
+        public void PopCharacterSpacing() {
+            stream.Add(new TextSymbol() {
+                type = TextSymbolType.CharSpacingPop,
             });
         }
 
@@ -35,15 +50,15 @@ namespace UIForia.Text {
                 });
             }
         }
-        
+
         public void PopTextEffect() {
             if (textEffects.size > 0) {
                 stream.Add(new TextSymbol() {
                     type = TextSymbolType.EffectPop
-                });    
+                });
             }
         }
-        
+
         public void PushTextTransform(TextTransform textTransform) {
             if (textTransform == TextTransform.None) {
                 return;
@@ -97,6 +112,43 @@ namespace UIForia.Text {
         public void PopFontSize() {
             stream.Add(new TextSymbol() {
                 type = TextSymbolType.FontSizePop,
+            });
+        }
+
+        public void HorizontalSpace(UIFixedLength fixedLength) {
+            requiresRichTextLayout = true;
+            stream.Add(new TextSymbol() {
+                type = TextSymbolType.HorizontalSpace,
+                length = fixedLength
+            });
+        }
+
+        public void PushHorizontalInvert() {
+            stream.Add(new TextSymbol() {type = TextSymbolType.PushHorizontalInvert});
+        }
+
+        public void PopHorizontalInvert() {
+            stream.Add(new TextSymbol() {type = TextSymbolType.PopHorizontalInvert});
+        }
+
+        public void PushVerticalInvert() {
+            stream.Add(new TextSymbol() {type = TextSymbolType.PushVerticalInvert});
+        }
+
+        public void PopVerticalInvert() {
+            stream.Add(new TextSymbol() {type = TextSymbolType.PopVerticalInvert});
+        }
+
+        public void PushOpacity(float value) {
+            stream.Add(new TextSymbol() {
+                type = TextSymbolType.PushOpacity,
+                floatValue = value
+            });
+        }
+
+        public void PopOpacity() {
+            stream.Add(new TextSymbol() {
+                type = TextSymbolType.PopOpacity
             });
         }
 

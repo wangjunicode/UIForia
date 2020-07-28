@@ -3,13 +3,36 @@ using System.IO;
 using UIForia.Elements;
 using UIForia.Graphics;
 using UIForia.Text;
-using Unity.Jobs.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 namespace UIForia {
+    struct TextMaterialInfo__Sizetest {
+    
+        uint faceColor;
+        uint outlineColor;
+        uint glowColor;
+        uint underlayColor;
+        // float opacity;
+        // float fontSize;
+        uint outlineWSFaceDilate;
+        //float outlineWidth;
+        //float outlineSoftness;
+        //float faceDilate;
 
+        uint underlayDilateSoftness;
+        byte glowOffset;
+        byte glowPower;
+        byte glowInner;
+        byte glowOuter;
+        float underlayX;
+        float underlayY;
+
+        public float2 uvScroll;
+        public float2 outlineScroll;
+
+    };
     public class UIViewBehavior : MonoBehaviour {
 
         public Type type;
@@ -34,6 +57,82 @@ namespace UIForia {
         }
 
         public void Start() {
+
+            unsafe {
+                Debug.Log(sizeof(TextMaterialInfo__Sizetest));
+                // could also be ranges of effect characters, does have to be a single one.
+                
+                // which works except for revealers
+                // while a reveal is active, could just treat the whole text as though it were special
+                
+                // on the plus side im not mixing logic
+                // when reveal completes the entire text is demoted to normal
+                // when it begins or restarts, entire text is promoted to effect
+                
+                // still dont really know what that means do I?
+                // reveal is intended to have a finite duration
+                // effects are more persistent
+                // what does that really mean?
+                // that I scan each character for material / effect overrides?
+                // other implications?
+                // dont want separate draw infos for revealing
+                // reveal can certainly be non linear
+                // i just need to know if the reveal is active
+                // does it have a lasting effect? maybe if you dont call clear it would?
+                // thats not really the intention though
+                // mixing effect with reveal
+                // is it too much? effect starts when reaveal finishes? 
+                // no i think not, check reveal state every frame if you want to know about it
+                // RevealState = BeginReveal | Revealing | EndReveal | Revealed | BeginHide | Hiding | EndHide | Hidden
+                // per character opacity byte is probably totally fine
+                // might end up solving a lot of these problems
+                
+                // data management is the real question here
+                //     per character effects
+                //        dont want to store more data than I need to
+                //        dont want to clear state that the user wants to use
+                //        when user is done with some data they need to know to call clear()?
+                //        use some other flag from effect to tell reveal not to clear data? otherwise when reveal completes it will clear its data out
+                //        where does reveal data live? material buffer? global? global makes a lot of sense but requires more copies and a flag possibly. could use negative idx
+                //        since effect data is persistent im fine with that living locally, but it probably makes more sense if it doesnt
+                
+                // so we have normal text, revealing text, effected text
+                // can have flags for that no problem 
+                // can maybe also have symbol level effects for lerping and animating spaces and stuff that impacts layout, called before offset effects
+                
+                // where / how do I cull text?
+                // rendering is the most precise, but I need to submit text elements for rendering that might be 'culled'? maybe not, just set a don't cull me flag later
+                // or compute text bounds after effects run, should work too!
+                // either way I do need to additionally do culling for render setup
+                // do it at the painter level -> less work overall, edges cases caught later
+                
+                // textEffect.OnApplyCharacterEffect();
+                // textEffect.OnApplySymbolEffect(); 
+                
+                // TextMaterialInfo m0 = new TextMaterialInfo();
+                // Debug.Log(MurmurHash3.Hash((byte*)&m0, sizeof(TextMaterialInfo)));
+                // m0.opacity = 1;
+                // Debug.Log(MurmurHash3.Hash((byte*)&m0, sizeof(TextMaterialInfo)));
+                // m0.opacity = 0.5f;
+                // Debug.Log(MurmurHash3.Hash((byte*)&m0, sizeof(TextMaterialInfo)));
+                // m0.opacity = 0f;
+                // Debug.Log(MurmurHash3.Hash((byte*)&m0, sizeof(TextMaterialInfo)));
+
+                // might need a new map type that doesnt hash my hashcode
+                // binary search might be ok too using a split key/value scheme
+                // Debug.Log(sizeof(TextureUsage));
+                // hash returns linked list node
+                // if no nodes, add it
+                // if 1 node, return it
+                // if more nodes, walk using memcmp
+                // if found use
+                // if not found append node, write data into array at given index
+                // nice thing is this works for elements as well as text since its jsut bytes
+                // i can get a big win by laying out the two structures coherently
+                // reasonably confident with this that a ushort is enough address space 
+
+            }
+
 #if UNITY_EDITOR
             AssertSize.AssertSizes();
 #endif
@@ -67,65 +166,19 @@ namespace UIForia {
         private RenderTexture renderTexture;
         private Mesh mesh;
         private Mesh coverMesh;
-        
-        struct TextMaterialInfo {
-                
-            float zPosition;
-            uint faceColor;
-            uint outlineColor;
-            uint glowColor;
-            uint underlayColor;
-            
-            byte opacity;
-            byte outlineWidth;
-            byte outlineSoftness;
-            byte faceDilate;
-                
-            byte glowOffset;
-            byte glowOuter;
-            byte glowInner;
-            byte glowPower;
-                
-            ushort underlayX;
-            ushort underlayY;
-            ushort underlayDilate;
-            ushort underlaySoftness;
-            
-            
-                
-        }
-        public struct Character {
 
-            // public int glyphRenderId; // could lookup, maybe no need to store per character. trade off is a dictionary or array lookup before rendering
-            public ushort flags;
-            public ushort codepoint;
-            public float2 position;
-
-            public ushort effectId;
-            public ushort matrixId;
-            public ushort vertexId;
-            public ushort materialId; 
-
-            // computable
-      //      public int wordIndex;
-      //      public ushort lineIndex;
-      //      public ushort charIndexInWord;
-
-        }
-        
         unsafe void OnPreRender() {
-            unsafe {
-               // Debug.Log(sizeof(BurstCharInfo));
-            }
+
             if (application != null && commandBuffer != null) {
                 commandBuffer.Clear();
                 application.Render(camera.pixelWidth, camera.pixelHeight, commandBuffer);
             }
-            
+
         }
 
         private void Update() {
 
+     
             if (application != null) {
                 if (commandBuffer == null) {
                     commandBuffer = new CommandBuffer();

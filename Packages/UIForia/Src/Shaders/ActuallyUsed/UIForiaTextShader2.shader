@@ -56,18 +56,17 @@ Shader "UIForia/UIForiaText2"
 
             struct v2f {
                 float4 vertex : SV_POSITION;
-                float4 debug : TEXCOORD0;
-                float2 texCoord0 : TEXCOORD1;
-                float2 texCoord1 : TEXCOORD2;
-                float4 param : TEXCOORD3;
-                int2 indices : TEXCOORD4;
+                float2 texCoord0 : TEXCOORD0;
+                float2 texCoord1 : TEXCOORD1;
+                float4 param : TEXCOORD2;
+                int4 indices : TEXCOORD3;
+                float4 underlay : TEXCOORD4; // todo -- remove if possible
             };
             
             struct UIForiaVertex {
                 float2 position;
-                float2 texCoord0; // sdf uvs (inset by half a pixel)
-                float2 texCoord1; // texture uvs
-                int2 indices;     // lookup indices in buffers packed into ushorts
+                float2 texCoord0;  // sdf uvs (inset by half a pixel)
+                uint4 indices;     // lookup indices in buffers packed into ushorts
             };
              
             sampler2D _MainTex;
@@ -78,10 +77,9 @@ Shader "UIForia/UIForiaText2"
             float _UIForiaDPIScale;
             float4x4 _UIForiaOriginMatrix;
 
-
             StructuredBuffer<float4x4> _UIForiaMatrixBuffer;            
             StructuredBuffer<UIForiaVertex> _UIForiaVertexBuffer;            
-            StructuredBuffer<AxisAlignedBounds2D> _UIForiaClipRectBuffer;            
+            StructuredBuffer<float4> _UIForiaFloat4Buffer;            
             StructuredBuffer<TextMaterialInfo> _UIForiaMaterialBuffer; 
             StructuredBuffer<GPUGlyphInfo> _UIForiaGlyphBuffer; 
             StructuredBuffer<GPUFontInfo> _UIForiaFontBuffer;
@@ -95,54 +93,48 @@ Shader "UIForia/UIForiaText2"
             v2f vert (appdata v) {
                 v2f o;
                 
-                int vertexId = v.vid & 0xffffff;
-                int cornerIdx = (v.vid >> 24) & (1 << 24) - 1;
+                int vertexId = v.vid & 0xffffff; // 3 bytes
+                int cornerIdx = (v.vid >> 24) & (1 << 24) - 1; // 1 byte, 2 bits for corner idx, 6 bits free
+                // cornerIdx = cornerIdx & 0xfffffff3;
                 
                 UIForiaVertex vertex = _UIForiaVertexBuffer[vertexId];
-
-                // todo --
-                    // font index
-                    // material buffer
-                    // compute character scale
-                    
-                uint glyphIndex = (uint)(vertex.texCoord0.x);
-                uint fontIndex = (uint)(vertex.texCoord0.y);
+                uint baseEffectIdx = UnpackEffectIdx(vertex.indices);
+                uint effectIdx = baseEffectIdx + cornerIdx;
+                uint matrixIndex = UnpackMatrixId(vertex.indices);
+                uint materialIndex = UnpackMaterialId(vertex.indices);
+                uint fontIndex = 0; // todo -- pack font index somewhere, probably in the material? (uint)(vertex.texCoord0.y);
+                uint glyphIndex = UnpackGlyphIdx(vertex.indices);
                 
-                GPUGlyphInfo glyphInfo = _UIForiaGlyphBuffer[glyphIndex];
                 GPUFontInfo fontInfo = _UIForiaFontBuffer[fontIndex];
+                GPUGlyphInfo glyphInfo = _UIForiaGlyphBuffer[fontInfo.glyphOffset + glyphIndex];
                 
-                TextMaterialInfo materialInfo;
-                
-                materialInfo.zPosition = 0;
-                
-                materialInfo.faceColor = 0;
-                materialInfo.outlineColor = 0;
-                materialInfo.glowColor = 0;
-                materialInfo.underlayColor = 0;
-                
-                materialInfo.opacity = 1;
-                
-                materialInfo.outlineWidth = 0;
-                materialInfo.outlineSoftness = 0;
-                materialInfo.faceDilate = 0;
-                
-                materialInfo.glowOffset = 0;
-                materialInfo.glowOuter = 0;
-                materialInfo.glowInner = 0;
-                materialInfo.glowPower = 0;
-                
-                materialInfo.underlayX = 0;
-                materialInfo.underlayY = 0;
-                materialInfo.underlaySoftness = 0;
-                materialInfo.underlayDilate = 0;
-                
+                TextMaterialInfo materialInfo = _UIForiaMaterialBuffer[materialIndex];
+            
                 float left = glyphInfo.atlasX / fontInfo.atlasWidth;
                 float top = glyphInfo.atlasY / fontInfo.atlasHeight;
                 float right = left + (glyphInfo.atlasWidth / fontInfo.atlasWidth);
                 float bottom = top + (glyphInfo.atlasHeight / fontInfo.atlasHeight);
                 
-                float3 ratios = ComputeSDFTextScaleRatios(fontInfo, materialInfo);
-                float padding = GetTextSDFPadding(fontInfo.gradientScale, materialInfo, ratios);
+                // can get mirrored text by flipping left and right
+                uint displayBits = GetByteN(vertex.indices.y, 3);
+                
+                int invertHorizontal = (displayBits & TEXT_DISPLAY_FLAG_INVERT_HORIZONTAL_BIT) != 0;
+                int invertVertical = (displayBits & TEXT_DISPLAY_FLAG_INVERT_VERTICAL_BIT) != 0;
+                
+                float tmp = lerp(left, right, invertHorizontal);
+                right = lerp(right, left, invertHorizontal);
+                left = tmp;
+                
+                tmp = lerp(top, bottom, invertVertical);
+                bottom = lerp(bottom, top, invertVertical);
+                top = tmp;
+                
+                TextMaterialInfoDecompressed textStyle = DecompressTextMaterialInfo(materialInfo);
+                textStyle.underlayDilate = 0;
+                textStyle.underlayDilate = lerp(textStyle.underlayDilate, -textStyle.underlayDilate, (displayBits & TEXT_DISPLAY_FLAG_UNDERLAY_INNER_BIT) == 0);
+                
+                float3 ratios = ComputeSDFTextScaleRatios(fontInfo, textStyle);
+                float padding = GetTextSDFPadding(fontInfo.gradientScale, textStyle, ratios);
                 int isBold = 0;
                 
                 float weight = 0;
@@ -161,115 +153,62 @@ Shader "UIForia/UIForiaText2"
                     padding = fontInfo.gradientScale - stylePadding;
                 }
                 
-                // treat position as baseline position to rest on (so lower left corner)
-                                
-                float fontSize = 36; // todo -- pass via material or character directly
- 
-                float smallCapsMultiplier = 1;
-                float m_fontScale = fontSize * smallCapsMultiplier / fontInfo.pointSize * fontInfo.scale;
-                float elementScale = m_fontScale * 1; // font scale multiplier
+                float4 effectData = _UIForiaFloat4Buffer[effectIdx];
+                float3 vpos = float3(vertex.position.xy, 0); // todo -- read z from somewhere if used
                 
+                float scaleMultiplier = lerp(1, effectData.w, baseEffectIdx != 0 && effectData.w != 0);
+                
+                // treat position as baseline position to rest on (so lower left corner)
+ 
+                // float smallCapsMultiplier = 1;
+                // float m_fontScale = fontSize * smallCapsMultiplier / fontInfo.pointSize * fontInfo.scale;
+                float elementScale = vertex.texCoord0.x * scaleMultiplier; //m_fontScale * 1; // font scale multiplier
                 padding += stylePadding;
                 float scaledPaddingWidth = padding / fontInfo.atlasWidth;
                 float scaledPaddingHeight = padding / fontInfo.atlasHeight;
                 
                 float charWidth = glyphInfo.width * elementScale;
                 float charHeight = glyphInfo.height * elementScale;
-                float offsetY = glyphInfo.yOffset * elementScale;
-                
-                float2 center = vertex.position + float2(charWidth, charHeight) * 0.5;
-                
-                float zPosition = 0;
-
-                float3 vpos = float3(vertex.position.xy, zPosition);
-    
-                vpos.y += offsetY;
+                float ascender = fontInfo.ascender * elementScale;
+                                
+                if(baseEffectIdx != 0) {
+                     vpos = effectData.xyz;
+                     charWidth = 0;
+                     charHeight = 0; 
+                }
+         
+                // vpos.y -= (vertex.texCoord0.y - ascender); // push character down onto the baseline for when a single line has mutlipe fonts or font sizes 
                 
                 if(cornerIdx == TOP_LEFT) {
+                    // vpos.x -= halfCharWidth;
                     vpos.x -= padding * elementScale;
                     vpos.y += padding * elementScale;
                     o.texCoord0 = float2(left - scaledPaddingWidth, bottom  + scaledPaddingHeight);
+                    o.texCoord1 = float2(0, 1);
                 }
                 else if(cornerIdx == TOP_RIGHT) {
                     vpos.x += charWidth; 
-                    vpos.x +=  padding * elementScale;
+                    vpos.x += padding * elementScale;
                     vpos.y += padding * elementScale;
                     o.texCoord0 = float2(right + scaledPaddingWidth, bottom + scaledPaddingHeight);
+                    o.texCoord1 = float2(1, 1);
                 }
                 else if(cornerIdx == BOTTOM_RIGHT) {
-                    vpos.x += charWidth; 
+                    vpos.x += charWidth;
                     vpos.y -= charHeight;
                     vpos.x += padding * elementScale;
                     vpos.y -= padding * elementScale;
                     o.texCoord0 = float2(right + scaledPaddingWidth, top - scaledPaddingHeight);
+                    o.texCoord1 = float2(1, 0);
                 }
-                else {
+                else { // BOTTOM_LEFT
+                    // vpos.x -= halfCharWidth;
                     vpos.y -= charHeight;
                     vpos.x -= padding * elementScale;
                     vpos.y -= padding * elementScale;
                     o.texCoord0 = float2(left - scaledPaddingWidth, top - scaledPaddingHeight);
+                    o.texCoord1 = float2(0, 0);
                 }
-                
-                // vertex.position = RotateUV(vertex.position, frac(_Time.y) * (2 * PI), vertex.position + float2(vertex.texCoord1.x * 0.5, vertex.texCoord1.y * 0.5));
-                            //  float sin = Mathf.Sin(frequency * animatorTime+ charIndex * waveSize) * amplitude * effectIntensity;
-                            //
-                            //            //bottom, torwards one direction
-                            //            data.vertices[0] += Vector3.right * sin;
-                            //            data.vertices[3] += Vector3.right * sin;
-                            //            //top, torwards the opposite dir
-                            //            data.vertices[1] += Vector3.right * -sin;
-                            //            data.vertices[2] += Vector3.right * -sin;
-                //if(vertexId == 0) {
-                    float effectIntensity = 1;
-                    float amp = 1;
-                    float waveSize = 25;
-                    float frequency = 150;
-                    float s = sin(frequency * frac(_Time.y) + vertexId * waveSize) * amp * effectIntensity;  
-                    // offset model
-                    //  1 base position (bottom left or center)
-                    //  4 override positions which are added to each vertex as an offset
-                    //  should handle all transformations just fine. if you fuck with uniformity of vertices thats fine but its your problem if it looks goofy
-                    //  size scale needs to handled somehow in a way that makes sense. i can provide 
-                    //  its computable though so probably fine
-                    
-                      if(cornerIdx == 0 || cornerIdx == 2) {
-                            vpos.x += s;
-                            vpos.y -= s;  
-                            //vpos.x += lerp(0, charWidth * 0.5, 1-frac(_Time.y));
-                        }
-                        else {
-                            vpos.x -= s;
-                            vpos.y += s;  
-                            //vpos.x -= lerp(0, charWidth * 0.5, 1- frac(_Time.y));
-                        }
-
-                    // cpu transform makes sense, upload in float4 buffer
-                    // how do I handle font size nicely?
-                    // just making vertices bigger sucks
-                    // just provide a scale and offset
-                    // then the user can supply pivots.
-                    // values should be the same between effect buffer and what I compute based on font size except for sdf adjustment which should be transparent
-                    
-                    // or they transform the the point with a matrix
-                    // and i have a some sort of 
-                    // if effects run after layout, I should have a layout matrix for the text info
-                    
-                    // matrix enough? scale inwards do the trick? with different pivot maybe
-                    
-                    // vpos.xy = RotateUV(vpos.xy, frac(_Time.y) * 2 * (PI), center);
-                    // float4 q = rotate_angle_axis(frac(_Time.y * 0.5) * 2 * (PI), float3(1, 1, 1));
-                    // float4 midpoint = float4(center.xy, 0, 1);
-                    // float3 offset = vpos - float3(center.xy, 0);
-                    // vpos = rotate_vector(offset, q) + float3(center.xy, 0);
-                    
-                    //if(cornerIdx == 0 || cornerIdx == 1) {
-                    //    vpos.y -= sin(frac(_Time.y)) * charHeight * 0.2;
-                    //}
-                    
-                //}
-                
-                int matrixIndex = UnpackMatrixId(vertex.indices);
-                int materialIndex = UnpackMaterialId(vertex.indices);
              
                 float4x4 transform = mul(_UIForiaMatrixBuffer[matrixIndex], _UIForiaOriginMatrix);
                 
@@ -277,28 +216,33 @@ Shader "UIForia/UIForiaText2"
                 
                 float2 pixelSize = o.vertex.w;
                 float2 scaleXY = float2(1, 1);
-                float _Sharpness = 0;
-                float charScale = fontSize / fontInfo.pointSize;
-                o.debug = float4(vertex.position.xy, charScale, scaledPaddingWidth);
 
                 pixelSize /= scaleXY * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
                 float scale = rsqrt(dot(pixelSize, pixelSize));
                 
-                scale *= abs(charScale) * fontInfo.gradientScale * (_Sharpness + 1);
+                scale *= abs(elementScale) * fontInfo.gradientScale; // * (sharpness + 1);
                 
-			    weight = (weight + materialInfo.faceDilate) * ratios.x * 0.5;
+			    weight = (weight + textStyle.faceDilate) * ratios.x * 0.5;
 
 		    	float bias = (0.5 - weight) + (0.5 / scale);
-	    		float alphaClip = (1.0 - materialInfo.outlineWidth * ratios.x - materialInfo.outlineSoftness * ratios.x);
+	    		float alphaClip = (1.0 - textStyle.outlineWidth * ratios.x - textStyle.outlineSoftness * ratios.x);
 
-                if(materialInfo.glowOffset != 0 || materialInfo.glowInner != 0 || materialInfo.glowOuter != 0 || materialInfo.glowPower != 0) {
- 				//    alphaClip = min(alphaClip, 1.0 - materialInfo.glowOffset * ratios.y - materialInfo.glowOuter * ratios.y);
+                if(textStyle.glowPower != 0) {
+ 				    alphaClip = min(alphaClip, 1.0 - textStyle.glowOffset * ratios.y - textStyle.glowOuter * ratios.y);
                 } 
-                
+
 				alphaClip = alphaClip / 2.0 - (0.5 / scale) - weight;
+				
+                float underlayScale = scale;
+    
+                underlayScale /= 1 + ((textStyle.underlaySoftness * ratios.z) * underlayScale);
+                float underlayBias = (0.5 - weight) * underlayScale - 0.5 - ((textStyle.underlayDilate *  ratios.z) * 0.5 * underlayScale);
+    
+                float x = -(textStyle.underlayX * ratios.z) * fontInfo.gradientScale / fontInfo.atlasWidth;
+                float y = -(textStyle.underlayY * ratios.z) * fontInfo.gradientScale / fontInfo.atlasHeight; 
                 
-                o.texCoord1 = vertex.texCoord1;
                 o.indices = vertex.indices;
+                o.underlay = float4(x, y, underlayScale, underlayBias);
                 o.param = float4(alphaClip, scale, bias, ratios.x);
                 
                 return o;
@@ -307,7 +251,7 @@ Shader "UIForia/UIForiaText2"
             fixed4 GetColor(half d, fixed4 faceColor, fixed4 outlineColor, half outline, half softness) {
                 half faceAlpha = 1 - saturate((d - outline * 0.5 + softness * 0.5) / (1.0 + softness));
                 half outlineAlpha = saturate((d + outline * 0.5)) * sqrt(min(1.0, outline));
-            
+                
                 faceColor.rgb *= faceColor.a;
                 outlineColor.rgb *= outlineColor.a;
             
@@ -319,51 +263,50 @@ Shader "UIForia/UIForiaText2"
             }
             
             fixed4 frag (v2f i) : SV_Target {
-            
-                TextMaterialInfo materialInfo;
                 
-                materialInfo.zPosition = 0;
-                
-                materialInfo.faceColor = 0;
-                materialInfo.outlineColor = 0;
-                materialInfo.glowColor = 0;
-                materialInfo.underlayColor = 0;
-                
-                materialInfo.opacity = 1;
-                
-                materialInfo.outlineWidth = 0;
-                materialInfo.outlineSoftness = 0;
-                materialInfo.faceDilate = 0;
-                
-                materialInfo.glowOffset = 0;
-                materialInfo.glowOuter = 0;
-                materialInfo.glowInner = 0;
-                materialInfo.glowPower = 0;
-                
-                materialInfo.underlayX = 0;
-                materialInfo.underlayY = 0;
-                materialInfo.underlaySoftness = 0;
-                materialInfo.underlayDilate = 0;
-                
+                // might not need the full uint4 of indices, can just get the 2 that I need
+                TextMaterialInfo materialInfo = _UIForiaMaterialBuffer[UnpackMaterialId(i.indices)];
+                half opacityMultiplier = GetByteN(i.indices.y, 2) / (float)0xff;
+
                 float c = tex2Dlod(_FontTexture, float4(i.texCoord0, 0, 0)).a;
-                
+                uint displayBits = GetByteN(i.indices.y, 3);
+
                 float alphaClip = i.param.x;
                 float scale = i.param.y;
                 float bias = i.param.z;
                 float ratioA = i.param.w;
                 float sd = (bias - c) * scale;
-                
-                float outline = (materialInfo.outlineWidth * ratioA) * scale;
-			    float softness = (materialInfo.outlineSoftness * ratioA) * scale;
-			    
-                half4 faceColor = fixed4(0, 0, 0, 1); // UnpackColor(asuint(materialInfo.faceColor));
-                half4 outlineColor = fixed4(0, 0, 0, 1); //UnpackColor(asuint(materialInfo.outlineColor));
-    
-                faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
 
-                // if not using underlay
-                clip(c - alphaClip);
+                float outlineWidth = GetByteN(materialInfo.glowOffsetOutlineWS, 2) / (float)0xff;
+                float outlineSoftness = GetByteN(materialInfo.glowOffsetOutlineWS, 3) / (float)0xff;
                 
+                float outline = (outlineWidth * ratioA) * scale;
+			    float softness = (outlineSoftness * ratioA) * scale;
+			    
+                half4 faceColor = UnpackColor(asuint(materialInfo.faceColor));
+                half4 outlineColor = UnpackColor(asuint(materialInfo.outlineColor));
+                half4 underlayColor = fixed4(1, 0, 0, 1);
+                
+                faceColor.a *= 0; //opacityMultiplier; 
+                outlineColor.a *= opacityMultiplier; 
+        
+                faceColor = GetColor(sd, faceColor, outlineColor, outline, softness);
+                
+                float d = tex2D(_FontTexture, i.texCoord0.xy + i.underlay.xy).a * i.underlay.z;
+			    float saturatedUnderlay = saturate(d - i.underlay.w);
+			    float innerUnderlayMultiplier = (1 - saturatedUnderlay) * saturate(1 - sd) * (1 - faceColor.a);
+			    float outerUnderlayMultiplier = saturatedUnderlay * (1 - faceColor.a);
+			    faceColor += underlayColor * lerp(innerUnderlayMultiplier, outerUnderlayMultiplier, 0); //(displayBits & TEXT_DISPLAY_FLAG_UNDERLAY_INNER_BIT) != 0);
+			    
+                // if not using underlay
+                // clip(c - alphaClip);
+                
+                // this is not at all scientific, but I was seeing cases where the letter had an unwanted background tint
+                // when using dilate or softness values that were too high. this fixes that, but very much not proven
+                // remove if it causes weirdness. Could be that alpha cut off is just wrong, but tmp exibits the same behavior
+                if(c < 0.05) {
+                    return fixed4(0, 0, 0, 0);
+                }
                 return faceColor;
                 
                 // faceColor *= tex2D(_FaceTex, i.texCoord1 + float2(0, 0) * _Time.y);

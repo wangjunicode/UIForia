@@ -232,13 +232,14 @@ namespace UIForia.Systems {
 
             invokePainters.Complete();
 
-            JobHandle shapeBaking = UIForiaScheduler.Await(invokePainters)
-                .ThenParallel(new BakeShapes() {
-                    parallel = new ParallelParams(persistentData.drawList.size, 10),
-                    fontAssetMap = resourceManager.fontAssetMap,
-                    drawList = persistentData.drawList,
-                    perThread_ShapeBuffer = persistentData.shapeBuffer
-                });
+            JobHandle shapeBaking = default;
+            //UIForiaScheduler.Await(invokePainters)
+            //    .ThenParallel(new BakeShapes() {
+            //        parallel = new ParallelParams(persistentData.drawList.size, 10),
+            //        fontAssetMap = resourceManager.fontAssetMap,
+            //        drawList = persistentData.drawList,
+            //        perThread_ShapeBuffer = persistentData.shapeBuffer
+            //    });
 
             JobHandle gatherTextures = UIForiaScheduler.Await(shapeBaking).Then(new GatherTextures_Managed() {
                 contextPoolHandle = persistentData.contextPoolHandle,
@@ -254,17 +255,17 @@ namespace UIForia.Systems {
                     surfaceHeight = layoutSystem.application.Height,
                     clipperBoundsList = persistentData.clipperBoundsList,
                     processedDrawList = persistentData.processedDrawList
-                })
-                .Then(new CreateDrawCalls() {
-                    drawList = persistentData.drawList,
-                    batchMemberList = persistentData.batchMemberList,
-                    batchList = persistentData.batchList,
-                    renderCommands = persistentData.renderCommands,
-                    stencilList = persistentData.stencilList,
-                    clipperBoundsList = persistentData.clipperBoundsList,
-                    processedDrawList = persistentData.processedDrawList,
-                    boundsAllocator = persistentData.boundsAllocator
                 });
+                // .Then(new CreateDrawCalls() {
+                //     drawList = persistentData.drawList,
+                //     batchMemberList = persistentData.batchMemberList,
+                //     batchList = persistentData.batchList,
+                //     renderCommands = persistentData.renderCommands,
+                //     stencilList = persistentData.stencilList,
+                //     clipperBoundsList = persistentData.clipperBoundsList,
+                //     processedDrawList = persistentData.processedDrawList,
+                //     boundsAllocator = persistentData.boundsAllocator
+                // });
 
             // JobHandle transparentPass = VertigoScheduler.Await(applyEffects)
             //     .Then(new TransparentRenderPassJob() {

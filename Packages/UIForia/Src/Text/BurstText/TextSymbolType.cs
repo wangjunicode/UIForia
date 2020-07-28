@@ -1,6 +1,6 @@
 ﻿namespace UIForia.Text {
 
-    // cannot be a flag since user can define their own types
+    // cannot be a flag since user can define their own types. values of 256 and higher are reserved for user
     public enum TextSymbolType {
 
         Character,
@@ -10,15 +10,23 @@
         ColorPush,
         ColorPop,
         
+        CharSpacingPush,
+        CharSpacingPop,
+        
         FontPush,
         FontPop,
         
         FontSizePush,
         FontSizePop,
-        
-        // underlay, 
-        // glow
-        // softness
+
+        FacePush,
+        FacePop,
+        UnderlayPush,
+        UnderlayPop,
+        OutlinePush,
+        OutlinePop,
+        GlowPush,
+        GlowPop,
         
         FontStylePush,
         FontStylePop,
@@ -26,13 +34,25 @@
         TextTransformPush,
         TextTransformPop,
 
-        MaterialPush,
-        MaterialPop,
         Sprite,
 
         EffectPush,
+        EffectPop,
 
-        EffectPop
+        UnderlinePush,
+        UnderlinePop,
+
+        TexturePush,
+        TexturePop,
+
+        PushHorizontalInvert,
+        PopHorizontalInvert,
+        
+        PushVerticalInvert,
+        PopVerticalInvert,
+
+        PushOpacity,
+        PopOpacity
 
     }
   

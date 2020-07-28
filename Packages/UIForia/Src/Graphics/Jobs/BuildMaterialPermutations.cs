@@ -8,27 +8,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 
 namespace UIForia.Graphics {
-
-    [BurstCompile]
-    internal struct BuildUVTransforms : IJob {
-
-        public DataList<DrawInfo2>.Shared drawList;
-        public DataList<UVTransform>.Shared uvTransformBuffer;
-        public List_Int32 uvTransformIndices;
-
-        public void Execute() { }
-
-    }
-
-    [BurstCompile]
-    internal struct BuildDynamicBatchGeometry : IJob {
-
-        public DataList<DrawInfo2>.Shared drawList;
-
-        public void Execute() { }
-
-    }
-
+    
     [BurstCompile]
     internal unsafe struct BuildMaterialPermutations : IJob {
 

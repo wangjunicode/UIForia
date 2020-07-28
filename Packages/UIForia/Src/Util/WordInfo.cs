@@ -22,6 +22,7 @@ namespace UIForia.Text {
         public float yOffset;
         public float x;
         public float y;
+        public float maxAscender;
 
         public int LastCharacterIndex {
             get => charEnd - 1;

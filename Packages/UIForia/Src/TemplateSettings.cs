@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text.RegularExpressions;
-using UIForia.Elements;
+using UIForia.Text;
+using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
@@ -21,7 +21,8 @@ namespace UIForia {
         public ResourceManager resourceManager;
         public Func<Type, string, string> filePathResolver;
         public List<Type> dynamicallyCreatedTypes;
-        
+        internal LightList<TextEffectDefinition> textEffectDefs;
+
         public TemplateSettings() {
             this.applicationName = "DefaultApplication";
             this.assemblyName = "UIForia.Application";
@@ -59,6 +60,26 @@ namespace UIForia {
 
         public string GetTemplatePath(string templateAttrTemplate) {
             return Path.GetFullPath(Path.Combine(templateResolutionBasePath, templateAttrTemplate)); 
+        }
+
+        public void RegisterTextEffect(string effectName, ITextEffectSpawner textEffectSpawner) {
+            
+            if (string.IsNullOrEmpty(effectName) || textEffectSpawner == null) {
+                return;
+            }
+            
+            textEffectDefs = textEffectDefs ?? new LightList<TextEffectDefinition>();
+            
+            for (int i = 0; i < textEffectDefs.size; i++) {
+                if (textEffectDefs.array[i].effectName == effectName) {
+                    throw new Exception("Duplicate Text Effect registered with name: " + effectName);
+                }
+            }
+
+            textEffectDefs.Add(new TextEffectDefinition() {
+                effectName = effectName,
+                effectSpawner = textEffectSpawner
+            });
         }
 
     }

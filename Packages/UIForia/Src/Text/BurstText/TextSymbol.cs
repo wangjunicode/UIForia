@@ -64,8 +64,16 @@ namespace UIForia.Text {
         }
         
     }
-    
-    [AssertSize(32)]
+
+    public struct TextEffectSymbolInfo {
+
+        public int spawnerId;
+        public int instanceId;
+        public bool isActive;
+
+    }
+
+    [AssertSize(52)]
     [StructLayout(LayoutKind.Explicit)]
     [DebuggerDisplay("{DebuggerView()}")]
     public struct TextSymbol {
@@ -76,10 +84,11 @@ namespace UIForia.Text {
         [FieldOffset(4)] public Color32 color;
         [FieldOffset(4)] public TextTransform textTransform;
         [FieldOffset(4)] public int fontId;
-        [FieldOffset(4)] public int effectId;
+        [FieldOffset(4)] public TextEffectId effectId;
         [FieldOffset(4)] public float floatValue;
         [FieldOffset(4)] public UnderlayInfo underlay;
         [FieldOffset(4)] public TextureUsage textureSetup;
+        [FieldOffset(4)] public TextEffectSymbolInfo effectInfo;
 
         private static readonly Dictionary<string, TextSymbolType> s_SymbolMap = new Dictionary<string, TextSymbolType>();
 

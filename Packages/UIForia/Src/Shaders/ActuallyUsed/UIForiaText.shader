@@ -112,10 +112,10 @@
 			    
 			    fixed outlineWidth = ((packedOutlineAndAlpha >> 0) & 0xff) / 255.0;
 			    fixed outlineSoftness = ((packedOutlineAndAlpha >> 8) & 0xff) / 255.0;
-			    float alphaClip = remap(((packedOutlineAndAlpha >> 16) & 0xffff), 0, 65535, 0, 1);
+			    float alphaClip = Remap(((packedOutlineAndAlpha >> 16) & 0xffff), 0, 65535, 0, 1);
 			    
-			    half weight = remap(((packedScaleAndWeight >> 0) & 0xffff), 0, 65535, 0, 32);
-			    half vertScale = remap(((packedScaleAndWeight >> 16) & 0xffff), 0, 65535, 0, 32);
+			    half weight = Remap(((packedScaleAndWeight >> 0) & 0xffff), 0, 65535, 0, 32);
+			    half vertScale = Remap(((packedScaleAndWeight >> 16) & 0xffff), 0, 65535, 0, 32);
 			    
 			    float2 pixelSize = vertex.w;
                 pixelSize /= float2(1, 1) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
@@ -140,7 +140,7 @@
 			    o.underlay = half4(0, 0, bScale, bBias);
  
   			    uint packedGlow = asuint(v.uv1.w);
-  			    fixed glowOffset = remap(((packedGlow >> 0) & 0xff) * 1.0, 0, 255, -1, 1);
+  			    fixed glowOffset = Remap(((packedGlow >> 0) & 0xff) * 1.0, 0, 255, -1, 1);
 			    fixed glowInner = ((packedGlow >> 8) & 0xff) / 255.0;
 			    fixed glowOuter = ((packedGlow >> 16) & 0xff) / 255.0;
 			    fixed glowPower = ((packedGlow >> 24) & 0xff) / 255.0;

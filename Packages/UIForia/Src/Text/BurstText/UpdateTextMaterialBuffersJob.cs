@@ -251,7 +251,7 @@ namespace UIForia.Text {
             // need to know difference between default state and what was set from tags I think
             // or just say fuck it for now? if effect needs it inverted it must set it every frame, otherwise we restore previous value when rebuilding material setup
 
-            RenderCharacterDisplayFlags displayFlags = 0;
+            CharacterDisplayFlags displayFlags = 0;
 
             for (int s = 0; s < textInfo.symbolList.size; s++) {
 
@@ -276,11 +276,8 @@ namespace UIForia.Text {
                         charInfo.materialIndex = materialIdx;
                         charInfo.baseMaterialIndex = materialIdx;
                         charInfo.opacityMultiplier = opacityMultiplier;
-                        charInfo.displayFlags = displayFlags;
-                        // ref RenderedCharacterInfo renderCharInfo = ref textInfo.renderedCharacters.array[charInfo.renderIdx];
-                        // renderCharInfo.materialIndex = materialIdx;
-                        // renderCharInfo.opacityMultiplier = opacityMultiplier;
-                        // renderCharInfo.displayFlags = displayFlags;
+                        charInfo.displayFlags &= ~(CharacterDisplayFlags.InvertUVs);
+                        charInfo.displayFlags |= displayFlags; // need to keep bold/italic bits if they are set, and unset inversions if set
 
                         break;
                     }
@@ -296,25 +293,25 @@ namespace UIForia.Text {
                         break;
 
                     case TextSymbolType.PushHorizontalInvert:
-                        displayFlags |= RenderCharacterDisplayFlags.InvertHorizontalUV;
+                        displayFlags |= CharacterDisplayFlags.InvertHorizontalUV;
                         materialStack.PushHInversion();
                         break;
 
                     case TextSymbolType.PopHorizontalInvert:
                         if (materialStack.PopHInversion()) {
-                            displayFlags &= ~RenderCharacterDisplayFlags.InvertHorizontalUV;
+                            displayFlags &= ~CharacterDisplayFlags.InvertHorizontalUV;
                         }
 
                         break;
 
                     case TextSymbolType.PushVerticalInvert:
-                        displayFlags |= RenderCharacterDisplayFlags.InvertVerticalUV;
+                        displayFlags |= CharacterDisplayFlags.InvertVerticalUV;
                         materialStack.PushVInversion();
                         break;
 
                     case TextSymbolType.PopVerticalInvert:
                         if (materialStack.PopVInversion()) {
-                            displayFlags &= ~RenderCharacterDisplayFlags.InvertVerticalUV;
+                            displayFlags &= ~CharacterDisplayFlags.InvertVerticalUV;
                         }
 
                         break;

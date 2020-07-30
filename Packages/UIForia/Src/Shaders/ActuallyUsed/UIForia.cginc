@@ -12,13 +12,20 @@
 #define BLUE fixed4(0, 0, 1, 1)
 #define WHITE fixed4(1, 1, 1, 1)
 #define BLACK fixed4(0, 0, 0, 1)
+#define CLEAR fixed4(0, 0, 0, 0)
 
+// Mirrors CharacterDisplayFlags in C#
 #define TEXT_DISPLAY_FLAG_INVERT_HORIZONTAL_BIT (1 << 0)
 #define TEXT_DISPLAY_FLAG_INVERT_VERTICAL_BIT (1 << 1)
-#define TEXT_DISPLAY_FLAG_ITALIC_BIT (1 << 2)
-#define TEXT_DISPLAY_FLAG_BOLD_BIT (1 << 3)
+#define TEXT_DISPLAY_FLAG_BOLD_BIT (1 << 2)
+#define TEXT_DISPLAY_FLAG_ITALIC_BIT (1 << 3)
 #define TEXT_DISPLAY_FLAG_UNDERLAY_INNER_BIT (1 << 4)
 
+#define TOP_LEFT 0
+#define TOP_RIGHT 1
+#define BOTTOM_RIGHT 2
+#define BOTTOM_LEFT 3
+                     
 struct AxisAlignedBounds2D {
     float xMin;
     float yMin;
@@ -35,11 +42,14 @@ int UnpackEffectIdx(uint4 indices) {
 }
 
 int UnpackMaterialId(uint4 indices) {
-    return indices.y & 0xffff; //(asuint(indices.y) >> 16) & (1 << 16) - 1; 
+    return indices.y & 0xffff;
 }
-     
+int UnpackFontIdx(uint4 indices) {
+    return indices.z & 0xffff; 
+}
+
 int UnpackUVTransformId(uint4 indices) {
-    return 0; // asuint(indices.y) & 0xffff;
+    return 0;
 }
          
 uint UnpackGlyphIdx(uint4 indices) {
@@ -54,7 +64,7 @@ uint ExtractByte(uint value, int byteIndex) {
     return ((value >> 8 * byteIndex) & 0xff);
 }
 
-float remap(float s, float a1, float a2, float b1, float b2) {
+float Remap(float s, float a1, float a2, float b1, float b2) {
     return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
 }
             
@@ -62,13 +72,16 @@ half remapHalf(half s, half a1, half a2, half b1, half b2) {
     return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
 }
 
-float4 GetGlowColor(float d, float scale, float4 glowColor, float glowOffset, float glowInner, float glowOuter, float glowPower) {
-    float glow = d - glowOffset * 0.5 * scale;
-    float t = lerp(glowInner, glowOuter, step(0.0, glow)) * 0.5 * scale;
-    glow = saturate(abs(glow/(1.0 + t)));
+half4 GetGlowColor(float d, float scale, half4 glowColor, half glowOffset, half glowInner, half glowOuter, half glowPower) {
+    half glow = d - glowOffset * 0.5 * scale;
+    glowInner = max(0.1, glowInner);
+    glowOuter = max(0.1, glowOuter);
+    half t = lerp(glowInner, glowOuter, step(0.0, glow)) * 0.5 * scale;
+    glow = saturate(abs(glow / (1.0 + t)));
     glow = 1.0 - pow(glow, glowPower);
-    glow *= sqrt(min(1.0, t)); // Fade off glow thinner than 1 screen pixel
-    return float4(glowColor.rgb, saturate(glowColor.a * glow * 2));
+    glow *= sqrt(min(1.0, t));
+    
+    return half4(glowColor.rgb, saturate(glowColor.a * glow * 2));
 }
        
 fixed4 GetTextColor(half d, fixed4 faceColor, fixed4 outlineColor, half outline, half softness) {
@@ -104,7 +117,11 @@ fixed4 UIForiaColorSpace(fixed4 color) {
 uint GetByteN(uint value, int n) {
     return ((value >> 8 * n) & 0xff);
 }
-        
+
+float GetByteNToFloat(uint value, int n) {
+    return ((value >> (8 * n)) & 0xff) / (float)0xff;
+}
+
 float4 UnpackColor(uint input) {
     return float4(
         uint((input >> 0) & 0xff) / float(0xff),
@@ -169,7 +186,6 @@ inline fixed4 ComputeColor(fixed4 mainColor, fixed4 tintColor, uint colorMode, f
     int tintTexture = (colorMode & ColorMode_TextureTint) != 0;
 
     fixed4 textureColor = tex2Dlod(textureToRead, float4(texCoord, 0, 0));
-
     textureColor = lerp(textureColor, textureColor * tintColor, tintTexture);
     
     if(useTexture && useColor) {
@@ -194,13 +210,17 @@ float sdRoundBox( in float2 p, in float2 b, in half4 r) {
     return min(max(q.x, q.y), 0) + length(max(q, 0)) - r.x;
 }
 
-half4 UnpackRadius(uint packedRadii, float2 size) {
-    float minSize = min(size.x, size.y);
+float sdRect( in float2 p, in float2 b) {    
+    float2 q = abs(p) - b;
+    return min(max(q.x, q.y), 0) + length(max(q, 0));
+}
+
+half4 UnpackRadius(uint packedRadii, float minSize) {
     half4 radius = 0.002 * half4(
-        (packedRadii >>  0) & 0xff,
-        (packedRadii >>  8) & 0xff,
+        (packedRadii >> 24) & 0xff,
         (packedRadii >> 16) & 0xff,
-        (packedRadii >> 24) & 0xff
+        (packedRadii >> 8) & 0xff,
+        (packedRadii >> 0) & 0xff
     );
     radius *= minSize;
     return radius;
@@ -279,19 +299,6 @@ struct TextMaterialInfoDecompressed {
     float underlayX;
     float underlayY;
 };
-// float remap(float s, float a1, float a2, float b1, float b2) {
-//     return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
-// }
-//
-//uint UnpackGlyphIdx(uint4 indices) {
-//    return (indices.z >> 16) & (1 << 16) - 1; 
-//}
-//         
-//int UnpackClipRectId(int4 indices) {
-//    return (indices.x >> 16) & (1 << 16) - 1; 
-//}
-
-
 
 // layout must EXACTLY match TextMaterialInfo in C#
 struct TextMaterialInfo {
@@ -317,17 +324,16 @@ struct TextMaterialInfo {
 TextMaterialInfoDecompressed DecompressTextMaterialInfo(in TextMaterialInfo textMaterialInfo) {
 
     TextMaterialInfoDecompressed retn;
-    uint faceDilate = (textMaterialInfo.faceUnderlayDilate) & 0xffff;
-    uint underDilate = (textMaterialInfo.faceUnderlayDilate >> 16) & (1 << 16) - 1;
-    retn.faceDilate = remap(faceDilate, 0, (float)0xffff, -1, 1);
+    
+    retn.faceDilate = Remap(textMaterialInfo.faceUnderlayDilate & 0xffff, 0, (float)0xffff, -1, 1);
     retn.outlineWidth = GetByteN(textMaterialInfo.glowOffsetOutlineWS, 2) / (float)0xff;
     retn.outlineSoftness = GetByteN(textMaterialInfo.glowOffsetOutlineWS, 3) / (float)0xff;
-    retn.glowPower = 0;
-    retn.glowInner = 0;
-    retn.glowOuter = 0;
-    retn.glowOffset = 0;
+    retn.glowPower = GetByteN(textMaterialInfo.glowPIOUnderlayS, 0) / (float)(0xff);
+    retn.glowInner = max(0.1, GetByteN(textMaterialInfo.glowPIOUnderlayS, 1) / (float)(0xff));
+    retn.glowOuter = max(0.1, GetByteN(textMaterialInfo.glowPIOUnderlayS, 2) / (float)(0xff));
+    retn.glowOffset = Remap(textMaterialInfo.glowOffsetOutlineWS & 0xffff, 0, (float)0xffff, -1, 1);
     retn.underlaySoftness = GetByteN(textMaterialInfo.glowPIOUnderlayS, 3) / (float)0xff;
-    retn.underlayDilate = remap(underDilate, 0, (float)0xffff, -1, 1);
+    retn.underlayDilate = Remap((textMaterialInfo.faceUnderlayDilate >> 16) & (1 << 16) - 1, 0, (float)0xffff, -1, 1);
     retn.underlayX = textMaterialInfo.underlayX;
     retn.underlayY = textMaterialInfo.underlayY;
     
@@ -351,13 +357,9 @@ float3 ComputeSDFTextScaleRatios(in GPUFontInfo fontInfo, in TextMaterialInfoDec
     float ratioB_t = glowOffset + glowOuter > 1 ? glowOffset + glowOuter : 1;
     float ratioB = max(0, gradientScale - 1 - ratioBRange) / (gradientScale * ratioB_t);
     if (ratioB < 0) ratioB = 0;
-    float underlayOffsetX = textStyle.underlayX;
-    float underlayOffsetY = textStyle.underlayY;
-    float underlayDilate = textStyle.underlayDilate;
-    float underlaySoftness = textStyle.underlaySoftness;
 
     float ratioCRange = (weight + faceDilate) * (gradientScale - 1);
-    float ratioC_t = max(1, max(abs(underlayOffsetX), abs(underlayOffsetY)) + underlayDilate + underlaySoftness);
+    float ratioC_t = max(1, max(abs(textStyle.underlayX), abs(textStyle.underlayY)) + textStyle.underlayDilate + textStyle.underlaySoftness);
 
     float ratioC = max(0, gradientScale - 1.0 - ratioCRange) / (gradientScale * ratioC_t);
 

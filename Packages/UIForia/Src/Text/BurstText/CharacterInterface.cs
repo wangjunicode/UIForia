@@ -1,4 +1,5 @@
-﻿using UIForia.Graphics;
+﻿using System;
+using UIForia.Graphics;
 using UIForia.Util;
 using Unity.Mathematics;
 using UnityEngine;
@@ -288,7 +289,7 @@ namespace UIForia.Text {
             float width = glyph.width * charptr->scale;
             float height = glyph.height * charptr->scale;
 
-            float2 p = charptr->position;
+            float2 p = charptr->renderPosition;
             vertexPtr->topLeft = new float3(p.x, -p.y, 0);
             vertexPtr->topRight = new float3(p.x + width, -p.y, 0);
             vertexPtr->bottomLeft = new float3(p.x + width, -(p.y + height), 0);
@@ -350,7 +351,7 @@ namespace UIForia.Text {
                 }
             }
 
-            float centerX = vertexPtr->topLeft.x + ((vertexPtr->topRight.x - vertexPtr->topLeft.x) * 0.5f);
+            float centerX = vertexPtr->topLeft.x + ((vertexPtr->bottomRight.x - vertexPtr->topLeft.x) * 0.5f);
             float centerY = vertexPtr->topLeft.y - ((vertexPtr->topLeft.y - vertexPtr->bottomRight.y) * 0.5f);
             return new float2(centerX, centerY);
         }
@@ -361,7 +362,7 @@ namespace UIForia.Text {
 
                 float width = glyph.width * charptr->scale;
 
-                return new float2(charptr->renderPosition.x + (width * 0.5f), -charptr->position.y);
+                return new float2(charptr->renderPosition.x + (width * 0.5f), -charptr->renderPosition.y);
             }
 
             float centerX = vertexPtr->topLeft.x + ((vertexPtr->topRight.x - vertexPtr->topLeft.x) * 0.5f);
@@ -561,19 +562,19 @@ namespace UIForia.Text {
 
         public void InvertHorizontal(bool invert) {
             if (invert) {
-                charptr->displayFlags |= RenderCharacterDisplayFlags.InvertHorizontalUV;
+                charptr->displayFlags |= CharacterDisplayFlags.InvertHorizontalUV;
             }
             else {
-                charptr->displayFlags &= ~RenderCharacterDisplayFlags.InvertHorizontalUV;
+                charptr->displayFlags &= ~CharacterDisplayFlags.InvertHorizontalUV;
             }
         }
 
         public void InvertVertical(bool invert) {
             if (invert) {
-                charptr->displayFlags |= RenderCharacterDisplayFlags.InvertVerticalUV;
+                charptr->displayFlags |= CharacterDisplayFlags.InvertVerticalUV;
             }
             else {
-                charptr->displayFlags &= ~RenderCharacterDisplayFlags.InvertVerticalUV;
+                charptr->displayFlags &= ~CharacterDisplayFlags.InvertVerticalUV;
             }
         }
 
@@ -590,7 +591,7 @@ namespace UIForia.Text {
             vertexPtr->bottomLeft = quaternion * vertexPtr->bottomLeft;
         }
 
-        public void RotateLocalAngleAxis(float rot, Vector3 axis) {
+        public void RotateLocalAngleAxis(float degrees, Vector3 axis) {
 
             InitDataPtr();
 
@@ -601,7 +602,7 @@ namespace UIForia.Text {
             vertexPtr->bottomRight -= offset;
             vertexPtr->bottomLeft -= offset;
 
-            Quaternion quaternion = Quaternion.AngleAxis(rot, axis);
+            Quaternion quaternion = Quaternion.AngleAxis(degrees, axis);
             vertexPtr->topLeft = quaternion * vertexPtr->topLeft;
             vertexPtr->topRight = quaternion * vertexPtr->topRight;
             vertexPtr->bottomRight = quaternion * vertexPtr->bottomRight;

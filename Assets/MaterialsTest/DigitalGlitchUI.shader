@@ -98,7 +98,7 @@ Shader "Devdog/UI/DigitalGlitchUI"
 		v2f OUT;
 		OUT.worldPosition = IN.vertex;
 
-		float3 noiseOffset = tex2Dlod(_NoiseTex, float4(IN.texcoord * ((_Time[1] % 5) + 5), 0.0, 0.0)).rgb;
+		float3 noiseOffset = float3(0, 0, 0); //tex2Dlod(_NoiseTex, float4(IN.texcoord * ((_Time[1] % 5) + 5), 0.0, 0.0)).rgb;
 		noiseOffset -= float3(0.5, 0.5, 0.5);
 		//noiseOffset += random(IN.vertex.xy / 10);
 		noiseOffset.y += _NormalizedTime * 4;

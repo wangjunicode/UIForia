@@ -11,7 +11,6 @@ namespace UIForia.Text {
 
         internal LightList<TextEffect> textEffectStack;
         internal TextSystem textSystem;
-        internal BounceTextEffect bounce = new BounceTextEffect();
         internal DataList<FontAssetInfo>.Shared fontAssetMap;
 
         public TextEffectAnimator(TextSystem textSystem) {
@@ -31,62 +30,132 @@ namespace UIForia.Text {
 
             int charIdx = 0;
 
-            // todo -- temp
-            if (textElement.id.index == 4) {
-                textEffectStack.Add(bounce);
-            }
-
-            bounce.OnPush(worldMatrix, textElement);
-            
             CharacterInterface characterInterface = default;
             characterInterface.fontAssetMap = fontAssetMap.GetArrayPointer();
             characterInterface.textSystem = textSystem;
+
             fixed (TextInfo* textInfoPtr = &textInfo) {
                 characterInterface.textInfo = textInfoPtr;
             }
 
+            int depthCount = 0;
+
             for (int i = 0; i < size; i++) {
-                ref TextSymbol textSymbol = ref array[i];
 
-                if (textSymbol.type == TextSymbolType.EffectPush) {
-                    TextEffect effect = textSystem.textEffectTable.array[textSymbol.effectId];
-                    effect.OnPush(worldMatrix, textElement);
+                ref TextSymbol currentSymbol = ref array[i];
+
+                if (currentSymbol.type == TextSymbolType.Character && (currentSymbol.charInfo.flags & CharacterFlags.Visible) != 0) {
+                    charIdx++;
+                }
+                
+                if (currentSymbol.type != TextSymbolType.EffectPush) {
                     continue;
                 }
 
-                if (textSymbol.type == TextSymbolType.EffectPop) {
-                    if (textEffectStack.size > 0) {
-                        TextEffect effect = textEffectStack.array[--textEffectStack.size];
-                        effect.OnPop();
+                if (currentSymbol.effectInfo.instanceId == -1) {
+                    continue;
+                }
+
+                TextEffect effect = textSystem.textEffectTable.array[currentSymbol.effectInfo.instanceId];
+
+                if (effect == null || !effect.isActive) {
+                    continue;
+                }
+
+                int rangeStart = i + 1;
+                int rangeEnd = size;
+
+                for (int j = i + 1; j < size; j++) {
+                    ref TextSymbol s = ref array[j];
+
+                    if (s.type == TextSymbolType.EffectPush && s.effectInfo.spawnerId == currentSymbol.effectInfo.spawnerId) {
+                        depthCount++;
+                    }
+                    else if (s.type == TextSymbolType.EffectPop && s.effectInfo.spawnerId == currentSymbol.effectInfo.spawnerId) {
+
+                        if (depthCount == 0) {
+                            rangeEnd = j;
+                            break;
+                        }
+
+                        depthCount--;
                     }
 
-                    continue;
                 }
 
-                if (textEffectStack.size == 0 || textSymbol.type != TextSymbolType.Character || (textSymbol.charInfo.flags & CharacterFlags.Visible) == 0) {
-                    continue;
-                }
+                effect.OnPush(worldMatrix, textElement);
 
-                fixed (BurstCharInfo* ptr = &textSymbol.charInfo) {
+                int charIdxSave = charIdx;
+                for (int j = rangeStart; j < rangeEnd; j++) {
+                    ref TextSymbol textSymbol = ref array[j];
 
-                    characterInterface.charptr = ptr;
-                    characterInterface.charIndex = charIdx;
-                    characterInterface.vertexPtr = null;
-                    
-                    // material id stored in effect data? 
-                    // on the one hand thats kind of nice and encapsulated
-                    // on the other hand it requires a full material data if all i want to override is styled properties
-                    // could make material idx 2 ushorts, a base and an override
-                    
-                    for (int eidx = 0; eidx < textEffectStack.size; eidx++) {
-                        textEffectStack.array[eidx].ApplyEffect(ref characterInterface);
+                    if (textSymbol.type != TextSymbolType.Character || (textSymbol.charInfo.flags & CharacterFlags.Visible) == 0) {
+                        continue;
                     }
 
+                    fixed (BurstCharInfo* ptr = &textSymbol.charInfo) {
+
+                        characterInterface.charptr = ptr;
+                        characterInterface.charIndex = charIdx;
+                        characterInterface.vertexPtr = null;
+
+                        effect.ApplyEffect(ref characterInterface);
+                        // material id stored in effect data? 
+                        // on the one hand thats kind of nice and encapsulated
+                        // on the other hand it requires a full material data if all i want to override is styled properties
+                        // could make material idx 2 ushorts, a base and an override
+
+                        // for (int eidx = 0; eidx < textEffectStack.size; eidx++) {
+                        //     textEffectStack.array[eidx].ApplyEffect(ref characterInterface);
+                        // }
+
+                    }
+
+                    charIdx++; 
                 }
 
-                charIdx++;
-
+                effect.OnPop();
+                charIdx = charIdxSave;
             }
+
+            // // I think its better to traverse char ranges once per effect and treat pop as the end of range
+            // if (textSymbol.type == TextSymbolType.EffectPop) {
+            //     if (textEffectStack.size > 0) {
+            //         for (int j = textEffectStack.size - 1; j >= 0; j--) {
+            //             TextEffect effect = textEffectStack.array[j];
+            //             // if (effect.effectTypeId == textSymbol.effectInfo.spawnerId) {
+            //             //     effect.OnPop();
+            //             //     textEffectStack.RemoveAt(j);
+            //             //     break;
+            //             // }
+            //         }
+            //     }
+            //
+            //     continue;
+            // }
+            //
+            // if (textEffectStack.size == 0 || textSymbol.type != TextSymbolType.Character || (textSymbol.charInfo.flags & CharacterFlags.Visible) == 0) {
+            //     continue;
+            // }
+            //
+            // fixed (BurstCharInfo* ptr = &textSymbol.charInfo) {
+            //
+            //     characterInterface.charptr = ptr;
+            //     characterInterface.charIndex = charIdx;
+            //     characterInterface.vertexPtr = null;
+            //
+            //     // material id stored in effect data? 
+            //     // on the one hand thats kind of nice and encapsulated
+            //     // on the other hand it requires a full material data if all i want to override is styled properties
+            //     // could make material idx 2 ushorts, a base and an override
+            //
+            //     for (int eidx = 0; eidx < textEffectStack.size; eidx++) {
+            //         textEffectStack.array[eidx].ApplyEffect(ref characterInterface);
+            //     }
+            //
+            // }
+            //
+            // charIdx++;
 
         }
 

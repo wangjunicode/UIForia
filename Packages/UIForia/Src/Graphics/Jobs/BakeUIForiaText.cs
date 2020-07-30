@@ -47,7 +47,7 @@ namespace UIForia.Graphics {
                 if (true || setup->requiresMaterialScan) {
 
                     int lastIdx = -1;
-                    int outputIdx = -1;
+                    int materialIdx = -1;
 
                     int symbolIdx = desc.start;
 
@@ -60,10 +60,10 @@ namespace UIForia.Graphics {
 
                         if (idx != lastIdx) {
                             lastIdx = idx;
-                            outputIdx = materialBuffer.size;
+                            materialIdx = materialBuffer.size;
                             // todo -- actually do hash resolution here. can profile running the hash up front or not. if done up front it'll run in managed code after effects
                             materialBuffer.Add(new UIForiaMaterialInfo() {
-                                textMaterial = idx >= 0 ? materialPtr[idx] : default // todo -- if idx < 0 it points to a global material (for typewriting)
+                                textMaterial = materialPtr[idx]
                             });
                         }
 
@@ -79,8 +79,8 @@ namespace UIForia.Graphics {
 
                         ref UIForiaVertex vertex = ref vertices[vertexIndex++];
 
-                        vertex.position.x = info.position.x;
-                        vertex.position.y = -info.position.y; // todo -- move line ascender offset here or bake directly into position so I dont have to upload it
+                        vertex.position.x = info.renderPosition.x;
+                        vertex.position.y = -info.renderPosition.y; // todo -- move line ascender offset here or bake directly into position so I dont have to upload it
 
                         vertex.texCoord0.x = info.scale;
                         vertex.texCoord0.y = 0; // reserve for z position or other float. still need uv transform index somewhere
@@ -91,19 +91,24 @@ namespace UIForia.Graphics {
                         
                         // todo -- premultiply base textInfo opacity with opacity value before packing
                         
+                        // still need:
+                            // soft mask data (maybe?)
+                            // clip data (float4 buffer) 
+                            // uvtransform data (float4 buffer?)
+                            // dont mind making vertex a little larger but needs to be aligned to float4, so im adding a full float4 or nothing
+                        
                         // could also pre-multiply opacity modifier by the base element opacity and make that be per-character. could also cull when 0 or close to it
                         uint displayAndOpacity = (uint)((byte) info.displayFlags << 8) | info.opacityMultiplier;
-                        vertex.indices.y = (uint) ((displayAndOpacity << 16) | (outputIdx & 0xffff)); //(uint)BitUtil.SetHighLowBits(effectIdx, outputIdx); // todo -- set effect idx
+                        vertex.indices.y = (uint) ((displayAndOpacity << 16) | (materialIdx & 0xffff)); //(uint)BitUtil.SetHighLowBits(effectIdx, outputIdx); // todo -- set effect idx
                         vertex.indices.z = (uint) ((info.glyphIndex << 16) | (desc.fontAssetId & 0xffff)); // BitUtil.SetHighLowBits(info.renderedGlyphIndex, (uint)desc.fontAssetId);
-                        vertex.indices.w = (uint)effectIdx;
-
+                        vertex.indices.w = (uint)effectIdx; // ushort is too small for this but 3 bytes could work if I need 1 free byte here, could move opacity here and use a 3 bytes for material id
                         symbolIdx = info.nextRenderIdx;
                     }
 
                 }
                 else {
 
-                    // todo -- implement this later
+                    // todo -- implement this later, for fast case when we dont need to check materials or effects
                     // int outputIdx;
                     // int startIdx = desc.textRenderInfo[0].materialIndex;
                     //

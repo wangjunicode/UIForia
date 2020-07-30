@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Text;
 using UIForia.Graphics;
 using UIForia.Layout;
@@ -8,7 +7,6 @@ using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia.Text {
 
@@ -668,21 +666,26 @@ namespace UIForia.Text {
             float fontScale = fontSize * smallCapsMultiplier / fontAsset.faceInfo.pointSize * fontAsset.faceInfo.scale;
 
             // todo -- I think i need to bring back the ratio computation here... if I do then I can't support per-character material overrides without a layout
-            
+
             //float3 sdfRatios = ComputeRatios(state.fontAssetInfo, state);
 
             // float padding = GetPadding(fontAsset.gradientScale, state, sdfRatios);
             //  float gradientScale = fontAsset.gradientScale;
             float boldAdvanceMultiplier = 1;
 
+            CharacterDisplayFlags displayFlags = 0;
             // dont need style padding here
             if ((state.fontStyle & FontStyle.Bold) != 0) {
+                displayFlags |= CharacterDisplayFlags.Bold;
                 // stylePadding = state.fontAssetInfo.boldStyle / 4.0f * gradientScale * sdfRatios.x;
                 // if (stylePadding + padding > gradientScale) {
                 //     padding = gradientScale - stylePadding;
                 // }
 
                 boldAdvanceMultiplier = 1 + state.fontAssetInfo.boldSpacing * 0.01f;
+            }
+            else {
+                displayFlags &= ~CharacterDisplayFlags.Bold;
             }
             // else {
             //     stylePadding = fontAsset.normalStyle / 4.0f * gradientScale;
@@ -702,13 +705,18 @@ namespace UIForia.Text {
             sizeInfo.monospacing = 0;
 
             // will need to check for a real italic font, probably I just want to ensure italic fonts have an italic style of 0
-            // if ((state.fontStyle & FontStyle.Italic) != 0) {
-            //     sizeInfo.shear = fontAsset.italicStyle * 0.01f;
-            // }
-            // else {
-            //     sizeInfo.shear = 0;
-            // }
+            if ((state.fontStyle & FontStyle.Italic) != 0) {
+                sizeInfo.shear = fontAsset.italicStyle * 0.01f;
+                displayFlags |= CharacterDisplayFlags.Italic;
 
+            }
+            else {
+                sizeInfo.shear = 0;
+                displayFlags &= ~CharacterDisplayFlags.Italic;
+
+            }
+
+            sizeInfo.displayFlags = displayFlags;
             sizeInfo.atlasWidth = fontAsset.atlasWidth;
             sizeInfo.atlasHeight = fontAsset.atlasHeight;
             sizeInfo.fontAscender = fontAsset.faceInfo.ascender;
@@ -864,9 +872,10 @@ namespace UIForia.Text {
                         textSymbol.charInfo.position.x = xAdvance + (glyph.xOffset * currentElementScale);
                         textSymbol.charInfo.position.y = sizeInfo.fontBaseLineOffset + (sizeInfo.fontAscender - glyph.yOffset) * currentElementScale;
                         textSymbol.charInfo.scale = currentElementScale;
-                        textSymbol.charInfo.fontAssetId = (ushort)sizeInfo.fontAssetId;
+                        textSymbol.charInfo.fontAssetId = (ushort) sizeInfo.fontAssetId;
                         textSymbol.charInfo.glyphIndex = (ushort) glyphIdx;
                         textSymbol.charInfo.wordIndex = (ushort) wordIndex;
+                        textSymbol.charInfo.displayFlags |= sizeInfo.displayFlags;
 
                         //(sizeInfo.fontAscender * currentElementScale); 
                         // Debug.Log(((char)textSymbol.charInfo.character) + " asc: "+ (sizeInfo.fontAscender * currentElementScale));
@@ -963,6 +972,8 @@ namespace UIForia.Text {
         public float monospacing;
         public float characterSpacing;
         public float normalSpacingOffset;
+        public CharacterDisplayFlags displayFlags;
+        public float shear;
 
     }
 

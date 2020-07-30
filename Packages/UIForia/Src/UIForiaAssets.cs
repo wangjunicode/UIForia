@@ -48,7 +48,6 @@ namespace UIForia {
         [FieldOffset(8)] public Vector4 vectorValue;
 
     }
-    
 
     public struct MaterialPropertyDefinition {
 
@@ -61,15 +60,10 @@ namespace UIForia {
 
     public class UIForiaAssets : MonoBehaviour {
 
-        public float centerX;
-        public float centerY;
 
         public MaterialReference[] materialReferences;
-
-        private void Update() {
-
-
-        }
+        public UnityEngine.Gradient gradient;
+        
 
     }
 

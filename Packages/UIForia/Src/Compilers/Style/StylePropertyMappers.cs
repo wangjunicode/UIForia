@@ -127,6 +127,10 @@ namespace UIForia.Compilers.Style {
                 {"cornerbeveltopright", (targetStyle, property, context) => targetStyle.CornerBevelTopRight = MapFixedLength(property.children[0], context)},
                 {"cornerbevelbottomright", (targetStyle, property, context) => targetStyle.CornerBevelBottomRight = MapFixedLength(property.children[0], context)},
                 {"cornerbevelbottomleft", (targetStyle, property, context) => targetStyle.CornerBevelBottomLeft = MapFixedLength(property.children[0], context)},
+                
+                {"outlinewidth", (targetStyle, property, context) => targetStyle.OutlineWidth = MapFixedLength(property.children[0], context)},
+                {"outlinecolor", (targetStyle, property, context) => targetStyle.OutlineColor = MapColor(property.children[0], context)},
+
 
                 {"griditemx", (targetStyle, property, context) => targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context)},
                 {"griditemy", (targetStyle, property, context) => targetStyle.GridItemY = MapGridItemPlacement(property.children[0], context)},

@@ -4,13 +4,27 @@ using UnityEngine;
 
 namespace UIForia.Text {
 
+
+
     public static class TextProcessors {
 
         public static RichTextProcessor RichText = new RichTextProcessor();
 
     }
 
+    public interface ITextEffectResolver {
+
+        bool TryResolveTextEffect(CharSpan effectName, out TextEffectId effectId);
+
+    }
+
     public class RichTextProcessor : ITextProcessor {
+
+        private ITextEffectResolver effectResolver;
+
+        public void SetTextEffectResolver(ITextEffectResolver effectResolver) {
+            this.effectResolver = effectResolver;
+        }
 
         public bool Process(CharStream stream, ref TextSymbolStream textSymbolStream) {
 
@@ -30,7 +44,7 @@ namespace UIForia.Text {
                     stream.Advance(2);
 
                     if (stream.TryGetStreamUntil(']', out CharStream bodyStream, '\\')) {
-                        stream.Advance(); // step of ']'
+                        stream.Advance(); // step over ']'
                         if (bodyStream.TryParseIdentifier(out CharSpan tag)) {
 
                             if (tag == "color") {
@@ -53,23 +67,25 @@ namespace UIForia.Text {
                                 textSymbolStream.PopOpacity();
                                 continue;
                             }
-                            
+
                             if (tag == "uppercase") {
                                 // maybe only pop when uppercase is set?
                                 textSymbolStream.PopTextTransform();
                                 continue;
                             }
+
                             if (tag == "lowercase") {
                                 // maybe only pop when lowercase  is set?
                                 textSymbolStream.PopTextTransform();
                                 continue;
                             }
+
                             if (tag == "titlecase") {
                                 // maybe only pop when titlecase is set?
                                 textSymbolStream.PopTextTransform();
                                 continue;
                             }
-                            
+
                             if (tag == "cspace") {
                                 textSymbolStream.PopCharacterSpacing();
                                 continue;
@@ -85,13 +101,19 @@ namespace UIForia.Text {
                                 continue;
                             }
 
+                            if (tag == "fx" && bodyStream.TryParseCharacter(':') && bodyStream.TryParseIdentifier(out CharSpan fxName)) {
+                                if (effectResolver != null && effectResolver.TryResolveTextEffect(fxName, out TextEffectId effectId)) {
+                                    textSymbolStream.PopTextEffect(effectId);
+                                    continue;
+                                }
+                            }
+
                         }
                     }
 
                     stream.RewindTo(start + 1);
                     textSymbolStream.AddCharacter(stream.Current);
 
-                  
                 }
                 else {
 
@@ -99,6 +121,19 @@ namespace UIForia.Text {
                         stream.Advance();
                         bodyStream.Advance(); // step over '['
                         if (bodyStream.TryParseIdentifier(out CharSpan tag)) {
+
+                            if (tag == "tw" && bodyStream.TryParseCharacter(':') && bodyStream.TryParseIdentifier(out CharSpan typeRevealName)) { }
+
+                            if (tag == "fx" && bodyStream.TryParseCharacter(':') && bodyStream.TryParseIdentifier(out CharSpan fxName)) {
+
+                                if (effectResolver != null && effectResolver.TryResolveTextEffect(fxName, out TextEffectId effectId)) {
+                                    textSymbolStream.PushTextEffect(effectId, bodyStream);
+                                    continue;
+                                }
+
+                            }
+
+                            if (tag == "link") { }
 
                             if (tag == "color") {
 
@@ -124,7 +159,7 @@ namespace UIForia.Text {
                                     continue;
                                 }
                             }
-                            else if(tag == "opacity") {
+                            else if (tag == "opacity") {
                                 bodyStream.TryParseCharacter('=');
                                 if (bodyStream.TryParseFloat(out float value)) {
                                     value = math.clamp(value, 0, 1);
@@ -169,50 +204,6 @@ namespace UIForia.Text {
                     stream.RewindTo(start + 1);
                     textSymbolStream.AddCharacter(stream.Current);
 
-                    // if (stream.TryMatchRange("nobreak]")) {
-                    //     textSymbolStream.PushNoBreak();
-                    // }
-                    // else if (stream.TryMatchRange("color")) { }
-                    // else if (stream.TryMatchRange("outline")) { }
-                    // else if (stream.TryMatchRange("fx:")) {
-                    //     if (stream.TryParseIdentifier(out CharSpan identifier)) {
-                    //         // if (fxParserMap.TryGetValue(identifier)) {
-                    //         //     if (fxParser.TryParse(ref stream)) {
-                    //         //         // if current stream.matchesSoFar
-                    //         //         // var instance = textSystem.effectTable[currentStream[i].effectId];
-                    //         //         // instance.ParseUpdate(value);
-                    //         //         var data = fxParser.TryParse(data);
-                    //         //         textSymbolStream.PushTextEffect(data);
-                    //         //     }
-                    //         // }
-                    //     }
-                    // }
-                    // else if (stream.TryMatchRange("size") && stream.TryParseCharacter('=')) {
-                    //
-                    //     //[size=3.4em]
-                    //     //[size=46px]
-                    //
-                    //     if (stream.TryParseFixedLength(out UIFixedLength value, true) && stream.TryParseCharacter(']')) {
-                    //         textSymbolStream.PushFontSize(value);
-                    //         continue;
-                    //     }
-                    //
-                    //     stream.RewindTo(start + 1);
-                    //     textSymbolStream.AddCharacter(stream.Current);
-                    // }
-                    // else if (stream.TryMatchRange("uppercase]")) {
-                    //     textSymbolStream.PushTextTransform(TextTransform.UpperCase);
-                    // }
-                    // else if (stream.TryMatchRange("titlecase]")) {
-                    //     textSymbolStream.PushTextTransform(TextTransform.TitleCase);
-                    // }
-                    // else if (stream.TryMatchRange("lowercase]")) {
-                    //     textSymbolStream.PushTextTransform(TextTransform.LowerCase);
-                    // }
-                    // else {
-                    //     stream.RewindTo(start + 1);
-                    //     textSymbolStream.AddCharacter(stream.Current);
-                    // }
                 }
             }
 

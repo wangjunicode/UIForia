@@ -65,6 +65,9 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorBottom, ColorUtil.UnsetValue),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorLeft, ColorUtil.UnsetValue),
             
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.OutlineColor, ColorUtil.UnsetValue),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.OutlineWidth, 0),
+            
             // Corner
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.CornerBevelTopLeft, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.CornerBevelTopRight, new UIFixedLength(0)),

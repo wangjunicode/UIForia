@@ -5,13 +5,13 @@ namespace UIForia.Text {
 
     public struct TextSymbolStream {
 
-        internal LightList<TextEffect> textEffects;
+        internal LightList<PendingTextEffectSymbolData> textEffects;
         internal StructList<TextSymbol> stream;
         internal bool requiresTextTransform;
         internal bool requiresRenderProcessing;
         internal bool requiresRichTextLayout;
 
-        internal TextSymbolStream(LightList<TextEffect> textEffects, StructList<TextSymbol> stream) {
+        internal TextSymbolStream(LightList<PendingTextEffectSymbolData> textEffects, StructList<TextSymbol> stream) {
             this.stream = stream;
             this.textEffects = textEffects;
             this.requiresTextTransform = false;
@@ -41,20 +41,22 @@ namespace UIForia.Text {
             });
         }
 
-        public void PushTextEffect(TextEffect textEffect) {
-            if (textEffect != null) {
-                textEffects.Add(textEffect);
-                stream.Add(new TextSymbol() {
-                    type = TextSymbolType.EffectPush,
-                    effectId = textEffects.size
-                });
-            }
+        public void PushTextEffect(TextEffectId effectId, CharStream bodyStream) {
+            textEffects.Add(new PendingTextEffectSymbolData() {
+                bodyStream = bodyStream,
+                symbolIndex = stream.size,
+                effectId = effectId
+            });
+            stream.Add(new TextSymbol() {
+                type = TextSymbolType.EffectPush,
+            });
         }
 
-        public void PopTextEffect() {
+        public void PopTextEffect(TextEffectId effectId) {
             if (textEffects.size > 0) {
                 stream.Add(new TextSymbol() {
-                    type = TextSymbolType.EffectPop
+                    type = TextSymbolType.EffectPop,
+                    effectId = effectId
                 });
             }
         }

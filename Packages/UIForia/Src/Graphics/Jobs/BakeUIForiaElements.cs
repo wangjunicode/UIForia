@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Diagnostics;
+using Packages.UIForia.Util.Unsafe;
 using UIForia.ListTypes;
-using UIForia.Rendering;
-using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace UIForia.Graphics {
 
@@ -23,7 +20,7 @@ namespace UIForia.Graphics {
 
     }
 
-    // needs to be cache line size since I build these in parallel
+    // needs to be cache line size since I build these in parallel (avoid false sharing)
     [AssertSize(64)]
     public unsafe struct MeshInfo {
 
@@ -42,41 +39,42 @@ namespace UIForia.Graphics {
 
     }
 
-    [BurstCompile]
-    internal unsafe struct BakeUIForiaShapes : IJob {
+    public unsafe struct ElementDesc {
 
-        public DataList<DrawInfo2>.Shared drawList;
-        public DataList<int>.Shared triangleList;
-        public DataList<UIForiaVertex>.Shared vertexList;
-        public DataList<MeshInfo> meshInfoList;
+        public float4 positions;
+        public int materialIndex;
+        public int textureIndex;
 
-        public void Execute() { }
+    }
+
+    public struct ElementVertex {
+
+        public float2 position;
+        public float2 texCoords;
+        public int4 indices;
 
     }
 
     [BurstCompile]
     internal unsafe struct BakeUIForiaElements : IJob {
 
-        // todo -- make sure geometry type is at least 1 cache line in size 
-        public DataList<DrawInfo2>.Shared drawList;
         public DataList<MeshInfo> meshInfoList;
-
+        public DataList<DrawInfo2>.Shared drawList;
         public DataList<UIForiaVertex>.Shared vertexList;
-
-        [NativeDisableUnsafePtrRestriction] private float2* scratchFloats;
-
+        public DataList<ElementMaterialInfo>.Shared materialList;
+        
         public void Execute() {
-
-            scratchFloats = TypedUnsafe.Malloc<float2>(4, Allocator.Temp);
-
-            List_float2 tempVertexBuffer = new List_float2(32, Allocator.Temp);
-
+            
             int drawListSize = drawList.size;
             DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
             MeshInfo* meshInfoArray = meshInfoList.GetArrayPointer();
-            UIForiaVertex* vertices = null;
 
-            // todo -- can pre-allocate vertex space since we now only support quads, this is easy
+            // its only 1 entry per element, we wont have thousands, and if we do most of them are probably elements anyway
+            vertexList.EnsureAdditionalCapacity(drawListSize);
+            UIForiaVertex* vertices = vertexList.GetArrayPointer();
+
+            int vertexIdx = 0;
+            
             for (int i = 0; i < drawListSize; i++) {
 
                 ref DrawInfo2 drawInfo = ref drawInfoArray[i];
@@ -85,63 +83,93 @@ namespace UIForia.Graphics {
                     continue;
                 }
 
+                // todo -- handle 9 slicing and batched draws
                 ref MeshInfo meshInfo = ref meshInfoArray[i];
+                RenderContext3.ElementBatch* elementBatch = (RenderContext3.ElementBatch*) drawInfo.shapeData;
 
-                meshInfo.type = MeshInfoType.Element;
+                int count = elementBatch->count;
+                
+                if (count == 1) {
+                    
+                    meshInfo.type = MeshInfoType.Element;
+                    meshInfo.vertexStart = vertexIdx;
+                    meshInfo.vertexCount = 1;
 
-                meshInfo.vertexStart = vertexList.size;
+                    int materialIdx = materialList.size;
+                    // mat.backgroundColor = 
+                    // elementBatch->elements[0].material
+                    // int hash = MurmurHash3.Hash((byte*)0, sizeof(ElementMaterialInfo));
+                    // FindIdx(hash, ptr, materialList);
+                    // materialList.Add();
+                    // want to collect data in the material desc but then extract a lot of it to per-element data to cut down on upload 
+                    // otherwise too much of the abstraction leaks out, its nice having one material per element / draw
+                    // can diff this on texture but no point doing it more than that
+                    
+                    ref ElementDrawInfo element = ref elementBatch->elements[0];
+                    float x = element.x;
+                    float y = element.y;
+                    float width = element.drawDesc.width;
+                    float height = element.drawDesc.height;
+                    float halfWidth = width * 0.5f;
+                    float halfHeight = height * 0.5f;
 
-                SDFMeshDesc* desc = (SDFMeshDesc*) drawInfo.shapeData;
+                    ElementMaterialInfo mat = default;
+                    
+                    mat.backgroundColor = element.drawDesc.backgroundColor;
+                    mat.backgroundTint = element.drawDesc.backgroundTint;
+                    
+                    mat.radius0 = element.drawDesc.radiusTL;
+                    mat.radius1 = element.drawDesc.radiusTR;
+                    mat.radius2 = element.drawDesc.radiusBR;
+                    mat.radius3 = element.drawDesc.radiusBL;
+                    
+                    mat.bevelTL = element.drawDesc.bevelTL;
+                    mat.bevelTR = element.drawDesc.bevelTR;
+                    mat.bevelBR = element.drawDesc.bevelBR;
+                    mat.bevelBL = element.drawDesc.bevelBL;
 
-                float x = desc->x;
-                float y = desc->y;
-                float width = desc->width;
-                float height = desc->height;
-
-                // should never happen but avoids a div by 0 just in case
-                if (width <= 0 || height <= 0) {
-                    meshInfo.vertexCount = 0;
-                    meshInfo.triangleCount = 0;
-                    continue;
+                    mat.bodyColorMode = element.drawDesc.bgColorMode;
+                    mat.outlineColorMode = element.drawDesc.outlineColorMode;
+                    
+                    mat.outlineWidth = element.drawDesc.outlineWidth;
+                    mat.outlineColor = element.drawDesc.outlineColor;
+                    
+                    materialList.Add(mat);
+                    
+                    ref UIForiaVertex vertex = ref vertices[vertexIdx++];
+                    vertex.position.x = x + halfWidth;
+                    vertex.position.y = -(y + halfHeight);
+                    vertex.texCoord0.x = width;
+                    vertex.texCoord0.y = height;
+                    vertex.indices.x = 0; // set later
+                    vertex.indices.y = (uint)materialIdx;
+                    vertex.indices.z = 0;
+                    vertex.indices.w = 0;
+                    
                 }
-
-                // todo -- for proper pivot I probably want to create mesh with pivot position in mind
-                vertexList.EnsureAdditionalCapacity(4);
-                vertices = vertexList.GetArrayPointer();
-
-                int vertexStart = vertexList.size;
-
-                vertices[vertexStart + 0] = new UIForiaVertex(x, y); // tl
-                vertices[vertexStart + 1] = new UIForiaVertex(x + width, y); // tr
-                vertices[vertexStart + 2] = new UIForiaVertex(x + width, -(y + height)); // br
-                vertices[vertexStart + 3] = new UIForiaVertex(x, -(y + height)); // bl
-
-                vertexList.size += 4;
-
-                meshInfo.vertexCount = vertexList.size - meshInfo.vertexStart;
-                int vEnd = meshInfo.vertexStart + meshInfo.vertexCount;
-
-                vertices = vertexList.GetArrayPointer();
+                
+                // for(int j = 0; j < count; j++) {
+                    // todo -- ensure size n stuff
+                // }
 
                 // todo -- account for uv rect, background fit, etc
                 // might be able to do this in shader
-                for (int v = meshInfo.vertexStart; v < vEnd; v++) {
-                    ref UIForiaVertex vertex = ref vertices[v];
-                    float uvX = ((vertex.position.x) / width);
-                    float uvY = 1 - ((vertex.position.y) / -height);
-                    int hSign = vertex.position.x == 0 ? -1 : 1;
-                    int vSign = vertex.position.y == 0 ? 1 : -1;
-                    vertex.texCoord0.x = uvX + ((0.5f / width) * hSign);
-                    vertex.texCoord0.y = uvY + ((0.5f / height) * vSign);
-
-                    //vertex.texCoord1.x = uvX;
-                    //vertex.texCoord1.y = uvY;
-                }
+                // for (int v = meshInfo.vertexStart; v < vEnd; v++) {
+                //     ref UIForiaVertex vertex = ref vertices[v];
+                //     float uvX = ((vertex.position.x) / width);
+                //     float uvY = 1 - ((vertex.position.y) / -height);
+                //     int hSign = vertex.position.x == 0 ? -1 : 1;
+                //     int vSign = vertex.position.y == 0 ? 1 : -1;
+                //     vertex.texCoord0.x = uvX + ((0.5f / width) * hSign);
+                //     vertex.texCoord0.y = uvY + ((0.5f / height) * vSign);
+                //
+                //     //vertex.texCoord1.x = uvX;
+                //     //vertex.texCoord1.y = uvY;
+                // }
 
             }
 
-            TypedUnsafe.Dispose(scratchFloats, Allocator.Temp);
-            tempVertexBuffer.Dispose();
+            vertexList.size = vertexIdx;
         }
 
     }

@@ -13,6 +13,7 @@ using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace UIForia.Text {
 
@@ -155,7 +156,7 @@ namespace UIForia.Text {
 
     }
 
-    
+    [Flags]
     public enum TextInfoFlags {
 
         HasRichText = 1 << 0,
@@ -189,37 +190,7 @@ namespace UIForia.Text {
         internal float resolvedFontSize;
         public TextMaterialInfo textMaterial;
         private TextInfoFlags flags;
-
-        public static TextInfo Create(string text, in TextStyle style, in DataList<FontAssetInfo>.Shared fontAssetMap) {
-
-            TextInfo textInfo = new TextInfo() {
-                textStyle = style
-            };
-
-            UpdateText(ref textInfo, text, null);
-
-            unsafe {
-
-                if (textInfo.requiresTextTransform || textInfo.textStyle.textTransform != TextTransform.None) {
-                    TextUtil.TransformText(textInfo.textStyle.textTransform, textInfo.symbolList.array, textInfo.symbolList.size);
-                }
-
-                DataList<TextSymbol> symbolBuffer = new DataList<TextSymbol>(textInfo.symbolList.size, Allocator.Temp);
-                DataList<TextLayoutSymbol> layoutBuffer = new DataList<TextLayoutSymbol>(textInfo.symbolList.size, Allocator.Temp);
-                TextMeasureState measureState = new TextMeasureState(Allocator.Temp);
-
-                ProcessWhitespace(ref textInfo, ref symbolBuffer);
-                CreateLayoutSymbols(ref textInfo, ref layoutBuffer);
-                ComputeSize(fontAssetMap, ref textInfo, 18, ref measureState);
-
-                symbolBuffer.Dispose();
-                layoutBuffer.Dispose();
-                measureState.Dispose();
-
-            }
-
-            return textInfo;
-        }
+        private bool hasEffects;
 
         // parser pushes character instructions into output stream
         // strip whitespace accordingly
@@ -287,7 +258,7 @@ namespace UIForia.Text {
             }
         }
 
-        public static unsafe void UpdateText(ref TextInfo textInfo, string text, ITextProcessor processor = null) {
+        public static unsafe void UpdateText(ref TextInfo textInfo, string text, ITextProcessor processor, TextSystem textSystem) {
             bool requiresTextTransform = false;
             bool requiresRenderProcessing = false;
             bool requiresRichTextLayout = false;
@@ -300,10 +271,12 @@ namespace UIForia.Text {
             inputSymbolBuffer.size = 0;
             int length = text.Length;
 
+            if (textInfo.hasEffects) { }
+
             fixed (char* charptr = text) {
                 if (processor != null) {
                     CharStream stream = new CharStream(charptr, 0, (uint) length);
-                    LightList<TextEffect> textEffects = LightList<TextEffect>.Get();
+                    LightList<PendingTextEffectSymbolData> textEffects = LightList<PendingTextEffectSymbolData>.Get();
                     TextSymbolStream symbolStream = new TextSymbolStream(textEffects, inputSymbolBuffer);
 
                     processedStream = processor.Process(stream, ref symbolStream);
@@ -312,7 +285,33 @@ namespace UIForia.Text {
                     requiresRenderProcessing = symbolStream.requiresRenderProcessing;
                     requiresRichTextLayout = symbolStream.requiresRichTextLayout;
                     inputSymbolBuffer = symbolStream.stream;
-                    if (symbolStream.textEffects.size > 0) { }
+
+                    // todo -- diff with previous stream if there was one, but only if using effects or a type writer
+
+                    if (symbolStream.textEffects.size > 0) {
+                        bool replacing = true;
+
+                        for (int i = 0; i < textEffects.size; i++) {
+
+                            PendingTextEffectSymbolData effectData = textEffects.array[i];
+
+                            ref TextSymbol symbol = ref symbolStream.stream.array[effectData.symbolIndex];
+
+                            Assert.IsTrue(symbol.type == TextSymbolType.EffectPush);
+
+                            // if replacing we spawn a new one, otherwise ask the effect to re-parse 
+                            TextEffect effect = textSystem.SpawnTextEffect(effectData.effectId.id, out int instanceId);
+                            symbol.effectInfo.instanceId = instanceId;
+                            symbol.effectInfo.spawnerId = effectData.effectId.id;
+
+                            effect.isActive = true;
+
+                            if (effect is IUIForiaRichTextEffect richTextEffect) {
+                                effect.isActive = richTextEffect.TryParseRichTextAttributes(effectData.bodyStream);
+                            }
+
+                        }
+                    }
 
                     textEffects.Release();
                 }
@@ -736,6 +735,24 @@ namespace UIForia.Text {
 
     }
 
+    public struct PendingTextEffectSymbolData {
+
+        public int symbolIndex;
+        public CharStream bodyStream;
+        public TextEffectId effectId;
+
+    }
+
+    public struct TextEffectId {
+
+        public readonly int id;
+
+        public TextEffectId(int id) {
+            this.id = id;
+        }
+
+    }
+
     public struct TextVertexOverride {
 
         public float2 topLeft;
@@ -751,82 +768,15 @@ namespace UIForia.Text {
 
     }
 
-    // todo -- reemove this crap
-    public static class Tween {
+    public abstract class TextEffect<T> : TextEffect {
 
-        public static float EaseIn(float t) {
-            return t * t;
-        }
-
-        public static float Flip(float x) {
-            return 1 - x;
-        }
-
-        public static float Square(float t) {
-            return t * t;
-        }
-
-        public static float EaseOut(float t) {
-            return Flip(Square(Flip(t)));
-        }
-
-        public static float EaseInOut(float t) {
-            return Mathf.Lerp(EaseIn(t), EaseOut(t), t);
-        }
-
-        #region BounceOut
-
-        public static float BounceOut(float t) {
-            /*
-            License of the original method/algorithm, modified later for C#.
-          
-            ------------------------Start------------------------
-            The MIT License
-
-            Copyright (c) 2010-2012 Tween.js authors.
-            
-            Easing equations Copyright (c) 2001 Robert Penner http:/robertpenner.com/ easing/
-            
-            Permission is hereby granted, free of charge, to any person obtaining a copy
-            of this software and associated documentation files (the "Software"), to deal
-            in the Software without restriction, including without limitation the rights
-            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-            copies of the Software, and to permit persons to whom the Software is
-            furnished to do so, subject to the following conditions:
-            
-            The above copyright notice and this permission notice shall be included in
-            all copies or substantial portions of the Software.
-            
-            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-            THE SOFTWARE.
-
-            ------------------------End------------------------
-            */
-
-            if (t < (1f / 2.75f)) {
-                return 7.5625f * t * t;
-            }
-            else if (t < (2f / 2.75f)) {
-                return 7.5625f * (t -= (1.5f / 2.75f)) * t + 0.75f;
-            }
-            else if (t < (2.5f / 2.75f)) {
-                return 7.5625f * (t -= (2.25f / 2.75f)) * t + 0.9375f;
-            }
-            else {
-                return 7.5625f * (t -= (2.625f / 2.75f)) * t + 0.984375f;
-            }
-        }
-
-        #endregion
+        public abstract void SetParameters(T parameters);
 
     }
 
     public abstract class TextEffect {
+
+        public bool isActive;
 
         internal UITextElement textElement;
 

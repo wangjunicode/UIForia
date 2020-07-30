@@ -168,7 +168,10 @@ namespace UIForia.Rendering {
 
         MeshFillDirection,
 
-        MeshFillOrigin
+        MeshFillOrigin,
+
+        OutlineColor,
+        OutlineWidth,
 
     }
 

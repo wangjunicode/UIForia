@@ -271,6 +271,24 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public UnityEngine.Color OutlineColor { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.OutlineColor, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.OutlineColor;
+                }
+            }
+
+            public UIForia.UIFixedLength OutlineWidth { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.OutlineWidth, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.OutlineWidth;
+                }
+            }
+
             public UIForia.UIFixedLength CornerBevelTopLeft { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -1478,6 +1496,20 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.BorderColorLeft, value)); }
         }
             
+        public UnityEngine.Color OutlineColor {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindColorProperty(StylePropertyId.OutlineColor); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.OutlineColor, value)); }
+        }
+            
+        public UIForia.UIFixedLength OutlineWidth {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.OutlineWidth); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.OutlineWidth, value)); }
+        }
+            
         public UIForia.UIFixedLength CornerBevelTopLeft {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIFixedLengthProperty(StylePropertyId.CornerBevelTopLeft); }
@@ -2503,6 +2535,24 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BorderColorLeft, out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.BorderColorLeft;
+                }
+            }
+
+            public UnityEngine.Color OutlineColor { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.OutlineColor, out property)) return property.AsColor;
+                    return DefaultStyleValues_Generated.OutlineColor;
+                }
+            }
+
+            public UIForia.UIFixedLength OutlineWidth { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.OutlineWidth, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.OutlineWidth;
                 }
             }
 
@@ -3739,6 +3789,22 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.BorderColorLeft, state).AsColor;
         }
         
+        public void SetOutlineColor(in UnityEngine.Color? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.OutlineColor, value), state);
+        }
+
+        public UnityEngine.Color GetOutlineColor(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.OutlineColor, state).AsColor;
+        }
+        
+        public void SetOutlineWidth(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.OutlineWidth, value), state);
+        }
+
+        public UIForia.UIFixedLength GetOutlineWidth(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.OutlineWidth, state).AsUIFixedLength;
+        }
+        
         public void SetCornerBevelTopLeft(in UIForia.UIFixedLength? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.CornerBevelTopLeft, value), state);
         }
@@ -4664,6 +4730,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.BorderColorBottom, BorderColorBottom);
 				case StylePropertyId.BorderColorLeft:
 					 return new StyleProperty(StylePropertyId.BorderColorLeft, BorderColorLeft);
+				case StylePropertyId.OutlineColor:
+					 return new StyleProperty(StylePropertyId.OutlineColor, OutlineColor);
+				case StylePropertyId.OutlineWidth:
+					 return new StyleProperty(StylePropertyId.OutlineWidth, OutlineWidth);
 				case StylePropertyId.CornerBevelTopLeft:
 					 return new StyleProperty(StylePropertyId.CornerBevelTopLeft, CornerBevelTopLeft);
 				case StylePropertyId.CornerBevelTopRight:
@@ -4920,6 +4990,8 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BorderColorRight: return typeof(UnityEngine.Color);
                     case StylePropertyId.BorderColorBottom: return typeof(UnityEngine.Color);
                     case StylePropertyId.BorderColorLeft: return typeof(UnityEngine.Color);
+                    case StylePropertyId.OutlineColor: return typeof(UnityEngine.Color);
+                    case StylePropertyId.OutlineWidth: return typeof(UIForia.UIFixedLength);
                     case StylePropertyId.CornerBevelTopLeft: return typeof(UIForia.UIFixedLength);
                     case StylePropertyId.CornerBevelTopRight: return typeof(UIForia.UIFixedLength);
                     case StylePropertyId.CornerBevelBottomRight: return typeof(UIForia.UIFixedLength);
@@ -5054,6 +5126,8 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BorderColorRight: return true;
                     case StylePropertyId.BorderColorBottom: return true;
                     case StylePropertyId.BorderColorLeft: return true;
+                    case StylePropertyId.OutlineColor: return true;
+                    case StylePropertyId.OutlineWidth: return true;
                     case StylePropertyId.CornerBevelTopLeft: return true;
                     case StylePropertyId.CornerBevelTopRight: return true;
                     case StylePropertyId.CornerBevelBottomRight: return true;

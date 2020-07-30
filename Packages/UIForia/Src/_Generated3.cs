@@ -43,6 +43,8 @@ namespace UIForia.Rendering {
 		public static readonly Color BorderColorRight = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color BorderColorBottom = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color BorderColorLeft = new Color(-1f, -1f, -1f, -1f);
+		public static readonly Color OutlineColor = new Color(-1f, -1f, -1f, -1f);
+		public static readonly UIFixedLength OutlineWidth = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength CornerBevelTopLeft = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength CornerBevelTopRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public static readonly UIFixedLength CornerBevelBottomRight = new UIFixedLength(0f, UIFixedUnit.Pixel);
@@ -212,6 +214,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.BorderColorBottom, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BorderColorLeft:
 					 return new StyleProperty(StylePropertyId.BorderColorLeft, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.OutlineColor:
+					 return new StyleProperty(StylePropertyId.OutlineColor, new Color(-1f, -1f, -1f, -1f));
+				case StylePropertyId.OutlineWidth:
+					 return new StyleProperty(StylePropertyId.OutlineWidth, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.CornerBevelTopLeft:
 					 return new StyleProperty(StylePropertyId.CornerBevelTopLeft, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.CornerBevelTopRight:

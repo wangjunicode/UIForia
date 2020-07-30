@@ -80,115 +80,109 @@ namespace UIForia.Rendering {
 
     }
 
+    public struct Gradient {
+
+        public int type;
+        public float angle;
+
+        // data fits in 3 float4s
+        public Color32 c0;
+        public Color32 c1;
+        public Color32 c2;
+        public Color32 c3;
+        public Color32 c4;
+        public Color32 c5;
+        public Color32 c6;
+        public Color32 c7;
+
+        public ushort a0;
+        public ushort a1;
+
+        public ushort a2;
+        public ushort a3;
+
+        public ushort a4;
+        public ushort a5;
+
+        public ushort a6;
+        public ushort a7;
+
+        public PackedGradientColors Pack() {
+            PackedGradientColors retn = default;
+
+            return default;
+        }
+
+    }
+
+    public struct PackedGradientColors {
+
+        public float4 colorRange0;
+        public float4 colorRange1;
+        public float4 alphaRange;
+
+    }
+
     [DebuggerDisplay("{element.ToString()}")]
     public class StandardRenderBox2 : RenderBox {
 
-        private ElementStyle elementStyle;
+        protected bool requireRendering;
 
-        private bool drawShadow;
-        private bool drawOutline;
-        private bool drawBackground;
+        public ElementDrawDesc drawDesc;
 
-        // remove?
-        private float width;
-        private float height;
-
-        public ElementMaterialInfo elementMaterialInfo;
+        protected Texture outlineTexture;
+        protected Texture backgroundTexture;
+        protected int backgroundTextureId;
+        protected int outlineTextureId;
 
         public override void OnInitialize() {
 
-            elementStyle = new ElementStyle() {
-                backgroundColor = element.style.BackgroundColor,
-                backgroundTint = element.style.BackgroundTint,
-                backgroundImage = element.style.BackgroundImage,
-                opacity = element.style.Opacity,
-                bgFit = element.style.BackgroundFit,
-                uvTransform = new UVTransform() {
-                    // uvRotation = element.style.BackgroundImageRotation,
-                    //uvOffsetX = element.style.BackgroundImageOffsetX.value, // fix
-                    //uvOffsetY = element.style.BackgroundImageOffsetY.value, // fix
-                    //uvScaleX = element.style.BackgroundImageScaleX,
-                    //uvScaleY = element.style.BackgroundImageScaleY,
-                    //uvTileX = element.style.BackgroundImageTileX,
-                    //uvTileY = element.style.BackgroundImageTileY,
-                },
-                meshStyle = new ElementMeshStyle() {
-                    meshType = element.style.MeshType,
-                    fillAmount = element.style.MeshFillAmount,
-                    fillDirection = element.style.MeshFillDirection,
-                    fillOrigin = element.style.MeshFillOrigin,
-                },
-                shadowStyle = new ElementShadowStyle() {
-                    shadowBlur = 0,
-                    shadowSpread = 0,
-                    shadowOffsetX = 0,
-                    shadowOffsetY = 0,
-                    shadowColor = default,
-                },
-                // borderSize = default,
-                outlineWidth = 0,
+            drawDesc.opacity = 255;
+            drawDesc.backgroundColor = element.style.BackgroundColor;
+            drawDesc.backgroundTint = element.style.BackgroundTint;
+            drawDesc.outlineColor = element.style.OutlineColor;
+            drawDesc.outlineWidth = 0; // set later since its size relative
 
-                gradientId = -1,
-                maskTexture = -1,
-                maskUvs = default,
+            drawDesc.radiusTL = 0;
+            drawDesc.radiusTR = 0;
+            drawDesc.radiusBR = 0;
+            drawDesc.radiusBL = 0;
 
-                outlineColor = element.style.BorderColorTop,
-                shinePower = 0,
-                shineX = 0,
-                shineY = 0,
+            drawDesc.bevelTL = 0;
+            drawDesc.bevelTR = 0;
+            drawDesc.bevelBR = 0;
+            drawDesc.bevelBL = 0;
 
-                uvBounds = new Rect(0, 0, 1, 1),
-                bevelTopLeft = element.style.CornerBevelTopLeft.value, // fix
-                bevelTopRight = element.style.CornerBevelTopRight.value,
-                bevelBottomRight = element.style.CornerBevelBottomRight.value,
-                bevelBottomLeft = element.style.CornerBevelBottomLeft.value,
+            backgroundTexture = element.style.BackgroundImage;
+            backgroundTextureId = ReferenceEquals(backgroundTexture, null) ? 0 : backgroundTexture.GetHashCode();
 
-                radiusTopLeft = element.style.BorderRadiusTopLeft.value, // fix
-                radiusTopRight = element.style.BorderRadiusTopRight.value, // fix
-                radiusBottomRight = element.style.BorderRadiusBottomRight.value, // fix
-                radiusBottomLeft = element.style.BorderRadiusBottomLeft.value, // fix
-            };
+            drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId);
+            requireRendering = false; // set after we get a size change
 
-            elementMaterialInfo.opacity = 255; //elementStyle.opacity;
-            elementMaterialInfo.backgroundColor = elementStyle.backgroundColor;
-            elementMaterialInfo.backgroundTint = elementStyle.backgroundTint;
-            elementMaterialInfo.outlineColor = elementStyle.outlineColor;
-            elementMaterialInfo.outlineTint = Color.white;
-            elementMaterialInfo.outlineWidth = 0;
+        }
 
-            ColorMode colorMode = ColorMode.None;
+        public static ColorMode GetColorMode(Color32 mainColor, Color32 tintColor, int textureId) {
+            ColorMode colorMode = 0;
 
-            if (!ReferenceEquals(elementStyle.backgroundImage, null)) {
+            if (textureId > 0) {
                 colorMode |= ColorMode.Texture;
             }
 
-            if (elementMaterialInfo.backgroundTint.a > 0) {
+            if (tintColor.a > 0) {
                 colorMode |= ColorMode.TextureTint;
             }
 
-            if (elementMaterialInfo.backgroundColor.a > 0) {
+            if (mainColor.a > 0) {
                 colorMode |= ColorMode.Color;
             }
 
-            // if keeping aspect ratio
-            // could include a letterbox color in packed colors
-            colorMode |= ColorMode.LetterBoxTexture;
-
-            elementMaterialInfo.bodyColorMode = colorMode;
-            elementMaterialInfo.outlineColorMode = default;
-            elementMaterialInfo.zPosition = 0;
-
-            Texture bgTexture = element.style.BackgroundImage;
-
-            elementStyle.backgroundImageId = !ReferenceEquals(bgTexture, null) ? bgTexture.GetInstanceID() : 0;
-            drawBackground = elementStyle.backgroundImageId != 0 || elementStyle.backgroundColor.a * elementStyle.opacity >= 0.01f;
-
+            return colorMode;
         }
 
         // send with style update, do this after layout finishes
         // sync point but i had that anyway
 
-        private float ResolveBevelOrRounding(float baseValue, UIFixedLength length) {
+        private float ResolveRelativeLength(float baseValue, UIFixedLength length) {
 
             switch (length.unit) {
 
@@ -204,9 +198,6 @@ namespace UIForia.Rendering {
         public override void OnSizeChanged(Size size) {
             // re-compute radius & bevel
 
-            width = size.width;
-            height = size.height;
-
             float min = size.width < size.height ? size.width : size.height;
 
             if (min <= 0) min = 0.0001f;
@@ -214,89 +205,136 @@ namespace UIForia.Rendering {
             float halfMin = min * 0.5f;
             float minScale = 1f / min;
 
-            float resolvedBorderRadiusTopLeft = Mathf.Clamp(ResolveBevelOrRounding(min, element.style.BorderRadiusTopLeft), 0, halfMin) * minScale;
-            float resolvedBorderRadiusTopRight = Mathf.Clamp(ResolveBevelOrRounding(min, element.style.BorderRadiusTopRight), 0, halfMin) * minScale;
-            float resolvedBorderRadiusBottomLeft = Mathf.Clamp(ResolveBevelOrRounding(min, element.style.BorderRadiusBottomRight), 0, halfMin) * minScale;
-            float resolvedBorderRadiusBottomRight = Mathf.Clamp(ResolveBevelOrRounding(min, element.style.BorderRadiusBottomLeft), 0, halfMin) * minScale;
+            float resolvedBorderRadiusTopLeft = Mathf.Clamp(ResolveRelativeLength(min, element.style.BorderRadiusTopLeft), 0, halfMin) * minScale;
+            float resolvedBorderRadiusTopRight = Mathf.Clamp(ResolveRelativeLength(min, element.style.BorderRadiusTopRight), 0, halfMin) * minScale;
+            float resolvedBorderRadiusBottomLeft = Mathf.Clamp(ResolveRelativeLength(min, element.style.BorderRadiusBottomRight), 0, halfMin) * minScale;
+            float resolvedBorderRadiusBottomRight = Mathf.Clamp(ResolveRelativeLength(min, element.style.BorderRadiusBottomLeft), 0, halfMin) * minScale;
 
             byte r0 = (byte) (((resolvedBorderRadiusTopLeft * 1000)) * 0.5f);
             byte r1 = (byte) (((resolvedBorderRadiusTopRight * 1000)) * 0.5f);
             byte r2 = (byte) (((resolvedBorderRadiusBottomLeft * 1000)) * 0.5f);
             byte r3 = (byte) (((resolvedBorderRadiusBottomRight * 1000)) * 0.5f);
 
-            // float resolvedCornerBevelTopLeft = ResolveBevelOrRounding(halfMin, element.style.CornerBevelTopLeft);
-            // float resolvedCornerBevelTopRight = ResolveBevelOrRounding(halfMin, element.style.CornerBevelTopRight);
-            // float resolvedCornerBevelBottomRight = ResolveBevelOrRounding(halfMin, element.style.CornerBevelBottomRight);
-            // float resolvedCornerBevelBottomLeft = ResolveBevelOrRounding(halfMin, element.style.CornerBevelBottomLeft);
+            float resolvedCornerBevelTopLeft = ResolveRelativeLength(halfMin, element.style.CornerBevelTopLeft);
+            float resolvedCornerBevelTopRight = ResolveRelativeLength(halfMin, element.style.CornerBevelTopRight);
+            float resolvedCornerBevelBottomRight = ResolveRelativeLength(halfMin, element.style.CornerBevelBottomRight);
+            float resolvedCornerBevelBottomLeft = ResolveRelativeLength(halfMin, element.style.CornerBevelBottomLeft);
 
-            elementMaterialInfo.bevel0 = 0;
-            elementMaterialInfo.bevel1 = 0;
-            elementMaterialInfo.bevel2 = 0;
-            elementMaterialInfo.bevel3 = 0;
-            elementMaterialInfo.radius0 = r0;
-            elementMaterialInfo.radius1 = r1;
-            elementMaterialInfo.radius2 = r2;
-            elementMaterialInfo.radius3 = r3;
-            elementMaterialInfo.size.x = size.width;
-            elementMaterialInfo.size.y = size.height;
+            byte b0 = (byte) (((resolvedCornerBevelTopLeft * 1000)) * 0.5f);
+            byte b1 = (byte) (((resolvedCornerBevelTopRight * 1000)) * 0.5f);
+            byte b2 = (byte) (((resolvedCornerBevelBottomRight * 1000)) * 0.5f);
+            byte b3 = (byte) (((resolvedCornerBevelBottomLeft * 1000)) * 0.5f);
+
+            drawDesc.width = size.width;
+            drawDesc.height = size.height;
+
+            drawDesc.bevelTL = b0;
+            drawDesc.bevelTR = b1;
+            drawDesc.bevelBR = b2;
+            drawDesc.bevelBL = b3;
+
+            drawDesc.radiusTL = r0;
+            drawDesc.radiusTR = r1;
+            drawDesc.radiusBR = r2;
+            drawDesc.radiusBL = r3;
+
+            drawDesc.outlineWidth = ResolveRelativeLength(halfMin, element.style.OutlineWidth);
+            requireRendering = drawDesc.opacity > 0 && (drawDesc.bgColorMode != 0 || (drawDesc.outlineWidth > 0 && drawDesc.outlineColorMode != 0));
         }
 
         public override void Enable() { }
 
         public override void OnStylePropertyChanged(StyleProperty[] propertyList, int propertyCount) {
+            bool recomputeDrawing = false;
+
             for (int i = 0; i < propertyCount; i++) {
                 ref StyleProperty property = ref propertyList[i];
                 switch (property.propertyId) {
+
+                    case StylePropertyId.OutlineWidth:
+                        float halfMin = math.min(drawDesc.width, drawDesc.height) * 0.5f;
+                        drawDesc.outlineWidth = ResolveRelativeLength(halfMin, property.AsUIFixedLength);
+                        break;
+
+                    case StylePropertyId.OutlineColor:
+                        recomputeDrawing = true;
+                        drawDesc.outlineColor = property.AsColor32;
+                        break;
+
                     case StylePropertyId.BackgroundColor:
-                        elementStyle.backgroundColor = property.AsColor32;
-                        elementMaterialInfo.backgroundColor = elementStyle.backgroundColor;
+                        recomputeDrawing = true;
+                        drawDesc.backgroundColor = property.AsColor32;
+                        break;
+
+                    case StylePropertyId.BackgroundTint:
+                        recomputeDrawing = true;
+                        drawDesc.backgroundTint = property.AsColor32;
                         break;
 
                     case StylePropertyId.BackgroundImage:
-                        Texture2D bgTexture = property.AsTexture;
-                        elementStyle.backgroundImageId = !ReferenceEquals(bgTexture, null) ? bgTexture.GetInstanceID() : 0;
+                        recomputeDrawing = true;
+                        backgroundTexture = property.AsTexture;
+                        backgroundTextureId = ReferenceEquals(backgroundTexture, null) ? 0 : backgroundTexture.GetHashCode();
+                        break;
+                    
+                    case StylePropertyId.MeshFillAmount:
+                        break;
+                    
+                    case StylePropertyId.MeshFillOrigin:
+                        break;
+                    
+                    case StylePropertyId.MeshFillDirection:
+                        break;
+                    
+                    case StylePropertyId.MeshType:
+                        break;
+                    
+                    case StylePropertyId.BackgroundImageScaleX:
+                        break;
+                    
+                    case StylePropertyId.BackgroundImageScaleY:
+                        break;
+                    
+                    case StylePropertyId.BackgroundImageRotation:
+                        break;
+                    
+                    case StylePropertyId.BackgroundImageTileX:
+                        break;
+                    
+                    case StylePropertyId.BackgroundImageTileY:
                         break;
                 }
             }
 
-            drawBackground = elementStyle.backgroundImageId != 0 || elementStyle.backgroundColor.a * elementStyle.opacity >= 0.01f;
+            if (recomputeDrawing) {
+                drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId);
+                drawDesc.outlineColorMode = GetColorMode(drawDesc.outlineColor, default, outlineTextureId);
+                requireRendering = drawDesc.opacity > 0 && (drawDesc.bgColorMode != 0 || (drawDesc.outlineWidth > 0 && drawDesc.outlineColorMode != 0));
+            }
 
         }
 
         public override void PaintBackground2(RenderContext2 ctx) { }
 
         public override void PaintBackground3(RenderContext3 ctx) {
-            SDFMeshDesc desc = default;
-            desc.x = 0;
-            desc.y = 0;
-            desc.width = width;
-            desc.height = height;
 
-            AxisAlignedBounds2D bounds2D = new AxisAlignedBounds2D(0, 0, width, height);
+            if (!requireRendering) return;
 
-            if (drawBackground) {
-
-                if (elementStyle.backgroundImageId != 0) {
-                    ctx.AddTexture(elementStyle.backgroundImage);
-                }
-
-                ctx.DrawElementBodyInternal(desc, bounds2D, new ElementMaterialSetup() {
-                    materialInfo = elementMaterialInfo,
-                    bodyTexture = new TextureUsage() {
-                        textureId = elementStyle.backgroundImageId,
-                    },
-                    outlineTexture = new TextureUsage() {
-                        textureId = 0
-                    }
-                });
-            }
-            // else if (drawOutline) {
-            //     ctx.DrawElementBodyInternal(desc, new ShapeMaterialInfo(), new AxisAlignedBounds2D(0, 0, width, height));
-            // }
-
-            if (drawShadow) {
-                // apply spread to width & height
-            }
+            ctx.SetBackgroundTexture(backgroundTexture);
+            ctx.DrawElement(0, 0, drawDesc);
+            var copy = drawDesc;
+            copy.width = 10;
+            copy.outlineWidth = 0;
+            copy.bevelTL = 0;
+            copy.bevelTR = 0;
+            copy.bevelBR = 0;
+            copy.bevelBL = 0;
+            copy.radiusTL = 0;
+            copy.radiusTR = 0;
+            copy.radiusBR = 0;
+            copy.radiusBL = 0;
+            copy.backgroundColor = Color.white;
+            ctx.DrawElement(300, 0, copy);
 
         }
 

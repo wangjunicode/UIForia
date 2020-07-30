@@ -1,20 +1,72 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Util;
 using Unity.Mathematics;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace UIForia.Text {
 
-    public class BounceTextEffect : TextEffect {
+    public class RotateTextEffect : TextEffect<RotateTextEffect.EffectParameters>, IUIForiaRichTextEffect {
 
-        public float amplitude = 0.8f;
-        public float frequency = 1f;
-        public float waveSize = 0.8f;
-        public float effectIntensity = 10f;
+        private EffectParameters parameters;
+
+        public struct EffectParameters {
+
+            public float angleSpeed;
+            public float angleDiffBetweenChars;
+
+        }
+
+        private float elapsed;
+
+        public override void OnPop() {
+            elapsed += Time.deltaTime;
+        }
+
+        public override void SetParameters(EffectParameters parameters) {
+            this.parameters = parameters;
+        }
+
+        public override void ApplyEffect(ref CharacterInterface characterInterface) {
+            float rotation = -elapsed * parameters.angleSpeed + parameters.angleDiffBetweenChars * characterInterface.charIndex;
+            if (rotation > 360) rotation = 0;
+            characterInterface.ResetVertices();
+            characterInterface.RotateLocalAngleAxis(rotation, new Vector3(0, 0, 1));
+        }
+
+        public bool TryParseRichTextAttributes(CharStream stream) {
+            stream.ParseFloatAttr("speed", out parameters.angleSpeed, 180f);
+            stream.ParseFloatAttr("diff", out parameters.angleDiffBetweenChars, 10f);
+            return true;
+        }
+
+    }
+
+    public class BounceTextEffect : TextEffect<BounceTextEffect.EffectParameters>, IUIForiaRichTextEffect {
+
+        public struct EffectParameters {
+
+            public float amplitude;
+            public float frequency;
+            public float waveSize;
+            public float effectIntensity;
+
+        }
+
+        public Color32 glowColor;
+        private float timePassed;
+        private float shakeDelay = 0.04f;
+        private int randIndex;
+        private int lastRandomIndex;
+        private float shakeStrength = 0.085f;
+        private float angleSpeed;
+        private float angleDiffBetweenChars;
 
         internal const int fakeRandomsCount = 25; //18° angle difference
         internal static Vector3[] fakeRandoms;
+
+        public EffectParameters parameters;
 
         static bool initialized = false;
 
@@ -26,7 +78,7 @@ namespace UIForia.Text {
 
             //Creates fake randoms from a list of directions (with an incremental angle of 360/fakeRandomsCount between each)
             //and then sorts them randomly, avoiding repetitions (which could have occurred using Random.insideUnitCircle)
-            System.Collections.Generic.List<Vector3> randomDirections = new System.Collections.Generic.List<Vector3>();
+            List<Vector3> randomDirections = new List<Vector3>();
 
             for (float i = 0; i < 360; i += 14) {
                 float angle = i * Mathf.Deg2Rad;
@@ -36,32 +88,28 @@ namespace UIForia.Text {
             fakeRandoms = new Vector3[fakeRandomsCount];
             int randomIndex;
             for (int i = 0; i < fakeRandoms.Length; i++) {
-                randomIndex = UnityEngine.Random.Range(0, randomDirections.Count);
+                randomIndex = Random.Range(0, randomDirections.Count);
                 fakeRandoms[i] = randomDirections[randomIndex];
                 randomDirections.RemoveAt(randomIndex);
             }
         }
 
-        float BounceTween(float t) {
-            const float stillTime = .2f;
-            const float easeIn = .2f;
-            const float bounce = 1 - stillTime - easeIn;
+        private static float BounceTween(float t, float pauseTime = 0.2f, float easeIn = 0.2f) {
 
-            if (t <= easeIn)
-                return Tween.EaseInOut(t / easeIn);
+            float bounce = 1 - pauseTime - easeIn;
+            if (t <= easeIn) {
+                return EaseInOut(t / easeIn);
+            }
+
             t -= easeIn;
 
-            if (t <= bounce)
-                return 1 - Tween.BounceOut(t / bounce);
+            return t <= bounce ? 1 - BounceOut(t / bounce) : 0;
 
-            return 0;
         }
 
-        private float timePassed;
-        private float shakeDelay = 0.04f;
-        private int randIndex;
-        private int lastRandomIndex;
-        private float shakeStrength = 0.085f;
+        public override void SetParameters(EffectParameters parameters) {
+            this.parameters = parameters;
+        }
 
         public override void OnPush(float4x4 worldMatrix, UITextElement element) {
             Initialize();
@@ -69,7 +117,7 @@ namespace UIForia.Text {
             if (timePassed >= shakeDelay) {
                 timePassed = 0;
 
-                randIndex = UnityEngine.Random.Range(0, fakeRandomsCount);
+                randIndex = Random.Range(0, fakeRandomsCount);
 
                 //Avoids repeating the same index twice 
                 if (lastRandomIndex == randIndex) {
@@ -91,49 +139,52 @@ namespace UIForia.Text {
         private float elapsed;
         private int loopCount;
 
-        public override void ApplyEffect(ref CharacterInterface characterInterface) {
-            
-            characterInterface.ResetVertices();
+        public static float EaseInOut(float t) {
+            return Mathf.Lerp(t * t, 1 - ((1 - t) * (1 - t)), t);
+        }
 
-            Vector3 random = fakeRandoms[
-                Mathf.RoundToInt((characterInterface.charIndex + randIndex) % (fakeRandomsCount - 1))
-            ] * (shakeStrength * effectIntensity);
+        public static float BounceOut(float t) {
 
-            // float val = (effectIntensity * BounceTween((Mathf.Repeat(elapsed * frequency - waveSize * characterInterface.charIndex, 1))) * amplitude);
-            // characterInterface.Translate(random);
-
-            if (characterInterface.character == 'U') {
-                characterInterface.SetFaceDilate(Time.realtimeSinceStartup % 1);
-                //    characterInterface.SetScale(10); //Time.realtimeSinceStartup % 1);
+            if (t < (1f / 2.75f)) {
+                return 7.5625f * t * t;
             }
-            //float sin = Mathf.Sin(frequency * elapsed + characterInterface.charIndex * waveSize) * amplitude * effectIntensity;
-            //float3 right = new float3(1, 0, 0);
-            // characterInterface.SetVertexOffsets(
-            //     right * sin,
-            //     right * sin,
-            //     right * -sin,
-            //     right * -sin
-            // );
-            //bottom, torwards one direction
 
-            // todo -- use better time value
-            // if (characterInterface.isRevealing) {
-            //     return;
-            // }
+            if (t < (2f / 2.75f)) {
+                return 7.5625f * (t -= (1.5f / 2.75f)) * t + 0.75f;
+            }
 
-            // characterInterface.GetDefaultVertices(out float3 topLeft, out float3 topRight, out float3 bottomRight, out float3 bottomLeft);
-            // characterInterface.SetVertexMode(CharacterInterface.CharacterVertexMode.Offset);
-            // characterInterface.SetVertexSpace(CharacterInterface.CharacterVertexSpace.Local);
-            // characterInterface.ResetVertices(); // drops allocated data
-            // characterInterface.Translate(new float3()); // gets new data slot 
-            // characterInterface.Rotate2D(45 * Mathf.Deg2Rad);
-            // characterInterface.RotateAround(new float3(), 45 * Mathf.Deg2Rad);
-            // characterInterface.SetVertices(topLeft, topRight, bottomRight, bottomLeft,CharacterInterface.CharacterVertexMode.Offset);
-            // characterInterface.SkewX(topLeft, topRight, bottomRight, bottomLeft,CharacterInterface.CharacterVertexMode.Offset);
-            // characterInterface.SetFaceColor(Color.red);
+            if (t < (2.5f / 2.75f)) {
+                return 7.5625f * (t -= (2.25f / 2.75f)) * t + 0.9375f;
+            }
 
-            //    characterInterface.RestoreVertices();
-            //    characterInterface.MoveVertices(Vector3.up * Mathf.Lerp(0, 20, Time.realtimeSinceStartup % 1)); //effectIntensity * BounceTween((Mathf.Repeat(Time.realtimeSinceStartup * frequency - waveSize * characterInterface.charIndex, 1))) * amplitude));
+            return 7.5625f * (t -= (2.625f / 2.75f)) * t + 0.984375f;
+        }
+
+        public override void ApplyEffect(ref CharacterInterface characterInterface) {
+            characterInterface.ResetVertices();
+//            Vector3 random = fakeRandoms[
+//                Mathf.RoundToInt((characterInterface.charIndex + randIndex) % (fakeRandomsCount - 1))
+//            ] * (shakeStrength * effectIntensity);
+
+            float t = (Mathf.Repeat(elapsed * parameters.frequency - parameters.waveSize * characterInterface.charIndex, 1));
+            float val = (parameters.effectIntensity * BounceTween(t) * parameters.amplitude);
+
+          
+            
+            characterInterface.Translate(new float3(0, val, 0));
+
+            characterInterface.SetGlowColor(glowColor);
+
+        }
+
+        public bool TryParseRichTextAttributes(CharStream stream) {
+
+            parameters.amplitude = stream.TryParseFloatAttr("amp", out float value) ? value : parameters.amplitude;
+            parameters.waveSize = stream.TryParseFloatAttr("waveSize", out value) ? value : parameters.waveSize;
+            parameters.effectIntensity = stream.TryParseFloatAttr("factor", out value) ? value : parameters.effectIntensity;
+            parameters.frequency = stream.TryParseFloatAttr("freq", out value) ? value : parameters.frequency;
+
+            return true;
         }
 
     }

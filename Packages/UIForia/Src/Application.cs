@@ -96,7 +96,7 @@ namespace UIForia {
 
         public TemplateMetaData[] zz_Internal_TemplateMetaData => templateData.templateMetaData;
 
-        private TemplateSettings templateSettings;
+        protected TemplateSettings templateSettings;
         private bool isPreCompiled;
 
         protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
@@ -125,7 +125,7 @@ namespace UIForia {
         protected virtual void CreateSystems() {
             elementSystem = new ElementSystem(InitialElementCapacity);
             styleSystem = new StyleSystem(elementSystem);
-            textSystem = new TextSystem(this, elementSystem);
+            textSystem = new TextSystem(this, elementSystem, templateSettings.textEffectDefs);
             routingSystem = new RoutingSystem();
             linqBindingSystem = new LinqBindingSystem();
             soundSystem = new UISoundSystem();

@@ -15,6 +15,8 @@ namespace UIForia.Elements {
 
         internal string text;
         internal ITextProcessor _processor;
+        internal TextReveal _reveal;
+        
         internal int textInfoId;
         internal int lastUpdateFrame;
 

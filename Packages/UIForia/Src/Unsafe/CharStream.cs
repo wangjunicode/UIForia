@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Xml.Linq;
 using UIForia.Util.Unsafe;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
@@ -1267,6 +1268,107 @@ namespace UIForia.Util {
             return TryParseQuotedString('"', out span, whitespaceHandling);
         }
 
+        public void ParseFloatAttr(string key, out float floatValue, float defaultValue) {
+            if (!TryParseFloatAttr(key, out floatValue)) {
+                floatValue = defaultValue;
+            }
+        }
+
+        /// <summary>
+        /// key=value
+        /// </summary>
+        public bool TryParseFloatAttr(string key, out float floatValue) {
+            uint i = ptr;
+            uint save = ptr;
+            char startChar = key[0];
+            
+            while (i != dataEnd) {
+                
+                if (data[i] == startChar) {
+                    ptr = i;
+                    if (Previous != ' ') {
+                        i++;
+                        continue;
+                    }
+                    if (TryMatchRange(key) && TryParseCharacter('=')) {
+
+                        if (ptr + 1 >= dataEnd) {
+                            i++;
+                            continue;
+                        }
+                        char openQuote = data[ptr];
+                        ptr++;
+                        if (openQuote != '\'' && openQuote != '"') {
+                            openQuote = '\0';
+                        }
+                        
+                        if (!TryParseFloat(out floatValue)) {
+                            i++;
+                            continue;
+                        }
+                        
+                        if (openQuote != '\0' && !TryParseCharacter(openQuote)) {
+                            i++;
+                            continue;    
+                        }
+                        
+                        ptr = save; // this method doesnt consume the stream
+                        return true;
+                    }    
+                }
+
+                i++;
+            }
+
+            ptr = save;
+            floatValue = 0;
+            return false;
+        }
+        
+        public bool TryParseColorAttr(string key, out Color32 colorValue, char quote = '\0') {
+            uint i = ptr;
+            uint save = ptr;
+            char startChar = key[0];
+            
+            while (i != dataEnd) {
+                
+                if (data[i] == startChar) {
+                    ptr = i;
+                    if (Previous != ' ') {
+                        i++;
+                        continue;
+                    }
+                    if (TryMatchRange(key) && TryParseCharacter('=')) {
+
+                        char openQuote = data[ptr];
+                        
+                        if (openQuote != '\'' && openQuote != '"') {
+                            openQuote = '\0';
+                        }
+                        
+                        if (!TryParseColorProperty(out colorValue)) {
+                            i++;
+                            continue;
+                        }
+                        
+                        if (openQuote != '\0' && !TryParseCharacter(openQuote)) {
+                            i++;
+                            continue;    
+                        }
+                        
+                        ptr = save; // this method doesnt consume the stream
+                        return true;
+                    }    
+                }
+
+                i++;
+            }
+
+            ptr = save;
+            colorValue = default;
+            return false;
+        }
+
     }
 
     [Flags]
@@ -1358,19 +1460,19 @@ namespace UIForia.Util {
         }
 
         public static bool operator ==(CharSpan a, string b) {
-            return StringUtil.EqualsRangeUnsafe(b, a);
+            return StringUtil.EqualsRangeUnsafe(b, a.data, a.rangeStart, a.rangeEnd - a.rangeStart);
         }
 
         public static bool operator !=(CharSpan a, string b) {
-            return !StringUtil.EqualsRangeUnsafe(b, a);
+            return !StringUtil.EqualsRangeUnsafe(b, a.data, a.rangeStart, a.rangeEnd - a.rangeStart);
         }
 
         public static bool operator !=(string b, CharSpan a) {
-            return !StringUtil.EqualsRangeUnsafe(b, a);
+            return !StringUtil.EqualsRangeUnsafe(b, a.data, a.rangeStart, a.rangeEnd - a.rangeStart);
         }
 
         public static bool operator ==(string b, CharSpan a) {
-            return !(b != a);
+            return StringUtil.EqualsRangeUnsafe(b, a.data, a.rangeStart, a.rangeEnd - a.rangeStart);
         }
 
         public static bool operator ==(CharSpan a, CharSpan b) {

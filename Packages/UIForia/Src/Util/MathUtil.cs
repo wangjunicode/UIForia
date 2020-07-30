@@ -92,6 +92,17 @@ namespace UIForia.Util {
             return val;
         }
 
+        public static void MinMax(float v0, float v1, out float min, out float max) {
+            if (v0 < v1) {
+                min = v0;
+                max = v1;
+            }
+            else {
+                min = v1;
+                max = v0;
+            }
+        }
+        
         public static float UShortToFloatOneMinusOne(ushort value) {
             return RemapRange(value, 0, ushort.MaxValue, -1f, 1f);
         }

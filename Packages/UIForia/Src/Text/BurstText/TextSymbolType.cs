@@ -52,7 +52,7 @@
         PopVerticalInvert,
 
         PushOpacity,
-        PopOpacity
+        PopOpacity,
 
     }
   

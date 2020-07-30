@@ -10,26 +10,18 @@
         
         style container2 {
             PreferredSize = 1vw 1vh;
-            // FlexLayoutWrap = WrapHorizontal;
-            // FlexLayoutDirection = Horizontal;
-            // BackgroundColor = white;
-            // TransformRotation = 10;
-            Padding = 250px;
+            Padding = 150px;
             TextFontSize = 72;
             TextFaceDilate = 0;
-            TextUnderlayColor = red;
-            TextOutlineWidth = 0;
+          //  TextColor = red;
+            //TextOutlineWidth = 1;
             TextOutlineSoftness = 0;
-            TextUnderlayDilate = 1;
-            TextUnderlaySoftness = 1;
+            TextUnderlayDilate = 0;
+            TextUnderlaySoftness = 0;
             TextUnderlayX = 0;
             TextUnderlayY = 0;
-            TextGlowOffset = 0;
-            TextGlowPower = 0;
-            TextGlowInner = 0;
-            TextGlowOuter = 0;
-            TextOutlineColor = white;
-<!--            TextFontStyle = Underline;-->
+          
+          //  TextOutlineColor = #F600FF;
         }
         
         style shape-kit {
@@ -97,7 +89,8 @@
         
         style regular {
             PreferredSize = 100px;
-            Margin = 10px;
+            OutlineWidth = 10%;
+            OutlineColor = white;
         }
         
         style clipper {
@@ -113,18 +106,22 @@
         }
 
         style red {
-            BackgroundColor = Red;
+            BackgroundColor = white;
             BorderRadiusTopLeft = 50%;
             BorderRadiusTopRight = 50%;
             BorderRadiusBottomRight = 50%;
             BorderRadiusBottomLeft = 50%;
-            PreferredWidth = 300px;
+            CornerBevelBottomLeft = 100px;
+            PreferredSize = 300px;
+         
         }
         
         style green {
-            // BackgroundColor = Green;
+            BackgroundColor = Green;
             PreferredSize = 300px;
-            BackgroundImage = url("images/2");
+        CornerBevelBottomRight = 100px;
+
+         BackgroundImage = url("images/2");
         }
         
         style blue {
@@ -134,9 +131,8 @@
     </Style>
     <Contents style="container2">
 
-<!--        <Div style="regular red"/>-->
-<!--        <Div style="regular green"/>-->
-<!--        <Div style="regular red"/>-->
+        <Div style="regular red"/>
+        <Div style="regular green"/>
 
 <!--        <RichText effects="effectList"> -->
 <!--            -->
@@ -154,10 +150,10 @@
 <!--        </RichText>-->
 
 <!--        <Text processor="UIForia.Text.TextProcessors.RichText">-->
-<!--            Hello -->
+<!--            [fx:rotate-center][color red]Hello[/fx:rotate-center] [fx:bounce amp=3 freq=1 glow=cyan] there -->
 <!--        </Text>-->
-        <Text>UIForia1</Text>
-        <Text>UIForia2
+<!--        <Text>UIForia1</Text>-->
+<!--        <Text>UIForia2-->
 <!--            D[color red]A[/color][hinvert][vinvert]R[/vinvert][/hinvert][opacity {Mathf.Lerp(20, 36, FracTime)}]K-->
             
 <!--            Lorem [cspace 1em] Ipsum is [color red]simply[/color][size 18]dummy[/size]hhh text-->
@@ -261,8 +257,6 @@
 <!--            Why do we use it?-->
 <!--            It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).-->
 
-        </Text>
-          
 <!--            </Text>-->
 <!--        <Text>UIForia is the fucking greatest!</Text>-->
 <!--        <Text>UIForia is the fucking greatest!</Text>-->

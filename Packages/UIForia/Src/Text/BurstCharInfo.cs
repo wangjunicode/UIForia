@@ -29,12 +29,15 @@ namespace UIForia.Text {
     }
 
     [Flags]
-    public enum RenderCharacterDisplayFlags : byte {
+    public enum CharacterDisplayFlags : byte {
 
         InvertHorizontalUV = 1 << 0,
         InvertVerticalUV = 1 << 1,
         Bold = 1 << 2,
-        Italic = 1 << 3
+        Italic = 1 << 3,
+        UnderlayInner = 1 << 4,
+        
+        InvertUVs = InvertHorizontalUV | InvertVerticalUV
 
     }
 
@@ -78,7 +81,7 @@ namespace UIForia.Text {
         public ushort baseMaterialIndex;
 
         public byte opacityMultiplier;
-        public RenderCharacterDisplayFlags displayFlags;
+        public CharacterDisplayFlags displayFlags;
         public int nextRenderIdx; // could be ushort if I treat this as an offset and not an index
         public int effectIdx;
 

@@ -33,11 +33,102 @@ namespace UIForia.Text {
 
     }
 
-    public unsafe class TextSystem : IDisposable {
+    public interface IRichTextRevealParser {
+
+        bool TryParseRevealNode(CharSpan nodeName, CharStream bodyStream, bool isCloseNode, out TextSymbol textSymbol);
+
+    }
+
+    public class StandardTextReveal : TextReveal, IRichTextRevealParser {
+
+        public bool TryParseRevealNode(CharSpan nodeName, CharStream bodyStream, bool isCloseNode, out TextSymbol textSymbol) {
+            // textSymbol.SetSymbolData();
+            textSymbol = default;
+            return true;
+        }
+
+    }
+
+    public struct TextInterface {
+
+        public StructList<TextSymbol> symbolList;
+
+        public ref TextSymbol GetSymbol(int idx) {
+            return ref symbolList.array[idx];
+        }
+
+        public ref CharacterInterface GetCharacterAt(int idx) {
+            throw new NotImplementedException();
+        }
+
+        public void SetRevealState(in CharacterInterface character, TextRevealState revealState) {
+            // character.charptr->flags 
+        }
+        
+    }
+
+    [Flags]
+    public enum TextRevealState : byte {
+
+        BeginReveal = 1 << 0,
+        Revealing = 1 << 1,
+        RevealComplete = 1 << 2,
+        Revealed = 1 << 3,
+        BeginHide = 1 << 4,
+        Hiding = 1 << 5,
+        HideComplete = 1 << 6,
+        Hidden = 1 << 7
+
+    }
+
+    public abstract class TextReveal {
+
+        public virtual void OnTextChanged() { }
+
+        public virtual void OnLayoutChanged() { }
+
+        public virtual void OnCharacterInsert() { }
+
+        public virtual void OnCharacterRemoved() { }
+
+        private float elapsedTime;
+        private int lastSymbolIdx;
+        private float pauseStartTime;
+        private float pauseEndTime;
+        
+        public virtual void Update(TextInterface textInterface) {
+
+            for (int i = 0; i < textInterface.symbolList.size; i++) {
+                
+                if (textInterface.symbolList.array[i].type == TextSymbolType.Character) {
+                    
+                }
+
+                uint type = (uint) textInterface.symbolList.array[i].type;
+
+                if (type == 255) {
+                    // Pause();
+                }
+             
+            }
+
+            if (textInterface.GetSymbol(1).type == TextSymbolType.Character) {
+                ref CharacterInterface characterAt = ref textInterface.GetCharacterAt(1);
+                textInterface.SetRevealState(characterAt, TextRevealState.BeginReveal);
+            }
+
+            elapsedTime += Time.deltaTime;
+
+        }
+
+    }
+
+    public unsafe class TextSystem : IDisposable, ITextEffectResolver {
 
         internal int freeList;
         internal int frameId;
         internal ElementSystem elementSystem;
+        private Application application;
 
         internal DataList<TextInfo> textInfoMap;
         internal DataList<TextChange>.Shared changedElementIds;
@@ -49,23 +140,25 @@ namespace UIForia.Text {
         internal DataList<TextId> activeTextElementIds;
         internal List_Int32 effectVertexFreeList;
         internal DataList<TextEffectInfo> textEffectVertexInfoTable;
+        private LightList<TextEffectDefinition> effectDefinitions;
         private bool requireSort;
-        private Application application;
-        
-        public TextSystem(Application application, ElementSystem elementSystem) {
+
+        public TextSystem(Application application, ElementSystem elementSystem, LightList<TextEffectDefinition> effectDefinitions) {
             this.application = application;
             this.elementSystem = elementSystem;
             this.activeTextElementIds = new DataList<TextId>(32, Allocator.Persistent);
             this.textInfoMap = new DataList<TextInfo>(32, Allocator.Persistent, NativeArrayOptions.ClearMemory); // clear memory is very important here!
-            this.changedElementIds = new DataList<TextChange>.Shared(32, Allocator.Persistent);
+            this.changedElementIds = new DataList<TextChange>.Shared(16, Allocator.Persistent);
             this.layoutBuffer = new DataList<TextLayoutSymbol>.Shared(128, Allocator.Persistent);
             this.textEffectTable = new LightList<TextEffect>();
             this.textEffectFreeList = new StructList<int>();
             this.textEffectAnimator = new TextEffectAnimator(this);
             this.effectVertexFreeList = new List_Int32(8, Allocator.Persistent);
             this.textEffectVertexInfoTable = new DataList<TextEffectInfo>(8, Allocator.Persistent);
-            textEffectVertexInfoTable.size++; // 0 is invalid
-            textInfoMap.size++; // 0 is invalid
+            this.effectDefinitions = effectDefinitions ?? new LightList<TextEffectDefinition>(0);
+
+            this.textInfoMap.size++; // 0 is invalid
+            this.textEffectVertexInfoTable.size++; // 0 is invalid
         }
 
         internal int RegisterTextEffect(TextEffect effect) {
@@ -203,7 +296,7 @@ namespace UIForia.Text {
                         underlayX = element.style.TextUnderlayX,
                         underlayY = element.style.TextUnderlayY,
                         whitespaceMode = element.style.TextWhitespaceMode,
-                        lineHeight = element.style.TextLineHeight
+                        lineHeight = element.style.TextLineHeight,
                     };
 
                     if (textElement.lastUpdateFrame != frameId) {
@@ -353,7 +446,11 @@ namespace UIForia.Text {
 
             ref TextInfo textInfo = ref textInfoMap[uiTextElement.textInfoId];
 
-            TextInfo.UpdateText(ref textInfo, uiTextElement.text, uiTextElement._processor);
+            if (uiTextElement._processor is RichTextProcessor richTextProcessor) {
+                richTextProcessor.SetTextEffectResolver(this);
+            }
+
+            TextInfo.UpdateText(ref textInfo, uiTextElement.text, uiTextElement._processor, this);
 
             if (uiTextElement.lastUpdateFrame != frameId) {
                 uiTextElement.lastUpdateFrame = frameId;
@@ -365,18 +462,19 @@ namespace UIForia.Text {
         // todo -- make this real, need to use free list or grow
         private int GetNextTextId() {
             int id = textInfoMap.size;
+            // todo -- make sure when releasing a text info that we dispose it first
             textInfoMap.Add(default);
             return id;
         }
 
         public void Dispose() {
 
-            // for (int i = 0; i < textInfoMap.size; i++) {
-            //     textInfoMap[i].Dispose();
-            // }
+            for (int i = 0; i < textInfoMap.size; i++) {
+                textInfoMap[i].Dispose();
+            }
 
-            // effectVertexFreeList.Dispose();
-            // textEffectVertexInfoTable.Dispose();
+            effectVertexFreeList.Dispose();
+            textEffectVertexInfoTable.Dispose();
             activeTextElementIds.Dispose();
             textInfoMap.Dispose();
             changedElementIds.Dispose();
@@ -424,7 +522,7 @@ namespace UIForia.Text {
             // todo -- only the ones that have effects should be invoked
 
             textEffectAnimator.fontAssetMap = application.ResourceManager.fontAssetMap;
-            
+
             Profiler.BeginSample("UIForia::TextEffectUpdate");
             for (int i = 0; i < activeTextElementIds.size; i++) {
 
@@ -435,6 +533,7 @@ namespace UIForia.Text {
                 // todo -- running on all right now
 
             }
+
             Profiler.EndSample();
         }
 
@@ -444,17 +543,52 @@ namespace UIForia.Text {
         }
 
         internal int AllocateEffectIndex() {
-            Color32 white = new Color32(255, 255, 255, 255);
             if (effectVertexFreeList.size == 0) {
                 textEffectVertexInfoTable.Add(default);
                 return textEffectVertexInfoTable.size - 1;
             }
-            else {
-                int idx = effectVertexFreeList.array[--effectVertexFreeList.size];
-                ref TextEffectInfo effect = ref textEffectVertexInfoTable[idx];
-                effect = default;
-                return idx;
+
+            int idx = effectVertexFreeList.array[--effectVertexFreeList.size];
+            ref TextEffectInfo effect = ref textEffectVertexInfoTable[idx];
+            effect = default;
+            return idx;
+        }
+
+        public TextEffect SpawnTextEffect(int spawnerId, out int instanceId) {
+            if (spawnerId >= 0 && spawnerId < effectDefinitions.size) {
+                TextEffect instance = effectDefinitions.array[spawnerId].effectSpawner.Spawn();
+                if (instance != null) {
+                    if (textEffectFreeList.size > 0) {
+                        instanceId = textEffectFreeList.array[--textEffectFreeList.size];
+                    }
+                    else {
+                        instanceId = textEffectTable.size;
+                        textEffectTable.Add(default);
+                    }
+
+                    textEffectTable[instanceId] = instance;
+                    return instance;
+                }
             }
+
+            instanceId = -1;
+            return null;
+        }
+
+        public void DespawnTextEffect(TextEffect effect) { }
+
+        public bool TryResolveTextEffect(CharSpan effectName, out TextEffectId effectId) {
+            for (int i = 0; i < effectDefinitions.size; i++) {
+
+                if (effectDefinitions.array[i].effectName == effectName) {
+                    effectId = new TextEffectId(i);
+                    return true;
+                }
+
+            }
+
+            effectId = default;
+            return false;
         }
 
     }

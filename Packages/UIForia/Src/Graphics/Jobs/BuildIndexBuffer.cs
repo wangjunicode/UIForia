@@ -17,10 +17,12 @@ namespace UIForia.Graphics {
 
         public void Execute() {
             int* batchMemberArray = batchMemberList.GetArrayPointer();
+            MeshInfo* meshArray = meshInfoList.GetArrayPointer();
+            Batch* batchArray = batchList.GetArrayPointer();
             
             int triangleCount = 0;
             for (int batchIdx = 0; batchIdx < batchList.size; batchIdx++) {
-                ref Batch batch = ref batchList[batchIdx];
+                ref Batch batch = ref batchArray[batchIdx];
 
                 if (batch.type == BatchType.Text || batch.type == BatchType.Element) {
                     
@@ -28,7 +30,7 @@ namespace UIForia.Graphics {
                     int end = batch.memberIdRange.end;
                     
                     for (int i = start; i < end; i++) {
-                        ref MeshInfo meshInfo = ref meshInfoList[batchMemberArray[i]];
+                        ref MeshInfo meshInfo = ref meshArray[batchMemberArray[i]];
                         triangleCount += meshInfo.vertexCount * 6;
                     }
                 }
@@ -45,15 +47,18 @@ namespace UIForia.Graphics {
             
             for (int batchIdx = 0; batchIdx < batchList.size; batchIdx++) {
 
-                ref Batch batch = ref batchList[batchIdx];
+                ref Batch batch = ref batchArray[batchIdx];
 
                 // I guess this includes text decorations, I'm not sure how to handle those since they arent really quads.
                 // I can maybe repurpose some data in order to get the uvs to stretch correctly 
 
-                int cidx1 = 1 << 24;
-                int cidx2 = 2 << 24;
-                int cidx3 = 3 << 24;
+                const int cornerIdx1 = 1 << 24;
+                const int cornerIdx2 = 2 << 24;
+                const int cornerIdx3 = 3 << 24;
                 
+                // todo -- reverse the batch building to save uploading the index buffer every frame
+                // If I can put the vertices in the correct order instead of the indices, I can use a 
+                // totally static index buffer and never need to upload it
                 if (batch.type == BatchType.Element || batch.type == BatchType.Text) {
                     
                     int start = batch.memberIdRange.start;
@@ -62,15 +67,19 @@ namespace UIForia.Graphics {
 
                     for (int i = start; i < end; i++) {
                     
-                        ref MeshInfo meshInfo = ref meshInfoList[batchMemberArray[i]];
+                        ref MeshInfo meshInfo = ref meshArray[batchMemberArray[i]];
 
                         for (int j = 0; j < meshInfo.vertexCount; j++) {
-                            triangles[triangleIndex + 0] = vertexOffset + j;
-                            triangles[triangleIndex + 1] = cidx1 | (vertexOffset + j & 0xffff); // BitUtil.SetHigh1Low3(1, vertexOffset + j);
-                            triangles[triangleIndex + 2] = cidx2 | (vertexOffset + j & 0xffff); // BitUtil.SetHigh1Low3(2, vertexOffset + j);
-                            triangles[triangleIndex + 3] = cidx2 | (vertexOffset + j & 0xffff); // BitUtil.SetHigh1Low3(2, vertexOffset + j);
-                            triangles[triangleIndex + 4] = cidx3 | (vertexOffset + j & 0xffff); // BitUtil.SetHigh1Low3(3, vertexOffset + j);
-                            triangles[triangleIndex + 5] = vertexOffset + j;
+                            // shouldn't need to mask vertex offset with 0xffff because if it overflows
+                            // we're screwed anyway (pretty unlikely to need more than 16,777,216 indices)
+                            // this will handle 2,796,202 quads
+                            int vertIdx = vertexOffset + j;
+                            triangles[triangleIndex + 0] = vertIdx;
+                            triangles[triangleIndex + 1] = cornerIdx1 | vertIdx;
+                            triangles[triangleIndex + 2] = cornerIdx2 | vertIdx;
+                            triangles[triangleIndex + 3] = cornerIdx2 | vertIdx;
+                            triangles[triangleIndex + 4] = cornerIdx3 | vertIdx;
+                            triangles[triangleIndex + 5] = vertIdx;
                             triangleIndex += 6;
                         }
                         

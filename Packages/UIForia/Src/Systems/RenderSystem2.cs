@@ -260,9 +260,7 @@ namespace UIForia.Systems {
             unsafeData.float4Buffer.size = 1; // 0 is invalid index
 
             resourceManager.GetFontTextures(renderContext.textureMap);
-
-            // todo -- if resourceManager
-
+            
             List<UIView> views = layoutSystem.application.views;
 
             unsafeData.perViewElementList.SetSize(views.Count);
@@ -321,8 +319,13 @@ namespace UIForia.Systems {
 
             // this needs to happen either after text, or output to a separate material buffer
             shapeBakingHandles[0] = UIForiaScheduler.Run(new BakeUIForiaElements() {
+                // need a separate float buffer in order to run in parallel with text
+                // can just bind a separate one since they never render at the same time and we swap shader anyway
+                // then another shared clip buffer? or copy clip buffer into each? 
+                // or just loop & offset element one, would like a single clip buffer for lots of reasons
                 drawList = unsafeData.drawList,
                 vertexList = unsafeData.elementVertexList,
+                materialList = unsafeData.elementMaterialBuffer,
                 meshInfoList = unsafeData.meshInfoList
             });
 
@@ -372,10 +375,10 @@ namespace UIForia.Systems {
             //     });
             new CombineUIForiaVertexBuffers() {
 
+                textMaterialBuffer = unsafeData.materialBuffer,
+                elementMaterialBuffer = unsafeData.elementMaterialBuffer,
                 textVertexList = unsafeData.textVertexList,
-
                 elementVertexList = unsafeData.elementVertexList,
-
                 meshList = unsafeData.meshInfoList,
                 matrixIdList = unsafeData.matrixIdList,
                 clipRectIdList = unsafeData.clipRectIdList
@@ -839,8 +842,10 @@ namespace UIForia.Systems {
             public NativeArray<int> dummyArray;
             public DataList<GPUGlyphInfo> glyphBuffer;
             public DataList<GPUFontInfo> fontBuffer;
+            public DataList<ElementMaterialInfo>.Shared elementMaterialBuffer;
 
             public void Initialize(RenderSystem2 renderSystem2) {
+                this.elementMaterialBuffer= new DataList<ElementMaterialInfo>.Shared(32, Allocator.Persistent);
                 this.fontBuffer = new DataList<GPUFontInfo>(8, Allocator.Persistent);
                 this.glyphBuffer = new DataList<GPUGlyphInfo>(512, Allocator.Persistent);
                 this.indirectArgBuffer = new DataList<IndirectArg>.Shared(16, Allocator.Persistent);
@@ -884,7 +889,7 @@ namespace UIForia.Systems {
                 float4Buffer.size = 0;
                 indirectArgBuffer.size = 0;
                 uiforiaIndexBuffer.size = 0;
-
+                elementMaterialBuffer.size = 0;
                 materialBuffer.size = 0;
                 shapeTriangleList.size = 0;
                 shapeVertexList.size = 0;
@@ -918,6 +923,7 @@ namespace UIForia.Systems {
                 indirectArgBuffer.Dispose();
                 materialIdList.Dispose();
 
+                elementMaterialBuffer.Dispose();
                 textVertexList.Dispose();
                 elementVertexList.Dispose();
 
@@ -950,3 +956,40 @@ namespace UIForia.Systems {
     }
 
 }
+
+// for mask generation
+
+//     // Set BlendOp to min
+//     // Set Blend params to One One
+//     // Set ZWrite On
+//     // Set ZTest to NotEqual
+//     // set depth to # of parent masks
+//     // draw parent shapes top down
+//     // subtract 1 from depth each time
+//     // draw child shape at depth 0
+//     // draw a rect over the whole space
+//     int start = vertexHelper.currentVertCount;
+//     shapeKit.AddQuad(ref vertexHelper, 0, 0, 256, 256, Color.green);
+//     for (int i = start; i < vertexHelper.currentVertCount; i++) {
+//         vertexHelper.positions[i].z = -2f;
+//     }
+//
+//     start = vertexHelper.currentVertCount;
+//     shapeKit.AddQuad(ref vertexHelper, 32, 32, 256 - 48, 256 - 48, new Color32(0, 0, 0, 128));
+//
+//     for (int i = start; i < vertexHelper.currentVertCount; i++) {
+//         vertexHelper.positions[i].z = -1f;
+//     }
+//     shapeKit.SetDpiScale(1);
+//     shapeKit.SetAntiAliasWidth(0);//1.25f);
+//     shapeKit.AddCircle(ref vertexHelper, new Rect(128, 128, 256, 256), new EllipseProperties() {
+//         fitting = EllipseFitting.Ellipse,
+//     }, Color.red);
+//
+//
+//     //vertexHelper.Clear();
+//     shapeKit.AddRect(ref vertexHelper, 0, 0, 256, 256, new Color32(0, 0, 0, 0));
+//     vertexHelper.FillMesh(mesh);
+//
+// }
+//

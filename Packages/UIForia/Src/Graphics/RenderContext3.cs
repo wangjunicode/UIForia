@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SVGX;
 using UIForia.ListTypes;
 using UIForia.Rendering;
 using UIForia.Text;
@@ -9,6 +10,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Vertigo;
 
 namespace UIForia.Graphics {
 
@@ -21,7 +23,7 @@ namespace UIForia.Graphics {
         private HeapAllocated<float4x4> dummyMatrix;
         private PagedByteAllocator stackAllocator;
         private float4x4* defaultMatrix;
-        
+
         internal StructList<CommandBufferCallback> callbacks;
         internal Dictionary<int, Texture> textureMap;
         internal ResourceManager resourceManager;
@@ -35,22 +37,23 @@ namespace UIForia.Graphics {
             this.drawList = new DataList<DrawInfo2>(64, Allocator.Persistent);
             this.stackAllocator = new PagedByteAllocator(TypedUnsafe.Kilobytes(16), Allocator.Persistent, Allocator.Persistent);
         }
-        
+
         public void Setup(MaterialId materialId, int renderIndex, float4x4* transform) {
             this.localDrawId = 0;
             this.renderIndex = (ushort) renderIndex;
             this.defaultMatrix = transform;
+            this.defaultBGTexture = 0;
         }
 
         public void Callback(object context, Action<object, CommandBuffer> callback) {
-            
+
             int callbackIdx = callbacks.size;
-            
+
             callbacks.Add(new CommandBufferCallback() {
                 context = context,
                 callback = callback
             });
-            
+
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
                 drawType = DrawType2.Callback,
@@ -62,14 +65,77 @@ namespace UIForia.Graphics {
                     baseRenderIdx = renderIndex
                 }
             });
-            
+
         }
 
         internal void AddTexture(Texture texture) {
             // GetHashCode() returns the texture's instanceId but without an IsMainThread() check
             textureMap[texture.GetHashCode()] = texture;
         }
-        
+
+        public void SetElementBatchData(IList<ElementMaterialSetup> materialSetups) { }
+
+        public unsafe struct ElementBatch {
+
+            public ElementDrawInfo* elements;
+            public int count;
+
+        }
+
+        public void DrawElementBatch(float x, float y, float width, float height) { }
+
+        private int defaultBGTexture;
+
+        public void SetBackgroundTexture(Texture texture) {
+            if (!ReferenceEquals(texture, null)) {
+                defaultBGTexture = texture.GetHashCode();
+                AddTexture(texture);
+            }
+
+        }
+
+        public void SetOutlineTexture() { }
+
+        public void DrawElement(float x, float y, in ElementDrawDesc drawDesc) {
+
+            if (drawDesc.width <= 0 || drawDesc.height <= 0) {
+                return;
+            }
+
+            ElementDrawInfo* elementDrawInfo = stackAllocator.Allocate(new ElementDrawInfo() {
+                x = x,
+                y = y,
+                opacity = 1f,
+                materialId = 0,
+                uvTransformId = 0,
+                drawDesc = drawDesc,
+            });
+
+            drawList.Add(new DrawInfo2() {
+                matrix = defaultMatrix,
+                drawType = DrawType2.UIForiaElement,
+                materialId = MaterialId.UIForiaShape,
+                localBounds = new AxisAlignedBounds2D(x, y, x + drawDesc.width, y + drawDesc.height), // compute based on matrix? probably
+
+                // could consider making these different allocators to keep similar types together
+                materialData = stackAllocator.Allocate(new ElementMaterialSetup() {
+                    bodyTexture = new TextureUsage() {
+                        textureId = defaultBGTexture
+                    }
+                }),
+
+                shapeData = stackAllocator.Allocate(new ElementBatch() {
+                    count = 1,
+                    elements = elementDrawInfo
+                }),
+
+                drawSortId = new DrawSortId() {
+                    localRenderIdx = localDrawId++,
+                    baseRenderIdx = renderIndex
+                }
+            });
+        }
+
         internal void DrawElementBodyInternal(in SDFMeshDesc meshDesc, in AxisAlignedBounds2D bounds, in ElementMaterialSetup materialSetup) {
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
@@ -90,33 +156,33 @@ namespace UIForia.Graphics {
 
             public int count;
             public TextSymbol* textRenderInfo;
-            public TextMaterialInfo * materialPtr;
+            public TextMaterialInfo* materialPtr;
             public int fontAssetId;
             public int start;
 
         }
-        
+
         internal void DrawTextCharacters(TextRenderRange textRenderRange) {
-            
+
             TextMaterialSetup textMaterialSetup = new TextMaterialSetup();
-            
+
             textMaterialSetup.faceTexture = textRenderRange.texture0;
             textMaterialSetup.outlineTexture = textRenderRange.texture1;
             // todo this feels a bit brittle
             textMaterialSetup.fontTextureId = resourceManager.fontAssetMap[textRenderRange.fontAssetId].atlasTextureId;
-                
+
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
-                drawType = DrawType2.UIForiaText, 
+                drawType = DrawType2.UIForiaText,
                 materialId = MaterialId.UIForiaSDFText,
                 localBounds = textRenderRange.localBounds,
                 // could consider making these different allocators to keep similar types together
-                materialData = stackAllocator.Allocate(textMaterialSetup), 
+                materialData = stackAllocator.Allocate(textMaterialSetup),
                 shapeData = stackAllocator.Allocate(new TextMeshDesc() {
                     materialPtr = textMaterialPtr,
                     fontAssetId = textRenderRange.fontAssetId,
                     textRenderInfo = textRenderRange.symbols,
-                    start =  textRenderRange.characterRange.start,
+                    start = textRenderRange.characterRange.start,
                     count = textRenderRange.characterRange.length
                 }),
                 drawSortId = new DrawSortId() {
@@ -124,16 +190,16 @@ namespace UIForia.Graphics {
                     baseRenderIdx = renderIndex
                 }
             });
-            
+
         }
-        
+
         public void Clear() {
             textureMap.Clear();
             drawList.size = 0;
             callbacks.Clear();
             stackAllocator.Clear();
         }
-        
+
         public void Dispose() {
             stackAllocator.Dispose();
             drawList.Dispose();
@@ -153,6 +219,48 @@ namespace UIForia.Graphics {
                 textMaterialPtr = null;
             }
         }
+
+    }
+
+    public struct ElementDrawDesc {
+
+        // all material data goes here
+        // any unpacking/re-arranging will happen later when building 
+
+        public byte radiusTL;
+        public byte radiusTR;
+        public byte radiusBR;
+        public byte radiusBL;
+
+        public byte bevelTL;
+        public byte bevelTR;
+        public byte bevelBR;
+        public byte bevelBL;
+
+        public Color32 backgroundColor;
+        public Color32 backgroundTint;
+
+        public byte opacity;
+        public ColorMode bgColorMode;
+        public ColorMode outlineColorMode;
+        public float outlineWidth;
+        public Color32 outlineColor;
+        public float width;
+        public float height;
+
+    }
+
+    public struct ElementDrawInfo {
+
+        public float x;
+        public float y;
+        public int materialId;
+        public int uvTransformId;
+
+        public float opacity;
+
+        public ElementDrawDesc drawDesc;
+        // other per-element data 
 
     }
 

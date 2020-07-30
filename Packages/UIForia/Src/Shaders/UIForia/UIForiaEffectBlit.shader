@@ -57,7 +57,7 @@ Shader "UIForia/EffectBlit"
             v2f vert(a2v IN) {
                 v2f OUT;
                 OUT.worldPosition = IN.vertex;
-	            OUT.vertex = UnityObjectToClipPos(OUT.worldPosition);
+	            OUT.vertex = float4(0, 0, 0, 0); //UnityObjectToClipPos(OUT.worldPosition);
 	            OUT.texcoord = IN.texcoord;
 	            return OUT;
             }

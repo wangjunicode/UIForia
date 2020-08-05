@@ -703,7 +703,12 @@ namespace UIForia.Systems {
 
         internal void BlurOnDisableOrDestroy() {
             if (m_FocusedElement != null && (m_FocusedElement.isDisabled || m_FocusedElement.isDestroyed)) {
-                ReleaseFocus((IFocusable) m_FocusedElement);
+                try {
+                    ReleaseFocus((IFocusable) m_FocusedElement);
+                }
+                catch (Exception e) {
+                    UnityEngine.Debug.LogException(e);
+                }
             }
         }
 

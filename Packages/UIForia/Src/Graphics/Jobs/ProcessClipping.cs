@@ -1,4 +1,5 @@
-﻿using UIForia.ListTypes;
+﻿using UIForia.Layout;
+using UIForia.ListTypes;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
@@ -21,13 +22,6 @@ namespace UIForia.Graphics {
 
     }
 
-    public struct DrawLink {
-
-        public int next;
-        public int prev;
-
-    }
-
     // assign clipper ids
     // do bounds intersections
     // cull where intersections are 0 height or width
@@ -39,11 +33,8 @@ namespace UIForia.Graphics {
         public DataList<DrawInfo2>.Shared drawList;
         public DataList<RenderTraversalInfo> clipRenderList;
         public DataList<AxisAlignedBounds2D>.Shared clipperBoundsList;
-        
-        // todo -- implement stenciled rendering
-        public DataList<int>.Shared stencilDrawList;
         public DataList<StencilInfo>.Shared stencilDataList;
-        
+
         public List_Int32 clipRectIdList;
 
         public float surfaceWidth;
@@ -79,16 +70,17 @@ namespace UIForia.Graphics {
             for (int i = 0; i < drawList.size; i++) {
 
                 // note: assumes all drawInfos have a valid matrix pointer, even if its bogus
-                
+
                 ref DrawInfo2 drawInfo = ref drawList[i];
                 AxisAlignedBounds2D aabb = drawInfo.localBounds;
 
-                // todo -- without burst this is stupid slow 
-                float3 p0 = math.transform(*drawInfo.matrix, new float3(aabb.xMin, aabb.yMin, 0));
-                float3 p1 = math.transform(*drawInfo.matrix, new float3(aabb.xMax, aabb.yMin, 0));
-                float3 p2 = math.transform(*drawInfo.matrix, new float3(aabb.xMax, aabb.yMax, 0));
-                float3 p3 = math.transform(*drawInfo.matrix, new float3(aabb.xMin, aabb.yMax, 0));
-
+                // todo -- without burst this is stupid slow
+                continue;
+                float3 p0 = math.transform(*drawInfo.matrix, new float3(aabb.xMin, -aabb.yMin, 0));
+                float3 p1 = math.transform(*drawInfo.matrix, new float3(aabb.xMax, -aabb.yMin, 0));
+                float3 p2 = math.transform(*drawInfo.matrix, new float3(aabb.xMax, -aabb.yMax, 0));
+                float3 p3 = math.transform(*drawInfo.matrix, new float3(aabb.xMin, -aabb.yMax, 0));
+                
                 float xMin = float.MaxValue;
                 float xMax = float.MinValue;
                 float yMin = float.MaxValue;
@@ -114,39 +106,40 @@ namespace UIForia.Graphics {
                 if (p2.y > yMax) yMax = p2.y;
                 if (p3.y > yMax) yMax = p3.y;
 
-                transformedBounds[i] = new AxisAlignedBounds2D(xMin, yMin, xMax, yMax);
+                transformedBounds[i] = new AxisAlignedBounds2D(xMin, -yMax, xMax, -yMin); // min max y flipped
 
             }
-            
+
         }
-        
+
         public void Execute() {
-            
+
             TransformLocalBounds();
             
-            Mode mode = Mode.Normal;
-
             DataList<Clipper> clipperStack = new DataList<Clipper>(16, Allocator.Temp);
-            
-            AxisAlignedBounds2D currentClipperBounds = new AxisAlignedBounds2D(0, 0, surfaceWidth, surfaceHeight);
-
-            clipperBoundsList.Add(currentClipperBounds);
 
             Clipper activeClipper = new Clipper() {
                 type = ClipperType.Scope,
                 boundsIndex = 0,
-                stencilDepth = 0,
-                stencilIndex = 0,
-                bounds = currentClipperBounds
+                bounds = new AxisAlignedBounds2D(0, 0, surfaceWidth, surfaceHeight)
             };
+            
+            clipperBoundsList.Add(activeClipper.bounds);
 
             stencilDataList.Add(new StencilInfo() {
                 aabb = activeClipper.bounds,
-                clipperDepth = 0
+                clipperDepth = 0,
+                stencilDepth = 0,
+                parentIndex = -1,
+                drawState = StencilSetupState.Pushed // base level stencil is no stencil, always valid
             });
 
-            int currentStencilStart = 0;
-
+            clipperStack.Add(activeClipper);
+            
+            int stencilIdx = 0;
+            int stencilDepth = 0;
+            bool isStencilMember = false;
+            
             for (int i = 0; i < drawList.size; i++) {
 
                 ref DrawInfo2 drawInfo = ref drawList[i];
@@ -157,35 +150,81 @@ namespace UIForia.Graphics {
                 clipRectIdList.array[i] = activeClipper.boundsIndex;
 
                 ref RenderTraversalInfo renderTraversalInfo = ref clipRenderList[i];
-                renderTraversalInfo.stencilIndex = activeClipper.stencilIndex;
+                renderTraversalInfo.stencilIndex = stencilIdx;
                 renderTraversalInfo.clipRectId = activeClipper.boundsIndex;
+                renderTraversalInfo.requiresRendering = false;
+                renderTraversalInfo.isStencilMember = isStencilMember;
 
                 switch (drawInfo.drawType) {
+                    
+                    case DrawType2.Callback: {
+                        break;
+                    }
 
                     case DrawType2.PushClipRect: {
 
-                        AxisAlignedBounds2D bounds = AxisAlignedBounds2D.Intersect(*(AxisAlignedBounds2D*) drawInfo.shapeData, currentClipperBounds);
+                        float3 topLeft = new float3(drawInfo.localBounds.xMin, -drawInfo.localBounds.yMin, 0);
 
-                        currentClipperBounds = bounds;
-                        clipperBoundsList.Add(bounds);
+                        float2 basePoint = topLeft.xy;
+                        
+                        // todo -- this method is sooo slow without burst
+                        topLeft = math.transform(*drawInfo.matrix, topLeft);
+                        // note -- cheating with width/height storage, its is NOT a max point in this case
+                        float width = drawInfo.localBounds.xMax;
+                        float height = drawInfo.localBounds.yMax; 
+                        // need to invert the y position
+                        AxisAlignedBounds2D bounds = AxisAlignedBounds2D.Intersect(new AxisAlignedBounds2D(topLeft.x, -topLeft.y, topLeft.x + width, basePoint.y + (-topLeft.y + height)), activeClipper.bounds);
 
                         activeClipper.bounds = bounds;
                         activeClipper.boundsIndex = clipperBoundsList.size;
                         activeClipper.type = ClipperType.AlignedRect;
-
+                        clipperBoundsList.Add(bounds);
                         clipperStack.Add(activeClipper);
-
                         break;
                     }
 
                     case DrawType2.BeginStencilClip: {
-                        currentStencilStart = stencilDrawList.size;
-                        mode = Mode.Stencil;
-
+                        isStencilMember = true;
+                        stencilDepth++;
+                        stencilIdx = stencilDataList.size;
+                        stencilDataList.Add(new StencilInfo() {
+                            aabb = default,
+                            drawState = StencilSetupState.Uninitialized,
+                            stencilDepth = stencilDepth,
+                            beginIndex = i + 1
+                        });
                         break;
                     }
 
-                    case DrawType2.PopClipper: {
+                    case DrawType2.PushStencilClip: {
+                        isStencilMember = false;
+                        ref StencilInfo stencilInfo = ref stencilDataList[stencilIdx];
+                        stencilInfo.pushIndex = i;
+                        ComputeStencilBounds(ref stencilInfo);
+                        
+                        AxisAlignedBounds2D bounds = AxisAlignedBounds2D.Intersect(stencilInfo.aabb, activeClipper.bounds);
+
+                        activeClipper.bounds = bounds;
+                        activeClipper.boundsIndex = clipperBoundsList.size;
+                        activeClipper.type = ClipperType.Stencil;
+                        clipperBoundsList.Add(bounds);
+                        clipperStack.Add(activeClipper);
+                        break;
+                    }
+                        
+                    case DrawType2.PopStencilClip: {
+                        stencilDepth--;
+                        // todo -- save pop index somehow
+                        if (clipperStack.size == 1) {
+                            continue;
+                        }
+                        ref Clipper current = ref clipperStack[clipperStack.size - 1];
+                        clipperStack.size--;
+                        activeClipper = clipperStack[clipperStack.size - 1];
+                        break;
+                    }
+
+                    case DrawType2.PopClipRect: {
 
                         if (clipperStack.size == 1) {
                             continue;
@@ -198,31 +237,14 @@ namespace UIForia.Graphics {
                         }
 
                         clipperStack.size--;
-
                         activeClipper = clipperStack[clipperStack.size - 1];
-
                         // might need to track ending indices
-
                         break;
                     }
 
                     case DrawType2.UIForiaElement:
                     case DrawType2.UIForiaText: {
-                        switch (mode) {
-
-                            case Mode.Stencil: {
-                                renderTraversalInfo.isStencilMember = true;
-                                stencilDrawList.Add(i);
-                                break;
-                            }
-
-                            default:
-                            case Mode.Normal: {
-                                renderTraversalInfo.isStencilMember = false;
-                                break;
-                            }
-                        }
-
+                        renderTraversalInfo.requiresRendering = true;
                         break;
                     }
                 }
@@ -231,6 +253,31 @@ namespace UIForia.Graphics {
 
             clipperStack.Dispose();
 
+        }
+
+        private void ComputeStencilBounds(ref StencilInfo stencilData) {
+            float xMin = float.MaxValue;
+            float yMin = float.MaxValue;
+            float xMax = float.MinValue;
+            float yMax = float.MinValue;
+            
+            for (int i = stencilData.beginIndex; i < stencilData.pushIndex; i++) {
+                ref DrawInfo2 drawInfo = ref drawList[i];
+                if (drawInfo.drawType == DrawType2.UIForiaElement || drawInfo.drawType == DrawType2.UIForiaText) {
+
+                    ref AxisAlignedBounds2D bounds = ref transformedBounds[i];
+
+                    if (bounds.xMin < xMin) xMin = bounds.xMin;
+                    if (bounds.xMax > xMax) xMax = bounds.xMax;
+                    
+                    if (bounds.yMin < yMin) yMin = bounds.yMin;
+                    if (bounds.yMax > yMax) yMax = bounds.yMax;
+
+                }
+                
+            }
+
+            stencilData.aabb = new AxisAlignedBounds2D(xMin, yMin, xMax, yMax);
         }
 
         public enum ClipperType {
@@ -246,8 +293,6 @@ namespace UIForia.Graphics {
 
             public ClipperType type;
             public int boundsIndex;
-            public int stencilDepth;
-            public int stencilIndex;
             public AxisAlignedBounds2D bounds;
 
         }

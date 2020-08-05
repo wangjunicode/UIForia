@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UIForia.Elements;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
@@ -44,7 +45,7 @@ namespace UIForia {
 
             // todo -- allocate from same buffer w/ front-back load config (grow one size from top, other from bottom)
             enabledElementsThisFrame = new DataList<ElementId>.Shared(64, Allocator.Persistent);
-            disabledElementsThisFrame = new DataList<ElementId>.Shared(64, Allocator.Persistent);
+            disabledElementsThisFrame = new DataList<ElementId>.Shared(32, Allocator.Persistent);
         }
 
         public void FilterEnabledDisabledElements() {
@@ -112,7 +113,8 @@ namespace UIForia {
             ref HierarchyInfo childInfo = ref hierarchyTable.array[childId.index];
 
             childInfo.parentId = parentId;
-
+            childInfo.viewId = parentInfo.viewId;
+            
             if (parentInfo.childCount == 0) {
                 parentInfo.firstChildId = childId;
                 parentInfo.lastChildId = childId;
@@ -172,8 +174,8 @@ namespace UIForia {
         public void DestroyElement(ElementId elementId, bool unlinkFromParent) {
             ref ElementMetaInfo meta = ref metaTable.array[elementId.index];
             meta.generation++;
-            meta.flags = default;
-            meta.__padding__ = default;
+            // meta.flags = default;
+            // meta.__padding__ = default;
             indexQueue.Enqueue(elementId.index);
             if (unlinkFromParent) {
                 UnlinkFromParent(elementId);

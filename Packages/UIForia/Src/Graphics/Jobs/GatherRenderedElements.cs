@@ -1,7 +1,12 @@
-﻿using UIForia.Rendering;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using UIForia.Rendering;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Jobs;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Systems {
 
@@ -11,7 +16,7 @@ namespace UIForia.Systems {
         public bool isForeground;
 
     }
-    
+
     [BurstCompile]
     public unsafe struct GatherRenderedElements : IJob {
 
@@ -27,7 +32,9 @@ namespace UIForia.Systems {
             for (int i = 0; i < elementLists.size; i++) {
 
                 ElementList list = elementLists[i];
-                renderCallList.EnsureAdditionalCapacity(list.size);
+                renderCallList.EnsureAdditionalCapacity(list.size * 2);
+                RenderCallInfo* renderCallPtr = renderCallList.GetArrayPointer();
+                int count = renderCallList.size;
 
                 for (int j = 0; j < list.size; j++) {
 
@@ -41,26 +48,61 @@ namespace UIForia.Systems {
 
                     ref RenderInfo renderInfo = ref renderInfoTable[elementId];
                     ref ElementTraversalInfo traversalInfo = ref traversalTable[elementId];
-                    renderCallList.Add(new RenderCallInfo() {
+                    renderCallPtr[count++] = new RenderCallInfo() {
                         layer = renderInfo.layer,
                         elementId = elementId,
-                        ftbIndex = traversalInfo.ftbIndex,
+                        traversalInfo = traversalInfo,
                         zIndex = renderInfo.zIndex,
                         renderOp = 0
-                    });
+                    };
 
-                    if (renderInfo.drawForeground) {
-                        renderCallList.Add(new RenderCallInfo() {
-                            layer = renderInfo.layer,
-                            elementId = elementId,
-                            ftbIndex = traversalInfo.ftbIndex,
-                            zIndex = renderInfo.zIndex,
-                            renderOp = 1
-                        });
-
-                    }
+                    renderCallPtr[count++] = new RenderCallInfo() {
+                        layer = renderInfo.layer,
+                        elementId = elementId,
+                        traversalInfo = traversalInfo,
+                        zIndex = renderInfo.zIndex,
+                        renderOp = 1
+                    };
 
                 }
+
+                renderCallList.size = count;
+            }
+
+            NativeSortExtension.Sort(renderCallList.GetArrayPointer(), renderCallList.size, new RenderCallComparer());
+
+            // if (!printed) {
+            //     printed = true;
+            //     for (int i = 0; i < renderCallList.size; i++) {
+            //         Debug.Log("element " + renderCallList[i].elementId.index + ": " + renderCallList[i].renderOp);
+            //     }
+            // }
+        }
+
+        private static bool printed = false;
+       
+        public struct RenderCallComparer : IComparer<RenderCallInfo> {
+
+            public int Compare(RenderCallInfo x, RenderCallInfo y) {
+
+                if (x.traversalInfo.ftbIndex == y.traversalInfo.ftbIndex) {
+                    return x.renderOp - y.renderOp;
+                }
+
+                if (x.traversalInfo.IsDescendentOf(y.traversalInfo)) {
+                    return y.renderOp == 0 ? 1 : -1;
+                }
+
+                if (y.traversalInfo.IsDescendentOf(x.traversalInfo)) {
+                    return x.renderOp == 0 ? -1 : 1;
+                }
+
+                // if (x.renderOp == y.renderOp) {
+                // // i think we're still missing a case here with compare
+                // }
+                
+                return x.traversalInfo.ftbIndex - y.traversalInfo.ftbIndex;
+
             }
 
         }

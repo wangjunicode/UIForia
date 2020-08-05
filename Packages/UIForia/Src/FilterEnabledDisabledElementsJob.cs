@@ -73,8 +73,15 @@ namespace UIForia {
 
             public ElementTable<ElementMetaInfo> metaTable;
 
+            // this is removing elements that were disabled and then enabled again in the same frame
             public bool Filter(in ElementId item) {
-                return metaTable[item].generation == item.generation && (metaTable[item].flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet;
+                bool generationMatch = metaTable[item].generation == item.generation;
+                // if generation doesn't match, the element was destroyed, keep it in this list 
+                if (!generationMatch) {
+                    return true;
+                }
+                // if element not currently enabled, keep it in this list
+                return (metaTable[item].flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet;
             }
 
         }
@@ -83,6 +90,7 @@ namespace UIForia {
 
             public ElementTable<ElementMetaInfo> metaTable;
 
+            // this is removing elements that were enabled and then disabled or destroyed in the same frame
             public bool Filter(in ElementId item) {
                 return metaTable[item].generation == item.generation && (metaTable[item].flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet;
             }

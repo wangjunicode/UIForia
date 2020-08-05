@@ -12,6 +12,7 @@ namespace UIForia.Layout {
         public ElementId viewRootId;
         public ElementTable<ElementTraversalInfo> traversalTable;
         public ElementTable<LayoutHierarchyInfo> layoutHierarchyTable;
+        public ElementTable<ElementMetaInfo> metaTable;
         public DataList<ElementId>.Shared elementList;
         public DataList<ElementId>.Shared parentList;
         public DataList<ElementId>.Shared ignoredList;
@@ -32,7 +33,7 @@ namespace UIForia.Layout {
             stack.Add(viewRootId);
 
             // inlining a lot of this because outside of burst this was slow
-            
+
             ElementId* s = stack.GetArrayPointer();
             LayoutHierarchyInfo* layoutHTable = layoutHierarchyTable.array;
             int stackSize = 1;
@@ -64,9 +65,19 @@ namespace UIForia.Layout {
                 }
 
             }
-            
-            if (ignoredList.size > 1) {
-                NativeSortExtension.Sort(ignoredList.GetArrayPointer(), ignoredList.size, new ElementFTBHierarchySort(traversalTable));
+
+            if (ignoredList.size > 0) {
+
+                for (int i = 0; i < ignoredList.size; i++) {
+                    ElementId elementId = ignoredList[i];
+                    if (ElementSystem.IsDeadOrDisabled(elementId, metaTable)) {
+                        ignoredList[i--] = ignoredList[--ignoredList.size];
+                    }
+                }
+
+                if (ignoredList.size > 1) {
+                    NativeSortExtension.Sort(ignoredList.GetArrayPointer(), ignoredList.size, new ElementFTBHierarchySort(traversalTable));
+                }
             }
 
             for (int i = 0; i < ignoredList.size; i++) {
@@ -89,6 +100,7 @@ namespace UIForia.Layout {
                 }
 
             }
+
             elementList.size = eSize;
             parentList.size = pSize;
             stack.Dispose();

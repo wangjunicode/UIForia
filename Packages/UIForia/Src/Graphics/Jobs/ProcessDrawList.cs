@@ -130,7 +130,7 @@ namespace UIForia.Graphics {
                             parentIndex = activeClipper.stencilIndex,
                             pushIndex = outputSize,
                             popIndex = -1, // pop index will be set later
-                            drawInfoRange = stencilDrawRange
+                            //drawInfoRange = stencilDrawRange
                         });
 
                         clipperBoundsList.Add(bounds);

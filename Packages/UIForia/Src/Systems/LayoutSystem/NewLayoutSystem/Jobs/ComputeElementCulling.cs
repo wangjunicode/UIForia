@@ -1,4 +1,5 @@
-﻿using UIForia.Graphics;
+﻿using System.Diagnostics;
+using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
@@ -35,13 +36,14 @@ namespace UIForia.Systems {
                 ref Clipper clipper = ref clipperList[clipInfo.clipperIndex];
                 ref LayoutBoxInfo layoutResult = ref layoutResultTable[elementId];
 
+                ref OrientedBounds orientedBounds = ref clipInfo.orientedBounds;
+
                 if (clipper.isCulled || layoutResult.actualSize.x * layoutResult.actualSize.y == 0) {
                     layoutResult.isCulled = true;
                     clipInfo.isCulled = true;
+                    orientedBounds = default;
                 }
                 else {
-
-                    ref OrientedBounds orientedBounds = ref clipInfo.orientedBounds;
 
                     float xMin = float.MaxValue;
                     float xMax = float.MinValue;
@@ -67,7 +69,6 @@ namespace UIForia.Systems {
                     if (orientedBounds.p1.y > yMax) yMax = orientedBounds.p1.y;
                     if (orientedBounds.p2.y > yMax) yMax = orientedBounds.p2.y;
                     if (orientedBounds.p3.y > yMax) yMax = orientedBounds.p3.y;
-
 
                     bool overlappingOrContains = xMax >= clipper.aabb.xMin && xMin <= clipper.aabb.xMax && yMax >= clipper.aabb.yMin && yMin <= clipper.aabb.yMax;
 

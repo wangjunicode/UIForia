@@ -1,4 +1,6 @@
-﻿using UIForia.Systems;
+﻿using System;
+using System.Diagnostics;
+using UIForia.Systems;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
@@ -39,7 +41,7 @@ namespace UIForia.Layout {
                 ref LayoutInfo verticalInfo = ref verticalLayoutInfo.array[index];
                 ref LayoutInfo horizontalInfo = ref horizontalLayoutInfo.array[index];
                 ref LayoutBoxInfo layoutResult = ref layoutResultTable.array[index];
-
+                
                 float emSize = emTable.array[index].resolvedValue;
 
                 verticalInfo.emSize = emSize;
@@ -66,19 +68,17 @@ namespace UIForia.Layout {
                 verticalInfo.marginEnd = marginBottom;
                 verticalInfo.paddingBorderStart = paddingTop + borderTop;
                 verticalInfo.paddingBorderEnd = paddingBottom + borderBottom;
-                
+
                 if (horizontalInfo.marginStart != marginLeft || horizontalInfo.marginEnd != marginRight) {
                     LayoutUtil.MarkForContentSizeChange(elementId, default, horizontalLayoutInfo);
                 }
-                
+
                 if (verticalInfo.marginStart != marginTop || verticalInfo.marginEnd != marginBottom) {
                     LayoutUtil.MarkForContentSizeChange(elementId, default, verticalLayoutInfo);
                 }
 
-                if (horizontalInfo.paddingBorderStart != paddingLeft + borderLeft || horizontalInfo.paddingBorderEnd != paddingRight + borderRight) {
-                    
-                }
-                
+                if (horizontalInfo.paddingBorderStart != paddingLeft + borderLeft || horizontalInfo.paddingBorderEnd != paddingRight + borderRight) { }
+
                 horizontalInfo.marginStart = marginLeft;
                 horizontalInfo.marginEnd = marginRight;
                 horizontalInfo.paddingBorderStart = paddingLeft + borderLeft;
@@ -86,25 +86,23 @@ namespace UIForia.Layout {
 
                 // if padding border changed -> content width changed
                 // if margin changed -> tell parent
-                
-                
+
                 // if these aren't used frequently I can skip this step and just re-compute when needed on demand
                 // this is about 25% of the run time of the job
                 layoutResult.margin.top = marginTop;
                 layoutResult.margin.right = marginRight;
                 layoutResult.margin.bottom = marginBottom;
                 layoutResult.margin.left = marginLeft;
-                
+
                 layoutResult.border.top = borderTop;
                 layoutResult.border.right = borderRight;
                 layoutResult.border.bottom = borderBottom;
                 layoutResult.border.left = borderLeft;
-                
+
                 layoutResult.padding.top = paddingTop;
                 layoutResult.padding.right = paddingRight;
                 layoutResult.padding.bottom = paddingBottom;
                 layoutResult.padding.left = paddingLeft;
-
             }
 
         }

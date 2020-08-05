@@ -64,7 +64,7 @@ fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 clipPos
     fixed4 retn = color;
     
     // float x = PercentOfRange(clipPos.x, unpackedSizeXY.x, unpackedSizeZW.x);
-    // loat y = PercentOfRange(clipPos.y, unpackedSizeXY.y, unpackedSizeZW.y);
+    // float y = PercentOfRange(clipPos.y, unpackedSizeXY.y, unpackedSizeZW.y);
     
     // x = Map(x, 0, 1, clipUvs.x, clipUvs.z);
     // y = Map(y, 0, 1, clipUvs.y, clipUvs.w);
@@ -459,7 +459,7 @@ BorderData GetBorderData(float2 coords, float2 size, float4 packedBorderColors, 
     }
               
     if(d < 1 && d > -1) {
-        d =  Map(d, -1, 1, 0, 1);
+        d = Map(d, -1, 1, 0, 1);
         if(sideOfLine == -1) {
             d = 1 - d;
         }

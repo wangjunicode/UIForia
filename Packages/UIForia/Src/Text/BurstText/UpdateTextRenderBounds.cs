@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using UIForia.Graphics;
 using UIForia.Rendering;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Jobs;
+using UnityEngine;
 
 namespace UIForia.Text {
 
@@ -65,25 +67,25 @@ namespace UIForia.Text {
                                 
                             }
                             else {
-                            
-                                ref UIForiaGlyph glyph = ref fontAssetMapArray[charInfo.fontAssetId].glyphList[charInfo.glyphIndex];
                                 
-                                float localMinX = charInfo.position.x;
-                                float localMinY = charInfo.position.y;
-                                float localMaxX = charInfo.position.x + (charInfo.scale * glyph.width);
-                                float localMaxY = charInfo.position.y + (charInfo.scale * glyph.height);
-
-                                if (localMinX < xMin) xMin = localMinX;
-                                if (localMinX > xMax) xMax = localMinX;
-
-                                if (localMaxX < xMin) xMin = localMaxX;
-                                if (localMaxX > xMax) xMax = localMaxX;
-
-                                if (localMinY < yMin) yMin = localMinY;
-                                if (localMinY > yMax) yMax = localMinY;
-
-                                if (localMaxY < yMin) yMin = localMaxY;
-                                if (localMaxY > yMax) yMax = localMaxY;
+                                // ref UIForiaGlyph glyph = ref fontAssetMapArray[charInfo.fontAssetId].glyphList[charInfo.glyphIndex];
+                                //
+                                // float localMinX = charInfo.position.x;
+                                // float localMinY = charInfo.position.y;
+                                // float localMaxX = charInfo.position.x + (charInfo.scale * glyph.width);
+                                // float localMaxY = charInfo.position.y + (charInfo.scale * glyph.height);
+                                //
+                                // if (localMinX < xMin) xMin = localMinX;
+                                // if (localMinX > xMax) xMax = localMinX;
+                                //
+                                // if (localMaxX < xMin) xMin = localMaxX;
+                                // if (localMaxX > xMax) xMax = localMaxX;
+                                //
+                                // if (localMinY < yMin) yMin = localMinY;
+                                // if (localMinY > yMax) yMax = localMinY;
+                                //
+                                // if (localMaxY < yMin) yMin = localMaxY;
+                                // if (localMaxY > yMax) yMax = localMaxY;
 
                             }
                         }

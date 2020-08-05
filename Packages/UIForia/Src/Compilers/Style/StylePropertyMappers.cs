@@ -127,6 +127,14 @@ namespace UIForia.Compilers.Style {
                 {"cornerbeveltopright", (targetStyle, property, context) => targetStyle.CornerBevelTopRight = MapFixedLength(property.children[0], context)},
                 {"cornerbevelbottomright", (targetStyle, property, context) => targetStyle.CornerBevelBottomRight = MapFixedLength(property.children[0], context)},
                 {"cornerbevelbottomleft", (targetStyle, property, context) => targetStyle.CornerBevelBottomLeft = MapFixedLength(property.children[0], context)},
+                {"cornerbevel", (targetStyle, property, context) => {
+                        UIFixedLength length = MapFixedLength(property.children[0], context);
+                        targetStyle.CornerBevelTopLeft = length;
+                        targetStyle.CornerBevelBottomLeft = length;
+                        targetStyle.CornerBevelTopRight = length;
+                        targetStyle.CornerBevelBottomRight = length;
+                    }
+                },
                 
                 {"outlinewidth", (targetStyle, property, context) => targetStyle.OutlineWidth = MapFixedLength(property.children[0], context)},
                 {"outlinecolor", (targetStyle, property, context) => targetStyle.OutlineColor = MapColor(property.children[0], context)},
@@ -135,8 +143,8 @@ namespace UIForia.Compilers.Style {
                 {"griditemx", (targetStyle, property, context) => targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context)},
                 {"griditemy", (targetStyle, property, context) => targetStyle.GridItemY = MapGridItemPlacement(property.children[0], context)},
                 {"griditemwidth", (targetStyle, property, context) => targetStyle.GridItemWidth = MapGridItemPlacement(property.children[0], context)},
-                {"griditemheight", (targetStyle, property, context) => targetStyle.GridItemHeight = MapGridItemPlacement(property.children[0], context)}, {
-                    "griditem", (targetStyle, property, context) => {
+                {"griditemheight", (targetStyle, property, context) => targetStyle.GridItemHeight = MapGridItemPlacement(property.children[0], context)},
+                {"griditem", (targetStyle, property, context) => {
                         if (property.children.size == 2) {
                             targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context);
                             targetStyle.GridItemY = MapGridItemPlacement(property.children[1], context);

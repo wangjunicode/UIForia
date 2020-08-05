@@ -248,7 +248,7 @@ namespace UIForia.Util {
                     return layoutResult.allocatedWidth;
 
                 case AlignmentTarget.Parent:
-                    return layoutResultTable[layoutResult.layoutParentId].actualWidth;
+                    return layoutResultTable[layoutResult.layoutParentId].actualSize.x;
 
                 case AlignmentTarget.ParentContentArea:
                     return math.max(0, layoutResultTable[layoutResult.layoutParentId].ContentAreaWidth);
@@ -287,6 +287,28 @@ namespace UIForia.Util {
                 case AlignmentTarget.Mouse: {
                     return 0;
                 }
+            }
+        }
+
+        public static float ResolveTransformPivot(float baseSize, in ViewParameters viewParameters, float emSize, UIFixedLength fixedSize) {
+            switch (fixedSize.unit) {
+
+                default:
+                case UIFixedUnit.Unset:
+                case UIFixedUnit.Pixel:
+                    return fixedSize.value;
+
+                case UIFixedUnit.Percent:
+                    return baseSize * fixedSize.value;
+                
+                case UIFixedUnit.Em:
+                    return emSize;
+
+                case UIFixedUnit.ViewportWidth:
+                    return viewParameters.viewWidth;
+
+                case UIFixedUnit.ViewportHeight:
+                    return viewParameters.viewHeight;
             }
         }
 

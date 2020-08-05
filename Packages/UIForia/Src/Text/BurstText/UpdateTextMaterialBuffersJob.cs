@@ -223,10 +223,13 @@ namespace UIForia.Text {
 
         private void UpdateMaterialBuffers(ref MaterialStack materialStack, ref TextInfo textInfo) {
 
-            // if (!textInfo.isRichText) {
-            //     // todo -- also check for material data
-            //     return;
-            // }
+            if (!textInfo.requiresRenderProcessing) {
+                // todo -- also check for material data
+                return;
+            }
+
+            textInfo.requiresRenderProcessing = false;
+            
             materialStack.Setup(textInfo);
 
             materialBuffer.size = 0;
@@ -241,15 +244,6 @@ namespace UIForia.Text {
             byte opacityMultiplier = 255;
             textMaterialStack.Add(textMaterial);
             textMaterialBuffer.Add(textMaterial);
-
-            // per character data
-            // opacity (byte)
-            // inversion flags (2bits)
-            // baseline config (2 or 3 bits)
-            // bold or italic (2 bits)
-            // how do these work with material buffer?
-            // need to know difference between default state and what was set from tags I think
-            // or just say fuck it for now? if effect needs it inverted it must set it every frame, otherwise we restore previous value when rebuilding material setup
 
             CharacterDisplayFlags displayFlags = 0;
 

@@ -8,14 +8,12 @@ namespace UIForia.Text {
         internal LightList<PendingTextEffectSymbolData> textEffects;
         internal StructList<TextSymbol> stream;
         internal bool requiresTextTransform;
-        internal bool requiresRenderProcessing;
         internal bool requiresRichTextLayout;
 
         internal TextSymbolStream(LightList<PendingTextEffectSymbolData> textEffects, StructList<TextSymbol> stream) {
             this.stream = stream;
             this.textEffects = textEffects;
             this.requiresTextTransform = false;
-            this.requiresRenderProcessing = false;
             this.requiresRichTextLayout = false;
         }
 

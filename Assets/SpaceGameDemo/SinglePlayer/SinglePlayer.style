@@ -1,0 +1,463 @@
+﻿import "SpaceGameDemo/Theme.style" as theme;
+
+style ship-list {
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutWrap = WrapHorizontal;
+    PreferredWidth = 1pca;
+    MaxWidth = 900px;
+    MarginBottom = 20px;
+}
+
+style ship-item {
+    FlexLayoutDirection = Horizontal;
+    FlexItemGrow = 1;
+    FlexItemShrink = 1;
+    DistributeExtraSpaceVertical = CenterContent;
+    TextColor = white;
+    TextFontAsset = @theme.orbitron;
+    TextFontSize = 13px;
+    BackgroundColor = rgba(120, 120, 120, 120);
+    PreferredWidth = 330px;
+    Padding = 8px;
+    MarginBottom = 1px;
+    MarginRight = 1px;
+    CornerBevelBottomRight = 5px;
+    
+    [hover] {
+        Cursor = @theme.cursorHover;
+        BackgroundColor = @theme.orangeHover;
+    }
+}
+
+style ship-icon {
+    AlignY = Center ParentContentArea;
+}
+
+style ship-display {
+    PaddingTop = 8px;
+    AlignY = 100% Parent;
+    AlignX = 0, Parent;
+    LayoutFitHorizontal = Fill;
+}
+
+style ship-title {
+    MarginBottom = 8px;
+}
+
+style ship-wrapper {
+    FlexLayoutDirection = Horizontal;
+    LayoutFitHorizontal = Fill;
+}
+
+style ship {
+    PreferredSize = 128px;
+    Border = 1px;
+    BorderColor = white;
+    BorderRadius = 12px;
+    MarginRight = 4px;
+    [attr:shipId="1a"] {
+        run animation(ship01a);
+    }
+    [attr:shipId="1b"] {
+        run animation(ship01b);
+    }
+    [attr:shipId="2a"] {
+        run animation(ship02a);
+    }
+    [attr:shipId="2b"] {
+        run animation(ship02b);
+    }
+    [attr:shipId="3a"] {
+        run animation(ship03a);
+    }
+    [attr:shipId="3b"] {
+        run animation(ship03b);
+    }
+    [attr:shipId="4a"] {
+        run animation(ship04a);
+    }
+    [attr:shipId="4b"] {
+        run animation(ship04b);
+    }
+}
+
+spritesheet ship01a {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship01a/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship01b {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship01b/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship02a {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship02a/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship02b {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship02b/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship03a {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship03a/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship03b {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship03b/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship04a {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship04a/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+spritesheet ship04b {
+    Fps = 30;
+    Iterations = Infinite;
+    PathPrefix = "Images/ship04b/tile{0:000}";
+    StartFrame = 0;
+    EndFrame = 59;
+}
+
+style radial {
+    BackgroundImage = url("Images/HexagonBorder1");
+    PreferredSize = 110px 122.5px;
+    AlignX = 100% Parent;
+    //AlignY = 25% Parent;
+    BackgroundTint = rgba(255, 255, 255, 100);
+}
+
+style radial-fill {
+    BackgroundImage = url("Images/HexagonBorder1Thick");
+    PreferredSize = 112px 124.5px;
+    AlignX = 0% Parent;
+    TransformPositionY = -1px;
+    MeshType = FillRadial360;
+    MeshFillAmount = 0.6;
+    BackgroundTint = red;
+    MeshFillOrigin = Origin360_Top;
+}
+
+style progress-text {
+    LayoutBehavior = Ignored;
+    AlignX = Center Parent;
+    AlignY = Center Parent;
+    TextColor = white;
+    TextFontAsset = @theme.orbitron;
+}
+
+style tab-container {
+    TextColor = white;
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = BeforeContent;
+    PreferredHeight = 42px;
+}
+
+style tab-item {
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = CenterContent;
+    PreferredHeight = 30px;
+    OutlineWidth = 1px;
+    OutlineColor = white;
+    BorderRadiusTopLeft = 12px;
+    BorderRadiusTopRight = 12px;
+    Padding = 4px 8px;
+    TextColor = white;
+    TextFontSize = 14px;
+    [hover] {
+        // Padding = 8px 16px;
+        BackgroundColor = @theme.orangeHover;
+        TextColor = white;
+        Cursor = @theme.cursorHover;
+    }
+    [attr:selected="selected"] {
+        [enter] run animation(expand-tab);
+        [exit] run animation(collapse-tab);
+    }
+}
+
+animation expand-tab {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 300ms;
+    }
+    
+    [keyframes] {
+        100% {
+            TextFontSize = 18px;
+            Padding = 8px 16px;
+            PreferredHeight = 42px;
+            BackgroundColor = rgba(251, 176, 59, 200);
+            TextColor = rgb(84, 60, 22);
+        }
+    }
+}
+
+animation collapse-tab {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 300ms;
+    }
+    
+    [keyframes] {
+        100% {
+            TextFontSize = 14px;
+            Padding = 4px 8px;
+            PreferredHeight = 30px;
+            TextColor = white;
+            TextFontSize = 14px;
+            BackgroundColor = clear;
+        }
+    }
+}
+
+style settings-panel {
+    BackgroundColor = rgba(0, 0, 0, 120);
+    LayoutFitHorizontal = Fill;
+    FlexItemGrow = 1;
+    BorderRadiusBottomLeft = 12px;
+    BorderRadiusBottomRight = 12px;
+    Padding = 8px;
+    OutlineWidth = 1px;
+    OutlineColor = white;
+}
+
+style ships-panel {
+    FitItemsHorizontal = Fill;
+}
+
+style inventory-panel {
+    LayoutType = Grid;
+    GridLayoutColTemplate = 1fr 1fr;
+    GridLayoutColGap = 4;
+    GridLayoutRowTemplate = 1fr;
+}
+
+style item-list {
+    LayoutFit = Fill;
+    FlexLayoutDirection = Horizontal;
+    FlexLayoutWrap = WrapHorizontal;
+    
+}
+
+style item {
+    OutlineWidth = 1px;
+    BorderRadius = 4px;
+    OutlineColor = white;
+    TextFontSize = 11px;
+    Padding = 4px 2px;
+    FlexItemShrink = 1;
+    PreferredSize = 64px;
+    Margin = 4px;
+    DistributeExtraSpace = CenterContent;
+}
+
+style item-text {
+    PreferredWidth = 1pca;
+    TextAlignment = Center;
+    TextColor = red;
+}
+
+style item-image {
+    LayoutBehavior = Ignored;
+    AlignY = Center Parent;
+    AlignX = Center Parent;
+    Opacity = 0.25;
+}
+
+style available-items {
+    FlexItemGrow = 1;
+    Padding = 4px;
+    LayoutFit = Fill;
+    [hover] {
+        BackgroundColor = rgba(220, 120, 120, 40);
+    }
+}
+
+style inventory {
+    Padding = 4px;
+    FlexItemGrow = 1;
+    LayoutFit = Fill;
+    [hover] {
+        BackgroundColor = rgba(220, 120, 120, 40);
+    }
+}
+
+style thingy {
+
+    BackgroundColor = rgba(200, 20, 20, 1);
+    PreferredSize = 1pca;
+//    AlignX = 0px 20px ParentContentArea End;
+//    AlignY = 0px 20px ParentContentArea End;
+    ShadowColor = rgba(200, 20, 20, 1);
+    ShadowIntensity = 10;
+}
+
+style pulse {
+    run animation(pulse);
+}
+
+animation pulse {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 4s;
+        Iterations = infinite;
+    }
+    
+    [keyframes] {
+        0%, 33%, 66%, 100% {
+            ShadowIntensity = 30;
+            PreferredSize = 20px;
+
+        } 
+        17%, 50%, 80% {
+            ShadowIntensity = 10;
+            PreferredSize = 10px;
+        } 
+    }
+}
+
+style blinking-things {
+    LayoutBehavior = Ignored;
+    AlignX = 0, 20px, Parent End;
+    AlignY = 0, 20px, Parent End;
+    LayoutFitHorizontal = Shrink;
+}
+
+style rotation-wrapper {
+    PreferredSize = 70px;
+}
+
+style rotating-left {
+    PreferredSize = 100px 60px;
+    OutlineColor = rgba(200, 20, 20, 200);
+    OutlineWidth = 2px;
+    BorderRadiusTopLeft = 50%;
+    BorderRadiusBottomRight = 50%;
+    // BorderTop = 2px;
+    Padding = 3px;
+   // run animation(rotate-left);
+}
+
+animation rotate-left {
+    [options] {
+        Iterations = infinite;
+        Duration = 7s;
+    }
+    
+    [keyframes] {
+        0% { TransformRotation = 0; } 
+        100% { TransformRotation = 360; }
+    }
+}
+
+style rotating-right {
+    PreferredSize = 1pca;
+    BorderLeft = 1px;
+    BorderTop = 1px;
+    Padding = 3px;
+    OutlineColor = @theme.orangeHover;
+    OutlineWidth = 1px;
+    run animation(rotate-right);
+}
+
+animation rotate-right {
+    [options] {
+        Iterations = infinite;
+        Duration = 3.5s;
+    }
+    
+    [keyframes] {
+        0% { TransformRotation = 0; } 
+        100% { TransformRotation = -360; }
+    }
+}
+
+style round {
+    BorderRadius = 50%;
+    DistributeExtraSpace = CenterContent;
+}
+
+style hire-container {
+    FlexLayoutDirection = Horizontal;
+    LayoutFitHorizontal = Fill;
+}
+
+style avatar-background {
+    BackgroundColor = rgb(90, 90, 90);
+    BorderRadius = 4px;
+    MarginRight = 10px;
+    MarginBottom = 4px;
+    Overflow = Hidden;
+    [attr:selected="True"] {
+        BackgroundColor = white;
+    }
+    [hover] {
+        BackgroundColor = rgb(200, 200, 0);
+    }
+}
+
+style pilot {
+    [hover] {
+        TransformScale = 1.1;
+    }
+    [active] {
+        run animation(select-pilot);
+    }
+}
+
+animation select-pilot {
+    [options] {
+        TimingFunction = QuadraticEaseOut;
+        Duration = 300ms;
+    }
+    
+    [keyframes] {
+        25%, 75% { BackgroundTint = rgba(20, 20, 0, 240); }
+        50% { BackgroundTint = rgba(220, 220, 0, 240); }
+        100% { BackgroundTint = rgba(255, 255, 255, 255); }
+        // 15%, 45% { BackgroundTint = rgba(220, 20, 0, 210); }
+//        60%, 100% { BackgroundTint = rgba(0, 0, 0, 0); }
+    }
+}
+
+style avatar-container {
+    DistributeExtraSpaceHorizontal = CenterContent;
+    MarginBottom = 20px;
+}
+
+style pilot-display {
+    PreferredSize = 128px;
+    Border = 1px;
+    BorderColor = white;
+    BorderRadius = 12px;
+    MarginRight = 4px;
+    BackgroundColor = white;
+    DistributeExtraSpace = CenterContent BeforeContent;
+}

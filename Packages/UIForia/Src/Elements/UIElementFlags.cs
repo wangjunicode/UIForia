@@ -16,15 +16,13 @@ namespace UIForia.Elements {
         EnabledRoot = 1 << 5,
         DisableRoot = 1 << 6,
 
-        Created = 1 << 7, // can maybe get rid fo this when revisiting 
+        Created = 1 << 7,
         TemplateRoot = 1 << 8,
 
         NeedsUpdate = 1 << 9,
 
         // Layout Flags, get rid of these
         DebugLayout = 1 << 10,
-        LayoutTransformNotIdentity = 1 << 12,
-        LayoutTypeOrBehaviorDirty = 1 << 15,
 
         EnabledFlagSet = Alive | Enabled | AncestorEnabled,
         EnabledFlagSetWithUpdate = EnabledFlagSet | NeedsUpdate,

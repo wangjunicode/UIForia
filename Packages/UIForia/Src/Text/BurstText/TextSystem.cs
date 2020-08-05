@@ -64,7 +64,7 @@ namespace UIForia.Text {
         public void SetRevealState(in CharacterInterface character, TextRevealState revealState) {
             // character.charptr->flags 
         }
-        
+
     }
 
     [Flags]
@@ -95,21 +95,19 @@ namespace UIForia.Text {
         private int lastSymbolIdx;
         private float pauseStartTime;
         private float pauseEndTime;
-        
+
         public virtual void Update(TextInterface textInterface) {
 
             for (int i = 0; i < textInterface.symbolList.size; i++) {
-                
-                if (textInterface.symbolList.array[i].type == TextSymbolType.Character) {
-                    
-                }
+
+                if (textInterface.symbolList.array[i].type == TextSymbolType.Character) { }
 
                 uint type = (uint) textInterface.symbolList.array[i].type;
 
                 if (type == 255) {
                     // Pause();
                 }
-             
+
             }
 
             if (textInterface.GetSymbol(1).type == TextSymbolType.Character) {
@@ -528,9 +526,9 @@ namespace UIForia.Text {
 
                 ref TextInfo textInfo = ref textInfoMap[activeTextElementIds[i].textInfoId];
 
-                textEffectAnimator.Animate(default, ref textInfo, (UITextElement) elementSystem.instanceTable[activeTextElementIds[i].elementId.index]);
-
-                // todo -- running on all right now
+                if (textInfo.hasEffects) {
+                    textEffectAnimator.Animate(default, ref textInfo, (UITextElement) elementSystem.instanceTable[activeTextElementIds[i].elementId.index]);
+                }
 
             }
 

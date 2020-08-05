@@ -1,0 +1,49 @@
+﻿style splash-container {
+    PreferredSize = 1pca;
+    DistributeExtraSpace = CenterContent;
+    BackgroundColor = black;
+    TextColor = white;
+    [attr:animate="fadeOut"] {
+        run animation(fadeOut);
+    }
+}
+
+style <Panel> {
+    Opacity = 0;
+    AlignY = Center Screen;
+    run animation(fadeIn);
+    [attr:animate="fadeOut"] {
+        run animation(fadeOutPanel);
+    }
+}
+
+animation fadeIn {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 700ms;
+    }
+    [keyframes] {
+        100% { Opacity = 1; } 
+    }
+}
+
+animation fadeOutPanel {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 800ms;
+    }
+    [keyframes] {
+        100% {
+            Opacity = 0;
+            AlignY = 15% Screen;
+        }
+    }
+}
+
+animation fadeOut {
+    [options] { TimingFunction = QuadraticEaseInOut; }
+    [keyframes] { 
+        0% { Opacity = 1; }
+        100% { Opacity = 0; Visibility = Hidden; }
+    }
+}

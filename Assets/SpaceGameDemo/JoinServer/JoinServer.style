@@ -1,39 +1,99 @@
 ﻿import "SpaceGameDemo/Theme.style" as theme;
 
-style container {
-    Padding = 30px 60px;
+style table-scroll-view {
+    PreferredSize = 1pca 80px;
+    FlexItemShrink = 1;
+    FlexItemGrow = 1;
 }
 
-style bread-crumb {
-    FlexLayoutDirection = Horizontal;
-    TextFontAsset = @theme.orbitron;
+style table {
+    PreferredSize = 1pca 1cnt;
+    MarginBottom = 20px;
+    FlexItemGrow = 1;
     TextColor = white;
     TextFontSize = 12px;
-    TextTransform = UpperCase;
-    MarginBottom = 8px;
-    MarginLeft = 12px;
-}
-
-style bread-crumb-divider {
-    TextColor = orange;
-    MarginLeft = 8px;
-    MarginRight = 8px;
-}
-
-style header {
+    FlexItemGrow = 1;
     TextFontAsset = @theme.orbitron;
-    TextFontSize = 24px;
-    TextFontStyle = Bold;
-    TextColor = white;
+}
+
+style table-header {
+    BorderBottom = 1px;
+    BorderColorBottom = @theme.orange;
+    MarginBottom = 8px;
+    TextFontSize = 11px;
+    PaddingBottom = 8px;
+}
+
+style table-head {
+    Padding = 4px 12px;
+}
+
+style table-layout {
+    LayoutType = Grid;
+    PreferredWidth = 1pca;
+    GridLayoutColTemplate = 1fr                // title
+                            80px               // players
+                            90px               // game type
+                            120px              // map
+                            70px               // ping
+                            grow(1mx, 150px);  // actions
+    GridLayoutRowGap = 1;
+    PaddingBottom = 8px;
+}
+
+style column {
+    Padding = 12px;
+    BackgroundColor = rgba(120, 120, 120, 60);
+    LayoutFit = Fill;
+    DistributeExtraSpaceVertical = CenterContent;
+}
+
+style column-center {
+    AlignX = Center;
+}
+
+style column-title {
+    BackgroundColor = rgba(0, 0, 0, 220);
+    Padding = 0 12px;
+}
+
+style column-actions {
     FlexLayoutDirection = Horizontal;
     DistributeExtraSpaceHorizontal = BetweenContent;
-    DistributeExtraSpaceVertical = CenterContent;
-    PreferredWidth = 1pca;
-    TextTransform = UpperCase;
-    BorderBottom = 2px;
-    BorderColorBottom = rgba(255, 255, 255, 20);
-    PaddingLeft = 12px;
-    PaddingRight = 12px;
+    LayoutFitHorizontal = Fill;
+    GridLayoutColAlignment = Fit;
+}
+
+style action {
+    BackgroundTint = #2fc1f4;
+    [hover] {
+        BackgroundTint = #6bcdef;
+    }
+}
+
+style star {
+    [hover] {
+        BackgroundImage = url("Images/star_hover");
+    }
+}
+
+style plus {
+    [hover] {
+        BackgroundImage = url("Images/plus_hover");
+    }
+}
+
+style scrollbar {
+   PreferredWidth = 3px;
+   AlignX = 0px 10px;
+   ClipBehavior = Never;
+}
+
+style scroll-handle {
+   PreferredWidth = 3px;
+   BackgroundColor = #fbb03b;
+   AlignX = 0px 10px;
+   ClipBehavior = Never;
 }
 
 style toggle {

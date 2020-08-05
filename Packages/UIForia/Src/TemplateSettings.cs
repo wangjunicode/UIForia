@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using UIForia.Elements;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
@@ -23,6 +26,8 @@ namespace UIForia {
         public List<Type> dynamicallyCreatedTypes;
         internal LightList<TextEffectDefinition> textEffectDefs;
 
+        public readonly string templateFileExtension = ".xml";
+        
         public TemplateSettings() {
             this.applicationName = "DefaultApplication";
             this.assemblyName = "UIForia.Application";
@@ -32,12 +37,6 @@ namespace UIForia {
             this.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
         }
         
-        // todo -- remove this dirty hack!
-        static TemplateSettings() {
-            s_InternalNonStreamingPath = null; //Path.Combine(PackageInfo.FindForAssembly(Assembly.GetAssembly(typeof(UIElement))).resolvedPath, "Src");
-        }
-
-        private static readonly string s_InternalNonStreamingPath;
 
         public string StrippedApplicationName => Regex.Replace(applicationName, @"\s", "" );
 
@@ -55,7 +54,7 @@ namespace UIForia {
         }
 
         public string GetInternalTemplatePath(string fileName) {
-            return Path.GetFullPath(Path.Combine(s_InternalNonStreamingPath, fileName));
+            return Path.GetFullPath(Path.Combine(GetCallPath(), fileName));
         }
 
         public string GetTemplatePath(string templateAttrTemplate) {
@@ -80,6 +79,10 @@ namespace UIForia {
                 effectName = effectName,
                 effectSpawner = textEffectSpawner
             });
+        }
+        
+        private string GetCallPath([CallerFilePath] string callerFilePath = "") {
+            return Path.GetDirectoryName(callerFilePath);
         }
 
     }

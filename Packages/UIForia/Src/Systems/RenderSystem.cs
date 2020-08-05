@@ -129,9 +129,6 @@ namespace UIForia.Systems {
                 renderInfoTable[elementId] = new RenderInfo() {
                     layer = instance.style.Layer,
                     zIndex = instance.style.ZIndex,
-                    drawForeground = renderBox.HasForeground,
-                    hasBackgroundEffect = false,
-                    hasForegroundEffect = false
                 };
 
                 instance.renderBox = renderBox; // todo -- remove link
@@ -739,9 +736,9 @@ namespace UIForia.Systems {
 
         public ElementId elementId;
         public int layer;
-        public int ftbIndex;
         public int zIndex;
         public int renderOp;
+        public ElementTraversalInfo traversalInfo;
 
     }
 

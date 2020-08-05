@@ -9,6 +9,7 @@ using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Rendering;
 using Vertigo;
 
@@ -28,7 +29,8 @@ namespace UIForia.Graphics {
         internal Dictionary<int, Texture> textureMap;
         internal ResourceManager resourceManager;
         private TextMaterialInfo* textMaterialPtr;
-
+        private ElementId elementId;
+        
         public RenderContext3(ResourceManager resourceManager) {
             this.resourceManager = resourceManager;
             this.textureMap = new Dictionary<int, Texture>(32);
@@ -38,7 +40,8 @@ namespace UIForia.Graphics {
             this.stackAllocator = new PagedByteAllocator(TypedUnsafe.Kilobytes(16), Allocator.Persistent, Allocator.Persistent);
         }
 
-        public void Setup(MaterialId materialId, int renderIndex, float4x4* transform) {
+        public void Setup(ElementId elementId, MaterialId materialId, int renderIndex, float4x4* transform) {
+            this.elementId = elementId;
             this.localDrawId = 0;
             this.renderIndex = (ushort) renderIndex;
             this.defaultMatrix = transform;
@@ -113,6 +116,7 @@ namespace UIForia.Graphics {
 
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
+                elementId = elementId,
                 drawType = DrawType2.UIForiaElement,
                 materialId = MaterialId.UIForiaShape,
                 localBounds = new AxisAlignedBounds2D(x, y, x + drawDesc.width, y + drawDesc.height), // compute based on matrix? probably
@@ -139,6 +143,7 @@ namespace UIForia.Graphics {
         internal void DrawElementBodyInternal(in SDFMeshDesc meshDesc, in AxisAlignedBounds2D bounds, in ElementMaterialSetup materialSetup) {
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
+                elementId = elementId,
                 drawType = DrawType2.UIForiaElement, // todo -- generate geometry instead if material id is not what we expect
                 materialId = MaterialId.UIForiaShape,
                 localBounds = bounds,
@@ -173,6 +178,7 @@ namespace UIForia.Graphics {
 
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
+                elementId = elementId,
                 drawType = DrawType2.UIForiaText,
                 materialId = MaterialId.UIForiaSDFText,
                 localBounds = textRenderRange.localBounds,
@@ -220,6 +226,83 @@ namespace UIForia.Graphics {
             }
         }
 
+        public void PushClipRect(float x, float y, float clipWidth, float clipHeight) {
+            drawList.Add(new DrawInfo2() {
+                elementId = elementId,
+                matrix = defaultMatrix,
+                drawType = DrawType2.PushClipRect,
+                localBounds = new AxisAlignedBounds2D(x, y, clipWidth, clipHeight),
+                drawSortId = new DrawSortId() {
+                    localRenderIdx = localDrawId++,
+                    baseRenderIdx = renderIndex
+                }
+            });
+
+        }
+
+        public void PopClipRect() {
+            drawList.Add(new DrawInfo2() {
+                matrix = defaultMatrix,
+                elementId = elementId,
+                drawType = DrawType2.PopClipRect,
+                drawSortId = new DrawSortId() {
+                    localRenderIdx = localDrawId++,
+                    baseRenderIdx = renderIndex
+                }
+            });
+        }
+
+        private int stencilClipStart;
+        public void BeginStencilClip() {
+            // todo -- i think i need to defend against nesting these, can nest but not while beginning, must push before starting a new one. also need to auto push if not done at end of draw method
+            stencilClipStart = drawList.size;
+ 
+            drawList.Add(new DrawInfo2() {
+                drawType = DrawType2.BeginStencilClip,
+                matrix = defaultMatrix,
+                elementId = elementId,
+                drawSortId = new DrawSortId() {
+                    baseRenderIdx = renderIndex,
+                    localRenderIdx = localDrawId++
+                }
+            });
+            
+        }
+
+        public void PushStencilClip() {
+            
+            if (stencilClipStart <= 0) {
+                throw new Exception("You need to call BeginStencilClip() before pushing a stencil clip");
+            }
+            
+            drawList.Add(new DrawInfo2() {
+                drawType = DrawType2.PushStencilClip,
+                matrix = defaultMatrix,
+                elementId = elementId,
+                drawSortId = new DrawSortId() {
+                    baseRenderIdx = renderIndex,
+                    localRenderIdx = localDrawId++
+                }
+                // shapeData = (void*)stencilClipStart
+            });
+            //Assert.IsTrue(drawList[drawList.size - stencilClipStart].drawType == DrawType2.BeginStencilClip);
+            //drawList[drawList.size - stencilClipStart].shapeData = (void*) (drawList.size - stencilClipStart);
+            
+            stencilClipStart = 0;
+        }
+
+        public void PopStencilClip() {
+            drawList.Add(new DrawInfo2() {
+                drawType = DrawType2.PopStencilClip,
+                matrix = defaultMatrix,
+                elementId = elementId,
+                drawSortId = new DrawSortId() {
+                    baseRenderIdx = renderIndex,
+                    localRenderIdx = localDrawId++
+                }
+            });
+        }
+
     }
 
     public struct ElementDrawDesc {
@@ -232,10 +315,10 @@ namespace UIForia.Graphics {
         public byte radiusBR;
         public byte radiusBL;
 
-        public byte bevelTL;
-        public byte bevelTR;
-        public byte bevelBR;
-        public byte bevelBL;
+        public ushort bevelTL;
+        public ushort bevelTR;
+        public ushort bevelBR;
+        public ushort bevelBL;
 
         public Color32 backgroundColor;
         public Color32 backgroundTint;
@@ -247,6 +330,19 @@ namespace UIForia.Graphics {
         public Color32 outlineColor;
         public float width;
         public float height;
+
+        public float textureRotation;
+        public ushort uvTopLeft;
+        public ushort uvTopRight;
+        public ushort uvBottomRight;
+        public ushort uvBottomLeft;
+        
+        public float textureScaleX;
+        public float textureScaleY;
+        public float textureOffsetX;
+        public float textureOffsetY;
+        public float textureTilingX;
+        public float textureTilingY;
 
     }
 

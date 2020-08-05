@@ -1,0 +1,17 @@
+﻿<UITemplate>
+    <Style src="SpaceGameDemo/SinglePlayer/SinglePlayer.style"/>
+    <Style src="SpaceGameDemo/Theme.style" alias="theme"/>
+
+    <Using namespace="SpaceGameDemo.SinglePlayer"/>
+
+    <Contents style="avatar-container">
+
+        <Div style="avatar-background" attr:selected="{selected}">
+            <Image style="pilot" style.preferredWidth="175" style.preferredHeight="175" src="imgSrc"/>
+        </Div>
+
+        <Text>{name}</Text>
+
+    </Contents>
+
+</UITemplate>

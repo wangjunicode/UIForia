@@ -23,6 +23,15 @@ namespace UIForia.Rendering {
 
 namespace UIForia.Graphics {
 
+    public enum StencilType {
+
+        Draw,
+        Push,
+        Pop,
+        Ignore
+
+    }
+    
     public unsafe struct Batch {
 
         public int meshId;
@@ -39,15 +48,13 @@ namespace UIForia.Graphics {
         public MaterialPropertyOverride* propertyOverrides;
         public int propertyOverrideCount;
 
-        public int clipRectCount;
-        public AxisAlignedBounds2D* clipRects;
-        
         public byte stencilRefValue;
         public StencilState stencilState;
         public ColorWriteMask colorMask;
         
         public MaterialPermutation materialPermutation;
         public BatchType type;
+        public StencilType stencilType;
         public int indirectArgOffset;
 
         public bool HasUIForiaMaterial() {

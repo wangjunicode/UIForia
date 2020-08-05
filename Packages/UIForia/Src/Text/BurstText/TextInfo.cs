@@ -190,7 +190,7 @@ namespace UIForia.Text {
         internal float resolvedFontSize;
         public TextMaterialInfo textMaterial;
         private TextInfoFlags flags;
-        private bool hasEffects;
+        internal bool hasEffects;
 
         // parser pushes character instructions into output stream
         // strip whitespace accordingly
@@ -260,7 +260,6 @@ namespace UIForia.Text {
 
         public static unsafe void UpdateText(ref TextInfo textInfo, string text, ITextProcessor processor, TextSystem textSystem) {
             bool requiresTextTransform = false;
-            bool requiresRenderProcessing = false;
             bool requiresRichTextLayout = false;
             bool processedStream = false;
 
@@ -271,8 +270,9 @@ namespace UIForia.Text {
             inputSymbolBuffer.size = 0;
             int length = text.Length;
 
-            if (textInfo.hasEffects) { }
-
+            textInfo.hasEffects = false;
+            textInfo.requiresRenderProcessing = true; // always re-process material buffer when text updates
+            
             fixed (char* charptr = text) {
                 if (processor != null) {
                     CharStream stream = new CharStream(charptr, 0, (uint) length);
@@ -282,13 +282,13 @@ namespace UIForia.Text {
                     processedStream = processor.Process(stream, ref symbolStream);
 
                     requiresTextTransform = symbolStream.requiresTextTransform;
-                    requiresRenderProcessing = symbolStream.requiresRenderProcessing;
                     requiresRichTextLayout = symbolStream.requiresRichTextLayout;
                     inputSymbolBuffer = symbolStream.stream;
 
                     // todo -- diff with previous stream if there was one, but only if using effects or a type writer
 
                     if (symbolStream.textEffects.size > 0) {
+                        textInfo.hasEffects = true;
                         bool replacing = true;
 
                         for (int i = 0; i < textEffects.size; i++) {
@@ -332,7 +332,6 @@ namespace UIForia.Text {
             }
 
             textInfo.requiresTextTransform = requiresTextTransform;
-            textInfo.requiresRenderProcessing = requiresRenderProcessing;
             if (requiresRichTextLayout) {
                 textInfo.flags |= TextInfoFlags.RequiresRichTextLayout;
             }
@@ -732,6 +731,38 @@ namespace UIForia.Text {
             renderRangeList.Dispose();
             materialBuffer.Dispose();
         }
+
+        // internal static unsafe void ApplyTextAlignment(ref TextInfo textInfo, float totalWidth) {
+        //     TextAlignment alignment = textInfo.textStyle.alignment;
+        //     for (int i = 0; i < textInfo.lineInfoList.size; i++) {
+        //         ref TextLineInfo lineInfo = ref textInfo.lineInfoList.array[i];
+        //         float lineOffsetX = lineInfo.x;
+        //
+        //         switch (alignment) {
+        //
+        //             default:
+        //             case TextAlignment.Unset:
+        //             case TextAlignment.Left:
+        //                 break;
+        //
+        //             case TextAlignment.Right:
+        //                 lineOffsetX = totalWidth - lineInfo.width;
+        //                 break;
+        //
+        //             case TextAlignment.Center:
+        //                 lineOffsetX = (totalWidth - lineInfo.width) * 0.5f;
+        //                 break;
+        //         }
+        //
+        //         int lsEnd = lineInfo.wordStart + lineInfo.wordCount;
+        //         for (int ls = lineInfo.wordStart; ls < lsEnd; ls++) {
+        //             ref TextLayoutSymbol symbol = ref textInfo.layoutSymbolList.array[ls];
+        //             if (symbol.type == TextLayoutSymbolType.Word) {
+        //                 symbol.wordInfo.x += lineOffsetX;
+        //             }
+        //         }
+        //     }
+        // }
 
     }
 

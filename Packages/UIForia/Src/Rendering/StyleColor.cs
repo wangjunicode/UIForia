@@ -47,9 +47,13 @@ namespace UIForia.Rendering {
         public static implicit operator StyleColor(Color c) {
             return new StyleColor((byte) (Mathf.Clamp01(c.r) * byte.MaxValue), (byte) (Mathf.Clamp01(c.g) * byte.MaxValue), (byte) (Mathf.Clamp01(c.b) * byte.MaxValue), (byte) (Mathf.Clamp01(c.a) * byte.MaxValue));
         }
-
+        
+        public static implicit operator StyleColor(Color32 c) {
+            return new StyleColor(c.r, c.b, c.g, c.a);
+        }
+        
         public static implicit operator Color32(StyleColor c) {
-            return new Color(c.r, c.g, c.b, c.a);
+            return new Color32(c.r, c.g, c.b, c.a);
         }
 
         public static implicit operator Color(StyleColor c) {

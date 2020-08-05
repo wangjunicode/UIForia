@@ -179,6 +179,12 @@ namespace UIForia.Util.Unsafe {
             return ((T*) array)[size - 1];
         }
 
+        public void Clear<T>() where T : unmanaged {
+            if (array != null) {
+                UnsafeUtility.MemClear(array, Capacity * sizeof(T));
+            }
+        }
+
     }
 
     [AssertSize(16)]
@@ -410,6 +416,8 @@ namespace UIForia.Util.Unsafe {
                 state = state
             };
         }
+        
+
 
         [DebuggerTypeProxy(typeof(DataListDebugView<>))]
         public struct Shared : IDisposable {
@@ -418,6 +426,10 @@ namespace UIForia.Util.Unsafe {
 
             public Shared(DataListState* state) {
                 this.state = state;
+            }
+
+            public DataList<T> TmpDebug() {
+                return FromState(*state);
             }
 
             public Shared(int initialCapacity, Allocator allocator, NativeArrayOptions clear = NativeArrayOptions.UninitializedMemory) {
@@ -538,7 +550,10 @@ namespace UIForia.Util.Unsafe {
                     this[size - i - 1] = tmp;
                 }
             }
-
+            
+            public void Clear() {
+                state->Clear<T>();
+            }
         }
 
         public ref T GetLast() {
@@ -553,7 +568,11 @@ namespace UIForia.Util.Unsafe {
                 this[size - i - 1] = tmp;
             }
         }
-        
+
+        public void Clear() {
+            state.Clear<T>();
+        }
+
     }
 
 }

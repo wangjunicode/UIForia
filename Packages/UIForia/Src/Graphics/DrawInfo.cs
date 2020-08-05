@@ -18,25 +18,16 @@ namespace UIForia.Graphics {
 
     }
 
-    internal unsafe struct StencilInfo {
+    internal struct StencilInfo {
 
         public StencilSetupState drawState;
+        public int beginIndex;
         public int pushIndex;
         public int popIndex;
         public int clipperDepth;
         public int stencilDepth;
         public int parentIndex;
         public AxisAlignedBounds2D aabb;
-        public bool isHidden;
-        public MaterialId materialId;
-        public MaterialPropertyOverride* propertyOverrides;
-        public int propertyOverrideCount;
-        public VertexLayout vertexLayout;
-        public StencilState state;
-        
-        public byte refValue;
-        public byte childRefValue;
-        public RangeInt drawInfoRange;
 
     }
     

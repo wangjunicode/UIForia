@@ -3,7 +3,6 @@ using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Jobs;
-using Unity.Mathematics;
 
 namespace UIForia.Graphics {
 
@@ -43,7 +42,7 @@ namespace UIForia.Graphics {
 
                     int matrixId = matrixIdList.array[i];
                     int clipRectId = clipRectIdList.array[i];
-                    uint clipAndMatrix = (uint) BitUtil.SetHighLowBits(clipRectId, matrixId);
+                    uint clipAndMatrix = (uint) ((clipRectId << 16) | (matrixId & 0xffff));
 
                     for (int v = start; v < end; v++) {
                         vertices[v].indices.x = clipAndMatrix;
@@ -52,10 +51,11 @@ namespace UIForia.Graphics {
                 else if (meshInfo.type == MeshInfoType.Element) {
                     int start = textVertexCount + meshInfo.vertexStart;
                     int end = start + meshInfo.vertexCount;
-
+                    meshInfo.vertexStart = start;
+                    
                     int matrixId = matrixIdList.array[i];
                     int clipRectId = clipRectIdList.array[i];
-                    uint clipAndMatrix = (uint) BitUtil.SetHighLowBits(clipRectId, matrixId);
+                    uint clipAndMatrix = (uint) ((clipRectId << 16) | (matrixId & 0xffff));
 
                     for (int v = start; v < end; v++) {
                         vertices[v].indices.x = clipAndMatrix;

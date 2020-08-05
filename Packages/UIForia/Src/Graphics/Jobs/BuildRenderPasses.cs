@@ -1,9 +1,11 @@
-﻿using UIForia.ListTypes;
+﻿using System.Diagnostics;
+using UIForia.ListTypes;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace UIForia.Graphics {
 
@@ -72,38 +74,6 @@ namespace UIForia.Graphics {
             map.Dispose();
         }
 
-        private void BuildOutOfOrderLinks(ref DataList<bool> requiresRender, ref DataList<DrawLink> drawLinks) {
-            DrawLink dummy = default;
-
-            ref DrawLink prevLink = ref dummy;
-
-            int prevIdx = -1;
-
-            for (int i = 0; i < drawList.size; i++) {
-
-                ref DrawInfo2 drawInfo = ref drawList[i];
-
-                requiresRender[i] = true;
-
-                if (drawInfo.IsNonRendering()) {
-                    continue;
-                }
-
-                ref RenderTraversalInfo renderTraversalInfo = ref renderTraversalList[i];
-
-                if (!renderTraversalInfo.isStencilMember) {
-                    drawLinks[i] = new DrawLink() {
-                        prev = prevIdx,
-                    };
-                    prevLink.next = i;
-                    prevLink = ref drawLinks[i];
-                }
-
-            }
-
-            prevLink.next = -1;
-        }
-
         public void Execute() {
 
             inOrderBatchList = new List_Int32(128, Allocator.Temp);
@@ -111,11 +81,11 @@ namespace UIForia.Graphics {
             stencilsToPop = new List_Int32(16, Allocator.Temp);
             stencilsToPush = new List_Int32(16, Allocator.Temp);
 
-            DataList<DrawLink> drawLinks = new DataList<DrawLink>(drawList.size, Allocator.Temp);
+            //  DataList<DrawLink> drawLinks = new DataList<DrawLink>(drawList.size, Allocator.Temp);
 
-            DataList<bool> requiresRender = new DataList<bool>(drawList.size, Allocator.Temp);
+            //      DataList<RenderData> renderDataList = new DataList<RenderData>(drawList.size, Allocator.Temp);
 
-            BuildOutOfOrderLinks(ref requiresRender, ref drawLinks);
+            //   BuildOutOfOrderLinks(ref renderDataList, ref drawLinks);
 
             // for each open stencil
             // if in order pointer >= pop index
@@ -136,8 +106,9 @@ namespace UIForia.Graphics {
                 // we do need to push callbacks though
 
                 ref DrawInfo2 drawInfo = ref drawList[i];
+                ref RenderTraversalInfo renderInfo = ref renderTraversalList[i];
 
-                if (!requiresRender[i]) {
+                if (!renderInfo.requiresRendering) {
                     continue;
                 }
 
@@ -152,26 +123,12 @@ namespace UIForia.Graphics {
                         break;
 
                     case DrawType2.UIForiaText: {
+                        
                         int batchMemberOffset = batchMemberList.size;
 
-                        i = UIForiaTextBatch_InOrderBatch(ref requiresRender, i, out MaterialPermutation materialPermutation);
-
-                        Batch batch = new Batch {
-                            type = BatchType.Text,
-                            materialPermutation = materialPermutation,
-                            memberIdRange = new RangeInt(batchMemberOffset, inOrderBatchList.size),
-                            // todo -- stencil setup
-                        };
-
-                        batchMemberList.AddRange(inOrderBatchList.array, inOrderBatchList.size);
-                        inOrderBatchList.size = 0;
-
-                        batchList.Add(batch);
-
-                        renderCommands.Add(new RenderCommand() {
-                            type = RenderCommandType.SDFTextBatch,
-                            batchIndex = batchList.size - 1
-                        });
+                        i = UIForiaTextBatch_InOrderBatch(ref renderTraversalList, i, out MaterialPermutation materialPermutation) - 1;
+                        
+                        SubmitInorderBatch(renderInfo, materialPermutation, batchMemberOffset, BatchType.Text, RenderCommandType.SDFTextBatch);
 
                         break;
 
@@ -181,34 +138,10 @@ namespace UIForia.Graphics {
 
                         int batchMemberOffset = batchMemberList.size;
 
-                        i = UIForiaShapeBatch_InOrderBatch(ref requiresRender, i, out MaterialPermutation materialPermutation);
+                        i = UIForiaShapeBatch_InOrderBatch(ref renderTraversalList, i, out MaterialPermutation materialPermutation) - 1;
 
-                        Batch batch = new Batch {
-                            type = BatchType.Element,
-                            materialPermutation = materialPermutation,
-                            memberIdRange = new RangeInt(batchMemberOffset, inOrderBatchList.size),
-                            // todo -- stencil setup
-                        };
+                        SubmitInorderBatch(renderInfo, materialPermutation, batchMemberOffset, BatchType.Element, RenderCommandType.ElementBatch);
 
-                        batchMemberList.AddRange(inOrderBatchList.array, inOrderBatchList.size);
-                        inOrderBatchList.size = 0;
-
-                        batchList.Add(batch);
-
-                        renderCommands.Add(new RenderCommand() {
-                            type = RenderCommandType.ElementBatch,
-                            batchIndex = batchList.size - 1
-                        });
-
-                        break;
-                    }
-
-                    case DrawType2.PushStencilClip: {
-                        break;
-                    }
-
-                    case DrawType2.PopClipper: {
-                        // should know which clipper and its type?
                         break;
                     }
 
@@ -222,9 +155,78 @@ namespace UIForia.Graphics {
             outOfOrderBatchList.Dispose();
         }
 
-        public int UIForiaTextBatch_InOrderBatch(ref DataList<bool> requiresRender, int startIdx, out MaterialPermutation permutation) {
-            DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
+        private void SubmitInorderBatch(RenderTraversalInfo renderInfo, MaterialPermutation materialPermutation, int batchMemberOffset, BatchType batchType, RenderCommandType cmdType) {
+            ref StencilInfo stencilInfo = ref stencilList[renderInfo.stencilIndex];
 
+            Batch batch = new Batch {
+                type = batchType,
+                materialPermutation = materialPermutation,
+                memberIdRange = new RangeInt(batchMemberOffset, inOrderBatchList.size),
+                stencilType = stencilInfo.stencilDepth == 0 ? StencilType.Ignore : StencilType.Draw,
+                stencilRefValue = (byte) stencilInfo.stencilDepth,
+                colorMask = ColorWriteMask.All
+            };
+
+            batchMemberList.AddRange(inOrderBatchList.array, inOrderBatchList.size);
+            inOrderBatchList.size = 0;
+
+            if (stencilsToPop.size > 0) { }
+
+            if (stencilsToPush.size > 0) {
+                PushStencils();
+            }
+
+            // need to add this after stencil, but can build it before stencils
+            batchList.Add(batch);
+            renderCommands.Add(new RenderCommand() {
+                type = cmdType,
+                batchIndex = batchList.size - 1
+            });
+        }
+
+        private void PushStencils() {
+            for (int i = 0; i < stencilsToPush.size; i++) {
+                ref StencilInfo stencilInfo = ref stencilList[stencilsToPush.array[i]];
+
+                for (int j = stencilInfo.beginIndex; j < stencilInfo.pushIndex; j++) {
+                    ref DrawInfo2 drawInfo = ref drawList[j];
+                    switch (drawInfo.drawType) {
+                        case DrawType2.UIForiaElement:
+
+                            int batchMemberOffset = batchMemberList.size;
+
+                            j = UIForiaShapeBatch_InOrderBatch(ref renderTraversalList, j, out MaterialPermutation materialPermutation) - 1;
+
+                            Batch batch = new Batch() {
+                                type = BatchType.Element,
+                                stencilType = StencilType.Push,
+                                materialPermutation = materialPermutation,
+                                memberIdRange = new RangeInt(batchMemberOffset, inOrderBatchList.size),
+                                stencilRefValue = (byte) (stencilInfo.stencilDepth - 1),
+                                colorMask = ColorWriteMask.All,
+                            };
+
+                            batchMemberList.AddRange(inOrderBatchList.array, inOrderBatchList.size);
+                            inOrderBatchList.size = 0;
+                            batchList.Add(batch);
+                            renderCommands.Add(new RenderCommand() {
+                                type = RenderCommandType.ElementBatch,
+                                batchIndex = batchList.size - 1
+                            });
+                            break;
+                    }
+                }
+
+            }
+
+            stencilsToPush.size = 0;
+
+        }
+
+        public int UIForiaTextBatch_InOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, out MaterialPermutation permutation) {
+            DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
+            RenderTraversalInfo* renderInfoArray = renderDataList.GetArrayPointer();
+            
             inOrderBatchList.Add(startIdx);
 
             // open the required stencil for first item in batch if it isnt open yet
@@ -233,10 +235,10 @@ namespace UIForia.Graphics {
 
             int stencilIndex = renderTraversalList[startIdx].stencilIndex;
 
-            // if (stencilList[batchStart.stencilIndex].drawState == StencilSetupState.Uninitialized) {
-            //     stencilsToPush.Add(batchStart.stencilIndex);
-            //     stencilList[batchStart.stencilIndex].drawState = StencilSetupState.Pushed;
-            // }
+            if (stencilList[stencilIndex].drawState == StencilSetupState.Uninitialized) {
+                stencilsToPush.Add(stencilIndex);
+                stencilList[stencilIndex].drawState = StencilSetupState.Pushed;
+            }
 
             TextMaterialSetup* materialSetup = (TextMaterialSetup*) drawInfoArray[startIdx].materialData;
 
@@ -246,12 +248,15 @@ namespace UIForia.Graphics {
                 texture1 = materialSetup->outlineTexture.textureId,
                 texture2 = materialSetup->fontTextureId
             };
+            
+            bool isStencilMember = renderTraversalList[startIdx].isStencilMember;
 
             for (int i = startIdx + 1; i < drawList.size; i++) {
 
                 ref DrawInfo2 current = ref drawInfoArray[i];
+                ref RenderTraversalInfo renderInfo = ref renderInfoArray[i];
 
-                if (!requiresRender[i]) {
+                if (renderInfo.isStencilMember != isStencilMember || !renderInfo.requiresRendering || (current.drawType & (DrawType2.PushClipRect | DrawType2.PopClipRect)) != 0) {
                     continue;
                 }
 
@@ -267,7 +272,6 @@ namespace UIForia.Graphics {
                     // otherwise break batch
                     return i;
                 }
-                
 
                 TextMaterialSetup* setup = (TextMaterialSetup*) current.materialData;
 
@@ -275,7 +279,7 @@ namespace UIForia.Graphics {
                 if (setup->fontTextureId != permutation.texture2) {
                     return i;
                 }
-                
+
                 // if no textures are set for the batch, set it this element's
 
                 int prevTex0 = permutation.texture0;
@@ -310,9 +314,10 @@ namespace UIForia.Graphics {
             return drawList.size;
         }
 
-        public int UIForiaShapeBatch_InOrderBatch(ref DataList<bool> requiresRender, int startIdx, out MaterialPermutation permutation) {
+        public int UIForiaShapeBatch_InOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, out MaterialPermutation permutation) {
 
             DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
+            RenderTraversalInfo* renderInfoArray = renderDataList.GetArrayPointer();
 
             inOrderBatchList.Add(startIdx);
 
@@ -322,10 +327,17 @@ namespace UIForia.Graphics {
 
             int stencilIndex = renderTraversalList[startIdx].stencilIndex;
 
-            // if (stencilList[batchStart.stencilIndex].drawState == StencilSetupState.Uninitialized) {
-            //     stencilsToPush.Add(batchStart.stencilIndex);
-            //     stencilList[batchStart.stencilIndex].drawState = StencilSetupState.Pushed;
-            // }
+            // i can assign a stencil id to all elements up front
+            // i know the stencil depth and bounds
+            // i know the stencil setup state
+            // using that i can figure out where batching can happen
+
+            // can optimize out of order searches pretty easily later on
+
+            if (stencilList[stencilIndex].drawState == StencilSetupState.Uninitialized) {
+                stencilsToPush.Add(stencilIndex);
+                stencilList[stencilIndex].drawState = StencilSetupState.Pushed;
+            }
 
             ElementMaterialSetup* materialSetup = (ElementMaterialSetup*) drawInfoArray[startIdx].materialData;
 
@@ -335,11 +347,13 @@ namespace UIForia.Graphics {
                 texture1 = materialSetup->outlineTexture.textureId
             };
 
+            bool isStencilMember = renderTraversalList[startIdx].isStencilMember;
             for (int i = startIdx + 1; i < drawList.size; i++) {
 
                 ref DrawInfo2 current = ref drawInfoArray[i];
+                ref RenderTraversalInfo renderInfo = ref renderInfoArray[i];
 
-                if (!requiresRender[i]) {
+                if (renderInfo.isStencilMember != isStencilMember || !renderInfo.requiresRendering || (current.drawType & (DrawType2.PushClipRect | DrawType2.PopClipRect)) != 0) {
                     continue;
                 }
 
@@ -348,7 +362,7 @@ namespace UIForia.Graphics {
                 }
 
                 // new stencil breaks in-order batching, we'll get around this in the out of order pass
-                if (renderTraversalList[i].stencilIndex != stencilIndex) {
+                if (renderInfo.stencilIndex != stencilIndex) {
                     // if stencil depths are the same
                     // check open states
                     // if can open and not intersecting then add to stencils to open list

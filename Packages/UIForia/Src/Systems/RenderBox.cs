@@ -222,11 +222,14 @@ namespace UIForia.Rendering {
 
         public virtual void Enable() { }
 
+        public virtual void OnDisable() { }
+        
         public string GetName() {
             return "painter-name";
         }
 
         public virtual void OnSizeChanged(Size size) {}
+
 
     }
 

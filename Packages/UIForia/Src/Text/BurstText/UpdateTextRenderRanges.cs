@@ -96,17 +96,15 @@ namespace UIForia.Text {
                                 lineIdx = symbol.charInfo.lineIndex;
 
                                 if (range.length > 0) {
-                                    prevSymbol = null;
                                     textInfo.renderRangeList.Add(new TextRenderRange() {
                                         characterRange = range,
                                         type = TextRenderType.Characters,
                                         fontAssetId = fontAssetId,
                                     });
-                                    range.start = c; //.size;
-                                    range.length = 0;
-
                                 }
-
+                                range.start = -1;
+                                range.length = 0;
+                                prevSymbol = null;
                                 // foreach active decoration
                                 // decoration.EndLine();
                             }

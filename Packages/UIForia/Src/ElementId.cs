@@ -15,6 +15,7 @@ namespace UIForia {
 
         internal ElementId(int index, byte generation) {
             // todo -- not totally sure of this
+            // this might be better -> (high << 24) | (low & 0xffffff);
             this.id = (index & ENTITY_INDEX_MASK) | (generation << ENTITY_INDEX_BITS);
         }
 

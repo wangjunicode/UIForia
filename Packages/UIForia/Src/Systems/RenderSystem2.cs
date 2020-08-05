@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using UIForia.Elements;
 using UIForia.Graphics;
@@ -15,6 +16,8 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Batch = UIForia.Graphics.Batch;
+using BatchType = UIForia.Graphics.BatchType;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Graphics {
 
@@ -22,8 +25,8 @@ namespace UIForia.Graphics {
     public struct DrawSortId {
 
         [FieldOffset(0)] public int sortId;
-        [FieldOffset(0)] public ushort baseRenderIdx;
-        [FieldOffset(2)] public ushort localRenderIdx;
+        [FieldOffset(0)] public ushort localRenderIdx;
+        [FieldOffset(2)] public ushort baseRenderIdx;
 
     }
 
@@ -38,54 +41,60 @@ namespace UIForia.Graphics {
 
     }
 
-    public struct DrawInfoComp : IComparer<DrawInfo2> {
-
-        public int Compare(DrawInfo2 x, DrawInfo2 y) {
-            return x.drawSortId.sortId - y.drawSortId.sortId;
-        }
-
-    }
-
+    [Flags]
     public enum DrawType2 {
 
-        UIForiaElement,
-        UIForiaText,
+        UIForiaElement = 1 << 0,
+        UIForiaText = 1 << 1,
+
+        PushClipScope = 1 << 2,
+        PushStencilClip = 1 << 3,
+        PushClipRect = 1 << 4,
+        PopClipper = 1 << 5,
+        Callback = 1 << 6,
+
+        BeginStencilClip = 1 << 7,
+        PopClipRect = 1 << 8,
 
         // I'm not totally sure what these are yet
         UIForiaGeometry,
         UIForiaSDF,
-
-        PushClipScope,
-        PushStencilClip,
-        PushClipRect,
-        PopClipper,
-        Callback,
-
-        BeginStencilClip,
+        PopStencilClip
 
     }
 
-    public unsafe struct DrawInfo2 {
+    [DebuggerDisplay("{GetDebugDisplay()}")]
+    public unsafe struct DrawInfo2 : IComparable<DrawInfo2> {
+
+        public ElementId elementId; // todo -- temp
 
         public DrawSortId drawSortId;
-
         public DrawType2 drawType;
-
         public AxisAlignedBounds2D localBounds;
-
         public MaterialId materialId;
-
         public float4x4* matrix;
         public void* shapeData;
         public void* materialData;
         public MaterialPropertyOverride* materialOverrideValues;
         public int materialOverrideCount;
 
+        public int CompareTo(DrawInfo2 other) {
+            return drawSortId.sortId - other.drawSortId.sortId;
+        }
+
+        public string GetDebugDisplay() {
+            string retn = " ElementId = " + elementId.index;
+            retn += " -- " + drawType;
+            return retn;
+        }
+
         public bool IsNonRendering() {
             return (drawType == DrawType2.PushClipRect ||
                     drawType == DrawType2.PushClipScope ||
                     drawType == DrawType2.PushStencilClip ||
                     drawType == DrawType2.PopClipper ||
+                    drawType == DrawType2.PopStencilClip ||
+                    drawType == DrawType2.PopClipRect ||
                     drawType == DrawType2.Callback);
         }
 
@@ -190,6 +199,7 @@ namespace UIForia.Systems {
         private ComputeBuffer[] indirectArgBuffers;
 
         private int frameId;
+        private bool doubleBuffer;
 
         public RenderSystem2(Application application, LayoutSystem layoutSystem, ElementSystem elementSystem) {
             this.elementSystem = elementSystem;
@@ -209,14 +219,15 @@ namespace UIForia.Systems {
             this.materialBuffers = new ComputeBuffer[2];
             this.indirectArgBuffers = new ComputeBuffer[2];
             this.indexBuffers = new GraphicsBuffer[2];
-            
+
             fontBuffer.name = "UIForia::FontBuffer";
             glyphBuffer.name = "UIForia::GlyphBuffer";
             unsafeData.Initialize(this);
             resourceManager.onFontAdded += HandleFontAdded;
 
             needsFontUpload = true;
-
+            doubleBuffer = true;
+            
         }
 
         private void HandleFontAdded(FontAsset fontAsset) {
@@ -238,10 +249,10 @@ namespace UIForia.Systems {
 
             float4Buffers[0]?.Dispose();
             float4Buffers[1]?.Dispose();
-            
+
             indirectArgBuffers[0]?.Dispose();
             indirectArgBuffers[1]?.Dispose();
-            
+
             indexBuffers[0]?.Dispose();
             indexBuffers[1]?.Dispose();
 
@@ -251,16 +262,17 @@ namespace UIForia.Systems {
             unsafeData.Dispose();
         }
 
+        public bool printed;
+
         public virtual void OnUpdate() {
             frameId++;
-
             unsafeData.Clear();
             renderContext.Clear();
 
-            unsafeData.float4Buffer.size = 1; // 0 is invalid index
+            unsafeData.float4Buffer.size = 0;
 
             resourceManager.GetFontTextures(renderContext.textureMap);
-            
+
             List<UIView> views = layoutSystem.application.views;
 
             unsafeData.perViewElementList.SetSize(views.Count);
@@ -291,6 +303,14 @@ namespace UIForia.Systems {
 
             new SortDrawInfoList() {drawList = unsafeData.drawList}.Run();
 
+            // if (!printed) {
+            //     printed = true;
+            //     for (int i = 0; i < unsafeData.drawList.size; i++) {
+            //         var depth = elementSystem.instanceTable[unsafeData.drawList[i].elementId.index].hierarchyDepth;
+            //         Debug.Log(new string(' ', 4 * depth) + " " + elementSystem.instanceTable[unsafeData.drawList[i].elementId.index] + "   " + unsafeData.drawList[i].drawType);
+            //     }
+            // }
+
             unsafeData.transformedBounds.SetSize(unsafeData.drawList.size);
             unsafeData.materialPermutationIds.SetSize(unsafeData.drawList.size);
             unsafeData.matrixIdList.SetSize(unsafeData.drawList.size);
@@ -299,7 +319,15 @@ namespace UIForia.Systems {
             unsafeData.clipRectIdList.SetSize(unsafeData.drawList.size);
             unsafeData.renderTraversalList.SetSize(unsafeData.drawList.size);
 
-            JobHandle processClipping = UIForiaScheduler.Run(new ProcessClipping() {
+            // these need full clears because not every drawInfo in the list is renderable
+            // and we don't write data for them in that case. This makes sure we have a clean slate
+            unsafeData.renderTraversalList.Clear();
+            unsafeData.meshInfoList.Clear();
+
+            // this must fill first because I need to combine clipBuffer with float4 buffer
+            // or clip buffer gets bound as cbuffer, unlikely to need 4096 rect clippers...right?
+
+            UIForiaScheduler.Run(new ProcessClipping() {
                 drawList = unsafeData.drawList,
                 transformedBounds = unsafeData.transformedBounds,
                 // todo -- verify this should really be dpi scaled
@@ -310,9 +338,10 @@ namespace UIForia.Systems {
                 clipRenderList = unsafeData.renderTraversalList,
                 stencilDataList = unsafeData.stencilDataList
 
-                // todo -- more data needed
-
             });
+
+            // SYNCHRONOUS!!!!
+            unsafeData.float4Buffer.AddRange((float4*) unsafeData.clipRectBuffer.GetArrayPointer(), unsafeData.clipRectBuffer.size);
 
             NativeArray<JobHandle> preProcessHandles = new NativeArray<JobHandle>(4, Allocator.Temp);
             NativeArray<JobHandle> shapeBakingHandles = new NativeArray<JobHandle>(3, Allocator.Temp);
@@ -346,35 +375,14 @@ namespace UIForia.Systems {
                 materialPermutationIdList = unsafeData.materialPermutationIds,
             });
 
-            preProcessHandles[3] = UIForiaScheduler.Run(new BuildMatrixBuffer() {
+            preProcessHandles[1] = UIForiaScheduler.Run(new BuildMatrixBuffer() {
                 drawList = unsafeData.drawList,
                 matrixBuffer = unsafeData.matrixBuffer,
                 matrixIndices = unsafeData.matrixIdList
             });
 
-            JobHandle buildData = JobHandle.CombineDependencies(preProcessHandles);
-
-            JobHandle ready = JobHandle.CombineDependencies(buildData, processClipping);
-
-            JobHandle shapeBaking = JobHandle.CombineDependencies(shapeBakingHandles);
-
-            // JobHandle uiforiaShapeBaking = UIForiaScheduler.Await(buildData, shapeBaking)
-            //     .Then(new CombineUIForiaVertexBuffers() {
-            //
-            //         textVertexList = unsafeData.textVertexList,
-            //         textTriangleList = unsafeData.textTriangleList,
-            //
-            //         elementVertexList = unsafeData.elementVertexList,
-            //         elementTriangleList = unsafeData.elementTriangleList,
-            //
-            //         meshList = unsafeData.meshInfoList,
-            //         materialIdList = unsafeData.materialIdList,
-            //         matrixIdList = unsafeData.matrixIdList,
-            //         clipRectIdList = unsafeData.clipRectIdList
-            //
-            //     });
+            // requires clipping matrix building to be complete
             new CombineUIForiaVertexBuffers() {
-
                 textMaterialBuffer = unsafeData.materialBuffer,
                 elementMaterialBuffer = unsafeData.elementMaterialBuffer,
                 textVertexList = unsafeData.textVertexList,
@@ -382,22 +390,7 @@ namespace UIForia.Systems {
                 meshList = unsafeData.meshInfoList,
                 matrixIdList = unsafeData.matrixIdList,
                 clipRectIdList = unsafeData.clipRectIdList
-
             }.Run();
-
-            // JobHandle renderPassHandle = UIForiaScheduler.Await(ready)
-            //     .Then(new BuildRenderPasses() {
-            //         drawList = unsafeData.drawList,
-            //         batchList = unsafeData.batchList,
-            //         batchMemberList = unsafeData.batchMemberList,
-            //         materialPermutationIds = unsafeData.materialPermutationIds,
-            //         materialPermutations = unsafeData.materialPermutationsList,
-            //         renderCommands = unsafeData.renderCommands,
-            //         stencilList = default,
-            //         clipperBoundsList = unsafeData.clipRectBuffer,
-            //         renderTraversalList = unsafeData.renderTraversalList
-            //     });
-            // .Then(new BuildDynamicBatchGeometry());
 
             new BuildRenderPasses() {
                 drawList = unsafeData.drawList,
@@ -406,12 +399,11 @@ namespace UIForia.Systems {
                 materialPermutationIds = unsafeData.materialPermutationIds,
                 materialPermutations = unsafeData.materialPermutationsList,
                 renderCommands = unsafeData.renderCommands,
-                stencilList = default,
+                stencilList = unsafeData.stencilDataList,
                 clipperBoundsList = unsafeData.clipRectBuffer,
                 renderTraversalList = unsafeData.renderTraversalList
             }.Run();
 
-            // renderHandle = JobHandle.CombineDependencies(uiforiaShapeBaking, renderPassHandle);
             new BuildIndexBuffer() {
                 indirectArgs = unsafeData.indirectArgBuffer,
                 meshInfoList = unsafeData.meshInfoList,
@@ -420,22 +412,7 @@ namespace UIForia.Systems {
                 indexBuffer = unsafeData.uiforiaIndexBuffer,
             }.Run();
 
-            // renderHandle = UIForiaScheduler.Await(renderHandle).Then(new BuildIndexBuffer() {
-            //     indirectArgs = unsafeData.indirectArgBuffer,
-            //     meshInfoList = unsafeData.meshInfoList,
-            //     batchList = unsafeData.batchList,
-            //     batchMemberList = unsafeData.batchMemberList,
-            //     indexBuffer = unsafeData.uiforiaIndexBuffer,
-            //     combinedTriangleList = unsafeData.textTriangleList // use text list as the merged one, its naturally larger anyway
-            // });
-
-            // JobHandle.ScheduleBatchedJobs();
-
             // todo -- could be done later, will still need to upload meshes n stuff
-
-            // foreach (KeyValuePair<int, Texture> kvp in renderContext.textureMap) {
-            //     textureMap[kvp.Key] = kvp.Value;
-            // }
 
             renderHandle.Complete();
 
@@ -452,14 +429,15 @@ namespace UIForia.Systems {
         private static readonly int s_FontDataBufferKey = Shader.PropertyToID("_UIForiaFontBuffer");
         private static readonly int s_GlyphBufferKey = Shader.PropertyToID("_UIForiaGlyphBuffer");
         private static readonly int s_FontTextureKey = Shader.PropertyToID("_FontTexture");
+        private static readonly int s_DPIScaleFactorKey = Shader.PropertyToID("_UIForiaDPIScale");
 
         private static readonly int s_MainTextureKey = Shader.PropertyToID("_MainTex");
         private static readonly int s_OutlineTextureKey = Shader.PropertyToID("_OutlineTex");
 
-        
         private void UpdateComputeBufferData<T>(DataList<T>.Shared list, string bufferName, ComputeBuffer[] buffers, int idx, ComputeBufferType bufferType = ComputeBufferType.Structured) where T : unmanaged {
             ComputeBuffer buffer = buffers[idx];
-            if (buffer == null || list.size > buffer.count) {
+            if (ReferenceEquals(buffer, null) || list.size > buffer.count) {
+                buffer?.Release();
                 buffer?.Dispose();
                 buffer = new ComputeBuffer(list.capacity, sizeof(T), bufferType);
                 buffer.name = bufferName + idx;
@@ -478,11 +456,14 @@ namespace UIForia.Systems {
             buffers[idx].SetData(array, 0, 0, list.size);
 
         }
-        
+
         public void Render(float surfaceWidth, float surfaceHeight, CommandBuffer commandBuffer) {
             // renderHandle.Complete();
-
+            Profiler.BeginSample("UIForia::ExecuteDraw");
             int bufferIdx = frameId % 2;
+            if (!doubleBuffer) {
+                bufferIdx = 0;
+            }
 
             if (needsFontUpload) {
                 needsFontUpload = false;
@@ -532,7 +513,7 @@ namespace UIForia.Systems {
             UpdateComputeBufferData(unsafeData.matrixBuffer, "UIForia::MatrixBuffer", matrixBuffers, bufferIdx);
             UpdateComputeBufferData(unsafeData.float4Buffer, "UIForia::Float4Buffer", float4Buffers, bufferIdx);
             UpdateComputeBufferData(unsafeData.indirectArgBuffer, "UIForia::IndirectArgBuffer", indirectArgBuffers, bufferIdx, ComputeBufferType.IndirectArguments);
-            
+
             ComputeBuffer vertexBuffer = vertexBuffers[bufferIdx];
             ComputeBuffer matrixBuffer = matrixBuffers[bufferIdx];
             ComputeBuffer materialBuffer = materialBuffers[bufferIdx];
@@ -540,7 +521,7 @@ namespace UIForia.Systems {
             ComputeBuffer argBuffer = indirectArgBuffers[bufferIdx];
             GraphicsBuffer indexBuffer = indexBuffers[bufferIdx];
 
-            if (indexBuffer == null || unsafeData.uiforiaIndexBuffer.size > indexBuffer.count) {
+            if (ReferenceEquals(indexBuffer, null) || unsafeData.uiforiaIndexBuffer.size > indexBuffer.count) {
                 indexBuffer?.Dispose();
                 indexBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Index, unsafeData.uiforiaIndexBuffer.capacity, sizeof(int));
                 indexBuffers[bufferIdx] = indexBuffer;
@@ -551,7 +532,6 @@ namespace UIForia.Systems {
                 unsafeData.uiforiaIndexBuffer.size,
                 Allocator.None
             );
-
 
 #if UNITY_EDITOR
             NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref triangleArray, NativeArrayUnsafeUtility.GetAtomicSafetyHandle(unsafeData.dummyArray));
@@ -565,9 +545,10 @@ namespace UIForia.Systems {
             float halfWidth = surfaceWidth * 0.5f;
             float halfHeight = surfaceHeight * 0.5f;
 
-            Matrix4x4 origin = Matrix4x4.TRS(new Vector3(-halfWidth, halfHeight, 0), Quaternion.identity, Vector3.one);
+            Matrix4x4 origin = Matrix4x4.TRS(new Vector3(-halfWidth, halfHeight, 0), Quaternion.identity, Vector3.one * application.DPIScaleFactor);
 
-            commandBuffer.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.Ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, -100, 100));
+            Matrix4x4 identity = Matrix4x4.identity;
+            commandBuffer.SetViewProjectionMatrices(identity, Matrix4x4.Ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, -100, 100));
 
             commandBuffer.SetGlobalBuffer(s_MatrixBufferKey, matrixBuffer);
             commandBuffer.SetGlobalBuffer(s_VertexBufferKey, vertexBuffer);
@@ -577,6 +558,7 @@ namespace UIForia.Systems {
             commandBuffer.SetGlobalBuffer(s_GlyphBufferKey, glyphBuffer);
 
             commandBuffer.SetGlobalMatrix(s_OriginMatrixKey, origin);
+            commandBuffer.SetGlobalFloat(s_DPIScaleFactorKey, application.DPIScaleFactor);
 
             for (int i = 0; i < renderCommandCount; i++) {
 
@@ -591,15 +573,17 @@ namespace UIForia.Systems {
 
                         Material material = resourceManager.GetMaterialInstance(MaterialId.UIForiaShape);
 
-                        if (renderContext.textureMap.TryGetValue(batch.materialPermutation.texture0, out Texture texture)) {
+                        if (batch.materialPermutation.texture0 != 0 && renderContext.textureMap.TryGetValue(batch.materialPermutation.texture0, out Texture texture)) {
                             mpb.SetTexture(s_MainTextureKey, texture);
                         }
 
-                        if (renderContext.textureMap.TryGetValue(batch.materialPermutation.texture1, out texture)) {
+                        if (batch.materialPermutation.texture1 != 0 && renderContext.textureMap.TryGetValue(batch.materialPermutation.texture1, out texture)) {
                             mpb.SetTexture(s_OutlineTextureKey, texture);
                         }
 
-                        commandBuffer.DrawProceduralIndirect(indexBuffer, Matrix4x4.identity, material, 0, MeshTopology.Triangles, argBuffer, sizeof(IndirectArg) * batch.indirectArgOffset, mpb);
+                        SetupStencilState(batch, commandBuffer);
+
+                        commandBuffer.DrawProceduralIndirect(indexBuffer, identity, material, 0, MeshTopology.Triangles, argBuffer, sizeof(IndirectArg) * batch.indirectArgOffset, mpb);
 
                         break;
                     }
@@ -620,19 +604,20 @@ namespace UIForia.Systems {
 
                         Material material = resourceManager.GetMaterialInstance(MaterialId.UIForiaSDFText);
 
-                        if (renderContext.textureMap.TryGetValue(batch.materialPermutation.texture0, out Texture texture)) {
+                        if (batch.materialPermutation.texture0 != 0 && renderContext.textureMap.TryGetValue(batch.materialPermutation.texture0, out Texture texture)) {
                             mpb.SetTexture(s_MainTextureKey, texture);
                         }
 
-                        if (renderContext.textureMap.TryGetValue(batch.materialPermutation.texture1, out texture)) {
+                        if (batch.materialPermutation.texture1 != 0 && renderContext.textureMap.TryGetValue(batch.materialPermutation.texture1, out texture)) {
                             mpb.SetTexture(s_OutlineTextureKey, texture);
                         }
 
-                        if (renderContext.textureMap.TryGetValue(batch.materialPermutation.texture2, out texture)) {
+                        if (batch.materialPermutation.texture2 != 0 && renderContext.textureMap.TryGetValue(batch.materialPermutation.texture2, out texture)) {
                             mpb.SetTexture(s_FontTextureKey, texture);
                         }
 
-                        commandBuffer.DrawProceduralIndirect(indexBuffer, Matrix4x4.identity, material, 0, MeshTopology.Triangles, argBuffer, sizeof(IndirectArg) * batch.indirectArgOffset, mpb);
+                        SetupStencilState(batch, commandBuffer);
+                        commandBuffer.DrawProceduralIndirect(indexBuffer, identity, material, 0, MeshTopology.Triangles, argBuffer, sizeof(IndirectArg) * batch.indirectArgOffset, mpb);
 
                         break;
                     }
@@ -676,6 +661,51 @@ namespace UIForia.Systems {
 
             }
 
+            Profiler.EndSample();
+        }
+
+        private static readonly int k_ColorMaskKey = Shader.PropertyToID("_UIForiaColorMask");
+        private static readonly int k_StencilRefKey = Shader.PropertyToID("_UIForiaStencilRef");
+        private static readonly int k_StencilCompKey = Shader.PropertyToID("_UIForiaStencilComp");
+        private static readonly int k_StencilOpKey = Shader.PropertyToID("_UIForiaStencilOp");
+
+        // todo -- only set if changed from last call
+        private StencilType stencilType;
+        private ColorWriteMask colorWriteMask;
+        private int refValue;
+
+        private void SetupStencilState(in Batch batch, CommandBuffer commandBuffer) {
+
+            bool update = (batch.stencilType != stencilType || refValue != batch.stencilRefValue || batch.colorMask != colorWriteMask);
+
+            if (!update) {
+                return;
+            }
+
+            if (batch.stencilType == StencilType.Push) {
+                commandBuffer.SetGlobalInt(k_ColorMaskKey, (int) batch.colorMask);
+                commandBuffer.SetGlobalInt(k_StencilRefKey, batch.stencilRefValue);
+                commandBuffer.SetGlobalInt(k_StencilCompKey, (int) CompareFunction.Equal);
+                commandBuffer.SetGlobalInt(k_StencilOpKey, (int) StencilOp.IncrementSaturate);
+            }
+            else if (batch.stencilType == StencilType.Pop) {
+                commandBuffer.SetGlobalInt(k_ColorMaskKey, (int) batch.colorMask);
+                commandBuffer.SetGlobalInt(k_StencilRefKey, batch.stencilRefValue);
+                commandBuffer.SetGlobalInt(k_StencilCompKey, (int) CompareFunction.Equal);
+                commandBuffer.SetGlobalInt(k_StencilOpKey, (int) StencilOp.DecrementSaturate);
+            }
+            else if (batch.stencilType == StencilType.Ignore) {
+                commandBuffer.SetGlobalInt(k_ColorMaskKey, (int) batch.colorMask);
+                commandBuffer.SetGlobalInt(k_StencilRefKey, batch.stencilRefValue);
+                commandBuffer.SetGlobalInt(k_StencilCompKey, (int) CompareFunction.Always);
+                commandBuffer.SetGlobalInt(k_StencilOpKey, (int) StencilOp.Keep);
+            }
+            else {
+                commandBuffer.SetGlobalInt(k_ColorMaskKey, (int) batch.colorMask);
+                commandBuffer.SetGlobalInt(k_StencilRefKey, batch.stencilRefValue);
+                commandBuffer.SetGlobalInt(k_StencilCompKey, (int) CompareFunction.Equal);
+                commandBuffer.SetGlobalInt(k_StencilOpKey, (int) StencilOp.Keep);
+            }
         }
 
         private void RunMainThreadPainters() {
@@ -707,13 +737,13 @@ namespace UIForia.Systems {
 
                 if (callInfo.renderOp == 0) {
                     // todo -- if clipper via styles, set that up here
-                    renderContext.Setup(materialId, i, matrices + elementId.index);
+                    renderContext.Setup(elementId, materialId, i, matrices + elementId.index);
                     // todo -- if is clipper, push clip rect or stencil, probably after the draw
                     box.PaintBackground3(renderContext);
                 }
                 else {
                     // todo -- if clipper via styles, tear it down here
-                    renderContext.Setup(materialId, i, matrices + elementId.index);
+                    renderContext.Setup(elementId, materialId, i, matrices + elementId.index);
                     box.PaintForeground3(renderContext);
                 }
             }
@@ -755,6 +785,14 @@ namespace UIForia.Systems {
 
                 UIElement instance = elementSystem.instanceTable[elementId.index];
 
+                // 2 options
+                // 1 - always recycle and renew painters
+                // saves memory potentially
+                // makes lifecycle harder and less predictable
+                // only do this for build in ones is probably reasonable
+                // 2 - always create new ones
+                // bad for gc good for lifecycle
+
                 string painter = instance.style.Painter;
 
                 RenderBox renderBox = null;
@@ -765,7 +803,9 @@ namespace UIForia.Systems {
 
                 if (renderBox == null) {
                     if (instance is UITextElement) {
-                        renderBox = new TextRenderBox2();
+                        //if (instance.renderBox == null) {
+                            renderBox = new TextRenderBox2();
+                        //}
                     }
                     else {
                         renderBox = new StandardRenderBox2();
@@ -777,12 +817,9 @@ namespace UIForia.Systems {
                 unsafeData.renderInfoTable[elementId] = new RenderInfo() {
                     layer = instance.style.Layer,
                     zIndex = instance.style.ZIndex,
-                    drawForeground = renderBox.HasForeground,
-                    hasBackgroundEffect = false,
-                    hasForegroundEffect = false
                 };
 
-                instance.renderBox = renderBox; // todo -- remove link
+                instance.renderBox = renderBox;
                 renderBox.element = instance;
                 instance.renderBox.OnInitialize();
 
@@ -790,21 +827,56 @@ namespace UIForia.Systems {
 
         }
 
-        public void HandleElementsDisabled(DataList<ElementId>.Shared disabledElements) { }
+        public void HandleElementsDisabled(DataList<ElementId>.Shared disabledElements) {
+            // todo -- implement this
+
+            for (int i = 0; i < disabledElements.size; i++) {
+                ElementId elementId = disabledElements[i];
+
+                UIElement element = elementSystem.instanceTable[elementId.index];
+
+                if (element.renderBox == null) {
+                    continue;
+                }
+
+                if (elementSystem.IsAlive(elementId)) {
+                    if (element.renderBox is TextRenderBox2 textRenderBox) { }
+                    else if (element.renderBox is StandardRenderBox2 standardRenderBox) { }
+                    else {
+                        element.renderBox.OnDisable();
+                    }
+                }
+                else {
+                    if (element.renderBox is TextRenderBox2 textRenderBox) { }
+                    else if (element.renderBox is StandardRenderBox2 standardRenderBox) { }
+                    else {
+                        element.renderBox?.OnDestroy();
+                    }
+                }
+
+                element.renderBox = null;
+
+            }
+
+        }
 
         public void HandleStylePropertyUpdates(UIElement element, StyleProperty[] propertyList, int propertyCount) {
-            //   if (element.renderBox == null) return;
+            if (element.renderBox == null) return;
 
-            // for (int i = 0; i < propertyCount; i++) {
-            //     ref StyleProperty property = ref propertyList[i];
-            //     switch (property.propertyId) {
-            //         case StylePropertyId.Painter:
-            //             ReplaceRenderBox(element, property.AsString);
-            //             break;
-            //     }
-            // }
+            for (int i = 0; i < propertyCount; i++) {
+                ref StyleProperty property = ref propertyList[i];
+                switch (property.propertyId) {
+                    case StylePropertyId.Painter:
+                        // ReplaceRenderBox(element, property.AsString);
+                        break;
 
-            //element.renderBox.OnStylePropertyChanged(propertyList, propertyCount);
+                    case StylePropertyId.OverflowX:
+                    case StylePropertyId.OverflowY:
+                        break;
+                }
+            }
+
+            element.renderBox.OnStylePropertyChanged(propertyList, propertyCount);
         }
 
         private struct UnsafeData : IDisposable {
@@ -845,7 +917,7 @@ namespace UIForia.Systems {
             public DataList<ElementMaterialInfo>.Shared elementMaterialBuffer;
 
             public void Initialize(RenderSystem2 renderSystem2) {
-                this.elementMaterialBuffer= new DataList<ElementMaterialInfo>.Shared(32, Allocator.Persistent);
+                this.elementMaterialBuffer = new DataList<ElementMaterialInfo>.Shared(32, Allocator.Persistent);
                 this.fontBuffer = new DataList<GPUFontInfo>(8, Allocator.Persistent);
                 this.glyphBuffer = new DataList<GPUGlyphInfo>(512, Allocator.Persistent);
                 this.indirectArgBuffer = new DataList<IndirectArg>.Shared(16, Allocator.Persistent);

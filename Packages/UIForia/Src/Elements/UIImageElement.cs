@@ -15,18 +15,22 @@ namespace UIForia.Elements {
             if (src != null) {
                 texture = application.ResourceManager.GetTexture(src);
             }
+            else {
+                texture = null;
+            }
 
-            SetupBackground();
+            style.SetBackgroundImage(texture, StyleState.Normal);
+
         }
 
         [OnPropertyChanged(nameof(texture))]
         public void OnTextureChanged() {
             SetupBackground();
-            
+
         }
 
         private void SetupBackground() {
-            // style.SetBackgroundImage(texture, StyleState.Normal);
+            style.SetBackgroundImage(texture, StyleState.Normal);
             // if (Width > 0) {
             //     style.SetPreferredHeight(Width * texture.height / texture.width, StyleState.Normal);
             //     style.SetPreferredWidth(Width, StyleState.Normal);

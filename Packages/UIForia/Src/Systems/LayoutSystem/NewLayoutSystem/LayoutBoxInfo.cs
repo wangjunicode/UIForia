@@ -27,7 +27,7 @@ namespace UIForia.Layout {
         }
 
         public float actualWidth {
-            get => actualSize.y;
+            get => actualSize.x;
         }
 
         public float actualHeight {

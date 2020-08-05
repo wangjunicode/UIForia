@@ -2583,6 +2583,7 @@ namespace UIForia.Compilers {
             catch (Exception e) {
                 TeardownAttributeData(attr);
                 compiler.EndIsolatedSection();
+                Debug.Log("File: " + attr.templateShell.filePath + " [line: " + attr.line + "]");
                 Debug.LogError(e);
                 return null;
             }

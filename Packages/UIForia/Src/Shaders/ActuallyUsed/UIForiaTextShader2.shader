@@ -56,9 +56,10 @@ Shader "UIForia/UIForiaText2"
                 float2 texCoord0 : TEXCOORD0;
                 float2 texCoord1 : TEXCOORD1;
                 nointerpolation float3 param : TEXCOORD2;
-                nointerpolation uint indices : TEXCOORD3;
+                nointerpolation uint2 indices : TEXCOORD3;
                 nointerpolation float4 underlay : TEXCOORD4;
                 nointerpolation float2 ratios : TextCoord5;
+                nointerpolation float4 debug : TextCoord6;
             };
             
             struct UIForiaVertex {
@@ -145,7 +146,6 @@ Shader "UIForia/UIForiaText2"
 
                 float3 ratios = ComputeSDFTextScaleRatios(fontInfo, textStyle);
                 float padding = GetTextSDFPadding(fontInfo.gradientScale, textStyle, ratios);
-                
                 float weight = 0;
                 float stylePadding = 0;
                
@@ -162,8 +162,9 @@ Shader "UIForia/UIForiaText2"
                     padding = fontInfo.gradientScale - stylePadding;
                 }
                 
-                 padding += stylePadding;
+                padding += stylePadding;
 
+                o.debug.x = padding;
                 float4 effectData = _UIForiaFloat4Buffer[effectIdx];
                 float3 vpos = float3(vertex.position.xy, 0); // todo -- read z from somewhere if used
                 
@@ -173,6 +174,9 @@ Shader "UIForia/UIForiaText2"
                 float elementScale = vertex.texCoord0.x * scaleMultiplier;
                 float scaledPaddingWidth = (padding / fontInfo.atlasWidth) * (invertHorizontal == 1 ? -1 : 1);
                 float scaledPaddingHeight = (padding / fontInfo.atlasHeight) * (invertVertical == 1 ? -1 : 1);
+                o.debug.y = elementScale * padding;
+                o.debug.z = left;
+                o.debug.w = elementScale;
                 
                 float charWidth = glyphInfo.width * elementScale;
                 float charHeight = glyphInfo.height * elementScale;
@@ -218,8 +222,7 @@ Shader "UIForia/UIForiaText2"
                     o.texCoord1 = float2(0, 0);
                 }
              
-                float4x4 transform = mul(_UIForiaMatrixBuffer[matrixIndex], _UIForiaOriginMatrix);
-                
+                float4x4 transform = mul(_UIForiaOriginMatrix, _UIForiaMatrixBuffer[matrixIndex]);
                 o.vertex = mul(UNITY_MATRIX_VP, mul(transform, float4(vpos, 1.0)));
                 
                 float2 pixelSize = o.vertex.w;
@@ -248,19 +251,19 @@ Shader "UIForia/UIForiaText2"
     
                 float x = -(textStyle.underlayX * ratios.z) * fontInfo.gradientScale / fontInfo.atlasWidth;
                 float y = -(textStyle.underlayY * ratios.z) * fontInfo.gradientScale / fontInfo.atlasHeight; 
-                
                 o.ratios = float2(ratios.x, ratios.y);
                 o.underlay = float4(x, y, underlayScale, underlayBias);
                 o.param = float3(alphaClip, scale, bias);
-                o.indices = vertex.indices.y;
+                o.indices.x = UnpackClipRectId(vertex.indices.x);
+                o.indices.y = vertex.indices.y;
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target {
-                half opacityMultiplier = GetByteNToFloat(i.indices, 2);
-                uint displayBits = GetByteN(i.indices, 3);
+                half opacityMultiplier = GetByteNToFloat(i.indices.y, 2);
+                uint displayBits = GetByteN(i.indices.y, 3);
                 
-                TextMaterialInfo materialInfo = _UIForiaMaterialBuffer[UnpackMaterialId(i.indices & 0xffff)];
+                TextMaterialInfo materialInfo = _UIForiaMaterialBuffer[UnpackMaterialId(i.indices.y & 0xffff)];
 
                 float c = tex2Dlod(_FontTexture, float4(i.texCoord0, 0, 0)).a;
 
@@ -306,14 +309,17 @@ Shader "UIForia/UIForiaText2"
                 glowColor = GetGlowColor(sd, scale, glowColor, glowOffset * i.ratios.y, glowInner, glowOuter * i.ratios.y, glowPower);
 			    faceColor.rgb += glowColor.rgb * glowColor.a;
                 
+                
+                float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y); //* _UIForiaDPIScale;
+                float4 clipRect = _UIForiaFloat4Buffer[i.indices.x]; // x = xMin, y = yMin, z = xMax, w = yMax
+                float2 s = step(clipRect.xw, clipPos) - step(clipRect.zy, clipPos);
+                
                 clip(c - alphaClip);
                 
                 // this is not at all scientific, but I was seeing cases where the letter had an unwanted background tint
                 // when using dilate or softness values that were too high. this fixes that, but very much not proven
                 // remove if it causes weirdness. Could be that alpha cut off is just wrong, but tmp exhibits the same behavior
-               return c < 0.05 ? fixed4(0, 0, 0, 0) : faceColor;
-                
-              
+                return ((c < 0.05 || s.x * s.y == 0) ? fixed4(0, 0, 0, 0) : faceColor);
             
             }
             

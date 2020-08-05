@@ -55,8 +55,11 @@ namespace UIForia.Rendering {
         public int activeElementCount;
 
         internal int index;
+
+        private static int s_IdGenerator = 1;
         
         internal UIView(int index, Application application, string name, Matrix4x4 matrix, Size size) {
+            this.id = s_IdGenerator++;
             this.index = index;
             this.name = name;
             this.application = application;
@@ -84,6 +87,7 @@ namespace UIForia.Rendering {
         }
         
         internal UIView(int index, Application application, string name, UIElement element, Matrix4x4 matrix, Size size) {
+            this.id = s_IdGenerator++;
             this.index = index;
             this.name = name;
             this.application = application;

@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using UIForia.Graphics;
 using UIForia.Layout;
@@ -12,6 +13,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using Vertigo;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Rendering {
 
@@ -123,6 +125,14 @@ namespace UIForia.Rendering {
 
     }
 
+    [Flags]
+    public enum OverflowHandling {
+
+        Horizontal = 1 << 0,
+        Vertical = 1 << 1
+
+    }
+
     [DebuggerDisplay("{element.ToString()}")]
     public class StandardRenderBox2 : RenderBox {
 
@@ -134,6 +144,7 @@ namespace UIForia.Rendering {
         protected Texture backgroundTexture;
         protected int backgroundTextureId;
         protected int outlineTextureId;
+        protected OverflowHandling overflowHandling;
 
         public override void OnInitialize() {
 
@@ -158,7 +169,14 @@ namespace UIForia.Rendering {
 
             drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId);
             requireRendering = false; // set after we get a size change
+            overflowHandling = 0;
+            if (element.style.OverflowX != Overflow.Visible) {
+                overflowHandling |= OverflowHandling.Horizontal;
+            }
 
+            if (element.style.OverflowY != Overflow.Visible) {
+                overflowHandling |= OverflowHandling.Vertical;
+            }
         }
 
         public static ColorMode GetColorMode(Color32 mainColor, Color32 tintColor, int textureId) {
@@ -220,10 +238,10 @@ namespace UIForia.Rendering {
             float resolvedCornerBevelBottomRight = ResolveRelativeLength(halfMin, element.style.CornerBevelBottomRight);
             float resolvedCornerBevelBottomLeft = ResolveRelativeLength(halfMin, element.style.CornerBevelBottomLeft);
 
-            byte b0 = (byte) (((resolvedCornerBevelTopLeft * 1000)) * 0.5f);
-            byte b1 = (byte) (((resolvedCornerBevelTopRight * 1000)) * 0.5f);
-            byte b2 = (byte) (((resolvedCornerBevelBottomRight * 1000)) * 0.5f);
-            byte b3 = (byte) (((resolvedCornerBevelBottomLeft * 1000)) * 0.5f);
+            ushort b0 = (ushort) resolvedCornerBevelTopLeft;
+            ushort b1 = (ushort) resolvedCornerBevelTopRight;
+            ushort b2 = (ushort) resolvedCornerBevelBottomRight;
+            ushort b3 = (ushort) resolvedCornerBevelBottomLeft;
 
             drawDesc.width = size.width;
             drawDesc.height = size.height;
@@ -239,6 +257,7 @@ namespace UIForia.Rendering {
             drawDesc.radiusBL = r3;
 
             drawDesc.outlineWidth = ResolveRelativeLength(halfMin, element.style.OutlineWidth);
+            drawDesc.outlineColorMode = GetColorMode(drawDesc.outlineColor, default, outlineTextureId);
             requireRendering = drawDesc.opacity > 0 && (drawDesc.bgColorMode != 0 || (drawDesc.outlineWidth > 0 && drawDesc.outlineColorMode != 0));
         }
 
@@ -252,6 +271,7 @@ namespace UIForia.Rendering {
                 switch (property.propertyId) {
 
                     case StylePropertyId.OutlineWidth:
+                        recomputeDrawing = true;
                         float halfMin = math.min(drawDesc.width, drawDesc.height) * 0.5f;
                         drawDesc.outlineWidth = ResolveRelativeLength(halfMin, property.AsUIFixedLength);
                         break;
@@ -276,31 +296,51 @@ namespace UIForia.Rendering {
                         backgroundTexture = property.AsTexture;
                         backgroundTextureId = ReferenceEquals(backgroundTexture, null) ? 0 : backgroundTexture.GetHashCode();
                         break;
-                    
+
+                    case StylePropertyId.OverflowX:
+                        if (property.AsOverflow == Overflow.Visible || property.AsOverflow == Overflow.Unset) {
+                            overflowHandling &= ~OverflowHandling.Horizontal;
+                        }
+                        else {
+                            overflowHandling |= OverflowHandling.Horizontal;
+                        }
+
+                        break;
+
+                    case StylePropertyId.OverflowY:
+                        if (property.AsOverflow == Overflow.Visible || property.AsOverflow == Overflow.Unset) {
+                            overflowHandling &= ~OverflowHandling.Vertical;
+                        }
+                        else {
+                            overflowHandling |= OverflowHandling.Vertical;
+                        }
+
+                        break;
+
                     case StylePropertyId.MeshFillAmount:
                         break;
-                    
+
                     case StylePropertyId.MeshFillOrigin:
                         break;
-                    
+
                     case StylePropertyId.MeshFillDirection:
                         break;
-                    
+
                     case StylePropertyId.MeshType:
                         break;
-                    
+
                     case StylePropertyId.BackgroundImageScaleX:
                         break;
-                    
+
                     case StylePropertyId.BackgroundImageScaleY:
                         break;
-                    
+
                     case StylePropertyId.BackgroundImageRotation:
                         break;
-                    
+
                     case StylePropertyId.BackgroundImageTileX:
                         break;
-                    
+
                     case StylePropertyId.BackgroundImageTileY:
                         break;
                 }
@@ -314,28 +354,60 @@ namespace UIForia.Rendering {
 
         }
 
-        public override void PaintBackground2(RenderContext2 ctx) { }
-
         public override void PaintBackground3(RenderContext3 ctx) {
 
-            if (!requireRendering) return;
+            if (requireRendering) {
 
-            ctx.SetBackgroundTexture(backgroundTexture);
-            ctx.DrawElement(0, 0, drawDesc);
-            var copy = drawDesc;
-            copy.width = 10;
-            copy.outlineWidth = 0;
-            copy.bevelTL = 0;
-            copy.bevelTR = 0;
-            copy.bevelBR = 0;
-            copy.bevelBL = 0;
-            copy.radiusTL = 0;
-            copy.radiusTR = 0;
-            copy.radiusBR = 0;
-            copy.radiusBL = 0;
-            copy.backgroundColor = Color.white;
-            ctx.DrawElement(300, 0, copy);
+                ctx.SetBackgroundTexture(backgroundTexture);
+                ctx.DrawElement(0, 0, drawDesc);
+            }
 
+            if (overflowHandling != 0) {
+
+                // todo -- add an overflow offset style
+                float clipX = 0;
+                float clipY = 0;
+                float clipWidth = float.MaxValue;
+                float clipHeight = float.MaxValue;
+
+                if ((overflowHandling & OverflowHandling.Horizontal) != 0) {
+                    clipWidth = drawDesc.width;
+                }
+
+                if ((overflowHandling & OverflowHandling.Vertical) != 0) {
+                    clipHeight = drawDesc.height;
+                }
+
+                ctx.PushClipRect(clipX, clipY, clipWidth, clipHeight);
+                // ctx.BeginStencilClip();
+                //
+                // ctx.DrawElement(0, 0, drawDesc);
+                //
+                // ctx.PushStencilClip();
+
+            }
+
+            // var copy = drawDesc;
+            // copy.width = 10;
+            // copy.outlineWidth = 0;
+            // copy.bevelTL = 0;
+            // copy.bevelTR = 0;
+            // copy.bevelBR = 0;
+            // copy.bevelBL = 0;
+            // copy.radiusTL = 0;
+            // copy.radiusTR = 0;
+            // copy.radiusBR = 0;
+            // copy.radiusBL = 0;
+            // copy.backgroundColor = Color.white;
+            // ctx.DrawElement(300, 0, copy);
+
+        }
+
+        public override void PaintForeground3(RenderContext3 ctx) {
+            if (overflowHandling != 0) {
+                ctx.PopClipRect();
+                // ctx.PopStencilClip();
+            }
         }
 
     }

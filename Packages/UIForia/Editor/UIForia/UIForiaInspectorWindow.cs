@@ -258,9 +258,14 @@ namespace UIForia.Editor {
                 GUILayout.Space(16);
 
                 DrawEnumWithValue<LayoutType>(selectedElement.style.GetComputedStyleProperty(StylePropertyId.LayoutType), false);
+                DrawEnumWithValue<LayoutBehavior>(selectedElement.style.GetComputedStyleProperty(StylePropertyId.LayoutBehavior), false);
                 DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredWidth), false);
                 DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredHeight), false);
 
+                if (selectedElement.style.LayoutType == LayoutType.Flex) {
+                    EditorGUILayout.IntField("Flex child count", app.layoutSystem.layoutBoxTable[selectedElement.id].flex.items.size);
+                }
+                
                 GUILayout.Space(16);
 
                 DrawLabel("Element Id", selectedElement.id.ToString());
@@ -534,6 +539,7 @@ namespace UIForia.Editor {
                 case StylePropertyId.TextGlowColor:
                 case StylePropertyId.TextUnderlayColor:
                 case StylePropertyId.CaretColor:
+                case StylePropertyId.OutlineColor:
                 case StylePropertyId.SelectionBackgroundColor:
                 case StylePropertyId.SelectionTextColor:
                     return DrawColor(property, isEditable);
@@ -546,6 +552,7 @@ namespace UIForia.Editor {
                     return DrawFloat(property, isEditable);
 
                 case StylePropertyId.RadialLayoutRadius:
+                case StylePropertyId.OutlineWidth:
                 case StylePropertyId.CornerBevelTopLeft:
                 case StylePropertyId.CornerBevelTopRight:
                 case StylePropertyId.CornerBevelBottomLeft:
@@ -648,6 +655,7 @@ namespace UIForia.Editor {
                 case StylePropertyId.ShadowOffsetY:
                     return DrawOffsetMeasurement(property, isEditable);
 
+                case StylePropertyId.TextLineHeight:
                 case StylePropertyId.TransformScaleX:
                 case StylePropertyId.TransformScaleY:
                     return DrawFloat(property, isEditable);

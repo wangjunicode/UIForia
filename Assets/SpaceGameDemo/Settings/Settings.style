@@ -1,0 +1,16 @@
+﻿import "SpaceGameDemo/Theme.style" as theme;
+
+style <Heading2> {
+    TextColor = white;
+    TextTransform = UpperCase;
+    TextFontAsset = @theme.orbitron;
+    MarginBottom = 12px;
+}
+
+style indent {
+    MarginLeft = 12px;
+}
+
+style settings-panel {
+    Padding = 12px;
+}

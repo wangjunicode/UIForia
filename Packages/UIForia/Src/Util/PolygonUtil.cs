@@ -39,6 +39,29 @@ namespace UIForia.Util {
         }
 
         public static bool PointInOrientedBounds(in float2 point, in OrientedBounds bounds) {
+
+            // float s = bounds.p0.y * bounds.p2.x - bounds.p0.x * bounds.p2.y + (bounds.p2.y - bounds.p0.y) * point.x + (bounds.p0.x - bounds.p2.x) * point.y;
+            // float t = bounds.p0.x * bounds.p1.y - bounds.p0.y * bounds.p1.x + (bounds.p0.y - bounds.p1.y) * point.x + (bounds.p1.x - bounds.p0.x) * point.y;
+            //
+            // // if ((s < 0) != (t < 0)) {
+            // //     return false;
+            // // }
+            //
+            // float area = -bounds.p1.y * bounds.p2.x + bounds.p0.y * (bounds.p2.x - bounds.p1.x) + bounds.p0.x * (bounds.p1.y - bounds.p2.y) + bounds.p1.x * bounds.p2.y;
+            //
+            // if (area == 0) return false;
+            //
+            // bool inTriangle0 = area < 0 ? (s <= 0 && s + t >= area) : (s >= 0 && s + t <= area);
+            //
+            // s =  bounds.p2.y *  bounds.p0.x -  bounds.p2.x *  bounds.p0.y + ( bounds.p0.y -  bounds.p2.y) * point.x + ( bounds.p2.x -  bounds.p0.x) * point.y;
+            // t =  bounds.p2.x * bounds.p3.y -  bounds.p2.y * bounds.p3.x + ( bounds.p2.y - bounds.p3.y) * point.x + (bounds.p3.x -  bounds.p2.x) * point.y;
+            //
+            // area = -bounds.p3.y * bounds.p0.x + bounds.p2.y * (bounds.p0.x - bounds.p3.x) + bounds.p2.x * (bounds.p3.y - bounds.p0.y) + bounds.p3.x * bounds.p0.y;
+            //
+            //
+            // bool inTriangle1 = area < 0 ? (s <= 0 && s + t >= area) : (s >= 0 && s + t <= area);
+            //
+            // return inTriangle0 || inTriangle1;
             return PointInTriangle(point, bounds.p0, bounds.p1, bounds.p2) || PointInTriangle(point, bounds.p2, bounds.p3, bounds.p0);
         }
 
@@ -51,6 +74,8 @@ namespace UIForia.Util {
             }
 
             float area = -p1.y * p2.x + p0.y * (p2.x - p1.x) + p0.x * (p1.y - p2.y) + p1.x * p2.y;
+
+            if (area == 0) return false;
 
             return area < 0 ? (s <= 0 && s + t >= area) : (s >= 0 && s + t <= area);
         }
@@ -105,13 +130,13 @@ namespace UIForia.Util {
 
             return new float4(minX, minY, maxX, maxY);
         }
-        
+
         public static unsafe AxisAlignedBounds2D GetBounds2D(float2* p, int size) {
             float minX = float.MaxValue;
             float minY = float.MaxValue;
             float maxX = float.MinValue;
             float maxY = float.MinValue;
-            
+
             for (int b = 0; b < size; b++) {
                 float2 point = p[b];
                 if (point.x < minX) minX = point.x;

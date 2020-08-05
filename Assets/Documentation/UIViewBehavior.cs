@@ -48,15 +48,15 @@ namespace UIForia {
             public ushort a4;
         
         }
+
         public void Start() {
 
 #if UNITY_EDITOR
-            QualitySettings.vSyncCount = 0; // VSync must be disabled for target frame rate to work
-            UnityEngine.Application.targetFrameRate = 60;
+//                QualitySettings.vSyncCount = 0; // VSync must be disabled for target frame rate to work
+//                UnityEngine.Application.targetFrameRate = 60;
 
             unsafe {
-Debug.Log(sizeof(Gradient2));
-Debug.Log(sizeof(Vector4) * 2);
+
                 // TextMaterialInfo m0 = new TextMaterialInfo();
                 // Debug.Log(MurmurHash3.Hash((byte*)&m0, sizeof(TextMaterialInfo)));
                 // m0.opacity = 1;
@@ -123,7 +123,8 @@ Debug.Log(sizeof(Vector4) * 2);
 
             if (application != null && commandBuffer != null) {
                 commandBuffer.Clear();
-                application.Render(camera.pixelWidth, camera.pixelHeight, commandBuffer);
+                commandBuffer.ClearRenderTarget(true, false, Color.black, 1f);
+                application.Render(application.Width, application.Height, commandBuffer); //camera.pixelWidth * application.DPIScaleFactor, camera.pixelHeight * application.DPIScaleFactor, commandBuffer);
             }
 
         }
@@ -137,7 +138,7 @@ Debug.Log(sizeof(Vector4) * 2);
                     camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
                 }
 
-                application.DPIScaleFactor = 1; // todo -- remove this
+                // application.DPIScaleFactor = 1; // todo -- remove this
                 application.Update();
 
             }

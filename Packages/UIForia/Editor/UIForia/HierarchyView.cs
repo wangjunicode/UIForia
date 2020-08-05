@@ -164,7 +164,7 @@ namespace UIForia.Editor {
         private static readonly GUIStyle s_ElementTemplateRootStyle;
         private static readonly GUIContent s_Content = new GUIContent();
 
-        public bool showChildrenAndId = false;
+        public bool showChildrenAndId = true;
         public bool showDisabled = false;
         public bool selectMode = false;
         public bool showLayoutStats = false;
@@ -303,7 +303,7 @@ namespace UIForia.Editor {
             }
 
             if (item.element.isEnabled && item.element.renderBox != null) {
-                if (item.element.renderBox.overflowX != Overflow.Visible || item.element.renderBox.overflowY != Overflow.Visible) {
+                if (item.element.renderBox.overflowX == Overflow.Hidden || item.element.renderBox.overflowY == Overflow.Hidden) {
                     s_Content.text += " [Clipper]";
                 }
             }

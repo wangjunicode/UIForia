@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UIForia.Compilers.Style;
 using UIForia.Exceptions;
 using UIForia.Util;
@@ -202,14 +203,17 @@ namespace UIForia {
                 }
             }
 
-            FontAsset retn = Resources.Load<FontAsset>(path);
+            return null;
+            TMP_FontAsset tmp = Resources.Load<TMP_FontAsset>(path);
 
-            if (retn == null) {
+            if (tmp == null) {
                 fontMap.Add(path, null);
                 return null;
             }
 
-            onFontAdded?.Invoke(retn);
+            FontAsset retn = ScriptableObject.CreateInstance<FontAsset>();
+            retn.convertFrom = tmp;
+            
 
             retn.id = fontAssetMap.size;
             retn.Initialize(this);
@@ -217,6 +221,9 @@ namespace UIForia {
             fontTextures.Add(retn.atlas);
             fontMap.Add(path, retn);
             retn.id = fontMap.Count;
+            
+            onFontAdded?.Invoke(retn);
+
             return retn;
         }
 

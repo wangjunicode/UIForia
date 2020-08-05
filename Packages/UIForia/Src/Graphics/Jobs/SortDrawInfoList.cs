@@ -12,7 +12,7 @@ namespace UIForia.Graphics {
 
         public void Execute() {
 
-            NativeSortExtension.Sort(drawList.GetArrayPointer(), drawList.size, new DrawInfoComp());
+            NativeSortExtension.Sort(drawList.GetArrayPointer(), drawList.size);
 
         }
 

@@ -1,0 +1,38 @@
+﻿import "SpaceGameDemo/Theme.style" as theme;
+
+style bread-crumb {
+    FlexLayoutDirection = Horizontal;
+    TextFontAsset = @theme.orbitron;
+    TextColor = white;
+    TextFontSize = 12px;
+    TextTransform = UpperCase;
+    MarginBottom = 8px;
+    MarginLeft = 12px;
+}
+
+style current-page {
+    TextColor = @theme.orange;
+}
+
+style bread-crumb-divider {
+    TextColor = @theme.orange;
+    MarginLeft = 8px;
+    MarginRight = 8px;
+}
+
+style header {
+    TextFontAsset = @theme.orbitron;
+    TextFontSize = 24px;
+    TextFontStyle = Bold;
+    TextColor = white;
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceHorizontal = BetweenContent;
+    DistributeExtraSpaceVertical = CenterContent;
+    PreferredWidth = 1pca;
+    TextTransform = UpperCase;
+    BorderBottom = 2px;
+    BorderColorBottom = rgba(255, 255, 255, 20);
+    PaddingLeft = 12px;
+    PaddingRight = 12px;
+    MarginBottom = 8px;
+}

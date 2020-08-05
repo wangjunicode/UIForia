@@ -43,8 +43,6 @@ namespace UIForia.Graphics {
             int* triangles = indexBuffer.GetArrayPointer();
             int triangleIndex = 0;
 
-            int vertexOffset = 0;
-            
             for (int batchIdx = 0; batchIdx < batchList.size; batchIdx++) {
 
                 ref Batch batch = ref batchArray[batchIdx];
@@ -69,6 +67,8 @@ namespace UIForia.Graphics {
                     
                         ref MeshInfo meshInfo = ref meshArray[batchMemberArray[i]];
 
+                        int vertexOffset = meshInfo.vertexStart;
+                        
                         for (int j = 0; j < meshInfo.vertexCount; j++) {
                             // shouldn't need to mask vertex offset with 0xffff because if it overflows
                             // we're screwed anyway (pretty unlikely to need more than 16,777,216 indices)
@@ -83,10 +83,9 @@ namespace UIForia.Graphics {
                             triangleIndex += 6;
                         }
                         
-                        vertexOffset += meshInfo.vertexCount;
-                        
                     }
-                    
+
+                    batch.indirectArgOffset = indirectArgs.size;
                     indirectArgs.Add(new IndirectArg() {
                         instanceCount = 1,
                         baseVertexLocation = 0,

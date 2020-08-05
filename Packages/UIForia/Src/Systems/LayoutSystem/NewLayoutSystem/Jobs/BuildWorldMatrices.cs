@@ -29,7 +29,7 @@ namespace UIForia.Layout {
                     ref float4x4 localMatrix = ref localMatrices[elementId];
                     ref float4x4 parentWorldMatrix = ref worldMatrices[parentId];
 
-                    worldMatrices[elementId] = math.mul(localMatrix, parentWorldMatrix);
+                    worldMatrices[elementId] = math.mul(parentWorldMatrix, localMatrix);
 
                 }
             }
@@ -53,8 +53,8 @@ namespace UIForia.Layout {
                 ElementId elementId = elementListPtr[i];
                 ElementId parentId = parentListPtr[i];
 
-                ref float4x4 left = ref loc[elementId.id & ElementId.ENTITY_INDEX_MASK];
-                ref float4x4 right = ref wrld[parentId.id & ElementId.ENTITY_INDEX_MASK];
+                ref float4x4 right = ref loc[elementId.id & ElementId.ENTITY_INDEX_MASK];
+                ref float4x4 left = ref wrld[parentId.id & ElementId.ENTITY_INDEX_MASK];
 
                 float4x4 m = new float4x4(
                     1, 0, 0, 0,
@@ -62,6 +62,8 @@ namespace UIForia.Layout {
                     0, 0, 1, 0,
                     0, 0, 0, 1
                 );
+                
+                // todo -- make sure this isnt backwards
                 
                 // this is an inlined 2d matrix multiplication. matrix multiply is stupidly slow in managed mode,
                 // being 2d cuts down our work load by a factor of 6 according to the profiler

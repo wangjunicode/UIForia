@@ -101,8 +101,12 @@ namespace UIForia.Systems {
                 // maybe only actually dispose if destroyed, keep disabled ones around?
                 // styles are unlikely to change much
                 // add to free list if using one and not 1-1 with elements
-                layoutBoxTable[disabledElements[i]].Dispose();
-
+                ElementId elementId = disabledElements[i];
+                if (elementId.index > elementCapacity) {
+                    continue;
+                }
+                ref LayoutBoxUnion layoutBox = ref layoutBoxTable[elementId];
+                layoutBox.Dispose();
             }
 
             DataList<ElementId>.Shared roots = new DataList<ElementId>.Shared(32, Allocator.TempJob);
@@ -122,8 +126,6 @@ namespace UIForia.Systems {
 
             // no need to burst this, usually only very few elements in this list 
             // cost of job running is probably larger than cost of running this in managed.
-            // note: any elements that were ignored will be removed from ignore list in the runner
-            // as a pre-process step before running layout. I don't need to search for them here.
             for (int i = 0; i < roots.size; i++) {
                 ElementId elementId = roots[i];
                 ref LayoutHierarchyInfo layoutInfo = ref layoutHierarchyTable[elementId];
@@ -145,6 +147,7 @@ namespace UIForia.Systems {
 
             }
 
+            roots.Dispose();
         }
 
         // also triggered for create
@@ -236,6 +239,7 @@ namespace UIForia.Systems {
                 horizontalLayoutInfo.prefSize = style.PreferredWidth;
                 horizontalLayoutInfo.minSize = style.MinWidth;
                 horizontalLayoutInfo.maxSize = style.MaxWidth;
+                horizontalLayoutInfo.finalSize = -1;
                 horizontalLayoutInfo.parentBlockSize = default;
                 horizontalLayoutInfo.isBlockProvider = !horizontalLayoutInfo.prefSize.IsContentBased;
 
@@ -243,6 +247,7 @@ namespace UIForia.Systems {
                 verticalLayoutInfo.prefSize = style.PreferredHeight;
                 verticalLayoutInfo.minSize = style.MinHeight;
                 verticalLayoutInfo.maxSize = style.MaxHeight;
+                horizontalLayoutInfo.finalSize = -1;
                 verticalLayoutInfo.parentBlockSize = default;
                 verticalLayoutInfo.isBlockProvider = !verticalLayoutInfo.prefSize.IsContentBased;
 
@@ -292,8 +297,8 @@ namespace UIForia.Systems {
                 // this feels out of place
                 layoutResultTable[elementId].layoutParentId = layoutHierarchyInfo.parentId;
 
-                if (layoutHierarchyInfo.behavior == LayoutBehavior.Normal) {
-                    layoutBoxTable[enabledElements[i]].OnChildrenChanged(this);
+                if (layoutHierarchyInfo.behavior != LayoutBehavior.TranscludeChildren) {
+                    layoutBoxTable[elementId].OnChildrenChanged(this);
                 }
 
             }
@@ -339,7 +344,17 @@ namespace UIForia.Systems {
 
             return null;
         }
+        
+        internal LayoutContext GetLayoutContext(int viewId) {
+            for (int i = 0; i < layoutContexts.size; i++) {
+                if (layoutContexts[i].view.id == viewId) {
+                    return layoutContexts[i];
+                }
+            }
 
+            return null;
+        }
+        
         // only called for elements that were not enabled this frame
         // todo -- totally burstable when styles are blittable
         public void HandleStylePropertyUpdates(UIElement element, StyleProperty[] properties, int propertyCount) {
@@ -535,9 +550,9 @@ namespace UIForia.Systems {
                 }
 
             }
-
+            
             layoutBoxTable[element.id].OnStylePropertiesChanged(this, element, properties, propertyCount);
-
+            
             ElementId parentId = layoutHierarchyTable[element.id].parentId;
             if (parentId != default) {
                 layoutBoxTable[parentId].OnChildStyleChanged(this, element.id, properties, propertyCount);
@@ -675,9 +690,9 @@ namespace UIForia.Systems {
                 }.Schedule();
 
                 JobHandle textLayoutUpdates = UIForiaScheduler.Await(emTableHandle, textTransformUpdates).ThenParallel(new UpdateTextLayoutJob() {
+                    parallel = new ParallelParams(layoutContext.textChangeBuffer.size, 10),
                     viewportWidth = viewParameters.viewWidth,
                     viewportHeight = viewParameters.viewHeight,
-                    parallel = new ParallelParams(layoutContext.textChangeBuffer.size, 10),
                     emTable = elementSystem.emTable,
                     textChanges = layoutContext.textChangeBuffer,
                     fontAssetMap = application.ResourceManager.fontAssetMap,
@@ -686,6 +701,7 @@ namespace UIForia.Systems {
 
                 JobHandle flatten = new FlattenLayoutTree() {
                     viewRootId = viewRootId,
+                    metaTable = elementSystem.metaTable,
                     elementList = layoutContext.elementList,
                     parentList = layoutContext.parentList,
                     ignoredList = layoutContext.ignoredList,
@@ -800,7 +816,7 @@ namespace UIForia.Systems {
 
             JobHandle.CompleteAll(cullingHandles);
             
-            // // todo -- find a better place for this stuff to happen
+            // todo -- find a better place for this stuff to happen
             new UpdateTextRenderRanges() {
                 textInfoMap = textSystem.textInfoMap,
                 fontAssetMap = application.ResourceManager.fontAssetMap,
@@ -898,7 +914,7 @@ namespace UIForia.Systems {
         }
 
         public void QueryPoint(float2 point, IList<UIElement> retn) {
-
+     
             if (!new Rect(0, 0, application.Width, application.Height).Contains(point)) {
                 return;
             }
@@ -973,8 +989,9 @@ namespace UIForia.Systems {
                     if (clipper.isCulled || !containsPoint[clipInfo.clipperIndex] || clipInfo.visibility == Visibility.Hidden || clipInfo.pointerEvents == PointerEvents.None) {
                         continue;
                     }
-
+                    
                     if (clipInfo.isMouseQueryHandler) {
+                      
                         retn.Add(new QueryResult() {elementId = elementList[i], requiresCustomHandling = true});
                         continue;
                     }

@@ -113,6 +113,10 @@ namespace UIForia.Text {
 
         public override void OnPush(float4x4 worldMatrix, UITextElement element) {
             Initialize();
+            parameters.waveSize = 1.8f;
+            parameters.amplitude = 3;
+            parameters.frequency = 3;
+            parameters.effectIntensity = 3;
             timePassed += Time.deltaTime;
             if (timePassed >= shakeDelay) {
                 timePassed = 0;
@@ -169,8 +173,6 @@ namespace UIForia.Text {
             float t = (Mathf.Repeat(elapsed * parameters.frequency - parameters.waveSize * characterInterface.charIndex, 1));
             float val = (parameters.effectIntensity * BounceTween(t) * parameters.amplitude);
 
-          
-            
             characterInterface.Translate(new float3(0, val, 0));
 
             characterInterface.SetGlowColor(glowColor);

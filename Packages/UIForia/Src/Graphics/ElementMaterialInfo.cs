@@ -55,7 +55,8 @@ namespace UIForia.Graphics {
         uint outlineTint;
 
         uint radius;
-        uint bevel;
+        uint bevelTop;
+        uint bevelBottom;
         uint meshPie;
         half2 meshPieOffset;
         
@@ -64,11 +65,12 @@ namespace UIForia.Graphics {
         ushort unused;
         
         // maybe move to float buffer
-        uint uvTopLeft;
-        uint uvBottomRight;
+        // uint uvTopLeft;
+        // uint uvBottomRight;
 
         float outlineWidth;
-        
+        private uint unused1;
+
     }
 
     ///<summary>
@@ -90,10 +92,10 @@ namespace UIForia.Graphics {
         public byte radius2;
         public byte radius3;
 
-        public byte bevelTL;
-        public byte bevelTR;
-        public byte bevelBR;
-        public byte bevelBL;
+        public ushort bevelTL;
+        public ushort bevelTR;
+        public ushort bevelBR;
+        public ushort bevelBL;
 
         public byte pieDirection;
         public byte pieOpenAmount;
@@ -106,12 +108,13 @@ namespace UIForia.Graphics {
         public ushort unused;
         
         // maybe move to float buffer
-        public ushort uvTop;
-        public ushort uvLeft;
-        public ushort uvRight;
-        public ushort uvBottom;
+        // public ushort uvTop;
+        // public ushort uvLeft;
+        // public ushort uvRight;
+        // public ushort uvBottom;
 
         public float outlineWidth;
+        private uint unused1;
 
         // by putting these here we also free up texCoords in the actual vertices
         // could either encode some of the data there or re-purpose those

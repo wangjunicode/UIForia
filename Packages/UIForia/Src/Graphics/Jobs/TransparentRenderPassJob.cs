@@ -13,34 +13,6 @@ using UnityEngine.Rendering;
 
 namespace UIForia.Graphics {
 
-    public enum RenderCommandType {
-
-        ElementBatch,
-        ShapeEffectBatch,
-        Mesh,
-        MeshBatch,
-        SDFTextBatch,
-        SDFTextEffectBatch,
-
-        CreateRenderTarget,
-        PushRenderTexture,
-        ClearRenderTarget,
-        MaskAtlasBatch,
-
-        UpdateClipRectBuffer,
-
-        SetClipRectBuffer,
-
-        Callback,
-
-        SetTextDataBuffer,
-
-        SetShapeDatabuffer,
-
-        SetGradientDataBuffer
-
-    }
-
     public unsafe struct DrawInfoRef {
 
         public int drawIndex;
@@ -51,40 +23,6 @@ namespace UIForia.Graphics {
         public AxisAlignedBounds2D aabb;
 
     }
-
-    public unsafe struct RenderCommand {
-
-        public RenderCommandType type;
-        public int batchIndex;
-        public int meshIndex;
-        public void* data; // context dependent. for batches this is float4 list for clipping 
-        public int sortIdx;
-
-    }
-
-    public enum BatchType {
-
-        None,
-        Text,
-        Element,
-        Mesh,
-        TextEffect,
-        ShapeEffect,
-
-        Mask
-
-    }
-
-    public enum StencilSetupState {
-
-        Uninitialized,
-        Pushed,
-        Closed,
-        Popped
-
-    }
-    
-
 
     [BurstCompile]
     internal unsafe struct TransparentRenderPassJob : IJob {

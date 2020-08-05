@@ -44,6 +44,7 @@ int UnpackEffectIdx(uint4 indices) {
 int UnpackMaterialId(uint4 indices) {
     return indices.y & 0xffff;
 }
+
 int UnpackFontIdx(uint4 indices) {
     return indices.z & 0xffff; 
 }
@@ -51,7 +52,17 @@ int UnpackFontIdx(uint4 indices) {
 int UnpackUVTransformId(uint4 indices) {
     return 0;
 }
-         
+
+uint UnpackHighBytes(uint value)
+{
+    return (value >> 16) & (1 << 16) - 1; 
+}
+
+uint UnpackLowBytes(uint value)
+{
+    return value & 0xffff;
+}
+
 uint UnpackGlyphIdx(uint4 indices) {
     return (indices.z >> 16) & (1 << 16) - 1; 
 }
@@ -72,6 +83,33 @@ half remapHalf(half s, half a1, half a2, half b1, half b2) {
     return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
 }
 
+// same as UnityPixelSnap except taht we add 0.5 to pixelPos after rounding
+inline float4 UIForiaPixelSnap (float4 pos) {
+     float2 hpc = _ScreenParams.xy * 0.5f;
+     float2 adjustment = float2(0, 0);
+     
+     if((uint)_ScreenParams.y % 2 != 0) {
+        adjustment.y = 0.5;
+     }
+     
+     if((uint)_ScreenParams.x % 2 != 0) {
+        adjustment.x = 0.5;
+     }
+     adjustment.x = (_ScreenParams.x % 2 != 0) * 0.5;
+     adjustment.y = (_ScreenParams.y % 2 != 0) * 0.5;
+     float2 pixelPos = round ((pos.xy / pos.w) * hpc) + adjustment;
+     pos.xy = pixelPos / hpc * pos.w;
+     return pos;
+}
+
+fixed4 UIForiaColorSpace(fixed4 color) {
+    #ifdef UNITY_COLORSPACE_GAMMA
+    return color;
+    #else
+    return fixed4(GammaToLinearSpace(color.rgb), color.a);
+    #endif
+}
+
 half4 GetGlowColor(float d, float scale, half4 glowColor, half glowOffset, half glowInner, half glowOuter, half glowPower) {
     half glow = d - glowOffset * 0.5 * scale;
     glowInner = max(0.1, glowInner);
@@ -88,6 +126,9 @@ fixed4 GetTextColor(half d, fixed4 faceColor, fixed4 outlineColor, half outline,
     half faceAlpha = 1 - saturate((d - outline * 0.5 + softness * 0.5) / (1.0 + softness));
     half outlineAlpha = saturate((d + outline * 0.5)) * sqrt(min(1.0, outline));
 
+    faceColor = UIForiaColorSpace(faceColor);
+    outlineColor = UIForiaColorSpace(outlineColor);
+    
     faceColor.rgb *= faceColor.a;
     outlineColor.rgb *= outlineColor.a;
 
@@ -106,7 +147,8 @@ float2 UnpackUV(float uv){
 	return output * 0.001953125;
 }     
 
-fixed4 UIForiaColorSpace(fixed4 color) {
+
+fixed4 UIForiaTextColorSpace(fixed4 color) {
     #ifdef UNITY_COLORSPACE_GAMMA
     return color;
     #else
@@ -120,6 +162,11 @@ uint GetByteN(uint value, int n) {
 
 float GetByteNToFloat(uint value, int n) {
     return ((value >> (8 * n)) & 0xff) / (float)0xff;
+}
+
+uint UnpackUShortHigh()
+{
+    
 }
 
 float4 UnpackColor(uint input) {

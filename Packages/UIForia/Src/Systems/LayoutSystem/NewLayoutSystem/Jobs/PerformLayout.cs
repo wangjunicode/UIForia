@@ -31,6 +31,8 @@ namespace UIForia.Layout {
 
                     runner->GetWidths(fakeRoot, blockSize, current, out LayoutSize size);
 
+                    blockSize.insetSize = size.Clamped; // todo -- padding/border subtraction
+                    blockSize.outerSize = size.Clamped; 
                     runner->ApplyLayoutHorizontal(current, size.marginStart, size.marginStart, size.Clamped, parentLayoutInfo.finalSize, blockSize, LayoutFit.Default, parentLayoutInfo.finalSize);
 
                 }

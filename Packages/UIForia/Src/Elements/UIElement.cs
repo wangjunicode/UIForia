@@ -22,7 +22,7 @@ namespace UIForia.Elements {
         internal UIElement parent;
 
         // todo -- maybe move a lot of this data to an internal representation of UIElement
-        internal RenderBox renderBox;
+        internal RenderBox renderBox; // todo -- nuke this, make it a table look up with render system for inspector
         public UIStyleSet style; // todo -- make internal with accessor
         public LinqBindingNode bindingNode; // todo -- make internal with accessor
 
@@ -44,7 +44,6 @@ namespace UIForia.Elements {
             }
         }
 
-//        
         // not actually used since we get elements from the pool as uninitialized
         protected internal UIElement() { }
 
@@ -241,11 +240,6 @@ namespace UIForia.Elements {
         }
 
         public bool internal__dontcallmeplease_SetEnabledIfBinding(bool enabled) {
-
-            if ((flags & UIElementFlags.Created) == 0) {
-                application.elementSystem.metaTable[id].flags &= ~UIElementFlags.Enabled;
-                flags = application.elementSystem.metaTable[id].flags;
-            }
 
             if (enabled && isSelfDisabled) {
                 application.DoEnableElement(this);

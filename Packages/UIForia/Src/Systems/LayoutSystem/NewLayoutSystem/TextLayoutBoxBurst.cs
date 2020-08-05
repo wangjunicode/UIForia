@@ -6,7 +6,6 @@ using UIForia.Text;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace UIForia.Layout {
 
@@ -32,11 +31,28 @@ namespace UIForia.Layout {
 
             textInfo.lineInfoList.CopyFrom(buffer.array, buffer.size, Allocator.Persistent);
 
-            // now I need to handle alignment 
-            
+            // TextInfo.ApplyTextAlignment(ref textInfo, );
+            TextAlignment alignment = textInfo.textStyle.alignment;
+
             for (int i = 0; i < buffer.size; i++) {
                 TextLineInfo lineInfo = buffer[i];
                 float position = 0;
+                switch (alignment) {
+
+                    default:
+                    case TextAlignment.Unset:
+                    case TextAlignment.Left:
+                        break;
+
+                    case TextAlignment.Right:
+                        position = width - lineInfo.width;
+                        break;
+
+                    case TextAlignment.Center:
+                        position = (width - lineInfo.width) * 0.5f;
+                        break;
+                }
+                
                 for (int w = lineInfo.wordStart; w < lineInfo.wordStart + lineInfo.wordCount; w++) {
                     ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList.array[w];
                     TextLayoutSymbolType type = layoutSymbol.type;

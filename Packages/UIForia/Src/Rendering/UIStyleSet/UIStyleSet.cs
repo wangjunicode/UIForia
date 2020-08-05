@@ -342,7 +342,7 @@ namespace UIForia.Rendering {
         /// Runs all runCommands that are applicable for the current state.
         /// </summary>
         internal void RunCommands() {
-            StyleEntry[] styleEntries = availableStyles.Array;
+            StyleEntry[] styleEntries = availableStyles.array;
             for (int i = 0; i < availableStyles.Count; i++) {
                 StyleEntry entry = styleEntries[i];
                 if ((entry.state & currentState) != 0) {

@@ -351,7 +351,7 @@ namespace UIForia.Text {
                 }
             }
 
-            float centerX = vertexPtr->topLeft.x + ((vertexPtr->bottomRight.x - vertexPtr->topLeft.x) * 0.5f);
+            float centerX = vertexPtr->topLeft.x + ((vertexPtr->topRight.x - vertexPtr->topLeft.x) * 0.5f);
             float centerY = vertexPtr->topLeft.y - ((vertexPtr->topLeft.y - vertexPtr->bottomRight.y) * 0.5f);
             return new float2(centerX, centerY);
         }

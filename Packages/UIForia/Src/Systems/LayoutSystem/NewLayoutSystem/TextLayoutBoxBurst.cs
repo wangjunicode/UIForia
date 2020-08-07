@@ -21,7 +21,7 @@ namespace UIForia.Layout {
             ref LayoutInfo layoutInfo = ref runner->GetHorizontalLayoutInfo(elementId);
 
             float width = layoutInfo.finalSize - layoutInfo.paddingBorderStart - layoutInfo.paddingBorderStart;
-
+            textInfo.requiresRenderRangeUpdate = true;
             if (textInfo.isRichText) {
                 TextInfo.RunLayoutHorizontal_RichText(ref textInfo, ref buffer, math.max(0, width));
             }
@@ -52,11 +52,11 @@ namespace UIForia.Layout {
                         position = (width - lineInfo.width) * 0.5f;
                         break;
                 }
-                
+
                 for (int w = lineInfo.wordStart; w < lineInfo.wordStart + lineInfo.wordCount; w++) {
                     ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList.array[w];
                     TextLayoutSymbolType type = layoutSymbol.type;
-                    
+
                     if (type == TextLayoutSymbolType.Word) {
                         layoutSymbol.wordInfo.x = position;
                         position += layoutSymbol.wordInfo.width;
@@ -73,20 +73,21 @@ namespace UIForia.Layout {
             int fontAssetId = textInfo.textStyle.fontAssetId;
             ref FontAssetInfo fontAsset = ref runner->GetFontAsset(fontAssetId);
             float fontSize = runner->GetResolvedFontSize(elementId);
+            textInfo.requiresRenderRangeUpdate = true;
 
             TextInfo.RunLayoutVertical_WordsOnly(fontAsset, fontSize, ref textInfo);
-            
+
             for (int i = 0; i < textInfo.lineInfoList.size; i++) {
-                TextLineInfo lineInfo =  textInfo.lineInfoList.array[i];
+                TextLineInfo lineInfo = textInfo.lineInfoList.array[i];
                 float maxAscender = 0;
                 for (int w = lineInfo.wordStart; w < lineInfo.wordStart + lineInfo.wordCount; w++) {
                     ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList.array[w];
                     TextLayoutSymbolType type = layoutSymbol.type;
                     if (type == TextLayoutSymbolType.Word) {
-                        maxAscender = maxAscender > layoutSymbol.wordInfo.maxAscender ?maxAscender : layoutSymbol.wordInfo.maxAscender; 
+                        maxAscender = maxAscender > layoutSymbol.wordInfo.maxAscender ? maxAscender : layoutSymbol.wordInfo.maxAscender;
                     }
                 }
-                
+
                 for (int w = lineInfo.wordStart; w < lineInfo.wordStart + lineInfo.wordCount; w++) {
                     ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList.array[w];
                     TextLayoutSymbolType type = layoutSymbol.type;
@@ -111,7 +112,6 @@ namespace UIForia.Layout {
 
             //TextInfo.RunLayoutHorizontal_WordsOnly(ref textInfo, ref buffer, blockSize.insetSize);
             TextInfo.RunLayoutHorizontal_RichText(ref textInfo, ref buffer, blockSize.insetSize);
-            
 
             float max = 0;
 
@@ -139,6 +139,18 @@ namespace UIForia.Layout {
             return lineInfoList.GetLast().y + lineInfoList.GetLast().height;
         }
 
+        public void OnStylePropertiesChanged(LayoutSystem layoutSystem, UIElement element, StyleProperty[] properties, int propertyCount) { }
+
+        public void OnChildStyleChanged(LayoutSystem layoutSystem, ElementId childId, StyleProperty[] properties, int propertyCount) { }
+
+        public float GetActualContentWidth(ref BurstLayoutRunner runner) {
+            return 0;
+        }
+
+        public float GetActualContentHeight(ref BurstLayoutRunner runner) {
+            return 0;
+        }
+
         public void Dispose() { }
 
         public void OnInitialize(LayoutSystem layoutSystem, UIElement element) {
@@ -155,6 +167,9 @@ namespace UIForia.Layout {
         // never called
         public float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
             return 0;
+        }
+
+        public void OnChildrenChanged(LayoutSystem layoutSystem) {
         }
 
     }

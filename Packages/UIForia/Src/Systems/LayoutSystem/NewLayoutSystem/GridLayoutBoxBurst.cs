@@ -701,7 +701,7 @@ namespace UIForia.Layout {
             rowTrackList.Dispose();
         }
 
-        public void OnStylePropertiesChanged(LayoutSystem layoutSystem, StyleProperty[] properties, int propertyCount) {
+        public void OnStylePropertiesChanged(LayoutSystem layoutSystem, UIElement element, StyleProperty[] properties, int propertyCount) {
 
             bool placementDirty = false;
 
@@ -751,7 +751,7 @@ namespace UIForia.Layout {
 
         }
 
-        public void OnChildStyleChanged(LayoutSystem layoutSystem, StyleProperty[] propertyList, int propertyCount) {
+        public void OnChildStyleChanged(LayoutSystem layoutSystem, ElementId childId, StyleProperty[] propertyList, int propertyCount) {
             for (int i = 0; i < propertyCount; i++) {
                 ref StyleProperty property = ref propertyList[i];
                 switch (property.propertyId) {
@@ -763,6 +763,14 @@ namespace UIForia.Layout {
                         return;
                 }
             }
+        }
+
+        public float GetActualContentWidth(ref BurstLayoutRunner runner) {
+            return 0;
+        }
+
+        public float GetActualContentHeight(ref BurstLayoutRunner runner) {
+            return 0;
         }
 
     }

@@ -14,17 +14,17 @@ namespace UIForia.Layout {
         [FieldOffset(4)] public TextLayoutBoxBurst text;
         [FieldOffset(4)] public GridLayoutBoxBurst grid;
         [FieldOffset(4)] public StackLayoutBoxBurst stack;
-        [FieldOffset(4)] public FlexLayoutBoxBurst scroll;
+        [FieldOffset(4)] public ScrollLayoutBoxBurst scroll;
         [FieldOffset(4)] public FlexLayoutBoxBurst radial;
         [FieldOffset(4)] public FlexLayoutBoxBurst image;
         [FieldOffset(4)] public RootLayoutBoxBurst root;
 
-        public void Initialize(LayoutSystem layoutSystem, UIElement element) {
+        public void Initialize(LayoutBoxType layoutType, LayoutSystem layoutSystem, UIElement element) {
 
             this = default; // need to clear the memory here
 
-            layoutType = GetLayoutBoxType(element);
-
+            this.layoutType = layoutType;
+            
             switch (layoutType) {
                 case LayoutBoxType.Unset:
                 case LayoutBoxType.Flex:
@@ -36,6 +36,7 @@ namespace UIForia.Layout {
                     break;
 
                 case LayoutBoxType.Radial:
+                    radial.OnInitialize(layoutSystem, element);
                     break;
 
                 case LayoutBoxType.Stack:
@@ -43,6 +44,7 @@ namespace UIForia.Layout {
                     break;
 
                 case LayoutBoxType.Image:
+                    image.OnInitialize(layoutSystem, element);
                     break;
 
                 case LayoutBoxType.ScrollView:
@@ -62,10 +64,10 @@ namespace UIForia.Layout {
             }
         }
 
-        private static LayoutBoxType GetLayoutBoxType(UIElement element) {
+        internal static LayoutBoxType GetLayoutBoxType(UIElement element) {
 
             switch (element) {
-                
+
                 case UIViewRootElement _: return LayoutBoxType.Root;
                 case UITextElement _: return LayoutBoxType.Text;
                 case ScrollView _: return LayoutBoxType.ScrollView;
@@ -88,6 +90,152 @@ namespace UIForia.Layout {
 
         }
 
+        public static LayoutBoxType GetLayoutBoxTypeForScrollView(UIElement element) {
+
+            switch (element.style.LayoutType) {
+                default:
+                case LayoutType.Unset:
+                case LayoutType.Flex: return LayoutBoxType.Flex;
+
+                case LayoutType.Grid: return LayoutBoxType.Grid;
+                case LayoutType.Radial: return LayoutBoxType.Radial;
+                case LayoutType.Stack: return LayoutBoxType.Stack;
+            }
+
+        }
+
+        public float GetActualContentWidth(ref BurstLayoutRunner runner) {
+            switch (layoutType) {
+
+                case LayoutBoxType.Unset:
+                case LayoutBoxType.Flex:
+                    return flex.GetActualContentWidth(ref runner);
+
+                case LayoutBoxType.Grid:
+                    return grid.GetActualContentWidth(ref runner);
+
+                case LayoutBoxType.Radial:
+                    return radial.GetActualContentWidth(ref runner);
+
+                case LayoutBoxType.Stack:
+                    return stack.GetActualContentWidth(ref runner);
+
+                case LayoutBoxType.Image:
+                    return image.GetActualContentWidth(ref runner);
+
+                case LayoutBoxType.ScrollView:
+                    return 0; // should never get called, would recurse
+
+                case LayoutBoxType.Text:
+                    return text.GetActualContentWidth(ref runner);
+
+                case LayoutBoxType.Root:
+                    return root.GetActualContentWidth(ref runner);
+
+                default:
+                    return 0;
+            }
+        }
+        
+        public float GetActualContentHeight(ref BurstLayoutRunner runner) {
+            switch (layoutType) {
+
+                case LayoutBoxType.Unset:
+                case LayoutBoxType.Flex:
+                    return flex.GetActualContentHeight(ref runner);
+
+                case LayoutBoxType.Grid:
+                    return grid.GetActualContentHeight(ref runner);
+
+                case LayoutBoxType.Radial:
+                    return radial.GetActualContentHeight(ref runner);
+
+                case LayoutBoxType.Stack:
+                    return stack.GetActualContentHeight(ref runner);
+
+                case LayoutBoxType.Image:
+                    return image.GetActualContentHeight(ref runner);
+
+                case LayoutBoxType.ScrollView:
+                    return 0; // should never get called, would recurse
+
+                case LayoutBoxType.Text:
+                    return text.GetActualContentHeight(ref runner);
+
+                case LayoutBoxType.Root:
+                    return root.GetActualContentHeight(ref runner);
+
+                default:
+                    return 0;
+            }
+        }
+        
+        public float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
+            switch (layoutType) {
+
+                case LayoutBoxType.Unset:
+                case LayoutBoxType.Flex:
+                    return flex.ResolveAutoWidth(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.Grid:
+                    return grid.ResolveAutoWidth(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.Radial:
+                    return radial.ResolveAutoWidth(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.Stack:
+                    return stack.ResolveAutoWidth(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.Image:
+                    return image.ResolveAutoWidth(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.ScrollView:
+                    return 0; // should never get called, would recurse
+
+                case LayoutBoxType.Text:
+                    return text.ResolveAutoWidth(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.Root:
+                    return root.ResolveAutoWidth(ref runner, elementId, measurement, blockSize);
+
+                default:
+                    return 0;
+            }
+        }
+
+        public float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
+            switch (layoutType) {
+
+                case LayoutBoxType.Unset:
+                case LayoutBoxType.Flex:
+                    return flex.ResolveAutoHeight(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.Grid:
+                    return grid.ResolveAutoHeight(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.Radial:
+                    return radial.ResolveAutoHeight(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.Stack:
+                    return stack.ResolveAutoHeight(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.Image:
+                    return image.ResolveAutoHeight(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.ScrollView:
+                    return 0; // should never get called, would recurse
+
+                case LayoutBoxType.Text:
+                    return text.ResolveAutoHeight(ref runner, elementId, measurement, blockSize);
+
+                case LayoutBoxType.Root:
+                    return root.ResolveAutoHeight(ref runner, elementId, measurement, blockSize);
+
+                default:
+                    return 0;
+            }
+        }
+        
         public void OnChildrenChanged(LayoutSystem layoutSystem) {
             switch (layoutType) {
 
@@ -101,13 +249,15 @@ namespace UIForia.Layout {
                     break;
 
                 case LayoutBoxType.Radial:
+                    radial.OnChildrenChanged(layoutSystem);
                     break;
 
                 case LayoutBoxType.Stack:
-                    stack.OnChildrenChanged();
+                    stack.OnChildrenChanged(layoutSystem);
                     break;
 
                 case LayoutBoxType.Image:
+                    image.OnChildrenChanged(layoutSystem);
                     break;
 
                 case LayoutBoxType.ScrollView:
@@ -115,14 +265,12 @@ namespace UIForia.Layout {
                     break;
 
                 case LayoutBoxType.Text:
+                    text.OnChildrenChanged(layoutSystem);
                     break;
 
                 case LayoutBoxType.Root:
                     root.OnChildrenChanged(layoutSystem);
                     break;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -132,7 +280,7 @@ namespace UIForia.Layout {
                 default:
                 case LayoutBoxType.Unset:
                 case LayoutBoxType.Flex:
-                   flex.RunHorizontal(runner);
+                    flex.RunHorizontal(runner);
                     break;
 
                 case LayoutBoxType.Grid:
@@ -160,7 +308,7 @@ namespace UIForia.Layout {
                     break;
 
                 case LayoutBoxType.Root:
-                     root.RunHorizontal(runner);
+                    root.RunHorizontal(runner);
                     break;
             }
         }
@@ -307,24 +455,25 @@ namespace UIForia.Layout {
                     break;
 
                 case LayoutBoxType.Flex:
-                    flex.OnStylePropertiesChanged(properties, propertyCount);
+                    flex.OnStylePropertiesChanged(layoutSystem, element, properties, propertyCount);
                     break;
 
                 case LayoutBoxType.Grid:
-                    grid.OnStylePropertiesChanged(layoutSystem, properties, propertyCount);
+                    grid.OnStylePropertiesChanged(layoutSystem, element, properties, propertyCount);
                     break;
 
                 case LayoutBoxType.Radial:
                     break;
 
                 case LayoutBoxType.Stack:
-                    stack.OnStylePropertiesChanged(properties, propertyCount);
+                    stack.OnStylePropertiesChanged(layoutSystem, element, properties, propertyCount);
                     break;
 
                 case LayoutBoxType.Image:
                     break;
 
                 case LayoutBoxType.ScrollView:
+                    scroll.OnStylePropertiesChanged(layoutSystem, element, properties, propertyCount);
                     break;
 
                 case LayoutBoxType.Text:
@@ -342,29 +491,35 @@ namespace UIForia.Layout {
                     break;
 
                 case LayoutBoxType.Flex:
-                    flex.OnChildStyleChanged(elementId, properties, propertyCount);
+                    flex.OnChildStyleChanged(layoutSystem, elementId, properties, propertyCount);
                     break;
 
                 case LayoutBoxType.Grid:
-                    grid.OnChildStyleChanged(layoutSystem, properties, propertyCount);
+                    grid.OnChildStyleChanged(layoutSystem, elementId, properties, propertyCount);
                     break;
 
                 case LayoutBoxType.Radial:
+                    radial.OnChildStyleChanged(layoutSystem, elementId, properties, propertyCount);
                     break;
 
                 case LayoutBoxType.Stack:
+                    stack.OnChildStyleChanged(layoutSystem, elementId, properties, propertyCount);
                     break;
 
                 case LayoutBoxType.Image:
+                    image.OnChildStyleChanged(layoutSystem, elementId, properties, propertyCount);
                     break;
 
                 case LayoutBoxType.ScrollView:
+                    scroll.OnChildStyleChanged(layoutSystem, elementId, properties, propertyCount);
                     break;
 
                 case LayoutBoxType.Text:
+                    text.OnChildStyleChanged(layoutSystem, elementId, properties, propertyCount);
                     break;
 
                 case LayoutBoxType.Root:
+                    root.OnChildStyleChanged(layoutSystem, elementId, properties, propertyCount);
                     break;
             }
         }

@@ -58,7 +58,6 @@ namespace UIForia.Graphics {
         [FieldOffset(0)] public Vector4 vectorValue;
 
     }
-    
 
     public struct ShapeId {
 
@@ -71,7 +70,7 @@ namespace UIForia.Graphics {
         }
 
     }
-    
+
     public struct MaterialPropertyOverride : IComparable<MaterialPropertyOverride> {
 
         public int shaderPropertyId;
@@ -84,12 +83,7 @@ namespace UIForia.Graphics {
 
     }
 
-    public struct TextureReference {
-
-        public int textureId;
-        public AxisAlignedBounds2DUShort uvRect;
-
-    }
+    // for now this is a class, when styles become unmanaged this will become a struct
 
     public struct TextureUsage {
 
@@ -125,7 +119,7 @@ namespace UIForia.Graphics {
         public half uvOffsetY;
         public half uvScaleX;
         public half uvScaleY;
-        
+
         public half uvTileX;
         public half uvTileY;
         public float uvRotation; // could be ushort 
@@ -134,13 +128,14 @@ namespace UIForia.Graphics {
     }
 
     public struct UVTransform {
+
         // could easily be halfs since I dont really need precision
         // could maybe pack these in ushorts using 8.8 fixed point, dont need to be really high precision
         public half uvOffsetX;
         public half uvOffsetY;
         public half uvScaleX;
         public half uvScaleY;
-        
+
         public half uvTileX;
         public half uvTileY;
         public half uvRotation;
@@ -265,7 +260,7 @@ namespace UIForia.Graphics {
             stackBuffer.Clear();
             textureMap.Clear();
         }
-        
+
         public void SetMaterial(MaterialId materialId) {
             activeMaterialId = materialId;
             materialValueOverrides.size = 0;
@@ -853,7 +848,7 @@ namespace UIForia.Graphics {
         }
         // todo -- figure out what can be packed into byte / ushort
 
-        internal void Setup(MaterialId materialId,  int renderCallId, float4x4* matrix) {
+        internal void Setup(MaterialId materialId, int renderCallId, float4x4* matrix) {
             this.localDrawIdx = 0;
             this.renderCallId = renderCallId;
             this.activeMaterialId = materialId;
@@ -956,20 +951,20 @@ namespace UIForia.Graphics {
 
             public float opacity;
             public float outlineWidth;
-            
+
             // uv transforms in alternate buffer, these are just indices. 99% of the time will be 0 (the no-op transform)
             public ushort bodyUVTransformIdx;
             public ushort outlineUVTransformIdx;
-            
+
             public Color32 outlineColor;
             public Color32 backgroundColor;
             public Color32 backgroundTint;
             public float2 size;
-            
+
             public float4x4 transform; // move, compress or drop this
 
         }
-        
+
         // todo make this not suck, only percent and px really makes sense. not really sure about px with dpi scale for this either
         public static float ResolveFixedSize(float baseSize, UIFixedLength length) {
             switch (length.unit) {
@@ -996,14 +991,14 @@ namespace UIForia.Graphics {
         public struct TextShapeDesc { }
 
         public void DrawElement(in Matrix4x4 matrix, Size size, ElementStyle elementStyle) {
-            
+
             // 3 things we might draw
             //  - border box
             //  - body / outline
             //  - shadow
             // check and draw border
             // cache before calling for internals
-            
+
             bool drawBody = (elementStyle.backgroundColor.a / 255f) * elementStyle.opacity >= 0.01f || !ReferenceEquals(elementStyle.backgroundImage, null);
             bool drawOutline = (elementStyle.outlineWidth > 0 && elementStyle.outlineColor.a * elementStyle.opacity >= 0.01f);
 
@@ -1031,13 +1026,9 @@ namespace UIForia.Graphics {
             byte b1 = (byte) (((resolvedBorderRadiusTopRight * 1000)) * 0.5f);
             byte b2 = (byte) (((resolvedBorderRadiusBottomLeft * 1000)) * 0.5f);
             byte b3 = (byte) (((resolvedBorderRadiusBottomRight * 1000)) * 0.5f);
-            if (drawBody || drawOutline) {
-                
-            }
+            if (drawBody || drawOutline) { }
 
-            if (drawBody && drawOutline) {
-                
-            }
+            if (drawBody && drawOutline) { }
             else if (drawBody) {
                 DrawInfo drawInfo = new DrawInfo();
                 drawInfo.matrix = default;
@@ -1052,14 +1043,12 @@ namespace UIForia.Graphics {
                 // shapeList.Add(drawInfoIdx);
                 // shapeList.Add(drawInfoIdx);
             }
-            else if (drawOutline) {
-                
-            }
-            
+            else if (drawOutline) { }
+
             if ((elementStyle.shadowStyle.shadowColor.a * elementStyle.opacity >= 0.01f)) {
                 // draw shadow
             }
-            
+
         }
 
     }
@@ -1075,7 +1064,7 @@ namespace UIForia.Graphics {
         LinearGradient = 1 << 4,
         RadialGradient = 1 << 5,
         CornerGradient = 1 << 6
-            
+
     }
 
     public enum MaskVisibility {

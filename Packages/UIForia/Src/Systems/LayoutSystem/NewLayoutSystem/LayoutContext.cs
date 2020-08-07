@@ -24,12 +24,11 @@ namespace UIForia.Layout {
         public DataList<ElementId>.Shared ignoredList;
         public int transclusionCount;
         public DataList<TextChange>.Shared textChangeBuffer;
-
+        
         public LayoutContext(UIView view, LayoutSystem layoutSystem) {
             this.view = view;
             this.rootElement = view.dummyRoot;
             this.runner = TypedUnsafe.Malloc<BurstLayoutRunner>(Allocator.Persistent);
-            *runner = new BurstLayoutRunner();
             this.elementList = new DataList<ElementId>.Shared(32, Allocator.Persistent);
             this.parentList = new DataList<ElementId>.Shared(32, Allocator.Persistent);
             this.ignoredList = new DataList<ElementId>.Shared(8, Allocator.Persistent);
@@ -44,7 +43,7 @@ namespace UIForia.Layout {
                 scaleY = 1
             };
 
-            layoutSystem.layoutBoxTable[rootElement.id].Initialize(layoutSystem, rootElement);
+            layoutSystem.layoutBoxTable[rootElement.id].Initialize(LayoutBoxType.Root, layoutSystem, rootElement);
             layoutSystem.layoutHierarchyTable[rootElement.id] = new LayoutHierarchyInfo() {
                 behavior = LayoutBehavior.Normal
             };
@@ -69,7 +68,7 @@ namespace UIForia.Layout {
                 lineBuffer->Dispose();
                 TypedUnsafe.Dispose(lineBuffer, Allocator.Persistent);
             }
-
+            
             ignoredList.Dispose();
             elementList.Dispose();
             parentList.Dispose();

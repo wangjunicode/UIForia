@@ -21,6 +21,13 @@ namespace UIForia.Layout {
         
         float ComputeContentHeight(ref BurstLayoutRunner layoutRunner, in BlockSize blockSize);
 
+        void OnStylePropertiesChanged(LayoutSystem layoutSystem, UIElement element, StyleProperty[] properties, int propertyCount);
+
+        void OnChildStyleChanged(LayoutSystem layoutSystem, ElementId childId, StyleProperty[] properties, int propertyCount);
+
+        float GetActualContentWidth(ref BurstLayoutRunner runner);
+        
+        float GetActualContentHeight(ref BurstLayoutRunner runner);
 
     }
 

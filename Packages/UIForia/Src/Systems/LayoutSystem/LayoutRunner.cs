@@ -1,18 +1,11 @@
-using System;
 using System.Collections.Generic;
-using SVGX;
 using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.UIInput;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
-using Unity.Burst;
-using Unity.Collections;
-using Unity.Jobs;
 using UnityEngine;
-using UnityEngine.Assertions;
-using Debug = System.Diagnostics.Debug;
 
 namespace UIForia.Systems {
 

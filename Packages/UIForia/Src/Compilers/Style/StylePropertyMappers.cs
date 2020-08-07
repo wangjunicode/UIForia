@@ -13,6 +13,7 @@ using UIForia.UIInput;
 using UIForia.Util;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.U2D;
 using FontStyle = UIForia.Text.FontStyle;
 using TextAlignment = UIForia.Text.TextAlignment;
 
@@ -126,8 +127,8 @@ namespace UIForia.Compilers.Style {
                 {"cornerbeveltopleft", (targetStyle, property, context) => targetStyle.CornerBevelTopLeft = MapFixedLength(property.children[0], context)},
                 {"cornerbeveltopright", (targetStyle, property, context) => targetStyle.CornerBevelTopRight = MapFixedLength(property.children[0], context)},
                 {"cornerbevelbottomright", (targetStyle, property, context) => targetStyle.CornerBevelBottomRight = MapFixedLength(property.children[0], context)},
-                {"cornerbevelbottomleft", (targetStyle, property, context) => targetStyle.CornerBevelBottomLeft = MapFixedLength(property.children[0], context)},
-                {"cornerbevel", (targetStyle, property, context) => {
+                {"cornerbevelbottomleft", (targetStyle, property, context) => targetStyle.CornerBevelBottomLeft = MapFixedLength(property.children[0], context)}, {
+                    "cornerbevel", (targetStyle, property, context) => {
                         UIFixedLength length = MapFixedLength(property.children[0], context);
                         targetStyle.CornerBevelTopLeft = length;
                         targetStyle.CornerBevelBottomLeft = length;
@@ -135,16 +136,15 @@ namespace UIForia.Compilers.Style {
                         targetStyle.CornerBevelBottomRight = length;
                     }
                 },
-                
+
                 {"outlinewidth", (targetStyle, property, context) => targetStyle.OutlineWidth = MapFixedLength(property.children[0], context)},
                 {"outlinecolor", (targetStyle, property, context) => targetStyle.OutlineColor = MapColor(property.children[0], context)},
-
 
                 {"griditemx", (targetStyle, property, context) => targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context)},
                 {"griditemy", (targetStyle, property, context) => targetStyle.GridItemY = MapGridItemPlacement(property.children[0], context)},
                 {"griditemwidth", (targetStyle, property, context) => targetStyle.GridItemWidth = MapGridItemPlacement(property.children[0], context)},
-                {"griditemheight", (targetStyle, property, context) => targetStyle.GridItemHeight = MapGridItemPlacement(property.children[0], context)},
-                {"griditem", (targetStyle, property, context) => {
+                {"griditemheight", (targetStyle, property, context) => targetStyle.GridItemHeight = MapGridItemPlacement(property.children[0], context)}, {
+                    "griditem", (targetStyle, property, context) => {
                         if (property.children.size == 2) {
                             targetStyle.GridItemX = MapGridItemPlacement(property.children[0], context);
                             targetStyle.GridItemY = MapGridItemPlacement(property.children[1], context);
@@ -1567,16 +1567,16 @@ namespace UIForia.Compilers.Style {
             targetStyle.OverflowY = overflowY;
         }
 
-        private static Texture2D MapTexture(StyleASTNode node, StyleCompileContext context) {
+        private static TextureReference MapTexture(StyleASTNode node, StyleCompileContext context) {
             node = context.GetValueForReference(node);
             switch (node) {
                 case UrlNode urlNode:
                     AssetInfo assetInfo = TransformUrlNode(urlNode, context);
-                    if (assetInfo.SpriteName != null) {
-                        throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
+                    if (assetInfo.spriteName != null) {
+                        return context.resourceManager?.GetSpriteTexture(assetInfo);
                     }
 
-                    return context.resourceManager?.GetTexture(assetInfo.Path);
+                    return context.resourceManager?.GetTexture(assetInfo.path);
 
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
@@ -1595,11 +1595,11 @@ namespace UIForia.Compilers.Style {
             switch (node) {
                 case UrlNode urlNode:
                     AssetInfo assetInfo = TransformUrlNode(urlNode, context);
-                    if (assetInfo.SpriteName != null) {
+                    if (assetInfo.spriteName != null) {
                         throw new CompileException(urlNode, "SpriteAtlas access is coming soon!");
                     }
 
-                    return context.resourceManager?.GetFont(assetInfo.Path);
+                    return context.resourceManager?.GetFont(assetInfo.path);
 
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
@@ -1623,15 +1623,15 @@ namespace UIForia.Compilers.Style {
 
             if (url.type == StyleASTNodeType.Identifier) {
                 return new AssetInfo {
-                    Path = ((StyleIdentifierNode) url).name,
-                    SpriteName = spriteName
+                    path = ((StyleIdentifierNode) url).name,
+                    spriteName = spriteName
                 };
             }
 
             if (url.type == StyleASTNodeType.StringLiteral) {
                 return new AssetInfo {
-                    Path = ((StyleLiteralNode) url).rawValue,
-                    SpriteName = spriteName
+                    path = ((StyleLiteralNode) url).rawValue,
+                    spriteName = spriteName
                 };
             }
 
@@ -1972,13 +1972,6 @@ namespace UIForia.Compilers.Style {
             }
         }
 
-        public struct AssetInfo {
-
-            public string Path;
-            public string SpriteName;
-
-        }
-
         public static unsafe void MapPainterProperty(UIStyle targetStyle, PainterPropertyNode painterPropertyNode, in StylePainterDefinition painterDefinition) {
 
             for (int i = 0; i < painterDefinition.definedVariables.Length; i++) {
@@ -2040,6 +2033,13 @@ namespace UIForia.Compilers.Style {
 
             throw new CompileException($"Tried to set a painter variable '{painterPropertyNode.propertyName}' but {painterPropertyNode.painterName} does not define it.");
         }
+
+    }
+
+    public struct AssetInfo {
+
+        public string path;
+        public string spriteName;
 
     }
 

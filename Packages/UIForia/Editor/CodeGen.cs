@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Rendering;
@@ -33,7 +34,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<MaterialId>(StylePropertyId.Material, default, InheritanceType.NotInherited, "new MaterialId(0)"), 
             
             // Mesh
-            new PropertyGenerator<MeshType>(StylePropertyId.MeshType, MeshType.Simple), 
+            new PropertyGenerator<MeshType>(StylePropertyId.MeshType, MeshType.None), 
             new PropertyGenerator<MeshFillDirection>(StylePropertyId.MeshFillDirection, MeshFillDirection.Clockwise), 
             new PropertyGenerator<MeshFillOrigin>(StylePropertyId.MeshFillOrigin, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.MeshFillAmount, 1f), 
@@ -56,7 +57,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageTileX, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageTileY, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageRotation, 0),
-            new PropertyGenerator<Texture2D>(StylePropertyId.BackgroundImage, null),
+            new PropertyGenerator<TextureReference>(StylePropertyId.BackgroundImage, default),
             new PropertyGenerator<BackgroundFit>(StylePropertyId.BackgroundFit, BackgroundFit.Fill),
 
             // Border
@@ -551,7 +552,9 @@ namespace UIForia.Rendering {
             if (typeof(GridItemPlacement) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsGridItemPlacement;";
             }
-
+            if (typeof(TextureReference) == propertyGenerator.type) {
+                return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsTextureReference;";
+            }
             throw new ArgumentOutOfRangeException($"Don't know what to do with {propertyGenerator.type}.");
         }
 

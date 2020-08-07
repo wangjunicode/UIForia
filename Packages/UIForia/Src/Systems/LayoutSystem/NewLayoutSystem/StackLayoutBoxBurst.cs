@@ -24,30 +24,7 @@ namespace UIForia.Layout {
 
         public void Dispose() { }
 
-        public void OnChildrenChanged() { }
-
-        public void OnStylePropertiesChanged(StyleProperty[] propertyList, int propertyCount) {
-            for (int i = 0; i < propertyCount; i++) {
-                // note: space distribution is ignored, we don't care if it changes
-                switch (propertyList[i].propertyId) {
-                    case StylePropertyId.AlignItemsHorizontal:
-                        alignHorizontal = propertyList[i].AsFloat;
-                        break;
-
-                    case StylePropertyId.FitItemsHorizontal:
-                        fitHorizontal = propertyList[i].AsLayoutFit;
-                        break;
-
-                    case StylePropertyId.AlignItemsVertical:
-                        alignVertical = propertyList[i].AsFloat;
-                        break;
-
-                    case StylePropertyId.FitItemsVertical:
-                        fitVertical = propertyList[i].AsLayoutFit;
-                        break;
-                }
-            }
-        }
+        public void OnChildrenChanged(LayoutSystem layoutSystem) { }
 
         public float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
             return 0;
@@ -158,6 +135,39 @@ namespace UIForia.Layout {
             }
 
             return retn;
+        }
+
+        public void OnStylePropertiesChanged(LayoutSystem layoutSystem, UIElement element, StyleProperty[] propertyList, int propertyCount) {
+            for (int i = 0; i < propertyCount; i++) {
+                // note: space distribution is ignored, we don't care if it changes
+                switch (propertyList[i].propertyId) {
+                    case StylePropertyId.AlignItemsHorizontal:
+                        alignHorizontal = propertyList[i].AsFloat;
+                        break;
+
+                    case StylePropertyId.FitItemsHorizontal:
+                        fitHorizontal = propertyList[i].AsLayoutFit;
+                        break;
+
+                    case StylePropertyId.AlignItemsVertical:
+                        alignVertical = propertyList[i].AsFloat;
+                        break;
+
+                    case StylePropertyId.FitItemsVertical:
+                        fitVertical = propertyList[i].AsLayoutFit;
+                        break;
+                }
+            }
+        }
+
+        public void OnChildStyleChanged(LayoutSystem layoutSystem, ElementId childId, StyleProperty[] properties, int propertyCount) { }
+
+        public float GetActualContentWidth(ref BurstLayoutRunner runner) {
+            return 0;
+        }
+
+        public float GetActualContentHeight(ref BurstLayoutRunner runner) {
+            return 0;
         }
 
     }

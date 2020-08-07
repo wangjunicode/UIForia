@@ -2,8 +2,8 @@
 
     public enum MeshFillDirection {
 
-        Clockwise,
-        CounterClockwise
+        Clockwise = 1,
+        CounterClockwise = -1
 
     }
 

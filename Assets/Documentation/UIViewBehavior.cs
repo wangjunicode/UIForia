@@ -138,7 +138,6 @@ namespace UIForia {
                     camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
                 }
 
-                // application.DPIScaleFactor = 1; // todo -- remove this
                 application.Update();
 
             }

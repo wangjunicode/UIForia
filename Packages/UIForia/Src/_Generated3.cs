@@ -1,6 +1,7 @@
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using System.Collections.Generic;
+using UIForia.Graphics;
 using UnityEngine;
 using UIForia.Util;
 using UIForia.Text;
@@ -19,7 +20,7 @@ namespace UIForia.Rendering {
 		public static readonly CursorStyle Cursor = default(CursorStyle);
 		public static readonly string Painter = "";
 		public static readonly MaterialId Material = new MaterialId(0);
-		public const MeshType MeshType = UIForia.Rendering.MeshType.Simple;
+		public const MeshType MeshType = UIForia.Rendering.MeshType.None;
 		public const MeshFillDirection MeshFillDirection = UIForia.Rendering.MeshFillDirection.Clockwise;
 		public const MeshFillOrigin MeshFillOrigin = UIForia.Rendering.MeshFillOrigin.OriginVertical_Bottom;
 		public const float MeshFillAmount = 1f;
@@ -37,7 +38,7 @@ namespace UIForia.Rendering {
 		public const float BackgroundImageTileX = 1f;
 		public const float BackgroundImageTileY = 1f;
 		public const float BackgroundImageRotation = 0f;
-		public static readonly Texture2D BackgroundImage = default(Texture2D);
+		public static readonly TextureReference BackgroundImage = default(TextureReference);
 		public const BackgroundFit BackgroundFit = UIForia.Rendering.BackgroundFit.Fill;
 		public static readonly Color BorderColorTop = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color BorderColorRight = new Color(-1f, -1f, -1f, -1f);
@@ -167,7 +168,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.Material:
 					 return new StyleProperty(StylePropertyId.Material, new MaterialId(0));
 				case StylePropertyId.MeshType:
-					 return new StyleProperty(StylePropertyId.MeshType, (int)UIForia.Rendering.MeshType.Simple);
+					 return new StyleProperty(StylePropertyId.MeshType, (int)UIForia.Rendering.MeshType.None);
 				case StylePropertyId.MeshFillDirection:
 					 return new StyleProperty(StylePropertyId.MeshFillDirection, (int)UIForia.Rendering.MeshFillDirection.Clockwise);
 				case StylePropertyId.MeshFillOrigin:
@@ -203,7 +204,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.BackgroundImageRotation:
 					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, 0f);
 				case StylePropertyId.BackgroundImage:
-					 return new StyleProperty(StylePropertyId.BackgroundImage, default(Texture2D));
+					 return new StyleProperty(StylePropertyId.BackgroundImage, default(TextureReference));
 				case StylePropertyId.BackgroundFit:
 					 return new StyleProperty(StylePropertyId.BackgroundFit, (int)UIForia.Rendering.BackgroundFit.Fill);
 				case StylePropertyId.BorderColorTop:

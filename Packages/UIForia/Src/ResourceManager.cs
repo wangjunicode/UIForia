@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UIForia.Compilers.Style;
 using UIForia.Exceptions;
+using UIForia.Graphics;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
@@ -73,11 +74,13 @@ namespace UIForia {
 
         internal MaterialDatabase2 materialDatabase;
         internal DataList<FontAssetInfo>.Shared fontAssetMap;
+        internal Dictionary<string, SpriteAssetInfo> spriteMap;
 
         private static readonly PainterVariableDeclaration[] s_EmptyVariables = { };
 
         public ResourceManager() {
             stylePainters = new Dictionary<string, StylePainterDefinition>();
+            spriteMap = new Dictionary<string, SpriteAssetInfo>();
             textureMap = new IntMap_Deprecated<AssetEntry<Texture2D>>();
             spriteAtlasMap = new IntMap_Deprecated<AssetEntry<SpriteAtlas>>();
             fontMap = new Dictionary<string, FontAsset>();
@@ -96,6 +99,7 @@ namespace UIForia {
             fontMap.Clear();
             audioMap.Clear();
             stylePainters.Clear();
+            spriteMap.Clear();
             renderedCharacterInfoList.size = 1; // 0 is invalid
             gpuFontInfoList.size = 0;
             onFontAdded = null;
@@ -213,7 +217,6 @@ namespace UIForia {
 
             FontAsset retn = ScriptableObject.CreateInstance<FontAsset>();
             retn.convertFrom = tmp;
-            
 
             retn.id = fontAssetMap.size;
             retn.Initialize(this);
@@ -221,7 +224,7 @@ namespace UIForia {
             fontTextures.Add(retn.atlas);
             fontMap.Add(path, retn);
             retn.id = fontMap.Count;
-            
+
             onFontAdded?.Invoke(retn);
 
             return retn;
@@ -428,6 +431,80 @@ namespace UIForia {
             }
 
             return fontAssetMap[fontAssetId].atlasTextureId;
+        }
+
+
+        internal struct SpriteAssetInfo {
+
+            public SpriteAtlas atlas;
+            public Texture2D texture;
+            public int textureId;
+            public SpriteAssetRef[] spriteRefs; // todo -- would be better to use a single large array
+            public string texturePath;
+
+        }
+
+        internal struct SpriteAssetRef {
+
+            public AxisAlignedBounds2DUShort uvRect;
+            public string spriteName;
+
+        }
+
+        // todo -- figure out how to unload these
+        public TextureReference GetSpriteTexture(AssetInfo assetInfo) {
+
+            if (spriteMap.TryGetValue(assetInfo.path, out SpriteAssetInfo asset)) {
+                return GetSprite(asset, assetInfo.spriteName);
+            }
+
+            asset = new SpriteAssetInfo();
+            SpriteAtlas atlas = Resources.Load<SpriteAtlas>(assetInfo.path);
+
+            if (atlas == null) {
+                asset.spriteRefs = new SpriteAssetRef[0];
+                spriteMap.Add(assetInfo.path, asset);
+                return TextureReference.s_Empty;
+            }
+            if (atlas.spriteCount == 0) {
+                throw new Exception("Failed to load sprite atlas: " + assetInfo.path + ". There were no sprites in the atlas");
+            }
+            Sprite[] sprites = new Sprite[atlas.spriteCount];
+            atlas.GetSprites(sprites);
+            asset.atlas = atlas;
+            asset.texture = sprites[0].texture;
+            if (asset.texture == null) {
+                throw new Exception("Failed to load sprite atlas: " + assetInfo.path + ". This might because it didnt pack properly");
+            }
+            asset.textureId = asset.texture.GetHashCode();
+            asset.texturePath = assetInfo.path;
+            asset.spriteRefs = new SpriteAssetRef[sprites.Length];
+            for (int i = 0; i < sprites.Length; i++) {
+                Rect spriteUVRect = sprites[i].textureRect;
+                AxisAlignedBounds2DUShort uvRect = default;
+                uvRect.xMin = (ushort) spriteUVRect.xMin;
+                uvRect.yMin = (ushort) spriteUVRect.yMin;
+                uvRect.xMax = (ushort) spriteUVRect.xMax;
+                uvRect.yMax = (ushort) spriteUVRect.yMax;
+                ref SpriteAssetRef spriteRef = ref asset.spriteRefs[i];
+                spriteRef.uvRect = uvRect;
+                spriteRef.spriteName = sprites[i].name.Substring(0, sprites[i].name.Length - "(Clone)".Length);
+                Object.Destroy(sprites[i]);
+            }
+
+            spriteMap.Add(assetInfo.path, asset);
+
+            return GetSprite(asset, assetInfo.spriteName);
+        }
+
+        private static TextureReference GetSprite(in SpriteAssetInfo asset, string spriteName) {
+            for (int i = 0; i < asset.spriteRefs.Length; i++) {
+                if (asset.spriteRefs[i].spriteName == spriteName) {
+                    return new TextureReference(asset, spriteName, asset.spriteRefs[i].uvRect);
+                }
+            }
+
+            return TextureReference.s_Empty;
         }
 
     }

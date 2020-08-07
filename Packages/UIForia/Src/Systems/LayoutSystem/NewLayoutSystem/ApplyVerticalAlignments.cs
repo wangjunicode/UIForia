@@ -7,7 +7,7 @@ using Unity.Jobs;
 namespace UIForia.Layout {
 
     [BurstCompile]
-    public struct ApplyVerticalAlignments : IJob, IVertigoParallel {
+    internal struct ApplyVerticalAlignments : IJob, IVertigoParallel {
 
         public ElementId viewRootId;
         public ViewParameters viewParameters;

@@ -33,6 +33,14 @@ struct AxisAlignedBounds2D {
     float yMax;
 };
 
+float UnpackHighUShortPercentageToFloat(uint value) {
+    return ((value >> 16) & (1 << 16) - 1) /  65536.0;
+}
+
+float UnpackLowUShortPercentageToFloat(uint value) {
+    return (value & 0xffff) /  65536.0;
+}
+
 int UnpackMatrixId(uint4 indices) {
     return indices.x & 0xffff;
 }
@@ -86,17 +94,9 @@ half remapHalf(half s, half a1, half a2, half b1, half b2) {
 // same as UnityPixelSnap except taht we add 0.5 to pixelPos after rounding
 inline float4 UIForiaPixelSnap (float4 pos) {
      float2 hpc = _ScreenParams.xy * 0.5f;
-     float2 adjustment = float2(0, 0);
-     
-     if((uint)_ScreenParams.y % 2 != 0) {
-        adjustment.y = 0.5;
-     }
-     
-     if((uint)_ScreenParams.x % 2 != 0) {
-        adjustment.x = 0.5;
-     }
-     adjustment.x = (_ScreenParams.x % 2 != 0) * 0.5;
-     adjustment.y = (_ScreenParams.y % 2 != 0) * 0.5;
+     float2 adjustment = float2(0, 0); //0.5, 0.5);
+    // adjustment.x = (_ScreenParams.x % 2 != 0) * 0.5;
+    // adjustment.y = (_ScreenParams.y % 2 != 0) * 0.5;
      float2 pixelPos = round ((pos.xy / pos.w) * hpc) + adjustment;
      pos.xy = pixelPos / hpc * pos.w;
      return pos;
@@ -164,11 +164,6 @@ float GetByteNToFloat(uint value, int n) {
     return ((value >> (8 * n)) & 0xff) / (float)0xff;
 }
 
-uint UnpackUShortHigh()
-{
-    
-}
-
 float4 UnpackColor(uint input) {
     return float4(
         uint((input >> 0) & 0xff) / float(0xff),
@@ -226,7 +221,7 @@ fixed UIForiaOverflowClip(float2 screenPos, AxisAlignedBounds2D bounds) {
     return 1; // todo 
 }
             
-inline fixed4 ComputeColor(fixed4 mainColor, fixed4 tintColor, uint colorMode, float2 texCoord, sampler2D textureToRead) {
+inline fixed4 ComputeColor(fixed4 mainColor, fixed4 tintColor, uint colorMode, float2 texCoord, sampler2D textureToRead, float4 uvBounds) {
             
     int useColor = (colorMode & ColorMode_Color) != 0;
     int useTexture = (colorMode & ColorMode_Texture) != 0;
@@ -234,6 +229,11 @@ inline fixed4 ComputeColor(fixed4 mainColor, fixed4 tintColor, uint colorMode, f
 
     fixed4 textureColor = tex2Dlod(textureToRead, float4(texCoord, 0, 0));
     textureColor = lerp(textureColor, textureColor * tintColor, tintTexture);
+    float2 s = step(uvBounds.xw, texCoord) - step(uvBounds.zy, texCoord);
+    
+    if(s.x * s.y == 0) {
+        return mainColor;
+    }
     
     if(useTexture && useColor) {
         return lerp(textureColor, mainColor, 1 - textureColor.a);
@@ -290,14 +290,15 @@ float2 RotateUV(float2 uv, float rotation) {
 float2 TransformUV(float2 uv, float2 offset, float2 scale, float rotation, half4 uvBounds, float atlasPadding) {
     uv += offset;
     uv *= scale;
-    uv = RotateUV(uv, rotation, float2(0.5, 0.5));
-    uv.x = (frac(uv.x) % (uvBounds.z - atlasPadding * 2)) + uvBounds.x + atlasPadding;
-    uv.y = (frac(uv.y) % (uvBounds.w - atlasPadding * 2)) + uvBounds.y + atlasPadding;
+    // uv *= float2(uvBounds.z - uvBounds.x, uvBounds.w - uvBounds.y);
+    uv = RotateUV(uv, rotation, float2((uvBounds.z - uvBounds.x) * 0.5, (uvBounds.w - uvBounds.y) * 0.5));
+   // uv.x = (frac(uv.x) % (uvBounds.z - atlasPadding * 2)) + uvBounds.x + atlasPadding;
+   // uv.y = (frac(uv.y) % (uvBounds.w - atlasPadding * 2)) + uvBounds.y + atlasPadding;
+   
     return uv;
 }
 
 // ---------------------- Text Structs and Functions ------------------------------------------------
-
 
 // note -- must match non shader version 
 struct GPUGlyphInfo {

@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using SVGX;
 using UIForia.ListTypes;
-using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.Rendering;
-using Vertigo;
 
 namespace UIForia.Graphics {
 
@@ -30,7 +26,9 @@ namespace UIForia.Graphics {
         internal ResourceManager resourceManager;
         private TextMaterialInfo* textMaterialPtr;
         private ElementId elementId;
-        
+        private int stencilClipStart;
+        private int defaultOutlineTexture;
+
         public RenderContext3(ResourceManager resourceManager) {
             this.resourceManager = resourceManager;
             this.textureMap = new Dictionary<int, Texture>(32);
@@ -46,6 +44,7 @@ namespace UIForia.Graphics {
             this.renderIndex = (ushort) renderIndex;
             this.defaultMatrix = transform;
             this.defaultBGTexture = 0;
+            this.defaultOutlineTexture = 0;
         }
 
         public void Callback(object context, Action<object, CommandBuffer> callback) {
@@ -97,7 +96,13 @@ namespace UIForia.Graphics {
 
         }
 
-        public void SetOutlineTexture() { }
+        public void SetOutlineTexture(Texture texture) {
+            if (!ReferenceEquals(texture, null)) {
+                defaultOutlineTexture = texture.GetHashCode();
+                AddTexture(texture);
+            }
+
+        }
 
         public void DrawElement(float x, float y, in ElementDrawDesc drawDesc) {
 
@@ -252,11 +257,10 @@ namespace UIForia.Graphics {
             });
         }
 
-        private int stencilClipStart;
         public void BeginStencilClip() {
             // todo -- i think i need to defend against nesting these, can nest but not while beginning, must push before starting a new one. also need to auto push if not done at end of draw method
             stencilClipStart = drawList.size;
- 
+
             drawList.Add(new DrawInfo2() {
                 drawType = DrawType2.BeginStencilClip,
                 matrix = defaultMatrix,
@@ -266,15 +270,15 @@ namespace UIForia.Graphics {
                     localRenderIdx = localDrawId++
                 }
             });
-            
+
         }
 
         public void PushStencilClip() {
-            
+
             if (stencilClipStart <= 0) {
                 throw new Exception("You need to call BeginStencilClip() before pushing a stencil clip");
             }
-            
+
             drawList.Add(new DrawInfo2() {
                 drawType = DrawType2.PushStencilClip,
                 matrix = defaultMatrix,
@@ -287,7 +291,7 @@ namespace UIForia.Graphics {
             });
             //Assert.IsTrue(drawList[drawList.size - stencilClipStart].drawType == DrawType2.BeginStencilClip);
             //drawList[drawList.size - stencilClipStart].shapeData = (void*) (drawList.size - stencilClipStart);
-            
+
             stencilClipStart = 0;
         }
 
@@ -336,13 +340,24 @@ namespace UIForia.Graphics {
         public ushort uvTopRight;
         public ushort uvBottomRight;
         public ushort uvBottomLeft;
-        
+
         public float textureScaleX;
         public float textureScaleY;
         public float textureOffsetX;
         public float textureOffsetY;
         public float textureTilingX;
         public float textureTilingY;
+        
+        public ushort meshFillOpenAmount;
+        public ushort meshFillRotation;
+        
+        public float meshFillOffsetX;
+        public float meshFillOffsetY;
+        
+        public float meshFillRadius;
+        
+        public byte meshFillDirection;
+        public byte meshFillInvert;
 
     }
 

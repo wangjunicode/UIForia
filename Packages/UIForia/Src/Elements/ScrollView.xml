@@ -18,11 +18,15 @@
             BackgroundColor = grey;
         }
 
+        style transclude {
+            LayoutBehavior = TranscludeChildren;
+        }
+        
     </Style>
 
     <Contents style="scrollview">
 
-        <define:Children />
+        <define:Children style="transclude"/>
 
         <define:vertical-scrollbar if="verticalScrollingEnabled" style="scroll-track" mouse:click="OnClickVertical($event)"/>
 
@@ -33,4 +37,5 @@
         <define:horizontal-handle if="horizontalScrollingEnabled" style="scroll-handle" drag:create="OnCreateHorizontalDrag($event)"/>
 
     </Contents>
+    
 </UITemplate>

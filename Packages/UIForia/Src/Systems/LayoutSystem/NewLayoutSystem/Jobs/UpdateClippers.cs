@@ -12,7 +12,7 @@ using UnityEngine;
 namespace UIForia.Systems {
 
     [BurstCompile]
-    public unsafe struct UpdateClippers : IJob {
+    internal unsafe struct UpdateClippers : IJob {
 
         public DataList<Clipper>.Shared clipperList;
         public ElementTable<ClipInfo> clipInfoTable;

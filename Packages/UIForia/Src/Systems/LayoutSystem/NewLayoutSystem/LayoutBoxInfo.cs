@@ -1,9 +1,10 @@
-﻿using UIForia.Util;
+﻿using UIForia.Elements;
+using UIForia.Util;
 using Unity.Mathematics;
 
 namespace UIForia.Layout {
 
-    public struct LayoutBoxInfo {
+    internal unsafe struct LayoutBoxInfo {
 
         public ElementId layoutParentId;
         public float2 alignedPosition;
@@ -16,7 +17,8 @@ namespace UIForia.Layout {
         public float emSize;
         public ElementId clipperId;
         public bool isCulled;
-        internal bool sizeChanged;
+        public bool sizeChanged;
+        public ScrollValues* scrollValues;
 
         public float allocatedWidth {
             get => allocatedSize.x;

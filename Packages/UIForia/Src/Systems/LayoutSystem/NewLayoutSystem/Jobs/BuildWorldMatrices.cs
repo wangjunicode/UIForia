@@ -63,8 +63,6 @@ namespace UIForia.Layout {
                     0, 0, 0, 1
                 );
                 
-                // todo -- make sure this isnt backwards
-                
                 // this is an inlined 2d matrix multiplication. matrix multiply is stupidly slow in managed mode,
                 // being 2d cuts down our work load by a factor of 6 according to the profiler
                 m.c0.x = left.c0.x * right.c0.x + left.c1.x * right.c0.y;

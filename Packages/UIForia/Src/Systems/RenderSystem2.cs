@@ -262,8 +262,6 @@ namespace UIForia.Systems {
             unsafeData.Dispose();
         }
 
-        public bool printed;
-
         public virtual void OnUpdate() {
             frameId++;
             unsafeData.Clear();

@@ -32,7 +32,7 @@ namespace UIForia.Layout {
         public readonly ElementId elementId;
         private readonly LayoutSystem.LayoutDataTables* layoutSystemTablePointers;
 
-        public LayoutResult(ElementId elementId, LayoutSystem.LayoutDataTables* layoutSystemTablePointers) : this() {
+        internal LayoutResult(ElementId elementId, LayoutSystem.LayoutDataTables* layoutSystemTablePointers) : this() {
             this.elementId = elementId;
             this.layoutSystemTablePointers = layoutSystemTablePointers;
         }

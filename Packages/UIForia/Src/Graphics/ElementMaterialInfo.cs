@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UIForia.Graphics {
 
-    [AssertSize(48)]
+    [AssertSize(64)]
     [StructLayout(LayoutKind.Explicit)]
     public struct UIForiaMaterialInfo {
 
@@ -17,7 +17,7 @@ namespace UIForia.Graphics {
     /// must be aligned on 16 byte boundaries for shader performance
     /// Could step this up to 64 if I needed to, might have to with masking Pie values for elements
     /// </summary>
-    [AssertSize(48)]
+    [AssertSize(64)]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct TextMaterialInfo {
 
@@ -41,42 +41,42 @@ namespace UIForia.Graphics {
         public byte outlineWidth;
         public byte outlineSoftness;
 
-        private fixed byte padding[12];
+        private fixed byte padding[28];
 
     }
 
-    [AssertSize(48)]
+    [AssertSize(64)]
     [StructLayout(LayoutKind.Sequential)]
     public struct ElementMaterialInfoGPU {
 
         uint backgroundColor;
         uint backgroundTint;
         uint outlineColor;
-        uint outlineTint;
+        uint outlineTint; // not used atm 
 
         uint radius;
         uint bevelTop;
         uint bevelBottom;
-        uint meshPie;
-        half2 meshPieOffset;
-        
-        byte bodyColorMode;
-        byte outlineColorMode;
-        ushort unused;
-        
-        // maybe move to float buffer
-        // uint uvTopLeft;
-        // uint uvBottomRight;
+        uint fillOpenAndRotation;
+        float fillRadius;
+        float fillOffsetX;
+        float fillRadiusY;
 
+        uint bMode_oMode_unused;
+                
+        // maybe move to float buffer
+                
         float outlineWidth;
-        private uint unused1;
+        uint unused0;
+        uint unused1;
+        uint unused2;
 
     }
 
     ///<summary>
     /// must be aligned on 16 byte boundaries for shader performance
     /// </summary>
-    [AssertSize(48)]
+    [AssertSize(64)]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct ElementMaterialInfo {
 
@@ -97,15 +97,17 @@ namespace UIForia.Graphics {
         public ushort bevelBR;
         public ushort bevelBL;
 
-        public byte pieDirection;
-        public byte pieOpenAmount;
-        public byte pieRotation;
-        public byte pieRadius; // probably needs to be bigger
-        public uint pieOffset;
+        public ushort fillOpenAmount;
+        public ushort fillRotation;
+        
+        public float fillRadius; 
+        public float fillOffsetX;
+        public float fillOffsetY;
 
         public ColorMode bodyColorMode;
         public ColorMode outlineColorMode;
-        public ushort unused;
+        public byte fillDirection;
+        public byte fillInvert;
         
         // maybe move to float buffer
         // public ushort uvTop;
@@ -114,7 +116,8 @@ namespace UIForia.Graphics {
         // public ushort uvBottom;
 
         public float outlineWidth;
-        private uint unused1;
+
+        public fixed byte padding[12];
 
         // by putting these here we also free up texCoords in the actual vertices
         // could either encode some of the data there or re-purpose those

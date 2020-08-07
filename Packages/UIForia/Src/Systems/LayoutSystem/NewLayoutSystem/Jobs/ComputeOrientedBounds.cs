@@ -7,7 +7,7 @@ using Unity.Mathematics;
 namespace UIForia.Systems {
 
     [BurstCompile]
-    public struct ComputeOrientedBounds : IJob, IVertigoParallel {
+    internal struct ComputeOrientedBounds : IJob, IVertigoParallel {
 
         public DataList<ElementId>.Shared elementList;
         public ElementTable<ClipInfo> clipInfoTable;

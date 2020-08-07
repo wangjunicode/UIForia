@@ -26,6 +26,10 @@ namespace UIForia.Util {
             return (byte) RemapRange(value, -1, 1, 0, 255);
         }
 
+        public static ushort FloatPercentageToUshort(float value) {
+            return(ushort) RemapRange(value, 0, 1, 0, ushort.MaxValue);
+        }
+
         public static ushort FloatMinus1To1ToUshort(float value) {
             if (value < -1) {
                 value = -1;

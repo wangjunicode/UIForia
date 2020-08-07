@@ -29,7 +29,10 @@ namespace UIForia.Layout {
 
         public List_FlexItem items;
         public List_FlexTrack wrappedTracks;
-
+        
+        private float finalContentWidth;
+        private float finalContentHeight;
+        
         public void RunHorizontal(BurstLayoutRunner* runner) {
             if (items.size == 0) {
                 return;
@@ -511,8 +514,18 @@ namespace UIForia.Layout {
                 offset += item.heightData.marginStart + item.heightData.marginEnd + gap;
             }
 
+            finalContentHeight = offset - gap;
+
         }
 
+        public float GetActualContentWidth(ref BurstLayoutRunner runner) {
+            return 0;
+        }
+
+        public float GetActualContentHeight(ref BurstLayoutRunner runner) {
+            return finalContentHeight;
+        }
+        
         private void GrowHorizontal(ref FlexTrack track) {
             int pieces = 0;
 
@@ -949,7 +962,7 @@ namespace UIForia.Layout {
             this = default;
         }
 
-        public void OnStylePropertiesChanged(StyleProperty[] properties, int propertyCount) {
+        public void OnStylePropertiesChanged(LayoutSystem layoutSystem, UIElement element, StyleProperty[] properties, int propertyCount) {
             // todo -- a lot of these won't require a full layout, optimize this later to just do alignment / etc
             for (int i = 0; i < propertyCount; i++) {
                 ref StyleProperty property = ref properties[i];
@@ -994,7 +1007,7 @@ namespace UIForia.Layout {
             }
         }
 
-        public void OnChildStyleChanged(ElementId childId, StyleProperty[] properties, int propertyCount) {
+        public void OnChildStyleChanged(LayoutSystem layoutSystem, ElementId childId, StyleProperty[] properties, int propertyCount) {
             int idx = -1;
             for (int i = 0; i < items.size; i++) {
                 if (items.array[i].elementId == childId) {
@@ -1019,6 +1032,7 @@ namespace UIForia.Layout {
             }
         }
 
+        
     }
 
     public struct FlexTrack {

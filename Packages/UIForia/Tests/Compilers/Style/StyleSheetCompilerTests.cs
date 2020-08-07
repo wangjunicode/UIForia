@@ -53,9 +53,9 @@ style image3 { BackgroundImage = url(testimg/cat); }
         var containers = styleSheet.styleGroupContainers;
         Assert.AreEqual(3, containers.Length);
 
-        Assert.AreEqual("cat", containers[0].groups[0].normal.style.BackgroundImage.name);
-        Assert.AreEqual("cat", containers[1].groups[0].normal.style.BackgroundImage.name);
-        Assert.AreEqual("cat", containers[2].groups[0].normal.style.BackgroundImage.name);
+        Assert.AreEqual("cat", containers[0].groups[0].normal.style.BackgroundImage.texture.name);
+        Assert.AreEqual("cat", containers[1].groups[0].normal.style.BackgroundImage.texture.name);
+        Assert.AreEqual("cat", containers[2].groups[0].normal.style.BackgroundImage.texture.name);
     }
 
     [Test]

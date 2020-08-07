@@ -58,6 +58,18 @@ namespace UIForia.Layout {
             return 0;
         }
 
+        public void OnStylePropertiesChanged(LayoutSystem layoutSystem, UIElement element, StyleProperty[] properties, int propertyCount) { }
+
+        public void OnChildStyleChanged(LayoutSystem layoutSystem, ElementId childId, StyleProperty[] properties, int propertyCount) { }
+
+        public float GetActualContentWidth(ref BurstLayoutRunner runner) {
+            return 0;
+        }
+
+        public float GetActualContentHeight(ref BurstLayoutRunner runner) {
+            return 0;
+        }
+
         public void Dispose() { }
 
         public void OnChildrenChanged(LayoutSystem layoutSystem) {

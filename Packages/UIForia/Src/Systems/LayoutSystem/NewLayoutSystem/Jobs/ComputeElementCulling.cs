@@ -8,7 +8,7 @@ using Unity.Jobs;
 namespace UIForia.Systems {
 
     [BurstCompile]
-    public struct ComputeElementCulling : IJob, IVertigoParallel {
+    internal struct ComputeElementCulling : IJob, IVertigoParallel {
 
         public DataList<ElementId>.Shared elementList;
         public ElementTable<ClipInfo> clipInfoTable;

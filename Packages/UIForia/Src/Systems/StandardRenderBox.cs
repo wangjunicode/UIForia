@@ -134,285 +134,6 @@ namespace UIForia.Rendering {
     }
 
     [DebuggerDisplay("{element.ToString()}")]
-    public class StandardRenderBox2 : RenderBox {
-
-        protected bool requireRendering;
-
-        public ElementDrawDesc drawDesc;
-
-        protected Texture outlineTexture;
-        protected Texture backgroundTexture;
-        protected int backgroundTextureId;
-        protected int outlineTextureId;
-        protected OverflowHandling overflowHandling;
-
-        public override void OnInitialize() {
-
-            drawDesc.opacity = 255;
-            drawDesc.backgroundColor = element.style.BackgroundColor;
-            drawDesc.backgroundTint = element.style.BackgroundTint;
-            drawDesc.outlineColor = element.style.OutlineColor;
-            drawDesc.outlineWidth = 0; // set later since its size relative
-
-            drawDesc.radiusTL = 0;
-            drawDesc.radiusTR = 0;
-            drawDesc.radiusBR = 0;
-            drawDesc.radiusBL = 0;
-
-            drawDesc.bevelTL = 0;
-            drawDesc.bevelTR = 0;
-            drawDesc.bevelBR = 0;
-            drawDesc.bevelBL = 0;
-
-            backgroundTexture = element.style.BackgroundImage;
-            backgroundTextureId = ReferenceEquals(backgroundTexture, null) ? 0 : backgroundTexture.GetHashCode();
-
-            drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId);
-            requireRendering = false; // set after we get a size change
-            overflowHandling = 0;
-            if (element.style.OverflowX != Overflow.Visible) {
-                overflowHandling |= OverflowHandling.Horizontal;
-            }
-
-            if (element.style.OverflowY != Overflow.Visible) {
-                overflowHandling |= OverflowHandling.Vertical;
-            }
-        }
-
-        public static ColorMode GetColorMode(Color32 mainColor, Color32 tintColor, int textureId) {
-            ColorMode colorMode = 0;
-
-            if (textureId > 0) {
-                colorMode |= ColorMode.Texture;
-            }
-
-            if (tintColor.a > 0) {
-                colorMode |= ColorMode.TextureTint;
-            }
-
-            if (mainColor.a > 0) {
-                colorMode |= ColorMode.Color;
-            }
-
-            return colorMode;
-        }
-
-        // send with style update, do this after layout finishes
-        // sync point but i had that anyway
-
-        private float ResolveRelativeLength(float baseValue, UIFixedLength length) {
-
-            switch (length.unit) {
-
-                default:
-                    return length.value;
-
-                case UIFixedUnit.Percent:
-                    return length.value * baseValue;
-            }
-
-        }
-
-        public override void OnSizeChanged(Size size) {
-            // re-compute radius & bevel
-
-            float min = size.width < size.height ? size.width : size.height;
-
-            if (min <= 0) min = 0.0001f;
-
-            float halfMin = min * 0.5f;
-            float minScale = 1f / min;
-
-            float resolvedBorderRadiusTopLeft = Mathf.Clamp(ResolveRelativeLength(min, element.style.BorderRadiusTopLeft), 0, halfMin) * minScale;
-            float resolvedBorderRadiusTopRight = Mathf.Clamp(ResolveRelativeLength(min, element.style.BorderRadiusTopRight), 0, halfMin) * minScale;
-            float resolvedBorderRadiusBottomLeft = Mathf.Clamp(ResolveRelativeLength(min, element.style.BorderRadiusBottomRight), 0, halfMin) * minScale;
-            float resolvedBorderRadiusBottomRight = Mathf.Clamp(ResolveRelativeLength(min, element.style.BorderRadiusBottomLeft), 0, halfMin) * minScale;
-
-            byte r0 = (byte) (((resolvedBorderRadiusTopLeft * 1000)) * 0.5f);
-            byte r1 = (byte) (((resolvedBorderRadiusTopRight * 1000)) * 0.5f);
-            byte r2 = (byte) (((resolvedBorderRadiusBottomLeft * 1000)) * 0.5f);
-            byte r3 = (byte) (((resolvedBorderRadiusBottomRight * 1000)) * 0.5f);
-
-            float resolvedCornerBevelTopLeft = ResolveRelativeLength(halfMin, element.style.CornerBevelTopLeft);
-            float resolvedCornerBevelTopRight = ResolveRelativeLength(halfMin, element.style.CornerBevelTopRight);
-            float resolvedCornerBevelBottomRight = ResolveRelativeLength(halfMin, element.style.CornerBevelBottomRight);
-            float resolvedCornerBevelBottomLeft = ResolveRelativeLength(halfMin, element.style.CornerBevelBottomLeft);
-
-            ushort b0 = (ushort) resolvedCornerBevelTopLeft;
-            ushort b1 = (ushort) resolvedCornerBevelTopRight;
-            ushort b2 = (ushort) resolvedCornerBevelBottomRight;
-            ushort b3 = (ushort) resolvedCornerBevelBottomLeft;
-
-            drawDesc.width = size.width;
-            drawDesc.height = size.height;
-
-            drawDesc.bevelTL = b0;
-            drawDesc.bevelTR = b1;
-            drawDesc.bevelBR = b2;
-            drawDesc.bevelBL = b3;
-
-            drawDesc.radiusTL = r0;
-            drawDesc.radiusTR = r1;
-            drawDesc.radiusBR = r2;
-            drawDesc.radiusBL = r3;
-
-            drawDesc.outlineWidth = ResolveRelativeLength(halfMin, element.style.OutlineWidth);
-            drawDesc.outlineColorMode = GetColorMode(drawDesc.outlineColor, default, outlineTextureId);
-            requireRendering = drawDesc.opacity > 0 && (drawDesc.bgColorMode != 0 || (drawDesc.outlineWidth > 0 && drawDesc.outlineColorMode != 0));
-        }
-
-        public override void Enable() { }
-
-        public override void OnStylePropertyChanged(StyleProperty[] propertyList, int propertyCount) {
-            bool recomputeDrawing = false;
-
-            for (int i = 0; i < propertyCount; i++) {
-                ref StyleProperty property = ref propertyList[i];
-                switch (property.propertyId) {
-
-                    case StylePropertyId.OutlineWidth:
-                        recomputeDrawing = true;
-                        float halfMin = math.min(drawDesc.width, drawDesc.height) * 0.5f;
-                        drawDesc.outlineWidth = ResolveRelativeLength(halfMin, property.AsUIFixedLength);
-                        break;
-
-                    case StylePropertyId.OutlineColor:
-                        recomputeDrawing = true;
-                        drawDesc.outlineColor = property.AsColor32;
-                        break;
-
-                    case StylePropertyId.BackgroundColor:
-                        recomputeDrawing = true;
-                        drawDesc.backgroundColor = property.AsColor32;
-                        break;
-
-                    case StylePropertyId.BackgroundTint:
-                        recomputeDrawing = true;
-                        drawDesc.backgroundTint = property.AsColor32;
-                        break;
-
-                    case StylePropertyId.BackgroundImage:
-                        recomputeDrawing = true;
-                        backgroundTexture = property.AsTexture;
-                        backgroundTextureId = ReferenceEquals(backgroundTexture, null) ? 0 : backgroundTexture.GetHashCode();
-                        break;
-
-                    case StylePropertyId.OverflowX:
-                        if (property.AsOverflow == Overflow.Visible || property.AsOverflow == Overflow.Unset) {
-                            overflowHandling &= ~OverflowHandling.Horizontal;
-                        }
-                        else {
-                            overflowHandling |= OverflowHandling.Horizontal;
-                        }
-
-                        break;
-
-                    case StylePropertyId.OverflowY:
-                        if (property.AsOverflow == Overflow.Visible || property.AsOverflow == Overflow.Unset) {
-                            overflowHandling &= ~OverflowHandling.Vertical;
-                        }
-                        else {
-                            overflowHandling |= OverflowHandling.Vertical;
-                        }
-
-                        break;
-
-                    case StylePropertyId.MeshFillAmount:
-                        break;
-
-                    case StylePropertyId.MeshFillOrigin:
-                        break;
-
-                    case StylePropertyId.MeshFillDirection:
-                        break;
-
-                    case StylePropertyId.MeshType:
-                        break;
-
-                    case StylePropertyId.BackgroundImageScaleX:
-                        break;
-
-                    case StylePropertyId.BackgroundImageScaleY:
-                        break;
-
-                    case StylePropertyId.BackgroundImageRotation:
-                        break;
-
-                    case StylePropertyId.BackgroundImageTileX:
-                        break;
-
-                    case StylePropertyId.BackgroundImageTileY:
-                        break;
-                }
-            }
-
-            if (recomputeDrawing) {
-                drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId);
-                drawDesc.outlineColorMode = GetColorMode(drawDesc.outlineColor, default, outlineTextureId);
-                requireRendering = drawDesc.opacity > 0 && (drawDesc.bgColorMode != 0 || (drawDesc.outlineWidth > 0 && drawDesc.outlineColorMode != 0));
-            }
-
-        }
-
-        public override void PaintBackground3(RenderContext3 ctx) {
-
-            if (requireRendering) {
-
-                ctx.SetBackgroundTexture(backgroundTexture);
-                ctx.DrawElement(0, 0, drawDesc);
-            }
-
-            if (overflowHandling != 0) {
-
-                // todo -- add an overflow offset style
-                float clipX = 0;
-                float clipY = 0;
-                float clipWidth = float.MaxValue;
-                float clipHeight = float.MaxValue;
-
-                if ((overflowHandling & OverflowHandling.Horizontal) != 0) {
-                    clipWidth = drawDesc.width;
-                }
-
-                if ((overflowHandling & OverflowHandling.Vertical) != 0) {
-                    clipHeight = drawDesc.height;
-                }
-
-                ctx.PushClipRect(clipX, clipY, clipWidth, clipHeight);
-                // ctx.BeginStencilClip();
-                //
-                // ctx.DrawElement(0, 0, drawDesc);
-                //
-                // ctx.PushStencilClip();
-
-            }
-
-            // var copy = drawDesc;
-            // copy.width = 10;
-            // copy.outlineWidth = 0;
-            // copy.bevelTL = 0;
-            // copy.bevelTR = 0;
-            // copy.bevelBR = 0;
-            // copy.bevelBL = 0;
-            // copy.radiusTL = 0;
-            // copy.radiusTR = 0;
-            // copy.radiusBR = 0;
-            // copy.radiusBL = 0;
-            // copy.backgroundColor = Color.white;
-            // ctx.DrawElement(300, 0, copy);
-
-        }
-
-        public override void PaintForeground3(RenderContext3 ctx) {
-            if (overflowHandling != 0) {
-                ctx.PopClipRect();
-                // ctx.PopStencilClip();
-            }
-        }
-
-    }
-
-    [DebuggerDisplay("{element.ToString()}")]
     public class StandardRenderBox : RenderBox {
 
         protected bool geometryNeedsUpdate;
@@ -429,7 +150,7 @@ namespace UIForia.Rendering {
         protected Color32 backgroundColor;
         protected Color32 backgroundTint;
         protected Color32 shadowColor;
-        protected Texture backgroundImage;
+        protected TextureReference backgroundImage;
 
         protected UIFixedLength borderRadiusTopLeft;
         protected UIFixedLength borderRadiusTopRight;
@@ -647,75 +368,75 @@ namespace UIForia.Rendering {
             // geometry.FillRect(size.width, size.height);
             geometry.FillMeshType(0, 0, width, height, meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
 
-            if (!ReferenceEquals(backgroundImage, null)) {
-                Vector3[] positions = geometry.positionList.array;
-                Vector4[] texCoord0 = geometry.texCoordList0.array;
-
-                float bgPositionX = element.style.BackgroundImageOffsetX.value;
-                float bgPositionY = element.style.BackgroundImageOffsetY.value;
-
-                float bgScaleX = element.style.BackgroundImageScaleX;
-                float bgScaleY = element.style.BackgroundImageScaleY;
-                float bgRotation = element.style.BackgroundImageRotation;
-
-                float sinX = Mathf.Sin(bgRotation * Mathf.Deg2Rad);
-                float cosX = Mathf.Cos(bgRotation * Mathf.Deg2Rad);
-
-                float originalWidth = element.style.BackgroundImage.width;
-                float originalHeight = element.style.BackgroundImage.height;
-
-                float ratioX = width / element.style.BackgroundImage.width;
-                float ratioY = height / element.style.BackgroundImage.height;
-
-                // use whichever multiplier is smaller
-                float ratio = ratioX < ratioY ? ratioX : ratioY;
-
-                // now we can get the new height and width
-                int newHeight = (int) (originalHeight * ratio);
-                int newWidth = (int) (originalWidth * ratio);
-
-                // Now calculate the X,Y position of the upper-left corner (one of these will always be zero)
-                int posX = (int) ((width - (originalWidth * ratio)) / 2);
-                int posY = (int) ((height - (originalHeight * ratio)) / 2);
-
-                switch (element.style.BackgroundFit) {
-                    case BackgroundFit.Fill:
-                        for (int i = 0; i < geometry.texCoordList0.size; i++) {
-                            float x = (bgPositionX + positions[i].x - pivotOffset.x) / (bgScaleX * width);
-                            float y = (bgPositionY + positions[i].y + pivotOffset.y) / (bgScaleY * -height);
-                            float newX = (cosX * x) - (sinX * y);
-                            float newY = (sinX * x) + (cosX * y);
-                            texCoord0[i].x = newX;
-                            texCoord0[i].y = 1 - newY;
-                        }
-
-                        break;
-
-                    case BackgroundFit.ScaleDown:
-                        break;
-
-                    case BackgroundFit.Cover:
-                        break;
-
-                    case BackgroundFit.Contain:
-                        for (int i = 0; i < geometry.texCoordList0.size; i++) {
-                            float x = (posX + bgPositionX + positions[i].x - pivotOffset.x) / (bgScaleX * newWidth);
-                            float y = (posY + bgPositionY + positions[i].y + pivotOffset.y) / (bgScaleY * -newHeight);
-                            float newX = (cosX * x) - (sinX * y);
-                            float newY = (sinX * x) + (cosX * y);
-                            texCoord0[i].x = newX;
-                            texCoord0[i].y = 1 - newY;
-                        }
-
-                        break;
-
-                    case BackgroundFit.None:
-
-                        break;
-                }
-            }
-
-            range = new GeometryRange(0, geometry.positionList.size, 0, geometry.triangleList.size);
+            // // if (!ReferenceEquals(backgroundImage, null)) {
+            // //     Vector3[] positions = geometry.positionList.array;
+            // //     Vector4[] texCoord0 = geometry.texCoordList0.array;
+            // //
+            // //     float bgPositionX = element.style.BackgroundImageOffsetX.value;
+            // //     float bgPositionY = element.style.BackgroundImageOffsetY.value;
+            // //
+            // //     float bgScaleX = element.style.BackgroundImageScaleX;
+            // //     float bgScaleY = element.style.BackgroundImageScaleY;
+            // //     float bgRotation = element.style.BackgroundImageRotation;
+            // //
+            // //     float sinX = Mathf.Sin(bgRotation * Mathf.Deg2Rad);
+            // //     float cosX = Mathf.Cos(bgRotation * Mathf.Deg2Rad);
+            // //
+            // //     float originalWidth = element.style.BackgroundImage.width;
+            // //     float originalHeight = element.style.BackgroundImage.height;
+            // //
+            // //     float ratioX = width / element.style.BackgroundImage.width;
+            // //     float ratioY = height / element.style.BackgroundImage.height;
+            // //
+            // //     // use whichever multiplier is smaller
+            // //     float ratio = ratioX < ratioY ? ratioX : ratioY;
+            // //
+            // //     // now we can get the new height and width
+            // //     int newHeight = (int) (originalHeight * ratio);
+            // //     int newWidth = (int) (originalWidth * ratio);
+            // //
+            // //     // Now calculate the X,Y position of the upper-left corner (one of these will always be zero)
+            // //     int posX = (int) ((width - (originalWidth * ratio)) / 2);
+            // //     int posY = (int) ((height - (originalHeight * ratio)) / 2);
+            // //
+            // //     switch (element.style.BackgroundFit) {
+            // //         case BackgroundFit.Fill:
+            // //             for (int i = 0; i < geometry.texCoordList0.size; i++) {
+            // //                 float x = (bgPositionX + positions[i].x - pivotOffset.x) / (bgScaleX * width);
+            // //                 float y = (bgPositionY + positions[i].y + pivotOffset.y) / (bgScaleY * -height);
+            // //                 float newX = (cosX * x) - (sinX * y);
+            // //                 float newY = (sinX * x) + (cosX * y);
+            // //                 texCoord0[i].x = newX;
+            // //                 texCoord0[i].y = 1 - newY;
+            // //             }
+            // //
+            // //             break;
+            // //
+            // //         case BackgroundFit.ScaleDown:
+            // //             break;
+            // //
+            // //         case BackgroundFit.Cover:
+            // //             break;
+            // //
+            // //         case BackgroundFit.Contain:
+            // //             for (int i = 0; i < geometry.texCoordList0.size; i++) {
+            // //                 float x = (posX + bgPositionX + positions[i].x - pivotOffset.x) / (bgScaleX * newWidth);
+            // //                 float y = (posY + bgPositionY + positions[i].y + pivotOffset.y) / (bgScaleY * -newHeight);
+            // //                 float newX = (cosX * x) - (sinX * y);
+            // //                 float newY = (sinX * x) + (cosX * y);
+            // //                 texCoord0[i].x = newX;
+            // //                 texCoord0[i].y = 1 - newY;
+            // //             }
+            // //
+            // //             break;
+            // //
+            // //         case BackgroundFit.None:
+            // //
+            // //             break;
+            // //     }
+            // }
+            //
+            // range = new GeometryRange(0, geometry.positionList.size, 0, geometry.triangleList.size);
         }
 
         private void UpdateMaterialData() {
@@ -827,7 +548,7 @@ namespace UIForia.Rendering {
 
             geometry.cornerData = new Vector4(resolvedCornerBevelTopLeft, resolvedCornerBevelTopRight, resolvedCornerBevelBottomLeft, resolvedCornerBevelBottomRight);
             geometry.objectData = new Vector4(val, VertigoUtil.PackSizeVector(element.layoutResult.actualSize), packedBorderRadii, opacity);
-            geometry.mainTexture = backgroundImage;
+         //   geometry.mainTexture = backgroundImage;
         }
 
         private static float Clamp(float test, float min, float max) {

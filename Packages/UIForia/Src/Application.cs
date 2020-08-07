@@ -287,10 +287,12 @@ namespace UIForia {
             }
 
             elementSystem.Dispose();
-
-            resourceManager.Reset();
+            layoutSystem.Dispose();
+            textSystem.Dispose();
             renderSystem.Dispose();
             templateData.Destroy();
+            
+            resourceManager.Reset();
 
             m_AfterUpdateTaskSystem.OnDestroy();
             m_BeforeUpdateTaskSystem.OnDestroy();
@@ -472,7 +474,7 @@ namespace UIForia {
             Profiler.BeginSample("UIForia::FlushStyleChanges");
             styleSystem.FlushChangeSets(elementSystem, layoutSystem, renderSystem);
             Profiler.EndSample();
-            
+
             layoutTimer.Restart();
             Profiler.BeginSample("UIForia::Layout");
             layoutSystem.RunLayout();

@@ -217,11 +217,11 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UnityEngine.Texture2D BackgroundImage { 
+            public UIForia.TextureReference BackgroundImage { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTextureReference;
                     return DefaultStyleValues_Generated.BackgroundImage;
                 }
             }
@@ -1454,9 +1454,9 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageRotation, value)); }
         }
             
-        public UnityEngine.Texture2D BackgroundImage {
+        public UIForia.TextureReference BackgroundImage {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.BackgroundImage).AsTexture2D; }
+            get { return GetProperty(StylePropertyId.BackgroundImage).AsTextureReference; }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value)); }
         }
@@ -2484,11 +2484,11 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UnityEngine.Texture2D BackgroundImage { 
+            public UIForia.TextureReference BackgroundImage { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTexture2D;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTextureReference;
                     return DefaultStyleValues_Generated.BackgroundImage;
                 }
             }
@@ -3741,12 +3741,12 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageRotation, state).AsFloat;
         }
         
-        public void SetBackgroundImage(UnityEngine.Texture2D value, StyleState state) {
+        public void SetBackgroundImage(UIForia.TextureReference value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value), state);
         }
 
-        public UnityEngine.Texture2D GetBackgroundImage(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundImage, state).AsTexture2D;
+        public UIForia.TextureReference GetBackgroundImage(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundImage, state).AsTextureReference;
         }
         
         public void SetBackgroundFit(in UIForia.Rendering.BackgroundFit? value, StyleState state) {
@@ -4984,7 +4984,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageTileX: return typeof(System.Single);
                     case StylePropertyId.BackgroundImageTileY: return typeof(System.Single);
                     case StylePropertyId.BackgroundImageRotation: return typeof(System.Single);
-                    case StylePropertyId.BackgroundImage: return typeof(UnityEngine.Texture2D);
+                    case StylePropertyId.BackgroundImage: return typeof(UIForia.TextureReference);
                     case StylePropertyId.BackgroundFit: return typeof(UIForia.Rendering.BackgroundFit);
                     case StylePropertyId.BorderColorTop: return typeof(UnityEngine.Color);
                     case StylePropertyId.BorderColorRight: return typeof(UnityEngine.Color);

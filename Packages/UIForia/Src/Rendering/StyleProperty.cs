@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Text;
@@ -202,6 +203,13 @@ namespace UIForia.Rendering {
         }
 
         [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, TextureReference objectField) : this() {
+            this.propertyId = propertyId;
+            this.flags = !ReferenceEquals(objectField, null) ? (ushort) 1 : (ushort) 0;
+            this.objectField = objectField;
+        }
+        
+        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, CursorStyle objectField) : this() {
             this.propertyId = propertyId;
             this.flags = objectField != null ? (ushort) 1 : (ushort) 0;
@@ -297,6 +305,7 @@ namespace UIForia.Rendering {
         public BackgroundFit AsBackgroundFit => (BackgroundFit) int0;
         public ClipBounds AsClipBounds => (ClipBounds) int0;
         public PointerEvents AsPointerEvents => (PointerEvents) int0;
+        public TextureReference AsTextureReference => (TextureReference) objectField;
 
         public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
         public AlignmentDirection AsAlignmentDirection => (AlignmentDirection) int0;

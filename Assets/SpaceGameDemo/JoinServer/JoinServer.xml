@@ -3,46 +3,62 @@
     <Style src="SpaceGameDemo/JoinServer/JoinServer.style"/>
     <Style src="SpaceGameDemo/Theme.style" alias="theme"/>
 
-    <Contents>
-        <Group style="menu">
-            <SpaceMenuItem label="'Back'" targetPanel="'StartMenu'" />
-        </Group>
-        <Panel style="main-content">
-            <SpacePanelHeader title="'Join Server'">
-                <override:rightSide style="toggle">
-                    <Text>Show Filters</Text>
-                </override:rightSide>
-            </SpacePanelHeader>
+    <Style>
+
+        style uv-box {
+            PreferredSize = 300px;
+            BackgroundImage = url("Images/2");  
+            CornerBevel = 10px;
+        }
+        
+    </Style>
     
-            <Group style="table">
-                <Group style="table-header table-layout">
-                    <Text style="table-head">Title</Text>
-                    <Text style="table-head">Players</Text>
-                    <Text style="table-head">Game Type</Text>
-                    <Text style="table-head">Map</Text>
-                    <Text style="table-head">Ping</Text>
-                    <Text style="table-head column-center">Actions</Text>
-                </Group>
-                
-                <ScrollView style="table-scroll-view" trackSize="3">
-                    <override:vertical-scrollbar-handle style="scroll-handle" />
-                    <override:vertical-scrollbar style="scrollbar" />
-                    <Repeat list="servers" style="table-layout">
-                        <Div style="column column-title">{$item.title}</Div>
-                        <Div style="column">{$item.players}/{$item.maxPlayers}</Div>
-                        <Div style="column">{$item.gameType}</Div>
-                        <Div style="column">{$item.map}</Div>
-                        <Div style="column">{$item.ping}ms</Div>
-                        <Div style="column column-actions">
-                            <Image style="action star" src="'Images/star'"/>
-                            <Image style="action plus" src="'Images/plus'"/>
-                            <Image style="action" src="'Images/cross'"/>
-                            
-                        </Div>
-                    </Repeat>
-                </ScrollView>
-            </Group>
-        </Panel>
+    <Contents>
+
+        <Div style="uv-box" style:MeshFillAmount="FracTime">
+            
+        </Div>
+        
+        <!--        <Group style="menu">-->
+        <!--            <SpaceMenuItem label="'Back'" targetPanel="'StartMenu'"/>-->
+        <!--        </Group>-->
+
+        <!--        <Panel style="main-content">-->
+        <!--            <SpacePanelHeader title="'Join Server'">-->
+        <!--                <override:rightSide style="toggle">-->
+        <!--                    <Text>Show Filters</Text>-->
+        <!--                </override:rightSide>-->
+        <!--            </SpacePanelHeader>-->
+
+        <!--            <Group style="table">-->
+        <!--                <Group style="table-header table-layout">-->
+        <!--                    <Text style="table-head">Title</Text>-->
+        <!--                    <Text style="table-head">Players</Text>-->
+        <!--                    <Text style="table-head">Game Type</Text>-->
+        <!--                    <Text style="table-head">Map</Text>-->
+        <!--                    <Text style="table-head">Ping</Text>-->
+        <!--                    <Text style="table-head column-center">Actions</Text>-->
+        <!--                </Group>-->
+
+        <!--                <ScrollView style="table-scroll-view" trackSize="3">-->
+        <!--                    &lt;!&ndash;                    <override:vertical-scrollbar-handle style="scroll-handle" />&ndash;&gt;-->
+        <!--                    &lt;!&ndash;                    <override:vertical-scrollbar style="scrollbar" />&ndash;&gt;-->
+        <!--                    <Repeat list="servers" style="table-layout">-->
+        <!--                        <Div style="column column-title">{$item.title}</Div>-->
+        <!--                        <Div style="column">{$item.players}/{$item.maxPlayers}</Div>-->
+        <!--                        <Div style="column">{$item.gameType}</Div>-->
+        <!--                        <Div style="column">{$item.map}</Div>-->
+        <!--                        <Div style="column">{$item.ping}ms</Div>-->
+        <!--                        <Div style="column column-actions">-->
+        <!--                            <Image style="action star" src="'Images/star'"/>-->
+        <!--                            <Image style="action plus" src="'Images/plus'"/>-->
+        <!--                            <Image style="action" src="'Images/cross'"/>-->
+
+        <!--                        </Div>-->
+        <!--                    </Repeat>-->
+        <!--                </ScrollView>-->
+        <!--            </Group>-->
+        <!--        </Panel>-->
 
     </Contents>
 

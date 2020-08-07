@@ -1,5 +1,4 @@
-﻿using UIForia.Layout;
-using UIForia.ListTypes;
+﻿using UIForia.ListTypes;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
@@ -75,7 +74,6 @@ namespace UIForia.Graphics {
                 AxisAlignedBounds2D aabb = drawInfo.localBounds;
 
                 // todo -- without burst this is stupid slow
-                continue;
                 float3 p0 = math.transform(*drawInfo.matrix, new float3(aabb.xMin, -aabb.yMin, 0));
                 float3 p1 = math.transform(*drawInfo.matrix, new float3(aabb.xMax, -aabb.yMin, 0));
                 float3 p2 = math.transform(*drawInfo.matrix, new float3(aabb.xMax, -aabb.yMax, 0));

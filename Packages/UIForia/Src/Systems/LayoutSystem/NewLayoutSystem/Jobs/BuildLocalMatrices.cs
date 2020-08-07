@@ -91,12 +91,20 @@ namespace UIForia.Layout {
                 //     continue;
                 // }
 
+                float scrollOffsetX = 0;
+                float scrollOffsetY = 0;
+                
+                if (layoutResult.scrollValues != null) {
+                    scrollOffsetX = layoutResult.scrollValues->contentWidth * layoutResult.scrollValues->scrollX;
+                    scrollOffsetY = (layoutResult.scrollValues->contentHeight - layoutResult.scrollValues->actualHeight) * -layoutResult.scrollValues->scrollY;
+                }
+                
                 if (transformInfo.positionX == 0 && transformInfo.positionY == 0 && transformInfo.rotation == 0 && transformInfo.scaleX == 1 && transformInfo.scaleY == 1) {
                     localMatrices.array[elementId.index] = new float4x4(
                         new float4(1, 0, 0, 0),
                         new float4(0, 1, 0, 0),
                         new float4(0, 0, 1, 0),
-                        new float4(layoutResult.alignedPosition.x, -(layoutResult.alignedPosition.y), 0, 1)
+                        new float4(layoutResult.alignedPosition.x + scrollOffsetX, -(layoutResult.alignedPosition.y + scrollOffsetY), 0, 1)
                     );
                     continue;
                 }
@@ -105,8 +113,8 @@ namespace UIForia.Layout {
 
                 ref LayoutBoxInfo parentResult = ref layoutBoxInfoTable.array[parentId.index];
 
-                float x = MeasurementUtil.ResolveTransformMeasurement(layoutResult, parentResult, viewParameters, transformInfo.positionX, layoutResult.actualSize.x);
-                float y = MeasurementUtil.ResolveTransformMeasurement(layoutResult, parentResult, viewParameters, transformInfo.positionY, layoutResult.actualSize.y);
+                float x = scrollOffsetX + MeasurementUtil.ResolveTransformMeasurement(layoutResult, parentResult, viewParameters, transformInfo.positionX, layoutResult.actualSize.x);
+                float y = scrollOffsetY + MeasurementUtil.ResolveTransformMeasurement(layoutResult, parentResult, viewParameters, transformInfo.positionY, layoutResult.actualSize.y);
 
                 float px = MeasurementUtil.ResolveTransformPivot(layoutResult.actualSize.x, viewParameters, layoutResult.emSize, transformInfo.pivotX);
                 float py = MeasurementUtil.ResolveTransformPivot(layoutResult.actualSize.y, viewParameters, layoutResult.emSize, transformInfo.pivotY);

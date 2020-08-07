@@ -9,7 +9,7 @@ using Unity.Jobs;
 namespace UIForia.Layout {
 
     [BurstCompile]
-    public unsafe struct UpdatePaddingBorderMargin : IJob, IVertigoParallel {
+    internal unsafe struct UpdatePaddingBorderMargin : IJob, IVertigoParallel {
 
         public ElementTable<EmValue> emTable;
         public ElementTable<PaddingBorderMargin> propertyTable;
@@ -31,9 +31,11 @@ namespace UIForia.Layout {
 
         private void Run(int start, int end) {
 
+            ElementId* elementIdList = elementList.GetArrayPointer();
+
             for (int i = start; i < end; i++) {
 
-                ElementId elementId = elementList[i];
+                ElementId elementId = elementIdList[i];
 
                 int index = elementId.index;
 
@@ -41,7 +43,6 @@ namespace UIForia.Layout {
                 ref LayoutInfo verticalInfo = ref verticalLayoutInfo.array[index];
                 ref LayoutInfo horizontalInfo = ref horizontalLayoutInfo.array[index];
                 ref LayoutBoxInfo layoutResult = ref layoutResultTable.array[index];
-                
                 float emSize = emTable.array[index].resolvedValue;
 
                 verticalInfo.emSize = emSize;

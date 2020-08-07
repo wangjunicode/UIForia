@@ -5,7 +5,7 @@ using Unity.Mathematics;
 
 namespace UIForia.Util {
 
-    public static class MeasurementUtil {
+    internal static class MeasurementUtil {
 
         public static float ResolveOriginBaseX(ElementTable<LayoutBoxInfo> layoutTable, in LayoutBoxInfo result, float viewportX, AlignmentTarget target, AlignmentDirection direction, float mouseX) {
             switch (target) {

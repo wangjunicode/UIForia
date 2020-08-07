@@ -24,7 +24,7 @@ namespace SpaceGameDemo {
 
     public class SpacePanelController {
 
-        public string currentActivePanel = "SinglePlayer";
+        public string currentActivePanel = "JoinServer";
 
         private Transform lookCameraTransform;
 

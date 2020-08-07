@@ -17,7 +17,7 @@ namespace UIForia.Layout {
         public LayoutHierarchyInfo* layoutHierarchyTable;
         public FontAssetInfo* fontAssetMap;
         public EmValue* emTable;
-
+        
         public ref LayoutHierarchyInfo GetLayoutHierarchy(ElementId elementId) {
             return ref layoutHierarchyTable[elementId.index];
         }
@@ -153,7 +153,7 @@ namespace UIForia.Layout {
             if (newSize != layoutInfo.finalSize) {
                 layoutBoxInfo.sizeChanged = true;
             }
-
+            
             layoutInfo.finalSize = newSize;
 
             layoutBoxInfo.actualSize.y = newSize;

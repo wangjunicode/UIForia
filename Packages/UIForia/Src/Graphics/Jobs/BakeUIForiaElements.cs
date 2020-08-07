@@ -1,10 +1,6 @@
 ﻿using System;
-using Packages.UIForia.Util.Unsafe;
-using UIForia.ListTypes;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 
@@ -133,6 +129,13 @@ namespace UIForia.Graphics {
                     
                     mat.outlineWidth = element.drawDesc.outlineWidth;
                     mat.outlineColor = element.drawDesc.outlineColor;
+
+                    mat.fillRadius = element.drawDesc.meshFillRadius;
+                    mat.fillOpenAmount = element.drawDesc.meshFillOpenAmount;
+                    mat.fillOffsetX = element.drawDesc.meshFillOffsetX;
+                    mat.fillOffsetY = element.drawDesc.meshFillOffsetY;
+                    mat.fillInvert = element.drawDesc.meshFillInvert;
+                    mat.fillDirection = element.drawDesc.meshFillDirection;
                     
                     materialList.Add(mat);
                     
@@ -143,7 +146,7 @@ namespace UIForia.Graphics {
                     vertex.texCoord0.y = height;
                     vertex.indices.x = 0; // set later
                     vertex.indices.y = (uint)materialIdx;
-                    vertex.indices.z = 0;
+                    vertex.indices.z = element.drawDesc.opacity; // maybe move this
                     vertex.indices.w = 0;
                     
                 }

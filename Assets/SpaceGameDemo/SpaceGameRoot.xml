@@ -8,15 +8,15 @@
 <!--        <SpacePanel name="'StartMenu'">-->
 <!--            <StartMenu style="container" />-->
 <!--        </SpacePanel>-->
+<!--        -->
+<!--        <SpacePanel name="'SinglePlayer'">-->
+<!--            <SinglePlayer style="container" />-->
+<!--        </SpacePanel>-->
         
-        <SpacePanel name="'SinglePlayer'">
-            <SinglePlayer style="container" />
+        <SpacePanel name="'JoinServer'">
+            <JoinServer style="container" />
         </SpacePanel>
         
-<!--        <SpacePanel name="'JoinServer'">-->
-<!--            <JoinServer style="container" />-->
-<!--        </SpacePanel>-->
-<!--        -->
 <!--        <SpacePanel name="'Settings'">-->
 <!--            <Settings style="container" />-->
 <!--        </SpacePanel>-->

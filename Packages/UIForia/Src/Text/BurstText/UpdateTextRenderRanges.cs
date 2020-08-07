@@ -1,10 +1,7 @@
-﻿using System.Diagnostics;
-using UIForia.Rendering;
-using UIForia.Util.Unsafe;
+﻿using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Text {
@@ -49,14 +46,20 @@ namespace UIForia.Text {
                 // if !needsDrawUpdate, continue
                 // if !rich text, do something simpler, still needs to break lines and handle text decoration per line
 
+  
+
+                TextId textId = activeTextElementIds[i];
+                ref TextInfo textInfo = ref textInfoMap[textId.textInfoId];
+                if (!textInfo.requiresRenderRangeUpdate) {
+                    continue;
+                }
+
+                textInfo.requiresRenderRangeUpdate = false;
                 faceTextureStack.size = 1;
                 outlineTextureStack.size = 1;
                 faceTextureStack[0] = 0;
                 outlineTextureStack[0] = 0;
-
-                TextId textId = activeTextElementIds[i];
-                ref TextInfo textInfo = ref textInfoMap[textId.textInfoId];
-
+                
                 textInfo.renderRangeList.EnsureCapacity(4, Allocator.Persistent);
                 // textInfo.renderedCharacters.EnsureCapacity(textInfo.renderingCharacterCount + 1, Allocator.Persistent); // +1 to account for invalid index 0
 

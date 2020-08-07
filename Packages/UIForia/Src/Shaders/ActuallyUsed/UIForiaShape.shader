@@ -56,16 +56,17 @@
                 uint radius;
                 uint bevelTop;
                 uint bevelBottom;
-                uint meshPie;
-                uint meshPieOffset; // cannot use half2 because its not 2 bytes, its 4 on most platforms, need to unpack
+                uint fillOpenAndRotation;
+                float fillRadius;
+                float fillOffsetX;
+                float fillOffsetY;
 
-                uint bMode_oMode_unused;
-                
-                // maybe move to float buffer
-              
+                uint bMode_oMode_meshFillDirection_meshFillInvert;
                 
                 float outlineWidth;
-                uint unused;
+                uint unused0;
+                uint unused1;
+                uint unused2;
             };
         
             struct UIForiaVertex {
@@ -178,7 +179,7 @@
                // todo -- snapping is terrible when moving/ rotating 
                o.vertex = UIForiaPixelSnap(o.vertex);
                 
-               o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, 0, 0);
+               o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, vertex.indices.z, 0);
                 
                return o;
             }
@@ -190,6 +191,8 @@
                 i.texCoord0.x += i.texCoord0.x > 0.5 ? halfUV.x : -halfUV.x;
                 i.texCoord0.y += i.texCoord0.y > 0.5 ? halfUV.y : -halfUV.y;
                 
+                float opacity = (float)i.indices.z / 255.0; // todo --- maybe unpack from elsewhere
+                
                 ElementMaterialInfo material = _UIForiaMaterialBuffer[i.indices.y];
                 float2 size = i.size;
                 float minSize = min(size.x, size.y);
@@ -199,24 +202,27 @@
                 fixed4 tintColor = UnpackColor(material.backgroundTint);
                 
                 uint packedRadii = material.radius;
-                uint bodyColorMode = ExtractByte(material.bMode_oMode_unused, 0);
+                uint bodyColorMode = ExtractByte(material.bMode_oMode_meshFillDirection_meshFillInvert, 0);
                 
                 // todo -- put these in a constant buffer or add to material
-                float pieDirection = 1; // can be a sign bit or flag elsewhere
-                float pieOpenAmount = 1; 
-                float pieRotation = 0; //frac(_Time.y) * PI * 2;
-                float pieRadius = max(size.x, size.y);
-                float2 pieOffset = (size * 0.5) + halfUV;
-                float invertPie = 1;
+                
+                 // can be a sign bit or flag elsewhere
+                float pieDirection = ExtractByte(material.bMode_oMode_meshFillDirection_meshFillInvert, 2) == 0 ? 1 : -1;
+                float invertPie = ExtractByte(material.bMode_oMode_meshFillDirection_meshFillInvert, 3) == 0 ? 1 : -1; 
+                float pieOpenAmount = UnpackLowUShortPercentageToFloat(material.fillOpenAndRotation);
+                float pieRotation = UnpackHighUShortPercentageToFloat(material.fillOpenAndRotation); //frac(_Time.y) * PI * 2;
+                float pieRadius = material.fillRadius;
+                float2 pieOffset = float2(material.fillOffsetX, material.fillOffsetY) - halfUV;
+                 
                 // todo -- put these in a UVTransform constant buffer that is indexed
                 float2 uvOffset = float2(0, 0);
-                float2 uvScale = float2(1, 1);
-                float uvRotation = 0; //lerp(-360, 360, frac(_Time.y * 0.1)) * Deg2Rad;
-                half4 uvBounds = half4(0, 0, 1, 1);
+                float2 uvScale = float2(0.5, 0.5); //1, 1); //, 1);
+                float uvRotation = frac(_Time.y) * PI * 2; // * Deg2Rad; //lerp(-360, 360, frac(_Time.y * 0.1)) * Deg2Rad;
+                half4 uvBounds = half4(0, 0, 0.5, 0.5);
          
-                // i.texCoord1 = TransformUV(i.texCoord1, uvOffset * _MainTex_TexelSize.xy, uvScale, uvRotation, uvBounds, _SpriteAtlasPadding);
+                i.texCoord1 = TransformUV(i.texCoord1, uvOffset * _MainTex_TexelSize.xy, uvScale, uvRotation, uvBounds, _SpriteAtlasPadding);
+                
                 half outlineWidth = material.outlineWidth * 0.5;
-        
                 if(outlineWidth == 0 || outlineColor.a <= 0.01) {
                     outlineColor = fixed4(color.rgb, 0);
                 }
@@ -263,15 +269,15 @@
                 float sdfOutline = outlineWidth > 0 ? abs(sdf) - outlineWidth : 0;
                 sdf = max(radialSDF * invertPie, sdf);
                 
-                color = ComputeColor(color, tintColor, bodyColorMode, i.texCoord1, _MainTex);
+                color = ComputeColor(color, tintColor, bodyColorMode, i.texCoord1, _MainTex, uvBounds);
                 color = lerp(color, outlineColor, outlineWidth == 0 ? 0 : 1 - saturate(sdfOutline));
                 color.a *= 1 - smoothstep(0, fwidth(sdf), sdf);
                                
                 float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y); //* _UIForiaDPIScale;
                 float4 clipRect = _UIForiaFloat4Buffer[i.indices.x]; // x = xMin, y = yMin, z = xMax, w = yMax
                 float2 s = step(clipRect.xw, clipPos) - step(clipRect.zy, clipPos);
+                color.a *= opacity;
                 color.a *= (s.x * s.y) != 0;
-                
                 color = UIForiaColorSpace(color);
                 clip(color.a - 0.01);
                 return color;

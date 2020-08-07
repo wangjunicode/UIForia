@@ -7,7 +7,7 @@ using Unity.Jobs;
 namespace UIForia.Layout {
 
     [BurstCompile]
-    public struct ApplyHorizontalAlignments : IJob, IVertigoParallel {
+    internal struct ApplyHorizontalAlignments : IJob, IVertigoParallel {
 
         public DataList<ElementId>.Shared elementList;
         public ElementTable<LayoutBoxInfo> layoutBoxInfoTable;

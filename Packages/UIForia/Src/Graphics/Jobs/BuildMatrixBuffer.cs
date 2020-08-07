@@ -20,23 +20,24 @@ namespace UIForia.Graphics {
             // could be persistent
             LongMap<int> ptrMap = new LongMap<int>(drawList.size, Allocator.Temp);
 
+            DrawInfo2* drawArray = drawList.GetArrayPointer();
             for (int i = 0; i < drawList.size; i++) {
-                ref DrawInfo2 drawInfo = ref drawList[i];
+                ref DrawInfo2 drawInfo = ref drawArray[i];
 
                 if (drawInfo.IsInternalDrawType()) { 
 
                     if (ptrMap.TryGetValue((long) drawInfo.matrix, out int idx)) {
-                        matrixIndices[i] = idx;
+                        matrixIndices.array[i] = idx;
                     }
                     else {
-                        matrixIndices[i] = ptrMap.size;
+                        matrixIndices.array[i] = ptrMap.size;
                         ptrMap.Add((long) drawInfo.matrix, ptrMap.size);
                         matrixBuffer.Add(*drawInfo.matrix);
                     }
 
                 }
                 else {
-                    matrixIndices[i] = 0;
+                    matrixIndices.array[i] = 0;
                 }
 
             }

@@ -191,6 +191,7 @@ namespace UIForia.Text {
         public TextMaterialInfo textMaterial;
         private TextInfoFlags flags;
         internal bool hasEffects;
+        public bool requiresRenderRangeUpdate;
 
         // parser pushes character instructions into output stream
         // strip whitespace accordingly
@@ -272,7 +273,7 @@ namespace UIForia.Text {
 
             textInfo.hasEffects = false;
             textInfo.requiresRenderProcessing = true; // always re-process material buffer when text updates
-            
+            textInfo.requiresRenderRangeUpdate = true; // always re-update ranges when changing text
             fixed (char* charptr = text) {
                 if (processor != null) {
                     CharStream stream = new CharStream(charptr, 0, (uint) length);

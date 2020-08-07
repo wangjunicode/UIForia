@@ -735,10 +735,10 @@ namespace UIForia.Systems {
     public struct RenderCallInfo {
 
         public ElementId elementId;
-        public int layer;
-        public int zIndex;
         public int renderOp;
-        public ElementTraversalInfo traversalInfo;
+        public int ftbIndex;
+        public int btfIndex;
+        
 
     }
 

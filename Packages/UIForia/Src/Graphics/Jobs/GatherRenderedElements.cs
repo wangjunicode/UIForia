@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UIForia.Graphics;
 using UIForia.Rendering;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine.Profiling;
 using Debug = UnityEngine.Debug;
 
 namespace UIForia.Systems {
@@ -23,7 +25,7 @@ namespace UIForia.Systems {
         public DataList<ElementList> elementLists;
         public ElementTable<ElementTraversalInfo> traversalTable;
         public ElementTable<ClipInfo> clipInfoTable;
-        public ElementTable<RenderInfo> renderInfoTable;
+        public ElementTable<RenderInfo> renderInfoTable; // need for layer & z-index eventually
         public DataList<RenderCallInfo>.Shared renderCallList;
 
         public void Execute() {
@@ -39,38 +41,39 @@ namespace UIForia.Systems {
                 for (int j = 0; j < list.size; j++) {
 
                     ElementId elementId = list.array[j];
-                    ref ClipInfo clipInfo = ref clipInfoTable[elementId];
+                    int elementIndex = elementId.index;
+                    ref ClipInfo clipInfo = ref clipInfoTable.array[elementIndex];
 
                     // consider a 'render always' setting so culled things can still handle render target changes etc
                     if (clipInfo.isCulled || clipInfo.visibility == Visibility.Hidden) {
                         continue;
                     }
 
-                    ref RenderInfo renderInfo = ref renderInfoTable[elementId];
-                    ref ElementTraversalInfo traversalInfo = ref traversalTable[elementId];
+                    // ref RenderInfo renderInfo = ref renderInfoTable[elementId];
+                    ref ElementTraversalInfo traversalInfo = ref traversalTable.array[elementIndex];
                     renderCallPtr[count++] = new RenderCallInfo() {
-                        layer = renderInfo.layer,
                         elementId = elementId,
-                        traversalInfo = traversalInfo,
-                        zIndex = renderInfo.zIndex,
+                        ftbIndex = traversalInfo.ftbIndex,
+                        btfIndex = traversalInfo.btfIndex,
                         renderOp = 0
                     };
-
                     renderCallPtr[count++] = new RenderCallInfo() {
-                        layer = renderInfo.layer,
+                        // zIndex = renderInfo.zIndex,
+                        //  layer = renderInfo.layer,
                         elementId = elementId,
-                        traversalInfo = traversalInfo,
-                        zIndex = renderInfo.zIndex,
+                        ftbIndex = traversalInfo.ftbIndex,
+                        btfIndex = traversalInfo.btfIndex,
                         renderOp = 1
                     };
-
                 }
 
                 renderCallList.size = count;
             }
-
+            
+      //      Profiler.BeginSample("Sort");
             NativeSortExtension.Sort(renderCallList.GetArrayPointer(), renderCallList.size, new RenderCallComparer());
-
+         //   Profiler.EndSample();
+            
             // if (!printed) {
             //     printed = true;
             //     for (int i = 0; i < renderCallList.size; i++) {
@@ -79,29 +82,29 @@ namespace UIForia.Systems {
             // }
         }
 
+        
         private static bool printed = false;
-       
+        public static int compares;
         public struct RenderCallComparer : IComparer<RenderCallInfo> {
 
             public int Compare(RenderCallInfo x, RenderCallInfo y) {
-
-                if (x.traversalInfo.ftbIndex == y.traversalInfo.ftbIndex) {
+                if (x.ftbIndex == y.ftbIndex) {
                     return x.renderOp - y.renderOp;
                 }
 
-                if (x.traversalInfo.IsDescendentOf(y.traversalInfo)) {
+                if (x.ftbIndex > y.ftbIndex && x.btfIndex > y.btfIndex) {
                     return y.renderOp == 0 ? 1 : -1;
                 }
 
-                if (y.traversalInfo.IsDescendentOf(x.traversalInfo)) {
+                if (y.ftbIndex > x.ftbIndex && y.btfIndex > x.btfIndex) {
                     return x.renderOp == 0 ? -1 : 1;
                 }
 
                 // if (x.renderOp == y.renderOp) {
                 // // i think we're still missing a case here with compare
                 // }
-                
-                return x.traversalInfo.ftbIndex - y.traversalInfo.ftbIndex;
+
+                return x.ftbIndex - y.ftbIndex;
 
             }
 

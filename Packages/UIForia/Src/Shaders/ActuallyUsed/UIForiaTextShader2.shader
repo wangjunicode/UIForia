@@ -309,7 +309,6 @@ Shader "UIForia/UIForiaText2"
                 glowColor = GetGlowColor(sd, scale, glowColor, glowOffset * i.ratios.y, glowInner, glowOuter * i.ratios.y, glowPower);
 			    faceColor.rgb += glowColor.rgb * glowColor.a;
                 
-                
                 float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y); //* _UIForiaDPIScale;
                 float4 clipRect = _UIForiaFloat4Buffer[i.indices.x]; // x = xMin, y = yMin, z = xMax, w = yMax
                 float2 s = step(clipRect.xw, clipPos) - step(clipRect.zy, clipPos);

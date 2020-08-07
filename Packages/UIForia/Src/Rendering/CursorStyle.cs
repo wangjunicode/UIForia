@@ -10,9 +10,9 @@ namespace UIForia.Rendering {
 
         public readonly Vector2 hotSpot;
 
-        public CursorStyle(string name, Texture2D texture, Vector2 hotSpot) {
+        public CursorStyle(string name, TextureReference textureReference, Vector2 hotSpot) {
             this.name = name;
-            this.texture = texture;
+            this.texture = (Texture2D)textureReference.texture; // todo -- this is not that safe
             this.hotSpot = hotSpot;
         }
 

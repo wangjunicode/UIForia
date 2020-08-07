@@ -51,7 +51,7 @@ namespace UIForia.Systems {
         private byte* layoutBackingStore;
         private byte* positionBackingStore;
 
-        public LayoutDataTables* tablePointers;
+        internal LayoutDataTables* tablePointers;
 
         internal DataList<ElementId>.Shared childrenChangedList;
 
@@ -64,7 +64,7 @@ namespace UIForia.Systems {
         internal DataList<ElementId> gridPlaceList;
         internal DataList<AxisAlignedBounds2D>.Shared clipperBoundsList;
 
-        public struct LayoutDataTables {
+        internal struct LayoutDataTables {
 
             public float4x4* localMatrices;
             public float4x4* worldMatrices;
@@ -177,7 +177,7 @@ namespace UIForia.Systems {
                 ref LayoutInfo verticalLayoutInfo = ref verticalLayoutInfoTable[element.id];
                 ref ClipInfo clipInfo = ref clipInfoTable[element.id];
 
-                layoutBox.Initialize(this, element);
+                layoutBox.Initialize(LayoutBoxUnion.GetLayoutBoxType(element), this, element);
 
                 UIStyleSet style = element.style;
 
@@ -296,6 +296,7 @@ namespace UIForia.Systems {
 
                 // this feels out of place
                 layoutResultTable[elementId].layoutParentId = layoutHierarchyInfo.parentId;
+                layoutResultTable[elementId].scrollValues = null;
 
                 if (layoutHierarchyInfo.behavior != LayoutBehavior.TranscludeChildren) {
                     layoutBoxTable[elementId].OnChildrenChanged(this);
@@ -571,7 +572,13 @@ namespace UIForia.Systems {
         public void RunLayout() {
             // cannot be parallel atm. can be a job though
             for (int i = 0; i < gridPlaceList.size; i++) {
-                layoutBoxTable[gridPlaceList[i]].grid.RunPlacement(this);
+                ref LayoutBoxUnion box = ref layoutBoxTable[gridPlaceList[i]];
+                if (box.layoutType == LayoutBoxType.ScrollView) {
+                    box.scroll.layoutBox->grid.RunPlacement(this);
+                }
+                else if (box.layoutType == LayoutBoxType.Grid) {
+                    box.grid.RunPlacement(this);
+                }
             }
 
             gridPlaceList.size = 0;

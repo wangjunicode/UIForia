@@ -108,16 +108,14 @@ namespace UIForia.Graphics {
         public ColorMode outlineColorMode;
         public byte fillDirection;
         public byte fillInvert;
+
+        public float outlineWidth; 
+        public uint uvTransformId; // dont need this to be an int
         
-        // maybe move to float buffer
-        // public ushort uvTop;
-        // public ushort uvLeft;
-        // public ushort uvRight;
-        // public ushort uvBottom;
-
-        public float outlineWidth;
-
-        public fixed byte padding[12];
+        public ushort uvRotation;
+        public ushort opacity;
+        
+        public fixed byte padding[4];
 
         // by putting these here we also free up texCoords in the actual vertices
         // could either encode some of the data there or re-purpose those

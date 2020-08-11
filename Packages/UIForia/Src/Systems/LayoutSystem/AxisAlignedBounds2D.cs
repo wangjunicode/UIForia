@@ -26,8 +26,12 @@ namespace UIForia.Graphics {
             return new AxisAlignedBounds2D(left, top, left + width, top + height);
         }
 
+        public bool OverlapOrContain(in AxisAlignedBounds2D b) {
+            return xMax >= b.xMin && xMin <= b.xMax && yMax >= b.yMin && yMin <= b.yMax;
+        }
+
     }
-    
+
     public struct AxisAlignedBounds2DUShort {
 
         public ushort xMin;
@@ -41,7 +45,6 @@ namespace UIForia.Graphics {
             this.xMax = xMax;
             this.yMax = yMax;
         }
-        
 
     }
 

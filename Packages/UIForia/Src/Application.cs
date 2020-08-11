@@ -112,6 +112,7 @@ namespace UIForia {
 #if UNITY_EDITOR
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnEditorReload;
 #endif
+            
         }
 
 #if UNITY_EDITOR
@@ -966,6 +967,16 @@ namespace UIForia {
 
         public static void SetCustomPainters(Dictionary<string, Type> dictionary) {
             s_CustomPainters = dictionary;
+        }
+
+        private GameObject gameObject;
+        
+        public GameObject GetDummyGameObject() {
+            if (gameObject == null) {
+                gameObject = new GameObject("UIForia::Dummy");
+            }
+
+            return gameObject;
         }
 
     }

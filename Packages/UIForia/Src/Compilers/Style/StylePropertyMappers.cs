@@ -83,10 +83,24 @@ namespace UIForia.Compilers.Style {
                 {"backgroundimageoffsetx", (targetStyle, property, context) => targetStyle.BackgroundImageOffsetX = MapFixedLength(property.children[0], context)},
                 {"backgroundimageoffsety", (targetStyle, property, context) => targetStyle.BackgroundImageOffsetY = MapFixedLength(property.children[0], context)},
                 {"backgroundimagescalex", (targetStyle, property, context) => targetStyle.BackgroundImageScaleX = MapNumber(property.children[0], context)},
-                {"backgroundimagescaley", (targetStyle, property, context) => targetStyle.BackgroundImageScaleY = MapNumber(property.children[0], context)},
+                {"backgroundimagescaley", (targetStyle, property, context) => targetStyle.BackgroundImageScaleY = MapNumber(property.children[0], context)}, {
+                    "backgroundimagescale", (targetStyle, property, context) => {
+                        if (property.children.Count == 1) {
+                            float number = MapNumber(property.children[0], context);
+                            targetStyle.BackgroundImageScaleX = number;
+                            targetStyle.BackgroundImageScaleY = number;
+
+                        }
+                        else {
+                            targetStyle.BackgroundImageScaleX = MapNumber(property.children[0], context);
+                            targetStyle.BackgroundImageScaleY = MapNumber(property.children[1], context);
+                        }
+                    }
+                },
+
                 {"backgroundimagetilex", (targetStyle, property, context) => targetStyle.BackgroundImageTileX = MapNumber(property.children[0], context)},
                 {"backgroundimagetiley", (targetStyle, property, context) => targetStyle.BackgroundImageTileY = MapNumber(property.children[0], context)},
-                {"backgroundimagerotation", (targetStyle, property, context) => targetStyle.BackgroundImageRotation = MapNumber(property.children[0], context)},
+                {"backgroundimagerotation", (targetStyle, property, context) => targetStyle.BackgroundImageRotation = MapAngle(property.children[0], context)},
                 {"backgroundimage", (targetStyle, property, context) => targetStyle.BackgroundImage = MapTexture(property.children[0], context)},
                 {"backgroundfit", (targetStyle, property, context) => targetStyle.BackgroundFit = MapEnum<BackgroundFit>(property.children[0], context)},
 
@@ -1243,6 +1257,32 @@ namespace UIForia.Compilers.Style {
             throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
         }
 
+        private static UIAngle MapAngle(StyleASTNode value, StyleCompileContext context) {
+            value = context.GetValueForReference(value);
+            switch (value) {
+                case MeasurementNode measurementNode:
+                    if (TryParseFloat(measurementNode.value.rawValue, out float measurementValue)) {
+                        UIAngleUnit unit = MapAngleUnit(measurementNode.unit, context);
+                        if (unit == UIAngleUnit.Percent) {
+                            measurementValue /= 100f;
+                        }
+
+                        return new UIAngle(measurementValue, unit);
+                    }
+
+                    break;
+
+                case StyleLiteralNode literalNode:
+                    if (TryParseFloat(literalNode.rawValue, out float literalValue)) {
+                        return new UIAngle(literalValue);
+                    }
+
+                    break;
+            }
+
+            throw new CompileException(context.fileName, value, $"Cannot parse value, expected a numeric literal or measurement {value}.");
+        }
+
         private static UIFixedLength MapFixedLength(StyleASTNode value, StyleCompileContext context) {
             value = context.GetValueForReference(value);
             switch (value) {
@@ -1348,6 +1388,26 @@ namespace UIForia.Compilers.Style {
                              "Try px, %, em, vw, vh or lh instead (see UIFixedUnit). Will fall back to px.");
 
             return UIFixedUnit.Pixel;
+        }
+
+        private static UIAngleUnit MapAngleUnit(UnitNode unitNode, StyleCompileContext context) {
+            if (unitNode == null) return UIAngleUnit.Degrees;
+
+            switch (unitNode.value) {
+                case "deg":
+                    return UIAngleUnit.Degrees;
+
+                case "%":
+                    return UIAngleUnit.Percent;
+
+                case "rad":
+                    return UIAngleUnit.Radians;
+            }
+
+            Debug.LogWarning($"You used a {unitNode.value} in line {unitNode.line} column {unitNode.column} in file {context.fileName} but this unit isn't supported. " +
+                             "Try deg, %, or rad instead (see UIAngleUnit). Will fall back to degrees.");
+
+            return UIAngleUnit.Degrees;
         }
 
         private static UIFixedUnit MapFixedUnit(UnitNode unitNode, StyleCompileContext context) {

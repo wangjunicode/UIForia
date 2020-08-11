@@ -12,6 +12,7 @@ namespace UIForia {
     public struct EmValue {
 
         public float resolvedValue;
+        public float previousValue;
         public UIFixedLength styleValue;
 
     }

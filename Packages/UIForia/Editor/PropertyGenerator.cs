@@ -127,7 +127,13 @@ namespace UIForia.Editor {
                 string v = Enum.GetName(typeof(UIFixedUnit), length.unit);
                 return $"new {nameof(UIFixedLength)}({length.value.ToString(CultureInfo.InvariantCulture)}f, {nameof(UIFixedUnit)}.{v})";
             }
-
+            
+            if (defaultValue is UIAngle) {
+                UIAngle length = (UIAngle) defaultValue;
+                string v = Enum.GetName(typeof(UIAngleUnit), length.unit);
+                return $"new {nameof(UIAngle)}({length.value.ToString(CultureInfo.InvariantCulture)}f, {nameof(UIAngleUnit)}.{v})";
+            }
+            
             if (defaultValue is Color) {
                 Color c = (Color) defaultValue;
                 return $"new Color({c.r.ToString(CultureInfo.InvariantCulture)}f, {c.g.ToString(CultureInfo.InvariantCulture)}f, {c.b.ToString(CultureInfo.InvariantCulture)}f, {c.a.ToString(CultureInfo.InvariantCulture)}f)";

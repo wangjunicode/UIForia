@@ -1,4 +1,5 @@
 ﻿using System;
+using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Jobs;
@@ -57,6 +58,7 @@ namespace UIForia.Graphics {
         public DataList<MeshInfo> meshInfoList;
         public DataList<DrawInfo2>.Shared drawList;
         public DataList<UIForiaVertex>.Shared vertexList;
+        public DataList<float4>.Shared float4Buffer;
         public DataList<ElementMaterialInfo>.Shared materialList;
         
         public void Execute() {
@@ -81,7 +83,7 @@ namespace UIForia.Graphics {
 
                 // todo -- handle 9 slicing and batched draws
                 ref MeshInfo meshInfo = ref meshInfoArray[i];
-                RenderContext3.ElementBatch* elementBatch = (RenderContext3.ElementBatch*) drawInfo.shapeData;
+                ElementBatch* elementBatch = (ElementBatch*) drawInfo.shapeData;
 
                 int count = elementBatch->count;
                 
@@ -130,14 +132,33 @@ namespace UIForia.Graphics {
                     mat.outlineWidth = element.drawDesc.outlineWidth;
                     mat.outlineColor = element.drawDesc.outlineColor;
 
+                    mat.fillRotation = element.drawDesc.meshFillRotation;
                     mat.fillRadius = element.drawDesc.meshFillRadius;
                     mat.fillOpenAmount = element.drawDesc.meshFillOpenAmount;
                     mat.fillOffsetX = element.drawDesc.meshFillOffsetX;
                     mat.fillOffsetY = element.drawDesc.meshFillOffsetY;
                     mat.fillInvert = element.drawDesc.meshFillInvert;
                     mat.fillDirection = element.drawDesc.meshFillDirection;
+                    mat.opacity = element.drawDesc.opacity;
+                    mat.uvRotation = element.drawDesc.uvRotation;
+                    
+                    uint uvTransformId = 0;
+                    
+                    if (element.drawDesc.uvScaleX != 1 || element.drawDesc.uvScaleY != 1 || element.drawDesc.uvOffsetX != 0 || element.drawDesc.uvOffsetY != 0) {
+                        uvTransformId = (uint)float4Buffer.size;
+                        float4Buffer.Add(new float4() {
+                            x = element.drawDesc.uvScaleX,
+                            y = element.drawDesc.uvScaleY,
+                            z = element.drawDesc.uvOffsetX,
+                            w = element.drawDesc.uvOffsetY
+                        });
+                    }
+
+                    mat.uvTransformId = uvTransformId;
                     
                     materialList.Add(mat);
+                    
+                    // todo -- put opacity somewhere, maybe material data for elements if we arent hash caching it
                     
                     ref UIForiaVertex vertex = ref vertices[vertexIdx++];
                     vertex.position.x = x + halfWidth;
@@ -146,8 +167,8 @@ namespace UIForia.Graphics {
                     vertex.texCoord0.y = height;
                     vertex.indices.x = 0; // set later
                     vertex.indices.y = (uint)materialIdx;
-                    vertex.indices.z = element.drawDesc.opacity; // maybe move this
-                    vertex.indices.w = 0;
+                    vertex.indices.z = BitUtil.SetHighLowBitsUint(element.drawDesc.uvTop, element.drawDesc.uvLeft); //element.drawDesc.opacity); // maybe move this
+                    vertex.indices.w =  BitUtil.SetHighLowBitsUint(element.drawDesc.uvBottom, element.drawDesc.uvRight);
                     
                 }
                 

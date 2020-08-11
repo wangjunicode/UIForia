@@ -35,6 +35,7 @@ namespace UIForia.Util {
         }
 
         private static readonly ColorLookup[] s_ColorList = new[] {
+            new ColorLookup("hotterpink", new Color32(255, 8, 77, 255)), 
             new ColorLookup("clear", new Color32(0, 0, 0, 0)),
             new ColorLookup("transparent", new Color32(0, 0, 0, 0)),
             new ColorLookup("black", new Color32(0, 0, 0, 255)),

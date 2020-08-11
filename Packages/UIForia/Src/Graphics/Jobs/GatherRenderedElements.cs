@@ -69,11 +69,11 @@ namespace UIForia.Systems {
 
                 renderCallList.size = count;
             }
-            
-      //      Profiler.BeginSample("Sort");
+
+            //      Profiler.BeginSample("Sort");
             NativeSortExtension.Sort(renderCallList.GetArrayPointer(), renderCallList.size, new RenderCallComparer());
-         //   Profiler.EndSample();
-            
+            //   Profiler.EndSample();
+
             // if (!printed) {
             //     printed = true;
             //     for (int i = 0; i < renderCallList.size; i++) {
@@ -82,9 +82,8 @@ namespace UIForia.Systems {
             // }
         }
 
-        
         private static bool printed = false;
-        public static int compares;
+
         public struct RenderCallComparer : IComparer<RenderCallInfo> {
 
             public int Compare(RenderCallInfo x, RenderCallInfo y) {

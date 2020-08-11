@@ -7,7 +7,7 @@ using Unity.Jobs;
 namespace UIForia.Layout {
 
     [BurstCompile]
-    internal struct ApplyHorizontalAlignments : IJob, IVertigoParallel {
+    internal unsafe struct ApplyHorizontalAlignments : IJob, IVertigoParallel {
 
         public DataList<ElementId>.Shared elementList;
         public ElementTable<LayoutBoxInfo> layoutBoxInfoTable;
@@ -28,14 +28,18 @@ namespace UIForia.Layout {
         }
 
         private void Run(int start, int end) {
+            ElementId* elementArray = elementList.GetArrayPointer();
+            
             for (int i = start; i < end; i++) {
 
-                ElementId elementId = elementList[i];
+                ElementId elementId = elementArray[i];
 
-                ref LayoutBoxInfo elementLayoutInfo = ref layoutBoxInfoTable[elementId];
-                ref LayoutBoxInfo parentLayoutInfo = ref layoutBoxInfoTable[elementLayoutInfo.layoutParentId];
+                int idx = elementId.id & ElementId.ENTITY_INDEX_MASK;
 
-                AlignmentInfo alignmentInfo = alignmentTable[elementList[i]];
+                ref LayoutBoxInfo elementLayoutInfo = ref layoutBoxInfoTable.array[idx];
+                ref LayoutBoxInfo parentLayoutInfo = ref layoutBoxInfoTable.array[elementLayoutInfo.layoutParentId.id & ElementId.ENTITY_INDEX_MASK];
+
+                AlignmentInfo alignmentInfo = alignmentTable.array[idx];
 
                 if (alignmentInfo.target == AlignmentTarget.Unset) {
                     continue;

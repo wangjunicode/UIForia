@@ -173,6 +173,14 @@ namespace UIForia.Rendering {
         OutlineColor,
         OutlineWidth,
 
+        Gradient,
+
+        GradientMode,
+
+        GradientOffsetX,
+
+        GradientOffsetY
+
     }
 
 }

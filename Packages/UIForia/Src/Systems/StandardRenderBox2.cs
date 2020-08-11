@@ -9,7 +9,7 @@ using UnityEngine;
 namespace UIForia.Rendering {
 
     [DebuggerDisplay("{element.ToString()}")]
-    public class StandardRenderBox2 : RenderBox {
+    public class StandardRenderBox2 : RenderBox { // todo -- make a new sealed class with isBuiltIn flag set to allow user to inherit this 
 
         protected bool requireRendering;
 
@@ -20,9 +20,12 @@ namespace UIForia.Rendering {
         protected int backgroundTextureId;
         protected int outlineTextureId;
         protected OverflowHandling overflowHandling;
-
+        protected Gradient gradient;
+        
         public override void OnInitialize() {
 
+            isBuiltIn = true;
+            isElementBox = true;
             drawDesc.opacity = MathUtil.Float01ToByte(element.style.Opacity);
             drawDesc.backgroundColor = element.style.BackgroundColor;
             drawDesc.backgroundTint = element.style.BackgroundTint;
@@ -42,7 +45,26 @@ namespace UIForia.Rendering {
             backgroundTexture = element.style.BackgroundImage;
             backgroundTextureId = ReferenceEquals(backgroundTexture, null) ? 0 : backgroundTexture.GetHashCode();
 
-            drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId);
+            drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId, element.style.BackgroundFit == BackgroundFit.Cover);
+            if (backgroundTexture != null) {
+                drawDesc.uvTop = backgroundTexture.uvRect.yMin;
+                drawDesc.uvRight = backgroundTexture.uvRect.xMax;
+                drawDesc.uvBottom = backgroundTexture.uvRect.yMax;
+                drawDesc.uvLeft = backgroundTexture.uvRect.xMin;
+                drawDesc.uvScaleX = element.style.BackgroundImageScaleX;
+                drawDesc.uvScaleY = element.style.BackgroundImageScaleY;
+                drawDesc.uvOffsetX = 0; // cannot set until we know size
+                drawDesc.uvOffsetY = 0; // cannot set until we know size
+            }
+            else {
+                drawDesc.uvScaleX = 1;
+                drawDesc.uvScaleY = 1;
+                drawDesc.uvOffsetX = 1;
+                drawDesc.uvOffsetY = 1;
+            }
+
+            drawDesc.uvRotation = MathUtil.FloatPercentageToUshort(element.style.BackgroundImageRotation.ToPercent().value);
+
             requireRendering = false; // set after we get a size change
             overflowHandling = 0;
             if (element.style.OverflowX != Overflow.Visible) {
@@ -54,7 +76,7 @@ namespace UIForia.Rendering {
             }
         }
 
-        public static ColorMode GetColorMode(Color32 mainColor, Color32 tintColor, int textureId) {
+        public static ColorMode GetColorMode(Color32 mainColor, Color32 tintColor, int textureId, bool useCoverMode) {
             ColorMode colorMode = 0;
 
             if (textureId != 0) {
@@ -67,6 +89,10 @@ namespace UIForia.Rendering {
 
             if (mainColor.a > 0) {
                 colorMode |= ColorMode.Color;
+            }
+
+            if (useCoverMode) {
+                colorMode |= ColorMode.Cover;
             }
 
             return colorMode;
@@ -132,23 +158,38 @@ namespace UIForia.Rendering {
             drawDesc.radiusBL = r3;
 
             drawDesc.outlineWidth = ResolveRelativeLength(halfMin, element.style.OutlineWidth);
-            drawDesc.outlineColorMode = GetColorMode(drawDesc.outlineColor, default, outlineTextureId);
+            drawDesc.outlineColorMode = GetColorMode(drawDesc.outlineColor, default, outlineTextureId, false);
             requireRendering = drawDesc.opacity > 0 && (drawDesc.bgColorMode != 0 || (drawDesc.outlineWidth > 0 && drawDesc.outlineColorMode != 0));
 
+            ComputeUVTransform();
             ComputeMeshFill();
 
         }
 
+        protected void ComputeUVTransform() {
+            if ((drawDesc.bgColorMode & ColorMode.Texture) != 0) {
+                drawDesc.uvScaleX = element.style.BackgroundImageScaleX;
+                drawDesc.uvScaleY = element.style.BackgroundImageScaleY;
+                drawDesc.uvOffsetX = ResolveRelativeLength(drawDesc.width, element.style.BackgroundImageOffsetX); // cannot set until we know size
+                drawDesc.uvOffsetY = ResolveRelativeLength(drawDesc.height, element.style.BackgroundImageOffsetY); // cannot set until we know size
+            }
+            else {
+                drawDesc.uvScaleX = 1;
+                drawDesc.uvScaleY = 1;
+                drawDesc.uvOffsetX = 0;
+                drawDesc.uvOffsetY = 0;
+            }
+        }
+
         protected void ComputeMeshFill() {
-            
-            
+
             // float pieDirection = 1; // can be a sign bit or flag elsewhere
             // float pieOpenAmount = 0.125; 
             // float pieRotation = 0; //frac(_Time.y) * PI * 2;
             // float pieRadius = 2 * max(size.x, size.y);
             // float2 pieOffset = (size * float2(0.0, 0.0)) + halfUV;
             // float invertPie = 1;
-            
+
             switch (element.style.MeshType) {
                 case MeshType.None:
                     drawDesc.meshFillOpenAmount = ushort.MaxValue;
@@ -159,13 +200,13 @@ namespace UIForia.Rendering {
                     drawDesc.meshFillInvert = 0;
                     drawDesc.meshFillRotation = 0;
                     break;
-                
+
                 case MeshType.Radial90_TopLeft: {
                     float amount = MathUtil.RemapRange(1 - element.style.MeshFillAmount, 0f, 1f, 0f, 0.25f);
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount); // maybe use 2 bits at the end for encoding direction & inversion
                     drawDesc.meshFillOffsetX = -1;
                     drawDesc.meshFillOffsetY = -1;
-                    drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte)0 : byte.MaxValue;
+                    drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte) 0 : byte.MaxValue;
                     drawDesc.meshFillRadius = float.MaxValue;
                     drawDesc.meshFillInvert = 0;
                     drawDesc.meshFillRotation = 0;
@@ -177,34 +218,34 @@ namespace UIForia.Rendering {
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount); // maybe use 2 bits at the end for encoding direction & inversion
                     drawDesc.meshFillOffsetX = -1;
                     drawDesc.meshFillOffsetY = drawDesc.height + 1;
-                    drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte)0 : byte.MaxValue;
+                    drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte) 0 : byte.MaxValue;
                     drawDesc.meshFillRadius = float.MaxValue;
                     drawDesc.meshFillInvert = 1;
                     drawDesc.meshFillRotation = 0;
                     break;
                 }
-                
+
                 case MeshType.Radial90_TopRight: {
                     float amount = MathUtil.RemapRange(1 - element.style.MeshFillAmount, 0f, 1f, 0.75f, 1f); //.Clamp(element.style.MeshFillAmount / 0.25f, 0, 0.25f);
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount); // maybe use 2 bits at the end for encoding direction & inversion
                     drawDesc.meshFillOffsetX = drawDesc.width + 1;
                     drawDesc.meshFillOffsetY = -1;
-                    drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte)0 : byte.MaxValue;
+                    drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte) 0 : byte.MaxValue;
                     drawDesc.meshFillRadius = float.MaxValue;
                     drawDesc.meshFillInvert = 0;
                     drawDesc.meshFillRotation = 0;
                     break;
                 }
-                
+
                 case MeshType.Radial90_BottomRight: {
                     float amount = MathUtil.RemapRange(1 - element.style.MeshFillAmount, 0f, 1f, 0.5f, 0.75f); //.Clamp(element.style.MeshFillAmount / 0.25f, 0, 0.25f);
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount); // maybe use 2 bits at the end for encoding direction & inversion
                     drawDesc.meshFillOffsetX = drawDesc.width + 1;
                     drawDesc.meshFillOffsetY = drawDesc.height + 1;
-                    drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte)0 : byte.MaxValue;
+                    drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte) 0 : byte.MaxValue;
                     drawDesc.meshFillInvert = 1;
                     drawDesc.meshFillRadius = float.MaxValue;
-                    drawDesc.meshFillRotation = 0; 
+                    drawDesc.meshFillRotation = 0;
                     break;
                 }
 
@@ -219,7 +260,7 @@ namespace UIForia.Rendering {
                     drawDesc.meshFillRotation = ushort.MaxValue / 2;
                     break;
                 }
-                
+
                 case MeshType.Horizontal_Right: {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(0.5f); // maybe use 2 bits at the end for encoding direction & inversion
@@ -231,7 +272,7 @@ namespace UIForia.Rendering {
                     drawDesc.meshFillRotation = ushort.MaxValue / 2;
                     break;
                 }
-                
+
                 case MeshType.Vertical_Top: {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(0.5f); // maybe use 2 bits at the end for encoding direction & inversion
@@ -243,16 +284,62 @@ namespace UIForia.Rendering {
                     drawDesc.meshFillRotation = ushort.MaxValue / 2;
                     break;
                 }
+
+                case MeshType.Radial360_Top: {
+                    float amount = element.style.MeshFillAmount;
+                    drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount);
+                    drawDesc.meshFillOffsetX = drawDesc.width * 0.5f;
+                    drawDesc.meshFillOffsetY = drawDesc.height * 0.5f;
+                    drawDesc.meshFillDirection = (byte) (element.style.MeshFillDirection == MeshFillDirection.CounterClockwise ? 0 : 1);
+                    drawDesc.meshFillInvert = 0; //(byte) (element.style.MeshFillInvert == Invert ? 1 : 0);
+                    drawDesc.meshFillRadius = float.MaxValue;
+                    drawDesc.meshFillRotation = ushort.MaxValue / 2;
+                    break;
+                }
+                
+                case MeshType.Radial360_Bottom: {
+                    float amount = element.style.MeshFillAmount;
+                    drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount);
+                    drawDesc.meshFillOffsetX = drawDesc.width * 0.5f;
+                    drawDesc.meshFillOffsetY = drawDesc.height * 0.5f;
+                    drawDesc.meshFillDirection = (byte) (element.style.MeshFillDirection == MeshFillDirection.CounterClockwise ? 0 : 1);
+                    drawDesc.meshFillInvert = 0; //(byte) (element.style.MeshFillInvert == Invert ? 1 : 0);
+                    drawDesc.meshFillRadius = float.MaxValue;
+                    drawDesc.meshFillRotation = 0;
+                    break;
+                }
+                case MeshType.Radial360_Right: {
+                    float amount = element.style.MeshFillAmount;
+                    drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount);
+                    drawDesc.meshFillOffsetX = drawDesc.width * 0.5f;
+                    drawDesc.meshFillOffsetY = drawDesc.height * 0.5f;
+                    drawDesc.meshFillDirection = (byte) (element.style.MeshFillDirection == MeshFillDirection.CounterClockwise ? 0 : 1);
+                    drawDesc.meshFillInvert = 0; //(byte) (element.style.MeshFillInvert == Invert ? 1 : 0);
+                    drawDesc.meshFillRadius = float.MaxValue;
+                    drawDesc.meshFillRotation =  ushort.MaxValue / 4;
+                    break;
+                }
+                
+                case MeshType.Radial360_Left: {
+                    float amount = element.style.MeshFillAmount;
+                    drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount);
+                    drawDesc.meshFillOffsetX = drawDesc.width * 0.5f;
+                    drawDesc.meshFillOffsetY = drawDesc.height * 0.5f;
+                    drawDesc.meshFillDirection = (byte) (element.style.MeshFillDirection == MeshFillDirection.CounterClockwise ? 0 : 1);
+                    drawDesc.meshFillInvert = 0; //(byte) (element.style.MeshFillInvert == Invert ? 1 : 0);
+                    drawDesc.meshFillRadius = float.MaxValue;
+                    drawDesc.meshFillRotation = 3 * (ushort.MaxValue / 4);
+                    break;
+                }
                 
             }
         }
-        
-        public override void Enable() { }
 
         public override void OnStylePropertyChanged(StyleProperty[] propertyList, int propertyCount) {
             bool recomputeDrawing = false;
             bool recomputeMeshFill = false;
-            
+            bool recomputeUVTransform = false;
+
             for (int i = 0; i < propertyCount; i++) {
                 ref StyleProperty property = ref propertyList[i];
                 switch (property.propertyId) {
@@ -280,8 +367,36 @@ namespace UIForia.Rendering {
 
                     case StylePropertyId.BackgroundImage:
                         recomputeDrawing = true;
-                        backgroundTexture = property.AsTexture;
-                        backgroundTextureId = ReferenceEquals(backgroundTexture, null) ? 0 : backgroundTexture.GetHashCode();
+                        backgroundTexture = property.AsTextureReference;
+                        backgroundTextureId = ReferenceEquals(backgroundTexture?.texture, null) ? 0 : backgroundTexture.texture.GetHashCode();
+                        if (backgroundTexture != null) {
+                            drawDesc.uvTop = backgroundTexture.uvRect.yMin;
+                            drawDesc.uvRight = backgroundTexture.uvRect.xMax;
+                            drawDesc.uvBottom = backgroundTexture.uvRect.yMax;
+                            drawDesc.uvLeft = backgroundTexture.uvRect.xMin;
+                        }
+
+                        break;
+
+                    case StylePropertyId.Gradient:
+                        gradient = property.AsGradient;
+                        break;
+                    
+                    case StylePropertyId.GradientOffsetX:
+                    case StylePropertyId.GradientOffsetY:
+                        break;
+                    case StylePropertyId.GradientMode:
+                        break;
+                    
+                    case StylePropertyId.BackgroundImageRotation:
+                        drawDesc.uvRotation = MathUtil.FloatPercentageToUshort(element.style.BackgroundImageRotation.ToPercent().value);
+                        break;
+                    
+                    case StylePropertyId.BackgroundImageOffsetX:
+                    case StylePropertyId.BackgroundImageOffsetY:
+                    case StylePropertyId.BackgroundImageScaleX:
+                    case StylePropertyId.BackgroundImageScaleY:
+                        recomputeUVTransform = true;
                         break;
 
                     case StylePropertyId.OverflowX:
@@ -316,30 +431,26 @@ namespace UIForia.Rendering {
                         recomputeMeshFill = true;
                         break;
 
-                    case StylePropertyId.BackgroundImageScaleX:
-                        break;
-
-                    case StylePropertyId.BackgroundImageScaleY:
-                        break;
-
-                    case StylePropertyId.BackgroundImageRotation:
-                        break;
-
+                    // todo -- remove these?
                     case StylePropertyId.BackgroundImageTileX:
-                        break;
-
                     case StylePropertyId.BackgroundImageTileY:
                         break;
                 }
             }
 
             if (recomputeDrawing) {
-                drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId);
-                drawDesc.outlineColorMode = GetColorMode(drawDesc.outlineColor, default, outlineTextureId);
+                drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId, element.style.BackgroundFit == BackgroundFit.Cover);
+                drawDesc.outlineColorMode = GetColorMode(drawDesc.outlineColor, default, outlineTextureId, false);
                 requireRendering = drawDesc.opacity > 0 && (drawDesc.bgColorMode != 0 || (drawDesc.outlineWidth > 0 && drawDesc.outlineColorMode != 0));
+                recomputeUVTransform = false;
+                ComputeUVTransform();
             }
 
-            if (recomputeMeshFill) {
+            if (recomputeUVTransform && requireRendering) {
+                ComputeUVTransform();
+            }
+
+            if (recomputeMeshFill && requireRendering) {
                 ComputeMeshFill();
             }
 
@@ -347,7 +458,11 @@ namespace UIForia.Rendering {
 
         public override void PaintBackground3(RenderContext3 ctx) {
 
+            // todo -- remove, obviously
+            gradient = new Gradient(GradientType.LinearBlend, GameObject.Find("UIForia").GetComponent<UIForiaAssets>().gradient);
+            
             if (requireRendering) {
+                ctx.SetGradient(gradient);
                 ctx.SetBackgroundTexture(backgroundTexture?.texture);
                 ctx.DrawElement(0, 0, drawDesc);
             }

@@ -1,10 +1,25 @@
 #ifndef __UIForiaInc__
+
 #define __UIForiaInc__
 
 #define ColorMode_Color (1 << 0)
 #define ColorMode_Texture (1 << 1)
 #define ColorMode_TextureTint (1 << 2)
 #define ColorMode_LetterBoxTexture (1 << 3)
+#define ColorMode_CoverTexture (1 << 4)
+     
+#define GradientMode_TextureColor (1 << 1)   
+#define GradientMode_TextureAlpha (1 << 2)   
+#define GradientMode_Opacity (1 << 3)   
+#define GradientMode_Color (1 << 4)   
+#define GradientMode_ColorTint (1 << 5)   
+#define GradientMode_ColorAlpha (1 << 6)
+
+#define GradientType_Conical 1
+#define GradientType_Linear 2
+#define GradientType_Radial 3
+#define GradientType_Corner 4   
+
 #define Deg2Rad 0.01745329
 #define PI 3.1415926535897932384626433832795
 #define RED fixed4(1, 0, 0, 1)
@@ -13,6 +28,7 @@
 #define WHITE fixed4(1, 1, 1, 1)
 #define BLACK fixed4(0, 0, 0, 1)
 #define CLEAR fixed4(0, 0, 0, 0)
+#define PINK fixed4(1.0, 0.05, 0.3, 1)
 
 // Mirrors CharacterDisplayFlags in C#
 #define TEXT_DISPLAY_FLAG_INVERT_HORIZONTAL_BIT (1 << 0)
@@ -20,6 +36,8 @@
 #define TEXT_DISPLAY_FLAG_BOLD_BIT (1 << 2)
 #define TEXT_DISPLAY_FLAG_ITALIC_BIT (1 << 3)
 #define TEXT_DISPLAY_FLAG_UNDERLAY_INNER_BIT (1 << 4)
+
+
 
 #define TOP_LEFT 0
 #define TOP_RIGHT 1
@@ -95,8 +113,8 @@ half remapHalf(half s, half a1, half a2, half b1, half b2) {
 inline float4 UIForiaPixelSnap (float4 pos) {
      float2 hpc = _ScreenParams.xy * 0.5f;
      float2 adjustment = float2(0, 0); //0.5, 0.5);
-    // adjustment.x = (_ScreenParams.x % 2 != 0) * 0.5;
-    // adjustment.y = (_ScreenParams.y % 2 != 0) * 0.5;
+     adjustment.x = (_ScreenParams.x % 2 != 0) * 0.5;
+     adjustment.y = (_ScreenParams.y % 2 != 0) * 0.5;
      float2 pixelPos = round ((pos.xy / pos.w) * hpc) + adjustment;
      pos.xy = pixelPos / hpc * pos.w;
      return pos;
@@ -181,27 +199,7 @@ float4 UnpackColor32(uint input) {
         uint((input >> 0) & 0xff) / float(0xff)
     );
 }
-
-//float4 SampleGradient(float Time,) {
-//    float3 color = colors[0].rgb;
-//    
-//    [unroll]
-//    for (int c = 1; c < 8; c ++) {
-//        float colorPos = saturate((Time - colors[c - 1].w) / (colors[c].w - colors[c - 1].w)) * step(c, _GradientColorLength - 1);
-//        color = lerp(color, colors[c].rgb, lerp(colorPos, step(0.01, colorPos), _GradientInterpolationType));
-//    }
-//    
-//    float alpha = alphas[0].x;
-//    
-//    [unroll]
-//    for (int a = 1; a < 8; a ++) {
-//        float alphaPos = saturate((Time - alphas[a - 1].y) / (alphas[a].y - alphas[a - 1].y)) * step(a, _GradientAlphaLength - 1);
-//        alpha = lerp(alpha, alphas[a].x, lerp(alphaPos, step(0.01, alphaPos), _GradientInterpolationType));
-//    }
-//    
-//    return float4(color, alpha);
-//}
-                
+     
 bool PointInTriangle(float2 test, float2 p0, float2 p1, float2 p2) {
     float s = p0.y * p2.x - p0.x * p2.y + (p2.y - p0.y) * test.x + (p0.x - p2.x) * test.y;
     float t = p0.x * p1.y - p0.y * p1.x + (p0.y - p1.y) * test.x + (p1.x - p0.x) * test.y;
@@ -220,20 +218,38 @@ bool PointInTriangle(float2 test, float2 p0, float2 p1, float2 p2) {
 fixed UIForiaOverflowClip(float2 screenPos, AxisAlignedBounds2D bounds) {
     return 1; // todo 
 }
-            
-inline fixed4 ComputeColor(fixed4 mainColor, fixed4 tintColor, uint colorMode, float2 texCoord, sampler2D textureToRead, float4 uvBounds) {
+
+
+inline fixed4 ComputeColor(fixed4 mainColor, fixed4 gradientColor, fixed4 tintColor, uint colorMode, float2 texCoord, sampler2D textureToRead, float4 uvBounds, float2 originalUV) {
             
     int useColor = (colorMode & ColorMode_Color) != 0;
     int useTexture = (colorMode & ColorMode_Texture) != 0;
     int tintTexture = (colorMode & ColorMode_TextureTint) != 0;
-
+    int coverTexture = (colorMode & ColorMode_CoverTexture) != 0;
     fixed4 textureColor = tex2Dlod(textureToRead, float4(texCoord, 0, 0));
-    textureColor = lerp(textureColor, textureColor * tintColor, tintTexture);
-    float2 s = step(uvBounds.xw, texCoord) - step(uvBounds.zy, texCoord);
+    int gradientMode = GradientMode_Color | GradientMode_ColorAlpha;
     
-    if(s.x * s.y == 0) {
-        return mainColor;
-    }
+    textureColor.rgb = lerp(textureColor.rgb, gradientColor.rgb, (gradientMode & GradientMode_TextureColor) != 0);
+    textureColor.a *= lerp(1, 1 - (textureColor.a - gradientColor.a), (gradientMode & GradientMode_TextureAlpha) != 0);
+    mainColor.rgb = lerp(mainColor.rgb, gradientColor.rgb, (gradientMode & GradientMode_Color) != 0);
+    mainColor.a = lerp(mainColor.a, gradientColor.a, (gradientMode & GradientMode_ColorAlpha) != 0);
+    // #ifdef UIFORIA_GRADIENT
+    // if gradient mode = background
+    
+    // if gradientMode == GradientMode_TextureColor
+    // if gradientMode == GradientMode_TextureAlpha
+    // if gradientMode == GradientMode_Opacity
+    // if gradientMode == GradientMode_TextureTint
+    // if gradientMode == GradientMode_BackgroundColor
+    // if gradientMode == GradientMode_BackgroundTint
+    // if gradientMode == GradientMode_BackgroundOpacity
+    
+    // #endif
+    
+    textureColor = lerp(textureColor, textureColor * tintColor, tintTexture);
+    // todo -- these lines could implement a cover effect a-la css background cover 
+    // float2 s = step(uvBounds.xw, originalUV) - step(uvBounds.zy, originalUV);
+    // textureColor = lerp(textureColor, mainColor, s.x * s.y == 0 && coverTexture == 0); 
     
     if(useTexture && useColor) {
         return lerp(textureColor, mainColor, 1 - textureColor.a);
@@ -287,15 +303,57 @@ float2 RotateUV(float2 uv, float rotation) {
     );
 }
 
-float2 TransformUV(float2 uv, float2 offset, float2 scale, float rotation, half4 uvBounds, float atlasPadding) {
+float2 TransformUV(float2 uv, float2 offset, float2 scale, float rotation, half4 uvBounds) {
     uv += offset;
     uv *= scale;
+    uv = RotateUV(uv, rotation, float2(0.5, 0.5)); // todo -- verify pivot point is correct -- (uvBounds.z - uvBounds.x) * 0.5, uvBounds.y + (uvBounds.w - uvBounds.y) * 0.5));
+    uv.x = lerp(uvBounds.x, uvBounds.z, frac(uv.x));
+    uv.y = lerp(uvBounds.y, uvBounds.w, frac(uv.y));
+    
     // uv *= float2(uvBounds.z - uvBounds.x, uvBounds.w - uvBounds.y);
-    uv = RotateUV(uv, rotation, float2((uvBounds.z - uvBounds.x) * 0.5, (uvBounds.w - uvBounds.y) * 0.5));
-   // uv.x = (frac(uv.x) % (uvBounds.z - atlasPadding * 2)) + uvBounds.x + atlasPadding;
-   // uv.y = (frac(uv.y) % (uvBounds.w - atlasPadding * 2)) + uvBounds.y + atlasPadding;
-   
+    //(frac(uv.x) % (uvBounds.z)) + uvBounds.x;
+    // uv.y = (frac(uv.y) % (uvBounds.w - uvBounds.y)) + uvBounds.y;
+    
     return uv;
+}
+// ---------------------- Gradient Functions --------------------------------------------------------
+
+float RadialGradient(float2 gradientTexCoord) {
+    return length(gradientTexCoord);
+}
+
+float ConicalGradient(float2 gradientTexCoord) {
+    return (atan2(gradientTexCoord.y, gradientTexCoord.x) + PI) / (2 * PI);
+}
+
+float LinearGradient(float2 gradientTexCoord, float gradRotation = 0) {
+   half gradientTime = cos(gradRotation) * (gradientTexCoord.x - 0.5) +
+                       sin(gradRotation) * (gradientTexCoord.y - 0.5) + 0.5;
+   return gradientTime;
+}
+
+fixed4 SampleCornerGradient(float2 gradientTexCoord, in fixed4 colors[8], in fixed2 alphas[8]) {
+    fixed4 topCol = lerp(fixed4(colors[0].rgb, alphas[0].x), fixed4(colors[1].rgb, alphas[1].x), gradientTexCoord.x);
+    fixed4 bottomCol = lerp(fixed4(colors[2].rgb, alphas[2].x), fixed4(colors[3].rgb, alphas[3].x), gradientTexCoord.x);
+    return lerp(topCol, bottomCol, gradientTexCoord.y);   
+}
+
+fixed4 SampleGradient(float sampleValue, fixed4 colors[8], fixed2 alphas[8], int colorCount, int alphaCount, int fixedOrBlend) {
+    fixed4 color = colors[0];
+    fixed alpha = alphas[0].x;
+    [unroll]
+    for (int idx = 1; idx < 8; idx ++) {
+        
+        fixed prevTimeKey = colors[idx - 1].w;
+        
+        fixed colorPos = saturate((sampleValue - prevTimeKey) / (colors[idx].w - prevTimeKey)) * step(idx, colorCount - 1);
+        color = lerp(color, colors[idx], lerp(colorPos, step(0.5, colorPos), fixedOrBlend));
+        
+        fixed alphaPos = saturate((sampleValue - alphas[idx - 1].y) / (alphas[idx].y - alphas[idx - 1].y)) * step(idx, alphaCount - 1);
+        alpha = lerp(alpha, alphas[idx].x, lerp(alphaPos, step(0.5, alphaPos), fixedOrBlend));
+    }
+
+    return fixed4(color.rgb, alpha);
 }
 
 // ---------------------- Text Structs and Functions ------------------------------------------------
@@ -367,6 +425,10 @@ struct TextMaterialInfo {
     uint unused0;
     uint unused1;
     uint unused2;
+    uint unused3;
+    uint unused4;
+    uint unused5;
+    uint unused6;
 };
             
 TextMaterialInfoDecompressed DecompressTextMaterialInfo(in TextMaterialInfo textMaterialInfo) {
@@ -459,6 +521,80 @@ float GetTextSDFPadding(float gradientScale, in TextMaterialInfoDecompressed tex
     uniformPadding = padding.w > uniformPadding ? padding.w : uniformPadding;
 
     return uniformPadding + 1.25;
+}
+
+
+// sample usage of sdf glow                
+// float sx = 0.25;                      
+// float altSDF = sdRoundBox(i.texCoord0.xy - 0.5, float2(sx, sx), sx * float4(0.0, 0.0, 0.0, 0.0));
+// float glow = 1.0 / (abs(altSDF));
+// glow *= 0.065; 
+// glow = pow(glow, 3); //lerp(1, 3, frac(_Time.y)));
+// color.rgb = glow * color.rgb; //float3(1.0, 0.5, 0.25);
+// color.rgb = 1.0 - exp(-color.rgb);
+// color.a *= 1.0 - smoothstep(0, sx, altSDF);
+// return color;
+                
+float getGlow(float dist, float radius, float intensity){
+    return pow(radius/dist, intensity);
+}
+
+// sample usage of rect shadow functions below                
+// float sigma = lerp(1, 20, frac(_Time.y));
+// float z = sigma / 2;
+// float4 rect = float4(20, 20, i.size.x - 40, i.size.y - 40);
+// float4 shadowRect = float4(float2(rect.x + sqrt(z), rect.y - sqrt(z)), rect.zw);
+// float4 shadowCol = drawRectShadow(i.texCoord0.xy * i.size, shadowRect, RED, sigma);
+		    
+		    
+// approximation to the gaussian integral [x, infty)
+float gi(float x) {
+	float i6 = 1.0 / 6.0;
+	float i4 = 1.0 / 4.0;
+	float i3 = 1.0 / 3.0;
+
+    if (x > 1.5) return 0.0;
+    if (x < -1.5) return 1.0;
+
+    float x2 = x * x;
+    float x3 = x2 * x;
+    
+    if (x >  0.5) return .5625  - ( x3 * i6 - 3. * x2 * i4 + 1.125 * x);
+    if (x > -0.5) return 0.5    - (0.75 * x - x3 * i3);
+    return 0.4375 + (-x3 * i6 - 3. * x2 * i4 - 1.125 * x);
+}
+
+// create a line shadow mask
+float lineShadow(float2 border, float pos, float sigma) {
+    
+    float pos1 = ((border.x - pos) / sigma) * 1.5;
+    float pos2 = ((pos - border.y) / sigma) * 1.5;
+    
+  	return 1.0 - abs(gi(pos1) - gi(pos2));
+}
+//
+//// create a rect shadow by two line shadow
+float rectShadow(float4 rect, float2 pt, float sigma) {
+    
+    float lineV = lineShadow(float2(rect.x, rect.x + rect.z), pt.x, sigma);
+    float lineH = lineShadow(float2(rect.y, rect.y + rect.w), pt.y, sigma);
+    
+  	return lineV * lineH;
+}
+//
+//// draw shadow
+float4 drawRectShadow(float2 pos, float4 rect, float4 color, float sigma) {
+    float4 result = color;
+    
+    float shadowMask = rectShadow(rect, pos, sigma);
+    
+    result.a *= shadowMask;
+    
+	return result;
+}
+
+float4 blend(float4 src, float4 append) {
+  	return float4(src.rgb * (1.0 - append.a) + append.rgb * append.a, 1.0 - (1.0 - src.a) * (1.0 - append.a));
 }
 
 #endif

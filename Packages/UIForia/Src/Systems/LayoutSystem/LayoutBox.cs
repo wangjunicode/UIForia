@@ -4,7 +4,6 @@ using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Util;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace UIForia.Systems {
 

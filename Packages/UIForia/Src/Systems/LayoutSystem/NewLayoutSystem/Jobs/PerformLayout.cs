@@ -3,6 +3,7 @@ using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using UnityEngine;
 
 namespace UIForia.Layout {
 
@@ -17,11 +18,16 @@ namespace UIForia.Layout {
         public void Execute() {
             // used for resolving auto size since parent shouldn't resolve auto size for ignored children
             RootLayoutBoxBurst fakeRoot = new RootLayoutBoxBurst();
-            for (int i = 0; i < elementList.size; i++) {
-                ElementId current = elementList[i];
+            int count = elementList.size;
 
+            ElementId* elementArray = elementList.GetArrayPointer();
+            for (int i = 0; i < count; i++) {
+                ElementId current = elementArray[i];
+
+                int idx = current.id & ElementId.ENTITY_INDEX_MASK;
+                
                 // todo -- I still need to invalidate content caches when stuff changes
-                ref LayoutHierarchyInfo layoutHierarchyInfo = ref runner->GetLayoutHierarchy(current);
+                ref LayoutHierarchyInfo layoutHierarchyInfo = ref runner->layoutHierarchyTable[idx]; //GetLayoutHierarchy(current);
 
                 if (layoutHierarchyInfo.behavior == LayoutBehavior.Ignored) {
 
@@ -37,9 +43,10 @@ namespace UIForia.Layout {
 
                 }
 
-                ref LayoutInfo layoutInfo = ref runner->GetHorizontalLayoutInfo(current);
+                ref LayoutInfo layoutInfo = ref runner->horizontalLayoutInfoTable[idx];
+                
                // if (layoutInfo.requiresLayout) {
-                    layoutBoxTable[current].RunLayoutHorizontal(runner);
+                    layoutBoxTable.array[idx].RunLayoutHorizontal(runner);
                     layoutInfo.requiresLayout = false;
                // }
             }

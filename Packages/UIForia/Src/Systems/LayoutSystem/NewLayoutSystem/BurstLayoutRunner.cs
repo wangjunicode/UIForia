@@ -27,11 +27,11 @@ namespace UIForia.Layout {
         }
 
         public ref LayoutInfo GetHorizontalLayoutInfo(ElementId elementId) {
-            return ref horizontalLayoutInfoTable[elementId.index];
+            return ref horizontalLayoutInfoTable[elementId.id & ElementId.ENTITY_INDEX_MASK];
         }
 
         public ref LayoutInfo GetVerticalLayoutInfo(ElementId elementId) {
-            return ref verticalLayoutInfoTable[elementId.index];
+            return ref verticalLayoutInfoTable[elementId.id & ElementId.ENTITY_INDEX_MASK];
         }
 
         public ref LayoutBoxInfo GetLayoutBoxInfo(ElementId elementId) {
@@ -165,7 +165,8 @@ namespace UIForia.Layout {
         public void GetWidths<T>(in T parent, in BlockSize blockSize, ElementId childId, out LayoutSize size) where T : ILayoutBox {
 
             // todo -- handle animated sizes
-
+            // ref AnimationLayoutSizes sizes = ref animationInfo[childId.index]; // if isAnimating pref/min/max -> update accordingly with lerp data
+            
             ref LayoutInfo childInfo = ref horizontalLayoutInfoTable[childId.index];
             size.preferred = ResolveWidth(parent, childId, blockSize, childInfo.prefSize, ref childInfo);
             size.minimum = ResolveWidth(parent, childId, blockSize, childInfo.minSize, ref childInfo);
@@ -273,8 +274,8 @@ namespace UIForia.Layout {
         }
 
         private float GetContentWidth(ElementId layoutBoxId, BlockSize blockSize, float measurementValue, ref LayoutInfo info) {
-
             // todo -- need 2 or 3 levels of content cache because of fits / constraints
+            
             // if (info.contentCache.cachedSize >= 0 && blockSize == info.contentCache.blockSize) {
             //     float val = info.contentCache.cachedSize * measurementValue;
             //     return val > 0 ? val : 0;

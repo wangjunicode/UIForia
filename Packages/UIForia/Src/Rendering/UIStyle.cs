@@ -8,7 +8,7 @@ namespace UIForia.Rendering {
     public partial class UIStyle {
 
         internal StyleProperty[] array;
-        
+
         public UIStyle(int capacity = 8) {
             if (capacity <= 0) capacity = 8;
             this.array = new StyleProperty[capacity];
@@ -29,7 +29,7 @@ namespace UIForia.Rendering {
                 return array[index];
             }
         }
-        
+
         public BorderRadius BorderRadius {
             set {
                 SetProperty(new StyleProperty(StylePropertyId.BorderRadiusTopLeft, value.topLeft));
@@ -56,7 +56,6 @@ namespace UIForia.Rendering {
 
             return false;
         }
-        
 
         private UIMeasurement FindUIMeasurementProperty(StylePropertyId propertyId) {
             for (int i = 0; i < PropertyCount; i++) {
@@ -67,7 +66,7 @@ namespace UIForia.Rendering {
 
             return UIMeasurement.Unset;
         }
-        
+
         private MaterialId FindMaterialIdProperty(StylePropertyId propertyId) {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
@@ -77,7 +76,7 @@ namespace UIForia.Rendering {
 
             return new MaterialId(0);
         }
-        
+
         private OffsetMeasurement FindOffsetMeasurementProperty(StylePropertyId propertyId) {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
@@ -98,6 +97,16 @@ namespace UIForia.Rendering {
             return UIFixedLength.Unset;
         }
 
+        private UIAngle FindUIAngleProperty(StylePropertyId propertyId) {
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
+                    return array[i].AsUIAngle;
+                }
+            }
+
+            return UIAngle.Unset;
+        }
+
         private float FindFloatProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
             return !property.hasValue ? FloatUtil.UnsetValue : property.AsFloat;
@@ -115,9 +124,9 @@ namespace UIForia.Rendering {
 
         private Color FindColorProperty(StylePropertyId propertyId) {
             StyleProperty property = GetProperty(propertyId);
-            return !property.hasValue ?  ColorUtil.UnsetValue :(Color) new StyleColor(property.int0);
+            return !property.hasValue ? ColorUtil.UnsetValue : (Color) new StyleColor(property.int0);
         }
-        
+
         internal void SetProperty(in StyleProperty property) {
             StylePropertyId propertyId = property.propertyId;
             if (!property.hasValue) {
@@ -127,6 +136,7 @@ namespace UIForia.Rendering {
                         return;
                     }
                 }
+
                 return;
             }
 
@@ -144,8 +154,8 @@ namespace UIForia.Rendering {
 
             array[PropertyCount++] = property;
         }
-        
-        private  void RemoveAt(int index) {
+
+        private void RemoveAt(int index) {
             if ((uint) index >= (uint) PropertyCount) return;
             if (index == PropertyCount - 1) {
                 array[--PropertyCount] = default;
@@ -158,7 +168,7 @@ namespace UIForia.Rendering {
                 array[--PropertyCount] = default;
             }
         }
-        
+
         public StyleProperty GetProperty(StylePropertyId propertyId) {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
@@ -168,7 +178,7 @@ namespace UIForia.Rendering {
 
             return new StyleProperty(propertyId);
         }
-       
+
         public bool TryGetProperty(StylePropertyId propertyId, out StyleProperty property) {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
@@ -197,7 +207,6 @@ namespace UIForia.Rendering {
 
             return destination;
         }
-
 
     }
 

@@ -522,12 +522,16 @@ namespace UIForia.Text {
             textEffectAnimator.fontAssetMap = application.ResourceManager.fontAssetMap;
 
             Profiler.BeginSample("UIForia::TextEffectUpdate");
-            for (int i = 0; i < activeTextElementIds.size; i++) {
+            TextId* arrayPointer = activeTextElementIds.GetArrayPointer();
+            TextInfo* textInfoMapArray = textInfoMap.GetArrayPointer();
+            int count = activeTextElementIds.size;
+            
+            for (int i = 0; i < count; i++) {
 
-                ref TextInfo textInfo = ref textInfoMap[activeTextElementIds[i].textInfoId];
+                ref TextInfo textInfo = ref textInfoMapArray[arrayPointer[i].textInfoId];
 
                 if (textInfo.hasEffects) {
-                    textEffectAnimator.Animate(default, ref textInfo, (UITextElement) elementSystem.instanceTable[activeTextElementIds[i].elementId.index]);
+                    textEffectAnimator.Animate(default, ref textInfo, (UITextElement) elementSystem.instanceTable[arrayPointer[i].elementId.index]);
                 }
 
             }

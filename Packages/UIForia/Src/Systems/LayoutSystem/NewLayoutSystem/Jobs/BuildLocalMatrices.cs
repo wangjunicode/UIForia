@@ -78,16 +78,17 @@ namespace UIForia.Layout {
             for (int i = start; i < end; i++) {
 
                 ElementId elementId = idArray[i];
+                int elementIndex = elementId.id & ElementId.ENTITY_INDEX_MASK;
 
-                ref TransformInfo transformInfo = ref transformInfoTable.array[elementId.index];
-                ref LayoutBoxInfo layoutResult = ref layoutBoxInfoTable.array[elementId.index];
-                // if (elementId.index == 4) {
+                ref TransformInfo transformInfo = ref transformInfoTable.array[elementIndex];
+                ref LayoutBoxInfo layoutResult = ref layoutBoxInfoTable.array[elementIndex];
+                // if (elementIndex == 4) {
                 //     float angle = -20;
                 //     SVGXMatrix m = SVGXMatrix.identity;
                 //     m = m.Translate(layoutResult.alignedPosition.x, (layoutResult.alignedPosition.y));
                 //     m = m.SkewX(angle);
                 //     m.m4 += m.skewX * 2;
-                //     localMatrices.array[elementId.index] = m.ToMatrix4x4();
+                //     localMatrices.array[elementIndex] = m.ToMatrix4x4();
                 //     continue;
                 // }
 
@@ -99,8 +100,8 @@ namespace UIForia.Layout {
                     scrollOffsetY = (layoutResult.scrollValues->contentHeight - layoutResult.scrollValues->actualHeight) * -layoutResult.scrollValues->scrollY;
                 }
                 
-                if (transformInfo.positionX == 0 && transformInfo.positionY == 0 && transformInfo.rotation == 0 && transformInfo.scaleX == 1 && transformInfo.scaleY == 1) {
-                    localMatrices.array[elementId.index] = new float4x4(
+                if (transformInfo.positionX.value == 0 && transformInfo.positionY.value == 0 && transformInfo.rotation == 0 && transformInfo.scaleX == 1 && transformInfo.scaleY == 1) {
+                    localMatrices.array[elementIndex] = new float4x4(
                         new float4(1, 0, 0, 0),
                         new float4(0, 1, 0, 0),
                         new float4(0, 0, 1, 0),
@@ -126,7 +127,7 @@ namespace UIForia.Layout {
 
                 if (rotation == 0 && scaleX == 1 && scaleY == 1) {
 
-                    localMatrices.array[elementId.index] = new float4x4(
+                    localMatrices.array[elementIndex] = new float4x4(
                         new float4(scaleX, 0, 0, 0),
                         new float4(0, scaleY, 0, 0),
                         new float4(0, 0, 1, 0),
@@ -153,7 +154,7 @@ namespace UIForia.Layout {
                         final = math.mul(final, float4x4.Scale(new float3(scaleX, scaleY, 1)));
                     }
 
-                    localMatrices[elementId] = math.mul(final, float4x4.Translate(new float3(-px, py, 0)));
+                    localMatrices.array[elementIndex] = math.mul(final, float4x4.Translate(new float3(-px, py, 0)));
 
                 }
 

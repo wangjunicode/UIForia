@@ -1,7 +1,6 @@
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using System.Collections.Generic;
-using UIForia.Graphics;
 using UnityEngine;
 using UIForia.Util;
 using UIForia.Text;
@@ -37,9 +36,13 @@ namespace UIForia.Rendering {
 		public const float BackgroundImageScaleY = 1f;
 		public const float BackgroundImageTileX = 1f;
 		public const float BackgroundImageTileY = 1f;
-		public const float BackgroundImageRotation = 0f;
+		public static readonly UIAngle BackgroundImageRotation = new UIAngle(0f, UIAngleUnit.Degrees);
 		public static readonly TextureReference BackgroundImage = default(TextureReference);
 		public const BackgroundFit BackgroundFit = UIForia.Rendering.BackgroundFit.Fill;
+		public static readonly OffsetMeasurement GradientOffsetX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
+		public static readonly OffsetMeasurement GradientOffsetY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
+		public static readonly Gradient Gradient = default(Gradient);
+		public const GradientMode GradientMode = UIForia.Rendering.GradientMode.None;
 		public static readonly Color BorderColorTop = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color BorderColorRight = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color BorderColorBottom = new Color(-1f, -1f, -1f, -1f);
@@ -72,8 +75,8 @@ namespace UIForia.Rendering {
 		public const LayoutFit FitItemsHorizontal = UIForia.Layout.LayoutFit.Unset;
 		public const SpaceDistribution DistributeExtraSpaceHorizontal = UIForia.Layout.SpaceDistribution.AfterContent;
 		public const SpaceDistribution DistributeExtraSpaceVertical = UIForia.Layout.SpaceDistribution.AfterContent;
-		public const float RadialLayoutStartAngle = 0f;
-		public const float RadialLayoutEndAngle = 360f;
+		public static readonly UIAngle RadialLayoutStartAngle = new UIAngle(0f, UIAngleUnit.Degrees);
+		public static readonly UIAngle RadialLayoutEndAngle = new UIAngle(360f, UIAngleUnit.Degrees);
 		public static readonly UIFixedLength RadialLayoutRadius = new UIFixedLength(0.5f, UIFixedUnit.Percent);
 		public const AlignmentDirection AlignmentDirectionX = UIForia.Layout.AlignmentDirection.Start;
 		public const AlignmentDirection AlignmentDirectionY = UIForia.Layout.AlignmentDirection.Start;
@@ -202,11 +205,19 @@ namespace UIForia.Rendering {
 				case StylePropertyId.BackgroundImageTileY:
 					 return new StyleProperty(StylePropertyId.BackgroundImageTileY, 1f);
 				case StylePropertyId.BackgroundImageRotation:
-					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, 0f);
+					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, new UIAngle(0f, UIAngleUnit.Degrees));
 				case StylePropertyId.BackgroundImage:
 					 return new StyleProperty(StylePropertyId.BackgroundImage, default(TextureReference));
 				case StylePropertyId.BackgroundFit:
 					 return new StyleProperty(StylePropertyId.BackgroundFit, (int)UIForia.Rendering.BackgroundFit.Fill);
+				case StylePropertyId.GradientOffsetX:
+					 return new StyleProperty(StylePropertyId.GradientOffsetX, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
+				case StylePropertyId.GradientOffsetY:
+					 return new StyleProperty(StylePropertyId.GradientOffsetY, new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel));
+				case StylePropertyId.Gradient:
+					 return new StyleProperty(StylePropertyId.Gradient, default(Gradient));
+				case StylePropertyId.GradientMode:
+					 return new StyleProperty(StylePropertyId.GradientMode, (int)UIForia.Rendering.GradientMode.None);
 				case StylePropertyId.BorderColorTop:
 					 return new StyleProperty(StylePropertyId.BorderColorTop, new Color(-1f, -1f, -1f, -1f));
 				case StylePropertyId.BorderColorRight:
@@ -272,9 +283,9 @@ namespace UIForia.Rendering {
 				case StylePropertyId.DistributeExtraSpaceVertical:
 					 return new StyleProperty(StylePropertyId.DistributeExtraSpaceVertical, (int)UIForia.Layout.SpaceDistribution.AfterContent);
 				case StylePropertyId.RadialLayoutStartAngle:
-					 return new StyleProperty(StylePropertyId.RadialLayoutStartAngle, 0f);
+					 return new StyleProperty(StylePropertyId.RadialLayoutStartAngle, new UIAngle(0f, UIAngleUnit.Degrees));
 				case StylePropertyId.RadialLayoutEndAngle:
-					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, 360f);
+					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, new UIAngle(360f, UIAngleUnit.Degrees));
 				case StylePropertyId.RadialLayoutRadius:
 					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent));
 				case StylePropertyId.AlignmentDirectionX:

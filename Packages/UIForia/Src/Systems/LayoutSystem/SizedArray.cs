@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UIForia.Systems;
 
 namespace UIForia.Util {
@@ -105,6 +106,19 @@ namespace UIForia.Util {
             }
         }
 
+        public void AddRange(IList<T> collection) {
+            if (size + collection.Count >= array.Length) {
+                Array.Resize(ref array, size + collection.Count);
+            }
+
+            int idx = size;
+            for (int i = 0; i < collection.Count; i++) {
+                array[idx++] = collection[i];
+            }
+
+            size += collection.Count;
+        }
+
         public void AddRange(SizedArray<T> collection) {
             if (size + collection.size >= array.Length) {
                 Array.Resize(ref array, size + collection.size * 2);
@@ -166,7 +180,7 @@ namespace UIForia.Util {
                 Array.Resize(ref array, size + count * 2);
             }
         }
-        
+
         public void EnsureAdditionalCapacity(int count) {
             if (count > 0 && size + count >= array.Length) {
                 Array.Resize(ref array, size + count * 2);

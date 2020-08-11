@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using UIForia.ListTypes;
 using UIForia.Text;
 using UIForia.Util;
@@ -8,8 +10,16 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Gradient = UIForia.Rendering.Gradient;
 
 namespace UIForia.Graphics {
+
+    internal unsafe struct ElementBatch {
+
+        public ElementDrawInfo* elements;
+        public int count;
+
+    }
 
     public unsafe class RenderContext3 : IDisposable {
 
@@ -28,6 +38,12 @@ namespace UIForia.Graphics {
         private ElementId elementId;
         private int stencilClipStart;
         private int defaultOutlineTexture;
+        private int defaultBGTexture;
+        private bool hasPendingMaterialOverrides;
+        private DataList<MaterialPropertyOverride> materialValueOverrides;
+        private MaterialPropertyOverride* currentOverrideProperties;
+        private DrawInfoFlags currentFlagSet;
+        private MaterialId activeMaterialId;
 
         public RenderContext3(ResourceManager resourceManager) {
             this.resourceManager = resourceManager;
@@ -36,6 +52,7 @@ namespace UIForia.Graphics {
             this.dummyMatrix = new HeapAllocated<float4x4>(float4x4.identity);
             this.drawList = new DataList<DrawInfo2>(64, Allocator.Persistent);
             this.stackAllocator = new PagedByteAllocator(TypedUnsafe.Kilobytes(16), Allocator.Persistent, Allocator.Persistent);
+            this.materialValueOverrides = new DataList<MaterialPropertyOverride>(16, Allocator.Persistent);
         }
 
         public void Setup(ElementId elementId, MaterialId materialId, int renderIndex, float4x4* transform) {
@@ -45,6 +62,10 @@ namespace UIForia.Graphics {
             this.defaultMatrix = transform;
             this.defaultBGTexture = 0;
             this.defaultOutlineTexture = 0;
+            this.gradient = null;
+            hasPendingMaterialOverrides = false;
+            currentFlagSet = 0;
+            activeMaterialId = materialId;
         }
 
         public void Callback(object context, Action<object, CommandBuffer> callback) {
@@ -75,19 +96,6 @@ namespace UIForia.Graphics {
             textureMap[texture.GetHashCode()] = texture;
         }
 
-        public void SetElementBatchData(IList<ElementMaterialSetup> materialSetups) { }
-
-        public unsafe struct ElementBatch {
-
-            public ElementDrawInfo* elements;
-            public int count;
-
-        }
-
-        public void DrawElementBatch(float x, float y, float width, float height) { }
-
-        private int defaultBGTexture;
-
         public void SetBackgroundTexture(Texture texture) {
             if (!ReferenceEquals(texture, null)) {
                 defaultBGTexture = texture.GetHashCode();
@@ -101,6 +109,63 @@ namespace UIForia.Graphics {
                 defaultOutlineTexture = texture.GetHashCode();
                 AddTexture(texture);
             }
+
+        }
+
+        private void CommitMaterialModifications() {
+
+            int size = materialValueOverrides.size;
+            MaterialPropertyOverride* writePtr = stackAllocator.Allocate<MaterialPropertyOverride>(size);
+
+            if (size > 1) {
+                // todo -- bubble sort is probably better here, low item count, fully local, less overhead
+                NativeSortExtension.Sort(materialValueOverrides.GetArrayPointer(), size);
+            }
+
+            TypedUnsafe.MemCpy(writePtr, materialValueOverrides.GetArrayPointer(), size);
+            currentOverrideProperties = writePtr;
+
+            hasPendingMaterialOverrides = false;
+
+        }
+
+        public enum GeometryType {
+
+            Quad
+
+        }
+
+        public void SetMaterial(MaterialId materialId) {
+            activeMaterialId = materialId;
+            materialValueOverrides.size = 0;
+            currentOverrideProperties = null;
+            hasPendingMaterialOverrides = false;
+            currentFlagSet = 0;
+        }
+
+        public void DrawQuad(float x, float y, float width, float height) {
+
+            if (width <= 0 || height <= 0) {
+                return;
+            }
+
+            if (hasPendingMaterialOverrides) {
+                CommitMaterialModifications();
+            }
+
+            drawList.Add(new DrawInfo2() {
+                matrix = defaultMatrix,
+                elementId = elementId,
+                drawType = DrawType2.UIForiaGeometry,
+                materialId = activeMaterialId,
+                localBounds = new AxisAlignedBounds2D(x, y, x + width, y + height),
+                materialData = currentOverrideProperties,
+                shapeData = (void*) (int) GeometryType.Quad,
+                drawSortId = new DrawSortId() {
+                    localRenderIdx = localDrawId++,
+                    baseRenderIdx = renderIndex
+                }
+            });
 
         }
 
@@ -119,13 +184,15 @@ namespace UIForia.Graphics {
                 drawDesc = drawDesc,
             });
 
+            if (gradient != null) {
+            }
+            
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
                 elementId = elementId,
                 drawType = DrawType2.UIForiaElement,
                 materialId = MaterialId.UIForiaShape,
-                localBounds = new AxisAlignedBounds2D(x, y, x + drawDesc.width, y + drawDesc.height), // compute based on matrix? probably
-
+                localBounds = new AxisAlignedBounds2D(x, y, x + drawDesc.width, y + drawDesc.height),
                 // could consider making these different allocators to keep similar types together
                 materialData = stackAllocator.Allocate(new ElementMaterialSetup() {
                     bodyTexture = new TextureUsage() {
@@ -205,6 +272,7 @@ namespace UIForia.Graphics {
         }
 
         public void Clear() {
+            materialValueOverrides.size = 0;
             textureMap.Clear();
             drawList.size = 0;
             callbacks.Clear();
@@ -215,6 +283,7 @@ namespace UIForia.Graphics {
             stackAllocator.Dispose();
             drawList.Dispose();
             dummyMatrix.Dispose();
+            materialValueOverrides.Dispose();
         }
 
         public int GetFontTextureId(int textStyleFontAssetId) {
@@ -307,8 +376,15 @@ namespace UIForia.Graphics {
             });
         }
 
+        private Gradient gradient;
+        
+        public void SetGradient(Gradient gradient) {
+            this.gradient = gradient;
+        }
+
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct ElementDrawDesc {
 
         // all material data goes here
@@ -327,37 +403,41 @@ namespace UIForia.Graphics {
         public Color32 backgroundColor;
         public Color32 backgroundTint;
 
-        public byte opacity;
+        public ushort opacity;
         public ColorMode bgColorMode;
         public ColorMode outlineColorMode;
+        
         public float outlineWidth;
         public Color32 outlineColor;
         public float width;
         public float height;
 
-        public float textureRotation;
-        public ushort uvTopLeft;
-        public ushort uvTopRight;
-        public ushort uvBottomRight;
-        public ushort uvBottomLeft;
+        public ushort uvTop;
+        public ushort uvLeft;
+        public ushort uvRight;
+        public ushort uvBottom;
 
-        public float textureScaleX;
-        public float textureScaleY;
-        public float textureOffsetX;
-        public float textureOffsetY;
-        public float textureTilingX;
-        public float textureTilingY;
-        
         public ushort meshFillOpenAmount;
         public ushort meshFillRotation;
-        
+
         public float meshFillOffsetX;
         public float meshFillOffsetY;
-        
+
         public float meshFillRadius;
-        
+
         public byte meshFillDirection;
         public byte meshFillInvert;
+        public ushort uvRotation;
+        
+        public float uvScaleX;
+        public float uvScaleY;
+        public float uvOffsetX;
+        public float uvOffsetY;
+        
+        public GradientMode gradientMode;
+        public float gradientRotation;
+        public float gradientOffsetX;
+        public float gradientOffsetY;
 
     }
 

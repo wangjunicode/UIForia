@@ -16,6 +16,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Systems {
 
@@ -64,6 +65,9 @@ namespace UIForia.Systems {
         internal DataList<ElementId> gridPlaceList;
         internal DataList<AxisAlignedBounds2D>.Shared clipperBoundsList;
 
+        internal DataList<ElementId>.Shared rootList;
+        internal DataList<ElementId>.Shared ignoredLayoutList;
+
         internal struct LayoutDataTables {
 
             public float4x4* localMatrices;
@@ -83,6 +87,8 @@ namespace UIForia.Systems {
             this.clipperIntersections = new DataList<float2>.Shared(128, Allocator.Persistent);
             this.queryBuffer = new DataList<QueryResult>.Shared(16, Allocator.Persistent);
             this.clipperBoundsList = new DataList<AxisAlignedBounds2D>.Shared(16, Allocator.Persistent);
+            this.rootList = new DataList<ElementId>.Shared(16, Allocator.Persistent);
+            this.ignoredLayoutList = new DataList<ElementId>.Shared(16, Allocator.Persistent);
 
             *tablePointers = default;
             ResizeBackingStore(application.InitialElementCapacity);
@@ -95,7 +101,6 @@ namespace UIForia.Systems {
 
         // also triggered for destroy
         public void HandleElementDisabled(DataList<ElementId>.Shared disabledElements) {
-
             for (int i = 0; i < disabledElements.size; i++) {
 
                 // maybe only actually dispose if destroyed, keep disabled ones around?
@@ -105,29 +110,36 @@ namespace UIForia.Systems {
                 if (elementId.index > elementCapacity) {
                     continue;
                 }
+
                 ref LayoutBoxUnion layoutBox = ref layoutBoxTable[elementId];
+
                 layoutBox.Dispose();
             }
 
-            DataList<ElementId>.Shared roots = new DataList<ElementId>.Shared(32, Allocator.TempJob);
-
+            rootList.size = 0;
             if (disabledElements.size > 1) {
                 new FindHierarchyRootElements() {
                     elements = disabledElements,
                     traversalTable = elementSystem.traversalTable,
                     metaTable = elementSystem.metaTable,
-                    roots = roots,
+                    roots = rootList,
                     mask = UIElementFlags.DisableRoot
                 }.Run();
             }
             else {
-                roots.Add(disabledElements[0]);
+                rootList.Add(disabledElements[0]);
             }
 
             // no need to burst this, usually only very few elements in this list 
             // cost of job running is probably larger than cost of running this in managed.
-            for (int i = 0; i < roots.size; i++) {
-                ElementId elementId = roots[i];
+            for (int i = 0; i < rootList.size; i++) {
+                ElementId elementId = rootList[i];
+
+                // if element is at an index we haven't allocated yet, the memory for it is garbage.
+                if (elementId.index >= elementCapacity) {
+                    continue;
+                }
+
                 ref LayoutHierarchyInfo layoutInfo = ref layoutHierarchyTable[elementId];
 
                 if (layoutInfo.behavior == LayoutBehavior.TranscludeChildren) {
@@ -140,14 +152,19 @@ namespace UIForia.Systems {
                 }
 
                 if (layoutInfo.parentId != default) {
-                    childrenChangedList.Add(layoutInfo.parentId);
+                    AddToChildrenChangeList(layoutInfo.parentId);
+                    // childrenChangedList.Add(layoutInfo.parentId);
                 }
 
                 layoutInfo = default;
 
             }
 
-            roots.Dispose();
+        }
+
+        public void AddToChildrenChangeList(ElementId elementId) {
+            if (elementId.index > 1000) Debugger.Break();
+            childrenChangedList.Add(elementId);
         }
 
         // also triggered for create
@@ -168,14 +185,14 @@ namespace UIForia.Systems {
             for (int i = 0; i < enabledElements.size; i++) {
 
                 UIElement element = elementSystem.instanceTable[enabledElements[i].index];
-                layoutHierarchyTable[element.id] = default;
-
                 // this point styles are all final for the frame because we ignore changesets for elements enabled this frame
                 ref LayoutHierarchyInfo hierarchyInfo = ref layoutHierarchyTable[element.id];
                 ref LayoutBoxUnion layoutBox = ref layoutBoxTable[element.id];
                 ref LayoutInfo horizontalLayoutInfo = ref horizontalLayoutInfoTable[element.id];
                 ref LayoutInfo verticalLayoutInfo = ref verticalLayoutInfoTable[element.id];
                 ref ClipInfo clipInfo = ref clipInfoTable[element.id];
+
+                hierarchyInfo = default;
 
                 layoutBox.Initialize(LayoutBoxUnion.GetLayoutBoxType(element), this, element);
 
@@ -259,9 +276,9 @@ namespace UIForia.Systems {
                 clipInfo.isMouseQueryHandler = element is IPointerQueryHandler;
             }
 
-            DataList<ElementId>.Shared rootList = new DataList<ElementId>.Shared(32, Allocator.Temp);
-            DataList<ElementId>.Shared ignoredLayoutList = new DataList<ElementId>.Shared(32, Allocator.Temp);
-
+            rootList.size = 0;
+            ignoredLayoutList.size = 0;
+            
             if (enabledElements.size > 1) {
                 new FindHierarchyRootElements() {
                     elements = enabledElements,
@@ -293,7 +310,6 @@ namespace UIForia.Systems {
                 ElementId elementId = enabledElements[i];
 
                 ref LayoutHierarchyInfo layoutHierarchyInfo = ref layoutHierarchyTable[elementId];
-
                 // this feels out of place
                 layoutResultTable[elementId].layoutParentId = layoutHierarchyInfo.parentId;
                 layoutResultTable[elementId].scrollValues = null;
@@ -312,7 +328,8 @@ namespace UIForia.Systems {
                     case LayoutBehavior.Normal:
                         ElementId parentId = LayoutUtil.FindLayoutParent(elementId, elementSystem.hierarchyTable, layoutHierarchyTable);
                         LayoutUtil.Insert(parentId, elementId, elementSystem.traversalTable, layoutHierarchyTable);
-                        childrenChangedList.Add(layoutInfo.parentId);
+                        // childrenChangedList.Add(layoutInfo.parentId);
+                        AddToChildrenChangeList(layoutInfo.parentId);
                         break;
 
                     case LayoutBehavior.Ignored:
@@ -321,7 +338,8 @@ namespace UIForia.Systems {
                         break;
 
                     case LayoutBehavior.TranscludeChildren:
-                        childrenChangedList.Add(layoutInfo.parentId);
+                        // childrenChangedList.Add(layoutInfo.parentId);
+                        AddToChildrenChangeList(layoutInfo.parentId);
                         LayoutUtil.TranscludeUnattached(elementId, layoutHierarchyTable, elementSystem.traversalTable);
                         break;
                 }
@@ -332,8 +350,6 @@ namespace UIForia.Systems {
                 GetLayoutContext(element.View).AddToIgnoredList(element.id);
             }
 
-            ignoredLayoutList.Dispose();
-            rootList.Dispose();
         }
 
         internal LayoutContext GetLayoutContext(UIView view) {
@@ -345,7 +361,7 @@ namespace UIForia.Systems {
 
             return null;
         }
-        
+
         internal LayoutContext GetLayoutContext(int viewId) {
             for (int i = 0; i < layoutContexts.size; i++) {
                 if (layoutContexts[i].view.id == viewId) {
@@ -355,7 +371,7 @@ namespace UIForia.Systems {
 
             return null;
         }
-        
+
         // only called for elements that were not enabled this frame
         // todo -- totally burstable when styles are blittable
         public void HandleStylePropertyUpdates(UIElement element, StyleProperty[] properties, int propertyCount) {
@@ -530,7 +546,8 @@ namespace UIForia.Systems {
                             LayoutUtil.Untransclude(element.id, elementSystem.traversalTable, elementSystem.hierarchyTable, layoutHierarchyTable);
                             GetLayoutContext(element.View).transclusionCount--;
                             p = layoutHierarchyTable[element.id].parentId;
-                            childrenChangedList.Add(element.id);
+                            // childrenChangedList.Add(element.id);
+                            AddToChildrenChangeList(element.id);
                         }
 
                         if (newBehavior == LayoutBehavior.Ignored) {
@@ -543,7 +560,8 @@ namespace UIForia.Systems {
                             GetLayoutContext(element.View).transclusionCount++;
                         }
 
-                        childrenChangedList.Add(p);
+                        AddToChildrenChangeList(p);
+                        // childrenChangedList.Add(p);
 
                         layoutHierarchyTable[element.id].behavior = newBehavior;
                         break;
@@ -551,9 +569,9 @@ namespace UIForia.Systems {
                 }
 
             }
-            
+
             layoutBoxTable[element.id].OnStylePropertiesChanged(this, element, properties, propertyCount);
-            
+
             ElementId parentId = layoutHierarchyTable[element.id].parentId;
             if (parentId != default) {
                 layoutBoxTable[parentId].OnChildStyleChanged(this, element.id, properties, propertyCount);
@@ -564,7 +582,8 @@ namespace UIForia.Systems {
         public void MarkForChildrenUpdate(ElementId id) {
 
             if ((elementSystem.metaTable[id].flags & UIElementFlags.EnableStateChanged) == 0) {
-                childrenChangedList.Add(id);
+                // childrenChangedList.Add(id);
+                AddToChildrenChangeList(id);
             }
 
         }
@@ -592,7 +611,13 @@ namespace UIForia.Systems {
             }
 
             for (int i = 0; i < childrenChangedList.size; i++) {
-                layoutBoxTable[childrenChangedList[i]].OnChildrenChanged(this);
+                try {
+                    if (childrenChangedList[i].id > 1000) Debugger.Break();
+                    layoutBoxTable[childrenChangedList[i]].OnChildrenChanged(this);
+                }
+                catch (Exception e) {
+                    Debug.LogException(e);
+                }
             }
 
             childrenChangedList.size = 0;
@@ -706,7 +731,8 @@ namespace UIForia.Systems {
                     textInfoMap = textSystem.textInfoMap
                 });
 
-                JobHandle flatten = new FlattenLayoutTree() {
+                JobHandle flatten = default;
+                new FlattenLayoutTree() {
                     viewRootId = viewRootId,
                     metaTable = elementSystem.metaTable,
                     elementList = layoutContext.elementList,
@@ -715,11 +741,11 @@ namespace UIForia.Systems {
                     traversalTable = elementSystem.traversalTable,
                     layoutHierarchyTable = layoutHierarchyTable,
                     viewActiveElementCount = activeElementCount
-                }.Schedule();
+                }.Run();
 
                 // parallel for large views
-                JobHandle updatePaddingMarginBorder = UIForiaScheduler.Await(emTableHandle, flatten).ThenParallel(new UpdatePaddingBorderMargin() {
-                    parallel = new ParallelParams(activeElementCount, 250),
+                JobHandle updatePaddingMarginBorder = UIForiaScheduler.Await(emTableHandle, flatten).Then(new UpdatePaddingBorderMargin() {
+                    parallel = new ParallelParams(layoutContext.elementList.size, 250),
                     elementList = layoutContext.elementList,
                     emTable = elementSystem.emTable,
                     propertyTable = paddingBorderMarginTable,
@@ -738,7 +764,7 @@ namespace UIForia.Systems {
 
                 // parallel for big list
                 JobHandle horizontalAlignment = UIForiaScheduler.Await(horizontalLayout).ThenParallel(new ApplyHorizontalAlignments() {
-                    parallel = new ParallelParams(activeElementCount, 250),
+                    parallel = new ParallelParams(layoutContext.elementList.size, 250),
                     alignmentTable = alignmentInfoHorizontal,
                     elementList = layoutContext.elementList,
                     mousePosition = application.inputSystem.MousePosition.x,
@@ -756,7 +782,7 @@ namespace UIForia.Systems {
 
                 // parallel for big list
                 JobHandle verticalAlignment = UIForiaScheduler.Await(verticalLayout).ThenParallel(new ApplyVerticalAlignments() {
-                    parallel = new ParallelParams(activeElementCount, 250),
+                    parallel = new ParallelParams(layoutContext.elementList.size, 250),
                     alignmentTable = alignmentInfoVertical,
                     elementList = layoutContext.elementList,
                     mousePosition = application.inputSystem.MousePosition.y,
@@ -768,7 +794,7 @@ namespace UIForia.Systems {
 
                 // parallel if big list element count, single if small, order doesnt matter
                 JobHandle buildLocalMatrices = UIForiaScheduler.Await(horizontalAlignment, verticalAlignment).ThenParallel(new BuildLocalMatrices() {
-                    parallel = new ParallelParams(activeElementCount, 250),
+                    parallel = new ParallelParams(layoutContext.elementList.size, 250),
                     elementList = layoutContext.elementList,
                     localMatrices = localMatrices,
                     parentList = layoutContext.parentList,
@@ -787,7 +813,7 @@ namespace UIForia.Systems {
 
                 // todo -- merge with matrix building, its likely much faster
                 layoutHandles[i] = UIForiaScheduler.Await(buildWorldMatrices).ThenParallel(new ComputeOrientedBounds() {
-                    parallel = new ParallelParams(activeElementCount, 250),
+                    parallel = new ParallelParams(layoutContext.elementList.size, 250),
                     elementList = layoutContext.elementList,
                     worldMatrices = worldMatrices,
                     clipInfoTable = clipInfoTable,
@@ -813,7 +839,7 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < layoutContexts.size; i++) {
                 cullingHandles[i] = UIForiaScheduler.Await(updateClippers, layoutCompleted).ThenParallel(new ComputeElementCulling() {
-                    parallel = new ParallelParams(layoutContexts[i].ActiveElementCount, 250),
+                    parallel = new ParallelParams(layoutContexts[i].elementList.size, 250),
                     clipperList = clippers,
                     layoutResultTable = layoutResultTable,
                     elementList = layoutContexts[i].elementList,
@@ -822,7 +848,7 @@ namespace UIForia.Systems {
             }
 
             JobHandle.CompleteAll(cullingHandles);
-            
+
             // todo -- find a better place for this stuff to happen
             new UpdateTextRenderRanges() {
                 textInfoMap = textSystem.textInfoMap,
@@ -830,20 +856,20 @@ namespace UIForia.Systems {
                 rangeSizeLimit = 200,
                 activeTextElementIds = textSystem.activeTextElementIds
             }.Run();
-            
+
             new UpdateTextMaterialBuffersJob() {
                 textInfoMap = textSystem.textInfoMap,
                 activeTextElementIds = textSystem.activeTextElementIds
             }.Run();
-            
+
             textSystem.UpdateEffects();
-            
+
             new UpdateTextRenderBounds() {
                 textInfoMap = textSystem.textInfoMap,
                 activeTextElementIds = textSystem.activeTextElementIds,
                 fontAssetMap = application.ResourceManager.fontAssetMap
             }.Run();
-            
+
             cullingHandles.Dispose();
             layoutHandles.Dispose();
             verticalAlignHandles.Dispose();
@@ -921,7 +947,7 @@ namespace UIForia.Systems {
         }
 
         public void QueryPoint(float2 point, IList<UIElement> retn) {
-     
+
             if (!new Rect(0, 0, application.Width, application.Height).Contains(point)) {
                 return;
             }
@@ -996,9 +1022,9 @@ namespace UIForia.Systems {
                     if (clipper.isCulled || !containsPoint[clipInfo.clipperIndex] || clipInfo.visibility == Visibility.Hidden || clipInfo.pointerEvents == PointerEvents.None) {
                         continue;
                     }
-                    
+
                     if (clipInfo.isMouseQueryHandler) {
-                      
+
                         retn.Add(new QueryResult() {elementId = elementList[i], requiresCustomHandling = true});
                         continue;
                     }
@@ -1037,7 +1063,9 @@ namespace UIForia.Systems {
             gridColTrackBuffer.Dispose();
             clipperBoundsList.Dispose();
             gridRowTrackBuffer.Dispose();
-
+            rootList.Dispose();
+            ignoredLayoutList.Dispose();
+            
             for (int i = 0; i < layoutContexts.size; i++) {
                 layoutContexts[i].Dispose();
             }

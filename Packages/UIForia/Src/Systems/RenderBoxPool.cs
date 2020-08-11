@@ -18,6 +18,7 @@ namespace UIForia.Systems {
             if (painterId == "self") {
                 return new SelfPaintedRenderBox();
             }
+            
 
             if (Application.s_CustomPainters.TryGetValue(painterId, out Type boxType)) {
                 return (RenderBox) Activator.CreateInstance(boxType);
@@ -25,8 +26,7 @@ namespace UIForia.Systems {
 
             if (resourceManager.TryGetStylePainter(painterId, out StylePainterDefinition painter)) {
 
-                StylePainterRenderBox stylePainterRenderBox = new StylePainterRenderBox();
-                stylePainterRenderBox.painterDefinition = painter;
+                StylePainterRenderBox stylePainterRenderBox = new StylePainterRenderBox(painter);
                 return stylePainterRenderBox;
 
             }

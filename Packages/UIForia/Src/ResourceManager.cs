@@ -433,7 +433,6 @@ namespace UIForia {
             return fontAssetMap[fontAssetId].atlasTextureId;
         }
 
-
         internal struct SpriteAssetInfo {
 
             public SpriteAtlas atlas;
@@ -466,9 +465,11 @@ namespace UIForia {
                 spriteMap.Add(assetInfo.path, asset);
                 return TextureReference.s_Empty;
             }
+
             if (atlas.spriteCount == 0) {
                 throw new Exception("Failed to load sprite atlas: " + assetInfo.path + ". There were no sprites in the atlas");
             }
+
             Sprite[] sprites = new Sprite[atlas.spriteCount];
             atlas.GetSprites(sprites);
             asset.atlas = atlas;
@@ -476,16 +477,38 @@ namespace UIForia {
             if (asset.texture == null) {
                 throw new Exception("Failed to load sprite atlas: " + assetInfo.path + ". This might because it didnt pack properly");
             }
+
             asset.textureId = asset.texture.GetHashCode();
             asset.texturePath = assetInfo.path;
             asset.spriteRefs = new SpriteAssetRef[sprites.Length];
             for (int i = 0; i < sprites.Length; i++) {
-                Rect spriteUVRect = sprites[i].textureRect;
+                if (i != 0 && sprites[i].texture != asset.texture) {
+                    throw new Exception("Failed to load sprite atlas: " + assetInfo.path + ". It looks like the atlas did not pack the sprites. This could happen because you didn't check 'Tight Packing' when creating the atlas");
+                }
+
+                float xMin = float.MaxValue;
+                float yMin = float.MaxValue;
+                float xMax = float.MinValue;
+                float yMax = float.MinValue;
+
+                Vector2[] uvs = sprites[i].uv;
+
+                for (int u = 0; u < uvs.Length; u++) {
+                    Vector2 uv = uvs[u];
+
+                    if (uv.x < xMin) xMin = uv.x;
+                    if (uv.x > xMax) xMax = uv.x;
+
+                    if (uv.y < yMin) yMin = uv.y;
+                    if (uv.y > yMax) yMax = uv.y;
+
+                }
+
                 AxisAlignedBounds2DUShort uvRect = default;
-                uvRect.xMin = (ushort) spriteUVRect.xMin;
-                uvRect.yMin = (ushort) spriteUVRect.yMin;
-                uvRect.xMax = (ushort) spriteUVRect.xMax;
-                uvRect.yMax = (ushort) spriteUVRect.yMax;
+                uvRect.xMin = (ushort) (xMin * asset.texture.width);
+                uvRect.yMin = (ushort) (yMin * asset.texture.height);
+                uvRect.xMax = (ushort) (xMax * asset.texture.width);
+                uvRect.yMax = (ushort) (yMax * asset.texture.height);
                 ref SpriteAssetRef spriteRef = ref asset.spriteRefs[i];
                 spriteRef.uvRect = uvRect;
                 spriteRef.spriteName = sprites[i].name.Substring(0, sprites[i].name.Length - "(Clone)".Length);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using UIForia.Layout;
 
 namespace UIForia.Systems {
@@ -77,11 +78,14 @@ namespace UIForia.Systems {
         }
 
         public static void SetLastChild(ElementId parentId, ElementId toInsert, ElementTable<LayoutHierarchyInfo> layoutHierarchyTable) {
+            
             ref LayoutHierarchyInfo parentLayoutInfo = ref layoutHierarchyTable[parentId];
             ref LayoutHierarchyInfo toInsertLayoutInfo = ref layoutHierarchyTable[toInsert];
 
             ElementId prevLastChild = parentLayoutInfo.lastChildId;
 
+            if (prevLastChild == toInsert) return;
+            
             if (prevLastChild != default) {
                 layoutHierarchyTable[prevLastChild].nextSiblingId = toInsert;
             }

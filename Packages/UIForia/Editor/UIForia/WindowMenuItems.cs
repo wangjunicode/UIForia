@@ -35,7 +35,7 @@ namespace UIForia.Editor {
             }
         }
 
-        [MenuItem("UIForia/Dev/Generate Code Templates")]
+        [MenuItem("UIForia Dev/Generate Code Templates")]
         public static void GenerateInternalCodeTemplates() {
             string templatePath = Path.Combine(GetPath(), "..", "Generated_List_Template.cs");
             string outputPathRoot = Path.Combine(Application.GetSourceDirectory(), "Generated", "ListTypes");
@@ -62,6 +62,7 @@ namespace UIForia.Editor {
             ListTemplateGenerator.Generate<TextRenderRange>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<UIForiaGlyph>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<TextMaterialInfo>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<ElementId>(outputPathRoot, contents);
             
         }
 

@@ -11,6 +11,8 @@ using UIForia.Util;
 using UnityEditor;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
+using Gradient = UIForia.Rendering.Gradient;
+using GradientMode = UnityEngine.GradientMode;
 using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Editor {
@@ -56,9 +58,15 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageScaleY, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageTileX, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageTileY, 1),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageRotation, 0),
+            new AnimatedPropertyGenerator<UIAngle>(StylePropertyId.BackgroundImageRotation, 0),
             new PropertyGenerator<TextureReference>(StylePropertyId.BackgroundImage, default),
             new PropertyGenerator<BackgroundFit>(StylePropertyId.BackgroundFit, BackgroundFit.Fill),
+            
+            // Gradient
+            new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.GradientOffsetX, new OffsetMeasurement(0)),
+            new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.GradientOffsetY, new OffsetMeasurement(0)),
+            new PropertyGenerator<Gradient>(StylePropertyId.Gradient, null),
+            new PropertyGenerator<UIForia.Rendering.GradientMode>(StylePropertyId.GradientMode, UIForia.Rendering.GradientMode.None),
 
             // Border
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BorderColorTop, ColorUtil.UnsetValue),
@@ -108,8 +116,8 @@ namespace UIForia.Editor {
             new PropertyGenerator<SpaceDistribution>(StylePropertyId.DistributeExtraSpaceVertical, SpaceDistribution.AfterContent),
 
             // Radial Layout
-            new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutStartAngle, 0f),
-            new AnimatedPropertyGenerator<float>(StylePropertyId.RadialLayoutEndAngle, 360f),
+            new AnimatedPropertyGenerator<UIAngle>(StylePropertyId.RadialLayoutStartAngle, 0f),
+            new AnimatedPropertyGenerator<UIAngle>(StylePropertyId.RadialLayoutEndAngle, 360f),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.RadialLayoutRadius, new UIFixedLength(0.5f, UIFixedUnit.Percent)),
 
             // Alignment
@@ -516,7 +524,11 @@ namespace UIForia.Rendering {
             if (typeof(UIFixedLength) == propertyGenerator.type) {
                 return $"FindUIFixedLengthProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
-
+            
+            if (typeof(UIAngle) == propertyGenerator.type) {
+                return $"FindUIAngleProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
+            }
+            
             if (typeof(UIMeasurement) == propertyGenerator.type) {
                 return $"FindUIMeasurementProperty(StylePropertyId.{propertyGenerator.propertyIdName});";
             }
@@ -552,9 +564,15 @@ namespace UIForia.Rendering {
             if (typeof(GridItemPlacement) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsGridItemPlacement;";
             }
+            
             if (typeof(TextureReference) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsTextureReference;";
             }
+            
+            if (typeof(Gradient) == propertyGenerator.type) {
+                return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsGradient;";
+            }
+            
             throw new ArgumentOutOfRangeException($"Don't know what to do with {propertyGenerator.type}.");
         }
 

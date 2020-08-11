@@ -9,199 +9,72 @@
     <Style>
 
         style container2 {
-        FlexLayoutDirection = Horizontal;
-        PreferredSize = 1vw 1vh;
-        TextFontSize = 72;
-        TextFaceDilate = 0;
-        // TextColor = red;
-        TextOutlineWidth = 0.4;
-        TextOutlineSoftness = 0;
-        TextUnderlayDilate = 0;
-        TextUnderlaySoftness = 0;
-        TextUnderlayX = 0;
-        TextUnderlayY = 0;
-
-        TextOutlineColor = red;
+            FlexLayoutDirection = Horizontal;
+            PreferredSize = 1vw 1vh;
         }
 
         style shape-kit {
-        // Painter = "ShapePainter";
-        PreferredSize = 100px;
-        BackgroundColor = blue;
-        // material = "materialName"
-
-        // painter:ShapePainter.sizeMod = 0.3f;
-        // material:materialName.field = x;
+            PreferredSize = 700;
+            BackgroundColor = blue;
+            BorderRadius = 20%;
+            BackgroundImageScale = 1;
+<!--            BackgroundImageOffsetX = 150%;-->
+<!--            BackgroundImageOffsetY = 15%;-->
+            BackgroundImageRotation = 0;//45deg;
+<!--            OutlineWidth = 5;-->
+<!--            OutlineColor = white;-->
+            BackgroundImage = url("Images/DefaultAtlas", "player2");
+            CornerBevelBottomLeft = 25%;
+            // material = "materialName"
+            // painter:ShapePainter.sizeMod = 0.3f;
+            // material:materialName.field = x;
+            
         }
 
         material UIForiaShape : resources("UIForiaShape");
 
-        // material Dissolve : resources("red") {
-        //
-        // IsUIForiaBatchable = true;
-        //
-        // [keywords] {
-        // IncludeUI;
-        // Thing;
-        // Colorful;
-        // }
-        //
-        // [properties] {
-        //
-        // }
-        //
-        // }
-
-        // painter ShapePainter {
-        //
-        // [variables] {
-        // float sizeMod = 0.1f;
-        // float size = 50f;
-        // Texture texture = url("icon_1");
-        // Texture texture2 = url("icon_2");
-        // Texture texture3 = url("icon_3");
-        // Texture texture4 = url("icon_4");
-        // }
-        //
-        // [draw:background] {
-        //
-        // float halfWidth = elementWidth * 0.5f;
-        // float halfHeight = elementHeight * 0.5f;
-        //
-        // Color32 hoverColor = saturate(style.IsHovered ? green : red, 30);
-        //
-        // SetMainTexture($texture);
-        // FillRect(0, 0, halfWidth, halfHeight);
-        //
-        // SetMainTexture($texture2);
-        // FillRect(halfWidth, 0, halfWidth, halfHeight);
-        //
-        // // SetColor(hoverColor);
-        // SetMainTexture($texture3);
-        // FillRect(0, halfHeight, halfWidth, halfHeight);
-        //
-        // // SetMainTexture($texture4);
-        // FillRect(halfWidth, halfHeight, halfWidth, halfHeight);
-        //
-        // }
-        //
-        // }
-
-        style regular {
-        PreferredSize = 100px;
-        OutlineWidth = 10%;
-        OutlineColor = white;
-        }
-
-        style clipper {
-        PreferredSize = 300px;
-        BackgroundColor = yellow;
-        Overflow = Hidden;
-        }
-
-        style nested-clipper {
-        PreferredSize = 200px;
-        BackgroundColor = green;
-        Overflow = Hidden;
-        }
-
-        style red {
-        BackgroundColor = white;
-        BorderRadiusTopLeft = 50%;
-        BorderRadiusTopRight = 50%;
-        BorderRadiusBottomRight = 50%;
-        BorderRadiusBottomLeft = 50%;
-        CornerBevelBottomLeft = 100px;
-        PreferredSize = 300px;
-
-        }
-
-        style green {
-        BackgroundColor = Green;
-        PreferredSize = 300px 300px;
-        BackgroundImage = url("images/2");
-        CornerBevel = 20;
-        }
-
-        style blue {
-        BackgroundColor = Blue;
-        }
-
-        style rect-clipper {
-        Overflow = Hidden;
-        PreferredSize = 200px 200px;
-        BackgroundColor = yellow;
-        }
-
-        style rect-clipper2 {
-        // Overflow = Hidden;
-        PreferredSize = 100px 100px;
-        BackgroundColor = blue;
-        MarginTop = 50px;
-        // [enter] run animation(ping-pong);
-        }
-
-        animation ping-pong {
-        [options] {
-        Duration = 3000ms;
-        TimingFunction = QuadraticEaseInOut;
-        Iterations = Infinite;
-        }
-
-        [keyframes] {
-        0% { MarginTop = 0px; }
-        50% { MarginTop = 300px; }
-        100% { MarginTop = 0px; }
-        }
-        }
-
-        style centered {
-        AlignX = Center Screen;
-        AlignY = Center Screen;
-        }
-
-        style pilot-avatar {
-        BackgroundImage = url("Images/player1");
-        [hover] {
-        TransformScale = 1.1;
-        }
-        [active] {
-        run animation(select-pilot);
-        }
-        }
-        animation select-pilot {
-        [options] {
-        TimingFunction = QuadraticEaseOut;
-        Duration = 300ms;
-        }
-
-        [keyframes] {
-        25%, 75% { BackgroundTint = rgba(20, 20, 0, 240); }
-        50% { BackgroundTint = rgba(220, 220, 0, 240); }
-        100% { BackgroundTint = rgba(255, 255, 255, 255); }
-        // 15%, 45% { BackgroundTint = rgba(220, 20, 0, 210); }
-        // 60%, 100% { BackgroundTint = rgba(0, 0, 0, 0); }
-        }
-        }
-
-        style parent {
-            PreferredSize = 700px;
-            BackgroundColor = white;
-        }
+        painter ShapePainter {
         
-        style align-me {
-            PreferredSize = 175px;
-            AlignX = 0, 20, Parent End;
-            BackgroundColor = orange;
+             [variables] {
+                 float sizeMod = 0.1f;
+                 float size = 50f;
+                 Texture texture = url("icon_1");
+                 Texture texture2 = url("icon_2");
+                 Texture texture3 = url("icon_3");
+                 Texture texture4 = url("icon_4");
+             }
+            
+             [draw:background] {
+            
+                float halfWidth = elementWidth * 0.5f;
+                float halfHeight = elementHeight * 0.5f;
+                Color32 hoverColor = red; //saturate(style.IsHovered ? green : red, 30);
+                SetColor(hoverColor);  
+
+              //  SetMainTexture($texture);
+              //  FillRect(0, 0, halfWidth, halfHeight);
+              //  
+              //  SetMainTexture($texture2);
+              //  FillRect(halfWidth, 0, halfWidth, halfHeight);
+              //  
+              //  // SetColor(hoverColor);
+              //  SetMainTexture($texture3);
+              //  FillRect(0, halfHeight, halfWidth, halfHeight);
+              //  
+              //  // SetMainTexture($texture4);
+                FillRect(halfWidth, halfHeight, halfWidth, halfHeight);
+                
+             } 
         }
-       
+
 
     </Style>
     <Using namespace="UIForia"/>
+    <Using namespace="UnityEngine"/>
     <Contents style="container2">
 
-        <Div style="parent">
-            <Div style="align-me"/>
+        <Div style="shape-kit">
+            
         </Div>
         
         <!--        </Div>-->

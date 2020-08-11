@@ -250,6 +250,7 @@ namespace UIForia.Graphics {
 
         internal void Dispose() {
             stackBuffer.Dispose();
+            materialValueOverrides.Dispose();
             drawList.Dispose();
         }
 
@@ -1061,9 +1062,11 @@ namespace UIForia.Graphics {
         Texture = 1 << 1,
         TextureTint = 1 << 2,
         LetterBoxTexture = 1 << 3,
-        LinearGradient = 1 << 4,
-        RadialGradient = 1 << 5,
-        CornerGradient = 1 << 6
+        Cover = 1 << 4,
+        //LinearGradient = 1 << 4,
+        //RadialGradient = 1 << 5,
+        //CornerGradient = 1 << 6,
+
 
     }
 

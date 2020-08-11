@@ -16,25 +16,6 @@ style root-container {
     PreferredSize = 1vw 1vh;
 }
 
-style custom-material {
-    PreferredSize = 200px 200px;
-    BackgroundColor = orange;
-    AlignX = Center Screen;
-    AlignY = Center Screen;
-    LayoutBehavior = Ignored;
-    ZIndex = 800;
-    BackgroundImage = url("icons/brush/brush_templates_seed");
-    
-    MeshType = FillRadial90;
-    
-    MeshFillAmount = 1f;
-    
-//    Material = "Glitch2" {
-//        _ShakeStrength = 4;
-//    };
-       
-}
-
 style main-container {
     LayoutType = Grid;
     PreferredSize = 1pca;

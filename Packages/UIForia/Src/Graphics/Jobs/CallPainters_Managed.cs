@@ -50,15 +50,15 @@ namespace UIForia.Systems {
                     // todo -- if clipper via styles, set that up here
                     ctx.Setup(materialId, i, matrices.array + elementId.index);
                     box.PaintBackground2(ctx);
-                    box.bgRenderContext = ctx;
-                    box.bgRenderRange = new RangeInt(drawIdx, ctx.drawList.size);
+                    // box.bgRenderContext = ctx;
+                    // box.bgRenderRange = new RangeInt(drawIdx, ctx.drawList.size);
                 }
                 else {
                     // todo -- if clipper via styles, tear it down here
                     ctx.Setup(materialId, i, matrices.array + elementId.index);
                     box.PaintForeground2(ctx);
-                    box.fgRenderContext = ctx;
-                    box.fgRenderRange = new RangeInt(drawIdx, ctx.drawList.size);
+                    // box.fgRenderContext = ctx;
+                    // box.fgRenderRange = new RangeInt(drawIdx, ctx.drawList.size);
                 }
 
             }

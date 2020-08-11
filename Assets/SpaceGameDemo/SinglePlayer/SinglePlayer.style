@@ -158,7 +158,7 @@ style radial-fill {
     PreferredSize = 112px 124.5px;
     AlignX = 0% Parent;
     TransformPositionY = -1px;
-    MeshType = FillRadial360;
+    MeshType = Radial360_Top;
     MeshFillAmount = 0.6;
     BackgroundTint = red;
     MeshFillOrigin = Origin360_Top;

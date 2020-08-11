@@ -39,17 +39,21 @@ SpriteAtlas:
       blockOffset: 1
       allowAlphaSplitting: 0
       enableRotation: 0
-      enableTightPacking: 0
+      enableTightPacking: 1
     variantMultiplier: 1
     packables:
     - {fileID: 21300000, guid: c1962a48a1db2474a88341d4298318ea, type: 3}
     - {fileID: 21300000, guid: c1f46e4d4d7eb466da7fec4e3e2ea238, type: 3}
-    totalSpriteSurfaceArea: 122500
+    totalSpriteSurfaceArea: 245000
     bindAsDefault: 1
     isAtlasV2: 0
     cachedData: {fileID: 0}
   m_MasterAtlas: {fileID: 0}
-  m_PackedSprites: []
-  m_PackedSpriteNamesToIndex: []
+  m_PackedSprites:
+  - {fileID: 21300000, guid: c1962a48a1db2474a88341d4298318ea, type: 3}
+  - {fileID: 21300000, guid: c1f46e4d4d7eb466da7fec4e3e2ea238, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - player1
+  - player2
   m_Tag: DefaultAtlas
   m_IsVariant: 0

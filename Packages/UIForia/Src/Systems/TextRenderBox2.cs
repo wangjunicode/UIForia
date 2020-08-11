@@ -23,6 +23,8 @@ namespace UIForia.Rendering {
 
         public override void OnInitialize() {
             base.OnInitialize();
+            isBuiltIn = true;
+            isTextBox = true;
         }
 
         // todo -- might be an issue if in-use by render system

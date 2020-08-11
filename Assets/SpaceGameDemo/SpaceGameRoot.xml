@@ -1,28 +1,28 @@
 ﻿<UITemplate>
-    
+
     <Style src="SpaceGameDemo/SpaceGameRoot.style"/>
     <Style src="SpaceGameDemo/Theme.style" alias="theme"/>
-    
+
     <Contents>
-        
-<!--        <SpacePanel name="'StartMenu'">-->
-<!--            <StartMenu style="container" />-->
-<!--        </SpacePanel>-->
-<!--        -->
-<!--        <SpacePanel name="'SinglePlayer'">-->
-<!--            <SinglePlayer style="container" />-->
-<!--        </SpacePanel>-->
-        
-        <SpacePanel name="'JoinServer'">
-            <JoinServer style="container" />
+
+        <SpacePanel name="'StartMenu'">
+            <StartMenu style="container"/>
         </SpacePanel>
-        
-<!--        <SpacePanel name="'Settings'">-->
-<!--            <Settings style="container" />-->
-<!--        </SpacePanel>-->
-        
-<!--        <SplashScreen />-->
-        
+
+        <SpacePanel name="'SinglePlayer'">
+            <SinglePlayer style="container"/>
+        </SpacePanel>
+
+        <SpacePanel name="'JoinServer'">
+            <JoinServer style="container"/>
+        </SpacePanel>
+
+        <SpacePanel name="'Settings'">
+            <Settings style="container"/>
+        </SpacePanel>
+
+        <!--        <SplashScreen />-->
+
     </Contents>
-    
+
 </UITemplate>

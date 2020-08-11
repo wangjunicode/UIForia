@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using UIForia.Graphics;
 using UIForia.Layout;
@@ -82,46 +83,52 @@ namespace UIForia.Rendering {
 
     }
 
-    public struct Gradient {
+    public enum GradientType {
 
-        public int type;
-        public float angle;
-
-        // data fits in 3 float4s
-        public Color32 c0;
-        public Color32 c1;
-        public Color32 c2;
-        public Color32 c3;
-        public Color32 c4;
-        public Color32 c5;
-        public Color32 c6;
-        public Color32 c7;
-
-        public ushort a0;
-        public ushort a1;
-
-        public ushort a2;
-        public ushort a3;
-
-        public ushort a4;
-        public ushort a5;
-
-        public ushort a6;
-        public ushort a7;
-
-        public PackedGradientColors Pack() {
-            PackedGradientColors retn = default;
-
-            return default;
-        }
-
+        LinearBlend,
+        LinearStep,
+        RadialBlend,
+        RadialStep,
+        Corner        
     }
 
-    public struct PackedGradientColors {
+    public enum GradientMode {
+        
+        None,
+        BackgroundColor,
+        BackgroundTint,
+        BackgroundAlpha,
+        TextureTint,
+        TextureAlpha,
 
-        public float4 colorRange0;
-        public float4 colorRange1;
-        public float4 alphaRange;
+    }
+    
+    public class Gradient {
+
+        public GradientType type;
+        public UIAngle angle;
+
+        private SizedArray<GradientColorKey> colorKeys;
+        private SizedArray<GradientAlphaKey> alphaKeys;
+
+        public Gradient(GradientType type, UnityEngine.Gradient gradient, UIAngle angle = default) {
+            this.type = type;
+            this.angle = angle;
+            this.colorKeys = new SizedArray<GradientColorKey>(gradient.colorKeys);
+            this.alphaKeys = new SizedArray<GradientAlphaKey>(gradient.alphaKeys);
+        }
+        
+        public void SetKeys(IList<GradientColorKey> colors, IList<GradientAlphaKey> alphas) {
+            colorKeys.size = 0;
+            if (colors != null) {
+                colorKeys.AddRange(colors);
+            }
+
+            alphaKeys.size = 0;
+            if (alphas != null) {
+                alphaKeys.AddRange(alphas);
+            }
+        }
 
     }
 
@@ -278,7 +285,7 @@ namespace UIForia.Rendering {
                         break;
 
                     case StylePropertyId.BackgroundImage:
-                        backgroundImage = property.AsTexture;
+                        backgroundImage = property.AsTextureReference;
                         dataNeedsUpdate = true;
                         break;
 

@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems;
+using UnityEngine;
 
 namespace UIForia.Layout {
 
@@ -24,7 +25,7 @@ namespace UIForia.Layout {
             this = default; // need to clear the memory here
 
             this.layoutType = layoutType;
-            
+
             switch (layoutType) {
                 case LayoutBoxType.Unset:
                 case LayoutBoxType.Flex:
@@ -136,7 +137,7 @@ namespace UIForia.Layout {
                     return 0;
             }
         }
-        
+
         public float GetActualContentHeight(ref BurstLayoutRunner runner) {
             switch (layoutType) {
 
@@ -169,7 +170,7 @@ namespace UIForia.Layout {
                     return 0;
             }
         }
-        
+
         public float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
             switch (layoutType) {
 
@@ -235,7 +236,7 @@ namespace UIForia.Layout {
                     return 0;
             }
         }
-        
+
         public void OnChildrenChanged(LayoutSystem layoutSystem) {
             switch (layoutType) {
 
@@ -272,6 +273,7 @@ namespace UIForia.Layout {
                     root.OnChildrenChanged(layoutSystem);
                     break;
             }
+
         }
 
         public void RunLayoutHorizontal(BurstLayoutRunner* runner) {

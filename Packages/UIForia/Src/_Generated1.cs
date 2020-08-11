@@ -208,11 +208,11 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public float BackgroundImageRotation { 
+            public UIForia.UIAngle BackgroundImageRotation { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageRotation, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageRotation, out property)) return property.AsUIAngle;
                     return DefaultStyleValues_Generated.BackgroundImageRotation;
                 }
             }
@@ -232,6 +232,42 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFit, out property)) return property.AsBackgroundFit;
                     return DefaultStyleValues_Generated.BackgroundFit;
+                }
+            }
+
+            public UIForia.OffsetMeasurement GradientOffsetX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GradientOffsetX, out property)) return property.AsOffsetMeasurement;
+                    return DefaultStyleValues_Generated.GradientOffsetX;
+                }
+            }
+
+            public UIForia.OffsetMeasurement GradientOffsetY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GradientOffsetY, out property)) return property.AsOffsetMeasurement;
+                    return DefaultStyleValues_Generated.GradientOffsetY;
+                }
+            }
+
+            public UIForia.Rendering.Gradient Gradient { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Gradient, out property)) return property.AsGradient;
+                    return DefaultStyleValues_Generated.Gradient;
+                }
+            }
+
+            public UIForia.Rendering.GradientMode GradientMode { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GradientMode, out property)) return property.AsGradientMode;
+                    return DefaultStyleValues_Generated.GradientMode;
                 }
             }
 
@@ -523,20 +559,20 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public float RadialLayoutStartAngle { 
+            public UIForia.UIAngle RadialLayoutStartAngle { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutStartAngle, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutStartAngle, out property)) return property.AsUIAngle;
                     return DefaultStyleValues_Generated.RadialLayoutStartAngle;
                 }
             }
 
-            public float RadialLayoutEndAngle { 
+            public UIForia.UIAngle RadialLayoutEndAngle { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutEndAngle, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutEndAngle, out property)) return property.AsUIAngle;
                     return DefaultStyleValues_Generated.RadialLayoutEndAngle;
                 }
             }
@@ -1447,9 +1483,9 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileY, value)); }
         }
             
-        public float BackgroundImageRotation {
+        public UIForia.UIAngle BackgroundImageRotation {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.BackgroundImageRotation); }
+            get { return FindUIAngleProperty(StylePropertyId.BackgroundImageRotation); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageRotation, value)); }
         }
@@ -1466,6 +1502,34 @@ namespace UIForia.Rendering {
             get { return (UIForia.Rendering.BackgroundFit)FindEnumProperty(StylePropertyId.BackgroundFit); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundFit, (int)value)); }
+        }
+            
+        public UIForia.OffsetMeasurement GradientOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindOffsetMeasurementProperty(StylePropertyId.GradientOffsetX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.GradientOffsetX, value)); }
+        }
+            
+        public UIForia.OffsetMeasurement GradientOffsetY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindOffsetMeasurementProperty(StylePropertyId.GradientOffsetY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.GradientOffsetY, value)); }
+        }
+            
+        public UIForia.Rendering.Gradient Gradient {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return GetProperty(StylePropertyId.Gradient).AsGradient; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.Gradient, value)); }
+        }
+            
+        public UIForia.Rendering.GradientMode GradientMode {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Rendering.GradientMode)FindEnumProperty(StylePropertyId.GradientMode); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.GradientMode, (int)value)); }
         }
             
         public UnityEngine.Color BorderColorTop {
@@ -1692,16 +1756,16 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.DistributeExtraSpaceVertical, (int)value)); }
         }
             
-        public float RadialLayoutStartAngle {
+        public UIForia.UIAngle RadialLayoutStartAngle {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.RadialLayoutStartAngle); }
+            get { return FindUIAngleProperty(StylePropertyId.RadialLayoutStartAngle); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutStartAngle, value)); }
         }
             
-        public float RadialLayoutEndAngle {
+        public UIForia.UIAngle RadialLayoutEndAngle {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return FindFloatProperty(StylePropertyId.RadialLayoutEndAngle); }
+            get { return FindUIAngleProperty(StylePropertyId.RadialLayoutEndAngle); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.RadialLayoutEndAngle, value)); }
         }
@@ -2475,11 +2539,11 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public float BackgroundImageRotation { 
+            public UIForia.UIAngle BackgroundImageRotation { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageRotation, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImageRotation, out property)) return property.AsUIAngle;
                     return DefaultStyleValues_Generated.BackgroundImageRotation;
                 }
             }
@@ -2499,6 +2563,42 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundFit, out property)) return property.AsBackgroundFit;
                     return DefaultStyleValues_Generated.BackgroundFit;
+                }
+            }
+
+            public UIForia.OffsetMeasurement GradientOffsetX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GradientOffsetX, out property)) return property.AsOffsetMeasurement;
+                    return DefaultStyleValues_Generated.GradientOffsetX;
+                }
+            }
+
+            public UIForia.OffsetMeasurement GradientOffsetY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GradientOffsetY, out property)) return property.AsOffsetMeasurement;
+                    return DefaultStyleValues_Generated.GradientOffsetY;
+                }
+            }
+
+            public UIForia.Rendering.Gradient Gradient { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.Gradient, out property)) return property.AsGradient;
+                    return DefaultStyleValues_Generated.Gradient;
+                }
+            }
+
+            public UIForia.Rendering.GradientMode GradientMode { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.GradientMode, out property)) return property.AsGradientMode;
+                    return DefaultStyleValues_Generated.GradientMode;
                 }
             }
 
@@ -2790,20 +2890,20 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public float RadialLayoutStartAngle { 
+            public UIForia.UIAngle RadialLayoutStartAngle { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutStartAngle, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutStartAngle, out property)) return property.AsUIAngle;
                     return DefaultStyleValues_Generated.RadialLayoutStartAngle;
                 }
             }
 
-            public float RadialLayoutEndAngle { 
+            public UIForia.UIAngle RadialLayoutEndAngle { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutEndAngle, out property)) return property.AsFloat;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.RadialLayoutEndAngle, out property)) return property.AsUIAngle;
                     return DefaultStyleValues_Generated.RadialLayoutEndAngle;
                 }
             }
@@ -3733,12 +3833,12 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageTileY, state).AsFloat;
         }
         
-        public void SetBackgroundImageRotation(in float? value, StyleState state) {
+        public void SetBackgroundImageRotation(in UIForia.UIAngle? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageRotation, value), state);
         }
 
-        public float GetBackgroundImageRotation(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundImageRotation, state).AsFloat;
+        public UIForia.UIAngle GetBackgroundImageRotation(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundImageRotation, state).AsUIAngle;
         }
         
         public void SetBackgroundImage(UIForia.TextureReference value, StyleState state) {
@@ -3755,6 +3855,38 @@ namespace UIForia.Rendering {
 
         public UIForia.Rendering.BackgroundFit GetBackgroundFit(StyleState state) {
             return GetPropertyValueInState(StylePropertyId.BackgroundFit, state).AsBackgroundFit;
+        }
+        
+        public void SetGradientOffsetX(in UIForia.OffsetMeasurement? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.GradientOffsetX, value), state);
+        }
+
+        public UIForia.OffsetMeasurement GetGradientOffsetX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GradientOffsetX, state).AsOffsetMeasurement;
+        }
+        
+        public void SetGradientOffsetY(in UIForia.OffsetMeasurement? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.GradientOffsetY, value), state);
+        }
+
+        public UIForia.OffsetMeasurement GetGradientOffsetY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GradientOffsetY, state).AsOffsetMeasurement;
+        }
+        
+        public void SetGradient(UIForia.Rendering.Gradient value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.Gradient, value), state);
+        }
+
+        public UIForia.Rendering.Gradient GetGradient(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.Gradient, state).AsGradient;
+        }
+        
+        public void SetGradientMode(in UIForia.Rendering.GradientMode? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.GradientMode, (int)value), state);
+        }
+
+        public UIForia.Rendering.GradientMode GetGradientMode(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.GradientMode, state).AsGradientMode;
         }
         
         public void SetBorderColorTop(in UnityEngine.Color? value, StyleState state) {
@@ -4013,20 +4145,20 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.DistributeExtraSpaceVertical, state).AsSpaceDistribution;
         }
         
-        public void SetRadialLayoutStartAngle(in float? value, StyleState state) {
+        public void SetRadialLayoutStartAngle(in UIForia.UIAngle? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.RadialLayoutStartAngle, value), state);
         }
 
-        public float GetRadialLayoutStartAngle(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.RadialLayoutStartAngle, state).AsFloat;
+        public UIForia.UIAngle GetRadialLayoutStartAngle(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.RadialLayoutStartAngle, state).AsUIAngle;
         }
         
-        public void SetRadialLayoutEndAngle(in float? value, StyleState state) {
+        public void SetRadialLayoutEndAngle(in UIForia.UIAngle? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.RadialLayoutEndAngle, value), state);
         }
 
-        public float GetRadialLayoutEndAngle(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.RadialLayoutEndAngle, state).AsFloat;
+        public UIForia.UIAngle GetRadialLayoutEndAngle(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.RadialLayoutEndAngle, state).AsUIAngle;
         }
         
         public void SetRadialLayoutRadius(in UIForia.UIFixedLength? value, StyleState state) {
@@ -4722,6 +4854,14 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.BackgroundImage, BackgroundImage);
 				case StylePropertyId.BackgroundFit:
 					 return new StyleProperty(StylePropertyId.BackgroundFit, (int)BackgroundFit);
+				case StylePropertyId.GradientOffsetX:
+					 return new StyleProperty(StylePropertyId.GradientOffsetX, GradientOffsetX);
+				case StylePropertyId.GradientOffsetY:
+					 return new StyleProperty(StylePropertyId.GradientOffsetY, GradientOffsetY);
+				case StylePropertyId.Gradient:
+					 return new StyleProperty(StylePropertyId.Gradient, Gradient);
+				case StylePropertyId.GradientMode:
+					 return new StyleProperty(StylePropertyId.GradientMode, (int)GradientMode);
 				case StylePropertyId.BorderColorTop:
 					 return new StyleProperty(StylePropertyId.BorderColorTop, BorderColorTop);
 				case StylePropertyId.BorderColorRight:
@@ -4983,9 +5123,13 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageScaleY: return typeof(System.Single);
                     case StylePropertyId.BackgroundImageTileX: return typeof(System.Single);
                     case StylePropertyId.BackgroundImageTileY: return typeof(System.Single);
-                    case StylePropertyId.BackgroundImageRotation: return typeof(System.Single);
+                    case StylePropertyId.BackgroundImageRotation: return typeof(UIForia.UIAngle);
                     case StylePropertyId.BackgroundImage: return typeof(UIForia.TextureReference);
                     case StylePropertyId.BackgroundFit: return typeof(UIForia.Rendering.BackgroundFit);
+                    case StylePropertyId.GradientOffsetX: return typeof(UIForia.OffsetMeasurement);
+                    case StylePropertyId.GradientOffsetY: return typeof(UIForia.OffsetMeasurement);
+                    case StylePropertyId.Gradient: return typeof(UIForia.Rendering.Gradient);
+                    case StylePropertyId.GradientMode: return typeof(UIForia.Rendering.GradientMode);
                     case StylePropertyId.BorderColorTop: return typeof(UnityEngine.Color);
                     case StylePropertyId.BorderColorRight: return typeof(UnityEngine.Color);
                     case StylePropertyId.BorderColorBottom: return typeof(UnityEngine.Color);
@@ -5018,8 +5162,8 @@ namespace UIForia.Rendering {
                     case StylePropertyId.FitItemsHorizontal: return typeof(UIForia.Layout.LayoutFit);
                     case StylePropertyId.DistributeExtraSpaceHorizontal: return typeof(UIForia.Layout.SpaceDistribution);
                     case StylePropertyId.DistributeExtraSpaceVertical: return typeof(UIForia.Layout.SpaceDistribution);
-                    case StylePropertyId.RadialLayoutStartAngle: return typeof(System.Single);
-                    case StylePropertyId.RadialLayoutEndAngle: return typeof(System.Single);
+                    case StylePropertyId.RadialLayoutStartAngle: return typeof(UIForia.UIAngle);
+                    case StylePropertyId.RadialLayoutEndAngle: return typeof(UIForia.UIAngle);
                     case StylePropertyId.RadialLayoutRadius: return typeof(UIForia.UIFixedLength);
                     case StylePropertyId.AlignmentDirectionX: return typeof(UIForia.Layout.AlignmentDirection);
                     case StylePropertyId.AlignmentDirectionY: return typeof(UIForia.Layout.AlignmentDirection);
@@ -5122,6 +5266,8 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageTileX: return true;
                     case StylePropertyId.BackgroundImageTileY: return true;
                     case StylePropertyId.BackgroundImageRotation: return true;
+                    case StylePropertyId.GradientOffsetX: return true;
+                    case StylePropertyId.GradientOffsetY: return true;
                     case StylePropertyId.BorderColorTop: return true;
                     case StylePropertyId.BorderColorRight: return true;
                     case StylePropertyId.BorderColorBottom: return true;

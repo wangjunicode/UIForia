@@ -35,7 +35,6 @@ namespace UIForia.Rendering {
         internal string uniqueId;
 
         protected internal UIElement element;
-        public UIEffect effect;
         public float opacity;
         public Visibility visibility;
         public Overflow overflowX;
@@ -48,12 +47,12 @@ namespace UIForia.Rendering {
         internal ClipData clipper;
         public bool didRender;
         public int traversalIndex;
-        internal RenderContext2 bgRenderContext;
-        internal RenderContext2 fgRenderContext;
-        internal RangeInt bgRenderRange;
-        internal RangeInt fgRenderRange;
         private bool hasForeground;
         public MaterialId materialId;
+        
+        internal bool isBuiltIn;
+        internal bool isElementBox;
+        internal bool isTextBox;
 
         public virtual bool HasForeground {
             get => hasForeground;

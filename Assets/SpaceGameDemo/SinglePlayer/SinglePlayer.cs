@@ -46,7 +46,7 @@ namespace SpaceGameDemo.SinglePlayer {
         public string progressString;
         
         // Property
-        public TabItem tab = TabItem.Ships;
+        public TabItem tab = TabItem.Items;
         
         // Property
         public List<InventoryItem> availableItems;

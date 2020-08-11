@@ -1,4 +1,5 @@
-﻿using UIForia.Systems;
+﻿using System.Diagnostics;
+using UIForia.Systems;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
@@ -42,18 +43,22 @@ namespace UIForia.Layout {
             int eSize = 0;
             int pSize = 0;
 
+            // todo -- I think this isn't handling all hierarchies correctly
+            // probably need to recurse / defer ignored somehow
+            
+            
             const int ENTITY_INDEX_BITS = 24;
             const int ENTITY_INDEX_MASK = (1 << ENTITY_INDEX_BITS) - 1;
 
             while (stackSize != 0) {
                 ElementId current = s[--stackSize];
-
+                
                 ref LayoutHierarchyInfo hierarchyInfo = ref layoutHTable[current.id & ENTITY_INDEX_MASK];
 
                 if (hierarchyInfo.behavior != LayoutBehavior.Normal) {
                     continue;
                 }
-
+                
                 elist[eSize++] = current;
                 plist[pSize++] = hierarchyInfo.parentId;
 
@@ -85,7 +90,7 @@ namespace UIForia.Layout {
 
                 while (stackSize != 0) {
                     ElementId current = s[--stackSize];
-
+                    
                     ref LayoutHierarchyInfo hierarchyInfo = ref layoutHTable[current.id & ENTITY_INDEX_MASK];
 
                     elist[eSize++] = current;

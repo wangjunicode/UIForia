@@ -1,35 +1,40 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace UIForia {
 
     [DebuggerDisplay("Index = {index} generation = {generation}")]
+    [StructLayout(LayoutKind.Explicit)]
     public struct ElementId : IComparable<ElementId> {
 
-        internal const int ENTITY_INDEX_BITS = 24;
+        private const int ENTITY_INDEX_BITS = 24;
         internal const int ENTITY_INDEX_MASK = (1 << ENTITY_INDEX_BITS) - 1;
-        internal const int ENTITY_GENERATION_BITS = 8;
+        private const int ENTITY_GENERATION_BITS = 8;
         internal const int ENTITY_GENERATION_MASK = (1 << ENTITY_GENERATION_BITS) - 1;
 
-        public readonly int id;
+        [FieldOffset(0)] public readonly int id;
+        [FieldOffset(3)] internal byte generation;
 
         internal ElementId(int index, byte generation) {
             // todo -- not totally sure of this
             // this might be better -> (high << 24) | (low & 0xffffff);
             this.id = (index & ENTITY_INDEX_MASK) | (generation << ENTITY_INDEX_BITS);
+            this.generation = generation;
         }
 
         internal ElementId(int id) {
+            this.generation = 0;
             this.id = id;
         }
 
         public int index {
             [DebuggerStepThrough] get => (id & ENTITY_INDEX_MASK);
         }
-
-        public int generation {
-            [DebuggerStepThrough] get => ((id >> ENTITY_INDEX_BITS) & ENTITY_GENERATION_MASK);
-        }
+        //
+        // public int generation {
+        //     [DebuggerStepThrough] get => ((id >> ENTITY_INDEX_BITS) & ENTITY_GENERATION_MASK);
+        // }
 
         public static ElementId Invalid {
             get => new ElementId(0, 0);

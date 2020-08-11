@@ -43,58 +43,56 @@ namespace UIForia.Layout {
             int stackSize = 1;
             while (stackSize != 0) {
 
-                EmEntry current = stack[--stackSize];
+                EmEntry current = s[--stackSize];
+                int elementIdx = current.elementId.id & ElementId.ENTITY_INDEX_MASK;
 
-                ref EmValue emValue = ref emTable.array[current.elementId.id & ElementId.ENTITY_INDEX_MASK];
+                ref EmValue emValue = ref emTable.array[elementIdx];
 
-                if (emValue.styleValue == default) {
-                    emValue.resolvedValue = current.resolveParentFontSize;
+                emValue.previousValue = emValue.resolvedValue;
+                
+                switch (emValue.styleValue.unit) {
+
+                    default:
+                    case UIFixedUnit.Unset:
+                        emValue.resolvedValue = current.resolveParentFontSize;
+                        break;
+
+                    case UIFixedUnit.Pixel:
+                        emValue.resolvedValue = emValue.styleValue.value;
+                        break;
+
+                    case UIFixedUnit.Percent:
+                        emValue.resolvedValue = current.resolveParentFontSize * emValue.styleValue.value;
+                        break;
+
+                    case UIFixedUnit.Em:
+                        emValue.resolvedValue = current.resolveParentFontSize * emValue.styleValue.value;
+                        break;
+
+                    case UIFixedUnit.ViewportWidth:
+                        emValue.resolvedValue = viewWidth * emValue.styleValue.value;
+                        break;
+
+                    case UIFixedUnit.ViewportHeight:
+                        emValue.resolvedValue = viewHeight * emValue.styleValue.value;
+                        break;
+
                 }
-                else {
-                    switch (emValue.styleValue.unit) {
 
-                        default:
-                        case UIFixedUnit.Unset:
-                        case UIFixedUnit.Pixel:
-                            emValue.resolvedValue = emValue.styleValue.value;
-                            break;
-
-                        case UIFixedUnit.Percent:
-                            emValue.resolvedValue = current.resolveParentFontSize * emValue.styleValue.value;
-                            break;
-
-                        case UIFixedUnit.Em:
-                            emValue.resolvedValue = current.resolveParentFontSize * emValue.styleValue.value;
-                            break;
-
-                        case UIFixedUnit.ViewportWidth:
-                            emValue.resolvedValue = viewWidth * emValue.styleValue.value;
-                            break;
-
-                        case UIFixedUnit.ViewportHeight:
-                            emValue.resolvedValue = viewHeight * emValue.styleValue.value;
-                            break;
-                    }
-
-                }
-
-                int childCount = hierarchyTable.array[current.elementId.id & ElementId.ENTITY_INDEX_MASK].childCount;
-
-                ElementId childPtr = hierarchyTable.array[current.elementId.id & ElementId.ENTITY_INDEX_MASK].lastChildId;
+                int childCount = hierarchyTable.array[elementIdx].childCount;
+                ElementId childPtr = hierarchyTable.array[elementIdx].lastChildId;
 
                 for (int i = 0; i < childCount; i++) {
 
-                    if (!(metaTable.array[childPtr.id & ElementId.ENTITY_INDEX_MASK].generation != childPtr.generation ||
-                          (metaTable.array[childPtr.id & ElementId.ENTITY_INDEX_MASK].flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet)
-                        ) {
-
+                    int childIdx = childPtr.id & ElementId.ENTITY_INDEX_MASK;
+                    if (!(metaTable.array[childIdx].generation != childPtr.generation || (metaTable.array[childIdx].flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet)) {
                         s[stackSize++] = new EmEntry() {
                             elementId = childPtr,
                             resolveParentFontSize = emValue.resolvedValue
                         };
                     }
 
-                    childPtr = hierarchyTable.array[childPtr.id & ElementId.ENTITY_INDEX_MASK].prevSiblingId;
+                    childPtr = hierarchyTable.array[childIdx].prevSiblingId;
 
                 }
 

@@ -16,8 +16,6 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.Rendering;
 using Batch = UIForia.Graphics.Batch;
-using BatchType = UIForia.Graphics.BatchType;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia.Graphics {
 
@@ -200,6 +198,7 @@ namespace UIForia.Systems {
 
         private int frameId;
         private bool doubleBuffer;
+        private UnmanagedRenderContext unmanagedRenderContext;
 
         public RenderSystem2(Application application, LayoutSystem layoutSystem, ElementSystem elementSystem) {
             this.elementSystem = elementSystem;
@@ -227,7 +226,7 @@ namespace UIForia.Systems {
 
             needsFontUpload = true;
             doubleBuffer = true;
-            
+            unmanagedRenderContext.Initialize();
         }
 
         private void HandleFontAdded(FontAsset fontAsset) {
@@ -266,7 +265,6 @@ namespace UIForia.Systems {
             frameId++;
             unsafeData.Clear();
             renderContext.Clear();
-
             unsafeData.float4Buffer.size = 0;
 
             resourceManager.GetFontTextures(renderContext.textureMap);
@@ -337,7 +335,7 @@ namespace UIForia.Systems {
                 stencilDataList = unsafeData.stencilDataList
 
             });
-
+            
             // SYNCHRONOUS!!!!
             unsafeData.float4Buffer.AddRange((float4*) unsafeData.clipRectBuffer.GetArrayPointer(), unsafeData.clipRectBuffer.size);
 
@@ -351,6 +349,7 @@ namespace UIForia.Systems {
                 // then another shared clip buffer? or copy clip buffer into each? 
                 // or just loop & offset element one, would like a single clip buffer for lots of reasons
                 drawList = unsafeData.drawList,
+                float4Buffer = unsafeData.float4Buffer,
                 vertexList = unsafeData.elementVertexList,
                 materialList = unsafeData.elementMaterialBuffer,
                 meshInfoList = unsafeData.meshInfoList
@@ -390,7 +389,7 @@ namespace UIForia.Systems {
                 clipRectIdList = unsafeData.clipRectIdList
             }.Run();
 
-            new BuildRenderPasses() {
+            new CreateRenderPasses() {
                 drawList = unsafeData.drawList,
                 batchList = unsafeData.batchList,
                 batchMemberList = unsafeData.batchMemberList,
@@ -399,7 +398,8 @@ namespace UIForia.Systems {
                 renderCommands = unsafeData.renderCommands,
                 stencilList = unsafeData.stencilDataList,
                 clipperBoundsList = unsafeData.clipRectBuffer,
-                renderTraversalList = unsafeData.renderTraversalList
+                renderTraversalList = unsafeData.renderTraversalList,
+                transformedBounds = unsafeData.transformedBounds,
             }.Run();
 
             new BuildIndexBuffer() {
@@ -505,12 +505,14 @@ namespace UIForia.Systems {
 
             }
 
+            Profiler.BeginSample("Set UIForia Render Data");
             UpdateComputeBufferData(unsafeData.materialBuffer, "UIForia::MaterialBuffer", materialBuffers, bufferIdx);
             UpdateComputeBufferData(unsafeData.textVertexList, "UIForia::VertexBuffer", vertexBuffers, bufferIdx);
             // todo -- convert to float3x2 to save on upload cost in 2d case, and maybe a quat, vec3, vec3 for 3d?
             UpdateComputeBufferData(unsafeData.matrixBuffer, "UIForia::MatrixBuffer", matrixBuffers, bufferIdx);
             UpdateComputeBufferData(unsafeData.float4Buffer, "UIForia::Float4Buffer", float4Buffers, bufferIdx);
             UpdateComputeBufferData(unsafeData.indirectArgBuffer, "UIForia::IndirectArgBuffer", indirectArgBuffers, bufferIdx, ComputeBufferType.IndirectArguments);
+            Profiler.EndSample();
 
             ComputeBuffer vertexBuffer = vertexBuffers[bufferIdx];
             ComputeBuffer matrixBuffer = matrixBuffers[bufferIdx];
@@ -673,12 +675,11 @@ namespace UIForia.Systems {
         private int refValue;
 
         private void SetupStencilState(in Batch batch, CommandBuffer commandBuffer) {
-
             bool update = (batch.stencilType != stencilType || refValue != batch.stencilRefValue || batch.colorMask != colorWriteMask);
 
-            if (!update) {
-                return;
-            }
+//            if (!update) {
+//                return;
+//            }
 
             if (batch.stencilType == StencilType.Push) {
                 commandBuffer.SetGlobalInt(k_ColorMaskKey, (int) batch.colorMask);
@@ -706,12 +707,23 @@ namespace UIForia.Systems {
             }
         }
 
+        public struct UnmanagedRenderCall {
+
+            public int renderId;
+            public int renderOp;
+            public bool isElement;
+            public int backgroundTexture;
+            public int outlineTexture;
+            public ElementDrawDesc drawDesc;
+
+        }
+
         private void RunMainThreadPainters() {
             Profiler.BeginSample("Run Managed Painters");
             DataList<RenderCallInfo>.Shared list = unsafeData.renderCallList;
             RenderCallInfo* array = list.GetArrayPointer();
-            float4x4* matrices = layoutSystem.worldMatrices.array;
 
+            float4x4* matrices = layoutSystem.worldMatrices.array;
             ElementTable<ClipInfo> clipInfoTable = layoutSystem.clipInfoTable;
 
             int size = list.size;
@@ -720,30 +732,59 @@ namespace UIForia.Systems {
                 ref RenderCallInfo callInfo = ref array[i];
                 ElementId elementId = callInfo.elementId;
 
-                RenderBox box = renderBoxTable[elementId.index];
+                int idx = elementId.id & ElementId.ENTITY_INDEX_MASK;
+                RenderBox box = renderBoxTable[idx];
 
                 if (box == null) continue;
 
                 MaterialId materialId = box.materialId;
 
-                ref LayoutBoxInfo layoutResult = ref layoutSystem.layoutResultTable.array[elementId.index];
+                ref LayoutBoxInfo layoutResult = ref layoutSystem.layoutResultTable.array[idx];
 
                 if (layoutResult.sizeChanged) {
                     layoutResult.sizeChanged = false;
                     box.OnSizeChanged(new Size(layoutResult.actualSize.x, layoutResult.actualSize.y));
                 }
 
+                // if (box.isBuiltIn) {
+                //
+                //     if (box.isElementBox) {
+                //         StandardRenderBox2 box2 = (StandardRenderBox2) box;
+                //         unsafeData.unmanagedRenderCalls.Add(new UnmanagedRenderCall() {
+                //             renderOp = callInfo.renderOp,
+                //             renderId = i,
+                //             backgroundTexture = 0,
+                //             outlineTexture = 0,
+                //             drawDesc = box2.drawDesc
+                //         });
+                //     }
+                //     else {
+                //         unsafeData.unmanagedRenderCalls.Add(new UnmanagedRenderCall() {
+                //             renderOp = callInfo.renderOp,
+                //             renderId = i,
+                //             backgroundTexture = 0,
+                //             outlineTexture = 0,
+                //             drawDesc = default,
+                //         });
+                //     }
+                //
+                //     continue;
+                // }
+
                 if (callInfo.renderOp == 0) {
+
                     // todo -- if clipper via styles, set that up here
-                    renderContext.Setup(elementId, materialId, i, matrices + elementId.index);
+                    renderContext.Setup(elementId, materialId, i, matrices + idx);
                     // todo -- if is clipper, push clip rect or stencil, probably after the draw
                     box.PaintBackground3(renderContext);
                 }
                 else {
+
                     // todo -- if clipper via styles, tear it down here
-                    renderContext.Setup(elementId, materialId, i, matrices + elementId.index);
+                    renderContext.Setup(elementId, materialId, i, matrices + idx);
                     box.PaintForeground3(renderContext);
                 }
+
             }
 
             Profiler.EndSample();
@@ -795,15 +836,18 @@ namespace UIForia.Systems {
 
                 RenderBox renderBox = null;
 
-                if (painter != null) {
+                if (!string.IsNullOrEmpty(painter)) {
                     renderBox = renderBoxPool.GetCustomPainter(painter);
                 }
 
                 if (renderBox == null) {
                     if (instance is UITextElement) {
                         //if (instance.renderBox == null) {
-                            renderBox = new TextRenderBox2();
+                        renderBox = new TextRenderBox2();
                         //}
+                    }
+                    else if (instance is UIVideoElement) {
+                        renderBox = new VideoRenderBox();
                     }
                     else {
                         renderBox = new StandardRenderBox2();
@@ -913,8 +957,10 @@ namespace UIForia.Systems {
             public DataList<GPUGlyphInfo> glyphBuffer;
             public DataList<GPUFontInfo> fontBuffer;
             public DataList<ElementMaterialInfo>.Shared elementMaterialBuffer;
+            public DataList<UnmanagedRenderCall>.Shared unmanagedRenderCalls;
 
             public void Initialize(RenderSystem2 renderSystem2) {
+                this.unmanagedRenderCalls = new DataList<UnmanagedRenderCall>.Shared(32, Allocator.Persistent);
                 this.elementMaterialBuffer = new DataList<ElementMaterialInfo>.Shared(32, Allocator.Persistent);
                 this.fontBuffer = new DataList<GPUFontInfo>(8, Allocator.Persistent);
                 this.glyphBuffer = new DataList<GPUGlyphInfo>(512, Allocator.Persistent);
@@ -955,6 +1001,7 @@ namespace UIForia.Systems {
 
             public void Clear() {
                 Profiler.BeginSample("Clear Render Setup");
+                unmanagedRenderCalls.size = 0;
                 renderCommands.size = 0;
                 float4Buffer.size = 0;
                 indirectArgBuffer.size = 0;
@@ -986,6 +1033,7 @@ namespace UIForia.Systems {
 
             public void Dispose() {
                 fontBuffer.Dispose();
+                unmanagedRenderCalls.Dispose();
                 glyphBuffer.Dispose();
                 meshInfoList.Dispose();
                 dummyArray.Dispose();

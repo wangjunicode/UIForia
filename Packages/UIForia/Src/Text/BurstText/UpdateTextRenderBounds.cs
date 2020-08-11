@@ -15,7 +15,7 @@ namespace UIForia.Text {
         public DataList<TextInfo> textInfoMap;
         public DataList<TextId> activeTextElementIds;
         public DataList<FontAssetInfo>.Shared fontAssetMap;
-        
+
         public void Execute() {
 
             Run(0, activeTextElementIds.size);
@@ -35,7 +35,7 @@ namespace UIForia.Text {
         private void ComputeBounds(ref TextInfo textInfo) {
 
             FontAssetInfo* fontAssetMapArray = fontAssetMap.GetArrayPointer();
-            
+
             for (int i = 0; i < textInfo.renderRangeList.size; i++) {
 
                 ref TextRenderRange renderRange = ref textInfo.renderRangeList.array[i];
@@ -53,77 +53,44 @@ namespace UIForia.Text {
 
                     case TextRenderType.Characters: {
 
-                        int startIdx = renderRange.characterRange.start;
+                        int idx = renderRange.characterRange.start;
 
-                        ref TextSymbol symbolX = ref textInfo.symbolList.array[startIdx];
+                        while (idx != -1) {
 
-                        while (symbolX.charInfo.nextRenderIdx != -1) {
-                            symbolX = ref textInfo.symbolList.array[symbolX.charInfo.nextRenderIdx];
-                            ref BurstCharInfo charInfo = ref symbolX.charInfo;
+                            ref TextSymbol symbol = ref textInfo.symbolList.array[idx];
+                            ref BurstCharInfo charInfo = ref symbol.charInfo;
 
                             if (charInfo.effectIdx != 0) {
-                                
+
                                 // todo -- 
-                                
+
                             }
                             else {
-                                
-                                // ref UIForiaGlyph glyph = ref fontAssetMapArray[charInfo.fontAssetId].glyphList[charInfo.glyphIndex];
-                                //
-                                // float localMinX = charInfo.position.x;
-                                // float localMinY = charInfo.position.y;
-                                // float localMaxX = charInfo.position.x + (charInfo.scale * glyph.width);
-                                // float localMaxY = charInfo.position.y + (charInfo.scale * glyph.height);
-                                //
-                                // if (localMinX < xMin) xMin = localMinX;
-                                // if (localMinX > xMax) xMax = localMinX;
-                                //
-                                // if (localMaxX < xMin) xMin = localMaxX;
-                                // if (localMaxX > xMax) xMax = localMaxX;
-                                //
-                                // if (localMinY < yMin) yMin = localMinY;
-                                // if (localMinY > yMax) yMax = localMinY;
-                                //
-                                // if (localMaxY < yMin) yMin = localMaxY;
-                                // if (localMaxY > yMax) yMax = localMaxY;
+
+                                ref UIForiaGlyph glyph = ref fontAssetMapArray[charInfo.fontAssetId].glyphList[charInfo.glyphIndex];
+
+                                float localMinX = charInfo.position.x;
+                                float localMinY = charInfo.position.y;
+                                float localMaxX = charInfo.position.x + (charInfo.scale * glyph.width);
+                                float localMaxY = charInfo.position.y + (charInfo.scale * glyph.height);
+
+                                if (localMinX < xMin) xMin = localMinX;
+                                if (localMinX > xMax) xMax = localMinX;
+
+                                if (localMaxX < xMin) xMin = localMaxX;
+                                if (localMaxX > xMax) xMax = localMaxX;
+
+                                if (localMinY < yMin) yMin = localMinY;
+                                if (localMinY > yMax) yMax = localMinY;
+
+                                if (localMaxY < yMin) yMin = localMaxY;
+                                if (localMaxY > yMax) yMax = localMaxY;
 
                             }
-                        }
 
-                        // for (int c = renderRange.characterRange.start; c < end; c++) {
-                        //     ref TextSymbol symbol = ref renderRange.symbols[c];
-                        //
-                        //     if (symbol.type != TextSymbolType.Character) {
-                        //         continue;
-                        //     }
-                        //
-                        //     ref BurstCharInfo charInfo = ref symbol.charInfo;
-                        //     
-                        //     // if not a character symbol or not displayed or opacity is 0, continue
-                        //     
-                        //     if (charInfo.effectIdx != 0) { }
-                        //     else {
-                        //
-                        //         float localMinX = charInfo.position.x;
-                        //         float localMinY = charInfo.position.y;
-                        //         float localMaxX = charInfo.position.x + charInfo.width;
-                        //         float localMaxY = charInfo.position.y + charInfo.height;
-                        //
-                        //         if (localMinX < xMin) xMin = localMinX;
-                        //         if (localMinX > xMax) xMax = localMinX;
-                        //
-                        //         if (localMaxX < xMin) xMin = localMaxX;
-                        //         if (localMaxX > xMax) xMax = localMaxX;
-                        //
-                        //         if (localMinY < yMin) yMin = localMinY;
-                        //         if (localMinY > yMax) yMax = localMinY;
-                        //
-                        //         if (localMaxY < yMin) yMin = localMaxY;
-                        //         if (localMaxY > yMax) yMax = localMaxY;
-                        //
-                        //     }
-                        //
-                        // }
+                            idx = symbol.charInfo.nextRenderIdx;
+
+                        }
 
                         renderRange.localBounds = new AxisAlignedBounds2D(xMin, yMin, xMax, yMax);
 
@@ -142,8 +109,6 @@ namespace UIForia.Text {
                     case TextRenderType.Element:
                         break;
 
-                    default:
-                        throw new ArgumentOutOfRangeException();
                 }
 
             }

@@ -2,9 +2,10 @@ using System;
 using System.Diagnostics;
 using JetBrains.Annotations;
 using UIForia.Util;
-using UnityEngine;
 
 namespace UIForia {
+
+
 
     public struct UIFixedLength {
 
@@ -51,7 +52,7 @@ namespace UIForia {
         public bool IsDefined() {
             return FloatUtil.IsDefined(value);
         }
-        
+
         public static implicit operator UIFixedLength(int value) {
             return new UIFixedLength(value, UIFixedUnit.Pixel);
         }
@@ -77,14 +78,19 @@ namespace UIForia {
                 case UIFixedUnit.Unset:
                 case UIFixedUnit.Pixel:
                     return length.value;
+
                 case UIFixedUnit.Percent:
                     return length.value * relativeBase;
+
                 case UIFixedUnit.Em:
                     return length.value * emSize;
+
                 case UIFixedUnit.ViewportWidth:
                     return length.value * viewportWidth;
+
                 case UIFixedUnit.ViewportHeight:
                     return length.value * viewportHeight;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }

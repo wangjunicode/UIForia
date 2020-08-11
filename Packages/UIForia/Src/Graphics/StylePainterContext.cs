@@ -9,10 +9,11 @@ namespace UIForia.Graphics {
     public class StylePainterContext {
 
         private Color _color;
-        public RenderContext2 ctx;
+        public RenderContext3 ctx;
         internal UIElement _element;
         internal PainterVariableDeclaration[] _variables;
-        
+        private ElementDrawDesc drawDesc;
+
         private static readonly int s_MainTextureKey = Shader.PropertyToID("_MainTex");
 
         public UIStyleSetProxy style {
@@ -20,7 +21,7 @@ namespace UIForia.Graphics {
         }
 
         public void SetMainTexture(Texture texture) {
-            ctx.SetMaterialTexture(s_MainTextureKey, texture);
+            // ctx.SetMaterialTexture(s_MainTextureKey, texture);
         }
 
         public void SetClipRect(float x, float y, float width, float height) { }
@@ -28,7 +29,7 @@ namespace UIForia.Graphics {
         public void debugger() {
             System.Diagnostics.Debugger.Break();
         }
-        
+
         public Color32 lighten(Color32 color, float amount = 10) {
             HSLColor hsl = HSLColor.FromRGB(color.r, color.g, color.b);
             hsl.l += amount / 100;
@@ -114,19 +115,19 @@ namespace UIForia.Graphics {
 
         public Texture __GetTextureVariable(int propertyId) {
             if (_element.style.propertyMap.TryGetValue(propertyId, out StyleProperty property)) {
-                return property.AsTexture;
+                return property.AsTextureReference?.texture;
             }
 
             for (int i = 0; i < _variables.Length; i++) {
                 if (_variables[i].propertyId == propertyId) {
-                    return _variables[i].objectValue as Texture;
+                    TextureReference textureReference = _variables[i].objectValue as TextureReference;
+                    return textureReference?.texture;
                 }
             }
 
             return default;
         }
-        
-        
+
         public float2 __GetVector2Variable(int propertyId) {
             if (_element.style.propertyMap.TryGetValue(propertyId, out StyleProperty property)) {
                 return property.AsFloat2;
@@ -150,11 +151,25 @@ namespace UIForia.Graphics {
         }
 
         public void SetColor(Color32 color) {
-            ctx.SetColor(color);
+            drawDesc.backgroundColor = color;
+            drawDesc.bgColorMode = ColorMode.Color;
+        }
+
+
+        public void SetTransform(in float4x4 matrix) {
+            // ctx.SetMatrix(matrix);
         }
 
         public void FillRect(float x, float y, float width, float height) {
-            ctx.FillRect(new float2(x, y), new float2(width, height));
+            drawDesc.width = width;
+            drawDesc.height = height;
+            drawDesc.meshFillOpenAmount = ushort.MaxValue;
+            drawDesc.meshFillRadius = float.MaxValue;
+            drawDesc.opacity = 255;
+            //if (!ReferenceEquals(main)) {
+            //    ctx.SetBackgroundTexture(backgroundTexture);
+            //}
+            ctx.DrawElement(x, y, drawDesc);
         }
 
         // public void FillSector(float width, float height, float length, ArcDirection direction) {
@@ -318,6 +333,12 @@ namespace UIForia.Graphics {
         public static Color32 slategrey => new Color32(112, 128, 144, 255);
         public static Color32 darkslategray => new Color32(47, 79, 79, 255);
         public static Color32 darkslategrey => new Color32(47, 79, 79, 255);
+
+        internal void Setup(RenderContext3 renderContext, UIElement element, PainterVariableDeclaration[] painterDefinitionDefinedVariables) {
+            this.ctx = renderContext;
+            this._element = element;
+            this._variables = painterDefinitionDefinedVariables;
+        }
 
     }
 

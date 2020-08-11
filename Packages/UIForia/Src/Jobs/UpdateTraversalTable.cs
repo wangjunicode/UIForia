@@ -1,4 +1,5 @@
 using UIForia.Elements;
+using UIForia.ListTypes;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
@@ -18,43 +19,43 @@ namespace UIForia {
         // because of writes into the traversal table
 
         // todo -- runs slow in managed, inline all the things and pre-allocate max size stack based on total number of active elements in application
-        
+
         public void Execute() {
 
             int ftbIndex = 0;
             int btfIndex = 0;
 
-            DataList<ElementId> stack = new DataList<ElementId>(512, Allocator.Temp);
-            
+            List_ElementId stack = new List_ElementId(512, Allocator.Temp);
+
             for (int rootIdx = 0; rootIdx < rootIds.size; rootIdx++) {
 
-                stack[stack.size++] = rootIds[rootIdx];
+                stack.array[stack.size++] = rootIds[rootIdx];
 
                 while (stack.size != 0) {
 
-                    ElementId current = stack[--stack.size];
+                    ElementId current = stack.array[--stack.size];
 
-                    int currentIdx = current.index;
-                    
+                    int currentIdx = current.id & ElementId.ENTITY_INDEX_MASK;
+
                     traversalTable.array[currentIdx].ftbIndex = ftbIndex++;
 
                     int childCount = hierarchyTable.array[currentIdx].childCount;
 
-                    stack.EnsureAdditionalCapacity(childCount);
-                    ElementId* stackArray = stack.GetArrayPointer();
+                    if (stack.size + childCount >= stack.Capacity) {
+                        stack.EnsureAdditionalCapacity(childCount);
+                    }
 
                     ElementId childPtr = hierarchyTable.array[currentIdx].lastChildId;
 
                     int size = stack.size;
                     for (int i = 0; i < childCount; i++) {
 
-                        // if (!ElementSystem.IsDeadOrDisabled(childPtr, metaTable)) {
-                        int idx = childPtr.index;
+                        int idx = childPtr.id & ElementId.ENTITY_INDEX_MASK;
                         if (!(metaTable.array[idx].generation != childPtr.generation || (metaTable.array[idx].flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet)) {
-                            stackArray[size++] = childPtr;
+                            stack.array[size++] = childPtr;
                         }
 
-                        childPtr = hierarchyTable.array[childPtr.index].prevSiblingId;
+                        childPtr = hierarchyTable.array[idx].prevSiblingId;
 
                     }
 
@@ -64,12 +65,12 @@ namespace UIForia {
 
             for (int rootIdx = 0; rootIdx < rootIds.size; rootIdx++) {
 
-                stack[stack.size++] = rootIds[rootIdx];
+                stack.array[stack.size++] = rootIds[rootIdx];
 
                 while (stack.size != 0) {
 
-                    ElementId current = stack[--stack.size];
-                    int currentIdx = current.index;
+                    ElementId current = stack.array[--stack.size];
+                    int currentIdx = current.id & ElementId.ENTITY_INDEX_MASK;
 
                     traversalTable.array[currentIdx].btfIndex = btfIndex++;
 
@@ -78,12 +79,13 @@ namespace UIForia {
                     ElementId childPtr = hierarchyTable.array[currentIdx].firstChildId;
 
                     for (int i = 0; i < childCount; i++) {
+                        int idx = childPtr.id & ElementId.ENTITY_INDEX_MASK;
 
-                        if (!(metaTable.array[childPtr.id & ElementId.ENTITY_INDEX_MASK].generation != childPtr.generation || (metaTable.array[childPtr.id & ElementId.ENTITY_INDEX_MASK].flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet)) {
-                            stack.AddUnchecked(childPtr);
+                        if (!(metaTable.array[idx].generation != childPtr.generation || (metaTable.array[idx].flags & UIElementFlags.EnabledFlagSet) != UIElementFlags.EnabledFlagSet)) {
+                            stack.array[stack.size++] = childPtr;
                         }
 
-                        childPtr = hierarchyTable.array[childPtr.index].nextSiblingId;
+                        childPtr = hierarchyTable.array[idx].nextSiblingId;
 
                     }
 

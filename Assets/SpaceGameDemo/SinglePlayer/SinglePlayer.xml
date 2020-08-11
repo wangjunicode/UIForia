@@ -28,6 +28,7 @@
             <Panel if="tab == TabItem.Ships" style="settings-panel ships-panel">
                 <Group style="choose-ship-container">
                     <Heading2>Choose your space ship</Heading2>
+
                     <Repeat list="ships" style="ship-list">
                         <SpaceMenuItem style="ship-item" mouse:click="SelectShip($item.id)" label="$item.name + ' ' + $item.id">
                             <override:Children style="ship-icon">
@@ -35,6 +36,7 @@
                             </override:Children>
                         </SpaceMenuItem>
                     </Repeat>
+
                 </Group>
 
                 <Group>

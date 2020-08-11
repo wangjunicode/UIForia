@@ -94,6 +94,25 @@ namespace UIForia.Rendering {
         }
 
         [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, in UIAngle length) : this() {
+            this.propertyId = propertyId;
+            this.flags = 1;
+            this.float0 = length.value;
+            this.int1 = (int) length.unit;
+        }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, in UIAngle? length) : this() {
+            this.propertyId = propertyId;
+            if (length.HasValue) {
+                UIAngle v = length.Value;
+                this.float0 = v.value;
+                this.int1 = (int) v.unit;
+                this.flags = 1;
+            }
+        }
+
+        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, in UIMeasurement measurement) : this() {
             this.propertyId = propertyId;
             this.flags = 1;
@@ -208,6 +227,13 @@ namespace UIForia.Rendering {
             this.flags = !ReferenceEquals(objectField, null) ? (ushort) 1 : (ushort) 0;
             this.objectField = objectField;
         }
+
+        [DebuggerStepThrough]
+        public StyleProperty(StylePropertyId propertyId, Gradient objectField) : this() {
+            this.propertyId = propertyId;
+            this.flags = !ReferenceEquals(objectField, null) ? (ushort) 1 : (ushort) 0;
+            this.objectField = objectField;
+        }
         
         [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, CursorStyle objectField) : this() {
@@ -262,11 +288,11 @@ namespace UIForia.Rendering {
         public AlignmentBoundary AsAlignmentBoundary => (AlignmentBoundary) int0;
         public Overflow AsOverflow => (Overflow) int0;
         public ClipBehavior AsClipBehavior => (ClipBehavior) int0;
+        
         public Color AsColor => new StyleColor(int0);
         public Color32 AsColor32 => new StyleColor(int0);
-
+        
         public FontAsset AsFont => (FontAsset) objectField;
-        public Texture2D AsTexture => (Texture2D) objectField;
 
         public FontStyle AsFontStyle => (FontStyle) int0;
         public TextAlignment AsTextAlignment => (TextAlignment) int0;
@@ -275,6 +301,8 @@ namespace UIForia.Rendering {
 
         public UIMeasurement AsUIMeasurement => new UIMeasurement(float0, (UIMeasurementUnit) int1);
         public UIFixedLength AsUIFixedLength => new UIFixedLength(float0, (UIFixedUnit) int1);
+        public UIAngle AsUIAngle => new UIAngle(float0, (UIAngleUnit) int1);
+
         public OffsetMeasurement AsOffsetMeasurement => new OffsetMeasurement(float0, (OffsetMeasurementUnit) int1);
 
         public GridItemPlacement AsGridItemPlacement {
@@ -290,7 +318,6 @@ namespace UIForia.Rendering {
         public IReadOnlyList<GridTrackSize> AsGridTrackTemplate => (IReadOnlyList<GridTrackSize>) objectField;
 
         public RenderLayer AsRenderLayer => (RenderLayer) int0;
-        public Texture2D AsTexture2D => (Texture2D) objectField;
         public GridLayoutDensity AsGridLayoutDensity => (GridLayoutDensity) int0;
         public LayoutType AsLayoutType => (LayoutType) int0;
         public TextTransform AsTextTransform => (TextTransform) int0;
@@ -309,6 +336,9 @@ namespace UIForia.Rendering {
 
         public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
         public AlignmentDirection AsAlignmentDirection => (AlignmentDirection) int0;
+
+        public Gradient AsGradient => (Gradient) objectField;
+        public GradientMode AsGradientMode => (GradientMode) int0;
 
         public float2 AsFloat2 {
             get {

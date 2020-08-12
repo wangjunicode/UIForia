@@ -14,6 +14,11 @@ namespace UIForia.Layout {
         public ElementId elementId;
         public int textElementInfoIndex;
 
+        // todo -- probably want to use the same proxy layoutbox setup as scroll/image
+        // we'll have to figure out how content width or height gets computed since 
+        // content size might have two meanings, one for children one for the text itself
+        // might be auto / content like it is for image
+        
         public void RunHorizontal(BurstLayoutRunner* runner) {
 
             ref List_TextLineInfo buffer = ref UnsafeUtilityEx.AsRef<List_TextLineInfo>(runner->lineInfoBuffer);

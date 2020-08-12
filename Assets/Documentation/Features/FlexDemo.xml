@@ -16,7 +16,7 @@
         style shape-kit {
             FlexLayoutDirection = Horizontal;
             PreferredSize = 1vw 1vh;
-            BackgroundColor = blue;
+            BackgroundColor = white;
             //BackgroundImage = url("Images/2"); //DefaultAtlas", "player1");
             // Padding = 10px;
             // material = "materialName"

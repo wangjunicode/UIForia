@@ -46,27 +46,9 @@ namespace UIForia.Layout {
             ref BurstLayoutRunner refRunner = ref UnsafeUtilityEx.AsRef<BurstLayoutRunner>(runner);
             layoutBox->RunLayoutHorizontal(runner);
             scrollValues->actualWidth = refRunner.GetHorizontalLayoutInfo(elementId).finalSize;
-            scrollValues->contentWidth = layoutBox->GetActualContentWidth(ref refRunner);
+            scrollValues->contentWidth = FindHorizontalMax(runner);
             scrollValues->isOverflowingX = scrollValues->contentWidth > scrollValues->actualWidth;
-           // runner->scrollWidthUpdates.Add(elementId);
-        }
-
-        public float FindHorizontalMax(BurstLayoutRunner* runner) {
-            ref LayoutHierarchyInfo hierarchyInfo = ref runner->GetLayoutHierarchy(elementId);
-            ElementId ptr = hierarchyInfo.firstChildId;
-
-            float xMax = float.MinValue;
-
-            while (ptr != default) {
-                
-                ref LayoutBoxInfo boxInfo = ref runner->layoutBoxInfoTable[ptr.index];
-
-                if (xMax < boxInfo.alignedPosition.x + boxInfo.actualSize.x) xMax = boxInfo.alignedPosition.x + boxInfo.actualSize.x;
-
-                ptr = hierarchyInfo.nextSiblingId;
-            }
-
-            return 0;
+            // runner->scrollWidthUpdates.Add(elementId);
         }
 
         public void RunVertical(BurstLayoutRunner* runner) {
@@ -75,8 +57,44 @@ namespace UIForia.Layout {
             ref BurstLayoutRunner refRunner = ref UnsafeUtilityEx.AsRef<BurstLayoutRunner>(runner);
             layoutBox->RunLayoutVertical(runner);
             scrollValues->actualHeight = refRunner.GetVerticalLayoutInfo(elementId).finalSize;
-            scrollValues->contentHeight = layoutBox->GetActualContentHeight(ref refRunner);
+            scrollValues->contentHeight = FindVerticalMax(runner);
             scrollValues->isOverflowingY = scrollValues->contentHeight > scrollValues->actualHeight;
+        }
+
+        public float FindHorizontalMax(BurstLayoutRunner* runner) {
+            ref LayoutHierarchyInfo hierarchyInfo = ref runner->layoutHierarchyTable[elementId.index];
+            ElementId ptr = hierarchyInfo.firstChildId;
+
+            float xMax = 0;
+
+            while (ptr != default) {
+
+                ref LayoutBoxInfo boxInfo = ref runner->layoutBoxInfoTable[ptr.index];
+
+                if (xMax < boxInfo.alignedPosition.x + boxInfo.actualSize.x) xMax = boxInfo.alignedPosition.x + boxInfo.actualSize.x;
+
+                ptr = runner->layoutHierarchyTable[ptr.index].nextSiblingId;
+            }
+
+            return xMax;
+        }
+
+        public float FindVerticalMax(BurstLayoutRunner* runner) {
+            ref LayoutHierarchyInfo hierarchyInfo = ref runner->GetLayoutHierarchy(elementId);
+            ElementId ptr = hierarchyInfo.firstChildId;
+
+            float yMax = 0;
+
+            while (ptr != default) {
+
+                ref LayoutBoxInfo boxInfo = ref runner->layoutBoxInfoTable[ptr.index];
+
+                if (yMax < boxInfo.alignedPosition.y + boxInfo.actualSize.y) yMax = boxInfo.alignedPosition.y + boxInfo.actualSize.y;
+
+                ptr = runner->layoutHierarchyTable[ptr.index].nextSiblingId;
+            }
+
+            return yMax;
         }
 
         public float ComputeContentWidth(ref BurstLayoutRunner layoutRunner, in BlockSize blockSize) {

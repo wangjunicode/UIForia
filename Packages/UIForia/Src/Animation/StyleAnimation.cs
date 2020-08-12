@@ -95,9 +95,8 @@ namespace UIForia.Animation {
 
         protected static float ResolveWidthMeasurement(UIElement element, Rect viewport, UIMeasurement measurement) {
             switch (measurement.unit) {
-                case UIMeasurementUnit.Unset:
-                    return 0;
-
+                
+                case UIMeasurementUnit.Auto:
                 case UIMeasurementUnit.Pixel:
                     return measurement.value;
 
@@ -138,9 +137,7 @@ namespace UIForia.Animation {
 
         protected static float ResolveHeightMeasurement(UIElement element, Rect viewport, UIMeasurement measurement) {
             switch (measurement.unit) {
-                case UIMeasurementUnit.Unset:
-                    return 0;
-
+                case UIMeasurementUnit.Auto:
                 case UIMeasurementUnit.Pixel:
                     return measurement.value;
 

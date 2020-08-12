@@ -17,7 +17,7 @@ namespace UIForia.Layout {
         public LayoutHierarchyInfo* layoutHierarchyTable;
         public FontAssetInfo* fontAssetMap;
         public EmValue* emTable;
-        
+
         public ref LayoutHierarchyInfo GetLayoutHierarchy(ElementId elementId) {
             return ref layoutHierarchyTable[elementId.index];
         }
@@ -39,7 +39,6 @@ namespace UIForia.Layout {
         }
 
         public void ApplyLayoutHorizontal(ElementId elementId, float localX, float alignedPosition, float size, float availableSize, in BlockSize blockSize, LayoutFit defaultFit, float parentSize) {
-
             ref LayoutInfo layoutInfo = ref GetHorizontalLayoutInfo(elementId);
             ref LayoutBoxInfo layoutBoxInfo = ref GetLayoutBoxInfo(elementId);
 
@@ -85,7 +84,6 @@ namespace UIForia.Layout {
                     alignedPosition = 0; //localX;
                     break;
                 }
-
             }
 
             if (newSize != layoutInfo.finalSize) {
@@ -98,7 +96,6 @@ namespace UIForia.Layout {
             layoutBoxInfo.alignedPosition.x = alignedPosition;
             layoutBoxInfo.allocatedPosition.x = localX;
             layoutBoxInfo.allocatedSize.x = availableSize;
-
         }
 
         public void ApplyLayoutVertical(ElementId elementId, float localY, float alignedPosition, float size, float availableSize, in BlockSize blockSize, LayoutFit defaultFit, float parentSize) {
@@ -147,13 +144,12 @@ namespace UIForia.Layout {
                     alignedPosition = 0; //localY;
                     break;
                 }
-
             }
 
             if (newSize != layoutInfo.finalSize) {
                 layoutBoxInfo.sizeChanged = true;
             }
-            
+
             layoutInfo.finalSize = newSize;
 
             layoutBoxInfo.actualSize.y = newSize;
@@ -163,20 +159,18 @@ namespace UIForia.Layout {
         }
 
         public void GetWidths<T>(in T parent, in BlockSize blockSize, ElementId childId, out LayoutSize size) where T : ILayoutBox {
-
             // todo -- handle animated sizes
             // ref AnimationLayoutSizes sizes = ref animationInfo[childId.index]; // if isAnimating pref/min/max -> update accordingly with lerp data
-            
+
             ref LayoutInfo childInfo = ref horizontalLayoutInfoTable[childId.index];
-            size.preferred = ResolveWidth(parent, childId, blockSize, childInfo.prefSize, ref childInfo);
-            size.minimum = ResolveWidth(parent, childId, blockSize, childInfo.minSize, ref childInfo);
-            size.maximum = ResolveWidth(parent, childId, blockSize, childInfo.maxSize, ref childInfo);
+            size.preferred = ResolveWidth(parent, childId, blockSize, childInfo.prefSize, ref childInfo, MeasurementAxis.Preferred);
+            size.minimum = ResolveWidth(parent, childId, blockSize, childInfo.minSize, ref childInfo, MeasurementAxis.Min);
+            size.maximum = ResolveWidth(parent, childId, blockSize, childInfo.maxSize, ref childInfo, MeasurementAxis.Max);
             size.marginStart = childInfo.marginStart;
             size.marginEnd = childInfo.marginEnd;
         }
 
         public void GetHeights<T>(in T parent, in BlockSize blockSize, ElementId childId, out LayoutSize size) where T : ILayoutBox {
-
             // todo -- handle animated sizes
 
             ref LayoutInfo childInfo = ref verticalLayoutInfoTable[childId.index];
@@ -187,19 +181,32 @@ namespace UIForia.Layout {
             size.marginEnd = childInfo.marginEnd;
         }
 
-        public float ResolveWidth<T>(in T parent, ElementId elementId, in BlockSize blockSize, in UIMeasurement measurement, ref LayoutInfo info) where T : ILayoutBox {
+        public float ResolveWidth<T>(in T parent, ElementId elementId, in BlockSize blockSize, in UIMeasurement measurement, ref LayoutInfo info, MeasurementAxis axis) where T : ILayoutBox {
             float value = measurement.value;
 
             switch (measurement.unit) {
-
                 case UIMeasurementUnit.Auto: {
-                    return parent.ResolveAutoWidth(ref this, elementId, measurement.value, blockSize);
+                    LayoutBoxUnion layoutBox = layoutBoxTable[elementId.index];
+                    if (layoutBox.layoutType == LayoutBoxType.Image) {
+                        return layoutBox.image.ResolveSelfAutoWidth(ref this, parent, blockSize, axis);
+                    }
+
+                    return parent.ResolveAutoWidth(ref this, elementId, blockSize);
+                }
+
+                case UIMeasurementUnit.BackgroundImageWidth: {
+                    return GetHorizontalLayoutInfo(elementId).bgSize * value;
+                }
+
+                case UIMeasurementUnit.BackgroundImageHeight: {
+                    return GetVerticalLayoutInfo(elementId).bgSize * value;
                 }
 
                 case UIMeasurementUnit.Content: {
                     return GetContentWidth(elementId, blockSize, measurement.value, ref info);
                 }
 
+                default:
                 case UIMeasurementUnit.Pixel:
                     return value;
 
@@ -226,29 +233,49 @@ namespace UIForia.Layout {
                     return scaled < 0 ? 0 : scaled;
                 }
             }
-
-            return 0;
         }
 
+        public enum MeasurementAxis {
+
+            Preferred,
+            Min,
+            Max
+
+        }
+        
         public float ResolveHeight<T>(in T parent, ElementId elementId, in BlockSize blockSize, in UIMeasurement measurement, ref LayoutInfo info) where T : ILayoutBox {
             float value = measurement.value;
 
             switch (measurement.unit) {
-
                 case UIMeasurementUnit.Auto: {
-                    return parent.ResolveAutoHeight(ref this, elementId, measurement.value, blockSize);
+                    
+                    LayoutBoxUnion layoutBox = layoutBoxTable[elementId.index];
+                    if (layoutBox.layoutType == LayoutBoxType.Image) {
+                        return layoutBox.image.ResolveSelfAutoHeight<T>(ref this);
+                    }
+
+                    return parent.ResolveAutoHeight(ref this, elementId, blockSize);
                 }
 
                 case UIMeasurementUnit.Content: {
                     return GetContentHeight(elementId, blockSize, measurement.value, ref info);
                 }
 
+                default:
                 case UIMeasurementUnit.Pixel:
                     return value;
 
                 case UIMeasurementUnit.Em: {
                     float scaled = info.emSize * value;
                     return scaled > 0 ? scaled : 0;
+                }
+
+                case UIMeasurementUnit.BackgroundImageWidth: {
+                    return GetHorizontalLayoutInfo(elementId).bgSize * value;
+                }
+
+                case UIMeasurementUnit.BackgroundImageHeight: {
+                    return GetVerticalLayoutInfo(elementId).bgSize * value;
                 }
 
                 case UIMeasurementUnit.ViewportWidth:
@@ -269,13 +296,11 @@ namespace UIForia.Layout {
                     return scaled < 0 ? 0 : scaled;
                 }
             }
-
-            return 0;
         }
 
         private float GetContentWidth(ElementId layoutBoxId, BlockSize blockSize, float measurementValue, ref LayoutInfo info) {
             // todo -- need 2 or 3 levels of content cache because of fits / constraints
-            
+
             // if (info.contentCache.cachedSize >= 0 && blockSize == info.contentCache.blockSize) {
             //     float val = info.contentCache.cachedSize * measurementValue;
             //     return val > 0 ? val : 0;
@@ -295,7 +320,6 @@ namespace UIForia.Layout {
         }
 
         private float GetContentHeight(ElementId layoutBoxId, BlockSize blockSize, float measurementValue, ref LayoutInfo info) {
-
             // todo -- need 2 or 3 levels of content cache because of fits / constraints
             // if (info.contentCache.cachedSize >= 0 && blockSize == info.contentCache.blockSize) {
             //     float val = info.contentCache.cachedSize * measurementValue;
@@ -313,10 +337,6 @@ namespace UIForia.Layout {
             if (contentHeight < 0) contentHeight = 0;
 
             return contentHeight;
-        }
-
-        public float GetEmSize(ElementId elementId) {
-            return 0;
         }
 
         public ref FontAssetInfo GetFontAsset(int fontAssetId) {

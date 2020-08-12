@@ -318,7 +318,8 @@ Shader "UIForia/UIForiaText2"
                 // this is not at all scientific, but I was seeing cases where the letter had an unwanted background tint
                 // when using dilate or softness values that were too high. this fixes that, but very much not proven
                 // remove if it causes weirdness. Could be that alpha cut off is just wrong, but tmp exhibits the same behavior
-                return ((c < 0.05 || s.x * s.y == 0) ? fixed4(0, 0, 0, 0) : faceColor);
+                return (c < 0.05  ? fixed4(0, 0, 0, 0) : faceColor);
+                // return ((c < 0.05 || s.x * s.y == 0) ? fixed4(0, 0, 0, 0) : faceColor);
             
             }
             

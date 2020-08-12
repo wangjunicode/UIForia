@@ -96,7 +96,7 @@ namespace UIForia.Layout {
                 float scrollOffsetY = 0;
                 
                 if (layoutResult.scrollValues != null) {
-                    scrollOffsetX = layoutResult.scrollValues->contentWidth * layoutResult.scrollValues->scrollX;
+                    scrollOffsetX = (layoutResult.scrollValues->contentWidth * layoutResult.scrollValues->actualWidth) * -layoutResult.scrollValues->scrollX;
                     scrollOffsetY = (layoutResult.scrollValues->contentHeight - layoutResult.scrollValues->actualHeight) * -layoutResult.scrollValues->scrollY;
                 }
                 

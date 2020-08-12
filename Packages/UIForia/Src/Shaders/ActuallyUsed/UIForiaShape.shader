@@ -171,9 +171,9 @@
             fixed4 frag (v2f i) : SV_Target {
                 // this could be done in the vertex shader too but this way we can support correct
                 // sdf uv offsets for non quad meshes, which we'll probably want eventually to reduce overdraw
-                float2 halfUV = float2(0.5, 0.5) / i.size;
-                i.texCoord0.x += i.texCoord0.x > 0.5 ? halfUV.x : -halfUV.x;
-                i.texCoord0.y += i.texCoord0.y > 0.5 ? halfUV.y : -halfUV.y;
+               float2 halfUV = float2(0.5, 0.5) / i.size;
+               i.texCoord0.x += i.texCoord0.x > 0.5 ? halfUV.x : -halfUV.x;
+               i.texCoord0.y += i.texCoord0.y > 0.5 ? halfUV.y : -halfUV.y;
                 
                 float opacity = 1; // (float)i.indices.z / 255.0; // todo --- maybe unpack from elsewhere
                 
@@ -265,12 +265,9 @@
                 gradientTime = lerp(gradientTime, RadialGradient(gradientTexCoord), gradientType == GradientType_Radial);
                 gradientTime = lerp(gradientTime, ConicalGradient(gradientTexCoord), gradientType == GradientType_Conical); 
                 gradientTime *= gradientScale;
-
                 
                 grad = SampleGradient(lerp(gradientTime, frac(gradientTime), wrapGradient), colors, alphas, 5, 3, hardBlend);
                 grad = lerp(grad, SampleCornerGradient(gradientTexCoord, colors, alphas), 0);
-                
-                
                 float sdf = sdRoundBox(samplePoint, size * 0.5, radius);
 
                 float radialSDF = sdPie(radialSamplePoint, angleSinCos, fillRadius);
@@ -297,7 +294,7 @@
                // fixed3 gradientCol = fixed3(grayscale * grad.rgb);  //tex2D(_GradientMap, float2(grayscale, 0));
                // return UIForiaColorSpace(fixed4(grad.rgb + (0.25 * color.rgb), color.a)); //gradientCol * c.a * IN.color;
                 color.a *= opacity;
-                color.a *= (s.x * s.y) != 0;
+                //color.a *= (s.x * s.y) != 0; todo -- fix this
                 color = UIForiaColorSpace(color); // todo -- video texture wont want to adjust color space 
                 clip(color.a - 0.01);
                 return color;

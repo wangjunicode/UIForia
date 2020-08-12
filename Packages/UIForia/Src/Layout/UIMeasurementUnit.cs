@@ -6,6 +6,7 @@ namespace UIForia.Layout {
     public enum UIMeasurementUnit {
 
         Unset = UnitConstants.Unset,
+        Auto = UnitConstants.Auto,
         Pixel = UnitConstants.Pixel,
         Content = UnitConstants.Content,
         BlockSize = UnitConstants.ParentSize,
@@ -17,8 +18,9 @@ namespace UIForia.Layout {
         IntrinsicMinimum = UnitConstants.MinContent,
         IntrinsicPreferred = UnitConstants.MaxContent,
         FitContent = UnitConstants.FitContent,
-
-        Auto = 0
+        
+        BackgroundImageWidth = UnitConstants.TextureWidth,
+        BackgroundImageHeight = UnitConstants.TextureHeight,
 
     }
 

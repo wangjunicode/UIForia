@@ -8,13 +8,13 @@ namespace UIForia.Layout {
         public const int AllocatedWidth = 1 << 2;
         public const int AllocatedHeight = 1 << 3;
         public const int Content = 1 << 4;
-        public const int ContentAreaWidth = 1 << 5;
-        public const int ContentAreaHeight = 1 << 6;
+        public const int TextureWidth = 1 << 5;
+        public const int TextureHeight = 1 << 6;
         public const int ContentHeight = 1 << 7;
         public const int ContentWidth = 1 << 8;
         public const int Em = 1 << 9;
         public const int FractionalRemaining = 1 << 10;
-        public const int LineHeight = 1 << 11;
+        public const int Auto = 1 << 11;
         public const int ParentWidth = 1 << 12;
         public const int MaxContent = 1 << 13;
         public const int MinContent = 1 << 14;

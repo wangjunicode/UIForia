@@ -910,11 +910,11 @@ namespace UIForia.Layout {
 
         }
 
-        public float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
+        public float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, in BlockSize blockSize) {
             return 0;
         }
 
-        public float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
+        public float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, in BlockSize blockSize) {
             return 0;
         }
 
@@ -1032,7 +1032,7 @@ namespace UIForia.Layout {
             }
         }
 
-        
+
     }
 
     public struct FlexTrack {

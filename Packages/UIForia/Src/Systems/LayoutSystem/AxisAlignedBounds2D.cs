@@ -16,6 +16,14 @@ namespace UIForia.Graphics {
             this.yMax = yMax;
         }
 
+        public float Width {
+            get => xMax - xMin;
+        }
+
+        public float Height {
+            get => yMax - yMin;
+        }
+
         // todo -- verify that this is correct, not sure that I want the additional - left / top
         public static AxisAlignedBounds2D Intersect(in AxisAlignedBounds2D a, in AxisAlignedBounds2D b) {
             float left = math.max(a.xMin, b.xMin);
@@ -44,6 +52,14 @@ namespace UIForia.Graphics {
             this.yMin = yMin;
             this.xMax = xMax;
             this.yMax = yMax;
+        }
+
+        public ushort Width {
+            get => (ushort) (xMax - xMin);
+        }
+
+        public ushort Height {
+            get => (ushort) (yMax - yMin);
         }
 
     }

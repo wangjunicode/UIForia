@@ -8,28 +8,36 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace UIForia.Layout {
 
+    public enum ScrollBounds {
+
+        Default
+
+    }
+
     internal unsafe struct ScrollLayoutBoxBurst : ILayoutBox {
 
         public ElementId elementId;
         public LayoutBoxUnion* layoutBox;
         public ScrollValues* scrollValues;
         public List_Int32 childrenIds;
+        public ScrollBounds scrollBounds;
 
         public void OnInitialize(LayoutSystem layoutSystem, UIElement element) {
             elementId = element.id;
             childrenIds = new List_Int32(8, Allocator.Persistent);
-            LayoutBoxType boxType = LayoutBoxUnion.GetLayoutBoxTypeForScrollView(element);
+            LayoutBoxType boxType = LayoutBoxUnion.GetLayoutBoxTypeForProxy(element);
             layoutBox = TypedUnsafe.Malloc<LayoutBoxUnion>(Allocator.Persistent);
             layoutBox->Initialize(boxType, layoutSystem, element);
             scrollValues = ((ScrollView) element).GetScrollValues();
+            scrollBounds = ScrollBounds.Default; // todo 
         }
 
-        public float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
-            return layoutBox->ResolveAutoWidth(ref runner, elementId, measurement, blockSize);
+        public float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, in BlockSize blockSize) {
+            return layoutBox->ResolveAutoWidth(ref runner, elementId, blockSize);
         }
 
-        public float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
-            return layoutBox->ResolveAutoHeight(ref runner, elementId, measurement, blockSize);
+        public float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, in BlockSize blockSize) {
+            return layoutBox->ResolveAutoHeight(ref runner, elementId, blockSize);
         }
 
         public void RunHorizontal(BurstLayoutRunner* runner) {
@@ -40,6 +48,25 @@ namespace UIForia.Layout {
             scrollValues->actualWidth = refRunner.GetHorizontalLayoutInfo(elementId).finalSize;
             scrollValues->contentWidth = layoutBox->GetActualContentWidth(ref refRunner);
             scrollValues->isOverflowingX = scrollValues->contentWidth > scrollValues->actualWidth;
+           // runner->scrollWidthUpdates.Add(elementId);
+        }
+
+        public float FindHorizontalMax(BurstLayoutRunner* runner) {
+            ref LayoutHierarchyInfo hierarchyInfo = ref runner->GetLayoutHierarchy(elementId);
+            ElementId ptr = hierarchyInfo.firstChildId;
+
+            float xMax = float.MinValue;
+
+            while (ptr != default) {
+                
+                ref LayoutBoxInfo boxInfo = ref runner->layoutBoxInfoTable[ptr.index];
+
+                if (xMax < boxInfo.alignedPosition.x + boxInfo.actualSize.x) xMax = boxInfo.alignedPosition.x + boxInfo.actualSize.x;
+
+                ptr = hierarchyInfo.nextSiblingId;
+            }
+
+            return 0;
         }
 
         public void RunVertical(BurstLayoutRunner* runner) {
@@ -48,7 +75,7 @@ namespace UIForia.Layout {
             ref BurstLayoutRunner refRunner = ref UnsafeUtilityEx.AsRef<BurstLayoutRunner>(runner);
             layoutBox->RunLayoutVertical(runner);
             scrollValues->actualHeight = refRunner.GetVerticalLayoutInfo(elementId).finalSize;
-            scrollValues->contentHeight = layoutBox->flex.GetActualContentHeight(ref refRunner);
+            scrollValues->contentHeight = layoutBox->GetActualContentHeight(ref refRunner);
             scrollValues->isOverflowingY = scrollValues->contentHeight > scrollValues->actualHeight;
         }
 
@@ -61,13 +88,14 @@ namespace UIForia.Layout {
         }
 
         public void Dispose() {
+            layoutBox->Dispose();
             // I don't think I need to handle setting children scrollValues ptr to null because if I am disposing this box, all children boxes are disposed as well 
             TypedUnsafe.Dispose(layoutBox, Allocator.Persistent);
             childrenIds.Dispose();
+            layoutBox = null;
         }
 
         public void OnChildrenChanged(LayoutSystem layoutSystem) {
-
             // might not be needed but safer to do this
             for (int i = 0; i < childrenIds.size; i++) {
                 layoutSystem.layoutResultTable.array[childrenIds.array[i]].scrollValues = null;
@@ -94,7 +122,6 @@ namespace UIForia.Layout {
                 layoutSystem.layoutResultTable.array[ptr.index].scrollValues = scrollValues;
                 ptr = layoutSystem.layoutHierarchyTable[ptr].nextSiblingId;
             }
-
         }
 
         public void OnStylePropertiesChanged(LayoutSystem layoutSystem, UIElement element, StyleProperty[] properties, int propertyCount) {

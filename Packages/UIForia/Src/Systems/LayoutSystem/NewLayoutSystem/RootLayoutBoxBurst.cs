@@ -13,11 +13,11 @@ namespace UIForia.Layout {
             this.elementId = element.id;
         }
 
-        public float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
+        public float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, in BlockSize blockSize) {
             return runner.viewParameters.viewWidth; // maybe content size?
         }
 
-        public float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
+        public float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, in BlockSize blockSize) {
             return runner.viewParameters.viewHeight;
         }
 

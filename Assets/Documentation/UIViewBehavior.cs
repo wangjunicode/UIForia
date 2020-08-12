@@ -132,6 +132,7 @@ namespace UIForia {
         private void Update() {
 
             if (application != null) {
+                application.DPIScaleFactor = 1;
                 if (commandBuffer == null) {
                     commandBuffer = new CommandBuffer();
                     commandBuffer.name = "UIForia";

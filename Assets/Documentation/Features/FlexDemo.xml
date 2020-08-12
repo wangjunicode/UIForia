@@ -14,17 +14,11 @@
         }
 
         style shape-kit {
-            PreferredSize = 700;
+            FlexLayoutDirection = Horizontal;
+            PreferredSize = 1vw 1vh;
             BackgroundColor = blue;
-            BorderRadius = 20%;
-            BackgroundImageScale = 1;
-<!--            BackgroundImageOffsetX = 150%;-->
-<!--            BackgroundImageOffsetY = 15%;-->
-            BackgroundImageRotation = 0;//45deg;
-<!--            OutlineWidth = 5;-->
-<!--            OutlineColor = white;-->
-            BackgroundImage = url("Images/DefaultAtlas", "player2");
-            CornerBevelBottomLeft = 25%;
+            //BackgroundImage = url("Images/2"); //DefaultAtlas", "player1");
+            // Padding = 10px;
             // material = "materialName"
             // painter:ShapePainter.sizeMod = 0.3f;
             // material:materialName.field = x;
@@ -67,15 +61,39 @@
              } 
         }
 
-
+        style child {
+            PreferredSize = 200px;
+            backgroundColor = red;
+            BorderRadius = 50%;
+        }
+        
     </Style>
     <Using namespace="UIForia"/>
     <Using namespace="UnityEngine"/>
     <Contents style="container2">
 
-        <Div style="shape-kit">
-            
-        </Div>
+        <ScrollView style="shape-kit">
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+            <Div style="child">{$parent.siblingIndex}</Div>
+
+        </ScrollView>
         
         <!--        </Div>-->
 

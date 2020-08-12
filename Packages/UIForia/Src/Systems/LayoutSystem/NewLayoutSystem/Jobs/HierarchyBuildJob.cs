@@ -18,20 +18,15 @@ namespace UIForia.Systems {
         public ElementTable<LayoutHierarchyInfo> layoutHierarchyTable;
 
         public void Execute() {
-
             DataList<ElementId> stack = new DataList<ElementId>(128, Allocator.Temp);
             DataList<ElementId> transclusionList = new DataList<ElementId>(32, Allocator.Temp);
 
             for (int i = 0; i < roots.size; i++) {
-                
                 ElementId rootId = roots[i];
-                
+
                 stack.Add(rootId);
 
                 while (stack.size != 0) {
-
-                    if(roots[0].index != 2) Debugger.Break();
-                    
                     ElementId parent = stack[--stack.size];
 
                     ElementId ptr = hierarchyTable[parent].firstChildId;
@@ -45,8 +40,6 @@ namespace UIForia.Systems {
                     ElementId prevSibling = default;
 
                     while (ptr.id != default) {
-                        if(roots[0].index != 2) Debugger.Break();
-
                         if (ElementSystem.IsDeadOrDisabled(ptr, metaTable)) {
                             ptr = hierarchyTable[ptr].nextSiblingId;
                             continue;
@@ -68,7 +61,6 @@ namespace UIForia.Systems {
                             ref LayoutHierarchyInfo prevLayoutHierarchy = ref layoutHierarchyTable[prevSibling];
                             prevLayoutHierarchy.nextSiblingId = currentChild;
                         }
-                        if(roots[0].index != 2) Debugger.Break();
 
                         // always set last child since we dont know if next ptr value is enabled or not
                         parentLayoutInfo.lastChildId = currentChild;
@@ -86,16 +78,12 @@ namespace UIForia.Systems {
                                 transclusionList.Add(currentChild);
                                 break;
                         }
-
                     }
 
                     ptr = hierarchyTable[parent].lastChildId;
-                    if(roots[0].index != 2) Debugger.Break();
 
                     while (ptr != default) {
-                        if(roots[0].index != 2) Debugger.Break();
-                        stack.Add(ptr);      
-                        if(roots[0].index != 2) Debugger.Break();
+                        stack.Add(ptr);
 
                         ptr = hierarchyTable[ptr].prevSiblingId;
                     }

@@ -30,11 +30,11 @@ namespace UIForia.Layout {
         public LayoutFit fitHorizontal;
         public LayoutFit fitVertical;
 
-        public float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
+        public float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, in BlockSize blockSize) {
             return 0;
         }
 
-        public float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize) {
+        public float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, in BlockSize blockSize) {
             return 0;
         }
 
@@ -317,7 +317,7 @@ namespace UIForia.Layout {
                     return math.max(0, blockSize.insetSize * cellSize.value);
 
                 case GridTemplateUnit.Em:
-                    return runner.GetEmSize(elementId) * cellSize.value;
+                    return runner.GetResolvedFontSize(elementId) * cellSize.value;
 
                 case GridTemplateUnit.ViewportWidth:
                     return runner.viewParameters.viewWidth * cellSize.value;
@@ -348,7 +348,7 @@ namespace UIForia.Layout {
                     return math.max(0, blockSize.insetSize * cellSize.value);
 
                 case GridTemplateUnit.Em:
-                    return runner.GetEmSize(elementId) * cellSize.value;
+                    return runner.GetResolvedFontSize(elementId) * cellSize.value;
 
                 case GridTemplateUnit.ViewportWidth:
                     return runner.viewParameters.viewWidth * cellSize.value;

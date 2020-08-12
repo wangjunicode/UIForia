@@ -19,6 +19,7 @@ namespace UIForia.Layout {
         public BlockSize parentBlockSize;
         public ContentCacheInfo contentCache;
         public LayoutFit fit;
+        public float bgSize;
 
         public bool isBlockProvider;
         public bool requiresLayout;

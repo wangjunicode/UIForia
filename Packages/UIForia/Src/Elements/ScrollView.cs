@@ -221,7 +221,6 @@ namespace UIForia.Elements {
         }
 
         public void OnClickVertical(MouseInputEvent evt) {
-
             float contentAreaHeight = layoutResult.ContentAreaHeight;
             float contentHeight = firstChild.layoutResult.actualSize.height;
             float paddingBorderStart = layoutResult.VerticalPaddingBorderStart;
@@ -275,30 +274,33 @@ namespace UIForia.Elements {
 
             Vector2 baseOffset = new Vector2();
             ScrollbarOrientation orientation = 0;
+            Vector2 baseScroll = default;
 
             if (horizontalScrollingEnabled) {
                 baseOffset.x = evt.MousePosition.x - horizontalHandle.layoutResult.screenPosition.x;
                 orientation |= ScrollbarOrientation.Horizontal;
+                baseScroll.x = scrollValues->scrollX;
             }
 
             if (verticalScrollingEnabled) {
                 baseOffset.y = evt.MousePosition.y - layoutResult.screenPosition.y; // maybe also - padding / border?
                 orientation |= ScrollbarOrientation.Vertical;
+                baseScroll.y = scrollValues->scrollY;
             }
 
-            return new ScrollbarDragEvent(orientation, baseOffset, this);
+            return new ScrollbarDragEvent(orientation, baseOffset, baseScroll, this);
         }
 
         public virtual DragEvent OnCreateVerticalDrag(MouseInputEvent evt) {
             if (evt.IsMouseRightDown) return null;
             float baseOffset = evt.MousePosition.y - (evt.element.layoutResult.screenPosition.y);
-            return new ScrollbarDragEvent(ScrollbarOrientation.Vertical, new Vector2(0, baseOffset), this);
+            return new ScrollbarDragEvent(ScrollbarOrientation.Vertical, new Vector2(0, baseOffset), default, this);
         }
 
         public virtual DragEvent OnCreateHorizontalDrag(MouseInputEvent evt) {
             if (evt.IsMouseRightDown) return null;
             float baseOffset = evt.MousePosition.x - evt.element.layoutResult.screenPosition.x;
-            return new ScrollbarDragEvent(ScrollbarOrientation.Horizontal, new Vector2(baseOffset, 0), this);
+            return new ScrollbarDragEvent(ScrollbarOrientation.Horizontal, new Vector2(baseOffset, 0), default, this);
         }
 
         public void ScrollToVerticalPercent(float percentage) {
@@ -314,42 +316,50 @@ namespace UIForia.Elements {
         public class ScrollbarDragEvent : DragEvent {
 
             public readonly Vector2 baseOffset;
+            public readonly Vector2 baseScroll;
             public readonly ScrollView scrollView;
             public readonly ScrollbarOrientation orientation;
 
-            public ScrollbarDragEvent(ScrollbarOrientation orientation, Vector2 baseOffset, ScrollView scrollView) {
+            public ScrollbarDragEvent(ScrollbarOrientation orientation, Vector2 baseOffset, Vector2 baseScroll, ScrollView scrollView) {
                 this.orientation = orientation;
                 this.baseOffset = baseOffset;
                 this.scrollView = scrollView;
+                this.baseScroll = baseScroll;
             }
 
             public override void Update() {
-                // todo -- this is still wrong
                 ScrollValues* scrollValues = scrollView.GetScrollValues();
                 if ((orientation & ScrollbarOrientation.Vertical) != 0) {
                     float height = scrollValues->actualHeight;
 
-                    float baseMouse = (MousePosition.y - baseOffset.y) - (scrollView.layoutResult.screenPosition.y);
-                    // float y = MousePosition.y - baseOffset.y + scrollView.layoutResult.VerticalPaddingBorderStart; //Mathf.Clamp(MousePosition.y - (scrollView.layoutResult.screenPosition.y + scrollView.layoutResult.VerticalPaddingBorderStart) - baseOffset.y, 0, height);
+                    float handleHeight = (scrollValues->actualHeight / scrollValues->contentHeight) * scrollValues->actualHeight;
+
+                    height -= handleHeight;
+
+                    float y = MousePosition.y - (scrollView.layoutResult.screenPosition.y + scrollView.layoutResult.VerticalPaddingBorderStart) - baseOffset.y;
 
                     if (height == 0) {
                         scrollView.ScrollToVerticalPercent(0);
                     }
                     else {
-                        scrollView.ScrollToVerticalPercent(baseMouse / height);
+                        scrollView.ScrollToVerticalPercent(baseScroll.y + y / height);
                     }
                 }
 
                 if ((orientation & ScrollbarOrientation.Horizontal) != 0) {
-                    float width =  scrollValues->actualWidth;
+                    float width = scrollValues->actualWidth;
 
-                    float baseMouse = (MousePosition.x - baseOffset.x) - (scrollView.layoutResult.screenPosition.x);
+                    float handleWidth = (scrollValues->actualWidth / scrollValues->contentWidth) * scrollValues->actualWidth;
+
+                    width -= handleWidth;
+
+                    float x = MousePosition.x - (scrollView.layoutResult.screenPosition.x + scrollView.layoutResult.HorizontalPaddingBorderStart) - baseOffset.x;
 
                     if (width == 0) {
                         scrollView.ScrollToHorizontalPercent(0);
                     }
                     else {
-                        scrollView.ScrollToHorizontalPercent(baseMouse / width);
+                        scrollView.ScrollToHorizontalPercent(baseScroll.x + x / width);
                     }
                 }
             }
@@ -360,7 +370,6 @@ namespace UIForia.Elements {
         public float ScrollOffsetY => -(firstChild.layoutResult.alignedPosition.y - layoutResult.VerticalPaddingBorderStart);
 
         internal void ScrollElementIntoView(UIElement element, float crawlPositionX, float crawlPositionY) {
-
             float scrollOffsetX = ScrollOffsetX;
             float localPositionX = crawlPositionX - layoutResult.HorizontalPaddingBorderStart;
 

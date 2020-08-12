@@ -89,7 +89,6 @@ namespace UIForia.Compilers.Style {
                             float number = MapNumber(property.children[0], context);
                             targetStyle.BackgroundImageScaleX = number;
                             targetStyle.BackgroundImageScaleY = number;
-
                         }
                         else {
                             targetStyle.BackgroundImageScaleX = MapNumber(property.children[0], context);
@@ -309,13 +308,11 @@ namespace UIForia.Compilers.Style {
                 {"meshfilldirection", (targetStyle, property, context) => targetStyle.MeshFillDirection = MapEnum<MeshFillDirection>(property.children[0], context)},
                 {"meshfillorigin", (targetStyle, property, context) => targetStyle.MeshFillOrigin = MapEnum<MeshFillOrigin>(property.children[0], context)},
                 {"meshfillamount", (targetStyle, property, context) => targetStyle.MeshFillAmount = MapNumber(property.children[0], context)},
-
             };
 
         // "materialName" { [type] [identifier] = [value] }
         // when using style database, we need to know per-module what the materials are already. should be easy
         private static unsafe MaterialId MapMaterial(PropertyNode node, StyleCompileContext context) {
-
             return new MaterialId();
             // if (!(node.children[0] is StyleLiteralNode literalNode) || literalNode.type != StyleASTNodeType.StringLiteral) {
             //     return default;
@@ -710,6 +707,7 @@ namespace UIForia.Compilers.Style {
         private static void MapPreferredSize(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
             UIMeasurement x = MapMeasurement(property.children[0], context);
             UIMeasurement y = x;
+
             if (property.children.Count > 1) {
                 y = MapMeasurement(property.children[1], context);
             }
@@ -1315,6 +1313,12 @@ namespace UIForia.Compilers.Style {
             switch (value) {
                 case "px":
                     return UIMeasurementUnit.Pixel;
+
+                case "bw":
+                    return UIMeasurementUnit.BackgroundImageWidth;
+
+                case "bh":
+                    return UIMeasurementUnit.BackgroundImageHeight;
 
                 case "pca":
                     return UIMeasurementUnit.ParentContentArea;
@@ -2033,7 +2037,6 @@ namespace UIForia.Compilers.Style {
         }
 
         public static unsafe void MapPainterProperty(UIStyle targetStyle, PainterPropertyNode painterPropertyNode, in StylePainterDefinition painterDefinition) {
-
             for (int i = 0; i < painterDefinition.definedVariables.Length; i++) {
                 if (painterPropertyNode.propertyName != painterDefinition.definedVariables[i].name) {
                     continue;
@@ -2042,7 +2045,6 @@ namespace UIForia.Compilers.Style {
                 PainterVariableDeclaration def = painterDefinition.definedVariables[i];
 
                 fixed (char* charptr = painterPropertyNode.propertyValue) {
-
                     CharStream stream = new CharStream(charptr, 0, (uint) painterPropertyNode.propertyValue.Length);
 
                     stream.ConsumeWhiteSpaceAndComments();
@@ -2079,16 +2081,13 @@ namespace UIForia.Compilers.Style {
                     }
                     else if (typeof(Texture).IsAssignableFrom(typeof(Texture))) {
                         throw new NotImplementedException("Todo -- implement texture parsing");
-
                     }
                     else {
                         throw new CompileException($"Tried to set a painter variable '{painterPropertyNode.propertyName}' but {painterPropertyNode.painterName} failed to parse value {painterPropertyNode.propertyValue}");
-
                     }
                 }
 
                 return;
-
             }
 
             throw new CompileException($"Tried to set a painter variable '{painterPropertyNode.propertyName}' but {painterPropertyNode.painterName} does not define it.");

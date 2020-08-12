@@ -227,7 +227,8 @@ inline fixed4 ComputeColor(fixed4 mainColor, fixed4 gradientColor, fixed4 tintCo
     int tintTexture = (colorMode & ColorMode_TextureTint) != 0;
     int coverTexture = (colorMode & ColorMode_CoverTexture) != 0;
     fixed4 textureColor = tex2Dlod(textureToRead, float4(texCoord, 0, 0));
-    int gradientMode = GradientMode_Color | GradientMode_ColorAlpha;
+    
+    int gradientMode = 0;
     
     textureColor.rgb = lerp(textureColor.rgb, gradientColor.rgb, (gradientMode & GradientMode_TextureColor) != 0);
     textureColor.a *= lerp(1, 1 - (textureColor.a - gradientColor.a), (gradientMode & GradientMode_TextureAlpha) != 0);

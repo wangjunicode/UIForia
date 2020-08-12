@@ -9,9 +9,9 @@ namespace UIForia.Layout {
 
         void OnInitialize(LayoutSystem layoutSystem, UIElement element);
 
-        float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize);
+        float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, in BlockSize blockSize);
         
-        float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, UIMeasurement measurement, in BlockSize blockSize);
+        float ResolveAutoHeight(ref BurstLayoutRunner runner, ElementId elementId, in BlockSize blockSize);
 
         void RunHorizontal(BurstLayoutRunner* runner);
 
@@ -24,10 +24,6 @@ namespace UIForia.Layout {
         void OnStylePropertiesChanged(LayoutSystem layoutSystem, UIElement element, StyleProperty[] properties, int propertyCount);
 
         void OnChildStyleChanged(LayoutSystem layoutSystem, ElementId childId, StyleProperty[] properties, int propertyCount);
-
-        float GetActualContentWidth(ref BurstLayoutRunner runner);
-        
-        float GetActualContentHeight(ref BurstLayoutRunner runner);
 
     }
 

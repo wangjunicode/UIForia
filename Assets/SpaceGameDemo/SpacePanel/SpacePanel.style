@@ -1,0 +1,64 @@
+﻿import "SpaceGameDemo/Theme.style" as theme;
+
+style space-panel {
+    LayoutBehavior = Ignored;
+    PreferredSize = 1vw 1vh;
+
+    [attr:state="default"] {
+        TransformScale = 1;
+        TransformPosition = 0;
+        Opacity = 1;
+        [exit] run animation(move-offscreen);
+    }
+    [attr:state="offscreen"] {
+        TransformScale = 3;
+        TransformPosition = -3w 3h;
+        Opacity = 0;
+        [exit] run animation(move-onscreen);
+    }
+    [attr:state="onscreen"] {
+        TransformScale = 1;
+        TransformPosition = 0;
+        Opacity = 1;
+        [exit] run animation(move-offscreen);
+    }
+}
+
+animation move-offscreen {
+    [options] {
+        Duration = 1200ms;
+        TimingFunction = QuadraticEaseIn;
+    }
+    [keyframes] {
+        0% {
+            TransformScale = 1;
+            TransformPosition = 0;
+            Opacity = 1;
+        }
+        35% { Opacity = 0.1; }
+        100% {
+            TransformScale = 3;
+            TransformPosition = -3w 3h;
+            Opacity = 0;
+        }
+    }
+}
+
+animation move-onscreen {
+    [options] {
+        Duration = 1200ms;
+        TimingFunction = QuadraticEaseIn;
+    }
+    [keyframes] {
+        0% {
+            TransformScale = 0.25;
+            TransformPosition = 1w -1h;
+            Opacity = 0.3;
+        }
+        100% {
+            TransformScale = 1;
+            TransformPosition = 0;
+            Opacity = 1;
+        }
+    }
+}

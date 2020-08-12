@@ -10,6 +10,7 @@ namespace UIForia.Rendering {
 
         void SetCamera(Camera camera);
 
+        RenderContext GetRenderContext();
     }
 
 }

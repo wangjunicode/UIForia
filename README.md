@@ -8,6 +8,13 @@ of TextMesh Pro (copy our forked package into your project). But not forever!
 Comments, fixes or demos are welcome. We might not have time for support
 right now, since we're working hard on the framework!
 
+## Demo
+
+[![UIForia SpaceGame Demo](docs/assets/videos/spacegamedemo_startmenu.gif)](docs/assets/videos/spacegamedemo_startmenu.mp4)
+[![UIForia SpaceGame Demo](docs/assets/videos/spacegamedemo_servers.gif)](docs/assets/videos/spacegamedemo_servers.mp4)
+[![UIForia SpaceGame Demo](docs/assets/videos/spacegamedemo_singleplayer.gif)](docs/assets/videos/spacegamedemo_singleplayer.mp4)
+
+
 # License - MIT
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

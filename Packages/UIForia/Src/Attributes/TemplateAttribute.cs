@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace UIForia.Attributes {
 
@@ -18,12 +19,14 @@ namespace UIForia.Attributes {
         public string templateId;
         public readonly TemplateType templateType;
         public string fullPathId;
+        public string relativePath;
 
         public TemplateAttribute() {
             this.templateType = TemplateType.DefaultFile;
             this.templateId = null;
             this.source = string.Empty;
             this.fullPathId = null;
+            this.relativePath = null;
         }
 
         public TemplateAttribute(TemplateType templateType, string sourceOrPath) {
@@ -45,6 +48,14 @@ namespace UIForia.Attributes {
                     else {
                         this.templateId = sourceOrPath.Substring(idx + 1);
                         this.filePath = sourceOrPath.Substring(0, idx);
+                    }
+
+                    int lastSlash = filePath.IndexOf(Path.DirectorySeparatorChar);
+                    if (lastSlash > 0) {
+                        relativePath = filePath.Substring(lastSlash);
+                    }
+                    else {
+                        relativePath = filePath;
                     }
 
                     break;

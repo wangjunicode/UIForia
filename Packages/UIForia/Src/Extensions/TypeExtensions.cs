@@ -79,15 +79,12 @@ namespace UIForia.Extensions {
 
         private static readonly CacheDict<MethodBase, ParameterInfo[]> _ParamInfoCache = new CacheDict<MethodBase, ParameterInfo[]>(75);
 
-        internal static Delegate CreateDelegate(
-            this MethodInfo methodInfo,
-            Type delegateType,
-            object target) {
-            DynamicMethod dynamicMethod = methodInfo as DynamicMethod;
-            if ((MethodInfo) dynamicMethod != (MethodInfo) null)
-                return dynamicMethod.CreateDelegate(delegateType, target);
-            return Delegate.CreateDelegate(delegateType, target, methodInfo);
-        }
+        // internal static Delegate CreateDelegate(this MethodInfo methodInfo, Type delegateType, object target) {
+        //     DynamicMethod dynamicMethod = methodInfo as DynamicMethod;
+        //     if ((MethodInfo) dynamicMethod != (MethodInfo) null)
+        //         return dynamicMethod.CreateDelegate(delegateType, target);
+        //     return Delegate.CreateDelegate(delegateType, target, methodInfo);
+        // }
 
         internal static Type GetReturnType(this MethodBase mi) {
             if (!mi.IsConstructor)

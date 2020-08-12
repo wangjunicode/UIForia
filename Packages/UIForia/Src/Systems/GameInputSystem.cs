@@ -60,7 +60,7 @@ namespace UIForia.Systems.Input {
                 lastMouseDownTime = now;
                 lastMouseDownPosition = retn.leftMouseButtonState.downPosition;
             }
-            else if (retn.isLeftMouseUpThisFrame) {
+            if (retn.isLeftMouseUpThisFrame) {
                 if (clickCount == 0 || now - lastMouseDownTime <= k_clickThresholdSeconds) {
                     if (Vector2.Distance(lastMouseDownPosition, retn.mousePosition) <= k_clickDistanceThreshold / global::UIForia.Application.dpiScaleFactor) {
                         clickCount++;
@@ -68,7 +68,9 @@ namespace UIForia.Systems.Input {
                     }
                 }
 
-                retn.leftMouseButtonState.downPosition = unsetDownPosition;
+                if (!retn.isLeftMouseDownThisFrame) {
+                    retn.leftMouseButtonState.downPosition = unsetDownPosition;
+                }
             }
 
             retn.isSingleClick = didClick && clickCount == 1;

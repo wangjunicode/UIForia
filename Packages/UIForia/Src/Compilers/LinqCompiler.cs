@@ -731,9 +731,9 @@ namespace UIForia.Compilers {
             return BuildLambda().Compile();
         }
 
-        public void CompileToMethod(MethodBuilder builder, DebugInfoGenerator debugInfoGenerator = null) {
-            BuildLambda().CompileToMethod(builder, debugInfoGenerator);
-        }
+        // public void CompileToMethod(MethodBuilder builder, DebugInfoGenerator debugInfoGenerator = null) {
+        //     BuildLambda().CompileToMethod(builder, debugInfoGenerator);
+        // }
 
         public void SetNullCheckHandler(Action<LinqCompiler, Expression> nullCHeckHandler) {
             this.nullCheckHandler = nullCHeckHandler;

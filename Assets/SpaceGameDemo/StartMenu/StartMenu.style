@@ -1,0 +1,12 @@
+﻿import "SpaceGameDemo/Theme.style" as theme;
+
+style menu {
+    AlignX = 50px Screen;
+    AlignY = 15% -15% Screen End;
+}
+
+style logo {
+    AlignX = Center Screen;
+    AlignY = 15% Screen;
+  //  Material = "Shine";
+}

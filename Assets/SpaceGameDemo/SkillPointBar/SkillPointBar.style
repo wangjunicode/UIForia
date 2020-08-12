@@ -1,0 +1,95 @@
+﻿import "SpaceGameDemo/Theme.style" as theme;
+
+style skill-bar-container {
+    FlexLayoutDirection = Horizontal;
+    LayoutFit = Fill;
+    DistributeExtraSpaceVertical = CenterContent;
+    Padding = 5px 10px;
+    [hover] {
+        BackgroundColor = rgba(80, 20, 20, 60);
+    }
+}
+
+style label {
+    PreferredWidth = 150px;
+}
+
+style skill-bar-wrapper {
+    FlexItemGrow = 1;
+    PreferredWidth = 10px;
+    DistributeExtraSpaceVertical = CenterContent;
+}
+
+style skill-bar {
+    PreferredHeight = 8px;
+    BackgroundColor = @theme.orange;
+    BorderRadius = 4px;
+    [attr:skill="25"] {
+        [enter] run animation(grow-bar);
+        [exit] run animation(shrink-bar);
+    }
+}
+
+animation grow-bar {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 200ms;
+    }
+    [keyframes] { 
+        100% { PreferredHeight = 12px; } 
+    }
+}
+
+animation shrink-bar {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 200ms;
+    }
+    [keyframes] { 
+        100% { PreferredHeight = 8px; } 
+    }
+}
+
+style knob {
+    PreferredSize = 16px;
+    BackgroundColor = black;
+    BorderRadius = 50%;
+    DistributeExtraSpace = CenterContent;
+    Margin = 0 5px 0 0;
+}
+
+style maxed-out {
+    AlignX = Center Parent;
+    LayoutBehavior = Ignored;
+    TextColor = black;
+    TextFontSize = 8px;
+    run animation(fly-in);
+}
+
+animation fly-in {
+    [options] {
+        TimingFunction = QuadraticEaseIn;
+        Duration = 500ms;
+    }
+    
+    [keyframes] {
+        0% {
+            Opacity = 0;
+            AlignY = 0px -100% Parent;
+        }
+        100% {
+            Opacity = 1;
+            AlignY = Center Parent;
+        }
+    }
+}
+
+animation warning {
+    [options] {
+        Duration = 800ms;
+    }
+    [keyframes] {
+        0%, 20%, 40%, 60%, 80%, 100% { BackgroundColor = @theme.orange; }
+         10%, 30%, 50%, 70%, 90% { BackgroundColor = red; }
+    }
+}

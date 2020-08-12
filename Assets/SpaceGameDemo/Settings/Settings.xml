@@ -1,0 +1,33 @@
+﻿<UITemplate>
+    <Style src="SpaceGameDemo/Settings/Settings.style"/>
+    <Style src="SpaceGameDemo/Theme.style" alias="theme"/>
+    <Contents>
+
+        <Group style="menu">
+            <SpaceMenuItem label="'Graphics'" targetPanel="'Settings'" mouse:click="Show('Graphics')" />
+            <SpaceMenuItem label="'Audio'" targetPanel="'Settings'" mouse:click="Show('Audio')" />
+            <SpaceMenuItem label="'Input'" targetPanel="'Settings'" mouse:click="Show('Input')" />
+            <SpaceMenuItem label="'Back'" targetPanel="'StartMenu'" />
+        </Group>
+
+        <Panel style="main-content">
+            <SpacePanelHeader crumb="'Settings'" title="title"/>
+            
+            <Panel if="title == 'Graphics'" style="settings-panel">
+                <Heading2>Post Processing Effects</Heading2>
+                <Group style="indent">
+                    <Toggle sync:value="bloom">Use Bloom</Toggle>
+                    <Toggle sync:value="vsync">VSync</Toggle>
+                </Group>
+            </Panel>
+    
+            <Panel if="title == 'Audio'" style="settings-panel">
+                audio
+            </Panel>
+    
+            <Panel if="title == 'Input'" style="settings-panel">
+                input 
+            </Panel>
+        </Panel>
+    </Contents>
+</UITemplate>

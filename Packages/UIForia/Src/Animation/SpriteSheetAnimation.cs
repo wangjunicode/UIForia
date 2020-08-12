@@ -1,10 +1,12 @@
 using System;
+using System.Text;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Sound;
 using UIForia.Systems;
 using UIForia.Util;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace UIForia.Animation {
 
@@ -19,8 +21,16 @@ namespace UIForia.Animation {
             if (!animationData.options.startFrame.HasValue) {
                 throw new Exception($"SpriteSheetAnimations must define a startFrame. File: {animationData.fileName}>{animationData.name}");
             }
-            for (int i = animationData.options.startFrame.Value; i <= animationData.options.endFrame; i++) {
-                frames.Add(target.application.ResourceManager.GetTexture(animationData.options.pathPrefix + i));
+
+            if (animationData.options.pathPrefix.IndexOf('{') > -1) {
+                for (int i = animationData.options.startFrame.Value; i <= animationData.options.endFrame; i++) {
+                    frames.Add(target.application.ResourceManager.GetTexture(string.Format(animationData.options.pathPrefix, i)));
+                }
+            }
+            else {
+                for (int i = animationData.options.startFrame.Value; i <= animationData.options.endFrame; i++) {
+                    frames.Add(target.application.ResourceManager.GetTexture(animationData.options.pathPrefix + i));
+                }
             }
         }
 

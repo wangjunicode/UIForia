@@ -1,0 +1,17 @@
+﻿<UITemplate>
+    <Style src="SpaceGameDemo/SkillPointBar/SkillPointBar.style" />
+    <Using namespace="UIForia.Rendering" />
+    <Using namespace="UIForia.Layout" />
+    <Contents style="skill-bar-container">
+        <define:Children style="label" />
+
+        <Div style="knob" mouse:click="DecreaseSkill()">-</Div>
+        <Div style="knob increase-knob" mouse:click="IncreaseSkill()">+</Div>
+        
+        <Div style="skill-bar-wrapper">                
+            <Div attr:id="skill-bar" attr:skill="{skillPoints}" style="skill-bar" style:preferredWidth="new UIMeasurement(skillPoints / 25f, UIMeasurementUnit.Percentage)" />
+            <Div if="skillPoints == 25f" style="maxed-out">Maxed Out!</Div>
+        </Div>
+        
+    </Contents>
+</UITemplate>

@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using UIForia.Compilers;
 using UIForia.Parsing;
-using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using UnityEditor;
+using UnityEditor.Callbacks;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
@@ -18,7 +16,7 @@ namespace UIForia.Editor {
         private string[] names;
         private bool didEnable;
 
-        [UnityEditor.Callbacks.DidReloadScripts]
+        [DidReloadScripts]
         private static void OnScriptsReloaded() {
             // todo try to track if pre-compiled templates are out of date or not
         }
@@ -78,6 +76,10 @@ namespace UIForia.Editor {
                 EditorSceneManager.MarkSceneDirty(behavior.gameObject.scene);
             }
 
+            EditorGUILayout.BeginHorizontal();
+            behavior.styleBasePath = EditorGUILayout.TextField("Style Base Path", behavior.styleBasePath);
+            EditorGUILayout.EndHorizontal();
+
             behavior.usePreCompiledTemplates = GUILayout.Toggle(behavior.usePreCompiledTemplates, "Use Precompiled");
 
             if (GUILayout.Button("Generate Code")) {
@@ -97,7 +99,7 @@ namespace UIForia.Editor {
             serializedObject.FindProperty("typeName").stringValue = behavior.typeName;
             serializedObject.ApplyModifiedProperties();
 
-            if (UnityEditor.EditorApplication.isPlaying) {
+            if (EditorApplication.isPlaying) {
                 if (behavior.application == null) return;
                 EditorGUILayout.BeginHorizontal();
                 float dpi = behavior.application.DPIScaleFactor;

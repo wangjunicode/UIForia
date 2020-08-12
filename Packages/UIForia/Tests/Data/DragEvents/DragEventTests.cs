@@ -121,7 +121,7 @@ namespace DragEventTests {
 
         [Test]
         public void CreateLambdaArgInvalidRetn() {
-            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<DragTestThing_CreateLambdaArgInvalidRetn>("DragTestThing_CreateLambdaArgInvalidRetn"); });
+            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<DragTestThing_CreateLambdaArgInvalidRetn>(); });
             Assert.IsTrue(exception.Message.Contains(@"drag:create=""(e) => CreateDragFromChild(e, 3)"""));
         }
 
@@ -193,7 +193,7 @@ namespace DragEventTests {
 
         [Test]
         public void CreateAnnotationInvalidParameter() {
-            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<DragTestThing_CreateAnnotationInvalidParameter>("DragTestThing_CreateAnnotationInvalidParameter"); });
+            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<DragTestThing_CreateAnnotationInvalidParameter>(); });
             Assert.IsTrue(
                 exception.Message.Contains(CompileException.InvalidInputAnnotation("CreateDrag", typeof(DragTestThing_CreateAnnotationInvalidParameter), typeof(OnDragCreateAttribute), typeof(MouseInputEvent), typeof(int)).Message));
         }
@@ -210,7 +210,7 @@ namespace DragEventTests {
 
         [Test]
         public void CreateAnnotationInvalidParameterCount() {
-            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<DragTestThing_CreateAnnotationInvalidParameterCount>("DragTestThing_CreateAnnotationInvalidParameterCount"); });
+            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<DragTestThing_CreateAnnotationInvalidParameterCount>(); });
             Assert.IsTrue(exception.Message.Contains(
                 CompileException.TooManyInputAnnotationArguments("CreateDrag", typeof(DragTestThing_CreateAnnotationInvalidParameterCount), typeof(OnDragCreateAttribute), typeof(MouseInputEvent), 2)
                 .Message));
@@ -226,7 +226,7 @@ namespace DragEventTests {
 
         [Test]
         public void CreateAnnotationInvalidReturn() {
-            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<DragTestThing_CreateAnnotationInvalidReturn>("DragTestThing_CreateAnnotationInvalidReturn"); });
+            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<DragTestThing_CreateAnnotationInvalidReturn>(); });
             Assert.IsTrue(exception.Message.Contains(CompileException.InvalidDragCreatorAnnotationReturnType("CreateDrag", typeof(DragTestThing_CreateAnnotationInvalidReturn), typeof(void)).Message));
         }
 

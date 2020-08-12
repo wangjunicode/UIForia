@@ -1,0 +1,19 @@
+﻿<UITemplate>
+    <Style src="SpaceGameDemo/SpacePanelHeader/SpacePanelHeader.style"/>
+    <Contents>
+        <Group style="bread-crumb">
+            <Text mouse:click="GoToStartMenu()">Start</Text>
+            <Text style="bread-crumb-divider" if="crumb != null"> // </Text>
+            <Text if="crumb != null">{crumb}</Text>
+            <Text style="bread-crumb-divider"> // </Text>
+            <Text style="current-page">{title}</Text>
+        </Group>
+
+        <Group style="header">
+            <Text>{title}</Text>
+            <define:rightSide style="toggle">
+                
+            </define:rightSide>
+        </Group>
+    </Contents>
+</UITemplate>

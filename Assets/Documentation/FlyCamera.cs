@@ -35,7 +35,6 @@ namespace Documentation {
             settings.assemblyName = "Assembly-CSharp";
             settings.outputPath = Path.Combine(UnityEngine.Application.dataPath, "UIForiaGenerated2");
             settings.codeFileExtension = "generated.cs";
-            settings.preCompiledTemplatePath = "Assets/UIForia_Generated2/" + settings.applicationName;
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
             return settings;
         }

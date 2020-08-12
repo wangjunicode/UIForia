@@ -1,0 +1,137 @@
+﻿<UITemplate>
+    <Style src="SpaceGameDemo/SinglePlayer/SinglePlayer.style" />
+    <Style src="SpaceGameDemo/Theme.style" alias="theme"/>
+    
+    <Using namespace="SpaceGameDemo.SinglePlayer"/>
+
+    <Contents>
+        <Group style="menu">
+            <SpaceMenuItem label="'Back'" targetPanel="'StartMenu'" />
+        </Group>
+        <Panel style="main-content">
+            <SpacePanelHeader title="'Single Player'"/>
+            <Group style="tab-container">
+                <Div style="tab-item" mouse:click="SelectTab(TabItem.Ships)" attr:selected="{tab == TabItem.Ships ? 'selected'}">Ships<Image Height="25" src="'Images/ship01a/tile000'" /></Div>
+                <Div style="tab-item" mouse:click="SelectTab(TabItem.Items)" attr:selected="{tab == TabItem.Items ? 'selected'}">Items<Image Height="16" src="'Images/bolt'" style="mh1" /></Div>
+                <Div style="tab-item" mouse:click="SelectTab(TabItem.Stats)" attr:selected="{tab == TabItem.Stats ? 'selected'}">Stats<Image Height="16" src="'Images/star'" style="mh1" /></Div>
+                
+            </Group>
+            
+            <Panel if="tab == TabItem.Ships" style="settings-panel ships-panel">
+                <Group style="choose-ship-container">
+                    <Heading2>Choose your space ship</Heading2>
+                    <Repeat list="ships" style="ship-list">
+                        <SpaceMenuItem style="ship-item" mouse:click="SelectShip($item.id)" label="$item.name">
+                            <override:Children style="ship-icon">
+                                <Image Width="32" src="'Images/ship0' + $item.id + 'a/tile000'" />
+                            </override:Children>
+                        </SpaceMenuItem>
+                    </Repeat>
+                </Group>
+
+                <Group>
+                    <Heading2>Choose your pilot</Heading2>
+                    <Group style="hire-container">
+                        <Div style="avatar-container" mouse:click="SelectPilot(1)">
+                            <Div style="avatar-background" attr:selected="{selectedPilot == 1}">
+                                <Image style="pilot" Height="175" src="'Images/player1'" />
+                            </Div>
+                            Timmy
+                        </Div>
+                        <Div style="avatar-container" mouse:click="SelectPilot(2)">
+                            <Div style="avatar-background" attr:selected="{selectedPilot == 2}">
+                                <Image style="pilot" Height="175" src="'Images/player2'" />
+                            </Div>
+                            Cat
+                        </Div>
+                        <Div style="avatar-container" mouse:click="SelectPilot(3)">
+                            <Div style="avatar-background" attr:selected="{selectedPilot == 3}">
+                                <Image style="pilot" Height="175" src="'Images/player3'" />
+                            </Div>
+                            Ziggy
+                        </Div>
+                    </Group>
+                    <Input style="input" sync:value="nickname" placeholder="'Choose your nickname'" />
+                </Group>
+                
+                <Div style="blinking-things">
+                    
+                    <Div style="rotation-wrapper">
+                        <Div style="round rotating-left">
+                            <Div style="round rotating-right">
+                                <Div style="round rotating-left">
+                                    <Div style="round rotating-right">
+                                        <Div style="thingy pulse round"/>
+                                    </Div>
+                                </Div>
+                            </Div>
+                        </Div>
+                    </Div>
+                </Div>
+            </Panel>
+
+            <Panel if="tab == TabItem.Items" style="settings-panel inventory-panel">
+                <Group style="available-items" drag:drop="DropItemIntoList($event)">
+                    <Heading2>Available Items</Heading2>
+                    
+                    <Repeat list="availableItems" style="item-list">
+                        <Div style="item"
+                             drag:create="OnDragCreateItem($event, $item)">
+                            <Image Width="16" src="'Images/bolt'" style="item-image" />
+                            <Text style="item-text">{$item.name}</Text>
+                        </Div>
+                    </Repeat>
+                </Group>
+                <Group style="inventory" drag:drop="DropItemIntoInventory($event)">
+                    <Heading2>Inventory</Heading2>
+
+                    <Repeat list="inventoryItems" style="item-list">
+                        <Div style="item"
+                             drag:create="OnDragCreateItem($event, $item)">
+                            <Image Width="16" src="'Images/bolt'" style="item-image" />
+                            <Text style="item-text">{$item.name}</Text>
+                        </Div>
+                    </Repeat>
+                </Group>
+            </Panel>
+
+            <Panel if="tab == TabItem.Stats" style="settings-panel">
+                <Heading2>Upgrade points: {upgradePoints}</Heading2>
+                
+                <SkillPointBar sync:availablePoints="upgradePoints" skillPoints.once="2">Acceleration</SkillPointBar>
+                <SkillPointBar sync:availablePoints="upgradePoints" skillPoints.once="4">Power</SkillPointBar>
+                <SkillPointBar sync:availablePoints="upgradePoints" skillPoints.once="12">Engine</SkillPointBar>
+                <SkillPointBar sync:availablePoints="upgradePoints" skillPoints.once="4">Toughness</SkillPointBar>
+                <SkillPointBar sync:availablePoints="upgradePoints" skillPoints.once="2">Repair Speed</SkillPointBar>
+                <SkillPointBar sync:availablePoints="upgradePoints" skillPoints.once="1">Velocity</SkillPointBar>
+                <SkillPointBar sync:availablePoints="upgradePoints" skillPoints.once="4">Accuracy</SkillPointBar>
+                <SkillPointBar sync:availablePoints="upgradePoints" skillPoints.once="6">Damage</SkillPointBar>
+                <SkillPointBar sync:availablePoints="upgradePoints" skillPoints.once="2">Shields</SkillPointBar>
+                <SkillPointBar sync:availablePoints="upgradePoints" skillPoints.once="5">Communication</SkillPointBar>
+                <SkillPointBar sync:availablePoints="upgradePoints" skillPoints.once="3">System Efficiency</SkillPointBar>
+            </Panel>
+
+            <Group style="ship-display">
+                <Heading2 style="ship-title">Selected Ship</Heading2>
+                <Group style="ship-wrapper">
+                    <Div style="ship" attr:shipId="{selectedShip + 'a'}" />
+                    <Div style="ship" attr:shipId="{selectedShip + 'b'}" />
+                    
+                    <Div style="pilot-display">
+                        <Image Height="100" src="'Images/player' + selectedPilot" />
+                    </Div>
+
+                    <ConsoleCrawler />        
+                    
+                    <Group style="radial">
+                        <Group style="radial-fill" style:meshFillAmount="progress"/>
+                        <Text style="progress-text"> {progressString}% </Text>
+                    </Group>
+                </Group>
+            </Group>
+
+    
+
+        </Panel>
+    </Contents>
+</UITemplate>

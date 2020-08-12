@@ -1,36 +1,48 @@
 ﻿<UITemplate>
 
     <Style src="SpaceGameDemo/JoinServer/JoinServer.style"/>
+    <Style src="SpaceGameDemo/Theme.style" alias="theme"/>
 
-    <Contents style="container">
-
-        <Group style="bread-crumb">
-            <Text>Start</Text>
-            <Text style="bread-crumb-divider"> // </Text>
-            <Text> Join server </Text>
+    <Contents>
+        <Group style="menu">
+            <SpaceMenuItem label="'Back'" targetPanel="'StartMenu'" />
         </Group>
-        
-        <Group style="header">
-            <Text>Join Server</Text>
-            
-            <Group style="toggle">
-                <Text>Show Filters</Text>
-            </Group>
-            
-        </Group>
-        
-        <Group style="table">
-            
-            <Group style="table-header">
-                    
-            </Group>
-            
-            <ScrollView style="table-scroll-view">
+        <Panel style="main-content">
+            <SpacePanelHeader title="'Join Server'">
+                <override:rightSide style="toggle">
+                    <Text>Show Filters</Text>
+                </override:rightSide>
+            </SpacePanelHeader>
+    
+            <Group style="table">
+                <Group style="table-header table-layout">
+                    <Text style="table-head">Title</Text>
+                    <Text style="table-head">Players</Text>
+                    <Text style="table-head">Game Type</Text>
+                    <Text style="table-head">Map</Text>
+                    <Text style="table-head">Ping</Text>
+                    <Text style="table-head column-center">Actions</Text>
+                </Group>
                 
-            </ScrollView>
-            
-        </Group>
-     
+                <ScrollView style="table-scroll-view" trackSize="3">
+                    <override:vertical-scrollbar-handle style="scroll-handle" />
+                    <override:vertical-scrollbar style="scrollbar" />
+                    <Repeat list="servers" style="table-layout">
+                        <Div style="column column-title">{$item.title}</Div>
+                        <Div style="column">{$item.players}/{$item.maxPlayers}</Div>
+                        <Div style="column">{$item.gameType}</Div>
+                        <Div style="column">{$item.map}</Div>
+                        <Div style="column">{$item.ping}ms</Div>
+                        <Div style="column column-actions">
+                            <Image style="action star" src="'Images/star'"/>
+                            <Image style="action plus" src="'Images/plus'"/>
+                            <Image style="action" src="'Images/cross'"/>
+                            
+                        </Div>
+                    </Repeat>
+                </ScrollView>
+            </Group>
+        </Panel>
 
     </Contents>
 

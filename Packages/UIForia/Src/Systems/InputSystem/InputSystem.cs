@@ -293,9 +293,8 @@ namespace UIForia.Systems {
                         if (dragEventBranch == null) {
                             bindingUpdateList.Add(rootElementBranch);
                             rootElementBranch = rootElementBranch.parent;
-                        }
-                    
-                        if (rootElementBranch == null) {
+                        } 
+                        else if (rootElementBranch == null) {
                             bindingUpdateList.Add(dragEventBranch);
                             dragEventBranch = dragEventBranch.parent;
                         }
@@ -303,7 +302,7 @@ namespace UIForia.Systems {
                 }
             }
             
-            bindingUpdateList.Sort((e1, e2) => e1.layoutBox.traversalIndex > e2.layoutBox.traversalIndex ? -1 : 1);
+            bindingUpdateList.Sort((e1, e2) => e1.layoutBox?.traversalIndex > e2.layoutBox?.traversalIndex ? -1 : 1);
 
             return bindingUpdateList;
         }
@@ -577,6 +576,10 @@ namespace UIForia.Systems {
                 }
             }
 
+            if (currentDragEvent == null) {
+                IsDragging = false;
+            }
+
             // todo -- capture phase
         }
 
@@ -766,11 +769,12 @@ namespace UIForia.Systems {
         }
 
         protected void ProcessKeyboardEvent(KeyCode keyCode, InputEventType eventType, char character, KeyboardModifiers modifiers) {
+            m_EventPropagator.Reset(mouseState);
             // GenericInputEvent keyEvent = new GenericInputEvent(eventType, modifiers, m_EventPropagator, character, keyCode, m_FocusedElement != null);
-            KeyboardInputEvent keyInputEvent = new KeyboardInputEvent(eventType, keyCode, character, modifiers, m_FocusedElement != null);
+            KeyboardInputEvent keyInputEvent = new KeyboardInputEvent(m_EventPropagator, eventType, keyCode, character, modifiers, m_FocusedElement != null);
             if (m_FocusedElement == null) {
                 m_KeyboardEventTree.ConditionalTraversePreOrder(keyInputEvent, (item, evt) => {
-                    if (evt.stopPropagation) return false;
+                    if (m_EventPropagator.shouldStopPropagation) return false;
 
                     UIElement element = (UIElement) item.Element;
                     if (element.isDestroyed || element.isDisabled) {
@@ -782,7 +786,7 @@ namespace UIForia.Systems {
                     bool ran = false;
                     LightList<UIElement> elementsToUpdate = null;
                     for (int i = 0; i < evtHandlerGroup.eventHandlers.size; i++) {
-                        if (evt.stopPropagation) break;
+                        if (m_EventPropagator.shouldStopPropagation) break;
                         ref InputHandlerGroup.HandlerData handler = ref evtHandlerGroup.eventHandlers.array[i];
                         if (!ShouldRun(handler, evt)) {
                             continue;
@@ -802,7 +806,7 @@ namespace UIForia.Systems {
                         RunWriteBindingsAndReleaseList(elementsToUpdate);
                     }
                     
-                    return !evt.stopPropagation;
+                    return !m_EventPropagator.shouldStopPropagation;
                 });
             }
 
@@ -926,7 +930,11 @@ namespace UIForia.Systems {
 
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseDown);
             }
-            else if (mouseState.isLeftMouseUpThisFrame || mouseState.isMiddleMouseUpThisFrame) {
+            else if (mouseState.isLeftMouseDown || mouseState.isRightMouseDown || mouseState.isMiddleMouseDown) {
+                RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseHeldDown);
+            }
+
+            if (mouseState.isLeftMouseUpThisFrame || mouseState.isMiddleMouseUpThisFrame) {
                 RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseUp);
                 if (mouseState.clickCount > 0) {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseClick);
@@ -938,10 +946,6 @@ namespace UIForia.Systems {
                     RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseContext);
                 }
             }
-            else if (mouseState.isLeftMouseDown || mouseState.isRightMouseDown || mouseState.isMiddleMouseDown) {
-                RunMouseEvents(m_ElementsThisFrame, InputEventType.MouseHeldDown);
-            }
-
 
             RunMouseEvents(m_ElementsThisFrame,
                 mouseState.DidMove ? InputEventType.MouseMove : InputEventType.MouseHover);

@@ -1,0 +1,27 @@
+﻿import "SpaceGameDemo/Theme.style" as theme;
+
+style toggle-container {
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = CenterContent;
+    PreferredSize = 1cnt 20px;
+}
+
+style toggle {
+    Border = 1px;
+    BorderColor = white;
+    BorderRadius = 1px;
+    PreferredSize = 16px;
+    MarginRight = 6px;
+    Padding = 2px;
+}
+
+style cross {
+    PreferredSize = 1pca;
+    BackgroundTint = @theme.orange;
+}
+
+style label {
+    TextColor = white;
+    TextFontSize = 1em;
+    TextTransform = UpperCase;
+}

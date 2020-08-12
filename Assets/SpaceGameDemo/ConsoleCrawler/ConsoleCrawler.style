@@ -1,0 +1,114 @@
+﻿import "SpaceGameDemo/Theme.style" as theme;
+
+style console-notification {
+    PreferredSize = 1px;
+    BorderRadius = 12px;
+    Overflow = Hidden;
+    Padding = 4px;
+    run animation(console-action);
+}
+
+animation console-action {
+    [options] {
+        TimingFunction = QuadraticEaseInOut;
+        Duration = 15s;
+        Iterations = infinite;
+    }
+
+    [keyframes] {
+        0% {
+            Border = 0;
+            BorderColor = clear;
+            PreferredWidth = 1px;
+        }
+        1% {
+            PreferredHeight = 1px;
+        }
+        
+        2% {
+            Border = 1px;
+            BorderColor = rgba(240, 240, 240, 120);
+            PreferredHeight = 1px;
+        }
+        3% {    
+            PreferredWidth = 200px;
+        }
+        4% {    
+            PreferredHeight = 1px;
+            PreferredWidth = 200px;
+        }
+        8% {
+            PreferredHeight = 128px;
+            PreferredWidth = 200px;
+            Border = 1px;
+            BorderColor = rgba(240, 240, 240, 120);
+        }
+        94% {
+            PreferredHeight = 128px;
+        }
+        97% { 
+            PreferredHeight = 1px;
+            PreferredWidth = 200px;
+        }
+       
+        99% {
+            Border = 1px;
+            BorderColor = rgba(240, 240, 240, 120);
+        }
+        100% {
+        
+            Border = 0;
+            BorderColor = clear;
+            PreferredWidth = 0;
+        }
+    
+    }
+}
+
+style scroll-text {
+    TextColor = #00ff00;
+    TextFontAsset = @theme.orbitron;
+    TextFontSize = 10px;
+    TextWhitespaceMode = PreserveNewLines TrimLineStart;
+    Opacity = 0.2;
+    run animation(scroll);
+}
+
+animation scroll {
+    [options] {
+        Iterations = infinite;
+        Duration = 30s;
+    }
+    [keyframes] {
+        0% { AlignY = 0, 100% Parent; }
+        30% { Opacity = 0.2; }
+        31% { Opacity = 0.8; }
+        32% { Opacity = 0.2; }
+        50% { AlignY = 0, -100% Parent; }
+        100% { AlignY = 0, -100% Parent; }
+    }
+}
+style scroll-text2 {
+    TextColor = #00ff00;
+    TextFontAsset = @theme.orbitron;
+    TextFontSize = 10px;
+    TextWhitespaceMode = PreserveNewLines TrimLineStart;
+    Opacity = 0.2;
+    run animation(scroll2);
+}
+
+animation scroll2 {
+    [options] {
+        Iterations = infinite;
+        Duration = 30s;
+    }
+    [keyframes] {
+        0% { AlignY = 0, 100% Parent; }
+        30% { Opacity = 0.2; }
+        31% { Opacity = 0.8; }
+        32% { Opacity = 0.2; }
+        35% { AlignY = 0, 100% Parent; }
+        85% { AlignY = 0, -100% Parent; }
+        100% { AlignY = 0, -100% Parent; }
+    }
+}

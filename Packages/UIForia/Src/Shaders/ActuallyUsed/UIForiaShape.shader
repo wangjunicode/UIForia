@@ -67,7 +67,7 @@
                 
                 float outlineWidth;
                 uint uvTransformIdx;
-                uint uvRotation_unused;
+                uint uvRotation_Opacity;
                 
                 uint unused2;
             };
@@ -86,13 +86,22 @@
             float _SpriteAtlasPadding;
             float _UIForiaDPIScale;
             float4x4 _UIForiaOriginMatrix;
+            
+            struct GradientInfo {
+                uint flags;
+                uint colorCount;
+                uint alphaCount;
+                uint unused_padding;
+                float4 colors[8];
+                float2 alphas[8];
+            };
                         
             StructuredBuffer<float4x4> _UIForiaMatrixBuffer;            
             StructuredBuffer<UIForiaVertex> _UIForiaVertexBuffer;            
             StructuredBuffer<ElementMaterialInfo> _UIForiaMaterialBuffer;            
             StructuredBuffer<float4> _UIForiaFloat4Buffer;
-           
-
+            StructuredBuffer<GradientInfo> _UIForiaGradientBuffer;
+            
             // todo -- byte isnt quite enough precision for this, convert to ushort if possible
             inline float UnpackCornerBevel(uint bevelTop, uint bevelBottom, float2 texCoord) {
 
@@ -161,7 +170,7 @@
                o.vertex = mul(UNITY_MATRIX_VP, mul(transform, float4(vpos.xyz, 1.0)));
 
                // todo -- snapping is terrible when moving/ rotating 
-               o.vertex = UIForiaPixelSnap(o.vertex);
+            //   o.vertex = UIForiaPixelSnap(o.vertex);
                 
                o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, vertex.indices.z, vertex.indices.w);
                 
@@ -171,11 +180,9 @@
             fixed4 frag (v2f i) : SV_Target {
                 // this could be done in the vertex shader too but this way we can support correct
                 // sdf uv offsets for non quad meshes, which we'll probably want eventually to reduce overdraw
-               float2 halfUV = float2(0.5, 0.5) / i.size;
-               i.texCoord0.x += i.texCoord0.x > 0.5 ? halfUV.x : -halfUV.x;
-               i.texCoord0.y += i.texCoord0.y > 0.5 ? halfUV.y : -halfUV.y;
-                
-                float opacity = 1; // (float)i.indices.z / 255.0; // todo --- maybe unpack from elsewhere
+                float2 halfUV = float2(0.5, 0.5) / i.size; // todo -- this might need to be dpi scaled
+                i.texCoord0.x += i.texCoord0.x > 0.5 ? halfUV.x : -halfUV.x;
+                i.texCoord0.y += i.texCoord0.y > 0.5 ? halfUV.y : -halfUV.y;
                 
                 ElementMaterialInfo material = _UIForiaMaterialBuffer[i.indices.y];
                 float2 size = i.size;
@@ -184,6 +191,7 @@
                 fixed4 color = UnpackColor(material.backgroundColor);
                 fixed4 outlineColor = UnpackColor(material.outlineColor);
                 fixed4 tintColor = UnpackColor(material.backgroundTint);
+                float opacity = UnpackHighUShortPercentageToFloat(material.uvRotation_Opacity);
                 
                 uint packedRadii = material.radius;
                 uint bodyColorMode = ExtractByte(material.bMode_oMode_meshFillDirection_meshFillInvert, 0);
@@ -200,7 +208,7 @@
                  
                 float2 uvScale = i.uvTransform.xy;
                 float2 uvOffset = i.uvTransform.zw;
-                float uvRotation = UnpackLowUShortPercentageToFloat(material.uvRotation_unused) * 2 * PI;
+                float uvRotation = UnpackLowUShortPercentageToFloat(material.uvRotation_Opacity) * 2 * PI;
                 
                 float4 uvBounds = float4(
                     UnpackLowBytes(i.indices.z) * _MainTex_TexelSize.x,
@@ -254,20 +262,23 @@
                 fixed4 grad = WHITE;
                 
                 float gradientScale = 1;
-                float gradRotation = 0 * Deg2Rad;
+                float gradRotation = 0 * Deg2Rad; // * Deg2Rad;
                 float2 gradientOffset = float2(0, 0);
-                int wrapGradient = 0;
+                int wrapGradient = 1;
                 int hardBlend = 0;
-                int gradientType = GradientType_Linear;
+                int gradientType = GradientType_Linear; //Conical;
                 
                 float2 gradientTexCoord = gradientOffset + i.texCoord0.xy;
                 half gradientTime = LinearGradient(gradientTexCoord, gradRotation);
                 gradientTime = lerp(gradientTime, RadialGradient(gradientTexCoord), gradientType == GradientType_Radial);
-                gradientTime = lerp(gradientTime, ConicalGradient(gradientTexCoord), gradientType == GradientType_Conical); 
+                gradientTime = lerp(gradientTime, ConicalGradient(RotateUV(gradientTexCoord, gradRotation, float2(0.5, 0.5))), gradientType == GradientType_Conical);
+                
                 gradientTime *= gradientScale;
                 
+               // return (tex2Dlod(_MainTex, float4(frac(gradientTime), 0, 0, 0)));
                 grad = SampleGradient(lerp(gradientTime, frac(gradientTime), wrapGradient), colors, alphas, 5, 3, hardBlend);
                 grad = lerp(grad, SampleCornerGradient(gradientTexCoord, colors, alphas), 0);
+                
                 float sdf = sdRoundBox(samplePoint, size * 0.5, radius);
 
                 float radialSDF = sdPie(radialSamplePoint, angleSinCos, fillRadius);

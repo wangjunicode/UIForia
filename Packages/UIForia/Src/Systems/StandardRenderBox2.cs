@@ -26,7 +26,7 @@ namespace UIForia.Rendering {
 
             isBuiltIn = true;
             isElementBox = true;
-            drawDesc.opacity = MathUtil.Float01ToByte(element.style.Opacity);
+            drawDesc.opacity = MathUtil.FloatPercentageToUshort(element.style.Opacity);
             drawDesc.backgroundColor = element.style.BackgroundColor;
             drawDesc.backgroundTint = element.style.BackgroundTint;
             drawDesc.outlineColor = element.style.OutlineColor;
@@ -421,7 +421,7 @@ namespace UIForia.Rendering {
 
                     case StylePropertyId.Opacity:
                         recomputeDrawing = true;
-                        drawDesc.opacity = MathUtil.Float01ToByte(property.AsFloat);
+                        drawDesc.opacity = MathUtil.FloatPercentageToUshort(property.AsFloat);
                         break;
 
                     case StylePropertyId.MeshFillAmount:

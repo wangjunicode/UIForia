@@ -11,14 +11,15 @@
         style container2 {
             FlexLayoutDirection = Horizontal;
             PreferredSize = 1vw 1vh;
+            BackgroundColor = white;
         }
 
         style shape-kit {
             FlexLayoutDirection = Horizontal;
             PreferredSize = 1vw 1vh;
             BackgroundColor = white;
-            //BackgroundImage = url("Images/2"); //DefaultAtlas", "player1");
-            // Padding = 10px;
+            //BackgroundImage = url("DefaultAtlas", "player1");
+             Padding = 10px;
             // material = "materialName"
             // painter:ShapePainter.sizeMod = 0.3f;
             // material:materialName.field = x;
@@ -72,28 +73,28 @@
     <Using namespace="UnityEngine"/>
     <Contents style="container2">
 
-        <ScrollView style="shape-kit">
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
-            <Div style="child">{$parent.siblingIndex}</Div>
+<!--        <ScrollView style="shape-kit">-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
 
-        </ScrollView>
+<!--        </ScrollView>-->
         
         <!--        </Div>-->
 

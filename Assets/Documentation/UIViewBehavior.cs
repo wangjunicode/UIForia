@@ -2,7 +2,10 @@
 using System.IO;
 using UIForia.Elements;
 using UIForia.Graphics;
+using UIForia.Rendering;
 using UIForia.Text;
+using Unity.Mathematics;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -30,6 +33,7 @@ namespace UIForia {
 
             return settings;
         }
+
         public struct Gradient2 {
 
             // data fits in 2 float4s
@@ -38,15 +42,36 @@ namespace UIForia {
             public Color32 c2;
             public Color32 c3;
             public Color32 c4;
-        
+
             public ushort a0;
             public ushort a1;
-        
+
             public ushort a2;
             public ushort a3;
-        
+
             public ushort a4;
-        
+
+        }
+
+        float saturate(float x) {
+            return math.max(0, math.min(1, x));
+        }
+
+        public Color SampleGradient(float sampleValue, Color[] colors, float2[] alphas, int colorCount, int alphaCount) {
+            Color color = colors[0];
+            float alpha = alphas[0].x;
+
+            for (int idx = 1; idx < colorCount; idx++) {
+
+                float prevTimeKey = colors[idx - 1].a;
+                float colorPos = saturate((sampleValue - prevTimeKey) / (colors[idx].a - prevTimeKey));
+                color = Color.Lerp(color, colors[idx], colorPos); // lerp(colorPos, step(0.5, colorPos), fixedOrBlend));
+            }
+
+            //float alphaPos = saturate((sampleValue - alphas[idx - 1].y) / (alphas[idx].y - alphas[idx - 1].y)) * step(idx, alphaCount - 1);
+            //alpha = lerp(alpha, alphas[idx].x, lerp(alphaPos, step(0.5, alphaPos), fixedOrBlend));
+
+            return new Color(color.r, color.g, color.b, alpha);
         }
 
         public void Start() {
@@ -54,6 +79,33 @@ namespace UIForia {
 #if UNITY_EDITOR
 //                QualitySettings.vSyncCount = 0; // VSync must be disabled for target frame rate to work
 //                UnityEngine.Application.targetFrameRate = 60;
+
+            // int width = 128;
+            // Texture2D texture2D = new Texture2D(width, 1, TextureFormat.ARGB32, false, false);
+            //
+            // Color[] colors = {
+            //     new Color(0.529f, 0.227f, 0.706f, 0.0f),
+            //     new Color(0.992f, 0.114f, 0.114f, 0.5f),
+            //     new Color(0, 1f, 0, 1f),
+            // };
+            //
+            // float2[] alphas = {
+            //     new float2(1, 0f),
+            //     new float2(1, 0.5f),
+            //     new float2(1, 1f),
+            // };
+            //
+            // for (int i = 0; i < width; i++) {
+            //     texture2D.SetPixel(i, 0, SampleGradient((i / (float) width), colors, alphas, 3, 3));
+            // }
+            //
+            // texture2D.SetPixel(0, 0, SampleGradient(0, colors, alphas, 3, 3));
+            //
+            // texture2D.filterMode = FilterMode.Trilinear;
+            // texture2D.anisoLevel = 1;
+            // texture2D.wrapMode = TextureWrapMode.Repeat;
+            // texture2D.Apply();
+           // GameObject.Find("RawImage").GetComponent<UnityEngine.UI.RawImage>().texture = texture2D;
 
             unsafe {
 
@@ -90,7 +142,7 @@ namespace UIForia {
 
             // todo -- these should be moved to modules when they become supported
             settings.RegisterTextEffect("bounce", new TextEffectSpawner<BounceTextEffect>());
-            
+
             settings.RegisterTextEffect("rotate-center", new TextEffectSpawner<RotateTextEffect, RotateTextEffect.EffectParameters>(
                 new RotateTextEffect.EffectParameters() {
                     angleSpeed = 180,
@@ -105,7 +157,8 @@ namespace UIForia {
 #else
             application = GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection);
 #endif
-
+            // var element = application.GetElement(new ElementId(2));
+            // element.style.SetBackgroundImage(texture2D, StyleState.Normal);
         }
 
         private void DoDependencyInjection(UIElement element) {

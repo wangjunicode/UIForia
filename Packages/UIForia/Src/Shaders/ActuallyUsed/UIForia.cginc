@@ -112,10 +112,10 @@ half remapHalf(half s, half a1, half a2, half b1, half b2) {
 // same as UnityPixelSnap except taht we add 0.5 to pixelPos after rounding
 inline float4 UIForiaPixelSnap (float4 pos) {
      float2 hpc = _ScreenParams.xy * 0.5f;
-     float2 adjustment = float2(0, 0); //0.5, 0.5);
-     adjustment.x = (_ScreenParams.x % 2 != 0) * 0.5;
-     adjustment.y = (_ScreenParams.y % 2 != 0) * 0.5;
-     float2 pixelPos = round ((pos.xy / pos.w) * hpc) + adjustment;
+     float2 adjustment = float2(0, 0);
+    // adjustment.x = (_ScreenParams.x % 2 != 0) * 0.5;
+    // adjustment.y = (_ScreenParams.y % 2 != 0) * 0.5;
+     float2 pixelPos = round ((pos.xy / pos.w) * hpc); // + adjustment;
      pos.xy = pixelPos / hpc * pos.w;
      return pos;
 }
@@ -320,10 +320,11 @@ float2 TransformUV(float2 uv, float2 offset, float2 scale, float rotation, half4
 // ---------------------- Gradient Functions --------------------------------------------------------
 
 float RadialGradient(float2 gradientTexCoord) {
-    return length(gradientTexCoord);
+    return length(gradientTexCoord - 0.5);
 }
 
 float ConicalGradient(float2 gradientTexCoord) {
+gradientTexCoord -= 0.5;
     return (atan2(gradientTexCoord.y, gradientTexCoord.x) + PI) / (2 * PI);
 }
 

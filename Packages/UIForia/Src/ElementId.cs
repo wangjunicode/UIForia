@@ -23,7 +23,7 @@ namespace UIForia {
             this.generation = generation;
         }
 
-        internal ElementId(int id) {
+        public ElementId(int id) {
             this.generation = 0;
             this.id = id;
         }

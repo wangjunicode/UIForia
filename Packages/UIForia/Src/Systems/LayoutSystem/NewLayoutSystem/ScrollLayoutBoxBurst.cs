@@ -45,10 +45,10 @@ namespace UIForia.Layout {
             // probably want a special layoutbox type for those
             ref BurstLayoutRunner refRunner = ref UnsafeUtilityEx.AsRef<BurstLayoutRunner>(runner);
             layoutBox->RunLayoutHorizontal(runner);
-            scrollValues->actualWidth = refRunner.GetHorizontalLayoutInfo(elementId).finalSize;
-            scrollValues->contentWidth = FindHorizontalMax(runner);
+            ref LayoutInfo horizontalInfo = ref refRunner.GetHorizontalLayoutInfo(elementId);
+            scrollValues->actualWidth = horizontalInfo.finalSize;
+            scrollValues->contentWidth = FindHorizontalMax(runner) + horizontalInfo.paddingBorderEnd;
             scrollValues->isOverflowingX = scrollValues->contentWidth > scrollValues->actualWidth;
-            // runner->scrollWidthUpdates.Add(elementId);
         }
 
         public void RunVertical(BurstLayoutRunner* runner) {
@@ -56,8 +56,9 @@ namespace UIForia.Layout {
             // probably want a special layoutbox type for those
             ref BurstLayoutRunner refRunner = ref UnsafeUtilityEx.AsRef<BurstLayoutRunner>(runner);
             layoutBox->RunLayoutVertical(runner);
-            scrollValues->actualHeight = refRunner.GetVerticalLayoutInfo(elementId).finalSize;
-            scrollValues->contentHeight = FindVerticalMax(runner);
+            ref LayoutInfo verticalInfo = ref refRunner.GetVerticalLayoutInfo(elementId);
+            scrollValues->actualHeight = verticalInfo.finalSize;
+            scrollValues->contentHeight = FindVerticalMax(runner) + verticalInfo.paddingBorderEnd;
             scrollValues->isOverflowingY = scrollValues->contentHeight > scrollValues->actualHeight;
         }
 

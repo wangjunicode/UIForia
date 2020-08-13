@@ -181,7 +181,14 @@
                 
                return o;
             }
-
+            
+            inline half DistToLine(half2 pt1, half2 pt2, half2 testPt) {
+              half2 lineDir = pt2 - pt1;
+              half2 perpDir = half2(lineDir.y, -lineDir.x);
+              half2 dirToPt1 = pt1 - testPt;
+              return abs(dot(normalize(perpDir), dirToPt1));
+            }
+            
             fixed4 frag (v2f i) : SV_Target {
                 // this could be done in the vertex shader too but this way we can support correct
                 
@@ -202,7 +209,7 @@
                  // can be a sign bit or flag elsewhere
                 float fillDirection = ExtractByte(material.bMode_oMode_meshFillDirection_meshFillInvert, 2) == 0 ? 1 : -1;
                 float invertFill = ExtractByte(material.bMode_oMode_meshFillDirection_meshFillInvert, 3) == 0 ? 1 : -1; 
-                float fillAmount = cos(_Time.y); //0.25; //UnpackLowUShortPercentageToFloat(material.fillOpenAndRotation);
+                float fillAmount = UnpackLowUShortPercentageToFloat(material.fillOpenAndRotation);
                 float fillRotation = UnpackHighUShortPercentageToFloat(material.fillOpenAndRotation); //frac(_Time.y) * PI * 2;
                 float fillRadius = material.fillRadius;
                 float2 fillOffset = i.size * float2(0.5, 0.5); //float2(material.fillOffsetX, material.fillOffsetY); // - halfUV;
@@ -221,11 +228,59 @@
                 float2 originalUV = i.texCoord1;
                 i.texCoord1 = TransformUV(i.texCoord1, uvOffset * _MainTex_TexelSize.xy, uvScale, uvRotation, uvBounds);
                 
-                half outlineWidth = material.outlineWidth * 0.5;
-                if(outlineWidth == 0 || outlineColor.a <= 0.01) {
-                    outlineColor = fixed4(color.rgb, 0);
+                //float4 border = float4(10, 20, 30, 40); // t,r,b,l
+                float4 border = float4(20, 0, 10, 00);
+                // fixed4 borderColor = ComputeBorderColor(border, originalUV);
+                
+                // todo -- figure out 9 slicing, i guess it must be different quads or a fully different vertex shader with uv set somehow
+                // similar to how we read effect data for text
+                
+                #define borderTop border.x
+                #define borderLeft border.w
+                #define borderBottom border.z
+                #define borderRight border.y
+                
+                #define borderColorRight BLACK
+                #define borderColorLeft GREEN
+                #define borderColorTop BLUE
+                #define borderColorBottom fixed4(1, 1, 0, 1)
+                
+                float left = step(originalUV.x, 0.5); // 1 if left
+                float bottom = step(1 - originalUV.y, 0.5); // 1 if bottom
+                
+                #define top (1 - bottom)
+                #define right (1 - left)  
+                
+                half borderH = lerp(border.y, border.w, left);
+                half borderV = lerp(border.x, border.z, top);
+                
+                fixed4 borderColorH = borderColorRight;
+                fixed4 borderColorV = borderColorTop;
+                
+                half2 corner = half2(lerp(0, size.x, right), lerp(0, size.y, bottom));
+                half2 inset = half2(lerp(borderH, size.x - borderH, right), lerp(borderV, size.y - borderV, bottom));
+                
+                half2 p = originalUV * size;
+                
+                // equasion of a line, take the sign to determine if a point is above or below the line
+                half lineEq = (inset.x - corner.x) * (p.y - corner.y) - (inset.y - corner.y) * (p.x - corner.x);
+                half distToLine = DistToLine(corner, inset, p);
+                fixed sideOfLine = ((left * top || right * bottom) ? -1 : 1) * sign(lineEq);
+            
+                distToLine = Remap(saturate(distToLine), -1, 1, 0, 1);
+                
+                if(sideOfLine < 0) {
+                    distToLine = 1 - distToLine;
                 }
                 
+                color = lerp(borderColorH, borderColorV, distToLine);
+                
+                float2 borderStep = step(float2(borderLeft, size.y - borderTop), p) - step(float2(size.x - borderRight, borderBottom), p);
+                if(borderStep.x * borderStep.y != 0) {
+                    color = RED;
+                }
+                
+                half outlineWidth = material.outlineWidth * 0.5;
                 half4 radius = UnpackRadius(packedRadii, minSize);
                 
                 float t = (fillAmount * 180) * Deg2Rad;

@@ -16,7 +16,7 @@ namespace UIForia.Layout {
         [FieldOffset(4)] public GridLayoutBoxBurst grid;
         [FieldOffset(4)] public StackLayoutBoxBurst stack;
         [FieldOffset(4)] public ScrollLayoutBoxBurst scroll;
-        [FieldOffset(4)] public FlexLayoutBoxBurst radial;
+        [FieldOffset(4)] public RadialLayoutBoxBurst radial;
         [FieldOffset(4)] public ImageLayoutBoxBurst image;
         [FieldOffset(4)] public RootLayoutBoxBurst root;
 

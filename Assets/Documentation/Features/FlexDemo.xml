@@ -71,10 +71,9 @@
         style child {
             PreferredSize = 200px;
             backgroundColor = red;
-            BorderRadius = 50%;
-            OutlineWidth = 5px;
-            OutlineColor = white;
-            
+            OutlineWidth = 10px;
+            OutlineColor = orange;
+            //CornerBevelBottomLeft = 40px;
         }
         
     </Style>

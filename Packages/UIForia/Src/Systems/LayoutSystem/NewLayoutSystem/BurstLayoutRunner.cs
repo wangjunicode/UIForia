@@ -1,7 +1,6 @@
 ﻿using UIForia.ListTypes;
 using UIForia.Rendering;
 using UIForia.Systems;
-using UIForia.Text;
 
 namespace UIForia.Layout {
 
@@ -13,17 +12,12 @@ namespace UIForia.Layout {
         public LayoutBoxInfo* layoutBoxInfoTable;
         public LayoutBoxUnion* layoutBoxTable;
         public List_TextLineInfo* lineInfoBuffer;
-        public TextInfo* textInfoTable;
         public LayoutHierarchyInfo* layoutHierarchyTable;
         public FontAssetInfo* fontAssetMap;
         public EmValue* emTable;
 
         public ref LayoutHierarchyInfo GetLayoutHierarchy(ElementId elementId) {
             return ref layoutHierarchyTable[elementId.index];
-        }
-
-        public ref TextInfo GetTextInfo(int id) {
-            return ref textInfoTable[id];
         }
 
         public ref LayoutInfo GetHorizontalLayoutInfo(ElementId elementId) {

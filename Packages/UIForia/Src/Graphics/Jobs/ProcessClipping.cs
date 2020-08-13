@@ -162,8 +162,6 @@ namespace UIForia.Graphics {
                     case DrawType2.PushClipRect: {
 
                         float3 topLeft = new float3(drawInfo.localBounds.xMin, -drawInfo.localBounds.yMin, 0);
-
-                        float2 basePoint = topLeft.xy;
                         
                         // todo -- this method is sooo slow without burst
                         topLeft = math.transform(*drawInfo.matrix, topLeft);
@@ -171,7 +169,7 @@ namespace UIForia.Graphics {
                         float width = drawInfo.localBounds.xMax;
                         float height = drawInfo.localBounds.yMax; 
                         // need to invert the y position
-                        AxisAlignedBounds2D bounds = AxisAlignedBounds2D.Intersect(new AxisAlignedBounds2D(topLeft.x, -topLeft.y, topLeft.x + width, basePoint.y + (-topLeft.y + height)), activeClipper.bounds);
+                        AxisAlignedBounds2D bounds = AxisAlignedBounds2D.Intersect(new AxisAlignedBounds2D(topLeft.x, -topLeft.y, topLeft.x + width, (-topLeft.y + height)), activeClipper.bounds);
 
                         activeClipper.bounds = bounds;
                         activeClipper.boundsIndex = clipperBoundsList.size;

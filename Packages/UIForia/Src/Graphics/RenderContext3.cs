@@ -69,7 +69,6 @@ namespace UIForia.Graphics {
         }
 
         public void Callback(object context, Action<object, CommandBuffer> callback) {
-
             int callbackIdx = callbacks.size;
 
             callbacks.Add(new CommandBufferCallback() {
@@ -88,7 +87,6 @@ namespace UIForia.Graphics {
                     baseRenderIdx = renderIndex
                 }
             });
-
         }
 
         internal void AddTexture(Texture texture) {
@@ -101,7 +99,6 @@ namespace UIForia.Graphics {
                 defaultBGTexture = texture.GetHashCode();
                 AddTexture(texture);
             }
-
         }
 
         public void SetOutlineTexture(Texture texture) {
@@ -109,11 +106,9 @@ namespace UIForia.Graphics {
                 defaultOutlineTexture = texture.GetHashCode();
                 AddTexture(texture);
             }
-
         }
 
         private void CommitMaterialModifications() {
-
             int size = materialValueOverrides.size;
             MaterialPropertyOverride* writePtr = stackAllocator.Allocate<MaterialPropertyOverride>(size);
 
@@ -126,7 +121,6 @@ namespace UIForia.Graphics {
             currentOverrideProperties = writePtr;
 
             hasPendingMaterialOverrides = false;
-
         }
 
         public enum GeometryType {
@@ -144,7 +138,6 @@ namespace UIForia.Graphics {
         }
 
         public void DrawQuad(float x, float y, float width, float height) {
-
             if (width <= 0 || height <= 0) {
                 return;
             }
@@ -166,11 +159,9 @@ namespace UIForia.Graphics {
                     baseRenderIdx = renderIndex
                 }
             });
-
         }
 
         public void DrawElement(float x, float y, in ElementDrawDesc drawDesc) {
-
             if (drawDesc.width <= 0 || drawDesc.height <= 0) {
                 return;
             }
@@ -184,9 +175,8 @@ namespace UIForia.Graphics {
                 drawDesc = drawDesc,
             });
 
-            if (gradient != null) {
-            }
-            
+            if (gradient != null) { }
+
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
                 elementId = elementId,
@@ -239,8 +229,50 @@ namespace UIForia.Graphics {
 
         }
 
-        internal void DrawTextCharacters(TextRenderRange textRenderRange) {
 
+        public void DrawTextHighlight(TextRenderRange render) {
+            float x = render.localBounds.xMin;
+            float y = render.localBounds.yMin;
+            float width = render.localBounds.Width;
+            float height = render.localBounds.Height;
+
+            if (width <= 0 || height <= 0) {
+                return;
+            }
+
+            ElementDrawInfo* elementDrawInfo = stackAllocator.Allocate(new ElementDrawInfo() {
+                x = x,
+                y = y,
+                opacity = 1f,
+                materialId = 0,
+                uvTransformId = 0,
+                drawDesc = new ElementDrawDesc(width, height) {
+                    backgroundColor = new Color32(255, 0, 0, 255)
+                },
+            });
+            
+            drawList.Add(new DrawInfo2() {
+                matrix = defaultMatrix,
+                elementId = elementId,
+                drawType = DrawType2.UIForiaElement,
+                materialId = MaterialId.UIForiaShape,
+                localBounds = render.localBounds,
+                // could consider making these different allocators to keep similar types together
+                materialData = stackAllocator.Allocate(default(ElementMaterialSetup)),
+
+                shapeData = stackAllocator.Allocate(new ElementBatch() {
+                    count = 1,
+                    elements = elementDrawInfo
+                }),
+
+                drawSortId = new DrawSortId() {
+                    localRenderIdx = localDrawId++,
+                    baseRenderIdx = renderIndex
+                }
+            });
+        }
+
+        internal void DrawTextCharacters(TextRenderRange textRenderRange) {
             TextMaterialSetup textMaterialSetup = new TextMaterialSetup();
 
             textMaterialSetup.faceTexture = textRenderRange.texture0;
@@ -268,7 +300,6 @@ namespace UIForia.Graphics {
                     baseRenderIdx = renderIndex
                 }
             });
-
         }
 
         public void Clear() {
@@ -311,7 +342,6 @@ namespace UIForia.Graphics {
                     baseRenderIdx = renderIndex
                 }
             });
-
         }
 
         public void PopClipRect() {
@@ -339,11 +369,9 @@ namespace UIForia.Graphics {
                     localRenderIdx = localDrawId++
                 }
             });
-
         }
 
         public void PushStencilClip() {
-
             if (stencilClipStart <= 0) {
                 throw new Exception("You need to call BeginStencilClip() before pushing a stencil clip");
             }
@@ -377,7 +405,7 @@ namespace UIForia.Graphics {
         }
 
         private Gradient gradient;
-        
+
         public void SetGradient(Gradient gradient) {
             this.gradient = gradient;
         }
@@ -406,7 +434,7 @@ namespace UIForia.Graphics {
         public ushort opacity;
         public ColorMode bgColorMode;
         public ColorMode outlineColorMode;
-        
+
         public float outlineWidth;
         public Color32 outlineColor;
         public float width;
@@ -428,16 +456,24 @@ namespace UIForia.Graphics {
         public byte meshFillDirection;
         public byte meshFillInvert;
         public ushort uvRotation;
-        
+
         public float uvScaleX;
         public float uvScaleY;
         public float uvOffsetX;
         public float uvOffsetY;
-        
+
         public GradientMode gradientMode;
         public float gradientRotation;
         public float gradientOffsetX;
         public float gradientOffsetY;
+
+        public ElementDrawDesc(float width, float height) : this() {
+            this.width = width;
+            this.height = height;
+            this.meshFillOpenAmount = ushort.MaxValue;
+            this.opacity = ushort.MaxValue;
+            this.meshFillRadius = ushort.MaxValue;
+        }
 
     }
 

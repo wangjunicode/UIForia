@@ -12,13 +12,12 @@ namespace UIForia.Text {
     [BurstCompile]
     internal unsafe struct UpdateTextRenderBounds : IJob {
 
-        public DataList<TextInfo> textInfoMap;
-        public DataList<TextId> activeTextElementIds;
+        public DataList<TextId> activeTextElementInfos;
         public DataList<FontAssetInfo>.Shared fontAssetMap;
 
         public void Execute() {
 
-            Run(0, activeTextElementIds.size);
+            Run(0, activeTextElementInfos.size);
 
         }
 
@@ -26,7 +25,7 @@ namespace UIForia.Text {
 
             for (int i = start; i < end; i++) {
 
-                ComputeBounds(ref textInfoMap[activeTextElementIds[i].textInfoId]);
+                ComputeBounds(ref activeTextElementInfos[i].textInfo[0]);
 
             }
 

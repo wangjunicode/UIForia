@@ -14,21 +14,21 @@ using UnityEngine.Profiling;
 
 namespace UIForia.Text {
 
-    internal struct TextId {
+    internal unsafe struct TextId {
 
         public ElementId elementId;
-        public int textInfoId;
+        public TextInfo* textInfo;
 
     }
 
-    internal struct TextChange {
+    internal unsafe struct TextChange {
 
-        public readonly int textInfoId;
+        public readonly TextInfo *textInfo;
         public readonly ElementId elementId;
 
-        public TextChange(ElementId elementId, int textInfoId) {
+        public TextChange(ElementId elementId, TextInfo * textInfo) {
             this.elementId = elementId;
-            this.textInfoId = textInfoId;
+            this.textInfo = textInfo;
         }
 
     }
@@ -97,9 +97,7 @@ namespace UIForia.Text {
         private float pauseEndTime;
 
         public virtual void Update(TextInterface textInterface) {
-
             for (int i = 0; i < textInterface.symbolList.size; i++) {
-
                 if (textInterface.symbolList.array[i].type == TextSymbolType.Character) { }
 
                 uint type = (uint) textInterface.symbolList.array[i].type;
@@ -107,7 +105,6 @@ namespace UIForia.Text {
                 if (type == 255) {
                     // Pause();
                 }
-
             }
 
             if (textInterface.GetSymbol(1).type == TextSymbolType.Character) {
@@ -116,7 +113,6 @@ namespace UIForia.Text {
             }
 
             elapsedTime += Time.deltaTime;
-
         }
 
     }
@@ -128,14 +124,14 @@ namespace UIForia.Text {
         internal ElementSystem elementSystem;
         private Application application;
 
-        internal DataList<TextInfo> textInfoMap;
+        // internal DataList<TextInfo> textInfoMap;
         internal DataList<TextChange>.Shared changedElementIds;
         internal DataList<TextLayoutSymbol>.Shared layoutBuffer;
         internal LightList<TextEffect> textEffectTable;
         internal StructList<int> textEffectFreeList;
         private TextEffectAnimator textEffectAnimator;
         private LightList<UITextElement> textWithEffects;
-        internal DataList<TextId> activeTextElementIds;
+        internal DataList<TextId> activeTextElementInfo;
         internal List_Int32 effectVertexFreeList;
         internal DataList<TextEffectInfo> textEffectVertexInfoTable;
         private LightList<TextEffectDefinition> effectDefinitions;
@@ -144,8 +140,8 @@ namespace UIForia.Text {
         public TextSystem(Application application, ElementSystem elementSystem, LightList<TextEffectDefinition> effectDefinitions) {
             this.application = application;
             this.elementSystem = elementSystem;
-            this.activeTextElementIds = new DataList<TextId>(32, Allocator.Persistent);
-            this.textInfoMap = new DataList<TextInfo>(32, Allocator.Persistent, NativeArrayOptions.ClearMemory); // clear memory is very important here!
+            this.activeTextElementInfo = new DataList<TextId>(32, Allocator.Persistent);
+          //  this.textInfoMap = new DataList<TextInfo>(32, Allocator.Persistent, NativeArrayOptions.ClearMemory); // clear memory is very important here!
             this.changedElementIds = new DataList<TextChange>.Shared(16, Allocator.Persistent);
             this.layoutBuffer = new DataList<TextLayoutSymbol>.Shared(128, Allocator.Persistent);
             this.textEffectTable = new LightList<TextEffect>();
@@ -155,7 +151,7 @@ namespace UIForia.Text {
             this.textEffectVertexInfoTable = new DataList<TextEffectInfo>(8, Allocator.Persistent);
             this.effectDefinitions = effectDefinitions ?? new LightList<TextEffectDefinition>(0);
 
-            this.textInfoMap.size++; // 0 is invalid
+            //this.textInfoMap.size++; // 0 is invalid
             this.textEffectVertexInfoTable.size++; // 0 is invalid
         }
 
@@ -190,7 +186,6 @@ namespace UIForia.Text {
         }
 
         internal void AnimateText() {
-
             if (requireSort) {
                 new SortTextElements().Run();
                 requireSort = false;
@@ -217,11 +212,9 @@ namespace UIForia.Text {
             //     }
             //
             // }
-
         }
 
         internal void HandleElementDisabled(DataList<ElementId>.Shared disabledElements) {
-
             // todo -- need to handle destroying text infos!
             // todo -- could be bursted
 
@@ -229,29 +222,34 @@ namespace UIForia.Text {
                 ElementId id = disabledElements[i];
                 UIElement element = elementSystem.instanceTable[id.index];
                 if (element is UITextElement textElement) {
-                    for (int j = 0; j < activeTextElementIds.size; j++) {
-                        if (activeTextElementIds[j].elementId == id) {
+                    for (int j = 0; j < activeTextElementInfo.size; j++) {
+                        if (activeTextElementInfo[j].elementId == id) {
                             requireSort = true;
-                            activeTextElementIds[j] = activeTextElementIds[--activeTextElementIds.size];
+                            activeTextElementInfo[j] = activeTextElementInfo[--activeTextElementInfo.size];
                             break;
                         }
                     }
                 }
             }
-
         }
 
         internal void HandleElementEnabled(DataList<ElementId>.Shared enabledElements) {
-
             for (int i = 0; i < enabledElements.size; i++) {
                 UIElement element = elementSystem.instanceTable[enabledElements[i].index];
                 if (element is UITextElement textElement) {
                     requireSort = true;
-                    activeTextElementIds.Add(new TextId() {
-                        textInfoId = textElement.textInfoId,
+                    activeTextElementInfo.Add(new TextId() {
+                        textInfo = textElement.textInfo,
                         elementId = textElement.id
                     });
-                    ref TextInfo textInfo = ref textInfoMap[textElement.textInfoId];
+                    ref TextInfo textInfo = ref textElement.textInfo[0];
+                    textInfo.whitespaceMode = element.style.TextWhitespaceMode;
+                    textInfo.alignment = element.style.TextAlignment;
+                    textInfo.fontAssetId = element.style.TextFontAsset.id;
+                    textInfo.fontStyle = element.style.TextFontStyle;
+                    textInfo.textTransform = element.style.TextTransform;
+                    textInfo.lineHeight = element.style.TextLineHeight;
+
                     textInfo.textMaterial = new TextMaterialInfo() {
                         // opacity = element.style.Opacity, // todo -- should be multiplied appropriately
                         faceColor = element.style.TextColor,
@@ -272,39 +270,12 @@ namespace UIForia.Text {
                         underlayY = element.style.TextUnderlayY,
                     };
 
-                    textInfo.textStyle = new TextStyle() {
-                        alignment = element.style.TextAlignment,
-                        faceDilate = element.style.TextFaceDilate,
-                        fontSize = element.style.TextFontSize,
-                        fontAssetId = element.style.TextFontAsset.id,
-                        fontStyle = element.style.TextFontStyle,
-                        glowColor = element.style.TextGlowColor,
-                        glowOffset = element.style.TextGlowOffset,
-                        glowInner = element.style.TextGlowInner,
-                        glowPower = element.style.TextGlowPower,
-                        glowOuter = element.style.TextGlowOuter,
-                        outlineColor = element.style.TextOutlineColor,
-                        outlineSoftness = element.style.TextOutlineSoftness,
-                        outlineWidth = element.style.TextOutlineWidth,
-                        faceColor = element.style.TextColor,
-                        textTransform = element.style.TextTransform,
-                        underlayColor = element.style.TextUnderlayColor,
-                        underlayDilate = element.style.TextUnderlayDilate,
-                        underlaySoftness = element.style.TextUnderlaySoftness,
-                        underlayX = element.style.TextUnderlayX,
-                        underlayY = element.style.TextUnderlayY,
-                        whitespaceMode = element.style.TextWhitespaceMode,
-                        lineHeight = element.style.TextLineHeight,
-                    };
-
                     if (textElement.lastUpdateFrame != frameId) {
                         textElement.lastUpdateFrame = frameId;
-                        changedElementIds.Add(new TextChange(textElement.id, textElement.textInfoId));
+                        changedElementIds.Add(new TextChange(textElement.id, textElement.textInfo));
                     }
                 }
-
             }
-
         }
 
         // need to re-process text if whitespace changed, if text transform changed, if style changed
@@ -312,118 +283,114 @@ namespace UIForia.Text {
 
         // will be bursted eventually
         internal void HandleStyleChanged(UIElement element, StyleProperty[] properties, int propertyCount) {
-
             // todo -- flag check MIGHT be better
             if (!(element is UITextElement textElement)) {
                 return;
             }
 
-            ref TextInfo textInfo = ref textInfoMap[textElement.textInfoId];
+            ref TextInfo textInfo = ref textElement.textInfo[0];
 
             bool requiresRefresh = false;
             for (int i = 0; i < propertyCount; i++) {
                 ref StyleProperty property = ref properties[i];
                 switch (property.propertyId) {
                     case StylePropertyId.TextFontStyle:
-                        textInfo.textStyle.fontStyle = property.AsFontStyle;
+                        textInfo.fontStyle = property.AsFontStyle;
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextFontAsset:
-                        textInfo.textStyle.fontAssetId = property.AsFont.id;
+                        textInfo.fontAssetId = property.AsFont.id;
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextFontSize:
-                        textInfo.textStyle.fontSize = property.AsUIFixedLength;
+                        textInfo.fontSize = property.AsUIFixedLength;
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextTransform:
-                        textInfo.textStyle.textTransform = property.AsTextTransform;
+                        textInfo.textTransform = property.AsTextTransform;
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextLineHeight:
-                        textInfo.textStyle.lineHeight = property.AsFloat;
+                        textInfo.lineHeight = property.AsFloat;
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextWhitespaceMode:
-                        textInfo.textStyle.whitespaceMode = property.AsWhitespaceMode;
+                        textInfo.whitespaceMode = property.AsWhitespaceMode;
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextAlignment:
-                        textInfo.textStyle.alignment = property.AsTextAlignment;
+                        textInfo.alignment = property.AsTextAlignment;
                         break;
 
                     case StylePropertyId.TextColor:
-                        textInfo.textStyle.faceColor = property.AsColor32;
+                        textInfo.textMaterial.faceColor = property.AsColor32;
                         break;
 
                     case StylePropertyId.TextGlowColor:
-                        textInfo.textStyle.glowColor = property.AsColor32;
+                        textInfo.textMaterial.glowColor = property.AsColor32;
                         break;
 
                     case StylePropertyId.TextGlowOffset:
-                        textInfo.textStyle.glowOffset = property.AsFloat;
+                        textInfo.textMaterial.glowOffset = MathUtil.FloatMinus1To1ToUshort(property.AsFloat);
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextGlowOuter:
-                        textInfo.textStyle.glowOuter = property.AsFloat;
+                        textInfo.textMaterial.glowOuter = MathUtil.Float01ToByte(property.AsFloat);
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextGlowInner:
-                        textInfo.textStyle.glowInner = property.AsFloat;
+                        textInfo.textMaterial.glowInner = MathUtil.Float01ToByte(property.AsFloat);
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextGlowPower:
-                        textInfo.textStyle.glowPower = property.AsFloat;
+                        textInfo.textMaterial.glowPower = MathUtil.Float01ToByte(property.AsFloat);
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextUnderlayX:
-                        textInfo.textStyle.underlayX = property.AsFloat;
+                        textInfo.textMaterial.underlayX = property.AsFloat;
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextUnderlayY:
-                        textInfo.textStyle.underlayY = property.AsFloat;
+                        textInfo.textMaterial.underlayY = property.AsFloat;
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextUnderlayDilate:
-                        textInfo.textStyle.underlayDilate = property.AsFloat;
+                        textInfo.textMaterial.underlayDilate = MathUtil.Float01ToByte(property.AsFloat);
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextUnderlayColor:
-                        textInfo.textStyle.underlayColor = property.AsColor32;
+                        textInfo.textMaterial.underlayColor = property.AsColor32;
                         break;
 
                     case StylePropertyId.TextUnderlaySoftness:
-                        textInfo.textStyle.underlaySoftness = property.AsFloat;
+                        textInfo.textMaterial.underlaySoftness = MathUtil.Float01ToByte(property.AsFloat);
                         requiresRefresh = true;
                         break;
 
                     case StylePropertyId.TextFaceDilate:
-                        textInfo.textStyle.faceDilate = property.AsFloat;
+                        textInfo.textMaterial.faceDilate = MathUtil.Float01ToByte(property.AsFloat);
                         requiresRefresh = true;
                         break;
-
                 }
-
             }
 
             if (requiresRefresh && textElement.lastUpdateFrame != frameId) {
                 textElement.lastUpdateFrame = frameId;
-                changedElementIds.Add(new TextChange(textElement.id, textElement.textInfoId));
+                changedElementIds.Add(new TextChange(textElement.id, textElement.textInfo));
             }
-
         }
 
         internal void CleanupFrame() {
@@ -432,17 +399,7 @@ namespace UIForia.Text {
 
         internal void UpdateText(UITextElement uiTextElement) {
 
-            if (uiTextElement.textInfoId == 0) {
-                uiTextElement.textInfoId = GetNextTextId();
-                if (uiTextElement.isEnabled) {
-                    activeTextElementIds.Add(new TextId() {
-                        textInfoId = uiTextElement.textInfoId,
-                        elementId = uiTextElement.id
-                    });
-                }
-            }
-
-            ref TextInfo textInfo = ref textInfoMap[uiTextElement.textInfoId];
+            ref TextInfo textInfo = ref uiTextElement.textInfo[0];
 
             if (uiTextElement._processor is RichTextProcessor richTextProcessor) {
                 richTextProcessor.SetTextEffectResolver(this);
@@ -452,29 +409,37 @@ namespace UIForia.Text {
 
             if (uiTextElement.lastUpdateFrame != frameId) {
                 uiTextElement.lastUpdateFrame = frameId;
-                changedElementIds.Add(new TextChange(uiTextElement.id, uiTextElement.textInfoId));
+                changedElementIds.Add(new TextChange(uiTextElement.id, uiTextElement.textInfo));
             }
+        }
 
+        internal void InitTextInfo(UITextElement uiTextElement) {
+            // if (uiTextElement.textInfoId == 0) {
+            //     uiTextElement.textInfoId = GetNextTextId();
+            //     if (uiTextElement.isEnabled) {
+            //         activeTextElementIds.Add(new TextId() {
+            //             textInfoId = uiTextElement.textInfoId,
+            //             elementId = uiTextElement.id
+            //         });
+            //     }
+            //
+            //     uiTextElement.textInfo = textInfoMap.GetArrayPointer() + uiTextElement.textInfoId;
+            // }
         }
 
         // todo -- make this real, need to use free list or grow
         private int GetNextTextId() {
-            int id = textInfoMap.size;
+            // int id = textInfoMap.size;
             // todo -- make sure when releasing a text info that we dispose it first
-            textInfoMap.Add(default);
-            return id;
+            // textInfoMap.Add(default);
+            // return id;
+            return -1;
         }
 
         public void Dispose() {
-
-            for (int i = 0; i < textInfoMap.size; i++) {
-                textInfoMap[i].Dispose();
-            }
-
             effectVertexFreeList.Dispose();
             textEffectVertexInfoTable.Dispose();
-            activeTextElementIds.Dispose();
-            textInfoMap.Dispose();
+            activeTextElementInfo.Dispose();
             changedElementIds.Dispose();
             layoutBuffer.Dispose();
         }
@@ -485,55 +450,44 @@ namespace UIForia.Text {
             ElementTraversalInfo info = elementSystem.traversalTable[viewRootId];
 
             for (int i = 0; i < changedElementIds.size; i++) {
-
                 if (info.IsAncestorOf(elementSystem.traversalTable[changedElementIds[i].elementId])) {
                     textChangeBuffer.Add(changedElementIds[i]);
                 }
-
             }
-
         }
 
         //Not burst job because we need access to the 'char' class for transformation
         internal struct UpdateTextTransformJob : IJob {
 
-            internal DataList<TextInfo> textInfoMap;
             internal DataList<TextChange>.Shared changedElementIds;
 
             public void Execute() {
                 for (int i = 0; i < changedElementIds.size; i++) {
+                    ref TextInfo textInfo = ref changedElementIds[i].textInfo[0];
 
-                    ref TextInfo textInfo = ref textInfoMap[changedElementIds[i].textInfoId];
-
-                    if (textInfo.requiresTextTransform || textInfo.textStyle.textTransform != TextTransform.None) {
-                        TextUtil.TransformText(textInfo.textStyle.textTransform, textInfo.symbolList.array, textInfo.symbolList.size);
+                    if (textInfo.requiresTextTransform || textInfo.textTransform != TextTransform.None) {
+                        TextUtil.TransformText(textInfo.textTransform, textInfo.symbolList.array, textInfo.symbolList.size);
                     }
-
                 }
-
             }
 
         }
 
         public void UpdateEffects() {
-
             // todo -- only the ones that have effects should be invoked
 
             textEffectAnimator.fontAssetMap = application.ResourceManager.fontAssetMap;
 
             Profiler.BeginSample("UIForia::TextEffectUpdate");
-            TextId* arrayPointer = activeTextElementIds.GetArrayPointer();
-            TextInfo* textInfoMapArray = textInfoMap.GetArrayPointer();
-            int count = activeTextElementIds.size;
-            
-            for (int i = 0; i < count; i++) {
+            TextId* arrayPointer = activeTextElementInfo.GetArrayPointer();
+            int count = activeTextElementInfo.size;
 
-                ref TextInfo textInfo = ref textInfoMapArray[arrayPointer[i].textInfoId];
+            for (int i = 0; i < count; i++) {
+                ref TextInfo textInfo = ref arrayPointer[i].textInfo[0];
 
                 if (textInfo.hasEffects) {
                     textEffectAnimator.Animate(default, ref textInfo, (UITextElement) elementSystem.instanceTable[arrayPointer[i].elementId.index]);
                 }
-
             }
 
             Profiler.EndSample();
@@ -581,25 +535,36 @@ namespace UIForia.Text {
 
         public bool TryResolveTextEffect(CharSpan effectName, out TextEffectId effectId) {
             for (int i = 0; i < effectDefinitions.size; i++) {
-
                 if (effectDefinitions.array[i].effectName == effectName) {
                     effectId = new TextEffectId(i);
                     return true;
                 }
-
             }
 
             effectId = default;
             return false;
         }
 
+        public bool TryGetFontAsset(int fontAssetId, out FontAssetInfo fontAsset) {
+            DataList<FontAssetInfo>.Shared assetMap = application.ResourceManager.fontAssetMap;
+
+            if (fontAssetId < 0 || fontAssetId >= assetMap.size) {
+                fontAsset = default;
+                return false;
+            }
+
+            fontAsset = assetMap[fontAssetId];
+            return true;
+        }
+
     }
 
-    public enum TextRenderType {
+    public enum TextRenderType : ushort {
 
-        Characters,
-        Underline,
-        Sprite,
+        Highlight = 0,
+        Characters = 1,
+        Sprite = 2,
+        Underline = 3,
         Image,
         Element
 
@@ -608,12 +573,16 @@ namespace UIForia.Text {
     public unsafe struct TextRenderRange {
 
         public TextRenderType type;
+        public ushort idx;
+
         public RangeInt characterRange;
         public int fontAssetId;
         public TextSymbol* symbols;
         public TextureUsage texture0;
         public TextureUsage texture1;
+
         public AxisAlignedBounds2D localBounds;
+        // public ElementDrawDesc* drawDesc;
 
     }
 

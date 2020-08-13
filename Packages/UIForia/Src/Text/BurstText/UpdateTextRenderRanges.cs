@@ -1,4 +1,6 @@
-﻿using UIForia.Util.Unsafe;
+﻿using System.Collections.Generic;
+using UIForia.Graphics;
+using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -10,14 +12,15 @@ namespace UIForia.Text {
     internal unsafe struct UpdateTextRenderRanges : IJob {
 
         public DataList<FontAssetInfo>.Shared fontAssetMap;
-        public DataList<TextInfo> textInfoMap;
-        public DataList<TextId> activeTextElementIds;
+        public DataList<TextId> activeTextElementInfos;
 
         public int rangeSizeLimit;
+        private float minSelectedPosition;
+        private float maxSelectedPosition;
 
         public void Execute() {
             if (rangeSizeLimit <= 0) rangeSizeLimit = 150;
-            Run(0, activeTextElementIds.size);
+            Run(0, activeTextElementInfos.size);
         }
 
         public enum TextDecorationType {
@@ -37,19 +40,16 @@ namespace UIForia.Text {
         }
 
         public void Run(int start, int end) {
-
             DataList<int> faceTextureStack = new DataList<int>(16, Allocator.Temp);
             DataList<int> outlineTextureStack = new DataList<int>(16, Allocator.Temp);
 
             for (int i = start; i < end; i++) {
-
                 // if !needsDrawUpdate, continue
                 // if !rich text, do something simpler, still needs to break lines and handle text decoration per line
 
-  
 
-                TextId textId = activeTextElementIds[i];
-                ref TextInfo textInfo = ref textInfoMap[textId.textInfoId];
+                TextId textId = activeTextElementInfos[i];
+                ref TextInfo textInfo = ref textId.textInfo[0];
                 if (!textInfo.requiresRenderRangeUpdate) {
                     continue;
                 }
@@ -59,14 +59,14 @@ namespace UIForia.Text {
                 outlineTextureStack.size = 1;
                 faceTextureStack[0] = 0;
                 outlineTextureStack[0] = 0;
-                
+
                 textInfo.renderRangeList.EnsureCapacity(4, Allocator.Persistent);
                 // textInfo.renderedCharacters.EnsureCapacity(textInfo.renderingCharacterCount + 1, Allocator.Persistent); // +1 to account for invalid index 0
 
                 textInfo.renderRangeList.size = 0;
                 // textInfo.renderedCharacters.size = 1; // 0 is invalid
 
-                ushort fontAssetId = (ushort) textInfo.textStyle.fontAssetId;
+                ushort fontAssetId = (ushort) textInfo.fontAssetId;
 
                 RangeInt range = new RangeInt(-1, 0);
 
@@ -77,14 +77,23 @@ namespace UIForia.Text {
                 UIForiaGlyph dummy = default;
                 ref UIForiaGlyph glyph = ref dummy;
                 FontAssetInfo* fontMap = fontAssetMap.GetArrayPointer();
-                
+
                 TextSymbol* prevSymbol = null;
-                
+
+                RangeInt selectionRange = textInfo.selectionRange;
+                selectionRange.start = 5;
+                selectionRange.length = 5;
+
+                int charIdx = 0;
+                bool hasSelection = selectionRange.length > 0;
+                minSelectedPosition = -1;
+                maxSelectedPosition = -1;
+
                 for (int c = 0; c < textInfo.symbolList.size; c++) {
                     ref TextSymbol symbol = ref textInfo.symbolList.array[c];
 
                     switch (symbol.type) {
-
+                        
                         case TextSymbolType.TexturePush:
                             // faceTextureStack.Add(symbol.textureId);
                             break;
@@ -96,6 +105,8 @@ namespace UIForia.Text {
                         case TextSymbolType.Character: {
 
                             if (symbol.charInfo.lineIndex != lineIdx) {
+                                SubmitSelectionHighlight(ref textInfo, lineIdx);
+
                                 lineIdx = symbol.charInfo.lineIndex;
 
                                 if (range.length > 0) {
@@ -105,6 +116,7 @@ namespace UIForia.Text {
                                         fontAssetId = fontAssetId,
                                     });
                                 }
+
                                 range.start = -1;
                                 range.length = 0;
                                 prevSymbol = null;
@@ -112,8 +124,20 @@ namespace UIForia.Text {
                                 // decoration.EndLine();
                             }
 
+                            if (hasSelection && charIdx >= selectionRange.start && charIdx < selectionRange.end) {
+
+                                if (charIdx == selectionRange.start || range.start == -1) {
+                                    minSelectedPosition = GetCharacterLeft(symbol, textInfo);
+                                }
+                                else if (charIdx == selectionRange.end - 1) {
+                                    maxSelectedPosition = GetCharacterRight(fontMap, symbol, textInfo, fontAssetId);
+                                }
+
+                            }
+
                             // todo -- handle disabled characters
                             if ((symbol.charInfo.flags & CharacterFlags.Visible) == 0) {
+                                charIdx++;
                                 continue;
                             }
 
@@ -148,7 +172,7 @@ namespace UIForia.Text {
                             prevSymbol = textInfo.symbolList.array + c;
                             // could do this in a post step for better locality 
                             glyph = ref fontMap[fontAssetId].glyphList[symbol.charInfo.glyphIndex];
-                            
+
                             // textInfo.renderedCharacters.array[textInfo.renderedCharacters.size++] = new RenderedCharacterInfo() {
                             //     position = position,
                             //     // width and height are used just for bounds computation
@@ -160,7 +184,7 @@ namespace UIForia.Text {
                             // };
 
                             range.length++;
-
+                            charIdx++;
                             break;
                         }
 
@@ -198,7 +222,6 @@ namespace UIForia.Text {
                         }
 
                         case TextSymbolType.UnderlinePush: {
-
                             // I dont have material data right now
                             // material buffer will need to go through decoration calls and set material index I think
                             // decorationList.Add(new Underline());
@@ -244,7 +267,6 @@ namespace UIForia.Text {
                         }
 
                         case TextSymbolType.FontPop: {
-
                             if (range.length > 0) {
                                 textInfo.renderRangeList.Add(new TextRenderRange());
                             }
@@ -253,7 +275,6 @@ namespace UIForia.Text {
                             range.length = 0;
                             break;
                         }
-
                     }
 
                     // font changing is a new draw 
@@ -270,16 +291,57 @@ namespace UIForia.Text {
                         texture0 = default,
                         texture1 = default
                     });
+                    SubmitSelectionHighlight(ref textInfo, lineIdx);
                 }
 
                 for (int j = 0; j < textInfo.renderRangeList.size; j++) {
-                    textInfo.renderRangeList.array[j].symbols = textInfo.symbolList.array;//.array;
+                    ref TextRenderRange render = ref textInfo.renderRangeList.array[j];
+                    render.idx = (ushort) j;
+                    if (render.type == TextRenderType.Characters) {
+                        render.symbols = textInfo.symbolList.array;
+                    }
                 }
 
+                NativeSortExtension.Sort(textInfo.renderRangeList.array, textInfo.renderRangeList.size, new Cmp());
             }
 
             faceTextureStack.Dispose();
             outlineTextureStack.Dispose();
+        }
+
+        private struct Cmp : IComparer<TextRenderRange> {
+
+            public int Compare(TextRenderRange x, TextRenderRange y) {
+                if (x.type == y.type) return x.idx - y.idx;
+                return x.type - y.type;
+            }
+
+        }
+
+        private void SubmitSelectionHighlight(ref TextInfo textInfo, ushort lineIdx) {
+            if (minSelectedPosition != -1 && maxSelectedPosition != -1) {
+                textInfo.renderRangeList.Add(new TextRenderRange() {
+                    type = TextRenderType.Highlight,
+                    localBounds = new AxisAlignedBounds2D() {
+                        xMin = minSelectedPosition,
+                        xMax = maxSelectedPosition,
+                        yMin = textInfo.lineInfoList.array[lineIdx].y,
+                        yMax = textInfo.lineInfoList.array[lineIdx].y + textInfo.lineInfoList.array[lineIdx].height
+                    }
+                });
+                minSelectedPosition = -1;
+                maxSelectedPosition = -1;
+            }
+        }
+
+        private float GetCharacterLeft(in TextSymbol symbol, in TextInfo textInfo) {
+            return textInfo.layoutSymbolList.array[symbol.charInfo.wordIndex].wordInfo.x + symbol.charInfo.position.x;
+        }
+
+        private float GetCharacterRight(FontAssetInfo* fontMap, in TextSymbol symbol, in TextInfo textInfo, int fontAssetId) {
+            ref UIForiaGlyph glyph = ref fontMap[fontAssetId].glyphList[symbol.charInfo.glyphIndex];
+            // todo -- handle bold and italic and sdf padding
+            return textInfo.layoutSymbolList.array[symbol.charInfo.wordIndex].wordInfo.x + symbol.charInfo.position.x + (glyph.width * symbol.charInfo.scale);
         }
 
         private void EndRenderRange() { }

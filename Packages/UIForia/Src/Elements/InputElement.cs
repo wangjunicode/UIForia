@@ -26,7 +26,7 @@ namespace UIForia.Elements {
         }
 
         public void Reset() {
-            selectionRange = new SelectionRange(0, text.Length);
+            selectionRange = default; //new SelectionRange(0, text.Length);
             HandleCharactersDeletedForwards();
         }
 

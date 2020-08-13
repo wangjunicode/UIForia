@@ -201,21 +201,21 @@ namespace UIForia {
         }
 
         internal static void ProcessClassAttributes(Type type, Attribute[] attrs) {
-            // for (var i = 0; i < attrs.Length; i++) {
-            //     Attribute attr = attrs[i];
-            //     if (attr is CustomPainterAttribute paintAttr) {
-            //         if (type.GetConstructor(Type.EmptyTypes) == null || !typeof(RenderBox).IsAssignableFrom(type)) {
-            //             throw new Exception($"Classes marked with [{nameof(CustomPainterAttribute)}] must provide a parameterless constructor" +
-            //                                 $" and the class must extend {nameof(RenderBox)}. Ensure that {type.FullName} conforms to these rules");
-            //         }
-            //
-            //         if (s_CustomPainters.ContainsKey(paintAttr.name)) {
-            //             throw new Exception($"Failed to register a custom painter with the name {paintAttr.name} from type {type.FullName} because it was already registered.");
-            //         }
-            //
-            //         s_CustomPainters.Add(paintAttr.name, type);
-            //     }
-            // }
+            for (var i = 0; i < attrs.Length; i++) {
+                Attribute attr = attrs[i];
+                if (attr is CustomPainterAttribute paintAttr) {
+                    if (type.GetConstructor(Type.EmptyTypes) == null || !typeof(RenderBox).IsAssignableFrom(type)) {
+                        throw new Exception($"Classes marked with [{nameof(CustomPainterAttribute)}] must provide a parameterless constructor" +
+                                            $" and the class must extend {nameof(RenderBox)}. Ensure that {type.FullName} conforms to these rules");
+                    }
+            
+                    if (s_CustomPainters.ContainsKey(paintAttr.name)) {
+                        throw new Exception($"Failed to register a custom painter with the name {paintAttr.name} from type {type.FullName} because it was already registered.");
+                    }
+            
+                    s_CustomPainters.Add(paintAttr.name, type);
+                }
+            }
         }
 
         public StyleSystem StyleSystem => styleSystem;

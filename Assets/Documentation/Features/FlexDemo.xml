@@ -1,7 +1,7 @@
 <UITemplate>
 
-    <Style path="Documentation/Features/FlexDemo.style"/>
-    <Style src="Documentation/Documentation.style" alias="theme"/>
+<!--    <Style path="Documentation/Features/FlexDemo.style"/>-->
+<!--    <Style src="Documentation/Documentation.style" alias="theme"/>-->
 
     <Using namespace="UIForia.Text"/>
     <Using namespace="UnityEngine"/>
@@ -11,11 +11,11 @@
         style container2 {
             FlexLayoutDirection = Horizontal;
             PreferredSize = 1vw 1vh;
-            BackgroundColor = white;
+            Padding = 250px;
         }
 
         style shape-kit {
-            FlexLayoutDirection = Horizontal;
+            // FlexLayoutDirection = Horizontal;
             PreferredSize = 1vw 1vh;
             BackgroundColor = white;
             //BackgroundImage = url("DefaultAtlas", "player1");
@@ -24,6 +24,12 @@
             // painter:ShapePainter.sizeMod = 0.3f;
             // material:materialName.field = x;
             
+        }
+        
+        style inputxxx {
+            PreferredWidth = 0.5cnt;
+            TextFontSize = 72px;
+            TextColor = blue;
         }
 
         material UIForiaShape : resources("UIForiaShape");
@@ -66,6 +72,9 @@
             PreferredSize = 200px;
             backgroundColor = red;
             BorderRadius = 50%;
+            OutlineWidth = 5px;
+            OutlineColor = white;
+            
         }
         
     </Style>
@@ -73,7 +82,121 @@
     <Using namespace="UnityEngine"/>
     <Contents style="container2">
 
+        <Div style="child"/>
+<!--        <Input style="inputxxx" value="'Matt sa|ys       lets make this words'"/>-->
+        
 <!--        <ScrollView style="shape-kit">-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
+<!--            <Div style="child">{$parent.siblingIndex}</Div>-->
 <!--            <Div style="child">{$parent.siblingIndex}</Div>-->
 <!--            <Div style="child">{$parent.siblingIndex}</Div>-->
 <!--            <Div style="child">{$parent.siblingIndex}</Div>-->

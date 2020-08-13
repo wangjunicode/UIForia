@@ -158,6 +158,11 @@
                    o.texCoord1 = float2(0, 1);
                }
                
+                  // sdf uv offsets for non quad meshes, which we'll probably want eventually to reduce overdraw
+                float2 halfUV = float2(0.5, 0.5) / vertex.size; // todo -- this might need to be dpi scaled
+                o.texCoord0.x += o.texCoord0.x > 0.5 ? halfUV.x : -halfUV.x;
+                o.texCoord0.y += o.texCoord0.y > 0.5 ? halfUV.y : -halfUV.y;
+               
                int matrixIndex = UnpackMatrixId(vertex.indices);
                int materialIndex = UnpackMaterialId(vertex.indices);
                ElementMaterialInfo material = _UIForiaMaterialBuffer[materialIndex];
@@ -170,7 +175,7 @@
                o.vertex = mul(UNITY_MATRIX_VP, mul(transform, float4(vpos.xyz, 1.0)));
 
                // todo -- snapping is terrible when moving/ rotating 
-            //   o.vertex = UIForiaPixelSnap(o.vertex);
+               // o.vertex = UIForiaPixelSnap(o.vertex);
                 
                o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, vertex.indices.z, vertex.indices.w);
                 
@@ -179,10 +184,6 @@
 
             fixed4 frag (v2f i) : SV_Target {
                 // this could be done in the vertex shader too but this way we can support correct
-                // sdf uv offsets for non quad meshes, which we'll probably want eventually to reduce overdraw
-                float2 halfUV = float2(0.5, 0.5) / i.size; // todo -- this might need to be dpi scaled
-                i.texCoord0.x += i.texCoord0.x > 0.5 ? halfUV.x : -halfUV.x;
-                i.texCoord0.y += i.texCoord0.y > 0.5 ? halfUV.y : -halfUV.y;
                 
                 ElementMaterialInfo material = _UIForiaMaterialBuffer[i.indices.y];
                 float2 size = i.size;
@@ -195,16 +196,16 @@
                 
                 uint packedRadii = material.radius;
                 uint bodyColorMode = ExtractByte(material.bMode_oMode_meshFillDirection_meshFillInvert, 0);
-                
+
                 // todo -- put these in a constant buffer or add to material
                 
                  // can be a sign bit or flag elsewhere
                 float fillDirection = ExtractByte(material.bMode_oMode_meshFillDirection_meshFillInvert, 2) == 0 ? 1 : -1;
                 float invertFill = ExtractByte(material.bMode_oMode_meshFillDirection_meshFillInvert, 3) == 0 ? 1 : -1; 
-                float fillAmount = UnpackLowUShortPercentageToFloat(material.fillOpenAndRotation);
+                float fillAmount = cos(_Time.y); //0.25; //UnpackLowUShortPercentageToFloat(material.fillOpenAndRotation);
                 float fillRotation = UnpackHighUShortPercentageToFloat(material.fillOpenAndRotation); //frac(_Time.y) * PI * 2;
                 float fillRadius = material.fillRadius;
-                float2 fillOffset = float2(material.fillOffsetX, material.fillOffsetY) - halfUV;
+                float2 fillOffset = i.size * float2(0.5, 0.5); //float2(material.fillOffsetX, material.fillOffsetY); // - halfUV;
                  
                 float2 uvScale = i.uvTransform.xy;
                 float2 uvOffset = i.uvTransform.zw;
@@ -291,8 +292,11 @@
                 sdf = max(-sdfBevel, sdf);
                 // todo -- move max up here to draw pie instead of using as a clipping bounds
                 // sdf = max(radialSDF * invertFill, sdf);
+                
                 float sdfOutline = outlineWidth > 0 ? abs(sdf) - outlineWidth : 0;
-                sdf = max(radialSDF * invertFill, sdf);
+                //sdf = max(radialSDF * invertFill, sdf);
+               // sdfOutline = (fillFlag & FillOutline) != 0 ? max(radialSDF * invertFill, sdfOutline) : sdfOutline;
+                
                 color = ComputeColor(color, grad, tintColor, bodyColorMode, i.texCoord1, _MainTex, uvBounds, originalUV);
                 color = lerp(color, outlineColor, outlineWidth == 0 ? 0 : 1 - saturate(sdfOutline));
                 color.a *= 1 - smoothstep(0, fwidth(sdf), sdf);
@@ -305,7 +309,7 @@
                // fixed3 gradientCol = fixed3(grayscale * grad.rgb);  //tex2D(_GradientMap, float2(grayscale, 0));
                // return UIForiaColorSpace(fixed4(grad.rgb + (0.25 * color.rgb), color.a)); //gradientCol * c.a * IN.color;
                 color.a *= opacity;
-                //color.a *= (s.x * s.y) != 0; todo -- fix this
+                color.a *= (s.x * s.y) != 0;
                 color = UIForiaColorSpace(color); // todo -- video texture wont want to adjust color space 
                 clip(color.a - 0.01);
                 return color;

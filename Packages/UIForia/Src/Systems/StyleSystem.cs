@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Src.Systems;
 using UIForia.Elements;
 using UIForia.Rendering;
@@ -139,7 +140,7 @@ namespace UIForia.Systems {
             if (property.propertyId == StylePropertyId.TextFontSize) {
                 elementSystem.emTable[element.id].styleValue = property.AsUIFixedLength;
             }
-            
+
             // should probably just defer inheritance
             if (!StyleUtil.IsInherited(property.propertyId) || element.ChildCount == 0) {
                 return;

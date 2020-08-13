@@ -26,7 +26,7 @@
                     <Text style="table-head column-center">Actions</Text>
                 </Group>
 
-                <Div style="table-scroll-view" >
+                <ScrollView style="table-scroll-view" >
 <!--                    <override:vertical-scrollbar-handle style="scroll-handle"/>-->
 <!--                    <override:vertical-scrollbar style="scrollbar"/>-->
                     <Repeat list="servers" style="table-layout">
@@ -42,7 +42,7 @@
 
                         </Div>
                     </Repeat>
-                </Div>
+                </ScrollView>
             </Group>
         </Panel>
 

@@ -107,13 +107,12 @@ namespace UIForia.Rendering {
             // maybe regenerating isnt so awful now 
             // can still do high level culling of lines, maybe even characters if line is overlapping its clip bounds. can be parallel and is fast
             // profile, maybe its not a problem
-            if (!((UITextElement) element).TryGetTextInfo(out TextInfo textInfo)) {
-                return;
-            }
+            UITextElement textElement = (UITextElement)element;
+            
 
-            ctx.SetTextMaterials(textInfo.materialBuffer);
-            for (int i = 0; i < textInfo.renderRangeList.size; i++) {
-                ref TextRenderRange render = ref textInfo.renderRangeList[i];
+            ctx.SetTextMaterials(textElement.textInfo->materialBuffer);
+            for (int i = 0; i < textElement.textInfo->renderRangeList.size; i++) {
+                ref TextRenderRange render = ref textElement.textInfo->renderRangeList[i];
                 
                 // todo -- should definitely do a broadphase cull here 
                 // bool overlappingOrContains = xMax >= clipper.aabb.xMin && xMin <= clipper.aabb.xMax && yMax >= clipper.aabb.yMin && yMin <= clipper.aabb.yMax;
@@ -124,6 +123,10 @@ namespace UIForia.Rendering {
                         ctx.DrawTextCharacters(render);
                         break;
 
+                    case TextRenderType.Highlight:
+                        ctx.DrawTextHighlight(render);
+                        break;
+                    
                     case TextRenderType.Underline:
                         break;
 
@@ -138,7 +141,6 @@ namespace UIForia.Rendering {
                 }
 
             }
-
 
         }
 

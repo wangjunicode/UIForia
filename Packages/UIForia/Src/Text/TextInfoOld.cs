@@ -923,16 +923,17 @@ namespace UIForia.Text {
 
             if (IsLastOnLine(charEndIdx)) {
                 // this is how we select up until the right edge
-                return new SelectionRange(
-                    charEndIdx + 1,
-                    charStartIdx
-                );
+                // return new SelectionRange(
+                //     charEndIdx + 1,
+                //     charStartIdx
+                // );
             }
 
-            return new SelectionRange(
-                charEndIdx,
-                charStartIdx
-            );
+            // return new SelectionRange(
+                // charEndIdx,
+                // charStartIdx
+            // );
+            return default;
         }
 
         public SelectionRange SelectLineAtPoint(Vector2 point) {
@@ -941,10 +942,11 @@ namespace UIForia.Text {
                 return default;
             }
 
-            return new SelectionRange(
-                lineInfoList.array[idx].globalCharacterEndIndex + 1, // might be wrong for multi line
-                lineInfoList.array[idx].globalCharacterStartIndex
-            );
+            return default;
+            //return new SelectionRange(
+            //    lineInfoList.array[idx].globalCharacterEndIndex + 1, // might be wrong for multi line
+            //    lineInfoList.array[idx].globalCharacterStartIndex
+            //);
         }
 
         public SelectionRange MoveCursorLeft(SelectionRange range, bool maintainSelection, bool word) {
@@ -975,7 +977,7 @@ namespace UIForia.Text {
 
             if (cursorIndex < 0) cursorIndex = 0;
 
-            return new SelectionRange(cursorIndex, selectionIndex);
+            return default; // new SelectionRange(cursorIndex, selectionIndex);
         }
 
         public SelectionRange MoveCursorRight(SelectionRange range, bool select, bool word) {
@@ -1007,7 +1009,7 @@ namespace UIForia.Text {
             int totalCount = GetRenderedCharacterCount();
             if (cursorIndex > totalCount) cursorIndex = totalCount;
 
-            return new SelectionRange(cursorIndex, selectionIndex);
+            return default; //new SelectionRange(cursorIndex, selectionIndex);
         }
 
         public int GetRenderedCharacterCount() {
@@ -1021,14 +1023,14 @@ namespace UIForia.Text {
 
         public SelectionRange MoveToStartOfLine(SelectionRange selectionRange, bool select) {
             if (selectionRange.cursorIndex <= 0) {
-                return new SelectionRange(selectionRange.cursorIndex, select ? selectionRange.selectIndex : -1);
+                return default; // new SelectionRange(selectionRange.cursorIndex, select ? selectionRange.selectIndex : -1);
             }
 
             for (int i = 0; i < lineInfoList.size; i++) {
                 TextLineInfo lineInfo = lineInfoList.array[i];
                 if (selectionRange.cursorIndex >= lineInfo.globalCharacterStartIndex && selectionRange.cursorIndex < lineInfo.globalCharacterEndIndex) {
                     if (select) {
-                        return new SelectionRange(lineInfo.globalCharacterStartIndex, Mathf.Max(selectionRange.selectIndex, selectionRange.cursorIndex));
+                        return default;// new SelectionRange(lineInfo.globalCharacterStartIndex, Mathf.Max(selectionRange.selectIndex, selectionRange.cursorIndex));
                     }
 
                     return new SelectionRange(lineInfo.globalCharacterStartIndex);
@@ -1038,7 +1040,7 @@ namespace UIForia.Text {
             // index is int.max or content size changed / we need to check for out of bounds 
             TextLineInfo lastLine = lineInfoList.array[lineInfoList.size - 1];
             if (select) {
-                return new SelectionRange(lastLine.globalCharacterStartIndex, selectionRange.selectIndex > -1 ? Mathf.Min(selectionRange.selectIndex, lastLine.globalCharacterEndIndex) : lastLine.globalCharacterEndIndex);
+                return default; //new SelectionRange(lastLine.globalCharacterStartIndex, selectionRange.selectIndex > -1 ? Mathf.Min(selectionRange.selectIndex, lastLine.globalCharacterEndIndex) : lastLine.globalCharacterEndIndex);
             }
 
             return new SelectionRange(lastLine.globalCharacterStartIndex);
@@ -1046,14 +1048,14 @@ namespace UIForia.Text {
 
         public SelectionRange MoveToEndOfLine(SelectionRange selectionRange, bool select) {
             if (selectionRange.cursorIndex <= 0) {
-                return new SelectionRange(lineInfoList.array[0].globalCharacterEndIndex, select ? Mathf.Max(0, selectionRange.selectIndex) : -1);
+                return default; //new SelectionRange(lineInfoList.array[0].globalCharacterEndIndex, select ? Mathf.Max(0, selectionRange.selectIndex) : -1);
             }
 
             for (int i = 0; i < lineInfoList.size; i++) {
                 TextLineInfo lineInfo = lineInfoList.array[i];
                 if (selectionRange.cursorIndex >= lineInfo.globalCharacterStartIndex && selectionRange.cursorIndex < lineInfo.globalCharacterEndIndex) {
                     if (select) {
-                        return new SelectionRange(lineInfo.globalCharacterEndIndex, Mathf.Max(selectionRange.selectIndex, selectionRange.cursorIndex));
+                        return default; //new SelectionRange(lineInfo.globalCharacterEndIndex, Mathf.Max(selectionRange.selectIndex, selectionRange.cursorIndex));
                     }
 
                     return new SelectionRange(lineInfo.globalCharacterEndIndex);
@@ -1061,7 +1063,7 @@ namespace UIForia.Text {
             }
 
             if (select) {
-                return new SelectionRange(lineInfoList.array[lineInfoList.size - 1].globalCharacterEndIndex, selectionRange.selectIndex);
+                return default; //new SelectionRange(lineInfoList.array[lineInfoList.size - 1].globalCharacterEndIndex, selectionRange.selectIndex);
             }
 
             return new SelectionRange(lineInfoList.array[lineInfoList.size - 1].globalCharacterEndIndex);

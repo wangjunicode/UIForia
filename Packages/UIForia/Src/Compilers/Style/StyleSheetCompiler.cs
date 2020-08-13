@@ -162,9 +162,7 @@ namespace UIForia.Compilers.Style {
                 return;
             }
 
-            fixed (char* charptr = matNode.body) {
-                CharStream stream = new CharStream(charptr, 0, matNode.body.Length);
-            }    
+         
         }
         
         private bool TryParsePainterVariableBlock(ref CharStream stream, out PainterVariableDeclaration[] painterVariables) {

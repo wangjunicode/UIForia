@@ -369,6 +369,8 @@ namespace UIForia.Systems {
         // only called for elements that were not enabled this frame
         // todo -- totally burstable when styles are blittable
         public void HandleStylePropertyUpdates(UIElement element, StyleProperty[] properties, int propertyCount) {
+
+            textSystem.HandleStyleChanged(element, properties, propertyCount);
             ref LayoutInfo horizontalLayoutInfo = ref horizontalLayoutInfoTable[element.id];
             ref LayoutInfo verticalLayoutInfo = ref verticalLayoutInfoTable[element.id];
             ref PaddingBorderMargin layoutPropertyEntry = ref paddingBorderMarginTable[element.id];
@@ -678,7 +680,6 @@ namespace UIForia.Systems {
                 layoutContext.runner->lineInfoBuffer = layoutContext.lineBuffer;
                 layoutContext.runner->layoutHierarchyTable = layoutHierarchyTable.array;
                 layoutContext.runner->layoutBoxInfoTable = layoutResultTable.array;
-                layoutContext.runner->textInfoTable = textSystem.textInfoMap.GetArrayPointer();
                 layoutContext.runner->viewParameters = viewParameters;
                 layoutContext.runner->layoutBoxTable = layoutBoxTable.array;
                 layoutContext.runner->horizontalLayoutInfoTable = horizontalLayoutInfoTable.array;
@@ -707,7 +708,6 @@ namespace UIForia.Systems {
 
                 JobHandle textTransformUpdates = new TextSystem.UpdateTextTransformJob() {
                     changedElementIds = layoutContext.textChangeBuffer,
-                    textInfoMap = textSystem.textInfoMap
                 }.Schedule();
 
                 JobHandle textLayoutUpdates = UIForiaScheduler.Await(emTableHandle, textTransformUpdates).ThenParallel(new UpdateTextLayoutJob() {
@@ -717,7 +717,6 @@ namespace UIForia.Systems {
                     emTable = elementSystem.emTable,
                     textChanges = layoutContext.textChangeBuffer,
                     fontAssetMap = application.ResourceManager.fontAssetMap,
-                    textInfoMap = textSystem.textInfoMap
                 });
 
                 JobHandle flatten = default;
@@ -841,22 +840,19 @@ namespace UIForia.Systems {
 
             // todo -- find a better place for this stuff to happen
             new UpdateTextRenderRanges() {
-                textInfoMap = textSystem.textInfoMap,
                 fontAssetMap = application.ResourceManager.fontAssetMap,
                 rangeSizeLimit = 200,
-                activeTextElementIds = textSystem.activeTextElementIds
+                activeTextElementInfos = textSystem.activeTextElementInfo
             }.Run();
 
             new UpdateTextMaterialBuffersJob() {
-                textInfoMap = textSystem.textInfoMap,
-                activeTextElementIds = textSystem.activeTextElementIds
+                activeTextElementIds = textSystem.activeTextElementInfo
             }.Run();
 
             textSystem.UpdateEffects();
 
             new UpdateTextRenderBounds() {
-                textInfoMap = textSystem.textInfoMap,
-                activeTextElementIds = textSystem.activeTextElementIds,
+                activeTextElementInfos = textSystem.activeTextElementInfo,
                 fontAssetMap = application.ResourceManager.fontAssetMap
             }.Run();
 

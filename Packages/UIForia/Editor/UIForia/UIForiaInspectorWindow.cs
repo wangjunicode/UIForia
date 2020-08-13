@@ -14,6 +14,7 @@ using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using FontStyle = UIForia.Text.FontStyle;
+using GradientMode = UIForia.Rendering.GradientMode;
 using TextAlignment = UIForia.Text.TextAlignment;
 
 namespace UIForia.Editor {
@@ -213,7 +214,6 @@ namespace UIForia.Editor {
         }
 
         private void DrawElementInfo() {
-
             if (!EditorApplication.isPlaying) {
                 return;
             }
@@ -221,7 +221,7 @@ namespace UIForia.Editor {
             if (selectedElement.renderBox is IUnityInspector inspector) {
                 inspector.OnGUI();
             }
-            
+
             List<ElementAttribute> attributes = selectedElement.GetAttributes();
             if (attributes != null) {
                 DrawAttributes(attributes);
@@ -237,13 +237,13 @@ namespace UIForia.Editor {
             DrawLabel("Enabled", selectedElement.isEnabled.ToString());
             if (selectedElement.isEnabled) {
                 DrawLabel("Culled", selectedElement.layoutResult.isCulled.ToString());
-                
+
                 if (selectedElement.renderBox != null && selectedElement.renderBox.overflowX != Overflow.Visible) {
                     DrawLabel("Clipper", true.ToString());
                     ClipInfo clipInfo = selectedElement.application.layoutSystem.clipInfoTable[selectedElement.id];
                     DrawLabel("Fully Contained In Parent Clipper", clipInfo.fullyContainedByParentClipper.ToString());
                 }
-                
+
                 DrawLabel("View", selectedElement.View.name);
                 DrawLabel("Viewport", $"X: {selectedElement.View.Viewport.x}, Y: {selectedElement.View.Viewport.y}, W: {selectedElement.View.Viewport.width}, H: {selectedElement.View.Viewport.height}");
                 DrawVector2Value("Local Position", layoutResult.localPosition);
@@ -265,7 +265,7 @@ namespace UIForia.Editor {
                 if (selectedElement.style.LayoutType == LayoutType.Flex) {
                     EditorGUILayout.IntField("Flex child count", app.layoutSystem.layoutBoxTable[selectedElement.id].flex.items.size);
                 }
-                
+
                 GUILayout.Space(16);
 
                 DrawLabel("Element Id", selectedElement.id.ToString());
@@ -277,7 +277,7 @@ namespace UIForia.Editor {
                 DrawLabel("Layout Child Count", app.layoutSystem.layoutHierarchyTable[selectedElement.id].childCount.ToString());
 
                 int index = app.layoutSystem.clipInfoTable[selectedElement.id].clipperIndex;
-                
+
                 DrawLabel("Clipper Index", index.ToString());
 
                 OffsetRect margin = selectedElement.layoutResult.margin;
@@ -738,8 +738,18 @@ namespace UIForia.Editor {
                 case StylePropertyId.PointerEvents:
                     return DrawEnumWithValue<PointerEvents>(property, isEditable);
 
+                case StylePropertyId.Gradient:
+                    return default;
+                
+                case StylePropertyId.GradientMode:
+                    return DrawEnumWithValue<GradientMode>(property, isEditable);
+                
+                case StylePropertyId.GradientOffsetX:
+                case StylePropertyId.GradientOffsetY:
+                    return DrawOffsetMeasurement(property, isEditable);
+
                 default:
-                    if ((int)property.propertyId < StyleUtil.CustomPropertyStart) {
+                    if ((int) property.propertyId < StyleUtil.CustomPropertyStart) {
                         Debug.Log(property.propertyId.ToString() + " has no inspector");
                     }
 
@@ -749,7 +759,6 @@ namespace UIForia.Editor {
 
         private static StyleProperty DrawMaterial(in StyleProperty property) {
             return property;
-
         }
 
         private static StyleProperty DrawCursor(StyleProperty property, bool isEditable) {
@@ -869,7 +878,7 @@ namespace UIForia.Editor {
         private static StyleProperty DrawTextureAsset(StyleProperty property, bool isEditable) {
             GUI.enabled = isEditable;
             GUILayout.BeginHorizontal();
-            Texture2D texture = (Texture2D) property.AsTextureReference.texture;
+            Texture2D texture = (Texture2D) property.AsTextureReference?.texture;
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(StyleUtil.GetPropertyName(property));

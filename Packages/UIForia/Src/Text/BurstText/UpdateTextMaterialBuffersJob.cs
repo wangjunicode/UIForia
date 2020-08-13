@@ -212,8 +212,7 @@ namespace UIForia.Text {
             for (int i = start; i < end; i++) {
                 // if !needsMaterialUpdate, continue
                 TextId textId = activeTextElementIds[i];
-                ref TextInfo textInfo = ref textInfoMap[textId.textInfoId];
-                UpdateMaterialBuffers(ref materialStack, ref textInfo);
+                UpdateMaterialBuffers(ref materialStack, ref textId.textInfo[0]);
 
             }
 

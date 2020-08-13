@@ -1,9 +1,11 @@
 using System;
 using JetBrains.Annotations;
 using UIForia.Attributes;
+using UIForia.Graphics;
 using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.UIInput;
+using Unity.Mathematics;
 using UnityEngine;
 
 #pragma warning disable 0649
@@ -64,6 +66,7 @@ namespace UIForia.Elements {
 
         public override void OnEnable() {
             textElement = FindById<UITextElement>("input-element-text");
+            EmitTextChanged();
             if (autofocus) {
                 application.InputSystem.RequestFocus(this);
             }
@@ -171,8 +174,8 @@ namespace UIForia.Elements {
                     break;
                 case KeyCode.A when evt.onlyControl && selectionRange.HasSelection:
                     HandleSelectAll(evt);
-                    //
                     break;
+
                 default:
                     OnTextEntered(evt);
                     break;
@@ -190,6 +193,7 @@ namespace UIForia.Elements {
                 if (!InitKeyPress(evt)) {
                     return;
                 }
+
                 HandleSubmit();
                 return;
             }
@@ -200,8 +204,7 @@ namespace UIForia.Elements {
 
             if (c == '\n' || c == '\t') return;
 
-            // assume we only ever use 1 text span for now, this should change in the future
-            if (!textElement.HasCharacter(c)) {
+            if (!textElement.FontHasCharacter(c)) {
                 return;
             }
 
@@ -210,11 +213,12 @@ namespace UIForia.Elements {
         }
 
         protected void ScrollToCursor() {
+            return;
+
             if (!hasFocus) {
                 return;
             }
 
-            textElement.Layout(Vector2.zero, float.MaxValue);
             Rect rect = VisibleTextRect;
 
             Vector2 cursor = textElement.GetCursorPosition(selectionRange.cursorIndex);
@@ -400,75 +404,96 @@ namespace UIForia.Elements {
 
         }
 
+        private Rect GetCaretRect() {
+            Rect rect = textElement.GetCursorRect(selectionRange.cursorIndex);
+            rect.x += layoutResult.HorizontalPaddingBorderStart;
+            rect.y += layoutResult.VerticalPaddingBorderStart;
+            return rect;
+        }
+
         [CustomPainter("UIForia::Input")]
-        public class InputElementPainter : StandardRenderBox {
+        public class InputElementPainter : StandardRenderBox2 {
 
-            public Path2D path = new Path2D();
-
-            public  void PaintBackground(RenderContext ctx) {
-                base.PaintBackground(ctx);
-
-                UIInputElement inputElement = (UIInputElement) element;
-
-                path.Clear();
-                path.SetTransform(inputElement.layoutResult.matrix.ToMatrix4x4());
+            public override void PaintForeground3(RenderContext3 ctx) {
+                base.PaintForeground3(ctx);
+                UIInputElement inputElement = element as UIInputElement;
+                if (inputElement == null) return;
 
                 float blinkPeriod = 1f / inputElement.caretBlinkRate;
 
                 bool blinkState = (Time.unscaledTime - inputElement.blinkStartTime) % blinkPeriod < blinkPeriod / 2;
 
-                Rect contentRect = inputElement.layoutResult.ContentRect;
-
-                TextInfoOld textInfoOld = null;//inputElement.textElement.textInfo;
-
-                // float baseLineHeight = textInfo.rootSpan.textStyle.fontAsset.faceInfo.LineHeight;
-                // float scaledSize = textInfo.rootSpan.fontSize / textInfo.rootSpan.textStyle.fontAsset.faceInfo.PointSize;
-                // float lh = baseLineHeight * scaledSize;
-
-                if (!inputElement.isSelecting && inputElement.hasFocus && blinkState) {
-                    path.BeginPath();
-                    path.SetStroke(inputElement.style.CaretColor);
-                    path.SetStrokeWidth(1f);
-                    Vector2 p = inputElement.textElement.GetCursorPosition(inputElement.selectionRange.cursorIndex) - inputElement.textScroll;
-                    path.MoveTo(inputElement.layoutResult.ContentRect.min + p);
-                    path.VerticalLineTo(inputElement.layoutResult.ContentRect.yMax);
-                    path.EndPath();
-                    path.Stroke();
+                // if (!inputElement.isSelecting && inputElement.hasFocus && blinkState) {
+                if (blinkState) {
+                    Rect rect = inputElement.GetCaretRect();
+                    ctx.DrawElement((int) rect.x, rect.y, new ElementDrawDesc((int) rect.width, rect.height) {
+                        backgroundColor = Color.black,
+                    });
                 }
 
-                if (inputElement.selectionRange.HasSelection) {
-                    RangeInt lineRange = new RangeInt(0, 1); //textInfo.GetLineRange(selectionRange));textInfo.GetLineRange(selectionRange);
-                    path.BeginPath();
-                    path.SetFill(inputElement.style.SelectionBackgroundColor);
-
-                    if (lineRange.length > 1) {
-                        // todo this doesn't really work yet
-                        for (int i = lineRange.start + 1; i < lineRange.end - 1; i++) {
-                            //                        Rect rect = textInfo.GetLineRect(i);
-                            //                        rect.x += contentRect.x;
-                            //                        rect.y += contentRect.y;
-                            //                        path.Rect(rect);
-                        }
-                    }
-                    else {
-                        Rect rect = inputElement.textElement.GetLineRect(lineRange.start);
-                        Vector2 cursorPosition = inputElement.textElement.GetCursorPosition(inputElement.selectionRange.cursorIndex) - inputElement.textScroll;
-                        Vector2 selectPosition = inputElement.textElement.GetSelectionPosition(inputElement.selectionRange) - inputElement.textScroll;
-                        float minX = Mathf.Min(cursorPosition.x, selectPosition.x);
-                        float maxX = Mathf.Max(cursorPosition.x, selectPosition.x);
-                        minX += contentRect.x;
-                        maxX += contentRect.x;
-                        rect.y += contentRect.y;
-                        float x = Mathf.Max(minX, contentRect.x);
-                        float cursorToContentEnd = contentRect.width;
-                        float cursorToMax = maxX - x;
-                        path.Rect(x, rect.y, Mathf.Min(cursorToContentEnd, cursorToMax), rect.height);
-                    }
-
-                    path.Fill();
-                }
-
-                ctx.DrawPath(path);
+                // base.PaintBackground(ctx);
+                //
+                // UIInputElement inputElement = (UIInputElement) element;
+                //
+                // path.Clear();
+                // path.SetTransform(inputElement.layoutResult.matrix.ToMatrix4x4());
+                //
+                // float blinkPeriod = 1f / inputElement.caretBlinkRate;
+                //
+                // bool blinkState = (Time.unscaledTime - inputElement.blinkStartTime) % blinkPeriod < blinkPeriod / 2;
+                //
+                // Rect contentRect = inputElement.layoutResult.ContentRect;
+                //
+                // TextInfoOld textInfoOld = null; //inputElement.textElement.textInfo;
+                //
+                // // float baseLineHeight = textInfo.rootSpan.textStyle.fontAsset.faceInfo.LineHeight;
+                // // float scaledSize = textInfo.rootSpan.fontSize / textInfo.rootSpan.textStyle.fontAsset.faceInfo.PointSize;
+                // // float lh = baseLineHeight * scaledSize;
+                //
+                // if (!inputElement.isSelecting && inputElement.hasFocus && blinkState) {
+                //     path.BeginPath();
+                //     path.SetStroke(inputElement.style.CaretColor);
+                //     path.SetStrokeWidth(1f);
+                //     // float2 p = inputElement.textElement.GetCursorPosition(inputElement.selectionRange.cursorIndex) - inputElement.textScroll;
+                //     // path.MoveTo(inputElement.layoutResult.ContentRect.min + p);
+                //     // path.VerticalLineTo(inputElement.layoutResult.ContentRect.yMax);
+                //     // path.EndPath();
+                //     // path.Stroke();
+                // }
+                //
+                // if (inputElement.selectionRange.HasSelection) {
+                //     RangeInt lineRange = new RangeInt(0, 1); //textInfo.GetLineRange(selectionRange));textInfo.GetLineRange(selectionRange);
+                //     path.BeginPath();
+                //     path.SetFill(inputElement.style.SelectionBackgroundColor);
+                //
+                //     if (lineRange.length > 1) {
+                //         // todo this doesn't really work yet
+                //         for (int i = lineRange.start + 1; i < lineRange.end - 1; i++) {
+                //             //                        Rect rect = textInfo.GetLineRect(i);
+                //             //                        rect.x += contentRect.x;
+                //             //                        rect.y += contentRect.y;
+                //             //                        path.Rect(rect);
+                //         }
+                //     }
+                //     else {
+                //         // Rect rect = inputElement.textElement.GetLineRect(lineRange.start);
+                //         // float2 cursorPosition = inputElement.textElement.GetCursorPosition(inputElement.selectionRange.cursorIndex) - inputElement.textScroll;
+                //         // Vector2 selectPosition = inputElement.textElement.GetSelectionPosition(inputElement.selectionRange) - inputElement.textScroll;
+                //         // float minX = Mathf.Min(cursorPosition.x, selectPosition.x);
+                //         // float maxX = Mathf.Max(cursorPosition.x, selectPosition.x);
+                //         // minX += contentRect.x;
+                //         // maxX += contentRect.x;
+                //         // rect.y += contentRect.y;
+                //         // float x = Mathf.Max(minX, contentRect.x);
+                //         // float cursorToContentEnd = contentRect.width;
+                //         // float cursorToMax = maxX - x;
+                //         // path.Rect(x, rect.y, Mathf.Min(cursorToContentEnd, cursorToMax), rect.height);
+                //     }
+                //
+                //     path.Fill();
+                // }
+                //
+                // ctx.DrawPath(path);
             }
 
         }

@@ -50,15 +50,15 @@ namespace UIForia.Layout {
             floatList = new DataList<FloatPair>(16, allocator);
         }
 
-        public void Initialize(float baseFontSize, in TextStyle textStyle, in FontAssetInfo fontAssetInfo) {
+        public void Initialize(float baseFontSize, in TextInfo textInfo, in FontAssetInfo fontAssetInfo) {
             floatList.size = 0;
             fontStack.size = 0;
             fontStack.Add(fontAssetInfo);
 
             floatList.Add(new FloatPair(TextStyleType.FontSize, baseFontSize));
 
-            if (textStyle.fontStyle != 0) {
-                floatList.Add(new FloatPair(TextStyleType.FontStyle, (int) textStyle.fontStyle));
+            if (textInfo.fontStyle != 0) {
+                floatList.Add(new FloatPair(TextStyleType.FontStyle, (int) textInfo.fontStyle));
             }
 
         }

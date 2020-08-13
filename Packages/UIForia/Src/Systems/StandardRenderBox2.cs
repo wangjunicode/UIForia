@@ -21,9 +21,8 @@ namespace UIForia.Rendering {
         protected int outlineTextureId;
         protected OverflowHandling overflowHandling;
         protected Gradient gradient;
-        
-        public override void OnInitialize() {
 
+        public override void OnInitialize() {
             isBuiltIn = true;
             isElementBox = true;
             drawDesc.opacity = MathUtil.FloatPercentageToUshort(element.style.Opacity);
@@ -102,16 +101,13 @@ namespace UIForia.Rendering {
         // sync point but i had that anyway
 
         private float ResolveRelativeLength(float baseValue, UIFixedLength length) {
-
             switch (length.unit) {
-
                 default:
                     return length.value;
 
                 case UIFixedUnit.Percent:
                     return length.value * baseValue;
             }
-
         }
 
         public override void OnSizeChanged(Size size) {
@@ -163,7 +159,6 @@ namespace UIForia.Rendering {
 
             ComputeUVTransform();
             ComputeMeshFill();
-
         }
 
         protected void ComputeUVTransform() {
@@ -182,7 +177,6 @@ namespace UIForia.Rendering {
         }
 
         protected void ComputeMeshFill() {
-
             // float pieDirection = 1; // can be a sign bit or flag elsewhere
             // float pieOpenAmount = 0.125; 
             // float pieRotation = 0; //frac(_Time.y) * PI * 2;
@@ -296,7 +290,7 @@ namespace UIForia.Rendering {
                     drawDesc.meshFillRotation = ushort.MaxValue / 2;
                     break;
                 }
-                
+
                 case MeshType.Radial360_Bottom: {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount);
@@ -316,10 +310,10 @@ namespace UIForia.Rendering {
                     drawDesc.meshFillDirection = (byte) (element.style.MeshFillDirection == MeshFillDirection.CounterClockwise ? 0 : 1);
                     drawDesc.meshFillInvert = 0; //(byte) (element.style.MeshFillInvert == Invert ? 1 : 0);
                     drawDesc.meshFillRadius = float.MaxValue;
-                    drawDesc.meshFillRotation =  ushort.MaxValue / 4;
+                    drawDesc.meshFillRotation = ushort.MaxValue / 4;
                     break;
                 }
-                
+
                 case MeshType.Radial360_Left: {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount);
@@ -331,7 +325,6 @@ namespace UIForia.Rendering {
                     drawDesc.meshFillRotation = 3 * (ushort.MaxValue / 4);
                     break;
                 }
-                
             }
         }
 
@@ -343,7 +336,6 @@ namespace UIForia.Rendering {
             for (int i = 0; i < propertyCount; i++) {
                 ref StyleProperty property = ref propertyList[i];
                 switch (property.propertyId) {
-
                     case StylePropertyId.OutlineWidth:
                         recomputeDrawing = true;
                         float halfMin = math.min(drawDesc.width, drawDesc.height) * 0.5f;
@@ -381,17 +373,17 @@ namespace UIForia.Rendering {
                     case StylePropertyId.Gradient:
                         gradient = property.AsGradient;
                         break;
-                    
+
                     case StylePropertyId.GradientOffsetX:
                     case StylePropertyId.GradientOffsetY:
                         break;
                     case StylePropertyId.GradientMode:
                         break;
-                    
+
                     case StylePropertyId.BackgroundImageRotation:
                         drawDesc.uvRotation = MathUtil.FloatPercentageToUshort(element.style.BackgroundImageRotation.ToPercent().value);
                         break;
-                    
+
                     case StylePropertyId.BackgroundImageOffsetX:
                     case StylePropertyId.BackgroundImageOffsetY:
                     case StylePropertyId.BackgroundImageScaleX:
@@ -453,22 +445,19 @@ namespace UIForia.Rendering {
             if (recomputeMeshFill && requireRendering) {
                 ComputeMeshFill();
             }
-
         }
 
         public override void PaintBackground3(RenderContext3 ctx) {
-
             // todo -- remove, obviously
-            gradient = new Gradient(GradientType.LinearBlend, GameObject.Find("UIForia").GetComponent<UIForiaAssets>().gradient);
-            
+           // gradient = new Gradient(GradientType.LinearBlend, GameObject.Find("UIForia").GetComponent<UIForiaAssets>().gradient);
+
             if (requireRendering) {
-                ctx.SetGradient(gradient);
+             //   ctx.SetGradient(gradient);
                 ctx.SetBackgroundTexture(backgroundTexture?.texture);
                 ctx.DrawElement(0, 0, drawDesc);
             }
 
             if (overflowHandling != 0) {
-
                 // todo -- add an overflow offset style
                 float clipX = 0;
                 float clipY = 0;
@@ -483,13 +472,33 @@ namespace UIForia.Rendering {
                     clipHeight = drawDesc.height;
                 }
 
+                switch (element.style.ClipBounds) { // todo -- cache this
+                    case ClipBounds.ContentBox: {
+                        OffsetRect border = element.layoutResult.border;
+                        OffsetRect padding = element.layoutResult.padding;
+                        clipX = border.left + padding.left;
+                        clipY = (border.top + padding.top);
+                        clipWidth -= (clipX + border.right + padding.right);
+                        clipHeight -= (border.top + padding.top + border.bottom + padding.bottom);
+                        break;
+                    }
+                    case ClipBounds.BorderBox: {
+                        OffsetRect border = element.layoutResult.border;
+                        clipX = border.left;
+                        clipY = border.top;
+                        clipWidth -= (border.left + border.right);
+                        clipHeight -= (border.bottom + border.top);
+                        break;
+                    }
+                }
+
+                // return new RenderBounds(0, 0, element.layoutResult.actualSize.width, element.layoutResult.actualSize.height);
                 ctx.PushClipRect(clipX, clipY, clipWidth, clipHeight);
                 // ctx.BeginStencilClip();
                 //
                 // ctx.DrawElement(0, 0, drawDesc);
                 //
                 // ctx.PushStencilClip();
-
             }
 
             // var copy = drawDesc;
@@ -505,7 +514,6 @@ namespace UIForia.Rendering {
             // copy.radiusBL = 0;
             // copy.backgroundColor = Color.white;
             // ctx.DrawElement(300, 0, copy);
-
         }
 
         public override void PaintForeground3(RenderContext3 ctx) {

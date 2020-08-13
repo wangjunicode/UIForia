@@ -590,8 +590,8 @@ namespace UIForia.Graphics {
             else {
 
                 if (activeMaterialId.index == MaterialId.UIForiaSDFText.index) {
-                    int fontTextureId = resourceManager.GetFontTextureId(textInfo.textStyle.fontAssetId);
-                    SetFontTexture(Shader.PropertyToID("_MainTex"), fontTextureId);
+                 //  int fontTextureId = resourceManager.GetFontTextureId(textInfo.textStyle.fontAssetId);
+                   // SetFontTexture(Shader.PropertyToID("_MainTex"), fontTextureId);
                 }
 
                 if (hasPendingMaterialOverrides) {
@@ -609,67 +609,67 @@ namespace UIForia.Graphics {
                     resolvedFontSize = textInfo.resolvedFontSize
                 });
 
-                TextInfoRenderSpan textSpan = new TextInfoRenderSpan() {
-                    outlineColor = textInfo.textStyle.outlineColor,
-                    glowColor = textInfo.textStyle.glowColor,
-                    underlayColor = textInfo.textStyle.underlayColor,
-                    faceColor = textInfo.textStyle.faceColor,
-
-                    fontStyle = textInfo.textStyle.fontStyle,
-
-                    textInfo = textRenderData,
-
-                    fontSize = textInfo.resolvedFontSize,
-                    fontAssetId = textInfo.textStyle.fontAssetId,
-
-                    faceUVScroll = textInfo.textStyle.faceUVScrollSpeed,
-                    faceUVOffset = textInfo.textStyle.faceUVOffset,
-
-                    faceUVModeH = textInfo.textStyle.faceUVModeHorizontal,
-                    faceUVModeV = textInfo.textStyle.faceUVModeVertical,
-
-                    rotation = textInfo.textStyle.characterRotation,
-                    vertexOffsetX = textInfo.textStyle.characterOffsetX,
-                    vertexOffsetY = textInfo.textStyle.characterOffsetY,
-
-                    charScale = textInfo.textStyle.characterScale,
-
-                    lineIndex = 0,
-
-                    outlineWidth = textInfo.textStyle.outlineWidth,
-                    outlineSoftness = textInfo.textStyle.outlineSoftness,
-
-                    glowOuter = textInfo.textStyle.glowOuter,
-                    glowOffset = textInfo.textStyle.glowOffset,
-                    glowInner = textInfo.textStyle.glowInner,
-                    glowPower = textInfo.textStyle.glowPower,
-
-                    underlayX = textInfo.textStyle.underlayX,
-                    underlayY = textInfo.textStyle.underlayY,
-                    underlayDilate = textInfo.textStyle.underlayDilate,
-                    underlaySoftness = textInfo.textStyle.underlaySoftness,
-
-                    faceDilate = textInfo.textStyle.faceDilate,
-                    faceSoftness = textInfo.textStyle.faceSoftness,
-
-                    outlineUVScroll = textInfo.textStyle.outlineUVScrollSpeed,
-                    outlineUVOffset = textInfo.textStyle.outlineUVOffset
-
-                };
+                // TextInfoRenderSpan textSpan = new TextInfoRenderSpan() {
+                //     outlineColor = textInfo.textStyle.outlineColor,
+                //     glowColor = textInfo.textStyle.glowColor,
+                //     underlayColor = textInfo.textStyle.underlayColor,
+                //     faceColor = textInfo.textStyle.faceColor,
+                //
+                //     fontStyle = textInfo.textStyle.fontStyle,
+                //
+                //     textInfo = textRenderData,
+                //
+                //     fontSize = textInfo.resolvedFontSize,
+                //     fontAssetId = textInfo.textStyle.fontAssetId,
+                //
+                //     faceUVScroll = textInfo.textStyle.faceUVScrollSpeed,
+                //     faceUVOffset = textInfo.textStyle.faceUVOffset,
+                //
+                //     faceUVModeH = textInfo.textStyle.faceUVModeHorizontal,
+                //     faceUVModeV = textInfo.textStyle.faceUVModeVertical,
+                //
+                //     rotation = textInfo.textStyle.characterRotation,
+                //     vertexOffsetX = textInfo.textStyle.characterOffsetX,
+                //     vertexOffsetY = textInfo.textStyle.characterOffsetY,
+                //
+                //     charScale = textInfo.textStyle.characterScale,
+                //
+                //     lineIndex = 0,
+                //
+                //     outlineWidth = textInfo.textStyle.outlineWidth,
+                //     outlineSoftness = textInfo.textStyle.outlineSoftness,
+                //
+                //     glowOuter = textInfo.textStyle.glowOuter,
+                //     glowOffset = textInfo.textStyle.glowOffset,
+                //     glowInner = textInfo.textStyle.glowInner,
+                //     glowPower = textInfo.textStyle.glowPower,
+                //
+                //     underlayX = textInfo.textStyle.underlayX,
+                //     underlayY = textInfo.textStyle.underlayY,
+                //     underlayDilate = textInfo.textStyle.underlayDilate,
+                //     underlaySoftness = textInfo.textStyle.underlaySoftness,
+                //
+                //     faceDilate = textInfo.textStyle.faceDilate,
+                //     faceSoftness = textInfo.textStyle.faceSoftness,
+                //
+                //     outlineUVScroll = textInfo.textStyle.outlineUVScrollSpeed,
+                //     outlineUVOffset = textInfo.textStyle.outlineUVOffset
+                //
+                // };
 
                 AxisAlignedBounds2D bounds = default; // todo -- figure out how to handle text overflow so i dont generate tons of lines that will just be clipped. ComputeAABBFromBounds(*overflowBounds);
 
                 for (int i = 0; i < textInfo.lineInfoList.size; i++) {
                     ref TextLineInfo lineInfo = ref textInfo.lineInfoList[i];
-                    textSpan.lineIndex = i;
+                //    textSpan.lineIndex = i;
                     int lineWordStart = lineInfo.wordStart;
                     int lineWordEnd = lineWordStart + lineInfo.wordCount;
 
                     // todo when an effect spans multiple text spans I won't know which one renders first
                     // i either need to have 1 of them control all the text effects
                     // or somehow recompute the joins in the controlling one since I dont know which will render first
-                    textSpan.nextSpanOnLine = null;
-                    textSpan.prevSpanOnLine = null;
+                 //   textSpan.nextSpanOnLine = null;
+                 //   textSpan.prevSpanOnLine = null;
 
                     // if offscreen dont render
 
@@ -716,23 +716,23 @@ namespace UIForia.Graphics {
                     //     continue;
                     // }
 
-                    textSpan.symbolStart = textInfo.layoutSymbolList[lineWordStart].wordInfo.charStart;
-                    textSpan.symbolEnd = textInfo.layoutSymbolList[lineWordEnd - 1].wordInfo.charEnd;
-                    textSpan.materialFeatureSet = GetTextFeatureSet(textSpan);
-
-                    drawList.Add(new DrawInfo() {
-                        type = DrawType.Shape,
-                        shapeType = ShapeType.SDFText,
-                        flags = currentFlagSet,
-                        materialId = activeMaterialId,
-                        vertexLayout = VertexLayout.UIForiaSDFText,
-                        matrix = defaultMatrix,
-                        materialOverrideValues = currentOverrideProperties,
-                        materialOverrideCount = materialValueOverrides.size,
-                        renderCallId = renderCallId,
-                        localDrawIdx = localDrawIdx++,
-                        shapeData = (byte*) stackBuffer.Allocate(textSpan)
-                    });
+                    // textSpan.symbolStart = textInfo.layoutSymbolList[lineWordStart].wordInfo.charStart;
+                    // textSpan.symbolEnd = textInfo.layoutSymbolList[lineWordEnd - 1].wordInfo.charEnd;
+                    // textSpan.materialFeatureSet = GetTextFeatureSet(textSpan);
+                    //
+                    // drawList.Add(new DrawInfo() {
+                    //     type = DrawType.Shape,
+                    //     shapeType = ShapeType.SDFText,
+                    //     flags = currentFlagSet,
+                    //     materialId = activeMaterialId,
+                    //     vertexLayout = VertexLayout.UIForiaSDFText,
+                    //     matrix = defaultMatrix,
+                    //     materialOverrideValues = currentOverrideProperties,
+                    //     materialOverrideCount = materialValueOverrides.size,
+                    //     renderCallId = renderCallId,
+                    //     localDrawIdx = localDrawIdx++,
+                    //     shapeData = (byte*) stackBuffer.Allocate(textSpan)
+                    // });
 
                 }
 

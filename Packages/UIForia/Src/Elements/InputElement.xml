@@ -6,6 +6,8 @@
             LayoutType = Stack;
             PreferredHeight = 1cnt;
             Border = 2px;
+            OutlineWidth = 2px;
+            OutlineColor = black;
             BorderColor = black;
             BackgroundColor = white;
             Padding = 4px 8px;

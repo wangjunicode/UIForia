@@ -267,11 +267,7 @@ namespace UIForia.Compilers {
                 AddStatement(Expression.Call(s_CommentNewLineAfter, Expression.Constant(comment)));
             }
         }
-
-        public void PushContextVariable(string aliasName) {
-            throw new NotImplementedException("PushContextVariable");
-        }
-
+        
         public void InlineComment(string comment) {
             if (outputComments) {
                 AddStatement(Expression.Call(s_InlineComment, Expression.Constant(comment)));

@@ -40,7 +40,7 @@ namespace UIForia.Text {
 
             for (int i = start; i < end; i++) {
 
-                ref TextInfo textInfo = ref textInfoMap[textChanges[i].textInfoId];
+                ref TextInfo textInfo = ref textChanges[i].textInfo[0];
 
                 TextInfo.ProcessWhitespace(ref textInfo, ref symbolBuffer);
 
@@ -48,7 +48,7 @@ namespace UIForia.Text {
 
             for (int i = start; i < end; i++) {
 
-                ref TextInfo textInfo = ref textInfoMap[textChanges[i].textInfoId];
+                ref TextInfo textInfo = ref textChanges[i].textInfo[0];
 
                 layoutBuffer.size = 0;
                 TextInfo.CreateLayoutSymbols(ref textInfo, ref layoutBuffer);
@@ -58,7 +58,7 @@ namespace UIForia.Text {
             for (int i = start; i < end; i++) {
 
                 ElementId elementId = textChanges[i].elementId;
-                ref TextInfo textInfo = ref textInfoMap[textChanges[i].textInfoId];
+                ref TextInfo textInfo = ref textChanges[i].textInfo[0];
 
                 TextInfo.ComputeSize(fontAssetMap, ref textInfo, emTable[elementId].resolvedValue, ref measureState);
 
@@ -66,7 +66,7 @@ namespace UIForia.Text {
             
             for (int i = start; i < end; i++) {
 
-                TextInfo.CountRenderedCharacters(ref textInfoMap[textChanges[i].textInfoId]);
+                TextInfo.CountRenderedCharacters(ref textChanges[i].textInfo[0]);
 
             }
             

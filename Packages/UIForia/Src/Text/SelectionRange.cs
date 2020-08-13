@@ -2,12 +2,19 @@ using System;
 
 namespace UIForia.Text {
 
+    public enum SelectionEdge {
+
+        Left, Right
+
+    }
     public struct SelectionRange {
 
         public readonly int cursorIndex;
         public readonly int selectIndex;
-
-        public SelectionRange(int cursorIndex, int selectIndex = -1) {
+        public readonly bool leftEdge;
+        
+        public SelectionRange(int cursorIndex, int selectIndex = -1, bool leftEdge = true) {
+            this.leftEdge = true;
             this.cursorIndex = Math.Max(0, cursorIndex);
             this.selectIndex = selectIndex;
         }

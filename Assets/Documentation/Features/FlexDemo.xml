@@ -71,10 +71,14 @@
         style child {
             PreferredSize = 200px;
             backgroundColor = red;
-            OutlineWidth = 10px;
+          //  OutlineWidth = 30px;
             OutlineColor = orange;
-            //CornerBevelBottomLeft = 40px;
         }
+        
+        style round {
+            BorderRadius = 50%;
+        }
+        
         
     </Style>
     <Using namespace="UIForia"/>
@@ -82,6 +86,7 @@
     <Contents style="container2">
 
         <Div style="child"/>
+        <Div style="child round"/>
 <!--        <Input style="inputxxx" value="'Matt sa|ys       lets make this words'"/>-->
         
 <!--        <ScrollView style="shape-kit">-->

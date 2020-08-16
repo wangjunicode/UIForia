@@ -317,6 +317,11 @@ float2 TransformUV(float2 uv, float2 offset, float2 scale, float rotation, half4
     
     return uv;
 }
+
+fixed4 ComputeBorderColor() {
+    
+}
+
 // ---------------------- Gradient Functions --------------------------------------------------------
 
 float RadialGradient(float2 gradientTexCoord) {

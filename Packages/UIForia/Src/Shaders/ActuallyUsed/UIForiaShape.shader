@@ -42,9 +42,12 @@
                 float4 vertex : SV_POSITION;
                 float2 texCoord0 : TEXCOORD0;
                 float2 texCoord1 : TEXCOORD1;
-                uint4 indices : TEXCOORD2;
-                float2 size : TEXCOORD3;
-                half4 uvTransform : TEXCOORD4;
+                nointerpolation uint4 indices : TEXCOORD2;
+                nointerpolation float2 size : TEXCOORD3;
+                nointerpolation half4 uvTransform : TEXCOORD4;
+                nointerpolation half4 border : TEXCOORD5;
+                nointerpolation fixed4 borderColorH : COLOR0;
+                nointerpolation fixed4 borderColorV : COLOR1;
             };
 
             // layout must EXACTLY match ElementMaterialInfo in C#
@@ -178,7 +181,12 @@
                // o.vertex = UIForiaPixelSnap(o.vertex);
                 
                o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, vertex.indices.z, vertex.indices.w);
-                
+               o.borderColorH = lerp(RED, BLUE, o.texCoord1.x < 0.5);
+               o.borderColorV = lerp(GREEN, BLACK, o.texCoord1.y > 0.5);
+               o.border = half4(20, 20, 20, 0);
+               
+             //  if(o.border.w == 0 && o.texCoord0.x > 0.5) o.borderColorH = o.borderColorV; //lerp(RED, BLUE, o.texCoord0.x > 0.5);
+               
                return o;
             }
             
@@ -229,16 +237,15 @@
                 i.texCoord1 = TransformUV(i.texCoord1, uvOffset * _MainTex_TexelSize.xy, uvScale, uvRotation, uvBounds);
                 
                 //float4 border = float4(10, 20, 30, 40); // t,r,b,l
-                float4 border = float4(20, 0, 10, 00);
                 // fixed4 borderColor = ComputeBorderColor(border, originalUV);
                 
                 // todo -- figure out 9 slicing, i guess it must be different quads or a fully different vertex shader with uv set somehow
                 // similar to how we read effect data for text
                 
-                #define borderTop border.x
-                #define borderLeft border.w
-                #define borderBottom border.z
-                #define borderRight border.y
+                #define borderTop i.border.x
+                #define borderLeft i.border.w
+                #define borderBottom i.border.z
+                #define borderRight i.border.y
                 
                 #define borderColorRight BLACK
                 #define borderColorLeft GREEN
@@ -251,15 +258,12 @@
                 #define top (1 - bottom)
                 #define right (1 - left)  
                 
-                half borderH = lerp(border.y, border.w, left);
-                half borderV = lerp(border.x, border.z, top);
-                
-                fixed4 borderColorH = borderColorRight;
-                fixed4 borderColorV = borderColorTop;
+                half borderH = lerp(borderLeft, borderRight, left);
+                half borderV = lerp(borderTop, borderBottom, top);
                 
                 half2 corner = half2(lerp(0, size.x, right), lerp(0, size.y, bottom));
                 half2 inset = half2(lerp(borderH, size.x - borderH, right), lerp(borderV, size.y - borderV, bottom));
-                
+                return i.borderColorV;
                 half2 p = originalUV * size;
                 
                 // equasion of a line, take the sign to determine if a point is above or below the line
@@ -273,12 +277,20 @@
                     distToLine = 1 - distToLine;
                 }
                 
-                color = lerp(borderColorH, borderColorV, distToLine);
+                fixed4 borderColor = lerp(i.borderColorH, i.borderColorV, distToLine);
+                //color = lerp(borderColorH, borderColorV, distToLine);
                 
                 float2 borderStep = step(float2(borderLeft, size.y - borderTop), p) - step(float2(size.x - borderRight, borderBottom), p);
+                
+                color = borderColor;
+                
                 if(borderStep.x * borderStep.y != 0) {
-                    color = RED;
+                 //   color = fixed4(0, 0, 0, 0); //RED;
+                    color = fixed4(1, 1, 0, 1);
                 }
+               // color = fixed4(1, 1, 0, 1);
+               // color = fixed4(0, 0, 0, 0); //RED;
+                outlineColor = borderColor;
                 
                 half outlineWidth = material.outlineWidth * 0.5;
                 half4 radius = UnpackRadius(packedRadii, minSize);

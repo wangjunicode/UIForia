@@ -59,7 +59,6 @@ Shader "UIForia/UIForiaText2"
                 nointerpolation uint2 indices : TEXCOORD3;
                 nointerpolation float4 underlay : TEXCOORD4;
                 nointerpolation float2 ratios : TextCoord5;
-                nointerpolation float4 debug : TextCoord6;
             };
             
             struct UIForiaVertex {
@@ -120,7 +119,7 @@ Shader "UIForia/UIForiaText2"
                 float bottom = top + (glyphInfo.atlasHeight / fontInfo.atlasHeight);
                 
                 // can get mirrored text by flipping left and right
-                uint displayBits = GetByteN(vertex.indices.y, 3);
+                uint displayBits = GetByteN(vertex.indices.w, 3);
                 
                 int invertHorizontal = (displayBits & TEXT_DISPLAY_FLAG_INVERT_HORIZONTAL_BIT) != 0;
                 int invertVertical = (displayBits & TEXT_DISPLAY_FLAG_INVERT_VERTICAL_BIT) != 0;
@@ -164,7 +163,6 @@ Shader "UIForia/UIForiaText2"
                 
                 padding += stylePadding;
 
-                o.debug.x = padding;
                 float4 effectData = _UIForiaFloat4Buffer[effectIdx];
                 float3 vpos = float3(vertex.position.xy, 0); // todo -- read z from somewhere if used
                 
@@ -174,10 +172,7 @@ Shader "UIForia/UIForiaText2"
                 float elementScale = vertex.texCoord0.x * scaleMultiplier;
                 float scaledPaddingWidth = (padding / fontInfo.atlasWidth) * (invertHorizontal == 1 ? -1 : 1);
                 float scaledPaddingHeight = (padding / fontInfo.atlasHeight) * (invertVertical == 1 ? -1 : 1);
-                o.debug.y = elementScale * padding;
-                o.debug.z = left;
-                o.debug.w = elementScale;
-                
+ 
                 float charWidth = glyphInfo.width * elementScale;
                 float charHeight = glyphInfo.height * elementScale;
                                 
@@ -260,7 +255,7 @@ Shader "UIForia/UIForiaText2"
             }
 
             fixed4 frag (v2f i) : SV_Target {
-                half opacityMultiplier = GetByteNToFloat(i.indices.y, 2);
+                half opacityMultiplier = GetByteNToFloat(i.indices.y, 3);
                 uint displayBits = GetByteN(i.indices.y, 3);
                 
                 TextMaterialInfo materialInfo = _UIForiaMaterialBuffer[UnpackMaterialId(i.indices.y & 0xffff)];

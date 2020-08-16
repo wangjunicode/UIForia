@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 using TMPro;
 using UIForia.Compilers.Style;
 using UIForia.Exceptions;
@@ -119,7 +121,7 @@ namespace UIForia {
         }
 
         public Texture2D GetTexture(string path) {
-            return GetResource(path, textureMap);
+            return GetTextureResource(path, textureMap);
         }
 
         internal void GatherGPUFontInfo(FontAsset fontAsset) {
@@ -190,7 +192,14 @@ namespace UIForia {
                 assetPath = "UIForiaText",
                 materialName = "UIForiaText"
             });
-
+            
+            TryGetMaterialProperties(AssetLoadMethod.Resources, "UIForiaShadow", properties);
+            materialDatabase.TryRegisterMaterial(new MaterialDefinition() {
+                properties = properties.ToArray(),
+                loadMethod = AssetLoadMethod.Resources,
+                assetPath = "UIForiaShadow",
+                materialName = "UIForiaShadow"
+            });
             properties.Release();
 
         }
@@ -302,7 +311,41 @@ namespace UIForia {
 
             return resource;
         }
+        private T GetTextureResource<T>(string path, IntMap_Deprecated<AssetEntry<T>> map) where T : Object {
+            T resource;
+            if (path == null) {
+                return null;
+            }
 
+            AssetEntry<T> pathEntry;
+            int pathId = path.GetHashCode();
+            if (map.TryGetValue(pathId, out pathEntry)) {
+                return pathEntry.asset;
+            }
+            else {
+                // this might be null, but we want to mark the map to show that we tried to load it
+                // during the lifecycle of an application we can expect Resources not to be updated
+                resource = Resources.Load<T>(path);
+                pathEntry.id = pathId;
+                pathEntry.asset = resource;
+                if (resource != null) {
+                    // see if we already have it loaded by id and update linkedId accordingly
+                    int resourceId = resource.GetHashCode();
+                    AssetEntry<T> idEntry;
+                    idEntry.id = resourceId;
+                    idEntry.asset = resource;
+                    map[idEntry.id] = idEntry;
+                }
+
+                Sprite sprite = Resources.Load<Sprite>(path);
+                if (sprite != null) {
+                    // sprite.texture = resource as Texture2D;;
+                }
+                map.Add(pathId, pathEntry);
+            }
+
+            return resource;
+        }
         public void Dispose() {
             fontAssetMap.Dispose();
         }
@@ -440,13 +483,16 @@ namespace UIForia {
             public int textureId;
             public SpriteAssetRef[] spriteRefs; // todo -- would be better to use a single large array
             public string texturePath;
+            public SpriteAssetRef defaultSprite;
 
         }
 
         internal struct SpriteAssetRef {
 
-            public AxisAlignedBounds2DUShort uvRect;
             public string spriteName;
+            public AxisAlignedBounds2DUShort uvRect;
+            public AxisAlignedBounds2DUShort uvBorderRect;
+            public TextureReference textureReference;
 
         }
 
@@ -504,6 +550,13 @@ namespace UIForia {
 
                 }
 
+                // Unity encodes sprite.border as X=left, Y=bottom, Z=right, W=top
+                AxisAlignedBounds2DUShort uvBorderRect = default;
+                Vector4 border = sprites[i].border;
+                uvBorderRect.xMin = (ushort) border.x;
+                uvBorderRect.yMin = (ushort) border.w;
+                uvBorderRect.xMax = (ushort) border.z;
+                uvBorderRect.yMax = (ushort) border.y;
                 AxisAlignedBounds2DUShort uvRect = default;
                 uvRect.xMin = (ushort) (xMin * asset.texture.width);
                 uvRect.yMin = (ushort) (yMin * asset.texture.height);
@@ -511,7 +564,9 @@ namespace UIForia {
                 uvRect.yMax = (ushort) (yMax * asset.texture.height);
                 ref SpriteAssetRef spriteRef = ref asset.spriteRefs[i];
                 spriteRef.uvRect = uvRect;
+                spriteRef.uvBorderRect = uvBorderRect;
                 spriteRef.spriteName = sprites[i].name.Substring(0, sprites[i].name.Length - "(Clone)".Length);
+                spriteRef.textureReference = new TextureReference(asset, spriteRef.spriteName, uvRect, uvBorderRect);
                 Object.Destroy(sprites[i]);
             }
 
@@ -523,11 +578,74 @@ namespace UIForia {
         private static TextureReference GetSprite(in SpriteAssetInfo asset, string spriteName) {
             for (int i = 0; i < asset.spriteRefs.Length; i++) {
                 if (asset.spriteRefs[i].spriteName == spriteName) {
-                    return new TextureReference(asset, spriteName, asset.spriteRefs[i].uvRect);
+                    return asset.spriteRefs[i].textureReference;
                 }
             }
 
             return TextureReference.s_Empty;
+        }
+
+        public bool TryGetSprite(string assetInfoPath, out TextureReference textureReference) {
+
+            if (spriteMap.TryGetValue(assetInfoPath, out SpriteAssetInfo asset)) {
+                textureReference = GetSprite(asset, assetInfoPath);
+                return textureReference != null;
+            }
+
+            Sprite sprite = Resources.Load<Sprite>(assetInfoPath);
+            if (sprite == null) {
+                spriteMap[assetInfoPath] = default;
+                textureReference = null;
+                return false;
+            }
+
+            float xMin = float.MaxValue;
+            float yMin = float.MaxValue;
+            float xMax = float.MinValue;
+            float yMax = float.MinValue;
+
+            Vector2[] uvs = sprite.uv;
+
+            for (int u = 0; u < uvs.Length; u++) {
+                Vector2 uv = uvs[u];
+
+                if (uv.x < xMin) xMin = uv.x;
+                if (uv.x > xMax) xMax = uv.x;
+
+                if (uv.y < yMin) yMin = uv.y;
+                if (uv.y > yMax) yMax = uv.y;
+
+            }
+
+            // Unity encodes sprite.border as X=left, Y=bottom, Z=right, W=top
+            AxisAlignedBounds2DUShort uvBorderRect = default;
+            Vector4 border = sprite.border;
+            uvBorderRect.xMin = (ushort) border.x;
+            uvBorderRect.yMin = (ushort) border.w;
+            uvBorderRect.xMax = (ushort) border.z;
+            uvBorderRect.yMax = (ushort) border.y;
+            AxisAlignedBounds2DUShort uvRect = default;
+            Texture2D texture = sprite.texture;
+            uvRect.xMin = (ushort) (xMin * texture.width);
+            uvRect.yMin = (ushort) (yMin * texture.height);
+            uvRect.xMax = (ushort) (xMax * texture.width);
+            uvRect.yMax = (ushort) (yMax * texture.height);
+
+            SpriteAssetInfo spriteAssetInfo = new SpriteAssetInfo {
+                texture = texture,
+                textureId = texture.GetHashCode(),
+                defaultSprite = new SpriteAssetRef {
+                    uvBorderRect = uvBorderRect,
+                    uvRect = uvRect,
+                    spriteName = sprite.name,
+                    textureReference = new TextureReference(asset, sprite.name, uvRect, uvBorderRect)
+                }
+            };
+            spriteMap[assetInfoPath] = spriteAssetInfo;
+            Object.Destroy(sprite);
+
+            textureReference = spriteAssetInfo.defaultSprite.textureReference;
+            return true;
         }
 
     }

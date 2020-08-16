@@ -152,6 +152,17 @@ namespace UIForia.Graphics {
                         break;
                     }
 
+                    case DrawType2.UIForiaShadow: {
+                        int batchMemberOffset = batchMemberList.size;
+
+                        i = UIForiaShadowBatch_InOrderBatch(ref renderTraversalList, i, out MaterialPermutation materialPermutation) - 1;
+
+                        // UIForiaShapeBatch_OutOfOrderBatch(ref renderTraversalList, i + 1, ref materialPermutation);
+
+                        SubmitInorderBatch(renderInfo, materialPermutation, batchMemberOffset, BatchType.Shadow, RenderCommandType.ShadowBatch);
+                        break;
+                    }
+                    
                 }
 
             }
@@ -162,6 +173,7 @@ namespace UIForia.Graphics {
             outOfOrderBatchList.Dispose();
             initialCandidateList.Dispose();
         }
+
 
         private void UIForiaShapeBatch_OutOfOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, ref MaterialPermutation permutation) {
             DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
@@ -562,6 +574,65 @@ namespace UIForia.Graphics {
             return drawList.size;
         }
 
+        private int UIForiaShadowBatch_InOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, out MaterialPermutation permutation) {
+            
+            DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
+            RenderTraversalInfo* renderInfoArray = renderDataList.GetArrayPointer();
+
+            inOrderBatchList.Add(startIdx);
+
+            // open the required stencil for first item in batch if it isnt open yet
+            // still dont know how to check ignored, maybe depth == 0? 
+            // better not to have special cases where possible
+
+            int stencilIndex = renderTraversalList[startIdx].stencilIndex;
+
+            // i can assign a stencil id to all elements up front
+            // i know the stencil depth and bounds
+            // i know the stencil setup state
+            // using that i can figure out where batching can happen
+
+            // can optimize out of order searches pretty easily later on
+
+            if (stencilList[stencilIndex].drawState == StencilSetupState.Uninitialized) {
+                stencilsToPush.Add(stencilIndex);
+                stencilList[stencilIndex].drawState = StencilSetupState.Pushed;
+            }
+
+            permutation = new MaterialPermutation {
+                materialId = MaterialId.UIForiaShadow,
+            };
+
+            bool isStencilMember = renderTraversalList[startIdx].isStencilMember;
+            for (int i = startIdx + 1; i < drawList.size; i++) {
+
+                ref DrawInfo2 current = ref drawInfoArray[i];
+                ref RenderTraversalInfo renderInfo = ref renderInfoArray[i];
+
+                if (renderInfo.isStencilMember != isStencilMember || !renderInfo.requiresRendering || (current.drawType & (DrawType2.PushClipRect | DrawType2.PopClipRect)) != 0) {
+                    continue;
+                }
+
+                if (current.drawType != DrawType2.UIForiaShadow) {
+                    return i;
+                }
+
+                // new stencil breaks in-order batching, we'll get around this in the out of order pass
+                if (renderInfo.stencilIndex != stencilIndex) {
+                    // if stencil depths are the same
+                    // check open states
+                    // if can open and not intersecting then add to stencils to open list
+                    // otherwise break batch
+                    return i;
+                }
+
+                inOrderBatchList.Add(i);
+
+            }
+
+            return drawList.size;
+        }
+        
         public int UIForiaShapeBatch_InOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, out MaterialPermutation permutation) {
 
             DrawInfo2* drawInfoArray = drawList.GetArrayPointer();

@@ -37,7 +37,8 @@
 #define TEXT_DISPLAY_FLAG_ITALIC_BIT (1 << 3)
 #define TEXT_DISPLAY_FLAG_UNDERLAY_INNER_BIT (1 << 4)
 
-
+#define ElementShaderFlags_IsNineSliceBorder (1 << 0)
+#define ElementShaderFlags_IsNineSliceContent (1 << 1)
 
 #define TOP_LEFT 0
 #define TOP_RIGHT 1
@@ -64,11 +65,11 @@ int UnpackMatrixId(uint4 indices) {
 }
 
 int UnpackEffectIdx(uint4 indices) {
-    return indices.w;
+    return indices.w & 0xffffff; // 3 bytes
 }
 
 int UnpackMaterialId(uint4 indices) {
-    return indices.y & 0xffff;
+    return indices.y & 0xffff; // 3 bytes
 }
 
 int UnpackFontIdx(uint4 indices) {
@@ -307,7 +308,7 @@ float2 RotateUV(float2 uv, float rotation) {
 float2 TransformUV(float2 uv, float2 offset, float2 scale, float rotation, half4 uvBounds) {
     uv += offset;
     uv *= scale;
-    uv = RotateUV(uv, rotation, float2(0.5, 0.5)); // todo -- verify pivot point is correct -- (uvBounds.z - uvBounds.x) * 0.5, uvBounds.y + (uvBounds.w - uvBounds.y) * 0.5));
+    //uv = RotateUV(uv, rotation, float2(0.5, 0.5)); // todo -- verify pivot point is correct -- (uvBounds.z - uvBounds.x) * 0.5, uvBounds.y + (uvBounds.w - uvBounds.y) * 0.5));
     uv.x = lerp(uvBounds.x, uvBounds.z, frac(uv.x));
     uv.y = lerp(uvBounds.y, uvBounds.w, frac(uv.y));
     
@@ -318,8 +319,31 @@ float2 TransformUV(float2 uv, float2 offset, float2 scale, float rotation, half4
     return uv;
 }
 
-fixed4 ComputeBorderColor() {
-    
+inline half DistToLine(half2 pt1, half2 pt2, half2 testPt) {
+    half2 lineDir = pt2 - pt1;
+    half2 perpDir = half2(lineDir.y, -lineDir.x);
+    half2 dirToPt1 = pt1 - testPt;
+    return abs(dot(normalize(perpDir), dirToPt1));
+}
+   
+inline float UnpackCornerBevel(uint bevelTop, uint bevelBottom, float2 texCoord) {
+
+    float left = step(texCoord.x, 0.5); // 1 if left
+    float bottom = step(1 - texCoord.y, 0.5); // 1 if bottom
+
+    #define top (1 - bottom)
+    #define right (1 - left) 
+
+    uint bevelAmount = 0;
+    bevelAmount += (top * left) * UnpackHighBytes(bevelTop);
+    bevelAmount += (top * right) * UnpackLowBytes(bevelTop);
+    bevelAmount += (bottom * right) * UnpackLowBytes(bevelBottom);
+    bevelAmount += (bottom * left) * UnpackHighBytes(bevelBottom);
+
+    return  (float)bevelAmount;
+                
+    #undef top
+    #undef right
 }
 
 // ---------------------- Gradient Functions --------------------------------------------------------
@@ -356,7 +380,7 @@ fixed4 SampleGradient(float sampleValue, fixed4 colors[8], fixed2 alphas[8], int
         fixed colorPos = saturate((sampleValue - prevTimeKey) / (colors[idx].w - prevTimeKey)) * step(idx, colorCount - 1);
         color = lerp(color, colors[idx], lerp(colorPos, step(0.5, colorPos), fixedOrBlend));
         
-        fixed alphaPos = saturate((sampleValue - alphas[idx - 1].y) / (alphas[idx].y - alphas[idx - 1].y)) * step(idx, alphaCount - 1);
+        fixed alphaPos = (saturate((sampleValue - alphas[idx - 1].y) / (alphas[idx].y - alphas[idx - 1].y))) * step(idx, alphaCount - 1);
         alpha = lerp(alpha, alphas[idx].x, lerp(alphaPos, step(0.5, alphaPos), fixedOrBlend));
     }
 
@@ -436,6 +460,10 @@ struct TextMaterialInfo {
     uint unused4;
     uint unused5;
     uint unused6;
+    uint unused7;
+    uint unused8;
+    uint unused9;
+    uint unused10;
 };
             
 TextMaterialInfoDecompressed DecompressTextMaterialInfo(in TextMaterialInfo textMaterialInfo) {

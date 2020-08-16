@@ -43,7 +43,7 @@ namespace UIForia.Layout {
         public void RunHorizontal(BurstLayoutRunner* runner) {
             // todo -- scroll tracks & handles
             // probably want a special layoutbox type for those
-            ref BurstLayoutRunner refRunner = ref UnsafeUtilityEx.AsRef<BurstLayoutRunner>(runner);
+            ref BurstLayoutRunner refRunner = ref UnsafeUtility.AsRef<BurstLayoutRunner>(runner);
             layoutBox->RunLayoutHorizontal(runner);
             ref LayoutInfo horizontalInfo = ref refRunner.GetHorizontalLayoutInfo(elementId);
             scrollValues->actualWidth = horizontalInfo.finalSize;
@@ -54,7 +54,7 @@ namespace UIForia.Layout {
         public void RunVertical(BurstLayoutRunner* runner) {
             // todo -- scroll tracks & handles
             // probably want a special layoutbox type for those
-            ref BurstLayoutRunner refRunner = ref UnsafeUtilityEx.AsRef<BurstLayoutRunner>(runner);
+            ref BurstLayoutRunner refRunner = ref UnsafeUtility.AsRef<BurstLayoutRunner>(runner);
             layoutBox->RunLayoutVertical(runner);
             ref LayoutInfo verticalInfo = ref refRunner.GetVerticalLayoutInfo(elementId);
             scrollValues->actualHeight = verticalInfo.finalSize;

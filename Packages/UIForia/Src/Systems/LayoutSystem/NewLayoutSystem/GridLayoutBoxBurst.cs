@@ -43,7 +43,7 @@ namespace UIForia.Layout {
                 return;
             }
 
-            ref BurstLayoutRunner runner = ref UnsafeUtilityEx.AsRef<BurstLayoutRunner>(prunner);
+            ref BurstLayoutRunner runner = ref UnsafeUtility.AsRef<BurstLayoutRunner>(prunner);
 
             ref LayoutInfo info = ref runner.GetHorizontalLayoutInfo(elementId);
 
@@ -127,7 +127,7 @@ namespace UIForia.Layout {
                 return;
             }
 
-            ref BurstLayoutRunner runner = ref UnsafeUtilityEx.AsRef<BurstLayoutRunner>(prunner);
+            ref BurstLayoutRunner runner = ref UnsafeUtility.AsRef<BurstLayoutRunner>(prunner);
 
             ref LayoutInfo info = ref runner.GetVerticalLayoutInfo(elementId);
 

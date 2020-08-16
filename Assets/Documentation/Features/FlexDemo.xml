@@ -11,7 +11,7 @@
         style container2 {
             FlexLayoutDirection = Horizontal;
             PreferredSize = 1vw 1vh;
-            Padding = 250px;
+            Padding = 10px;
         }
 
         style shape-kit {
@@ -69,10 +69,26 @@
         }
 
         style child {
-            PreferredSize = 200px;
-            backgroundColor = red;
-          //  OutlineWidth = 30px;
+            PreferredSize = 400px 400px; 
+            backgroundColor = blue;
+<!--            OutlineWidth = 30px;-->
             OutlineColor = orange;
+<!--            Border = 50px;-->
+<!--            BorderMode = SliceImage;-->
+<!--            BorderTop = 15px;-->
+<!--            BorderRight = 150px;-->
+<!--            BorderBottom = 15px;-->
+<!--            BorderLeft = 150px;-->
+<!--            BorderColorTop = Blue;-->
+            BorderColorRight = Blue;
+<!--            BorderColorBottom = Blue;-->
+            BorderColorLeft = Black;
+            CornerBevel = 20px;
+<!--        BorderRadiusTopRight = 50%;-->
+<!--        BorderRadius = 50%;-->
+<!--            BackgroundImage = url("Images/DefaultAtlas", "9SliceSprites-4_edit");-->
+<!--            MeshType = Radial360_Top;-->
+<!--            BackgroundImageScale = 4;-->
         }
         
         style round {
@@ -86,7 +102,7 @@
     <Contents style="container2">
 
         <Div style="child"/>
-        <Div style="child round"/>
+<!--        <Div style="child round"/>-->
 <!--        <Input style="inputxxx" value="'Matt sa|ys       lets make this words'"/>-->
         
 <!--        <ScrollView style="shape-kit">-->

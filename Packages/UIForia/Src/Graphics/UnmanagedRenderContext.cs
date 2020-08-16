@@ -34,9 +34,7 @@ namespace UIForia.Graphics {
             ElementDrawInfo* elementDrawInfo = stackAllocator.Allocate(new ElementDrawInfo() {
                 x = x,
                 y = y,
-                opacity = 1f,
-                materialId = 0,
-                uvTransformId = 0,
+            
                 drawDesc = drawDesc,
             });
 

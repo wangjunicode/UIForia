@@ -77,7 +77,7 @@ namespace UIForia.Util.Unsafe {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrCreateReference(long key) {
             TValue* ptr = mapState->GetOrCreate<TValue>(key);
-            return ref UnsafeUtilityEx.AsRef<TValue>(ptr);
+            return ref UnsafeUtility.AsRef<TValue>(ptr);
         }
 
         public int size {

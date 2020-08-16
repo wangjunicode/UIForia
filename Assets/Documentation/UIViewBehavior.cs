@@ -2,10 +2,8 @@
 using System.IO;
 using UIForia.Elements;
 using UIForia.Graphics;
-using UIForia.Rendering;
 using UIForia.Text;
 using Unity.Mathematics;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -32,25 +30,6 @@ namespace UIForia {
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
 
             return settings;
-        }
-
-        public struct Gradient2 {
-
-            // data fits in 2 float4s
-            public Color32 c0;
-            public Color32 c1;
-            public Color32 c2;
-            public Color32 c3;
-            public Color32 c4;
-
-            public ushort a0;
-            public ushort a1;
-
-            public ushort a2;
-            public ushort a3;
-
-            public ushort a4;
-
         }
 
         float saturate(float x) {
@@ -108,7 +87,6 @@ namespace UIForia {
            // GameObject.Find("RawImage").GetComponent<UnityEngine.UI.RawImage>().texture = texture2D;
 
             unsafe {
-
                 // TextMaterialInfo m0 = new TextMaterialInfo();
                 // Debug.Log(MurmurHash3.Hash((byte*)&m0, sizeof(TextMaterialInfo)));
                 // m0.opacity = 1;

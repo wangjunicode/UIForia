@@ -24,7 +24,9 @@
 
         SetShapeDatabuffer,
 
-        SetGradientDataBuffer
+        SetGradientDataBuffer,
+
+        ShadowBatch
 
     }
 

@@ -5,19 +5,20 @@ namespace UIForia {
 
     public class TextureReference {
 
-        // todo -- make readonly
         public readonly int textureId;
         public readonly Texture texture;
         public readonly string texturePath;
         public readonly AxisAlignedBounds2DUShort uvRect;
+        public readonly AxisAlignedBounds2DUShort uvBorderRect;
         public readonly string spriteName;
 
-        internal TextureReference(in ResourceManager.SpriteAssetInfo asset, string spriteName, AxisAlignedBounds2DUShort uvRect) {
+        internal TextureReference(in ResourceManager.SpriteAssetInfo asset, string spriteName, AxisAlignedBounds2DUShort uvRect, AxisAlignedBounds2DUShort uvBorderRect) {
             this.texture = asset.texture;
             this.textureId = asset.textureId;
             this.texturePath = asset.texturePath;
             this.spriteName = spriteName;
             this.uvRect = uvRect;
+            this.uvBorderRect = uvBorderRect;
         }
 
         internal TextureReference(Texture texture) {

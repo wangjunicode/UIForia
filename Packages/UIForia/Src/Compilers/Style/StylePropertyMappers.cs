@@ -1639,7 +1639,7 @@ namespace UIForia.Compilers.Style {
                     if (assetInfo.spriteName != null) {
                         return context.resourceManager?.GetSpriteTexture(assetInfo);
                     }
-
+                    
                     return context.resourceManager?.GetTexture(assetInfo.path);
 
                 case StyleLiteralNode literalNode:

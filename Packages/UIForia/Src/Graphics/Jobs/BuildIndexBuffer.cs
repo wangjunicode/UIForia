@@ -24,7 +24,7 @@ namespace UIForia.Graphics {
             for (int batchIdx = 0; batchIdx < batchList.size; batchIdx++) {
                 ref Batch batch = ref batchArray[batchIdx];
 
-                if (batch.type == BatchType.Text || batch.type == BatchType.Element) {
+                if (batch.type == BatchType.Text || batch.type == BatchType.Element || batch.type == BatchType.Shadow) {
                     
                     int start = batch.memberIdRange.start;
                     int end = batch.memberIdRange.end;
@@ -57,7 +57,7 @@ namespace UIForia.Graphics {
                 // todo -- reverse the batch building to save uploading the index buffer every frame
                 // If I can put the vertices in the correct order instead of the indices, I can use a 
                 // totally static index buffer and never need to upload it
-                if (batch.type == BatchType.Element || batch.type == BatchType.Text) {
+                if (batch.type == BatchType.Element || batch.type == BatchType.Text || batch.type == BatchType.Shadow) {
                     
                     int start = batch.memberIdRange.start;
                     int end = batch.memberIdRange.end;

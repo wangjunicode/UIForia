@@ -40,7 +40,7 @@ namespace UIForia.Util.Unsafe {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref TValue GetOrCreateReference(int key) {
             TValue* ptr = mapState->GetOrCreate<TValue>(key);
-            return ref UnsafeUtilityEx.AsRef<TValue>(ptr);
+            return ref UnsafeUtility.AsRef<TValue>(ptr);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -51,7 +51,7 @@ namespace UIForia.Util.Unsafe {
         // ReSharper disable once RedundantAssignment
         public bool TryGetReference(int key, ref TValue value) {
             if (mapState->TryGetPointer(key, out TValue* ptr)) {
-                value = UnsafeUtilityEx.AsRef<TValue>(ptr);
+                value = UnsafeUtility.AsRef<TValue>(ptr);
                 return true;
             }
 

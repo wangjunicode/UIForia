@@ -89,6 +89,42 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public UIForia.UIAngle MeshFillRotation { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillRotation, out property)) return property.AsUIAngle;
+                    return DefaultStyleValues_Generated.MeshFillRotation;
+                }
+            }
+
+            public UIForia.UIFixedLength MeshFillRadius { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillRadius, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.MeshFillRadius;
+                }
+            }
+
+            public UIForia.UIFixedLength MeshFillOffsetX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillOffsetX, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.MeshFillOffsetX;
+                }
+            }
+
+            public UIForia.UIFixedLength MeshFillOffsetY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillOffsetY, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.MeshFillOffsetY;
+                }
+            }
+
             public UIForia.Rendering.Overflow OverflowX { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -1392,6 +1428,34 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.MeshFillAmount, value)); }
         }
             
+        public UIForia.UIAngle MeshFillRotation {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIAngleProperty(StylePropertyId.MeshFillRotation); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.MeshFillRotation, value)); }
+        }
+            
+        public UIForia.UIFixedLength MeshFillRadius {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.MeshFillRadius); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.MeshFillRadius, value)); }
+        }
+            
+        public UIForia.UIFixedLength MeshFillOffsetX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.MeshFillOffsetX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.MeshFillOffsetX, value)); }
+        }
+            
+        public UIForia.UIFixedLength MeshFillOffsetY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.MeshFillOffsetY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.MeshFillOffsetY, value)); }
+        }
+            
         public UIForia.Rendering.Overflow OverflowX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return (UIForia.Rendering.Overflow)FindEnumProperty(StylePropertyId.OverflowX); }
@@ -2417,6 +2481,42 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillAmount, out property)) return property.AsFloat;
                     return DefaultStyleValues_Generated.MeshFillAmount;
+                }
+            }
+
+            public UIForia.UIAngle MeshFillRotation { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillRotation, out property)) return property.AsUIAngle;
+                    return DefaultStyleValues_Generated.MeshFillRotation;
+                }
+            }
+
+            public UIForia.UIFixedLength MeshFillRadius { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillRadius, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.MeshFillRadius;
+                }
+            }
+
+            public UIForia.UIFixedLength MeshFillOffsetX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillOffsetX, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.MeshFillOffsetX;
+                }
+            }
+
+            public UIForia.UIFixedLength MeshFillOffsetY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.MeshFillOffsetY, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.MeshFillOffsetY;
                 }
             }
 
@@ -3729,6 +3829,38 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.MeshFillAmount, state).AsFloat;
         }
         
+        public void SetMeshFillRotation(in UIForia.UIAngle? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.MeshFillRotation, value), state);
+        }
+
+        public UIForia.UIAngle GetMeshFillRotation(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MeshFillRotation, state).AsUIAngle;
+        }
+        
+        public void SetMeshFillRadius(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.MeshFillRadius, value), state);
+        }
+
+        public UIForia.UIFixedLength GetMeshFillRadius(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MeshFillRadius, state).AsUIFixedLength;
+        }
+        
+        public void SetMeshFillOffsetX(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.MeshFillOffsetX, value), state);
+        }
+
+        public UIForia.UIFixedLength GetMeshFillOffsetX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MeshFillOffsetX, state).AsUIFixedLength;
+        }
+        
+        public void SetMeshFillOffsetY(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.MeshFillOffsetY, value), state);
+        }
+
+        public UIForia.UIFixedLength GetMeshFillOffsetY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.MeshFillOffsetY, state).AsUIFixedLength;
+        }
+        
         public void SetOverflowX(in UIForia.Rendering.Overflow? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.OverflowX, (int)value), state);
         }
@@ -4822,6 +4954,14 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.MeshFillOrigin, (int)MeshFillOrigin);
 				case StylePropertyId.MeshFillAmount:
 					 return new StyleProperty(StylePropertyId.MeshFillAmount, MeshFillAmount);
+				case StylePropertyId.MeshFillRotation:
+					 return new StyleProperty(StylePropertyId.MeshFillRotation, MeshFillRotation);
+				case StylePropertyId.MeshFillRadius:
+					 return new StyleProperty(StylePropertyId.MeshFillRadius, MeshFillRadius);
+				case StylePropertyId.MeshFillOffsetX:
+					 return new StyleProperty(StylePropertyId.MeshFillOffsetX, MeshFillOffsetX);
+				case StylePropertyId.MeshFillOffsetY:
+					 return new StyleProperty(StylePropertyId.MeshFillOffsetY, MeshFillOffsetY);
 				case StylePropertyId.OverflowX:
 					 return new StyleProperty(StylePropertyId.OverflowX, (int)OverflowX);
 				case StylePropertyId.OverflowY:
@@ -5110,6 +5250,10 @@ namespace UIForia.Rendering {
                     case StylePropertyId.MeshFillDirection: return typeof(UIForia.Rendering.MeshFillDirection);
                     case StylePropertyId.MeshFillOrigin: return typeof(UIForia.Rendering.MeshFillOrigin);
                     case StylePropertyId.MeshFillAmount: return typeof(System.Single);
+                    case StylePropertyId.MeshFillRotation: return typeof(UIForia.UIAngle);
+                    case StylePropertyId.MeshFillRadius: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.MeshFillOffsetX: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.MeshFillOffsetY: return typeof(UIForia.UIFixedLength);
                     case StylePropertyId.OverflowX: return typeof(UIForia.Rendering.Overflow);
                     case StylePropertyId.OverflowY: return typeof(UIForia.Rendering.Overflow);
                     case StylePropertyId.ClipBehavior: return typeof(UIForia.Layout.ClipBehavior);
@@ -5257,6 +5401,10 @@ namespace UIForia.Rendering {
                     case StylePropertyId.Opacity: return true;
                     case StylePropertyId.Material: return true;
                     case StylePropertyId.MeshFillAmount: return true;
+                    case StylePropertyId.MeshFillRotation: return true;
+                    case StylePropertyId.MeshFillRadius: return true;
+                    case StylePropertyId.MeshFillOffsetX: return true;
+                    case StylePropertyId.MeshFillOffsetY: return true;
                     case StylePropertyId.BackgroundColor: return true;
                     case StylePropertyId.BackgroundTint: return true;
                     case StylePropertyId.BackgroundImageOffsetX: return true;

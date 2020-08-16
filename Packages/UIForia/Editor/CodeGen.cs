@@ -40,6 +40,10 @@ namespace UIForia.Editor {
             new PropertyGenerator<MeshFillDirection>(StylePropertyId.MeshFillDirection, MeshFillDirection.Clockwise), 
             new PropertyGenerator<MeshFillOrigin>(StylePropertyId.MeshFillOrigin, 0),
             new AnimatedPropertyGenerator<float>(StylePropertyId.MeshFillAmount, 1f), 
+            new AnimatedPropertyGenerator<UIAngle>(StylePropertyId.MeshFillRotation, new UIAngle(0)), 
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.MeshFillRadius, new UIFixedLength(float.MaxValue)), 
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.MeshFillOffsetX, new UIFixedLength(0)), 
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.MeshFillOffsetY, new UIFixedLength(0)), 
             
             // Overflow
             new PropertyGenerator<Overflow>(StylePropertyId.OverflowX, Overflow.Visible),

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using UIForia.ListTypes;
 using UIForia.Text;
 using UIForia.Util;
@@ -44,6 +43,7 @@ namespace UIForia.Graphics {
         private MaterialPropertyOverride* currentOverrideProperties;
         private DrawInfoFlags currentFlagSet;
         private MaterialId activeMaterialId;
+        internal AxisAlignedBounds2DUShort uvBorderBounds;
 
         public RenderContext3(ResourceManager resourceManager) {
             this.resourceManager = resourceManager;
@@ -66,6 +66,7 @@ namespace UIForia.Graphics {
             hasPendingMaterialOverrides = false;
             currentFlagSet = 0;
             activeMaterialId = materialId;
+            uvBorderBounds = default;
         }
 
         public void Callback(object context, Action<object, CommandBuffer> callback) {
@@ -94,10 +95,14 @@ namespace UIForia.Graphics {
             textureMap[texture.GetHashCode()] = texture;
         }
 
-        public void SetBackgroundTexture(Texture texture) {
-            if (!ReferenceEquals(texture, null)) {
-                defaultBGTexture = texture.GetHashCode();
-                AddTexture(texture);
+        public void SetBackgroundTexture(TextureReference textureReference) {
+            if (!ReferenceEquals(textureReference?.texture, null)) {
+                defaultBGTexture = textureReference.textureId;
+                uvBorderBounds = textureReference.uvBorderRect;
+                AddTexture(textureReference.texture);
+            }
+            else {
+                uvBorderBounds = default;
             }
         }
 
@@ -161,6 +166,42 @@ namespace UIForia.Graphics {
             });
         }
 
+        public void DrawElementShadow(float x, float y, in ElementDrawDesc drawDesc) {
+            if (drawDesc.width <= 0 || drawDesc.height <= 0) {
+                return;
+            }
+
+            ElementDrawInfo* elementDrawInfo = stackAllocator.Allocate(new ElementDrawInfo() {
+                x = x,
+                y = y,
+                drawDesc = drawDesc,
+            });
+
+            drawList.Add(new DrawInfo2() {
+                matrix = defaultMatrix,
+                elementId = elementId,
+                drawType = DrawType2.UIForiaShadow,
+                materialId = MaterialId.UIForiaShadow,
+                localBounds = new AxisAlignedBounds2D(x, y, x + drawDesc.width, y + drawDesc.height),
+                // could consider making these different allocators to keep similar types together
+                materialData = stackAllocator.Allocate(new ElementMaterialSetup() {
+                    bodyTexture = new TextureUsage() {
+                        textureId = defaultBGTexture
+                    }
+                }),
+
+                shapeData = stackAllocator.Allocate(new ElementBatch() {
+                    count = 1,
+                    elements = elementDrawInfo
+                }),
+
+                drawSortId = new DrawSortId() {
+                    localRenderIdx = localDrawId++,
+                    baseRenderIdx = renderIndex
+                }
+            });    
+        }
+
         public void DrawElement(float x, float y, in ElementDrawDesc drawDesc) {
             if (drawDesc.width <= 0 || drawDesc.height <= 0) {
                 return;
@@ -169,13 +210,8 @@ namespace UIForia.Graphics {
             ElementDrawInfo* elementDrawInfo = stackAllocator.Allocate(new ElementDrawInfo() {
                 x = x,
                 y = y,
-                opacity = 1f,
-                materialId = 0,
-                uvTransformId = 0,
                 drawDesc = drawDesc,
             });
-
-            if (gradient != null) { }
 
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
@@ -202,16 +238,45 @@ namespace UIForia.Graphics {
             });
         }
 
-        internal void DrawElementBodyInternal(in SDFMeshDesc meshDesc, in AxisAlignedBounds2D bounds, in ElementMaterialSetup materialSetup) {
+        public void DrawSlicedElement(float x, float y, in ElementDrawDesc drawDesc) {
+            if (drawDesc.width <= 0 || drawDesc.height <= 0) {
+                return;
+            }
+
+            if (defaultBGTexture == 0 || !drawDesc.HasBorder) {
+                DrawElement(x, y, drawDesc);
+                return;
+            }
+            
+            ElementDrawInfo* elementDrawInfo = stackAllocator.Allocate(new ElementDrawInfo() {
+                x = x,
+                y = y,
+                isSliced = true,
+                drawDesc = drawDesc,
+                uvBorderTop = uvBorderBounds.yMin,
+                uvBorderRight = uvBorderBounds.xMax,
+                uvBorderBottom = uvBorderBounds.yMax,
+                uvBorderLeft = uvBorderBounds.xMin
+            });
+
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
                 elementId = elementId,
-                drawType = DrawType2.UIForiaElement, // todo -- generate geometry instead if material id is not what we expect
+                drawType = DrawType2.UIForiaElement,
                 materialId = MaterialId.UIForiaShape,
-                localBounds = bounds,
+                localBounds = new AxisAlignedBounds2D(x, y, x + drawDesc.width, y + drawDesc.height),
                 // could consider making these different allocators to keep similar types together
-                materialData = stackAllocator.Allocate(materialSetup),
-                shapeData = stackAllocator.Allocate(meshDesc),
+                materialData = stackAllocator.Allocate(new ElementMaterialSetup() {
+                    bodyTexture = new TextureUsage() {
+                        textureId = defaultBGTexture
+                    }
+                }),
+
+                shapeData = stackAllocator.Allocate(new ElementBatch() {
+                    count = 1,
+                    elements = elementDrawInfo
+                }),
+
                 drawSortId = new DrawSortId() {
                     localRenderIdx = localDrawId++,
                     baseRenderIdx = renderIndex
@@ -229,8 +294,7 @@ namespace UIForia.Graphics {
 
         }
 
-
-        public void DrawTextHighlight(TextRenderRange render) {
+        public void DrawTextHighlight(in TextRenderRange render) {
             float x = render.localBounds.xMin;
             float y = render.localBounds.yMin;
             float width = render.localBounds.Width;
@@ -243,14 +307,11 @@ namespace UIForia.Graphics {
             ElementDrawInfo* elementDrawInfo = stackAllocator.Allocate(new ElementDrawInfo() {
                 x = x,
                 y = y,
-                opacity = 1f,
-                materialId = 0,
-                uvTransformId = 0,
                 drawDesc = new ElementDrawDesc(width, height) {
                     backgroundColor = new Color32(255, 0, 0, 255)
                 },
             });
-            
+
             drawList.Add(new DrawInfo2() {
                 matrix = defaultMatrix,
                 elementId = elementId,
@@ -272,7 +333,7 @@ namespace UIForia.Graphics {
             });
         }
 
-        internal void DrawTextCharacters(TextRenderRange textRenderRange) {
+        internal void DrawTextCharacters(in TextRenderRange textRenderRange) {
             TextMaterialSetup textMaterialSetup = new TextMaterialSetup();
 
             textMaterialSetup.faceTexture = textRenderRange.texture0;
@@ -412,82 +473,16 @@ namespace UIForia.Graphics {
 
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public struct ElementDrawDesc {
-
-        // all material data goes here
-        // any unpacking/re-arranging will happen later when building 
-
-        public byte radiusTL;
-        public byte radiusTR;
-        public byte radiusBR;
-        public byte radiusBL;
-
-        public ushort bevelTL;
-        public ushort bevelTR;
-        public ushort bevelBR;
-        public ushort bevelBL;
-
-        public Color32 backgroundColor;
-        public Color32 backgroundTint;
-
-        public ushort opacity;
-        public ColorMode bgColorMode;
-        public ColorMode outlineColorMode;
-
-        public float outlineWidth;
-        public Color32 outlineColor;
-        public float width;
-        public float height;
-
-        public ushort uvTop;
-        public ushort uvLeft;
-        public ushort uvRight;
-        public ushort uvBottom;
-
-        public ushort meshFillOpenAmount;
-        public ushort meshFillRotation;
-
-        public float meshFillOffsetX;
-        public float meshFillOffsetY;
-
-        public float meshFillRadius;
-
-        public byte meshFillDirection;
-        public byte meshFillInvert;
-        public ushort uvRotation;
-
-        public float uvScaleX;
-        public float uvScaleY;
-        public float uvOffsetX;
-        public float uvOffsetY;
-
-        public GradientMode gradientMode;
-        public float gradientRotation;
-        public float gradientOffsetX;
-        public float gradientOffsetY;
-
-        public ElementDrawDesc(float width, float height) : this() {
-            this.width = width;
-            this.height = height;
-            this.meshFillOpenAmount = ushort.MaxValue;
-            this.opacity = ushort.MaxValue;
-            this.meshFillRadius = ushort.MaxValue;
-        }
-
-    }
-
     public struct ElementDrawInfo {
 
         public float x;
         public float y;
-        public int materialId;
-        public int uvTransformId;
-
-        public float opacity;
-
         public ElementDrawDesc drawDesc;
-        // other per-element data 
+        public bool isSliced;
+        public ushort uvBorderTop;
+        public ushort uvBorderRight;
+        public ushort uvBorderBottom;
+        public ushort uvBorderLeft;
 
     }
 

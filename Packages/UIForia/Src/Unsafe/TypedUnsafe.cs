@@ -560,7 +560,7 @@ namespace UIForia.Util.Unsafe {
         }
 
         public static ref T AsRef<T>(T* target) where T : unmanaged {
-            return ref UnsafeUtilityEx.AsRef<T>(target);
+            return ref UnsafeUtility.AsRef<T>(target);
         }
 
     }

@@ -179,7 +179,15 @@ namespace UIForia.Rendering {
 
         GradientOffsetX,
 
-        GradientOffsetY
+        GradientOffsetY,
+
+        MeshFillRotation,
+
+        MeshFillOffsetX,
+
+        MeshFillOffsetY,
+
+        MeshFillRadius
 
     }
 

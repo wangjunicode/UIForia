@@ -214,7 +214,6 @@ namespace UIForia.Graphics {
                         if (clipperStack.size == 1) {
                             continue;
                         }
-                        ref Clipper current = ref clipperStack[clipperStack.size - 1];
                         clipperStack.size--;
                         activeClipper = clipperStack[clipperStack.size - 1];
                         break;
@@ -239,6 +238,7 @@ namespace UIForia.Graphics {
                     }
 
                     case DrawType2.UIForiaElement:
+                    case DrawType2.UIForiaShadow:
                     case DrawType2.UIForiaText: {
                         renderTraversalInfo.requiresRendering = true;
                         break;
@@ -259,7 +259,7 @@ namespace UIForia.Graphics {
             
             for (int i = stencilData.beginIndex; i < stencilData.pushIndex; i++) {
                 ref DrawInfo2 drawInfo = ref drawList[i];
-                if (drawInfo.drawType == DrawType2.UIForiaElement || drawInfo.drawType == DrawType2.UIForiaText) {
+                if (drawInfo.drawType == DrawType2.UIForiaElement || drawInfo.drawType == DrawType2.UIForiaText || drawInfo.drawType == DrawType2.UIForiaShadow) {
 
                     ref AxisAlignedBounds2D bounds = ref transformedBounds[i];
 

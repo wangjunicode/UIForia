@@ -343,7 +343,7 @@ namespace UIForia.Rendering {
         public float2 AsFloat2 {
             get {
                 long cheating = longVal;
-                return UnsafeUtilityEx.As<long, float2>(ref cheating);
+                return UnsafeUtility.As<long, float2>(ref cheating);
             }
         }
 

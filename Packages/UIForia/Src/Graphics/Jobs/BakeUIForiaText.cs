@@ -1,4 +1,5 @@
 ﻿using UIForia.Text;
+using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Jobs;
@@ -101,7 +102,7 @@ namespace UIForia.Graphics {
                         uint displayAndOpacity = (uint)((byte) info.displayFlags << 8) | info.opacityMultiplier;
                         vertex.indices.y = (uint) ((displayAndOpacity << 16) | (materialIdx & 0xffff)); //(uint)BitUtil.SetHighLowBits(effectIdx, outputIdx); // todo -- set effect idx
                         vertex.indices.z = (uint) ((info.glyphIndex << 16) | (desc.fontAssetId & 0xffff)); // BitUtil.SetHighLowBits(info.renderedGlyphIndex, (uint)desc.fontAssetId);
-                        vertex.indices.w = (uint)effectIdx; // ushort is too small for this but 3 bytes could work if I need 1 free byte here, could move opacity here and use a 3 bytes for material id
+                        vertex.indices.w = (uint)(((byte) info.displayFlags << 24) | (effectIdx & 0xffffff)); // ushort is too small for this but 3 bytes could work if I need 1 free byte here, could move opacity here and use a 3 bytes for material id
                         symbolIdx = info.nextRenderIdx;
                     }
 

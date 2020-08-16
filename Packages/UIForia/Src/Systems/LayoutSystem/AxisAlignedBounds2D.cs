@@ -62,6 +62,12 @@ namespace UIForia.Graphics {
             get => (ushort) (yMax - yMin);
         }
 
+        public static unsafe bool HasValue(in AxisAlignedBounds2DUShort aabb) {
+            fixed (void* longVal = &aabb) {
+                return *(long*)longVal != 0;
+            }
+        }
+
     }
 
 }

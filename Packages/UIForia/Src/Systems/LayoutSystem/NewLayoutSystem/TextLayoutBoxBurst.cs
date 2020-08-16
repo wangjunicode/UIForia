@@ -21,7 +21,7 @@ namespace UIForia.Layout {
         
         public void RunHorizontal(BurstLayoutRunner* runner) {
 
-            ref List_TextLineInfo buffer = ref UnsafeUtilityEx.AsRef<List_TextLineInfo>(runner->lineInfoBuffer);
+            ref List_TextLineInfo buffer = ref UnsafeUtility.AsRef<List_TextLineInfo>(runner->lineInfoBuffer);
             ref LayoutInfo layoutInfo = ref runner->GetHorizontalLayoutInfo(elementId);
 
             float width = layoutInfo.finalSize - layoutInfo.paddingBorderStart - layoutInfo.paddingBorderStart;
@@ -110,7 +110,7 @@ namespace UIForia.Layout {
         }
 
         public float ComputeContentWidth(ref BurstLayoutRunner runner, in BlockSize blockSize) {
-            ref List_TextLineInfo buffer = ref UnsafeUtilityEx.AsRef<List_TextLineInfo>(runner.lineInfoBuffer);
+            ref List_TextLineInfo buffer = ref UnsafeUtility.AsRef<List_TextLineInfo>(runner.lineInfoBuffer);
 
             //TextInfo.RunLayoutHorizontal_WordsOnly(ref textInfo, ref buffer, blockSize.insetSize);
             TextInfo.RunLayoutHorizontal_RichText(ref textInfo[0], ref buffer, blockSize.insetSize);

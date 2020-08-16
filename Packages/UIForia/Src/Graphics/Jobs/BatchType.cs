@@ -9,6 +9,8 @@ namespace UIForia.Graphics {
         Element,
         Mesh,
 
+        Shadow
+
     }
 
 }

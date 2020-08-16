@@ -23,6 +23,10 @@ namespace UIForia.Rendering {
 		public const MeshFillDirection MeshFillDirection = UIForia.Rendering.MeshFillDirection.Clockwise;
 		public const MeshFillOrigin MeshFillOrigin = UIForia.Rendering.MeshFillOrigin.OriginVertical_Bottom;
 		public const float MeshFillAmount = 1f;
+		public static readonly UIAngle MeshFillRotation = new UIAngle(0f, UIAngleUnit.Degrees);
+		public static readonly UIFixedLength MeshFillRadius = new UIFixedLength(3.402823E+38f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength MeshFillOffsetX = new UIFixedLength(0f, UIFixedUnit.Pixel);
+		public static readonly UIFixedLength MeshFillOffsetY = new UIFixedLength(0f, UIFixedUnit.Pixel);
 		public const Overflow OverflowX = UIForia.Rendering.Overflow.Visible;
 		public const Overflow OverflowY = UIForia.Rendering.Overflow.Visible;
 		public const ClipBehavior ClipBehavior = UIForia.Layout.ClipBehavior.Normal;
@@ -178,6 +182,14 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.MeshFillOrigin, (int)UIForia.Rendering.MeshFillOrigin.OriginVertical_Bottom);
 				case StylePropertyId.MeshFillAmount:
 					 return new StyleProperty(StylePropertyId.MeshFillAmount, 1f);
+				case StylePropertyId.MeshFillRotation:
+					 return new StyleProperty(StylePropertyId.MeshFillRotation, new UIAngle(0f, UIAngleUnit.Degrees));
+				case StylePropertyId.MeshFillRadius:
+					 return new StyleProperty(StylePropertyId.MeshFillRadius, new UIFixedLength(3.402823E+38f, UIFixedUnit.Pixel));
+				case StylePropertyId.MeshFillOffsetX:
+					 return new StyleProperty(StylePropertyId.MeshFillOffsetX, new UIFixedLength(0f, UIFixedUnit.Pixel));
+				case StylePropertyId.MeshFillOffsetY:
+					 return new StyleProperty(StylePropertyId.MeshFillOffsetY, new UIFixedLength(0f, UIFixedUnit.Pixel));
 				case StylePropertyId.OverflowX:
 					 return new StyleProperty(StylePropertyId.OverflowX, (int)UIForia.Rendering.Overflow.Visible);
 				case StylePropertyId.OverflowY:

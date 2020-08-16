@@ -53,6 +53,7 @@ namespace UIForia.Graphics {
 
         BeginStencilClip = 1 << 7,
         PopClipRect = 1 << 8,
+        UIForiaShadow = 1 << 9,
 
         // I'm not totally sure what these are yet
         UIForiaGeometry,
@@ -99,6 +100,7 @@ namespace UIForia.Graphics {
         public bool IsInternalDrawType() {
             return (drawType == DrawType2.UIForiaText ||
                     drawType == DrawType2.UIForiaElement ||
+                    drawType == DrawType2.UIForiaShadow ||
                     drawType == DrawType2.UIForiaGeometry ||
                     drawType == DrawType2.UIForiaSDF);
         }
@@ -109,7 +111,6 @@ namespace UIForia.Graphics {
 
         public TextureUsage bodyTexture;
         public TextureUsage outlineTexture;
-        public ElementMaterialInfo materialInfo;
 
     }
 
@@ -129,30 +130,8 @@ namespace UIForia.Graphics {
     public struct UIForiaVertex {
 
         public float2 position;
-
         public float2 texCoord0;
-
-        // public int2 texCoord1;
         public uint4 indices;
-
-        public UIForiaVertex(float x, float y) {
-            position.x = x;
-            position.y = y;
-            texCoord0 = default;
-            //texCoord1 = default;
-            indices = default;
-        }
-
-    }
-
-    public struct SDFMeshDesc {
-
-        public float x;
-        public float y;
-        public ElementMeshStyle meshStyle;
-        public AxisAlignedBounds2D uvRect;
-        public float width;
-        public float height;
 
     }
 
@@ -335,7 +314,7 @@ namespace UIForia.Systems {
                 stencilDataList = unsafeData.stencilDataList
 
             });
-            
+
             // SYNCHRONOUS!!!!
             unsafeData.float4Buffer.AddRange((float4*) unsafeData.clipRectBuffer.GetArrayPointer(), unsafeData.clipRectBuffer.size);
 
@@ -357,6 +336,15 @@ namespace UIForia.Systems {
 
             // might want to do this after culling finishes
             // otherwise I'm uploading data for potentially culled render groups
+            shapeBakingHandles[1] = UIForiaScheduler.Run(new BakeUIForiaText() {
+                drawList = unsafeData.drawList,
+                vertexList = unsafeData.textVertexList,
+                meshInfoList = unsafeData.meshInfoList,
+                materialBuffer = unsafeData.materialBuffer,
+                float4Buffer = unsafeData.float4Buffer,
+                textEffectBuffer = application.textSystem.textEffectVertexInfoTable
+            });
+            
             shapeBakingHandles[1] = UIForiaScheduler.Run(new BakeUIForiaText() {
                 drawList = unsafeData.drawList,
                 vertexList = unsafeData.textVertexList,
@@ -564,6 +552,20 @@ namespace UIForia.Systems {
 
                 ref RenderCommand renderCommand = ref renderCommands[i];
                 switch (renderCommand.type) {
+
+                    case RenderCommandType.ShadowBatch: {
+                        
+                        mpb.Clear();
+
+                        Batch batch = unsafeData.batchList[renderCommand.batchIndex];
+
+                        Material material = resourceManager.GetMaterialInstance(MaterialId.UIForiaShadow);
+
+                        SetupStencilState(batch, commandBuffer);
+
+                        commandBuffer.DrawProceduralIndirect(indexBuffer, identity, material, 0, MeshTopology.Triangles, argBuffer, sizeof(IndirectArg) * batch.indirectArgOffset, mpb);
+                        break;
+                    }
 
                     case RenderCommandType.ElementBatch: {
 

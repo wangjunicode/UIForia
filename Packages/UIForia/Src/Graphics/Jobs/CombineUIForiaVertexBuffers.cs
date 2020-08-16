@@ -48,7 +48,7 @@ namespace UIForia.Graphics {
                         vertices[v].indices.x = clipAndMatrix;
                     }
                 }
-                else if (meshInfo.type == MeshInfoType.Element) {
+                else if (meshInfo.type == MeshInfoType.Element || meshInfo.type == MeshInfoType.Shadow) {
                     int start = textVertexCount + meshInfo.vertexStart;
                     int end = start + meshInfo.vertexCount;
                     meshInfo.vertexStart = start;

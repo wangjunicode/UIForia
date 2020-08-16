@@ -929,7 +929,7 @@ namespace UIForia.Layout {
 
             public ref ListInterface GetListInterface() {
                 void* x = UnsafeUtility.AddressOf(ref this);
-                return ref UnsafeUtilityEx.AsRef<ListInterface>(x);
+                return ref UnsafeUtility.AsRef<ListInterface>(x);
             }
 
             public int ItemSize {

@@ -44,6 +44,11 @@ namespace UIForia.Rendering {
             backgroundTexture = element.style.BackgroundImage;
             backgroundTextureId = ReferenceEquals(backgroundTexture, null) ? 0 : backgroundTexture.GetHashCode();
 
+            drawDesc.borderColorTop = element.style.BorderColorTop;
+            drawDesc.borderColorRight = element.style.BorderColorRight;
+            drawDesc.borderColorBottom = element.style.BorderColorBottom;
+            drawDesc.borderColorLeft = element.style.BorderColorLeft;
+
             drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId, element.style.BackgroundFit == BackgroundFit.Cover);
             if (backgroundTexture != null) {
                 drawDesc.uvTop = backgroundTexture.uvRect.yMin;
@@ -155,8 +160,12 @@ namespace UIForia.Rendering {
 
             drawDesc.outlineWidth = ResolveRelativeLength(halfMin, element.style.OutlineWidth);
             drawDesc.outlineColorMode = GetColorMode(drawDesc.outlineColor, default, outlineTextureId, false);
-            requireRendering = drawDesc.opacity > 0 && (drawDesc.bgColorMode != 0 || (drawDesc.outlineWidth > 0 && drawDesc.outlineColorMode != 0));
-
+            OffsetRect border = element.layoutResult.border;
+            drawDesc.borderTop = border.top;
+            drawDesc.borderRight = border.right;
+            drawDesc.borderBottom = border.bottom;
+            drawDesc.borderLeft = border.left;
+            requireRendering = drawDesc.opacity > 0 && (drawDesc.bgColorMode != 0 || (drawDesc.outlineWidth > 0 && drawDesc.outlineColorMode != 0) || drawDesc.HasBorder && drawDesc.HasPaintedBorder);
             ComputeUVTransform();
             ComputeMeshFill();
         }
@@ -177,13 +186,6 @@ namespace UIForia.Rendering {
         }
 
         protected void ComputeMeshFill() {
-            // float pieDirection = 1; // can be a sign bit or flag elsewhere
-            // float pieOpenAmount = 0.125; 
-            // float pieRotation = 0; //frac(_Time.y) * PI * 2;
-            // float pieRadius = 2 * max(size.x, size.y);
-            // float2 pieOffset = (size * float2(0.0, 0.0)) + halfUV;
-            // float invertPie = 1;
-
             switch (element.style.MeshType) {
                 case MeshType.None:
                     drawDesc.meshFillOpenAmount = ushort.MaxValue;
@@ -194,6 +196,18 @@ namespace UIForia.Rendering {
                     drawDesc.meshFillInvert = 0;
                     drawDesc.meshFillRotation = 0;
                     break;
+
+                case MeshType.Manual: {
+                    drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(element.style.MeshFillAmount); // maybe use 2 bits at the end for encoding direction & inversion
+                    drawDesc.meshFillOffsetX = ResolveRelativeLength(drawDesc.width, element.style.MeshFillOffsetX);
+                    drawDesc.meshFillOffsetY = ResolveRelativeLength(drawDesc.height, element.style.MeshFillOffsetY);
+
+                    drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte) 0 : byte.MaxValue;
+                    drawDesc.meshFillRadius = ResolveRelativeLength(math.min(drawDesc.width, drawDesc.height), element.style.MeshFillRadius);
+                    drawDesc.meshFillInvert = 0;
+                    drawDesc.meshFillRotation = MathUtil.FloatPercentageToUshort(element.style.MeshFillRotation.ToPercent().value);
+                    break;
+                }
 
                 case MeshType.Radial90_TopLeft: {
                     float amount = MathUtil.RemapRange(1 - element.style.MeshFillAmount, 0f, 1f, 0f, 0.25f);
@@ -302,6 +316,7 @@ namespace UIForia.Rendering {
                     drawDesc.meshFillRotation = 0;
                     break;
                 }
+
                 case MeshType.Radial360_Right: {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount);
@@ -342,6 +357,22 @@ namespace UIForia.Rendering {
                         drawDesc.outlineWidth = ResolveRelativeLength(halfMin, property.AsUIFixedLength);
                         break;
 
+                    case StylePropertyId.BorderColorTop:
+                        drawDesc.borderColorTop = property.AsColor32;
+                        break;
+
+                    case StylePropertyId.BorderColorRight:
+                        drawDesc.borderColorRight = property.AsColor32;
+                        break;
+
+                    case StylePropertyId.BorderColorBottom:
+                        drawDesc.borderColorBottom = property.AsColor32;
+                        break;
+
+                    case StylePropertyId.BorderColorLeft:
+                        drawDesc.borderColorLeft = property.AsColor32;
+                        break;
+
                     case StylePropertyId.OutlineColor:
                         recomputeDrawing = true;
                         drawDesc.outlineColor = property.AsColor32;
@@ -377,6 +408,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.GradientOffsetX:
                     case StylePropertyId.GradientOffsetY:
                         break;
+
                     case StylePropertyId.GradientMode:
                         break;
 
@@ -420,6 +452,10 @@ namespace UIForia.Rendering {
                     case StylePropertyId.MeshFillOrigin:
                     case StylePropertyId.MeshFillDirection:
                     case StylePropertyId.MeshType:
+                    case StylePropertyId.MeshFillOffsetX:
+                    case StylePropertyId.MeshFillOffsetY:
+                    case StylePropertyId.MeshFillRadius:
+                    case StylePropertyId.MeshFillRotation:
                         recomputeMeshFill = true;
                         break;
 
@@ -433,7 +469,12 @@ namespace UIForia.Rendering {
             if (recomputeDrawing) {
                 drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId, element.style.BackgroundFit == BackgroundFit.Cover);
                 drawDesc.outlineColorMode = GetColorMode(drawDesc.outlineColor, default, outlineTextureId, false);
-                requireRendering = drawDesc.opacity > 0 && (drawDesc.bgColorMode != 0 || (drawDesc.outlineWidth > 0 && drawDesc.outlineColorMode != 0));
+                OffsetRect border = element.layoutResult.border;
+                drawDesc.borderTop = border.top;
+                drawDesc.borderRight = border.right;
+                drawDesc.borderBottom = border.bottom;
+                drawDesc.borderLeft = border.left;
+                requireRendering = drawDesc.opacity > 0 && (drawDesc.bgColorMode != 0 || (drawDesc.outlineWidth > 0 && drawDesc.outlineColorMode != 0) || drawDesc.HasBorder && drawDesc.HasPaintedBorder);
                 recomputeUVTransform = false;
                 ComputeUVTransform();
             }
@@ -449,12 +490,23 @@ namespace UIForia.Rendering {
 
         public override void PaintBackground3(RenderContext3 ctx) {
             // todo -- remove, obviously
-           // gradient = new Gradient(GradientType.LinearBlend, GameObject.Find("UIForia").GetComponent<UIForiaAssets>().gradient);
+            // gradient = new Gradient(GradientType.LinearBlend, GameObject.Find("UIForia").GetComponent<UIForiaAssets>().gradient);
 
             if (requireRendering) {
-             //   ctx.SetGradient(gradient);
-                ctx.SetBackgroundTexture(backgroundTexture?.texture);
-                ctx.DrawElement(0, 0, drawDesc);
+                //   ctx.SetGradient(gradient);
+                OffsetRect border = element.layoutResult.border;
+                drawDesc.borderTop = border.top;
+                drawDesc.borderRight = border.right;
+                drawDesc.borderBottom = border.bottom;
+                drawDesc.borderLeft = border.left;
+                ctx.SetBackgroundTexture(backgroundTexture);
+                if (backgroundTexture != null && AxisAlignedBounds2DUShort.HasValue(backgroundTexture.uvBorderRect)) {
+                    ctx.DrawSlicedElement(0, 0, drawDesc);
+                }
+                else {
+                    //ctx.DrawElementShadow(0, 0, drawDesc);
+                    ctx.DrawElement(0, 0, drawDesc);
+                }
             }
 
             if (overflowHandling != 0) {
@@ -482,6 +534,7 @@ namespace UIForia.Rendering {
                         clipHeight -= (border.top + padding.top + border.bottom + padding.bottom);
                         break;
                     }
+
                     case ClipBounds.BorderBox: {
                         OffsetRect border = element.layoutResult.border;
                         clipX = border.left;

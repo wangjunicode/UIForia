@@ -46,8 +46,6 @@
                 nointerpolation float2 size : TEXCOORD3;
                 nointerpolation half4 uvTransform : TEXCOORD4;
                 nointerpolation half4 border : TEXCOORD5;
-                nointerpolation fixed4 borderColorH : COLOR0;
-                nointerpolation fixed4 borderColorV : COLOR1;
             };
 
             // layout must EXACTLY match ElementMaterialInfo in C#
@@ -56,7 +54,12 @@
                 uint backgroundColor;
                 uint backgroundTint;
                 uint outlineColor;
-                uint outlineTint; // not used atm 
+                uint outlineTint; // not used atm
+                
+                uint borderColorTop;
+                uint borderColorRight;
+                uint borderColorBottom;
+                uint borderColorLeft;
 
                 uint radius;
                 uint bevelTop;
@@ -72,7 +75,7 @@
                 uint uvTransformIdx;
                 uint uvRotation_Opacity;
                 
-                uint unused2;
+                uint borderIndex;
             };
         
             struct UIForiaVertex {
@@ -86,7 +89,6 @@
             
             float4 _MainTex_TexelSize; 
             
-            float _SpriteAtlasPadding;
             float _UIForiaDPIScale;
             float4x4 _UIForiaOriginMatrix;
             
@@ -104,106 +106,96 @@
             StructuredBuffer<ElementMaterialInfo> _UIForiaMaterialBuffer;            
             StructuredBuffer<float4> _UIForiaFloat4Buffer;
             StructuredBuffer<GradientInfo> _UIForiaGradientBuffer;
-            
-            // todo -- byte isnt quite enough precision for this, convert to ushort if possible
-            inline float UnpackCornerBevel(uint bevelTop, uint bevelBottom, float2 texCoord) {
 
-                float left = step(texCoord.x, 0.5); // 1 if left
-                float bottom = step(1 - texCoord.y, 0.5); // 1 if bottom
-
-                #define top (1 - bottom)
-                #define right (1 - left) 
-
-                uint bevelAmount = 0;
-                bevelAmount += (top * left) * UnpackHighBytes(bevelTop);
-                bevelAmount += (top * right) * UnpackLowBytes(bevelTop);
-                bevelAmount += (bottom * right) * UnpackLowBytes(bevelBottom);
-                bevelAmount += (bottom * left) * UnpackHighBytes(bevelBottom);
-
-                return  (float)bevelAmount;
-                
-                #undef top
-                #undef right
-            }
-            
             v2f vert (appdata v) {
-               v2f o;
-               int vertexId = v.vid & 0xffffff; // 3 bytes
-               int cornerIdx = (v.vid >> 24) & (1 << 24) - 1; // 1 byte, 2 bits for corner idx, 6 bits free
-                
-               UIForiaVertex vertex = _UIForiaVertexBuffer[vertexId];
-                
-               float3 vpos = float3(vertex.position.xy, 0); // positioned at center
-               float2 halfSize = vertex.size * 0.5;
+                v2f o;
+                int vertexId = v.vid & 0xffffff; // 3 bytes
+                int cornerIdx = (v.vid >> 24) & (1 << 24) - 1; // 1 byte, 2 bits for corner idx, 6 bits free
+                 
+                UIForiaVertex vertex = _UIForiaVertexBuffer[vertexId];
+                int matrixIndex = UnpackMatrixId(vertex.indices);
+                int materialIndex = UnpackMaterialId(vertex.indices);
+                ElementMaterialInfo material = _UIForiaMaterialBuffer[materialIndex];
+                 
+                float3 vpos = float3(vertex.position.xy, 0); // positioned at center
+                float2 halfSize = vertex.size * 0.5;
 
-               if(cornerIdx == TOP_LEFT) {
-                   vpos.x -= halfSize.x;
-                   vpos.y -= halfSize.y;
-                   o.texCoord0 = float2(0, 1); 
-                   o.texCoord1 = float2(0, 0);
-               }
-               else if(cornerIdx == TOP_RIGHT) {
-                   vpos.x += halfSize.x;
-                   vpos.y -= halfSize.y;
-                   o.texCoord0 = float2(1, 1);
-                   o.texCoord1 = float2(1, 0);
-               }
-               else if(cornerIdx == BOTTOM_RIGHT) {
-                   vpos.x += halfSize.x;
-                   vpos.y += halfSize.y;
-                   o.texCoord0 = float2(1, 0);
-                   o.texCoord1 = float2(1, 1);
-               }
-               else { // BOTTOM_LEFT
-                   vpos.x -= halfSize.x;
-                   vpos.y += halfSize.y;
-                   o.texCoord0 = float2(0, 0);
-                   o.texCoord1 = float2(0, 1);
-               }
-               
-                  // sdf uv offsets for non quad meshes, which we'll probably want eventually to reduce overdraw
-                float2 halfUV = float2(0.5, 0.5) / vertex.size; // todo -- this might need to be dpi scaled
+                bool is9SliceBorder = (GetByteN(vertex.indices.y, 3) & ElementShaderFlags_IsNineSliceBorder) != 0;
+                bool is9SliceContent = (GetByteN(vertex.indices.y, 3) & ElementShaderFlags_IsNineSliceContent) != 0;
+
+                float4 borderInfo = _UIForiaFloat4Buffer[material.borderIndex];
+                o.border = material.borderIndex != 0 ? _UIForiaFloat4Buffer[material.borderIndex] : float4(0, 0, 0, 0);
+                
+                float4 mainSize = float4(0, 0, vertex.size.x, vertex.size.y);
+
+                if(is9SliceBorder)
+                {
+                    material.uvTransformIdx = 0;
+                    o.border = float4(0, 0, 0, 0);
+                    mainSize = borderInfo; // overloaded border index here
+                }
+                
+                if(is9SliceContent)
+                {
+                    o.border = float4(0, 0, 0, 0);
+                    mainSize = borderInfo;
+                }
+                
+                if(cornerIdx == TOP_LEFT) {
+                    vpos.x -= halfSize.x;
+                    vpos.y -= halfSize.y;
+                    o.texCoord0 = float2(0, 1); 
+                    o.texCoord1 = float2(0, 0);
+                }
+                else if(cornerIdx == TOP_RIGHT) {
+                    vpos.x += halfSize.x;
+                    vpos.y -= halfSize.y;
+                    o.texCoord0 = float2(1, 1);
+                    o.texCoord1 = float2(1, 0);
+                }
+                else if(cornerIdx == BOTTOM_RIGHT) {
+                    vpos.x += halfSize.x;
+                    vpos.y += halfSize.y;
+                    o.texCoord0 = float2(1, 0);
+                    o.texCoord1 = float2(1, 1);
+                }
+                else { // BOTTOM_LEFT
+                    vpos.x -= halfSize.x;
+                    vpos.y += halfSize.y;
+                    o.texCoord0 = float2(0, 0);
+                    o.texCoord1 = float2(0, 1);
+                }
+
+                o.texCoord0.x = vpos.x / mainSize.z;
+                o.texCoord0.y = -vpos.y / mainSize.w;
+                o.size = mainSize.zw;
+
+                // sdf uv offsets for non quad meshes, which we'll probably want eventually to reduce overdraw
+                float2 halfUV = float2(0.5, 0.5) / mainSize.zw; // todo -- this might need to be dpi scaled
                 o.texCoord0.x += o.texCoord0.x > 0.5 ? halfUV.x : -halfUV.x;
-                o.texCoord0.y += o.texCoord0.y > 0.5 ? halfUV.y : -halfUV.y;
-               
-               int matrixIndex = UnpackMatrixId(vertex.indices);
-               int materialIndex = UnpackMaterialId(vertex.indices);
-               ElementMaterialInfo material = _UIForiaMaterialBuffer[materialIndex];
+                o.texCoord0.y += o.texCoord0.y > 0.5 ? halfUV.y : -halfUV.y;        
+ 
+                o.uvTransform = material.uvTransformIdx != 0 ? _UIForiaFloat4Buffer[material.uvTransformIdx] : float4(1, 1, 0, 0);
 
-               o.uvTransform = material.uvTransformIdx != 0 ? _UIForiaFloat4Buffer[material.uvTransformIdx] : float4(1, 1, 0, 0);
-                
-               o.size = vertex.size;
-               
-               float4x4 transform = mul(_UIForiaOriginMatrix, _UIForiaMatrixBuffer[matrixIndex]);
-               o.vertex = mul(UNITY_MATRIX_VP, mul(transform, float4(vpos.xyz, 1.0)));
-
-               // todo -- snapping is terrible when moving/ rotating 
-               // o.vertex = UIForiaPixelSnap(o.vertex);
-                
-               o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, vertex.indices.z, vertex.indices.w);
-               o.borderColorH = lerp(RED, BLUE, o.texCoord1.x < 0.5);
-               o.borderColorV = lerp(GREEN, BLACK, o.texCoord1.y > 0.5);
-               o.border = half4(20, 20, 20, 0);
-               
-             //  if(o.border.w == 0 && o.texCoord0.x > 0.5) o.borderColorH = o.borderColorV; //lerp(RED, BLUE, o.texCoord0.x > 0.5);
-               
-               return o;
+                float4x4 transform = mul(_UIForiaOriginMatrix, _UIForiaMatrixBuffer[matrixIndex]);
+                o.vertex = mul(UNITY_MATRIX_VP, mul(transform, float4(vpos.xyz, 1.0)));
+ 
+                // todo -- snapping is terrible when moving/ rotating 
+                // o.vertex = UIForiaPixelSnap(o.vertex);
+                 
+                o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, vertex.indices.z, vertex.indices.w);
+            
+                return o;
             }
             
-            inline half DistToLine(half2 pt1, half2 pt2, half2 testPt) {
-              half2 lineDir = pt2 - pt1;
-              half2 perpDir = half2(lineDir.y, -lineDir.x);
-              half2 dirToPt1 = pt1 - testPt;
-              return abs(dot(normalize(perpDir), dirToPt1));
-            }
+ 
             
             fixed4 frag (v2f i) : SV_Target {
                 // this could be done in the vertex shader too but this way we can support correct
-                
-                ElementMaterialInfo material = _UIForiaMaterialBuffer[i.indices.y];
-                float2 size = i.size;
+                ElementMaterialInfo material = _UIForiaMaterialBuffer[i.indices.y & 0xffffff];
+                float2 size = i.size ;
                 float minSize = min(size.x, size.y);
-                
+              
                 fixed4 color = UnpackColor(material.backgroundColor);
                 fixed4 outlineColor = UnpackColor(material.outlineColor);
                 fixed4 tintColor = UnpackColor(material.backgroundTint);
@@ -220,7 +212,7 @@
                 float fillAmount = UnpackLowUShortPercentageToFloat(material.fillOpenAndRotation);
                 float fillRotation = UnpackHighUShortPercentageToFloat(material.fillOpenAndRotation); //frac(_Time.y) * PI * 2;
                 float fillRadius = material.fillRadius;
-                float2 fillOffset = i.size * float2(0.5, 0.5); //float2(material.fillOffsetX, material.fillOffsetY); // - halfUV;
+                float2 fillOffset = float2(material.fillOffsetX, material.fillOffsetY); // - halfUV;
                  
                 float2 uvScale = i.uvTransform.xy;
                 float2 uvOffset = i.uvTransform.zw;
@@ -246,30 +238,27 @@
                 #define borderLeft i.border.w
                 #define borderBottom i.border.z
                 #define borderRight i.border.y
-                
-                #define borderColorRight BLACK
-                #define borderColorLeft GREEN
-                #define borderColorTop BLUE
-                #define borderColorBottom fixed4(1, 1, 0, 1)
-                
+
                 float left = step(originalUV.x, 0.5); // 1 if left
-                float bottom = step(1 - originalUV.y, 0.5); // 1 if bottom
+                float top = step(1 - originalUV.y, 0.5); // 1 if bottom
                 
-                #define top (1 - bottom)
+                #define bottom (1 - top)
                 #define right (1 - left)  
-                
+
                 half borderH = lerp(borderLeft, borderRight, left);
-                half borderV = lerp(borderTop, borderBottom, top);
+                half borderV = lerp(borderTop, borderBottom, bottom);
                 
-                half2 corner = half2(lerp(0, size.x, right), lerp(0, size.y, bottom));
-                half2 inset = half2(lerp(borderH, size.x - borderH, right), lerp(borderV, size.y - borderV, bottom));
-                return i.borderColorV;
+                half4 borderColorV = UnpackColor(top == 1 ? material.borderColorTop : material.borderColorBottom);
+                half4 borderColorH =  UnpackColor(left == 1 ? material.borderColorLeft : material.borderColorRight);
+
+                half2 corner = half2(lerp(0, size.x, right), lerp(0, size.y, top));
+                half2 inset = half2(lerp(borderH, size.x - borderH, right), lerp(borderV, size.y - borderV, top));
                 half2 p = originalUV * size;
                 
-                // equasion of a line, take the sign to determine if a point is above or below the line
+                // equation of a line, take the sign to determine if a point is above or below the line
                 half lineEq = (inset.x - corner.x) * (p.y - corner.y) - (inset.y - corner.y) * (p.x - corner.x);
                 half distToLine = DistToLine(corner, inset, p);
-                fixed sideOfLine = ((left * top || right * bottom) ? -1 : 1) * sign(lineEq);
+                fixed sideOfLine = ((left * bottom || right * top) ? -1 : 1) * sign(lineEq);
             
                 distToLine = Remap(saturate(distToLine), -1, 1, 0, 1);
                 
@@ -277,21 +266,17 @@
                     distToLine = 1 - distToLine;
                 }
                 
-                fixed4 borderColor = lerp(i.borderColorH, i.borderColorV, distToLine);
-                //color = lerp(borderColorH, borderColorV, distToLine);
-                
+                fixed4 borderColor = lerp(borderColorH, borderColorV, distToLine);
+
                 float2 borderStep = step(float2(borderLeft, size.y - borderTop), p) - step(float2(size.x - borderRight, borderBottom), p);
-                
+                fixed4 contentColor = color;
                 color = borderColor;
                 
                 if(borderStep.x * borderStep.y != 0) {
-                 //   color = fixed4(0, 0, 0, 0); //RED;
-                    color = fixed4(1, 1, 0, 1);
+                   color = contentColor;
                 }
-               // color = fixed4(1, 1, 0, 1);
-               // color = fixed4(0, 0, 0, 0); //RED;
-                outlineColor = borderColor;
                 
+                outlineColor = borderColor.a > 0 ? borderColor : outlineColor;
                 half outlineWidth = material.outlineWidth * 0.5;
                 half4 radius = UnpackRadius(packedRadii, minSize);
                 
@@ -352,22 +337,24 @@
                 float radialSDF = sdPie(radialSamplePoint, angleSinCos, fillRadius);
 
                 float bevelAmount = UnpackCornerBevel(material.bevelTop, material.bevelBottom, i.texCoord0);
-                
                 float2 bevelOffset = float2(size.x * 0.5 * (i.texCoord0.x > 0.5 ? 1 : -1), size.y * 0.5 * (i.texCoord0. y > 0.5 ? 1 : -1));
-                float sdfBevel = sdRect(RotateUV(samplePoint - bevelOffset, 45 * Deg2Rad), float2(bevelAmount, bevelAmount));
+                float2 bevelPoint = ((i.texCoord0 - 0.5) * size) - bevelOffset;
+                float sdfBevel = sdRect(RotateUV(bevelPoint, 45 * Deg2Rad), float2(bevelAmount, bevelAmount));
                 
-                sdf = max(-sdfBevel, sdf);
+                 sdf = max(-sdfBevel, sdf);
                 // todo -- move max up here to draw pie instead of using as a clipping bounds
                 // sdf = max(radialSDF * invertFill, sdf);
                 
                 float sdfOutline = outlineWidth > 0 ? abs(sdf) - outlineWidth : 0;
-                //sdf = max(radialSDF * invertFill, sdf);
+                sdf = max(radialSDF * invertFill, sdf);
                // sdfOutline = (fillFlag & FillOutline) != 0 ? max(radialSDF * invertFill, sdfOutline) : sdfOutline;
                 
                 color = ComputeColor(color, grad, tintColor, bodyColorMode, i.texCoord1, _MainTex, uvBounds, originalUV);
                 color = lerp(color, outlineColor, outlineWidth == 0 ? 0 : 1 - saturate(sdfOutline));
                 color.a *= 1 - smoothstep(0, fwidth(sdf), sdf);
-                
+                //float shadow = minSize * 0.5;
+                //color.a *= 1.0 - smoothstep(0, lerp(shadow * 0.25, fwidth(sdf), (cos(_Time.y))), sdf);
+
                 float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y); //* _UIForiaDPIScale;
                 float4 clipRect = _UIForiaFloat4Buffer[i.indices.x]; // x = xMin, y = yMin, z = xMax, w = yMax
                 float2 s = step(clipRect.xw, clipPos) - step(clipRect.zy, clipPos);
@@ -377,7 +364,7 @@
                // return UIForiaColorSpace(fixed4(grad.rgb + (0.25 * color.rgb), color.a)); //gradientCol * c.a * IN.color;
                 color.a *= opacity;
                 color.a *= (s.x * s.y) != 0;
-                color = UIForiaColorSpace(color); // todo -- video texture wont want to adjust color space 
+                color = (color); // todo -- video texture wont want to adjust color space 
                 clip(color.a - 0.01);
                 return color;
                 

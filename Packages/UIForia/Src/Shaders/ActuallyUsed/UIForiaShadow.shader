@@ -242,10 +242,10 @@
                 float sdf = sdRoundBox(i.texCoord0 - 0.5, float2(s, s), radius);
                 // color.rgb = col * 1 - exp(-10 * abs(sdf));
                 // color.a = 1 - easeInOutQuad(4 * sdf);
-               float bevelAmount = 10 * (1/size.x);
-                
-                float2 bevelOffset = float2(0.5 * (i.texCoord0.x > 0.5 ? 1 : -1), 0.5 * (i.texCoord0. y > 0.5 ? 1 : -1));
-                
+                float bevelAmount = 10 * (1 / size.x);
+
+                float2 bevelOffset = float2(0.5 * (i.texCoord0.x > 0.5 ? 1 : -1), 0.5 * (i.texCoord0.y > 0.5 ? 1 : -1));
+
                 float sdfBevel = sdRect(RotateUV(i.texCoord0 - bevelOffset, 45 * Deg2Rad), float2(bevelAmount, bevelAmount));
                 sdf = max(-sdfBevel, sdf);
 

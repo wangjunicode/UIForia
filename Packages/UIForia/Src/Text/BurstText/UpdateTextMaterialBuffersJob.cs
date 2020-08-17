@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using UIForia.Elements;
 using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Rendering;
@@ -179,8 +180,8 @@ namespace UIForia.Text {
         [StructLayout(LayoutKind.Explicit)]
         private struct Entry {
 
-            [FieldOffset(0)]public int prev;
-            [FieldOffset(4)]public TextStyleType type;
+            [FieldOffset(0)] public int prev;
+            [FieldOffset(4)] public TextStyleType type;
             [FieldOffset(8)] public float floatValue;
             [FieldOffset(8)] public UIFixedLength length;
             [FieldOffset(8)] public Color32 color;
@@ -198,7 +199,6 @@ namespace UIForia.Text {
     internal unsafe struct UpdateTextMaterialBuffersJob : IJob {
 
         public DataList<TextId> activeTextElementIds;
-        public DataList<TextInfo> textInfoMap;
         private DataList<TextMaterialInfo> materialBuffer;
 
         public void Execute() {
@@ -222,13 +222,13 @@ namespace UIForia.Text {
 
         private void UpdateMaterialBuffers(ref MaterialStack materialStack, ref TextInfo textInfo) {
 
-            if (!textInfo.requiresRenderProcessing) {
+            if (!textInfo.requiresRenderProcessing && !textInfo.HasSelection) {
                 // todo -- also check for material data
                 return;
             }
 
             textInfo.requiresRenderProcessing = false;
-            
+
             materialStack.Setup(textInfo);
 
             materialBuffer.size = 0;
@@ -246,6 +246,30 @@ namespace UIForia.Text {
 
             CharacterDisplayFlags displayFlags = 0;
 
+            SelectionCursor selectionStartCursor = new SelectionCursor(2, SelectionEdge.Left);
+            SelectionCursor selectionEndCursor = new SelectionCursor(18, SelectionEdge.Right);
+
+            // convert cursors to range
+            RangeInt selectionRange = default;
+
+            if (selectionStartCursor.index > 0) {
+                selectionRange.start = selectionStartCursor.index;
+                if (selectionStartCursor.edge == SelectionEdge.Right) {
+                    selectionRange.start++;
+                }
+            }
+
+            if (selectionEndCursor.index > 0) {
+                selectionRange.length = selectionEndCursor.index - selectionRange.start;
+                if (selectionEndCursor.edge == SelectionEdge.Right) {
+                    selectionRange.length++;
+                }
+            }
+
+            int charIdx = 0;
+
+            bool hasSelection = selectionRange.length > 0;
+           
             for (int s = 0; s < textInfo.symbolList.size; s++) {
 
                 ref TextSymbol textSymbol = ref textInfo.symbolList.array[s];
@@ -256,7 +280,23 @@ namespace UIForia.Text {
 
                         ref BurstCharInfo charInfo = ref textSymbol.charInfo;
 
+                        if (hasSelection) {
+                            
+                            // todo -- currently NOT compatible with rich text!
+                            
+                            if (charIdx == selectionRange.start) {
+                                needsMaterialPush = true;
+                                textMaterial.faceColor = materialStack.PushFaceColor(textInfo.selectionColor);
+                            }
+
+                            if (charIdx == selectionRange.end) {
+                                needsMaterialPush = true;
+                                textMaterial.faceColor = materialStack.PushFaceColor(textInfo.textMaterial.faceColor);
+                            }
+                        }
+                        
                         if ((charInfo.flags & CharacterFlags.Visible) == 0) {
+                            charIdx++;
                             continue;
                         }
 
@@ -272,6 +312,7 @@ namespace UIForia.Text {
                         charInfo.displayFlags &= ~(CharacterDisplayFlags.InvertUVs);
                         charInfo.displayFlags |= displayFlags; // need to keep bold/italic bits if they are set, and unset inversions if set
 
+                        charIdx++;
                         break;
                     }
 
@@ -357,7 +398,6 @@ namespace UIForia.Text {
                 }
 
             }
-
 
             textInfo.materialBuffer.size = 0;
             textInfo.materialBuffer.EnsureCapacity(textMaterialBuffer.size, Allocator.Persistent);

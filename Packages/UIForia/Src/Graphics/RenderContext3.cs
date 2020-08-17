@@ -294,7 +294,7 @@ namespace UIForia.Graphics {
 
         }
 
-        public void DrawTextHighlight(in TextRenderRange render) {
+        public void DrawTextHighlight(in TextRenderRange render, Color32 color) {
             float x = render.localBounds.xMin;
             float y = render.localBounds.yMin;
             float width = render.localBounds.Width;
@@ -308,7 +308,7 @@ namespace UIForia.Graphics {
                 x = x,
                 y = y,
                 drawDesc = new ElementDrawDesc(width, height) {
-                    backgroundColor = new Color32(255, 0, 0, 255)
+                    backgroundColor = color
                 },
             });
 

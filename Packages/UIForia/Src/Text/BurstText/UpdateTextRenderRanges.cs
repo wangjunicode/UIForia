@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UIForia.Elements;
 using UIForia.Graphics;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
@@ -47,7 +48,6 @@ namespace UIForia.Text {
                 // if !needsDrawUpdate, continue
                 // if !rich text, do something simpler, still needs to break lines and handle text decoration per line
 
-
                 TextId textId = activeTextElementInfos[i];
                 ref TextInfo textInfo = ref textId.textInfo[0];
                 if (!textInfo.requiresRenderRangeUpdate) {
@@ -61,10 +61,7 @@ namespace UIForia.Text {
                 outlineTextureStack[0] = 0;
 
                 textInfo.renderRangeList.EnsureCapacity(4, Allocator.Persistent);
-                // textInfo.renderedCharacters.EnsureCapacity(textInfo.renderingCharacterCount + 1, Allocator.Persistent); // +1 to account for invalid index 0
-
                 textInfo.renderRangeList.size = 0;
-                // textInfo.renderedCharacters.size = 1; // 0 is invalid
 
                 ushort fontAssetId = (ushort) textInfo.fontAssetId;
 
@@ -74,15 +71,31 @@ namespace UIForia.Text {
                 bool active = false;
                 // active can be set on any? non character symbol that supports it
                 // or with an [enabled] tag
-                UIForiaGlyph dummy = default;
-                ref UIForiaGlyph glyph = ref dummy;
                 FontAssetInfo* fontMap = fontAssetMap.GetArrayPointer();
 
                 TextSymbol* prevSymbol = null;
 
-                RangeInt selectionRange = textInfo.selectionRange;
-                selectionRange.start = 5;
-                selectionRange.length = 5;
+                SelectionCursor selectionStartCursor = new SelectionCursor(2, SelectionEdge.Left);
+                SelectionCursor selectionEndCursor = new SelectionCursor(18, SelectionEdge.Right);
+
+                // convert cursors to range
+                RangeInt selectionRange = default;
+                selectionRange.start = 0;
+                selectionRange.length = 0;
+
+                if (selectionStartCursor.index > 0) {
+                    selectionRange.start = selectionStartCursor.index;
+                    if (selectionStartCursor.edge == SelectionEdge.Right) {
+                        selectionRange.start++;
+                    }
+                }
+
+                if (selectionEndCursor.index > 0) {
+                    selectionRange.length = selectionEndCursor.index - selectionRange.start;
+                    if (selectionEndCursor.edge == SelectionEdge.Right) {
+                        selectionRange.length++;
+                    }
+                }
 
                 int charIdx = 0;
                 bool hasSelection = selectionRange.length > 0;
@@ -93,7 +106,7 @@ namespace UIForia.Text {
                     ref TextSymbol symbol = ref textInfo.symbolList.array[c];
 
                     switch (symbol.type) {
-                        
+
                         case TextSymbolType.TexturePush:
                             // faceTextureStack.Add(symbol.textureId);
                             break;
@@ -105,7 +118,11 @@ namespace UIForia.Text {
                         case TextSymbolType.Character: {
 
                             if (symbol.charInfo.lineIndex != lineIdx) {
-                                SubmitSelectionHighlight(ref textInfo, lineIdx);
+
+                                if (hasSelection && minSelectedPosition != -1) {
+                                    maxSelectedPosition = textInfo.lineInfoList[lineIdx].x + textInfo.lineInfoList[lineIdx].width;
+                                    SubmitSelectionHighlight(ref textInfo, lineIdx);
+                                }
 
                                 lineIdx = symbol.charInfo.lineIndex;
 
@@ -124,15 +141,18 @@ namespace UIForia.Text {
                                 // decoration.EndLine();
                             }
 
-                            if (hasSelection && charIdx >= selectionRange.start && charIdx < selectionRange.end) {
+                            if (hasSelection) {
+                                if (charIdx >= selectionRange.start && charIdx < selectionRange.end) {
 
-                                if (charIdx == selectionRange.start || range.start == -1) {
-                                    minSelectedPosition = GetCharacterLeft(symbol, textInfo);
-                                }
-                                else if (charIdx == selectionRange.end - 1) {
-                                    maxSelectedPosition = GetCharacterRight(fontMap, symbol, textInfo, fontAssetId);
-                                }
+                                    if (charIdx == selectionRange.start || range.start == -1) {
+                                        minSelectedPosition = GetCharacterLeft(symbol, textInfo);
+                                    }
+                                    else if (charIdx == selectionRange.end - 1) {
+                                        maxSelectedPosition = GetCharacterRight(fontMap, symbol, textInfo, fontAssetId);
+                                        SubmitSelectionHighlight(ref textInfo, lineIdx);
+                                    }
 
+                                }
                             }
 
                             // todo -- handle disabled characters
@@ -171,17 +191,6 @@ namespace UIForia.Text {
 
                             prevSymbol = textInfo.symbolList.array + c;
                             // could do this in a post step for better locality 
-                            glyph = ref fontMap[fontAssetId].glyphList[symbol.charInfo.glyphIndex];
-
-                            // textInfo.renderedCharacters.array[textInfo.renderedCharacters.size++] = new RenderedCharacterInfo() {
-                            //     position = position,
-                            //     // width and height are used just for bounds computation
-                            //     width = glyph.width * symbol.charInfo.scale,    
-                            //     height = glyph.height * symbol.charInfo.scale,
-                            //     lineAscender = symbol.charInfo.maxAscender,
-                            //     symbolIdx = c, // might not need symbol idx
-                            //     renderedGlyphIndex = glyph.renderBufferIndex,
-                            // };
 
                             range.length++;
                             charIdx++;
@@ -312,8 +321,10 @@ namespace UIForia.Text {
         private struct Cmp : IComparer<TextRenderRange> {
 
             public int Compare(TextRenderRange x, TextRenderRange y) {
-                if (x.type == y.type) return x.idx - y.idx;
-                return x.type - y.type;
+                // note -- cast is needed or we subtract ushorts which might overflow incorrectly
+                // ReSharper disable once RedundantCast
+                if (x.type == y.type) return (int) x.idx - (int) y.idx;
+                return (int) x.type - (int) y.type;
             }
 
         }
@@ -323,9 +334,9 @@ namespace UIForia.Text {
                 textInfo.renderRangeList.Add(new TextRenderRange() {
                     type = TextRenderType.Highlight,
                     localBounds = new AxisAlignedBounds2D() {
-                        xMin = minSelectedPosition,
-                        xMax = maxSelectedPosition,
-                        yMin = textInfo.lineInfoList.array[lineIdx].y,
+                        xMin = minSelectedPosition - 1,
+                        xMax = maxSelectedPosition + 1,
+                        yMin = textInfo.lineInfoList.array[lineIdx].y - 1,
                         yMax = textInfo.lineInfoList.array[lineIdx].y + textInfo.lineInfoList.array[lineIdx].height
                     }
                 });
@@ -340,7 +351,6 @@ namespace UIForia.Text {
 
         private float GetCharacterRight(FontAssetInfo* fontMap, in TextSymbol symbol, in TextInfo textInfo, int fontAssetId) {
             ref UIForiaGlyph glyph = ref fontMap[fontAssetId].glyphList[symbol.charInfo.glyphIndex];
-            // todo -- handle bold and italic and sdf padding
             return textInfo.layoutSymbolList.array[symbol.charInfo.wordIndex].wordInfo.x + symbol.charInfo.position.x + (glyph.width * symbol.charInfo.scale);
         }
 

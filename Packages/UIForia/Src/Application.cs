@@ -105,14 +105,13 @@ namespace UIForia {
             this.onElementRegistered = onElementRegistered;
             this.id = templateSettings.applicationName;
             this.resourceManager = resourceManager ?? new ResourceManager();
-            this.resourceManager.Initialize();
             this.viewRootIds = new DataList<ElementId>.Shared(8, Allocator.Persistent);
 
             Applications.Add(this);
 #if UNITY_EDITOR
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnEditorReload;
 #endif
-            
+
         }
 
 #if UNITY_EDITOR
@@ -208,11 +207,11 @@ namespace UIForia {
                         throw new Exception($"Classes marked with [{nameof(CustomPainterAttribute)}] must provide a parameterless constructor" +
                                             $" and the class must extend {nameof(RenderBox)}. Ensure that {type.FullName} conforms to these rules");
                     }
-            
+
                     if (s_CustomPainters.ContainsKey(paintAttr.name)) {
                         throw new Exception($"Failed to register a custom painter with the name {paintAttr.name} from type {type.FullName} because it was already registered.");
                     }
-            
+
                     s_CustomPainters.Add(paintAttr.name, type);
                 }
             }
@@ -292,7 +291,7 @@ namespace UIForia {
             textSystem.Dispose();
             renderSystem.Dispose();
             templateData.Destroy();
-            
+
             resourceManager.Reset();
 
             m_AfterUpdateTaskSystem.OnDestroy();
@@ -397,7 +396,9 @@ namespace UIForia {
 
         public void Update() {
             frameId++;
+
             textSystem.frameId = frameId;
+
             // input queries against last frame layout
             inputSystem.Read();
             loopTimer.Reset();
@@ -970,7 +971,7 @@ namespace UIForia {
         }
 
         private GameObject gameObject;
-        
+
         public GameObject GetDummyGameObject() {
             if (gameObject == null) {
                 gameObject = new GameObject("UIForia::Dummy");

@@ -72,6 +72,8 @@ namespace UIForia.Graphics {
         public ElementDrawDesc(float width, float height) : this() {
             this.width = width;
             this.height = height;
+            this.uvScaleX = 1;
+            this.uvScaleY = 1;
             this.meshFillOpenAmount = ushort.MaxValue;
             this.opacity = ushort.MaxValue;
             this.meshFillRadius = ushort.MaxValue;

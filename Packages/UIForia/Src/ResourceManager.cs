@@ -92,6 +92,7 @@ namespace UIForia {
             gpuFontInfoList = new DataList<GPUFontInfo>(8, Allocator.Persistent);
             renderedCharacterInfoList = new DataList<GPUGlyphInfo>(1024, Allocator.Persistent);
             renderedCharacterInfoList.size = 1; // 0 is invalid
+            Initialize();
         }
 
         public void Reset() {
@@ -216,7 +217,6 @@ namespace UIForia {
                 }
             }
 
-            return null;
             TMP_FontAsset tmp = Resources.Load<TMP_FontAsset>(path);
 
             if (tmp == null) {
@@ -232,7 +232,6 @@ namespace UIForia {
             fontAssetMap.Add(retn.GetFontInfo());
             fontTextures.Add(retn.atlas);
             fontMap.Add(path, retn);
-            retn.id = fontMap.Count;
 
             onFontAdded?.Invoke(retn);
 

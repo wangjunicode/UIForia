@@ -716,6 +716,7 @@ namespace UIForia.Text {
 
             }
 
+            sizeInfo.fontAssetId = fontAsset.id;
             sizeInfo.displayFlags = displayFlags;
             sizeInfo.atlasWidth = fontAsset.atlasWidth;
             sizeInfo.atlasHeight = fontAsset.atlasHeight;
@@ -800,40 +801,6 @@ namespace UIForia.Text {
             return new float3(ratioA, ratioB, ratioC);
         }
 
-        internal static float3 ComputeRatios(in FontAssetInfo fontAsset, in TextMeasureState textStyle) {
-            // A = outline, face dilate, weight
-            // B = glow 
-            // C = underlay
-
-            // float gradientScale = fontAsset.gradientScale;
-            // float faceDilate = textStyle.faceDilate;
-            //
-            // float outlineThickness = textStyle.outlineWidth;
-            // float outlineSoftness = textStyle.outlineSoftness;
-            // float weight = math.max(fontAsset.weightNormal, fontAsset.weightBold) / 4f;
-            // float ratioA_t = math.max(1, weight + faceDilate + outlineThickness + outlineSoftness);
-            // float ratioA = (gradientScale - 1f) / (gradientScale * ratioA_t);
-            //
-            // float glowOffset = textStyle.glowOffset;
-            // float glowOuter = textStyle.glowOuter;
-            // float ratioBRange = (weight + faceDilate) * (gradientScale - 1f);
-            //
-            // float ratioB_t = math.max(1, glowOffset + glowOuter);
-            // float ratioB = math.max(0, gradientScale - 1 - ratioBRange) / (gradientScale * ratioB_t);
-            //
-            // float underlayOffsetX = textStyle.underlayX;
-            // float underlayOffsetY = textStyle.underlayY;
-            // float underlayDilate = textStyle.underlayDilate;
-            // float underlaySoftness = textStyle.underlaySoftness;
-            //
-            // float ratioCRange = (weight + faceDilate) * (gradientScale - 1);
-            // float ratioC_t = math.max(1, math.max(math.abs(underlayOffsetX), math.abs(underlayOffsetY)) + underlayDilate + underlaySoftness);
-            //
-            // float ratioC = math.max(0, gradientScale - 1f - ratioCRange) / (gradientScale * ratioC_t);
-
-            // return new float3(ratioA, ratioB, ratioC);
-            return new float3(1, 1, 1);
-        }
 
         internal static void MeasureWord(in DataList<FontAssetInfo>.Shared fontAssetMap, int wordIndex, ref WordInfo wordInfo, in List_TextSymbol symbolList, ref ComputeSizeInfo sizeInfo, ref TextMeasureState measureState) {
             float xAdvance = 0;
@@ -954,6 +921,40 @@ namespace UIForia.Text {
             wordInfo.height = maxHeight;
         }
 
+        internal static float3 ComputeRatios(in FontAssetInfo fontAsset, in TextMeasureState textStyle) {
+            // A = outline, face dilate, weight
+            // B = glow 
+            // C = underlay
+
+            // float gradientScale = fontAsset.gradientScale;
+            // float faceDilate = textStyle.faceDilate;
+            //
+            // float outlineThickness = textStyle.outlineWidth;
+            // float outlineSoftness = textStyle.outlineSoftness;
+            // float weight = math.max(fontAsset.weightNormal, fontAsset.weightBold) / 4f;
+            // float ratioA_t = math.max(1, weight + faceDilate + outlineThickness + outlineSoftness);
+            // float ratioA = (gradientScale - 1f) / (gradientScale * ratioA_t);
+            //
+            // float glowOffset = textStyle.glowOffset;
+            // float glowOuter = textStyle.glowOuter;
+            // float ratioBRange = (weight + faceDilate) * (gradientScale - 1f);
+            //
+            // float ratioB_t = math.max(1, glowOffset + glowOuter);
+            // float ratioB = math.max(0, gradientScale - 1 - ratioBRange) / (gradientScale * ratioB_t);
+            //
+            // float underlayOffsetX = textStyle.underlayX;
+            // float underlayOffsetY = textStyle.underlayY;
+            // float underlayDilate = textStyle.underlayDilate;
+            // float underlaySoftness = textStyle.underlaySoftness;
+            //
+            // float ratioCRange = (weight + faceDilate) * (gradientScale - 1);
+            // float ratioC_t = math.max(1, math.max(math.abs(underlayOffsetX), math.abs(underlayOffsetY)) + underlayDilate + underlaySoftness);
+            //
+            // float ratioC = math.max(0, gradientScale - 1f - ratioCRange) / (gradientScale * ratioC_t);
+
+            // return new float3(ratioA, ratioB, ratioC);
+            return new float3(1, 1, 1);
+        }
     }
 
     internal struct ComputeSizeInfo {

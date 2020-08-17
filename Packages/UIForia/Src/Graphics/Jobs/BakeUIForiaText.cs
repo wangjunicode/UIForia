@@ -99,8 +99,7 @@ namespace UIForia.Graphics {
                             // dont mind making vertex a little larger but needs to be aligned to float4, so im adding a full float4 or nothing
                         
                         // could also pre-multiply opacity modifier by the base element opacity and make that be per-character. could also cull when 0 or close to it
-                        uint displayAndOpacity = (uint)((byte) info.displayFlags << 8) | info.opacityMultiplier;
-                        vertex.indices.y = (uint) ((displayAndOpacity << 16) | (materialIdx & 0xffff)); //(uint)BitUtil.SetHighLowBits(effectIdx, outputIdx); // todo -- set effect idx
+                        vertex.indices.y = (uint) ((info.opacityMultiplier) << 24 | (materialIdx & 0xffffff)); //(uint)BitUtil.SetHighLowBits(effectIdx, outputIdx); // todo -- set effect idx
                         vertex.indices.z = (uint) ((info.glyphIndex << 16) | (desc.fontAssetId & 0xffff)); // BitUtil.SetHighLowBits(info.renderedGlyphIndex, (uint)desc.fontAssetId);
                         vertex.indices.w = (uint)(((byte) info.displayFlags << 24) | (effectIdx & 0xffffff)); // ushort is too small for this but 3 bytes could work if I need 1 free byte here, could move opacity here and use a 3 bytes for material id
                         symbolIdx = info.nextRenderIdx;

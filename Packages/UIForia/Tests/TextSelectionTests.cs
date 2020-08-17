@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using UIForia.Elements;
 using UIForia.Text;
 
 [TestFixture]

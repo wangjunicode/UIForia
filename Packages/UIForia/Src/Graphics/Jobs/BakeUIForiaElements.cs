@@ -198,10 +198,10 @@ namespace UIForia.Graphics {
                     if (element.drawDesc.HasBorder) {
                         mat.borderIndex = (uint) float4Buffer.size;
                         float4Buffer.Add(new float4() {
-                            x = element.drawDesc.borderTop > halfHeight ? element.drawDesc.borderTop : halfHeight,
-                            y = element.drawDesc.borderRight > halfWidth ? element.drawDesc.borderRight : halfWidth,
-                            z = element.drawDesc.borderBottom > halfHeight ? element.drawDesc.borderBottom : halfHeight,
-                            w = element.drawDesc.borderLeft > halfWidth ? element.drawDesc.borderLeft : halfWidth
+                            x = element.drawDesc.borderTop < halfHeight ? element.drawDesc.borderTop : halfHeight,
+                            y = element.drawDesc.borderRight < halfWidth ? element.drawDesc.borderRight : halfWidth,
+                            z = element.drawDesc.borderBottom < halfHeight ? element.drawDesc.borderBottom : halfHeight,
+                            w = element.drawDesc.borderLeft < halfWidth ? element.drawDesc.borderLeft : halfWidth
                         });
                     }
 

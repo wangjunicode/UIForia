@@ -1,5 +1,6 @@
 ﻿using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Systems;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
@@ -15,7 +16,6 @@ namespace UIForia.Text {
 
         internal ElementTable<EmValue> emTable;
         internal DataList<TextChange>.Shared textChanges;
-        internal DataList<TextInfo> textInfoMap;
         internal DataList<FontAssetInfo>.Shared fontAssetMap;
 
         public ParallelParams parallel { get; set; }

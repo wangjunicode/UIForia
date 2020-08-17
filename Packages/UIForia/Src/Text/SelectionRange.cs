@@ -11,10 +11,8 @@ namespace UIForia.Text {
 
         public readonly int cursorIndex;
         public readonly int selectIndex;
-        public readonly bool leftEdge;
         
-        public SelectionRange(int cursorIndex, int selectIndex = -1, bool leftEdge = true) {
-            this.leftEdge = true;
+        public SelectionRange(int cursorIndex, int selectIndex = -1) {
             this.cursorIndex = Math.Max(0, cursorIndex);
             this.selectIndex = selectIndex;
         }

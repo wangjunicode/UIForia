@@ -8,6 +8,7 @@ using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.UIInput;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia.Elements {
 
@@ -523,7 +524,11 @@ namespace UIForia.Elements {
         public static float FracTime {
             get => UnityEngine.Time.realtimeSinceStartup % 1;
         }
-        
+
+        public Vector2 RelativePoint(Vector2 point) {
+            return point - layoutResult.screenPosition - layoutResult.ContentRect.position;
+        }
+
     }
 
 }

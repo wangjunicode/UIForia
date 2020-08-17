@@ -179,7 +179,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextOutlineWidth, 0, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.TextOutlineColor, Color.black, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.CaretColor, Color.black, InheritanceType.Inherited),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.SelectionBackgroundColor, new Color32(184, 255, 255,  255), InheritanceType.Inherited),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.SelectionBackgroundColor, new Color32(173, 214, 255,  255), InheritanceType.Inherited),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.SelectionTextColor, Color.black, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<float>(StylePropertyId.TextOutlineSoftness, 0f, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<Color>(StylePropertyId.TextGlowColor, ColorUtil.UnsetValue, InheritanceType.Inherited),

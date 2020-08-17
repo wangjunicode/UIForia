@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.ListTypes;
 using UIForia.Text;
@@ -16,25 +15,8 @@ namespace UIForia.Elements {
 
         internal string text;
         internal ITextProcessor _processor;
-        internal TextReveal _reveal;
         internal TextInfo* textInfo;
-        internal int textInfoId;
         internal int lastUpdateFrame;
-
-        internal RangeInt selectionRange;
-
-        internal IList<TextEffect> _textEffects;
-
-        public void SetSelectionRange(RangeInt selectionRange) {
-            this.selectionRange = selectionRange;
-            ValidateSelectionRange();
-        }
-
-        private void ValidateSelectionRange() {
-            if (selectionRange.start < 0) {
-                selectionRange.start = 0;
-            }
-        }
 
         ~UITextElement() {
             OnDestroy();
@@ -44,6 +26,7 @@ namespace UIForia.Elements {
             if (textInfo != null) {
                 return;
             }
+
             textInfo = TypedUnsafe.Malloc<TextInfo>(1, Allocator.Persistent);
             *textInfo = default;
         }
@@ -90,7 +73,6 @@ namespace UIForia.Elements {
                 return;
             }
 
-
             fixed (char* oldTextPtr = text)
             fixed (char* newTextPtr = newText) {
                 if (UnsafeUtility.MemCmp(oldTextPtr, newTextPtr, 2 * length) != 0) {
@@ -123,7 +105,6 @@ namespace UIForia.Elements {
             return "Text";
         }
 
-
         public SelectionRange SelectWordAtPoint(Vector2 mouse) {
             throw new NotImplementedException();
         }
@@ -144,7 +125,6 @@ namespace UIForia.Elements {
 
             return false;
         }
-
 
         public float2 GetCursorPosition(int cursorIndex) {
             if (textInfo == null) return default;
@@ -207,11 +187,41 @@ namespace UIForia.Elements {
             return textInfo->GetIndexAtPoint(application.ResourceManager.fontAssetMap, point);
         }
 
-        public Rect GetCursorRect(int cursorIdx) {
-            if (textInfo == null) return default;
-
-            return textInfo->GetCursorRect(application.ResourceManager.fontAssetMap, cursorIdx);
+        public SelectionCursor GetSelectionCursorAtPoint(Vector2 point) {
+            if (textInfo == null) return new SelectionCursor();
+            return textInfo->GetSelectionCursorAtPoint(application.ResourceManager.fontAssetMap, point);
         }
+
+        public Rect GetCursorRect() {
+            if (textInfo == null) return default;
+            return textInfo->GetCursorRect(application.ResourceManager.fontAssetMap);
+        }
+
+        public void SetSelection(SelectionCursor caretCursor, SelectionCursor selectionCursor) {
+            if (textInfo == null) return;
+            textInfo->selectionStartCursor = caretCursor;
+            textInfo->selectionEndCursor = selectionCursor;
+        }
+
+        public RangeInt GetSelectionRange(out bool isRightEdge) {
+            isRightEdge = false;
+            if (textInfo == null) return default;
+            return textInfo->GetSelectionRange(out isRightEdge);
+        }
+
+    }
+
+    public struct SelectionCursor {
+
+        public int index;
+        public SelectionEdge edge;
+
+        public SelectionCursor(int index, SelectionEdge edge) {
+            this.index = index;
+            this.edge = edge;
+        }
+
+        public static SelectionCursor Invalid => new SelectionCursor(-1, SelectionEdge.Left);
 
     }
 

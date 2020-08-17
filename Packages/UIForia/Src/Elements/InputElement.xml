@@ -6,8 +6,6 @@
             LayoutType = Stack;
             PreferredHeight = 1cnt;
             Border = 2px;
-            OutlineWidth = 2px;
-            OutlineColor = black;
             BorderColor = black;
             BackgroundColor = white;
             Padding = 4px 8px;
@@ -19,7 +17,8 @@
         }
 
         style input-element-text {
-            TextWhitespaceMode = NoWrap;
+            // TextWhitespaceMode = NoWrap;
+            PreferredWidth = 1pca;
             MinHeight = 1em;
             AlignY = 50% ParentContentArea;
         }

@@ -740,14 +740,22 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.Gradient:
                     return default;
-                
+
                 case StylePropertyId.GradientMode:
                     return DrawEnumWithValue<GradientMode>(property, isEditable);
-                
+
                 case StylePropertyId.GradientOffsetX:
                 case StylePropertyId.GradientOffsetY:
                     return DrawOffsetMeasurement(property, isEditable);
 
+                case StylePropertyId.MeshFillRadius:
+                case StylePropertyId.MeshFillOffsetX:
+                case StylePropertyId.MeshFillOffsetY:
+                    return DrawOffsetMeasurement(property, isEditable);
+
+                case StylePropertyId.MeshFillRotation:
+                    return DrawAngleMeasurement(property, isEditable);
+                
                 default:
                     if ((int) property.propertyId < StyleUtil.CustomPropertyStart) {
                         Debug.Log(property.propertyId.ToString() + " has no inspector");
@@ -863,7 +871,17 @@ namespace UIForia.Editor {
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new OffsetMeasurement(value, unit)) : property;
         }
-
+        private static StyleProperty DrawAngleMeasurement(StyleProperty property, bool isEditable) {
+            s_Content.text = StyleUtil.GetPropertyName(property);
+            GUILayout.BeginHorizontal();
+            GUI.enabled = isEditable;
+            float value = EditorGUILayout.FloatField(s_Content, property.AsUIAngle.value);
+            UIAngleUnit unit = (UIAngleUnit) EditorGUILayout.EnumPopup(property.AsUIAngle.unit);
+            GUI.enabled = true;
+            GUILayout.EndHorizontal();
+            return isEditable ? new StyleProperty(property.propertyId, new UIAngle(value, unit)) : property;
+        }
+        
         private static StyleProperty DrawMeasurement(StyleProperty property, bool isEditable) {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUI.enabled = isEditable;

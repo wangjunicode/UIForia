@@ -119,12 +119,10 @@ namespace UIForia.Text {
 
     public unsafe class TextSystem : IDisposable, ITextEffectResolver {
 
-        internal int freeList;
         internal int frameId;
         internal ElementSystem elementSystem;
         private Application application;
 
-        // internal DataList<TextInfo> textInfoMap;
         internal DataList<TextChange>.Shared changedElementIds;
         internal DataList<TextLayoutSymbol>.Shared layoutBuffer;
         internal LightList<TextEffect> textEffectTable;
@@ -141,7 +139,6 @@ namespace UIForia.Text {
             this.application = application;
             this.elementSystem = elementSystem;
             this.activeTextElementInfo = new DataList<TextId>(32, Allocator.Persistent);
-          //  this.textInfoMap = new DataList<TextInfo>(32, Allocator.Persistent, NativeArrayOptions.ClearMemory); // clear memory is very important here!
             this.changedElementIds = new DataList<TextChange>.Shared(16, Allocator.Persistent);
             this.layoutBuffer = new DataList<TextLayoutSymbol>.Shared(128, Allocator.Persistent);
             this.textEffectTable = new LightList<TextEffect>();
@@ -151,7 +148,6 @@ namespace UIForia.Text {
             this.textEffectVertexInfoTable = new DataList<TextEffectInfo>(8, Allocator.Persistent);
             this.effectDefinitions = effectDefinitions ?? new LightList<TextEffectDefinition>(0);
 
-            //this.textInfoMap.size++; // 0 is invalid
             this.textEffectVertexInfoTable.size++; // 0 is invalid
         }
 
@@ -249,6 +245,7 @@ namespace UIForia.Text {
                     textInfo.fontStyle = element.style.TextFontStyle;
                     textInfo.textTransform = element.style.TextTransform;
                     textInfo.lineHeight = element.style.TextLineHeight;
+                    textInfo.selectionColor = element.style.SelectionTextColor;
 
                     textInfo.textMaterial = new TextMaterialInfo() {
                         // opacity = element.style.Opacity, // todo -- should be multiplied appropriately
@@ -270,10 +267,7 @@ namespace UIForia.Text {
                         underlayY = element.style.TextUnderlayY,
                     };
 
-                    if (textElement.lastUpdateFrame != frameId) {
-                        textElement.lastUpdateFrame = frameId;
-                        changedElementIds.Add(new TextChange(textElement.id, textElement.textInfo));
-                    }
+                    AddToChangeSet(textElement);
                 }
             }
         }
@@ -387,9 +381,8 @@ namespace UIForia.Text {
                 }
             }
 
-            if (requiresRefresh && textElement.lastUpdateFrame != frameId) {
-                textElement.lastUpdateFrame = frameId;
-                changedElementIds.Add(new TextChange(textElement.id, textElement.textInfo));
+            if (requiresRefresh) {
+                AddToChangeSet(textElement);
             }
         }
 
@@ -407,35 +400,22 @@ namespace UIForia.Text {
 
             TextInfo.UpdateText(ref textInfo, uiTextElement.text, uiTextElement._processor, this);
 
+            AddToChangeSet(uiTextElement);
+            
+        }
+
+        private void AddToChangeSet(UITextElement uiTextElement) {
             if (uiTextElement.lastUpdateFrame != frameId) {
                 uiTextElement.lastUpdateFrame = frameId;
+                for (int i = 0; i < changedElementIds.size; i++) {
+                    if (changedElementIds[i].elementId.id == uiTextElement.id.id) {
+                        return;
+                    }
+                }
                 changedElementIds.Add(new TextChange(uiTextElement.id, uiTextElement.textInfo));
             }
         }
-
-        internal void InitTextInfo(UITextElement uiTextElement) {
-            // if (uiTextElement.textInfoId == 0) {
-            //     uiTextElement.textInfoId = GetNextTextId();
-            //     if (uiTextElement.isEnabled) {
-            //         activeTextElementIds.Add(new TextId() {
-            //             textInfoId = uiTextElement.textInfoId,
-            //             elementId = uiTextElement.id
-            //         });
-            //     }
-            //
-            //     uiTextElement.textInfo = textInfoMap.GetArrayPointer() + uiTextElement.textInfoId;
-            // }
-        }
-
-        // todo -- make this real, need to use free list or grow
-        private int GetNextTextId() {
-            // int id = textInfoMap.size;
-            // todo -- make sure when releasing a text info that we dispose it first
-            // textInfoMap.Add(default);
-            // return id;
-            return -1;
-        }
-
+   
         public void Dispose() {
             effectVertexFreeList.Dispose();
             textEffectVertexInfoTable.Dispose();

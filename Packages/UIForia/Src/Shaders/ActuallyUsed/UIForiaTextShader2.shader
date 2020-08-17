@@ -56,7 +56,7 @@ Shader "UIForia/UIForiaText2"
                 float2 texCoord0 : TEXCOORD0;
                 float2 texCoord1 : TEXCOORD1;
                 nointerpolation float3 param : TEXCOORD2;
-                nointerpolation uint2 indices : TEXCOORD3;
+                nointerpolation uint4 indices : TEXCOORD3;
                 nointerpolation float4 underlay : TEXCOORD4;
                 nointerpolation float2 ratios : TextCoord5;
             };
@@ -251,13 +251,15 @@ Shader "UIForia/UIForiaText2"
                 o.param = float3(alphaClip, scale, bias);
                 o.indices.x = UnpackClipRectId(vertex.indices.x);
                 o.indices.y = vertex.indices.y;
+                o.indices.z = 0;
+                o.indices.w = vertex.indices.w;
                 return o;
             }
 
             fixed4 frag (v2f i) : SV_Target {
                 half opacityMultiplier = GetByteNToFloat(i.indices.y, 3);
-                uint displayBits = GetByteN(i.indices.y, 3);
-                
+                uint displayBits = GetByteN(i.indices.w, 3);
+
                 TextMaterialInfo materialInfo = _UIForiaMaterialBuffer[UnpackMaterialId(i.indices.y & 0xffff)];
 
                 float c = tex2Dlod(_FontTexture, float4(i.texCoord0, 0, 0)).a;

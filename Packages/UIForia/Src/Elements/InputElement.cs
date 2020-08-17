@@ -1,6 +1,7 @@
 using System;
 using UIForia.Attributes;
 using UIForia.Text;
+using UnityEngine;
 
 namespace UIForia.Elements {
 
@@ -23,10 +24,11 @@ namespace UIForia.Elements {
             deserializer = deserializer ?? (IInputDeserializer<T>) GetDeserializer();
             serializer = serializer ?? (IInputSerializer<T>) GetSerializer();
             formatter = formatter ?? GetFormatter();
+            text = serializer.Serialize(value) ?? string.Empty;
         }
 
         public void Reset() {
-            selectionRange = default; //new SelectionRange(0, text.Length);
+            //selectionRange = default; //new SelectionRange(0, text.Length);
             HandleCharactersDeletedForwards();
         }
 
@@ -35,7 +37,7 @@ namespace UIForia.Elements {
             string oldText = text;
             text = serializer.Serialize(value) ?? string.Empty;
 
-            selectionRange = new SelectionRange(int.MaxValue);
+            //selectionRange = new SelectionRange(int.MaxValue);
             T v = deserializer.Deserialize(text);
 
             if (hasFocus) {
@@ -51,19 +53,23 @@ namespace UIForia.Elements {
 
         protected override void HandleCharactersEntered(string characters) {
             string previous = text;
+            // todo -- wrong
+            RangeInt range = textElement.GetSelectionRange(out bool isRight);
+            SelectionRange selectionRange = new SelectionRange(range.start, range.end);
             text = SelectionRangeUtil.InsertText(text, ref selectionRange, characters);
+            textElement.SetSelection(new SelectionCursor(selectionRange.cursorIndex - (isRight ? 1 : 0), SelectionEdge.Left), SelectionCursor.Invalid);
             HandleTextChanged(previous);
         }
 
         protected override void HandleCharactersDeletedForwards() {
             string previous = text;
-            text = SelectionRangeUtil.DeleteTextForwards(text, ref selectionRange);
+            //text = SelectionRangeUtil.DeleteTextForwards(text, ref selectionRange);
             HandleTextChanged(previous);
         }
 
         protected override void HandleCharactersDeletedBackwards() {
             string previous = text;
-            text = SelectionRangeUtil.DeleteTextBackwards(text, ref selectionRange);
+           // text = SelectionRangeUtil.DeleteTextBackwards(text, ref selectionRange);
             HandleTextChanged(previous);
         }
 
@@ -87,7 +93,7 @@ namespace UIForia.Elements {
 
             if (text != preFormat) {
                 int diff = text.Length - preFormat.Length;
-                selectionRange = new SelectionRange(selectionRange.cursorIndex + diff);
+                //selectionRange = new SelectionRange(selectionRange.cursorIndex + diff);
             }
 
             // todo -- fix this boxing!
@@ -100,7 +106,7 @@ namespace UIForia.Elements {
                 EmitTextChanged();
             }
         }
-
+        
         public bool ShowPlaceholder => placeholder != null && string.IsNullOrEmpty(text);
 
         public override string GetDisplayName() {

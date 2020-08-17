@@ -9,7 +9,6 @@
     <Style>
 
         style container2 {
-            FlexLayoutDirection = Horizontal;
             PreferredSize = 1vw 1vh;
             Padding = 10px;
         }
@@ -27,9 +26,12 @@
         }
         
         style inputxxx {
-            PreferredWidth = 0.5cnt;
-            TextFontSize = 72px;
-            TextColor = blue;
+            TextColor = Black;
+            TextFontSize = 36px;
+            PreferredWidth = 300px;
+            SelectionTextColor = White;
+            SelectionBackgroundColor = rgba(173, 214, 255,  255);
+            TextFontStyle = Bold;
         }
 
         material UIForiaShape : resources("UIForiaShape");
@@ -69,6 +71,7 @@
         }
 
         style child {
+            TextFontAsset = url("Fonts/Orbitron/Orbitron-Medium SDF");
             PreferredSize = 400px 400px; 
             backgroundColor = blue;
 <!--            OutlineWidth = 30px;-->
@@ -83,16 +86,16 @@
             BorderColorRight = Blue;
 <!--            BorderColorBottom = Blue;-->
             BorderColorLeft = Black;
-            CornerBevel = 20px;
+<!--            CornerBevel = 20px;-->
 <!--        BorderRadiusTopRight = 50%;-->
 <!--        BorderRadius = 50%;-->
-<!--            BackgroundImage = url("Images/DefaultAtlas", "9SliceSprites-4_edit");-->
+            BackgroundImage = url("Images/DefaultAtlas", "player1"); //9SliceSprites-4_edit");
 <!--            MeshType = Radial360_Top;-->
 <!--            BackgroundImageScale = 4;-->
         }
         
         style round {
-            BorderRadius = 50%;
+<!--            BorderRadius = 50%;-->
         }
         
         
@@ -100,10 +103,9 @@
     <Using namespace="UIForia"/>
     <Using namespace="UnityEngine"/>
     <Contents style="container2">
-
-        <Div style="child"/>
-<!--        <Div style="child round"/>-->
-<!--        <Input style="inputxxx" value="'Matt sa|ys       lets make this words'"/>-->
+      
+        <Div style="child round"/>
+        <Input style="inputxxx" value.once="'UIForia is the fucking greatest'"/>
         
 <!--        <ScrollView style="shape-kit">-->
 <!--            <Div style="child">{$parent.siblingIndex}</Div>-->

@@ -14,6 +14,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Text {
 
@@ -164,28 +165,26 @@ namespace UIForia.Text {
     public unsafe struct TextInfo : IDisposable {
 
         internal List_TextSymbol symbolList;
+        internal List_TextLineInfo lineInfoList;
         internal List_TextLayoutSymbol layoutSymbolList;
-        internal List_TextLineInfo lineInfoList; // theres a chance I dont need to store this
         internal List_TextRenderRange renderRangeList;
-
         internal List_TextMaterialInfo materialBuffer;
-        
+
         internal int renderingCharacterCount;
 
         // todo -- flags
         internal bool isRichText;
         internal bool requiresRichLayout;
         internal bool requiresTextTransform;
+        internal bool requiresRenderRangeUpdate;
         internal bool requiresRenderProcessing;
         internal bool isRenderDecorated;
-
-        [ThreadStatic] internal static StructList<TextSymbol> inputSymbolBuffer;
-        internal float resolvedFontSize;
-        public TextMaterialInfo textMaterial;
-        private TextInfoFlags flags;
         internal bool hasEffects;
-        public bool requiresRenderRangeUpdate;
-        public RangeInt selectionRange;
+
+        private TextInfoFlags flags;
+
+        internal float resolvedFontSize;
+        internal TextMaterialInfo textMaterial;
 
         internal UIFixedLength fontSize;
         internal TextAlignment alignment;
@@ -194,28 +193,56 @@ namespace UIForia.Text {
         internal WhitespaceMode whitespaceMode;
         internal FontStyle fontStyle;
         internal float lineHeight;
+        internal Color32 selectionColor;
 
-        // parser pushes character instructions into output stream
-        // strip whitespace accordingly
-        // transform text accordingly
-        // convert char instructions to words 
-        // measure those
-        // layout knows how to handle word stream
-        // renderer only handles character stream
-        public int GetIndexAtPoint(in DataList<FontAssetInfo>.Shared fontMap, Vector2 point) {
+        internal SelectionCursor selectionStartCursor;
+        internal SelectionCursor selectionEndCursor;
+
+        [ThreadStatic] internal static StructList<TextSymbol> inputSymbolBuffer;
+
+        public bool HasSelection => selectionStartCursor.index >= 0 && selectionEndCursor.index >= 0;
+
+        public RangeInt GetSelectionRange(out bool isRightEdge) {
+            RangeInt selectionRange = default;
+            selectionRange.start = 0;
+            selectionRange.length = 0;
+            isRightEdge = false;
+            if (selectionStartCursor.index >= 0) {
+                selectionRange.start = selectionStartCursor.index;
+                if (selectionStartCursor.edge == SelectionEdge.Right) {
+                    selectionRange.start++;
+                    isRightEdge = true;
+                }
+            }
+
+            if (selectionEndCursor.index >= 0) {
+                selectionRange.length = selectionEndCursor.index - selectionRange.start;
+                if (selectionEndCursor.edge == SelectionEdge.Right) {
+                    selectionRange.length++;
+                }
+            }
+
+            return selectionRange;
+        }
+
+        public SelectionCursor GetSelectionCursorAtPoint(in DataList<FontAssetInfo>.Shared fontMap, Vector2 point) {
             if (lineInfoList.size == 0) {
-                return 0;
+                return SelectionCursor.Invalid;
             }
 
             int lineIndex = FindNearestLine(point);
 
-            if (lineIndex < 0) return -1;
+            if (lineIndex < 0) return SelectionCursor.Invalid;
 
             int wordStart = lineInfoList[lineIndex].wordStart;
             int wordEnd = wordStart + lineInfoList[lineIndex].wordCount;
             float closestDistance = float.MaxValue;
             int closestIndex = -1;
-            
+
+            SelectionEdge closestSide = SelectionEdge.Left;
+
+            StructList<int> buffer = StructList<int>.Get();
+
             for (int i = wordStart; i < wordEnd; i++) {
                 ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList[i];
 
@@ -225,6 +252,74 @@ namespace UIForia.Text {
 
                 ref WordInfo wordInfo = ref layoutSymbol.wordInfo;
 
+                for (int charIndex = wordInfo.charStart; charIndex < wordInfo.charEnd; charIndex++) {
+                    ref TextSymbol charSymbol = ref symbolList.array[charIndex];
+
+                    if (charSymbol.type != TextSymbolType.Character) {
+                        continue;
+                    }
+
+                    buffer.Add(charIndex);
+
+                }
+            }
+
+            // todo -- maybe normalize selection so we always pick left side unless last on line?
+            // todo -- if we care enough we can get clever with this search and not blindly check all the characters
+            for (int i = 0; i < buffer.size; i++) {
+
+                ref TextSymbol charSymbol = ref symbolList.array[buffer.array[i]];
+
+                ref UIForiaGlyph glyph = ref fontMap[charSymbol.charInfo.fontAssetId].glyphList[charSymbol.charInfo.glyphIndex];
+                ref WordInfo wordInfo = ref layoutSymbolList.array[charSymbol.charInfo.wordIndex].wordInfo;
+
+                float leftSide = wordInfo.x + charSymbol.charInfo.position.x;
+                float rightSide = leftSide + (glyph.width * charSymbol.charInfo.scale); // todo -- might need to account for sdf / italic / bold widths. in that case its better to store width per character maybe
+
+                float leftDist = Mathf.Abs(leftSide - point.x);
+                float rightDist = Mathf.Abs(rightSide - point.x);
+
+                if (leftDist < closestDistance) {
+                    closestDistance = leftDist;
+                    closestSide = SelectionEdge.Left;
+                    closestIndex = buffer.array[i];
+                }
+
+                if (rightDist < closestDistance) {
+                    closestDistance = rightDist;
+                    closestSide = SelectionEdge.Right;
+                    closestIndex = buffer.array[i];
+                }
+
+            }
+
+            buffer.Release();
+
+            return new SelectionCursor(closestIndex, closestSide);
+
+        }
+
+        public int GetIndexAtPoint(in DataList<FontAssetInfo>.Shared fontMap, Vector2 point) {
+            if (lineInfoList.size == 0) {
+                return 0;
+            }
+
+            int lineIndex = FindNearestLine(point);
+            if (lineIndex < 0) return -1;
+
+            int wordStart = lineInfoList[lineIndex].wordStart;
+            int wordEnd = wordStart + lineInfoList[lineIndex].wordCount;
+            float closestDistance = float.MaxValue;
+            int closestIndex = -1;
+
+            for (int i = wordStart; i < wordEnd; i++) {
+                ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList[i];
+
+                if (layoutSymbol.type != TextLayoutSymbolType.Word) {
+                    continue;
+                }
+
+                ref WordInfo wordInfo = ref layoutSymbol.wordInfo;
 
                 for (int charIndex = wordInfo.charStart; charIndex < wordInfo.charEnd; charIndex++) {
                     ref TextSymbol charSymbol = ref symbolList.array[charIndex];
@@ -233,11 +328,10 @@ namespace UIForia.Text {
                     }
 
                     ref UIForiaGlyph glyph = ref fontMap[charSymbol.charInfo.fontAssetId].glyphList[charSymbol.charInfo.glyphIndex];
-
                     float midpoint = wordInfo.x + charSymbol.charInfo.position.x + (glyph.width * charSymbol.charInfo.scale * 0.5f);
 
                     float dist = Mathf.Abs(midpoint - point.x);
-                    
+
                     if (dist < closestDistance) {
                         closestDistance = dist;
                         closestIndex = midpoint <= point.x ? charIndex + 1 : charIndex;
@@ -248,10 +342,10 @@ namespace UIForia.Text {
             return closestIndex;
         }
 
-        public Rect GetCursorRect(in DataList<FontAssetInfo>.Shared fontAssetMap, int cursorIndex, float width = 1) {
-            
-            if (cursorIndex < 0) return default;
-            int symbolIdx = GetCursorSymbolIndex(cursorIndex);
+        public Rect GetCursorRect(in DataList<FontAssetInfo>.Shared fontAssetMap, float width = 1) {
+
+            if (selectionStartCursor.index < 0) return default;
+            int symbolIdx = GetCursorSymbolIndex(selectionStartCursor.index);
             if (symbolIdx < 0) return default;
 
             ref BurstCharInfo charInfo = ref symbolList.array[symbolIdx].charInfo;
@@ -262,13 +356,90 @@ namespace UIForia.Text {
 
             ref WordInfo wordInfo = ref layoutSymbolList.array[charInfo.wordIndex].wordInfo;
             float2 position = charInfo.position + new float2(wordInfo.x, wordInfo.y);
-            position.x -= fontAssetMap[charInfo.fontAssetId].glyphList[charInfo.glyphIndex].xOffset * charInfo.scale;
+            if (selectionStartCursor.edge == SelectionEdge.Right) {
+
+                position += fontAssetMap[charInfo.fontAssetId].glyphList[charInfo.glyphIndex].width * charInfo.scale;
+                int idx = FindNextSpacedSymbolIndex(symbolIdx, charInfo);
+
+                if (idx >= 0 && idx < symbolList.size) {
+                    ref BurstCharInfo nextChar = ref symbolList.array[idx].charInfo;
+                    // we want to return a position that is half way between the next character left edge and this character's right edge
+                    float farX = layoutSymbolList.array[nextChar.wordIndex].wordInfo.x + nextChar.position.x;
+                    float nearX = position.x;
+                    position.x += ((farX - nearX) * 0.5f);
+                }
+
+            }
+            else {
+                int idx = FindPrevSpacedSymbolIndex(symbolIdx, charInfo);
+
+                if (idx >= 0) {
+                    ref BurstCharInfo prevChar = ref symbolList.array[idx].charInfo;
+                    // we want to return a position that is half way between the prev character right edge and our left edge
+                    float farX = position.x;
+                    ref UIForiaGlyph prevGlyph = ref fontAssetMap[prevChar.fontAssetId].glyphList[prevChar.glyphIndex];
+                    float nearX = layoutSymbolList.array[prevChar.wordIndex].wordInfo.x + prevChar.position.x + (prevGlyph.width * prevChar.scale);
+                    position.x -= ((farX - nearX) * 0.5f);
+                }
+                else {
+                    position.x -= fontAssetMap[charInfo.fontAssetId].glyphList[charInfo.glyphIndex].xOffset * charInfo.scale; // todo -- do I really want this?
+                }
+            }
+
             return new Rect(position.x, lineInfoList.array[charInfo.lineIndex].y, width, lineInfoList.array[charInfo.lineIndex].height);
+        }
+
+        private int FindNextSpacedSymbolIndex(int symbolIdx, BurstCharInfo charInfo) {
+            int idx = symbolIdx + 1;
+
+            // todo -- this will be weird if using rich text and some sort of spacing modifier. technically I need to find the spacing modifier value and ignore it if present I think
+            while (idx < symbolList.size) {
+                ref TextSymbol nextSymbol = ref symbolList.array[idx];
+                if (nextSymbol.type == TextSymbolType.Character) {
+                    if (nextSymbol.charInfo.lineIndex != charInfo.lineIndex) {
+                        idx = -1;
+                    }
+
+                    break;
+                }
+
+                if (nextSymbol.type == TextSymbolType.HorizontalSpace) {
+                    idx = -1;
+                    break;
+                }
+
+                idx++;
+            }
+
+            return idx;
+        }
+
+        private int FindPrevSpacedSymbolIndex(int symbolIdx, BurstCharInfo charInfo) {
+            int idx = symbolIdx - 1;
+            while (idx >= 0) {
+                ref TextSymbol prevSymbol = ref symbolList.array[idx];
+                if (prevSymbol.type == TextSymbolType.Character) {
+                    if (prevSymbol.charInfo.lineIndex != charInfo.lineIndex) {
+                        idx = -1;
+                    }
+
+                    break;
+                }
+
+                if (prevSymbol.type == TextSymbolType.HorizontalSpace) {
+                    idx = -1;
+                    break;
+                }
+
+                idx--;
+            }
+
+            return idx;
         }
 
         private int GetCursorSymbolIndex(int cursorIndex) {
             int charIdx = 0;
-            
+
             for (int i = 0; i < symbolList.size; i++) {
                 ref TextSymbol symbol = ref symbolList.array[i];
                 if (symbol.type != TextSymbolType.Character) {
@@ -634,7 +805,7 @@ namespace UIForia.Text {
                     continue;
                 }
 
-                switch (wordInfo.type) { 
+                switch (wordInfo.type) {
                     case WordType.Whitespace: {
                         // if whitespace overruns end of line, start a new one and add it to that line
                         if (allowWrapping && cursorX + wordInfo.width > width) {
@@ -780,19 +951,18 @@ namespace UIForia.Text {
 
             // todo -- something is wacky with line height I think
             float lineHeight = fontAsset.faceInfo.lineHeight * fontScale;
-            float lineGap = fontAsset.faceInfo.lineHeight - (fontAsset.faceInfo.lineHeight);
             // need to compute a line height for each line
             for (int i = 0; i < lineInfoList.size; i++) {
                 ref TextLineInfo lineInfo = ref lineInfoList[i];
                 int end = lineInfo.wordStart + lineInfo.wordCount;
-                float max = 0;
+                // float max = 0;
 
                 for (int w = lineInfo.wordStart; w < end; w++) {
                     ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList.array[w];
-                    ref WordInfo wordInfo = ref textInfo.layoutSymbolList.array[w].wordInfo;
-                    if (wordInfo.height > max) {
-                        max = textInfo.layoutSymbolList.array[w].wordInfo.height;
-                    }
+                    ref WordInfo wordInfo = ref layoutSymbol.wordInfo;
+                    // if (wordInfo.height > max) {
+                    //     max = layoutSymbol.wordInfo.height;
+                    // }
 
                     ushort lineIdx = (ushort) i;
                     // assign line index to character symbols
@@ -803,13 +973,10 @@ namespace UIForia.Text {
 
                 lineInfo.height = lineHeight;
                 lineInfo.y = lineOffset;
-                lineOffset += max * textInfo.lineHeight;
+                lineOffset += lineHeight; // todo -- line gap or whatever
                 for (int w = lineInfo.wordStart; w < end; w++) {
                     layoutSymbolList.array[w].wordInfo.y = lineInfo.y;
                 }
-
-                // baseline defined by tallest symbol on line's lower position? doesnt handle 
-                // 
             }
         }
 

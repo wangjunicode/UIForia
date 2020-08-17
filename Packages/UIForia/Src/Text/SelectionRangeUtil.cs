@@ -1,3 +1,5 @@
+using System;
+using UIForia.Elements;
 using UnityEngine;
 
 namespace UIForia.Text {
@@ -5,14 +7,16 @@ namespace UIForia.Text {
     public static class SelectionRangeUtil {
 
         public static string InsertText(string source, ref SelectionRange selectionRange, string characters) {
-            string retn = null;
-
+            string retn;
+            
+            
             if (string.IsNullOrEmpty(characters)) {
                 return source;
             }
 
             if (string.IsNullOrEmpty(source)) {
                 selectionRange = new SelectionRange(characters.Length);
+                // cursor = new SelectionCursor(characters.Length, SelectionEdge.Right);
                 return characters;
             }
 
@@ -22,6 +26,7 @@ namespace UIForia.Text {
 
             if (string.IsNullOrEmpty(source)) {
                 selectionRange = new SelectionRange(characters.Length);
+                // cursor = new SelectionCursor(characters.Length, SelectionEdge.Right);
                 return characters;
             }
 
@@ -29,14 +34,19 @@ namespace UIForia.Text {
             if (cursorIndex == 0) {
                 retn = characters + source;
                 selectionRange = new SelectionRange(characters.Length);
+                // cursor = new SelectionCursor(characters.Length, SelectionEdge.Right);
             }
             else if (cursorIndex == source.Length) {
                 retn = source + characters;
                 selectionRange = new SelectionRange(retn.Length);
+                // cursor = new SelectionCursor(characters.Length, SelectionEdge.Right);
+
             }
             else {
                 retn = $"{source.Substring(0, selectionRange.cursorIndex)}{characters}{source.Substring(selectionRange.cursorIndex)}";
                 selectionRange = new SelectionRange(selectionRange.cursorIndex + characters.Length);
+                // cursor = new SelectionCursor(selectionRange.cursorIndex + characters.Length, SelectionEdge.Right);
+
             }
 
             return retn;

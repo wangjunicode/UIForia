@@ -179,6 +179,17 @@ namespace UIForia.Layout {
             float value = measurement.value;
 
             switch (measurement.unit) {
+                
+                case UIMeasurementUnit.IntrinsicMinimum: {
+                    // todo -- consider making this real, its just a prototype for now
+                    LayoutBoxUnion layoutBox = layoutBoxTable[elementId.index];
+                    if (layoutBox.layoutType == LayoutBoxType.Text) {
+                        return layoutBox.text.ComputeContentWidth(ref this, new BlockSize(float.MaxValue, float.MaxValue));
+                    }
+
+                    return 0;
+                }
+
                 case UIMeasurementUnit.Auto: {
                     LayoutBoxUnion layoutBox = layoutBoxTable[elementId.index];
                     if (layoutBox.layoutType == LayoutBoxType.Image) {
@@ -187,7 +198,7 @@ namespace UIForia.Layout {
 
                     return parent.ResolveAutoWidth(ref this, elementId, blockSize);
                 }
-
+                
                 case UIMeasurementUnit.BackgroundImageWidth: {
                     return GetHorizontalLayoutInfo(elementId).bgSize * value;
                 }

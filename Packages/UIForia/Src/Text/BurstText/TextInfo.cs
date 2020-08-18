@@ -584,9 +584,106 @@ namespace UIForia.Text {
             return idx;
         }
 
+        private int FindPreviousWordEdge(int index) {
+            if (index <= 0) return 0;
+
+            for (int i = index - 1; i >= 0; i--) {
+                ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList.array[i];
+                if (layoutSymbol.type != TextLayoutSymbolType.Word) {
+                    continue;
+                }
+
+                return i;
+            }
+
+            return 0;
+        }
+
+        private int FindNextWordEdge(int index) {
+            if (index >= layoutSymbolList.size) return layoutSymbolList.size - 1;
+
+            for (int i = index + 1; i < layoutSymbolList.size; i++) {
+                ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList.array[i];
+                if (layoutSymbol.type != TextLayoutSymbolType.Word) {
+                    continue;
+                }
+
+                return i;
+            }
+
+            return layoutSymbolList.size - 1;
+        }
+
+        public void MoveCursorLeft(bool maintainSelection, bool evtCommand) {
+            if (!maintainSelection) {
+                selectionOrigin = SelectionCursor.Invalid;
+            }
+            else if (selectionOrigin.IsInvalid) {
+                selectionOrigin = selectionCursor;
+            }
+
+            if (evtCommand) {
+                int symbolIndex = GetCursorSymbolIndex(selectionCursor.index);
+                if (symbolIndex >= 0) {
+                    ushort wordIndex = symbolList.array[symbolIndex].charInfo.wordIndex;
+                    if (layoutSymbolList.array[wordIndex].wordInfo.charStart == symbolIndex) {
+                        int previousWordEdge = FindPreviousWordEdge(wordIndex);
+                        if (previousWordEdge >= 0) {
+                            int startIdx = layoutSymbolList.array[previousWordEdge].wordInfo.charStart;
+                            selectionCursor = new SelectionCursor(startIdx, SelectionEdge.Left);
+                        }
+                    }
+                    else {
+                        selectionCursor = new SelectionCursor(layoutSymbolList.array[wordIndex].wordInfo.charStart, SelectionEdge.Left);
+                    }
+                }
+            }
+            else {
+                if (selectionCursor.edge == SelectionEdge.Right) {
+                    selectionCursor = new SelectionCursor(selectionCursor.index, SelectionEdge.Left);
+                    return;
+                }
+
+                selectionCursor = new SelectionCursor(math.max(0, selectionCursor.index - 1), SelectionEdge.Left);
+            }
+        }
+
+        public void MoveCursorRight(bool maintainSelection, bool evtCommand) {
+            if (!maintainSelection) {
+                selectionOrigin = SelectionCursor.Invalid;
+            }
+            else if (selectionOrigin.IsInvalid) {
+                selectionOrigin = selectionCursor;
+            }
+
+            if (evtCommand) {
+                int symbolIndex = GetCursorSymbolIndex(selectionCursor.index);
+                if (symbolIndex >= 0) {
+                    ushort wordIndex = symbolList.array[symbolIndex].charInfo.wordIndex;
+                    if (layoutSymbolList.array[wordIndex].wordInfo.charEnd - 1 == symbolIndex && selectionCursor.edge == SelectionEdge.Right) {
+                        int nextWordEdge = FindNextWordEdge(wordIndex);
+                        if (nextWordEdge <= layoutSymbolList.size - 1) {
+                            int startIdx = layoutSymbolList.array[nextWordEdge].wordInfo.charEnd - 1;
+                            selectionCursor = new SelectionCursor(startIdx, SelectionEdge.Right);
+                        }
+                    }
+                    else {
+                        selectionCursor = new SelectionCursor(layoutSymbolList.array[wordIndex].wordInfo.charEnd - 1, SelectionEdge.Right);
+                    }
+                }
+            }
+            else {
+                if (selectionCursor.edge == SelectionEdge.Left) {
+                    selectionCursor = new SelectionCursor(selectionCursor.index, SelectionEdge.Right);
+                    return;
+                }
+
+                selectionCursor = new SelectionCursor(math.min(selectionCursor.index + 1, symbolList.size - 1), SelectionEdge.Right);
+            }
+        }
+
         private int GetCursorSymbolIndex(int cursorIndex) {
             int charIdx = 0;
-
             for (int i = 0; i < symbolList.size; i++) {
                 ref TextSymbol symbol = ref symbolList.array[i];
                 if (symbol.type != TextSymbolType.Character) {
@@ -617,8 +714,11 @@ namespace UIForia.Text {
             }
 
             float closestDistance = float.MaxValue;
+
             int closestIndex = 0;
-            for (int i = 0; i < lineInfoList.size; i++) {
+            for (int i = 0;
+                i < lineInfoList.size;
+                i++) {
                 ref TextLineInfo line = ref lineInfoList.array[i];
                 float y1 = line.y;
                 float y2 = y1 + line.height;
@@ -645,9 +745,7 @@ namespace UIForia.Text {
 
         internal static void ProcessWhitespace(ref TextInfo textInfo, ref DataList<TextSymbol> symbolBuffer) {
             symbolBuffer.size = 0;
-
             TextUtil.ProcessWhiteSpace(textInfo.whitespaceMode, textInfo.symbolList.array, textInfo.symbolList.size, ref symbolBuffer);
-
             if (symbolBuffer.size != textInfo.symbolList.size) {
                 textInfo.symbolList.CopyFrom(symbolBuffer.GetArrayPointer(), symbolBuffer.size);
             }
@@ -655,7 +753,6 @@ namespace UIForia.Text {
 
         internal static void CreateLayoutSymbols(ref TextInfo textInfo, ref DataList<TextLayoutSymbol> layoutBuffer) {
             TextUtil.CreateLayoutSymbols(textInfo.symbolList.array, textInfo.symbolList.size, ref layoutBuffer);
-
             if (textInfo.layoutSymbolList.array == null) {
                 textInfo.layoutSymbolList = new List_TextLayoutSymbol(layoutBuffer.size, Allocator.Persistent);
             }
@@ -665,8 +762,9 @@ namespace UIForia.Text {
 
         internal static void CountRenderedCharacters(ref TextInfo textInfo) {
             int cnt = 0;
-
-            for (int s = 0; s < textInfo.symbolList.size; s++) {
+            for (int s = 0;
+                s < textInfo.symbolList.size;
+                s++) {
                 // todo -- also handle disabled characters
                 if (textInfo.symbolList.array[s].type == TextSymbolType.Character) {
                     if ((textInfo.symbolList.array[s].charInfo.flags & CharacterFlags.Visible) != 0) {
@@ -682,10 +780,10 @@ namespace UIForia.Text {
             ComputeSizeInfo sizeInfo = new ComputeSizeInfo();
             measureState.Initialize(emSize, textInfo, fontAssetMap[textInfo.fontAssetId]);
             TextUtil.RecomputeFontInfo(ref measureState, ref sizeInfo);
-
             textInfo.resolvedFontSize = measureState.fontSize;
-
-            for (int i = 0; i < textInfo.layoutSymbolList.size; i++) {
+            for (int i = 0;
+                i < textInfo.layoutSymbolList.size;
+                i++) {
                 ref TextLayoutSymbol layoutSymbol = ref textInfo.layoutSymbolList[i];
 
                 TextLayoutSymbolType type = layoutSymbol.type;
@@ -702,19 +800,19 @@ namespace UIForia.Text {
         public static void UpdateText(ref TextInfo textInfo, string text, ITextProcessor processor, TextSystem textSystem) {
             bool requiresTextTransform = false;
             bool requiresRichTextLayout = false;
-            bool processedStream = false;
 
+            bool processedStream = false;
             if (inputSymbolBuffer == null) {
                 inputSymbolBuffer = new StructList<TextSymbol>(128);
             }
 
             inputSymbolBuffer.size = 0;
             int length = text.Length;
-
             textInfo.hasEffects = false;
             textInfo.requiresRenderProcessing = true; // always re-process material buffer when text updates
             textInfo.requiresRenderRangeUpdate = true; // always re-update ranges when changing text
-            fixed (char* charptr = text) {
+            fixed
+                (char* charptr = text) {
                 if (processor != null) {
                     CharStream stream = new CharStream(charptr, 0, (uint) length);
                     LightList<PendingTextEffectSymbolData> textEffects = LightList<PendingTextEffectSymbolData>.Get();
@@ -775,25 +873,24 @@ namespace UIForia.Text {
             }
 
             textInfo.symbolList.SetSize(inputSymbolBuffer.size, Allocator.Persistent);
-
-            fixed (TextSymbol* inputPtr = inputSymbolBuffer.array) {
+            fixed
+                (TextSymbol* inputPtr = inputSymbolBuffer.array) {
                 textInfo.symbolList.CopyFrom(inputPtr, inputSymbolBuffer.size);
             }
         }
 
         internal static void RunLayoutHorizontal_RichText<T>(ref TextInfo textInfo, ref T buffer, float width) where T : IBasicList<TextLineInfo> {
             ref List_TextLayoutSymbol layoutSymbolList = ref textInfo.layoutSymbolList;
-
             buffer.SetSize(0);
-
             WhitespaceMode whitespaceMode = textInfo.whitespaceMode;
             bool trimStart = (whitespaceMode & WhitespaceMode.TrimLineStart) != 0;
-
             int wordStart = 0;
             int wordCount = 0;
-            float cursorX = 0;
 
-            for (int i = 0; i < layoutSymbolList.size; i++) {
+            float cursorX = 0;
+            for (int i = 0;
+                i < layoutSymbolList.size;
+                i++) {
                 ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList.array[i];
                 TextLayoutSymbolType type = layoutSymbol.type;
                 //& ~TextLayoutSymbolType.IsBreakable);
@@ -930,18 +1027,17 @@ namespace UIForia.Text {
 
         internal static void RunLayoutHorizontal_WordsOnly<T>(ref TextInfo textInfo, ref T buffer, float width) where T : IBasicList<TextLineInfo> {
             ref List_TextLayoutSymbol layoutSymbolList = ref textInfo.layoutSymbolList;
-
             buffer.SetSize(0);
-
             WhitespaceMode whitespaceMode = textInfo.whitespaceMode;
             bool trimStart = (whitespaceMode & WhitespaceMode.TrimLineStart) != 0;
             bool allowWrapping = (whitespaceMode & WhitespaceMode.NoWrap) == 0;
-
             int wordStart = 0;
             int wordCount = 0;
-            float cursorX = 0;
 
-            for (int i = 0; i < layoutSymbolList.size; i++) {
+            float cursorX = 0;
+            for (int i = 0;
+                i < layoutSymbolList.size;
+                i++) {
                 ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList.array[i];
                 ref WordInfo wordInfo = ref layoutSymbol.wordInfo;
                 bool isBreakable = layoutSymbol.isBreakable;
@@ -960,6 +1056,7 @@ namespace UIForia.Text {
                                 buffer.Add(new TextLineInfo(wordStart, wordCount, cursorX));
                                 wordStart = i;
                                 cursorX = trimStart ? 0 : wordInfo.width;
+                                wordCount = 1;
                             }
                             else {
                                 wordCount++;
@@ -1036,76 +1133,75 @@ namespace UIForia.Text {
         }
 
         internal static unsafe void RunLayoutVertical_RichText(in FontAssetInfo fontAsset, float fontSize, ref TextInfo textInfo) {
-            // for (int i = 0; i < layoutSymbolList.size; i++) {
-            //     ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList.array[i];
-            //     TextLayoutSymbolType type = (layoutSymbol.type & ~TextLayoutSymbolType.IsBreakable);
-            //
-            //     switch (type) {
-            //
-            //         case TextLayoutSymbolType.Word: {
-            //
-            //             break;
-            //         }
-            //
-            //         case TextLayoutSymbolType.HorizontalSpace:
-            //
-            //             break;
-            //
-            //         case TextLayoutSymbolType.LineHeightPush:
-            //             break;
-            //
-            //         case TextLayoutSymbolType.LineHeightPop:
-            //             break;
-            //
-            //         case TextLayoutSymbolType.LineIndentPush:
-            //             break;
-            //
-            //         case TextLayoutSymbolType.LineIndentPop:
-            //             break;
-            //
-            //         case TextLayoutSymbolType.MarginLeftPush:
-            //             break;
-            //
-            //         case TextLayoutSymbolType.MarginLeftPop:
-            //             break;
-            //
-            //         case TextLayoutSymbolType.MarginRightPush:
-            //             break;
-            //
-            //         case TextLayoutSymbolType.MarginRightPop:
-            //             break;
-            //
-            //         case TextLayoutSymbolType.IndentPush:
-            //             break;
-            //
-            //         case TextLayoutSymbolType.AlignPush:
-            //             break;
-            //
-            //         case TextLayoutSymbolType.IndentPop:
-            //             break;
-            //
-            //         case TextLayoutSymbolType.IsBreakable:
-            //             break;
-            //
-            //     }
-            //
-            // }
+// for (int i = 0; i < layoutSymbolList.size; i++) {
+//     ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList.array[i];
+//     TextLayoutSymbolType type = (layoutSymbol.type & ~TextLayoutSymbolType.IsBreakable);
+//
+//     switch (type) {
+//
+//         case TextLayoutSymbolType.Word: {
+//
+//             break;
+//         }
+//
+//         case TextLayoutSymbolType.HorizontalSpace:
+//
+//             break;
+//
+//         case TextLayoutSymbolType.LineHeightPush:
+//             break;
+//
+//         case TextLayoutSymbolType.LineHeightPop:
+//             break;
+//
+//         case TextLayoutSymbolType.LineIndentPush:
+//             break;
+//
+//         case TextLayoutSymbolType.LineIndentPop:
+//             break;
+//
+//         case TextLayoutSymbolType.MarginLeftPush:
+//             break;
+//
+//         case TextLayoutSymbolType.MarginLeftPop:
+//             break;
+//
+//         case TextLayoutSymbolType.MarginRightPush:
+//             break;
+//
+//         case TextLayoutSymbolType.MarginRightPop:
+//             break;
+//
+//         case TextLayoutSymbolType.IndentPush:
+//             break;
+//
+//         case TextLayoutSymbolType.AlignPush:
+//             break;
+//
+//         case TextLayoutSymbolType.IndentPop:
+//             break;
+//
+//         case TextLayoutSymbolType.IsBreakable:
+//             break;
+//
+//     }
+//
+// }
         }
 
-        internal static unsafe void RunLayoutVertical_WordsOnly(in FontAssetInfo fontAsset, float fontSize, ref TextInfo textInfo) {
+        internal static void RunLayoutVertical_WordsOnly(in FontAssetInfo fontAsset, float fontSize, ref TextInfo textInfo) {
             ref List_TextLayoutSymbol layoutSymbolList = ref textInfo.layoutSymbolList;
-
             float lineOffset = 0;
-
             ref List_TextLineInfo lineInfoList = ref textInfo.lineInfoList;
-
             float smallCapsMultiplier = (textInfo.textTransform == TextTransform.SmallCaps) ? 0.8f : 1f;
             float fontScale = (fontSize * smallCapsMultiplier) / (fontAsset.faceInfo.pointSize * fontAsset.faceInfo.scale);
 
-            // todo -- something is wacky with line height I think
+// todo -- something is wacky with line height I think
             float lineHeight = fontAsset.faceInfo.lineHeight * fontScale;
             // need to compute a line height for each line
-            for (int i = 0; i < lineInfoList.size; i++) {
+            for (int i = 0;
+                i < lineInfoList.size;
+                i++) {
                 ref TextLineInfo lineInfo = ref lineInfoList[i];
                 int end = lineInfo.wordStart + lineInfo.wordCount;
                 // float max = 0;
@@ -1135,8 +1231,10 @@ namespace UIForia.Text {
 
         public string GetString() {
             TextUtil.StringBuilder.Clear();
-            // todo -- if not rich text just return stringified buffer
-            for (int i = 0; i < symbolList.size; i++) {
+// todo -- if not rich text just return stringified buffer
+            for (int i = 0;
+                i < symbolList.size;
+                i++) {
                 if (symbolList[i].type == TextSymbolType.Character) {
                     TextUtil.StringBuilder.Append((char) symbolList[i].charInfo.character);
                 }
@@ -1153,37 +1251,37 @@ namespace UIForia.Text {
             materialBuffer.Dispose();
         }
 
-        // internal static unsafe void ApplyTextAlignment(ref TextInfo textInfo, float totalWidth) {
-        //     TextAlignment alignment = textInfo.textStyle.alignment;
-        //     for (int i = 0; i < textInfo.lineInfoList.size; i++) {
-        //         ref TextLineInfo lineInfo = ref textInfo.lineInfoList.array[i];
-        //         float lineOffsetX = lineInfo.x;
-        //
-        //         switch (alignment) {
-        //
-        //             default:
-        //             case TextAlignment.Unset:
-        //             case TextAlignment.Left:
-        //                 break;
-        //
-        //             case TextAlignment.Right:
-        //                 lineOffsetX = totalWidth - lineInfo.width;
-        //                 break;
-        //
-        //             case TextAlignment.Center:
-        //                 lineOffsetX = (totalWidth - lineInfo.width) * 0.5f;
-        //                 break;
-        //         }
-        //
-        //         int lsEnd = lineInfo.wordStart + lineInfo.wordCount;
-        //         for (int ls = lineInfo.wordStart; ls < lsEnd; ls++) {
-        //             ref TextLayoutSymbol symbol = ref textInfo.layoutSymbolList.array[ls];
-        //             if (symbol.type == TextLayoutSymbolType.Word) {
-        //                 symbol.wordInfo.x += lineOffsetX;
-        //             }
-        //         }
-        //     }
-        // }
+// internal static unsafe void ApplyTextAlignment(ref TextInfo textInfo, float totalWidth) {
+//     TextAlignment alignment = textInfo.textStyle.alignment;
+//     for (int i = 0; i < textInfo.lineInfoList.size; i++) {
+//         ref TextLineInfo lineInfo = ref textInfo.lineInfoList.array[i];
+//         float lineOffsetX = lineInfo.x;
+//
+//         switch (alignment) {
+//
+//             default:
+//             case TextAlignment.Unset:
+//             case TextAlignment.Left:
+//                 break;
+//
+//             case TextAlignment.Right:
+//                 lineOffsetX = totalWidth - lineInfo.width;
+//                 break;
+//
+//             case TextAlignment.Center:
+//                 lineOffsetX = (totalWidth - lineInfo.width) * 0.5f;
+//                 break;
+//         }
+//
+//         int lsEnd = lineInfo.wordStart + lineInfo.wordCount;
+//         for (int ls = lineInfo.wordStart; ls < lsEnd; ls++) {
+//             ref TextLayoutSymbol symbol = ref textInfo.layoutSymbolList.array[ls];
+//             if (symbol.type == TextLayoutSymbolType.Word) {
+//                 symbol.wordInfo.x += lineOffsetX;
+//             }
+//         }
+//     }
+// }
 
     }
 

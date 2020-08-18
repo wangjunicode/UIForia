@@ -286,15 +286,13 @@ namespace UIForia.Elements {
 
         private void HandleLeftArrow(KeyboardInputEvent evt) {
             if (!InitKeyPress(evt)) return;
-
-            //  selectionRange = textElement.MoveCursorLeft(selectionRange, evt.shift, evt.ctrl || evt.command);
+            textElement.MoveCursorLeft(evt.shift, evt.command || evt.ctrl);
             ScrollToCursor();
         }
 
         private void HandleRightArrow(KeyboardInputEvent evt) {
             if (!InitKeyPress(evt)) return;
-
-            //selectionRange = textElement.MoveCursorRight(selectionRange, evt.shift, evt.ctrl || evt.command);
+            textElement.MoveCursorRight(evt.shift, evt.command || evt.ctrl);
             ScrollToCursor();
         }
 

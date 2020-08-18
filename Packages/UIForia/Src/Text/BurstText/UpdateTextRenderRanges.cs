@@ -81,6 +81,8 @@ namespace UIForia.Text {
                 minSelectedPosition = -1;
                 maxSelectedPosition = -1;
 
+                int lineStartCharIdx = -1;
+                
                 for (int c = 0; c < textInfo.symbolList.size; c++) {
                     ref TextSymbol symbol = ref textInfo.symbolList.array[c];
 
@@ -95,6 +97,8 @@ namespace UIForia.Text {
 
                         case TextSymbolType.Character: {
                             if (symbol.charInfo.lineIndex != lineIdx) {
+                                lineStartCharIdx = charIdx;
+                                
                                 if (hasSelection && minSelectedPosition != -1) {
                                     maxSelectedPosition = textInfo.lineInfoList[lineIdx].x + textInfo.lineInfoList[lineIdx].width;
                                     SubmitSelectionHighlight(ref textInfo, lineIdx);
@@ -119,7 +123,7 @@ namespace UIForia.Text {
 
                             if (hasSelection) {
                                 if (charIdx >= selectionRange.start && charIdx < selectionRange.end) {
-                                    if (charIdx == selectionRange.start || range.start == -1) {
+                                    if (charIdx == selectionRange.start || charIdx == lineStartCharIdx) {
                                         minSelectedPosition = GetCharacterLeft(symbol, textInfo);
                                     }
 

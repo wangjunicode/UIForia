@@ -164,12 +164,14 @@ namespace UIForia.Elements {
             throw new NotImplementedException();
         }
 
-        public SelectionRange MoveCursorLeft(SelectionRange selectionRange, bool maintainSelection, bool evtCommand) {
-            return default; // new SelectionRange(cursorIndex, selectionIndex);
+        public void MoveCursorLeft(bool maintainSelection, bool evtCommand) {
+            if (textInfo == null) return;
+            textInfo->MoveCursorLeft(maintainSelection, evtCommand);
         }
 
-        public SelectionRange MoveCursorRight(SelectionRange selectionRange, bool evtShift, bool evtCommand) {
-            throw new NotImplementedException();
+        public void MoveCursorRight(bool maintainSelection, bool evtCommand) {
+            if (textInfo == null) return;
+            textInfo->MoveCursorRight(maintainSelection, evtCommand);
         }
 
         public string GetSelectedString(SelectionRange selectionRange) {

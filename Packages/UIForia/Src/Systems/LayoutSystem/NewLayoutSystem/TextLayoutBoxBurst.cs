@@ -1,4 +1,5 @@
 ﻿using UIForia.Elements;
+using UIForia.Graphics;
 using UIForia.ListTypes;
 using UIForia.Rendering;
 using UIForia.Systems;
@@ -70,6 +71,7 @@ namespace UIForia.Layout {
                     }
                 }
             }
+
         }
 
         public void RunVertical(BurstLayoutRunner* runner) {
@@ -107,6 +109,10 @@ namespace UIForia.Layout {
                     }
                 }
             }
+            
+            // this feels really dirty but its 'correcter'
+            
+            
         }
 
         public float ComputeContentWidth(ref BurstLayoutRunner runner, in BlockSize blockSize) {

@@ -71,7 +71,7 @@ namespace UIForia.Layout {
             while (ptr != default) {
 
                 ref LayoutBoxInfo boxInfo = ref runner->layoutBoxInfoTable[ptr.index];
-
+                // todo -- text needs to be done based on computed bounds size, not 'actualSize' because lines can overflow the 'actualSize' values
                 if (xMax < boxInfo.alignedPosition.x + boxInfo.actualSize.x) xMax = boxInfo.alignedPosition.x + boxInfo.actualSize.x;
 
                 ptr = runner->layoutHierarchyTable[ptr.index].nextSiblingId;

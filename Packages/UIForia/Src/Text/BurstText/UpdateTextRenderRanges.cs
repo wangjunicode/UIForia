@@ -75,28 +75,7 @@ namespace UIForia.Text {
 
                 TextSymbol* prevSymbol = null;
 
-                SelectionCursor selectionStartCursor = new SelectionCursor(2, SelectionEdge.Left);
-                SelectionCursor selectionEndCursor = new SelectionCursor(18, SelectionEdge.Right);
-
-                // convert cursors to range
-                RangeInt selectionRange = default;
-                selectionRange.start = 0;
-                selectionRange.length = 0;
-
-                if (selectionStartCursor.index > 0) {
-                    selectionRange.start = selectionStartCursor.index;
-                    if (selectionStartCursor.edge == SelectionEdge.Right) {
-                        selectionRange.start++;
-                    }
-                }
-
-                if (selectionEndCursor.index > 0) {
-                    selectionRange.length = selectionEndCursor.index - selectionRange.start;
-                    if (selectionEndCursor.edge == SelectionEdge.Right) {
-                        selectionRange.length++;
-                    }
-                }
-
+                RangeInt selectionRange = textInfo.GetSelectionRange();
                 int charIdx = 0;
                 bool hasSelection = selectionRange.length > 0;
                 minSelectedPosition = -1;
@@ -106,7 +85,6 @@ namespace UIForia.Text {
                     ref TextSymbol symbol = ref textInfo.symbolList.array[c];
 
                     switch (symbol.type) {
-
                         case TextSymbolType.TexturePush:
                             // faceTextureStack.Add(symbol.textureId);
                             break;
@@ -116,9 +94,7 @@ namespace UIForia.Text {
                             break;
 
                         case TextSymbolType.Character: {
-
                             if (symbol.charInfo.lineIndex != lineIdx) {
-
                                 if (hasSelection && minSelectedPosition != -1) {
                                     maxSelectedPosition = textInfo.lineInfoList[lineIdx].x + textInfo.lineInfoList[lineIdx].width;
                                     SubmitSelectionHighlight(ref textInfo, lineIdx);
@@ -143,15 +119,14 @@ namespace UIForia.Text {
 
                             if (hasSelection) {
                                 if (charIdx >= selectionRange.start && charIdx < selectionRange.end) {
-
                                     if (charIdx == selectionRange.start || range.start == -1) {
                                         minSelectedPosition = GetCharacterLeft(symbol, textInfo);
                                     }
-                                    else if (charIdx == selectionRange.end - 1) {
+
+                                    if (charIdx == selectionRange.end - 1) {
                                         maxSelectedPosition = GetCharacterRight(fontMap, symbol, textInfo, fontAssetId);
                                         SubmitSelectionHighlight(ref textInfo, lineIdx);
                                     }
-
                                 }
                             }
 

@@ -195,35 +195,37 @@ namespace UIForia.Text {
         internal float lineHeight;
         internal Color32 selectionColor;
 
-        internal SelectionCursor selectionStartCursor;
-        internal SelectionCursor selectionEndCursor;
+        internal SelectionCursor _selectionCursor;
+        internal SelectionCursor _selectionOrigin;
+        internal Vector2 scrollOffset;
+
+        public SelectionCursor selectionCursor {
+            get => _selectionCursor;
+            set {
+                if (_selectionCursor.index == value.index && _selectionCursor.edge == value.edge) {
+                    return;
+                }
+
+                requiresRenderProcessing = true;
+                _selectionCursor = value;
+            }
+        }
+
+        public SelectionCursor selectionOrigin {
+            get => _selectionOrigin;
+            set {
+                if (_selectionOrigin.index == value.index && _selectionOrigin.edge == value.edge) {
+                    return;
+                }
+
+                requiresRenderProcessing = true;
+                _selectionOrigin = value;
+            }
+        }
 
         [ThreadStatic] internal static StructList<TextSymbol> inputSymbolBuffer;
 
-        public bool HasSelection => selectionStartCursor.index >= 0 && selectionEndCursor.index >= 0;
-
-        public RangeInt GetSelectionRange(out bool isRightEdge) {
-            RangeInt selectionRange = default;
-            selectionRange.start = 0;
-            selectionRange.length = 0;
-            isRightEdge = false;
-            if (selectionStartCursor.index >= 0) {
-                selectionRange.start = selectionStartCursor.index;
-                if (selectionStartCursor.edge == SelectionEdge.Right) {
-                    selectionRange.start++;
-                    isRightEdge = true;
-                }
-            }
-
-            if (selectionEndCursor.index >= 0) {
-                selectionRange.length = selectionEndCursor.index - selectionRange.start;
-                if (selectionEndCursor.edge == SelectionEdge.Right) {
-                    selectionRange.length++;
-                }
-            }
-
-            return selectionRange;
-        }
+        public bool HasSelection => selectionCursor.index >= 0 && selectionOrigin.index >= 0;
 
         public SelectionCursor GetSelectionCursorAtPoint(in DataList<FontAssetInfo>.Shared fontMap, Vector2 point) {
             if (lineInfoList.size == 0) {
@@ -260,14 +262,12 @@ namespace UIForia.Text {
                     }
 
                     buffer.Add(charIndex);
-
                 }
             }
 
             // todo -- maybe normalize selection so we always pick left side unless last on line?
             // todo -- if we care enough we can get clever with this search and not blindly check all the characters
             for (int i = 0; i < buffer.size; i++) {
-
                 ref TextSymbol charSymbol = ref symbolList.array[buffer.array[i]];
 
                 ref UIForiaGlyph glyph = ref fontMap[charSymbol.charInfo.fontAssetId].glyphList[charSymbol.charInfo.glyphIndex];
@@ -290,18 +290,120 @@ namespace UIForia.Text {
                     closestSide = SelectionEdge.Right;
                     closestIndex = buffer.array[i];
                 }
-
             }
 
             buffer.Release();
 
             return new SelectionCursor(closestIndex, closestSide);
+        }
 
+        public void SelectWordAtPoint(Vector2 point) {
+            int wordIdx = GetWordIndexAtPoint(point);
+            if (wordIdx < 0) {
+                selectionOrigin = SelectionCursor.Invalid;
+            }
+            else {
+                ref WordInfo wordInfo = ref layoutSymbolList.array[wordIdx].wordInfo;
+                selectionOrigin = new SelectionCursor(wordInfo.charStart, SelectionEdge.Left);
+                selectionCursor = new SelectionCursor(wordInfo.charEnd - 1, SelectionEdge.Right);
+            }
+        }
+
+        public void SelectLineAtPoint(Vector2 point) {
+            selectionOrigin = SelectionCursor.Invalid;
+            if (lineInfoList.size == 0) {
+                return;
+            }
+
+            int lineIndex = FindNearestLine(point);
+            if (lineIndex < 0) return;
+
+            ref TextLineInfo lineInfo = ref lineInfoList.array[lineIndex];
+
+            // find first and last word of type Normal on line
+
+            int firstWordIdx = -1;
+            int lastWordIdx = -1;
+
+            for (int i = lineInfo.wordStart; i < lineInfo.wordStart + lineInfo.wordCount; i++) {
+                ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList.array[i];
+
+                if (layoutSymbol.type != TextLayoutSymbolType.Word) {
+                    continue;
+                }
+
+                firstWordIdx = i;
+                break;
+            }
+
+            if (firstWordIdx < 0) {
+                return;
+            }
+
+            for (int i = lineInfo.wordStart + lineInfo.wordCount - 1; i >= 0; i--) {
+                ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList.array[i];
+
+                if (layoutSymbol.type != TextLayoutSymbolType.Word) {
+                    continue;
+                }
+
+                lastWordIdx = i;
+                break;
+            }
+
+            int charStart = layoutSymbolList.array[firstWordIdx].wordInfo.charStart;
+            int charEnd = layoutSymbolList.array[lastWordIdx].wordInfo.charEnd;
+
+            selectionOrigin = new SelectionCursor(charStart, SelectionEdge.Left);
+            selectionCursor = new SelectionCursor(charEnd - 1, SelectionEdge.Right);
+        }
+
+        public int GetWordIndexAtPoint(Vector2 point) {
+            if (lineInfoList.size == 0) {
+                return -1;
+            }
+
+            int lineIndex = FindNearestLine(point);
+            if (lineIndex < 0) return -1;
+
+            int wordStart = lineInfoList[lineIndex].wordStart;
+            int wordEnd = wordStart + lineInfoList[lineIndex].wordCount;
+            float closestDistance = float.MaxValue;
+            int closestIndex = -1;
+
+            for (int i = wordStart; i < wordEnd; i++) {
+                ref TextLayoutSymbol layoutSymbol = ref layoutSymbolList[i];
+
+                if (layoutSymbol.type != TextLayoutSymbolType.Word) {
+                    continue;
+                }
+
+                ref WordInfo wordInfo = ref layoutSymbol.wordInfo;
+
+                if (wordInfo.type == WordType.Whitespace || wordInfo.type == WordType.NewLine) {
+                    continue;
+                }
+
+                float xMinDist = math.abs(wordInfo.x - point.x);
+                float xMaxDist = math.abs((wordInfo.x + wordInfo.width) - point.x);
+
+                if (xMinDist < closestDistance) {
+                    closestDistance = xMinDist;
+                    closestIndex = i;
+                }
+
+                if (xMaxDist < closestDistance) {
+                    closestDistance = xMaxDist;
+                    closestIndex = i;
+                }
+            }
+
+            return closestIndex;
         }
 
         public int GetIndexAtPoint(in DataList<FontAssetInfo>.Shared fontMap, Vector2 point) {
             if (lineInfoList.size == 0) {
-                return 0;
+                return -1;
             }
 
             int lineIndex = FindNearestLine(point);
@@ -342,10 +444,57 @@ namespace UIForia.Text {
             return closestIndex;
         }
 
-        public Rect GetCursorRect(in DataList<FontAssetInfo>.Shared fontAssetMap, float width = 1) {
+        public AxisAlignedBounds2D ComputeBounds() {
+            float xMin = float.MaxValue;
+            float yMin = float.MaxValue;
+            float xMax = float.MinValue;
+            float yMax = float.MinValue;
 
-            if (selectionStartCursor.index < 0) return default;
-            int symbolIdx = GetCursorSymbolIndex(selectionStartCursor.index);
+            for (int i = 0; i < lineInfoList.size; i++) {
+                ref TextLineInfo lineInfo = ref lineInfoList.array[i];
+                if (lineInfo.x < xMin) xMin = lineInfo.x;
+                if (lineInfo.y < yMin) yMin = lineInfo.y;
+                if (lineInfo.x + lineInfo.width > xMax) xMax = lineInfo.x + lineInfo.width;
+                if (lineInfo.y + lineInfo.height > yMax) yMax = lineInfo.y + lineInfo.height;
+            }
+
+            return new AxisAlignedBounds2D(xMin, yMin, xMax, yMax);
+        }
+
+        internal RangeInt GetSelectionRange() {
+            // convert cursors to range
+            RangeInt selectionRange = default;
+            selectionRange.start = 0;
+            selectionRange.length = 0;
+
+            if (selectionCursor.IsValid && selectionOrigin.IsValid) {
+                int startIndex = selectionCursor.index + (selectionCursor.edge == SelectionEdge.Right ? 1 : 0);
+                int endIndex = selectionOrigin.index + (selectionOrigin.edge == SelectionEdge.Right ? 1 : 0);
+                SelectionCursor selectionStartCursor = startIndex < endIndex ? selectionCursor : selectionOrigin;
+                SelectionCursor selectionEndCursor = startIndex > endIndex ? selectionCursor : selectionOrigin;
+
+
+                if (selectionStartCursor.index >= 0) {
+                    selectionRange.start = selectionStartCursor.index;
+                    if (selectionStartCursor.edge == SelectionEdge.Right) {
+                        selectionRange.start++;
+                    }
+                }
+
+                if (selectionEndCursor.index >= 0) {
+                    selectionRange.length = selectionEndCursor.index - selectionRange.start;
+                    if (selectionEndCursor.edge == SelectionEdge.Right) {
+                        selectionRange.length++;
+                    }
+                }
+            }
+
+            return selectionRange;
+        }
+
+        public Rect GetCursorRect(in DataList<FontAssetInfo>.Shared fontAssetMap, float width = 1) {
+            if (selectionCursor.index < 0) return default;
+            int symbolIdx = GetCursorSymbolIndex(selectionCursor.index);
             if (symbolIdx < 0) return default;
 
             ref BurstCharInfo charInfo = ref symbolList.array[symbolIdx].charInfo;
@@ -356,8 +505,7 @@ namespace UIForia.Text {
 
             ref WordInfo wordInfo = ref layoutSymbolList.array[charInfo.wordIndex].wordInfo;
             float2 position = charInfo.position + new float2(wordInfo.x, wordInfo.y);
-            if (selectionStartCursor.edge == SelectionEdge.Right) {
-
+            if (selectionCursor.edge == SelectionEdge.Right) {
                 position += fontAssetMap[charInfo.fontAssetId].glyphList[charInfo.glyphIndex].width * charInfo.scale;
                 int idx = FindNextSpacedSymbolIndex(symbolIdx, charInfo);
 
@@ -368,7 +516,6 @@ namespace UIForia.Text {
                     float nearX = position.x;
                     position.x += ((farX - nearX) * 0.5f);
                 }
-
             }
             else {
                 int idx = FindPrevSpacedSymbolIndex(symbolIdx, charInfo);
@@ -456,7 +603,7 @@ namespace UIForia.Text {
             return -1;
         }
 
-        private int FindNearestLine(Vector2 point) {
+        public int FindNearestLine(Vector2 point) {
             if (lineInfoList.size == 0) {
                 return -1;
             }
@@ -808,13 +955,19 @@ namespace UIForia.Text {
                 switch (wordInfo.type) {
                     case WordType.Whitespace: {
                         // if whitespace overruns end of line, start a new one and add it to that line
-                        if (allowWrapping && cursorX + wordInfo.width > width) {
-                            buffer.Add(new TextLineInfo(wordStart, wordCount, cursorX));
-                            wordStart = i;
-                            wordCount = 1;
-                            cursorX = trimStart ? 0 : wordInfo.width;
+                        if (allowWrapping) {
+                            if (cursorX + wordInfo.width > width) {
+                                buffer.Add(new TextLineInfo(wordStart, wordCount, cursorX));
+                                wordStart = i;
+                                cursorX = trimStart ? 0 : wordInfo.width;
+                            }
+                            else {
+                                wordCount++;
+                                cursorX += wordInfo.width;
+                            }
                         }
                         else {
+                            // todo -- maybe still wrong
                             if (wordCount != 0) {
                                 wordCount++;
                                 cursorX += wordInfo.width;
@@ -843,12 +996,12 @@ namespace UIForia.Text {
                         if (allowWrapping && wordInfo.width > width) {
                             if (wordCount != 0) {
                                 buffer.Add(new TextLineInfo(wordStart, wordCount, cursorX));
-                                cursorX = 0;
+                                cursorX = wordInfo.width;
                                 wordStart = i;
                                 wordCount = 1;
                             }
                             else {
-                                buffer.Add(new TextLineInfo(wordStart, 1, width));
+                                buffer.Add(new TextLineInfo(wordStart, 1, wordInfo.width));
                                 cursorX = 0;
                                 wordStart = i + 1;
                                 wordCount = 0;

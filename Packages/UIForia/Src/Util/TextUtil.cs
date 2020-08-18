@@ -267,7 +267,6 @@ namespace UIForia.Text {
         }
 
         internal static float GetPadding(float gradientScale, in TextMeasureState textStyle, in float3 ratios) {
-
             // not using cpu side padding anymore, gpu will apply proper padding.
 
             // float4 padding = default;
@@ -456,17 +455,14 @@ namespace UIForia.Text {
                     if (symbol.type != TextSymbolType.Character) {
                         buffer.AddUnchecked(symbol);
                     }
-
                 }
             }
-
         }
 
         [ThreadStatic] private static TextTransform[] ts_TransformStack;
 
         // This must be done in managed code because char.ToUpper requires some virtual calls for locale
         public static unsafe void TransformText(TextTransform transform, TextSymbol* buffer, int count) {
-
             int stackSize = 0;
 
             if (ts_TransformStack == null) {
@@ -478,14 +474,12 @@ namespace UIForia.Text {
             int prevCharacter = 0;
 
             for (int i = 0; i < count; i++) {
-
                 ref TextSymbol symbol = ref buffer[i];
 
                 if (symbol.type == TextSymbolType.Character) {
                     ref int character = ref symbol.charInfo.character;
 
                     switch (transform) {
-
                         case TextTransform.UpperCase:
                         case TextTransform.SmallCaps:
                             character = char.ToUpper((char) character);
@@ -506,17 +500,14 @@ namespace UIForia.Text {
                     }
                 }
                 else if (symbol.type == TextSymbolType.TextTransformPush) {
-
                     if (stackSize + 1 >= ts_TransformStack.Length) {
                         Array.Resize(ref ts_TransformStack, ts_TransformStack.Length * 2);
                     }
 
                     ts_TransformStack[stackSize++] = symbol.textTransform;
                     transform = symbol.textTransform;
-
                 }
                 else if (symbol.type == TextSymbolType.TextTransformPop) {
-
                     if (stackSize > 0) {
                         stackSize--;
                         transform = ts_TransformStack[stackSize - 1];
@@ -524,14 +515,11 @@ namespace UIForia.Text {
                     else {
                         transform = TextTransform.None;
                     }
-
                 }
             }
-
         }
 
         public static unsafe void CreateLayoutSymbols(TextSymbol* symbolList, int symbolListSize, ref DataList<TextLayoutSymbol> layoutBuffer) {
-
             WordInfo currentWord = new WordInfo();
             WordType previousType = WordType.Normal;
 
@@ -572,11 +560,9 @@ namespace UIForia.Text {
             bool isBreakable = true; //TextLayoutSymbolType.IsBreakable;
 
             for (int i = 0; i < symbolListSize; i++) {
-
                 ref TextSymbol symbol = ref symbolList[i];
 
                 switch (symbol.type) {
-
                     case TextSymbolType.Character: {
                         int c = symbol.charInfo.character;
 
@@ -594,7 +580,6 @@ namespace UIForia.Text {
 
                         if (type == previousType) {
                             if (type == WordType.NewLine) {
-
                                 layoutBuffer.AddUnchecked(new TextLayoutSymbol() {
                                     type = TextLayoutSymbolType.Word,
                                     isBreakable = isBreakable,
@@ -643,7 +628,6 @@ namespace UIForia.Text {
 
                         continue;
                 }
-
             }
 
             if (currentWord.charEnd > 0) {
@@ -653,11 +637,9 @@ namespace UIForia.Text {
                     wordInfo = currentWord
                 });
             }
-
         }
 
         internal static void RecomputeFontInfo(ref TextMeasureState state, ref ComputeSizeInfo sizeInfo) {
-
             ref FontAssetInfo fontAsset = ref state.fontAssetInfo;
 
             float fontSize = state.fontSize;
@@ -708,12 +690,10 @@ namespace UIForia.Text {
             if ((state.fontStyle & FontStyle.Italic) != 0) {
                 sizeInfo.shear = fontAsset.italicStyle * 0.01f;
                 displayFlags |= CharacterDisplayFlags.Italic;
-
             }
             else {
                 sizeInfo.shear = 0;
                 displayFlags &= ~CharacterDisplayFlags.Italic;
-
             }
 
             sizeInfo.fontAssetId = fontAsset.id;
@@ -726,7 +706,6 @@ namespace UIForia.Text {
             sizeInfo.boldAdvanceMultiplier = boldAdvanceMultiplier;
             sizeInfo.fontScaleMultiplier = fontScaleMultiplier;
             sizeInfo.fontBaseLineOffset = fontBaseLineOffset;
-
         }
 
         public struct TextRatioData {
@@ -813,13 +792,10 @@ namespace UIForia.Text {
             float currentElementScale = sizeInfo.fontScale * sizeInfo.fontScaleMultiplier;
 
             for (int charIndex = start; charIndex < end; charIndex++) {
-
                 ref TextSymbol textSymbol = ref symbolList[charIndex];
 
                 switch (textSymbol.type) {
-
                     case TextSymbolType.Character: {
-
                         if (!fontAssetMap[sizeInfo.fontAssetId].TryGetGlyphIndex(textSymbol.charInfo.character, out int glyphIdx)) {
                             continue; // todo -- handle missing glyphs somehow
                         }
@@ -836,7 +812,7 @@ namespace UIForia.Text {
                         }
 
                         float ascender = sizeInfo.fontAscender * currentElementScale;
-                        textSymbol.charInfo.position.x = xAdvance + (glyph.xOffset * currentElementScale);
+                        textSymbol.charInfo.position.x = xAdvance + (charIndex == start ? 0 : (glyph.xOffset * currentElementScale));
                         textSymbol.charInfo.position.y = sizeInfo.fontBaseLineOffset + (sizeInfo.fontAscender - glyph.yOffset) * currentElementScale;
                         textSymbol.charInfo.scale = currentElementScale;
                         textSymbol.charInfo.fontAssetId = (ushort) sizeInfo.fontAssetId;
@@ -863,6 +839,9 @@ namespace UIForia.Text {
                                    + kerningAdvance) * currentElementScale + sizeInfo.characterSpacing;
 
                         xAdvance += w;
+                        if (charIndex == start) {
+                            xAdvance -= (glyph.xOffset * currentElementScale);
+                        }
 
                         maxHeight = math.max(maxHeight, bottom - textSymbol.charInfo.position.y);
 
@@ -912,9 +891,7 @@ namespace UIForia.Text {
                         measureState.TryPopCharSpacing(out sizeInfo.characterSpacing);
                         break;
                     }
-
                 }
-
             }
 
             wordInfo.width = xAdvance;
@@ -955,6 +932,7 @@ namespace UIForia.Text {
             // return new float3(ratioA, ratioB, ratioC);
             return new float3(1, 1, 1);
         }
+
     }
 
     internal struct ComputeSizeInfo {

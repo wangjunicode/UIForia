@@ -7,6 +7,14 @@ namespace UIForia.Text {
         Left, Right
 
     }
+
+    public struct SelectionRangeGroup {
+
+        public SelectionRange start;
+        public SelectionRange end;
+
+    }
+
     public struct SelectionRange {
 
         public readonly int cursorIndex;

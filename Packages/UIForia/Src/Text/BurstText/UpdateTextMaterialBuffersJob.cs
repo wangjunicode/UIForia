@@ -223,7 +223,6 @@ namespace UIForia.Text {
         private void UpdateMaterialBuffers(ref MaterialStack materialStack, ref TextInfo textInfo) {
 
             if (!textInfo.requiresRenderProcessing && !textInfo.HasSelection) {
-                // todo -- also check for material data
                 return;
             }
 
@@ -246,25 +245,8 @@ namespace UIForia.Text {
 
             CharacterDisplayFlags displayFlags = 0;
 
-            SelectionCursor selectionStartCursor = new SelectionCursor(2, SelectionEdge.Left);
-            SelectionCursor selectionEndCursor = new SelectionCursor(18, SelectionEdge.Right);
-
             // convert cursors to range
-            RangeInt selectionRange = default;
-
-            if (selectionStartCursor.index > 0) {
-                selectionRange.start = selectionStartCursor.index;
-                if (selectionStartCursor.edge == SelectionEdge.Right) {
-                    selectionRange.start++;
-                }
-            }
-
-            if (selectionEndCursor.index > 0) {
-                selectionRange.length = selectionEndCursor.index - selectionRange.start;
-                if (selectionEndCursor.edge == SelectionEdge.Right) {
-                    selectionRange.length++;
-                }
-            }
+            RangeInt selectionRange = textInfo.GetSelectionRange();
 
             int charIdx = 0;
 

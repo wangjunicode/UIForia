@@ -1,23 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using UIForia.Graphics;
+﻿using System.Collections.Generic;
 using UIForia.Rendering;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
-using UnityEngine.Profiling;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia.Systems {
 
-    public struct EffectUsage {
-
-        public ElementId elementId;
-        public bool isForeground;
-
-    }
 
     [BurstCompile]
     public unsafe struct GatherRenderedElements : IJob {

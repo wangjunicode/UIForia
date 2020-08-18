@@ -12,15 +12,16 @@
             PreferredWidth = 1cnt;
             MinWidth = 20px;
             MarginBottom = 10px;
-            Overflow = Hidden;
+<!--            Overflow = Hidden;-->
             ClipBounds = ContentBox;
         }
 
         style input-element-text {
-            // TextWhitespaceMode = NoWrap;
+            TextWhitespaceMode = PreserveNewLines;
             PreferredWidth = 1pca;
             MinHeight = 1em;
             AlignY = 50% ParentContentArea;
+            Visibility = Hidden;
         }
 
         style placeholder-slot {

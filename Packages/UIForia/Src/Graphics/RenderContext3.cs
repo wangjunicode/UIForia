@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UIForia.Elements;
 using UIForia.ListTypes;
 using UIForia.Text;
 using UIForia.Util;
@@ -44,7 +45,7 @@ namespace UIForia.Graphics {
         private DrawInfoFlags currentFlagSet;
         private MaterialId activeMaterialId;
         internal AxisAlignedBounds2DUShort uvBorderBounds;
-
+        
         public RenderContext3(ResourceManager resourceManager) {
             this.resourceManager = resourceManager;
             this.textureMap = new Dictionary<int, Texture>(32);
@@ -471,6 +472,19 @@ namespace UIForia.Graphics {
             this.gradient = gradient;
         }
 
+        public void SetMatrix(in float4x4 matrix) {
+            dummyMatrix.Set(matrix);
+            defaultMatrix = dummyMatrix;
+        }
+
+        public void PaintElementBackground(UIElement element) {
+            element.renderBox?.PaintBackground3(this);
+        }
+
+        public void PaintElementForeground(UIElement element) {
+            element.renderBox?.PaintForeground3(this);
+        }
+        
     }
 
     public struct ElementDrawInfo {

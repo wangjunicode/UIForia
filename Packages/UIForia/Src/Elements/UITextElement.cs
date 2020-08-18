@@ -105,12 +105,14 @@ namespace UIForia.Elements {
             return "Text";
         }
 
-        public SelectionRange SelectWordAtPoint(Vector2 mouse) {
-            throw new NotImplementedException();
+        public void SelectWordAtPoint(Vector2 point) {
+            if (textInfo == null) return;
+            textInfo->SelectWordAtPoint(point);
         }
 
-        public SelectionRange SelectLineAtPoint(Vector2 mouse) {
-            throw new NotImplementedException();
+        public void SelectLineAtPoint(Vector2 point) {
+            if (textInfo == null) return;
+            textInfo->SelectLineAtPoint(point);
         }
 
         public bool FontHasCharacter(char c) {
@@ -162,8 +164,8 @@ namespace UIForia.Elements {
             throw new NotImplementedException();
         }
 
-        public SelectionRange MoveCursorLeft(SelectionRange selectionRange, bool evtShift, bool evtCommand) {
-            throw new NotImplementedException();
+        public SelectionRange MoveCursorLeft(SelectionRange selectionRange, bool maintainSelection, bool evtCommand) {
+            return default; // new SelectionRange(cursorIndex, selectionIndex);
         }
 
         public SelectionRange MoveCursorRight(SelectionRange selectionRange, bool evtShift, bool evtCommand) {
@@ -171,14 +173,6 @@ namespace UIForia.Elements {
         }
 
         public string GetSelectedString(SelectionRange selectionRange) {
-            throw new NotImplementedException();
-        }
-
-        public Rect GetLineRect(int lineRangeStart) {
-            throw new NotImplementedException();
-        }
-
-        public Vector2 GetSelectionPosition(SelectionRange inputElementSelectionRange) {
             throw new NotImplementedException();
         }
 
@@ -197,16 +191,37 @@ namespace UIForia.Elements {
             return textInfo->GetCursorRect(application.ResourceManager.fontAssetMap);
         }
 
-        public void SetSelection(SelectionCursor caretCursor, SelectionCursor selectionCursor) {
+        public void SetSelection(SelectionCursor cursor, SelectionCursor selection) {
             if (textInfo == null) return;
-            textInfo->selectionStartCursor = caretCursor;
-            textInfo->selectionEndCursor = selectionCursor;
+            textInfo->selectionCursor = cursor;
+            textInfo->selectionOrigin = selection;
         }
 
-        public RangeInt GetSelectionRange(out bool isRightEdge) {
-            isRightEdge = false;
+        public SelectionCursor GetSelectionStartCursor() {
             if (textInfo == null) return default;
-            return textInfo->GetSelectionRange(out isRightEdge);
+            return textInfo->selectionCursor;
+        }
+
+        public SelectionCursor GetSelectionEndCursor() {
+            if (textInfo == null) return default;
+            return textInfo->selectionOrigin;
+        }
+
+        public string InsertText(string text, string characters) {
+            if (textInfo == null) return default;
+            return SelectionRangeUtil.InsertText(ref UnsafeUtility.AsRef<TextInfo>(textInfo), text, characters);
+        }
+
+        public string DeleteForwards() {
+            if (textInfo == null) return text;
+            SetText(SelectionRangeUtil.DeleteTextForwards(text, ref UnsafeUtility.AsRef<TextInfo>(textInfo)));
+            return text;
+        }
+
+        public string DeleteBackwards() {
+            if (textInfo == null) return text;
+            SetText(SelectionRangeUtil.DeleteTextBackwards(text, ref UnsafeUtility.AsRef<TextInfo>(textInfo)));
+            return text;
         }
 
     }
@@ -222,6 +237,8 @@ namespace UIForia.Elements {
         }
 
         public static SelectionCursor Invalid => new SelectionCursor(-1, SelectionEdge.Left);
+        public bool IsInvalid => index < 0;
+        public bool IsValid => index >= 0;
 
     }
 

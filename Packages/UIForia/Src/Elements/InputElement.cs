@@ -53,23 +53,19 @@ namespace UIForia.Elements {
 
         protected override void HandleCharactersEntered(string characters) {
             string previous = text;
-            // todo -- wrong
-            RangeInt range = textElement.GetSelectionRange(out bool isRight);
-            SelectionRange selectionRange = new SelectionRange(range.start, range.end);
-            text = SelectionRangeUtil.InsertText(text, ref selectionRange, characters);
-            textElement.SetSelection(new SelectionCursor(selectionRange.cursorIndex - (isRight ? 1 : 0), SelectionEdge.Left), SelectionCursor.Invalid);
+            text = textElement.InsertText(text, characters);
             HandleTextChanged(previous);
         }
 
         protected override void HandleCharactersDeletedForwards() {
             string previous = text;
-            //text = SelectionRangeUtil.DeleteTextForwards(text, ref selectionRange);
+            text = textElement.DeleteForwards();
             HandleTextChanged(previous);
         }
 
         protected override void HandleCharactersDeletedBackwards() {
             string previous = text;
-           // text = SelectionRangeUtil.DeleteTextBackwards(text, ref selectionRange);
+            text = textElement.DeleteBackwards();
             HandleTextChanged(previous);
         }
 
@@ -106,7 +102,7 @@ namespace UIForia.Elements {
                 EmitTextChanged();
             }
         }
-        
+
         public bool ShowPlaceholder => placeholder != null && string.IsNullOrEmpty(text);
 
         public override string GetDisplayName() {

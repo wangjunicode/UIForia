@@ -29,9 +29,9 @@
             TextColor = Black;
             TextFontSize = 36px;
             PreferredWidth = 300px;
-            SelectionTextColor = White;
+            SelectionTextColor = Red;
             SelectionBackgroundColor = rgba(173, 214, 255,  255);
-            TextFontStyle = Bold;
+            TextWhitespaceMode = TrimLineStart;
         }
 
         material UIForiaShape : resources("UIForiaShape");
@@ -73,23 +73,23 @@
         style child {
             TextFontAsset = url("Fonts/Orbitron/Orbitron-Medium SDF");
             PreferredSize = 400px 400px; 
-            backgroundColor = blue;
+            backgroundColor = clear;
 <!--            OutlineWidth = 30px;-->
             OutlineColor = orange;
-<!--            Border = 50px;-->
+<!--            Border = 20px;-->
 <!--            BorderMode = SliceImage;-->
-<!--            BorderTop = 15px;-->
-<!--            BorderRight = 150px;-->
-<!--            BorderBottom = 15px;-->
-<!--            BorderLeft = 150px;-->
-<!--            BorderColorTop = Blue;-->
-            BorderColorRight = Blue;
-<!--            BorderColorBottom = Blue;-->
-            BorderColorLeft = Black;
-<!--            CornerBevel = 20px;-->
+            BorderTop = 100px;
+            BorderRight = 100px;
+<!--            BorderBottom = 100px;-->
+            BorderLeft = 100px;
+            BorderColorTop = Blue;
+<!--            BorderColorRight = Red;-->
+            BorderColorBottom = Green;
+<!--            BorderColorLeft = Black;-->
+            CornerBevel = 50px;
 <!--        BorderRadiusTopRight = 50%;-->
 <!--        BorderRadius = 50%;-->
-            BackgroundImage = url("Images/DefaultAtlas", "player1"); //9SliceSprites-4_edit");
+            //BackgroundImage = url("Images/DefaultAtlas", "9SliceSprites-4_edit");
 <!--            MeshType = Radial360_Top;-->
 <!--            BackgroundImageScale = 4;-->
         }
@@ -105,7 +105,7 @@
     <Contents style="container2">
       
         <Div style="child round"/>
-        <Input style="inputxxx" value.once="'UIForia is the fucking greatest'"/>
+        <Input style="inputxxx" value.once="'           UIForia is the fucking greatesssssssssssssssssssssssssssssssst'"/>
         
 <!--        <ScrollView style="shape-kit">-->
 <!--            <Div style="child">{$parent.siblingIndex}</Div>-->

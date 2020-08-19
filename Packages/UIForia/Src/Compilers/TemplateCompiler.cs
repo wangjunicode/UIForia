@@ -2739,7 +2739,7 @@ namespace UIForia.Compilers {
 
         private Expression CreateElement(CompilationContext ctx, ProcessedType processedType, Expression parentExpression, int childCount, int attrCount, int templateId) {
             return ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-                Expression.Constant(processedType.id),
+                Expression.New(processedType.GetConstructor()),
                 parentExpression,
                 Expression.Constant(childCount),
                 Expression.Constant(attrCount),

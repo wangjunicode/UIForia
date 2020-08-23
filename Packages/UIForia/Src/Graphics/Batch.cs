@@ -1,5 +1,6 @@
 using UIForia.Rendering.Vertigo;
 using UIForia.Util;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -56,6 +57,7 @@ namespace UIForia.Graphics {
         public BatchType type;
         public StencilType stencilType;
         public int indirectArgOffset;
+        public float4x4* matrix;
 
         public bool HasUIForiaMaterial() {
             return true;

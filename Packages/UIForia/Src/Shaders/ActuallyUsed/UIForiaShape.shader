@@ -4,15 +4,15 @@
         _MainTex ("Texture", 2D) = "white" {}
     }
     SubShader {
-        Tags {
 
+        Tags {
         }
 
         LOD 100
 
         Pass {
 
-            Cull Off // configurable is probably the best approach for this
+            Cull Off 
             ColorMask [_UIForiaColorMask]
             Stencil {
                 Ref [_UIForiaStencilRef]
@@ -20,15 +20,15 @@
                 Pass [_UIForiaStencilOp]
             }
 
+            Blend [_UIForiaSrcMode] [_UIForiaDstBlendMode] // 
             Blend SrcAlpha OneMinusSrcAlpha // todo -- consider unifying the blend mode with text so we have less state change on shader switch
-            //Blend One OneMinusSrcAlpha
             CGPROGRAM
 #pragma vertex vert
             #pragma fragment frag
             #pragma target 4.5
-            #pragma enable_d3d11_debug_symbols
             #include "UnityCG.cginc"
             #include "UIForia.cginc"
+            #pragma require 2darray
 
             struct appdata
             {
@@ -64,6 +64,7 @@
                 uint bevelBottom;
                 uint fillOpenAndRotation;
                 float fillRadius;
+
                 float fillOffsetX;
                 float fillOffsetY;
 
@@ -74,6 +75,12 @@
                 uint uvRotation_Opacity;
 
                 uint borderIndex;
+
+                // todo -- try to get rid of some of this data 
+                uint maskFlags;
+                float maskSoftness;
+                uint maskTopLeftUV;
+                uint maskBottomRightUV;
             };
 
             struct UIForiaVertex
@@ -85,27 +92,25 @@
 
             sampler2D _MainTex;
             sampler2D _OutlineTex;
+            sampler2D _MaskTexture;
 
             float4 _MainTex_TexelSize;
 
             float _UIForiaDPIScale;
             float4x4 _UIForiaOriginMatrix;
-
-            struct GradientInfo
-            {
-                uint flags;
-                uint colorCount;
-                uint alphaCount;
-                uint unused_padding;
-                float4 colors[8];
-                float2 alphas[8];
-            };
+            float _MaskSoftness;
 
             StructuredBuffer<float4x4> _UIForiaMatrixBuffer;
             StructuredBuffer<UIForiaVertex> _UIForiaVertexBuffer;
             StructuredBuffer<ElementMaterialInfo> _UIForiaMaterialBuffer;
             StructuredBuffer<float4> _UIForiaFloat4Buffer;
-            StructuredBuffer<GradientInfo> _UIForiaGradientBuffer;
+
+            float sdSegment(in float2 p, in float2 a, in float2 b)
+            {
+                float2 pa = p - a, ba = b - a;
+                float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
+                return length(pa - ba * h);
+            }
 
             v2f vert(appdata v)
             {
@@ -119,8 +124,15 @@
                 ElementMaterialInfo material = _UIForiaMaterialBuffer[materialIndex];
 
                 float3 vpos = float3(vertex.position.xy, 0); // positioned at center
-                float2 halfSize = vertex.size * 0.5;
 
+                // vertex.size.x += _WidthAdd;
+                // vertex.size.y += _HeightAdd;
+                // size *= 1/(ratio * 0.5);
+                // float ratio = _Outer / 150.0;
+                // vertex.size.x += (vertex.size.x * (ratio));
+                // vertex.size.y += (vertex.size.y * (ratio));
+
+                float2 halfSize = vertex.size * 0.5;
                 bool is9SliceBorder = (GetByteN(vertex.indices.y, 3) & ElementShaderFlags_IsNineSliceBorder) != 0;
                 bool is9SliceContent = (GetByteN(vertex.indices.y, 3) & ElementShaderFlags_IsNineSliceContent) != 0;
 
@@ -128,7 +140,6 @@
                 o.border = material.borderIndex != 0 ? _UIForiaFloat4Buffer[material.borderIndex] : float4(0, 0, 0, 0);
 
                 float4 mainSize = float4(0, 0, vertex.size.x, vertex.size.y);
-
                 if (is9SliceBorder)
                 {
                     material.uvTransformIdx = 0;
@@ -171,14 +182,15 @@
                     o.texCoord0 = float2(0, 0);
                     o.texCoord1 = float2(0, 1);
                 }
+
                 o.size = vertex.size;
+
                 if (is9SliceBorder || is9SliceContent)
                 {
                     o.texCoord0.x = vpos.x / mainSize.z;
                     o.texCoord0.y = -vpos.y / mainSize.w;
                     o.size = mainSize.zw;
                 }
-
 
                 // sdf uv offsets for non quad meshes, which we'll probably want eventually to reduce overdraw
                 float2 halfUV = float2(0.5, 0.5) / mainSize.zw; // todo -- this might need to be dpi scaled
@@ -198,15 +210,14 @@
                 return o;
             }
 
-
-            fixed4 frag(v2f i) : SV_Target
+            float4 frag(v2f i) : SV_Target
             {
-
                 const float shadowScale = 1;
-                
+
                 // this could be done in the vertex shader too but this way we can support correct
                 ElementMaterialInfo material = _UIForiaMaterialBuffer[i.indices.y & 0xffffff];
                 float2 size = i.size;
+
                 float minSize = min(size.x, size.y);
                 fixed4 color = UnpackColor(material.backgroundColor);
                 fixed4 outlineColor = UnpackColor(material.outlineColor);
@@ -224,7 +235,6 @@
                 float fillRotation = UnpackHighUShortPercentageToFloat(material.fillOpenAndRotation); //frac(_Time.y) * PI * 2;
                 float fillRadius = material.fillRadius;
                 float2 fillOffset = float2(material.fillOffsetX, material.fillOffsetY); // - halfUV;
-
                 float2 uvScale = i.uvTransform.xy;
                 float2 uvOffset = i.uvTransform.zw;
                 float uvRotation = UnpackLowUShortPercentageToFloat(material.uvRotation_Opacity) * 2 * PI;
@@ -281,43 +291,39 @@
                 {
                     color = contentColor;
                 }
-
                 outlineColor = borderColor.a > 0 ? borderColor : outlineColor;
                 half outlineWidth = material.outlineWidth * 0.5;
-                half4 radius = UnpackRadius(packedRadii, minSize);
+                float2 samplePoint = (i.texCoord0.xy - 0.5) * size;
+
+                half radius = UnpackRadius(samplePoint, packedRadii, minSize);
 
                 float t = (fillAmount * 180) * Deg2Rad;
                 float v = t + (fillRotation * (2 * PI)) * fillDirection;
 
                 float2 angleSinCos = float2(sin(t), cos(t));
-                float2 samplePoint = (i.texCoord0.xy - 0.5) * size;
                 float2 radialSamplePoint = RotateUV((i.texCoord0.xy * size) - fillOffset, -v * fillDirection);
 
-                float sdf = sdRoundBox(samplePoint, size * 0.5 * shadowScale, radius);
-
+                float bevelAmount = UnpackCornerBevel(material.bevelTop, material.bevelBottom, i.texCoord0);
                 float radialSDF = sdPie(radialSamplePoint, angleSinCos, fillRadius);
 
-                float bevelAmount = UnpackCornerBevel(material.bevelTop, material.bevelBottom, i.texCoord0);
                 float2 bevelOffset = float2(size.x * 0.5 * (i.texCoord0.x > 0.5 ? 1 : -1), size.y * 0.5 * (i.texCoord0.y > 0.5 ? 1 : -1));
                 float2 bevelPoint = ((i.texCoord0 - 0.5) * size) - bevelOffset;
                 float sdfBevel = sdRect(RotateUV(bevelPoint, 45 * Deg2Rad), float2(bevelAmount, bevelAmount));
-
-                sdf = max(-sdfBevel, sdf); // todo -- not a true sdf, cannot be used for shadows really
+                float sdf = sdRoundBox(samplePoint, size * 0.5 * shadowScale, radius * shadowScale);
+                sdf = max(-sdfBevel, sdf);
 
                 // todo -- move max up here to draw pie instead of using as a clipping bounds
                 //sdf = max(radialSDF * invertFill, sdf);
-
                 float sdfOutline = outlineWidth > 0 ? abs(sdf) - outlineWidth : 0;
                 sdf = max(radialSDF * invertFill, sdf);
                 // sdfOutline = (fillFlag & FillOutline) != 0 ? max(radialSDF * invertFill, sdfOutline) : sdfOutline;
                 fixed4 grad = WHITE;
                 color = ComputeColor(color, grad, tintColor, bodyColorMode, i.texCoord1, _MainTex, uvBounds, originalUV);
-
                 color = lerp(color, outlineColor, outlineWidth == 0 ? 0 : 1 - saturate(sdfOutline));
-                color.a *= 1 - smoothstep(0, fwidth(sdf), sdf);
+                color.a *= 1.0 - smoothstep(0, fwidth(sdf), sdf);
 
                 //float shadow = minSize * 0.5;
-                //color.a *= 1.0 - smoothstep(0, lerp(shadow * 0.25, fwidth(sdf), (cos(_Time.y))), sdf);
+                //color.a *= 1.0 - smoothstep(0, lerp(_Inner, fwidth(sdf), 0), sdf);
 
                 float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y); //* _UIForiaDPIScale;
                 float4 clipRect = _UIForiaFloat4Buffer[i.indices.x]; // x = xMin, y = yMin, z = xMax, w = yMax
@@ -327,59 +333,90 @@
                 // float grayscale = dot(color.rgb, float3(0.3, 0.59, 0.11));
                 // fixed3 gradientCol = fixed3(grayscale * grad.rgb);  //tex2D(_GradientMap, float2(grayscale, 0));
                 // return UIForiaColorSpace(fixed4(grad.rgb + (0.25 * color.rgb), color.a)); //gradientCol * c.a * IN.color;
+
+                uint maskFlags = material.maskFlags;
+                if ((maskFlags & MaskFlags_UseTextureMask) != 0)
+                {
+                    // todo -- use maskUVs
+                    float maskAlpha = (saturate(tex2Dlod(_MaskTexture, float4(originalUV.xy, 0, 0)) / _MaskSoftness)); // todo -- mask softness & mask uvs
+                    if ((maskFlags & MaskFlags_UseTextureMaskInverted) != 0)
+                    {
+                        maskAlpha = 1 - maskAlpha;
+                    }
+                    color.a = saturate(color.a * maskAlpha);
+                }
+
                 color.a *= opacity;
                 color.a *= (s.x * s.y) != 0;
-                color = UIForiaColorSpace(color); // todo -- video texture wont want to adjust color space 
+                color = lerp(color, UIForiaColorSpace(color), (bodyColorMode & ColorMode_ApplyColorSpaceCorrection) != 0);
                 clip(color.a - 0.01);
+
+                // #ifndef UNITY_COLORSPACE_GAMMA
+                // color.rgb = LinearToGammaSpace(color.rgb);
+                // #endif
+                // // apply intensity exposure
+                // color.rgb *= pow(2.0, 0.5);
+                // // if not using gamma color space, convert back to linear
+                // #ifndef UNITY_COLORSPACE_GAMMA
+                // color.rgb = GammaToLinearSpace(color.rgb);
+                // #endif
                 return color;
             }
             ENDCG
         }
     }
 }
-
-
-                //fixed4 colors[8] = {
-                //     fixed4(0.529, 0.227, 0.706, 0),
-                //     fixed4(GREEN.rgb, 0.25),
-                //     fixed4(0.992, 0.114, 0.114, 0.5),
-                //     fixed4(0.988, 0.690, 0.271, 0.75),
-                //     fixed4(PINK.rgb, 1),
-                //     
-                //     fixed4(1, 0, 0, 0.6),
-                //     fixed4(1, 1, 0, 0.7),
-                //     fixed4(1, 0, 0, 0.8),
-                // };
-                // 
-                //fixed2 alphas[8] = {
-                //    fixed2(1, 0),
-                //    fixed2(1, 0.5),
-                //    fixed2(1, 1),
-                //    
-                //    fixed2(1, 1),
-                //    fixed2(1, 1),
-                //    fixed2(1, 1),
-                //    fixed2(1, 1),
-                //    fixed2(1, 1),
-                //    
-                // };
-                //
-                //fixed4 grad = WHITE;
-                //
-                //float gradientScale = 1;
-                //float gradRotation = 0 * Deg2Rad; // * Deg2Rad;
-                //float2 gradientOffset = float2(0, 0);
-                //int wrapGradient = 1;
-                //int hardBlend = 0;
-                //int gradientType = GradientType_Linear; //Conical;
-                //
-                //float2 gradientTexCoord = gradientOffset + i.texCoord0.xy;
-                //half gradientTime = LinearGradient(gradientTexCoord, gradRotation);
-                //gradientTime = lerp(gradientTime, RadialGradient(gradientTexCoord), gradientType == GradientType_Radial);
-                //gradientTime = lerp(gradientTime, ConicalGradient(RotateUV(gradientTexCoord, gradRotation, float2(0.5, 0.5))), gradientType == GradientType_Conical);
-                //
-                //gradientTime *= gradientScale;
-                //
-                //// return (tex2Dlod(_MainTex, float4(frac(gradientTime), 0, 0, 0)));
-                //grad = SampleGradient(lerp(gradientTime, frac(gradientTime), wrapGradient), colors, alphas, 5, 3, hardBlend);
-                //grad = lerp(grad, SampleCornerGradient(gradientTexCoord, colors, alphas), 0);
+//
+//  float ratio = _Outer / 100;
+//                float halfRatio = ratio * 0.125; //(1/(1 +ratio));//0.4;
+//                float start = float2(halfRatio, halfRatio);
+//                float end = float2(1 - halfRatio, 1 - halfRatio);
+//                size *= 1 / (ratio * 0.125);
+//                // float alpha = roundedBoxShadow(float2(ratio * 0.5, ratio * 0.5) , float2(1-ratio* 0.5, 1- ratio * 0.5) , originalUV , ratio, 0);
+//                float alpha = roundedBoxShadow(start * size, end * size, i.texCoord0.xy * size, _Outer, _Inner);
+//                // alpha = lerp(alpha, 1.0 - smoothstep(0, fwidth(sdf), sdf), _Outer <= 0.25);
+//                return UIForiaColorSpace(lerp(fixed4(color.rgb, alpha), RED,0));
+//fixed4 colors[8] = {
+//     fixed4(0.529, 0.227, 0.706, 0),
+//     fixed4(GREEN.rgb, 0.25),
+//     fixed4(0.992, 0.114, 0.114, 0.5),
+//     fixed4(0.988, 0.690, 0.271, 0.75),
+//     fixed4(PINK.rgb, 1),
+//     
+//     fixed4(1, 0, 0, 0.6),
+//     fixed4(1, 1, 0, 0.7),
+//     fixed4(1, 0, 0, 0.8),
+// };
+// 
+//fixed2 alphas[8] = {
+//    fixed2(1, 0),
+//    fixed2(1, 0.5),
+//    fixed2(1, 1),
+//    
+//    fixed2(1, 1),
+//    fixed2(1, 1),
+//    fixed2(1, 1),
+//    fixed2(1, 1),
+//    fixed2(1, 1),
+//    
+// };
+//
+//fixed4 grad = WHITE;
+//
+//float gradientScale = 1;
+//float gradRotation = 0 * Deg2Rad; // * Deg2Rad;
+//float2 gradientOffset = float2(0, 0);
+//int wrapGradient = 1;
+//int hardBlend = 0;
+//int gradientType = GradientType_Linear; //Conical;
+//
+//float2 gradientTexCoord = gradientOffset + i.texCoord0.xy;
+//half gradientTime = LinearGradient(gradientTexCoord, gradRotation);
+//gradientTime = lerp(gradientTime, RadialGradient(gradientTexCoord), gradientType == GradientType_Radial);
+//gradientTime = lerp(gradientTime, ConicalGradient(RotateUV(gradientTexCoord, gradRotation, float2(0.5, 0.5))), gradientType == GradientType_Conical);
+//
+//gradientTime *= gradientScale;
+//
+//// return (tex2Dlod(_MainTex, float4(frac(gradientTime), 0, 0, 0)));
+//grad = SampleGradient(lerp(gradientTime, frac(gradientTime), wrapGradient), colors, alphas, 5, 3, hardBlend);
+//grad = lerp(grad, SampleCornerGradient(gradientTexCoord, colors, alphas), 0);

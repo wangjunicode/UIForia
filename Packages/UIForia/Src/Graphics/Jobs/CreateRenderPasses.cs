@@ -117,6 +117,39 @@ namespace UIForia.Graphics {
 
                 switch (drawInfo.drawType) {
 
+                    case DrawType2.Mesh2D: {
+                        int batchIdx = batchList.size;
+                        ref StencilInfo stencilInfo = ref stencilList[renderInfo.stencilIndex];
+                        batchList.Add(new Batch() {
+                            type = BatchType.Mesh,
+                            matrix = drawInfo.matrix,
+                            meshId = (int) drawInfo.shapeData,
+                            materialId = drawInfo.materialId,
+                            stencilType = stencilInfo.stencilDepth == 0 ? StencilType.Ignore : StencilType.Draw,
+                            stencilRefValue = (byte) stencilInfo.stencilDepth,
+                        });
+                        renderCommands.Add(new RenderCommand() {
+                            type = RenderCommandType.Mesh,
+                            batchIndex = batchIdx,
+                        });
+                        break;
+                    }
+                    case DrawType2.PushRenderTargetRegion: {
+                        renderCommands.Add(new RenderCommand() {
+                            type = RenderCommandType.PushRenderTexture,
+                            batchIndex = (int)drawInfo.shapeData
+                        });
+                        
+                        break;
+                    }
+                    case DrawType2.PopRenderTargetRegion: {
+                        renderCommands.Add(new RenderCommand() {
+                            type = RenderCommandType.PopRenderTexture,
+                            batchIndex = (int)drawInfo.shapeData
+                        });
+                        
+                        break;
+                    }
                     case DrawType2.Callback:
                         // can track indices of commands and limit ooob search range between them
                         renderCommands.Add(new RenderCommand() {
@@ -162,7 +195,7 @@ namespace UIForia.Graphics {
                         SubmitInorderBatch(renderInfo, materialPermutation, batchMemberOffset, BatchType.Shadow, RenderCommandType.ShadowBatch);
                         break;
                     }
-                    
+
                 }
 
             }
@@ -173,7 +206,6 @@ namespace UIForia.Graphics {
             outOfOrderBatchList.Dispose();
             initialCandidateList.Dispose();
         }
-
 
         private void UIForiaShapeBatch_OutOfOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, ref MaterialPermutation permutation) {
             DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
@@ -197,22 +229,7 @@ namespace UIForia.Graphics {
                 stencilList[stencilIndex].drawState = StencilSetupState.Pushed;
             }
 
-            // gather candidates then cull?
-            // or step by step 
-            // gather is less work at a time, likely better
-
             bool isStencilMember = renderTraversalList[startIdx].isStencilMember;
-
-            // startIdx + 1 because startIdx broke the batch
-
-            // find other elements that have yet to be rendered
-            // if we encounter a batch breaking command
-            //    unknown material
-            //    callback
-            //    render target change
-            //    clear?
-            //    etc
-            // stop.
 
             initialCandidateList.size = 0;
 
@@ -222,7 +239,7 @@ namespace UIForia.Graphics {
                 ref RenderTraversalInfo renderInfo = ref renderInfoArray[i];
 
                 // todo -- break for other types also
-                if (current.drawType == DrawType2.Callback) {
+                if (current.drawType == DrawType2.Callback || current.drawType == DrawType2.PushRenderTargetRegion || current.drawType == DrawType2.PopRenderTargetRegion) {
                     break;
                 }
 
@@ -276,11 +293,13 @@ namespace UIForia.Graphics {
 
                 int bodyTextureId = materialSetup->bodyTexture.textureId;
                 int outlineTextureId = materialSetup->outlineTexture.textureId;
+                int maskTextureId = materialSetup->maskTexture.textureId;
 
                 bool passTexture0 = permutation.texture0 == 0 || permutation.texture0 == bodyTextureId || bodyTextureId == 0;
                 bool passTexture1 = permutation.texture1 == 0 || permutation.texture1 == outlineTextureId || outlineTextureId == 0;
+                bool passTexture2 = permutation.texture2 == 0 || permutation.texture2 == maskTextureId || maskTextureId == 0;
 
-                if (passTexture0 && passTexture1) {
+                if (passTexture0 && passTexture1 && passTexture2) {
 
                     if (permutation.texture0 == 0) {
                         permutation.texture0 = bodyTextureId;
@@ -288,6 +307,10 @@ namespace UIForia.Graphics {
 
                     if (permutation.texture1 == 0) {
                         permutation.texture1 = outlineTextureId;
+                    }
+
+                    if (permutation.texture2 == 0) {
+                        permutation.texture2 = maskTextureId;
                     }
 
                     renderInfoArray[idx].requiresRendering = false;
@@ -575,7 +598,7 @@ namespace UIForia.Graphics {
         }
 
         private int UIForiaShadowBatch_InOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, out MaterialPermutation permutation) {
-            
+
             DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
             RenderTraversalInfo* renderInfoArray = renderDataList.GetArrayPointer();
 
@@ -632,7 +655,7 @@ namespace UIForia.Graphics {
 
             return drawList.size;
         }
-        
+
         public int UIForiaShapeBatch_InOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, out MaterialPermutation permutation) {
 
             DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
@@ -663,7 +686,8 @@ namespace UIForia.Graphics {
             permutation = new MaterialPermutation {
                 materialId = MaterialId.UIForiaShape,
                 texture0 = materialSetup->bodyTexture.textureId,
-                texture1 = materialSetup->outlineTexture.textureId
+                texture1 = materialSetup->outlineTexture.textureId,
+                texture2 = materialSetup->maskTexture.textureId
             };
 
             bool isStencilMember = renderTraversalList[startIdx].isStencilMember;
@@ -695,6 +719,7 @@ namespace UIForia.Graphics {
 
                 int prevTex0 = permutation.texture0;
                 int prevTex1 = permutation.texture1;
+                int prevTex2 = permutation.texture2;
 
                 if (permutation.texture0 == 0) {
                     permutation.texture0 = setup->bodyTexture.textureId;
@@ -704,17 +729,29 @@ namespace UIForia.Graphics {
                     permutation.texture1 = setup->outlineTexture.textureId;
                 }
 
+                if (permutation.texture2 == 0) {
+                    permutation.texture2 = setup->maskTexture.textureId;
+                }
                 // when one texture passes and the other doesn't, we need to undo our change
 
                 if (setup->bodyTexture.textureId != 0 && permutation.texture0 != setup->bodyTexture.textureId) {
                     permutation.texture0 = prevTex0;
                     permutation.texture1 = prevTex1;
+                    permutation.texture2 = prevTex2;
                     return i;
                 }
 
                 if (setup->outlineTexture.textureId != 0 && permutation.texture1 != setup->outlineTexture.textureId) {
                     permutation.texture0 = prevTex0;
                     permutation.texture1 = prevTex1;
+                    permutation.texture2 = prevTex2;
+                    return i;
+                }
+
+                if (setup->maskTexture.textureId != 0 && permutation.texture2 != setup->maskTexture.textureId) {
+                    permutation.texture0 = prevTex0;
+                    permutation.texture1 = prevTex1;
+                    permutation.texture2 = prevTex2;
                     return i;
                 }
 

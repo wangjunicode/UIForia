@@ -20,6 +20,30 @@ namespace UIForia.Graphics {
                 NativeSortExtension.Sort(drawList.GetArrayPointer(), drawList.size);
             }
 
+            // todo -- flag if has render target swaps
+
+            int depth = 0;
+            // DataList<DrawInfo2> region
+            // mainTexture = ctx.PushRenderTargetRegion(actualSize, rgba); if already inside a render target region
+            // draw draw draw
+            // ctx.PopRenderTargetRegion();
+            // ctx.SetTexture(texture);
+            // ctx.DrawElement();
+            // ctx.Draw(blur, texture, material);
+            // for (int i = 0; i < drawList.size; i++) {
+            //     
+            //     if (drawList[i].drawType == DrawType2.PushRenderTargetRegion) {
+            //         depth++;
+            //         // gather the draws in a region
+            //         // sort regions
+            //     }
+            //
+            //     if (drawList[i].drawType == DrawType2.PopRenderTargetRegion) {
+            //         if (depth != 0) depth--;
+            //     }
+            //     
+            // }
+
         }
 
         private static void BubbleSort(DrawInfo2* array, int count)  {

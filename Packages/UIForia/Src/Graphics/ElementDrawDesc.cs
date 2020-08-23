@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Graphics {
@@ -68,6 +67,11 @@ namespace UIForia.Graphics {
         public float gradientRotation;
         public float gradientOffsetX;
         public float gradientOffsetY;
+
+        public MaskFlags maskFlags;
+        public float maskSoftness;
+        public uint maskTopLeftUV;
+        public uint maskBottomRightUV;
 
         public ElementDrawDesc(float width, float height) : this() {
             this.width = width;

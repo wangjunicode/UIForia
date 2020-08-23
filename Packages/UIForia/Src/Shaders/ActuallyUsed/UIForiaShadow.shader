@@ -226,43 +226,100 @@
                 return o / sum;
             }
 
+            // A standard gaussian function, used for weighting samples
+            float gaussian(float x, float sigma)
+            {
+                const float pi = 3.141592653589793;
+                return exp(-(x * x) / (2.0 * sigma * sigma)) / (sqrt(2.0 * pi) * sigma);
+            }
+
+            // This approximates the error function, needed for the gaussian integral
+            float2 erf(float2 x)
+            {
+                float2 s = sign(x), a = abs(x);
+                x = 1.0 + (0.278393 + (0.230389 + 0.078108 * (a * a)) * a) * a;
+                x *= x;
+                return s - s / (x * x);
+            }
+
+            // Return the blurred mask along the x dimension
+            float roundedBoxShadowX(float x, float y, float sigma, float corner, float2 halfSize)
+            {
+                float delta = min(halfSize.y - corner - abs(y), 0.0);
+                float curved = halfSize.x - corner + sqrt(max(0.0, corner * corner - delta * delta));
+                float2 integral = 0.5 + 0.5 * erf((x + float2(-curved, curved)) * (sqrt(0.5) / sigma));
+                return integral.y - integral.x;
+            }
+
+            // Return the mask for the shadow of a box from lower to upper
+            float roundedBoxShadow(float2 lower, float2 upper, float2 pt, float sigma, float corner)
+            {
+                // Center everything to make the math easier
+                float2 center = (lower + upper) * 0.5;
+                float2 halfSize = (upper - lower) * 0.5;
+                pt -= center;
+
+                // The signal is only non-zero in a limited range, so don't waste samples
+                float low = pt.y - halfSize.y;
+                float high = pt.y + halfSize.y;
+                float start = clamp(-3.0 * sigma, low, high);
+                float end = clamp(3.0 * sigma, low, high);
+
+                // Accumulate samples (we can get away with surprisingly few samples)
+                float step = (end - start) / 4.0;
+                float y = start + step * 0.5;
+                float value = 0.0;
+                for (int i = 0; i < 4; i++)
+                {
+                    value += roundedBoxShadowX(pt.x, pt.y - y, sigma, corner, halfSize) * gaussian(y, sigma) * step;
+                    y += step;
+                }
+
+                return value;
+            }
+
+            float easeOutBack(float x)
+            {
+                const float c1 = 1.70158;
+                const float c3 = c1 + 1;
+
+                return 1 + c3 * pow(x - 1, 3) + c1 * pow(x - 1, 2);
+            }
             fixed4 frag(v2f i) : SV_Target
             {
                 fixed4 color = RED;
-                float2 size = i.size;
-                float minSize = min(size.x, size.y);
-                ElementMaterialInfo material = _UIForiaMaterialBuffer[i.indices.y & 0xffffff];
-
-                uint packedRadii = material.radius;
-                half4 radius = UnpackRadius(packedRadii, minSize);
-
-                float s = 0.25;
-                radius = float4(0.5, 0.5, 0.0, 0.2) * s;
-
-                float sdf = sdRoundBox(i.texCoord0 - 0.5, float2(s, s), radius);
-                // color.rgb = col * 1 - exp(-10 * abs(sdf));
-                // color.a = 1 - easeInOutQuad(4 * sdf);
-                float bevelAmount = 10 * (1 / size.x);
-
-                float2 bevelOffset = float2(0.5 * (i.texCoord0.x > 0.5 ? 1 : -1), 0.5 * (i.texCoord0.y > 0.5 ? 1 : -1));
-
-                float sdfBevel = sdRect(RotateUV(i.texCoord0 - bevelOffset, 45 * Deg2Rad), float2(bevelAmount, bevelAmount));
-                sdf = max(-sdfBevel, sdf);
-
-                float sigma = 100;
-                fixed4 boxShadowColor = drawRectShadow(i.texCoord0.xy * size, float4(0 + sqrt(sigma / s), 20 - sqrt(sigma / 2), size.xy), fixed4(0, 0, 0, 1), sigma);
-                // sdf = abs(sdf) - 0.0015;
-                float glow = 1.0 / (abs(sdf));
-                // sdf *= s /(0.5 *s); //1.5; //lerp(1, 10, saturate(sin(_Time.y)));
-                // sdf = pow(sdf, 3); //lerp(1, 3, frac(_Time.y)));
-                //color.rgb = glow * color.rgb; //float3(1.0, 0.5, 0.25);
-                // color.rgb = 1.0 - exp(-color.rgb);
-                color.a *= 1.0 - smoothstep(0, lerp(s * 0.5, fwidth(sdf), cos(_Time.y)), sdf);
-                return UIForiaColorSpace(color);
-                if (sdf <= 0)
-                {
-                    //    color = BLACK;
-                }
+                return color;
+                // float2 size = i.size;
+                // float minSize = min(size.x, size.y);
+                // ElementMaterialInfo material = _UIForiaMaterialBuffer[i.indices.y & 0xffffff];
+                //
+                // uint packedRadii = material.radius;
+                // half4 radius = UnpackRadius(packedRadii, minSize);
+                //
+                // float s = 0.25;
+                // radius = float4(0.5, 0.5, 0.0, 0.2) * s;
+                //
+                // float sdf = sdRoundBox(i.texCoord0 - 0.5, float2(s, s), radius);
+                // // color.rgb = col * 1 - exp(-10 * abs(sdf));
+                // // color.a = 1 - easeInOutQuad(4 * sdf);
+                // float bevelAmount = 10 * (1 / size.x);
+                //
+                // float2 bevelOffset = float2(0.5 * (i.texCoord0.x > 0.5 ? 1 : -1), 0.5 * (i.texCoord0.y > 0.5 ? 1 : -1));
+                //
+                // float sdfBevel = sdRect(RotateUV(i.texCoord0 - bevelOffset, 45 * Deg2Rad), float2(bevelAmount, bevelAmount));
+                // sdf = max(-sdfBevel, sdf);
+                //
+                // float sigma = 100;
+                // fixed4 boxShadowColor = drawRectShadow(i.texCoord0.xy * size, float4(0 + sqrt(sigma / s), 20 - sqrt(sigma / 2), size.xy), fixed4(0, 0, 0, 1), sigma);
+                // // sdf = abs(sdf) - 0.0015;
+                // float glow = 1.0 / (abs(sdf));
+                // // sdf *= s /(0.5 *s); //1.5; //lerp(1, 10, saturate(sin(_Time.y)));
+                // // sdf = pow(sdf, 3); //lerp(1, 3, frac(_Time.y)));
+                // //color.rgb = glow * color.rgb; //float3(1.0, 0.5, 0.25);
+                // // color.rgb = 1.0 - exp(-color.rgb);
+                // color.a *= 1.0 - smoothstep(0, lerp(s * 0.5, fwidth(sdf), cos(_Time.y)), sdf);
+                // return UIForiaColorSpace(color);
+               
 
                 // if(sdf > s) color.a = 0;
 

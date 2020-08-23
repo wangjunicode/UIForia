@@ -1053,7 +1053,15 @@ namespace UIForia.Graphics {
         }
 
     }
+    [Flags]
+    public enum MaskFlags : byte {
 
+        None = 0,
+        UseMaskTexture = 1 << 0,
+        Invert = 1 << 1,
+
+    }
+    
     [Flags]
     public enum ColorMode : byte {
 
@@ -1066,24 +1074,6 @@ namespace UIForia.Graphics {
         //LinearGradient = 1 << 4,
         //RadialGradient = 1 << 5,
         //CornerGradient = 1 << 6,
-
-
-    }
-
-    public enum MaskVisibility {
-
-        Visible,
-        Hidden
-
-    }
-
-    public enum MaskType {
-
-        Bounds,
-        SoftGeometry, // including AA
-        HardGeometry, // not including AA
-        Material, // user material 
-        Texture
 
     }
 

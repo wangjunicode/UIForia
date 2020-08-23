@@ -38,7 +38,7 @@ namespace ThisOtherThing.UI.ShapeUtils {
             center.x = x + (width * 0.5f);
             center.y = -(y + (height * 0.5f));
 
-            float innerOffset = (width < height ? width : height) * (1.0f - edgeGradientData.innerScale);
+            float innerOffset = 0; //(width < height ? width : height) * (1.0f - edgeGradientData.innerScale);
 
             AddRectVertRing(ref vh, center, width - innerOffset, height - innerOffset, color, width, height);
 

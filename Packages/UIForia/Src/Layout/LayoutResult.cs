@@ -107,6 +107,9 @@ namespace UIForia.Layout {
         public float VerticalPaddingBorderEnd => padding.bottom + border.bottom;
         public float HorizontalPaddingBorderStart => padding.left + border.left;
         public float HorizontalPaddingBorderEnd => padding.right + border.right;
+        
+        public float HorizontalPaddingBorder => padding.right + border.right + padding.left + border.left;
+        public float VerticalPaddingBorder => padding.bottom + border.bottom + padding.top + border.top;
 
         public Rect ScreenRect => new Rect(screenPosition, new Vector2(actualSize.width, actualSize.height));
         public Rect AllocatedRect => new Rect(allocatedPosition, new Vector2(allocatedSize.width, allocatedSize.height));
@@ -126,6 +129,7 @@ namespace UIForia.Layout {
         public float ContentAreaHeight {
             get => layoutSystemTablePointers->layoutBoxInfo[elementId.index].ContentAreaHeight;
         }
+
 
     }
 

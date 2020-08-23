@@ -3,13 +3,12 @@ using UnityEngine;
 
 namespace UIForia.Graphics {
 
-    [AssertSize(80)]
+    [AssertSize(96)]
     [StructLayout(LayoutKind.Explicit)]
     public struct UIForiaMaterialInfo {
 
         [FieldOffset(0)] public TextMaterialInfo textMaterial;
         [FieldOffset(0)] public ElementMaterialInfo elementElementMaterial;
-        [FieldOffset(0)] public ShadowMaterialInfo shadowMaterialInfo;
 
     }
 
@@ -17,7 +16,7 @@ namespace UIForia.Graphics {
     /// must be aligned on 16 byte boundaries for shader performance
     /// Could step this up to 64 if I needed to, might have to with masking Pie values for elements
     /// </summary>
-    [AssertSize(80)]
+    [AssertSize(96)]
     [StructLayout(LayoutKind.Sequential)]
     public unsafe struct TextMaterialInfo {
 
@@ -46,51 +45,50 @@ namespace UIForia.Graphics {
         private uint unused1;
         private uint unused2;
         private uint unused3;
+        
+        // todo -- move to float4 buffer and find a place for index storage
+        public uint maskFlags;
+        public uint maskTopLeftUV;
+        public uint maskBottomRightUV;
+        public float maskSoftness;
 
     }
 
-    [AssertSize(64)]
-    [StructLayout(LayoutKind.Sequential)]
-    public struct ElementMaterialInfoGPU {
+    // [AssertSize(64)]
+    // [StructLayout(LayoutKind.Sequential)]
+    // public struct ElementMaterialInfoGPU {
+    //
+    //     uint backgroundColor;
+    //     uint backgroundTint;
+    //     uint outlineColor;
+    //     uint outlineTint; // not used atm 
+    //
+    //     uint radius;
+    //     uint bevelTop;
+    //     uint bevelBottom;
+    //     uint fillOpenAndRotation;
+    //     float fillRadius;
+    //     float fillOffsetX;
+    //     float fillRadiusY;
+    //
+    //     uint bMode_oMode_unused;
+    //
+    //     // maybe move to float buffer
+    //
+    //     float outlineWidth;
+    //     uint unused0;
+    //     uint unused1;
+    //     uint unused2;
+    //
+    // }
 
-        uint backgroundColor;
-        uint backgroundTint;
-        uint outlineColor;
-        uint outlineTint; // not used atm 
-
-        uint radius;
-        uint bevelTop;
-        uint bevelBottom;
-        uint fillOpenAndRotation;
-        float fillRadius;
-        float fillOffsetX;
-        float fillRadiusY;
-
-        uint bMode_oMode_unused;
-
-        // maybe move to float buffer
-
-        float outlineWidth;
-        uint unused0;
-        uint unused1;
-        uint unused2;
-
-    }
-
-    [AssertSize(80)]
-    [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct ShadowMaterialInfo {
-
-        public fixed byte padding[80];
-
-    }
 
     ///<summary>
     /// must be aligned on 16 byte boundaries for shader performance
     /// </summary>
-    [AssertSize(80)]
+    [AssertSize(96)]
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct ElementMaterialInfo {
+    public  struct ElementMaterialInfo {
 
         public Color32 backgroundColor;
         public Color32 backgroundTint;
@@ -133,6 +131,12 @@ namespace UIForia.Graphics {
         public ushort opacity;
 
         public uint borderIndex;
+        
+        // todo -- move to float4 buffer and find a place for index storage
+        public uint maskFlags;
+        public float maskSoftness;
+        public uint maskTopLeftUV;
+        public uint maskBottomRightUV;
 
         // by putting these here we also free up texCoords in the actual vertices
         // could either encode some of the data there or re-purpose those

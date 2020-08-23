@@ -55,10 +55,16 @@ namespace UIForia.Graphics {
         PopClipRect = 1 << 8,
         UIForiaShadow = 1 << 9,
 
+        Mesh2D = 1 << 10,
+        Mesh3D = 1 << 11,
         // I'm not totally sure what these are yet
-        UIForiaGeometry,
-        UIForiaSDF,
-        PopStencilClip
+        UIForiaGeometry = 1 << 12,
+        UIForiaSDF = 1 << 13,
+        PopStencilClip = 1 << 14,
+
+        PushRenderTargetRegion = 1 << 15,
+        PopRenderTargetRegion = 1 << 16,
+
 
     }
 
@@ -111,6 +117,7 @@ namespace UIForia.Graphics {
 
         public TextureUsage bodyTexture;
         public TextureUsage outlineTexture;
+        public TextureUsage maskTexture;
 
     }
 
@@ -344,7 +351,7 @@ namespace UIForia.Systems {
                 float4Buffer = unsafeData.float4Buffer,
                 textEffectBuffer = application.textSystem.textEffectVertexInfoTable
             });
-            
+
             shapeBakingHandles[1] = UIForiaScheduler.Run(new BakeUIForiaText() {
                 drawList = unsafeData.drawList,
                 vertexList = unsafeData.textVertexList,
@@ -414,10 +421,11 @@ namespace UIForia.Systems {
         private static readonly int s_OriginMatrixKey = Shader.PropertyToID("_UIForiaOriginMatrix");
         private static readonly int s_FontDataBufferKey = Shader.PropertyToID("_UIForiaFontBuffer");
         private static readonly int s_GlyphBufferKey = Shader.PropertyToID("_UIForiaGlyphBuffer");
-        private static readonly int s_FontTextureKey = Shader.PropertyToID("_FontTexture");
         private static readonly int s_DPIScaleFactorKey = Shader.PropertyToID("_UIForiaDPIScale");
 
         private static readonly int s_MainTextureKey = Shader.PropertyToID("_MainTex");
+        private static readonly int s_FontTextureKey = Shader.PropertyToID("_FontTexture");
+        private static readonly int s_MaskTextureKey = Shader.PropertyToID("_MaskTexture");
         private static readonly int s_OutlineTextureKey = Shader.PropertyToID("_OutlineTex");
 
         private void UpdateComputeBufferData<T>(DataList<T>.Shared list, string bufferName, ComputeBuffer[] buffers, int idx, ComputeBufferType bufferType = ComputeBufferType.Structured) where T : unmanaged {
@@ -536,6 +544,9 @@ namespace UIForia.Systems {
             Matrix4x4 origin = Matrix4x4.TRS(new Vector3(-halfWidth, halfHeight, 0), Quaternion.identity, Vector3.one * application.DPIScaleFactor);
 
             Matrix4x4 identity = Matrix4x4.identity;
+
+            RenderTexture baseTexture = RenderTexture.active;
+
             commandBuffer.SetViewProjectionMatrices(identity, Matrix4x4.Ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, -100, 100));
 
             commandBuffer.SetGlobalBuffer(s_MatrixBufferKey, matrixBuffer);
@@ -554,7 +565,7 @@ namespace UIForia.Systems {
                 switch (renderCommand.type) {
 
                     case RenderCommandType.ShadowBatch: {
-                        
+
                         mpb.Clear();
 
                         Batch batch = unsafeData.batchList[renderCommand.batchIndex];
@@ -575,17 +586,26 @@ namespace UIForia.Systems {
 
                         Material material = resourceManager.GetMaterialInstance(MaterialId.UIForiaShape);
 
+                        bool needsMpb = false;
+
                         if (batch.materialPermutation.texture0 != 0 && renderContext.textureMap.TryGetValue(batch.materialPermutation.texture0, out Texture texture)) {
+                            needsMpb = true;
                             mpb.SetTexture(s_MainTextureKey, texture);
                         }
 
                         if (batch.materialPermutation.texture1 != 0 && renderContext.textureMap.TryGetValue(batch.materialPermutation.texture1, out texture)) {
+                            needsMpb = true;
                             mpb.SetTexture(s_OutlineTextureKey, texture);
+                        }
+
+                        if (batch.materialPermutation.texture2 != 0 && renderContext.textureMap.TryGetValue(batch.materialPermutation.texture2, out texture)) {
+                            needsMpb = true;
+                            mpb.SetTexture(s_MaskTextureKey, texture);
                         }
 
                         SetupStencilState(batch, commandBuffer);
 
-                        commandBuffer.DrawProceduralIndirect(indexBuffer, identity, material, 0, MeshTopology.Triangles, argBuffer, sizeof(IndirectArg) * batch.indirectArgOffset, mpb);
+                        commandBuffer.DrawProceduralIndirect(indexBuffer, identity, material, 0, MeshTopology.Triangles, argBuffer, sizeof(IndirectArg) * batch.indirectArgOffset, needsMpb ? mpb : null);
 
                         break;
                     }
@@ -593,8 +613,25 @@ namespace UIForia.Systems {
                     case RenderCommandType.ShapeEffectBatch:
                         break;
 
-                    case RenderCommandType.Mesh:
+                    case RenderCommandType.Mesh: {
+
+                        Batch batch = unsafeData.batchList[renderCommand.batchIndex];
+
+                        if (!renderContext.meshMap.TryGetValue(batch.meshId, out Mesh mesh)) {
+                            continue;
+                        }
+                        
+                        if (!renderContext.materialMap.TryGetValue(batch.materialId.index, out Material material)) {
+                            continue;
+                        }
+
+                        mpb.Clear();
+                        //SetupMaterialProperties(batch);
+
+                        // SetupStencilState(batch, commandBuffer); todo -- borked
+                        commandBuffer.DrawMesh(mesh, math.mul(origin, *batch.matrix), material, 0, 0, mpb);
                         break;
+                    }
 
                     case RenderCommandType.MeshBatch:
                         break;
@@ -631,6 +668,19 @@ namespace UIForia.Systems {
                         break;
 
                     case RenderCommandType.PushRenderTexture:
+                        RenderTexture rt = renderContext.renderTextures[renderCommand.batchIndex];
+                        // todo -- need to offset newOrigin by the screen xy of the element providing it
+                        Matrix4x4 newOrigin = Matrix4x4.TRS(new Vector3(-(rt.width / 2f) - 10, (rt.height / 2f) + 10, 0), Quaternion.identity, Vector3.one * application.DPIScaleFactor);
+                        commandBuffer.SetRenderTarget(rt);
+                        commandBuffer.ClearRenderTarget(true, true, Color.clear);
+                        commandBuffer.SetGlobalMatrix(s_OriginMatrixKey, newOrigin);
+                        commandBuffer.SetViewProjectionMatrices(identity, Matrix4x4.Ortho(-(rt.width / 2f), rt.width / 2f, -(rt.height / 2f), rt.height / 2f, -100, 100));
+                        break;
+
+                    case RenderCommandType.PopRenderTexture:
+                        commandBuffer.SetRenderTarget(baseTexture);
+                        commandBuffer.SetGlobalMatrix(s_OriginMatrixKey, origin);
+                        commandBuffer.SetViewProjectionMatrices(identity, Matrix4x4.Ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, -100, 100));
                         break;
 
                     case RenderCommandType.ClearRenderTarget:

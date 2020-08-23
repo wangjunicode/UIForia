@@ -8,6 +8,7 @@
 
 #define OrthoCameraWidth unity_OrthoParams.x
 #define OrthoCameraHeight unity_OrthoParams.y
+#include <HLSLSupport.cginc>
 
 struct FillSettings {
     fixed4 fillColor1;

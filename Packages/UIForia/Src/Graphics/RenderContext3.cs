@@ -10,6 +10,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Debug = UnityEngine.Debug;
 using Gradient = UIForia.Rendering.Gradient;
 
 namespace UIForia.Graphics {
@@ -27,7 +28,6 @@ namespace UIForia.Graphics {
         internal ushort renderIndex;
 
         internal DataList<DrawInfo2> drawList;
-        private HeapAllocated<float4x4> dummyMatrix;
         private PagedByteAllocator stackAllocator;
         private float4x4* defaultMatrix;
 
@@ -36,24 +36,35 @@ namespace UIForia.Graphics {
         internal ResourceManager resourceManager;
         private TextMaterialInfo* textMaterialPtr;
         private ElementId elementId;
+
         private int stencilClipStart;
         private int defaultOutlineTexture;
         private int defaultBGTexture;
+        private int maskTextureId;
+
         private bool hasPendingMaterialOverrides;
         private DataList<MaterialPropertyOverride> materialValueOverrides;
         private MaterialPropertyOverride* currentOverrideProperties;
         private DrawInfoFlags currentFlagSet;
         private MaterialId activeMaterialId;
         internal AxisAlignedBounds2DUShort uvBorderBounds;
-        
+        internal LightList<RenderTexture> renderTextures;
+
+        internal Dictionary<int, Material> materialMap;
+        public Dictionary<int, Mesh> meshMap;
+
+        private Gradient gradient;
+
         public RenderContext3(ResourceManager resourceManager) {
             this.resourceManager = resourceManager;
+            this.materialMap = new Dictionary<int, Material>();
+            this.meshMap = new Dictionary<int, Mesh>();
             this.textureMap = new Dictionary<int, Texture>(32);
             this.callbacks = new StructList<CommandBufferCallback>(4);
-            this.dummyMatrix = new HeapAllocated<float4x4>(float4x4.identity);
             this.drawList = new DataList<DrawInfo2>(64, Allocator.Persistent);
             this.stackAllocator = new PagedByteAllocator(TypedUnsafe.Kilobytes(16), Allocator.Persistent, Allocator.Persistent);
             this.materialValueOverrides = new DataList<MaterialPropertyOverride>(16, Allocator.Persistent);
+            this.renderTextures = new LightList<RenderTexture>();
         }
 
         public void Setup(ElementId elementId, MaterialId materialId, int renderIndex, float4x4* transform) {
@@ -63,6 +74,7 @@ namespace UIForia.Graphics {
             this.defaultMatrix = transform;
             this.defaultBGTexture = 0;
             this.defaultOutlineTexture = 0;
+            this.maskTextureId = 0;
             this.gradient = null;
             hasPendingMaterialOverrides = false;
             currentFlagSet = 0;
@@ -94,6 +106,29 @@ namespace UIForia.Graphics {
         internal void AddTexture(Texture texture) {
             // GetHashCode() returns the texture's instanceId but without an IsMainThread() check
             textureMap[texture.GetHashCode()] = texture;
+        }
+
+        public void SetMaskTexture(Texture texture) {
+            if (!ReferenceEquals(texture, null)) {
+                maskTextureId = texture.GetHashCode();
+                AddTexture(texture);
+            }
+        }
+
+        public void SetMaskTexture(TextureReference textureReference) {
+            if (!ReferenceEquals(textureReference?.texture, null)) {
+                maskTextureId = textureReference.textureId;
+                // uvBorderBounds = textureReference.uvBorderRect;
+                AddTexture(textureReference.texture);
+            }
+        }
+
+        public void SetBackgroundTexture(Texture texture) {
+            uvBorderBounds = default;
+            if (!ReferenceEquals(texture, null)) {
+                defaultBGTexture = texture.GetHashCode();
+                AddTexture(texture);
+            }
         }
 
         public void SetBackgroundTexture(TextureReference textureReference) {
@@ -141,6 +176,35 @@ namespace UIForia.Graphics {
             currentOverrideProperties = null;
             hasPendingMaterialOverrides = false;
             currentFlagSet = 0;
+        }
+
+        public void DrawMesh(Mesh mesh) {
+            int meshId = mesh.GetHashCode();
+            meshMap[meshId] = mesh;
+
+            if (hasPendingMaterialOverrides) {
+                CommitMaterialModifications();
+            }
+
+            Bounds bounds = mesh.bounds;
+            DrawType2 drawType = DrawType2.Mesh2D;
+            if (bounds.size.z != 0) {
+                return; // todo -- mesh3d and handle culling differently
+            }
+
+            drawList.Add(new DrawInfo2() {
+                matrix = defaultMatrix,
+                elementId = elementId,
+                drawType = drawType,
+                materialId = activeMaterialId,
+                localBounds = new AxisAlignedBounds2D(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y),
+                materialData = currentOverrideProperties,
+                shapeData = (void*) meshId,
+                drawSortId = new DrawSortId() {
+                    localRenderIdx = localDrawId++,
+                    baseRenderIdx = renderIndex
+                }
+            });
         }
 
         public void DrawQuad(float x, float y, float width, float height) {
@@ -200,7 +264,7 @@ namespace UIForia.Graphics {
                     localRenderIdx = localDrawId++,
                     baseRenderIdx = renderIndex
                 }
-            });    
+            });
         }
 
         public void DrawElement(float x, float y, in ElementDrawDesc drawDesc) {
@@ -224,6 +288,9 @@ namespace UIForia.Graphics {
                 materialData = stackAllocator.Allocate(new ElementMaterialSetup() {
                     bodyTexture = new TextureUsage() {
                         textureId = defaultBGTexture
+                    },
+                    maskTexture = new TextureUsage() {
+                        textureId = maskTextureId
                     }
                 }),
 
@@ -248,7 +315,7 @@ namespace UIForia.Graphics {
                 DrawElement(x, y, drawDesc);
                 return;
             }
-            
+
             ElementDrawInfo* elementDrawInfo = stackAllocator.Allocate(new ElementDrawInfo() {
                 x = x,
                 y = y,
@@ -367,15 +434,20 @@ namespace UIForia.Graphics {
         public void Clear() {
             materialValueOverrides.size = 0;
             textureMap.Clear();
+            materialMap.Clear();
             drawList.size = 0;
             callbacks.Clear();
             stackAllocator.Clear();
+            for (int i = 0; i < renderTextures.size; i++) {
+                RenderTexture.ReleaseTemporary(renderTextures[i]);
+            }
+
+            renderTextures.Clear();
         }
 
         public void Dispose() {
             stackAllocator.Dispose();
             drawList.Dispose();
-            dummyMatrix.Dispose();
             materialValueOverrides.Dispose();
         }
 
@@ -466,15 +538,39 @@ namespace UIForia.Graphics {
             });
         }
 
-        private Gradient gradient;
+        public RenderTexture PushRenderTargetRegion(AxisAlignedBounds2DUShort screenBounds) {
+            drawList.Add(new DrawInfo2() {
+                drawType = DrawType2.PushRenderTargetRegion,
+                matrix = defaultMatrix,
+                elementId = elementId,
+                shapeData = (void*) renderTextures.size,
+                drawSortId = new DrawSortId() {
+                    baseRenderIdx = renderIndex,
+                    localRenderIdx = localDrawId++
+                }
+            });
+            renderTextures.Add(RenderTexture.GetTemporary(screenBounds.Width, screenBounds.Height, 24, RenderTextureFormat.Default));
+            return renderTextures[renderTextures.size - 1];
+        }
+
+        public void PopRenderTargetRegion() {
+            drawList.Add(new DrawInfo2() {
+                drawType = DrawType2.PopRenderTargetRegion,
+                matrix = defaultMatrix,
+                elementId = elementId,
+                drawSortId = new DrawSortId() {
+                    baseRenderIdx = renderIndex,
+                    localRenderIdx = localDrawId++
+                }
+            });
+        }
 
         public void SetGradient(Gradient gradient) {
             this.gradient = gradient;
         }
 
         public void SetMatrix(in float4x4 matrix) {
-            dummyMatrix.Set(matrix);
-            defaultMatrix = dummyMatrix;
+            defaultMatrix = stackAllocator.Allocate(matrix);
         }
 
         public void PaintElementBackground(UIElement element) {
@@ -484,7 +580,15 @@ namespace UIForia.Graphics {
         public void PaintElementForeground(UIElement element) {
             element.renderBox?.PaintForeground3(this);
         }
-        
+
+        public void SetMaterial(Material material) {
+            if (ReferenceEquals(material, null)) return;
+            activeMaterialId = new MaterialId(material.GetHashCode());
+            materialMap[activeMaterialId.index] = material;
+            hasPendingMaterialOverrides = false;
+            materialValueOverrides.size = 0;
+        }
+
     }
 
     public struct ElementDrawInfo {

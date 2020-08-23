@@ -159,6 +159,11 @@ namespace UIForia.Graphics {
                         break;
                     }
 
+                    case DrawType2.PopRenderTargetRegion: 
+                    case DrawType2.PushRenderTargetRegion: {
+                        renderTraversalInfo.requiresRendering = true;
+                        break;
+                    }
                     case DrawType2.PushClipRect: {
 
                         float3 topLeft = new float3(drawInfo.localBounds.xMin, -drawInfo.localBounds.yMin, 0);
@@ -237,6 +242,7 @@ namespace UIForia.Graphics {
                         break;
                     }
 
+                    case DrawType2.Mesh2D:
                     case DrawType2.UIForiaElement:
                     case DrawType2.UIForiaShadow:
                     case DrawType2.UIForiaText: {

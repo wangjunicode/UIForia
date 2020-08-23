@@ -300,7 +300,7 @@ namespace UIForia.Compilers.Style {
                 {"shadowintensity", (targetStyle, property, context) => targetStyle.ShadowIntensity = MapNumber(property.children[0], context)},
                 {"shadowcolor", (targetStyle, property, context) => targetStyle.ShadowColor = MapColor(property.children[0], context)},
                 {"shadowtint", (targetStyle, property, context) => targetStyle.ShadowTint = MapColor(property.children[0], context)},
-                {"shadowopacity", (targetStyle, property, context) => targetStyle.ShadowOpacity = MapNumber(property, context)},
+                {"shadowopacity", (targetStyle, property, context) => targetStyle.ShadowOpacity = MapNumber(property.children[0], context)},
 
                 {"material", (targetStyle, property, context) => targetStyle.Material = MapMaterial(property, context)},
 

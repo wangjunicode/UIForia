@@ -103,39 +103,6 @@ namespace UIForia.Graphics {
                 ref MeshInfo meshInfo = ref meshInfoArray[i];
                 ElementBatch* elementBatch = (ElementBatch*) drawInfo.shapeData;
 
-                if (drawInfo.drawType == DrawType2.UIForiaShadow) {
-                    meshInfo.type = MeshInfoType.Shadow;
-                    meshInfo.vertexStart = vertexIdx;
-                    meshInfo.vertexCount = 1;
-                    
-                    ref ElementDrawInfo element = ref elementBatch->elements[0];
-                    float x = element.x;
-                    float y = element.y;
-                    float width = element.drawDesc.width;
-                    float height = element.drawDesc.height;
-                    float halfWidth = width * 0.5f;
-                    float halfHeight = height * 0.5f;
-
-                    ref UIForiaVertex vertex = ref vertices[vertexIdx++];
-                    vertex.position.x = x + halfWidth;
-                    vertex.position.y = -(y + halfHeight);
-                    vertex.texCoord0.x = width;
-                    vertex.texCoord0.y = height;
-                    vertex.indices.x = 0; // set later
-                    vertex.indices.y = (uint) materialList.size;
-                    vertex.indices.z = 0; 
-                    vertex.indices.w = 0; 
-                    
-                    
-                    materialList.Add(default);
-                    ShadowMaterialInfo* matptr = (ShadowMaterialInfo*)materialList.GetPointer(materialList.size - 1);
-                    
-                    
-                    
-                    continue;
-                }
-                
-
                 int count = elementBatch->count;
 
                 if (count == 1) {
@@ -194,6 +161,11 @@ namespace UIForia.Graphics {
                     mat.borderColorRight = element.drawDesc.borderColorRight;
                     mat.borderColorBottom = element.drawDesc.borderColorBottom;
                     mat.borderColorLeft = element.drawDesc.borderColorLeft;
+
+                    mat.maskFlags = (uint)element.drawDesc.maskFlags;
+                    mat.maskSoftness = element.drawDesc.maskSoftness;
+                    mat.maskTopLeftUV = element.drawDesc.maskTopLeftUV;
+                    mat.maskBottomRightUV = element.drawDesc.maskBottomRightUV;
 
                     if (element.drawDesc.HasBorder) {
                         mat.borderIndex = (uint) float4Buffer.size;

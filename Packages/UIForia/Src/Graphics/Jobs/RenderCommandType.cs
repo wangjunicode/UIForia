@@ -26,7 +26,9 @@
 
         SetGradientDataBuffer,
 
-        ShadowBatch
+        ShadowBatch,
+
+        PopRenderTexture
 
     }
 

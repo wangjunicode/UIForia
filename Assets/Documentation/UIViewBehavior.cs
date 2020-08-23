@@ -150,7 +150,7 @@ namespace UIForia {
         private Mesh mesh;
         private Mesh coverMesh;
 
-        void OnPreRender() {
+        void OnPostRender() {
 
             if (application != null && commandBuffer != null) {
                 commandBuffer.Clear();

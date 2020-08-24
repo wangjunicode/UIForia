@@ -1639,7 +1639,7 @@ namespace UIForia.Compilers.Style {
                     if (assetInfo.spriteName != null) {
                         return context.resourceManager?.GetSpriteTexture(assetInfo);
                     }
-                    
+
                     return context.resourceManager?.GetTexture(assetInfo.path);
 
                 case StyleLiteralNode literalNode:
@@ -2091,6 +2091,26 @@ namespace UIForia.Compilers.Style {
             }
 
             throw new CompileException($"Tried to set a painter variable '{painterPropertyNode.propertyName}' but {painterPropertyNode.painterName} does not define it.");
+        }
+
+        public static void MapMaterialProperty(UIStyle normalStyle, MaterialPropertyNode materialPropertyNode, StyleCompileContext context) {
+            if (context.resourceManager.TryGetMaterialPropertyInfo(materialPropertyNode.materialName, materialPropertyNode.identifier, out MaterialPropertyDefinition propertyDefinition)) {
+                switch (propertyDefinition.propertyType) {
+                    case MaterialPropertyType.Color:
+                        break;
+                    case MaterialPropertyType.Range:
+                    case MaterialPropertyType.Float:
+                        normalStyle.SetFloatProperty((StylePropertyId) propertyDefinition.stylePropertyId, MapNumber(materialPropertyNode.children[0], context));
+                        break;
+                    case MaterialPropertyType.Vector:
+                        break;
+                    case MaterialPropertyType.Texture:
+                        normalStyle.SetTextureProperty((StylePropertyId) propertyDefinition.stylePropertyId, MapTexture(materialPropertyNode.children[0], context));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
         }
 
     }

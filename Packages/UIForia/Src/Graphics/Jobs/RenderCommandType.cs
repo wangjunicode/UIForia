@@ -28,7 +28,9 @@
 
         ShadowBatch,
 
-        PopRenderTexture
+        PopRenderTexture,
+
+        GeometryBatch
 
     }
 

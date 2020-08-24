@@ -227,6 +227,33 @@ namespace UIForia.Text {
 
         public bool HasSelection => selectionCursor.index >= 0 && selectionOrigin.index >= 0;
 
+        public string GetSelectedText() {
+            if (!HasSelection) return string.Empty;
+
+            RangeInt range = GetSelectionRange();
+
+            TextUtil.StringBuilder.Clear();
+
+            int charIdx = 0;
+            for (int i = 0; i < symbolList.size; i++) {
+                ref TextSymbol symbol = ref symbolList.array[i];
+                if (symbol.type != TextSymbolType.Character) {
+                    continue;
+                }
+
+                if (charIdx >= range.start) {
+                    TextUtil.StringBuilder.Append((char) symbol.charInfo.character);
+                }
+
+                charIdx++;
+                if (charIdx >= range.end) {
+                    break;
+                }
+            }
+
+            return TextUtil.StringBuilder.ToString();
+        }
+
         public SelectionCursor GetSelectionCursorAtPoint(in DataList<FontAssetInfo>.Shared fontMap, Vector2 point) {
             if (lineInfoList.size == 0) {
                 return SelectionCursor.Invalid;
@@ -612,6 +639,18 @@ namespace UIForia.Text {
             }
 
             return layoutSymbolList.size - 1;
+        }
+
+        public void MoveToStartOfLine(bool evtCommand) {
+            int symbolIndex = GetCursorSymbolIndex(selectionCursor.index);
+            if (symbolIndex < 0) {
+                return;
+            }
+
+            // ref TextLineInfo lineInfo = ref lineInfoList.array[symbolIndex];
+            // ref WordInfo wordSymbol = ref layoutSymbolList.array[lineInfo.wordStart].wordInfo;
+            // wordSymbol.charStart
+            // todo -- finish this
         }
 
         public void MoveCursorLeft(bool maintainSelection, bool evtCommand) {

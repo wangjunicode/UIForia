@@ -54,7 +54,6 @@ namespace UIForia.Graphics {
             int lastElementMaterialUseId;
 
             for (int i = 0; i < drawList.size; i++) {
-
                 ref DrawInfo2 drawInfo = ref drawList[i];
 
                 if (!requiresRender[i]) {
@@ -70,7 +69,6 @@ namespace UIForia.Graphics {
 
                 int idx = 0;
                 if (map.TryGetReference(materialPermutationIds[i], ref idx)) { }
-
             }
 
             map.Dispose();
@@ -103,7 +101,6 @@ namespace UIForia.Graphics {
             // if parent clipper is culled, then so is that child clipper
 
             for (int i = 0; i < drawList.size; i++) {
-
                 // we want to skip to the first thing that actually draws
                 // if we hit any stenciling in here we ignore it
                 // we do need to push callbacks though
@@ -116,7 +113,17 @@ namespace UIForia.Graphics {
                 }
 
                 switch (drawInfo.drawType) {
+                    case DrawType2.UIForiaGeometry: {
+                        int batchMemberOffset = batchMemberList.size;
 
+                        i = UIForiaGeometryBatch_InOrderBatch(ref renderTraversalList, i) - 1;
+
+                        // UIForiaShapeBatch_OutOfOrderBatch(ref renderTraversalList, i + 1, ref materialPermutation);
+                        
+                        SubmitInorderBatch(renderInfo, materialPermutations[0], batchMemberOffset, BatchType.Geometry, RenderCommandType.GeometryBatch);
+
+                        break;
+                    }
                     case DrawType2.Mesh2D: {
                         int batchIdx = batchList.size;
                         ref StencilInfo stencilInfo = ref stencilList[renderInfo.stencilIndex];
@@ -137,17 +144,17 @@ namespace UIForia.Graphics {
                     case DrawType2.PushRenderTargetRegion: {
                         renderCommands.Add(new RenderCommand() {
                             type = RenderCommandType.PushRenderTexture,
-                            batchIndex = (int)drawInfo.shapeData
+                            batchIndex = (int) drawInfo.shapeData
                         });
-                        
+
                         break;
                     }
                     case DrawType2.PopRenderTargetRegion: {
                         renderCommands.Add(new RenderCommand() {
                             type = RenderCommandType.PopRenderTexture,
-                            batchIndex = (int)drawInfo.shapeData
+                            batchIndex = (int) drawInfo.shapeData
                         });
-                        
+
                         break;
                     }
                     case DrawType2.Callback:
@@ -159,7 +166,6 @@ namespace UIForia.Graphics {
                         break;
 
                     case DrawType2.UIForiaText: {
-
                         int batchMemberOffset = batchMemberList.size;
 
                         i = UIForiaTextBatch_InOrderBatch(ref renderTraversalList, i, out MaterialPermutation materialPermutation) - 1;
@@ -169,11 +175,9 @@ namespace UIForia.Graphics {
                         SubmitInorderBatch(renderInfo, materialPermutation, batchMemberOffset, BatchType.Text, RenderCommandType.SDFTextBatch);
 
                         break;
-
                     }
 
                     case DrawType2.UIForiaElement: {
-
                         int batchMemberOffset = batchMemberList.size;
 
                         i = UIForiaShapeBatch_InOrderBatch(ref renderTraversalList, i, out MaterialPermutation materialPermutation) - 1;
@@ -195,9 +199,7 @@ namespace UIForia.Graphics {
                         SubmitInorderBatch(renderInfo, materialPermutation, batchMemberOffset, BatchType.Shadow, RenderCommandType.ShadowBatch);
                         break;
                     }
-
                 }
-
             }
 
             stencilsToPush.Dispose();
@@ -234,7 +236,6 @@ namespace UIForia.Graphics {
             initialCandidateList.size = 0;
 
             for (int i = startIdx + 1; i < drawList.size; i++) {
-
                 ref DrawInfo2 current = ref drawInfoArray[i];
                 ref RenderTraversalInfo renderInfo = ref renderInfoArray[i];
 
@@ -258,7 +259,6 @@ namespace UIForia.Graphics {
             AxisAlignedBounds2D* transformedBoundsArray = transformedBounds.GetArrayPointer();
 
             for (int i = 0; i < initialCandidateList.size; i++) {
-
                 // discard the ones that are in different stencils for now, improve this later
 
                 int idx = initialCandidateList.array[i];
@@ -269,7 +269,6 @@ namespace UIForia.Graphics {
                 bool fitsInBatch = true;
 
                 for (int j = startIdx; j < idx; j++) {
-
                     ref RenderTraversalInfo renderInfo = ref renderInfoArray[j];
                     ref DrawInfo2 test = ref drawInfoArray[j];
 
@@ -300,7 +299,6 @@ namespace UIForia.Graphics {
                 bool passTexture2 = permutation.texture2 == 0 || permutation.texture2 == maskTextureId || maskTextureId == 0;
 
                 if (passTexture0 && passTexture1 && passTexture2) {
-
                     if (permutation.texture0 == 0) {
                         permutation.texture0 = bodyTextureId;
                     }
@@ -316,9 +314,7 @@ namespace UIForia.Graphics {
                     renderInfoArray[idx].requiresRendering = false;
                     inOrderBatchList.Add(idx);
                 }
-
             }
-
         }
 
         private void UIForiaTextBatch_OutOfOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, ref MaterialPermutation permutation) {
@@ -353,7 +349,6 @@ namespace UIForia.Graphics {
             initialCandidateList.size = 0;
 
             for (int i = startIdx + 1; i < drawList.size; i++) {
-
                 ref DrawInfo2 current = ref drawInfoArray[i];
                 ref RenderTraversalInfo renderInfo = ref renderInfoArray[i];
 
@@ -377,7 +372,6 @@ namespace UIForia.Graphics {
             AxisAlignedBounds2D* transformedBoundsArray = transformedBounds.GetArrayPointer();
 
             for (int i = 0; i < initialCandidateList.size; i++) {
-
                 // discard the ones that are in different stencils for now, improve this later
 
                 int idx = initialCandidateList.array[i];
@@ -388,7 +382,6 @@ namespace UIForia.Graphics {
                 bool fitsInBatch = true;
 
                 for (int j = startIdx; j < idx; j++) {
-
                     ref RenderTraversalInfo renderInfo = ref renderInfoArray[j];
                     ref DrawInfo2 test = ref drawInfoArray[j];
 
@@ -421,7 +414,6 @@ namespace UIForia.Graphics {
                 bool passTexture1 = permutation.texture1 == 0 || permutation.texture1 == outlineTextureId || outlineTextureId == 0;
 
                 if (passTexture0 && passTexture1) {
-
                     if (permutation.texture0 == 0) {
                         permutation.texture0 = faceTextureId;
                     }
@@ -433,9 +425,7 @@ namespace UIForia.Graphics {
                     renderInfoArray[idx].requiresRendering = false;
                     inOrderBatchList.Add(idx);
                 }
-
             }
-
         }
 
         private void SubmitInorderBatch(RenderTraversalInfo renderInfo, MaterialPermutation materialPermutation, int batchMemberOffset, BatchType batchType, RenderCommandType cmdType) {
@@ -499,11 +489,9 @@ namespace UIForia.Graphics {
                             break;
                     }
                 }
-
             }
 
             stencilsToPush.size = 0;
-
         }
 
         public int UIForiaTextBatch_InOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, out MaterialPermutation permutation) {
@@ -535,7 +523,6 @@ namespace UIForia.Graphics {
             bool isStencilMember = renderTraversalList[startIdx].isStencilMember;
 
             for (int i = startIdx + 1; i < drawList.size; i++) {
-
                 ref DrawInfo2 current = ref drawInfoArray[i];
                 ref RenderTraversalInfo renderInfo = ref renderInfoArray[i];
 
@@ -591,14 +578,12 @@ namespace UIForia.Graphics {
                 }
 
                 inOrderBatchList.Add(i);
-
             }
 
             return drawList.size;
         }
 
         private int UIForiaShadowBatch_InOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, out MaterialPermutation permutation) {
-
             DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
             RenderTraversalInfo* renderInfoArray = renderDataList.GetArrayPointer();
 
@@ -628,7 +613,6 @@ namespace UIForia.Graphics {
 
             bool isStencilMember = renderTraversalList[startIdx].isStencilMember;
             for (int i = startIdx + 1; i < drawList.size; i++) {
-
                 ref DrawInfo2 current = ref drawInfoArray[i];
                 ref RenderTraversalInfo renderInfo = ref renderInfoArray[i];
 
@@ -650,14 +634,71 @@ namespace UIForia.Graphics {
                 }
 
                 inOrderBatchList.Add(i);
+            }
 
+            return drawList.size;
+        }
+
+        public int UIForiaGeometryBatch_InOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx) {
+            DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
+            RenderTraversalInfo* renderInfoArray = renderDataList.GetArrayPointer();
+
+            inOrderBatchList.Add(startIdx);
+
+            int stencilIndex = renderTraversalList[startIdx].stencilIndex;
+
+            if (stencilList[stencilIndex].drawState == StencilSetupState.Uninitialized) {
+                stencilsToPush.Add(stencilIndex);
+                stencilList[stencilIndex].drawState = StencilSetupState.Pushed;
+            }
+
+            VertexSetup vertexSetup = ((UIForiaGeometryShapeData*) drawInfoArray[startIdx].shapeData)->type;
+            MaterialId materialId = drawInfoArray[startIdx].materialId;
+            int targetPermutationId = materialPermutationIds.array[startIdx];
+
+            bool isStencilMember = renderTraversalList[startIdx].isStencilMember;
+            for (int i = startIdx + 1; i < drawList.size; i++) {
+                ref DrawInfo2 current = ref drawInfoArray[i];
+                ref RenderTraversalInfo renderInfo = ref renderInfoArray[i];
+
+                if (renderInfo.isStencilMember != isStencilMember || !renderInfo.requiresRendering) {
+                    continue;
+                }
+
+                // todo -- if material supports UIForia rect clipping 
+                // (current.drawType & (DrawType2.PushClipRect | DrawType2.PopClipRect)) != 0
+
+                if (current.drawType != DrawType2.UIForiaGeometry) {
+                    return i;
+                }
+
+                if (current.materialId.index != materialId.index) {
+                    continue;
+                }
+
+                if (materialPermutationIds.array[i] != targetPermutationId) {
+                    return i;
+                }
+
+                UIForiaGeometryShapeData* geometryShapeData = (UIForiaGeometryShapeData*) current.shapeData;
+
+                if (geometryShapeData->type != vertexSetup) {
+                    return i;
+                }
+
+                // new stencil breaks in-order batching, we'll get around this in the out of order pass
+                if (renderInfo.stencilIndex != stencilIndex) {
+                    return i;
+                }
+
+
+                inOrderBatchList.Add(i);
             }
 
             return drawList.size;
         }
 
         public int UIForiaShapeBatch_InOrderBatch(ref DataList<RenderTraversalInfo> renderDataList, int startIdx, out MaterialPermutation permutation) {
-
             DrawInfo2* drawInfoArray = drawList.GetArrayPointer();
             RenderTraversalInfo* renderInfoArray = renderDataList.GetArrayPointer();
 
@@ -692,7 +733,6 @@ namespace UIForia.Graphics {
 
             bool isStencilMember = renderTraversalList[startIdx].isStencilMember;
             for (int i = startIdx + 1; i < drawList.size; i++) {
-
                 ref DrawInfo2 current = ref drawInfoArray[i];
                 ref RenderTraversalInfo renderInfo = ref renderInfoArray[i];
 
@@ -756,11 +796,9 @@ namespace UIForia.Graphics {
                 }
 
                 inOrderBatchList.Add(i);
-
             }
 
             return drawList.size;
-
         }
 
     }

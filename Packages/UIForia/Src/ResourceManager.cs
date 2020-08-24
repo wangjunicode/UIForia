@@ -412,10 +412,8 @@ namespace UIForia {
                         return MaterialPropertyType.Vector;
 
                     case UnityEditor.ShaderUtil.ShaderPropertyType.Float:
-                        return MaterialPropertyType.Float;
-
                     case UnityEditor.ShaderUtil.ShaderPropertyType.Range:
-                        return MaterialPropertyType.Range;
+                        return MaterialPropertyType.Float;
 
                     case UnityEditor.ShaderUtil.ShaderPropertyType.TexEnv:
                         return MaterialPropertyType.Texture;
@@ -645,6 +643,15 @@ namespace UIForia {
 
             textureReference = spriteAssetInfo.defaultSprite.textureReference;
             return true;
+        }
+
+        public bool TryGetMaterialPropertyInfo(string materialName, string value, out MaterialPropertyDefinition info) {
+            if (materialDatabase.TryGetMaterialInfo(materialName, out MaterialInfo materialInfo)) {
+                return materialInfo.TryGetPropertyInfo(value, out info);
+            }
+
+            info = default;
+            return false;
         }
 
     }

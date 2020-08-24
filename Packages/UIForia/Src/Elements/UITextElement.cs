@@ -56,6 +56,10 @@ namespace UIForia.Elements {
             }
         }
 
+        public bool HasSelection {
+            get { return textInfo != null && textInfo->HasSelection; }
+        }
+
         public string GetText() {
             return text;
         }
@@ -156,8 +160,9 @@ namespace UIForia.Elements {
             return default;
         }
 
-        public SelectionRange MoveToStartOfLine(SelectionRange selectionRange, bool evtShift) {
-            throw new NotImplementedException();
+        public void MoveToStartOfLine(bool evtShift) {
+            if (textInfo == null) return;
+            textInfo->MoveToStartOfLine(evtShift);
         }
 
         public SelectionRange MoveToEndOfLine(SelectionRange selectionRange, bool evtShift) {
@@ -174,8 +179,9 @@ namespace UIForia.Elements {
             textInfo->MoveCursorRight(maintainSelection, evtCommand);
         }
 
-        public string GetSelectedString(SelectionRange selectionRange) {
-            throw new NotImplementedException();
+        public string GetSelectedString() {
+            if (textInfo == null) return string.Empty;
+            return textInfo->GetSelectedText();
         }
 
         public int GetIndexAtPoint(Vector2 point) {
@@ -224,6 +230,12 @@ namespace UIForia.Elements {
             if (textInfo == null) return text;
             SetText(SelectionRangeUtil.DeleteTextBackwards(text, ref UnsafeUtility.AsRef<TextInfo>(textInfo)));
             return text;
+        }
+
+        public void SelectAll() {
+            if (textInfo == null) return;
+            textInfo->_selectionOrigin = new SelectionCursor(0, SelectionEdge.Left);
+            textInfo->selectionCursor = new SelectionCursor(textInfo->symbolList.size - 1, SelectionEdge.Right);
         }
 
     }

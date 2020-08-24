@@ -208,6 +208,48 @@ namespace UIForia.Rendering {
             return destination;
         }
 
+        public void SetFloatProperty(StylePropertyId propertyId, float result) {
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
+                    array[i] = new StyleProperty(propertyId, result);
+                }
+            }
+
+            if (PropertyCount + 1 >= array.Length) {
+                Array.Resize(ref array, PropertyCount * 2);
+            }
+
+            array[PropertyCount++] = new StyleProperty(propertyId, result);
+        }
+
+        public void SetColorProperty(StylePropertyId propertyId, Color32 result) {
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
+                    array[i] = new StyleProperty(propertyId, result);
+                }
+            }
+
+            if (PropertyCount + 1 >= array.Length) {
+                Array.Resize(ref array, PropertyCount * 2);
+            }
+
+            array[PropertyCount++] = new StyleProperty(propertyId, result);
+        }
+
+        public void SetTextureProperty(StylePropertyId propertyId, TextureReference result) {
+            for (int i = 0; i < PropertyCount; i++) {
+                if (array[i].propertyId == propertyId) {
+                    array[i] = new StyleProperty(propertyId, result);
+                }
+            }
+
+            if (PropertyCount + 1 >= array.Length) {
+                Array.Resize(ref array, PropertyCount * 2);
+            }
+
+            array[PropertyCount++] = new StyleProperty(propertyId, result);
+        }
+        
     }
 
 }

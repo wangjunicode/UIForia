@@ -22,7 +22,7 @@ namespace UIForia.Rendering {
         protected TextureReference maskTexture;
         protected TextureReference outlineTexture;
         protected TextureReference backgroundTexture;
-        
+
         protected int backgroundTextureId;
         protected int outlineTextureId;
         protected OverflowHandling overflowHandling;
@@ -495,13 +495,13 @@ namespace UIForia.Rendering {
         }
 
         private RenderTexture targetTexture;
-        public override void PaintBackground3(RenderContext3 ctx) {
 
-            if (element.style.ShadowOpacity == 0) { // cheating -- change this to a real property
-                targetTexture = ctx.PushRenderTargetRegion(new AxisAlignedBounds2DUShort(0, 0, (ushort) (element.layoutResult.actualSize.width - element.layoutResult.HorizontalPaddingBorder), (ushort) (element.layoutResult.actualSize.height - element.layoutResult.VerticalPaddingBorder)));
-                return;
-            }
-            
+        public override void PaintBackground3(RenderContext3 ctx) {
+            // if (element.style.ShadowOpacity == 0) { // todo cheating -- change this to a real property
+            //     targetTexture = ctx.PushRenderTargetRegion(new AxisAlignedBounds2DUShort(0, 0, (ushort) (element.layoutResult.actualSize.width - element.layoutResult.HorizontalPaddingBorder), (ushort) (element.layoutResult.actualSize.height - element.layoutResult.VerticalPaddingBorder)));
+            //     return;
+            // }
+
             if (requireRendering) {
                 OffsetRect border = element.layoutResult.border;
                 drawDesc.borderTop = border.top;
@@ -509,7 +509,7 @@ namespace UIForia.Rendering {
                 drawDesc.borderBottom = border.bottom;
                 drawDesc.borderLeft = border.left;
                 ctx.SetBackgroundTexture(backgroundTexture);
-                ctx.SetMaskTexture(maskTexture); 
+                ctx.SetMaskTexture(maskTexture);
                 if (backgroundTexture != null && AxisAlignedBounds2DUShort.HasValue(backgroundTexture.uvBorderRect)) {
                     ctx.DrawSlicedElement(0, 0, drawDesc);
                 }
@@ -562,60 +562,90 @@ namespace UIForia.Rendering {
                 //
                 // ctx.PushStencilClip();
             }
-
         }
 
         // tmp
         private Mesh mesh;
-        
+
+        public static void SetMaterialProperties(Material material, LightList<MaterialStyleProperty> properties) {
+            for (int i = 0; i < properties.size; i++) {
+                ref MaterialStyleProperty property = ref properties.array[i];
+                switch (property.propertyType) {
+                    case MaterialPropertyType.Color:
+                        material.SetColor(property.shaderKey, property.property.AsColor32);
+                        break;
+                    case MaterialPropertyType.Float:
+                    case MaterialPropertyType.Range:
+                        material.SetFloat(property.shaderKey, property.property.AsFloat);
+                        break;
+                    case MaterialPropertyType.Vector:
+                        float2 val = property.property.AsFloat2;
+                        material.SetVector(property.shaderKey, new Vector4(val.x, val.y, 0, 0)); // todo -- now sure how to set this
+                        break;
+                    case MaterialPropertyType.Texture:
+                        material.SetTexture(property.shaderKey, property.property.AsTextureReference?.texture);
+                        break;
+                }
+            }
+        }
+
         public override void PaintForeground3(RenderContext3 ctx) {
             if (overflowHandling != 0) {
                 ctx.PopClipRect();
                 // ctx.PopStencilClip();
             }
-            if (element.style.ShadowOpacity == 0) { // cheating -- change this to a real property
-                ctx.PopRenderTargetRegion();
 
-                Material material = Resources.Load<Material>("UIForiaDissolve");
-                ctx.SetMaterial(material);
-                
-                material.SetTexture("_MainTex", targetTexture);
-                material.SetTexture("_NoiseTex", Resources.Load<Texture2D>("DissolveNoise"));
-                material.SetFloat("_EffectFactor", element.style.OutlineWidth.value);
-                material.SetFloat("_Softness", 1f);
-                material.SetFloat("_Width", 0.5f);
-                material.SetColor("_DissolveColor", drawDesc.backgroundColor);
-                
-                // // element.style.SetCustomProperty("MaterialName::PropertyName", value);
-                //
-                // // element.style.GetActiveMaterialParameters();
-                UIVertexHelper helper = UIVertexHelper.Create(Allocator.Temp);
-                
-                using (ShapeKit shapeKit = new ShapeKit()) {
-                    shapeKit.SetDrawMode(DrawMode.Normal);
-                    
-                    shapeKit.AddRect(ref helper, 0, 0, 300, 600, Color.blue);
-                    mesh = mesh ?? new Mesh();
-                    mesh.MarkDynamic();
-                    mesh.Clear(true);
-                    helper.FillMesh(mesh);
-                }
-                
-                helper.Dispose();
-                ctx.DrawMesh(mesh);
-                
-                // ctx.SetBackgroundTexture(targetTexture);
-                // ctx.SetMaskTexture(Resources.Load<Texture2D>("Images/Cloud_Mask"));
-                // drawDesc.uvTop = 0;
-                // drawDesc.uvLeft = 0;
-                // drawDesc.uvBottom = (ushort) targetTexture.height;
-                // drawDesc.uvRight = (ushort) targetTexture.width;
-                // drawDesc.bgColorMode |= ColorMode.Texture;
-                // drawDesc.maskFlags |= MaskFlags.UseMaskTexture;
-                // drawDesc.maskSoftness = 0.5f;
-                // ctx.DrawElement(0, 0, drawDesc);
-            }
-
+         //    if (element.style.ShadowOpacity == 0) { // cheating -- change this to a real property
+         //        ctx.PopRenderTargetRegion();
+         //
+         //        Material material = Resources.Load<Material>("UIForiaDissolve");
+         //        ctx.SetMaterial(material);
+         //
+         //        LightList<MaterialStyleProperty> materialStyles = LightList<MaterialStyleProperty>.Get();
+         //
+         //        MaterialId matId = element.application.ResourceManager.GetMaterialId("dissolve");
+         //
+         //        element.style.GetMaterialProperties(matId, materialStyles);
+         //
+         //     //   SetMaterialProperties(material, materialStyles);
+         //        materialStyles.Release();
+         //        
+         //        material.SetTexture("_MainTex", targetTexture);
+         //        material.SetTexture("_NoiseTex", Resources.Load<Texture2D>("DissolveNoise"));
+         // //       material.SetFloat("_EffectFactor", element.style.OutlineWidth.value);
+         //        material.SetFloat("_Softness", 1f);
+         //        material.SetFloat("_Width", 0.5f);
+         //        // material.SetColor("_DissolveColor", drawDesc.backgroundColor);
+         //
+         //        // // element.style.SetCustomProperty("MaterialName::PropertyName", value);
+         //        //
+         //        // // element.style.GetActiveMaterialParameters();
+         //        UIVertexHelper helper = UIVertexHelper.Create(Allocator.Temp);
+         //
+         //        using (ShapeKit shapeKit = new ShapeKit()) {
+         //            shapeKit.SetDrawMode(DrawMode.Normal);
+         //
+         //            shapeKit.AddRect(ref helper, 0, 0, 300, 600, Color.blue);
+         //            mesh = mesh ?? new Mesh();
+         //            mesh.MarkDynamic();
+         //            mesh.Clear(true);
+         //            helper.FillMesh(mesh);
+         //        }
+         //
+         //        helper.Dispose();
+         //        ctx.DrawMesh(mesh);
+         //
+         //        // ctx.SetBackgroundTexture(targetTexture);
+         //        // ctx.SetMaskTexture(Resources.Load<Texture2D>("Images/Cloud_Mask"));
+         //        // drawDesc.uvTop = 0;
+         //        // drawDesc.uvLeft = 0;
+         //        // drawDesc.uvBottom = (ushort) targetTexture.height;
+         //        // drawDesc.uvRight = (ushort) targetTexture.width;
+         //        // drawDesc.bgColorMode |= ColorMode.Texture;
+         //        // drawDesc.maskFlags |= MaskFlags.UseMaskTexture;
+         //        // drawDesc.maskSoftness = 0.5f;
+         //        // ctx.DrawElement(0, 0, drawDesc);
+         //    }
         }
 
     }

@@ -12,7 +12,7 @@
 
         Pass {
 
-            Cull Off 
+            Cull Off
             ColorMask [_UIForiaColorMask]
             Stencil {
                 Ref [_UIForiaStencilRef]
@@ -197,7 +197,9 @@
                 o.texCoord0.x += o.texCoord0.x > 0.5 ? halfUV.x : -halfUV.x;
                 o.texCoord0.y += o.texCoord0.y > 0.5 ? halfUV.y : -halfUV.y;
 
-                o.uvTransform = material.uvTransformIdx != 0 ? _UIForiaFloat4Buffer[material.uvTransformIdx] : float4(1, 1, 0, 0);
+                o.uvTransform = material.uvTransformIdx != 0
+                                    ? _UIForiaFloat4Buffer[material.uvTransformIdx]
+                                    : float4(1, 1, 0, 0);
 
                 float4x4 transform = mul(_UIForiaOriginMatrix, _UIForiaMatrixBuffer[matrixIndex]);
                 o.vertex = mul(UNITY_MATRIX_VP, mul(transform, float4(vpos.xyz, 1.0)));
@@ -205,9 +207,26 @@
                 // todo -- snapping is terrible when moving/ rotating 
                 // o.vertex = UIForiaPixelSnap(o.vertex);
 
-                o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, vertex.indices.z, vertex.indices.w);
+                o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, vertex.indices.z,
+                                  vertex.indices.w);
 
                 return o;
+            }
+
+            float4 ApplyUIForiaMask(uint maskFlags, float4 color, float2 uv, sampler2D maskTexture, float maskSoftness)
+            {
+                if ((maskFlags & MaskFlags_UseTextureMask) != 0)
+                {
+                    // todo -- use maskUVs
+                    float maskAlpha = (saturate(tex2Dlod(maskTexture, float4(uv, 0, 0)) / maskSoftness));
+                    // todo -- mask softness & mask uvs
+                    if ((maskFlags & MaskFlags_UseTextureMaskInverted) != 0)
+                    {
+                        maskAlpha = 1 - maskAlpha;
+                    }
+                    color.a = saturate(color.a * maskAlpha);
+                }
+                return color;
             }
 
             float4 frag(v2f i) : SV_Target
@@ -232,7 +251,8 @@
                 float fillDirection = ExtractByte(material.bMode_oMode_meshFillDirection_meshFillInvert, 2) == 0 ? 1 : -1;
                 float invertFill = ExtractByte(material.bMode_oMode_meshFillDirection_meshFillInvert, 3) == 0 ? 1 : -1;
                 float fillAmount = UnpackLowUShortPercentageToFloat(material.fillOpenAndRotation);
-                float fillRotation = UnpackHighUShortPercentageToFloat(material.fillOpenAndRotation); //frac(_Time.y) * PI * 2;
+                float fillRotation = UnpackHighUShortPercentageToFloat(material.fillOpenAndRotation);
+                //frac(_Time.y) * PI * 2;
                 float fillRadius = material.fillRadius;
                 float2 fillOffset = float2(material.fillOffsetX, material.fillOffsetY); // - halfUV;
                 float2 uvScale = i.uvTransform.xy;
@@ -284,7 +304,8 @@
 
                 fixed4 borderColor = lerp(borderColorH, borderColorV, distToLine);
 
-                float2 borderStep = step(float2(borderLeft, size.y - borderTop), p) - step(float2(size.x - borderRight, borderBottom), p);
+                float2 borderStep = step(float2(borderLeft, size.y - borderTop), p) - step(
+                    float2(size.x - borderRight, borderBottom), p);
                 fixed4 contentColor = color;
                 color = borderColor;
                 if (borderStep.x * borderStep.y != 0)
@@ -306,7 +327,8 @@
                 float bevelAmount = UnpackCornerBevel(material.bevelTop, material.bevelBottom, i.texCoord0);
                 float radialSDF = sdPie(radialSamplePoint, angleSinCos, fillRadius);
 
-                float2 bevelOffset = float2(size.x * 0.5 * (i.texCoord0.x > 0.5 ? 1 : -1), size.y * 0.5 * (i.texCoord0.y > 0.5 ? 1 : -1));
+                float2 bevelOffset = float2(size.x * 0.5 * (i.texCoord0.x > 0.5 ? 1 : -1),
+                                            size.y * 0.5 * (i.texCoord0.y > 0.5 ? 1 : -1));
                 float2 bevelPoint = ((i.texCoord0 - 0.5) * size) - bevelOffset;
                 float sdfBevel = sdRect(RotateUV(bevelPoint, 45 * Deg2Rad), float2(bevelAmount, bevelAmount));
                 float sdf = sdRoundBox(samplePoint, size * 0.5 * shadowScale, radius * shadowScale);
@@ -318,14 +340,17 @@
                 sdf = max(radialSDF * invertFill, sdf);
                 // sdfOutline = (fillFlag & FillOutline) != 0 ? max(radialSDF * invertFill, sdfOutline) : sdfOutline;
                 fixed4 grad = WHITE;
-                color = ComputeColor(color, grad, tintColor, bodyColorMode, i.texCoord1, _MainTex, uvBounds, originalUV);
+                color = ComputeColor(color, grad, tintColor, bodyColorMode, i.texCoord1, _MainTex, uvBounds,
+                                     originalUV);
                 color = lerp(color, outlineColor, outlineWidth == 0 ? 0 : 1 - saturate(sdfOutline));
                 color.a *= 1.0 - smoothstep(0, fwidth(sdf), sdf);
 
                 //float shadow = minSize * 0.5;
                 //color.a *= 1.0 - smoothstep(0, lerp(_Inner, fwidth(sdf), 0), sdf);
 
-                float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y); //* _UIForiaDPIScale;
+                float2 clipPos =
+                    float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y);
+                //* _UIForiaDPIScale;
                 float4 clipRect = _UIForiaFloat4Buffer[i.indices.x]; // x = xMin, y = yMin, z = xMax, w = yMax
                 float2 s = step(clipRect.xw, clipPos) - step(clipRect.zy, clipPos);
 
@@ -334,17 +359,7 @@
                 // fixed3 gradientCol = fixed3(grayscale * grad.rgb);  //tex2D(_GradientMap, float2(grayscale, 0));
                 // return UIForiaColorSpace(fixed4(grad.rgb + (0.25 * color.rgb), color.a)); //gradientCol * c.a * IN.color;
 
-                uint maskFlags = material.maskFlags;
-                if ((maskFlags & MaskFlags_UseTextureMask) != 0)
-                {
-                    // todo -- use maskUVs
-                    float maskAlpha = (saturate(tex2Dlod(_MaskTexture, float4(originalUV.xy, 0, 0)) / _MaskSoftness)); // todo -- mask softness & mask uvs
-                    if ((maskFlags & MaskFlags_UseTextureMaskInverted) != 0)
-                    {
-                        maskAlpha = 1 - maskAlpha;
-                    }
-                    color.a = saturate(color.a * maskAlpha);
-                }
+                color = ApplyUIForiaMask(material.maskFlags, color, originalUV, _MaskTexture, material.maskSoftness);
 
                 color.a *= opacity;
                 color.a *= (s.x * s.y) != 0;
@@ -360,7 +375,7 @@
                 // #ifndef UNITY_COLORSPACE_GAMMA
                 // color.rgb = GammaToLinearSpace(color.rgb);
                 // #endif
-                return color;
+               return color;
             }
             ENDCG
         }

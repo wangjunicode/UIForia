@@ -37,7 +37,7 @@ namespace UIForia.Compilers.Style {
         public int NextCustomPropertyId {
             get => StyleUtil.CustomPropertyStart + (customPropertyCount++);
         }
-        
+
         // todo -- deprecate, use other method
         public StyleSheet Compile(string filePath, LightList<StyleASTNode> rootNodes) {
             try {
@@ -125,7 +125,7 @@ namespace UIForia.Compilers.Style {
                     case PainterDefinitionNode painterNode:
                         CompilePainterNode(painterNode);
                         break;
-                    
+
                     case MaterialDefinitionNode materialDefinitionNode:
                         CompileMaterialNode(materialDefinitionNode);
                         break;
@@ -137,11 +137,9 @@ namespace UIForia.Compilers.Style {
         }
 
         private unsafe void CompileMaterialNode(MaterialDefinitionNode matNode) {
-            
             if (matNode.body == null) {
-                
                 StructList<MaterialPropertyDefinition> properties = StructList<MaterialPropertyDefinition>.Get();
-                
+
                 if (!resourceManager.TryGetMaterialProperties(matNode.loadMethod, matNode.assetLoadPath, properties)) {
                     throw new CompileException($"Could not find or load a material named {matNode.materialName} at {context.fileName} {matNode.line}:{matNode.column}");
                 }
@@ -149,7 +147,7 @@ namespace UIForia.Compilers.Style {
                 for (int i = 0; i < properties.size; i++) {
                     properties.array[i].stylePropertyId = NextCustomPropertyId;
                 }
-                
+
                 resourceManager.materialDatabase.TryRegisterMaterial(new MaterialDefinition() {
                     keywords = null,
                     properties = properties.ToArray(),
@@ -157,23 +155,19 @@ namespace UIForia.Compilers.Style {
                     loadMethod = matNode.loadMethod,
                     materialName = matNode.materialName
                 });
-                
+
                 properties.Release();
                 return;
             }
-
-         
         }
-        
-        private bool TryParsePainterVariableBlock(ref CharStream stream, out PainterVariableDeclaration[] painterVariables) {
 
+        private bool TryParsePainterVariableBlock(ref CharStream stream, out PainterVariableDeclaration[] painterVariables) {
             painterVariableBuffer.Clear();
 
             painterVariables = default;
 
             // type name = defaultValue;
             while (stream.HasMoreTokens) {
-
                 stream.ConsumeWhiteSpaceAndComments();
 
                 if (!stream.TryGetStreamUntil(';', out CharStream lineStream)) {
@@ -225,7 +219,7 @@ namespace UIForia.Compilers.Style {
                     propertyType = typeof(Texture);
                     if (TryParseTextureVariable(ref lineStream, out TextureDefinition textureDef)) {
                         if (textureDef.textureName == null) {
-                            painterVariableBuffer.Add(new PainterVariableDeclaration(propertyType, propertyName.ToString(), (Texture2D)null));
+                            painterVariableBuffer.Add(new PainterVariableDeclaration(propertyType, propertyName.ToString(), (Texture2D) null));
                         }
                         else if (textureDef.spriteName == null) {
                             Texture texture = resourceManager.GetTexture(textureDef.textureName);
@@ -233,8 +227,8 @@ namespace UIForia.Compilers.Style {
                         }
                         else {
                             throw new NotImplementedException("Sprite sheets are not yet supported");
-                           // Texture texture = resourceManager.GetTexture(textureDef.textureName);
-                           // painterVariableBuffer.Add(new PainterVariableDeclaration(propertyType, propertyName.ToString(), texture));
+                            // Texture texture = resourceManager.GetTexture(textureDef.textureName);
+                            // painterVariableBuffer.Add(new PainterVariableDeclaration(propertyType, propertyName.ToString(), texture));
                         }
                     }
                 }
@@ -250,7 +244,6 @@ namespace UIForia.Compilers.Style {
                     // try resolve type name
                     return false;
                 }
-
             }
 
             painterVariables = painterVariableBuffer.ToArray();
@@ -259,7 +252,6 @@ namespace UIForia.Compilers.Style {
 
         private static bool TryParseTextureVariable(ref CharStream stream, out TextureDefinition textureDef) {
             if (stream.TryParseIdentifier(out CharSpan identifier)) {
-
                 if (identifier == "null" || identifier == "default") {
                     stream.ConsumeWhiteSpaceAndComments();
                     if (stream.HasMoreTokens) {
@@ -282,14 +274,12 @@ namespace UIForia.Compilers.Style {
                         };
                         return true;
                     }
-                    
                 }
 
                 // Texture texture = sprite("sheetName:spriteName");
                 if (identifier == "sprite") { }
 
                 throw new ParseException($"Failed to parse texture definition from painter. {stream} is invalid.");
-
             }
 
             textureDef = default;
@@ -307,7 +297,6 @@ namespace UIForia.Compilers.Style {
         }
 
         private unsafe void CompilePainterNode(PainterDefinitionNode painterNode) {
-
             if (painterCache.ContainsKey(painterNode.painterName)) {
                 throw new CompileException("Duplicate painter with name: " + painterNode.painterName);
             }
@@ -331,7 +320,6 @@ namespace UIForia.Compilers.Style {
                     uint start = stream.Ptr;
 
                     if (stream.TryMatchRangeIgnoreCase("[variables]")) {
-
                         if (hasVariables) {
                             throw new CompileException("Duplicate [variables] section in style painter");
                         }
@@ -345,10 +333,8 @@ namespace UIForia.Compilers.Style {
                         if (!TryParsePainterVariableBlock(ref bodyStream, out variables)) {
                             throw new CompileException("Failed to compile painter variable block");
                         }
-
                     }
                     else if (stream.TryMatchRangeIgnoreCase("[draw:background]")) {
-
                         if (hasbg) {
                             throw new CompileException("Duplicate [draw:background] section in style painter");
                         }
@@ -364,10 +350,8 @@ namespace UIForia.Compilers.Style {
                         CharSpan span = new CharSpan(bodyStream);
                         span = span.Trim();
                         drawBgFn = span.ToString();
-
                     }
                     else if (stream.TryMatchRangeIgnoreCase("[draw:foreground]")) {
-
                         if (hasFg) {
                             throw new CompileException("Duplicate [draw:foreground] section in style painter");
                         }
@@ -383,7 +367,6 @@ namespace UIForia.Compilers.Style {
                         CharSpan span = new CharSpan(bodyStream);
                         span = span.Trim();
                         drawFgFn = span.ToString();
-
                     }
 
                     stream.ConsumeWhiteSpaceAndComments();
@@ -391,9 +374,7 @@ namespace UIForia.Compilers.Style {
                     if (start == stream.Ptr) {
                         throw new CompileException("Failed to parse painter " + painterNode.painterName);
                     }
-
                 }
-
             }
 
             if (variables != null) {
@@ -415,7 +396,6 @@ namespace UIForia.Compilers.Style {
                 backgroundFnIndex = bgPainterId,
                 foregroundFnIndex = fgPainterId
             });
-
         }
 
         private AnimationData CompileSpriteSheetAnimation(SpriteSheetNode node, AnimationData[] styleSheetAnimations, UISoundData[] uiSoundData) {
@@ -469,7 +449,6 @@ namespace UIForia.Compilers.Style {
                     if (keyFrameProperty is PropertyNode propertyNode) {
                         StylePropertyMappers.MapProperty(s_ScratchStyle, propertyNode, context);
                     }
-                    
                 }
 
                 StructList<StyleKeyFrameValue> styleKeyValues = new StructList<StyleKeyFrameValue>(s_ScratchStyle.PropertyCount);
@@ -700,9 +679,7 @@ namespace UIForia.Compilers.Style {
             for (int index = 0; index < root.children.Count; index++) {
                 StyleASTNode node = root.children[index];
                 switch (node) {
-
                     case PainterPropertyNode painterPropertyNode: {
-
                         if (painterCache.TryGetValue(painterPropertyNode.painterName, out StylePainterDefinition painterDefinition)) {
                             StylePropertyMappers.MapPainterProperty(targetGroup.normal.style, painterPropertyNode, painterDefinition);
                         }
@@ -716,6 +693,10 @@ namespace UIForia.Compilers.Style {
                     case PropertyNode propertyNode:
                         // add to normal ui style set
                         StylePropertyMappers.MapProperty(targetGroup.normal.style, propertyNode, context);
+                        break;
+
+                    case MaterialPropertyNode materialPropertyNode:
+                        StylePropertyMappers.MapMaterialProperty(targetGroup.normal.style, materialPropertyNode, context);
                         break;
 
                     case AttributeNodeContainer attribute:
@@ -859,7 +840,6 @@ namespace UIForia.Compilers.Style {
         }
 
         private UIStyleRule MapAttributeContainerToRule(ChainableNodeContainer nodeContainer) {
-
             if (nodeContainer == null) return null;
 
             if (nodeContainer is AttributeNodeContainer attribute) {

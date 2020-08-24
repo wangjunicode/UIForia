@@ -160,6 +160,12 @@ namespace UIForia.Graphics {
             // ctx.SetMatrix(matrix);
         }
 
+        private ElementDescBuilder builder;
+
+        public void SetOpacity(float opacity) {
+            builder.SetOpacity(Mathf.Clamp01(opacity));
+        }
+        
         public void FillRect(float x, float y, float width, float height) {
             drawDesc.width = width;
             drawDesc.height = height;

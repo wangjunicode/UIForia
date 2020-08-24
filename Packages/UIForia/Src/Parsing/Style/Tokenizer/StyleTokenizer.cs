@@ -302,6 +302,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
         private static StyleToken TransformIdentifierToTokenType(TokenizerContext context, string identifier) {
             string identifierLowerCase = identifier.ToLower();
             switch (identifierLowerCase) {
+                // case "material": return new StyleToken(StyleTokenType.Material, identifierLowerCase, context.line, context.column);
                 case "use": return new StyleToken(StyleTokenType.Use, identifierLowerCase, context.line, context.column);
                 case "and": return new StyleToken(StyleTokenType.And, identifierLowerCase, context.line, context.column);
                 case "not": return new StyleToken(StyleTokenType.Not, identifierLowerCase, context.line, context.column);

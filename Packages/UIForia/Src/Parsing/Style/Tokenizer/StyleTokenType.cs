@@ -99,7 +99,9 @@ namespace UIForia.Parsing.Style.Tokenizer {
         
         PainterVariableReference,
         PainterVariableName,
-        PainterVariableValue
+        PainterVariableValue,
+
+        Material
 
     }
 }

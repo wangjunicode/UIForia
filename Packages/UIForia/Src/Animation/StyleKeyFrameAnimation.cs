@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using UIForia.Compilers;
 using UIForia.Elements;
-using UIForia.Exceptions;
 using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Systems;
@@ -47,7 +45,6 @@ namespace UIForia.Animation {
         }
 
         private void AddKeyFrame(float time, StyleKeyFrameValue property) {
-
             for (int i = 0; i < processedStyleFrameGroups.Count; i++) {
                 if (processedStyleFrameGroups[i].propertyId == property.propertyId) {
                     processedStyleFrameGroups[i].frames.Add(new ProcessedStyleKeyFrame(time, property));
@@ -100,11 +97,9 @@ namespace UIForia.Animation {
             Rect viewport = target.View.Viewport;
 
             if (processedStyleFrameGroups != null) {
-
                 ProcessedStyleKeyFrameGroup[] styleGroups = processedStyleFrameGroups.array;
 
                 for (int i = 0; i < processedStyleFrameGroups.Count; i++) {
-
                     StylePropertyId propertyId = styleGroups[i].propertyId;
                     ProcessedStyleKeyFrame[] frames = styleGroups[i].frames.array;
                     int frameCount = styleGroups[i].frames.size;
@@ -161,7 +156,6 @@ namespace UIForia.Animation {
                         case StylePropertyId.PreferredWidth:
                         case StylePropertyId.MinWidth:
                         case StylePropertyId.MaxWidth: {
-
                             float v0 = ResolveWidthMeasurement(target, viewport, prev.value.styleProperty.AsUIMeasurement);
 
                             float v1 = ResolveWidthMeasurement(target, viewport, next.value.styleProperty.AsUIMeasurement);
@@ -228,18 +222,16 @@ namespace UIForia.Animation {
                         case StylePropertyId.ShadowOffsetY:
                         case StylePropertyId.TransformPositionY:
                         case StylePropertyId.AlignmentOffsetY: {
-
                             // todo -- this is totally temporary
                             if ((target.flags & UIElementFlags.EnableStateChanged) == 0) {
                                 ref LayoutBoxInfo layoutResult = ref target.application.layoutSystem.layoutResultTable[target.id];
                                 ref LayoutBoxInfo parentResult = ref target.application.layoutSystem.layoutResultTable[layoutResult.layoutParentId];
-                            
+
                                 float v0 = MeasurementUtil.ResolveTransformMeasurement(layoutResult, parentResult, viewParameters, prev.value.styleProperty.AsOffsetMeasurement, layoutResult.actualSize.y);
                                 float v1 = MeasurementUtil.ResolveTransformMeasurement(layoutResult, parentResult, viewParameters, next.value.styleProperty.AsOffsetMeasurement, layoutResult.actualSize.y);
                                 target.style.SetAnimatedProperty(new StyleProperty(propertyId, new OffsetMeasurement(Mathf.Lerp(v0, v1, t))));
-                            
                             }
-                       
+
                             // if (target.layoutBox != null) {
                             //     float v0 = MeasurementUtil.ResolveOffsetMeasurement(layoutResult, target, viewParameters, prev.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.height);
                             //     float v1 = MeasurementUtil.ResolveOffsetMeasurement(layoutResult, target, viewParameters, nextStyleFrame.value.styleProperty.AsOffsetMeasurement, target.layoutResult.actualSize.height);
@@ -294,6 +286,22 @@ namespace UIForia.Animation {
                         }
 
                         default:
+
+                            // todo -- handle animating material and painter properties if they have a type we know how to animate
+                            if ((int) propertyId >= StyleUtil.CustomPropertyStart) {
+                                // switch (StyleUtil.GetCustomPropertyType(propertyId)) {
+                                //     case 1:
+                                //         float v0 = prev.value.styleProperty.AsFloat;
+                                //         float v1 = next.value.styleProperty.AsFloat;
+                                //         target.style.SetAnimatedProperty(new StyleProperty(propertyId, Mathf.Lerp(v0, v1, t)));
+                                //         break;
+                                //     case 2:
+                                //         break;
+                                //     case 3:
+                                //         break;
+                                // }
+                            }
+
                             if (StyleUtil.CanAnimate(propertyId)) {
                                 throw new NotImplementedException(propertyId + " can be animated but is not implemented");
                             }
@@ -305,12 +313,10 @@ namespace UIForia.Animation {
                     if (progress >= 1f) {
                         target.style.SetAnimatedProperty(next.value.styleProperty);
                     }
-
                 }
             }
 
             return progress >= 1f ? UITaskResult.Completed : UITaskResult.Running;
-
         }
 
     }

@@ -598,7 +598,6 @@ namespace UIForia.Parsing.Style {
             };
 
             styleRootNode.AddChildNode(painterNode);
-
         }
 
         private void ParseStateOrAttributeGroup(StyleNodeContainer styleRootNode) {
@@ -634,7 +633,7 @@ namespace UIForia.Parsing.Style {
             }
         }
 
-        private void ParseProperty(StyleNodeContainer styleRootNode, bool parsingKeyframes = false) {
+        private void ParseProperty(StyleNodeContainer styleRootNode) {
             StyleToken propertyNodeToken = tokenStream.Current;
             string propertyName;
             if (AdvanceIfTokenType(StyleTokenType.Cursor)) {
@@ -662,8 +661,8 @@ namespace UIForia.Parsing.Style {
             else {
                 propertyName = AssertTokenTypeAndAdvance(StyleTokenType.Identifier);
 
-                if (propertyName == "material" || propertyName == "Material") {
 
+                if (propertyName == "material" || propertyName == "Material") {
                     if (tokenStream.Current == StyleTokenType.Colon) {
                         tokenStream.Advance();
 
@@ -677,29 +676,26 @@ namespace UIForia.Parsing.Style {
 
                         TextUtil.StringBuilder.Clear();
 
+                        PropertyNode pNode = StyleASTNodeFactory.PropertyNode("material:" + materialPropertyName);
+                        pNode.WithLocation(propertyNodeToken);
+
                         while (tokenStream.HasMoreTokens && tokenStream.Current != StyleTokenType.EndStatement) {
-                            TextUtil.StringBuilder.Append(tokenStream.Current.value);
-                            tokenStream.Advance();
+                            pNode.AddChildNode(ParsePropertyValue());
+                            AdvanceIfTokenType(StyleTokenType.Comma);
                         }
 
                         tokenStream.Advance();
-
                         MaterialPropertyNode materialPropertyNode = new MaterialPropertyNode {
                             materialName = materialName,
                             identifier = materialPropertyName,
-                            value = TextUtil.StringBuilder.ToString()
                         };
-
-                        TextUtil.StringBuilder.Clear();
+                        materialPropertyNode.AddChildNode(pNode.children[0]);
 
                         materialPropertyNode.WithLocation(propertyNodeToken);
                         styleRootNode.AddChildNode(materialPropertyNode);
                         return;
-
                     }
-
                 }
-
             }
 
             AssertTokenTypeAndAdvance(StyleTokenType.EqualSign);
@@ -849,7 +845,6 @@ namespace UIForia.Parsing.Style {
                         tokenStream.Advance();
                         n.rawValue = TextUtil.StringBuilder.ToString();
                         TextUtil.StringBuilder.Clear();
-
                     }
 
                     break;

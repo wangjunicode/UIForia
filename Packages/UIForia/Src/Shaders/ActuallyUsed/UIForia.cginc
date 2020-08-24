@@ -59,6 +59,15 @@
 #define ColorEffect_Cutoff (1 << 3)
 #define ColorEffect_Default (ColorEffect_Fill | ColorEffect_Add | ColorEffect_Subtract)
 
+float4 DebugSDF(float sdf)
+{
+    float3 col = float3(1.0, 1, 1) - sign(sdf)*float3(0.1,0.4,0.7);
+    col *= 1.0 - exp(-3.0*abs(sdf));
+    col *= 0.8 + 0.2*cos(150.0*sdf);
+    col = lerp( col, float3(1.0, 0, 0), 1.0-smoothstep(0.0,0.02,abs(sdf)) );
+    return float4(col, 1);
+}
+
 fixed4 ApplyColorEffect(half4 color, half4 factor, uint colorEffectFlags)
 {
     fixed3 fill = lerp(color.rgb, factor.rgb, factor.a);

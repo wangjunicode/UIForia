@@ -1086,8 +1086,37 @@ namespace UIForia.Rendering {
             };
         }
 
+        public void GetMaterialProperties(MaterialId materialId, LightList<MaterialStyleProperty> materialStyles) {
+            materialStyles.size = 0;
+            
+            if (element.application.ResourceManager.materialDatabase.TryGetMaterialInfo(materialId, out MaterialInfo materialInfo)) {
+                for (int i = 0; i < materialInfo.properties.Length; i++) {
+
+                    ref MaterialPropertyDefinition property = ref materialInfo.properties[i];
+                    if (propertyMap.TryGetValue(property.stylePropertyId, out StyleProperty styleProperty)) {
+                        materialStyles.Add(new MaterialStyleProperty(property.shaderPropertyId, property.propertyType, styleProperty));
+                    }
+                    
+                }
+            }
+                
+        }
+
     }
 
+    public struct MaterialStyleProperty {
+
+        public readonly int shaderKey;
+        public readonly MaterialPropertyType propertyType;
+        public readonly StyleProperty property;
+        
+        public MaterialStyleProperty(int shaderKey, MaterialPropertyType propertyType, in StyleProperty property) {
+            this.shaderKey = shaderKey;
+            this.propertyType = propertyType;
+            this.property = property;
+        }
+
+    }
     [Flags]
     public enum AnimationFlags {
 

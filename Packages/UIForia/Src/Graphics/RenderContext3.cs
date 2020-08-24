@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using UIForia.Elements;
+using UIForia.Graphics.ShapeKit;
 using UIForia.ListTypes;
 using UIForia.Text;
 using UIForia.Util;
@@ -10,10 +10,74 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Debug = UnityEngine.Debug;
 using Gradient = UIForia.Rendering.Gradient;
 
 namespace UIForia.Graphics {
+
+    public enum VertexSetup {
+
+        Simple,
+        Lit,
+        Full
+
+    }
+
+    public struct UIForiaGeometryShapeData {
+
+        public VertexSetup type;
+
+    }
+
+    public abstract class UIForiaMesh {
+
+        [ThreadStatic] internal static UIVertexHelper vertexHelper;
+        [ThreadStatic] internal static ThisOtherThing.UI.ShapeUtils.ShapeKit shapeKit;
+
+        public void FillRect(float x, float y, float width, float height) {
+            shapeKit.AddRect(ref vertexHelper, x, y, width, height, Color.red);
+        }
+
+        public void StrokeRect() { }
+
+        public void FillUnityMesh(Mesh mesh) { }
+
+    }
+
+    public struct UIForiaVertexSimple {
+
+        public float3 position;
+        public float2 texCoord;
+        public Color color;
+
+    }
+
+    public struct UIForiaVertexLit {
+
+        public float3 position;
+        public float3 normal;
+        public float2 texCoord;
+        public Color color;
+
+    }
+
+    public struct UIForiaVertexFull {
+
+        public float3 position;
+        public float3 normal;
+        public float2 texCoord0;
+        public float2 texCoord1;
+        public Color color;
+
+    }
+
+    public class UIForiaBatchMesh_Default {
+
+        internal StructList<float3> position;
+        internal StructList<float2> texCoord;
+
+        public void AddVertex(UIForiaVertexSimple vertex) { }
+
+    }
 
     internal unsafe struct ElementBatch {
 
@@ -101,6 +165,33 @@ namespace UIForia.Graphics {
                     baseRenderIdx = renderIndex
                 }
             });
+        }
+
+        public void DrawMesh2(Mesh mesh) {
+            if (mesh.vertexCount < 500) { }
+            else { }
+        }
+
+        public void DrawUIForiaMesh(UIForiaMesh mesh) {
+            // switch (mesh.type) {
+            //     case UIForiaMeshType.Simple:
+            //         positionBuffer.AddRange(mesh.positions);
+            //         drawList.Add(new DrawInfo2() {
+            //             matrix = defaultMatrix,
+            //             drawType = DrawType2.UIForiaMesh_Simple,
+            //             localBounds = mesh.GetBounds2D(),
+            //             elementId = elementId,
+            //             materialId = activeMaterialId,
+            //             materialData = default,
+            //             shapeData = default,
+            //             drawSortId = new DrawSortId() {
+            //                 baseRenderIdx = renderIndex,
+            //                 localRenderIdx = localDrawId++
+            //             }
+            //             
+            //         });
+            //         break;
+            // }
         }
 
         internal void AddTexture(Texture texture) {
@@ -266,7 +357,7 @@ namespace UIForia.Graphics {
                 }
             });
         }
-
+        
         public void DrawElement(float x, float y, in ElementDrawDesc drawDesc) {
             if (drawDesc.width <= 0 || drawDesc.height <= 0) {
                 return;

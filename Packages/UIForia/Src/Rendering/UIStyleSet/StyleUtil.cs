@@ -10,6 +10,7 @@ namespace UIForia.Rendering {
         public static readonly List<StylePropertyId> InheritedProperties;
 
         private static readonly IntMap_Deprecated<string> s_NameMap;
+        private static readonly SizedArray<int> s_CustomTypeMap;
 
         static StyleUtil() {
             s_NameMap = new IntMap_Deprecated<string>();
@@ -43,6 +44,16 @@ namespace UIForia.Rendering {
             string name;
             s_NameMap.TryGetValue((int) propertyId, out name);
             return name;
+        }
+
+        public static int GetCustomPropertyType(StylePropertyId propertyId) {
+            if ((int)propertyId < CustomPropertyStart) return 0;
+            int idx = (int) propertyId - CustomPropertyStart;
+            if (idx < s_CustomTypeMap.size) {
+                return s_CustomTypeMap[idx];
+            }
+
+            return 0;
         }
 
     }

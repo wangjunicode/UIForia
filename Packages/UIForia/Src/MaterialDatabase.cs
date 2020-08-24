@@ -29,6 +29,18 @@ namespace UIForia {
         public AssetLoadState loadState;
         public bool supportsColorMask;
 
+        public bool TryGetPropertyInfo(string value, out MaterialPropertyDefinition materialPropertyDefinition) {
+            for (int i = 0; i < properties.Length; i++) {
+                if (properties[i].propertyName == value) {
+                    materialPropertyDefinition = properties[i];
+                    return true;
+                }
+            }
+
+            materialPropertyDefinition = default;
+            return false;
+        }
+
     }
 
     [Flags]
@@ -40,9 +52,9 @@ namespace UIForia {
         FaceTextures = 1 << 2,
         Effect = 1 << 3,
         Bevel = 1 << 4
-        
+
     }
-    
+
     public struct MaterialId {
 
         internal readonly int index;
@@ -56,7 +68,6 @@ namespace UIForia {
             this.index = index;
         }
 
-
     }
 
     internal struct CPUTextMaterialInfo {
@@ -65,7 +76,7 @@ namespace UIForia {
         public TextMaterialFeatures features;
 
     }
-    
+
     public class MaterialDatabase2 {
 
         private MaterialInfo[] materialMap;
@@ -77,19 +88,19 @@ namespace UIForia {
         private static readonly MaterialPropertyDefinition[] s_EmptyPropertyArray = { };
 
         internal StructList<CPUTextMaterialInfo> textMaterialList;
+
         public MaterialDatabase2() {
             this.materialMap = new MaterialInfo[16];
             this.textMaterialList = new StructList<CPUTextMaterialInfo>();
             this.nameMap = new Dictionary<string, int>();
             this.materialCount = 1; // skip 0 index
         }
-        
+
         internal MaterialId GetTextMaterial(TextMaterialFeatures features) {
-            
             if (features == 0) {
                 return MaterialId.UIForiaSDFText;
             }
-            
+
             for (int i = 0; i < textMaterialList.size; i++) {
                 if (textMaterialList.array[i].features == features) {
                     return textMaterialList.array[i].materialId;
@@ -97,11 +108,11 @@ namespace UIForia {
             }
 
             Material material = new Material(GetMaterial(MaterialId.UIForiaSDFText));
-            
+
             if ((features & TextMaterialFeatures.Underlay) != 0) {
                 material.EnableKeyword("USE_UNDERLAY");
             }
-            
+
             if ((features & TextMaterialFeatures.Glow) != 0) {
                 material.EnableKeyword("USE_GLOW");
             }
@@ -113,7 +124,7 @@ namespace UIForia {
             if ((features & TextMaterialFeatures.Bevel) != 0) {
                 material.EnableKeyword("USE_BEVEL");
             }
-            
+
             MaterialId materialId = new MaterialId(materialCount);
             if (materialCount + 1 >= materialMap.Length) {
                 Array.Resize(ref materialMap, materialMap.Length * 2);
@@ -130,7 +141,7 @@ namespace UIForia {
                 features = features,
                 materialId = materialId
             });
-            
+
             return materialId;
         }
 
@@ -143,7 +154,6 @@ namespace UIForia {
         }
 
         internal bool TryGetMaterialInfo(MaterialId materialId, out MaterialInfo materialInfo) {
-
             if (materialId.index <= 0 || materialId.index > materialCount) {
                 materialInfo = default;
                 return false;
@@ -153,8 +163,17 @@ namespace UIForia {
             return true;
         }
 
-        public MaterialId TryRegisterMaterial(MaterialDefinition materialDefinition) {
+        internal bool TryGetMaterialInfo(string materialName, out MaterialInfo materialInfo) {
+            if (nameMap.TryGetValue(materialName, out int idx)) {
+                materialInfo = materialMap[idx];
+                return true;
+            }
 
+            materialInfo = default;
+            return false;
+        }
+
+        public MaterialId TryRegisterMaterial(MaterialDefinition materialDefinition) {
             if (nameMap.TryGetValue(materialDefinition.materialName, out int _)) {
                 return default;
             }
@@ -184,7 +203,6 @@ namespace UIForia {
 
             materialCount++;
             return materialId;
-
         }
 
         private static RangeInt FindPropertyRange(MaterialPropertyDefinition[] properties, MaterialPropertyType propertyType) {
@@ -210,7 +228,6 @@ namespace UIForia {
             }
 
             return new RangeInt(start, count);
-
         }
 
         public bool HasTextureProperty(MaterialId materialId, string propertyName) {

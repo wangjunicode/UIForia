@@ -34,7 +34,7 @@
         TextWhitespaceMode = TrimLineStart;
         }
 
-        material UIForiaShape : resources("UIForiaShape");
+        material dissolve : resources("UIForiaDissolve");
 
         painter ShapePainter {
 
@@ -89,23 +89,30 @@
         }
 
         style rt-parent {
-            BackgroundColor = Red;
-<!--            Padding = 10px;-->
-            ShadowOpacity = 0f;
-            OutlineWidth = 0.2;
+        BackgroundColor = Red;
+        <!--            Padding = 10px;-->
+        ShadowOpacity = 0f;
+        OutlineWidth = 0.2;
+        Material = dissolve;
+        material:dissolve._EffectFactor = 0.8f; //url("DissolveNoise");
         }
-        
+
+        style painted {
+        Painter = "GeometryPainter";
+        PreferredSize = 300px;
+        }
+
     </Style>
     <Using namespace="UIForia"/>
     <Using namespace="UnityEngine"/>
     <Contents style="container2">
 
+        <!--        <Div style="painted"></Div>-->
         <Div style="rt-parent">
-
             <Div style="child round"/>
             <Div style="child round"/>
         </Div>
-        <!--        <Input style="inputxxx" value.once="'           UIForia is the fucking greatesssssssssssssssssssssssssssssssst'"/>-->
+        <Input style="inputxxx" value.once="'           UIForia is the fucking greatesssssssssssssssssssssssssssssssst'"/>
 
         <!--        <ScrollView style="shape-kit">-->
         <!--            <Div style="child">{$parent.siblingIndex}</Div>-->

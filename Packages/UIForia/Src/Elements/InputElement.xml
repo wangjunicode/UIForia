@@ -12,7 +12,7 @@
             PreferredWidth = 1cnt;
             MinWidth = 20px;
             MarginBottom = 10px;
-<!--            Overflow = Hidden;-->
+            Overflow = Hidden;
             ClipBounds = ContentBox;
         }
 

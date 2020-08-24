@@ -45,6 +45,7 @@ namespace UIForia.Graphics {
                     });
                 }
 
+                // todo -- might need to be a long to accomodate material ids being 32 bits (from GetHashCode())
                 int permutationId = BitUtil.SetHighLowBits(drawInfo.materialId.index, overrideId);
 
                 // see if we have this id in our map, add it if we don't

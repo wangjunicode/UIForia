@@ -161,18 +161,18 @@ namespace UIForia.Elements {
                 case KeyCode.RightArrow:
                     HandleRightArrow(evt);
                     break;
-                // case KeyCode.C when evt.onlyControl && selectionRange.HasSelection:
-                //     HandleCopy(evt);
-                //     break;
-                // case KeyCode.V when evt.onlyControl && selectionRange.HasSelection:
-                //     HandlePaste(evt);
-                //     break;
-                // case KeyCode.X when evt.onlyControl && selectionRange.HasSelection:
-                //     HandleCut(evt);
-                //     break;
-                // case KeyCode.A when evt.onlyControl && selectionRange.HasSelection:
-                //     HandleSelectAll(evt);
-                //     break;
+                case KeyCode.C when evt.onlyControl && textElement.HasSelection:
+                    HandleCopy(evt);
+                    break;
+                case KeyCode.V when evt.onlyControl:
+                    HandlePaste(evt);
+                    break;
+                case KeyCode.X when evt.onlyControl && textElement.HasSelection:
+                    HandleCut(evt);
+                    break;
+                case KeyCode.A when evt.onlyControl:
+                    HandleSelectAll(evt);
+                    break;
 
                 default:
                     OnTextEntered(evt);
@@ -243,6 +243,7 @@ namespace UIForia.Elements {
 
         private void HandleHome(KeyboardInputEvent evt) {
             SelectionCursor cursor = textElement.GetSelectionStartCursor();
+            textElement.MoveToStartOfLine(evt.shift);
             //selectionRange = textElement.MoveToStartOfLine(selectionRange, evt.shift);
             blinkStartTime = Time.unscaledTime;
             ScrollToCursor();
@@ -297,16 +298,16 @@ namespace UIForia.Elements {
         }
 
         private void HandleCopy(KeyboardInputEvent evt) {
-            // if (evt.onlyControl && selectionRange.HasSelection) {
-            //     clipboard = textElement.GetSelectedString(selectionRange);
-            //     evt.StopPropagation();
-            // }
+            if (evt.onlyControl && textElement.HasSelection) {
+                clipboard = textElement.GetSelectedString();
+                evt.StopPropagation();
+            }
         }
 
         private void HandleCut(KeyboardInputEvent evt) {
-            // clipboard = textElement.GetSelectedString(selectionRange);
-            // HandleCharactersDeletedBackwards();
-            // evt.StopPropagation();
+            clipboard = textElement.GetSelectedString();
+            HandleCharactersDeletedBackwards();
+            evt.StopPropagation();
         }
 
         private void HandlePaste(KeyboardInputEvent evt) {
@@ -315,8 +316,8 @@ namespace UIForia.Elements {
         }
 
         private void HandleSelectAll(KeyboardInputEvent evt) {
-            // selectionRange = new SelectionRange(0, int.MaxValue);
-            // evt.StopPropagation();
+            textElement.SelectAll();
+            evt.StopPropagation();
         }
 
         public bool HasDisabledAttr() {

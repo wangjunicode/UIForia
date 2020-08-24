@@ -1040,11 +1040,8 @@ namespace UIForia.Systems {
 
                 this.materialIdList = new List_Int32(64, Allocator.Persistent);
                 this.materialBuffer = new DataList<UIForiaMaterialInfo>.Shared(64, Allocator.Persistent);
-
                 this.elementVertexList = new DataList<UIForiaVertex>.Shared(4 * 64, Allocator.Persistent);
-
                 this.textVertexList = new DataList<UIForiaVertex>.Shared(4 * 64, Allocator.Persistent);
-
                 this.shapeVertexList = new DataList<UIForiaVertex>.Shared(16, Allocator.Persistent);
                 this.shapeTriangleList = new DataList<int>.Shared(16, Allocator.Persistent);
                 this.meshInfoList = new DataList<MeshInfo>(64, Allocator.Persistent);

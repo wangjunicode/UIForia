@@ -158,7 +158,7 @@ namespace UIForia.Editor.FontLoading {
             for (int i = 0; i < glyphInfos.Length; i++) {
                 codepoints.Add((uint)glyphInfos[i].codepoint);
             }
-            GetFontKerning.Get(font, codepoints);
+         //   GetFontKerning.Get(font, codepoints);
             
             IntMap<GlyphInfo> glyphMap = new IntMap<GlyphInfo>(256, Allocator.TempJob);
             IntMap<float> kerningDictionary = new IntMap<float>(256, Allocator.TempJob);

@@ -12,10 +12,11 @@ namespace UIForia.Animation {
 
         private float lastFrameTime;
 
-        private LightList<Texture2D> frames;
+        private LightList<Texture> frames;
 
+        // todo -- we should support this via uv rect also not just textures
         public SpriteSheetAnimation(UIElement target, AnimationData animationData) : base(target, animationData) {
-            frames = new LightList<Texture2D>();
+            frames = new LightList<Texture>();
             if (!animationData.options.startFrame.HasValue) {
                 throw new Exception($"SpriteSheetAnimations must define a startFrame. File: {animationData.fileName}>{animationData.name}");
             }

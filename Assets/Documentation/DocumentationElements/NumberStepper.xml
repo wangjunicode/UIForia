@@ -19,10 +19,10 @@
 
             <Group style="arrows {disabled ? 'disabled-arrows'}">
                 <Div style="arrow-container arrow-up" mouse:Down="Increment($event)" mouse:heldDown="IncrementContinuously($event)">
-                    <Image src="'Client\UI\Sprites\ui_treeview_collapse_arrow_right'" style="arrow rotate-up" />
+                    <Image src="'ui_treeview_collapse_arrow_right'" style="arrow rotate-up" />
                 </Div>
                 <Div style="arrow-container arrow-down" mouse:Down="Decrement($event)" mouse:heldDown="DecrementContinuously($event)">
-                    <Image src="'Client\UI\Sprites\ui_treeview_collapse_arrow_right'" style="arrow" />
+                    <Image src="'ui_treeview_collapse_arrow_right'" style="arrow" />
                 </Div>
             </Group>
         </Group>

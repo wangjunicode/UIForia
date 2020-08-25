@@ -875,25 +875,25 @@ namespace UIForia.Editor.FontLoading {
                 //fontAsset.textGlyphList = GetGlyphInfo(m_FontGlyphInfo);
                 // fontAsset.kerningPairs = GetKerningTable(AssetDatabase.GetAssetPath(m_SourceFontFile), (int) fontAsset.faceInfo.pointSize, fontAsset.textGlyphList);
 
-                fontAsset.atlas = m_FontAtlas;
-                m_FontAtlas.name = tex_FileName + " Atlas";
-
-                AssetDatabase.AddObjectToAsset(m_FontAtlas, fontAsset);
-
-                fontAsset.gradientScale = m_Padding + 1;
-
-                // Save Font Asset creation settings
-                m_SelectedFontAsset = fontAsset;
-                m_LegacyFontAsset = null;
-                // fontAsset.creationSettings = SaveFontCreationSettings();
-
-                AssetDatabase.SaveAssets();
-
-                AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(fontAsset)); // Re-import font asset to get the new updated version.
-
-                AssetDatabase.Refresh();
-
-                m_FontAtlas = null;
+                // fontAsset.atlas = m_FontAtlas;
+                // m_FontAtlas.name = tex_FileName + " Atlas";
+                //
+                // AssetDatabase.AddObjectToAsset(m_FontAtlas, fontAsset);
+                //
+                // fontAsset.gradientScale = m_Padding + 1;
+                //
+                // // Save Font Asset creation settings
+                // m_SelectedFontAsset = fontAsset;
+                // m_LegacyFontAsset = null;
+                // // fontAsset.creationSettings = SaveFontCreationSettings();
+                //
+                // AssetDatabase.SaveAssets();
+                //
+                // AssetDatabase.ImportAsset(AssetDatabase.GetAssetPath(fontAsset)); // Re-import font asset to get the new updated version.
+                //
+                // AssetDatabase.Refresh();
+                //
+                // m_FontAtlas = null;
 
             }
 

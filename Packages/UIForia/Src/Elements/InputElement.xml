@@ -17,8 +17,8 @@
         }
 
         style input-element-text {
-            TextWhitespaceMode = PreserveNewLines;
-            PreferredWidth = 1pca;
+            TextWhitespaceMode = NoWrap;
+            PreferredWidth = 1cnt;
             MinHeight = 1em;
             AlignY = 50% ParentContentArea;
             Visibility = Hidden;

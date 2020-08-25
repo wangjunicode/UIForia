@@ -2,8 +2,20 @@
 <UITemplate>
     <Style src="Documentation/Documentation.style" alias="theme"/>
     <Style path="Documentation/Features/BindingsDemo.style"/>
+    <Style>
+        
+        style img-thing {
+            PreferredSize = 320px;
+            BackgroundImage = url("Images/1");
+            TransformRotation = 45;
+        }
+        
+    </Style>
     <Contents style="container">
         <NumberStepper sync:value="stepperValue" max="100" min="0"/>
         <ClearButton sync:value="stepperValue" />
+<!--        <Group style="img-thing" style:TransformRotation="(FracTime * 360)"/>-->
+                
+
     </Contents>
 </UITemplate>

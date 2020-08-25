@@ -456,6 +456,15 @@ namespace UIForia {
                 rootIds = viewRootIds,
             }.Run();
 
+            Profiler.EndSample();
+            Profiler.BeginSample("UIForia::AnimationUpdate");
+            animationSystem.OnUpdate();
+            Profiler.EndSample();
+
+            Profiler.BeginSample("UIForia::FlushStyleChanges");
+            styleSystem.FlushChangeSets(elementSystem, layoutSystem, renderSystem);
+            Profiler.EndSample();
+            
             if (elementSystem.disabledElementsThisFrame.size > 0) {
                 layoutSystem.HandleElementDisabled(elementSystem.disabledElementsThisFrame);
                 textSystem.HandleElementDisabled(elementSystem.disabledElementsThisFrame);
@@ -467,15 +476,6 @@ namespace UIForia {
                 textSystem.HandleElementEnabled(elementSystem.enabledElementsThisFrame);
                 renderSystem.HandleElementsEnabled(elementSystem.enabledElementsThisFrame);
             }
-
-            Profiler.EndSample();
-            Profiler.BeginSample("UIForia::AnimationUpdate");
-            animationSystem.OnUpdate();
-            Profiler.EndSample();
-
-            Profiler.BeginSample("UIForia::FlushStyleChanges");
-            styleSystem.FlushChangeSets(elementSystem, layoutSystem, renderSystem);
-            Profiler.EndSample();
 
             layoutTimer.Restart();
             Profiler.BeginSample("UIForia::Layout");

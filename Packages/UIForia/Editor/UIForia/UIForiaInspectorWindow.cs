@@ -896,7 +896,7 @@ namespace UIForia.Editor {
         private static StyleProperty DrawTextureAsset(StyleProperty property, bool isEditable) {
             GUI.enabled = isEditable;
             GUILayout.BeginHorizontal();
-            Texture2D texture = (Texture2D) property.AsTextureReference?.texture;
+            Texture2D texture = (Texture2D) property.AsTexture;
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.PrefixLabel(StyleUtil.GetPropertyName(property));

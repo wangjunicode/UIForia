@@ -115,13 +115,12 @@ namespace UIForia.Graphics {
 
         public Texture __GetTextureVariable(int propertyId) {
             if (_element.style.propertyMap.TryGetValue(propertyId, out StyleProperty property)) {
-                return property.AsTextureReference?.texture;
+                return property.AsTexture;
             }
 
             for (int i = 0; i < _variables.Length; i++) {
                 if (_variables[i].propertyId == propertyId) {
-                    TextureReference textureReference = _variables[i].objectValue as TextureReference;
-                    return textureReference?.texture;
+                    return _variables[i].objectValue as Texture;
                 }
             }
 

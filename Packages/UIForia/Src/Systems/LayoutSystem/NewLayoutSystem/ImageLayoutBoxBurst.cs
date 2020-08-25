@@ -4,6 +4,7 @@ using UIForia.Systems;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace UIForia.Layout {
 
@@ -21,20 +22,13 @@ namespace UIForia.Layout {
         public void OnInitialize(LayoutSystem layoutSystem, UIElement element) {
             this.elementId = element.id;
 
-            UIStyleSet style = element.style;
-            TextureReference textureReference = style.BackgroundImage;
-            if (textureReference == null || textureReference.texture == null) {
-                textureHeight = 0;
-                textureWidth = 0;
-            }
-            else {
-                textureWidth = textureReference.uvRect.Width;
-                textureHeight = textureReference.uvRect.Height;
-            }
+            Size size = LayoutSystem.UpdateTextureSize(element);
+            textureWidth = size.width;
+            textureHeight = size.height;
 
-            preferredHeight = style.PreferredHeight;
-            minHeight = style.MinHeight;
-            maxHeight = style.MaxHeight;
+            preferredHeight = element.style.PreferredHeight;
+            minHeight = element.style.MinHeight;
+            maxHeight = element.style.MaxHeight;
 
             LayoutBoxType boxType = LayoutBoxUnion.GetLayoutBoxTypeForProxy(element);
             layoutBox = TypedUnsafe.Malloc<LayoutBoxUnion>(Allocator.Persistent);
@@ -121,18 +115,15 @@ namespace UIForia.Layout {
         }
 
         public void OnStylePropertiesChanged(LayoutSystem layoutSystem, UIElement element, StyleProperty[] propertyList, int propertyCount) {
+            bool updateTextureParams = false;
             for (int i = 0; i < propertyCount; i++) {
                 switch (propertyList[i].propertyId) {
                     case StylePropertyId.BackgroundImage:
-                        TextureReference textureReference = propertyList[i].AsTextureReference;
-                        if (textureReference == null || ReferenceEquals(textureReference.texture, null)) {
-                            textureHeight = 0;
-                            textureWidth = 0;
-                            continue;
-                        }
-
-                        textureWidth = math.min(0, textureReference.uvRect.Width);
-                        textureHeight = math.min(0, textureReference.uvRect.Height);
+                    case StylePropertyId.BackgroundRectMinX:
+                    case StylePropertyId.BackgroundRectMinY:
+                    case StylePropertyId.BackgroundRectMaxX:
+                    case StylePropertyId.BackgroundRectMaxY:
+                        updateTextureParams = true;
                         break;
 
                     case StylePropertyId.PreferredHeight:
@@ -149,6 +140,12 @@ namespace UIForia.Layout {
                         maxHeight = propertyList[i].AsUIMeasurement;
                         break;
                 }
+            }
+
+            if (updateTextureParams) {
+                Size size = LayoutSystem.UpdateTextureSize(element);
+                textureWidth = size.width;
+                textureHeight = size.height;
             }
         }
 

@@ -251,7 +251,20 @@ namespace UIForia.Systems {
                 horizontalLayoutInfo.prefSize = style.PreferredWidth;
                 horizontalLayoutInfo.minSize = style.MinWidth;
                 horizontalLayoutInfo.maxSize = style.MaxWidth;
-                horizontalLayoutInfo.bgSize = style.BackgroundImage?.uvRect.Width ?? 0;
+
+                Texture bgTexture = style.BackgroundImage;
+                if (!ReferenceEquals(bgTexture, null)) {
+                    UIFixedLength minX = style.BackgroundRectMinX;
+                    UIFixedLength maxX = style.BackgroundRectMaxX;
+                    // em and view size go to 0
+                    int resolvedMin = (int) MeasurementUtil.ResolveFixedSize(bgTexture.width, default, default, minX);
+                    int resolvedMax = (int) MeasurementUtil.ResolveFixedSize(bgTexture.width, default, default, maxX);
+                    horizontalLayoutInfo.bgSize = Mathf.Clamp(resolvedMax - resolvedMin, 0, bgTexture.width);
+                }
+                else {
+                    horizontalLayoutInfo.bgSize = 0;
+                }
+
                 horizontalLayoutInfo.finalSize = -1;
                 horizontalLayoutInfo.parentBlockSize = default;
                 horizontalLayoutInfo.isBlockProvider = !horizontalLayoutInfo.prefSize.IsContentBased;
@@ -260,9 +273,19 @@ namespace UIForia.Systems {
                 verticalLayoutInfo.prefSize = style.PreferredHeight;
                 verticalLayoutInfo.minSize = style.MinHeight;
                 verticalLayoutInfo.maxSize = style.MaxHeight;
-                verticalLayoutInfo.bgSize = style.BackgroundImage?.uvRect.Height ?? 0;
+                if (!ReferenceEquals(bgTexture, null)) {
+                    UIFixedLength minY = style.BackgroundRectMinY;
+                    UIFixedLength maxY = style.BackgroundRectMaxY;
+                    // em and view size go to 0
+                    int resolvedMin = (int) MeasurementUtil.ResolveFixedSize(bgTexture.height, default, default, minY);
+                    int resolvedMax = (int) MeasurementUtil.ResolveFixedSize(bgTexture.height, default, default, maxY);
+                    verticalLayoutInfo.bgSize = Mathf.Clamp(resolvedMax - resolvedMin, 0, bgTexture.height);
+                }
+                else {
+                    verticalLayoutInfo.bgSize = 0;
+                }
 
-                horizontalLayoutInfo.finalSize = -1;
+                verticalLayoutInfo.finalSize = -1;
                 verticalLayoutInfo.parentBlockSize = default;
                 verticalLayoutInfo.isBlockProvider = !verticalLayoutInfo.prefSize.IsContentBased;
 
@@ -369,13 +392,14 @@ namespace UIForia.Systems {
         // only called for elements that were not enabled this frame
         // todo -- totally burstable when styles are blittable
         public void HandleStylePropertyUpdates(UIElement element, StyleProperty[] properties, int propertyCount) {
-
             textSystem.HandleStyleChanged(element, properties, propertyCount);
             ref LayoutInfo horizontalLayoutInfo = ref horizontalLayoutInfoTable[element.id];
             ref LayoutInfo verticalLayoutInfo = ref verticalLayoutInfoTable[element.id];
             ref PaddingBorderMargin layoutPropertyEntry = ref paddingBorderMarginTable[element.id];
             ref AlignmentInfo horizontalAlignmentInfo = ref alignmentInfoHorizontal[element.id];
             ref AlignmentInfo verticalAlignmentInfo = ref alignmentInfoVertical[element.id];
+
+            bool recomputeBGSize = false;
 
             for (int i = 0; i < propertyCount; i++) {
                 ref StyleProperty property = ref properties[i];
@@ -521,9 +545,12 @@ namespace UIForia.Systems {
                         layoutPropertyEntry.paddingBottom = property.AsUIFixedLength;
                         break;
 
+                    case StylePropertyId.BackgroundRectMinX:
+                    case StylePropertyId.BackgroundRectMaxX:
+                    case StylePropertyId.BackgroundRectMinY:
+                    case StylePropertyId.BackgroundRectMaxY:
                     case StylePropertyId.BackgroundImage:
-                        horizontalLayoutInfo.bgSize = property.AsTextureReference?.uvRect.Width ?? 0;
-                        verticalLayoutInfo.bgSize = property.AsTextureReference?.uvRect.Height ?? 0;
+                        recomputeBGSize = true;
                         break;
 
                     case StylePropertyId.LayoutBehavior:
@@ -566,12 +593,40 @@ namespace UIForia.Systems {
                 }
             }
 
+            if (recomputeBGSize) {
+                Size bgSize = UpdateTextureSize(element);
+                horizontalLayoutInfo.bgSize = bgSize.width;
+                verticalLayoutInfo.bgSize = bgSize.height;
+            }
+
             layoutBoxTable[element.id].OnStylePropertiesChanged(this, element, properties, propertyCount);
 
             ElementId parentId = layoutHierarchyTable[element.id].parentId;
             if (parentId != default) {
                 layoutBoxTable[parentId].OnChildStyleChanged(this, element.id, properties, propertyCount);
             }
+        }
+
+        internal static Size UpdateTextureSize(UIElement element) {
+            Texture bgTexture = element.style.BackgroundImage;
+            if (!ReferenceEquals(bgTexture, null)) {
+                UIFixedLength minX = element.style.BackgroundRectMinX;
+                UIFixedLength maxX = element.style.BackgroundRectMaxX;
+                UIFixedLength minY = element.style.BackgroundRectMinY;
+                UIFixedLength maxY = element.style.BackgroundRectMaxY;
+                // em and view size go to 0
+                int resolvedMinX = (int) MeasurementUtil.ResolveFixedSize(bgTexture.width, default, default, minX);
+                int resolvedMaxX = (int) MeasurementUtil.ResolveFixedSize(bgTexture.width, default, default, maxX);
+                // em and view size go to 0
+                int resolvedMinY = (int) MeasurementUtil.ResolveFixedSize(bgTexture.height, default, default, minY);
+                int resolvedMaxY = (int) MeasurementUtil.ResolveFixedSize(bgTexture.height, default, default, maxY);
+                return new Size(
+                    Mathf.Clamp(resolvedMaxY - resolvedMinY, 0, bgTexture.width),
+                    Mathf.Clamp(resolvedMinX - resolvedMaxX, 0, bgTexture.height)
+                );
+            }
+
+            return default;
         }
 
         public void MarkForChildrenUpdate(ElementId id) {
@@ -874,9 +929,7 @@ namespace UIForia.Systems {
             public ElementTable<LayoutBoxInfo> layoutBoxInfoTable;
 
             public void Execute() {
-                
                 for (int i = 0; i < scrollViewIds.size; i++) {
-                    
                     ElementId scrollId = scrollViewIds[i];
 
                     ref LayoutBoxUnion scrollBox = ref layoutBoxTable[scrollId];
@@ -891,15 +944,14 @@ namespace UIForia.Systems {
                         float yMax = float.MinValue;
 
                         while (ptr != default) {
-
                             ref LayoutBoxInfo boxInfo = ref layoutBoxInfoTable[ptr];
-                            
-                            if (xMin < boxInfo.alignedPosition.x) xMin = boxInfo.alignedPosition.x; 
+
+                            if (xMin < boxInfo.alignedPosition.x) xMin = boxInfo.alignedPosition.x;
                             if (xMax > boxInfo.alignedPosition.x) xMax = boxInfo.alignedPosition.x;
-                            
+
                             if (yMin < boxInfo.alignedPosition.y) yMin = boxInfo.alignedPosition.y;
                             if (yMax < boxInfo.alignedPosition.y) yMax = boxInfo.alignedPosition.y;
-                            
+
                             ptr = hierarchyInfo.nextSiblingId;
                         }
                     }

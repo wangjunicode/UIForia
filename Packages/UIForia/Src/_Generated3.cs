@@ -40,8 +40,12 @@ namespace UIForia.Rendering {
 		public const float BackgroundImageScaleY = 1f;
 		public const float BackgroundImageTileX = 1f;
 		public const float BackgroundImageTileY = 1f;
+		public static readonly UIFixedLength BackgroundRectMinX = new UIFixedLength(0f, UIFixedUnit.Percent);
+		public static readonly UIFixedLength BackgroundRectMinY = new UIFixedLength(0f, UIFixedUnit.Percent);
+		public static readonly UIFixedLength BackgroundRectMaxX = new UIFixedLength(1f, UIFixedUnit.Percent);
+		public static readonly UIFixedLength BackgroundRectMaxY = new UIFixedLength(1f, UIFixedUnit.Percent);
 		public static readonly UIAngle BackgroundImageRotation = new UIAngle(0f, UIAngleUnit.Degrees);
-		public static readonly TextureReference BackgroundImage = default(TextureReference);
+		public static readonly Texture BackgroundImage = default(Texture);
 		public const BackgroundFit BackgroundFit = UIForia.Rendering.BackgroundFit.Fill;
 		public static readonly OffsetMeasurement GradientOffsetX = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
 		public static readonly OffsetMeasurement GradientOffsetY = new OffsetMeasurement(0f, OffsetMeasurementUnit.Pixel);
@@ -124,7 +128,7 @@ namespace UIForia.Rendering {
 		public const float TextOutlineWidth = 0f;
 		public static readonly Color TextOutlineColor = new Color(0f, 0f, 0f, 1f);
 		public static readonly Color CaretColor = new Color(0f, 0f, 0f, 1f);
-		public static readonly Color SelectionBackgroundColor = new Color(0.7215686f, 1f, 1f, 1f);
+		public static readonly Color SelectionBackgroundColor = new Color(0.6784314f, 0.8392157f, 1f, 1f);
 		public static readonly Color SelectionTextColor = new Color(0f, 0f, 0f, 1f);
 		public const float TextOutlineSoftness = 0f;
 		public static readonly Color TextGlowColor = new Color(-1f, -1f, -1f, -1f);
@@ -216,10 +220,18 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.BackgroundImageTileX, 1f);
 				case StylePropertyId.BackgroundImageTileY:
 					 return new StyleProperty(StylePropertyId.BackgroundImageTileY, 1f);
+				case StylePropertyId.BackgroundRectMinX:
+					 return new StyleProperty(StylePropertyId.BackgroundRectMinX, new UIFixedLength(0f, UIFixedUnit.Percent));
+				case StylePropertyId.BackgroundRectMinY:
+					 return new StyleProperty(StylePropertyId.BackgroundRectMinY, new UIFixedLength(0f, UIFixedUnit.Percent));
+				case StylePropertyId.BackgroundRectMaxX:
+					 return new StyleProperty(StylePropertyId.BackgroundRectMaxX, new UIFixedLength(1f, UIFixedUnit.Percent));
+				case StylePropertyId.BackgroundRectMaxY:
+					 return new StyleProperty(StylePropertyId.BackgroundRectMaxY, new UIFixedLength(1f, UIFixedUnit.Percent));
 				case StylePropertyId.BackgroundImageRotation:
 					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, new UIAngle(0f, UIAngleUnit.Degrees));
 				case StylePropertyId.BackgroundImage:
-					 return new StyleProperty(StylePropertyId.BackgroundImage, default(TextureReference));
+					 return new StyleProperty(StylePropertyId.BackgroundImage, default(Texture));
 				case StylePropertyId.BackgroundFit:
 					 return new StyleProperty(StylePropertyId.BackgroundFit, (int)UIForia.Rendering.BackgroundFit.Fill);
 				case StylePropertyId.GradientOffsetX:
@@ -385,7 +397,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.CaretColor:
 					 return new StyleProperty(StylePropertyId.CaretColor, new Color(0f, 0f, 0f, 1f));
 				case StylePropertyId.SelectionBackgroundColor:
-					 return new StyleProperty(StylePropertyId.SelectionBackgroundColor, new Color(0.7215686f, 1f, 1f, 1f));
+					 return new StyleProperty(StylePropertyId.SelectionBackgroundColor, new Color(0.6784314f, 0.8392157f, 1f, 1f));
 				case StylePropertyId.SelectionTextColor:
 					 return new StyleProperty(StylePropertyId.SelectionTextColor, new Color(0f, 0f, 0f, 1f));
 				case StylePropertyId.TextOutlineSoftness:

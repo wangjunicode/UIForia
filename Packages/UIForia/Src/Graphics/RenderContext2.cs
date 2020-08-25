@@ -93,6 +93,17 @@ namespace UIForia.Graphics {
 
     }
 
+    public struct TextureUsageDesc {
+
+        public Texture texture;
+        public UIFixedLength xMin;
+        public UIFixedLength xMax;
+        public UIFixedLength yMin;
+        public UIFixedLength yMax;
+        public bool hasTexureCoords;
+
+    }
+
     public struct GradientUsage {
 
         public int gradientId;
@@ -271,7 +282,6 @@ namespace UIForia.Graphics {
         }
 
         public bool SetMaterialFloat(int shaderKey, float value) {
-
             if (!materialDatabase.HasFloatProperty(activeMaterialId, shaderKey)) {
                 return false;
             }
@@ -300,7 +310,6 @@ namespace UIForia.Graphics {
         }
 
         public bool SetMaterialVector(int shaderKey, float4 value) {
-
             if (!materialDatabase.HasFloatProperty(activeMaterialId, shaderKey)) {
                 return false;
             }
@@ -329,7 +338,6 @@ namespace UIForia.Graphics {
         }
 
         public bool SetMaterialColor(int shaderKey, Color32 value) {
-
             if (!materialDatabase.HasFloatProperty(activeMaterialId, shaderKey)) {
                 return false;
             }
@@ -382,7 +390,6 @@ namespace UIForia.Graphics {
         }
 
         public bool SetMaterialTexture(int shaderKey, Texture texture) {
-
             // todo -- may only work if exposed via property which is not what I want
             if (!materialDatabase.HasTextureProperty(activeMaterialId, shaderKey)) {
                 return false;
@@ -414,7 +421,6 @@ namespace UIForia.Graphics {
 
             materialValueOverrides.Add(overrideProperty);
             return true;
-
         }
 
         public bool SetMaterialTexture(string key, Texture texture) {
@@ -429,7 +435,6 @@ namespace UIForia.Graphics {
         // draw shape = commit changes
         // draw shape + alter state = write to active set
         private void CommitMaterialModifications() {
-
             int size = materialValueOverrides.size;
             MaterialPropertyOverride* writePtr = stackBuffer.Allocate<MaterialPropertyOverride>(size);
 
@@ -442,11 +447,9 @@ namespace UIForia.Graphics {
             currentOverrideProperties = writePtr;
 
             hasPendingMaterialOverrides = false;
-
         }
 
         public void PushClipRect(Rect rect) {
-
             AxisAlignedBounds2D bounds = default;
 
             // todo -- get rid fo math.transform, its slow
@@ -463,18 +466,15 @@ namespace UIForia.Graphics {
                 matrix = defaultMatrix,
                 shapeData = stackBuffer.Allocate(bounds)
             });
-
         }
 
         public void FillRoundRect(float x, float y, float width, float height, in Corner corner) {
-
             FillRoundRect(x, y, width, height, new CornerProperties() {
                 topLeft = corner,
                 topRight = corner,
                 bottomLeft = corner,
                 bottomRight = corner,
             });
-
         }
 
         public void FillRoundRect(float x, float y, float width, float height, in CornerProperties cornerProperties) {
@@ -558,7 +558,6 @@ namespace UIForia.Graphics {
         }
 
         public void DrawSDFText(in TextInfo textInfo) {
-
             // todo -- only do this if we processed text and the 'requires render processing' flag is set
             // todo -- if text has many characters, do this with .Run()
             if (textInfo.requiresRenderProcessing) {
@@ -582,16 +581,13 @@ namespace UIForia.Graphics {
                         }
 
                         if (symbol.type == TextSymbolType.Sprite) { }
-
                     }
-
                 }
             }
             else {
-
                 if (activeMaterialId.index == MaterialId.UIForiaSDFText.index) {
-                 //  int fontTextureId = resourceManager.GetFontTextureId(textInfo.textStyle.fontAssetId);
-                   // SetFontTexture(Shader.PropertyToID("_MainTex"), fontTextureId);
+                    //  int fontTextureId = resourceManager.GetFontTextureId(textInfo.textStyle.fontAssetId);
+                    // SetFontTexture(Shader.PropertyToID("_MainTex"), fontTextureId);
                 }
 
                 if (hasPendingMaterialOverrides) {
@@ -661,15 +657,15 @@ namespace UIForia.Graphics {
 
                 for (int i = 0; i < textInfo.lineInfoList.size; i++) {
                     ref TextLineInfo lineInfo = ref textInfo.lineInfoList[i];
-                //    textSpan.lineIndex = i;
+                    //    textSpan.lineIndex = i;
                     int lineWordStart = lineInfo.wordStart;
                     int lineWordEnd = lineWordStart + lineInfo.wordCount;
 
                     // todo when an effect spans multiple text spans I won't know which one renders first
                     // i either need to have 1 of them control all the text effects
                     // or somehow recompute the joins in the controlling one since I dont know which will render first
-                 //   textSpan.nextSpanOnLine = null;
-                 //   textSpan.prevSpanOnLine = null;
+                    //   textSpan.nextSpanOnLine = null;
+                    //   textSpan.prevSpanOnLine = null;
 
                     // if offscreen dont render
 
@@ -733,15 +729,11 @@ namespace UIForia.Graphics {
                     //     localDrawIdx = localDrawIdx++,
                     //     shapeData = (byte*) stackBuffer.Allocate(textSpan)
                     // });
-
                 }
-
             }
-
         }
 
         private static TextMaterialFeatures GetTextFeatureSet(in TextInfoRenderSpan span) {
-
             TextMaterialFeatures features = default;
 
             if (span.faceTextureId != 0 || span.outlineTextureId != 0) {
@@ -757,7 +749,6 @@ namespace UIForia.Graphics {
             }
 
             return features;
-
         }
 
         private static AxisAlignedBounds2D ComputeAABBFromBounds(in OverflowBounds orientedBounds) {
@@ -789,7 +780,6 @@ namespace UIForia.Graphics {
         }
 
         public static MaterialId GetSDFMaterialId(in TextInfoRenderSpan span) {
-
             // todo -- if these all sit in the same struct we can probably just memcmp 
             if (span.faceTextureId != 0 || span.outlineTextureId != 0) {
                 return MaterialId.UIForiaSDFTextEffect;
@@ -811,7 +801,6 @@ namespace UIForia.Graphics {
         private static int s_TextOutlineColor = Shader.PropertyToID("_OutlineColor");
 
         private void SetupTextMPB(ref TextInfoRenderSpan span) {
-
             // fixed (TextStyleBuffer* a = &TextStyleBuffer.defaultValue) 
             // fixed (TextStyleBuffer* b = &span.textStyleBuffer) {
             //     
@@ -845,7 +834,6 @@ namespace UIForia.Graphics {
             //
             //     
             // }
-
         }
         // todo -- figure out what can be packed into byte / ushort
 
@@ -870,13 +858,11 @@ namespace UIForia.Graphics {
         }
 
         public ShapeId GetLastShape() {
-
             if (drawList.size == 0) {
                 throw new Exception("No draw calls");
             }
 
             return new ShapeId(this, drawList.size - 1);
-
         }
 
         public void BeginStencilClip() {
@@ -885,19 +871,15 @@ namespace UIForia.Graphics {
             drawList.Add(new DrawInfo() {
                 type = DrawType.BeginStencilClip
             });
-
         }
 
         public void BeginSoftMask() {
-
             // drawList.Add(new DrawInfo() {
             //     type = DrawType.BeginSoftMask
             // });
-
         }
 
         private void AddDrawInfo(in DrawInfo drawInfo) {
-
             drawList.Add(drawInfo);
         }
 
@@ -934,7 +916,6 @@ namespace UIForia.Graphics {
                     drawInfoCount = drawList.size - stencilClipStart
                 })
             });
-
         }
 
         // make sure we align on sizeof(float4)
@@ -992,7 +973,6 @@ namespace UIForia.Graphics {
         public struct TextShapeDesc { }
 
         public void DrawElement(in Matrix4x4 matrix, Size size, ElementStyle elementStyle) {
-
             // 3 things we might draw
             //  - border box
             //  - body / outline
@@ -1049,10 +1029,10 @@ namespace UIForia.Graphics {
             if ((elementStyle.shadowStyle.shadowColor.a * elementStyle.opacity >= 0.01f)) {
                 // draw shadow
             }
-
         }
 
     }
+
     [Flags]
     public enum MaskFlags : byte {
 
@@ -1061,7 +1041,7 @@ namespace UIForia.Graphics {
         Invert = 1 << 1,
 
     }
-    
+
     [Flags]
     public enum ColorMode : byte {
 
@@ -1099,7 +1079,6 @@ namespace UIForia.Graphics {
             if (count < 0) {
                 count = coords.Length - start;
             }
-
         }
 
         public void SetTexCoord(int index, float2[] coords, int start, int count) { }

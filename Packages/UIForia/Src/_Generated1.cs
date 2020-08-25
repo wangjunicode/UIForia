@@ -244,6 +244,42 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public UIForia.UIFixedLength BackgroundRectMinX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundRectMinX, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.BackgroundRectMinX;
+                }
+            }
+
+            public UIForia.UIFixedLength BackgroundRectMinY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundRectMinY, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.BackgroundRectMinY;
+                }
+            }
+
+            public UIForia.UIFixedLength BackgroundRectMaxX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundRectMaxX, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.BackgroundRectMaxX;
+                }
+            }
+
+            public UIForia.UIFixedLength BackgroundRectMaxY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundRectMaxY, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.BackgroundRectMaxY;
+                }
+            }
+
             public UIForia.UIAngle BackgroundImageRotation { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -253,11 +289,11 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.TextureReference BackgroundImage { 
+            public UnityEngine.Texture BackgroundImage { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTextureReference;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTexture;
                     return DefaultStyleValues_Generated.BackgroundImage;
                 }
             }
@@ -1547,6 +1583,34 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageTileY, value)); }
         }
             
+        public UIForia.UIFixedLength BackgroundRectMinX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundRectMinX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundRectMinX, value)); }
+        }
+            
+        public UIForia.UIFixedLength BackgroundRectMinY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundRectMinY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundRectMinY, value)); }
+        }
+            
+        public UIForia.UIFixedLength BackgroundRectMaxX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundRectMaxX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundRectMaxX, value)); }
+        }
+            
+        public UIForia.UIFixedLength BackgroundRectMaxY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindUIFixedLengthProperty(StylePropertyId.BackgroundRectMaxY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.BackgroundRectMaxY, value)); }
+        }
+            
         public UIForia.UIAngle BackgroundImageRotation {
             [System.Diagnostics.DebuggerStepThrough]
             get { return FindUIAngleProperty(StylePropertyId.BackgroundImageRotation); }
@@ -1554,9 +1618,9 @@ namespace UIForia.Rendering {
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImageRotation, value)); }
         }
             
-        public UIForia.TextureReference BackgroundImage {
+        public UnityEngine.Texture BackgroundImage {
             [System.Diagnostics.DebuggerStepThrough]
-            get { return GetProperty(StylePropertyId.BackgroundImage).AsTextureReference; }
+            get { return GetProperty(StylePropertyId.BackgroundImage).AsTexture; }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value)); }
         }
@@ -2639,6 +2703,42 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public UIForia.UIFixedLength BackgroundRectMinX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundRectMinX, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.BackgroundRectMinX;
+                }
+            }
+
+            public UIForia.UIFixedLength BackgroundRectMinY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundRectMinY, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.BackgroundRectMinY;
+                }
+            }
+
+            public UIForia.UIFixedLength BackgroundRectMaxX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundRectMaxX, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.BackgroundRectMaxX;
+                }
+            }
+
+            public UIForia.UIFixedLength BackgroundRectMaxY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundRectMaxY, out property)) return property.AsUIFixedLength;
+                    return DefaultStyleValues_Generated.BackgroundRectMaxY;
+                }
+            }
+
             public UIForia.UIAngle BackgroundImageRotation { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -2648,11 +2748,11 @@ namespace UIForia.Rendering {
                 }
             }
 
-            public UIForia.TextureReference BackgroundImage { 
+            public UnityEngine.Texture BackgroundImage { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
                     StyleProperty property;
-                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTextureReference;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundImage, out property)) return property.AsTexture;
                     return DefaultStyleValues_Generated.BackgroundImage;
                 }
             }
@@ -3965,6 +4065,38 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageTileY, state).AsFloat;
         }
         
+        public void SetBackgroundRectMinX(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BackgroundRectMinX, value), state);
+        }
+
+        public UIForia.UIFixedLength GetBackgroundRectMinX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundRectMinX, state).AsUIFixedLength;
+        }
+        
+        public void SetBackgroundRectMinY(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BackgroundRectMinY, value), state);
+        }
+
+        public UIForia.UIFixedLength GetBackgroundRectMinY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundRectMinY, state).AsUIFixedLength;
+        }
+        
+        public void SetBackgroundRectMaxX(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BackgroundRectMaxX, value), state);
+        }
+
+        public UIForia.UIFixedLength GetBackgroundRectMaxX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundRectMaxX, state).AsUIFixedLength;
+        }
+        
+        public void SetBackgroundRectMaxY(in UIForia.UIFixedLength? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.BackgroundRectMaxY, value), state);
+        }
+
+        public UIForia.UIFixedLength GetBackgroundRectMaxY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundRectMaxY, state).AsUIFixedLength;
+        }
+        
         public void SetBackgroundImageRotation(in UIForia.UIAngle? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImageRotation, value), state);
         }
@@ -3973,12 +4105,12 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.BackgroundImageRotation, state).AsUIAngle;
         }
         
-        public void SetBackgroundImage(UIForia.TextureReference value, StyleState state) {
+        public void SetBackgroundImage(UnityEngine.Texture value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.BackgroundImage, value), state);
         }
 
-        public UIForia.TextureReference GetBackgroundImage(StyleState state) {
-            return GetPropertyValueInState(StylePropertyId.BackgroundImage, state).AsTextureReference;
+        public UnityEngine.Texture GetBackgroundImage(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.BackgroundImage, state).AsTexture;
         }
         
         public void SetBackgroundFit(in UIForia.Rendering.BackgroundFit? value, StyleState state) {
@@ -4988,6 +5120,14 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.BackgroundImageTileX, BackgroundImageTileX);
 				case StylePropertyId.BackgroundImageTileY:
 					 return new StyleProperty(StylePropertyId.BackgroundImageTileY, BackgroundImageTileY);
+				case StylePropertyId.BackgroundRectMinX:
+					 return new StyleProperty(StylePropertyId.BackgroundRectMinX, BackgroundRectMinX);
+				case StylePropertyId.BackgroundRectMinY:
+					 return new StyleProperty(StylePropertyId.BackgroundRectMinY, BackgroundRectMinY);
+				case StylePropertyId.BackgroundRectMaxX:
+					 return new StyleProperty(StylePropertyId.BackgroundRectMaxX, BackgroundRectMaxX);
+				case StylePropertyId.BackgroundRectMaxY:
+					 return new StyleProperty(StylePropertyId.BackgroundRectMaxY, BackgroundRectMaxY);
 				case StylePropertyId.BackgroundImageRotation:
 					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, BackgroundImageRotation);
 				case StylePropertyId.BackgroundImage:
@@ -5267,8 +5407,12 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageScaleY: return typeof(System.Single);
                     case StylePropertyId.BackgroundImageTileX: return typeof(System.Single);
                     case StylePropertyId.BackgroundImageTileY: return typeof(System.Single);
+                    case StylePropertyId.BackgroundRectMinX: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BackgroundRectMinY: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BackgroundRectMaxX: return typeof(UIForia.UIFixedLength);
+                    case StylePropertyId.BackgroundRectMaxY: return typeof(UIForia.UIFixedLength);
                     case StylePropertyId.BackgroundImageRotation: return typeof(UIForia.UIAngle);
-                    case StylePropertyId.BackgroundImage: return typeof(UIForia.TextureReference);
+                    case StylePropertyId.BackgroundImage: return typeof(UnityEngine.Texture);
                     case StylePropertyId.BackgroundFit: return typeof(UIForia.Rendering.BackgroundFit);
                     case StylePropertyId.GradientOffsetX: return typeof(UIForia.OffsetMeasurement);
                     case StylePropertyId.GradientOffsetY: return typeof(UIForia.OffsetMeasurement);
@@ -5413,6 +5557,10 @@ namespace UIForia.Rendering {
                     case StylePropertyId.BackgroundImageScaleY: return true;
                     case StylePropertyId.BackgroundImageTileX: return true;
                     case StylePropertyId.BackgroundImageTileY: return true;
+                    case StylePropertyId.BackgroundRectMinX: return true;
+                    case StylePropertyId.BackgroundRectMinY: return true;
+                    case StylePropertyId.BackgroundRectMaxX: return true;
+                    case StylePropertyId.BackgroundRectMaxY: return true;
                     case StylePropertyId.BackgroundImageRotation: return true;
                     case StylePropertyId.GradientOffsetX: return true;
                     case StylePropertyId.GradientOffsetY: return true;

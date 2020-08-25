@@ -11,6 +11,7 @@ namespace UIForia.Rendering {
         BackgroundColor,
         BackgroundImage,
         Painter,
+        
         BackgroundImageOffsetX,
         BackgroundImageOffsetY,
         BackgroundImageScaleX,
@@ -18,6 +19,12 @@ namespace UIForia.Rendering {
         BackgroundImageRotation,
         BackgroundImageTileX,
         BackgroundImageTileY,
+        
+        BackgroundRectMinX,
+        BackgroundRectMinY,
+        BackgroundRectMaxX,
+        BackgroundRectMaxY,
+        
         Opacity,
         Cursor,
         Visibility,

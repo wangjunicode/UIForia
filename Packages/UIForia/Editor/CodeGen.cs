@@ -62,10 +62,16 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageScaleY, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageTileX, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageTileY, 1),
-            new AnimatedPropertyGenerator<UIAngle>(StylePropertyId.BackgroundImageRotation, 0),
-            new PropertyGenerator<TextureReference>(StylePropertyId.BackgroundImage, default),
-            new PropertyGenerator<BackgroundFit>(StylePropertyId.BackgroundFit, BackgroundFit.Fill),
             
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundRectMinX, new UIFixedLength(0, UIFixedUnit.Percent)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundRectMinY, new UIFixedLength(0, UIFixedUnit.Percent)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundRectMaxX, new UIFixedLength(1, UIFixedUnit.Percent)),
+            new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundRectMaxY, new UIFixedLength(1, UIFixedUnit.Percent)),
+            
+            new AnimatedPropertyGenerator<UIAngle>(StylePropertyId.BackgroundImageRotation, 0),
+            new PropertyGenerator<Texture>(StylePropertyId.BackgroundImage, default),
+            new PropertyGenerator<BackgroundFit>(StylePropertyId.BackgroundFit, BackgroundFit.Fill),
+
             // Gradient
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.GradientOffsetX, new OffsetMeasurement(0)),
             new AnimatedPropertyGenerator<OffsetMeasurement>(StylePropertyId.GradientOffsetY, new OffsetMeasurement(0)),
@@ -569,8 +575,8 @@ namespace UIForia.Rendering {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsGridItemPlacement;";
             }
             
-            if (typeof(TextureReference) == propertyGenerator.type) {
-                return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsTextureReference;";
+            if (typeof(Texture) == propertyGenerator.type) {
+                return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsTexture;";
             }
             
             if (typeof(Gradient) == propertyGenerator.type) {

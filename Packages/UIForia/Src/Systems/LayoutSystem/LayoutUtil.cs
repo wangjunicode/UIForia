@@ -7,19 +7,16 @@ namespace UIForia.Systems {
     public static class LayoutUtil {
 
         public static void MarkForContentSizeChange(ElementId elementId, ElementTable<LayoutHierarchyInfo> layoutHierarchyTable, ElementTable<LayoutInfo> layoutInfo) {
-
-            return;
-            ElementId parentId = layoutHierarchyTable[elementId].parentId;
-
-            while (parentId != default) {
-                // todo -- also stop after encountering ignored
-                if (!layoutInfo[parentId].isContentBased || layoutInfo[parentId].requiresContentSizeLayout) {
-                    break;
-                }
-
-                parentId = layoutHierarchyTable[parentId].parentId;
-            }
-
+            // ElementId parentId = layoutHierarchyTable[elementId].parentId;
+            //
+            // while (parentId != default) {
+            //     // todo -- also stop after encountering ignored
+            //     if (!layoutInfo[parentId].isContentBased || layoutInfo[parentId].requiresContentSizeLayout) {
+            //         break;
+            //     }
+            //
+            //     parentId = layoutHierarchyTable[parentId].parentId;
+            // }
         }
 
         public static void UnlinkFromParent(ElementId elementId, ElementTable<LayoutHierarchyInfo> layoutHierarchyTable) {
@@ -51,7 +48,6 @@ namespace UIForia.Systems {
         }
 
         public static void Insert(ElementId parentId, ElementId elementId, ElementTable<ElementTraversalInfo> traversalTable, ElementTable<LayoutHierarchyInfo> layoutHierarchyTable) {
-
             ElementId ptr = layoutHierarchyTable[parentId].firstChildId;
 
             ElementTraversalInfo traversalInfo = traversalTable[elementId];
@@ -78,14 +74,13 @@ namespace UIForia.Systems {
         }
 
         public static void SetLastChild(ElementId parentId, ElementId toInsert, ElementTable<LayoutHierarchyInfo> layoutHierarchyTable) {
-            
             ref LayoutHierarchyInfo parentLayoutInfo = ref layoutHierarchyTable[parentId];
             ref LayoutHierarchyInfo toInsertLayoutInfo = ref layoutHierarchyTable[toInsert];
 
             ElementId prevLastChild = parentLayoutInfo.lastChildId;
 
             if (prevLastChild == toInsert) return;
-            
+
             if (prevLastChild != default) {
                 layoutHierarchyTable[prevLastChild].nextSiblingId = toInsert;
             }
@@ -100,11 +95,9 @@ namespace UIForia.Systems {
             if (parentLayoutInfo.firstChildId == default) {
                 parentLayoutInfo.firstChildId = toInsert;
             }
-
         }
 
         private static void BecomePreviousSibling(ElementId toInsert, ElementId target, ElementTable<LayoutHierarchyInfo> layoutHierarchyTable) {
-
             ref LayoutHierarchyInfo nextSiblingLayoutInfo = ref layoutHierarchyTable[target];
             ref LayoutHierarchyInfo toInsertLayoutInfo = ref layoutHierarchyTable[toInsert];
             ref LayoutHierarchyInfo parentLayoutInfo = ref layoutHierarchyTable[nextSiblingLayoutInfo.parentId];
@@ -126,7 +119,6 @@ namespace UIForia.Systems {
             toInsertLayoutInfo.parentId = nextSiblingLayoutInfo.parentId;
             toInsertLayoutInfo.nextSiblingId = target;
             toInsertLayoutInfo.prevSiblingId = lastPrevSibling;
-
         }
 
         // start at first enabled element
@@ -155,7 +147,6 @@ namespace UIForia.Systems {
 
             ElementId forwardPtr = parentLayoutHierarchyInfo.firstChildId;
             while (forwardPtr != default) {
-
                 if (traversalTable[forwardPtr].IsDescendentOf(elementTraversalInfo)) {
                     break;
                 }
@@ -205,7 +196,6 @@ namespace UIForia.Systems {
 
                 parentLayoutHierarchyInfo.childCount += (-count + 1);
                 layoutHierarchyInfo.childCount = count;
-
             }
             else {
                 // no descendents are currently enabled in the parent, we'll find the first place we can slot in based on element hierarchy instead
@@ -225,9 +215,7 @@ namespace UIForia.Systems {
                 else {
                     SetLastChild(elementId, parentId, layoutHierarchyTable);
                 }
-
             }
-
         }
 
         public static void TranscludeUnattached(ElementId elementId, ElementTable<LayoutHierarchyInfo> layoutHierarchyTable, ElementTable<ElementTraversalInfo> traversalTable) {
@@ -257,10 +245,8 @@ namespace UIForia.Systems {
                 parentHierarchyInfo.childCount = hierarchyInfo.childCount;
             }
             else {
-
                 ElementId forwardPtr = parentHierarchyInfo.firstChildId;
                 while (forwardPtr != default) {
-
                     if (elementTraversalInfo.IsLaterInHierarchy(traversalTable[forwardPtr])) {
                         break;
                     }
@@ -278,7 +264,6 @@ namespace UIForia.Systems {
                     firstChildInfo.prevSiblingId = parentHierarchyInfo.lastChildId;
                     parentHierarchyInfo.childCount += hierarchyInfo.childCount;
                     parentHierarchyInfo.lastChildId = hierarchyInfo.lastChildId;
-
                 }
                 else {
                     ref LayoutHierarchyInfo prevSibling = ref layoutHierarchyTable[forwardPtr];
@@ -301,7 +286,6 @@ namespace UIForia.Systems {
 
             hierarchyInfo = default;
             hierarchyInfo.behavior = LayoutBehavior.TranscludeChildren;
-
         }
 
         public static void Transclude(ElementId elementId, ElementTable<LayoutHierarchyInfo> layoutHierarchyTable) {
@@ -316,7 +300,15 @@ namespace UIForia.Systems {
             }
 
             if (hierarchyInfo.nextSiblingId == default) {
-                layoutHierarchyTable[hierarchyInfo.parentId].lastChildId = hierarchyInfo.lastChildId;
+                if (hierarchyInfo.lastChildId != default) {
+                    layoutHierarchyTable[hierarchyInfo.parentId].lastChildId = hierarchyInfo.lastChildId;
+                }
+                else if (hierarchyInfo.prevSiblingId != default) {
+                    layoutHierarchyTable[hierarchyInfo.parentId].lastChildId = hierarchyInfo.prevSiblingId;
+                }
+                else {
+                    layoutHierarchyTable[hierarchyInfo.parentId].lastChildId = default;
+                }
             }
             else {
                 layoutHierarchyTable[hierarchyInfo.nextSiblingId].prevSiblingId = hierarchyInfo.lastChildId;
@@ -337,7 +329,6 @@ namespace UIForia.Systems {
 
             hierarchyInfo = default; // at this point all values in here are junk, we'll need to re-compute the hierarchy if the behavior changes
             hierarchyInfo.behavior = LayoutBehavior.TranscludeChildren;
-
         }
 
         public static ElementId FindLayoutParent(ElementId elementId, ElementTable<HierarchyInfo> hierarchyTable, ElementTable<LayoutHierarchyInfo> layoutHierarchyTable) {

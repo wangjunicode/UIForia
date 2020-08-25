@@ -150,11 +150,11 @@ namespace UIForia.Systems {
             queryableElements.Clear();
 
             PerformLayout();
-            return;
-            ApplyHorizontalAlignments();
-            ApplyVerticalAlignments();
-            ApplyLayoutResults();
-            ApplyBoxSizeChanges();
+
+            // ApplyHorizontalAlignments();
+            // ApplyVerticalAlignments();
+            // ApplyLayoutResults();
+            // ApplyBoxSizeChanges();
 
         }
 

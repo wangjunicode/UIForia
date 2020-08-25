@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UIForia.Exceptions;
+using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Layout.LayoutTypes;
 using UIForia.Parsing.Style.AstNodes;
@@ -100,8 +101,24 @@ namespace UIForia.Compilers.Style {
                 {"backgroundimagetilex", (targetStyle, property, context) => targetStyle.BackgroundImageTileX = MapNumber(property.children[0], context)},
                 {"backgroundimagetiley", (targetStyle, property, context) => targetStyle.BackgroundImageTileY = MapNumber(property.children[0], context)},
                 {"backgroundimagerotation", (targetStyle, property, context) => targetStyle.BackgroundImageRotation = MapAngle(property.children[0], context)},
-                {"backgroundimage", (targetStyle, property, context) => targetStyle.BackgroundImage = MapTexture(property.children[0], context)},
+                {"backgroundimage", (targetStyle, property, context) => {
+                        TextureUsageDesc desc = MapTexture(property.children[0], context);
+                        targetStyle.BackgroundImage = desc.texture;
+                        if (desc.hasTexureCoords) {
+                            targetStyle.BackgroundRectMinX = desc.xMin;
+                            targetStyle.BackgroundRectMinY = desc.yMin;
+                            targetStyle.BackgroundRectMaxX = desc.xMax;
+                            targetStyle.BackgroundRectMaxY = desc.yMax;
+                        }
+                    }
+                },
                 {"backgroundfit", (targetStyle, property, context) => targetStyle.BackgroundFit = MapEnum<BackgroundFit>(property.children[0], context)},
+                
+                {"backgroundrectminx", (targetStyle, property, context) => targetStyle.BackgroundRectMinX = MapFixedLength(property.children[0], context)},
+                {"backgroundrectminy", (targetStyle, property, context) => targetStyle.BackgroundRectMinY = MapFixedLength(property.children[0], context)},
+                {"backgroundrectmaxx", (targetStyle, property, context) => targetStyle.BackgroundRectMaxX = MapFixedLength(property.children[0], context)},
+                {"backgroundrectmaxy", (targetStyle, property, context) => targetStyle.BackgroundRectMaxY = MapFixedLength(property.children[0], context)},
+                // {"backgroundrect", (targetStyle, property, context) => targetStyle.BackgroundFit = MapFixedLength(property.children[0], context)},
 
                 {"visibility", (targetStyle, property, context) => targetStyle.Visibility = MapEnum<Visibility>(property.children[0], context)},
                 {"opacity", (targetStyle, property, context) => targetStyle.Opacity = MapNumber(property.children[0], context)},
@@ -729,7 +746,7 @@ namespace UIForia.Compilers.Style {
                 }
             }
 
-            return new CursorStyle(null, MapTexture(property.children[0], context), new Vector2(hotSpotX, hotSpotY));
+            return new CursorStyle(null, MapTexture(property.children[0], context).texture, new Vector2(hotSpotX, hotSpotY));
         }
 
         private static GridItemPlacement MapGridItemPlacement(StyleASTNode node, StyleCompileContext context) {
@@ -1631,21 +1648,23 @@ namespace UIForia.Compilers.Style {
             targetStyle.OverflowY = overflowY;
         }
 
-        private static TextureReference MapTexture(StyleASTNode node, StyleCompileContext context) {
+        private static TextureUsageDesc MapTexture(StyleASTNode node, StyleCompileContext context) {
             node = context.GetValueForReference(node);
             switch (node) {
                 case UrlNode urlNode:
                     AssetInfo assetInfo = TransformUrlNode(urlNode, context);
                     if (assetInfo.spriteName != null) {
-                        return context.resourceManager?.GetSpriteTexture(assetInfo);
+                        return context.resourceManager?.GetSpriteTexture(assetInfo) ?? default;
                     }
 
-                    return context.resourceManager?.GetTexture(assetInfo.path);
+                    return new TextureUsageDesc() {
+                        texture = context.resourceManager?.GetTexture(assetInfo.path)
+                    };
 
                 case StyleLiteralNode literalNode:
                     string value = literalNode.rawValue;
                     if (value == "unset" || value == "default" || value == "null") {
-                        return null;
+                        return default;
                     }
 
                     break;
@@ -2105,7 +2124,7 @@ namespace UIForia.Compilers.Style {
                     case MaterialPropertyType.Vector:
                         break;
                     case MaterialPropertyType.Texture:
-                        normalStyle.SetTextureProperty((StylePropertyId) propertyDefinition.stylePropertyId, MapTexture(materialPropertyNode.children[0], context));
+                        normalStyle.SetTextureProperty((StylePropertyId) propertyDefinition.stylePropertyId, MapTexture(materialPropertyNode.children[0], context).texture);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();

@@ -4,6 +4,7 @@ using ThisOtherThing.UI.ShapeUtils;
 using UIForia.Graphics;
 using UIForia.Graphics.ShapeKit;
 using UIForia.Layout;
+using UIForia.Systems;
 using UIForia.UIInput;
 using UIForia.Util;
 using Unity.Collections;
@@ -19,9 +20,9 @@ namespace UIForia.Rendering {
 
         public ElementDrawDesc drawDesc;
 
-        protected TextureReference maskTexture;
-        protected TextureReference outlineTexture;
-        protected TextureReference backgroundTexture;
+        protected Texture maskTexture;
+        protected Texture outlineTexture;
+        protected Texture backgroundTexture;
 
         protected int backgroundTextureId;
         protected int outlineTextureId;
@@ -57,10 +58,10 @@ namespace UIForia.Rendering {
 
             drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId, element.style.BackgroundFit == BackgroundFit.Cover);
             if (backgroundTexture != null) {
-                drawDesc.uvTop = backgroundTexture.uvRect.yMin;
-                drawDesc.uvRight = backgroundTexture.uvRect.xMax;
-                drawDesc.uvBottom = backgroundTexture.uvRect.yMax;
-                drawDesc.uvLeft = backgroundTexture.uvRect.xMin;
+                drawDesc.uvTop = (ushort) ResolveRelativeLength(backgroundTexture.height, element.style.BackgroundRectMinY);
+                drawDesc.uvRight = (ushort) ResolveRelativeLength(backgroundTexture.width, element.style.BackgroundRectMaxX);
+                drawDesc.uvBottom = (ushort) ResolveRelativeLength(backgroundTexture.height, element.style.BackgroundRectMaxY);
+                drawDesc.uvLeft = (ushort) ResolveRelativeLength(backgroundTexture.width, element.style.BackgroundRectMinX);
                 drawDesc.uvScaleX = element.style.BackgroundImageScaleX;
                 drawDesc.uvScaleY = element.style.BackgroundImageScaleY;
                 drawDesc.uvOffsetX = 0; // cannot set until we know size
@@ -353,6 +354,7 @@ namespace UIForia.Rendering {
             bool recomputeDrawing = false;
             bool recomputeMeshFill = false;
             bool recomputeUVTransform = false;
+            bool recomputeBGParams = false;
 
             for (int i = 0; i < propertyCount; i++) {
                 ref StyleProperty property = ref propertyList[i];
@@ -396,15 +398,7 @@ namespace UIForia.Rendering {
 
                     case StylePropertyId.BackgroundImage:
                         recomputeDrawing = true;
-                        backgroundTexture = property.AsTextureReference;
-                        backgroundTextureId = ReferenceEquals(backgroundTexture?.texture, null) ? 0 : backgroundTexture.texture.GetHashCode();
-                        if (backgroundTexture != null) {
-                            drawDesc.uvTop = backgroundTexture.uvRect.yMin;
-                            drawDesc.uvRight = backgroundTexture.uvRect.xMax;
-                            drawDesc.uvBottom = backgroundTexture.uvRect.yMax;
-                            drawDesc.uvLeft = backgroundTexture.uvRect.xMin;
-                        }
-
+                        recomputeBGParams = true;
                         break;
 
                     case StylePropertyId.Gradient:
@@ -472,6 +466,18 @@ namespace UIForia.Rendering {
                 }
             }
 
+            if (recomputeBGParams) {
+                backgroundTexture = element.style.BackgroundImage;
+                backgroundTextureId = 0;
+                if (ReferenceEquals(backgroundTexture, null)) {
+                    backgroundTextureId = backgroundTexture.GetHashCode();
+                    drawDesc.uvTop = (ushort) ResolveRelativeLength(backgroundTexture.height, element.style.BackgroundRectMinY);
+                    drawDesc.uvRight = (ushort) ResolveRelativeLength(backgroundTexture.width, element.style.BackgroundRectMaxX);
+                    drawDesc.uvBottom = (ushort) ResolveRelativeLength(backgroundTexture.height, element.style.BackgroundRectMaxY);
+                    drawDesc.uvLeft = (ushort) ResolveRelativeLength(backgroundTexture.width, element.style.BackgroundRectMinX);
+                }
+            }
+
             if (recomputeDrawing) {
                 drawDesc.bgColorMode = GetColorMode(drawDesc.backgroundColor, drawDesc.backgroundTint, backgroundTextureId, element.style.BackgroundFit == BackgroundFit.Cover);
                 drawDesc.outlineColorMode = GetColorMode(drawDesc.outlineColor, default, outlineTextureId, false);
@@ -510,12 +516,13 @@ namespace UIForia.Rendering {
                 drawDesc.borderLeft = border.left;
                 ctx.SetBackgroundTexture(backgroundTexture);
                 ctx.SetMaskTexture(maskTexture);
-                if (backgroundTexture != null && AxisAlignedBounds2DUShort.HasValue(backgroundTexture.uvBorderRect)) {
-                    ctx.DrawSlicedElement(0, 0, drawDesc);
-                }
-                else {
+                // todo -- future me, restore 9 slice borders
+                // if (backgroundTexture != null && AxisAlignedBounds2DUShort.HasValue(backgroundTexture.uvBorderRect)) {
+                    // ctx.DrawSlicedElement(0, 0, drawDesc);
+                // }
+                // else {
                     ctx.DrawElement(0, 0, drawDesc);
-                }
+                // }
             }
 
             if (overflowHandling != 0) {
@@ -583,7 +590,7 @@ namespace UIForia.Rendering {
                         material.SetVector(property.shaderKey, new Vector4(val.x, val.y, 0, 0)); // todo -- now sure how to set this
                         break;
                     case MaterialPropertyType.Texture:
-                        material.SetTexture(property.shaderKey, property.property.AsTextureReference?.texture);
+                        material.SetTexture(property.shaderKey, property.property.AsTexture);
                         break;
                 }
             }
@@ -595,57 +602,57 @@ namespace UIForia.Rendering {
                 // ctx.PopStencilClip();
             }
 
-         //    if (element.style.ShadowOpacity == 0) { // cheating -- change this to a real property
-         //        ctx.PopRenderTargetRegion();
-         //
-         //        Material material = Resources.Load<Material>("UIForiaDissolve");
-         //        ctx.SetMaterial(material);
-         //
-         //        LightList<MaterialStyleProperty> materialStyles = LightList<MaterialStyleProperty>.Get();
-         //
-         //        MaterialId matId = element.application.ResourceManager.GetMaterialId("dissolve");
-         //
-         //        element.style.GetMaterialProperties(matId, materialStyles);
-         //
-         //     //   SetMaterialProperties(material, materialStyles);
-         //        materialStyles.Release();
-         //        
-         //        material.SetTexture("_MainTex", targetTexture);
-         //        material.SetTexture("_NoiseTex", Resources.Load<Texture2D>("DissolveNoise"));
-         // //       material.SetFloat("_EffectFactor", element.style.OutlineWidth.value);
-         //        material.SetFloat("_Softness", 1f);
-         //        material.SetFloat("_Width", 0.5f);
-         //        // material.SetColor("_DissolveColor", drawDesc.backgroundColor);
-         //
-         //        // // element.style.SetCustomProperty("MaterialName::PropertyName", value);
-         //        //
-         //        // // element.style.GetActiveMaterialParameters();
-         //        UIVertexHelper helper = UIVertexHelper.Create(Allocator.Temp);
-         //
-         //        using (ShapeKit shapeKit = new ShapeKit()) {
-         //            shapeKit.SetDrawMode(DrawMode.Normal);
-         //
-         //            shapeKit.AddRect(ref helper, 0, 0, 300, 600, Color.blue);
-         //            mesh = mesh ?? new Mesh();
-         //            mesh.MarkDynamic();
-         //            mesh.Clear(true);
-         //            helper.FillMesh(mesh);
-         //        }
-         //
-         //        helper.Dispose();
-         //        ctx.DrawMesh(mesh);
-         //
-         //        // ctx.SetBackgroundTexture(targetTexture);
-         //        // ctx.SetMaskTexture(Resources.Load<Texture2D>("Images/Cloud_Mask"));
-         //        // drawDesc.uvTop = 0;
-         //        // drawDesc.uvLeft = 0;
-         //        // drawDesc.uvBottom = (ushort) targetTexture.height;
-         //        // drawDesc.uvRight = (ushort) targetTexture.width;
-         //        // drawDesc.bgColorMode |= ColorMode.Texture;
-         //        // drawDesc.maskFlags |= MaskFlags.UseMaskTexture;
-         //        // drawDesc.maskSoftness = 0.5f;
-         //        // ctx.DrawElement(0, 0, drawDesc);
-         //    }
+            //    if (element.style.ShadowOpacity == 0) { // cheating -- change this to a real property
+            //        ctx.PopRenderTargetRegion();
+            //
+            //        Material material = Resources.Load<Material>("UIForiaDissolve");
+            //        ctx.SetMaterial(material);
+            //
+            //        LightList<MaterialStyleProperty> materialStyles = LightList<MaterialStyleProperty>.Get();
+            //
+            //        MaterialId matId = element.application.ResourceManager.GetMaterialId("dissolve");
+            //
+            //        element.style.GetMaterialProperties(matId, materialStyles);
+            //
+            //     //   SetMaterialProperties(material, materialStyles);
+            //        materialStyles.Release();
+            //        
+            //        material.SetTexture("_MainTex", targetTexture);
+            //        material.SetTexture("_NoiseTex", Resources.Load<Texture2D>("DissolveNoise"));
+            // //       material.SetFloat("_EffectFactor", element.style.OutlineWidth.value);
+            //        material.SetFloat("_Softness", 1f);
+            //        material.SetFloat("_Width", 0.5f);
+            //        // material.SetColor("_DissolveColor", drawDesc.backgroundColor);
+            //
+            //        // // element.style.SetCustomProperty("MaterialName::PropertyName", value);
+            //        //
+            //        // // element.style.GetActiveMaterialParameters();
+            //        UIVertexHelper helper = UIVertexHelper.Create(Allocator.Temp);
+            //
+            //        using (ShapeKit shapeKit = new ShapeKit()) {
+            //            shapeKit.SetDrawMode(DrawMode.Normal);
+            //
+            //            shapeKit.AddRect(ref helper, 0, 0, 300, 600, Color.blue);
+            //            mesh = mesh ?? new Mesh();
+            //            mesh.MarkDynamic();
+            //            mesh.Clear(true);
+            //            helper.FillMesh(mesh);
+            //        }
+            //
+            //        helper.Dispose();
+            //        ctx.DrawMesh(mesh);
+            //
+            //        // ctx.SetBackgroundTexture(targetTexture);
+            //        // ctx.SetMaskTexture(Resources.Load<Texture2D>("Images/Cloud_Mask"));
+            //        // drawDesc.uvTop = 0;
+            //        // drawDesc.uvLeft = 0;
+            //        // drawDesc.uvBottom = (ushort) targetTexture.height;
+            //        // drawDesc.uvRight = (ushort) targetTexture.width;
+            //        // drawDesc.bgColorMode |= ColorMode.Texture;
+            //        // drawDesc.maskFlags |= MaskFlags.UseMaskTexture;
+            //        // drawDesc.maskSoftness = 0.5f;
+            //        // ctx.DrawElement(0, 0, drawDesc);
+            //    }
         }
 
     }

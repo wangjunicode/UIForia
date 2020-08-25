@@ -38,12 +38,6 @@ namespace UIForia.Rendering {
             imageGeometry = new UIForiaGeometry();
         }
 
-        public void PaintBackground(RenderContext ctx) {
-            base.PaintBackground(ctx);
-            //  imageGeometry.mainTexture = ((UIImageElement) element).texture;
-            // ctx.DrawBatchedGeometry(imageGeometry, new GeometryRange(0, 4, 0, 6), element.layoutResult.matrix.ToMatrix4x4());
-        }
-
         [BurstCompile]
         private unsafe struct Job : IJob {
 
@@ -157,7 +151,7 @@ namespace UIForia.Rendering {
         protected Color32 backgroundColor;
         protected Color32 backgroundTint;
         protected Color32 shadowColor;
-        protected TextureReference backgroundImage;
+        protected Texture backgroundImage;
 
         protected UIFixedLength borderRadiusTopLeft;
         protected UIFixedLength borderRadiusTopRight;
@@ -174,7 +168,6 @@ namespace UIForia.Rendering {
         protected MeshFillOrigin meshFillOrigin;
         protected MeshFillDirection meshFillDirection;
 
-        public MaterialId materialId;
         // public LayoutResult[] layoutTable;
 
         private PooledMesh mesh;
@@ -285,7 +278,7 @@ namespace UIForia.Rendering {
                         break;
 
                     case StylePropertyId.BackgroundImage:
-                        backgroundImage = property.AsTextureReference;
+                        backgroundImage = property.AsTexture;
                         dataNeedsUpdate = true;
                         break;
 

@@ -304,8 +304,7 @@
 
                 fixed4 borderColor = lerp(borderColorH, borderColorV, distToLine);
 
-                float2 borderStep = step(float2(borderLeft, size.y - borderTop), p) - step(
-                    float2(size.x - borderRight, borderBottom), p);
+                float2 borderStep = step(float2(borderLeft, size.y - borderTop), p) - step(float2(size.x - borderRight, borderBottom), p);
                 fixed4 contentColor = color;
                 color = borderColor;
                 if (borderStep.x * borderStep.y != 0)

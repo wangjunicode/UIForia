@@ -236,7 +236,7 @@ namespace UIForia.Rendering {
             array[PropertyCount++] = new StyleProperty(propertyId, result);
         }
 
-        public void SetTextureProperty(StylePropertyId propertyId, TextureReference result) {
+        public void SetTextureProperty(StylePropertyId propertyId, Texture result) {
             for (int i = 0; i < PropertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
                     array[i] = new StyleProperty(propertyId, result);

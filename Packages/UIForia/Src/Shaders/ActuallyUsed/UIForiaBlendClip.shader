@@ -1,4 +1,4 @@
-﻿Shader "UIForia/UIForiaShape"
+﻿Shader "UIForia/UIForiaBlend"
 {
     Properties
     {

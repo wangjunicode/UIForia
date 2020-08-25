@@ -242,7 +242,7 @@ namespace UIForia.Compilers.Style {
                     throw new NotImplementedException("");
                     // if type is enum
                     // try resolve type name
-                    return false;
+                    // return false;
                 }
             }
 

@@ -144,10 +144,10 @@ namespace UIForia.Layout {
                     py += layoutResult.alignedPosition.y;
                     
                     float4x4 final = float4x4.Translate(new float3(x, y, 0));
-                    final = math.mul(final, float4x4.Translate(new float3(px, -py, 0)));
+                    final = math.mul(final, float4x4.Translate(new float3(px, -(py), 0)));
                     
                     if (rotation != 0) {
-                        final = math.mul(final, float4x4.RotateZ(rotation));
+                        final = math.mul(float4x4.RotateZ(rotation), final);
                     }
 
                     if (scaleX != 1 || scaleY != 1) {

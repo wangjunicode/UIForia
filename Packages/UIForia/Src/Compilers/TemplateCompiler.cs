@@ -2541,7 +2541,12 @@ namespace UIForia.Compilers {
                 }
             }
 
-            compiler.RawExpression(Expression.Call(field, method, value, Expression.Constant(styleState)));
+            try {
+                compiler.RawExpression(Expression.Call(field, method, value, Expression.Constant(styleState)));
+            }
+            catch (Exception e) {
+                Debug.LogException(e);
+            }
 
             compiler.EndIsolatedSection();
         }

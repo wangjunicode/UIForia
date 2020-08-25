@@ -110,9 +110,6 @@ namespace UIForia.Layout {
                 }
             }
             
-            // this feels really dirty but its 'correcter'
-            
-            
         }
 
         public float ComputeContentWidth(ref BurstLayoutRunner runner, in BlockSize blockSize) {
@@ -142,6 +139,10 @@ namespace UIForia.Layout {
             TextInfo.RunLayoutVertical_WordsOnly(fontAsset, fontSize, ref textInfo[0]);
 
             ref List_TextLineInfo lineInfoList = ref textInfo->lineInfoList;
+
+            if (lineInfoList.size == 0) {
+                return 0;
+            }
 
             return lineInfoList.GetLast().y + lineInfoList.GetLast().height;
         }

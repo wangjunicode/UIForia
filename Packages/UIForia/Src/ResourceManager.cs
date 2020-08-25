@@ -121,7 +121,7 @@ namespace UIForia {
             return AddResource(clip, audioMap);
         }
 
-        public Texture2D GetTexture(string path) {
+        public Texture GetTexture(string path) {
             return GetTextureResource(path, textureMap);
         }
 
@@ -494,7 +494,7 @@ namespace UIForia {
         }
 
         // todo -- figure out how to unload these
-        public TextureReference GetSpriteTexture(AssetInfo assetInfo) {
+        public TextureUsageDesc GetSpriteTexture(AssetInfo assetInfo) {
 
             if (spriteMap.TryGetValue(assetInfo.path, out SpriteAssetInfo asset)) {
                 return GetSprite(asset, assetInfo.spriteName);
@@ -506,7 +506,7 @@ namespace UIForia {
             if (atlas == null) {
                 asset.spriteRefs = new SpriteAssetRef[0];
                 spriteMap.Add(assetInfo.path, asset);
-                return TextureReference.s_Empty;
+                return default;
             }
 
             if (atlas.spriteCount == 0) {
@@ -572,78 +572,84 @@ namespace UIForia {
             return GetSprite(asset, assetInfo.spriteName);
         }
 
-        private static TextureReference GetSprite(in SpriteAssetInfo asset, string spriteName) {
+        private static TextureUsageDesc GetSprite(in SpriteAssetInfo asset, string spriteName) {
             for (int i = 0; i < asset.spriteRefs.Length; i++) {
                 if (asset.spriteRefs[i].spriteName == spriteName) {
-                    return asset.spriteRefs[i].textureReference;
+                    TextureUsageDesc retn = new TextureUsageDesc();
+                    retn.texture = asset.spriteRefs[i].textureReference.texture;
+                    retn.xMin = asset.spriteRefs[i].textureReference.uvRect.xMin;
+                    retn.yMin = asset.spriteRefs[i].textureReference.uvRect.yMin;
+                    retn.xMax = asset.spriteRefs[i].textureReference.uvRect.xMax;
+                    retn.yMax = asset.spriteRefs[i].textureReference.uvRect.yMax;
+                    return retn;
                 }
             }
 
-            return TextureReference.s_Empty;
+            return default;
         }
 
-        public bool TryGetSprite(string assetInfoPath, out TextureReference textureReference) {
-
-            if (spriteMap.TryGetValue(assetInfoPath, out SpriteAssetInfo asset)) {
-                textureReference = GetSprite(asset, assetInfoPath);
-                return textureReference != null;
-            }
-
-            Sprite sprite = Resources.Load<Sprite>(assetInfoPath);
-            if (sprite == null) {
-                spriteMap[assetInfoPath] = default;
-                textureReference = null;
-                return false;
-            }
-
-            float xMin = float.MaxValue;
-            float yMin = float.MaxValue;
-            float xMax = float.MinValue;
-            float yMax = float.MinValue;
-
-            Vector2[] uvs = sprite.uv;
-
-            for (int u = 0; u < uvs.Length; u++) {
-                Vector2 uv = uvs[u];
-
-                if (uv.x < xMin) xMin = uv.x;
-                if (uv.x > xMax) xMax = uv.x;
-
-                if (uv.y < yMin) yMin = uv.y;
-                if (uv.y > yMax) yMax = uv.y;
-
-            }
-
-            // Unity encodes sprite.border as X=left, Y=bottom, Z=right, W=top
-            AxisAlignedBounds2DUShort uvBorderRect = default;
-            Vector4 border = sprite.border;
-            uvBorderRect.xMin = (ushort) border.x;
-            uvBorderRect.yMin = (ushort) border.w;
-            uvBorderRect.xMax = (ushort) border.z;
-            uvBorderRect.yMax = (ushort) border.y;
-            AxisAlignedBounds2DUShort uvRect = default;
-            Texture2D texture = sprite.texture;
-            uvRect.xMin = (ushort) (xMin * texture.width);
-            uvRect.yMin = (ushort) (yMin * texture.height);
-            uvRect.xMax = (ushort) (xMax * texture.width);
-            uvRect.yMax = (ushort) (yMax * texture.height);
-
-            SpriteAssetInfo spriteAssetInfo = new SpriteAssetInfo {
-                texture = texture,
-                textureId = texture.GetHashCode(),
-                defaultSprite = new SpriteAssetRef {
-                    uvBorderRect = uvBorderRect,
-                    uvRect = uvRect,
-                    spriteName = sprite.name,
-                    textureReference = new TextureReference(asset, sprite.name, uvRect, uvBorderRect)
-                }
-            };
-            spriteMap[assetInfoPath] = spriteAssetInfo;
-            Object.Destroy(sprite);
-
-            textureReference = spriteAssetInfo.defaultSprite.textureReference;
-            return true;
-        }
+        // public bool TryGetSprite(string assetInfoPath, out TextureReference textureReference) {
+        //
+        //     if (spriteMap.TryGetValue(assetInfoPath, out SpriteAssetInfo asset)) {
+        //         textureReference = GetSprite(asset, assetInfoPath);
+        //         return textureReference != null;
+        //     }
+        //
+        //     Sprite sprite = Resources.Load<Sprite>(assetInfoPath);
+        //     if (sprite == null) {
+        //         spriteMap[assetInfoPath] = default;
+        //         textureReference = null;
+        //         return false;
+        //     }
+        //
+        //     float xMin = float.MaxValue;
+        //     float yMin = float.MaxValue;
+        //     float xMax = float.MinValue;
+        //     float yMax = float.MinValue;
+        //
+        //     Vector2[] uvs = sprite.uv;
+        //
+        //     for (int u = 0; u < uvs.Length; u++) {
+        //         Vector2 uv = uvs[u];
+        //
+        //         if (uv.x < xMin) xMin = uv.x;
+        //         if (uv.x > xMax) xMax = uv.x;
+        //
+        //         if (uv.y < yMin) yMin = uv.y;
+        //         if (uv.y > yMax) yMax = uv.y;
+        //
+        //     }
+        //
+        //     // Unity encodes sprite.border as X=left, Y=bottom, Z=right, W=top
+        //     AxisAlignedBounds2DUShort uvBorderRect = default;
+        //     Vector4 border = sprite.border;
+        //     uvBorderRect.xMin = (ushort) border.x;
+        //     uvBorderRect.yMin = (ushort) border.w;
+        //     uvBorderRect.xMax = (ushort) border.z;
+        //     uvBorderRect.yMax = (ushort) border.y;
+        //     AxisAlignedBounds2DUShort uvRect = default;
+        //     Texture2D texture = sprite.texture;
+        //     uvRect.xMin = (ushort) (xMin * texture.width);
+        //     uvRect.yMin = (ushort) (yMin * texture.height);
+        //     uvRect.xMax = (ushort) (xMax * texture.width);
+        //     uvRect.yMax = (ushort) (yMax * texture.height);
+        //
+        //     SpriteAssetInfo spriteAssetInfo = new SpriteAssetInfo {
+        //         texture = texture,
+        //         textureId = texture.GetHashCode(),
+        //         defaultSprite = new SpriteAssetRef {
+        //             uvBorderRect = uvBorderRect,
+        //             uvRect = uvRect,
+        //             spriteName = sprite.name,
+        //             textureReference = new TextureReference(asset, sprite.name, uvRect, uvBorderRect)
+        //         }
+        //     };
+        //     spriteMap[assetInfoPath] = spriteAssetInfo;
+        //     Object.Destroy(sprite);
+        //
+        //     textureReference = spriteAssetInfo.defaultSprite.textureReference;
+        //     return true;
+        // }
 
         public bool TryGetMaterialPropertyInfo(string materialName, string value, out MaterialPropertyDefinition info) {
             if (materialDatabase.TryGetMaterialInfo(materialName, out MaterialInfo materialInfo)) {

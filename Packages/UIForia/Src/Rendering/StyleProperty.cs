@@ -222,13 +222,6 @@ namespace UIForia.Rendering {
         }
 
         [DebuggerStepThrough]
-        public StyleProperty(StylePropertyId propertyId, TextureReference objectField) : this() {
-            this.propertyId = propertyId;
-            this.flags = !ReferenceEquals(objectField, null) ? (ushort) 1 : (ushort) 0;
-            this.objectField = objectField;
-        }
-
-        [DebuggerStepThrough]
         public StyleProperty(StylePropertyId propertyId, Gradient objectField) : this() {
             this.propertyId = propertyId;
             this.flags = !ReferenceEquals(objectField, null) ? (ushort) 1 : (ushort) 0;
@@ -332,7 +325,7 @@ namespace UIForia.Rendering {
         public BackgroundFit AsBackgroundFit => (BackgroundFit) int0;
         public ClipBounds AsClipBounds => (ClipBounds) int0;
         public PointerEvents AsPointerEvents => (PointerEvents) int0;
-        public TextureReference AsTextureReference => (TextureReference) objectField;
+        public Texture AsTexture => (Texture) objectField;
 
         public AlignmentTarget AsAlignmentTarget => (AlignmentTarget) int0;
         public AlignmentDirection AsAlignmentDirection => (AlignmentDirection) int0;

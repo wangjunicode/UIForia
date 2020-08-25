@@ -206,30 +206,11 @@ namespace UIForia.Graphics {
             }
         }
 
-        public void SetMaskTexture(TextureReference textureReference) {
-            if (!ReferenceEquals(textureReference?.texture, null)) {
-                maskTextureId = textureReference.textureId;
-                // uvBorderBounds = textureReference.uvBorderRect;
-                AddTexture(textureReference.texture);
-            }
-        }
-
         public void SetBackgroundTexture(Texture texture) {
             uvBorderBounds = default;
             if (!ReferenceEquals(texture, null)) {
                 defaultBGTexture = texture.GetHashCode();
                 AddTexture(texture);
-            }
-        }
-
-        public void SetBackgroundTexture(TextureReference textureReference) {
-            if (!ReferenceEquals(textureReference?.texture, null)) {
-                defaultBGTexture = textureReference.textureId;
-                uvBorderBounds = textureReference.uvBorderRect;
-                AddTexture(textureReference.texture);
-            }
-            else {
-                uvBorderBounds = default;
             }
         }
 

@@ -8,7 +8,7 @@ namespace UIForia.Elements {
     public class UIImageElement : UIContainerElement {
 
         public string src;
-        public Texture2D texture;
+        public Texture texture;
 
         [OnPropertyChanged(nameof(src))]
         public void OnSrcChanged() {

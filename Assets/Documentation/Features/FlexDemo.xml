@@ -71,14 +71,14 @@
         }
 
         style child {
-        TextFontAsset = url("Fonts/Orbitron/Orbitron-Medium SDF");
-        BackgroundImage = url("Images/player2");
+<!--        TextFontAsset = url("Fonts/Orbitron/Orbitron-Medium SDF");-->
+<!--        BackgroundImage = url("Images/player2");-->
         PreferredSize = 300px, 300px;
         backgroundColor = rgba(0, 95, 124, 255);
         <!--            AlignX = Center Screen;-->
         <!--            AlignY = Center Screen;-->
         <!--            BorderColorLeft = Black;-->
-        BorderRadiusTopLeft = 50%;
+<!--        BorderRadiusTopLeft = 50%;-->
         //BackgroundImage = url("Images/DefaultAtlas", "9SliceSprites-4_edit");
         <!--            MeshType = Radial360_Top;-->
         <!--            BackgroundImageScale = 4;-->
@@ -86,6 +86,13 @@
 
         style round {
         <!--            BorderRadius = 50%;-->
+            Border = 10px;
+            BorderRight = 30px;
+            BorderColorTop = Blue;
+            BorderColorRight = Red;
+            BorderColorBottom = Orange;
+            BorderColorLeft = Green;
+            BorderRadiusTopLeft = 50px;
         }
 
         style rt-parent {
@@ -110,9 +117,8 @@
         <!--        <Div style="painted"></Div>-->
         <Div style="rt-parent">
             <Div style="child round"/>
-            <Div style="child round"/>
         </Div>
-        <Input style="inputxxx" value.once="'           UIForia is the fucking greatesssssssssssssssssssssssssssssssst'"/>
+<!--        <Input style="inputxxx" value.once="'           UIForia is the fucking greatesssssssssssssssssssssssssssssssst'"/>-->
 
         <!--        <ScrollView style="shape-kit">-->
         <!--            <Div style="child">{$parent.siblingIndex}</Div>-->

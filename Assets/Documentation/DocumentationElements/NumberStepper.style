@@ -74,14 +74,14 @@ style arrow-container {
 style arrow {
     PreferredSize = 12px 12px;
     BackgroundTint = rgb(100, 100, 100);
-    TransformRotation = 90;
+    TransformRotation = -90;
     [hover] {
         BackgroundTint = black;
     }
 }
 
 style rotate-up {
-    TransformRotation = -90;
+    TransformRotation = 90;
 }
 
 style arrow-up {

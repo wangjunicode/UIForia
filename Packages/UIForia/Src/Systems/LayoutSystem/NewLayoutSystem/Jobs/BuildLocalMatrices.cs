@@ -36,7 +36,7 @@ namespace UIForia.Layout {
             int isBurstActive = 1;
             CheckIsBurst(&isBurstActive);
             // todo -- burst version is acting strange
-            if (false && isBurstActive == 1) {
+            if (isBurstActive == 1) {
                 for (int i = start; i < end; i++) {
                     ElementId elementId = elementList[i];
                     ElementId parentId = parentList[i];
@@ -136,18 +136,12 @@ namespace UIForia.Layout {
                     
                 }
                 else {
-
-                    // todo -- when NOT using burst, these matrix operations are INCREDIBLY SLOW
-                    // could cut these down to 2d if applicable
-
-                    px += layoutResult.alignedPosition.x;
-                    py += layoutResult.alignedPosition.y;
-                    
-                    float4x4 final = float4x4.Translate(new float3(x, y, 0));
-                    final = math.mul(final, float4x4.Translate(new float3(px, -(py), 0)));
+                    x += layoutResult.alignedPosition.x;
+                    y -= layoutResult.alignedPosition.y;
+                    float4x4 final = float4x4.Translate(new float3(x + px, -(y + py), 0));
                     
                     if (rotation != 0) {
-                        final = math.mul(float4x4.RotateZ(rotation), final);
+                        final = math.mul(final, float4x4.RotateZ(rotation));
                     }
 
                     if (scaleX != 1 || scaleY != 1) {

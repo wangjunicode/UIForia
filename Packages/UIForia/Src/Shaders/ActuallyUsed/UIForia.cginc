@@ -329,10 +329,10 @@ inline float4 ComputeColor(fixed4 mainColor, fixed4 gradientColor, fixed4 tintCo
 
     // #endif
 
-    // textureColor = lerp(textureColor, textureColor * tintColor, tintTexture);
+    textureColor = lerp(textureColor, textureColor * tintColor, tintTexture);
     // todo -- these lines could implement a cover effect a-la css background cover 
-    // float2 s = step(uvBounds.xw, originalUV) - step(uvBounds.zy, originalUV);
-    // textureColor = lerp(textureColor, mainColor, s.x * s.y == 0 && coverTexture == 0);
+    float2 s = step(uvBounds.xw, texCoord) - step(uvBounds.zy, texCoord);
+    textureColor = lerp(textureColor, mainColor, s.x * s.y == 0);
     if (useTexture && useColor)
     {
         return lerp(textureColor, mainColor, 1 - textureColor.a);
@@ -399,9 +399,9 @@ float2 TransformUV(float2 uv, float2 offset, float2 scale, float rotation, half4
 {
     uv += offset;
     uv *= scale;
-    //uv = RotateUV(uv, rotation, float2(0.5, 0.5)); // todo -- verify pivot point is correct -- (uvBounds.z - uvBounds.x) * 0.5, uvBounds.y + (uvBounds.w - uvBounds.y) * 0.5));
-    uv.x = lerp(uvBounds.x, uvBounds.z, frac(uv.x));
-    uv.y = lerp(uvBounds.y, uvBounds.w, frac(uv.y));
+    uv = RotateUV(uv, rotation, float2(0.5, 0.5)); // todo -- verify pivot point is correct -- (uvBounds.z - uvBounds.x) * 0.5, uvBounds.y + (uvBounds.w - uvBounds.y) * 0.5));
+    // uv.x = lerp(uvBounds.x, uvBounds.z, frac(uv.x));
+    // uv.y = lerp(uvBounds.y, uvBounds.w, frac(uv.y));
 
     // uv *= float2(uvBounds.z - uvBounds.x, uvBounds.w - uvBounds.y);
     //(frac(uv.x) % (uvBounds.z)) + uvBounds.x;

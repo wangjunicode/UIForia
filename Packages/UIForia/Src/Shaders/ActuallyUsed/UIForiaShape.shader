@@ -207,8 +207,7 @@
                 // todo -- snapping is terrible when moving/ rotating 
                 // o.vertex = UIForiaPixelSnap(o.vertex);
 
-                o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, vertex.indices.z,
-                                  vertex.indices.w);
+                o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, vertex.indices.z, vertex.indices.w);
 
                 return o;
             }
@@ -280,7 +279,7 @@
                 #define bottom (1 - top)
                 #define right (1 - left)
 
-                half borderH = lerp(borderLeft, borderRight, left);
+                half borderH = lerp(borderLeft, borderRight, right);
                 half borderV = lerp(borderTop, borderBottom, bottom);
 
                 half4 borderColorV = UnpackColor(top == 1 ? material.borderColorTop : material.borderColorBottom);
@@ -303,15 +302,15 @@
                 }
 
                 fixed4 borderColor = lerp(borderColorH, borderColorV, distToLine);
-
                 float2 borderStep = step(float2(borderLeft, size.y - borderTop), p) - step(float2(size.x - borderRight, borderBottom), p);
                 fixed4 contentColor = color;
                 color = borderColor;
+                outlineColor = borderColor.a > 0 ? borderColor : outlineColor;
                 if (borderStep.x * borderStep.y != 0)
                 {
                     color = contentColor;
                 }
-                outlineColor = borderColor.a > 0 ? borderColor : outlineColor;
+              
                 half outlineWidth = material.outlineWidth * 0.5;
                 float2 samplePoint = (i.texCoord0.xy - 0.5) * size;
 
@@ -339,17 +338,14 @@
                 sdf = max(radialSDF * invertFill, sdf);
                 // sdfOutline = (fillFlag & FillOutline) != 0 ? max(radialSDF * invertFill, sdfOutline) : sdfOutline;
                 fixed4 grad = WHITE;
-                color = ComputeColor(color, grad, tintColor, bodyColorMode, i.texCoord1, _MainTex, uvBounds,
-                                     originalUV);
+                color = ComputeColor(color, grad, tintColor, bodyColorMode, i.texCoord1, _MainTex, uvBounds, originalUV);
                 color = lerp(color, outlineColor, outlineWidth == 0 ? 0 : 1 - saturate(sdfOutline));
                 color.a *= 1.0 - smoothstep(0, fwidth(sdf), sdf);
 
                 //float shadow = minSize * 0.5;
                 //color.a *= 1.0 - smoothstep(0, lerp(_Inner, fwidth(sdf), 0), sdf);
 
-                float2 clipPos =
-                    float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y);
-                //* _UIForiaDPIScale;
+                float2 clipPos =  float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y); //* _UIForiaDPIScale;
                 float4 clipRect = _UIForiaFloat4Buffer[i.indices.x]; // x = xMin, y = yMin, z = xMax, w = yMax
                 float2 s = step(clipRect.xw, clipPos) - step(clipRect.zy, clipPos);
 

@@ -736,6 +736,7 @@ namespace UIForia.Systems {
 
         public ElementId elementId;
         public int renderOp;
+        public int zIndex;
         public int ftbIndex;
         public int btfIndex;
         

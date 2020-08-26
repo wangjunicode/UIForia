@@ -71,42 +71,35 @@
         }
 
         style child {
-<!--        TextFontAsset = url("Fonts/Orbitron/Orbitron-Medium SDF");-->
-<!--        BackgroundImage = url("Images/player2");-->
+        TransformPivotX = 0;
+        TransformPivotY = 100%;
         PreferredSize = 300px, 300px;
         backgroundColor = rgba(0, 95, 124, 255);
-        <!--            AlignX = Center Screen;-->
-        <!--            AlignY = Center Screen;-->
-        <!--            BorderColorLeft = Black;-->
-<!--        BorderRadiusTopLeft = 50%;-->
-        //BackgroundImage = url("Images/DefaultAtlas", "9SliceSprites-4_edit");
-        <!--            MeshType = Radial360_Top;-->
-        <!--            BackgroundImageScale = 4;-->
+        BackgroundImageRotation=45deg;
+        BackgroundImage = url("Images/2"); 
+       
         }
 
         style round {
-        <!--            BorderRadius = 50%;-->
-            Border = 10px;
-            BorderRight = 30px;
-            BorderColorTop = Blue;
-            BorderColorRight = Red;
-            BorderColorBottom = Orange;
-            BorderColorLeft = Green;
-            BorderRadiusTopLeft = 50px;
         }
 
         style rt-parent {
-        BackgroundColor = Red;
-        <!--            Padding = 10px;-->
-        ShadowOpacity = 0f;
-        OutlineWidth = 0.2;
-        Material = dissolve;
-        material:dissolve._EffectFactor = 0.8f; //url("DissolveNoise");
+        AlignX = Center Screen;
+        AlignY = Center Screen;
+        Padding = 10px;
+        LayoutType = Stack;
+        
         }
 
         style painted {
         Painter = "GeometryPainter";
         PreferredSize = 300px;
+        }
+
+        style child-z {
+        PreferredSize = 100px;
+        ZIndex = 10;
+        BackgroundColor = red;
         }
 
     </Style>
@@ -115,10 +108,11 @@
     <Contents style="container2">
 
         <!--        <Div style="painted"></Div>-->
-        <Div style="rt-parent">
+        <Group style="rt-parent">
+            <Div style="child-z"/>
             <Div style="child round"/>
-        </Div>
-<!--        <Input style="inputxxx" value.once="'           UIForia is the fucking greatesssssssssssssssssssssssssssssssst'"/>-->
+        </Group>
+        <!--        <Input style="inputxxx" value.once="'           UIForia is the fucking greatesssssssssssssssssssssssssssssssst'"/>-->
 
         <!--        <ScrollView style="shape-kit">-->
         <!--            <Div style="child">{$parent.siblingIndex}</Div>-->

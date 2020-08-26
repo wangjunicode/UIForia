@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using UIForia.Elements;
+using UIForia.Layout;
+using UIForia.Systems;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
+using Unity.Mathematics;
 
 namespace UIForia {
 
@@ -30,10 +33,10 @@ namespace UIForia {
         public ElementTable<ElementTraversalInfo> traversalTable;
 
         public ElementTable<EmValue> emTable;
-
+        
         public UIElement[] instanceTable;
 
-        private int elementCapacity;
+        internal int elementCapacity;
         private byte* backingStore;
 
         public DataList<ElementId>.Shared enabledElementsThisFrame;

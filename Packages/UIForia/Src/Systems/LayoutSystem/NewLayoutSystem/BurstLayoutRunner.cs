@@ -1,6 +1,7 @@
 ﻿using UIForia.ListTypes;
 using UIForia.Rendering;
 using UIForia.Systems;
+using UnityEngine;
 
 namespace UIForia.Layout {
 
@@ -157,9 +158,9 @@ namespace UIForia.Layout {
             // ref AnimationLayoutSizes sizes = ref animationInfo[childId.index]; // if isAnimating pref/min/max -> update accordingly with lerp data
 
             ref LayoutInfo childInfo = ref horizontalLayoutInfoTable[childId.index];
-            size.preferred = ResolveWidth(parent, childId, blockSize, childInfo.prefSize, ref childInfo, MeasurementAxis.Preferred);
-            size.minimum = ResolveWidth(parent, childId, blockSize, childInfo.minSize, ref childInfo, MeasurementAxis.Min);
-            size.maximum = ResolveWidth(parent, childId, blockSize, childInfo.maxSize, ref childInfo, MeasurementAxis.Max);
+            size.preferred = Mathf.Max(ResolveWidth(parent, childId, blockSize, childInfo.prefSize, ref childInfo, MeasurementAxis.Preferred), 0);
+            size.minimum = Mathf.Max(ResolveWidth(parent, childId, blockSize, childInfo.minSize, ref childInfo, MeasurementAxis.Min), 0);
+            size.maximum = Mathf.Max(ResolveWidth(parent, childId, blockSize, childInfo.maxSize, ref childInfo, MeasurementAxis.Max), 0);
             size.marginStart = childInfo.marginStart;
             size.marginEnd = childInfo.marginEnd;
         }
@@ -168,9 +169,9 @@ namespace UIForia.Layout {
             // todo -- handle animated sizes
 
             ref LayoutInfo childInfo = ref verticalLayoutInfoTable[childId.index];
-            size.preferred = ResolveHeight(parent, childId, blockSize, childInfo.prefSize, ref childInfo);
-            size.minimum = ResolveHeight(parent, childId, blockSize, childInfo.minSize, ref childInfo);
-            size.maximum = ResolveHeight(parent, childId, blockSize, childInfo.maxSize, ref childInfo);
+            size.preferred = Mathf.Max(ResolveHeight(parent, childId, blockSize, childInfo.prefSize, ref childInfo), 0);
+            size.minimum = Mathf.Max(ResolveHeight(parent, childId, blockSize, childInfo.minSize, ref childInfo), 0);
+            size.maximum = Mathf.Max(ResolveHeight(parent, childId, blockSize, childInfo.maxSize, ref childInfo), 0);
             size.marginStart = childInfo.marginStart;
             size.marginEnd = childInfo.marginEnd;
         }

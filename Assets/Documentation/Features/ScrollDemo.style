@@ -5,11 +5,19 @@ style scroll-demo {
 }
 
 style scroll {
-    FlexItemShrink = 1;
-    FlexItemGrow = 1;
+//    FlexItemShrink = 1;
+//    FlexItemGrow = 1;
     LayoutFitHorizontal = Fill;
-    PreferredSize = 1pca;
+    PreferredSize = 1pca 200px;
+    MarginTop = 50px;
+    Border = 2px;
+    BorderColor = pink;
 }
+
+style scroll-3 {
+    PreferredHeight = 2000px;
+}
+
 
 style hidden-element {
     LayoutBehavior = Ignored;
@@ -18,4 +26,20 @@ style hidden-element {
     Padding = 20px;
     BackgroundColor = black;
     TextColor = white;
+}
+
+style static-element {
+    AlignY = 200px Screen;
+    AlignX = 100px Screen;
+    Padding = 20px;
+    BackgroundColor = orange;
+    TextColor = white;
+    
+}
+
+style image-1 {
+    PreferredSize = auto 200px; 
+}
+style image {
+    PreferredSize = auto; 
 }

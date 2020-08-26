@@ -101,6 +101,11 @@ namespace UIForia.Systems {
 
         // also triggered for destroy
         public void HandleElementDisabled(DataList<ElementId>.Shared disabledElements) {
+
+            if (elementSystem.elementCapacity > elementCapacity) {
+                ResizeBackingStore(elementSystem.elementCapacity);
+            }
+            
             for (int i = 0; i < disabledElements.size; i++) {
                 // maybe only actually dispose if destroyed, keep disabled ones around?
                 // styles are unlikely to change much
@@ -160,22 +165,14 @@ namespace UIForia.Systems {
         }
 
         public void AddToChildrenChangeList(ElementId elementId) {
-            if (elementId.index > 1000) Debugger.Break();
             childrenChangedList.Add(elementId);
         }
 
         // also triggered for create
         public void HandleElementEnabled(DataList<ElementId>.Shared enabledElements) {
-            int maxIndex = enabledElements[0].index;
-
-            for (int i = 0; i < enabledElements.size; i++) {
-                if (enabledElements[i].index > maxIndex) {
-                    maxIndex = enabledElements[i].index;
-                }
-            }
-
-            if (maxIndex >= elementCapacity) {
-                ResizeBackingStore(maxIndex);
+            
+            if (elementSystem.elementCapacity > elementCapacity) {
+                ResizeBackingStore(elementSystem.elementCapacity);
             }
 
             for (int i = 0; i < enabledElements.size; i++) {
@@ -319,6 +316,7 @@ namespace UIForia.Systems {
                 hierarchyTable = elementSystem.hierarchyTable,
                 metaTable = elementSystem.metaTable,
                 layoutHierarchyTable = layoutHierarchyTable,
+                layoutBoxTable = layoutBoxTable
             }.Run();
 
             // todo -- maybe better to just return the transclusion list and handle it outside of the job, lots can go wrong with transclusion
@@ -621,8 +619,8 @@ namespace UIForia.Systems {
                 int resolvedMinY = (int) MeasurementUtil.ResolveFixedSize(bgTexture.height, default, default, minY);
                 int resolvedMaxY = (int) MeasurementUtil.ResolveFixedSize(bgTexture.height, default, default, maxY);
                 return new Size(
-                    Mathf.Clamp(resolvedMaxY - resolvedMinY, 0, bgTexture.width),
-                    Mathf.Clamp(resolvedMinX - resolvedMaxX, 0, bgTexture.height)
+                    Mathf.Clamp(resolvedMaxX - resolvedMinX, 0, bgTexture.width),
+                    Mathf.Clamp(resolvedMaxY - resolvedMinY, 0, bgTexture.height)
                 );
             }
 

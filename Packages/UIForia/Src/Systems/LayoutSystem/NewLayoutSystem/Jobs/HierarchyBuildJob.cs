@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using UIForia.Layout;
+﻿using UIForia.Layout;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
@@ -8,7 +7,7 @@ using Unity.Jobs;
 namespace UIForia.Systems {
 
     [BurstCompile]
-    public struct HierarchyBuildJob : IJob {
+    internal struct HierarchyBuildJob : IJob {
 
         public DataList<ElementId>.Shared roots;
         public DataList<ElementId>.Shared layoutIgnoredList;

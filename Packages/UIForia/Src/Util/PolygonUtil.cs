@@ -77,7 +77,7 @@ namespace UIForia.Util {
 
             if (area == 0) return false;
 
-            return area < 0 ? (s <= 0 && s + t >= area) : (s >= 0 && s + t <= area);
+            return area < 0 ? (s <= 0 && (s + t >= area || Mathf.Approximately(s + t, area))) : s >= 0 && (s + t <= area || Mathf.Approximately(s + t, area));
         }
 
         public static bool PointInPolygon(in Vector2 point, Vector2[] polygon, int size) {

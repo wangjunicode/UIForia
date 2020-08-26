@@ -7,7 +7,7 @@ namespace UIForia.Util {
 
     internal static class MeasurementUtil {
 
-        public static float ResolveOriginBaseX(ElementTable<LayoutBoxInfo> layoutTable, in LayoutBoxInfo result, float viewportX, AlignmentTarget target, AlignmentDirection direction, float mouseX) {
+        public static unsafe float ResolveOriginBaseX(ElementTable<LayoutBoxInfo> layoutTable, in LayoutBoxInfo result, float viewportX, AlignmentTarget target, AlignmentDirection direction, float mouseX) {
             switch (target) {
                 default:
                 case AlignmentTarget.Unset:
@@ -47,13 +47,22 @@ namespace UIForia.Util {
                 case AlignmentTarget.Screen: {
                     float output = 0;
 
+                    if (result.scrollValues != null) {
+                        output = (result.scrollValues->contentWidth - result.scrollValues->actualWidth) * result.scrollValues->scrollX;
+                    }
+                    
                     ElementId ptr = result.layoutParentId;
 
                     while (ptr != default) {
 
                         ref LayoutBoxInfo layoutResult = ref layoutTable[ptr];
-
-                        output -= layoutResult.alignedPosition.x;
+                        float scrollOffsetX = 0;
+                
+                        if (layoutResult.scrollValues != null) {
+                            scrollOffsetX = (layoutResult.scrollValues->contentWidth - layoutResult.scrollValues->actualWidth) * -layoutResult.scrollValues->scrollX;
+                        }
+                        
+                        output -= layoutResult.alignedPosition.x + scrollOffsetX;
 
                         ptr = layoutResult.layoutParentId;
 
@@ -69,7 +78,7 @@ namespace UIForia.Util {
             }
         }
 
-        public static float ResolveOriginBaseY(ElementTable<LayoutBoxInfo> layoutTable, in LayoutBoxInfo result, float viewportY, AlignmentTarget target, AlignmentDirection direction, float mouseY) {
+        public static unsafe float ResolveOriginBaseY(ElementTable<LayoutBoxInfo> layoutTable, in LayoutBoxInfo result, float viewportY, AlignmentTarget target, AlignmentDirection direction, float mouseY) {
             switch (target) {
                 default:
                 case AlignmentTarget.Unset:
@@ -108,7 +117,11 @@ namespace UIForia.Util {
 
                 case AlignmentTarget.Screen: {
 
-                    float output = 0;
+                    float output = 0;            
+                    
+                    if (result.scrollValues != null) {
+                        output = (result.scrollValues->contentHeight - result.scrollValues->actualHeight) * result.scrollValues->scrollY;
+                    }
 
                     ElementId ptr = result.layoutParentId;
 
@@ -116,7 +129,13 @@ namespace UIForia.Util {
 
                         ref LayoutBoxInfo layoutResult = ref layoutTable[ptr];
 
-                        output -= layoutResult.alignedPosition.y;
+                        float scrollOffsetY = 0;
+                
+                        if (layoutResult.scrollValues != null) {
+                            scrollOffsetY = (layoutResult.scrollValues->contentHeight - layoutResult.scrollValues->actualHeight) * -layoutResult.scrollValues->scrollY;
+                        }
+
+                        output -= layoutResult.alignedPosition.y + scrollOffsetY;
 
                         ptr = layoutResult.layoutParentId;
 

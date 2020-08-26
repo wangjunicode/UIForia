@@ -19,7 +19,7 @@
         }
 
         style transclude {
-            LayoutBehavior = TranscludeChildren;
+<!--            LayoutBehavior = TranscludeChildren;-->
         }
         
     </Style>

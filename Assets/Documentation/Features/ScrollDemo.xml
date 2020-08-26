@@ -19,9 +19,24 @@
             mouse to pan.
         </Paragraph>
         <Paragraph>
-            Every UIElement has a method called 'ScrollIntoView()'
-            that will automatically scroll the ScrollView so that
-            the element is visible.
+            You can use the scroll bars to scroll, your mouse wheel
+            or hold the middle mouse button pressed and move the 
+            mouse to pan.
+        </Paragraph>
+        <Paragraph>
+            You can use the scroll bars to scroll, your mouse wheel
+            or hold the middle mouse button pressed and move the 
+            mouse to pan.
+        </Paragraph>
+        <Paragraph>
+            You can use the scroll bars to scroll, your mouse wheel
+            or hold the middle mouse button pressed and move the 
+            mouse to pan.
+        </Paragraph>
+        <Paragraph>
+            You can use the scroll bars to scroll, your mouse wheel
+            or hold the middle mouse button pressed and move the 
+            mouse to pan.
         </Paragraph>
 
         <Button style="button" mouse:click="FindById('hiddenElement').ScrollIntoView()">
@@ -29,19 +44,23 @@
         </Button>
 
         <ScrollView style="scroll scroll-1">
-            <Image src="'Images/seed_01'" />
+            <Image src="'Images/seed_01'" style="image"  />
             <Div attr:id="hiddenElement" style="hidden-element">
                 I can be scrolled into view
             </Div>
         </ScrollView>
 
-        <ScrollView style="scroll scroll-2">
-            <Image src="'Images/seed_02'" />
+        <ScrollView style="scroll scroll-2" >
+            <Image src="'Images/seed_02'" style="image" />
         </ScrollView>
 
         <ScrollView style="scroll scroll-3">
-            <Image src="'Images/seed_03'" />
-        </ScrollView>
+            <Image src="'Images/seed_03'" style="image" />
+            <Image src="'Images/seed_02'" style="image" />
 
+        </ScrollView>
+<!--        <ScrollView style="scroll scroll-3">-->
+<!--            <Image src="'Images/seed_03'" style="image" />-->
+<!--        </ScrollView>-->
     </Contents>
 </UITemplate>

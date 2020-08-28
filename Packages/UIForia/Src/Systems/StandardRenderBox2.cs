@@ -28,7 +28,8 @@ namespace UIForia.Rendering {
         protected int outlineTextureId;
         protected OverflowHandling overflowHandling;
         protected Gradient gradient;
-
+        protected Size size;
+        
         public override void OnInitialize() {
             isBuiltIn = true;
             isElementBox = true;
@@ -152,9 +153,6 @@ namespace UIForia.Rendering {
             ushort b2 = (ushort) resolvedCornerBevelBottomRight;
             ushort b3 = (ushort) resolvedCornerBevelBottomLeft;
 
-            drawDesc.width = size.width;
-            drawDesc.height = size.height;
-
             drawDesc.bevelTL = b0;
             drawDesc.bevelTR = b1;
             drawDesc.bevelBR = b2;
@@ -181,8 +179,8 @@ namespace UIForia.Rendering {
             if ((drawDesc.bgColorMode & ColorMode.Texture) != 0) {
                 drawDesc.uvScaleX = element.style.BackgroundImageScaleX;
                 drawDesc.uvScaleY = element.style.BackgroundImageScaleY;
-                drawDesc.uvOffsetX = ResolveRelativeLength(drawDesc.width, element.style.BackgroundImageOffsetX); // cannot set until we know size
-                drawDesc.uvOffsetY = ResolveRelativeLength(drawDesc.height, element.style.BackgroundImageOffsetY); // cannot set until we know size
+                drawDesc.uvOffsetX = ResolveRelativeLength(size.width, element.style.BackgroundImageOffsetX); // cannot set until we know size
+                drawDesc.uvOffsetY = ResolveRelativeLength(size.height, element.style.BackgroundImageOffsetY); // cannot set until we know size
             }
             else {
                 drawDesc.uvScaleX = 1;
@@ -206,11 +204,11 @@ namespace UIForia.Rendering {
 
                 case MeshType.Manual: {
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(element.style.MeshFillAmount); // maybe use 2 bits at the end for encoding direction & inversion
-                    drawDesc.meshFillOffsetX = ResolveRelativeLength(drawDesc.width, element.style.MeshFillOffsetX);
-                    drawDesc.meshFillOffsetY = ResolveRelativeLength(drawDesc.height, element.style.MeshFillOffsetY);
+                    drawDesc.meshFillOffsetX = ResolveRelativeLength(size.width, element.style.MeshFillOffsetX);
+                    drawDesc.meshFillOffsetY = ResolveRelativeLength(size.height, element.style.MeshFillOffsetY);
 
                     drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte) 0 : byte.MaxValue;
-                    drawDesc.meshFillRadius = ResolveRelativeLength(math.min(drawDesc.width, drawDesc.height), element.style.MeshFillRadius);
+                    drawDesc.meshFillRadius = ResolveRelativeLength(math.min(size.width, size.height), element.style.MeshFillRadius);
                     drawDesc.meshFillInvert = 0;
                     drawDesc.meshFillRotation = MathUtil.FloatPercentageToUshort(element.style.MeshFillRotation.ToPercent().value);
                     break;
@@ -232,7 +230,7 @@ namespace UIForia.Rendering {
                     float amount = MathUtil.RemapRange(1 - element.style.MeshFillAmount, 0f, 1f, 0.25f, 0.5f); //.Clamp(element.style.MeshFillAmount / 0.25f, 0, 0.25f);
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount); // maybe use 2 bits at the end for encoding direction & inversion
                     drawDesc.meshFillOffsetX = -1;
-                    drawDesc.meshFillOffsetY = drawDesc.height + 1;
+                    drawDesc.meshFillOffsetY = size.height + 1;
                     drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte) 0 : byte.MaxValue;
                     drawDesc.meshFillRadius = float.MaxValue;
                     drawDesc.meshFillInvert = 1;
@@ -243,7 +241,7 @@ namespace UIForia.Rendering {
                 case MeshType.Radial90_TopRight: {
                     float amount = MathUtil.RemapRange(1 - element.style.MeshFillAmount, 0f, 1f, 0.75f, 1f); //.Clamp(element.style.MeshFillAmount / 0.25f, 0, 0.25f);
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount); // maybe use 2 bits at the end for encoding direction & inversion
-                    drawDesc.meshFillOffsetX = drawDesc.width + 1;
+                    drawDesc.meshFillOffsetX = size.width + 1;
                     drawDesc.meshFillOffsetY = -1;
                     drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte) 0 : byte.MaxValue;
                     drawDesc.meshFillRadius = float.MaxValue;
@@ -255,8 +253,8 @@ namespace UIForia.Rendering {
                 case MeshType.Radial90_BottomRight: {
                     float amount = MathUtil.RemapRange(1 - element.style.MeshFillAmount, 0f, 1f, 0.5f, 0.75f); //.Clamp(element.style.MeshFillAmount / 0.25f, 0, 0.25f);
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount); // maybe use 2 bits at the end for encoding direction & inversion
-                    drawDesc.meshFillOffsetX = drawDesc.width + 1;
-                    drawDesc.meshFillOffsetY = drawDesc.height + 1;
+                    drawDesc.meshFillOffsetX = size.width + 1;
+                    drawDesc.meshFillOffsetY = size.height + 1;
                     drawDesc.meshFillDirection = element.style.MeshFillDirection == MeshFillDirection.Clockwise ? (byte) 0 : byte.MaxValue;
                     drawDesc.meshFillInvert = 1;
                     drawDesc.meshFillRadius = float.MaxValue;
@@ -267,7 +265,7 @@ namespace UIForia.Rendering {
                 case MeshType.Horizontal_Left: {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(0.5f); // maybe use 2 bits at the end for encoding direction & inversion
-                    drawDesc.meshFillOffsetX = drawDesc.width * amount;
+                    drawDesc.meshFillOffsetX = size.width * amount;
                     drawDesc.meshFillOffsetY = 0;
                     drawDesc.meshFillDirection = 0;
                     drawDesc.meshFillInvert = 1;
@@ -279,7 +277,7 @@ namespace UIForia.Rendering {
                 case MeshType.Horizontal_Right: {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(0.5f); // maybe use 2 bits at the end for encoding direction & inversion
-                    drawDesc.meshFillOffsetX = drawDesc.width * (1 - amount);
+                    drawDesc.meshFillOffsetX = size.width * (1 - amount);
                     drawDesc.meshFillOffsetY = 0;
                     drawDesc.meshFillDirection = 0;
                     drawDesc.meshFillInvert = 0;
@@ -292,7 +290,7 @@ namespace UIForia.Rendering {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(0.5f); // maybe use 2 bits at the end for encoding direction & inversion
                     drawDesc.meshFillOffsetX = 0;
-                    drawDesc.meshFillOffsetY = drawDesc.height * amount;
+                    drawDesc.meshFillOffsetY = size.height * amount;
                     drawDesc.meshFillDirection = 0;
                     drawDesc.meshFillInvert = 0;
                     drawDesc.meshFillRadius = float.MaxValue;
@@ -303,8 +301,8 @@ namespace UIForia.Rendering {
                 case MeshType.Radial360_Top: {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount);
-                    drawDesc.meshFillOffsetX = drawDesc.width * 0.5f;
-                    drawDesc.meshFillOffsetY = drawDesc.height * 0.5f;
+                    drawDesc.meshFillOffsetX = size.width * 0.5f;
+                    drawDesc.meshFillOffsetY = size.height * 0.5f;
                     drawDesc.meshFillDirection = (byte) (element.style.MeshFillDirection == MeshFillDirection.CounterClockwise ? 0 : 1);
                     drawDesc.meshFillInvert = 0; //(byte) (element.style.MeshFillInvert == Invert ? 1 : 0);
                     drawDesc.meshFillRadius = float.MaxValue;
@@ -315,8 +313,8 @@ namespace UIForia.Rendering {
                 case MeshType.Radial360_Bottom: {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount);
-                    drawDesc.meshFillOffsetX = drawDesc.width * 0.5f;
-                    drawDesc.meshFillOffsetY = drawDesc.height * 0.5f;
+                    drawDesc.meshFillOffsetX = size.width * 0.5f;
+                    drawDesc.meshFillOffsetY = size.height * 0.5f;
                     drawDesc.meshFillDirection = (byte) (element.style.MeshFillDirection == MeshFillDirection.CounterClockwise ? 0 : 1);
                     drawDesc.meshFillInvert = 0; //(byte) (element.style.MeshFillInvert == Invert ? 1 : 0);
                     drawDesc.meshFillRadius = float.MaxValue;
@@ -327,8 +325,8 @@ namespace UIForia.Rendering {
                 case MeshType.Radial360_Right: {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount);
-                    drawDesc.meshFillOffsetX = drawDesc.width * 0.5f;
-                    drawDesc.meshFillOffsetY = drawDesc.height * 0.5f;
+                    drawDesc.meshFillOffsetX = size.width * 0.5f;
+                    drawDesc.meshFillOffsetY = size.height * 0.5f;
                     drawDesc.meshFillDirection = (byte) (element.style.MeshFillDirection == MeshFillDirection.CounterClockwise ? 0 : 1);
                     drawDesc.meshFillInvert = 0; //(byte) (element.style.MeshFillInvert == Invert ? 1 : 0);
                     drawDesc.meshFillRadius = float.MaxValue;
@@ -339,8 +337,8 @@ namespace UIForia.Rendering {
                 case MeshType.Radial360_Left: {
                     float amount = element.style.MeshFillAmount;
                     drawDesc.meshFillOpenAmount = MathUtil.FloatPercentageToUshort(amount);
-                    drawDesc.meshFillOffsetX = drawDesc.width * 0.5f;
-                    drawDesc.meshFillOffsetY = drawDesc.height * 0.5f;
+                    drawDesc.meshFillOffsetX = size.width * 0.5f;
+                    drawDesc.meshFillOffsetY = size.height * 0.5f;
                     drawDesc.meshFillDirection = (byte) (element.style.MeshFillDirection == MeshFillDirection.CounterClockwise ? 0 : 1);
                     drawDesc.meshFillInvert = 0; //(byte) (element.style.MeshFillInvert == Invert ? 1 : 0);
                     drawDesc.meshFillRadius = float.MaxValue;
@@ -361,7 +359,7 @@ namespace UIForia.Rendering {
                 switch (property.propertyId) {
                     case StylePropertyId.OutlineWidth:
                         recomputeDrawing = true;
-                        float halfMin = math.min(drawDesc.width, drawDesc.height) * 0.5f;
+                        float halfMin = math.min(size.width, size.height) * 0.5f;
                         drawDesc.outlineWidth = ResolveRelativeLength(halfMin, property.AsUIFixedLength);
                         break;
 
@@ -521,7 +519,7 @@ namespace UIForia.Rendering {
                     // ctx.DrawSlicedElement(0, 0, drawDesc);
                 // }
                 // else {
-                    ctx.DrawElement(0, 0, drawDesc);
+                    ctx.DrawElement(0, 0, size.width, size.height, drawDesc);
                 // }
             }
 
@@ -533,11 +531,11 @@ namespace UIForia.Rendering {
                 float clipHeight = float.MaxValue;
 
                 if ((overflowHandling & OverflowHandling.Horizontal) != 0) {
-                    clipWidth = drawDesc.width;
+                    clipWidth = size.width;
                 }
 
                 if ((overflowHandling & OverflowHandling.Vertical) != 0) {
-                    clipHeight = drawDesc.height;
+                    clipHeight = size.height;
                 }
 
                 switch (element.style.ClipBounds) { // todo -- cache this

@@ -27,7 +27,7 @@ namespace UIForia.Graphics {
         public override void PaintBackground3(RenderContext3 ctx) {
             if (requireRendering) {
                 ctx.SetBackgroundTexture(renderTexture);
-                ctx.DrawElement(0, 0, drawDesc);
+                ctx.DrawElement(0, 0, size.width, size.height, drawDesc);
             }
 
             if (overflowHandling != 0) {
@@ -39,11 +39,11 @@ namespace UIForia.Graphics {
                 float clipHeight = float.MaxValue;
 
                 if ((overflowHandling & OverflowHandling.Horizontal) != 0) {
-                    clipWidth = drawDesc.width;
+                    clipWidth = size.width;
                 }
 
                 if ((overflowHandling & OverflowHandling.Vertical) != 0) {
-                    clipHeight = drawDesc.height;
+                    clipHeight = size.height;
                 }
 
                 ctx.PushClipRect(clipX, clipY, clipWidth, clipHeight);

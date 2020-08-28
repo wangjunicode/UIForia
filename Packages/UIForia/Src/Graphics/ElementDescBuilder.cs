@@ -48,8 +48,6 @@ namespace UIForia.Graphics {
         }
 
         public ElementDrawDesc Build(float width, float height) {
-            drawDesc.width = width;
-            drawDesc.height = height;
 
             float min = width < height ? width : height;
 

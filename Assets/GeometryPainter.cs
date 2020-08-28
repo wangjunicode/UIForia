@@ -1,8 +1,6 @@
 using UIForia;
 using UIForia.Graphics;
 using UIForia.Rendering;
-using UIForia.Util;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace DefaultNamespace {
@@ -21,15 +19,14 @@ namespace DefaultNamespace {
             // if(propertyList[0].propertyId == )
         }
 
-        
         public override void PaintBackground3(RenderContext3 ctx) {
-
             // 2 things
             // draw instances -> n:1 with element desc
             // draw thing -> 1:1 with element desc
-            
+
+            ctx.SetBackgroundColor(Color.red);
             for (int i = 0; i < 10; i++) {
-                // ctx.SetBackgroundColor(Color.red);
+                ctx.DrawCircle(i * 60, 0, 30);
                 // ctx.SetOutlineColor(red);
                 // ctx.SetBackgroundTexture(gradientxyz);
                 // ctx.SetTextureUsage(alpha);
@@ -40,10 +37,9 @@ namespace DefaultNamespace {
                 // // ctx.DrawNineSlice(borderPaint, contentPaint, borderTop, borderRight, borderLeft, borderBottom);
                 // ctx.SetMaskTexture(maskTexture, ...);
                 // ctx.Reset();
-                // ctx.DrawRect(i * 20, 0, 10, 10);
                 // ctx.SetBackgroundTexture(gradient, rect);
             }
-            
+
             // mesh.Clear();
             // mesh.SetVertexColor();
             // mesh.SetAAWidth(1.25);
@@ -65,7 +61,6 @@ namespace DefaultNamespace {
             // ctx.DrawCircle(0, 0, 100);
             //
             // ctx.DrawDecoratedRect();
-
         }
 
         // gradients are images, punkt.
@@ -92,31 +87,30 @@ namespace DefaultNamespace {
         //     blur(5px);
         //     linear-gradient(50deg, red, blue);
         // }
-    
-    // generic draw api
+
+        // generic draw api
         // draw some mesh with some material + batch it
         // blur + other effects
         // sdf paint api
         // render texture effect api
         // need to offset clip rect when rendering to non screen render target!!!
         // gradient texture generation
-        
+
         // style painters probably only work with immediate mode sdf based drawing
-        
+
         // other painters can listen to property changes etc
         // need to implement custom style properties of some sort
-        
+
         // style.SetCustomProperty("name", 4);
         // style.GetCustomProperty<type>("name", default);
         // style { painter::Geometry.value = x }
-        
+
         // <Element painter:geometry.value="xxx"/>
         // <Element material:name.value="xxx"/>
-        
+
         // if element.painter == geometry
         // painter.value = xx;
-        
-        
+
     }
 
 }

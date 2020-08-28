@@ -88,8 +88,6 @@ namespace UIForia.Graphics {
     public struct TextureUsage {
 
         public int textureId;
-        public AxisAlignedBounds2DUShort uvRect; // could be ushort because pixels aligned on ints and only need max ~4k per axis
-        public UVTransform uvTransform;
 
     }
 

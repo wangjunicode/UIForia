@@ -61,10 +61,10 @@
 
 float4 DebugSDF(float sdf)
 {
-    float3 col = float3(1.0, 1, 1) - sign(sdf)*float3(0.1,0.4,0.7);
-    col *= 1.0 - exp(-3.0*abs(sdf));
-    col *= 0.8 + 0.2*cos(150.0*sdf);
-    col = lerp( col, float3(1.0, 0, 0), 1.0-smoothstep(0.0,0.02,abs(sdf)) );
+    float3 col = float3(1.0, 1, 1) - sign(sdf) * float3(0.1, 0.4, 0.7);
+    col *= 1.0 - exp(-3.0 * abs(sdf));
+    col *= 0.8 + 0.2 * cos(150.0 * sdf);
+    col = lerp(col, float3(1.0, 0, 0), 1.0 - smoothstep(0.0, 0.02, abs(sdf)));
     return float4(col, 1);
 }
 
@@ -73,7 +73,7 @@ fixed4 ApplyColorEffect(half4 color, half4 factor, uint colorEffectFlags)
     fixed3 fill = lerp(color.rgb, factor.rgb, factor.a);
     fixed3 add = color.rgb + factor.rgb * factor.a;
     fixed3 sub = color.rgb - factor.rgb * factor.a;
-    fixed3 def = lerp(color.rgb, color.rgb * factor.rgb, factor.a); 
+    fixed3 def = lerp(color.rgb, color.rgb * factor.rgb, factor.a);
 
     color.rgb = lerp(color.rgb, fill, (colorEffectFlags & ColorEffect_Fill) != 0);
     color.rgb = lerp(color.rgb, add, (colorEffectFlags & ColorEffect_Add) != 0);
@@ -177,14 +177,14 @@ half remapHalf(half s, half a1, half a2, half b1, half b2)
     return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
 }
 
-// same as UnityPixelSnap except taht we add 0.5 to pixelPos after rounding
+// same as UnityPixelSnap except that we add 0.5 to pixelPos after rounding
 inline float4 UIForiaPixelSnap(float4 pos)
 {
     float2 hpc = _ScreenParams.xy * 0.5f;
     float2 adjustment = float2(0, 0);
-    // adjustment.x = (_ScreenParams.x % 2 != 0) * 0.5;
-    // adjustment.y = (_ScreenParams.y % 2 != 0) * 0.5;
-    float2 pixelPos = round((pos.xy / pos.w) * hpc); // + adjustment;
+    adjustment.x = (_ScreenParams.x % 2 != 0) * 0.5;
+    adjustment.y = (_ScreenParams.y % 2 != 0) * 0.5;
+    float2 pixelPos = round((pos.xy / pos.w) * hpc) + adjustment;
     pos.xy = pixelPos / hpc * pos.w;
     return pos;
 }
@@ -198,7 +198,8 @@ fixed4 UIForiaColorSpace(fixed4 color)
     #endif
 }
 
-half4 GetGlowColor(float d, float scale, half4 glowColor, half glowOffset, half glowInner, half glowOuter, half glowPower)
+half4 GetGlowColor(float d, float scale, half4 glowColor, half glowOffset, half glowInner, half glowOuter,
+                   half glowPower)
 {
     half glow = d - glowOffset * 0.5 * scale;
     glowInner = max(0.1, glowInner);
@@ -301,7 +302,8 @@ fixed UIForiaOverflowClip(float2 screenPos, AxisAlignedBounds2D bounds)
 }
 
 
-inline float4 ComputeColor(fixed4 mainColor, fixed4 gradientColor, fixed4 tintColor, uint colorMode, float2 texCoord, sampler2D textureToRead, float4 uvBounds, float2 originalUV)
+inline float4 ComputeColor(fixed4 mainColor, fixed4 gradientColor, fixed4 tintColor, uint colorMode, float2 texCoord,
+                           sampler2D textureToRead, float4 uvBounds, float2 originalUV)
 {
     int useColor = (colorMode & ColorMode_Color) != 0;
     int useTexture = (colorMode & ColorMode_Texture) != 0;
@@ -399,7 +401,8 @@ float2 TransformUV(float2 uv, float2 offset, float2 scale, float rotation, half4
 {
     uv += offset;
     uv *= scale;
-    uv = RotateUV(uv, rotation, float2(0.5, 0.5)); // todo -- verify pivot point is correct -- (uvBounds.z - uvBounds.x) * 0.5, uvBounds.y + (uvBounds.w - uvBounds.y) * 0.5));
+    uv = RotateUV(uv, rotation, float2(0.5, 0.5));
+    // todo -- verify pivot point is correct -- (uvBounds.z - uvBounds.x) * 0.5, uvBounds.y + (uvBounds.w - uvBounds.y) * 0.5));
     // uv.x = lerp(uvBounds.x, uvBounds.z, frac(uv.x));
     // uv.y = lerp(uvBounds.y, uvBounds.w, frac(uv.y));
 
@@ -465,7 +468,8 @@ fixed4 SampleCornerGradient(float2 gradientTexCoord, in fixed4 colors[8], in fix
     return lerp(topCol, bottomCol, gradientTexCoord.y);
 }
 
-fixed4 SampleGradient(float sampleValue, fixed4 colors[8], fixed2 alphas[8], int colorCount, int alphaCount, int fixedOrBlend)
+fixed4 SampleGradient(float sampleValue, fixed4 colors[8], fixed2 alphas[8], int colorCount, int alphaCount,
+                      int fixedOrBlend)
 {
     fixed4 color = colors[0];
     fixed alpha = alphas[0].x;
@@ -474,10 +478,12 @@ fixed4 SampleGradient(float sampleValue, fixed4 colors[8], fixed2 alphas[8], int
     {
         fixed prevTimeKey = colors[idx - 1].w;
 
-        fixed colorPos = saturate((sampleValue - prevTimeKey) / (colors[idx].w - prevTimeKey)) * step(idx, colorCount - 1);
+        fixed colorPos = saturate((sampleValue - prevTimeKey) / (colors[idx].w - prevTimeKey)) * step(
+            idx, colorCount - 1);
         color = lerp(color, colors[idx], lerp(colorPos, step(0.5, colorPos), fixedOrBlend));
 
-        fixed alphaPos = (saturate((sampleValue - alphas[idx - 1].y) / (alphas[idx].y - alphas[idx - 1].y))) * step(idx, alphaCount - 1);
+        fixed alphaPos = (saturate((sampleValue - alphas[idx - 1].y) / (alphas[idx].y - alphas[idx - 1].y))) * step(
+            idx, alphaCount - 1);
         alpha = lerp(alpha, alphas[idx].x, lerp(alphaPos, step(0.5, alphaPos), fixedOrBlend));
     }
 
@@ -610,7 +616,9 @@ float3 ComputeSDFTextScaleRatios(in GPUFontInfo fontInfo, in TextMaterialInfoDec
     if (ratioB < 0) ratioB = 0;
 
     float ratioCRange = (weight + faceDilate) * (gradientScale - 1);
-    float ratioC_t = max(1, max(abs(textStyle.underlayX), abs(textStyle.underlayY)) + textStyle.underlayDilate + textStyle.underlaySoftness);
+    float ratioC_t = max(
+        1, max(abs(textStyle.underlayX), abs(textStyle.underlayY)) + textStyle.underlayDilate + textStyle.
+        underlaySoftness);
 
     float ratioC = max(0, gradientScale - 1.0 - ratioCRange) / (gradientScale * ratioC_t);
 
@@ -743,6 +751,99 @@ float4 drawRectShadow(float2 pos, float4 rect, float4 color, float sigma)
 float4 blend(float4 src, float4 append)
 {
     return float4(src.rgb * (1.0 - append.a) + append.rgb * append.a, 1.0 - (1.0 - src.a) * (1.0 - append.a));
+}
+
+float gauss(float x, float sigma)
+{
+    float sigmaPow2 = sigma * sigma;
+    return 1.0 / sqrt(6.283185307179586 * sigmaPow2) * exp(-(x * x) / (2.0 * sigmaPow2));
+}
+
+float erf(float x)
+{
+    bool negative = x < 0.0;
+    if (negative)
+        x = -x;
+    float x2 = x * x;
+    float x3 = x2 * x;
+    float x4 = x2 * x2;
+    float denom = 1.0 + 0.278393 * x + 0.230389 * x2 + 0.000972 * x3 + 0.078108 * x4;
+    float result = 1.0 - 1.0 / (denom * denom * denom * denom);
+    return negative ? -result : result;
+}
+
+float erfSigma(float x, float sigma)
+{
+    return erf(x / (sigma * 1.4142135623730951));
+}
+
+float colorFromRect(float2 p0, float2 p1, float sigma)
+{
+    return ((erfSigma(p1.x, sigma) - erfSigma(p0.x, sigma)) * (erfSigma(p1.y, sigma) - erfSigma(p0.y, sigma))) / 4.0;
+}
+
+float ellipsePoint(float y, float y0, float2 radii)
+{
+    float bStep = (y - y0) / radii.y;
+    return radii.x * sqrt(1.0 - bStep * bStep);
+}
+
+float colorCutoutGeneral(float x0l,
+                         float x0r,
+                         float y0,
+                         float yMin,
+                         float yMax,
+                         float2 radii,
+                         float sigma)
+{
+    float sum = 0.0;
+    for (float y = yMin; y <= yMax; y += 1.0)
+    {
+        float xEllipsePoint = ellipsePoint(y, y0, radii);
+        sum += gauss(y, sigma) *
+        (erfSigma(x0r + radii.x, sigma) - erfSigma(x0r + xEllipsePoint, sigma) +
+            erfSigma(x0l - xEllipsePoint, sigma) - erfSigma(x0l - radii.x, sigma));
+    }
+    return sum / 2.0;
+}
+
+float colorCutoutTop(float x0l, float x0r, float y0, float2 radii, float sigma)
+{
+    return colorCutoutGeneral(x0l, x0r, y0, y0, y0 + radii.y, radii, sigma);
+}
+
+// The value that needs to be subtracted to accommodate the bottom border corners.
+float colorCutoutBottom(float x0l, float x0r, float y0, float2 radii, float sigma)
+{
+    return colorCutoutGeneral(x0l, x0r, y0, y0 - radii.y, y0, radii, sigma);
+}
+
+float color(float2 pos, float2 p0Rect, float2 p1Rect, float2 radii, float sigma)
+{
+    // Compute the vector distances `p_0` and `p_1`.
+    float2 p0 = p0Rect - pos, p1 = p1Rect - pos;
+
+    // Compute the basic color `"colorFromRect"_sigma(p_0, p_1)`. This is all we have to do if
+    // the box is unrounded.
+    float cRect = colorFromRect(p0, p1, sigma);
+    // if (radii.x == 0.0 || radii.y == 0.0)
+    // return cRect;
+    //
+    // // Compute the inner corners of the box, taking border radii into account: `x_{0_l}`,
+    // // `y_{0_t}`, `x_{0_r}`, and `y_{0_b}`.
+    float x0l = p0.x + radii.x;
+    float y0t = p1.y - radii.y;
+    float x0r = p1.x - radii.x;
+    float y0b = p0.y + radii.y;
+    //
+    // // Compute the final color:
+    // //
+    // //     "colorFromRect"_sigma(p_0, p_1) -
+    // //          ("colorCutoutTop"_sigma(x_{0_l}, x_{0_r}, y_{0_t}, a, b) +
+    // //           "colorCutoutBottom"_sigma(x_{0_l}, x_{0_r}, y_{0_b}, a, b))
+    float cCutoutTop = colorCutoutTop(x0l, x0r, y0t, radii, sigma);
+    float cCutoutBottom = colorCutoutBottom(x0l, x0r, y0b, radii, sigma);
+    return cRect - (cCutoutTop + cCutoutBottom);
 }
 
 #endif

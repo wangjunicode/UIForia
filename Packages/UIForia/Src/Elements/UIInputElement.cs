@@ -444,9 +444,9 @@ namespace UIForia.Elements {
                 // if (!inputElement.isSelecting && inputElement.hasFocus && blinkState) {
                 //   if (blinkState) {
                 Rect rect = inputElement.GetCaretRect();
-                ctx.DrawElement((int) rect.x, rect.y, new ElementDrawDesc((int) rect.width, rect.height) {
-                    backgroundColor = Color.black
-                });
+                ElementDrawDesc desc = ElementDrawDesc.Create();
+                desc.backgroundColor = Color.black;
+                ctx.DrawElement((int) rect.x, rect.y, rect.width, rect.height, desc);
                 //    }
 
                 // base.PaintBackground(ctx);

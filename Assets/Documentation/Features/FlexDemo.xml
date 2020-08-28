@@ -89,7 +89,8 @@
         PreferredSize = 140px 140px;
         LayoutType = Stack;
         BackgroundColor = red;
-        
+                Painter = "GeometryPainter";
+
         }
 
         style painted {

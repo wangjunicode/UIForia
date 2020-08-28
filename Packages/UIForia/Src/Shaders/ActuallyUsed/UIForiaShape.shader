@@ -2,8 +2,9 @@
     Properties {
         _Color ("Color", Color) = (1, 1, 1, 1)
         _MainTex ("Texture", 2D) = "white" {}
-_Sigma ("Sigma", Range(0, 1)) = 0
+        // _Sigma ("Sigma", Range(0, 1)) = 0
     }
+
     SubShader {
 
         Tags {
@@ -100,7 +101,9 @@ _Sigma ("Sigma", Range(0, 1)) = 0
             float _UIForiaDPIScale;
             float4x4 _UIForiaOriginMatrix;
             float _MaskSoftness;
-float _Sigma;
+
+            // float _Sigma;
+            
             StructuredBuffer<float4x4> _UIForiaMatrixBuffer;
             StructuredBuffer<UIForiaVertex> _UIForiaVertexBuffer;
             StructuredBuffer<ElementMaterialInfo> _UIForiaMaterialBuffer;
@@ -206,106 +209,14 @@ float _Sigma;
                 o.vertex = mul(UNITY_MATRIX_VP, mul(transform, float4(vpos.xyz, 1.0)));
 
                 // todo -- snapping is terrible when moving/ rotating 
-                // o.vertex = UIForiaPixelSnap(o.vertex);
+                o.vertex = UIForiaPixelSnap(o.vertex);
 
                 o.indices = uint4(UnpackClipRectId(vertex.indices.x), vertex.indices.y, vertex.indices.z, vertex.indices.w);
 
                 return o;
             }
 
-            float gauss(float x, float sigma)
-            {
-                float sigmaPow2 = sigma * sigma;
-                return 1.0 / sqrt(6.283185307179586 * sigmaPow2) * exp(-(x * x) / (2.0 * sigmaPow2));
-            }
-
-            float erf(float x)
-            {
-                bool negative = x < 0.0;
-                if (negative)
-                    x = -x;
-                float x2 = x * x;
-                float x3 = x2 * x;
-                float x4 = x2 * x2;
-                float denom = 1.0 + 0.278393 * x + 0.230389 * x2 + 0.000972 * x3 + 0.078108 * x4;
-                float result = 1.0 - 1.0 / (denom * denom * denom * denom);
-                return negative ? -result : result;
-            }
-
-            float erfSigma(float x, float sigma)
-            {
-                return erf(x / (sigma * 1.4142135623730951));
-            }
-
-            float colorFromRect(float2 p0, float2 p1, float sigma)
-            {
-                return ((erfSigma(p1.x, sigma) - erfSigma(p0.x, sigma)) * (erfSigma(p1.y, sigma) - erfSigma(p0.y, sigma))) / 4.0;
-            }
-
-            float ellipsePoint(float y, float y0, float2 radii)
-            {
-                float bStep = (y - y0) / radii.y;
-                return radii.x * sqrt(1.0 - bStep * bStep);
-            }
-
-            float colorCutoutGeneral(float x0l,
-                                     float x0r,
-                                     float y0,
-                                     float yMin,
-                                     float yMax,
-                                     float2 radii,
-                                     float sigma)
-            {
-                float sum = 0.0;
-                for (float y = yMin; y <= yMax; y += 1.0)
-                {
-                    float xEllipsePoint = ellipsePoint(y, y0, radii);
-                    sum += gauss(y, sigma) *
-                    (erfSigma(x0r + radii.x, sigma) - erfSigma(x0r + xEllipsePoint, sigma) +
-                        erfSigma(x0l - xEllipsePoint, sigma) - erfSigma(x0l - radii.x, sigma));
-                }
-                return sum / 2.0;
-            }
-
-            float colorCutoutTop(float x0l, float x0r, float y0, float2 radii, float sigma)
-            {
-                return colorCutoutGeneral(x0l, x0r, y0, y0, y0 + radii.y, radii, sigma);
-            }
-
-            // The value that needs to be subtracted to accommodate the bottom border corners.
-            float colorCutoutBottom(float x0l, float x0r, float y0, float2 radii, float sigma)
-            {
-                return colorCutoutGeneral(x0l, x0r, y0, y0 - radii.y, y0, radii, sigma);
-            }
-
-            float color(float2 pos, float2 p0Rect, float2 p1Rect, float2 radii, float sigma)
-            {
-                // Compute the vector distances `p_0` and `p_1`.
-                float2 p0 = p0Rect - pos, p1 = p1Rect - pos;
-
-                // Compute the basic color `"colorFromRect"_sigma(p_0, p_1)`. This is all we have to do if
-                // the box is unrounded.
-                float cRect = colorFromRect(p0, p1, sigma);
-               // if (radii.x == 0.0 || radii.y == 0.0)
-                   // return cRect;
-                //
-                // // Compute the inner corners of the box, taking border radii into account: `x_{0_l}`,
-                // // `y_{0_t}`, `x_{0_r}`, and `y_{0_b}`.
-                float x0l = p0.x + radii.x;
-                float y0t = p1.y - radii.y;
-                float x0r = p1.x - radii.x;
-                float y0b = p0.y + radii.y;
-                //
-                // // Compute the final color:
-                // //
-                // //     "colorFromRect"_sigma(p_0, p_1) -
-                // //          ("colorCutoutTop"_sigma(x_{0_l}, x_{0_r}, y_{0_t}, a, b) +
-                // //           "colorCutoutBottom"_sigma(x_{0_l}, x_{0_r}, y_{0_b}, a, b))
-                float cCutoutTop = colorCutoutTop(x0l, x0r, y0t, radii, sigma);
-                float cCutoutBottom = colorCutoutBottom(x0l, x0r, y0b, radii, sigma);
-                return cRect - (cCutoutTop + cCutoutBottom);
-            }
-
+           
             float4 ApplyUIForiaMask(uint maskFlags, float4 color, float2 uv, sampler2D maskTexture, float maskSoftness)
             {
                 if ((maskFlags & MaskFlags_UseTextureMask) != 0)
@@ -436,7 +347,9 @@ float _Sigma;
                 // todo -- move max up here to draw pie instead of using as a clipping bounds
                 //sdf = max(radialSDF * invertFill, sdf);
                 float sdfOutline = outlineWidth > 0 ? abs(sdf) - outlineWidth : 0;
-                sdf = max(radialSDF * invertFill, sdf);
+
+                // sdf = max(radialSDF * invertFill, sdf);
+                 
                 // sdfOutline = (fillFlag & FillOutline) != 0 ? max(radialSDF * invertFill, sdfOutline) : sdfOutline;
                 fixed4 grad = WHITE;
                 color = ComputeColor(color, grad, tintColor, bodyColorMode, i.texCoord1, _MainTex, uvBounds, originalUV);

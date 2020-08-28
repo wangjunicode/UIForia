@@ -166,15 +166,13 @@ namespace UIForia.Graphics {
         }
         
         public void FillRect(float x, float y, float width, float height) {
-            drawDesc.width = width;
-            drawDesc.height = height;
             drawDesc.meshFillOpenAmount = ushort.MaxValue;
             drawDesc.meshFillRadius = float.MaxValue;
             drawDesc.opacity = 255;
             //if (!ReferenceEquals(main)) {
             //    ctx.SetBackgroundTexture(backgroundTexture);
             //}
-            ctx.DrawElement(x, y, drawDesc);
+            ctx.DrawElement(x, y, width, height, drawDesc);
         }
 
         // public void FillSector(float width, float height, float length, ArcDirection direction) {

@@ -25,45 +25,6 @@ namespace UIForia.Graphics {
             this.defaultOutlineTexture = 0;
         }
         
-        public void DrawElement(float x, float y, in ElementDrawDesc drawDesc) {
-
-            if (drawDesc.width <= 0 || drawDesc.height <= 0) {
-                return;
-            }
-
-            ElementDrawInfo* elementDrawInfo = stackAllocator.Allocate(new ElementDrawInfo() {
-                x = x,
-                y = y,
-            
-                drawDesc = drawDesc,
-            });
-
-            drawList.Add(new DrawInfo2() {
-                matrix = defaultMatrix,
-                elementId = elementId,
-                drawType = DrawType2.UIForiaElement,
-                materialId = MaterialId.UIForiaShape,
-                localBounds = new AxisAlignedBounds2D(x, y, x + drawDesc.width, y + drawDesc.height), // compute based on matrix? probably
-
-                // could consider making these different allocators to keep similar types together
-                materialData = stackAllocator.Allocate(new ElementMaterialSetup() {
-                    bodyTexture = new TextureUsage() {
-                        textureId = defaultBGTexture
-                    }
-                }),
-
-                shapeData = stackAllocator.Allocate(new ElementBatch() {
-                    count = 1,
-                    elements = elementDrawInfo
-                }),
-
-                drawSortId = new DrawSortId() {
-                    localRenderIdx = localDrawId++,
-                    baseRenderIdx = renderIndex
-                }
-            });
-        }
-
         public void Initialize() {
             this.drawList = new DataList<DrawInfo2>(64, Allocator.Persistent);
             this.stackAllocator = new PagedByteAllocator(TypedUnsafe.Kilobytes(16), Allocator.Persistent, Allocator.Persistent);

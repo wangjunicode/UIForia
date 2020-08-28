@@ -86,8 +86,9 @@
         style rt-parent {
         AlignX = Center Screen;
         AlignY = Center Screen;
-        Padding = 10px;
+        PreferredSize = 140px 140px;
         LayoutType = Stack;
+        BackgroundColor = red;
         
         }
 
@@ -109,8 +110,7 @@
 
         <!--        <Div style="painted"></Div>-->
         <Group style="rt-parent">
-            <Div style="child-z"/>
-            <Div style="child round"/>
+       
         </Group>
         <!--        <Input style="inputxxx" value.once="'           UIForia is the fucking greatesssssssssssssssssssssssssssssssst'"/>-->
 

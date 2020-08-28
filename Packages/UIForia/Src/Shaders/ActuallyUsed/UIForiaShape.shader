@@ -2,6 +2,7 @@
     Properties {
         _Color ("Color", Color) = (1, 1, 1, 1)
         _MainTex ("Texture", 2D) = "white" {}
+_Sigma ("Sigma", Range(0, 1)) = 0
     }
     SubShader {
 
@@ -99,7 +100,7 @@
             float _UIForiaDPIScale;
             float4x4 _UIForiaOriginMatrix;
             float _MaskSoftness;
-
+float _Sigma;
             StructuredBuffer<float4x4> _UIForiaMatrixBuffer;
             StructuredBuffer<UIForiaVertex> _UIForiaVertexBuffer;
             StructuredBuffer<ElementMaterialInfo> _UIForiaMaterialBuffer;
@@ -129,8 +130,8 @@
                 // vertex.size.y += _HeightAdd;
                 // size *= 1/(ratio * 0.5);
                 // float ratio = _Outer / 150.0;
-                // vertex.size.x += (vertex.size.x * (ratio));
-                // vertex.size.y += (vertex.size.y * (ratio));
+              // vertex.size.x += (vertex.size.x * (_Sigma));
+              // vertex.size.y += (vertex.size.y * (_Sigma));
 
                 float2 halfSize = vertex.size * 0.5;
                 bool is9SliceBorder = (GetByteN(vertex.indices.y, 3) & ElementShaderFlags_IsNineSliceBorder) != 0;
@@ -212,6 +213,99 @@
                 return o;
             }
 
+            float gauss(float x, float sigma)
+            {
+                float sigmaPow2 = sigma * sigma;
+                return 1.0 / sqrt(6.283185307179586 * sigmaPow2) * exp(-(x * x) / (2.0 * sigmaPow2));
+            }
+
+            float erf(float x)
+            {
+                bool negative = x < 0.0;
+                if (negative)
+                    x = -x;
+                float x2 = x * x;
+                float x3 = x2 * x;
+                float x4 = x2 * x2;
+                float denom = 1.0 + 0.278393 * x + 0.230389 * x2 + 0.000972 * x3 + 0.078108 * x4;
+                float result = 1.0 - 1.0 / (denom * denom * denom * denom);
+                return negative ? -result : result;
+            }
+
+            float erfSigma(float x, float sigma)
+            {
+                return erf(x / (sigma * 1.4142135623730951));
+            }
+
+            float colorFromRect(float2 p0, float2 p1, float sigma)
+            {
+                return ((erfSigma(p1.x, sigma) - erfSigma(p0.x, sigma)) * (erfSigma(p1.y, sigma) - erfSigma(p0.y, sigma))) / 4.0;
+            }
+
+            float ellipsePoint(float y, float y0, float2 radii)
+            {
+                float bStep = (y - y0) / radii.y;
+                return radii.x * sqrt(1.0 - bStep * bStep);
+            }
+
+            float colorCutoutGeneral(float x0l,
+                                     float x0r,
+                                     float y0,
+                                     float yMin,
+                                     float yMax,
+                                     float2 radii,
+                                     float sigma)
+            {
+                float sum = 0.0;
+                for (float y = yMin; y <= yMax; y += 1.0)
+                {
+                    float xEllipsePoint = ellipsePoint(y, y0, radii);
+                    sum += gauss(y, sigma) *
+                    (erfSigma(x0r + radii.x, sigma) - erfSigma(x0r + xEllipsePoint, sigma) +
+                        erfSigma(x0l - xEllipsePoint, sigma) - erfSigma(x0l - radii.x, sigma));
+                }
+                return sum / 2.0;
+            }
+
+            float colorCutoutTop(float x0l, float x0r, float y0, float2 radii, float sigma)
+            {
+                return colorCutoutGeneral(x0l, x0r, y0, y0, y0 + radii.y, radii, sigma);
+            }
+
+            // The value that needs to be subtracted to accommodate the bottom border corners.
+            float colorCutoutBottom(float x0l, float x0r, float y0, float2 radii, float sigma)
+            {
+                return colorCutoutGeneral(x0l, x0r, y0, y0 - radii.y, y0, radii, sigma);
+            }
+
+            float color(float2 pos, float2 p0Rect, float2 p1Rect, float2 radii, float sigma)
+            {
+                // Compute the vector distances `p_0` and `p_1`.
+                float2 p0 = p0Rect - pos, p1 = p1Rect - pos;
+
+                // Compute the basic color `"colorFromRect"_sigma(p_0, p_1)`. This is all we have to do if
+                // the box is unrounded.
+                float cRect = colorFromRect(p0, p1, sigma);
+               // if (radii.x == 0.0 || radii.y == 0.0)
+                   // return cRect;
+                //
+                // // Compute the inner corners of the box, taking border radii into account: `x_{0_l}`,
+                // // `y_{0_t}`, `x_{0_r}`, and `y_{0_b}`.
+                float x0l = p0.x + radii.x;
+                float y0t = p1.y - radii.y;
+                float x0r = p1.x - radii.x;
+                float y0b = p0.y + radii.y;
+                //
+                // // Compute the final color:
+                // //
+                // //     "colorFromRect"_sigma(p_0, p_1) -
+                // //          ("colorCutoutTop"_sigma(x_{0_l}, x_{0_r}, y_{0_t}, a, b) +
+                // //           "colorCutoutBottom"_sigma(x_{0_l}, x_{0_r}, y_{0_b}, a, b))
+                float cCutoutTop = colorCutoutTop(x0l, x0r, y0t, radii, sigma);
+                float cCutoutBottom = colorCutoutBottom(x0l, x0r, y0b, radii, sigma);
+                return cRect - (cCutoutTop + cCutoutBottom);
+            }
+
             float4 ApplyUIForiaMask(uint maskFlags, float4 color, float2 uv, sampler2D maskTexture, float maskSoftness)
             {
                 if ((maskFlags & MaskFlags_UseTextureMask) != 0)
@@ -235,6 +329,13 @@
                 // this could be done in the vertex shader too but this way we can support correct
                 ElementMaterialInfo material = _UIForiaMaterialBuffer[i.indices.y & 0xffffff];
                 float2 size = i.size;
+
+                // float sigma = _Sigma/2; 
+                // float2 p0Rect = float2(sigma, sigma);
+                // float2 p1Rect = float2(1-sigma, 1-sigma);
+                // float2 radii = float2(0, 0);
+                // float value = color(i.texCoord0, p0Rect, p1Rect, radii, sigma);
+                // return float4(BLACK.rgb, max(value, 0.0));
 
                 float minSize = min(size.x, size.y);
                 fixed4 color = UnpackColor(material.backgroundColor);
@@ -310,7 +411,7 @@
                 {
                     color = contentColor;
                 }
-              
+
                 half outlineWidth = material.outlineWidth * 0.5;
                 float2 samplePoint = (i.texCoord0.xy - 0.5) * size;
 
@@ -345,7 +446,7 @@
                 //float shadow = minSize * 0.5;
                 //color.a *= 1.0 - smoothstep(0, lerp(_Inner, fwidth(sdf), 0), sdf);
 
-                float2 clipPos =  float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y); //* _UIForiaDPIScale;
+                float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y); //* _UIForiaDPIScale;
                 float4 clipRect = _UIForiaFloat4Buffer[i.indices.x]; // x = xMin, y = yMin, z = xMax, w = yMax
                 float2 s = step(clipRect.xw, clipPos) - step(clipRect.zy, clipPos);
 
@@ -370,7 +471,7 @@
                 // #ifndef UNITY_COLORSPACE_GAMMA
                 // color.rgb = GammaToLinearSpace(color.rgb);
                 // #endif
-               return color;
+                return color;
             }
             ENDCG
         }

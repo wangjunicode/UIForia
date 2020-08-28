@@ -72,6 +72,7 @@ Material:
     - _OcclusionStrength: 1
     - _Outer: 1
     - _Parallax: 0.02
+    - _Sigma: 0.103
     - _SizeXAdd: 131
     - _SizeYAdd: 100
     - _SmoothnessTextureChannel: 0

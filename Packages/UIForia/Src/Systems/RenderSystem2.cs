@@ -26,6 +26,12 @@ namespace UIForia.Graphics {
         [FieldOffset(0)] public ushort localRenderIdx;
         [FieldOffset(2)] public ushort baseRenderIdx;
 
+        public DrawSortId(ushort localRenderIdx, ushort baseRenderIdx) {
+            this.sortId = 0;
+            this.localRenderIdx = localRenderIdx;
+            this.baseRenderIdx = baseRenderIdx;
+        }
+
     }
 
     [StructLayout(LayoutKind.Sequential)]

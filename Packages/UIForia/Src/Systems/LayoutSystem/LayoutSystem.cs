@@ -316,7 +316,6 @@ namespace UIForia.Systems {
                 hierarchyTable = elementSystem.hierarchyTable,
                 metaTable = elementSystem.metaTable,
                 layoutHierarchyTable = layoutHierarchyTable,
-                layoutBoxTable = layoutBoxTable
             }.Run();
 
             // todo -- maybe better to just return the transclusion list and handle it outside of the job, lots can go wrong with transclusion

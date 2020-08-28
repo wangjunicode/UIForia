@@ -242,6 +242,48 @@ namespace UIForia.Graphics {
 
         }
 
+        public struct Brush {
+
+            public Color stroke;
+            public Color fill;
+            public TextureUsageDesc mainTexture;
+            public TextureUsageDesc secondaryTexture;
+            public TextureUsageDesc mask;
+            public float strokeWidth;
+
+        }
+
+        private ElementDrawDesc drawDesc;
+        
+        public void SetBackgroundColor(in Color color) {
+            
+        }
+        
+        public void DrawRect(float x, float y, float width, float height) {
+            if (width <= 0 || height <= 0) {
+                return;
+            }
+
+            drawList.Add(new DrawInfo2() {
+                matrix = defaultMatrix,
+                elementId = elementId,
+                drawType = DrawType2.UIForiaElement,
+                materialId = MaterialId.UIForiaShape,
+                localBounds = new AxisAlignedBounds2D(x, y, x + width, y + height),
+                // could consider making these different allocators to keep similar types together
+                materialData = stackAllocator.Allocate(new ElementMaterialSetup() {
+                    bodyTexture = new TextureUsage() {
+                        textureId = defaultBGTexture
+                    },
+                    maskTexture = new TextureUsage() {
+                        textureId = maskTextureId
+                    }
+                }),
+                shapeData = stackAllocator.Allocate(drawDesc),
+                drawSortId = new DrawSortId(localDrawId++, renderIndex)
+            });
+        }
+        
         public void SetMaterial(MaterialId materialId) {
             activeMaterialId = materialId;
             materialValueOverrides.size = 0;

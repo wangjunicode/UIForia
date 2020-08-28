@@ -1,6 +1,9 @@
 using UIForia;
 using UIForia.Graphics;
 using UIForia.Rendering;
+using UIForia.Util;
+using Unity.Mathematics;
+using UnityEngine;
 
 namespace DefaultNamespace {
 
@@ -18,11 +21,29 @@ namespace DefaultNamespace {
             // if(propertyList[0].propertyId == )
         }
 
+        
         public override void PaintBackground3(RenderContext3 ctx) {
+
+            // 2 things
+            // draw instances -> n:1 with element desc
+            // draw thing -> 1:1 with element desc
             
+            for (int i = 0; i < 10; i++) {
+                // ctx.SetBackgroundColor(Color.red);
+                // ctx.SetOutlineColor(red);
+                // ctx.SetBackgroundTexture(gradientxyz);
+                // ctx.SetTextureUsage(alpha);
+                // ctx.ComposeTexture();
+                //
+                // ctx.SetBackgroundTexture(texture, rect, uvTransform);
+                // ctx.SetMatrix(float4x4.identity);
+                // // ctx.DrawNineSlice(borderPaint, contentPaint, borderTop, borderRight, borderLeft, borderBottom);
+                // ctx.SetMaskTexture(maskTexture, ...);
+                // ctx.Reset();
+                // ctx.DrawRect(i * 20, 0, 10, 10);
+                // ctx.SetBackgroundTexture(gradient, rect);
+            }
             
-            // Debug.Log("Painting");
-            //
             // mesh.Clear();
             // mesh.SetVertexColor();
             // mesh.SetAAWidth(1.25);

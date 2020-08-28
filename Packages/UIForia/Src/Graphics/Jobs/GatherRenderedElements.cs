@@ -37,6 +37,7 @@ namespace UIForia.Systems {
 
                     ref RenderInfo renderInfo = ref renderInfoTable[elementId];
                     ref ElementTraversalInfo traversalInfo = ref traversalTable.array[elementIndex];
+                    
                     renderCallPtr[count++] = new RenderCallInfo() {
                         elementId = elementId,
                         zIndex = renderInfo.zIndex,
@@ -44,13 +45,18 @@ namespace UIForia.Systems {
                         btfIndex = traversalInfo.btfIndex,
                         renderOp = 0
                     };
-                    renderCallPtr[count++] = new RenderCallInfo() {
-                        elementId = elementId,
-                        zIndex = renderInfo.zIndex,
-                        ftbIndex = traversalInfo.ftbIndex,
-                        btfIndex = traversalInfo.btfIndex,
-                        renderOp = 1
-                    };
+                    
+                    // custom painter, has foreground callback, is clipper
+                    // if (renderInfo.mayRequireForeground) {
+                        renderCallPtr[count++] = new RenderCallInfo() {
+                            elementId = elementId,
+                            zIndex = renderInfo.zIndex,
+                            ftbIndex = traversalInfo.ftbIndex,
+                            btfIndex = traversalInfo.btfIndex,
+                            renderOp = 1
+                        };
+                    // }
+                    
                 }
 
                 renderCallList.size = count;
@@ -92,9 +98,9 @@ namespace UIForia.Systems {
 //
 //                 return x.ftbIndex - y.ftbIndex;
 
-                // if (rbA.zIndex != rbB.zIndex) {
-                // return rbA.zIndex - rbB.zIndex;
-                // }
+                 if (x.zIndex != y.zIndex) {
+                    return x.zIndex - y.zIndex;
+                 }
 
                 // // return rbA.traversalIndex - rbB.traversalIndex;
                 if (x.ftbIndex == y.ftbIndex) {

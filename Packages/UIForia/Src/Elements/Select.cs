@@ -56,7 +56,7 @@ namespace UIForia.Elements {
         public IList<ISelectOption<T>> options;
 
         public bool selecting;
-        internal UIChildrenElement childrenElement;
+        internal UIElement childrenElement;
         internal UIElement optionList;
         internal UIElement repeat;
 
@@ -75,7 +75,7 @@ namespace UIForia.Elements {
         }
 
         public override void OnCreate() {
-            childrenElement = FindById<UIChildrenElement>("option-children");
+            childrenElement = this["repeated-options"];
             optionList = this["option-list"];
             repeat = this["repeated-options"];
             application.InputSystem.RegisterFocusable(this);

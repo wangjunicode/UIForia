@@ -236,7 +236,6 @@
             float4 frag(v2f i) : SV_Target
             {
                 const float shadowScale = 1;
-
                 // this could be done in the vertex shader too but this way we can support correct
                 ElementMaterialInfo material = _UIForiaMaterialBuffer[i.indices.y & 0xffffff];
                 float2 size = i.size;

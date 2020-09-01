@@ -98,9 +98,9 @@ namespace UIForia.Systems {
 //
 //                 return x.ftbIndex - y.ftbIndex;
 
-                 if (x.zIndex != y.zIndex) {
+                if (x.zIndex != y.zIndex) {
                     return x.zIndex - y.zIndex;
-                 }
+                }
 
                 // // return rbA.traversalIndex - rbB.traversalIndex;
                 if (x.ftbIndex == y.ftbIndex) {

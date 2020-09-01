@@ -275,15 +275,21 @@ namespace UIForia.Systems {
                 };
 
             }
-
-            UIForiaScheduler.Run(new GatherRenderedElements() {
+            //
+            // UIForiaScheduler.Run(new GatherRenderedElements() {
+            //     elementLists = unsafeData.perViewElementList,
+            //     traversalTable = elementSystem.traversalTable,
+            //     clipInfoTable = layoutSystem.clipInfoTable,
+            //     renderCallList = unsafeData.renderCallList,
+            //     renderInfoTable = unsafeData.renderInfoTable,
+            // });
+new GatherRenderedElements() {
                 elementLists = unsafeData.perViewElementList,
                 traversalTable = elementSystem.traversalTable,
                 clipInfoTable = layoutSystem.clipInfoTable,
                 renderCallList = unsafeData.renderCallList,
                 renderInfoTable = unsafeData.renderInfoTable,
-            });
-
+            }.Execute();
             // todo -- if i end up using native painters, will need to include them in draw list
             RunMainThreadPainters();
 

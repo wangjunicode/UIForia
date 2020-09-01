@@ -88,3 +88,14 @@ style icon {
 style pointers-none {
     PointerEvents = None;
 }
+
+style tooltip {
+    Visibility = Hidden;
+    AlignX = Start Mouse;
+    AlignY = Start Mouse;
+    BackgroundColor = black;
+    Border = 1px;
+    BorderColor = white;
+    TextColor = white;
+    Padding = 20px;
+}

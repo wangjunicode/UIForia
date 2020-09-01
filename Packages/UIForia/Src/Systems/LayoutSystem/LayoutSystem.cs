@@ -101,11 +101,10 @@ namespace UIForia.Systems {
 
         // also triggered for destroy
         public void HandleElementDisabled(DataList<ElementId>.Shared disabledElements) {
-
             if (elementSystem.elementCapacity > elementCapacity) {
                 ResizeBackingStore(elementSystem.elementCapacity);
             }
-            
+
             for (int i = 0; i < disabledElements.size; i++) {
                 // maybe only actually dispose if destroyed, keep disabled ones around?
                 // styles are unlikely to change much
@@ -170,7 +169,6 @@ namespace UIForia.Systems {
 
         // also triggered for create
         public void HandleElementEnabled(DataList<ElementId>.Shared enabledElements) {
-            
             if (elementSystem.elementCapacity > elementCapacity) {
                 ResizeBackingStore(elementSystem.elementCapacity);
             }
@@ -183,6 +181,7 @@ namespace UIForia.Systems {
                 ref LayoutInfo horizontalLayoutInfo = ref horizontalLayoutInfoTable[element.id];
                 ref LayoutInfo verticalLayoutInfo = ref verticalLayoutInfoTable[element.id];
                 ref ClipInfo clipInfo = ref clipInfoTable[element.id];
+                ref ElementTraversalInfo traversalInfo = ref elementSystem.traversalTable[element.id];
 
                 hierarchyInfo = default;
 
@@ -198,6 +197,8 @@ namespace UIForia.Systems {
                 if (hierarchyInfo.behavior == LayoutBehavior.TranscludeChildren) {
                     GetLayoutContext(element.View).transclusionCount++;
                 }
+
+                traversalInfo.zIndex = element.style.ZIndex;
 
                 transformInfoTable[element.id] = new TransformInfo() {
                     positionX = style.TransformPositionX,
@@ -540,6 +541,14 @@ namespace UIForia.Systems {
 
                     case StylePropertyId.PaddingLeft:
                         layoutPropertyEntry.paddingBottom = property.AsUIFixedLength;
+                        break;
+
+                    case StylePropertyId.Visibility:
+                        clipInfoTable[element.id].visibility = property.AsVisibility;
+                        break;
+
+                    case StylePropertyId.ZIndex:
+                        elementSystem.traversalTable[element.id].zIndex = element.style.ZIndex;
                         break;
 
                     case StylePropertyId.BackgroundRectMinX:
@@ -1054,6 +1063,7 @@ namespace UIForia.Systems {
                     retn.Add(instance);
                 }
             }
+            
         }
 
         [BurstCompile]

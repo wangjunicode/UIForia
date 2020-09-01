@@ -21,6 +21,7 @@ style simple-cell {
     BackgroundColor = white;
     Border = 1px;
     BorderColor = black;
+    DistributeExtraSpace = CenterContent;
 }
 
 

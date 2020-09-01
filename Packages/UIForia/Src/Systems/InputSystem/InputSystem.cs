@@ -7,6 +7,7 @@ using UIForia.Rendering;
 using UIForia.Systems.Input;
 using UIForia.UIInput;
 using UIForia.Util;
+using Unity.Collections;
 using UnityEngine;
 using Debug = System.Diagnostics.Debug;
 
@@ -17,6 +18,7 @@ namespace UIForia.Systems {
         public event Action<IFocusable> onFocusChanged;
 
         private const float k_DragThreshold = 5f;
+    private ElementComparer elementComp;
 
         private readonly LayoutSystem layoutSystem;
 
@@ -73,7 +75,8 @@ namespace UIForia.Systems {
             this.m_EnteredElements = new List<UIElement>();
             this.m_ExitedElements = new List<UIElement>();
             this.m_ActiveElements = new List<UIElement>();
-
+            this.elementComp = new ElementComparer();
+            
             this.m_KeyboardEventTree = new SkipTree<UIElement>();
             this.keyboardInputManager = keyboardInputManager ?? new KeyboardInputManager();
             this.m_EventPropagator = new EventPropagator();
@@ -233,7 +236,6 @@ namespace UIForia.Systems {
         }
 
         public virtual void OnUpdate() {
-
             m_KeyboardState = keyboardInputManager.UpdateKeyboardInputState();
 
             ProcessKeyboardEvents();
@@ -321,13 +323,17 @@ namespace UIForia.Systems {
 
             layoutSystem.QueryPoint(mouseState.mousePosition, queryResults);
 
-            // todo -- bug!
-            var traversalTable = layoutSystem.elementSystem.traversalTable;
+            if (UnityEngine.Input.GetKeyDown(KeyCode.A)) {
+                Debugger.Break();
+            }
 
-            queryResults.Sort((a, b) => traversalTable[b.id].ftbIndex - traversalTable[a.id].ftbIndex);
+            ElementTable<ElementTraversalInfo> traversalTable = layoutSystem.elementSystem.traversalTable;
+
+            // queryResults.Sort((a, b) => traversalTable[b.id].ftbIndex - traversalTable[a.id].ftbIndex);
+            elementComp.traversalTable = traversalTable;
+            queryResults.Sort(elementComp);
 
             if (!IsDragging) {
-
                 ancestorBuffer.QuickClear();
 
                 if (queryResults.size > 0) {
@@ -347,7 +353,6 @@ namespace UIForia.Systems {
 
                     queryResults.size = 0;
                     queryResults.AddRange(ancestorBuffer);
-
                 }
             }
 
@@ -434,7 +439,6 @@ namespace UIForia.Systems {
                     m_MouseDownElements.AddRange(m_ElementsThisFrame);
                 }
             }
-
         }
 
         private static bool IsParentOf(UIElement element, UIElement child) {
@@ -545,13 +549,12 @@ namespace UIForia.Systems {
                     }
                 }
             }
-            
+
             if (currentDragEvent == null) {
                 IsDragging = false;
             }
-            
+
             // todo -- capture phase
-            
         }
 
         private void EndDrag(InputEventType evtType) {
@@ -698,7 +701,6 @@ namespace UIForia.Systems {
             m_MouseDownElements.Remove(element);
 
             m_KeyboardEventTree.RemoveHierarchy(element);
-
         }
 
         internal void BlurOnDisableOrDestroy() {
@@ -950,6 +952,23 @@ namespace UIForia.Systems {
     public struct KeyboardEventHandlerInvocation {
 
         public KeyboardInputEvent evt { get; set; }
+
+    }
+
+    public class ElementComparer : IComparer<UIElement> {
+
+        public ElementTable<ElementTraversalInfo> traversalTable;
+
+        public int Compare(UIElement a, UIElement b) {
+            ref ElementTraversalInfo x = ref traversalTable[a.id];
+            ref ElementTraversalInfo y = ref traversalTable[b.id];
+
+            if (x.zIndex != y.zIndex) {
+                return y.zIndex - x.zIndex;
+            }
+
+            return y.ftbIndex - x.ftbIndex;
+        }
 
     }
 

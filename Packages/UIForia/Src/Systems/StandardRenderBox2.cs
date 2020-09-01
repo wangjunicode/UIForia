@@ -125,7 +125,7 @@ namespace UIForia.Rendering {
 
         public override void OnSizeChanged(Size size) {
             // re-compute radius & bevel
-
+            this.size = size;
             float min = size.width < size.height ? size.width : size.height;
 
             if (min <= 0) min = 0.0001f;

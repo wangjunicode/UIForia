@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Layout;
+using UIForia.Rendering;
 
 namespace Documentation.Features {
 
@@ -35,6 +36,10 @@ namespace Documentation.Features {
                 new EnumSelectOption<AlignmentBoundary>(AlignmentBoundary.View),
                 new EnumSelectOption<AlignmentBoundary>(AlignmentBoundary.Screen),
             };
+        }
+
+        public void ShowToolTip() {
+            FindById("tooltip").style.SetVisibility(Visibility.Visible, StyleState.Normal);
         }
     }
 }

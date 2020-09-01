@@ -10,7 +10,7 @@ export const fontGothamBold =  url("Fonts/GothamNarrow-Medium SDF");
 //url("Fonts/Gotham-Bold SDF");
 export const fontDigitalDreamFat = url("Fonts/DigitaldreamFat SDF");
 
-export const cursorHand = url("Cursors/hand");
+export const cursorHand = url("Cursors/hand32");
 
 style root-container {
     PreferredSize = 1vw 1vh;

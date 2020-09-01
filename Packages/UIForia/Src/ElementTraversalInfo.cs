@@ -5,6 +5,7 @@
         public int depth;
         public int ftbIndex;
         public int btfIndex;
+        public int zIndex;
         // public ushort templateOriginId;
         // public ushort templateId;
 

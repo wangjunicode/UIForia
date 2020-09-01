@@ -131,7 +131,7 @@
                     <Image style="icon" src="'icon_8'" />
                 </Group>
             </Group>
-            <Group style="grid-cell">
+            <Group style="grid-cell" mouse:hover="ShowToolTip()">
                 <Group style="pointers-none align-right-bottom"
                        style:alignmentTargetX="alignmentTarget"
                        style:alignmentTargetY="alignmentTarget"
@@ -145,5 +145,9 @@
                 </Group>
             </Group>
         </Group>
+        
+        <Div attr:id="tooltip" style="tooltip">
+            This is a tool tip
+        </Div>
     </Contents>
 </UITemplate>

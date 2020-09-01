@@ -41,22 +41,22 @@
                         <Heading2>Hi, this is the demo.</Heading2>
                         <Paragraph>Choose a demo from the menu on the left.</Paragraph>
                     </Group>
-    
-                    <AlignmentDemo style="demo-panel-route" attr:route="/AlignmentDemo"/>
-                    <AnimationDemo style="demo-panel-route" attr:route="/AnimationDemo"/>
-                    <BindingsDemo style="demo-panel-route" attr:route="/BindingsDemo"/>
-                    <Cursors style="demo-panel-route" attr:route="/cursors"/>
-                    <FlexDemo style="demo-panel-route" attr:route="/FlexDemo"/>
-                    <GridDemo style="demo-panel-route" attr:route="/GridDemo"/>
-                    <InputDemo style="demo-panel-route" attr:route="/input"/>
-    <!--                <InputEventsDemo style="demo-panel-route" attr:route="/inputEvents"/>-->
-                    <PerformanceTest style="demo-panel-route" attr:route="/PerformanceTest"/>
-                    <RepeatExample style="demo-panel-route" attr:route="/RepeatExample"/>
-                    <ScrollDemo style="demo-panel-route" attr:route="/ScrollDemo"/>
-                    <SelectDemo style="demo-panel-route" attr:route="/SelectDemo"/>
-                    <SoundSystemDemo style="demo-panel-route" attr:route="/SoundSystemDemo"/>
-                    <StylePropertiesDemo style="demo-panel-route" attr:route="/StylePropertiesDemo"/>
-                    <TransclusionDemo style="demo-panel-route" attr:route="/TransclusionDemo"/>
+<!--    -->
+<!--                    <AlignmentDemo style="demo-panel-route" attr:route="/AlignmentDemo"/>-->
+<!--                    <AnimationDemo style="demo-panel-route" attr:route="/AnimationDemo"/>-->
+<!--                    <BindingsDemo style="demo-panel-route" attr:route="/BindingsDemo"/>-->
+<!--                    <Cursors style="demo-panel-route" attr:route="/cursors"/>-->
+<!--                    <FlexDemo style="demo-panel-route" attr:route="/FlexDemo"/>-->
+<!--                    <GridDemo style="demo-panel-route" attr:route="/GridDemo"/>-->
+<!--                    <InputDemo style="demo-panel-route" attr:route="/input"/>-->
+<!--    &lt;!&ndash;                <InputEventsDemo style="demo-panel-route" attr:route="/inputEvents"/>&ndash;&gt;-->
+<!--                    <PerformanceTest style="demo-panel-route" attr:route="/PerformanceTest"/>-->
+<!--                    <RepeatExample style="demo-panel-route" attr:route="/RepeatExample"/>-->
+<!--                    <ScrollDemo style="demo-panel-route" attr:route="/ScrollDemo"/>-->
+<!--                    <SelectDemo style="demo-panel-route" attr:route="/SelectDemo"/>-->
+<!--                    <SoundSystemDemo style="demo-panel-route" attr:route="/SoundSystemDemo"/>-->
+<!--                    <StylePropertiesDemo style="demo-panel-route" attr:route="/StylePropertiesDemo"/>-->
+<!--                    <TransclusionDemo style="demo-panel-route" attr:route="/TransclusionDemo"/>-->
                 </override:Children>
                 
             </ScrollView>

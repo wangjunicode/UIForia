@@ -491,7 +491,6 @@ namespace UIForia.Compilers {
         }
 
         private Expression VisitReturn(ReturnStatementNode node) {
-
             EnsureReturnLabel();
 
             if (node.expression == null) {
@@ -2048,21 +2047,18 @@ namespace UIForia.Compilers {
             }
 
             return variable;
-
         }
 
         private Expression VisitIfStatement(IfStatementNode node) {
             Expression condition = Visit(typeof(bool), node.condition);
 
             if (node.elseIfStatements == null || node.elseIfStatements.Length == 0) {
-
                 if (node.elseBlock == null) {
                     PushBlock();
 
                     StatementList(node.thenBlock);
 
                     return Expression.IfThen(condition, PopBlock());
-
                 }
 
                 PushBlock();
@@ -2104,7 +2100,7 @@ namespace UIForia.Compilers {
                     }
 
                     BlockExpression thenBlock = PopBlock();
-                    
+
                     if (i == node.elseIfStatements.Length - 1 && node.elseBlock != null) {
                         PushBlock();
                         StatementList(node.elseBlock);
@@ -2113,19 +2109,15 @@ namespace UIForia.Compilers {
                     }
                     else {
                         RawExpression(Expression.IfThen(condition, thenBlock));
-
                     }
-
                 }
 
                 if (labelRefs > 0) {
                     RawExpression(Expression.Label(end));
                 }
-
             }
 
             return null;
-
         }
 
         private Expression VisitBlock(BlockNode node) {
@@ -2160,6 +2152,12 @@ namespace UIForia.Compilers {
         }
 
         private Expression Visit(Type targetType, ASTNode node) {
+            Type nonNullableTarget = targetType;
+            // todo -- doesn't currently handle nested nullables...but that's crazy anyway
+            if (nonNullableTarget.IsNullableType()) {
+                nonNullableTarget = targetType.GetGenericArguments()[0];
+            }
+
             Expression retn = VisitUnchecked(targetType, node);
 
             if (targetType != null && retn.Type != targetType) {

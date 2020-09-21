@@ -19,7 +19,6 @@ namespace UIForia.Compilers {
     public static class TemplateLoader {
 
         public static CompiledTemplateData LoadRuntimeTemplates(Type type, TemplateSettings templateSettings) {
-
             CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
 
             // Stopwatch stopwatch = Stopwatch.StartNew();
@@ -108,38 +107,17 @@ namespace UIForia.Compilers {
             ConstructorInfo constructedTypeCtor = typeof(ConstructedElement).GetConstructor(new Type[] {typeof(int), typeof(UIElement)});
             System.Diagnostics.Debug.Assert(constructedTypeCtor != null, nameof(constructedTypeCtor) + " != null");
 
-            // todo -- this can be improved, cannot currently parallelize because the write target (constructorFnMap) is a dictionary which is not threadsafe
-            // can convert the constructorFnMap to an array but would need a unique index for each type that is sequential
+            compiledTemplateData.bindings = bindings;
+            compiledTemplateData.slots = slots;
+            compiledTemplateData.templates = templates;
+            compiledTemplateData.templateMetaData = templateMetaData;
+            compiledTemplateData.constructorFnMap = constructorFnMap;
+            compiledTemplateData.constructElement = (typeId) => compiledTemplateData.constructorFnMap[typeId].Invoke();
 
-        //     foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
-        //         if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
-        //             continue;
-        //         }
-        //
-        //         ConstructorInfo ctor = kvp.Key.GetConstructor(Type.EmptyTypes);
-        //
-        //         if (ctor == null) {
-        //             throw new CompileException(kvp.Key + " must provide a default constructor in order to be used in templates");
-        //         }
-        //
-        //         parameters[0] = Expression.Constant(compiledTemplateData.GetTagNameId(kvp.Value.tagName));
-        //         parameters[1] = Expression.New(ctor);
-        //         Func<ConstructedElement> constructorFn = Expression.Lambda<Func<ConstructedElement>>(Expression.New(constructedTypeCtor, parameters)).Compile();
-        //         constructorFnMap[kvp.Value.id] = constructorFn;
-        //         GCHandle.Alloc(constructorFn);
-        //     }
-        //
-        compiledTemplateData.bindings = bindings;
-        compiledTemplateData.slots = slots;
-        compiledTemplateData.templates = templates;
-        compiledTemplateData.templateMetaData = templateMetaData;
-        compiledTemplateData.constructorFnMap = constructorFnMap;
-        compiledTemplateData.constructElement = (typeId) => compiledTemplateData.constructorFnMap[typeId].Invoke();
+            // stopwatch.Stop();
+            // Debug.Log("Loaded UIForia templates in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
 
-        // stopwatch.Stop();
-        // Debug.Log("Loaded UIForia templates in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
-        
-        return compiledTemplateData;
+            return compiledTemplateData;
         }
 
         public static CompiledTemplateData LoadPrecompiledTemplates(TemplateSettings templateSettings) {
@@ -163,7 +141,7 @@ namespace UIForia.Compilers {
             Dictionary<string, StyleSheet> styleSheetMap = new Dictionary<string, StyleSheet>(128);
 
             MaterialDatabase materialDatabase = loader.GetMaterialDatabase();
-            
+
             for (int i = 0; i < files.Length; i++) {
                 StyleSheet sheet = compiledTemplateData.styleImporter.ImportStyleSheetFromFile(files[i], materialDatabase);
                 styleList.EnsureAdditionalCapacity(sheet.styleGroupContainers.Length);
@@ -173,7 +151,6 @@ namespace UIForia.Compilers {
                 }
 
                 styleSheetMap.Add(sheet.path, sheet);
-
             }
 
             compiledTemplateData.templates = loader.LoadTemplates();

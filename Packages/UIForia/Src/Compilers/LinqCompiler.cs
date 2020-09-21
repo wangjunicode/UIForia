@@ -2154,7 +2154,7 @@ namespace UIForia.Compilers {
         private Expression Visit(Type targetType, ASTNode node) {
             Type nonNullableTarget = targetType;
             // todo -- doesn't currently handle nested nullables...but that's crazy anyway
-            if (nonNullableTarget.IsNullableType()) {
+            if (nonNullableTarget != null && nonNullableTarget.IsNullableType()) {
                 nonNullableTarget = targetType.GetGenericArguments()[0];
             }
 

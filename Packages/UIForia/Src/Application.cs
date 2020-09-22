@@ -890,7 +890,7 @@ namespace UIForia {
         }
 
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
-        public UIElement CreateElementFromPool(UIElement element, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
+        public UIElement CreateElementFromPool(UIElement element, UIElement parent, int childCount, int attributeCount, int originTemplateId, UIElementFlags specialFlags) {
             // children get assigned in the template function but we need to setup the list here
             // ConstructedElement retn = templateData.ConstructElement(typeId);
             // UIElement element = retn.element;
@@ -898,7 +898,7 @@ namespace UIForia {
             element.application = this;
             element.templateMetaData = templateData.templateMetaData[originTemplateId];
 
-            const UIElementFlags flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
+            UIElementFlags flags = specialFlags | UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
 
             element.id = elementSystem.CreateElement(element, parent?.hierarchyDepth + 1 ?? 0, -999, -999, flags);
             element.flags = flags;

@@ -7,7 +7,7 @@ namespace UIForia.Layout {
 
     internal unsafe interface ILayoutBox : IDisposable {
 
-        void OnInitialize(LayoutSystem layoutSystem, UIElement element);
+        void OnInitialize(LayoutSystem layoutSystem, UIElement element, UIElement proxy);
 
         float ResolveAutoWidth(ref BurstLayoutRunner runner, ElementId elementId, in BlockSize blockSize);
 

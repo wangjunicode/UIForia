@@ -14,12 +14,12 @@ namespace UIForia.Layout {
         public LayoutFit fitHorizontal;
         public LayoutFit fitVertical;
 
-        public void OnInitialize(LayoutSystem layoutSystem, UIElement element) {
+        public void OnInitialize(LayoutSystem layoutSystem, UIElement element, UIElement proxy) {
             this.elementId = element.id;
-            alignHorizontal = element.style.AlignItemsHorizontal;
-            alignVertical = element.style.AlignItemsVertical;
-            fitHorizontal = element.style.FitItemsHorizontal;
-            fitVertical = element.style.FitItemsVertical;
+            alignHorizontal = proxy.style.AlignItemsHorizontal;
+            alignVertical = proxy.style.AlignItemsVertical;
+            fitHorizontal = proxy.style.FitItemsHorizontal;
+            fitVertical = proxy.style.FitItemsVertical;
         }
 
         public void Dispose() { }

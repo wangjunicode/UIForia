@@ -43,7 +43,7 @@ namespace UIForia.Layout {
                 scaleY = 1
             };
 
-            layoutSystem.layoutBoxTable[rootElement.id].Initialize(LayoutBoxType.Root, layoutSystem, rootElement);
+            layoutSystem.layoutBoxTable[rootElement.id].Initialize(LayoutBoxType.Root, layoutSystem, rootElement, rootElement);
             layoutSystem.layoutHierarchyTable[rootElement.id] = new LayoutHierarchyInfo() {
                 behavior = LayoutBehavior.Normal
             };

@@ -9,7 +9,7 @@ namespace UIForia.Layout {
         public ElementId childId;
         public ElementId elementId;
 
-        public void OnInitialize(LayoutSystem layoutSystem, UIElement element) {
+        public void OnInitialize(LayoutSystem layoutSystem, UIElement element, UIElement proxy) {
             this.elementId = element.id;
         }
 

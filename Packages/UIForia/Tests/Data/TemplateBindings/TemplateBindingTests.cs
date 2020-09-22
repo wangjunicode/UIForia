@@ -59,7 +59,6 @@ namespace TemplateBinding {
         [Test]
         public void CreatedBinding() {
             using (MockApplication app = MockApplication.Setup<TemplateBindingTest_CreatedBindingOuter>()) {
-
                 TemplateBindingTest_CreatedBindingOuter outer = (TemplateBindingTest_CreatedBindingOuter) app.RootElement;
                 TemplateBindingTest_CreatedBindingInner inner = (TemplateBindingTest_CreatedBindingInner) app.RootElement[0];
 
@@ -83,7 +82,6 @@ namespace TemplateBinding {
         [Test]
         public void AttributeBinding() {
             using (MockApplication app = MockApplication.Setup<TemplateBindingTest_AttributeBinding>()) {
-
                 TemplateBindingTest_AttributeBinding outer = (TemplateBindingTest_AttributeBinding) app.RootElement;
                 UIElement inner = outer[0];
 
@@ -376,10 +374,10 @@ namespace TemplateBinding {
                 UITextElement textElementFalse = e[1] as UITextElement;
                 Assert.IsTrue(textElementFalse.isEnabled);
                 Assert.IsTrue(textElementTrue.isDisabled);
-                
+
                 e.condition = true;
                 app.Update();
-                
+
                 Assert.IsTrue(textElementFalse.isDisabled);
                 Assert.IsTrue(textElementTrue.isEnabled);
             }
@@ -394,7 +392,7 @@ namespace TemplateBinding {
             }
 
         }
-        
+
         [Test]
         public void StyleBindingPainter() {
             using (MockApplication app = MockApplication.Setup<TemplateBindingTest_StyleBindingPainter>()) {
@@ -402,20 +400,20 @@ namespace TemplateBinding {
 
                 app.ResourceManager.TryGetStylePainter("test-painter", out StylePainterDefinition painterDefinition);
                 int propertyId = painterDefinition.definedVariables[0].propertyId;
-                
+
                 app.Update();
 
                 // e[0].style.SetPainterFloatProperty(painterName, )
-                
-                StyleProperty value = e[0].style.GetPropertyValue((StylePropertyId)propertyId, out bool isDefault);
-                
+
+                StyleProperty value = e[0].style.GetPropertyValue((StylePropertyId) propertyId, out bool isDefault);
+
                 Assert.AreEqual(value.AsFloat, 42f);
-                
+
                 // Assert.AreEqual(Color.red, e[0].style.BackgroundColor);
                 // Assert.AreEqual(new OffsetMeasurement(53, OffsetMeasurementUnit.ViewportWidth), e[0].style.GetPropertyValueInState(StylePropertyId.TransformPositionX, StyleState.Hover));
             }
         }
-        
+
         [Template("Data/TemplateBindings/TemplateBindingTest_StyleBinding.xml")]
         public class TemplateBindingTest_StyleBinding : UIElement { }
 
@@ -1193,6 +1191,27 @@ namespace TemplateBinding {
 
         }
 
+        [Template("Data/TemplateBindings/TemplateBindingTest_Nullable.xml")]
+        public class TemplateBindingTest_Nullable : UIElement { }
+
+        public class NullableFieldThing : UIContainerElement {
+
+            public int? intVal;
+            public bool? boolVal;
+
+        }
+
+        [Test]
+        public void NullableFieldAutoConvert() {
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_Nullable>()) {
+                TemplateBindingTest_Nullable e = (TemplateBindingTest_Nullable) app.RootElement;
+                NullableFieldThing e0 = e.GetFirstChild() as NullableFieldThing;
+                app.Update();
+                Assert.AreEqual(e0.intVal.Value, 3);
+                Assert.AreEqual(e0.boolVal.HasValue, false);
+            }
+        }
+
         [Test]
         public void ResolveGeneric() {
             using (MockApplication app = MockApplication.Setup<TemplateBindingTest_ResolveGeneric_Outer>()) {
@@ -1372,7 +1391,7 @@ namespace TemplateBinding {
                 e.data.Add(new NestedRepeatData() {
                     data = new List<string>() {"one", "two", "three"}
                 });
-                
+
                 app.Update();
 
                 Assert.IsInstanceOf<UIRepeatElement<NestedRepeatData>>(e[0]);

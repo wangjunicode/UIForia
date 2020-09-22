@@ -161,7 +161,7 @@ namespace UIForia.Layout {
 
         public void Dispose() { }
 
-        public void OnInitialize(LayoutSystem layoutSystem, UIElement element) {
+        public void OnInitialize(LayoutSystem layoutSystem, UIElement element, UIElement proxy) {
             UITextElement textElement = (UITextElement) element;
             this.elementId = textElement.id;
             this.textInfo = textElement.textInfo;

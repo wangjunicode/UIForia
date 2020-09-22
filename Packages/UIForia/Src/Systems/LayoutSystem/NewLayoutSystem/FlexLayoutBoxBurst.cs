@@ -859,16 +859,16 @@ namespace UIForia.Layout {
             return totalSize;
         }
 
-        public void OnInitialize(LayoutSystem layoutSystem, UIElement element) {
+        public void OnInitialize(LayoutSystem layoutSystem, UIElement element, UIElement proxy) {
             elementId = element.id;
-            direction = element.style.FlexLayoutDirection;
-            layoutWrap = element.style.FlexLayoutWrap;
-            alignHorizontal = element.style.AlignItemsHorizontal;
-            alignVertical = element.style.AlignItemsVertical;
-            fitHorizontal = element.style.FitItemsHorizontal;
-            fitVertical = element.style.FitItemsVertical;
-            horizontalDistribution = element.style.DistributeExtraSpaceHorizontal;
-            verticalDistribution = element.style.DistributeExtraSpaceVertical;
+            direction = proxy.style.FlexLayoutDirection;
+            layoutWrap = proxy.style.FlexLayoutWrap;
+            alignHorizontal = proxy.style.AlignItemsHorizontal;
+            alignVertical = proxy.style.AlignItemsVertical;
+            fitHorizontal = proxy.style.FitItemsHorizontal;
+            fitVertical = proxy.style.FitItemsVertical;
+            horizontalDistribution = proxy.style.DistributeExtraSpaceHorizontal;
+            verticalDistribution = proxy.style.DistributeExtraSpaceVertical;
 
             if (layoutWrap == LayoutWrap.WrapHorizontal) {
                 wrappedTracks = new List_FlexTrack(8, Allocator.Persistent);

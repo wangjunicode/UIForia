@@ -21,6 +21,8 @@ style main-container {
     PreferredSize = 1pca;
     GridLayoutColTemplate = 1mx 1fr;
     GridLayoutRowTemplate = 1fr;
+    FitItemsHorizontal = Fill;
+    FitItemsVertical = Fill;
     TextFontAsset = @fontGothamNarrowMedium;
 }
 
@@ -111,7 +113,7 @@ style navigation {
 }
 
 style demo-panel {
-    Padding = 3px;
+//    Padding = 3px;
     BorderLeft = 2px;
     BorderColor = #2c2e53;
     BackgroundColor = @boringBackgroundColor;

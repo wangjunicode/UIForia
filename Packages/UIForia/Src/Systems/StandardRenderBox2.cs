@@ -506,6 +506,15 @@ namespace UIForia.Rendering {
             //     return;
             // }
 
+            // if (isMask) {
+            //
+            //     ctx.BeginMask();
+            //     ctx.EndMask();
+            //     ctx.RenderMask();
+            //     ctx.RenderAndPushMask();
+            //
+            // }
+            
             if (requireRendering) {
                 OffsetRect border = element.layoutResult.border;
                 drawDesc.borderTop = border.top;

@@ -13,7 +13,7 @@ using Debug = UnityEngine.Debug;
 
 namespace DefaultNamespace {
 
-    [CustomPainter("ShapeKitTest")]
+    // [CustomPainter("ShapeKitTest")]
     public class ShapeKitPainter : StandardRenderBox, IUnityInspector {
 
         public Mesh mesh;

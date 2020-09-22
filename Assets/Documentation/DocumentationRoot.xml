@@ -1,19 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UITemplate>
     <Style src="Documentation/Documentation.style"/>
+    <Style>
+
+        style rounded {
+        PreferredSize = 48px;
+        OutlineWidth = 2px;
+        OutlineColor = Black;
+        BorderRadius = 25%;
+        // MaskTarget = Descendents;
+        // MaskType = Stencil | Alpha | Invert;
+        }
+
+      //  style content {
+        // mask = parent;
+       //}
+
+    </Style>
     <Contents style="root-container">
         <Group style="main-container">
-            
+
             <Group style="burger" mouse:click="ToggleMenu()">
-                <Div style="burger-patty" />
-                <Div style="burger-patty" />
+                <Div style="burger-patty"/>
+                <Div style="burger-patty"/>
             </Group>
-            
-            
+
             <ScrollView style="navigation" attr:id="nav">
                 <Heading1>Choose a feature</Heading1>
                 <Anchor href="'/index'">Home</Anchor>
-                
+
                 <Anchor href="'/AlignmentDemo'">Alignment Demo</Anchor>
                 <Anchor href="'/AnimationDemo'">Animation</Anchor>
                 <Anchor href="'/BindingsDemo'">Bindings</Anchor>
@@ -21,7 +36,7 @@
                 <Anchor href="'/FlexDemo'">FlexDemo</Anchor>
                 <Anchor href="'/GridDemo'">GridDemo</Anchor>
                 <Anchor href="'/input'">Input</Anchor>
-<!--                <Anchor href="'/inputEvents'">Input Events</Anchor>-->
+                <!--                <Anchor href="'/inputEvents'">Input Events</Anchor>-->
                 <Anchor href="'/PerformanceTest'">Performance Test</Anchor>
                 <Anchor href="'/RepeatExample'">Repeat Example</Anchor>
                 <Anchor href="'/ScrollDemo'">Scrolling</Anchor>
@@ -34,31 +49,125 @@
 
             <ScrollView disableAutoScroll="true" style="demo-panel" attr:router="demo" attr:defaultRoute="/index">
 
-                <override:Children style="demo-panel-children">
-                    
-                    <Group style="demo-panel-route" attr:route="/index">
-                        <Heading1>UIForia Documentation</Heading1>
-                        <Heading2>Hi, this is the demo.</Heading2>
-                        <Paragraph>Choose a demo from the menu on the left.</Paragraph>
-                    </Group>
-<!--    -->
-<!--                    <AlignmentDemo style="demo-panel-route" attr:route="/AlignmentDemo"/>-->
-<!--                    <AnimationDemo style="demo-panel-route" attr:route="/AnimationDemo"/>-->
-<!--                    <BindingsDemo style="demo-panel-route" attr:route="/BindingsDemo"/>-->
-<!--                    <Cursors style="demo-panel-route" attr:route="/cursors"/>-->
-<!--                    <FlexDemo style="demo-panel-route" attr:route="/FlexDemo"/>-->
-<!--                    <GridDemo style="demo-panel-route" attr:route="/GridDemo"/>-->
-<!--                    <InputDemo style="demo-panel-route" attr:route="/input"/>-->
-<!--    &lt;!&ndash;                <InputEventsDemo style="demo-panel-route" attr:route="/inputEvents"/>&ndash;&gt;-->
-<!--                    <PerformanceTest style="demo-panel-route" attr:route="/PerformanceTest"/>-->
-<!--                    <RepeatExample style="demo-panel-route" attr:route="/RepeatExample"/>-->
-<!--                    <ScrollDemo style="demo-panel-route" attr:route="/ScrollDemo"/>-->
-<!--                    <SelectDemo style="demo-panel-route" attr:route="/SelectDemo"/>-->
-<!--                    <SoundSystemDemo style="demo-panel-route" attr:route="/SoundSystemDemo"/>-->
-<!--                    <StylePropertiesDemo style="demo-panel-route" attr:route="/StylePropertiesDemo"/>-->
-<!--                    <TransclusionDemo style="demo-panel-route" attr:route="/TransclusionDemo"/>-->
-                </override:Children>
-                
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+                <Div style="rounded"/>
+
+<!--                <override:Children style="demo-panel-children">-->
+
+<!--                    <Group style="demo-panel-route" attr:route="/index">-->
+<!--                        <Div style="rounded"/>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                        <Div style="scroll-content">-->
+<!--                            <Heading1>UIForia Documentation</Heading1>-->
+<!--                            <Heading2>Hi, this is the demo.</Heading2>-->
+<!--                            <Paragraph>Choose a demo from the menu on the left.</Paragraph>-->
+<!--                        </Div>-->
+<!--                    </Group>-->
+<!--                    &lt;!&ndash;    &ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <AlignmentDemo style="demo-panel-route" attr:route="/AlignmentDemo"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <AnimationDemo style="demo-panel-route" attr:route="/AnimationDemo"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <BindingsDemo style="demo-panel-route" attr:route="/BindingsDemo"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <Cursors style="demo-panel-route" attr:route="/cursors"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <FlexDemo style="demo-panel-route" attr:route="/FlexDemo"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <GridDemo style="demo-panel-route" attr:route="/GridDemo"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <InputDemo style="demo-panel-route" attr:route="/input"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;    &lt;!&ndash;                <InputEventsDemo style="demo-panel-route" attr:route="/inputEvents"/>&ndash;&gt;&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <PerformanceTest style="demo-panel-route" attr:route="/PerformanceTest"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <RepeatExample style="demo-panel-route" attr:route="/RepeatExample"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <ScrollDemo style="demo-panel-route" attr:route="/ScrollDemo"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <SelectDemo style="demo-panel-route" attr:route="/SelectDemo"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <SoundSystemDemo style="demo-panel-route" attr:route="/SoundSystemDemo"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <StylePropertiesDemo style="demo-panel-route" attr:route="/StylePropertiesDemo"/>&ndash;&gt;-->
+<!--                    &lt;!&ndash;                    <TransclusionDemo style="demo-panel-route" attr:route="/TransclusionDemo"/>&ndash;&gt;-->
+<!--                </override:Children>-->
+
             </ScrollView>
 
         </Group>

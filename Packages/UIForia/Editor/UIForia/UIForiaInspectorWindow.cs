@@ -257,12 +257,18 @@ namespace UIForia.Editor {
 
                 GUILayout.Space(16);
 
-                DrawEnumWithValue<LayoutType>(selectedElement.style.GetComputedStyleProperty(StylePropertyId.LayoutType), false);
+                if ((selectedElement is ScrollView)) {
+                    DrawLabel("Layout Type", "Scroll");
+                }
+                else {
+                    DrawEnumWithValue<LayoutType>(selectedElement.style.GetComputedStyleProperty(StylePropertyId.LayoutType), false);
+                }
+
                 DrawEnumWithValue<LayoutBehavior>(selectedElement.style.GetComputedStyleProperty(StylePropertyId.LayoutBehavior), false);
                 DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredWidth), false);
                 DrawMeasurement(selectedElement.style.GetComputedStyleProperty(StylePropertyId.PreferredHeight), false);
 
-                if (selectedElement.style.LayoutType == LayoutType.Flex) {
+                if (!(selectedElement is ScrollView) && selectedElement.style.LayoutType == LayoutType.Flex) {
                     EditorGUILayout.IntField("Flex child count", app.layoutSystem.layoutBoxTable[selectedElement.id].flex.items.size);
                 }
 
@@ -755,7 +761,7 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.MeshFillRotation:
                     return DrawAngleMeasurement(property, isEditable);
-                
+
                 default:
                     if ((int) property.propertyId < StyleUtil.CustomPropertyStart) {
                         Debug.Log(property.propertyId.ToString() + " has no inspector");
@@ -871,6 +877,7 @@ namespace UIForia.Editor {
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new OffsetMeasurement(value, unit)) : property;
         }
+
         private static StyleProperty DrawAngleMeasurement(StyleProperty property, bool isEditable) {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUILayout.BeginHorizontal();
@@ -881,7 +888,7 @@ namespace UIForia.Editor {
             GUILayout.EndHorizontal();
             return isEditable ? new StyleProperty(property.propertyId, new UIAngle(value, unit)) : property;
         }
-        
+
         private static StyleProperty DrawMeasurement(StyleProperty property, bool isEditable) {
             s_Content.text = StyleUtil.GetPropertyName(property);
             GUI.enabled = isEditable;

@@ -292,14 +292,14 @@ namespace UIForia.Layout {
             return retn;
         }
 
-        public void OnInitialize(LayoutSystem layoutSystem, UIElement element) {
+        public void OnInitialize(LayoutSystem layoutSystem, UIElement element, UIElement proxy) {
             elementId = element.id;
-            horizontalAlignment = element.style.AlignItemsHorizontal;
-            verticalAlignment = element.style.AlignItemsVertical;
-            fitVertical = element.style.FitItemsVertical;
-            fitHorizontal = element.style.FitItemsHorizontal;
-            colGap = element.style.GridLayoutColGap;
-            rowGap = element.style.GridLayoutRowGap;
+            horizontalAlignment = proxy.style.AlignItemsHorizontal;
+            verticalAlignment = proxy.style.AlignItemsVertical;
+            fitVertical = proxy.style.FitItemsVertical;
+            fitHorizontal = proxy.style.FitItemsHorizontal;
+            colGap = proxy.style.GridLayoutColGap;
+            rowGap = proxy.style.GridLayoutRowGap;
         }
 
         private float ResolveFixedHorizontalCellSize(ref BurstLayoutRunner runner, in GridCellSize cellSize, in BlockSize blockSize) {
@@ -763,14 +763,6 @@ namespace UIForia.Layout {
                         return;
                 }
             }
-        }
-
-        public float GetActualContentWidth(ref BurstLayoutRunner runner) {
-            return 0;
-        }
-
-        public float GetActualContentHeight(ref BurstLayoutRunner runner) {
-            return 0;
         }
 
     }

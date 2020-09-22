@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using UIForia.Systems;
+﻿using UIForia.Systems;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
@@ -55,7 +54,7 @@ namespace UIForia.Layout {
                 
                 ref LayoutHierarchyInfo hierarchyInfo = ref layoutHTable[current.id & ENTITY_INDEX_MASK];
 
-                if (hierarchyInfo.behavior != LayoutBehavior.Normal) {
+                if (hierarchyInfo.behavior != LayoutBehavior.Normal) {//  && hierarchyInfo.behavior != LayoutBehavior.__Special__) {
                     continue;
                 }
                 

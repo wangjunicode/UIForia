@@ -2160,7 +2160,14 @@ namespace UIForia.Compilers {
         }
 
         private Expression Visit(Type targetType, ASTNode node) {
-            Expression retn = VisitUnchecked(targetType, node);
+
+            Type nonNullableTarget = targetType;
+            // todo -- doesn't currently handle nested nullables...but that's crazy anyway
+            if (nonNullableTarget != null && nonNullableTarget.IsNullableType()) {
+                nonNullableTarget = targetType.GetGenericArguments()[0];
+            }
+            
+            Expression retn = VisitUnchecked(nonNullableTarget, node);
 
             if (retn != null && targetType != null && retn.Type != targetType) {
                 try {
@@ -2857,6 +2864,7 @@ namespace UIForia.Compilers {
         }
 
         private static Expression VisitNumericLiteral(Type targetType, LiteralNode literalNode) {
+            
             if (targetType == null) {
                 string value = literalNode.rawValue.Trim();
                 char lastChar = char.ToLower(value[value.Length - 1]);

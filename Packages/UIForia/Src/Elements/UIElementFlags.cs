@@ -5,6 +5,7 @@ namespace UIForia.Elements {
     [Flags]
     public enum UIElementFlags : ushort {
 
+        None = 0,
         // Element Flags
         EnableStateChanged = 1 << 0,
 
@@ -23,6 +24,8 @@ namespace UIForia.Elements {
 
         // Layout Flags, get rid of these
         DebugLayout = 1 << 10,
+        
+        SpecialLayoutProvider = 1 << 11,
 
         EnabledFlagSet = Alive | Enabled | AncestorEnabled,
         EnabledFlagSetWithUpdate = EnabledFlagSet | NeedsUpdate,

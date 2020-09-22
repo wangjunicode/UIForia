@@ -67,6 +67,7 @@ namespace UIForia.Systems {
 
         internal DataList<ElementId>.Shared rootList;
         internal DataList<ElementId>.Shared ignoredLayoutList;
+        internal DataList<ElementId>.Shared specialLayoutList;
 
         internal struct LayoutDataTables {
 
@@ -89,6 +90,7 @@ namespace UIForia.Systems {
             this.clipperBoundsList = new DataList<AxisAlignedBounds2D>.Shared(16, Allocator.Persistent);
             this.rootList = new DataList<ElementId>.Shared(16, Allocator.Persistent);
             this.ignoredLayoutList = new DataList<ElementId>.Shared(16, Allocator.Persistent);
+            this.specialLayoutList = new DataList<ElementId>.Shared(16, Allocator.Persistent);
 
             *tablePointers = default;
             ResizeBackingStore(application.InitialElementCapacity);
@@ -115,6 +117,10 @@ namespace UIForia.Systems {
                 }
 
                 ref LayoutBoxUnion layoutBox = ref layoutBoxTable[elementId];
+
+                if (layoutBox.layoutType == LayoutBoxType.ScrollView) {
+                    throw new NotImplementedException("Need to unregister scroll views, bruh");
+                }
 
                 layoutBox.Dispose();
             }
@@ -155,19 +161,14 @@ namespace UIForia.Systems {
                 }
 
                 if (layoutInfo.parentId != default) {
-                    AddToChildrenChangeList(layoutInfo.parentId);
-                    // childrenChangedList.Add(layoutInfo.parentId);
+                    childrenChangedList.Add(layoutInfo.parentId);
                 }
 
                 layoutInfo = default;
             }
         }
 
-        public void AddToChildrenChangeList(ElementId elementId) {
-            childrenChangedList.Add(elementId);
-        }
-
-        // also triggered for create
+        // also triggered for elements created this frame
         public void HandleElementEnabled(DataList<ElementId>.Shared enabledElements) {
             if (elementSystem.elementCapacity > elementCapacity) {
                 ResizeBackingStore(elementSystem.elementCapacity);
@@ -185,14 +186,23 @@ namespace UIForia.Systems {
 
                 hierarchyInfo = default;
 
-                layoutBox.Initialize(LayoutBoxUnion.GetLayoutBoxType(element), this, element);
-
                 UIStyleSet style = element.style;
+                
+                // todo -- remove shitty hack
+                // basically we need to differentiate between init styles from the proxy target (scroll view is currently the only example) and the elements own styles.
+                // in the proxy case we want to treat the actual target element as a dummy, and read layout styles from the parent
+                if (element.parent is ScrollView && element.siblingIndex == 0) {
+                    layoutBox.Initialize(LayoutBoxUnion.GetLayoutBoxType(element), this, element, element.parent);
+                }
+                else {
+                    layoutBox.Initialize(LayoutBoxUnion.GetLayoutBoxType(element), this, element, element);
+                }
 
                 horizontalLayoutInfo.requiresLayout = true;
                 verticalLayoutInfo.requiresLayout = true;
-
+                
                 hierarchyInfo.behavior = style.LayoutBehavior;
+
                 // todo -- maybe skip for transclusion since we never do the layout
                 if (hierarchyInfo.behavior == LayoutBehavior.TranscludeChildren) {
                     GetLayoutContext(element.View).transclusionCount++;
@@ -314,6 +324,7 @@ namespace UIForia.Systems {
             new HierarchyBuildJob() {
                 roots = rootList,
                 layoutIgnoredList = ignoredLayoutList,
+                specialList = specialLayoutList,
                 hierarchyTable = elementSystem.hierarchyTable,
                 metaTable = elementSystem.metaTable,
                 layoutHierarchyTable = layoutHierarchyTable,
@@ -344,8 +355,7 @@ namespace UIForia.Systems {
                     case LayoutBehavior.Normal:
                         ElementId parentId = LayoutUtil.FindLayoutParent(elementId, elementSystem.hierarchyTable, layoutHierarchyTable);
                         LayoutUtil.Insert(parentId, elementId, elementSystem.traversalTable, layoutHierarchyTable);
-                        // childrenChangedList.Add(layoutInfo.parentId);
-                        AddToChildrenChangeList(layoutInfo.parentId);
+                        childrenChangedList.Add(layoutInfo.parentId);
                         break;
 
                     case LayoutBehavior.Ignored:
@@ -354,8 +364,7 @@ namespace UIForia.Systems {
                         break;
 
                     case LayoutBehavior.TranscludeChildren:
-                        // childrenChangedList.Add(layoutInfo.parentId);
-                        AddToChildrenChangeList(layoutInfo.parentId);
+                        childrenChangedList.Add(layoutInfo.parentId);
                         LayoutUtil.TranscludeUnattached(elementId, layoutHierarchyTable, elementSystem.traversalTable);
                         break;
                 }
@@ -386,7 +395,6 @@ namespace UIForia.Systems {
 
             return null;
         }
-
         // only called for elements that were not enabled this frame
         // todo -- totally burstable when styles are blittable
         public void HandleStylePropertyUpdates(UIElement element, StyleProperty[] properties, int propertyCount) {
@@ -578,7 +586,7 @@ namespace UIForia.Systems {
                             GetLayoutContext(element.View).transclusionCount--;
                             p = layoutHierarchyTable[element.id].parentId;
                             // childrenChangedList.Add(element.id);
-                            AddToChildrenChangeList(element.id);
+                            childrenChangedList.Add(element.id);
                         }
 
                         if (newBehavior == LayoutBehavior.Ignored) {
@@ -591,7 +599,7 @@ namespace UIForia.Systems {
                             GetLayoutContext(element.View).transclusionCount++;
                         }
 
-                        AddToChildrenChangeList(p);
+                        childrenChangedList.Add(p);
                         // childrenChangedList.Add(p);
 
                         layoutHierarchyTable[element.id].behavior = newBehavior;
@@ -605,7 +613,13 @@ namespace UIForia.Systems {
                 verticalLayoutInfo.bgSize = bgSize.height;
             }
 
-            layoutBoxTable[element.id].OnStylePropertiesChanged(this, element, properties, propertyCount);
+            ref LayoutBoxUnion box = ref layoutBoxTable[element.id];
+            if (box.layoutType == LayoutBoxType.ScrollView) {
+                
+            }
+            else {
+                layoutBoxTable[element.id].OnStylePropertiesChanged(this, element, properties, propertyCount);
+            }
 
             ElementId parentId = layoutHierarchyTable[element.id].parentId;
             if (parentId != default) {
@@ -637,8 +651,7 @@ namespace UIForia.Systems {
 
         public void MarkForChildrenUpdate(ElementId id) {
             if ((elementSystem.metaTable[id].flags & UIElementFlags.EnableStateChanged) == 0) {
-                // childrenChangedList.Add(id);
-                AddToChildrenChangeList(id);
+                childrenChangedList.Add(id);
             }
         }
 
@@ -646,12 +659,7 @@ namespace UIForia.Systems {
             // cannot be parallel atm. can be a job though
             for (int i = 0; i < gridPlaceList.size; i++) {
                 ref LayoutBoxUnion box = ref layoutBoxTable[gridPlaceList[i]];
-                if (box.layoutType == LayoutBoxType.ScrollView) {
-                    if (box.scroll.layoutBox->layoutType == LayoutBoxType.Grid) {
-                        box.scroll.layoutBox->grid.RunPlacement(this);
-                    }
-                }
-                else if (box.layoutType == LayoutBoxType.Image) {
+                if (box.layoutType == LayoutBoxType.Image) {
                     if (box.image.layoutBox->layoutType == LayoutBoxType.Grid) {
                         box.image.layoutBox->grid.RunPlacement(this);
                     }
@@ -829,8 +837,15 @@ namespace UIForia.Systems {
                     layoutBoxTable = layoutBoxTable
                 });
 
+                // todo -- move
+                JobHandle scrollVertical = UIForiaScheduler.Await(verticalLayout).Then(new UpdateScrollVertical() {
+                    runner = layoutContext.runner,
+                    scrollBoxHead = scrollBoxHead,
+                    layoutBoxTable = layoutBoxTable
+                });
+
                 // parallel for big list
-                JobHandle verticalAlignment = UIForiaScheduler.Await(verticalLayout).ThenParallel(new ApplyVerticalAlignments() {
+                JobHandle verticalAlignment = UIForiaScheduler.Await(scrollVertical, verticalLayout).ThenParallel(new ApplyVerticalAlignments() {
                     parallel = new ParallelParams(layoutContext.elementList.size, 250),
                     alignmentTable = alignmentInfoVertical,
                     elementList = layoutContext.elementList,
@@ -851,7 +866,6 @@ namespace UIForia.Systems {
                     transformInfoTable = transformInfoTable,
                     layoutBoxInfoTable = layoutResultTable
                 });
-
 
                 // todo -- merge with local matrix building, its likely much faster
                 JobHandle buildWorldMatrices = UIForiaScheduler.Await(buildLocalMatrices).Then(new BuildWorldMatrices() {
@@ -924,46 +938,6 @@ namespace UIForia.Systems {
 
         public void OnViewAdded(UIView view) {
             layoutContexts.Add(new LayoutContext(view, this));
-        }
-
-        [BurstCompile]
-        internal struct UpdateScrollViews : IJob {
-
-            public List_ElementId scrollViewIds;
-            public ElementTable<LayoutHierarchyInfo> hierarchyTable;
-            public ElementTable<LayoutBoxUnion> layoutBoxTable;
-            public ElementTable<LayoutBoxInfo> layoutBoxInfoTable;
-
-            public void Execute() {
-                for (int i = 0; i < scrollViewIds.size; i++) {
-                    ElementId scrollId = scrollViewIds[i];
-
-                    ref LayoutBoxUnion scrollBox = ref layoutBoxTable[scrollId];
-
-                    if (scrollBox.scroll.scrollBounds == ScrollBounds.Default) {
-                        ref LayoutHierarchyInfo hierarchyInfo = ref hierarchyTable[scrollId];
-                        ElementId ptr = hierarchyInfo.firstChildId;
-
-                        float xMin = float.MaxValue;
-                        float yMin = float.MaxValue;
-                        float xMax = float.MinValue;
-                        float yMax = float.MinValue;
-
-                        while (ptr != default) {
-                            ref LayoutBoxInfo boxInfo = ref layoutBoxInfoTable[ptr];
-
-                            if (xMin < boxInfo.alignedPosition.x) xMin = boxInfo.alignedPosition.x;
-                            if (xMax > boxInfo.alignedPosition.x) xMax = boxInfo.alignedPosition.x;
-
-                            if (yMin < boxInfo.alignedPosition.y) yMin = boxInfo.alignedPosition.y;
-                            if (yMax < boxInfo.alignedPosition.y) yMax = boxInfo.alignedPosition.y;
-
-                            ptr = hierarchyInfo.nextSiblingId;
-                        }
-                    }
-                }
-            }
-
         }
 
         // todo -- re-instate this
@@ -1063,7 +1037,6 @@ namespace UIForia.Systems {
                     retn.Add(instance);
                 }
             }
-            
         }
 
         [BurstCompile]
@@ -1145,6 +1118,7 @@ namespace UIForia.Systems {
             gridRowTrackBuffer.Dispose();
             rootList.Dispose();
             ignoredLayoutList.Dispose();
+            specialLayoutList.Dispose();
 
             for (int i = 0; i < layoutContexts.size; i++) {
                 layoutContexts[i].Dispose();
@@ -1189,6 +1163,23 @@ namespace UIForia.Systems {
             };
 
             elementCapacity = newCapacity;
+        }
+
+        private ElementId scrollBoxHead;
+        private ElementId scrollBoxTail;
+
+        internal void RegisterScrollBox(ElementId elementId) {
+            if (scrollBoxHead == default) {
+                scrollBoxHead = elementId;
+                scrollBoxTail = elementId;
+                layoutBoxTable[elementId].scroll.nextScrollBox = default;
+                layoutBoxTable[elementId].scroll.prevScrollBox = default;
+            }
+            else {
+                layoutBoxTable[scrollBoxTail].scroll.nextScrollBox = elementId;
+                layoutBoxTable[elementId].scroll.prevScrollBox = scrollBoxTail;
+                scrollBoxTail = elementId;
+            }
         }
 
     }

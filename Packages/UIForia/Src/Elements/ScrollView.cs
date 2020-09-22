@@ -1,6 +1,7 @@
 using System;
 using UIForia.Attributes;
 using UIForia.Layout;
+using UIForia.Parsing;
 using UIForia.Rendering;
 using UIForia.UIInput;
 using UIForia.Util.Unsafe;
@@ -9,6 +10,12 @@ using UnityEngine;
 
 namespace UIForia.Elements {
 
+    public enum ScrollGutterSide {
+
+        Max, 
+        Min
+
+    }
     // shared unmanaged struct so the layout system can access and modify these values
     internal struct ScrollValues {
 
@@ -16,19 +23,36 @@ namespace UIForia.Elements {
         public float scrollY;
         public float contentWidth;
         public float contentHeight;
-        public bool isOverflowingX;
-        public bool isOverflowingY;
+        public bool isOverflowingX => contentWidth > actualWidth;
+        public bool isOverflowingY => contentHeight > actualHeight;
         public float actualWidth;
         public float actualHeight;
+        public ElementId verticalTrackId;
+        public ElementId horizontalTrackId;
+        public float trackSize;
+        public ScrollGutterSide horizontalGutterPosition;
+        public ScrollGutterSide verticalGutterPosition;
+        public bool showVertical;
 
     }
 
+    [RequireSpecialLayout]
     [Template(TemplateType.Internal, "Elements/ScrollView.xml")]
     public unsafe class ScrollView : UIElement {
 
         public float scrollSpeedY = 48f;
         public float scrollSpeedX = 16f;
-        public float trackSize = 10f;
+
+        public float trackSize {
+            get {
+                InitScrollValues();
+                return scrollValues->trackSize;
+            }
+            set {
+                InitScrollValues();
+                scrollValues->trackSize = Mathf.Min(1, value);
+            }
+        }
 
         public bool disableOverflowX;
         public bool disableOverflowY;
@@ -67,11 +91,24 @@ namespace UIForia.Elements {
         private float accumulatedScrollSpeedY;
         private float accumulatedScrollSpeedX;
 
+        private void InitScrollValues() {
+            if (scrollValues != null) {
+                return;
+            }
+
+            scrollValues = TypedUnsafe.Malloc<ScrollValues>(Allocator.Persistent);
+            *scrollValues = default;
+            scrollValues->trackSize = 10;
+            scrollValues->horizontalGutterPosition = ScrollGutterSide.Max;
+            scrollValues->verticalGutterPosition = ScrollGutterSide.Max;
+            scrollValues->verticalTrackId = FindById("vertical-scrolltrack").id;
+            scrollValues->horizontalTrackId = FindById("horizontal-scrolltrack").id;
+        }
+
         internal float scrollPercentageX {
             get {
                 if (scrollValues != null) return scrollValues->scrollX;
-                scrollValues = TypedUnsafe.Malloc<ScrollValues>(Allocator.Persistent);
-                *scrollValues = default;
+
 
                 return scrollValues->scrollX;
             }
@@ -79,8 +116,7 @@ namespace UIForia.Elements {
                 if (value < 0) value = 0;
                 if (value > 1) value = 1;
                 if (scrollValues == null) {
-                    scrollValues = TypedUnsafe.Malloc<ScrollValues>(Allocator.Persistent);
-                    *scrollValues = default;
+                    InitScrollValues();
                 }
 
                 scrollValues->scrollX = value;
@@ -90,29 +126,26 @@ namespace UIForia.Elements {
         internal float scrollPercentageY {
             get {
                 if (scrollValues != null) return scrollValues->scrollY;
-                scrollValues = TypedUnsafe.Malloc<ScrollValues>(Allocator.Persistent);
-                *scrollValues = default;
-
+                InitScrollValues();
                 return scrollValues->scrollY;
             }
             set {
                 if (value < 0) value = 0;
                 if (value > 1) value = 1;
-                if (scrollValues == null) {
-                    scrollValues = TypedUnsafe.Malloc<ScrollValues>(Allocator.Persistent);
-                    *scrollValues = default;
-                }
-
+                InitScrollValues();
                 scrollValues->scrollY = value;
             }
         }
 
         internal ScrollValues* GetScrollValues() {
             if (scrollValues != null) return scrollValues;
-            scrollValues = TypedUnsafe.Malloc<ScrollValues>(Allocator.Persistent);
-            *scrollValues = default;
-
+            InitScrollValues();
             return scrollValues;
+        }
+
+        public override void OnCreate() {
+            // horizontalScrollTrack = FindById("horizontal-scrolltrack");
+            // verticalScrollTrack = FindById("vertical-scrolltrack");
         }
 
         public override void OnUpdate() {
@@ -126,12 +159,13 @@ namespace UIForia.Elements {
             else if (isScrollingX) {
                 elapsedTotalTime += Time.unscaledDeltaTime;
 
-                float t = Mathf.Clamp01(Easing.Interpolate(elapsedTotalTime / 0.500f, EasingFunction.CubicEaseOut));
+                float t = Mathf.Clamp01(Easing.Interpolate(elapsedTotalTime / 0.5f, EasingFunction.CubicEaseOut));
                 scrollPercentageX = Mathf.Lerp(fromScrollX, toScrollX, t);
                 isScrollingX = t < 1;
             }
 
-       
+            // verticalScrollTrack.SetEnabled(verticalScrollingEnabled);
+            // horizontalScrollTrack.SetEnabled(horizontalScrollingEnabled);
 
             // if (!firstChild.isEnabled) {
             //     // isOverflowingX = false;
@@ -359,7 +393,7 @@ namespace UIForia.Elements {
                 }
 
                 return child.layoutResult.alignedPosition.y - layoutResult.VerticalPaddingBorderStart;
-            } 
+            }
         }
 
         internal void ScrollElementIntoView(UIElement element, float crawlPositionX, float crawlPositionY) {

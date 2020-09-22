@@ -3,8 +3,6 @@ using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.Util.Unsafe;
 using Unity.Collections;
-using Unity.Mathematics;
-using UnityEngine;
 
 namespace UIForia.Layout {
 
@@ -19,20 +17,20 @@ namespace UIForia.Layout {
         public LayoutBoxUnion* layoutBox;
 
 
-        public void OnInitialize(LayoutSystem layoutSystem, UIElement element) {
+        public void OnInitialize(LayoutSystem layoutSystem, UIElement element, UIElement proxy) {
             this.elementId = element.id;
 
             Size size = LayoutSystem.UpdateTextureSize(element);
             textureWidth = size.width;
             textureHeight = size.height;
 
-            preferredHeight = element.style.PreferredHeight;
-            minHeight = element.style.MinHeight;
-            maxHeight = element.style.MaxHeight;
+            preferredHeight = proxy.style.PreferredHeight;
+            minHeight = proxy.style.MinHeight;
+            maxHeight = proxy.style.MaxHeight;
 
             LayoutBoxType boxType = LayoutBoxUnion.GetLayoutBoxTypeForProxy(element);
             layoutBox = TypedUnsafe.Malloc<LayoutBoxUnion>(Allocator.Persistent);
-            layoutBox->Initialize(boxType, layoutSystem, element);
+            layoutBox->Initialize(boxType, layoutSystem, element, proxy);
         }
 
         public void Dispose() {

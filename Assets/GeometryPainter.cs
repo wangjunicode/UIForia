@@ -5,7 +5,8 @@ using UnityEngine;
 
 namespace DefaultNamespace {
 
-    [CustomPainter("GeometryPainter")]
+    // todo -- bring this back
+    // [CustomPainter("GeometryPainter")]
     public class GeometryPainter : StandardRenderBox2 {
 
         private UIForiaMesh mesh;

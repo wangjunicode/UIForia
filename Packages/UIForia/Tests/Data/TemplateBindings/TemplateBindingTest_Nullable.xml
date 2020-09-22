@@ -1,0 +1,9 @@
+<UITemplate>
+
+    <Contents>
+
+        <NullableFieldThing intVal="3" boolVal="null"/>
+        
+    </Contents>
+
+</UITemplate>

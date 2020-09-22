@@ -153,6 +153,46 @@ namespace UIForia.Layout {
             layoutBoxInfo.allocatedSize.y = availableSize;
         }
 
+         public void ApplyLayoutHorizontalOverride(ElementId elementId, float localX, float size) {
+            ref LayoutInfo layoutInfo = ref GetHorizontalLayoutInfo(elementId);
+            ref LayoutBoxInfo layoutBoxInfo = ref GetLayoutBoxInfo(elementId);
+            
+            layoutInfo.parentBlockSize = default;
+
+            float newSize = size;
+
+            if (newSize != layoutInfo.finalSize) {
+                layoutBoxInfo.sizeChanged = true;
+            }
+
+            layoutInfo.finalSize = newSize;
+
+            layoutBoxInfo.actualSize.x = newSize;
+            layoutBoxInfo.alignedPosition.x = localX;
+            layoutBoxInfo.allocatedPosition.x = localX;
+            layoutBoxInfo.allocatedSize.x = newSize;
+        }
+         
+        public void ApplyLayoutVerticalOverride(ElementId elementId, float localY, float size, in BlockSize blockSize) {
+            ref LayoutInfo layoutInfo = ref GetVerticalLayoutInfo(elementId);
+            ref LayoutBoxInfo layoutBoxInfo = ref GetLayoutBoxInfo(elementId);
+            
+            layoutInfo.parentBlockSize = blockSize;
+
+            float newSize = size;
+
+            if (newSize != layoutInfo.finalSize) {
+                layoutBoxInfo.sizeChanged = true;
+            }
+
+            layoutInfo.finalSize = newSize;
+
+            layoutBoxInfo.actualSize.y = newSize;
+            layoutBoxInfo.alignedPosition.y = localY;
+            layoutBoxInfo.allocatedPosition.y = localY;
+            layoutBoxInfo.allocatedSize.y = newSize;
+        }
+
         public void GetWidths<T>(in T parent, in BlockSize blockSize, ElementId childId, out LayoutSize size) where T : ILayoutBox {
             // todo -- handle animated sizes
             // ref AnimationLayoutSizes sizes = ref animationInfo[childId.index]; // if isAnimating pref/min/max -> update accordingly with lerp data
@@ -180,7 +220,6 @@ namespace UIForia.Layout {
             float value = measurement.value;
 
             switch (measurement.unit) {
-                
                 case UIMeasurementUnit.IntrinsicMinimum: {
                     // todo -- consider making this real, its just a prototype for now
                     LayoutBoxUnion layoutBox = layoutBoxTable[elementId.index];
@@ -199,7 +238,7 @@ namespace UIForia.Layout {
 
                     return parent.ResolveAutoWidth(ref this, elementId, blockSize);
                 }
-                
+
                 case UIMeasurementUnit.BackgroundImageWidth: {
                     return GetHorizontalLayoutInfo(elementId).bgSize * value;
                 }
@@ -248,13 +287,12 @@ namespace UIForia.Layout {
             Max
 
         }
-        
+
         public float ResolveHeight<T>(in T parent, ElementId elementId, in BlockSize blockSize, in UIMeasurement measurement, ref LayoutInfo info) where T : ILayoutBox {
             float value = measurement.value;
 
             switch (measurement.unit) {
                 case UIMeasurementUnit.Auto: {
-                    
                     LayoutBoxUnion layoutBox = layoutBoxTable[elementId.index];
                     if (layoutBox.layoutType == LayoutBoxType.Image) {
                         return layoutBox.image.ResolveSelfAutoHeight<T>(ref this);

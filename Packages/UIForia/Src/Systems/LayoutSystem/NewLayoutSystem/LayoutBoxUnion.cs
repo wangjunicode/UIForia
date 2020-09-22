@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems;
-using UnityEngine;
 
 namespace UIForia.Layout {
 
@@ -20,7 +19,8 @@ namespace UIForia.Layout {
         [FieldOffset(4)] public ImageLayoutBoxBurst image;
         [FieldOffset(4)] public RootLayoutBoxBurst root;
 
-        public void Initialize(LayoutBoxType layoutType, LayoutSystem layoutSystem, UIElement element) {
+        // if element is not proxied (most of the time we are not, mainly for scroll views) then element will == proxy
+        public void Initialize(LayoutBoxType layoutType, LayoutSystem layoutSystem, UIElement element, UIElement proxy) {
             this = default; // need to clear the memory here
 
             this.layoutType = layoutType;
@@ -28,35 +28,35 @@ namespace UIForia.Layout {
             switch (layoutType) {
                 case LayoutBoxType.Unset:
                 case LayoutBoxType.Flex:
-                    flex.OnInitialize(layoutSystem, element);
+                    flex.OnInitialize(layoutSystem, element, proxy);
                     break;
 
                 case LayoutBoxType.Grid:
-                    grid.OnInitialize(layoutSystem, element);
+                    grid.OnInitialize(layoutSystem, element, proxy);
                     break;
 
                 case LayoutBoxType.Radial:
-                    radial.OnInitialize(layoutSystem, element);
+                    radial.OnInitialize(layoutSystem, element, proxy);
                     break;
 
                 case LayoutBoxType.Stack:
-                    stack.OnInitialize(layoutSystem, element);
+                    stack.OnInitialize(layoutSystem, element, proxy);
                     break;
 
                 case LayoutBoxType.Image:
-                    image.OnInitialize(layoutSystem, element);
+                    image.OnInitialize(layoutSystem, element, proxy);
                     break;
 
                 case LayoutBoxType.ScrollView:
-                    scroll.OnInitialize(layoutSystem, element);
+                    scroll.OnInitialize(layoutSystem, element, proxy);
                     break;
 
                 case LayoutBoxType.Text:
-                    text.OnInitialize(layoutSystem, element);
+                    text.OnInitialize(layoutSystem, element, proxy);
                     break;
 
                 case LayoutBoxType.Root:
-                    root.OnInitialize(layoutSystem, element);
+                    root.OnInitialize(layoutSystem, element, proxy);
                     break;
 
                 default:
@@ -65,6 +65,7 @@ namespace UIForia.Layout {
         }
 
         internal static LayoutBoxType GetLayoutBoxType(UIElement element) {
+            
             switch (element) {
                 case UIViewRootElement _: return LayoutBoxType.Root;
                 case UITextElement _: return LayoutBoxType.Text;

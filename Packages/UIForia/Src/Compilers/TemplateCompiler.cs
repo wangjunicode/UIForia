@@ -306,7 +306,6 @@ namespace UIForia.Compilers {
 
             if (isRoot) {
                 ctx.Comment("new " + TypeNameGenerator.GetTypeName(processedType.rawType));
-
                 Expression createRootExpression = CreateElement(ctx, processedType, Expression.Default(typeof(UIElement)), templateRootNode.ChildCount, CountRealAttributes(templateRootNode.attributes), ctx.compiledTemplate.templateId);
                 ctx.Assign(ctx.rootParam, createRootExpression);
                 ProcessAttrsAndVisitChildren(ctx, templateRootNode);
@@ -2844,12 +2843,16 @@ namespace UIForia.Compilers {
         }
 
         private Expression CreateElement(CompilationContext ctx, ProcessedType processedType, Expression parentExpression, int childCount, int attrCount, int templateId) {
+
+            processedType.GetConstructorData(out ConstructorInfo constructorInfo, out UIElementFlags requiresSpecialLayout);
+     
             return ExpressionFactory.CallInstanceUnchecked(ctx.applicationExpr, s_CreateFromPool,
-                Expression.New(processedType.GetConstructor()),
+                Expression.New(constructorInfo),
                 parentExpression,
                 Expression.Constant(childCount),
                 Expression.Constant(attrCount),
-                Expression.Constant(templateId)
+                Expression.Constant(templateId),
+                Expression.Constant(requiresSpecialLayout)
             );
         }
 

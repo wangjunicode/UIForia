@@ -3,6 +3,7 @@ using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine;
 
 namespace UIForia.Systems {
 
@@ -11,6 +12,7 @@ namespace UIForia.Systems {
 
         public DataList<ElementId>.Shared roots;
         public DataList<ElementId>.Shared layoutIgnoredList;
+        public DataList<ElementId>.Shared specialList;
 
         public ElementTable<ElementMetaInfo> metaTable;
         public ElementTable<HierarchyInfo> hierarchyTable;
@@ -69,6 +71,10 @@ namespace UIForia.Systems {
                         switch (layoutHierarchyInfo.behavior) {
                             // easier to setup everything and then do another teardown pass for ignored & transclude
                             // unlinking is cheap and that way the data for all the elements is totally correct
+                            // case LayoutBehavior.__Special__:
+                            //     specialList.Add(currentChild);
+                            //     break;
+                            //
                             case LayoutBehavior.Ignored:
                                 layoutIgnoredList.Add(currentChild);
                                 break;
@@ -95,6 +101,11 @@ namespace UIForia.Systems {
             }
 
             // already in hierarchy sort order
+            for (int i = 0; i < specialList.size; i++) {
+                LayoutUtil.UnlinkFromParent(specialList[i], layoutHierarchyTable);
+            }
+
+            // already in hierarchy sort order
             for (int i = 0; i < layoutIgnoredList.size; i++) {
                 LayoutUtil.UnlinkFromParent(layoutIgnoredList[i], layoutHierarchyTable);
             }
@@ -105,6 +116,7 @@ namespace UIForia.Systems {
             }
 
             transclusionList.Dispose();
+            specialList.size = 0;
             stack.Dispose();
         }
 

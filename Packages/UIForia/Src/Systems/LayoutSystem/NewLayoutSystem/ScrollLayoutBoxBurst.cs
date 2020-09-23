@@ -8,6 +8,7 @@ using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace UIForia.Layout {
 
@@ -80,26 +81,51 @@ namespace UIForia.Layout {
             runner->GetWidths(this, blockSize, childrenElementId, out LayoutSize size);
             float clampWidth = size.Clamped + size.marginStart + size.marginEnd;
             float x = inset + size.marginStart;
-            runner->ApplyLayoutHorizontal(childrenElementId, x, x, clampWidth, contentAreaWidth, blockSize, LayoutFit.None, horizontalInfo.finalSize);
+            runner->ApplyLayoutHorizontalOverride(childrenElementId, x, clampWidth, blockSize);
 
-            // assume its there for now (and enabled)
-            if (scrollValues->showVertical && scrollValues->verticalTrackId.index != 0) {
-                if (scrollValues->verticalGutterPosition == ScrollGutterSide.Min) {
-                    runner->ApplyLayoutHorizontalOverride(scrollValues->verticalTrackId, 0, math.min(1, scrollValues->trackSize));
+            float gutterJoinSize = 0;
+
+            if (scrollValues->showVertical && scrollValues->showHorizontal) {
+                gutterJoinSize = scrollValues->trackSize;
+            }
+
+            // override block size for gutter
+            blockSize = new BlockSize() {
+                outerSize = horizontalInfo.finalSize - gutterJoinSize,
+                insetSize = horizontalInfo.finalSize - gutterJoinSize
+            };
+
+            if (scrollValues->showHorizontal) {
+                if (scrollValues->showVertical && scrollValues->verticalGutterPosition == ScrollGutterSide.Min) {
+                    runner->ApplyLayoutHorizontalOverride(scrollValues->horizontalTrackId, gutterJoinSize, horizontalInfo.finalSize - gutterJoinSize, blockSize);
                 }
                 else {
-                    runner->ApplyLayoutHorizontalOverride(scrollValues->verticalTrackId, scrollValues->trackSize, scrollValues->trackSize);
+                    runner->ApplyLayoutHorizontalOverride(scrollValues->horizontalTrackId, 0, horizontalInfo.finalSize - gutterJoinSize, blockSize);
                 }
             }
 
-            scrollValues->actualWidth = horizontalInfo.finalSize;
+            if (scrollValues->showVertical) {
+                if (scrollValues->verticalGutterPosition == ScrollGutterSide.Min) {
+                    runner->ApplyLayoutHorizontalOverride(scrollValues->verticalTrackId, 0, scrollValues->trackSize, blockSize);
+                }
+                else {
+                    runner->ApplyLayoutHorizontalOverride(scrollValues->verticalTrackId, horizontalInfo.finalSize - scrollValues->trackSize, scrollValues->trackSize, blockSize);
+                }
+            }
+
+            scrollValues->actualWidth = horizontalInfo.finalSize - (horizontalInfo.paddingBorderStart + horizontalInfo.paddingBorderEnd + (scrollValues->showVertical ? scrollValues->trackSize : 0));
+
         }
 
         public void RunVertical(BurstLayoutRunner* runner) {
+
             ref BurstLayoutRunner refRunner = ref UnsafeUtility.AsRef<BurstLayoutRunner>(runner);
             ref LayoutInfo verticalInfo = ref refRunner.GetVerticalLayoutInfo(elementId);
 
-            // float contentAreaHeight = verticalInfo.finalSize - (verticalInfo.paddingBorderStart + verticalInfo.paddingBorderEnd);
+            ref LayoutInfo hInfo = ref refRunner.horizontalLayoutInfoTable[scrollValues->verticalTrackId.index];
+            ref LayoutInfo vInfo = ref refRunner.verticalLayoutInfoTable[scrollValues->verticalTrackId.index];
+            hInfo.isBlockProvider = true;
+            vInfo.isBlockProvider = true;
 
             float inset = verticalInfo.paddingBorderStart;
             BlockSize blockSize = verticalInfo.parentBlockSize;
@@ -115,20 +141,42 @@ namespace UIForia.Layout {
             float clampHeight = size.Clamped + size.marginStart + size.marginEnd;
             float y = inset + size.marginStart;
             runner->ApplyLayoutVerticalOverride(childrenElementId, y, clampHeight, blockSize);
+            float gutterJoinSize = 0;
 
-            if (scrollValues->showVertical && scrollValues->verticalTrackId.index != 0) {
-                runner->ApplyLayoutVerticalOverride(scrollValues->verticalTrackId, 0, verticalInfo.finalSize, blockSize);
+            if (scrollValues->showVertical && scrollValues->showHorizontal) {
+                gutterJoinSize = math.max(1, scrollValues->trackSize);
             }
 
-            scrollValues->actualHeight = verticalInfo.finalSize;
+            // override block size for gutter
+            blockSize = new BlockSize() {
+                outerSize = verticalInfo.finalSize - gutterJoinSize,
+                insetSize = verticalInfo.finalSize - gutterJoinSize
+            };
+
+            if (scrollValues->showVertical) {
+                runner->ApplyLayoutVerticalOverride(scrollValues->verticalTrackId, 0, verticalInfo.finalSize - gutterJoinSize, blockSize);
+            }
+
+            if (scrollValues->showHorizontal) {
+                if (scrollValues->horizontalGutterPosition == ScrollGutterSide.Min) {
+                    runner->ApplyLayoutVerticalOverride(scrollValues->horizontalTrackId, 0, scrollValues->trackSize, blockSize);
+                }
+                else {
+                    runner->ApplyLayoutVerticalOverride(scrollValues->horizontalTrackId, verticalInfo.finalSize - scrollValues->trackSize, scrollValues->trackSize, blockSize);
+                }
+
+            }
+
+            scrollValues->actualHeight = verticalInfo.finalSize - (verticalInfo.paddingBorderStart + verticalInfo.paddingBorderEnd + (scrollValues->showHorizontal ? scrollValues->trackSize : 0));
+
         }
 
         public void UpdateScrollValues(BurstLayoutRunner* runner) {
-            ref LayoutInfo horizontalInfo = ref runner->GetHorizontalLayoutInfo(elementId);
-            ref LayoutInfo verticalInfo = ref runner->GetVerticalLayoutInfo(elementId);
+         //   ref LayoutInfo horizontalInfo = ref runner->GetHorizontalLayoutInfo(elementId);
+         //   ref LayoutInfo verticalInfo = ref runner->GetVerticalLayoutInfo(elementId);
 
-            scrollValues->contentWidth = FindHorizontalMax(runner) + horizontalInfo.paddingBorderEnd;
-            scrollValues->contentHeight = FindVerticalMax(runner) + verticalInfo.paddingBorderEnd;
+            scrollValues->contentWidth = FindHorizontalMax(runner);
+            scrollValues->contentHeight = FindVerticalMax(runner); // + verticalInfo.paddingBorderEnd;
 
             ref LayoutBoxInfo info = ref runner->GetLayoutBoxInfo(childrenElementId);
             info.scrollValues = scrollValues;
@@ -168,56 +216,35 @@ namespace UIForia.Layout {
         }
 
         public float ComputeContentWidth(ref BurstLayoutRunner layoutRunner, in BlockSize blockSize) {
+            ref LayoutInfo hInfo = ref layoutRunner.horizontalLayoutInfoTable[scrollValues->verticalTrackId.index];
+            ref LayoutInfo vInfo = ref layoutRunner.verticalLayoutInfoTable[scrollValues->verticalTrackId.index];
+            hInfo.isBlockProvider = true;
+            vInfo.isBlockProvider = true;
+
             layoutRunner.GetWidths(this, blockSize, childrenElementId, out LayoutSize size);
 
             return size.Clamped;
-
-            // return layoutBox->ComputeContentWidth(ref layoutRunner, blockSize);
         }
 
         public float ComputeContentHeight(ref BurstLayoutRunner layoutRunner, in BlockSize blockSize) {
+
             layoutRunner.GetHeights(this, blockSize, childrenElementId, out LayoutSize size);
 
             return size.Clamped;
-
-            // return layoutBox->ComputeContentHeight(ref layoutRunner, blockSize);
         }
 
-        public void Dispose() {
-            // layoutBox->Dispose();
-            // I don't think I need to handle setting children scrollValues ptr to null because if I am disposing this box, all children boxes are disposed as well 
-            // TypedUnsafe.Dispose(layoutBox, Allocator.Persistent);
-            // childrenIds.Dispose();
-            // layoutBox = null;
-        }
+        public void Dispose() { }
 
         public void OnChildrenChanged(LayoutSystem layoutSystem) {
-            // might not be needed but safer to do this
-            // for (int i = 0; i < childrenIds.size; i++) {
-            //     layoutSystem.layoutResultTable.array[childrenIds.array[i]].scrollValues = null;
-            // }
-            //
-            // // todo -- make sure the scrollbars are not included in the children
-            //
-            // // layoutBox->OnChildrenChanged(layoutSystem);
-            // ref LayoutHierarchyInfo layoutHierarchyInfo = ref layoutSystem.layoutHierarchyTable[elementId];
-            //
-            // int childCount = layoutHierarchyInfo.childCount;
-            // childrenIds.size = 0;
-            //
-            // if (childCount == 0) {
-            //     return;
-            // }
-            //
-            // childrenIds.SetSize(childCount);
-            // ElementId ptr = layoutHierarchyInfo.firstChildId;
-            //
-            // int idx = 0;
-            // while (ptr != default) {
-            //     childrenIds.array[idx++] = ptr.index;
-            //     layoutSystem.layoutResultTable.array[ptr.index].scrollValues = scrollValues;
-            //     ptr = layoutSystem.layoutHierarchyTable[ptr].nextSiblingId;
-            // }
+            // we explicitly provide sizes to the gutters, make absolutely sure they are marked as block providers
+            ref LayoutInfo hInfo = ref layoutSystem.horizontalLayoutInfoTable[scrollValues->verticalTrackId];
+            ref LayoutInfo vInfo = ref layoutSystem.verticalLayoutInfoTable[scrollValues->verticalTrackId];
+            hInfo.isBlockProvider = true;
+            vInfo.isBlockProvider = true;
+            hInfo = ref layoutSystem.horizontalLayoutInfoTable[scrollValues->horizontalTrackId];
+            vInfo = ref layoutSystem.verticalLayoutInfoTable[scrollValues->horizontalTrackId];
+            hInfo.isBlockProvider = true;
+            vInfo.isBlockProvider = true;
         }
 
         public void OnStylePropertiesChanged(LayoutSystem layoutSystem, UIElement element, StyleProperty[] properties, int propertyCount) {
@@ -228,6 +255,10 @@ namespace UIForia.Layout {
 
         public void OnChildStyleChanged(LayoutSystem layoutSystem, ElementId childId, StyleProperty[] properties, int propertyCount) {
             // layoutBox->OnChildStyleChanged(layoutSystem, childId, properties, propertyCount);
+            ref LayoutInfo hInfo = ref layoutSystem.horizontalLayoutInfoTable[scrollValues->verticalTrackId];
+            ref LayoutInfo vInfo = ref layoutSystem.verticalLayoutInfoTable[scrollValues->verticalTrackId];
+            hInfo.isBlockProvider = true;
+            vInfo.isBlockProvider = true;
         }
 
     }

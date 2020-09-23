@@ -464,7 +464,7 @@ namespace UIForia {
             Profiler.BeginSample("UIForia::FlushStyleChanges");
             styleSystem.FlushChangeSets(elementSystem, layoutSystem, renderSystem);
             Profiler.EndSample();
-            
+
             if (elementSystem.disabledElementsThisFrame.size > 0) {
                 layoutSystem.HandleElementDisabled(elementSystem.disabledElementsThisFrame);
                 textSystem.HandleElementDisabled(elementSystem.disabledElementsThisFrame);
@@ -530,6 +530,14 @@ namespace UIForia {
                 return;
             }
 
+            if ((element.flags & UIElementFlags.HasBeenEnabled) != 0) {
+                if (element.isEnabled) {
+                    return;
+                }
+            }
+
+            // if has been enabled & isEnabled return 
+
             ElementTable<ElementMetaInfo> metaTable = elementSystem.metaTable;
 
             if (!element.isAncestorEnabled) {
@@ -550,6 +558,7 @@ namespace UIForia {
             element.isSelfEnabled = true;
 
             metaTable[element.id].flags |= UIElementFlags.HasBeenEnabled | UIElementFlags.Enabled | UIElementFlags.EnabledRoot;
+            element.flags |= UIElementFlags.HasBeenEnabled | UIElementFlags.Enabled | UIElementFlags.EnabledRoot;
 
             UIElement[] instanceTable = elementSystem.instanceTable;
             ElementTable<HierarchyInfo> hierarchyTable = elementSystem.hierarchyTable;
@@ -559,7 +568,7 @@ namespace UIForia {
                 // inline stack pop
                 UIElement child = stack.array[--stack.size].element;
 
-                ref ElementMetaInfo metaInfo = ref metaTable[child.id];
+                ref ElementMetaInfo metaInfo = ref metaTable.array[child.id.index];
 
                 metaInfo.flags |= UIElementFlags.AncestorEnabled;
                 child.isAncestorEnabled = true;
@@ -575,7 +584,7 @@ namespace UIForia {
                 child.style.UpdateInheritedStyles(); // todo -- move this
                 view.activeElementCount++;
                 metaInfo.flags |= UIElementFlags.HasBeenEnabled;
-
+                element.flags |= UIElementFlags.HasBeenEnabled;
                 try {
                     child.OnEnable();
                 }
@@ -665,16 +674,17 @@ namespace UIForia {
                 }
 
                 elementSystem.disabledElementsThisFrame.Add(child.id);
-                view.activeElementCount--;
-                // todo -- profile not calling disable when it's not needed
-                // if (child.flags & UIElementFlags.RequiresEnableCall) {
-                try {
-                    child.OnDisable();
+                if ((child.flags & UIElementFlags.HasBeenEnabled) != 0) {
+                    view.activeElementCount--;
+                    // todo -- profile not calling disable when it's not needed
+                    // if (child.flags & UIElementFlags.RequiresEnableCall) {
+                    try {
+                        child.OnDisable();
+                    }
+                    catch (Exception e) {
+                        Debug.Log(e);
+                    }
                 }
-                catch (Exception e) {
-                    Debug.Log(e);
-                }
-                // }
 
                 // todo -- maybe do this on enable instead
                 if (child.style.currentState != StyleState.Normal) {
@@ -779,6 +789,9 @@ namespace UIForia {
 
                 ref ElementMetaInfo metaInfo = ref metaTable[current.id];
 
+                // metaInfo.flags &= ~UIElementFlags.Enabled;
+                // current.flags &= ~UIElementFlags.Enabled;
+
                 current.isAncestorEnabled = current.parent.isEnabled;
 
                 if (current.parent.isEnabled) {
@@ -796,7 +809,7 @@ namespace UIForia {
 
                     try {
                         onElementRegistered?.Invoke(current);
-                        current.OnCreate();
+                        current.OnCreate(); // might have been disabled here!
                     }
                     catch (Exception e) {
                         Debug.LogWarning(e);
@@ -890,7 +903,7 @@ namespace UIForia {
         }
 
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
-        public UIElement CreateElementFromPool(UIElement element, UIElement parent, int childCount, int attributeCount, int originTemplateId, UIElementFlags specialFlags) {
+        public UIElement CreateElementFromPool(UIElement element, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
             // children get assigned in the template function but we need to setup the list here
             // ConstructedElement retn = templateData.ConstructElement(typeId);
             // UIElement element = retn.element;
@@ -898,7 +911,7 @@ namespace UIForia {
             element.application = this;
             element.templateMetaData = templateData.templateMetaData[originTemplateId];
 
-            UIElementFlags flags = specialFlags | UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
+            const UIElementFlags flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
 
             element.id = elementSystem.CreateElement(element, parent?.hierarchyDepth + 1 ?? 0, -999, -999, flags);
             element.flags = flags;

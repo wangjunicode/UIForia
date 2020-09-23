@@ -82,12 +82,10 @@ namespace UIForia.Parsing {
         }
 
         private ConstructorInfo constructorInfo;
-        internal UIElementFlags elementFlags;
         
-        public void GetConstructorData(out ConstructorInfo constructorInfo, out UIElementFlags specialFlags) {
+        public void GetConstructorData(out ConstructorInfo constructorInfo) {
             if (this.constructorInfo != null) {
                 constructorInfo = this.constructorInfo;
-                specialFlags = elementFlags;
                 return;
             }
 
@@ -95,18 +93,8 @@ namespace UIForia.Parsing {
             if (this.constructorInfo == null) {
                 UnityEngine.Debug.LogError(rawType + "doesn't define a parameterless public constructor. This is a requirement for it to be used templates");
             }
-
-            if (rawType.GetCustomAttribute<RequireSpecialLayoutAttribute>() != null) {
-                elementFlags |= UIElementFlags.SpecialLayoutProvider;
-            }
-            
             constructorInfo = this.constructorInfo;
-            specialFlags = elementFlags;
         }
 
     }
-
-    [AttributeUsage(AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
-    internal class RequireSpecialLayoutAttribute : Attribute { }
-
 }

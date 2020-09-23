@@ -114,7 +114,7 @@ style visi3 { Visibility = Visible; }
         var nodes = StyleParser.Parse(@"
 
 const o1 = hidden;
-const o2 = Scroll;
+const o2 = hidden;
 
 style overflow1 { Overflow = @o1 @o2; }
 style overflow2 { Overflow = @o2; }
@@ -122,7 +122,7 @@ style overflow3 { OverflowX = @o2; }
 style overflow4 { OverflowY = @o1; }
 style overflow5 {
     Overflow = hidden; 
-    OverflowY = Scroll;
+    OverflowY = hidden;
 }
 
         ".Trim());
@@ -133,19 +133,19 @@ style overflow5 {
         Assert.AreEqual(5, containers.Length);
 
         Assert.AreEqual(Overflow.Hidden, containers[0].groups[0].normal.style.OverflowX);
-        Assert.AreEqual(Overflow.Scroll, containers[0].groups[0].normal.style.OverflowY);
+        Assert.AreEqual(Overflow.Hidden, containers[0].groups[0].normal.style.OverflowY);
 
-        Assert.AreEqual(Overflow.Scroll, containers[1].groups[0].normal.style.OverflowX);
-        Assert.AreEqual(Overflow.Scroll, containers[1].groups[0].normal.style.OverflowY);
+        Assert.AreEqual(Overflow.Hidden, containers[1].groups[0].normal.style.OverflowX);
+        Assert.AreEqual(Overflow.Hidden, containers[1].groups[0].normal.style.OverflowY);
 
-        Assert.AreEqual(Overflow.Scroll, containers[2].groups[0].normal.style.OverflowX);
+        Assert.AreEqual(Overflow.Hidden, containers[2].groups[0].normal.style.OverflowX);
         Assert.AreEqual(Overflow.Unset, containers[2].groups[0].normal.style.OverflowY);
 
         Assert.AreEqual(Overflow.Unset, containers[3].groups[0].normal.style.OverflowX);
         Assert.AreEqual(Overflow.Hidden, containers[3].groups[0].normal.style.OverflowY);
 
         Assert.AreEqual(Overflow.Hidden, containers[4].groups[0].normal.style.OverflowX);
-        Assert.AreEqual(Overflow.Scroll, containers[4].groups[0].normal.style.OverflowY);
+        Assert.AreEqual(Overflow.Hidden, containers[4].groups[0].normal.style.OverflowY);
     }
 
     [Test]

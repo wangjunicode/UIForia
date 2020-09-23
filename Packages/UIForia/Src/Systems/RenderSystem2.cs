@@ -63,6 +63,7 @@ namespace UIForia.Graphics {
 
         Mesh2D = 1 << 10,
         Mesh3D = 1 << 11,
+
         // I'm not totally sure what these are yet
         UIForiaGeometry = 1 << 12,
         UIForiaSDF = 1 << 13,
@@ -70,7 +71,6 @@ namespace UIForia.Graphics {
 
         PushRenderTargetRegion = 1 << 15,
         PopRenderTargetRegion = 1 << 16,
-
 
     }
 
@@ -260,7 +260,6 @@ namespace UIForia.Systems {
             unsafeData.float4Buffer.size = 0;
 
             resourceManager.GetFontTextures(renderContext.textureMap);
-
             List<UIView> views = layoutSystem.application.views;
 
             unsafeData.perViewElementList.SetSize(views.Count);
@@ -275,6 +274,7 @@ namespace UIForia.Systems {
                 };
 
             }
+
             //
             // UIForiaScheduler.Run(new GatherRenderedElements() {
             //     elementLists = unsafeData.perViewElementList,
@@ -283,7 +283,7 @@ namespace UIForia.Systems {
             //     renderCallList = unsafeData.renderCallList,
             //     renderInfoTable = unsafeData.renderInfoTable,
             // });
-new GatherRenderedElements() {
+            new GatherRenderedElements() {
                 elementLists = unsafeData.perViewElementList,
                 traversalTable = elementSystem.traversalTable,
                 clipInfoTable = layoutSystem.clipInfoTable,
@@ -632,7 +632,7 @@ new GatherRenderedElements() {
                         if (!renderContext.meshMap.TryGetValue(batch.meshId, out Mesh mesh)) {
                             continue;
                         }
-                        
+
                         if (!renderContext.materialMap.TryGetValue(batch.materialId.index, out Material material)) {
                             continue;
                         }

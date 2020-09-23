@@ -64,6 +64,11 @@ namespace UIForia {
         public override string ToString() {
             return $"{value} {unit}";
         }
+
+        public static OffsetMeasurement Percent(float value) {
+            return new OffsetMeasurement(value, OffsetMeasurementUnit.Percent);
+        }
+
     }
 
     public struct OffsetMeasurementPair {

@@ -112,10 +112,8 @@ namespace UIForia.Systems {
                 // styles are unlikely to change much
                 // add to free list if using one and not 1-1 with elements
                 ElementId elementId = disabledElements[i];
-                if (elementId.index > elementCapacity) {
-                    continue;
-                }
-
+                // if is actually disabled -> dispose / unlink?
+                
                 ref LayoutBoxUnion layoutBox = ref layoutBoxTable[elementId];
 
                 if (layoutBox.layoutType == LayoutBoxType.ScrollView) {
@@ -329,9 +327,7 @@ namespace UIForia.Systems {
                 metaTable = elementSystem.metaTable,
                 layoutHierarchyTable = layoutHierarchyTable,
             }.Run();
-
-            // todo -- maybe better to just return the transclusion list and handle it outside of the job, lots can go wrong with transclusion
-
+            
             // could technically be done in parallel.
 
             // ignored elements are still in this list
@@ -715,7 +711,7 @@ namespace UIForia.Systems {
             clipperIntersections[5] = new float2(Screen.width, 0);
             clipperIntersections[6] = new float2(Screen.width, Screen.height);
             clipperIntersections[7] = new float2(0, Screen.height);
-
+            
             JobHandle constructClippers = new ConstructClippersJob() {
                 clipInfoTable = clipInfoTable,
                 clipperOutputList = clippers,

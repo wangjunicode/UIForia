@@ -4,8 +4,7 @@ namespace UIForia.Rendering {
 
         Unset = 0,
         Visible = 1 << 0, 
-        Hidden  = 1 << 1,
-        Scroll = 1 << 2,
+        Hidden  = 1 << 1
 
     }
 

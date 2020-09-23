@@ -1,4 +1,5 @@
-﻿using UIForia.Systems;
+﻿using System.Diagnostics;
+using UIForia.Systems;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
 using Unity.Collections;
@@ -18,6 +19,16 @@ namespace UIForia.Layout {
         public DataList<ElementId>.Shared ignoredList;
         public int viewActiveElementCount;
 
+        // public bool Contains(ElementId elementId, ElementId* array, int size) {
+        //     for (int i = 0; i < size; i++) {
+        //         if (array[i] == elementId) {
+        //             return true;
+        //         }
+        //     }
+        //
+        //     return false;
+        // }
+        
         public void Execute() {
 
             if (viewActiveElementCount <= 0) {
@@ -54,7 +65,7 @@ namespace UIForia.Layout {
                 
                 ref LayoutHierarchyInfo hierarchyInfo = ref layoutHTable[current.id & ENTITY_INDEX_MASK];
 
-                if (hierarchyInfo.behavior != LayoutBehavior.Normal) {//  && hierarchyInfo.behavior != LayoutBehavior.__Special__) {
+                if (hierarchyInfo.behavior != LayoutBehavior.Normal) {
                     continue;
                 }
                 
@@ -64,6 +75,9 @@ namespace UIForia.Layout {
                 ElementId childPtr = hierarchyInfo.lastChildId;
 
                 while (childPtr != default) {
+                    // if (Contains(childPtr, s, stackSize)) {
+                    //     Debugger.Break();
+                    // }
                     s[stackSize++] = childPtr;
                     childPtr = layoutHTable[childPtr.id & ENTITY_INDEX_MASK].prevSiblingId;
                 }

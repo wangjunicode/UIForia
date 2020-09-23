@@ -1,7 +1,4 @@
-using System;
 using UIForia.Attributes;
-using UIForia.Layout;
-using UIForia.Parsing;
 using UIForia.Rendering;
 using UIForia.UIInput;
 using UIForia.Util.Unsafe;
@@ -12,10 +9,11 @@ namespace UIForia.Elements {
 
     public enum ScrollGutterSide {
 
-        Max, 
+        Max,
         Min
 
     }
+
     // shared unmanaged struct so the layout system can access and modify these values
     internal struct ScrollValues {
 
@@ -32,16 +30,187 @@ namespace UIForia.Elements {
         public float trackSize;
         public ScrollGutterSide horizontalGutterPosition;
         public ScrollGutterSide verticalGutterPosition;
+        public bool showHorizontal;
         public bool showVertical;
 
     }
 
-    [RequireSpecialLayout]
+    [Template(TemplateType.Internal, "Elements/ScrollView.xml#horizontal-scroll-track")]
+    public class HorizontalScrollTrack : UIElement {
+
+        protected ScrollView scrollView;
+        protected UIElement handle;
+
+        public float handleWidth;
+
+        public override void OnCreate() {
+            scrollView = FindParent<ScrollView>();
+            handle = FindById("handle");
+        }
+
+        public override void OnUpdate() {
+            handleWidth = scrollView.GetScrollPagePercentageX() * layoutResult.ActualWidth;
+            handle.style.SetPreferredWidth(new UIMeasurement(handleWidth), StyleState.Normal);
+            handle.style.SetAlignmentOriginX(OffsetMeasurement.Percent(scrollView.scrollPercentageX), StyleState.Normal);
+            handle.style.SetAlignmentOffsetX(OffsetMeasurement.Percent(-scrollView.scrollPercentageX), StyleState.Normal);
+        }
+
+        [OnDragCreate]
+        public virtual DragEvent OnCreateHandleDrag(MouseInputEvent evt) {
+            if (evt.IsMouseRightDown) return null;
+            float baseOffset = evt.MousePosition.x - (evt.element.layoutResult.screenPosition.x);
+            return new ScrollHorizontalHandleDragEvent(scrollView, this, handle, baseOffset);
+        }
+
+        [OnMouseClick]
+        public void OnClick(MouseInputEvent evt) {
+
+            if (evt.Origin != this) {
+                evt.StopPropagation();
+                return;
+            }
+
+            float percentage = scrollView.scrollPercentageX;
+            float relative = evt.MousePosition.x - layoutResult.screenPosition.x;
+            float relativePercentage = relative / layoutResult.ActualWidth;
+
+            if (relativePercentage > percentage) {
+                scrollView.ScrollToHorizontalPercent(percentage + scrollView.GetScrollPagePercentageX());
+            }
+            else {
+                scrollView.ScrollToHorizontalPercent(percentage - scrollView.GetScrollPagePercentageX());
+            }
+
+            evt.StopPropagation();
+        }
+
+        public class ScrollHorizontalHandleDragEvent : DragEvent {
+
+            protected ScrollView scrollView;
+            protected UIElement handle;
+            protected UIElement track;
+            private float offset;
+            private float scrollPercentageOffset;
+
+            public ScrollHorizontalHandleDragEvent(ScrollView scrollView, UIElement track, UIElement handle, float offset) {
+                this.scrollView = scrollView;
+                this.handle = handle;
+                this.track = track;
+                this.offset = offset;
+                this.scrollPercentageOffset = scrollView.scrollPercentageX;
+            }
+
+            public override void Update() {
+                float width = scrollView.GetHorizontalGutterWidth() - handle.layoutResult.ActualWidth;
+
+                float x = MousePosition.x - (track.layoutResult.screenPosition.x) - offset;
+
+                if (width == 0) {
+                    scrollView.ScrollToHorizontalPercent(0);
+                }
+                else {
+                    float percentage = (x / width) + scrollPercentageOffset;
+                    scrollView.ScrollToHorizontalPercent(percentage);
+                }
+
+            }
+
+        }
+
+    }
+
+    [Template(TemplateType.Internal, "Elements/ScrollView.xml#vertical-scroll-track")]
+    public class VerticalScrollTrack : UIElement {
+
+        protected ScrollView scrollView;
+        protected UIElement handle;
+
+        public float handleHeight;
+
+        public override void OnCreate() {
+            scrollView = FindParent<ScrollView>();
+            handle = FindById("handle");
+        }
+
+        public override void OnUpdate() {
+            handleHeight = scrollView.GetScrollPagePercentageY() * layoutResult.ActualHeight;
+            handle.style.SetPreferredHeight(new UIMeasurement(handleHeight), StyleState.Normal);
+            handle.style.SetAlignmentOriginY(OffsetMeasurement.Percent(scrollView.scrollPercentageY), StyleState.Normal);
+            handle.style.SetAlignmentOffsetY(OffsetMeasurement.Percent(-scrollView.scrollPercentageY), StyleState.Normal);
+        }
+
+        [OnDragCreate]
+        public virtual DragEvent OnCreateHandleDrag(MouseInputEvent evt) {
+            if (evt.IsMouseRightDown) return null;
+            float baseOffset = evt.MousePosition.y - (evt.element.layoutResult.screenPosition.y);
+            return new ScrollVerticalHandleDragEvent(scrollView, this, handle, baseOffset);
+        }
+
+        [OnMouseClick]
+        public void OnClick(MouseInputEvent evt) {
+
+            if (evt.Origin != this) {
+                evt.StopPropagation();
+                return;
+            }
+
+            float percentage = scrollView.scrollPercentageY;
+            float relative = evt.MousePosition.y - layoutResult.screenPosition.y;
+            float relativePercentage = relative / layoutResult.ActualHeight;
+
+            if (relativePercentage > percentage) {
+                scrollView.ScrollToVerticalPercent(percentage + scrollView.GetScrollPagePercentageY());
+            }
+            else {
+                scrollView.ScrollToVerticalPercent(percentage - scrollView.GetScrollPagePercentageY());
+            }
+
+            evt.StopPropagation();
+        }
+
+        public class ScrollVerticalHandleDragEvent : DragEvent {
+
+            protected ScrollView scrollView;
+            protected UIElement handle;
+            protected UIElement track;
+            private float offset;
+            private float scrollPercentageOffset;
+
+            public ScrollVerticalHandleDragEvent(ScrollView scrollView, UIElement track, UIElement handle, float offset) {
+                this.scrollView = scrollView;
+                this.handle = handle;
+                this.track = track;
+                this.offset = offset;
+                this.scrollPercentageOffset = scrollView.scrollPercentageY;
+            }
+
+            public override void Update() {
+                float height = scrollView.GetVerticalGutterHeight() - handle.layoutResult.ActualHeight;
+
+                float y = MousePosition.y - (track.layoutResult.screenPosition.y) - offset;
+
+                if (height == 0) {
+                    scrollView.ScrollToVerticalPercent(0);
+                }
+                else {
+                    float percentage = (y / height) + scrollPercentageOffset;
+                    scrollView.ScrollToVerticalPercent(percentage);
+                }
+
+            }
+
+        }
+
+    }
+
     [Template(TemplateType.Internal, "Elements/ScrollView.xml")]
     public unsafe class ScrollView : UIElement {
 
         public float scrollSpeedY = 48f;
         public float scrollSpeedX = 16f;
+
+        protected UIElement verticalScrollTrack;
+        protected UIElement horizontalScrollTrack;
 
         public float trackSize {
             get {
@@ -61,8 +230,6 @@ namespace UIForia.Elements {
 
         public bool verticalScrollingEnabled => !disableOverflowY && isOverflowingY;
         public bool horizontalScrollingEnabled => !disableOverflowX && isOverflowingX;
-
-        private Size previousChildrenSize;
 
         public bool isOverflowingX {
             get => scrollValues != null && scrollValues->isOverflowingX;
@@ -96,36 +263,33 @@ namespace UIForia.Elements {
                 return;
             }
 
+            verticalScrollTrack = FindById("vertical-scrolltrack");
+            horizontalScrollTrack = FindById("horizontal-scrolltrack");
+
             scrollValues = TypedUnsafe.Malloc<ScrollValues>(Allocator.Persistent);
             *scrollValues = default;
             scrollValues->trackSize = 10;
             scrollValues->horizontalGutterPosition = ScrollGutterSide.Max;
             scrollValues->verticalGutterPosition = ScrollGutterSide.Max;
-            scrollValues->verticalTrackId = FindById("vertical-scrolltrack").id;
-            scrollValues->horizontalTrackId = FindById("horizontal-scrolltrack").id;
+            scrollValues->verticalTrackId = verticalScrollTrack.id;
+            scrollValues->horizontalTrackId = horizontalScrollTrack.id;
         }
 
         internal float scrollPercentageX {
             get {
-                if (scrollValues != null) return scrollValues->scrollX;
-
-
+                InitScrollValues();
                 return scrollValues->scrollX;
             }
             set {
                 if (value < 0) value = 0;
                 if (value > 1) value = 1;
-                if (scrollValues == null) {
-                    InitScrollValues();
-                }
-
+                InitScrollValues();
                 scrollValues->scrollX = value;
             }
         }
 
         internal float scrollPercentageY {
             get {
-                if (scrollValues != null) return scrollValues->scrollY;
                 InitScrollValues();
                 return scrollValues->scrollY;
             }
@@ -138,14 +302,8 @@ namespace UIForia.Elements {
         }
 
         internal ScrollValues* GetScrollValues() {
-            if (scrollValues != null) return scrollValues;
             InitScrollValues();
             return scrollValues;
-        }
-
-        public override void OnCreate() {
-            // horizontalScrollTrack = FindById("horizontal-scrolltrack");
-            // verticalScrollTrack = FindById("vertical-scrolltrack");
         }
 
         public override void OnUpdate() {
@@ -164,26 +322,13 @@ namespace UIForia.Elements {
                 isScrollingX = t < 1;
             }
 
-            // verticalScrollTrack.SetEnabled(verticalScrollingEnabled);
-            // horizontalScrollTrack.SetEnabled(horizontalScrollingEnabled);
+            InitScrollValues();
+            verticalScrollTrack.SetEnabled(verticalScrollingEnabled);
+            horizontalScrollTrack.SetEnabled(horizontalScrollingEnabled);
 
-            // if (!firstChild.isEnabled) {
-            //     // isOverflowingX = false;
-            //     // isOverflowingY = false;
-            // }
-            // else {
-            //     Size currentChildrenSize = new Size(firstChild.layoutResult.actualSize.width, firstChild.layoutResult.allocatedSize.height);
-            //
-            //     // isOverflowingX = currentChildrenSize.width > layoutResult.actualSize.width;
-            //     // isOverflowingY = currentChildrenSize.height > layoutResult.actualSize.height;
-            //
-            //     if (!disableAutoScroll && currentChildrenSize != previousChildrenSize) {
-            //         ScrollToHorizontalPercent(0);
-            //         ScrollToVerticalPercent(0);
-            //     }
-            //
-            //     previousChildrenSize = currentChildrenSize;
-            // }
+            scrollValues->showVertical = verticalScrollTrack.isEnabled;
+            scrollValues->showHorizontal = horizontalScrollTrack.isEnabled;
+
         }
 
         public override void OnDisable() {
@@ -236,29 +381,6 @@ namespace UIForia.Elements {
                     }
                 }
             }
-        }
-
-        public void OnClickVertical(MouseInputEvent evt) {
-            // float contentAreaHeight = layoutResult.ContentAreaHeight;
-            // float contentHeight = firstChild.layoutResult.actualSize.height;
-            // float paddingBorderStart = layoutResult.VerticalPaddingBorderStart;
-            // float y = evt.MousePosition.y - layoutResult.screenPosition.y - paddingBorderStart;
-            //
-            // if (contentHeight == 0) return;
-            //
-            // float handleHeight = (contentAreaHeight / contentHeight) * contentAreaHeight;
-            //
-            // float handlePosition = (paddingBorderStart + contentAreaHeight - handleHeight) * scrollPercentageY;
-            //
-            // float pageSize = evt.element.layoutResult.allocatedSize.height / contentHeight;
-            //
-            // if (y < handlePosition) {
-            //     pageSize = -pageSize;
-            // }
-            //
-            // ScrollToVerticalPercent(scrollPercentageY + pageSize);
-
-            evt.StopPropagation();
         }
 
         public void OnClickHorizontal(MouseInputEvent evt) {
@@ -440,6 +562,30 @@ namespace UIForia.Elements {
             }
 
             scrollValues = default;
+        }
+
+        public float GetScrollPagePercentageX() {
+            InitScrollValues();
+            if (scrollValues->contentWidth <= 0) return 0;
+            float pageSize = scrollValues->actualWidth / scrollValues->contentWidth;
+            return Mathf.Clamp01(pageSize);
+        }
+
+        public float GetScrollPagePercentageY() {
+            InitScrollValues();
+            if (scrollValues->contentHeight <= 0) return 0;
+            float pageSize = scrollValues->actualHeight / scrollValues->contentHeight;
+            return Mathf.Clamp01(pageSize);
+        }
+
+        public float GetVerticalGutterHeight() {
+            InitScrollValues();
+            return scrollValues->actualHeight;
+        }
+
+        public float GetHorizontalGutterWidth() {
+            InitScrollValues();
+            return scrollValues->actualWidth;
         }
 
     }

@@ -113,7 +113,7 @@ style navigation {
 }
 
 style demo-panel {
-//    Padding = 3px;
+    Padding = 30px;
     BorderLeft = 2px;
     BorderColor = #2c2e53;
     BackgroundColor = @boringBackgroundColor;

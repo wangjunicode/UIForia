@@ -96,15 +96,7 @@ namespace UIForia {
                 //templateOriginId = (ushort) templateOriginId
             };
 
-            hierarchyTable.array[idx] = new HierarchyInfo() {
-                childCount = 0,
-                firstChildId = default,
-                lastChildId = default,
-                nextSiblingId = default,
-                prevSiblingId = default,
-                parentId = default
-            };
-
+            hierarchyTable.array[idx] = default;
             instanceTable[idx] = element;
 
             return new ElementId(idx, metaTable.array[idx].generation);

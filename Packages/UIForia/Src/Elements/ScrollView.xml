@@ -4,37 +4,63 @@
         const trackColor = #b2b2b2aa;
 
         style scrollview {
-            Overflow = scroll;
-            ClipBounds = ContentBox;
+            Overflow = hidden;
         }
 
         style scroll-track {
             BackgroundColor = red; //@trackColor;
             BorderRadius = 3px;
         }
-
-        style scroll-handle {
+        
+        style scroll-handle-horizontal {
             BorderRadius = 50%;
+            PreferredHeight = 1pca;
             BackgroundColor = grey;
+            AlignmentTargetX = Parent;
         }
-
-        style transclude {
-            // LayoutBehavior = TranscludeChildren;
+        
+        style scroll-handle-vertical {
+            BorderRadius = 50%;
+            PreferredWidth = 1pca;
+            BackgroundColor = grey;
+            AlignmentTargetY = Parent;
+        }
+        
+        style track {
+            PreferredSize = 1pca;
+            BackgroundColor = blue;
+            FlexItemShrink = 1;
         }
         
     </Style>
 
     <Contents style="scrollview">
-        
+
         <define:Children/>
-        
-        <define:vertical-scrollbar attr:id="vertical-scrolltrack" style="scroll-track" mouse:click="OnClickVertical($event)"/>
 
-        <define:vertical-scrollbar-handle style="scroll-handle" drag:create="OnCreateVerticalDrag($event)"/>
-        
-        <define:horizontal-scrollbar attr:id="horizontal-scrolltrack" style="scroll-track" mouse:click="OnClickHorizontal($event)"/>
+        <define:horizontal-gutter attr:id="horizontal-scrolltrack" style="scroll-track">
 
-        <define:horizontal-handle style="scroll-handle" drag:create="OnCreateHorizontalDrag($event)"/>
+            <HorizontalScrollTrack/>
+
+        </define:horizontal-gutter>
+        
+        <define:vertical-gutter attr:id="vertical-scrolltrack" style="scroll-track">
+
+            <VerticalScrollTrack/>
+
+        </define:vertical-gutter>
+
+    </Contents>
+
+    <Contents id="horizontal-scroll-track" style="track">
+        
+        <define:handle attr:id="handle" style="scroll-handle-horizontal"/> 
+        
+    </Contents>
+
+    <Contents id="vertical-scroll-track" style="track">
+
+        <define:handle attr:id="handle" style="scroll-handle-vertical"/>
 
     </Contents>
     

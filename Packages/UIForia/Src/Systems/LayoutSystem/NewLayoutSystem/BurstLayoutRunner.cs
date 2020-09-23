@@ -1,6 +1,7 @@
 ﻿using UIForia.ListTypes;
 using UIForia.Rendering;
 using UIForia.Systems;
+using UIForia.Util.Unsafe;
 using UnityEngine;
 
 namespace UIForia.Layout {
@@ -153,11 +154,11 @@ namespace UIForia.Layout {
             layoutBoxInfo.allocatedSize.y = availableSize;
         }
 
-         public void ApplyLayoutHorizontalOverride(ElementId elementId, float localX, float size) {
+         public void ApplyLayoutHorizontalOverride(ElementId elementId, float localX, float size, in BlockSize blockSize) {
             ref LayoutInfo layoutInfo = ref GetHorizontalLayoutInfo(elementId);
             ref LayoutBoxInfo layoutBoxInfo = ref GetLayoutBoxInfo(elementId);
             
-            layoutInfo.parentBlockSize = default;
+            layoutInfo.parentBlockSize = blockSize;
 
             float newSize = size;
 

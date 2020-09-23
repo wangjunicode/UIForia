@@ -1,7 +1,9 @@
-﻿using UIForia.Elements;
+﻿using System.Runtime.InteropServices;
+using UIForia.Elements;
 
 namespace UIForia {
 
+    [StructLayout(LayoutKind.Sequential)]
     public struct ElementMetaInfo {
 
         public byte generation;

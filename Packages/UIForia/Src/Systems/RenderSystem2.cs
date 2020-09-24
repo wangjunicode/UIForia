@@ -203,7 +203,7 @@ namespace UIForia.Systems {
 
             this.glyphBuffer = new ComputeBuffer(512, sizeof(GPUGlyphInfo), ComputeBufferType.Structured); // todo -- try as constant
             this.fontBuffer = new ComputeBuffer(8, sizeof(GPUFontInfo), ComputeBufferType.Structured); // todo -- try as constant
-
+            
             this.vertexBuffers = new ComputeBuffer[2];
             this.matrixBuffers = new ComputeBuffer[2];
             this.float4Buffers = new ComputeBuffer[2];
@@ -355,15 +355,6 @@ namespace UIForia.Systems {
 
             // might want to do this after culling finishes
             // otherwise I'm uploading data for potentially culled render groups
-            shapeBakingHandles[1] = UIForiaScheduler.Run(new BakeUIForiaText() {
-                drawList = unsafeData.drawList,
-                vertexList = unsafeData.textVertexList,
-                meshInfoList = unsafeData.meshInfoList,
-                materialBuffer = unsafeData.materialBuffer,
-                float4Buffer = unsafeData.float4Buffer,
-                textEffectBuffer = application.textSystem.textEffectVertexInfoTable
-            });
-
             shapeBakingHandles[1] = UIForiaScheduler.Run(new BakeUIForiaText() {
                 drawList = unsafeData.drawList,
                 vertexList = unsafeData.textVertexList,

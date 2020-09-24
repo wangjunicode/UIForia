@@ -136,6 +136,7 @@ namespace UIForia {
         }
 
         internal void Initialize() {
+            
             systems = new List<ISystem>();
             views = new List<UIView>();
 

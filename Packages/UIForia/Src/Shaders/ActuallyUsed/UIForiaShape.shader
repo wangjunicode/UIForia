@@ -2,7 +2,6 @@
     Properties {
         _Color ("Color", Color) = (1, 1, 1, 1)
         _MainTex ("Texture", 2D) = "white" {}
-        // _Sigma ("Sigma", Range(0, 1)) = 0
     }
 
     SubShader {
@@ -22,10 +21,10 @@
                 Pass [_UIForiaStencilOp]
             }
 
-            Blend [_UIForiaSrcMode] [_UIForiaDstBlendMode] // 
+            Blend [_UIForiaSrcMode] [_UIForiaDstBlendMode] // these CANNOT be properties or Unity will not set them from globals
             Blend SrcAlpha OneMinusSrcAlpha // todo -- consider unifying the blend mode with text so we have less state change on shader switch
             CGPROGRAM
-#pragma vertex vert
+            #pragma vertex vert
             #pragma fragment frag
             #pragma target 4.5
             #include "UnityCG.cginc"
@@ -101,8 +100,6 @@
             float _UIForiaDPIScale;
             float4x4 _UIForiaOriginMatrix;
             float _MaskSoftness;
-
-            // float _Sigma;
             
             StructuredBuffer<float4x4> _UIForiaMatrixBuffer;
             StructuredBuffer<UIForiaVertex> _UIForiaVertexBuffer;
@@ -128,13 +125,6 @@
                 ElementMaterialInfo material = _UIForiaMaterialBuffer[materialIndex];
 
                 float3 vpos = float3(vertex.position.xy, 0); // positioned at center
-
-                // vertex.size.x += _WidthAdd;
-                // vertex.size.y += _HeightAdd;
-                // size *= 1/(ratio * 0.5);
-                // float ratio = _Outer / 150.0;
-              // vertex.size.x += (vertex.size.x * (_Sigma));
-              // vertex.size.y += (vertex.size.y * (_Sigma));
 
                 float2 halfSize = vertex.size * 0.5;
                 bool is9SliceBorder = (GetByteN(vertex.indices.y, 3) & ElementShaderFlags_IsNineSliceBorder) != 0;
@@ -235,17 +225,9 @@
 
             float4 frag(v2f i) : SV_Target
             {
-                const float shadowScale = 1;
                 // this could be done in the vertex shader too but this way we can support correct
                 ElementMaterialInfo material = _UIForiaMaterialBuffer[i.indices.y & 0xffffff];
                 float2 size = i.size;
-
-                // float sigma = _Sigma/2; 
-                // float2 p0Rect = float2(sigma, sigma);
-                // float2 p1Rect = float2(1-sigma, 1-sigma);
-                // float2 radii = float2(0, 0);
-                // float value = color(i.texCoord0, p0Rect, p1Rect, radii, sigma);
-                // return float4(BLACK.rgb, max(value, 0.0));
 
                 float minSize = min(size.x, size.y);
                 fixed4 color = UnpackColor(material.backgroundColor);
@@ -340,7 +322,7 @@
                                             size.y * 0.5 * (i.texCoord0.y > 0.5 ? 1 : -1));
                 float2 bevelPoint = ((i.texCoord0 - 0.5) * size) - bevelOffset;
                 float sdfBevel = sdRect(RotateUV(bevelPoint, 45 * Deg2Rad), float2(bevelAmount, bevelAmount));
-                float sdf = sdRoundBox(samplePoint, size * 0.5 * shadowScale, radius * shadowScale);
+                float sdf = sdRoundBox(samplePoint, size * 0.5, radius);
                 sdf = max(-sdfBevel, sdf);
 
                 // todo -- move max up here to draw pie instead of using as a clipping bounds
@@ -354,9 +336,6 @@
                 color = ComputeColor(color, grad, tintColor, bodyColorMode, i.texCoord1, _MainTex, uvBounds, originalUV);
                 color = lerp(color, outlineColor, outlineWidth == 0 ? 0 : 1 - saturate(sdfOutline));
                 color.a *= 1.0 - smoothstep(0, fwidth(sdf), sdf);
-
-                //float shadow = minSize * 0.5;
-                //color.a *= 1.0 - smoothstep(0, lerp(_Inner, fwidth(sdf), 0), sdf);
 
                 float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y); //* _UIForiaDPIScale;
                 float4 clipRect = _UIForiaFloat4Buffer[i.indices.x]; // x = xMin, y = yMin, z = xMax, w = yMax
@@ -389,16 +368,7 @@
         }
     }
 }
-//
-//  float ratio = _Outer / 100;
-//                float halfRatio = ratio * 0.125; //(1/(1 +ratio));//0.4;
-//                float start = float2(halfRatio, halfRatio);
-//                float end = float2(1 - halfRatio, 1 - halfRatio);
-//                size *= 1 / (ratio * 0.125);
-//                // float alpha = roundedBoxShadow(float2(ratio * 0.5, ratio * 0.5) , float2(1-ratio* 0.5, 1- ratio * 0.5) , originalUV , ratio, 0);
-//                float alpha = roundedBoxShadow(start * size, end * size, i.texCoord0.xy * size, _Outer, _Inner);
-//                // alpha = lerp(alpha, 1.0 - smoothstep(0, fwidth(sdf), sdf), _Outer <= 0.25);
-//                return UIForiaColorSpace(lerp(fixed4(color.rgb, alpha), RED,0));
+
 //fixed4 colors[8] = {
 //     fixed4(0.529, 0.227, 0.706, 0),
 //     fixed4(GREEN.rgb, 0.25),

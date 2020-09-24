@@ -47,7 +47,6 @@ namespace UIForia.Util.Unsafe {
         }
 
         public void EnsureCapacity(int desiredCapacity) {
-
             int capacity = 1 << capacityShiftBits;
             if (capacity > desiredCapacity) {
                 return;
@@ -98,7 +97,6 @@ namespace UIForia.Util.Unsafe {
 
             this = default;
         }
-        
 
     }
 
@@ -187,6 +185,71 @@ namespace UIForia.Util.Unsafe {
         public int size {
             get => state.size;
             set => state.size = value;
+        }
+
+    }
+
+    public static unsafe class PointerListUtil {
+
+        public static void Initialize(ushort initialCapacity, out ushort size, out ushort capacity, out void** listPointer, Allocator allocator) {
+            size = 0;
+            capacity = 0;
+            listPointer = null;
+
+            if (initialCapacity > 0) {
+                capacity = initialCapacity;
+                int listSizeInBytes = sizeof(void*) * capacity;
+                listPointer = (void**) UnsafeUtility.Malloc(listSizeInBytes, UnsafeUtility.AlignOf<long>(), allocator);
+            }
+        }
+
+        public static void AddPointerItem(ref ushort size, ref ushort capacity, ref void** listPointer, void* item, Allocator allocator) {
+            if (size + 1 >= capacity) {
+                ushort newCapacity = (ushort) (capacity * 2);
+
+                int listSizeInBytes = sizeof(void*) * newCapacity;
+
+                void** newListPointer = (void**) UnsafeUtility.Malloc(listSizeInBytes, UnsafeUtility.AlignOf<long>(), allocator);
+
+                if (listPointer != null) {
+                    UnsafeUtility.MemCpy(newListPointer, listPointer, sizeof(IntPtr) * capacity);
+                    UnsafeUtility.Free(listPointer, allocator);
+                }
+
+                capacity = newCapacity;
+
+                listPointer = newListPointer;
+            }
+
+            listPointer[size++] = item;
+        }
+
+        public static void Dispose(ushort size, ref void** listPointer) {
+            if (listPointer != null) {
+                for (int i = 0; i < size; i++) {
+                    if (listPointer[i] != null) {
+                        UnsafeUtility.Free(listPointer[i], Allocator.Persistent);
+                        listPointer[i] = null;
+                    }
+                }
+            }
+
+            listPointer = null;
+        }
+
+        public static void Dispose<T>(ushort size, ref void** listPointer) where T : unmanaged, IDisposable {
+            if (listPointer != null) {
+                for (int i = 0; i < size; i++) {
+                    if (listPointer[i] != null) {
+                        T* cast = (T*) listPointer[i];
+                        cast->Dispose();
+                        UnsafeUtility.Free(listPointer[i], Allocator.Persistent);
+                        listPointer[i] = null;
+                    }
+                }
+            }
+
+            listPointer = null;
         }
 
     }

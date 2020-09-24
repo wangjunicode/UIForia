@@ -117,6 +117,13 @@ namespace UIForia.Systems {
                 ref LayoutBoxUnion layoutBox = ref layoutBoxTable[elementId];
 
                 if (layoutBox.layoutType == LayoutBoxType.ScrollView) {
+
+                    if (scrollBoxHead == layoutBox.scroll.elementId) {
+                        
+                        scrollBoxHead = layoutBox.scroll.nextScrollBox;
+                        
+                    }
+                    
                     throw new NotImplementedException("Need to unregister scroll views, bruh");
                 }
 

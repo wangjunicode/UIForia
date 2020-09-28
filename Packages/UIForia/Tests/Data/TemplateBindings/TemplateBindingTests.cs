@@ -953,19 +953,21 @@ namespace TemplateBinding {
 
         }
 
-        [Test]
+       [Test]
         public void SyncBinding_Sync() {
-            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_SyncBinding_SyncEnum>()) {
-                TemplateBindingTest_SyncBinding_SyncEnumChild e = (TemplateBindingTest_SyncBinding_SyncEnumChild) app.RootElement;
+            using (MockApplication app = MockApplication.Setup<TemplateBindingTest_SyncBinding_Sync>()) {
+                TemplateBindingTest_SyncBinding_Sync e = (TemplateBindingTest_SyncBinding_Sync) app.RootElement;
+                TemplateBindingTest_SyncBinding_FakeInput child = (TemplateBindingTest_SyncBinding_FakeInput) e[0];
 
-                e.syncedValue = EnumSyncThing.ValueOne;
+                e.syncedValue = "synced";
 
                 app.Update();
 
-                // Assert.AreEqual("synced__afterSync", child.value);
-                // Assert.AreEqual("synced__afterSync", e.syncedValue);
+                Assert.AreEqual("synced__afterSync", child.value);
+                Assert.AreEqual("synced__afterSync", e.syncedValue);
             }
         }
+
         
         [Test]
         public void SyncBinding_SyncNested() {

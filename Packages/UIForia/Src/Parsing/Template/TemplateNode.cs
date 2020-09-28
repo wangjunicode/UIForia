@@ -52,7 +52,7 @@ namespace UIForia.Parsing {
             this.root = root;
             this.parent = parent;
             this.attributes = attributes;
-            this.processedType = processedType;
+           this.processedType = processedType;
             this.lineInfo = templateLineInfo;
         }
 
@@ -77,7 +77,7 @@ namespace UIForia.Parsing {
         public TemplateNode this[int i] => children?.array[i];
 
         public int ChildCount => children?.size ?? 0;
-        public Type ElementType => processedType.rawType;
+       public Type ElementType => processedType.rawType;
         
         public TemplateNodeDebugData TemplateNodeDebugData => new TemplateNodeDebugData() {
             lineInfo = lineInfo,

@@ -36,6 +36,7 @@ namespace UIForia.Parsing {
     // <Shadow:
 
     public class XMLTemplateParser {
+        internal static readonly XmlParserContext s_XmlParserContext = new XmlParserContext(null, new CustomNamespaceReader(new NameTable()), null, XmlSpace.None);
 
         private readonly XmlParserContext parserContext;
         private readonly Dictionary<string, TemplateShell> parsedFiles;
@@ -304,9 +305,6 @@ namespace UIForia.Parsing {
             }
             else if (typeof(UITextElement).IsAssignableFrom(processedType.rawType)) {
                 node = new TextNode(templateRoot, parent, string.Empty, processedType, attributes, templateLineInfo);
-            }
-            else if (typeof(UITerminalElement).IsAssignableFrom(processedType.rawType)) {
-                node = new TerminalNode(templateRoot, parent, processedType, attributes, templateLineInfo);
             }
             else if (typeof(UIElement).IsAssignableFrom(processedType.rawType)) {
                 node = new ExpandedTemplateNode(templateRoot, parent, processedType, attributes, templateLineInfo);

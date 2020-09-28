@@ -13,7 +13,7 @@ namespace UIForia.Parsing {
             this.textExpressionList = new StructList<TextExpression>(3);
             this.rawTextContent = content;
             this.attributes = attributes;
-            this.processedType = processedType;
+            // this.processedType = processedType;
         }
 
         public bool IsTextConstant() {

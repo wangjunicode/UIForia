@@ -7,6 +7,7 @@ using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Extensions;
+using UIForia.NewStyleParsing;
 using UIForia.Parsing;
 using UIForia.Util;
 using UnityEngine;
@@ -36,6 +37,13 @@ namespace UIForia {
 
     }
 
+    public enum CompilationType {
+
+        Dynamic,
+        Precompiled
+
+    }
+    
     public static class UIForiaRuntime {
 
         private static bool _failedToLoad;
@@ -56,8 +64,37 @@ namespace UIForia {
         private static UIModule[] modules;
         private static List<DiagnosticEntry> diagnosticLog;
 
-        public static void Initialize() {
+        private static List<AppCache> cacheMap;
+        
+        private class AppCache {
 
+            public string appName;
+            public CompilationType compilationType;
+            public TemplateParseCache templateParseCache;
+
+        }
+        
+        public static Application CreateGameApp(string appName, CompilationType compilationType, Type entryType) {
+            
+            Initialize();
+
+            // GetModules(entryType);
+            
+            // ParseTemplates();
+            
+            // ParseStyles();
+            
+            // CompileStyles();
+            
+            // CompileTemplates(); 
+            
+            // GenerateCode();
+            
+            return null;
+
+        }
+
+        public static void Initialize() {
             diagnosticLog = new List<DiagnosticEntry>();
             TypeResolver.Stats stats = TypeResolver.Initialize();
             TypeScanner.Stats scanStats = TypeScanner.Scan();
@@ -87,11 +124,9 @@ namespace UIForia {
             }
 
             IsLoading = false;
-
         }
 
         private static void ValidateModulePaths() {
-
             for (int i = 0; i < modules.Length; i++) {
                 for (int j = i; j < modules.Length; j++) {
                     UIModule moduleI = modules[i];
@@ -115,7 +150,6 @@ namespace UIForia {
         }
 
         private static void ValidateModuleDependencies() {
-
             Dictionary<string, Type> stringHash = new Dictionary<string, Type>();
             HashSet<Type> typeHash = new HashSet<Type>();
 
@@ -174,17 +208,14 @@ namespace UIForia {
             LightStack<UIModule> stack = new LightStack<UIModule>();
 
             Visit(modules[0], stack, sorted);
-
         }
 
         private static bool Visit(UIModule module, LightStack<UIModule> stack, LightList<UIModule> sorted) {
-
             if (sorted.Contains(module)) {
                 return true;
             }
 
             if (stack.Contains(module)) {
-
                 string error = StringUtil.ListToString(stack.array.Select(m => m.GetType().GetTypeName()).ToArray(), " -> ");
 
                 LogDiagnosticError($"Cyclic dependency found while loading modules: {error}");
@@ -208,7 +239,6 @@ namespace UIForia {
 
         // cannot be mulithreaded without significant work
         private static void AssignElementsToModules() {
-
             IList<Type> elements = TypeScanner.elementTypes;
 
             for (int i = 0; i < elements.Count; i++) {
@@ -236,7 +266,6 @@ namespace UIForia {
                 TypeProcessor.typeMap[processedType.rawType] = processedType;
 
                 TryAssignModule(processedType);
-
             }
 
             // stats.elementCount = elements.Count;
@@ -295,7 +324,7 @@ namespace UIForia {
                 string templateLocation = processedType.resolvedTemplateLocation.Value.filePath;
 
                 // todo -- need to get template sources somehow
-                
+
                 // if (!s_TemplateShells.TryGetValue(templateLocation, out TemplateFileShell shell)) {
                 //     shell = new TemplateFileShell(templateLocation);
                 //     module.templateShells.Add(shell);
@@ -311,7 +340,89 @@ namespace UIForia {
             }
 
             LogDiagnosticError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} at {processedType.elementPath} was not inside a module hierarchy.");
+        }
 
+        public struct ParseCacheEntry {
+
+            public string filePath;
+            public long timestamp;
+            public TemplateASTRoot[] roots;
+
+        }
+
+        public class TemplateParseCache {
+
+            private Dictionary<string, TemplateFileShell> shellMap;
+
+            public void Hydrate() {
+                byte[] bytes = File.ReadAllBytes("uiforia.parsecache");
+
+                ManagedByteBuffer buffer = new ManagedByteBuffer(bytes);
+
+                buffer.Read(out int fileCount);
+
+                for (int i = 0; i < fileCount; i++) {
+                    buffer.Read(out string filePath);
+                    buffer.Read(out int timeStamp);
+
+                    // could just store byte size and hydrate later as needed
+
+                    if (File.Exists(filePath)) {
+                        shellMap[filePath] = new TemplateFileShell(filePath);
+                        //.Deserialize(ref buffer);
+                    }
+                    else {
+                        shellMap.Remove(filePath);
+                    }
+                }
+            }
+
+            public bool TryGetTemplate(TemplateLocation location, out TemplateASTRoot templateAstRoot) {
+                throw new NotImplementedException();
+            }
+
+            public void Set(string locationFilePath, TemplateFileShell templateShellBuilder) {
+                throw new NotImplementedException();
+            }
+
+        }
+
+        public static void ParseTemplates() {
+            TemplateParseCache cache = new TemplateParseCache();
+            cache.Hydrate();
+
+            TemplateParserXML2 parser = new TemplateParserXML2();
+
+            for (int i = 0; i < modules.Length; i++) {
+                for (int j = 0; j < modules[i].elementTypes.size; j++) {
+                    ProcessedType processedType = default;
+
+                    if (!processedType.DeclaresTemplate) {
+                        continue;
+                    }
+
+                    TemplateLocation location = processedType.resolvedTemplateLocation.Value;
+
+                    if (cache.TryGetTemplate(location, out TemplateASTRoot root)) {
+                        // all good, can re-use template from cache as is
+                    }
+                    else {
+                        // todo -- async parse later?
+
+                        // need to note that we tried to parse a template but failed, vs missing
+
+                        //  parser.TryParse(location.filePath, out TemplateFileShell fileShell);            
+
+                        // needs to reparse
+                        //  cache.Set(location.filePath, fileShell);
+                    }
+
+                    // if didn't fail to parse
+                    // processedType.template = fileShell;
+                }
+            }
+
+            // cache.Persist(); // will only write to disk if we had updates
         }
 
         private static UIModule GetModuleInstance(Type moduleType) {
@@ -353,7 +464,6 @@ namespace UIForia {
         }
 
         private static void InitializeModules() {
-
             IList<Type> moduleTypes = TypeScanner.moduleTypes;
 
             modules = new UIModule[moduleTypes.Count];

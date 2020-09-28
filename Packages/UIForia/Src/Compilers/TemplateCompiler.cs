@@ -354,6 +354,7 @@ namespace UIForia.Compilers {
         }
 
         private Expression Visit(CompilationContext ctx, TemplateNode templateNode, Type requiredType) {
+
             if (templateNode is RepeatNode repeatNode) {
                 // todo -- fix loop hole with required type
                 return CompileRepeatNode(ctx, repeatNode);
@@ -378,9 +379,6 @@ namespace UIForia.Compilers {
 
                 case SlotNode slotNode:
                     return CompileSlotDefinition(ctx, slotNode);
-
-                case TerminalNode terminalNode:
-                    return CompileTerminalNode(ctx, terminalNode);
 
                 case ExpandedTemplateNode expandedTemplateNode:
                     return CompileExpandedNode(ctx, expandedTemplateNode);
@@ -464,10 +462,6 @@ namespace UIForia.Compilers {
             ctx.Assign(itemVarIdField, Expression.Constant(itemVarId));
 
             return nodeExpr;
-        }
-
-        private Expression CompileTerminalNode(CompilationContext ctx, TerminalNode terminalNode) {
-            throw new NotImplementedException();
         }
 
         private ContextVariableDefinition[] CloneContextStack() {

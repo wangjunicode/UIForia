@@ -40,7 +40,9 @@ namespace UIForia.Parsing.Expressions {
 
         StyleStateHover = 1 << 6,
         StyleStateFocus = 1 << 7,
-        StyleStateActive = 1 << 8
+        StyleStateActive = 1 << 8,
+
+        Injected = 1 << 9
 
     }
 

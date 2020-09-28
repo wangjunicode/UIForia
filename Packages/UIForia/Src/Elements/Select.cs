@@ -31,7 +31,7 @@ namespace UIForia.Elements {
         public EnumSelectOption(T value) : base (value.ToString(), value) { }
     }
 
-    [Template(TemplateType.Internal, "Elements/Select.xml")]
+    [Template("Select.xml")]
     public class Select<T> : UIElement, IFocusable {
 
         private const string disabledAttributeValue = "select-disabled";

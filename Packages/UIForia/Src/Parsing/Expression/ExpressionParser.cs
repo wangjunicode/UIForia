@@ -510,7 +510,7 @@ namespace UIForia.Parsing.Expressions {
                 }
 
                 if (!tokenStream.HasMoreTokens) {
-                    if (typeLookup.generics != null || !string.IsNullOrEmpty(typeLookup.namespaceName)) {
+                    if (typeLookup.generics.array != null || !string.IsNullOrEmpty(typeLookup.namespaceName)) {
                         tokenStream.Restore();
                         return false;
                     }
@@ -672,13 +672,13 @@ namespace UIForia.Parsing.Expressions {
                         return false;
                     }
 
-                    arg.generics = null;
+                    arg.generics = default;
 
                     continue;
                 }
 
                 if (tokenStream.Current == ExpressionTokenType.Comma) {
-                    retn.generics = retn.generics ?? StructList<TypeLookup>.GetMinSize(4);
+                    retn.generics = retn.generics.array != default ? retn.generics : new SizedArray<TypeLookup>(4);
                     retn.generics.Add(arg);
                     tokenStream.Advance();
                     continue;
@@ -695,7 +695,7 @@ namespace UIForia.Parsing.Expressions {
                 return false;
             }
 
-            retn.generics = retn.generics ?? StructList<TypeLookup>.GetMinSize(4);
+            retn.generics = retn.generics.array != default ? retn.generics : new SizedArray<TypeLookup>(4);
             retn.generics.Add(arg);
 
             return true;
@@ -713,6 +713,8 @@ namespace UIForia.Parsing.Expressions {
 
             string lastString = identifier;
 
+            StringBuilder builder = StringUtil.GetPerThreadStringBuilder();
+            
             while (tokenStream.Current == ExpressionTokenType.Dot) {
                 tokenStream.Advance();
 
@@ -723,20 +725,25 @@ namespace UIForia.Parsing.Expressions {
                     break;
                 }
 
-                s_StringBuilder.Append(lastString);
-                s_StringBuilder.Append(".");
+                builder.Append(lastString);
+                
+                if (tokenStream.NextTokenIs(ExpressionTokenType.Dot)) {
+                    builder.Append(".");
+                }
+                
                 lastString = tokenStream.Current.value;
 
                 tokenStream.Advance();
             }
 
-            if (s_StringBuilder.Length > 1) {
-                s_StringBuilder.Remove(s_StringBuilder.Length - 1, 1);
-            }
+            
+            // if (builder.Length > 1) {
+            // builder.Remove(builder.Length - 1, 1);
+            // }
 
-            retn.namespaceName = s_StringBuilder.ToString();
+            retn.namespaceName = builder.ToString();
             retn.typeName = lastString;
-            s_StringBuilder.Clear();
+            StringUtil.ReleasePerThreadStringBuilder(builder);
             return true;
         }
 

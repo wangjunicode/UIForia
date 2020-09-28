@@ -150,24 +150,19 @@ namespace UIForia.Parsing {
         }
 
         internal void Parse(TemplateRootNode templateRootNode, ProcessedType processedType) {
-            TemplateAttribute templateAttr = processedType.templateAttr;
 
-            string filePath = templateAttr.filePath;
+            string filePath = processedType.resolvedTemplateLocation?.filePath;
 
-            if (parsedFiles.TryGetValue(filePath, out TemplateShell rootNode)) {
+            if (parsedFiles.TryGetValue(processedType.resolvedTemplateLocation?.filePath, out TemplateShell rootNode)) {
                 ParseContentTemplate(templateRootNode, rootNode, processedType);
                 return;
             }
 
-            TemplateShell shell = ParseOuterShell(templateAttr.filePath, templateAttr.source);
+            TemplateShell shell = ParseOuterShell(filePath, processedType.templateSource);
 
             parsedFiles.Add(filePath, shell);
 
             ParseContentTemplate(templateRootNode, shell, processedType);
-        }
-
-        internal TemplateShell GetOuterTemplateShell(TemplateAttribute templateAttribute) {
-            return GetOuterTemplateShell(templateAttribute.filePath, templateAttribute.source);
         }
 
         internal TemplateShell GetOuterTemplateShell(string filePath, string source) {
@@ -186,7 +181,7 @@ namespace UIForia.Parsing {
             XElement root = shell.GetElementTemplateContent(processedType.templateAttr.templateId);
 
             if (root == null) {
-                throw new TemplateNotFoundException(processedType.templateAttr.filePath, processedType.templateAttr.templateId);
+                throw new TemplateNotFoundException(processedType.resolvedTemplateLocation?.filePath, processedType.resolvedTemplateLocation?.templateId);
             }
 
             IXmlLineInfo xmlLineInfo = root;

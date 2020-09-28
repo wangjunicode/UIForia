@@ -27,6 +27,14 @@ namespace UIForia.Parsing {
         public bool requiresOnEnable;
         public bool isDynamic;
 
+        private ConstructorInfo constructorInfo;
+        public string elementPath;
+        public string templateId;
+        public string templatePath;
+        internal TemplateLocation? resolvedTemplateLocation;
+        public UIModule module;
+        public string templateSource;
+
         public ProcessedType(Type rawType, TemplateAttribute templateAttr, string tagName = null) {
             this.id = -1; // set by TypeProcessor
             this.rawType = rawType;
@@ -38,6 +46,10 @@ namespace UIForia.Parsing {
             this.requiresAfterPropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnAfterPropertyBindings)));
             this.namespaceName = rawType.Namespace;
         }
+        
+        internal static ProcessedType CreateFromType(Type type) {
+            throw new NotImplementedException();
+        }
 
         public struct PropertyChangeHandlerDesc {
 
@@ -47,6 +59,7 @@ namespace UIForia.Parsing {
         }
 
         public bool IsUnresolvedGeneric { get; set; }
+        public bool IsContainerElement { get; set; }
 
         public void GetChangeHandlers(string memberName, StructList<PropertyChangeHandlerDesc> retn) {
             if (methods == null) {
@@ -81,8 +94,7 @@ namespace UIForia.Parsing {
             return this;
         }
 
-        private ConstructorInfo constructorInfo;
-        
+
         public void GetConstructorData(out ConstructorInfo constructorInfo) {
             if (this.constructorInfo != null) {
                 constructorInfo = this.constructorInfo;

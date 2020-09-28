@@ -35,7 +35,7 @@ namespace UIForia.Elements {
 
     }
 
-    [Template(TemplateType.Internal, "Elements/ScrollView.xml#horizontal-scroll-track")]
+    [Template("ScrollView.xml#horizontal-scroll-track")]
     public class HorizontalScrollTrack : UIElement {
 
         protected ScrollView scrollView;
@@ -119,7 +119,7 @@ namespace UIForia.Elements {
 
     }
 
-    [Template(TemplateType.Internal, "Elements/ScrollView.xml#vertical-scroll-track")]
+    [Template("ScrollView.xml#vertical-scroll-track")]
     public class VerticalScrollTrack : UIElement {
 
         protected ScrollView scrollView;
@@ -203,7 +203,7 @@ namespace UIForia.Elements {
 
     }
 
-    [Template(TemplateType.Internal, "Elements/ScrollView.xml")]
+    [Template("ScrollView.xml")]
     public unsafe class ScrollView : UIElement {
 
         public float scrollSpeedY = 48f;

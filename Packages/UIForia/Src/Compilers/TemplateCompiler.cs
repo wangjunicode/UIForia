@@ -324,7 +324,7 @@ namespace UIForia.Compilers {
 
         private static Type ResolveRequiredType(IList<string> namespaces, string typeName, Type rootType) {
             if (typeName != null) {
-                Type requiredType = TypeProcessor.ResolveTypeExpression(rootType, namespaces, typeName);
+                Type requiredType = TypeResolver.ResolveTypeExpression(rootType, namespaces, typeName);
 
                 if (requiredType == null) {
                     throw new CompileException($"Unable to resolve required child type `{typeName}`");
@@ -2905,7 +2905,7 @@ namespace UIForia.Compilers {
 
                 for (int i = 0; i < strings.size; i++) {
                     if (ExpressionParser.TryParseTypeName(strings[i], out TypeLookup typeLookup)) {
-                        Type type = TypeProcessor.ResolveType(typeLookup, (IReadOnlyList<string>) namespaces);
+                        Type type = TypeResolver.ResolveType(typeLookup, (IReadOnlyList<string>) namespaces);
 
                         if (type == null) {
                             throw CompileException.UnresolvedType(typeLookup, (IReadOnlyList<string>) namespaces);

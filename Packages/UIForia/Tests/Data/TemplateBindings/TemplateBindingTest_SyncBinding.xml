@@ -17,4 +17,11 @@
         <TemplateBindingTest_SyncBinding_FakeInput sync:value="nested.syncedValue"/>
         
     </Contents>
+
+    <Contents id="sync_enum">
+
+        <TemplateBindingTest_SyncBinding_SyncEnumChild sync:syncedValue="enumVal"/>
+
+    </Contents>
+    
 </UITemplate>

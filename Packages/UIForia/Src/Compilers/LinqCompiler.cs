@@ -1234,7 +1234,7 @@ namespace UIForia.Compilers {
 
             for (int i = names.Count - 2; i >= 0; i--) {
                 string check = BuildString(i);
-                if (TypeProcessor.IsNamespace(check)) {
+                if (TypeResolver.IsNamespace(check)) {
                     LightList<string>.Release(ref names);
                     resolvedNamespace = check;
                     start = i;
@@ -1268,7 +1268,7 @@ namespace UIForia.Compilers {
             // we also need to be sure the generic argument count is equal
             if (start + 1 < parts.Count - 1 && parts[start + 1].type == PartType.Generic) {
                 start++;
-                targetName += "`" + parts[start].generic.genericPath.generics.Count;
+                targetName += "`" + parts[start].generic.genericPath.generics.size;
                 genericNode = parts[start].generic;
             }
 
@@ -1277,7 +1277,7 @@ namespace UIForia.Compilers {
                     tailType = nestedTypes[i];
 
                     if (genericNode != null) {
-                        tailType = TypeProcessor.ResolveNestedGenericType(startType, tailType, genericNode.genericPath, namespaces);
+                        tailType = TypeResolver.ResolveNestedGenericType(startType, tailType, genericNode.genericPath, namespaces);
                     }
 
                     start++;
@@ -1601,7 +1601,7 @@ namespace UIForia.Compilers {
                     throw CompileException.InvalidAccessExpression();
                 }
 
-                Type type = TypeProcessor.ResolveType(accessRootName, resolvedNamespace);
+                Type type = TypeResolver.ResolveType(accessRootName, resolvedNamespace);
 
                 if (type == null) {
                     throw CompileException.UnresolvedType(new TypeLookup(accessRootName), namespaces);
@@ -1617,7 +1617,7 @@ namespace UIForia.Compilers {
             else {
                 // check for generic access too
 
-                Type type = implicitContext?.type.GetNestedType(accessRootName) ?? TypeProcessor.ResolveType(accessRootName, namespaces);
+                Type type = implicitContext?.type.GetNestedType(accessRootName) ?? TypeResolver.ResolveType(accessRootName, namespaces);
 
                 if (type == null) {
                     throw CompileException.UnresolvedIdentifier(accessRootName);
@@ -2039,7 +2039,7 @@ namespace UIForia.Compilers {
             }
             else {
                 // todo -- generics probably need invoking type passed in
-                variableType = TypeProcessor.ResolveType(node.typeLookup, namespaces);
+                variableType = TypeResolver.ResolveType(node.typeLookup, namespaces);
             }
 
             ParameterExpression variable = AddVariable(variableType, node.name);
@@ -2595,13 +2595,13 @@ namespace UIForia.Compilers {
             left = Visit(operatorNode.left);
             if (operatorNode.operatorType == OperatorType.Is) {
                 TypeNode typeNode = (TypeNode) operatorNode.right;
-                Type t = TypeProcessor.ResolveType(typeNode.typeLookup, namespaces);
+                Type t = TypeResolver.ResolveType(typeNode.typeLookup, namespaces);
                 return Expression.TypeIs(left, t);
             }
 
             if (operatorNode.operatorType == OperatorType.As) {
                 TypeNode typeNode = (TypeNode) operatorNode.right;
-                Type t = TypeProcessor.ResolveType(typeNode.typeLookup, namespaces);
+                Type t = TypeResolver.ResolveType(typeNode.typeLookup, namespaces);
                 return Expression.TypeAs(left, t);
             }
 
@@ -2660,7 +2660,7 @@ namespace UIForia.Compilers {
             if (lambda.signature.size > 0) {
                 for (int i = 0; i < lambda.signature.size; i++) {
                     if (lambda.signature[i].type != null) {
-                        Type argType = TypeProcessor.ResolveType(lambda.signature[i].type.Value, namespaces);
+                        Type argType = TypeResolver.ResolveType(lambda.signature[i].type.Value, namespaces);
                         if (argType != arguments[i]) {
                             throw CompileException.InvalidLambdaArgument();
                         }
@@ -2730,7 +2730,7 @@ namespace UIForia.Compilers {
         private Expression VisitNew(NewExpressionNode newNode) {
             TypeLookup typeLookup = newNode.typeLookup;
 
-            Type type = TypeProcessor.ResolveType(typeLookup, namespaces);
+            Type type = TypeResolver.ResolveType(typeLookup, namespaces);
             if (type == null) {
                 throw CompileException.UnresolvedType(typeLookup);
             }
@@ -2766,7 +2766,7 @@ namespace UIForia.Compilers {
         }
 
         private Expression VisitDirectCast(UnaryExpressionNode node) {
-            Type t = TypeProcessor.ResolveType(node.typeLookup, namespaces);
+            Type t = TypeResolver.ResolveType(node.typeLookup, namespaces);
 
             Expression toConvert = Visit(node.expression);
             return Expression.Convert(toConvert, t);
@@ -2808,7 +2808,7 @@ namespace UIForia.Compilers {
         private Expression VisitTypeNode(TypeNode typeNode) {
             TypeLookup typePath = typeNode.typeLookup;
             try {
-                Type t = TypeProcessor.ResolveType(typeNode.typeLookup, namespaces);
+                Type t = TypeResolver.ResolveType(typeNode.typeLookup, namespaces);
                 return Expression.Constant(t);
             }
             catch (TypeResolutionException) { }

@@ -6,7 +6,7 @@ using UnityEngine;
 namespace UIForia.Elements {
 
     [TemplateTagName("Input")]
-    [Template(TemplateType.Internal, "Elements/InputElement.xml")]
+    [Template("InputElement.xml")]
     public class InputElement<T> : UIInputElement where T : IEquatable<T> {
 
         public T value;

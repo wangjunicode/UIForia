@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-using JetBrains.Annotations;
 using UIForia.Compilers;
 using UIForia.Layout;
 using UIForia.Rendering;
@@ -265,7 +263,6 @@ namespace UIForia.Elements {
             return FindById<UIElement>(elementId);
         }
 
-        [PublicAPI]
         public T FindById<T>(string elementId) where T : UIElement {
 
             LightStack<UIElement> elementStack = LightStack<UIElement>.Get();
@@ -298,7 +295,6 @@ namespace UIForia.Elements {
             return null;
         }
 
-        [PublicAPI]
         public T FindFirstByType<T>() where T : UIElement {
 
             UIElement ptr = GetFirstChild();

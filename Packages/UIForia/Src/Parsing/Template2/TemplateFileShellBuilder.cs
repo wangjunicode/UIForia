@@ -12,8 +12,8 @@ namespace UIForia {
     [DebuggerDisplay("type={type} {key}={value}")]
     public struct AttributeDefinition2 {
 
-        public readonly string key;
-        public readonly string value;
+        public string key;
+        public string value;
         public int line;
         public int column;
         public AttributeType type;
@@ -27,7 +27,7 @@ namespace UIForia {
             this.line = line;
             this.column = column;
         }
-
+      
     }
 
     [Serializable]
@@ -138,7 +138,7 @@ namespace UIForia {
 
         public TemplateASTBuilder CreateRootNode(string templateId, IList<AttributeDefinition2> attributes, LineInfo lineInfo, string genericTypeResolver, string requireType) {
             rootNodes.Add(new TemplateASTRoot() {
-                templateName = templateId,
+                // templateNameId = templateId,
                 slotDefinitionCount = 0,
                 firstSlotDefinitionIndex = 0,
                 templateIndex = templateNodes.size

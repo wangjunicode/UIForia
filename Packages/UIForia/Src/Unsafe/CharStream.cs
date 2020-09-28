@@ -24,6 +24,14 @@ namespace UIForia.Util {
 
     }
 
+    public enum CommentMode {
+
+        None,
+        DoubleSlash,
+        XML
+
+    }
+    
     public unsafe struct CharStream {
 
         private char* data;
@@ -31,6 +39,7 @@ namespace UIForia.Util {
         private uint dataEnd;
         private uint ptr;
         public int baseOffset;
+        public CommentMode commentMode;
 
         [ThreadStatic] private static string s_ScratchBuffer;
         [ThreadStatic] private static List<EnumNameEntry> s_EnumNameEntryList;
@@ -40,6 +49,7 @@ namespace UIForia.Util {
             this.dataStart = span.rangeStart;
             this.dataEnd = span.rangeEnd;
             this.ptr = dataStart;
+            this.commentMode = CommentMode.DoubleSlash;
         }
 
         public CharStream(char* source, int start, int end) : this() {
@@ -47,6 +57,7 @@ namespace UIForia.Util {
             this.dataStart = (uint) start;
             this.dataEnd = (uint) end;
             this.ptr = dataStart;
+            this.commentMode = CommentMode.DoubleSlash;
         }
 
         public CharStream(char* source, uint start, uint end) : this() {
@@ -54,6 +65,7 @@ namespace UIForia.Util {
             this.dataStart = start;
             this.dataEnd = end;
             this.ptr = dataStart;
+            this.commentMode = CommentMode.DoubleSlash;
         }
 
         // copy from current pointer position
@@ -62,6 +74,7 @@ namespace UIForia.Util {
             this.dataStart = propertyStream.ptr;
             this.dataEnd = propertyStream.dataEnd;
             this.ptr = propertyStream.ptr;
+            this.commentMode = CommentMode.DoubleSlash;
         }
 
         public bool HasMoreTokens => ptr < dataEnd;
@@ -139,11 +152,6 @@ namespace UIForia.Util {
 
                 Advance((uint) str.Length);
                 return true;
-                // for (int i = 0; i < str.Length; i++) {
-                //     if (data[ptr + i] != s[i]) {
-                //         return false;
-                //     }
-                // }
             }
 
         }
@@ -248,13 +256,20 @@ namespace UIForia.Util {
             ptr = start < dataStart ? dataStart : start;
         }
 
+        public void ConsumeWhiteSpaceAndComments(CommentMode commentMode) {
+            CommentMode lastMode = this.commentMode;
+            this.commentMode = commentMode;
+            ConsumeWhiteSpaceAndComments();
+            this.commentMode = lastMode;
+        }
+
         public void ConsumeWhiteSpaceAndComments() {
             while (true) {
                 while (ptr < dataEnd && char.IsWhiteSpace(data[ptr])) {
                     ptr++;
                 }
 
-                if (ptr < dataEnd - 2) {
+                if (commentMode == CommentMode.DoubleSlash && ptr < dataEnd - 2) {
                     if (data[ptr + 0] == '/' && data[ptr + 1] == '/') {
                         ptr += 2;
                         while (ptr < dataEnd) {
@@ -1244,9 +1259,8 @@ namespace UIForia.Util {
             uint rangeStart = ptr;
             for (uint i = ptr; i < dataEnd; i++) {
                 if(data[i] == quote && data[i - 1] != '\\') {
-                    ptr = i;
                     span = new CharSpan(data, (int)rangeStart,(int) i);
-                    
+                    ptr = i + 1; // step over quote;
                     if ((whitespaceHandling & WhitespaceHandling.ConsumeAfter) != 0) {
                         ConsumeWhiteSpaceAndComments();
                     }
@@ -1367,6 +1381,10 @@ namespace UIForia.Util {
             ptr = save;
             colorValue = default;
             return false;
+        }
+
+        public void SetCommentMode(CommentMode commentMode) {
+            this.commentMode = commentMode;
         }
 
     }

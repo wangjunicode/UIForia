@@ -53,7 +53,7 @@ namespace UIForia {
 
             TemplateEditorRootNode rootNode = new TemplateEditorRootNode();
 
-            rootNode.templateId = root.templateName;
+            rootNode.templateId = default; //shell.GetString(root.templateNameId);
             rootNode.shell = shell;
             TemplateASTNode node = shell.templateNodes[root.templateIndex];
             

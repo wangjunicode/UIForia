@@ -49,6 +49,10 @@ namespace UIForia.Util {
             array[size++] = item;
         }
 
+        public T Peek() {
+            return array[size - 1];
+        }
+        
         public T PeekAt(int index) {
             return array[index];
         }

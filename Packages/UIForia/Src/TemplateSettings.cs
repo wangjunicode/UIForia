@@ -36,7 +36,6 @@ namespace UIForia {
             this.codeFileExtension = "cs";
             this.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
         }
-        
 
         public string StrippedApplicationName => Regex.Replace(applicationName, @"\s", "" );
 

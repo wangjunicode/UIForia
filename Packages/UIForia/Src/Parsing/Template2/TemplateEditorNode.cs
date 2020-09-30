@@ -51,7 +51,7 @@ namespace UIForia {
 
         public TemplateEditorAttributeNode GetAttribute(string id) {
             for (int i = 0; i < attributeNodes.Count; i++) {
-                if (attributeNodes[i].name == id) {
+                if (attributeNodes[i].key == id) {
                     return attributeNodes[i];
                 }
             }

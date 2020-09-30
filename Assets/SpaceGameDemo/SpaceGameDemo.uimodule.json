@@ -1,0 +1,23 @@
+﻿{
+    "Prototype": "UIForia.DefaultModule",
+    "StyleLocator": "",
+    "AssetLocator": "UIForia.Default.AssetLocator",
+    "DefaultNamespaces": [
+        "UIForia.Rendering",
+        "UIForia.Style"
+    ],
+    "ImplicitModuleReferences": [
+        {
+            "ModuleName": "",
+            "Alias": ""
+        }
+    ],
+    "ImplicitStyles": [
+        {
+            "alias": "",
+            "src": "module:packageName"
+        }
+    ],
+    "CustomStyleProperties": {
+    }
+}

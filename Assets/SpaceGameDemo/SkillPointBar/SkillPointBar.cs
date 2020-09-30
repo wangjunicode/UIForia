@@ -4,7 +4,7 @@ using UIForia.Elements;
 
 namespace SpaceGameDemo.SkillPointBar {
     
-    [Template("SpaceGameDemo/SkillPointBar/SkillPointBar.xml")]
+    [Template("SkillPointBar/SkillPointBar.xml")]
     public class SkillPointBar : UIElement {
 
         public int availablePoints;

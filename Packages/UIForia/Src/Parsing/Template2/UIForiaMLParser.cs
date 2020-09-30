@@ -1,58 +1,102 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
+using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia {
 
-    public struct UIForiaXMLNode {
-
-        public string prefix;
-        public string tagName;
-        public int nextSibling;
-        public int firstChild;
-        public int attrStart;
-        public int attrEnd;
-        public int line;
-        public int column;
-
-    }
-
-    public struct UIForiaAttributeNode {
-
-        public string prefix;
-        public string attrName;
-        public int nextSibling;
-        public int flags;
-        public int type;
-        public int value;
-        public int line;
-        public int column;
-
-    }
-
     public class UIForiaMLParser {
 
         private bool hasCriticalError;
-        private StructList<char> charBuffer;
         private StructStack<CharSpan> openStack;
+        private StructStack<TemplateFileShellBuilder.TemplateASTBuilder> elementStack;
         private TemplateFileShellBuilder builder;
-        private LightList<AttributeDefinition2> attrBuffer;
+        private LightList<AttributeDefinition3> attrBuffer;
+        private StructList<char> textBuffer;
+        private Diagnostics diagnostics;
+        private string filePath;
 
-        public UIForiaMLParser() {
-            builder = new TemplateFileShellBuilder();
-            charBuffer = new StructList<char>(128);
-            openStack = new StructStack<CharSpan>();
-            attrBuffer = new LightList<AttributeDefinition2>(16);
+        public UIForiaMLParser(Diagnostics diagnostics = null) {
+            this.diagnostics = diagnostics;
+            this.builder = new TemplateFileShellBuilder();
+            this.textBuffer = new StructList<char>(1024);
+            this.openStack = new StructStack<CharSpan>();
+            this.attrBuffer = new LightList<AttributeDefinition3>(16);
+            this.elementStack = new StructStack<TemplateFileShellBuilder.TemplateASTBuilder>(16);
         }
 
-        // todo -- need to verify no duplicated attributes somewhere
+        public bool TryParse(string filePath, string contents, out TemplateFileShell result) {
+            this.filePath = filePath;
+            hasCriticalError = false;
+            result = default;
+            openStack.size = 0;
+            attrBuffer.size = 0;
+            elementStack.size = 0;
+            textBuffer.size = 0;
+            unsafe {
+
+                fixed (char* ptr = contents) {
+                    CharStream stream = new CharStream(ptr, 0, contents.Length);
+
+                    stream.ConsumeWhiteSpaceAndComments(CommentMode.XML);
+
+                    if (stream.TryMatchRange("<?")) {
+                        stream.ConsumeUntilFound("?>", out CharSpan _);
+                    }
+
+                    if (!stream.TryParseCharacter('<') || !stream.TryParseIdentifier(out CharSpan rootTagName) || rootTagName != "UITemplate" || !stream.TryParseCharacter('>')) {
+                        hasCriticalError = true;
+                        LogError("Templates must begin with a <UITemplate> root");
+                        return false;
+                    }
+
+                    stream.ConsumeWhiteSpaceAndComments();
+
+                    openStack.Push(rootTagName); // push the <UITemplate> tag
+
+                    while (stream.HasMoreTokens && !hasCriticalError) {
+
+                        uint p = stream.Ptr;
+                        stream.ConsumeWhiteSpaceAndComments(CommentMode.XML);
+
+                        if (stream.TryMatchRange("</UITemplate")) {
+                            stream.ConsumeWhiteSpaceAndComments(CommentMode.None);
+                            if (stream.Current == '>') {
+                                openStack.Pop();
+                            }    
+                            break;
+                        }
+                        
+                        if (!TryParseOuterTag(ref stream)) {
+                            break;
+                        }
+
+                        if (!hasCriticalError && p == stream.Ptr) {
+                            break;
+                        }
+
+                    }
+
+                    // assert open stack is empty except for the <UITemplate> root node
+                    if (!hasCriticalError && openStack.size != 0) {
+                        LogError("Pushed more tags than popped");
+                        return false;
+                    }
+                }
+            }
+
+            if (hasCriticalError) {
+                return false;
+            }
+
+            result = builder.Build(filePath);
+            return true;
+        }
 
         private bool TryParseOuterTag(ref CharStream stream) {
             uint tagStart = stream.Ptr;
-            
+
             if (stream.Current != '<') {
                 return false;
             }
@@ -64,15 +108,18 @@ namespace UIForia {
             }
 
             if (identifier == "Style") {
-                // ParseStyleAttributes();
-                // FindClosingStyleTagIfNotSelfClosing()
+                if (!TryParseStyle(ref stream)) {
+                    return false;
+                }
             }
             else if (identifier == "Contents") {
                 stream.RewindTo(tagStart); // avoid special cases in the parser
                 ParseTemplateContents(ref stream);
             }
             else if (identifier == "Using") {
-                // ParseUsingAttributes();
+                if (!ParseUsingAttributes(identifier, ref stream)) {
+                    return false;
+                }
             }
             else {
                 return false;
@@ -82,7 +129,120 @@ namespace UIForia {
 
         }
 
-        private bool TryMakeAttribute(in CharSpan prefix, in CharSpan attrKey, in CharSpan attrValue, out AttributeDefinition2 attribute) {
+        private const string s_Style = "</Style";
+
+        private bool TryParseStyle(ref CharStream stream) {
+            ParseElementAttributes(ref stream);
+
+            stream.ConsumeWhiteSpaceAndComments(CommentMode.None);
+
+            if (stream.Current == '>') {
+                stream.Advance();
+
+                if (attrBuffer.size != 0) {
+                    LogError("A <Style> node that is not self-closing cannot take attributes.", stream.GetLineInfo());
+                    return false;
+                }
+
+                unsafe {
+
+                    int length = s_Style.Length;
+                    fixed (char* styleTag = s_Style) {
+
+                        // Note -- this will not consume comments which means we'll need to remove xml comments before actually parsing the style 
+                        if (!stream.ConsumeUntilFound(styleTag, length, out CharSpan styleSource)) {
+                            LogError("Expected to find a terminating </Style> tag but hit the end of the file without finding one.");
+                            return false;
+                        }
+
+                        stream.ConsumeWhiteSpaceAndComments(CommentMode.None);
+
+                        if (stream.Current != '>') {
+                            LogError("Expected a terminating `>` after </Style", stream.GetLineInfo());
+                            return false;
+                        }
+
+                        stream.Advance();
+
+                        builder.AddStyleSource(styleSource);
+
+                    }
+                }
+            }
+            else if (stream.Current == '/' && stream.Next == '>') {
+                stream.Advance(2);
+                AttributeDefinition3? srcAttr = GetAttribute(AttributeType.Property, "src");
+                AttributeDefinition3? aliasAttr = GetAttribute(AttributeType.Property, "alias");
+
+                if (srcAttr == null) {
+                    // non critical error, style will just be ignored
+                    return true;
+                }
+
+                if (builder.StyleSourceIsReferenced(srcAttr.Value.value)) {
+                    LogError($"Unable to add <Style> node because another style node referencing `{builder.GetCharSpan(srcAttr.Value.value)}` was already declared", stream.GetLineInfo());
+                    return false;
+                }
+
+                if (aliasAttr != null && builder.StyleAliasIsDeclared(aliasAttr.Value.value)) {
+                    LogError($"Unable to add <Style> node because another style node already declared an alias `{builder.GetCharSpan(aliasAttr.Value.value)}`", stream.GetLineInfo());
+                    return false;
+                }
+
+                builder.AddStyleReference(srcAttr.Value.value, aliasAttr?.value ?? default);
+
+            }
+            else {
+                // invalid
+                LogError("Expected the <Style tag to be closed but didn't find `>` or `/>`", stream.GetLineInfo());
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ParseUsingAttributes(CharSpan usingSpan, ref CharStream stream) {
+
+            ParseElementAttributes(ref stream);
+
+            // ensure the <Using> is self closing
+            stream.ConsumeWhiteSpaceAndComments(CommentMode.None);
+
+            if (stream.Current != '/' || stream.Next != '>') {
+                LogError("Expected <Using> to be self closing (<Using/>)", usingSpan.GetLineInfo());
+                return false;
+            }
+
+            stream.Advance(2); // step over closing />
+
+            AttributeDefinition3? namespaceAttr = GetAttribute(AttributeType.Property, "namespace");
+
+            if (namespaceAttr == null) {
+                LogError("<Using/> tags require a `namespace` attribute", usingSpan.GetLineInfo());
+                return false;
+            }
+
+            builder.AddUsing(new UsingDeclaration() {
+                namespaceRange = namespaceAttr.Value.value,
+            });
+
+            return true;
+        }
+
+        private AttributeDefinition3? GetAttribute(AttributeType type, string attrKey) {
+            for (int i = 0; i < attrBuffer.size; i++) {
+                if (attrBuffer.array[i].type == type) {
+                    CharSpan span = builder.GetCharSpan(attrBuffer.array[i].key);
+                    if (span == attrKey) {
+                        return attrBuffer.array[i];
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private bool TryMakeAttribute(in CharSpan prefix, in CharSpan attrKey, in CharSpan attrValue, out AttributeDefinition3 attribute) {
             AttributeType attributeType = default;
             AttributeFlags flags = default;
             attribute = default;
@@ -110,6 +270,9 @@ namespace UIForia {
                 }
                 else if (prefix == "onChange") {
                     attributeType = AttributeType.ChangeHandler;
+                }
+                else if (prefix == "painter") {
+                    attributeType = AttributeType.PainterVar;
                 }
                 else if (prefix == "touch") {
                     attributeType = AttributeType.Touch;
@@ -160,15 +323,23 @@ namespace UIForia {
                 attributeType = AttributeType.Property;
             }
 
-            attribute = new AttributeDefinition2() {
+            // todo -- probably kinda slow
+            LineInfo lineInfo = attrKey.GetLineInfo();
+
+            for (int i = 0; i < attrBuffer.size; i++) {
+                // todo -- de-duplicate attributes here
+                // make sure keys are different
+            }
+
+            attribute = new AttributeDefinition3() {
                 flags = flags,
                 type = attributeType,
-                // todo -- don't need ToString() just store the template string somewhere in a buffer
-                key = attrKey.ToString(),
-                value = attrValue.ToString(),
-                // line = lineInfo.line,
-                // column = lineInfo.column
+                key = builder.AddString(attrKey, true),
+                value = builder.AddString(attrValue),
+                line = lineInfo.line,
+                column = lineInfo.column
             };
+
             return true;
         }
 
@@ -184,20 +355,20 @@ namespace UIForia {
                     break;
                 }
 
-                if (!stream.TryParseMultiDottedIdentifier(out CharSpan prefixOrIdentifier)) {
+                if (!stream.TryParseMultiDottedIdentifier(out CharSpan prefixOrIdentifier, WhitespaceHandling.ConsumeAll, true)) {
                     break;
                 }
 
+                CharSpan attrKey;
                 CharSpan prefix = default;
-                CharSpan attrKey = default;
                 CharSpan attrValue = default;
 
                 if (stream.TryParseCharacter(':')) {
                     // validate prefixOrIdentifier as prefix
                     prefix = prefixOrIdentifier;
-                    // todo -- require:type=xyz;
-                    if (!stream.TryParseMultiDottedIdentifier(out attrKey)) {
-                        throw new Exception("bad");
+                    if (!stream.TryParseMultiDottedIdentifier(out attrKey, WhitespaceHandling.ConsumeAll, true)) {
+                        LogError($"Expected a valid attribute name after `:` for attribute `{prefix}`", prefix.GetLineInfo());
+                        return;
                     }
                 }
                 else {
@@ -206,13 +377,14 @@ namespace UIForia {
 
                 if (stream.TryParseCharacter('=')) {
                     if (!stream.TryParseDoubleQuotedString(out attrValue)) {
-                        throw new Exception("Bad");
+                        LogError($"Expected a quoted attribute value or expression after the `=` for attribute `{attrKey}`", attrKey.GetLineInfo());
+                        return;
                     }
                 }
 
                 // todo -- update compiler to allow default value attributes
 
-                if (TryMakeAttribute(prefix, attrKey, attrValue, out AttributeDefinition2 attr)) {
+                if (TryMakeAttribute(prefix, attrKey, attrValue, out AttributeDefinition3 attr)) {
                     attrBuffer.Add(attr);
                 }
 
@@ -220,92 +392,76 @@ namespace UIForia {
 
         }
 
-        private bool TryParseElementTag(TemplateFileShellBuilder.TemplateASTBuilder parent, ref CharStream stream) {
+        private unsafe CharSpan GetFullTagRange(in CharSpan prefix, in CharSpan tagName) {
+            return prefix.HasValue ? new CharSpan(tagName.data, prefix.rangeStart, tagName.rangeEnd, tagName.baseOffset) : tagName;
+        }
 
-            uint start = stream.Ptr;
-            if (!stream.TryParseCharacter('<')) {
+        private bool TryParseElementTag(ref CharStream stream) {
+
+            if (!TryParseTag(ref stream, false, out CharSpan prefix, out CharSpan tagName)) {
                 return false;
-            }
-
-            CharSpan tagName;
-            CharSpan moduleName = default;
-
-            if (!stream.TryParseMultiDottedIdentifier(out CharSpan prefixOrIdentifier)) {
-                stream.RewindTo(start);
-                return false;
-            }
-
-            TemplateNodeType nodeType = default;
-
-            if (stream.TryParseCharacter(':')) {
-
-                if (char.IsUpper(prefixOrIdentifier[0])) {
-                    // module name
-                    moduleName = prefixOrIdentifier;
-                }
-                else {
-                    // slot or other internal specifier
-                    if (prefixOrIdentifier == "define") {
-                        nodeType = TemplateNodeType.SlotDefine;
-                    }
-                    else if (prefixOrIdentifier == "forward") {
-                        nodeType = TemplateNodeType.SlotForward;
-                    }
-                    else if (prefixOrIdentifier == "override") {
-                        nodeType = TemplateNodeType.SlotOverride;
-                    }
-                }
-
-                if (!stream.TryParseMultiDottedIdentifier(out tagName)) {
-                    throw new Exception("Bad");
-                }
-
-            }
-            else {
-                // we didnt have : specifier so the prefixOrIdentifier is actually a tag name
-                tagName = prefixOrIdentifier;
             }
 
             ParseElementAttributes(ref stream);
 
             stream.ConsumeWhiteSpaceAndComments(CommentMode.None);
 
+            CharSpan fullTagRange = GetFullTagRange(prefix, tagName);
+
+            TemplateFileShellBuilder.TemplateASTBuilder element;
+            LineInfo lineInfo = default; // todo -- line info remapping
+
+            if (!prefix.HasValue || char.IsUpper(prefix[0])) {
+                element = elementStack.Peek().AddElementChild(prefix, tagName, attrBuffer, lineInfo);
+            }
+            else if (prefix == "define") {
+                element = elementStack.Peek().AddSlotChild(tagName, attrBuffer, lineInfo, SlotType.Define);
+            }
+            else if (prefix == "forward") {
+                element = elementStack.Peek().AddSlotChild(tagName, attrBuffer, lineInfo, SlotType.Forward);
+            }
+            else if (prefix == "override") {
+                element = elementStack.Peek().AddSlotChild(tagName, attrBuffer, lineInfo, SlotType.Override);
+            }
+            else {
+                LogError("Unknown directive `" + prefix + "`. Valid directives are (define, forward, or override). If you intended to reference a module you must uppercase the prefix", prefix.GetLineInfo());
+                return false;
+            }
+
             if (stream.Current == '/' && stream.Next == '>') {
+                // if was self closing we have no children and do not add it to the open or element stacks
                 stream.Advance(2);
             }
             else if (stream.Current == '>') {
+                // if was not self closing add to the open and element stacks
                 stream.Advance();
-                // if was not self closing add to openStack
-                if (prefixOrIdentifier.HasValue) {
-                    unsafe {
-                        openStack.Push( new CharSpan(stream.Data, prefixOrIdentifier.rangeStart, tagName.rangeEnd, stream.baseOffset));
-                    }
-                }
-                else {
-                    openStack.Push(tagName);
-                }
+                openStack.Push(fullTagRange);
+                elementStack.Push(element);
             }
             else {
-                throw new Exception("bad");
+                LogError("Expected a closing '>' or '/>' after opening the tag <" + fullTagRange + "> but was not found", fullTagRange.GetLineInfo());
+                return false;
             }
-
-            parent.AddElementChild(moduleName.ToString(), tagName.ToString(), default, default, "", "");
 
             return true;
 
         }
 
-        private bool TryFindIdAttribute(out string id) {
+        private bool TryFindIdAttribute(out RangeInt id) {
             for (int i = 0; i < attrBuffer.size; i++) {
                 if (attrBuffer.array[i].type == AttributeType.Attribute) {
-                    if (attrBuffer.array[i].key == "id") {
+
+                    CharSpan span = builder.GetCharSpan(attrBuffer.array[i].key);
+
+                    if (span == "id") {
                         id = attrBuffer.array[i].value;
                         return true;
                     }
+
                 }
             }
 
-            id = null;
+            id = default;
             return false;
         }
 
@@ -313,15 +469,13 @@ namespace UIForia {
             // attributes not yet parsed
 
             stream.ConsumeWhiteSpaceAndComments(CommentMode.XML);
-            
+
             stream.TryParseCharacter('<');
             stream.TryParseIdentifier(out CharSpan contents);
 
             ParseElementAttributes(ref stream);
 
-            TryFindIdAttribute(out string idValue);
-
-            TemplateFileShellBuilder.TemplateASTBuilder rootNode = builder.CreateRootNode(idValue, attrBuffer, stream.GetLineInfo(), "generic", "require");
+            TryFindIdAttribute(out RangeInt idValue);
 
             stream.ConsumeWhiteSpaceAndComments(CommentMode.None);
 
@@ -330,348 +484,194 @@ namespace UIForia {
             }
             else if (stream.Current == '/' && stream.Next == '>') {
                 stream.Advance(2); // if self closing, skip
+
+                builder.CreateRootNode(idValue, attrBuffer, contents.GetLineInfo());
+                
                 return;
             }
 
-            openStack.Push(contents);
+            openStack.Push(contents);    
+            
+            //todo assert id for template is not already taken in this file
+            elementStack.Push(builder.CreateRootNode(idValue, attrBuffer, contents.GetLineInfo()));
 
             // todo -- remap line numbers as post-processing step or on error
-            
-            while (stream.HasMoreTokens && !hasCriticalError) {
+
+            while (elementStack.size > 0 && stream.HasMoreTokens && !hasCriticalError) {
+
+                if (TryParseTextContent(ref stream)) {
+                    elementStack.Peek().SetTextContent(textBuffer, default);
+                    continue;
+                }
 
                 stream.ConsumeWhiteSpaceAndComments(CommentMode.XML);
 
-                if (TryParseElementTag(rootNode, ref stream)) {
+                if (TryParseElementTag(ref stream)) {
                     continue;
                 }
 
-                if (TryParseElementClosingTag(ref stream)) {
-                    continue;
-                }
-
-                if (TryParseTextContent(ref stream)) { }
+                TryParseElementClosingTag(ref stream);
 
             }
 
-            // assert open stack is size = 1
-
+            openStack.Pop();
+            
         }
 
         private bool TryParseTextContent(ref CharStream stream) {
-            return false;
-        }
+            textBuffer.size = 0;
 
-        private bool TryParseElementClosingTag(ref CharStream stream) {
-            if (stream.Current == '<' && stream.Next == '/') {
-                stream.Advance(2);
-                if (!stream.TryParseIdentifier(out CharSpan tagName)) {
-                    throw new Exception("Bad");
+            bool hasNonWhitespace = false;
+            while (stream.HasMoreTokens) {
+
+                char current = stream.Current;
+
+                switch (current) {
+                    // see if its a comment
+                    case '<' when stream.Next == '!':
+                        // looks like a comment, try to consume it
+                        stream.ConsumeXMLComment();
+                        break;
+
+                    case '<':
+                        // stop
+                        return hasNonWhitespace;
+
+                    case '&': {
+                        // handle escaping stuff
+                        hasNonWhitespace = true;
+                        if (stream.TryMatchRange("&amp;")) {
+                            textBuffer.Add('&');
+                        }
+                        else if (stream.TryMatchRange("&lt;")) {
+                            textBuffer.Add('<');
+                        }
+                        else if (stream.TryMatchRange("&gt;")) {
+                            textBuffer.Add('>');
+                        }
+                        else {
+                            textBuffer.Add('&');
+                        }
+
+                        break;
+                    }
+
+                    default: {
+                        if (!hasNonWhitespace && !(current == ' ' || current == '\t' || current == '\n' || current == '\r')) {
+                            hasNonWhitespace = true;
+                        }
+
+                        textBuffer.Add(current);
+                        break;
+                    }
                 }
 
-                if (!stream.TryParseCharacter('>')) {
-                    throw new Exception("Bad");
-                }
+                stream.Advance();
 
-                CharSpan span = openStack.Pop();
-                if (span != tagName) {
-                    throw new Exception("Bad");
-                }
-
-                return true;
             }
 
             return false;
         }
 
-        public bool TryParse(string contents) {
-            hasCriticalError = false;
-            unsafe {
+        private bool TryParseTag(ref CharStream stream, bool closing, out CharSpan prefix, out CharSpan tagName) {
 
-                fixed (char* ptr = contents) {
-                    CharStream stream = new CharStream(ptr, 0, contents.Length);
+            prefix = default;
+            tagName = default;
 
-                    stream.ConsumeWhiteSpaceAndComments(CommentMode.XML);
-                    
-                    if (!stream.TryParseCharacter('<') || !stream.TryParseIdentifier(out CharSpan rootTagName) || rootTagName != "UITemplate" || !stream.TryParseCharacter('>')) {
-                        hasCriticalError = true;
-                        LogError("Templates must begin with a <UITemplate> root");
-                        return false;
-                    }
-                    
-                    stream.ConsumeWhiteSpaceAndComments();
+            uint start = stream.Ptr;
 
-                    openStack.Push(rootTagName); // push the <UITemplate> tag
+            if (!stream.TryParseCharacter('<', WhitespaceHandling.None)) {
+                stream.RewindTo(start);
+                return false;
+            }
 
-                    while (stream.HasMoreTokens && !hasCriticalError) {
+            if (closing && !stream.TryParseCharacter('/', WhitespaceHandling.None)) {
+                stream.RewindTo(start);
+                return false;
+            }
 
-                        if (!TryParseOuterTag(ref stream)) {
-                            LogError("Expected to parse a valid outer Tag <Style> <Contents> or <Using> but hit end of file");
-                            break;
-                        }
+            if (!stream.TryParseMultiDottedIdentifier(out CharSpan prefixOrIdentifier, WhitespaceHandling.ConsumeAll, true)) {
+                stream.RewindTo(start);
+                return false;
+            }
 
-                    }
-                    
-                    // assert open stack is empty
+            if (stream.TryParseCharacter(':')) {
 
+                if (!stream.TryParseMultiDottedIdentifier(out tagName, WhitespaceHandling.ConsumeAll, true)) {
+                    LogError("Expected to find a valid tag name after the ':' while parsing tag `<" + prefixOrIdentifier + ":` ", prefixOrIdentifier.GetLineInfo());
+                    return false;
                 }
+
+                prefix = prefixOrIdentifier;
+            }
+            else {
+                // we didnt have : specifier so the prefixOrIdentifier is actually a tag name
+                tagName = prefixOrIdentifier;
+            }
+
+            if (!closing) return true;
+
+            stream.ConsumeWhiteSpaceAndComments();
+
+            if (!stream.TryParseCharacter('>')) {
+                CharSpan fullTagRange = GetFullTagRange(prefix, tagName);
+                LogError("Expected closing tag for `<" + fullTagRange + ">` to terminated with '>' but it was not", fullTagRange.GetLineInfo());
+                return false;
             }
 
             return true;
+
+        }
+
+        private unsafe bool TryParseElementClosingTag(ref CharStream stream) {
+            if (!TryParseTag(ref stream, true, out CharSpan prefix, out CharSpan tagName)) {
+                return false;
+            }
+
+            CharSpan fullTagRange;
+            if (prefix.HasValue) {
+                fullTagRange = new CharSpan(stream.Data, prefix.rangeStart, tagName.rangeEnd, stream.baseOffset);
+            }
+            else {
+                fullTagRange = tagName;
+            }
+
+            CharSpan span = openStack.Pop();
+            if (span != fullTagRange) {
+                LogError("Expected to find closing tag for <" + span + "> but instead found </" + fullTagRange + ">", fullTagRange.GetLineInfo());
+                return false;
+            }
+
+            if (elementStack.size != 0) {
+                elementStack.Pop();
+            }
+
+            return true;
+
+        }
+
+        private void LogError(string error, LineInfo lineInfo) {
+            error = "[UIForia::ParseError]@" + filePath + "|" + error;
+            if (diagnostics != null) {
+                diagnostics.LogError(error, filePath, lineInfo.line, lineInfo.column);
+            }
+            else {
+                Debug.LogError(error + "(" + lineInfo + ")");
+            }
+
+            hasCriticalError = true;
         }
 
         private void LogError(string error) {
-            Debug.LogError(error);
+            if (diagnostics != null) {
+                diagnostics.LogError(error);
+            }
+            else {
+                Debug.Log(error);
+            }
+
             hasCriticalError = true;
         }
-    }
-
-    class NanoXMLBase {
-
-        protected static bool IsSpace(char c) {
-            return c == ' ' || c == '\t' || c == '\n' || c == '\r';
-        }
-
-        protected static void SkipSpaces(string str, ref int i) {
-            while (i < str.Length) {
-                if (!IsSpace(str[i])) {
-                    if (str[i] == '<' && i + 4 < str.Length && str[i + 1] == '!' && str[i + 2] == '-' && str[i + 3] == '-') {
-                        i += 4; // skip <!--
-
-                        while (i + 2 < str.Length && !(str[i] == '-' && str[i + 1] == '-'))
-                            i++;
-
-                        i += 2; // skip --
-                    }
-                    else
-                        break;
-                }
-
-                i++;
-            }
-        }
-
-        protected static string GetValue(string str, ref int i, char endChar, char endChar2, bool stopOnSpace) {
-            int start = i;
-            while ((!stopOnSpace || !IsSpace(str[i])) && str[i] != endChar && str[i] != endChar2) i++;
-
-            return str.Substring(start, i - start);
-        }
-
-        protected static bool IsQuote(char c) {
-            return c == '"' || c == '\'';
-        }
-
-        protected static string ParseAttributes(string str, ref int i, List<NanoXMLAttribute> attributes, char endChar, char endChar2) {
-            SkipSpaces(str, ref i);
-            string name = GetValue(str, ref i, endChar, endChar2, true);
-
-            SkipSpaces(str, ref i);
-
-            while (str[i] != endChar && str[i] != endChar2) {
-                string attrName = GetValue(str, ref i, '=', '\0', true);
-
-                SkipSpaces(str, ref i);
-                i++; // skip '='
-                SkipSpaces(str, ref i);
-
-                char quote = str[i];
-                if (!IsQuote(quote))
-                    throw new XMLParsingException("Unexpected token after " + attrName);
-
-                i++; // skip quote
-                string attrValue = GetValue(str, ref i, quote, '\0', false);
-                i++; // skip quote
-
-                attributes = attributes ?? new List<NanoXMLAttribute>();
-                attributes.Add(new NanoXMLAttribute(attrName, attrValue));
-
-                SkipSpaces(str, ref i);
-            }
-
-            return name;
-        }
-
-    }
-
-    class NanoXMLDocument : NanoXMLBase {
-
-        private NanoXMLNode rootNode;
-        private List<NanoXMLAttribute> declarations = new List<NanoXMLAttribute>();
-
-        /// <summary>
-        /// Public constructor. Loads xml document from raw string
-        /// </summary>
-        /// <param name="xmlString">String with xml</param>
-        public NanoXMLDocument(string xmlString) {
-            int i = 0;
-
-            while (true) {
-                SkipSpaces(xmlString, ref i);
-
-                char thing = xmlString[i];
-                if (xmlString[i] != '<')
-                    throw new XMLParsingException("Unexpected token");
-
-                i++; // skip <
-
-                if (xmlString[i] == '?') // declaration
-                {
-                    i++; // skip ?
-                    ParseAttributes(xmlString, ref i, declarations, '?', '>');
-                    i++; // skip ending ?
-                    i++; // skip ending >
-
-                    continue;
-                }
-
-                if (xmlString[i] == '!') // doctype
-                {
-                    while (xmlString[i] != '>') // skip doctype
-                        i++;
-
-                    i++; // skip >
-
-                    continue;
-                }
-
-                rootNode = new NanoXMLNode(xmlString, ref i);
-                break;
-            }
-        }
-
-        /// <summary>
-        /// Root document element
-        /// </summary>
-        public NanoXMLNode RootNode {
-            get { return rootNode; }
-        }
-
-        /// <summary>
-        /// List of XML Declarations as <see cref="NanoXMLAttribute"/>
-        /// </summary>
-        public IEnumerable<NanoXMLAttribute> Declarations {
-            get { return declarations; }
-        }
-
-    }
-
-    /// <summary>
-    /// Element node of document
-    /// </summary>
-    class NanoXMLNode : NanoXMLBase {
-
-        private string value;
-        private string name;
-
-        private List<NanoXMLNode> subNodes = new List<NanoXMLNode>();
-        private List<NanoXMLAttribute> attributes = new List<NanoXMLAttribute>();
-
-        internal NanoXMLNode(string str, ref int i) {
-            name = ParseAttributes(str, ref i, attributes, '>', '/');
-
-            if (str[i] == '/') // if this node has nothing inside
-            {
-                i++; // skip /
-                i++; // skip >
-                return;
-            }
-
-            i++; // skip >
-
-            // temporary. to include all whitespaces into value, if any
-            int tempI = i;
-
-            SkipSpaces(str, ref tempI);
-
-            if (str[tempI] == '<') {
-                i = tempI;
-
-                while (str[i + 1] != '/') // parse subnodes
-                {
-                    i++; // skip <
-                    subNodes.Add(new NanoXMLNode(str, ref i));
-
-                    SkipSpaces(str, ref i);
-
-                    if (i >= str.Length)
-                        return; // EOF
-
-                    if (str[i] != '<')
-                        throw new XMLParsingException("Unexpected token");
-                }
-
-                i++; // skip <
-            }
-            else // parse value
-            {
-                value = GetValue(str, ref i, '<', '\0', false);
-                i++; // skip <
-
-                if (str[i] != '/')
-                    throw new XMLParsingException("Invalid ending on tag " + name);
-            }
-
-            i++; // skip /
-            SkipSpaces(str, ref i);
-
-            string endName = GetValue(str, ref i, '>', '\0', true);
-            if (endName != name)
-                throw new XMLParsingException("Start/end tag name mismatch: " + name + " and " + endName);
-            SkipSpaces(str, ref i);
-
-            if (str[i] != '>')
-                throw new XMLParsingException("Invalid ending on tag " + name);
-
-            i++; // skip >
-        }
-
-        /// <summary>
-        /// Returns subelement by given name
-        /// </summary>
-        /// <param name="nodeName">Name of subelement to get</param>
-        /// <returns>First subelement with given name or NULL if no such element</returns>
-        public NanoXMLNode this[string nodeName] {
-            get {
-                foreach (NanoXMLNode nanoXmlNode in subNodes)
-                    if (nanoXmlNode.name == nodeName)
-                        return nanoXmlNode;
-
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Returns attribute by given name
-        /// </summary>
-        /// <param name="attributeName">Attribute name to get</param>
-        /// <returns><see cref="NanoXMLAttribute"/> with given name or null if no such attribute</returns>
-        public NanoXMLAttribute? GetAttribute(string attributeName) {
-            foreach (NanoXMLAttribute nanoXmlAttribute in attributes)
-                if (nanoXmlAttribute.name == attributeName)
-                    return nanoXmlAttribute;
-
-            return null;
-        }
-
-    }
-
-    struct NanoXMLAttribute {
-
-        public string name;
-        public string value;
-        public AttributeType attributeType;
-        public AttributeFlags flags;
-
-        internal NanoXMLAttribute(string name, string value) : this() {
-            this.name = name;
-            this.value = value;
-        }
-
-    }
-
-    class XMLParsingException : Exception {
-
-        public XMLParsingException(string message) : base(message) { }
 
     }
 

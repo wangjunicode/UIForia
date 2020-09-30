@@ -30,7 +30,7 @@ namespace UIForia.Editor {
         }
 
         private void Update() {
-            if (!EditorApplication.isPlaying) {
+            if (!UnityEditor.EditorApplication.isPlaying) {
                 return;
             }
 
@@ -38,7 +38,7 @@ namespace UIForia.Editor {
         }
 
         public void OnGUI() {
-            if (!EditorApplication.isPlaying) {
+            if (!UnityEditor.EditorApplication.isPlaying) {
                 EditorGUILayout.LabelField("Enter play mode to inspect a UIForia Application");
                 return;
             }
@@ -174,7 +174,7 @@ namespace UIForia.Editor {
         }
 
         private void Update() {
-            if (!EditorApplication.isPlaying) {
+            if (!UnityEditor.EditorApplication.isPlaying) {
                 return;
             }
 
@@ -243,7 +243,7 @@ namespace UIForia.Editor {
         }
 
         public void OnGUI() {
-            if (!EditorApplication.isPlaying) {
+            if (!UnityEditor.EditorApplication.isPlaying) {
                 EditorGUILayout.LabelField("Enter play mode to inspect a UIForia Application");
                 return;
             }

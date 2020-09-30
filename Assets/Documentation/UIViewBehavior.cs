@@ -119,9 +119,6 @@ namespace UIForia {
             type = Type.GetType(typeName);
             if (type == null) return;
 
-            UIForiaRuntime.Initialize();
-            
-          
             TemplateSettings settings = GetTemplateSettings(type);
 
             // todo -- these should be moved to modules when they become supported

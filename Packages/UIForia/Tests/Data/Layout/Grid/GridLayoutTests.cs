@@ -10,7 +10,7 @@ namespace Layout {
 
     public class GridLayoutTest {
 
-        [Template("Data/Layout/Grid/GridLayout_RowSizeMinContent.xml")]
+        [Template("Grid/GridLayout_RowSizeMinContent.xml")]
         public class GridLayout_RowSize_MinContent : UIElement { }
 
         [Test]
@@ -29,7 +29,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_ColSizeMaxContent.xml")]
+        [Template("Grid/GridLayout_ColSizeMaxContent.xml")]
         public class GridLayout_ColSizeMaxContent : UIElement { }
 
         [Test]
@@ -49,7 +49,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_ColSizeMinContent.xml")]
+        [Template("Grid/GridLayout_ColSizeMinContent.xml")]
         public class GridLayout_ColSizeMinContent : UIElement { }
 
         [Test]
@@ -68,7 +68,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_GrowToMaxSize.xml")]
+        [Template("Grid/GridLayout_GrowToMaxSize.xml")]
         public class GridLayout_GrowToMaxSize : UIElement { }
 
         [Test]
@@ -84,7 +84,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_GrowToMaxSize_Fractional.xml")]
+        [Template("Grid/GridLayout_GrowToMaxSize_Fractional.xml")]
         public class GridLayout_GrowToMaxSize_Fractional : UIElement { }
 
         [Test]
@@ -107,7 +107,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_ResolveMaxContentTrackSize.xml")]
+        [Template("Grid/GridLayout_ResolveMaxContentTrackSize.xml")]
         public class GridLayout_ResolveMaxContentTrackSize : UIElement { }
 
         [Test]
@@ -133,7 +133,7 @@ namespace Layout {
             }
         }
 
-//        [Template("Data/Layout/Grid/GridLayout_ColCollapseMaxSizeContribution.xml")]
+//        [Template("Grid/GridLayout_ColCollapseMaxSizeContribution.xml")]
 //        public class GridLayout_ColCollapseMaxSizeContribution : UIElement { }
 //
 //        [Test]
@@ -151,7 +151,7 @@ namespace Layout {
 //            Assert.AreEqual(new Rect(100, 200, 100, 100), root[5].layoutResult.AllocatedRect);
 //        }
 
-        [Template("Data/Layout/Grid/GridLayout_ColMaxSizeContribution_NotCollapsed.xml")]
+        [Template("Grid/GridLayout_ColMaxSizeContribution_NotCollapsed.xml")]
         public class GridLayout_ColMaxSizeContribution_NotCollapsed : UIElement { }
 
         [Test]
@@ -171,7 +171,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_ExplicitPlaced_Flex.xml")]
+        [Template("Grid/GridLayout_ExplicitPlaced_Flex.xml")]
         public class GridLayout_ExplicitPlaced_Flex : UIElement { }
 
         [Test]
@@ -187,7 +187,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_ImplicitRowUnplaced3x2.xml")]
+        [Template("Grid/GridLayout_ImplicitRowUnplaced3x2.xml")]
         public class GridLayout_ImplicitRowUnplaced3x2 : UIElement { }
 
         [Test]
@@ -206,7 +206,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_ImplicitColUnplaced3x2.xml")]
+        [Template("Grid/GridLayout_ImplicitColUnplaced3x2.xml")]
         public class GridLayout_ImplicitColUnplaced3x2 : UIElement { }
 
         [Test]
@@ -225,7 +225,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_AssignBasicPlacements.xml")]
+        [Template("Grid/GridLayout_AssignBasicPlacements.xml")]
         public class GridLayout_AssignBasicPlacements : UIElement { }
 
         [Test]
@@ -244,7 +244,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_VerticalSparse.xml")]
+        [Template("Grid/GridLayout_VerticalSparse.xml")]
         public class GridLayout_VerticalSparse : UIElement { }
 
         [Test]
@@ -262,7 +262,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_VerticalDense.xml")]
+        [Template("Grid/GridLayout_VerticalDense.xml")]
         public class GridLayout_VerticalDense : UIElement { }
 
         [Test]
@@ -280,7 +280,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_HorizontalSparse.xml")]
+        [Template("Grid/GridLayout_HorizontalSparse.xml")]
         public class GridLayout_HorizontalSparse : UIElement { }
 
         [Test]
@@ -298,7 +298,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_HorizontalDense.xml")]
+        [Template("Grid/GridLayout_HorizontalDense.xml")]
         public class GridLayout_HorizontalDense : UIElement { }
 
         [Test]
@@ -316,7 +316,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_Margin_OffsetFromLayoutBox.xml")]
+        [Template("Grid/GridLayout_Margin_OffsetFromLayoutBox.xml")]
         public class GridLayout_Margin_OffsetFromLayoutBox : UIElement { }
 
         [Test]
@@ -336,7 +336,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_RowLocked_ColumnFlow.xml")]
+        [Template("Grid/GridLayout_RowLocked_ColumnFlow.xml")]
         public class GridLayout_RowLocked_ColumnFlow : UIElement { }
 
         [Test]
@@ -355,7 +355,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_GapUsage.xml")]
+        [Template("Grid/GridLayout_GapUsage.xml")]
         public class GridLayout_GapUsage : UIElement { }
 
         [Test]
@@ -374,7 +374,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_MixImplicitExplicit.xml")]
+        [Template("Grid/GridLayout_MixImplicitExplicit.xml")]
         public class GridLayout_MixImplicitExplicit : UIElement { }
 
         [Test]
@@ -394,7 +394,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_ExplicitPlaced_MinWidth.xml")]
+        [Template("Grid/GridLayout_ExplicitPlaced_MinWidth.xml")]
         public class GridLayout_ExplicitPlaced_MinWidth : UIElement { }
 
         [Test]
@@ -413,7 +413,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_HorizontalBlockSize.xml")]
+        [Template("Grid/GridLayout_HorizontalBlockSize.xml")]
         public class GridLayout_HorizontalBlockSize : UIElement { }
 
         [Test]
@@ -432,7 +432,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_VerticalBlockSize.xml")]
+        [Template("Grid/GridLayout_VerticalBlockSize.xml")]
         public class GridLayout_VerticalBlockSize : UIElement { }
 
         [Test]
@@ -451,7 +451,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Grid/GridLayout_Align.xml")]
+        [Template("Grid/GridLayout_Align.xml")]
         public class GridLayout_Align : UIElement { }
 
         [Test]

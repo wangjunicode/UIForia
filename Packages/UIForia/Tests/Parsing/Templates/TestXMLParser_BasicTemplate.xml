@@ -1,4 +1,22 @@
 <UITemplate>
-    <Contents attr:id="id-0">
+    <Contents>
+
+        <Div attr:id="id-0">
+            <Group/>
+            <Group/>
+            <Group/>
+        </Div>
+
+        <Div attr:id="id-1">
+            <Group/>
+            <Group/>
+            <Group/>
+        </Div>
+
+        <Div attr:id="id-2">
+            <Group/>
+            <Group/>
+            <Group/>
+        </Div>
     </Contents>
 </UITemplate>

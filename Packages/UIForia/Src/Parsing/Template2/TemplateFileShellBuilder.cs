@@ -4,6 +4,9 @@ using System.Diagnostics;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
 using UIForia.Util;
+using UIForia.Util.Unsafe;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -27,86 +30,107 @@ namespace UIForia {
             this.line = line;
             this.column = column;
         }
-      
-    }
-
-    [Serializable]
-    public struct IndexedString {
-
-        public int index;
-        public string value;
 
     }
 
-    [Serializable]
+    [DebuggerDisplay("type={type} {key}={value}")]
+    public struct AttributeDefinition3 {
+
+        public RangeInt key;
+        public RangeInt value;
+        public int line;
+        public int column;
+        public AttributeType type;
+        public AttributeFlags flags;
+
+        public AttributeDefinition3(AttributeType type, AttributeFlags flags, RangeInt key, RangeInt value, int line = -1, int column = -1) {
+            this.type = type;
+            this.flags = flags;
+            this.key = key;
+            this.value = value;
+            this.line = line;
+            this.column = column;
+        }
+
+    }
+
     public struct TextContent {
 
-        public int index;
         public LineInfo lineInfo;
-        public RangeInt textExpressions;
+        public RangeInt stringRange;
+        public bool isExpression;
 
     }
 
-    public class TemplateFileShellBuilder {
+    public struct UsingDeclaration {
 
-        internal StructList<IndexedString> tagNames;
-        internal StructList<IndexedString> moduleNames;
-        internal StructList<IndexedString> requiredTypes;
-        internal StructList<IndexedString> genericTypeResolvers;
-        internal StructList<TextContent> textContents;
-        internal StructList<TextExpression> textExpressions;
+        public RangeInt namespaceRange;
+        // public UsingDeclarationType type;
 
-        internal StructList<TemplateASTRoot> rootNodes;
-        internal StructList<TemplateASTNode> templateNodes;
-        internal StructList<AttributeDefinition2> attributeList;
-        internal StructList<UsingDeclaration> usings;
-        internal LightList<string> referencedNamespaces;
-        internal StructList<SlotAST> slots;
+    }
+
+    public struct StyleDeclaration {
+
+        public RangeInt path;
+        public RangeInt sourceBody;
+        public RangeInt alias;
+
+    }
+
+    internal class TemplateFileShellBuilder {
+
+        private StructList<TextContent> textContents;
+        private StructList<TextExpression> textExpressions;
+
+        private StructList<TemplateASTRoot> rootNodes;
+        private StructList<TemplateASTNode> templateNodes;
+        private StructList<AttributeDefinition3> attributeList;
+        private StructList<UsingDeclaration> usings;
+        private StructList<StyleDeclaration> styles;
+        private StructList<SlotAST> slots;
+
+        private DataList<char>.Shared charBuffer;
 
         internal TemplateFileShellBuilder() {
+            this.charBuffer = new DataList<char>.Shared(1024, Allocator.Persistent);
             this.rootNodes = new StructList<TemplateASTRoot>(2);
-            this.templateNodes = new StructList<TemplateASTNode>(16);
-            this.attributeList = new StructList<AttributeDefinition2>(32);
-            this.usings = new StructList<UsingDeclaration>(4);
-            this.referencedNamespaces = new LightList<string>(4);
-            this.tagNames = new StructList<IndexedString>();
-            this.moduleNames = new StructList<IndexedString>();
-            this.genericTypeResolvers = new StructList<IndexedString>();
-            this.textContents = new StructList<TextContent>();
+            this.styles = new StructList<StyleDeclaration>();
             this.textExpressions = new StructList<TextExpression>();
-            this.requiredTypes = new StructList<IndexedString>();
+            this.templateNodes = new StructList<TemplateASTNode>(16);
+            this.attributeList = new StructList<AttributeDefinition3>(32);
+            this.usings = new StructList<UsingDeclaration>(4);
+            this.textContents = new StructList<TextContent>();
             this.slots = new StructList<SlotAST>();
         }
 
-        public void Build(TemplateFileShell shell) {
-            shell.tagNames = tagNames.ToArray();
-            shell.moduleNames = moduleNames.ToArray();
-            shell.requiredTypes = requiredTypes.ToArray();
-            shell.genericTypeResolvers = genericTypeResolvers.ToArray();
+        ~TemplateFileShellBuilder() {
+            charBuffer.Dispose();
+        }
+
+        public TemplateFileShell Build(string templateLocation) {
+
+            TemplateFileShell shell = new TemplateFileShell(templateLocation);
             shell.textContents = textContents.ToArray();
-            shell.textExpressions = textExpressions.ToArray();
             shell.rootNodes = rootNodes.ToArray();
             shell.templateNodes = templateNodes.ToArray();
             shell.attributeList = attributeList.ToArray();
             shell.usings = usings.ToArray();
-            shell.referencedNamespaces = referencedNamespaces.ToArray();
             shell.slots = slots.ToArray();
+            shell.charBuffer = charBuffer.ToArray();
+            shell.styles = styles.ToArray();
 
-            tagNames.size = 0;
-            moduleNames.size = 0;
-            requiredTypes.size = 0;
-            genericTypeResolvers.size = 0;
+            charBuffer.size = 0;
+            styles.size = 0;
             textContents.size = 0;
-            textExpressions.size = 0;
             rootNodes.size = 0;
             templateNodes.size = 0;
             attributeList.size = 0;
             usings.size = 0;
-            referencedNamespaces.size = 0;
             slots.size = 0;
+            return shell;
         }
 
-        private ref TemplateASTNode AddTemplateNode(TemplateNodeType nodeType, IList<AttributeDefinition2> attributes, LineInfo lineInfo, string genericTypeResolver, string requireType) {
+        private ref TemplateASTNode AddTemplateNode(TemplateNodeType nodeType, IList<AttributeDefinition3> attributes, LineInfo lineInfo) {
             int idx = templateNodes.size;
             RangeInt attrRange = AddAttributes(attributes);
             templateNodes.Add(new TemplateASTNode() {
@@ -121,42 +145,37 @@ namespace UIForia {
                 templateNodeType = nodeType,
             });
 
-            if (genericTypeResolver != null) {
-                genericTypeResolvers.Add(new IndexedString() {
-                    index = idx, value = genericTypeResolver
-                });
-            }
-
-            if (requireType != null) {
-                requiredTypes.Add(new IndexedString() {
-                    index = idx, value = requireType
-                });
-            }
-
             return ref templateNodes.array[idx];
         }
 
-        public TemplateASTBuilder CreateRootNode(string templateId, IList<AttributeDefinition2> attributes, LineInfo lineInfo, string genericTypeResolver, string requireType) {
+        public TemplateASTBuilder CreateRootNode(in RangeInt templateId, IList<AttributeDefinition3> attributes, LineInfo lineInfo) {
             rootNodes.Add(new TemplateASTRoot() {
-                // templateNameId = templateId,
+                templateNameRange = templateId,
                 slotDefinitionCount = 0,
                 firstSlotDefinitionIndex = 0,
                 templateIndex = templateNodes.size
             });
-            AddTemplateNode(TemplateNodeType.Root, attributes, lineInfo, genericTypeResolver, requireType);
+
+            AddTemplateNode(TemplateNodeType.Root, attributes, lineInfo);
             return new TemplateASTBuilder(templateNodes.size - 1, this, rootNodes.size - 1);
         }
 
         public void AddUsing(UsingDeclaration declaration) {
-            usings.Add(declaration);
 
-            // todo -- this is awkward
-            if (declaration.name != null) {
-                referencedNamespaces.Add(declaration.name);
+            CharSpan declSpan = GetCharSpan(declaration.namespaceRange);
+
+            for (int i = 0; i < usings.size; i++) {
+                UsingDeclaration usingDecl = usings.array[i];
+                CharSpan value = GetCharSpan(usingDecl.namespaceRange);
+                if (value == declSpan) {
+                    return;
+                }
             }
+
+            usings.Add(declaration);
         }
 
-        private TemplateASTBuilder CreateSlotNode(TemplateASTBuilder parentId, string slotName, IList<AttributeDefinition2> attributes, LineInfo lineInfo, SlotType slotType, string requireType) {
+        private TemplateASTBuilder CreateSlotNode(TemplateASTBuilder parentId, in CharSpan slotName, IList<AttributeDefinition3> attributes, LineInfo lineInfo, SlotType slotType) {
             int nodeId = templateNodes.size;
 
             TemplateNodeType nodeType = 0;
@@ -176,10 +195,12 @@ namespace UIForia {
                     break;
             }
 
-            ref TemplateASTNode node = ref AddTemplateNode(nodeType, attributes, lineInfo, null, requireType);
+            ref TemplateASTNode node = ref AddTemplateNode(nodeType, attributes, lineInfo);
 
             node.parentId = parentId.index;
-            // node.tagName = slotName;
+
+            RangeInt slotNameRange = AddString(slotName);
+            node.moduleNameRange = slotNameRange;
 
             ref TemplateASTRoot root = ref rootNodes.array[parentId.rootId];
 
@@ -194,7 +215,7 @@ namespace UIForia {
             // when compiling we'll need to verify that the target node can support slots
             // parsing is super permissive, restrict in a later phase
             slots.Add(new SlotAST() {
-                slotName = slotName,
+                slotNameRange = slotNameRange,
                 templateNodeId = nodeId,
                 slotType = slotType
             });
@@ -202,54 +223,67 @@ namespace UIForia {
             return new TemplateASTBuilder(nodeId, this, parentId.rootId);
         }
 
-        private TemplateASTBuilder CreateElementNode(TemplateASTBuilder parentId, string moduleName, string tagName, IList<AttributeDefinition2> attributes, LineInfo lineInfo, string genericTypeResolver, string requiredType) {
+        private unsafe RangeInt AddString(string span, bool attemptDeduplicate = false) {
+
+            // todo -- we could de-dup this if we wanted to, exercise for later I think
+
+            if (string.IsNullOrEmpty(span)) {
+                return default;
+            }
+
+            int length = span.Length;
+
+            charBuffer.EnsureAdditionalCapacity(length);
+            fixed (char* str = span) {
+                UnsafeUtility.MemCpy(charBuffer.GetArrayPointer() + charBuffer.size, str, length * sizeof(char));
+            }
+
+            RangeInt retn = new RangeInt(charBuffer.size, length);
+            charBuffer.size += length;
+            return retn;
+
+        }
+
+        public unsafe RangeInt AddString(in CharSpan span, bool attemptDeduplicate = false) {
+
+            // todo -- we could de-dup this if we wanted to, exercise for later I think
+
+            if (span.HasValue) {
+                int length = span.Length;
+
+                charBuffer.EnsureAdditionalCapacity(length);
+
+                UnsafeUtility.MemCpy(charBuffer.GetArrayPointer() + charBuffer.size, span.data + span.rangeStart, length * sizeof(char));
+
+                RangeInt retn = new RangeInt(charBuffer.size, length);
+                charBuffer.size += length;
+                return retn;
+            }
+
+            return default;
+        }
+
+        private TemplateASTBuilder CreateElementNode(TemplateASTBuilder parentId, in CharSpan moduleName, in CharSpan tagName, IList<AttributeDefinition3> attributes, LineInfo lineInfo) {
             int nodeId = templateNodes.size;
 
             AddChild(parentId.index, nodeId);
 
-            ref TemplateASTNode node = ref AddTemplateNode(TemplateNodeType.Unresolved, attributes, lineInfo, genericTypeResolver, requiredType);
+            ref TemplateASTNode node = ref AddTemplateNode(TemplateNodeType.Unresolved, attributes, lineInfo);
 
             node.parentId = parentId.index;
 
-            if (!string.IsNullOrEmpty(moduleName)) {
-                // if (!stringTable.TryGetValue(moduleName, out idx)) {
-                //     stringTable[moduleName] = idx;
-                // }
-                
-                moduleNames.Add(new IndexedString() {
-                    index = nodeId,
-                    value = moduleName
-                });
-            }
-
-            if (!string.IsNullOrEmpty(tagName)) {
-                tagNames.Add(new IndexedString() {
-                    index = nodeId,
-                    value = tagName
-                });
-            }
+            node.moduleNameRange = AddString(moduleName);
+            node.tagNameRange = AddString(tagName);
 
             return new TemplateASTBuilder(nodeId, this, parentId.rootId);
         }
 
-        private TemplateASTBuilder CreateRepeatNode(TemplateASTBuilder parentId, List<AttributeDefinition2> attributes, LineInfo lineInfo, string genericTypeResolver, string requireChildTypeExpression) {
+        private TemplateASTBuilder CreateTextNode(TemplateASTBuilder parentId, LineInfo lineInfo, IList<AttributeDefinition3> attributes, TemplateNodeType nodeType) {
             int nodeId = templateNodes.size;
 
             AddChild(parentId.index, nodeId);
 
-            ref TemplateASTNode node = ref AddTemplateNode(TemplateNodeType.Repeat, attributes, lineInfo, genericTypeResolver, requireChildTypeExpression);
-
-            node.parentId = parentId.index;
-
-            return new TemplateASTBuilder(nodeId, this, parentId.rootId);
-        }
-
-        private TemplateASTBuilder CreateTextNode(TemplateASTBuilder parentId, LineInfo lineInfo, IList<AttributeDefinition2> attributes, TemplateNodeType nodeType) {
-            int nodeId = templateNodes.size;
-
-            AddChild(parentId.index, nodeId);
-
-            ref TemplateASTNode node = ref AddTemplateNode(nodeType, attributes, lineInfo, null, null);
+            ref TemplateASTNode node = ref AddTemplateNode(nodeType, attributes, lineInfo);
 
             node.parentId = parentId.index;
 
@@ -257,6 +291,10 @@ namespace UIForia {
         }
 
         private void SetTextContent(string textContent, LineInfo lineInfo) {
+            // todo -- user api?
+        }
+
+        private void SetTextContent(StructList<char> textContent, LineInfo lineInfo) {
             int nodeId = templateNodes.size - 1;
 
             RangeInt range = new RangeInt(textExpressions.size, 0);
@@ -270,14 +308,19 @@ namespace UIForia {
                 textExpressions.size = range.start;
             }
 
-            textContents.Add(new TextContent() {
-                index = nodeId,
-                textExpressions = range,
-                lineInfo = lineInfo
-            });
+            templateNodes.array[nodeId].textContentRange = range;
+
+            for (int i = range.start; i < range.end; i++) {
+                textContents.Add(new TextContent() {
+                    stringRange = AddString(textExpressions.array[i].text),
+                    isExpression = textExpressions.array[i].isExpression,
+                    lineInfo = lineInfo
+                });
+            }
+
         }
 
-        private RangeInt AddAttributes(IList<AttributeDefinition2> attributes) {
+        private RangeInt AddAttributes(IList<AttributeDefinition3> attributes) {
             if (attributes == null || attributes.Count == 0) return default;
             int start = attributeList.size;
             attributeList.AddRange(attributes);
@@ -318,26 +361,105 @@ namespace UIForia {
                 this.rootId = rootId;
             }
 
-            public TemplateASTBuilder AddSlotChild(string slotName, IList<AttributeDefinition2> childAttributes, LineInfo lineInfo, SlotType slotType, string requireType) {
-                return templateFileShellBuilder.CreateSlotNode(this, slotName, childAttributes, lineInfo, slotType, requireType);
+            public TemplateASTBuilder AddSlotChild(in CharSpan slotName, IList<AttributeDefinition3> childAttributes, LineInfo lineInfo, SlotType slotType) {
+                return templateFileShellBuilder.CreateSlotNode(this, slotName, childAttributes, lineInfo, slotType);
             }
 
-            public TemplateASTBuilder AddElementChild(string moduleName, string tagName, IList<AttributeDefinition2> attributes, LineInfo lineInfo, string genericTypeResolver, string requireChildTypeExpression) {
-                return templateFileShellBuilder.CreateElementNode(this, moduleName, tagName, attributes, lineInfo, genericTypeResolver, requireChildTypeExpression);
+            public TemplateASTBuilder AddElementChild(in CharSpan moduleName, in CharSpan tagName, IList<AttributeDefinition3> attributes, LineInfo lineInfo) {
+                return templateFileShellBuilder.CreateElementNode(this, moduleName, tagName, attributes, lineInfo);
             }
 
-            public TemplateASTBuilder AddTextChild(IList<AttributeDefinition2> attributes, LineInfo templateLineInfo) {
-                return templateFileShellBuilder.CreateTextNode(this, templateLineInfo, attributes, TemplateNodeType.Text);
-            }
-
-            public TemplateASTBuilder AddRepeatChild(List<AttributeDefinition2> attributes, LineInfo lineInfo, string genericTypeResolver, string requireChildTypeExpression) {
-                return templateFileShellBuilder.CreateRepeatNode(this, attributes, lineInfo, genericTypeResolver, requireChildTypeExpression);
-            }
-
-            public void SetTextContent(string textContent, LineInfo lineInfo) {
+            public void SetTextContent(StructList<char> textContent, LineInfo lineInfo) {
                 templateFileShellBuilder.SetTextContent(textContent, lineInfo);
             }
 
+            // public TemplateASTBuilder AddTextChild(IList<AttributeDefinition3> attributes, LineInfo templateLineInfo) {
+            //     return templateFileShellBuilder.CreateTextNode(this, templateLineInfo, attributes, TemplateNodeType.Text);
+            // }
+
+            // public TemplateASTBuilder AddRepeatChild(List<AttributeDefinition2> attributes, LineInfo lineInfo, string genericTypeResolver, string requireChildTypeExpression) {
+            //     return templateFileShellBuilder.CreateRepeatNode(this, attributes, lineInfo, genericTypeResolver, requireChildTypeExpression);
+            // }
+
+        }
+
+        public CharSpan GetCharSpan(RangeInt key) {
+
+            if (key.length == 0) {
+                return default;
+            }
+
+            if (key.start < 0 || key.start > charBuffer.size) {
+                return default;
+            }
+
+            if (key.end > charBuffer.size) {
+                return default;
+            }
+
+            unsafe {
+                return new CharSpan(charBuffer.GetArrayPointer(), key.start, key.end);
+            }
+        }
+
+        public bool AddStyleSource(in CharSpan styleSource) {
+
+            for (int i = 0; i < styles.size; i++) {
+                if (styles.array[i].sourceBody.length > 0) {
+                    return false;
+                }
+            }
+
+            styles.Add(new StyleDeclaration() {
+                sourceBody = AddString(styleSource)
+            });
+
+            return true;
+        }
+
+        public bool AddStyleReference(in RangeInt src, in RangeInt alias) {
+
+            styles.Add(new StyleDeclaration() {
+                path = src,
+                alias = alias
+            });
+
+            return true;
+        }
+
+        internal bool StyleAliasIsDeclared(RangeInt alias) {
+            if (styles.size <= 0 || alias.length <= 0) {
+                return false;
+            }
+            
+            CharSpan aliasSpan = GetCharSpan(alias);
+            for (int i = 0; i < styles.size; i++) {
+                RangeInt range = styles.array[i].alias;
+                if (range.length > 0) {
+                    CharSpan existingAlias = GetCharSpan(range);
+                    if (existingAlias == aliasSpan) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        internal bool StyleSourceIsReferenced(RangeInt src) {
+            CharSpan srcSpan = GetCharSpan(src);
+
+            for (int i = 0; i < styles.size; i++) {
+                RangeInt range = styles.array[i].path;
+                if (range.length > 0) {
+                    CharSpan existingSrc = GetCharSpan(range);
+                    if (existingSrc == srcSpan) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
     }

@@ -1,0 +1,10 @@
+﻿<UITemplate>
+
+    <Using namespace="superduper"/>
+    <Using namespace="super.duper"/>
+    <Using namespace="super_double.dip"/>
+    <Using something="xxx_double.dip"/>
+
+    <Contents/>
+
+</UITemplate>

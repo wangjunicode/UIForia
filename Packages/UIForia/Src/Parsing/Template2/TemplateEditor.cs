@@ -1,11 +1,38 @@
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
 
 namespace UIForia {
 
+    public struct TemplateStyleNode {
+
+        public readonly string path;
+        public readonly string alias;
+        public readonly string source;
+
+        public TemplateStyleNode(string path, string alias, string source) {
+            this.path = path;
+            this.alias = alias;
+            this.source = source;
+        }
+
+    }
+    
+    public struct TemplateUsingNode {
+
+        public readonly string namespaceName;
+
+        public TemplateUsingNode(string namespaceName) {
+            this.namespaceName = namespaceName;
+        }
+
+    }
+    
     public class TemplateEditor {
 
         private TemplateFileShell shell;
         private LightList<TemplateEditorRootNode> rootNodes;
+        private LightList<TemplateStyleNode> styleNodes;
+        private LightList<TemplateUsingNode> usingNodes;
 
         // todo -- after creating, we want to forget about the shell, essentially discard it
         public TemplateEditor(TemplateFileShell shell) {
@@ -16,6 +43,25 @@ namespace UIForia {
             }
 
             rootNodes.size = shell.rootNodes.Length;
+            
+            this.styleNodes = new LightList<TemplateStyleNode>(shell.styles.Length);
+            for (int i = 0; i < shell.styles.Length; i++) {
+                StyleDeclaration style = shell.styles[i];
+                string stylePath = shell.GetString(style.path); 
+                string styleAlias = shell.GetString(style.alias); 
+                string styleSource = shell.GetString(style.sourceBody); 
+                styleNodes.array[i] = new TemplateStyleNode(stylePath, styleAlias, styleSource);
+            }
+
+            styleNodes.size = shell.styles.Length;
+            
+            this.usingNodes = new LightList<TemplateUsingNode>(shell.usings.Length);
+            for (int i = 0; i < shell.usings.Length; i++) {
+                UsingDeclaration usingNode = shell.usings[i];
+                usingNodes.array[i] = new TemplateUsingNode(shell.GetString(usingNode.namespaceRange));
+            }
+
+            usingNodes.size = shell.usings.Length;
         }
 
         public TemplateEditorRootNode GetTemplateRoot(string templateName = null) {
@@ -30,11 +76,14 @@ namespace UIForia {
 
         private TemplateEditorNode CreateChildNode(int templateId) {
             ref TemplateASTNode node = ref shell.templateNodes[templateId];
-            TemplateEditorNode editorNode = new TemplateEditorNode(shell.GetModuleName(node.index), shell.GetRawTagName(node.index));
+
+            TemplateEditorNode editorNode = new TemplateEditorNode(shell.GetString(node.moduleNameRange), shell.GetString(node.tagNameRange));
 
             for (int i = node.attributeRangeStart; i < node.attributeRangeEnd; i++) {
-                AttributeDefinition2 attr = shell.attributeList[i];
-                editorNode.attributeNodes.Add(new TemplateEditorAttributeNode(attr));
+                AttributeDefinition3 attr = shell.attributeList[i];
+                string attrKey = shell.GetString(attr.key);
+                string attrValue = shell.GetString(attr.value);
+                editorNode.attributeNodes.Add(new TemplateEditorAttributeNode(attrKey, attrValue, attr.type, attr.flags));
             }
 
             int childPtr = node.firstChildIndex;
@@ -53,14 +102,16 @@ namespace UIForia {
 
             TemplateEditorRootNode rootNode = new TemplateEditorRootNode();
 
-            rootNode.templateId = default; //shell.GetString(root.templateNameId);
+            rootNode.templateId = shell.GetString(root.templateNameRange);
             rootNode.shell = shell;
             TemplateASTNode node = shell.templateNodes[root.templateIndex];
             
             // rootNode.firstChild = CreateChildNode(shell.templateNodes[rootId].firstChildIndex);
             for (int i = node.attributeRangeStart; i < node.attributeRangeEnd; i++) {
-                AttributeDefinition2 attr = shell.attributeList[i];
-                rootNode.attributeNodes.Add(new TemplateEditorAttributeNode(attr));
+                AttributeDefinition3 attr = shell.attributeList[i];
+                string attrKey = shell.GetString(attr.key);
+                string attrValue = shell.GetString(attr.value);
+                rootNode.attributeNodes.Add(new TemplateEditorAttributeNode(attrKey, attrValue, attr.type, attr.flags));
             }
 
             int childPtr = node.firstChildIndex;

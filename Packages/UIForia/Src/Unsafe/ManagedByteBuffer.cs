@@ -1,5 +1,6 @@
 using System;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
 
 namespace UIForia.NewStyleParsing {
 
@@ -20,6 +21,10 @@ namespace UIForia.NewStyleParsing {
                 length = value.Length;
             }
 
+            if (array == null) {
+                array = new byte[Mathf.Max(512, length * 2)];
+            }
+            
             int advance = ptr + sizeof(int) + (length * 2);
             if (advance > array.Length) {
                 int required = advance;
@@ -49,6 +54,11 @@ namespace UIForia.NewStyleParsing {
         }
 
         public void Write(int value) {
+            
+            if (array == null) {
+                array = new byte[512];
+            }
+            
             if (ptr + sizeof(int) > array.Length) {
                 Array.Resize(ref array, array.Length * 2);
             }
@@ -62,6 +72,10 @@ namespace UIForia.NewStyleParsing {
         }
 
         public void Write(ushort value) {
+            if (array == null) {
+                array = new byte[512];
+            }
+            
             if (ptr + sizeof(ushort) > array.Length) {
                 Array.Resize(ref array, array.Length * 2);
             }
@@ -96,7 +110,9 @@ namespace UIForia.NewStyleParsing {
         }
 
         public void Write<T>(T* items, int count) where T : unmanaged {
-
+            if (array == null) {
+                array = new byte[sizeof(T) * count * 2];
+            }
             if (ptr + (sizeof(T) * count) > array.Length) {
                 int advance = ptr + (sizeof(T) * count);
                 int doubled = array.Length * 2;
@@ -121,7 +137,7 @@ namespace UIForia.NewStyleParsing {
             fixed (byte* p = array) {
                 T* items = (T*) (p + ptr);
                 UnsafeUtility.MemCpy(output, items, sizeof(T) * outputArray.Length);
-                ptr += sizeof(T*) * outputArray.Length;
+                ptr += sizeof(T) * outputArray.Length;
             }
         }
 
@@ -147,15 +163,14 @@ namespace UIForia.NewStyleParsing {
             fixed (byte* p = array) {
                 T* items = (T*) (p + ptr);
                 UnsafeUtility.MemCpy(output, items, sizeof(T) * itemCount);
-                ptr += sizeof(T*) * itemCount;
+                ptr += sizeof(T) * itemCount;
             }
         }
 
         public void Read(out string target) {
             fixed (byte* p = array) {
-                int length;
                 ushort* i = (ushort*) (p + ptr);
-                length = *i;
+                int length = *i;
                 ptr += sizeof(int);
                 if (length == 0) {
                     target = string.Empty;
@@ -166,6 +181,7 @@ namespace UIForia.NewStyleParsing {
                 else {
                     char* charptr = (char*) (p + ptr);
                     target = new string(charptr, 0, length);
+                    ptr += sizeof(char) * length;
                 }
             }
 

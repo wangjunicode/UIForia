@@ -4,7 +4,7 @@ using static SpaceGameDemo.Controllers;
 
 namespace SpaceGameDemo {
 
-    [Template("SpaceGameDemo/SpaceMenuItem/SpaceMenuItem.xml")]
+    [Template("SpaceMenuItem/SpaceMenuItem.xml")]
     public class SpaceMenuItem : UIElement {
 
         // Parameter / Property

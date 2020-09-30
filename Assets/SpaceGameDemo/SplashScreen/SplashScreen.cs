@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SpaceGameDemo.SplashScreen {
     
-    [Template("SpaceGameDemo/SplashScreen/SplashScreen.xml")]
+    [Template("SplashScreen/SplashScreen.xml")]
     public class SplashScreen : UIElement {
         
         // Parameter

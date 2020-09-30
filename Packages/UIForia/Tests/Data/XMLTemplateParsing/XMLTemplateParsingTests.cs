@@ -22,7 +22,7 @@ namespace TemplateParsing_XML {
             return settings;
         }
 
-        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_CollapseTextNode_Simple.xml")]
+        [Template("XMLTemplateParsing_CollapseTextNode_Simple.xml")]
         public class XMLTemplateParsing_CollapseTextNode_Simple : UIElement { }
 
         [Test]
@@ -38,7 +38,7 @@ namespace TemplateParsing_XML {
             Assert.AreEqual("Hello Templates", text.textExpressionList[0].text);
         }
 
-        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_CollapseTextNode_Complex.xml")]
+        [Template("XMLTemplateParsing_CollapseTextNode_Complex.xml")]
         public class XMLTemplateParsing_CollapseTextNode_Complex : UIElement { }
 
         [Test]
@@ -59,7 +59,7 @@ namespace TemplateParsing_XML {
             Assert.AreEqual("Templates", subText.textExpressionList[0].text.Trim());
         }
 
-        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_DefineSlot.xml")]
+        [Template("XMLTemplateParsing_DefineSlot.xml")]
         public class XMLTemplateParsing_DefineSlot : UIElement { }
 
         [Test]
@@ -75,7 +75,7 @@ namespace TemplateParsing_XML {
             Assert.AreEqual("my-slot", node.slotName);
         }
 
-        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_DefineSlotNameTwice.xml")]
+        [Template("XMLTemplateParsing_DefineSlotNameTwice.xml")]
         public class XMLTemplateParsing_DefineSlotNameTwice : UIElement { }
 
         // [Test]
@@ -93,7 +93,7 @@ namespace TemplateParsing_XML {
             Assert.DoesNotThrow(() => { cache.GetParsedTemplate(processedType); });
         }
 
-        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_OverrideSlot.xml")]
+        [Template("XMLTemplateParsing_OverrideSlot.xml")]
         public class XMLTemplateParsing_OverrideSlot : UIElement { }
 
         [Test]
@@ -114,10 +114,10 @@ namespace TemplateParsing_XML {
             AssertTrimmedText("Hello Between", overrideNode[0]);
         }
 
-        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_ExpandTemplate.xml")]
+        [Template("XMLTemplateParsing_ExpandTemplate.xml")]
         public class XMLTemplateParsing_ExpandTemplate : UIElement { }
 
-        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_ExpandedTemplateChild.xml")]
+        [Template("XMLTemplateParsing_ExpandedTemplateChild.xml")]
         public class XMLTemplateParsing_ExpandedTemplateChild : UIElement { }
 
         [Test]
@@ -137,7 +137,7 @@ namespace TemplateParsing_XML {
             AssertAndReturn<TextNode>(templateRootRoot[2]);
         }
 
-        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_Namespaces.xml")]
+        [Template("XMLTemplateParsing_Namespaces.xml")]
         public class XMLTemplateParsing_Namespace : UIElement { }
 
         [Test]
@@ -149,7 +149,7 @@ namespace TemplateParsing_XML {
             Assert.AreEqual(typeof(UIDivElement), templateRoot.children[0].processedType.rawType);
         }
 
-        [Template("Data/XMLTemplateParsing/XMLTemplateParsing_Namespaces.xml#unknown")]
+        [Template("XMLTemplateParsing_Namespaces.xml#unknown")]
         public class XMLTemplateParsing_Namespace_Unknown : UIElement { }
 
         [Test]
@@ -159,7 +159,7 @@ namespace TemplateParsing_XML {
                 TemplateCache cache = new TemplateCache(Setup("App"));
                 cache.GetParsedTemplate(processedType);
             });
-            Assert.IsTrue(exception.Message.Contains(ParseException.UnresolvedTagName("Data/XMLTemplateParsing/XMLTemplateParsing_Namespaces.xml", new TemplateLineInfo(11, 10), "NotHere:Div").Message));
+            Assert.IsTrue(exception.Message.Contains(ParseException.UnresolvedTagName("XMLTemplateParsing_Namespaces.xml", new TemplateLineInfo(11, 10), "NotHere:Div").Message));
         }
 
         public static string GetText(UIElement element) {

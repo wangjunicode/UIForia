@@ -7,7 +7,7 @@ namespace ElementTests {
 
     public class ElementTests {
 
-        [Template("Data/Element/ElementTests_Depth.xml")]
+        [Template("ElementTests_Depth.xml")]
         public class DepthThing : UIElement {
 
             public UIElement g1;
@@ -26,7 +26,7 @@ namespace ElementTests {
 
         }
 
-        [Template("Data/Element/ElementTests_Depth.xml#depth_thing_child")]
+        [Template("ElementTests_Depth.xml#depth_thing_child")]
         public class DepthThingChild : UIElement { }
 
         [Test]

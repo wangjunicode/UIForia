@@ -49,7 +49,7 @@ namespace UIForia.Parsing {
             ParseContents(root);
 
             templateShell = new TemplateFileShell(filePath);
-            templateFileShellBuilder.Build(templateShell);
+            //templateFileShellBuilder.Build(templateShell);
 
             return true;
         }
@@ -77,9 +77,9 @@ namespace UIForia.Parsing {
 
                 ValidateRootAttributes(contentRoot);
 
-                TemplateFileShellBuilder.TemplateASTBuilder retn = templateFileShellBuilder.CreateRootNode(templateId, attributes, lineInfo, genericTypeResolver, requireType);
-
-                ParseChildren(retn, contentRoot.Nodes());
+                // TemplateFileShellBuilder.TemplateASTBuilder retn = templateFileShellBuilder.CreateRootNode(templateId, attributes, lineInfo, genericTypeResolver, requireType);
+                //
+                // ParseChildren(retn, contentRoot.Nodes());
             }
         }
 
@@ -88,7 +88,7 @@ namespace UIForia.Parsing {
 
             foreach (XElement usingElement in usingElements) {
                 if (TryParseUsing(usingElement, out UsingDeclaration declaration)) {
-                    templateFileShellBuilder.AddUsing(declaration);
+                //    templateFileShellBuilder.AddUsing(declaration);
                 }
             }
 
@@ -195,7 +195,7 @@ namespace UIForia.Parsing {
 
                         if (textContent.Length > 0) {
                             IXmlLineInfo textLineInfo = element.PreviousNode;
-                            parent.SetTextContent(textContent.ToString(), new LineInfo(textLineInfo.LineNumber, textLineInfo.LinePosition));
+                          //  parent.SetTextContent(textContent.ToString(), new LineInfo(textLineInfo.LineNumber, textLineInfo.LinePosition));
                             textContent.Clear();
                         }
 
@@ -210,31 +210,31 @@ namespace UIForia.Parsing {
 
                         TemplateFileShellBuilder.TemplateASTBuilder childNode;
 
-                        if (namespaceName == "define") {
-                            childNode = parent.AddSlotChild(tagName, attributes, lineInfo, SlotType.Define, requireType);
-                        }
-                        else if (namespaceName == "override") {
-                            childNode = parent.AddSlotChild(tagName, attributes, lineInfo, SlotType.Override, requireType);
-                        }
-                        else if (namespaceName == "forward") {
-                            childNode = parent.AddSlotChild(tagName, attributes, lineInfo, SlotType.Forward, requireType);
-                        }
-                        else if (string.IsNullOrEmpty(namespaceName)) {
-                            if (string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
-                                childNode = parent.AddRepeatChild(attributes, lineInfo, genericTypeResolver, requireType);
-                            }
-                            else if (string.Equals(tagName, "Text", StringComparison.Ordinal)) {
-                                childNode = parent.AddTextChild(attributes, lineInfo);
-                            }
-                            else {
-                                childNode = parent.AddElementChild(namespaceName, tagName, attributes, lineInfo, genericTypeResolver, requireType);
-                            }
-                        }
-                        else {
-                            childNode = parent.AddElementChild(namespaceName, tagName, attributes, lineInfo, genericTypeResolver, requireType);
-                        }
-
-                        ParseChildren(childNode, element.Nodes());
+                        // if (namespaceName == "define") {
+                        //     childNode = parent.AddSlotChild(tagName, attributes, lineInfo, SlotType.Define, requireType);
+                        // }
+                        // else if (namespaceName == "override") {
+                        //     childNode = parent.AddSlotChild(tagName, attributes, lineInfo, SlotType.Override, requireType);
+                        // }
+                        // else if (namespaceName == "forward") {
+                        //     childNode = parent.AddSlotChild(tagName, attributes, lineInfo, SlotType.Forward, requireType);
+                        // }
+                        // else if (string.IsNullOrEmpty(namespaceName)) {
+                        //     if (string.Equals(tagName, "Repeat", StringComparison.Ordinal)) {
+                        //         childNode = parent.AddRepeatChild(attributes, lineInfo, genericTypeResolver, requireType);
+                        //     }
+                        //     else if (string.Equals(tagName, "Text", StringComparison.Ordinal)) {
+                        //         childNode = parent.AddTextChild(attributes, lineInfo);
+                        //     }
+                        //     else {
+                        //         childNode = parent.AddElementChild(namespaceName, tagName, attributes, lineInfo, genericTypeResolver, requireType);
+                        //     }
+                        // }
+                        // else {
+                        //     childNode = parent.AddElementChild(namespaceName, tagName, attributes, lineInfo, genericTypeResolver, requireType);
+                        // }
+                        //
+                        // ParseChildren(childNode, element.Nodes());
 
                         continue;
                     }
@@ -249,7 +249,7 @@ namespace UIForia.Parsing {
             }
 
             if (textContent.Length != 0) {
-                parent.SetTextContent(textContent.ToString(), new LineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
+                //parent.SetTextContent(textContent.ToString(), new LineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition));
                 textContent.Clear();
             }
         }

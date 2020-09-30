@@ -3,7 +3,7 @@ using UIForia.Elements;
 
 namespace SpaceGameDemo.Toggle {
     
-    [Template("SpaceGameDemo/Toggle/Toggle.xml")]
+    [Template("Toggle/Toggle.xml")]
     public class Toggle : UIElement {
         // Parameter / Property
         public bool value;

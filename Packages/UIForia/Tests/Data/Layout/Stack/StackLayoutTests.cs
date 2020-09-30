@@ -10,7 +10,7 @@ namespace Layout {
 
     public class StackLayoutTests {
 
-        [Template("Data/Layout/Stack/Stack_ComputeContentSize.xml")]
+        [Template("Stack/Stack_ComputeContentSize.xml")]
         public class Stack_ComputeContentSize : UIElement { }
 
         [Test]
@@ -31,7 +31,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/Stack/Stack_AlignItems.xml")]
+        [Template("Stack/Stack_AlignItems.xml")]
         public class Stack_AlignItems : UIElement { }
 
         [Test]

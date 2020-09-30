@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
@@ -12,10 +13,10 @@ namespace TemplateStructure {
 
     public class TestTemplateStructure {
 
-        [Template("Data/TemplateStructure/SlotOverride/TemplateStructure_SlotOverride_Main.xml")]
+        [Template("SlotOverride/TemplateStructure_SlotOverride_Main.xml")]
         public class TemplateStructure_SlotOverride_Main : UIElement { }
 
-        [Template("Data/TemplateStructure/SlotOverride/TemplateStructure_SlotOverride_Expand.xml")]
+        [Template("SlotOverride/TemplateStructure_SlotOverride_Expand.xml")]
         public class TemplateStructure_SlotOverride_Expand : UIElement { }
 
         [Test]
@@ -30,10 +31,10 @@ namespace TemplateStructure {
             }
         }
 
-        [Template("Data/TemplateStructure/SlotOverride_Default/TemplateStructure_SlotOverrideDefault_Main.xml")]
+        [Template("SlotOverride_Default/TemplateStructure_SlotOverrideDefault_Main.xml")]
         public class TemplateStructure_SlotOverrideDefault_Main : UIElement { }
 
-        [Template("Data/TemplateStructure/SlotOverride_Default/TemplateStructure_SlotOverrideDefault_Expand.xml")]
+        [Template("SlotOverride_Default/TemplateStructure_SlotOverrideDefault_Expand.xml")]
         public class TemplateStructure_SlotOverrideDefault_Expand : UIElement { }
 
         [Test]
@@ -46,13 +47,13 @@ namespace TemplateStructure {
             }
         }
 
-        [Template("Data/TemplateStructure/SlotOverride_Extern_OuterOverride/TemplateStructure_SlotOverrideExtern_Main.xml")]
+        [Template("SlotOverride_Extern_OuterOverride/TemplateStructure_SlotOverrideExtern_Main.xml")]
         public class TemplateStructure_SlotOverrideExternOuterOverride_Main : UIElement { }
 
-        [Template("Data/TemplateStructure/SlotOverride_Extern_OuterOverride/TemplateStructure_SlotOverrideExtern_Exposer.xml")]
+        [Template("SlotOverride_Extern_OuterOverride/TemplateStructure_SlotOverrideExtern_Exposer.xml")]
         public class TemplateStructure_SlotOverrideExternOuterOverride_Exposer : UIElement { }
 
-        [Template("Data/TemplateStructure/SlotOverride_Extern_OuterOverride/TemplateStructure_SlotOverrideExtern_Definer.xml")]
+        [Template("SlotOverride_Extern_OuterOverride/TemplateStructure_SlotOverrideExtern_Definer.xml")]
         public class TemplateStructure_SlotOverrideExternOuterOverride_Definer : UIElement { }
 
         [Test]
@@ -67,13 +68,13 @@ namespace TemplateStructure {
             }
         }
 
-        [Template("Data/TemplateStructure/SlotOverride_Extern_ExternDefault/TemplateStructure_SlotOverride_Extern_ExternDefault_Main.xml")]
+        [Template("SlotOverride_Extern_ExternDefault/TemplateStructure_SlotOverride_Extern_ExternDefault_Main.xml")]
         public class TemplateStructure_SlotOverride_Extern_ExternDefault_Main : UIElement { }
 
-        [Template("Data/TemplateStructure/SlotOverride_Extern_ExternDefault/TemplateStructure_SlotOverride_Extern_ExternDefault_Exposer.xml")]
+        [Template("SlotOverride_Extern_ExternDefault/TemplateStructure_SlotOverride_Extern_ExternDefault_Exposer.xml")]
         public class TemplateStructure_SlotOverride_Extern_ExternDefault_Exposer : UIElement { }
 
-        [Template("Data/TemplateStructure/SlotOverride_Extern_ExternDefault/TemplateStructure_SlotOverride_Extern_ExternDefault_Definer.xml")]
+        [Template("SlotOverride_Extern_ExternDefault/TemplateStructure_SlotOverride_Extern_ExternDefault_Definer.xml")]
         public class TemplateStructure_SlotOverride_Extern_ExternDefault_Definer : UIElement { }
 
         [Test]
@@ -88,13 +89,13 @@ namespace TemplateStructure {
             }
         }
 
-        [Template("Data/TemplateStructure/SlotOverride_Extern_DefinerDefault/TemplateStructure_SlotOverride_Extern_DefinerDefault_Main.xml")]
+        [Template("SlotOverride_Extern_DefinerDefault/TemplateStructure_SlotOverride_Extern_DefinerDefault_Main.xml")]
         public class TemplateStructure_SlotOverride_Extern_DefinerDefault_Main : UIElement { }
 
-        [Template("Data/TemplateStructure/SlotOverride_Extern_DefinerDefault/TemplateStructure_SlotOverride_Extern_DefinerDefault_Exposer.xml")]
+        [Template("SlotOverride_Extern_DefinerDefault/TemplateStructure_SlotOverride_Extern_DefinerDefault_Exposer.xml")]
         public class TemplateStructure_SlotOverride_Extern_DefinerDefault_Exposer : UIElement { }
 
-        [Template("Data/TemplateStructure/SlotOverride_Extern_DefinerDefault/TemplateStructure_SlotOverride_Extern_DefinerDefault_Definer.xml")]
+        [Template("SlotOverride_Extern_DefinerDefault/TemplateStructure_SlotOverride_Extern_DefinerDefault_Definer.xml")]
         public class TemplateStructure_SlotOverride_Extern_DefinerDefault_Definer : UIElement { }
 
         [Test]
@@ -110,21 +111,21 @@ namespace TemplateStructure {
         }
 
 
-        [Template("Data/TemplateStructure/ChildrenSlot.xml")]
+        [Template("ChildrenSlot.xml")]
         public class TemplateStructure_RadioButtonTest : UIElement {
 
             public string selectedRadioOption;
 
         }
 
-        [Template("Data/TemplateStructure/ChildrenSlot.xml#button")]
+        [Template("ChildrenSlot.xml#button")]
         public class RadioButton<T> : UIElement {
 
             public T value;
 
         }
 
-        [Template("Data/TemplateStructure/ChildrenSlot.xml#group")]
+        [Template("ChildrenSlot.xml#group")]
         public class RadioGroup<T> : UIElement where T : IEquatable<T> {
 
             public T value;
@@ -136,7 +137,7 @@ namespace TemplateStructure {
             using(MockApplication app = MockApplication.Setup<TemplateStructure_RadioButtonTest>()) {}
         }
 
-        [Template("Data/TemplateStructure/AliasStyles.xml")]
+        [Template("AliasStyles.xml")]
         public class TemplateStructure_AliasStyles : UIElement { }
 
         [Test]
@@ -146,10 +147,10 @@ namespace TemplateStructure {
             }
         }
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#outer")]
+        [Template("TestTemplateStructure_SlotDefine.xml#outer")]
         public class TestTemplateStructure_UseDefaultSlotContent_Outer : UIElement { }
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#slot_definer")]
+        [Template("TestTemplateStructure_SlotDefine.xml#slot_definer")]
         public class TestTemplateStructure_UseDefaultSlotContent_Inner : UIElement {
 
             public string str;
@@ -168,7 +169,7 @@ namespace TemplateStructure {
             }
         }
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#outer_override")]
+        [Template("TestTemplateStructure_SlotDefine.xml#outer_override")]
         public class TestTemplateStructure_UseDefaultSlotContent_OuterOverride : UIElement { }
 
         [Test]
@@ -183,10 +184,10 @@ namespace TemplateStructure {
         }
 
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#use_default_children_outer")]
+        [Template("TestTemplateStructure_SlotDefine.xml#use_default_children_outer")]
         public class UseDefaultChildrenOuter : UIElement { }
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#use_default_children_inner")]
+        [Template("TestTemplateStructure_SlotDefine.xml#use_default_children_inner")]
         public class UseDefaultChildrenInner : UIElement { }
 
         [Test]
@@ -200,14 +201,14 @@ namespace TemplateStructure {
             }
         }
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#override_children_outer")]
+        [Template("TestTemplateStructure_SlotDefine.xml#override_children_outer")]
         public class OverrideChildrenOuter : UIElement {
 
             public string overrideBinding;
 
         }
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_SlotDefine.xml#override_children_inner")]
+        [Template("TestTemplateStructure_SlotDefine.xml#override_children_inner")]
         public class OverrideChildrenInner : UIElement { }
 
         [Test]
@@ -222,13 +223,16 @@ namespace TemplateStructure {
         }
 
 
+        [ContainerElement]
         public class GenericThing1<T> : UIContainerElement { }
 
+        [ContainerElement]
         public class GenericThing2<T, U> : UIContainerElement { }
 
+        [ContainerElement]
         public class GenericThing3<T, U, V> : UIContainerElement { }
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_ResolveGeneric.xml")]
+        [Template("TestTemplateStructure_ResolveGeneric.xml")]
         public class ResolveGeneric : UIElement { }
 
         [Test]
@@ -246,10 +250,10 @@ namespace TemplateStructure {
         }
 
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#require_type_main")]
+        [Template("TestTemplateStructure_ModifySlot.xml#require_type_main")]
         public class TestTemplateStructure_ModifySlot_RequireTypeMain : UIElement { }
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#radio_group_div")]
+        [Template("TestTemplateStructure_ModifySlot.xml#radio_group_div")]
         public class TestTemplateStructure_ModifySlot_RadioGroupDiv : UIElement { }
 
         [Test]
@@ -257,7 +261,7 @@ namespace TemplateStructure {
             Assert.DoesNotThrow(() => { MockApplication.Setup<TestTemplateStructure_ModifySlot_RequireTypeMain>(); });
         }
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#require_type_main_invalid")]
+        [Template("TestTemplateStructure_ModifySlot.xml#require_type_main_invalid")]
         public class TestTemplateStructure_ModifySlot_RequireTypeMainInvalid : UIElement { }
 
         [Test]
@@ -266,10 +270,10 @@ namespace TemplateStructure {
             Assert.IsTrue(exception.Message.Contains($"Expected element that can be assigned to {typeof(UIDivElement)} but {typeof(UITextElement)} (<Text>) is not."));
         }
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#radio_group_with_attr_main")]
+        [Template("TestTemplateStructure_ModifySlot.xml#radio_group_with_attr_main")]
         public class TestTemplateStructure_ModifySlot_RadioGroupWithAttrMain : UIElement { }
 
-        [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#radio_group_with_attr")]
+        [Template("TestTemplateStructure_ModifySlot.xml#radio_group_with_attr")]
         public class TestTemplateStructure_ModifySlot_RadioGroupWithAttr : UIElement {
 
             public int index;
@@ -346,16 +350,17 @@ namespace TemplateStructure {
 
     }
 
-    [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#type_with_field_main")]
+    [Template("TestTemplateStructure_ModifySlot.xml#type_with_field_main")]
     public class TestTemplateStructure_ModifySlot_TypedWithFieldMain : UIElement { }
 
-    [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#type_with_field_inner")]
+    [Template("TestTemplateStructure_ModifySlot.xml#type_with_field_inner")]
     public class TestTemplateStructure_ModifySlot_TypedWithFieldInner : UIElement {
 
         public int value;
 
     }
 
+    [ContainerElement]
     public class TestTemplateStructure_ModifySlot_TypedWithFieldInnerThing : UIContainerElement {
 
         public int typedField;
@@ -368,16 +373,17 @@ namespace TemplateStructure {
 
     }
     
-    [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#require_generic_main")]
+    [Template("TestTemplateStructure_ModifySlot.xml#require_generic_main")]
     public class TestTemplateStructure_ModifySlot_RequireGenericMain : UIElement { }
 
-    [Template("Data/TemplateStructure/TestTemplateStructure_ModifySlot.xml#require_generic_inner")]
+    [Template("TestTemplateStructure_ModifySlot.xml#require_generic_inner")]
     public class TestTemplateStructure_ModifySlot_RequireGenericInner<T> : UIElement {
 
         public T value;
 
     }
 
+    [ContainerElement]
     public class TestTemplateStructure_ModifySlot_RequireGenericThing<T> : UIContainerElement {
 
         public T field;

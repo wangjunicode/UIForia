@@ -4,30 +4,45 @@ using System.Diagnostics;
 using System.Reflection;
 using UIForia.Attributes;
 using UIForia.Elements;
-using UIForia.Parsing;
-using UIForia.Rendering;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Compilers {
 
+    [AttributeUsage(AttributeTargets.Method)]
+    public class TemplateLocatorAttribute : Attribute {
+
+        public readonly string name;
+
+        public TemplateLocatorAttribute(string name) {
+            this.name = name;
+        }
+
+    }
+
+    [AttributeUsage(AttributeTargets.Method)]
+    public class StyleLocatorAttribute : Attribute {
+
+        public readonly string name;
+
+        public StyleLocatorAttribute(string name) {
+            this.name = name;
+        }
+
+    }
+
+   
+
     public static class TypeScanner {
 
-        internal static readonly Dictionary<Type, ProcessedType> genericTypeMap = new Dictionary<Type, ProcessedType>();
-        internal static readonly Dictionary<Type, ProcessedType> typeMap = new Dictionary<Type, ProcessedType>();
-        internal static readonly Dictionary<string, Type> renderBoxTypeMap = new Dictionary<string, Type>();
-        internal static readonly Dictionary<string, Type> layoutBoxTypeMap = new Dictionary<string, Type>();
-
-        internal static IList<Type> moduleTypes;
         internal static IList<Type> elementTypes;
-        internal static IList<Type> renderTypes;
         internal static IList<MethodInfo> changeHandlers;
-
-        internal static readonly List<ProcessedType> dynamicTypes = new List<ProcessedType>();
-        // internal static IList<TemplateParserDefinition> templateParserDefinitions;
-
-        private static Stats stats;
+        internal static Dictionary<string, Func<TemplateLookup, TemplateLocation>> templateLocators;
+        internal static Dictionary<string, Func<string, string, string>> styleLocators;
         
-        public static Stats Scan() {
+        private static Stats stats;
 
+        public static Stats Scan() {
+            if (stats.totalScanTime != 0) return stats;
 #if UNITY_EDITOR
             ScanFast();
 #else
@@ -40,52 +55,85 @@ namespace UIForia.Compilers {
         private static void ScanFast() {
 #if UNITY_EDITOR
             Stopwatch stopwatch = Stopwatch.StartNew();
-            moduleTypes = UnityEditor.TypeCache.GetTypesDerivedFrom<UIModule>();
             elementTypes = UnityEditor.TypeCache.GetTypesDerivedFrom<UIElement>();
-            renderTypes = UnityEditor.TypeCache.GetTypesDerivedFrom<RenderBox>();
             changeHandlers = UnityEditor.TypeCache.GetMethodsWithAttribute<OnPropertyChanged>();
+
+            UnityEditor.TypeCache.MethodCollection templateLocationFunctions = UnityEditor.TypeCache.GetMethodsWithAttribute<TemplateLocatorAttribute>();
+            UnityEditor.TypeCache.MethodCollection styleLocationFunctions = UnityEditor.TypeCache.GetMethodsWithAttribute<StyleLocatorAttribute>();
+
+            templateLocators = new Dictionary<string, Func<TemplateLookup, TemplateLocation>>();
+            styleLocators = new Dictionary<string, Func<string, string, string>>();
+            
+            foreach (MethodInfo method in templateLocationFunctions) {
+                Func<TemplateLookup, TemplateLocation> del = null;
+
+                if (!method.IsStatic) { }
+
+                if (!method.IsPublic) { }
+
+                var parameters = method.GetParameters();
+                
+                if(parameters.Length != 1) {}
+
+                if (parameters[0].ParameterType != typeof(TemplateLookup)) {
+                    
+                }
+                
+                if (method.ReturnType != typeof(TemplateLocation)) { }
+
+                try {
+                    del = (Func<TemplateLookup, TemplateLocation>) Delegate.CreateDelegate(typeof(Func<TemplateLookup, TemplateLocation>), method, true);
+                }
+                catch (Exception e) {
+
+                    Debug.Log(e);
+                }
+
+                TemplateLocatorAttribute attr = method.GetCustomAttribute<TemplateLocatorAttribute>();
+
+                if (templateLocators.TryGetValue(attr.name, out var _)) { }
+                else {
+                    templateLocators.Add(attr.name, del);
+                }
+
+            }
+
+            foreach (MethodInfo method in styleLocationFunctions) {
+                Func<string, string, string> del = null;
+                if (!method.IsStatic) { }
+
+                if (!method.IsPublic) { }
+
+                if (method.ReturnType != typeof(string)) { }
+
+                try {
+                    del = (Func<string, string, string>) Delegate.CreateDelegate(typeof(Func<string, string, string>), method, true);
+                }
+                catch (Exception e) {
+                    Debug.Log(e);
+                }
+
+                StyleLocatorAttribute attr = method.GetCustomAttribute<StyleLocatorAttribute>();
+
+                if (styleLocators.TryGetValue(attr.name, out var _)) { }
+                else {
+                    styleLocators.Add(attr.name, del);
+                }
+
+            }
+
             stats.totalScanTime = stopwatch.Elapsed.TotalMilliseconds;
-            stats.moduleCount = moduleTypes.Count;
-            stats.elementTypes = elementTypes.Count;
-            stats.renderTypes = renderTypes.Count;
+            stats.elementTypeCount = elementTypes.Count;
             stats.changeHandlerCount = changeHandlers.Count;
 
 #endif
-            //  TypeCache.TypeCollection templateParsers = TypeCache.GetTypesWithAttribute(typeof(TemplateParserAttribute));
-            // templateParserDefinitions = new List<TemplateParserDefinition>(templateParsers.Count);
-            //
-            // for (int i = 0; i < templateParsers.Count; i++) {
-            //
-            //     Type type = templateParsers[i];
-            //
-            //     if (!type.IsSubclassOf(typeof(TemplateParser))) {
-            //         Debug.LogError($"{type.GetTypeName()} is marked with [{nameof(TemplateParserAttribute)}] but does not extend {TypeNameGenerator.GetTypeName(typeof(TemplateParser))}");
-            //         continue;
-            //     }
-            //
-            //     TemplateParserAttribute attr = type.GetCustomAttribute<TemplateParserAttribute>();
-            //
-            //     for (int j = 0; j < templateParserDefinitions.Count; j++) {
-            //         if (templateParserDefinitions[j].extension == attr.extension) {
-            //             Debug.LogError($"Duplicate parser for template extension {attr.extension}. Both {type.GetTypeName()} and {templateParserDefinitions[j].type.GetTypeName()} handle .{attr.extension} files");
-            //         }
-            //     }
-            //
-            //     templateParserDefinitions.Add(new TemplateParserDefinition() {
-            //         extension = attr.extension,
-            //         type = type
-            //     });
-            //
-            // }
 
         }
 
         public struct Stats {
 
             public double totalScanTime;
-            public int moduleCount;
-            public int elementTypes;
-            public int renderTypes;
+            public int elementTypeCount;
             public int changeHandlerCount;
 
         }

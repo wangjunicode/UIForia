@@ -2,7 +2,7 @@
 using UIForia.Elements;
 
 namespace SpaceGameDemo.SpacePanel {
-    [Template("SpaceGameDemo/SpacePanel/SpacePanel.xml")]
+    [Template("SpacePanel/SpacePanel.xml")]
     public class SpacePanel : UIElement {
         // Parameter / Property
         public string name;

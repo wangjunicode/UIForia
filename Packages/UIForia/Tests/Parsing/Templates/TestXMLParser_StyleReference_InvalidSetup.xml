@@ -1,0 +1,9 @@
+﻿<UITemplate>
+
+    <Style src="path/to/style">
+        style xyz {}
+    </Style>
+
+    <Contents/>
+
+</UITemplate>

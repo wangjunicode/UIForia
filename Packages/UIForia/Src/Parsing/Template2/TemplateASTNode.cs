@@ -1,5 +1,6 @@
 using System;
 using UIForia.Util;
+using UnityEngine;
 
 namespace UIForia {
 
@@ -21,6 +22,10 @@ namespace UIForia {
         public int nextSiblingIndex;
         public int firstChildIndex;
         public int index;
+        
+        public RangeInt moduleNameRange;
+        public RangeInt tagNameRange;
+        public RangeInt textContentRange;
 
         public int attributeCount {
             get => attributeRangeEnd - attributeRangeStart;

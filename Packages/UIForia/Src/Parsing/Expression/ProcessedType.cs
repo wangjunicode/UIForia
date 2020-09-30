@@ -30,7 +30,6 @@ namespace UIForia.Parsing {
         public string templateId;
         public string templatePath;
         internal TemplateLocation? resolvedTemplateLocation;
-        public UIModule module;
         public string templateSource;
         internal string[] importedStyleSheets;
 
@@ -94,7 +93,8 @@ namespace UIForia.Parsing {
 
         [ThreadStatic] private static LightList<string> s_StyleList;
 
-        internal static ProcessedType CreateFromType(Type type) {
+        // This is threadsafe
+        internal static ProcessedType CreateFromType(Type type, Diagnostics diagnostics) {
             LightList<string> styles = null;
             string[] styleSheets = null;
 
@@ -117,7 +117,7 @@ namespace UIForia.Parsing {
             foreach (Attribute attr in type.GetCustomAttributes()) {
                 switch (attr) {
                     case TemplateTagNameAttribute templateTagNameAttr when elementPath != null && elementPath != templateTagNameAttr.filePath:
-                        UIForiaRuntime.LogDiagnosticError($"File paths were different {elementPath}, {templateTagNameAttr.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        diagnostics.LogError($"File paths were different {elementPath}, {templateTagNameAttr.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
                         return null;
 
                     case TemplateTagNameAttribute templateTagNameAttr:
@@ -126,7 +126,7 @@ namespace UIForia.Parsing {
                         continue;
 
                     case TemplateAttribute templateAttribute when elementPath != null && elementPath != templateAttribute.elementPath:
-                        UIForiaRuntime.LogDiagnosticError($"File paths were different {elementPath}, {templateAttribute.elementPath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        diagnostics.LogError($"File paths were different {elementPath}, {templateAttribute.elementPath} for element type {TypeNameGenerator.GetTypeName(type)}");
                         return null;
 
                     case TemplateAttribute templateAttribute: {
@@ -135,7 +135,7 @@ namespace UIForia.Parsing {
                         templateId = templateAttribute.templateId;
 
                         if (isContainer) {
-                            UIForiaRuntime.LogDiagnosticError($"Element cannot be a container and provide a template. {TypeNameGenerator.GetTypeName(type)} is both.");
+                            diagnostics.LogError($"Element cannot be a container and provide a template. {TypeNameGenerator.GetTypeName(type)} is both.");
                             return null;
                         }
 
@@ -145,7 +145,7 @@ namespace UIForia.Parsing {
                     }
 
                     case RecordFilePathAttribute recordFilePathAttribute when elementPath != null && elementPath != recordFilePathAttribute.filePath:
-                        UIForiaRuntime.LogDiagnosticError($"File paths were different {elementPath}, {recordFilePathAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        diagnostics.LogError($"File paths were different {elementPath}, {recordFilePathAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
                         return null;
 
                     case RecordFilePathAttribute recordFilePathAttribute:
@@ -153,7 +153,7 @@ namespace UIForia.Parsing {
                         continue;
 
                     case ImportStyleSheetAttribute importStyleSheetAttribute when elementPath != null && elementPath != importStyleSheetAttribute.filePath:
-                        UIForiaRuntime.LogDiagnosticError($"File paths were different {elementPath}, {importStyleSheetAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        diagnostics.LogError($"File paths were different {elementPath}, {importStyleSheetAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
                         return null;
 
                     case ImportStyleSheetAttribute importStyleSheetAttribute:
@@ -163,7 +163,7 @@ namespace UIForia.Parsing {
                         continue;
 
                     case StyleAttribute styleAttribute when elementPath != null && elementPath != styleAttribute.filePath:
-                        UIForiaRuntime.LogDiagnosticError($"File paths were different {elementPath}, {styleAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        diagnostics.LogError($"File paths were different {elementPath}, {styleAttribute.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
                         return null;
 
                     case StyleAttribute styleAttribute:
@@ -172,12 +172,12 @@ namespace UIForia.Parsing {
                         break;
 
                     case ContainerElementAttribute containerAttr when elementPath != null && elementPath != containerAttr.filePath:
-                        UIForiaRuntime.LogDiagnosticError($"File paths were different {elementPath}, {containerAttr.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
+                        diagnostics.LogError($"File paths were different {elementPath}, {containerAttr.filePath} for element type {TypeNameGenerator.GetTypeName(type)}");
                         return null;
 
                     case ContainerElementAttribute containerAttr: {
                         if (templateProvided) {
-                            UIForiaRuntime.LogDiagnosticError($"Element cannot be a container and provide a template. {TypeNameGenerator.GetTypeName(type)} is both.");
+                            diagnostics.LogError($"Element cannot be a container and provide a template. {TypeNameGenerator.GetTypeName(type)} is both.");
                             return null;
                         }
 

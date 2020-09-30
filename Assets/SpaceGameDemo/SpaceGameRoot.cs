@@ -3,7 +3,7 @@ using UIForia.Elements;
 
 namespace SpaceGameDemo {
 
-    [Template("SpaceGameDemo/SpaceGameRoot.xml")]
+    [Template("SpaceGameRoot.xml")]
     public class SpaceGameRoot : UIElement {
 
         public override void OnUpdate() {

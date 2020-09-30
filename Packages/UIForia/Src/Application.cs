@@ -28,6 +28,8 @@ namespace UIForia {
     public abstract class Application : IDisposable {
 
         private static SizeInt UIApplicationSize;
+        
+        public bool IsValid { get; internal set; }
 
         public static float dpiScaleFactor = Mathf.Max(1, Screen.dpi / 100f);
 
@@ -99,6 +101,14 @@ namespace UIForia {
         protected TemplateSettings templateSettings;
         private bool isPreCompiled;
 
+        protected Application(string applicationName) {
+            this.isPreCompiled = isPreCompiled;
+            this.templateSettings = templateSettings;
+            this.id = applicationName;
+            this.resourceManager = new ResourceManager();
+            this.viewRootIds = new DataList<ElementId>.Shared(8, Allocator.Persistent);
+        }
+        
         protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
             this.isPreCompiled = isPreCompiled;
             this.templateSettings = templateSettings;
@@ -133,6 +143,10 @@ namespace UIForia {
             layoutSystem = new LayoutSystem(this, elementSystem, textSystem);
             renderSystem = new RenderSystem2(this, layoutSystem, elementSystem);
             inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
+        }
+
+        public void Compile() {
+            
         }
 
         internal void Initialize() {

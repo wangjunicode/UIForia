@@ -1,0 +1,17 @@
+﻿<UITemplate>
+
+    <Style src="path/to/style1"/>
+    <Style src="path/to/style1"/>
+    <Style src="path/to/style2"/>
+
+    <Style>
+        style some-style {
+        BackgroundColor = red;
+        // comment
+        PaddingLeft = 32px;
+        }
+    </Style>
+
+    <Contents/>
+
+</UITemplate>

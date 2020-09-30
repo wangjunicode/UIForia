@@ -554,6 +554,16 @@ namespace UIForia.Util.Unsafe {
             public void Clear() {
                 state->Clear<T>();
             }
+
+            public T[] ToArray() {
+                T[] retn = new T[size];
+                fixed (T* ptr = retn) {
+                    TypedUnsafe.MemCpy(ptr, (T*)state->array, size);
+                }
+
+                return retn;
+            }
+
         }
 
         public ref T GetLast() {

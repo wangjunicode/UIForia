@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Documentation.DocumentationElements {
 
+    [ContainerElement]
     public class Anchor : UIContainerElement {
 
         private static Color highlight = new Color(0.1f, 0.39f, 0.5f);

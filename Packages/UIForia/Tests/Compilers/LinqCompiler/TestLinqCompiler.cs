@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Mono.Linq.Expressions;
 using NUnit.Framework;
+using UIForia.Attributes;
 using UIForia.Bindings;
 using UIForia.Compilers;
 using UIForia.Elements;
@@ -247,8 +248,11 @@ public class TestLinqCompiler {
 
     }
 
+    private class TestThing {
 
-    private class TestElement : UIElement { }
+        public int id;
+
+    }
 
     [Test]
     public void CompileConstant() {
@@ -822,15 +826,15 @@ public class TestLinqCompiler {
     public void CompileClosure_UntypedArguments() {
         LinqCompiler compiler = new LinqCompiler();
 
-        compiler.SetSignature<Func<float, int, int>>(new Parameter<UIElement>("root"));
+        compiler.SetSignature<Func<float, int, int>>(new Parameter<TestThing>("root"));
 
         compiler.Return("(intVal, intVal2) => (intVal + root.id.id) + intVal2");
 
-        Func<UIElement, Func<float, int, int>> fn = compiler.Compile<Func<UIElement, Func<float, int, int>>>();
+        Func<TestThing, Func<float, int, int>> fn = compiler.Compile<Func<TestThing, Func<float, int, int>>>();
 
-        TestElement element = new TestElement();
+        TestThing element = new TestThing();
 
-        Assert.AreEqual(15f + element.id.id + 5, fn(element)(15f, 5));
+        Assert.AreEqual(15f + element.id + 5, fn(element)(15f, 5));
     }
 
     [Test]

@@ -4,7 +4,7 @@ using UIForia.Elements;
 
 namespace SpaceGameDemo.SinglePlayer {
 
-    [Template("SpaceGameDemo/SinglePlayer/PilotAvatar/PilotAvatar.xml")]
+    [Template("SinglePlayer/PilotAvatar/PilotAvatar.xml")]
     public class PilotAvatar : UIElement {
 
         public bool selected;

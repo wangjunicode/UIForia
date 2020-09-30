@@ -34,7 +34,7 @@ namespace SpaceGameDemo.SinglePlayer {
         Ships, Items, Stats
     }
 
-    [Template("SpaceGameDemo/SinglePlayer/SinglePlayer.xml")]
+    [Template("SinglePlayer/SinglePlayer.xml")]
     public class SinglePlayer : UIElement {
         public int selectedShip = 1;
         public int selectedPilot = 1;

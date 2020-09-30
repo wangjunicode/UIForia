@@ -11,7 +11,7 @@ namespace MouseEvents {
 
     public class MouseEventTests {
 
-        [Template("Data/MouseEvents/MouseEventTest_Mouse.xml")]
+        [Template("MouseEventTest_Mouse.xml")]
         public class InputSystemTestThing : UIElement {
 
             public int clickedChildIndex = -1;
@@ -58,7 +58,7 @@ namespace MouseEvents {
             }
         }
 
-        [Template("Data/MouseEvents/MouseEventTest_Mouse.xml#mouse_2")]
+        [Template("MouseEventTest_Mouse.xml#mouse_2")]
         public class InputSystemTestThing2 : UIElement {
 
             public int clickedChildIndex = -1;

@@ -13,10 +13,10 @@ namespace TemplateLoading {
 
     public class TemplateLoadingTests {
 
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadNestedTemplate.xml#outer")]
+        [Template("TemplateLoadingTest_LoadNestedTemplate.xml#outer")]
         public class Outer : UIElement { }
 
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadNestedTemplate.xml#inner")]
+        [Template("TemplateLoadingTest_LoadNestedTemplate.xml#inner")]
         public class Inner : UIElement { }
 
         [Test]
@@ -27,10 +27,10 @@ namespace TemplateLoading {
             }
         }
 
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadNestedTemplateDefault.xml")]
+        [Template("TemplateLoadingTest_LoadNestedTemplateDefault.xml")]
         public class OuterDefault : UIElement { }
 
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadNestedTemplateDefault.xml#inner")]
+        [Template("TemplateLoadingTest_LoadNestedTemplateDefault.xml#inner")]
         public class InnerDefault : UIElement { }
 
         [Test]
@@ -44,7 +44,6 @@ namespace TemplateLoading {
         [Template]
         public class DefaultPathElement : UIElement { }
 
-
         [Test]
         public void ResolveUsingDefaultPath() {
             using (MockApplication app = MockApplication.Setup<DefaultPathElement>()) {
@@ -52,6 +51,7 @@ namespace TemplateLoading {
             }
         }
 
+        [ContainerElement]
         public class DefaultPathElementNoAttr : UIElement { }
 
         [Test]
@@ -63,6 +63,7 @@ namespace TemplateLoading {
             }
         }
 
+        [ContainerElement]
         public class DefaultPathElementNoAttrNotFound : UIElement { }
 
         [Test]
@@ -70,18 +71,18 @@ namespace TemplateLoading {
             TemplateNotFoundException ex = Assert.Throws<TemplateNotFoundException>(() => { MockApplication.Setup<DefaultPathElementNoAttrNotFound>(); });
         }
 
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadGeneric.xml")]
+        [Template("TemplateLoadingTest_LoadGeneric.xml")]
         public class TemplateLoadingTest_LoadGenericOuter : UIElement { }
 
         [GenericElementTypeResolvedBy(nameof(value))]
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadGeneric.xml#generic")]
+        [Template("TemplateLoadingTest_LoadGeneric.xml#generic")]
         public class TemplateLoadingTest_Generic<T> : UIElement {
 
             public T value;
 
         }
 
-        [Template("Data/TemplateLoading/TemplateLoadingTest_LoadGeneric.xml#generic")]
+        [Template("TemplateLoadingTest_LoadGeneric.xml#generic")]
         public class TemplateLoadingTest_Generic2<T, U> : UIElement {
 
             public T value0;
@@ -92,6 +93,7 @@ namespace TemplateLoading {
 
         }
 
+        [ContainerElement]
         public class TemplateLoadingTest_Generic3<T, U, V> : UIElement {
 
             [ResolveGenericTemplateArguments] public U value1;

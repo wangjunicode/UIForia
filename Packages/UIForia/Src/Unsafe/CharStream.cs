@@ -262,7 +262,11 @@ namespace UIForia.Util {
             ConsumeWhiteSpaceAndComments();
             this.commentMode = lastMode;
         }
-
+        
+        private static bool IsSpace(char c) {
+            return c == ' ' || c == '\t' || c == '\n' || c == '\r';
+        }
+        
         public void ConsumeWhiteSpaceAndComments() {
             while (true) {
                 while (ptr < dataEnd && char.IsWhiteSpace(data[ptr])) {
@@ -283,9 +287,48 @@ namespace UIForia.Util {
                         continue;
                     }
                 }
+                else if (commentMode == CommentMode.XML) {
+                    ConsumeXMLComment();
+                }
 
                 break;
             }
+        }
+        
+        public void ConsumeXMLComment() {
+            
+            if (data[ptr] == '<' && ptr + 4 < dataEnd && data[ptr + 1] == '!' && data[ptr + 2] == '-' && data[ptr + 3] == '-') {
+                ptr += 4;
+                
+                while (ptr + 3 < dataEnd) {
+                    if(data[ptr] == '-' && data[ptr + 1] == '-' && data[ptr + 2] == '>') {
+                        ptr += 3;
+                        return;
+                    }
+                    ptr++;
+                }
+                
+            }
+
+            // while (ptr < dataEnd) {
+            //     char current = data[ptr];
+            //     if (!(current == ' ' || current == '\t' || current == '\n' || current == '\r')) {
+            //         if (data[ptr] == '<' && ptr + 4 < dataEnd && data[ptr + 1] == '!' && data[ptr + 2] == '-' && data[ptr + 3] == '-') {
+            //             ptr += 4; // step over <!--
+            //
+            //             while (ptr + 2 < dataEnd && !(data[ptr] == '-' && data[ptr + 1] == '-')) {
+            //                 ptr++;
+            //             }
+            //
+            //             ptr += 2; // step over --
+            //         }
+            //         else {
+            //             break;
+            //         }
+            //     }
+            //
+            //     ptr++;
+            // }
         }
 
         public bool TryGetSubstreamTo(char c0, char c1, out CharStream stream) {
@@ -1157,18 +1200,18 @@ namespace UIForia.Util {
         }
 
         public LineInfo GetLineInfo() {
-            int line = 0;
+            int line = 1; // start counting at line 1
             int x = 0;
 
             for (int i = 0; i < ptr; i++) {
                 if (data[i] == '\n') {
                     line++;
-                    x = i;
+                    x = i + 1;
                 }
             }
 
             int col = 0;
-            for (int i = x; i < ptr; i++) {
+            for (int i = x; i < ptr - 1; i++) {
                 col++;
             }
 
@@ -1385,6 +1428,72 @@ namespace UIForia.Util {
 
         public void SetCommentMode(CommentMode commentMode) {
             this.commentMode = commentMode;
+        }
+
+        public bool ConsumeUntilFound(string str, out CharSpan result) {
+            fixed (char* buffer = str) {
+                return ConsumeUntilFound(buffer, str.Length, out result);
+            }
+        }
+
+        public bool ConsumeUntilFound(char* str, int length, out CharSpan result) {
+            if (length == 0 || str == null) {
+                result = default;
+                return false;
+            }
+
+            uint max = (uint)(dataEnd - length);
+            uint idx = ptr;
+            while (idx < max) {
+
+                while (idx < max && data[idx] != str[0]) {
+                    idx++;
+                }
+
+                if (length == 1) {
+                    result = new CharSpan(data, (int)ptr, (int)idx + 1, baseOffset);
+                    ptr = (uint) (idx + length);
+                    return true;
+                }
+                
+                bool found = true;
+                
+                // todo -- memcmp might be faster, depends on how big length is
+                for (int i = 1; i < length; i++) {
+                    if(data[idx + i] != str[i]) {
+                        found = false;
+                        break;
+                    }
+                }
+
+                if (found) {
+                    result = new CharSpan(data, (int)ptr, (int)idx, baseOffset);
+                    ptr = idx + (uint)length;
+                    return true;
+                }
+
+                idx++;
+            }
+
+            result = default;
+            return false;
+
+        }
+
+        public bool TryMatchRangeFast(char* str, int length) {
+            
+            if (ptr + length < dataEnd) {
+                bool found = false;
+                for (int i = 0; i < length; i++) {
+                    if(data[ptr + i] != str[i]) {
+                        break;
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
     }
@@ -1679,6 +1788,25 @@ namespace UIForia.Util {
 
         public bool TryParseColor(out Color32 color) {
             return new CharStream(this).TryParseColorProperty(out color);
+        }
+
+        public LineInfo GetLineInfo() {
+            int line = 1; // start counting at line 1
+            int x = 0;
+
+            for (int i = 0; i < rangeStart; i++) {
+                if (data[i] == '\n') {
+                    line++;
+                    x = i + 1;
+                }
+            }
+
+            int col = 0;
+            for (int i = x; i < rangeStart - 1; i++) {
+                col++;
+            }
+
+            return new LineInfo(line, col);
         }
 
     }

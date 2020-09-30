@@ -10,7 +10,7 @@ namespace Layout {
 
     public class FlexHorizontalTests {
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_DistributeSpaceHorizontal.xml")]
+        [Template("FlexHorizontal/FlexHorizontal_DistributeSpaceHorizontal.xml")]
         public class FlexHorizontal_DistributeSpaceHorizontal : UIElement { }
 
         [Test]
@@ -102,7 +102,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_GrowUnconstrained.xml")]
+        [Template("FlexHorizontal/FlexHorizontal_GrowUnconstrained.xml")]
         public class FlexHorizontal_GrowUnconstrained : UIElement { }
 
         [Test]
@@ -118,7 +118,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_GrowConstrained.xml")]
+        [Template("FlexHorizontal/FlexHorizontal_GrowConstrained.xml")]
         public class FlexHorizontal_GrowConstrained : UIElement { }
 
         [Test]
@@ -134,7 +134,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_GrowWithExtraSpace.xml")]
+        [Template("FlexHorizontal/FlexHorizontal_GrowWithExtraSpace.xml")]
         public class FlexHorizontal_GrowWithExtraSpace : UIElement { }
 
         [Test]
@@ -150,7 +150,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_RespectMarginHorizontal.xml")]
+        [Template("FlexHorizontal/FlexHorizontal_RespectMarginHorizontal.xml")]
         public class FlexHorizontal_RespectMarginHorizontal : UIElement { }
 
         [Test]
@@ -166,7 +166,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_ShrinkUnconstrained.xml")]
+        [Template("FlexHorizontal/FlexHorizontal_ShrinkUnconstrained.xml")]
         public class FlexHorizontal_ShrinkUnconstrained : UIElement { }
 
         [Test]
@@ -182,7 +182,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_ShrinkConstrained.xml")]
+        [Template("FlexHorizontal/FlexHorizontal_ShrinkConstrained.xml")]
         public class FlexHorizontal_ShrinkConstrained : UIElement { }
 
         [Test]
@@ -198,7 +198,7 @@ namespace Layout {
             }
         }
 
-        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_ShrinkWithOverflow.xml")]
+        [Template("FlexHorizontal/FlexHorizontal_ShrinkWithOverflow.xml")]
         public class FlexHorizontal_ShrinkWithOverflow : UIElement { }
 
         [Test]

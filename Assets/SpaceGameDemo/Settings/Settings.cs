@@ -3,7 +3,7 @@ using UIForia.Elements;
 
 namespace SpaceGameDemo.Settings {
     
-    [Template("SpaceGameDemo/Settings/Settings.xml")]
+    [Template("Settings/Settings.xml")]
     public class Settings : UIElement {
         public string title = "Graphics";
         public bool bloom;

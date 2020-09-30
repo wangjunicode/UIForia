@@ -45,7 +45,7 @@ namespace UIForia.Editor {
         public static readonly string[] s_TabNames = {"Element", "Applied Styles", "Computed Style"};
 
         public void Update() {
-            if (!EditorApplication.isPlaying) {
+            if (!UnityEditor.EditorApplication.isPlaying) {
                 return;
             }
 
@@ -214,7 +214,7 @@ namespace UIForia.Editor {
         }
 
         private void DrawElementInfo() {
-            if (!EditorApplication.isPlaying) {
+            if (!UnityEditor.EditorApplication.isPlaying) {
                 return;
             }
 

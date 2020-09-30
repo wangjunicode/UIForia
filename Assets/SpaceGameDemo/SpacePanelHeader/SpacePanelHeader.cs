@@ -4,7 +4,7 @@ using static SpaceGameDemo.Controllers;
 
 namespace SpaceGameDemo.SpacePanelHeader {
    
-    [Template("SpaceGameDemo/SpacePanelHeader/SpacePanelHeader.xml")]
+    [Template("SpacePanelHeader/SpacePanelHeader.xml")]
     public class SpacePanelHeader : UIElement {
         // Parameter / Property
         public string title;

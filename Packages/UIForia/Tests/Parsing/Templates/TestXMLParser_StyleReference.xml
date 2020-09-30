@@ -1,0 +1,16 @@
+﻿<UITemplate>
+
+    <Style src="path/to/style"/>
+    <Style src="path/to/style2" alias="my-style"/>
+    
+    <Style>
+        style some-style {
+            BackgroundColor = red;
+            // comment
+            PaddingLeft = 32px;
+        }
+    </Style>
+    
+    <Contents/>
+
+</UITemplate>

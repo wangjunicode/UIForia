@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -10,10 +11,15 @@ using UIForia.Extensions;
 using UIForia.NewStyleParsing;
 using UIForia.Parsing;
 using UIForia.Util;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia {
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class EntryPointAttribute : Attribute { }
 
     public struct DiagnosticEntry {
 
@@ -43,202 +49,268 @@ namespace UIForia {
         Precompiled
 
     }
-    
-    public static class UIForiaRuntime {
 
-        private static bool _failedToLoad;
+    public class PrecompileSettings {
 
-        public static bool FailedToLoad {
-            get => _failedToLoad;
-            internal set {
-                IsLoading = false;
-                _failedToLoad = value;
+        public string assemblyName;
+        public string codeOutputPath;
+        public string styleOutputPath;
+        public string rootTypeName;
+        public string codeFileExtension;
+
+        public PrecompileSettings() {
+            this.assemblyName = "UIForia.Application";
+            this.styleOutputPath = Path.Combine(UnityEngine.Application.dataPath, "__UIForiaGenerated__");
+            this.codeOutputPath = Path.Combine(UnityEngine.Application.dataPath, "__UIForiaGenerated__");
+            this.codeFileExtension = "generated.cs";
+            this.rootTypeName = "UIForiaGeneratedApplication";
+        }
+
+    }
+
+    public class CompilationResult { }
+
+    internal class UIModule2 {
+
+        public string location;
+        public UIModuleDefinition data;
+
+        public Func<TemplateLookup, TemplateLocation> templateLocator;
+        public Func<string, string, string> styleLocator;
+        public Dictionary<string, ProcessedType> tagNameMap;
+        public string path;
+
+        public UIModule2() {
+            tagNameMap = new Dictionary<string, ProcessedType>();
+        }
+
+        public void Initialize() {
+
+            if (!string.IsNullOrEmpty(data.TemplateLocator)) {
+
+                if (TypeScanner.templateLocators.TryGetValue(data.TemplateLocator, out Func<TemplateLookup, TemplateLocation> locator)) {
+                    this.templateLocator = locator;
+                }
+
             }
-        }
 
-        public static bool IsLoading { get; internal set; }
-        public static UIModule BuiltInModule { get; private set; }
-
-        internal static bool s_ConstructionAllowed;
-
-        private static UIModule[] modules;
-        private static List<DiagnosticEntry> diagnosticLog;
-
-        private static List<AppCache> cacheMap;
-        
-        private class AppCache {
-
-            public string appName;
-            public CompilationType compilationType;
-            public TemplateParseCache templateParseCache;
+            if (!string.IsNullOrEmpty(data.StyleLocator)) {
+                if (TypeScanner.styleLocators.TryGetValue(data.StyleLocator, out Func<string, string, string> locator)) {
+                    this.styleLocator = locator;
+                }
+            }
 
         }
-        
-        public static Application CreateGameApp(string appName, CompilationType compilationType, Type entryType) {
-            
-            Initialize();
 
-            // GetModules(entryType);
-            
-            // ParseTemplates();
-            
-            // ParseStyles();
-            
-            // CompileStyles();
-            
-            // CompileTemplates(); 
-            
-            // GenerateCode();
-            
-            return null;
+        public TemplateLocation ResolveTemplate(TemplateLookup lookup) {
+            return templateLocator?.Invoke(lookup) ?? DefaultLocators.LocateTemplate(lookup);
+        }
 
+        public string ResolveStyle(string elementPath, string stylePath) {
+            return styleLocator?.Invoke(elementPath, stylePath) ?? DefaultLocators.LocateStyle(elementPath, stylePath);
+        }
+
+    }
+
+    internal class UIModuleDefinition {
+
+        public string Prototype;
+        public string TemplateLocator;
+        public string StyleLocator;
+        public string AssetLocator;
+        public string[] DefaultNamespaces;
+        public string[] ImplicitStyleReferences;
+        public string[] ImplicitModuleReferences;
+
+    }
+
+    public static class UIForiaRuntime2 {
+
+        private static LightList<Application> s_Applications;
+
+        internal static void Reset() {
+            // kill all apps, kill all caches
         }
 
         public static void Initialize() {
-            diagnosticLog = new List<DiagnosticEntry>();
-            TypeResolver.Stats stats = TypeResolver.Initialize();
-            TypeScanner.Stats scanStats = TypeScanner.Scan();
 
-            Debug.Log($"Loaded {stats.typeCount} types from {stats.namespaceCount} namespaces from {stats.assemblyCount} assemblies in {stats.namespaceScanTime:F2}ms");
-            Debug.Log($"Scanned for UIForia types in {scanStats.totalScanTime:F2}ms");
+            // todo -- consider pre-warming style cache on startup
+            // basically suck in all style files ONCE
+            // parse them all
+            // never do this again until next editor session
+            // could probably do the same for templates, except I can't look for xml files since we'd parse unwanted shit, unless we check for <UITemplate> in each
+            // probably not worth it
+            // store results ...somewhere
 
-            InitializeModules();
-
-            if (FailedToLoad) {
-                return;
+#if UNITY_EDITOR
+            if (SessionState.GetInt("UIForiaRuntime::DidInitialStyleParse", 0) == 0) {
+                SessionState.SetInt("UIForiaRuntime::DidInitialStyleParse", 1);
+                // IEnumerable<string> z = Directory.EnumerateFiles(Path.Combine(UnityEngine.Application.dataPath, ".."), "*.style", SearchOption.AllDirectories);
+                // int cnt = 0;
+                // foreach(var f in z) {
+                //     cnt++;
+                // }
+                // Debug.Log(cnt);
             }
+#endif
 
-            ValidateModulePaths();
-            if (FailedToLoad) {
-                return;
-            }
-
-            ValidateModuleDependencies();
-            if (FailedToLoad) {
-                return;
-            }
-
-            AssignElementsToModules();
-            if (FailedToLoad) {
-                return;
-            }
-
-            IsLoading = false;
         }
 
-        private static void ValidateModulePaths() {
-            for (int i = 0; i < modules.Length; i++) {
-                for (int j = i; j < modules.Length; j++) {
-                    UIModule moduleI = modules[i];
-                    UIModule moduleJ = modules[j];
-                    if (moduleI == moduleJ) continue;
-
-                    if (moduleI.location.StartsWith(moduleJ.location, StringComparison.Ordinal)) {
-                        LogDiagnosticError("Nested Modules are not yet supported. " +
-                                           $"{TypeNameGenerator.GetTypeName(moduleI.GetType())} is a parent of " +
-                                           $"{TypeNameGenerator.GetTypeName(moduleJ.GetType())}. ({moduleJ.location})");
-                        continue;
-                    }
-
-                    if (moduleJ.location.StartsWith(moduleI.location, StringComparison.Ordinal)) {
-                        LogDiagnosticError("Nested Modules are not yet supported. " +
-                                           $"{TypeNameGenerator.GetTypeName(moduleJ.GetType())} is a parent of " +
-                                           $"{TypeNameGenerator.GetTypeName(moduleI.GetType())}. ({moduleI.location})");
-                    }
-                }
-            }
+        private static string GetUniqueApplicationName(string applicationId) {
+            // todo -- figure this out
+            return applicationId;
         }
 
-        private static void ValidateModuleDependencies() {
-            Dictionary<string, Type> stringHash = new Dictionary<string, Type>();
-            HashSet<Type> typeHash = new HashSet<Type>();
+        private static Dictionary<ProcessedType, UIModule2> BuildModuleMap(List<UIModule2> moduleDefinitions) {
 
-            for (int m = 0; m < modules.Length; m++) {
-                UIModule instance = modules[m];
+            Stopwatch sw = Stopwatch.StartNew();
 
-                stringHash.Clear();
-                typeHash.Clear();
+            Dictionary<ProcessedType, UIModule2> moduleMap = new Dictionary<ProcessedType, UIModule2>();
 
-                IList<ModuleReference> dependencies = instance.dependencies;
+            // probably need to convert type map to array for thread safety
+            // makes it easier to thread this too if needed
 
-                for (int j = 0; j < dependencies.Count; j++) {
-                    dependencies[j].ResolveModule(GetModuleInstance(dependencies[j].GetModuleType()));
+            foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
+
+                string elementPath = kvp.Value.elementPath;
+
+                if (string.IsNullOrEmpty(elementPath)) {
+                    continue;
                 }
 
-                if (instance.GetType() != typeof(BuiltInElementsModule)) {
-                    bool found = false;
-                    for (int i = 0; i < dependencies.Count; i++) {
-                        if (dependencies[i].GetModuleType() == typeof(BuiltInElementsModule)) {
-                            found = true;
-                            break;
+                bool found = false;
+                for (int i = 0; i < moduleDefinitions.Count; i++) {
+
+                    if (elementPath.StartsWith(moduleDefinitions[i].location, StringComparison.Ordinal)) {
+                        moduleMap[kvp.Value] = moduleDefinitions[i];
+
+                        string tagName = kvp.Value.tagName;
+
+                        if (moduleDefinitions[i].tagNameMap.TryGetValue(tagName, out ProcessedType type)) {
+                            // has critical error = true
+                            throw new Exception($"Duplicate tag name `{tagName}` in module at {moduleDefinitions[i].path}");
+                            return null;
                         }
+
+                        moduleDefinitions[i].tagNameMap.Add(tagName, kvp.Value);
+                        found = true;
+                        break;
                     }
 
-                    if (!found) {
-                        dependencies.Add(new ModuleReference(typeof(BuiltInElementsModule)));
-                        dependencies[dependencies.Count - 1].ResolveModule(GetModuleInstance(typeof(BuiltInElementsModule)));
-                    }
                 }
 
-                for (int i = 0; i < dependencies.Count; i++) {
-                    Type dependencyType = dependencies[i].GetModuleType();
-                    string alias = dependencies[i].GetAlias();
+                if (!found) {
+                    Debug.Log("Unable to associate element " + kvp.Value.rawType.GetTypeName() + " with a module");
+                }
 
-                    if (stringHash.TryGetValue(alias, out Type otherModule)) {
-                        LogDiagnosticError($"Duplicate alias or module name found in module {instance.GetType().GetTypeName()}. Both {dependencyType.GetTypeName()} and {otherModule.GetTypeName()} are registered as {alias}");
-                        break;
+            }
+
+            Debug.Log("map modules: " + sw.Elapsed.TotalMilliseconds.ToString("F3"));
+            return moduleMap;
+        }
+
+        public static GameApplication2 CreateGameApplication(string applicationId, Type entryType) {
+            Initialize();
+
+            GameApplication2 application = new GameApplication2(GetUniqueApplicationName(applicationId));
+            if (entryType == null || entryType.IsGenericType || entryType.IsAbstract || !(typeof(UIElement).IsAssignableFrom(entryType))) {
+                application.IsValid = false;
+                throw new Exception("invalid type");
+            }
+            // else if (entryType.GetCustomAttribute<EntryPointAttribute>() == null) {
+            //     application.IsValid = false;
+            //     throw new Exception("Missing [EntryPoint] attribute");
+            // }
+            else {
+                TypeScanner.Scan();
+                TypeResolver.Initialize();
+                CreateProcessedElementTypes();
+
+                // this should be done PER application so that if one app is running and we refresh another,
+                // the running one won't need to adjust itself until it gets refreshed
+                List<UIModule2> moduleList = FindModules();
+                Dictionary<ProcessedType, UIModule2> map = BuildModuleMap(moduleList);
+                MapElementsToTemplates(map);
+                BuildTagNameMaps();
+                CompileApplication(entryType);
+
+            }
+
+            return application;
+        }
+
+        private static void BuildTagNameMaps() { }
+
+        private static void MapElementsToTemplates(Dictionary<ProcessedType, UIModule2> map) {
+            Stopwatch sw = Stopwatch.StartNew();
+
+            foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
+
+                ProcessedType processedType = kvp.Value;
+                if (!string.IsNullOrEmpty(processedType.templatePath)) {
+
+                    if (map.TryGetValue(processedType, out UIModule2 module)) {
+
+                        TemplateLookup lookup = new TemplateLookup() {
+                            elementLocation = processedType.elementPath,
+                            elementType = processedType.rawType,
+                            moduleLocation = module.location,
+                            modulePath = module.path,
+                            templatePath = processedType.templatePath,
+                            templateId = processedType.templateId
+                        };
+                        
+                        TemplateLocation templatePath = module.ResolveTemplate(lookup);
+
+                        // look up the template in cache
+                        // if its not there, add to the parse list
+                        // its timestamp changed, add to the parse list
+
+                        if (!File.Exists(templatePath.filePath)) {
+                            Debug.Log(templatePath.filePath + " was not found " + processedType.rawType.GetTypeName());
+                        }
+
                     }
 
-                    if (typeHash.Contains(dependencyType)) {
-                        LogDiagnosticError($"Duplicate dependency of type {TypeNameGenerator.GetTypeName(dependencyType)} in module {instance.GetType().GetTypeName()}");
-                        break;
-                    }
-
-                    stringHash.Add(alias, dependencyType);
-                    typeHash.Add(dependencyType);
                 }
             }
 
-            if (FailedToLoad) {
+            Debug.Log("map elements to template: " + sw.Elapsed.TotalMilliseconds.ToString("F3"));
+
+        }
+
+        private static void CompileApplication(Type entryType) {
+            // scan all templates
+            // resolve all the tags that we can
+            // go wide compiling those tags
+
+            // challenge #1
+            // find all non generic element tags and compile their hydrations
+
+            ProcessedType processedType = TypeProcessor.typeMap[entryType];
+
+            // processedType.resolvedTemplateLocation;
+
+            // how do I find what templates are included for an entry point?
+            // get the template for the entry point
+            // traverse node tree
+            // resolve tag
+
+            // still need to map element to template
+
+        }
+
+        private static void CreateProcessedElementTypes() {
+
+            // this should only run once on startup, the type map might get appended to during compilation but the types will never change
+            // while an application is running
+
+            if (TypeProcessor.typeMap.Count > 0) {
                 return;
             }
 
-            LightList<UIModule> sorted = new LightList<UIModule>(modules.Length);
-
-            LightStack<UIModule> stack = new LightStack<UIModule>();
-
-            Visit(modules[0], stack, sorted);
-        }
-
-        private static bool Visit(UIModule module, LightStack<UIModule> stack, LightList<UIModule> sorted) {
-            if (sorted.Contains(module)) {
-                return true;
-            }
-
-            if (stack.Contains(module)) {
-                string error = StringUtil.ListToString(stack.array.Select(m => m.GetType().GetTypeName()).ToArray(), " -> ");
-
-                LogDiagnosticError($"Cyclic dependency found while loading modules: {error}");
-                return false;
-            }
-
-            stack.Push(module);
-
-            IList<ModuleReference> dependencies = module.dependencies;
-
-            for (int i = 0; i < dependencies.Count; i++) {
-                if (!Visit(dependencies[i].GetModuleInstance(), stack, sorted)) {
-                    return false;
-                }
-            }
-
-            Assert.AreEqual(module, stack.Peek());
-            sorted.Add(stack.Pop());
-            return true;
-        }
-
-        // cannot be mulithreaded without significant work
-        private static void AssignElementsToModules() {
+            // todo -- this is totally threadsafe as long as I give each thread its own diagnostics and change the TypeProcessor.typeMap to be a concurrent dictionary
+            Diagnostics diagnostics = new Diagnostics();
             IList<Type> elements = TypeScanner.elementTypes;
 
             for (int i = 0; i < elements.Count; i++) {
@@ -246,271 +318,103 @@ namespace UIForia {
 
                 if (currentType.IsAbstract) continue;
 
-                ProcessedType processedType = ProcessedType.CreateFromType(currentType);
+                ProcessedType processedType = ProcessedType.CreateFromType(currentType, diagnostics);
 
                 // CreateFromType handles logging diagnostics, can just move on if we failed
                 if (processedType == null) {
                     continue;
                 }
 
+                // I don't think we need an element location unless we need to resolve either a style or template based on that element
+                // except that in order to resolve by tag name, we do need to have a unique tag name per module
+
                 if (string.IsNullOrEmpty(processedType.elementPath)) {
                     if (processedType.rawType.Assembly != typeof(UIElement).Assembly) {
-                        LogDiagnosticError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} requires a location providing attribute." +
-                                           $" Please use [{nameof(RecordFilePathAttribute)}], [{nameof(TemplateAttribute)}], " +
-                                           $"[{nameof(ImportStyleSheetAttribute)}], [{nameof(StyleAttribute)}]" +
-                                           $" or [{nameof(TemplateTagNameAttribute)}] on the class. If you intend not to provide a template you can also use [{nameof(ContainerElementAttribute)}].");
+                        diagnostics.LogError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} requires a location providing attribute." +
+                                             $" Please use [{nameof(RecordFilePathAttribute)}], [{nameof(TemplateAttribute)}], " +
+                                             $"[{nameof(ImportStyleSheetAttribute)}], [{nameof(StyleAttribute)}]" +
+                                             $" or [{nameof(TemplateTagNameAttribute)}] on the class. If you intend not to provide a template you can also use [{nameof(ContainerElementAttribute)}].");
                         continue;
                     }
                 }
 
+                // todo -- this needs to be concurrent dictionary to be threadsafe
                 TypeProcessor.typeMap[processedType.rawType] = processedType;
 
-                TryAssignModule(processedType);
             }
 
-            // stats.elementCount = elements.Count;
+            if (diagnostics.HasErrors()) {
+                diagnostics.Dump();
+            }
         }
 
-        private static void TryAssignModule(ProcessedType processedType) {
-            string path = processedType.elementPath;
+        private static List<UIModule2> FindModules() {
+            IEnumerable<string> z = Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..")), "*.uimodule.json", SearchOption.AllDirectories);
 
-            if (processedType.module != null) {
-                return;
+            List<UIModule2> moduleList = new List<UIModule2>();
+            foreach (string f in z) {
+                UIModuleDefinition p = JsonUtility.FromJson<UIModuleDefinition>(File.ReadAllText(f));
+                UIModule2 module = new UIModule2() {
+                    location = Path.GetDirectoryName(f) + Path.DirectorySeparatorChar,
+                    path = f,
+                    data = p
+                };
+                module.Initialize();
+                moduleList.Add(module);
             }
 
-            if (processedType.rawType.IsAbstract) {
-                return;
-            }
-
-            for (int i = 0; i < modules.Length; i++) {
-                UIModule module = modules[i];
-
-                if (!path.StartsWith(module.location, StringComparison.Ordinal)) {
-                    continue;
-                }
-
-                module.AddElementType(processedType);
-
-                try {
-                    module.tagNameMap.Add(processedType.tagName, processedType);
-                }
-                catch (ArgumentException) {
-                    LogDiagnosticError($"UIForia does not support multiple elements with the same tag name within the same module. Tried to register type {TypeNameGenerator.GetTypeName(processedType.rawType)} for `{processedType.tagName}` " +
-                                       $" in module {TypeNameGenerator.GetTypeName(module.GetType())} at {module.location} " +
-                                       $"but this tag name was already taken by type {TypeNameGenerator.GetTypeName(module.tagNameMap[processedType.tagName].rawType)}. " +
-                                       "For generic overload types with multiple arguments you need to supply a unique [TagName] attribute");
-                    return;
-                }
-
-                processedType.module = module;
-
-                if (processedType.IsContainerElement) {
-                    return;
-                }
-
-                try {
-                    processedType.resolvedTemplateLocation = module.ResolveTemplatePath(new TemplateLookup(processedType));
-                }
-                catch (Exception e) {
-                    LogDiagnosticException($"Unable to resolve template location for {processedType.rawType.GetTypeName()}", e);
-                    return;
-                }
-
-                if (processedType.resolvedTemplateLocation == null) {
-                    LogDiagnosticError($"Unable to locate template for {TypeNameGenerator.GetTypeName(processedType.rawType)}.");
-                    return;
-                }
-
-                string templateLocation = processedType.resolvedTemplateLocation.Value.filePath;
-
-                // todo -- need to get template sources somehow
-
-                // if (!s_TemplateShells.TryGetValue(templateLocation, out TemplateFileShell shell)) {
-                //     shell = new TemplateFileShell(templateLocation);
-                //     module.templateShells.Add(shell);
-                //     processedType.templateFileShell = shell;
-                //     shell.module = module;
-                //     s_TemplateShells.Add(templateLocation, shell);
-                // }
-                // else {
-                //     processedType.templateFileShell = shell;
-                // }
-
-                return;
-            }
-
-            LogDiagnosticError($"Type {TypeNameGenerator.GetTypeName(processedType.rawType)} at {processedType.elementPath} was not inside a module hierarchy.");
+            return moduleList;
         }
 
-        public struct ParseCacheEntry {
+        public static EditorApplication CreateEditorApplication(string applicationId, Type entryType) {
+            Initialize();
 
-            public string filePath;
-            public long timestamp;
-            public TemplateASTRoot[] roots;
+            EditorApplication application = new EditorApplication(GetUniqueApplicationName(applicationId));
 
-        }
-
-        public class TemplateParseCache {
-
-            private Dictionary<string, TemplateFileShell> shellMap;
-
-            public void Hydrate() {
-                byte[] bytes = File.ReadAllBytes("uiforia.parsecache");
-
-                ManagedByteBuffer buffer = new ManagedByteBuffer(bytes);
-
-                buffer.Read(out int fileCount);
-
-                for (int i = 0; i < fileCount; i++) {
-                    buffer.Read(out string filePath);
-                    buffer.Read(out int timeStamp);
-
-                    // could just store byte size and hydrate later as needed
-
-                    if (File.Exists(filePath)) {
-                        shellMap[filePath] = new TemplateFileShell(filePath);
-                        //.Deserialize(ref buffer);
-                    }
-                    else {
-                        shellMap.Remove(filePath);
-                    }
-                }
+            if (entryType.IsGenericType || entryType.IsAbstract || !(typeof(UIElement).IsAssignableFrom(entryType))) {
+                application.IsValid = false;
             }
+            else { }
 
-            public bool TryGetTemplate(TemplateLocation location, out TemplateASTRoot templateAstRoot) {
-                throw new NotImplementedException();
+            return application;
+        }
+
+        public static TestApplication CreateTestApplication(string applicationId, Type entryType) {
+            Initialize();
+
+            TestApplication application = new TestApplication(GetUniqueApplicationName(applicationId));
+
+            if (entryType.IsGenericType || entryType.IsAbstract || !(typeof(UIElement).IsAssignableFrom(entryType))) {
+                application.IsValid = false;
             }
+            else { }
 
-            public void Set(string locationFilePath, TemplateFileShell templateShellBuilder) {
-                throw new NotImplementedException();
-            }
-
+            return application;
         }
 
-        public static void ParseTemplates() {
-            TemplateParseCache cache = new TemplateParseCache();
-            cache.Hydrate();
+        public static CompilationResult PrecompileGameApplication(string applicationId, PrecompileSettings precompileSettings) {
+            Initialize();
 
-            TemplateParserXML2 parser = new TemplateParserXML2();
-
-            for (int i = 0; i < modules.Length; i++) {
-                for (int j = 0; j < modules[i].elementTypes.size; j++) {
-                    ProcessedType processedType = default;
-
-                    if (!processedType.DeclaresTemplate) {
-                        continue;
-                    }
-
-                    TemplateLocation location = processedType.resolvedTemplateLocation.Value;
-
-                    if (cache.TryGetTemplate(location, out TemplateASTRoot root)) {
-                        // all good, can re-use template from cache as is
-                    }
-                    else {
-                        // todo -- async parse later?
-
-                        // need to note that we tried to parse a template but failed, vs missing
-
-                        //  parser.TryParse(location.filePath, out TemplateFileShell fileShell);            
-
-                        // needs to reparse
-                        //  cache.Set(location.filePath, fileShell);
-                    }
-
-                    // if didn't fail to parse
-                    // processedType.template = fileShell;
-                }
-            }
-
-            // cache.Persist(); // will only write to disk if we had updates
+            return new CompilationResult();
         }
 
-        private static UIModule GetModuleInstance(Type moduleType) {
-            for (int i = 0; i < modules.Length; i++) {
-                if (modules[i].type == moduleType) {
-                    return modules[i];
-                }
-            }
+        public static CompilationResult PrecompileEditorApplication(string applicationId, PrecompileSettings precompileSettings) {
+            Initialize();
 
-            return null;
+            return new CompilationResult();
         }
 
-        internal static void LogDiagnosticInfo(string message) {
-            diagnosticLog.Add(new DiagnosticEntry() {
-                message = message,
-                diagnosticType = DiagnosticType.Info
-            });
-            Debug.Log(message);
+        public static CompilationResult PrecompileTestApplication(string applicationId, PrecompileSettings precompileSettings) {
+            Initialize();
+
+            return new CompilationResult();
         }
 
-        internal static void LogDiagnosticException(string message, Exception e) {
-            diagnosticLog.Add(new DiagnosticEntry() {
-                exception = e,
-                message = message,
-                diagnosticType = DiagnosticType.Exception
-            });
-            Debug.LogError(message + "\n" + e.Message);
-            Debug.LogError(e.StackTrace);
-            FailedToLoad = true;
-        }
+        public static GameApplication2 LoadGameApplication(string applicationId, PrecompileSettings precompileSettings) {
 
-        internal static void LogDiagnosticError(string message) {
-            diagnosticLog.Add(new DiagnosticEntry() {
-                message = message,
-                diagnosticType = DiagnosticType.Error
-            });
-            Debug.LogError(message);
-            FailedToLoad = true;
-        }
+            GameApplication2 application = new GameApplication2(GetUniqueApplicationName(applicationId));
 
-        private static void InitializeModules() {
-            IList<Type> moduleTypes = TypeScanner.moduleTypes;
-
-            modules = new UIModule[moduleTypes.Count];
-
-            for (int i = 0; i < moduleTypes.Count; i++) {
-                s_ConstructionAllowed = true;
-                UIModule instance = null;
-
-                if (moduleTypes[i].IsAbstract) {
-                    FailedToLoad = true;
-                    LogDiagnosticInfo("Modules cannot be abstract but found " + moduleTypes[i].GetTypeName() + " which was declared as abstract");
-                    continue;
-                }
-
-                try {
-                    instance = (UIModule) Activator.CreateInstance(moduleTypes[i]);
-                }
-                catch (Exception e) {
-                    LogDiagnosticException("Exception while creating module instance of type " + moduleTypes[i].GetTypeName(), e);
-                    continue;
-                }
-
-                s_ConstructionAllowed = false;
-
-                RecordFilePathAttribute attr = moduleTypes[i].GetCustomAttribute<RecordFilePathAttribute>();
-
-                if (attr == null) {
-                    LogDiagnosticError($"Modules must provide a [{TypeNameGenerator.GetTypeName(typeof(RecordFilePathAttribute))}] attribute. {TypeNameGenerator.GetTypeName(moduleTypes[i])} is missing one.");
-                    continue;
-                }
-
-                string moduleLocation = attr.filePath;
-
-                instance.location = Path.GetDirectoryName(moduleLocation) + Path.DirectorySeparatorChar;
-                modules[i] = instance;
-
-                if (instance.IsBuiltIn) {
-                    BuiltInModule = instance;
-                }
-
-                try {
-                    instance.Configure();
-                }
-                catch (Exception e) {
-                    LogDiagnosticError(e.Message);
-                }
-            }
+            return application;
         }
 
     }

@@ -55,6 +55,8 @@ namespace UIForia.Layout {
 
             ElementId ptr = layoutHierarchyInfo.firstChildId;
 
+            // todo -- if positioned via align items, we should set the local position of the element, not the aligned position
+            // that way we still play nice with the element's own alignment values 
             while (ptr != default) {
                 runner->GetWidths(this, blockSize, ptr, out LayoutSize size);
                 float clampWidth = size.Clamped + size.marginStart + size.marginEnd;

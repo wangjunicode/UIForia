@@ -4,16 +4,17 @@ namespace UIForia {
 
     public class TemplateEditorAttributeNode {
 
-        public string name;
-        public string value;
-        public AttributeType type;
+        public readonly string key;
+        public readonly string value;
+        public readonly AttributeType type;
+        
         internal AttributeFlags flags;
         
-        public TemplateEditorAttributeNode(AttributeDefinition2 attr) {
-            name = attr.key;
-            value = attr.value;
-            type = attr.type;
-            flags = attr.flags;
+        public TemplateEditorAttributeNode(string attrKey, string attrValue, AttributeType attrType, AttributeFlags attrFlags) {
+            this.key = attrKey;
+            this.value = attrValue;
+            this.type = attrType;
+            this.flags = attrFlags;
         }
 
         public bool isConst {

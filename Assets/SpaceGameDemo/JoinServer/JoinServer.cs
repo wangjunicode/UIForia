@@ -16,7 +16,7 @@ namespace SpaceGameDemo {
         public bool isFavorite;
     }
 
-    [Template("SpaceGameDemo/JoinServer/JoinServer.xml")]
+    [Template("JoinServer/JoinServer.xml")]
     public class JoinServer : UIElement {
 
         public List<ServerItem> servers;

@@ -42,7 +42,7 @@ namespace UIForia.Parsing {
         private readonly Dictionary<string, TemplateShell> parsedFiles;
         private TemplateSettings settings;
 
-        private class CustomNamespaceReader : XmlNamespaceManager {
+        internal class CustomNamespaceReader : XmlNamespaceManager {
 
             public CustomNamespaceReader([NotNull] XmlNameTable nameTable) : base(nameTable) { }
 

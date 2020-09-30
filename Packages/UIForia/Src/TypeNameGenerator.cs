@@ -6,11 +6,14 @@ namespace UIForia.Compilers {
 
     public static class TypeNameGenerator {
 
+        [ThreadStatic] private static StringBuilder s_Builder;
+        
         public static string GetTypeName(Type type) {
+            s_Builder = s_Builder ?? new StringBuilder(128);
+            s_Builder.Clear();
             if (type == typeof(void)) return "void";
-            StringBuilder builder = new StringBuilder();
-            GetTypeName(type, builder);
-            return builder.ToString();
+            GetTypeName(type, s_Builder);
+            return s_Builder.ToString();
         }
         
         public static void GetTypeName(Type type, StringBuilder builder, bool genericName = false) {
@@ -44,7 +47,7 @@ namespace UIForia.Compilers {
 
         private static string CleanGenericName(Type type) {
             string name = GetPrintableTypeName(type);
-            int position = name.LastIndexOf("`");
+            int position = name.LastIndexOf("`", StringComparison.Ordinal);
             if (position == -1) {
                 return name;
             }

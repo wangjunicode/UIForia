@@ -10,9 +10,10 @@ namespace UIForia {
 
             if (lookup.templatePath == null) {
                 string fileName = Path.GetFileName(lookup.elementLocation);
-                
+                return new TemplateLocation(lookup.moduleLocation + "//" + fileName + "//" + fileName + ".xml", lookup.templateId);
             }
 
+            // todo -- GetFullPath && Combine are not fast, write something better later
             string location = Path.GetFullPath(Path.Combine(lookup.moduleLocation, lookup.templatePath));
             return new TemplateLocation(location, lookup.templateId);
         }

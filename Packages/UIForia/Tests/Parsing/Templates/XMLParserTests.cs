@@ -197,7 +197,7 @@ namespace Tests.Parsing {
         [Test]
         public void ParseStyleReference_InvalidSetup() {
             
-            UIForiaRuntime2.CreateGameApplication("app", typeof(UIDivElement));
+            UIForiaRuntime.CreateGameApplication("app", typeof(UIDivElement));
             
             Diagnostics diagnostics = new Diagnostics();
             UIForiaMLParser parser = new UIForiaMLParser(diagnostics);

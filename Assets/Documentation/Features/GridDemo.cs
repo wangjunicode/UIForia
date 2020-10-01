@@ -4,7 +4,7 @@ using UIForia.Elements;
 #pragma warning disable 0414
 namespace Documentation.Features {
 
-    [Template("Documentation/Features/GridDemo.xml")]
+    [Template("Features/GridDemo.xml")]
     public class GridDemo : UIElement {
 
         public string variableStyle = "varStyle0";

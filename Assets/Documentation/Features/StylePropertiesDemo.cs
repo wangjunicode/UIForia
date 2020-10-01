@@ -4,7 +4,7 @@ using UIForia.Rendering;
 
 namespace Documentation.Features {
     
-    [Template("Documentation/Features/StylePropertiesDemo.xml")]
+    [Template("Features/StylePropertiesDemo.xml")]
     public class StylePropertiesDemo : UIElement {
 
         public Visibility visibility;

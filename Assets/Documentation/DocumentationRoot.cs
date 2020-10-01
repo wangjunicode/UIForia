@@ -3,7 +3,7 @@ using UIForia.Elements;
 
 namespace Documentation {
 
-    [Template("Documentation/DocumentationRoot.xml")]
+    [Template("DocumentationRoot.xml")]
     public class DocumentationRoot : UIElement {
 
         public string myValue = "hello";

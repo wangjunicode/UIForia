@@ -4,7 +4,7 @@ using UIForia.Elements;
 
 namespace Documentation.DocumentationElements {
     
-    [Template("Documentation/DocumentationElements/SectionsContainer.xml")]
+    [Template("DocumentationElements/SectionsContainer.xml")]
     public class SectionsContainer : UIElement {
 
         public List<SectionPanel> sectionPanels = new List<SectionPanel>();

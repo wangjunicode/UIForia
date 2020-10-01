@@ -5,7 +5,7 @@ using UIForia.UIInput;
 
 namespace Documentation {
     
-    [Template("Documentation/Features/InputDemo.xml")]
+    [Template("Features/InputDemo.xml")]
     public class InputDemo : UIElement {
         
         public string tv = "my string to read my string to read my string to read my string to read my string to read";

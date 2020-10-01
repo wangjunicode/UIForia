@@ -5,7 +5,7 @@ using UIForia.Elements;
 
 namespace UnityEngine {
     
-    [Template("Documentation/Features/PerformanceTest.xml")]
+    [Template("Features/PerformanceTest.xml")]
     public class PerformanceTest : UIElement {
 
         public List<PlayerData> players;

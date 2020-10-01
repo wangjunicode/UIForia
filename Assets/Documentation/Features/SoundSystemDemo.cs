@@ -4,7 +4,7 @@ using UIForia.Sound;
 
 namespace Documentation.Features {
     
-    [Template("Documentation/Features/SoundSystemDemo.xml")]
+    [Template("Features/SoundSystemDemo.xml")]
     public class SoundSystemDemo : UIElement {
 
         public UISoundData currentSound;

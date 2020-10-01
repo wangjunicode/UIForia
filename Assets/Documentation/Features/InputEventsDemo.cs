@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Documentation.Features {
 
-    [Template("Documentation/Features/InputEventsDemo.xml")]
+    [Template("Features/InputEventsDemo.xml")]
     public class InputEventsDemo : UIElement {
 
         public bool IsInStartZone;

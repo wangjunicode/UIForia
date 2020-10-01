@@ -4,7 +4,7 @@ using UIForia.Elements;
 
 namespace Documentation.Features {
     
-    [Template("Documentation/Features/RepeatExample.xml")]
+    [Template("Features/RepeatExample.xml")]
     public class RepeatExample : UIElement {
 
         public List<string> wordList;

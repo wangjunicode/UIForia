@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Documentation.Features {
 
-    [Template("Documentation/Features/FlexDemo.xml")]
+    [Template("Features/FlexDemo.xml")]
     public class FlexDemo : UIElement {
 
         public float rotation;

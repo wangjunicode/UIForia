@@ -2,24 +2,22 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Reflection;
+using System.Xml;
+using System.Xml.Linq;
 using UIForia.Attributes;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Extensions;
 using UIForia.NewStyleParsing;
 using UIForia.Parsing;
+using UIForia.Parsing.Expressions;
 using UIForia.Util;
+using UIForia.Util.Unsafe;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Debug = UnityEngine.Debug;
 
 namespace UIForia {
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public sealed class EntryPointAttribute : Attribute { }
 
     public struct DiagnosticEntry {
 
@@ -79,6 +77,8 @@ namespace UIForia {
         public Func<string, string, string> styleLocator;
         public Dictionary<string, ProcessedType> tagNameMap;
         public string path;
+        public string name;
+        public UIModule2[] implicitModuleReferences;
 
         public UIModule2() {
             tagNameMap = new Dictionary<string, ProcessedType>();
@@ -112,6 +112,13 @@ namespace UIForia {
 
     }
 
+    internal class TemplateParseCache {
+
+        private LightList<string> missingTemplates;
+        private LightList<string> parseUpdateList;
+
+    }
+
     internal class UIModuleDefinition {
 
         public string Prototype;
@@ -124,35 +131,35 @@ namespace UIForia {
 
     }
 
-    public static class UIForiaRuntime2 {
+    internal class Compilation {
+
+        public Application application;
+        public CompilationType compilationType;
+        public ProcessedType entryType;
+        public UIForiaRuntime.TemplateParseCache parseCache;
+        public Dictionary<ProcessedType, UIModule2> moduleMap;
+
+    }
+
+    public static class UIForiaRuntime {
 
         private static LightList<Application> s_Applications;
-
+        private static TemplateParseCache s_ParseCache;
+        
         internal static void Reset() {
             // kill all apps, kill all caches
         }
 
         public static void Initialize() {
 
-            // todo -- consider pre-warming style cache on startup
-            // basically suck in all style files ONCE
-            // parse them all
-            // never do this again until next editor session
-            // could probably do the same for templates, except I can't look for xml files since we'd parse unwanted shit, unless we check for <UITemplate> in each
-            // probably not worth it
-            // store results ...somewhere
-
 #if UNITY_EDITOR
             if (SessionState.GetInt("UIForiaRuntime::DidInitialStyleParse", 0) == 0) {
                 SessionState.SetInt("UIForiaRuntime::DidInitialStyleParse", 1);
                 // IEnumerable<string> z = Directory.EnumerateFiles(Path.Combine(UnityEngine.Application.dataPath, ".."), "*.style", SearchOption.AllDirectories);
-                // int cnt = 0;
-                // foreach(var f in z) {
-                //     cnt++;
-                // }
-                // Debug.Log(cnt);
             }
 #endif
+
+            Debug.Log(FileUtil.GetUniqueTempPathInProject() + "_uiforia_template_cache.bytes");
 
         }
 
@@ -224,14 +231,22 @@ namespace UIForia {
             else {
                 TypeScanner.Scan();
                 TypeResolver.Initialize();
+                
+                Compilation compilation = new Compilation();
+                compilation.entryType = TypeProcessor.GetProcessedType(entryType);
+                compilation.parseCache = new TemplateParseCache();
+                compilation.compilationType = CompilationType.Dynamic;
+                compilation.application = application;
+                compilation.parseCache.Initialize();
+                
                 CreateProcessedElementTypes();
 
                 // this should be done PER application so that if one app is running and we refresh another,
                 // the running one won't need to adjust itself until it gets refreshed
                 List<UIModule2> moduleList = FindModules();
-                Dictionary<ProcessedType, UIModule2> map = BuildModuleMap(moduleList);
-                MapElementsToTemplates(map);
-                BuildTagNameMaps();
+                compilation.moduleMap = BuildModuleMap(moduleList);
+                MapElementsToTemplates(compilation);
+                BuildTagNameMaps(compilation);
                 CompileApplication(entryType);
 
             }
@@ -239,17 +254,270 @@ namespace UIForia {
             return application;
         }
 
-        private static void BuildTagNameMaps() { }
+        public class TemplateParseCache {
 
-        private static void MapElementsToTemplates(Dictionary<ProcessedType, UIModule2> map) {
+            private string cacheFilePath;
+
+            private Dictionary<string, TemplateFileShell> templateMap;
+
+            internal TemplateParseCache() {
+                templateMap = new Dictionary<string, TemplateFileShell>(128);
+            }
+            
+            public void Initialize(bool forceReparse = false) {
+
+                if (cacheFilePath != null) {
+                    return;
+                }
+
+                cacheFilePath = GetCacheFilePath();
+
+                if (forceReparse || !File.Exists(cacheFilePath)) {
+                    BuildCache();
+                }
+                else {
+                    HydrateCache();
+                }
+
+            }
+
+            private void HydrateCache() {
+                byte[] bytes = File.ReadAllBytes(cacheFilePath);
+                ManagedByteBuffer buffer = new ManagedByteBuffer(bytes);
+                buffer.Read(out int templateCount);
+                buffer.Read(out int version);
+
+                if (version != UIForiaMLParser.Version) {
+                    BuildCache();
+                    return;
+                }
+
+                for (int i = 0; i < templateCount; i++) {
+                    
+                    TemplateFileShell shell = new TemplateFileShell();
+                    
+                    // must always deserialize so the buffer pointer knows how much data to skip
+                    shell.Deserialize(ref buffer);
+                    
+                    // could consider doing these validation checks when resolving the template instead of here
+                    // that reduces (maybe) the number of times we have to run the checks 
+                    // we should also check per compilation run that the file hasn't changed since we started compiling
+                    if (File.Exists(shell.filePath)) {
+                        DateTime lastWrite = File.GetLastWriteTime(shell.filePath);
+                        if (shell.lastWriteTime == lastWrite) {
+                            templateMap[shell.filePath] = shell;
+                        }
+                    }
+
+                }
+
+                if (buffer.ptr != buffer.array.Length) {
+                    Debug.LogWarning("Encountered an issue when loading UIForia templates from cache, reparsing files and rebuilding cache");
+                    BuildCache();
+                }
+                
+            }
+
+            private void BuildCache() {
+
+                templateMap.Clear();
+                // todo -- could improve search time by only finding module locations and looking only at those xml files
+
+                Diagnostics diagnostics = new Diagnostics();
+                IEnumerable<string> itr = Directory.EnumerateFiles(Path.GetFullPath(UnityEngine.Application.dataPath), "*.xml", SearchOption.AllDirectories);
+
+                UIForiaMLParser parser = new UIForiaMLParser(diagnostics);
+
+                LightList<string> list = new LightList<string>(128);
+                LightList<string> contentList = new LightList<string>(128);
+                LightList<DateTime> timestamps = new LightList<DateTime>(128);
+
+                foreach (string file in itr) {
+                    string contents = File.ReadAllText(file);
+                    DateTime timestamp = File.GetLastWriteTime(file);
+                    
+                    if (UIForiaMLParser.IsProbablyTemplate(contents)) {
+                        list.Add(file);
+                        contentList.Add(contents);
+                        timestamps.Add(timestamp);
+                    }
+                }
+
+                IEnumerable<string> itr2 = Directory.EnumerateFiles(Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..", "Packages")), "*.xml", SearchOption.AllDirectories);
+
+                foreach (string file in itr2) {
+                    string contents = File.ReadAllText(file);
+                    DateTime timestamp = File.GetLastWriteTime(file);
+                    if (UIForiaMLParser.IsProbablyTemplate(contents)) {
+                        list.Add(file);
+                        contentList.Add(contents);
+                        timestamps.Add(timestamp);
+                    }
+                }
+
+                ManagedByteBuffer buffer = new ManagedByteBuffer(new byte[TypedUnsafe.Kilobytes(512)]);
+
+                LightList<TemplateFileShell> files = new LightList<TemplateFileShell>(list.size);
+
+                for (int i = 0; i < list.size; i++) {
+
+                    DateTime timestamp = timestamps.array[i];
+                    
+                    if (parser.TryParse(list.array[i], contentList.array[i], out TemplateFileShell result)) {
+                        result.lastWriteTime = timestamp;
+                        files.Add(result);
+                    }
+
+                    diagnostics.Clear();
+
+                }
+
+                buffer.Write(files.size);
+                buffer.Write(UIForiaMLParser.Version);
+
+                for (int i = 0; i < files.size; i++) {
+                    templateMap[files[i].filePath] = files[i];
+                    files.array[i].Serialize(ref buffer);
+                }
+
+                // WriteCacheResult since it didnt exist before or we are initializing
+                using (FileStream fStream = new FileStream(cacheFilePath, FileMode.OpenOrCreate)) {
+                    fStream.Write(buffer.array, 0, buffer.ptr);
+                }
+
+            }
+
+            private string GetCacheFilePath() {
+                return Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..", "Temp", "__UIForiaTemplateCache__.bytes"));
+            }
+
+            public TemplateFileShell GetTemplate(ProcessedType type) {
+                // todo -- lookup n stuff, parse if needed / missing
+                return templateMap[type.resolvedTemplateLocation.Value.filePath];
+            }
+
+        }
+
+        private static void BuildTagNameMaps(Compilation compilation) {
+
+            TemplateFileShell shell = compilation.parseCache.GetTemplate(compilation.entryType);
+            TemplateASTRoot template = shell.GetRootTemplateForType(compilation.entryType);
+
+            int ptr = template.templateIndex;
+            
+            StructStack<int> stack = new StructStack<int>();
+            // I can map every node to a processed type 
+            // later we'll figure out which generics need to swapped in 
+            // also producer / consumer pattern possible
+            // 1 producer will traverse and enqueue all the types to be resolved
+            
+            
+            stack.Push(ptr);
+            
+            // parser could also just do this, at least the 'traversal' part of module + tag name
+            // cant do resolve though
+            UIModule2 module = compilation.moduleMap[compilation.entryType];
+            LightList<ProcessedType> tagBuffer = new LightList<ProcessedType>(128);
+            
+            while (stack.size > 0) {
+
+                int idx = stack.PopUnchecked();
+                
+                TemplateASTNode node = shell.templateNodes[idx];
+                
+                if ((node.templateNodeType & TemplateNodeType.Slot) != 0) {
+                    CharSpan moduleName = shell.GetCharSpan(node.moduleNameRange);
+                    CharSpan tagName = shell.GetCharSpan(node.tagNameRange);
+                    
+                    
+                    // need to know which modules to look in if non is provided
+                    // start looking in 'this' module 
+                    // if didnt find it, walk down the list of implicit modules in declaration order for the module
+                    // if didnt find it, look in UIForia default
+                    // if didnt find it, fail
+
+                    ProcessedType tagType = ResolveTagName(module, moduleName, tagName);
+                    
+                    tagBuffer.Add(tagType); // might be null
+
+                }
+                else {
+                    
+                }
+                // traverse all nodes
+                // resolve tag names
+                // if node requires descent, add to queue
+
+                for (int i = 0; i < node.childCount; i++) {
+                    
+                }
+                
+            }
+            
+            shell.processedTypes
+
+        }
+
+        private static ProcessedType ResolveTagName(UIModule2 module, string moduleName, string tagName) {
+
+            if (string.IsNullOrEmpty(moduleName)) {
+                // module.tagNameMap.TryGetValue(tagName)
+            }
+            else {
+                // todo -- scan module aliases in <using> directives
+                // todo -- module names must be unique
+                // todo -- modules cannot be nested for now
+
+                // scan already resolved module mapping first? not sure yet if its worth caching or not
+                
+                if (module.implicitModuleReferences != null) {
+                    for (int i = 0; i < module.implicitModuleReferences.Length; i++) {
+                        UIModule2[] reference = module.implicitModuleReferences;
+                    }
+                }
+
+                for (int i = 0; i < moduleList.size; i++) {
+                    
+                    UIModule2 checkModule = moduleList[i];
+                    
+                    if (checkModule == module) {
+                        continue;
+                    }
+                    
+                    if (checkModule.name == moduleName) {
+
+                        if (checkModule.tagNameMap.TryGetValue(tagName, out ProcessedType type)) {
+                            return type;
+                        }
+                    }
+                }
+
+            }
+                
+            return null;
+        }
+
+        internal struct TagResolution {
+
+            public UIModule2 module;
+            public ProcessedType type;
+            public TemplateFileShell shell;
+            public int templateIdx;
+
+        }
+
+        private static void MapElementsToTemplates(Compilation compilation) {
             Stopwatch sw = Stopwatch.StartNew();
+
+            // todo -- this should very likely be cached or parallelized somehow
+            // bare minimum would be a faster implementation of path combine and GetFullPath
 
             foreach (KeyValuePair<Type, ProcessedType> kvp in TypeProcessor.typeMap) {
 
                 ProcessedType processedType = kvp.Value;
                 if (!string.IsNullOrEmpty(processedType.templatePath)) {
 
-                    if (map.TryGetValue(processedType, out UIModule2 module)) {
+                    if (compilation.moduleMap.TryGetValue(processedType, out UIModule2 module)) {
 
                         TemplateLookup lookup = new TemplateLookup() {
                             elementLocation = processedType.elementPath,
@@ -259,7 +527,7 @@ namespace UIForia {
                             templatePath = processedType.templatePath,
                             templateId = processedType.templateId
                         };
-                        
+
                         TemplateLocation templatePath = module.ResolveTemplate(lookup);
 
                         // look up the template in cache
@@ -288,6 +556,18 @@ namespace UIForia {
             // find all non generic element tags and compile their hydrations
 
             ProcessedType processedType = TypeProcessor.typeMap[entryType];
+
+            // how to solve threading
+            // producer / consumer
+            // optimistic partial compilation -- don't like
+            // parallel per entry point -> not great
+            
+            // can I map tag names without compiling? I think so
+            // at which point I know which ones are generic
+            // so i can probably do the tag name mapping up front / in parallel
+            // at least most of the time...
+            // generics are an issue kind of
+
 
             // processedType.resolvedTemplateLocation;
 

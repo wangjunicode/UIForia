@@ -9,7 +9,7 @@ namespace Documentation.Features {
         public string Name;
     }
 
-    [Template("Documentation/Features/SelectDemo.xml")]
+    [Template("Features/SelectDemo.xml")]
     public class SelectDemo : UIElement {
 
         public List<ISelectOption<int>> intList;

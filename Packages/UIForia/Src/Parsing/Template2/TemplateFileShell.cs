@@ -165,6 +165,25 @@ namespace UIForia {
 
         }
 
+        public unsafe CharSpan GetCharSpan(RangeInt stringRange) {
+            if (stringRange.length == 0) {
+                return default;
+            }
+
+            if (stringRange.start < 0 || stringRange.start >= charBuffer.Length) {
+                return default;
+            }
+            
+            if (stringRange.end < 0 || stringRange.end > charBuffer.Length || stringRange.end < stringRange.start) {
+                return default;
+            }
+
+            fixed (char* buffer = charBuffer) {
+                return new CharSpan(buffer, stringRange.start, stringRange.length);
+            }
+
+        }
+
     }
 
 }

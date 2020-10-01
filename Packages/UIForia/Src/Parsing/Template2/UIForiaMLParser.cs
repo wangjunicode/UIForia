@@ -26,6 +26,24 @@ namespace UIForia {
             this.elementStack = new StructStack<TemplateFileShellBuilder.TemplateASTBuilder>(16);
         }
 
+        public const int Version = 1;
+
+        public static bool IsProbablyTemplate(string contents) {
+            unsafe {
+
+                fixed (char* ptr = contents) {
+                    CharStream stream = new CharStream(ptr, 0, contents.Length);
+                    stream.ConsumeWhiteSpaceAndComments(CommentMode.XML);
+                    if (stream.TryMatchRange("<?")) {
+                        stream.ConsumeUntilFound("?>", out CharSpan _);
+                    }
+                    stream.ConsumeWhiteSpaceAndComments(CommentMode.XML);
+                    return stream.HasMoreTokens && stream.TryMatchRange("<UITemplate");
+                }
+
+            }
+        }
+
         public bool TryParse(string filePath, string contents, out TemplateFileShell result) {
             this.filePath = filePath;
             hasCriticalError = false;
@@ -64,10 +82,11 @@ namespace UIForia {
                             stream.ConsumeWhiteSpaceAndComments(CommentMode.None);
                             if (stream.Current == '>') {
                                 openStack.Pop();
-                            }    
+                            }
+
                             break;
                         }
-                        
+
                         if (!TryParseOuterTag(ref stream)) {
                             break;
                         }
@@ -251,6 +270,8 @@ namespace UIForia {
                 if (prefix == "attr") {
                     attributeType = AttributeType.Attribute;
                 }
+                else if (prefix == "require") { }
+                else if (prefix == "generic") { }
                 else if (prefix == "style") { }
                 else if (prefix == "inject") { }
                 else if (prefix == "property") {
@@ -376,7 +397,7 @@ namespace UIForia {
                 }
 
                 if (stream.TryParseCharacter('=')) {
-                    if (!stream.TryParseDoubleQuotedString(out attrValue)) {
+                    if (!stream.TryParseDoubleQuotedString(out attrValue) && !stream.TryParseSingleQuotedString(out attrValue)) {
                         LogError($"Expected a quoted attribute value or expression after the `=` for attribute `{attrKey}`", attrKey.GetLineInfo());
                         return;
                     }
@@ -486,12 +507,12 @@ namespace UIForia {
                 stream.Advance(2); // if self closing, skip
 
                 builder.CreateRootNode(idValue, attrBuffer, contents.GetLineInfo());
-                
+
                 return;
             }
 
-            openStack.Push(contents);    
-            
+            openStack.Push(contents);
+
             //todo assert id for template is not already taken in this file
             elementStack.Push(builder.CreateRootNode(idValue, attrBuffer, contents.GetLineInfo()));
 
@@ -515,7 +536,7 @@ namespace UIForia {
             }
 
             openStack.Pop();
-            
+
         }
 
         private bool TryParseTextContent(ref CharStream stream) {

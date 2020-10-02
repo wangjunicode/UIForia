@@ -26,7 +26,7 @@ namespace UIForia {
             this.elementStack = new StructStack<TemplateFileShellBuilder.TemplateASTBuilder>(16);
         }
 
-        public const int Version = 1;
+        public const int Version = 2;
 
         public static bool IsProbablyTemplate(string contents) {
             unsafe {

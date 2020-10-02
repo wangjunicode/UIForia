@@ -1,3 +1,5 @@
+using UIForia.Parsing;
+
 namespace UIForia.Elements {
 
     public class UISlotBase : UIContainerElement {
@@ -7,6 +9,8 @@ namespace UIForia.Elements {
     }
 
     public class UISlotDefinition : UISlotBase {
+
+        public SlotType slotType;
 
         public override string GetDisplayName() {
             return "define:" + slotId;

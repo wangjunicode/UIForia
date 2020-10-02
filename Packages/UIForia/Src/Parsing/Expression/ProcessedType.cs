@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using UIForia.Attributes;
@@ -15,39 +16,23 @@ namespace UIForia.Parsing {
     public class ProcessedType {
 
         public readonly Type rawType;
-        public readonly TemplateAttribute templateAttr;
-        private object rawCtorFn;
         private StructList<PropertyChangeHandlerDesc> methods;
-        private Func<ProcessedType, UIElement, UIElement> constructionFn;
         public readonly string tagName;
-        public string namespaceName;
         public int id;
-        public int references;
         private Flags flags;
+        private Expression ctorExpr;
 
-        private ConstructorInfo constructorInfo;
         public string elementPath;
         public string templateId;
         public string templatePath;
-        internal TemplateLocation? resolvedTemplateLocation;
-        public string templateSource;
-        internal string[] importedStyleSheets;
 
+        internal string[] importedStyleSheets;
         internal string implicitStyles;
 
-        private static int currentTypeId = -1;
+        public readonly ElementArchetype archetype;
 
-        public ProcessedType(Type rawType, TemplateAttribute templateAttr, string tagName = null) {
-            this.id = -1; // set by TypeProcessor
-            this.rawType = rawType;
-            this.templateAttr = templateAttr;
-            this.tagName = tagName;
-            // this.requiresUpdateFn = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnUpdate)));
-            // this.requiresOnEnable = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnEnable)));
-            // this.requiresBeforePropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnBeforePropertyBindings)));
-            // this.requiresAfterPropertyUpdates = ReflectionUtil.IsOverride(rawType.GetMethod(nameof(UIElement.OnAfterPropertyBindings)));
-            this.namespaceName = rawType.Namespace;
-        }
+        private static int currentTypeId = -1;
+        [ThreadStatic] private static LightList<string> s_StyleList;
 
         internal ProcessedType(Type rawType, string elementPath, string templatePath, string templateId, string tagName, string implicitStyles, string[] styleSheets) {
             this.id = Interlocked.Add(ref currentTypeId, 1);
@@ -59,13 +44,27 @@ namespace UIForia.Parsing {
             this.implicitStyles = implicitStyles;
             this.importedStyleSheets = styleSheets;
 
-            if (templatePath == null && templateId == null) {
-                IsContainerElement = true;
+            if (rawType == typeof(UISlotDefinition)) {
+                archetype = ElementArchetype.SlotDefine;
             }
-
-            // might not be cheap -- explore skipping when we know 100% is or isn't a text element
-            if (typeof(UITextElement).IsAssignableFrom(rawType)) {
+            else if (rawType == typeof(UISlotForward)) {
+                archetype = ElementArchetype.SlotForward;
+            }
+            else if (rawType == typeof(UISlotOverride)) {
+                archetype = ElementArchetype.SlotOverride;
+            }
+            else if (rawType == typeof(UIMetaElement)) {
+                archetype = ElementArchetype.Meta;
+            }
+            else if (DeclaresTemplate) {
+                archetype = ElementArchetype.Template;
+            }
+            else if (typeof(UITextElement).IsAssignableFrom(rawType)) {
+                // might not be cheap -- explore skipping when we know 100% is or isn't a text element
                 flags |= Flags.IsTextElement;
+            }
+            else {
+                IsContainerElement = true;
             }
 
             this.IsUnresolvedGeneric = rawType.IsGenericTypeDefinition;
@@ -91,7 +90,20 @@ namespace UIForia.Parsing {
 
         }
 
-        [ThreadStatic] private static LightList<string> s_StyleList;
+        [Flags]
+        public enum ElementArchetype {
+
+            Unresolved = 0,
+            Template = 1 << 0,
+            Meta = 1 << 1,
+            SlotDefine = 1 << 2,
+            SlotForward = 1 << 3,
+            SlotOverride = 1 << 4,
+            Container = 1 << 5,
+            Text = 1 << 6
+
+        }
+
 
         // This is threadsafe
         internal static ProcessedType CreateFromType(Type type, Diagnostics diagnostics) {
@@ -285,7 +297,7 @@ namespace UIForia.Parsing {
         }
 
         public bool DeclaresTemplate {
-            get => templatePath != null;
+            get => templatePath != null || templateId != null;
         }
 
         public struct PropertyChangeHandlerDesc {
@@ -294,9 +306,10 @@ namespace UIForia.Parsing {
             public string memberName;
 
         }
-        
+
         public void GetChangeHandlers(string memberName, StructList<PropertyChangeHandlerDesc> retn) {
             if (methods == null) {
+                // todo -- use type scanner for this probably, not sure how it handles generics though
                 MethodInfo[] candidates = ReflectionUtil.GetInstanceMethods(rawType);
                 for (int i = 0; i < candidates.Length; i++) {
                     IEnumerable<OnPropertyChanged> attrs = candidates[i].GetCustomAttributes<OnPropertyChanged>();
@@ -321,25 +334,22 @@ namespace UIForia.Parsing {
             }
         }
 
-        public void ValidateAttributes(StructList<AttributeDefinition> attributes) { }
-
+        // todo -- remove
         public ProcessedType Reference() {
-            references++;
             return this;
         }
 
-        public void GetConstructorData(out ConstructorInfo constructorInfo) {
-            if (this.constructorInfo != null) {
-                constructorInfo = this.constructorInfo;
-                return;
+        public Expression GetConstructorExpression() {
+            if (ctorExpr == null) {
+                ConstructorInfo constructorInfo = rawType.GetConstructor(Type.EmptyTypes);
+                if (constructorInfo == null) {
+                    return null;
+                }
+
+                ctorExpr = ExpressionFactory.New(constructorInfo);
             }
 
-            this.constructorInfo = rawType.GetConstructor(Type.EmptyTypes);
-            if (this.constructorInfo == null) {
-                UnityEngine.Debug.LogError(rawType + "doesn't define a parameterless public constructor. This is a requirement for it to be used templates");
-            }
-
-            constructorInfo = this.constructorInfo;
+            return ctorExpr;
         }
 
     }

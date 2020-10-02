@@ -65,6 +65,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("RepeatCount")]
     public sealed class UIRepeatCountElement : UIRepeatElement {
 
         public int count;
@@ -99,6 +100,7 @@ namespace UIForia.Elements {
 
     }
 
+    [TemplateTagName("Repeat")]
     public sealed class UIRepeatElement<T> : UIRepeatElement {
 
         public IList<T> list;
@@ -194,7 +196,6 @@ namespace UIForia.Elements {
                 hierarchyInfo.lastChildId = default;
             }
             else {
-
                 hierarchyInfo.firstChildId = lastFrameChildren[0].element.id;
                 hierarchyInfo.lastChildId = lastFrameChildren[lastFrameChildren.size - 1].element.id;
 
@@ -229,9 +230,7 @@ namespace UIForia.Elements {
                 if (needsLayoutUpdate) {
                     application.layoutSystem.MarkForChildrenUpdate(id);
                 }
-
             }
-
         }
 
         private void UpdateWithoutKeyFunc(int rangeStart, int rangeEnd) {
@@ -252,7 +251,6 @@ namespace UIForia.Elements {
                     }
                 }
                 else {
-
                     UIElement destroyPtr = FindChildAt(currCount);
 
                     while (destroyPtr != null) {
@@ -260,7 +258,6 @@ namespace UIForia.Elements {
                         destroyPtr.Destroy();
                         destroyPtr = next;
                     }
-                    
                 }
             }
 
@@ -272,7 +269,6 @@ namespace UIForia.Elements {
                 ContextVariable ptr = childptr.bindingNode.localVariable;
 
                 while (ptr != null) {
-
                     if (ptr.id == itemVarId) {
                         ((ContextVariable<T>) ptr).value = list[rangeStart + idx];
                     }

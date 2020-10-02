@@ -1,5 +1,4 @@
 using System;
-using UIForia.Extensions;
 using UIForia.NewStyleParsing;
 using UIForia.Parsing;
 using UIForia.Util;
@@ -23,17 +22,18 @@ namespace UIForia {
         public StyleDeclaration[] styles;
 
         // --- not serialized ---
-        public ProcessedType[] processedTypes; // todo -- remove 
+        public ProcessedType[] typeMappings;
         public bool successfullyParsed;
-        public bool successfullyValidated;
+        public bool checkedTimestamp;
 
         // ----------------------
 
         public TemplateFileShell(string templateLocation = null) {
             this.filePath = templateLocation;
         }
-        
+
         public bool TryGetTextContent(int nodeIndex, out RangeInt textContent) {
+            throw new NotImplementedException();
             if (textContents == null) {
                 textContent = default;
                 return false;
@@ -52,9 +52,7 @@ namespace UIForia {
 
         public TemplateASTRoot GetRootTemplateForType(ProcessedType processedType) {
             unsafe {
-
                 fixed (char* buffer = charBuffer) {
-
                     for (int i = 0; i < rootNodes.Length; i++) {
                         RangeInt range = rootNodes[i].templateNameRange;
                         if (StringUtil.EqualsRangeUnsafe(processedType.templateId, buffer, range.start, range.length))
@@ -82,51 +80,10 @@ namespace UIForia {
             return false;
         }
 
-        public string GetFormattedTagName(ProcessedType processedType, int templateNodeIndex) {
-            ref TemplateASTNode node = ref templateNodes[templateNodeIndex];
-            // switch (node.templateNodeType) {
-            //     case TemplateNodeType.Unresolved:
-            //         return "unresolved";
-            //
-            //     case TemplateNodeType.SlotDefine:
-            //         return "define:" + GetRawTagName(templateNodeIndex);
-            //
-            //     case TemplateNodeType.SlotForward:
-            //         return "<forward:" + GetRawTagName(templateNodeIndex);
-            //
-            //     case TemplateNodeType.SlotOverride:
-            //         return "override:" + GetRawTagName(templateNodeIndex);
-            //
-            //     case TemplateNodeType.Root:
-            //         return processedType.tagName;
-            //
-            //     case TemplateNodeType.Expanded:
-            //     case TemplateNodeType.Container:
-            //     case TemplateNodeType.Text: {
-            //         // todo -- might want to print out a nice generic string if type is generic
-            //         string moduleName = GetModuleName(templateNodeIndex);
-            //         string tagName = processedType.tagName; //GetRawTagName(templateNodeIndex);
-            //         if (moduleName != null) {
-            //             return moduleName + ":" + tagName;
-            //         }
-            //
-            //         return tagName;
-            //     }
-            //
-            //     case TemplateNodeType.Repeat:
-            //         return "Repeat";
-            // }
-
-            return null;
-        }
-
-        public string GetTypeName(int nodeIndex) {
-            return processedTypes[nodeIndex].rawType.GetTypeName();
-        }
-
+        
         public void Serialize(ref ManagedByteBuffer buffer) {
-
             buffer.Write(filePath);
+            buffer.Write(lastWriteTime);
             buffer.Write(rootNodes);
             buffer.Write(templateNodes);
             buffer.Write(slots);
@@ -134,11 +91,11 @@ namespace UIForia {
             buffer.Write(charBuffer);
             buffer.Write(textContents);
             buffer.Write(styles);
-
         }
 
         public void Deserialize(ref ManagedByteBuffer buffer) {
             buffer.Read(out filePath);
+            buffer.Read(out lastWriteTime);
             buffer.Read(out rootNodes);
             buffer.Read(out templateNodes);
             buffer.Read(out slots);
@@ -156,13 +113,12 @@ namespace UIForia {
             if (stringRange.start < 0 || stringRange.start >= charBuffer.Length) {
                 return null;
             }
-            
+
             if (stringRange.end < 0 || stringRange.end > charBuffer.Length || stringRange.end < stringRange.start) {
                 return null;
             }
 
             return new string(charBuffer, stringRange.start, stringRange.length);
-
         }
 
         public unsafe CharSpan GetCharSpan(RangeInt stringRange) {
@@ -173,15 +129,14 @@ namespace UIForia {
             if (stringRange.start < 0 || stringRange.start >= charBuffer.Length) {
                 return default;
             }
-            
+
             if (stringRange.end < 0 || stringRange.end > charBuffer.Length || stringRange.end < stringRange.start) {
                 return default;
             }
 
             fixed (char* buffer = charBuffer) {
-                return new CharSpan(buffer, stringRange.start, stringRange.length);
+                return new CharSpan(buffer, stringRange.start, stringRange.end);
             }
-
         }
 
     }

@@ -4,11 +4,9 @@ using System.Linq;
 using System.Xml;
 using System.Xml.Linq;
 using JetBrains.Annotations;
-using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Exceptions;
 using UIForia.Parsing.Expressions;
-using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Templates;
 using UIForia.Text;
 using UIForia.Util;
@@ -150,22 +148,6 @@ namespace UIForia.Parsing {
             return true;
         }
 
-        internal void Parse(TemplateRootNode templateRootNode, ProcessedType processedType) {
-
-            string filePath = processedType.resolvedTemplateLocation?.filePath;
-
-            if (parsedFiles.TryGetValue(processedType.resolvedTemplateLocation?.filePath, out TemplateShell rootNode)) {
-                ParseContentTemplate(templateRootNode, rootNode, processedType);
-                return;
-            }
-
-            TemplateShell shell = ParseOuterShell(filePath, processedType.templateSource);
-
-            parsedFiles.Add(filePath, shell);
-
-            ParseContentTemplate(templateRootNode, shell, processedType);
-        }
-
         internal TemplateShell GetOuterTemplateShell(string filePath, string source) {
             if (parsedFiles.TryGetValue(filePath, out TemplateShell rootNode)) {
                 return rootNode;
@@ -178,34 +160,34 @@ namespace UIForia.Parsing {
         }
 
         // this might be getting called too many times since im not sure im caching the result
-        private void ParseContentTemplate(TemplateRootNode templateRootNode, TemplateShell shell, ProcessedType processedType) {
-            XElement root = shell.GetElementTemplateContent(processedType.templateAttr.templateId);
-
-            if (root == null) {
-                throw new TemplateNotFoundException(processedType.resolvedTemplateLocation?.filePath, processedType.resolvedTemplateLocation?.templateId);
-            }
-
-            IXmlLineInfo xmlLineInfo = root;
-
-            StructList<AttributeDefinition> attributes = StructList<AttributeDefinition>.Get();
-            StructList<AttributeDefinition> injectedAttributes = StructList<AttributeDefinition>.Get();
-
-            ParseAttributes(shell, "Contents", root.Attributes(), attributes, injectedAttributes, out string genericTypeResolver, out string requireType);
-
-            if (attributes.size == 0) {
-                StructList<AttributeDefinition>.Release(ref attributes);
-            }
-
-            if (injectedAttributes.size == 0) {
-                StructList<AttributeDefinition>.Release(ref injectedAttributes);
-            }
-
-            templateRootNode.attributes = ValidateRootAttributes(shell.filePath, attributes);
-            templateRootNode.lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
-            templateRootNode.genericTypeResolver = genericTypeResolver;
-            templateRootNode.requireType = requireType; // always null I think
-            ParseChildren(templateRootNode, templateRootNode, root.Nodes());
-        }
+        // private void ParseContentTemplate(TemplateRootNode templateRootNode, TemplateShell shell, ProcessedType processedType) {
+        //     XElement root = shell.GetElementTemplateContent(processedType.templateAttr.templateId);
+        //
+        //     if (root == null) {
+        //         throw new TemplateNotFoundException(processedType.resolvedTemplateLocation?.filePath, processedType.resolvedTemplateLocation?.templateId);
+        //     }
+        //
+        //     IXmlLineInfo xmlLineInfo = root;
+        //
+        //     StructList<AttributeDefinition> attributes = StructList<AttributeDefinition>.Get();
+        //     StructList<AttributeDefinition> injectedAttributes = StructList<AttributeDefinition>.Get();
+        //
+        //     ParseAttributes(shell, "Contents", root.Attributes(), attributes, injectedAttributes, out string genericTypeResolver, out string requireType);
+        //
+        //     if (attributes.size == 0) {
+        //         StructList<AttributeDefinition>.Release(ref attributes);
+        //     }
+        //
+        //     if (injectedAttributes.size == 0) {
+        //         StructList<AttributeDefinition>.Release(ref injectedAttributes);
+        //     }
+        //
+        //     templateRootNode.attributes = ValidateRootAttributes(shell.filePath, attributes);
+        //     templateRootNode.lineInfo = new TemplateLineInfo(xmlLineInfo.LineNumber, xmlLineInfo.LinePosition);
+        //     templateRootNode.genericTypeResolver = genericTypeResolver;
+        //     templateRootNode.requireType = requireType; // always null I think
+        //     ParseChildren(templateRootNode, templateRootNode, root.Nodes());
+        // }
 
         private StructList<AttributeDefinition> ValidateRootAttributes(string fileName, StructList<AttributeDefinition> attributes) {
             if (attributes == null) return null;
@@ -297,8 +279,6 @@ namespace UIForia.Parsing {
             if (processedType == null) {
                 throw ParseException.UnresolvedTagName(templateRoot.templateShell.filePath, templateLineInfo, namespacePath + ":" + tagName);
             }
-
-            processedType.ValidateAttributes(attributes);
 
             if (typeof(UIContainerElement).IsAssignableFrom(processedType.rawType)) {
                 node = new ContainerNode(templateRoot, parent, processedType, attributes, templateLineInfo);

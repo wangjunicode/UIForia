@@ -537,7 +537,8 @@ namespace UIForia.Systems {
                 for (int creatorIndex = 0; creatorIndex < element.inputHandlers.dragCreators.size; creatorIndex++) {
                     InputHandlerGroup.DragCreatorData data = element.inputHandlers.dragCreators.array[creatorIndex];
 
-                    currentDragEvent = data.handler.Invoke(new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, m_KeyboardState.modifiersThisFrame, false, element));
+                    throw new NotImplementedException("Todo -- fix up drag events with new compiler");
+                    currentDragEvent = null; //data.handler.Invoke(new MouseInputEvent(m_EventPropagator, InputEventType.DragCreate, m_KeyboardState.modifiersThisFrame, false, element));
 
                     if (currentDragEvent != null) {
                         currentDragEvent.StartTime = Time.realtimeSinceStartup;
@@ -626,7 +627,8 @@ namespace UIForia.Systems {
                         continue;
                     }
 
-                    Action<DragEvent> castHandler = (Action<DragEvent>) handler.handlerFn;
+                    throw new NotImplementedException("Todo -- fixup input system");
+                    Action<DragEvent> castHandler = null; //(Action<DragEvent>) handler.handlerFn;
 
                     if (handler.eventPhase != EventPhase.Bubble) {
                         captureList.Add(castHandler);
@@ -773,7 +775,8 @@ namespace UIForia.Systems {
                             RunBindings(element);
                         }
 
-                        Action<KeyboardInputEvent> keyHandler = handler.handlerFn as Action<KeyboardInputEvent>;
+                        throw new NotImplementedException("Fix input system");
+                        Action<KeyboardInputEvent> keyHandler = null; //handler.handlerFn as Action<KeyboardInputEvent>;
                         Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
                         keyHandler.Invoke(evt);
                     }
@@ -802,7 +805,8 @@ namespace UIForia.Systems {
                         continue;
                     }
 
-                    Action<KeyboardInputEvent> keyHandler = evtHandlerGroup.eventHandlers[i].handlerFn as Action<KeyboardInputEvent>;
+                    throw new NotImplementedException("todo -- fix input system");
+                    Action<KeyboardInputEvent> keyHandler = null; //evtHandlerGroup.eventHandlers[i].handlerFn as Action<KeyboardInputEvent>;
                     Debug.Assert(keyHandler != null, nameof(keyHandler) + " != null");
                     keyHandler.Invoke(keyInputEvent);
                 }
@@ -857,7 +861,8 @@ namespace UIForia.Systems {
                     }
 
                     if ((handlerData.modifiers & m_KeyboardState.modifiersThisFrame) == handlerData.modifiers) {
-                        Action<MouseInputEvent> handler = handlerData.handlerFn as Action<MouseInputEvent>;
+                        throw new NotImplementedException("todo -- fix input system");
+                        Action<MouseInputEvent> handler = null; //handlerData.handlerFn as Action<MouseInputEvent>;
                         Debug.Assert(handler != null, nameof(handler) + " != null");
                         handler.Invoke(new MouseInputEvent(m_EventPropagator, eventType, m_KeyboardState.modifiersThisFrame, element == m_FocusedElement, element));
                     }

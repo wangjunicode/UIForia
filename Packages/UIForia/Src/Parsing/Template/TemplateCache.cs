@@ -20,38 +20,7 @@ namespace UIForia.Parsing {
             this.templateMap = new Dictionary<string, LightList<TemplateRootNode>>(37);
         }
 
-        public string ResolveDefaultFilePath(ProcessedType processedType) {
-            if (settings.filePathResolver != null) {
-                return settings.filePathResolver(processedType.rawType, processedType.templateAttr.templateId);
-            }
-
-            // expected is templateroot/typename/typename.xml if template id == null
-            // or templateroot/typename/typename/typename.xml#templateid
-            string namespaceName = processedType.rawType.Namespace;
- 
-            if (namespaceName != null && namespaceName.Contains(".")) {
-                namespaceName = namespaceName.Replace(".", Path.PathSeparator.ToString());
-            }
-
-            string basePath;
-            
-            basePath = namespaceName == null 
-                ? Path.Combine(settings.templateRoot, processedType.rawType.Name, processedType.rawType.Name) 
-                : Path.Combine(settings.templateRoot, namespaceName, processedType.rawType.Name, processedType.rawType.Name);
-            
-            // todo -- support more extensions
-            string xmlPath = Path.GetFullPath(Path.Combine(settings.templateResolutionBasePath, basePath + ".xml"));
-            
-            if (File.Exists(xmlPath)) {
-                basePath += ".xml";
-            }
-            else {
-                throw new TemplateNotFoundException(processedType, xmlPath);
-            }
-            
-            return basePath;
-        }
-
+       
         /// <summary>
         /// In the future we'll have cached versions of templates that are hydratable directly from a byte stream
         /// for now we want to maintain the old compilation behavior and need to continue to use TemplateRootNode for this

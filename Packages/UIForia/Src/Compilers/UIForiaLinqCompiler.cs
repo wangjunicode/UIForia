@@ -78,10 +78,10 @@ namespace UIForia.Compilers {
                         return slotContext;
                     }
                     Parameter p = new Parameter(attributeData.slotContextType.rawType, variableName, ParameterFlags.NeverNull);
-                    MemberExpression bindingNode = Expression.Field(GetElement(), TemplateCompiler.s_UIElement_BindingNode);
-                    MemberExpression referenceArray = Expression.Field(bindingNode, TemplateCompiler.s_LinqBindingNode_ReferencedContext);
-                    BinaryExpression index = Expression.ArrayIndex(referenceArray, Expression.Constant(attributeData.slotDepth));
-                    slotContext = AddVariableUnchecked(p, ExpressionFactory.Convert(index, attributeData.slotContextType.rawType));
+                    // MemberExpression bindingNode = Expression.Field(GetElement(), TemplateCompiler.s_UIElement_BindingNode);
+                    // MemberExpression referenceArray = Expression.Field(bindingNode, TemplateCompiler.s_LinqBindingNode_ReferencedContext);
+                    // BinaryExpression index = Expression.ArrayIndex(referenceArray, Expression.Constant(attributeData.slotDepth));
+                    // slotContext = AddVariableUnchecked(p, ExpressionFactory.Convert(index, attributeData.slotContextType.rawType));
                 }
 
                 return slotContext;
@@ -116,10 +116,10 @@ namespace UIForia.Compilers {
                         return variable;
                     }
                     Parameter p = new Parameter(attributeData.slotContextType.rawType, variableName, ParameterFlags.NeverNull);
-                    MemberExpression bindingNode = Expression.Field(GetElement(), TemplateCompiler.s_UIElement_BindingNode);
-                    MemberExpression referenceArray = Expression.Field(bindingNode, TemplateCompiler.s_LinqBindingNode_ReferencedContext);
-                    BinaryExpression index = Expression.ArrayIndex(referenceArray, Expression.Constant(attributeData.slotDepth));
-                    castSlotContext = AddVariableUnchecked(p, Expression.Convert(index, attributeData.slotContextType.rawType));
+                    // MemberExpression bindingNode = Expression.Field(GetElement(), TemplateCompiler.s_UIElement_BindingNode);
+                    // MemberExpression referenceArray = Expression.Field(bindingNode, TemplateCompiler.s_LinqBindingNode_ReferencedContext);
+                    // BinaryExpression index = Expression.ArrayIndex(referenceArray, Expression.Constant(attributeData.slotDepth));
+                    // castSlotContext = AddVariableUnchecked(p, Expression.Convert(index, attributeData.slotContextType.rawType));
                 }
 
                 return castSlotContext;

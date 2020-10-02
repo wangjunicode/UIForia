@@ -61,6 +61,12 @@ namespace UIForia.Systems {
         internal LinqBindingNode parent;
         public UIElement[] referencedContexts;
 
+        public void SetBindingVariable() { }
+
+        public void GetBindingVariable() { }
+
+        public void InvokeUpdate() { }
+
         public void InitializeContextArray(string slotName, TemplateScope templateScope, int size) {
             referencedContexts = new UIElement[size + 1];
 

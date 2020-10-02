@@ -2181,7 +2181,7 @@ namespace UIForia.Compilers {
 
                     if (targetType == typeof(string)) {
                         // null check?
-                        return ExpressionFactory.CallInstanceUnchecked(retn, retn.Type.GetMethod("ToString", Type.EmptyTypes));
+                        return ExpressionFactory.CallInstance(retn, retn.Type.GetMethod("ToString", Type.EmptyTypes));
                     }
 
                     throw CompileException.InvalidTargetType(targetType, retn.Type);

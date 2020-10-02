@@ -21,7 +21,7 @@ namespace UIForia {
                 timestamp = DateTime.Now
             });
         }
-        
+
         public void LogWarning(string message) {
             diagnosticList.Add(new DiagnosticEntry() {
                 message = message,
@@ -48,7 +48,7 @@ namespace UIForia {
                 timestamp = DateTime.Now
             });
         }
-        
+
         public void LogException(Exception exception) {
             diagnosticList.Add(new DiagnosticEntry() {
                 message = exception.Message,
@@ -57,7 +57,7 @@ namespace UIForia {
                 timestamp = DateTime.Now
             });
         }
-        
+
         public void Clear() {
             diagnosticList.Clear();
         }
@@ -77,7 +77,6 @@ namespace UIForia {
                 ref DiagnosticEntry diag = ref diagnosticList.array[i];
                 string retn = "";
                 switch (diag.diagnosticType) {
-
                     case DiagnosticType.Info:
                         retn += "[UIForia::Info] ";
                         break;
@@ -139,11 +138,30 @@ namespace UIForia {
                         Debug.Log(retn);
                         break;
                 }
-
             }
         }
 
-        
+        public struct DiagnosticEntry {
+
+            public string message;
+            public string filePath;
+            public string category;
+            public DateTime timestamp;
+            public Exception exception;
+            public int lineNumber;
+            public int columnNumber;
+            public DiagnosticType diagnosticType;
+
+        }
+
+        public enum DiagnosticType : ushort {
+
+            Error,
+            Exception,
+            Info,
+            Warning
+
+        }
 
     }
 

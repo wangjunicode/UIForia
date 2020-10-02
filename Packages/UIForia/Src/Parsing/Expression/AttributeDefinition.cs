@@ -25,7 +25,9 @@ namespace UIForia.Parsing.Expressions {
         ImplicitVariable = 1 << 15,
         ChangeHandler = 1 << 16,
         Drag = 1 << 17,
-        PainterVar = 1 << 18
+        PainterVar = 1 << 18,
+
+        RequireType
 
     }
 

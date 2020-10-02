@@ -7,11 +7,79 @@ using UIForia.Util;
 
 namespace UIForia.Compilers {
 
-    internal static class ExpressionUtil {
+    public static class ExpressionUtil {
+
+        [ThreadStatic] private static Dictionary<int, Expression> s_IntExpression;
+        [ThreadStatic] private static Dictionary<Type, Expression> s_DefaultExpressions;
+        [ThreadStatic] private static Dictionary<string, Expression> s_StringExpression;
+
+        private static readonly Expression s_TrueConst = Expression.Constant(true);
+        private static readonly Expression s_FalseConst = Expression.Constant(false);
+        
+        private struct EnumCache<U> where U : Enum {
+
+            // ReSharper disable once StaticMemberInGenericType
+            [ThreadStatic] private static Dictionary<int, Expression> s_Cache;
+
+            public static Expression Get(int value) {
+                s_Cache = s_Cache ?? new Dictionary<int, Expression>();
+                if (s_Cache.TryGetValue(value, out Expression retn)) {
+                    return retn;
+                }
+
+                retn = Expression.Constant((U) (object)value);
+                s_Cache[value] = retn;
+                return retn;
+            }
+
+        }
+
+        public static Expression GetBoolConstant(bool value) {
+            return value
+                ? s_TrueConst
+                : s_FalseConst;
+        }
+        
+        public static Expression GetEnumConstant<T>(int value) where T : Enum {
+            return EnumCache<T>.Get(value);
+        }
+
+        public static Expression GetDefaultExpression(Type type) {
+            s_DefaultExpressions = s_DefaultExpressions ?? new Dictionary<Type, Expression>();
+            if (s_DefaultExpressions.TryGetValue(type, out Expression retn)) {
+                return retn;
+            }
+
+            retn = Expression.Default(type);
+            s_DefaultExpressions[type] = retn;
+            return retn;
+        }
+
+        public static Expression GetIntConstant(int value) {
+            s_IntExpression = s_IntExpression ?? new Dictionary<int, Expression>();
+            if (s_IntExpression.TryGetValue(value, out Expression retn)) {
+                return retn;
+            }
+
+            retn = Expression.Constant(value);
+            s_IntExpression[value] = retn;
+            return retn;
+        }
+
+        public static Expression GetStringConstant(string value) {
+            s_StringExpression = s_StringExpression ?? new Dictionary<string, Expression>();
+            if (s_StringExpression.TryGetValue(value, out Expression retn)) {
+                return retn;
+            }
+
+            retn = Expression.Constant(value);
+            s_StringExpression[value] = retn;
+            return retn;
+        }
 
         // used in expressions to output comments in compiled functions
         public static void Comment(string comment) { }
-        
+
         public static void InlineComment(string comment) { }
 
         // used in expressions to output comments in compiled functions
@@ -20,27 +88,27 @@ namespace UIForia.Compilers {
         // used in expressions to output comments in compiled functions
         public static void CommentNewLineAfter(string comment) { }
 
-        // public static bool IsConstant(Expression n) {
-        //     while (true) {
-        //         switch (n) {
-        //             case DefaultExpression _:
-        //             case ConstantExpression _:
-        //                 return true;
-        //
-        //             case ConditionalExpression conditionalExpression:
-        //                 return IsConstant(conditionalExpression.Test) && IsConstant(conditionalExpression.IfTrue) && IsConstant(conditionalExpression.IfFalse);
-        //
-        //             case UnaryExpression unary:
-        //                 n = unary.Operand;
-        //                 continue;
-        //
-        //             case BinaryExpression binaryExpression:
-        //                 return IsConstant(binaryExpression.Left) && IsConstant(binaryExpression.Right);
-        //         }
-        //
-        //         return false;
-        //     }
-        // }
+        public static bool IsConstant(Expression n) {
+            while (true) {
+                switch (n) {
+                    case DefaultExpression _:
+                    case ConstantExpression _:
+                        return true;
+
+                    case ConditionalExpression conditionalExpression:
+                        return IsConstant(conditionalExpression.Test) && IsConstant(conditionalExpression.IfTrue) && IsConstant(conditionalExpression.IfFalse);
+
+                    case UnaryExpression unary:
+                        n = unary.Operand;
+                        continue;
+
+                    case BinaryExpression binaryExpression:
+                        return IsConstant(binaryExpression.Left) && IsConstant(binaryExpression.Right);
+                }
+
+                return false;
+            }
+        }
 
         internal struct ParameterConversion {
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using SpaceGameDemo;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Graphics;
@@ -58,6 +59,8 @@ namespace UIForia {
 
         public void Start() {
 
+            UIForiaRuntime.CreateGameApplication("GameApp", typeof(SpaceGameRoot));
+            return;
 #if UNITY_EDITOR
                 QualitySettings.vSyncCount = 0; // VSync must be disabled for target frame rate to work
                 UnityEngine.Application.targetFrameRate = 60;

@@ -81,6 +81,7 @@ namespace UIForia {
 
         private StructList<TextContent> textContents;
         private StructList<TextExpression> textExpressions;
+        private StructList<CharSpan> dedupList;
 
         private StructList<TemplateASTRoot> rootNodes;
         private StructList<TemplateASTNode> templateNodes;
@@ -101,6 +102,7 @@ namespace UIForia {
             this.usings = new StructList<UsingDeclaration>(4);
             this.textContents = new StructList<TextContent>();
             this.slots = new StructList<SlotAST>();
+            this.dedupList = new StructList<CharSpan>(32);
         }
 
         ~TemplateFileShellBuilder() {
@@ -118,7 +120,8 @@ namespace UIForia {
             shell.slots = slots.ToArray();
             shell.charBuffer = charBuffer.ToArray();
             shell.styles = styles.ToArray();
-
+            
+            dedupList.size = 0;
             charBuffer.size = 0;
             styles.size = 0;
             textContents.size = 0;
@@ -244,11 +247,22 @@ namespace UIForia {
 
         }
 
+        
         public unsafe RangeInt AddString(in CharSpan span, bool attemptDeduplicate = false) {
 
-            // todo -- we could de-dup this if we wanted to, exercise for later I think
 
             if (span.HasValue) {
+
+                
+                // todo -- we could de-dup this if we wanted to, exercise for later I think
+                // if (attemptDeduplicate) {
+                //     for (int i = 0; i < dedupList.size; i++) {
+                //         if (dedupList.array[i].Equals(span)) {
+                //             return new RangeInt(dedupList.array[i].rangeStart, (dedupList.array[i].rangeEnd - dedupList.array[i].rangeStart));
+                //         }
+                //     }
+                // }
+                
                 int length = span.Length;
 
                 charBuffer.EnsureAdditionalCapacity(length);

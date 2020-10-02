@@ -15,7 +15,6 @@ namespace UIForia.NewStyleParsing {
         }
 
         public void Write(string value) {
-
             int length = 0;
             if (value != null) {
                 length = value.Length;
@@ -24,7 +23,7 @@ namespace UIForia.NewStyleParsing {
             if (array == null) {
                 array = new byte[Mathf.Max(512, length * 2)];
             }
-            
+
             int advance = ptr + sizeof(int) + (length * 2);
             if (advance > array.Length) {
                 int required = advance;
@@ -50,15 +49,13 @@ namespace UIForia.NewStyleParsing {
 
                 ptr += value.Length * 2;
             }
-
         }
 
         public void Write(int value) {
-            
             if (array == null) {
                 array = new byte[512];
             }
-            
+
             if (ptr + sizeof(int) > array.Length) {
                 Array.Resize(ref array, array.Length * 2);
             }
@@ -71,11 +68,32 @@ namespace UIForia.NewStyleParsing {
             ptr += sizeof(int);
         }
 
+        public void Write(long value) {
+            if (array == null) {
+                array = new byte[512];
+            }
+
+            if (ptr + sizeof(long) > array.Length) {
+                Array.Resize(ref array, array.Length * 2);
+            }
+
+            fixed (byte* p = array) {
+                byte* offset = p + ptr;
+                *((long*) offset) = value;
+            }
+
+            ptr += sizeof(long);
+        }
+
+        public void Write(DateTime value) {
+            Write(value.Ticks);
+        }
+
         public void Write(ushort value) {
             if (array == null) {
                 array = new byte[512];
             }
-            
+
             if (ptr + sizeof(ushort) > array.Length) {
                 Array.Resize(ref array, array.Length * 2);
             }
@@ -113,6 +131,7 @@ namespace UIForia.NewStyleParsing {
             if (array == null) {
                 array = new byte[sizeof(T) * count * 2];
             }
+
             if (ptr + (sizeof(T) * count) > array.Length) {
                 int advance = ptr + (sizeof(T) * count);
                 int doubled = array.Length * 2;
@@ -139,6 +158,20 @@ namespace UIForia.NewStyleParsing {
                 UnsafeUtility.MemCpy(output, items, sizeof(T) * outputArray.Length);
                 ptr += sizeof(T) * outputArray.Length;
             }
+        }
+
+        public void Read(out DateTime target) {
+            Read(out long longVal);
+            target = new DateTime(longVal);
+        }
+
+        public void Read(out long target) {
+            fixed (byte* p = array) {
+                long* i = (long*) (p + ptr);
+                target = *i;
+            }
+
+            ptr += sizeof(int);
         }
 
         public void Read(out int target) {
@@ -184,7 +217,6 @@ namespace UIForia.NewStyleParsing {
                     ptr += sizeof(char) * length;
                 }
             }
-
         }
 
     }

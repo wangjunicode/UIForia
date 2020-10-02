@@ -26,7 +26,7 @@ namespace UIForia {
             templateSettings.resourceManager = new ResourceManager();
             // Stopwatch stopwatch = new Stopwatch();
             // stopwatch.Start();
-            CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
+            CompiledTemplateData compiledTemplateData = default; //TemplateCompiler.CompileTemplates(type, templateSettings);
 
             // stopwatch.Stop();
             // UnityEngine.Debug.Log("Compiled Templates in " + stopwatch.Elapsed.Milliseconds + "ms");
@@ -356,7 +356,7 @@ namespace UIForia {
                     dynamicElementTypes.Add(kvp.Value);
                 }
 
-                if (kvp.Key.IsAbstract || kvp.Value.references == 0 || kvp.Value.id < 0) {
+                if (kvp.Key.IsAbstract ||  kvp.Value.id < 0) {
                     continue;
                 }
 

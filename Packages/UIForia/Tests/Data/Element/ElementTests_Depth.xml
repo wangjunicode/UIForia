@@ -1,5 +1,6 @@
 <UITemplate>
     <Contents>
+
         <Group attr:id="g1">
             <Group attr:id="g1_child1"/>
         </Group>

@@ -19,7 +19,7 @@ namespace UIForia.Compilers {
 
         public static CompiledTemplateData LoadRuntimeTemplates(Type type, TemplateSettings templateSettings) {
 
-            CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
+            CompiledTemplateData compiledTemplateData = default; //TemplateCompiler.CompileTemplates(type, templateSettings);
 
             // Stopwatch stopwatch = Stopwatch.StartNew();
 

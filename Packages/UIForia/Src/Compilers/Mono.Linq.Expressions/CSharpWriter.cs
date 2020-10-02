@@ -28,6 +28,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -84,7 +85,7 @@ namespace Mono.Linq.Expressions {
             if (!string.IsNullOrEmpty(parameter.Name))
                 return parameter.Name;
 
-            var name = GeneratedNameFor(parameter);
+            string name = GeneratedNameFor(parameter);
             if (name != null)
                 return name;
 
@@ -108,6 +109,10 @@ namespace Mono.Linq.Expressions {
                 VisitBlockExpressionBody(node);
         }
 
+        protected void VisitTemplateBody(LambdaExpression node) {
+            VisitBlockExpression((BlockExpression) node.Body);
+        }
+
         void VisitBlockExpressionBody(LambdaExpression node) {
             VisitBlockExpression((BlockExpression) node.Body);
         }
@@ -123,7 +128,7 @@ namespace Mono.Linq.Expressions {
                     return true;
 
                 default:
-                    var custom = expression as CustomExpression;
+                    CustomExpression custom = expression as CustomExpression;
                     if (custom != null)
                         return IsStatement(custom);
 
@@ -214,7 +219,7 @@ namespace Mono.Linq.Expressions {
         void VisitGenericTypeDefinition(Type type) {
             WriteReference(CleanGenericName(type), type);
             WriteToken("<");
-            var arity = type.GetGenericArguments().Length;
+            int arity = type.GetGenericArguments().Length;
             for (int i = 1; i < arity; i++)
                 WriteToken(",");
             WriteToken(">");
@@ -263,14 +268,15 @@ namespace Mono.Linq.Expressions {
                             WriteToken("<");
                             for (int c = 0; c < genericArguments.Length; c++) {
                                 VisitType(genericArguments[c]);
-                        
+
                                 if (c != genericArguments.Length - 1) {
                                     WriteToken(", ");
                                 }
                             }
-                        
+
                             WriteToken(">");
                         }
+
                         return;
                     }
 
@@ -295,8 +301,8 @@ namespace Mono.Linq.Expressions {
         }
 
         static string CleanGenericName(Type type) {
-            var name = GetPrintableTypeName(type);
-            var position = name.LastIndexOf("`");
+            string name = GetPrintableTypeName(type);
+            int position = name.LastIndexOf("`");
             if (position == -1)
                 return name;
 
@@ -404,7 +410,7 @@ namespace Mono.Linq.Expressions {
 
         void VisitBlockExpressions(BlockExpression node) {
             for (int i = 0; i < node.Expressions.Count; i++) {
-                var expression = node.Expressions[i];
+                Expression expression = node.Expressions[i];
 
                 if (IsActualStatement(expression) && RequiresExplicitReturn(node, i, node.Type != typeof(void))) {
                     WriteKeyword("return");
@@ -439,7 +445,7 @@ namespace Mono.Linq.Expressions {
         }
 
         void VisitBlockVariables(BlockExpression node) {
-            foreach (var variable in node.Variables) {
+            foreach (ParameterExpression variable in node.Variables) {
                 VisitType(variable.Type);
                 WriteSpace();
                 WriteIdentifier(NameFor(variable), variable);
@@ -455,11 +461,11 @@ namespace Mono.Linq.Expressions {
             if (!return_last)
                 return false;
 
-            var last_index = node.Expressions.Count - 1;
+            int last_index = node.Expressions.Count - 1;
             if (index != last_index)
                 return false;
 
-            var last = node.Expressions[last_index];
+            Expression last = node.Expressions[last_index];
             if (last.Is(ExpressionType.Goto) && ((GotoExpression) last).Kind == GotoExpressionKind.Return)
                 return false;
 
@@ -506,7 +512,7 @@ namespace Mono.Linq.Expressions {
         }
 
         void VisitPower(BinaryExpression node) {
-            var pow = Expression.Call(typeof(Math).GetMethod("Pow"), node.Left, node.Right);
+            MethodCallExpression pow = Expression.Call(typeof(Math).GetMethod("Pow"), node.Left, node.Right);
 
             if (node.Is(ExpressionType.Power))
                 Visit(pow);
@@ -1060,11 +1066,13 @@ namespace Mono.Linq.Expressions {
         }
 
         static string GetEnumLiteral(object value) {
-            var type = value.GetType();
+            Type type = value.GetType();
             if (Enum.IsDefined(type, value))
                 return GetPrintableTypeName(type) + "." + Enum.GetName(type, value);
-
-            throw new NotSupportedException();
+            else {
+                string v = ((int) value).ToString();
+                return "((" + GetPrintableTypeName(type) + ")" + v + ")";
+            }
         }
 
         protected override Expression VisitLabel(LabelExpression node) {
@@ -1129,7 +1137,7 @@ namespace Mono.Linq.Expressions {
                 lastWasComment = true;
                 return null;
             }
-            
+
             if (method == s_InlineComment) {
                 ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
                 string comment = commentValue.Value as string;
@@ -1138,7 +1146,7 @@ namespace Mono.Linq.Expressions {
                 WriteToken("// " + comment);
                 return null;
             }
-            
+
             if (method == s_CommentNewLineBefore) {
                 ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
                 string comment = commentValue.Value as string;
@@ -1147,7 +1155,7 @@ namespace Mono.Linq.Expressions {
                 lastWasComment = true;
                 return null;
             }
-            
+
             if (method == s_CommentNewLineAfter) {
                 ConstantExpression commentValue = node.Arguments[0] as ConstantExpression;
                 string comment = commentValue.Value as string;
@@ -1156,7 +1164,7 @@ namespace Mono.Linq.Expressions {
                 lastWasComment = true;
                 return null;
             }
-            
+
             if (method == s_SubscribeEvent) {
                 // when generating code we can use the event subscription syntax (evt += xxx) 
                 // however when using Linq we don't have access to this and must use reflection
@@ -1164,7 +1172,7 @@ namespace Mono.Linq.Expressions {
                 string targetName = ((ParameterExpression) node.Arguments[0]).Name;
                 string eventName = ((ConstantExpression) node.Arguments[1]).Value.ToString();
                 string handlerName = null;
-                
+
                 if (node.Arguments[2] is ParameterExpression parameterExpression) {
                     handlerName = parameterExpression.Name;
                 }
@@ -1206,23 +1214,28 @@ namespace Mono.Linq.Expressions {
                 return node;
             }
 
-            ParameterInfo[] parameterInfos = method.GetParameters();
+            ParameterInfo[] parameterInfos = method.GetParametersCached();
 
             WriteToken("(");
 
-            for (int i = 0; i < node.Arguments.Count; i++) {
-                if (i > 0) {
-                    WriteToken(",");
-                    WriteSpace();
-                }
+            try {
+                for (int i = 0; i < node.Arguments.Count; i++) {
+                    if (i > 0) {
+                        WriteToken(",");
+                        WriteSpace();
+                    }
 
-                if (parameterInfos[i].IsOut) {
-                    WriteToken("out ");
-                    Visit(node.Arguments[i]);
+                    if (parameterInfos[i].IsOut) {
+                        WriteToken("out ");
+                        Visit(node.Arguments[i]);
+                    }
+                    else {
+                        Visit(node.Arguments[i]);
+                    }
                 }
-                else {
-                    Visit(node.Arguments[i]);
-                }
+            }
+            catch (Exception e) {
+                Debugger.Break();
             }
 
             WriteToken(")");
@@ -1346,7 +1359,7 @@ namespace Mono.Linq.Expressions {
             Indent();
 
             for (int i = 0; i < bindings.Count; i++) {
-                var binding = bindings[i];
+                MemberBinding binding = bindings[i];
 
                 VisitMemberBinding(binding);
 
@@ -1438,7 +1451,7 @@ namespace Mono.Linq.Expressions {
             WriteLine();
             VisitAsBlock(node.Body);
 
-            foreach (var handler in node.Handlers)
+            foreach (CatchBlock handler in node.Handlers)
                 VisitCatchBlock(handler);
 
             if (node.Fault != null) {
@@ -1513,7 +1526,7 @@ namespace Mono.Linq.Expressions {
             WriteLine();
 
             VisitBlock(() => {
-                foreach (var @case in node.Cases)
+                foreach (SwitchCase @case in node.Cases)
                     VisitSwitchCase(@case);
 
                 if (node.DefaultBody != null) {
@@ -1531,7 +1544,7 @@ namespace Mono.Linq.Expressions {
         }
 
         protected override SwitchCase VisitSwitchCase(SwitchCase node) {
-            foreach (var value in node.TestValues) {
+            foreach (Expression value in node.TestValues) {
                 WriteKeyword("case");
                 WriteSpace();
                 Visit(value);

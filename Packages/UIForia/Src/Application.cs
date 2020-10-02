@@ -532,7 +532,6 @@ namespace UIForia {
                 // only continue if calling enable didn't re-disable the element
                 if ((child.flags & UIElementFlags.SelfAndAncestorEnabled) == UIElementFlags.SelfAndAncestorEnabled) {
                     child.enableStateChangedFrameId = frameId;
-                    child.tagNameIndex.Add(child);
                     UIElement[] children = child.children.array;
                     int childCount = child.children.size;
                     if (stack.size + childCount >= stack.array.Length) {
@@ -660,11 +659,7 @@ namespace UIForia {
             return null;
         }
 
-        private Dictionary<string, int> attrNameToId = new Dictionary<string, int>();
-
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) {
-            if (attrNameToId.TryGetValue(attributeName, out int id)) { }
-
             for (int i = 0; i < systems.Count; i++) {
                 systems[i].OnAttributeSet(element, attributeName, currentValue, previousValue);
             }
@@ -734,6 +729,7 @@ namespace UIForia {
                     }
 
                     try {
+                        
                         onElementRegistered?.Invoke(current);
                         current.OnCreate();
                     }
@@ -894,28 +890,10 @@ namespace UIForia {
             return retn;
         }
 
-        public struct TagNameEntry {
-
-            public int depth;
-            public UIElement element;
-
-        }
-
-        internal Dictionary<int, TagNameIndex> tagNameIndexMap = new Dictionary<int, TagNameIndex>();
-
         /// Returns the shell of a UI Element, space is allocated for children but no child data is associated yet, only a parent, view, and depth
-        public UIElement CreateElementFromPool(int typeId, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
+        public UIElement CreateElementFromPool( UIElement element, UIElement parent, int childCount, int attributeCount, int originTemplateId) {
             // children get assigned in the template function but we need to setup the list here
-            ConstructedElement retn = templateData.ConstructElement(typeId);
-            UIElement element = retn.element;
-
-            if (!tagNameIndexMap.TryGetValue(retn.tagNameId, out TagNameIndex index)) {
-                index = new TagNameIndex();
-                tagNameIndexMap[retn.tagNameId] = index;
-            }
-
-            element.tagNameIndex = index;
-
+          
             element.application = this;
             element.templateMetaData = templateData.templateMetaData[originTemplateId];
             element.id = NextElementId;
@@ -941,8 +919,28 @@ namespace UIForia {
             return templateData.templateMetaData[metaDataId];
         }
 
-        public UIElement CreateElementFromPoolWithType(int typeId, UIElement parent, int childCount, int attrCount, int originTemplateId) {
-            return CreateElementFromPool(typeId, parent, childCount, attrCount, originTemplateId);
+        public UIElement CreateElementFromPoolWithType(UIElement instance, UIElement parent, int childCount, int attrCount, int originTemplateId) {
+            // children get assigned in the template function but we need to setup the list here
+          
+            instance.application = this;
+            instance.templateMetaData = templateData.templateMetaData[originTemplateId];
+            instance.id = NextElementId;
+            instance.style = new UIStyleSet(instance);
+            instance.layoutResult = new LayoutResult(instance);
+            instance.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
+
+            instance.children = LightList<UIElement>.GetMinSize(childCount);
+
+            if (attrCount > 0) {
+                instance.attributes = new StructList<ElementAttribute>(attrCount);
+                instance.attributes.size = attrCount;
+            }
+
+            instance.parent = parent;
+
+            parent?.children.Add(instance);
+
+            return instance;
         }
 
         public static int ResolveSlotId(string slotName, StructList<SlotUsage> slotList, int defaultId, out UIElement contextRoot) {

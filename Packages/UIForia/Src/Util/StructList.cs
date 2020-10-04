@@ -34,7 +34,7 @@ namespace UIForia.Util {
     }
 
     [DebuggerDisplay("StructList Count = {" + nameof(size) + "} | Capacity = {array.Length}")]
-    [DebuggerTypeProxy(typeof(StructListDebugView<>))]
+    // [DebuggerTypeProxy(typeof(StructListDebugView<>))]
     public class StructList<T> where T : struct {
 
         public T[] array;

@@ -177,7 +177,7 @@ namespace UIForia {
         }
 
         // todo -- template origin info / id
-        public void InitializeHydratedElement(int attrCount, int childCount) {
+        public void InitializeHydratedElement(int attrCount) {
             element.flags |= UIElementFlags.TemplateRoot;
             InitializeElement(attrCount);
 

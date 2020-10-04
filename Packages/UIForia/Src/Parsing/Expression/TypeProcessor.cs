@@ -33,7 +33,6 @@ namespace UIForia.Parsing {
 
         private static int currentTypeId;
 
-
         internal static ProcessedType GetProcessedType(Type type) {
             typeMap.TryGetValue(type, out ProcessedType retn);
             return retn;
@@ -42,7 +41,7 @@ namespace UIForia.Parsing {
         public static LightList<ProcessedType> GetTemplateTypes() {
             return templateTypes;
         }
-        
+
         // Namespace resolution
         //    if there is only one element with a name then no namespace is needed
         //    if there are multiple elements with a name
@@ -110,10 +109,11 @@ namespace UIForia.Parsing {
 
             return null;
         }
-        
+
         private static ProcessedType s_SlotDefine;
         private static ProcessedType s_SlotForward;
         private static ProcessedType s_SlotOverride;
+        private static ProcessedType s_TextElement;
         private static ProcessedType s_MetaElement;
 
         public static ProcessedType GetSlotDefine() {
@@ -154,6 +154,16 @@ namespace UIForia.Parsing {
             typeMap.TryGetValue(typeof(UISlotForward), out s_MetaElement);
 
             return s_MetaElement;
+        }
+
+        public static ProcessedType GetTextElement() {
+            if (s_TextElement != null) {
+                return s_TextElement;
+            }
+
+            typeMap.TryGetValue(typeof(UITextElement), out s_TextElement);
+
+            return s_TextElement;
         }
 
     }

@@ -93,24 +93,16 @@ namespace UIForia {
                 throw new Exception("UIForiaSettings are missing. Use the UIForia/Create UIForia Settings to create it");
             }
         }
-
-        public UIForiaSettings settings => Settings;
-
-        public TemplateMetaData[] zz_Internal_TemplateMetaData => templateData.templateMetaData;
-
+        
         protected TemplateSettings templateSettings;
-        private bool isPreCompiled;
 
         protected Application(string applicationName) {
-            this.isPreCompiled = isPreCompiled;
-            this.templateSettings = templateSettings;
             this.id = applicationName;
             this.resourceManager = new ResourceManager();
             this.viewRootIds = new DataList<ElementId>.Shared(8, Allocator.Persistent);
         }
         
         protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
-            this.isPreCompiled = isPreCompiled;
             this.templateSettings = templateSettings;
             this.onElementRegistered = onElementRegistered;
             this.id = templateSettings.applicationName;
@@ -145,10 +137,6 @@ namespace UIForia {
             inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
         }
 
-        public void Compile() {
-            
-        }
-
         internal void Initialize() {
 
             systems = new List<ISystem>();
@@ -167,12 +155,12 @@ namespace UIForia {
             m_BeforeUpdateTaskSystem = new UITaskSystem();
             m_AfterUpdateTaskSystem = new UITaskSystem();
 
-            if (isPreCompiled) {
-                templateData = TemplateLoader.LoadPrecompiledTemplates(templateSettings);
-            }
-            else {
-                templateData = TemplateLoader.LoadRuntimeTemplates(templateSettings.rootType, templateSettings);
-            }
+            // if (isPreCompiled) {
+            //     templateData = TemplateLoader.LoadPrecompiledTemplates(templateSettings);
+            // }
+            // else {
+            //     templateData = TemplateLoader.LoadRuntimeTemplates(templateSettings.rootType, templateSettings);
+            // }
 
             viewRootIds.size = 0;
 
@@ -285,14 +273,8 @@ namespace UIForia {
             return view;
         }
 
-        public void Refresh() {
-            if (isPreCompiled) {
-                Debug.Log("Cannot refresh application because it is using precompiled templates");
-                return;
-            }
 
-            Stopwatch stopwatch = Stopwatch.StartNew();
-
+        internal void Reset() {
             for (int i = views.Count - 1; i >= 0; i--) {
                 views[i].Destroy();
             }
@@ -311,6 +293,18 @@ namespace UIForia {
 
             m_AfterUpdateTaskSystem.OnDestroy();
             m_BeforeUpdateTaskSystem.OnDestroy();
+        }
+
+        internal void Refresh() {
+            // if (isPreCompiled) {
+            //     Debug.Log("Cannot refresh application because it is using precompiled templates");
+            //     return;
+            // }
+
+            Stopwatch stopwatch = Stopwatch.StartNew();
+
+            Reset();
+           
 
             Initialize();
 
@@ -320,7 +314,12 @@ namespace UIForia {
             Debug.Log("Refreshed " + id + " in " + stopwatch.Elapsed.TotalSeconds.ToString("F2") + " seconds");
         }
 
-        public void Destroy() {
+        internal void Destroy() {
+            
+            if (!IsValid) {
+                return;
+            }
+            
             Applications.Remove(this);
             templateData?.Destroy();
 
@@ -410,6 +409,7 @@ namespace UIForia {
         }
 
         public void Update() {
+            if (!IsValid) return;
             frameId++;
 
             textSystem.frameId = frameId;
@@ -991,6 +991,7 @@ namespace UIForia {
         }
 
         public void Render(float surfaceWidth, float surfaceHeight, CommandBuffer commandBuffer) {
+            if (!IsValid) return;
             renderSystem.Render(surfaceWidth, surfaceHeight, commandBuffer);
         }
 

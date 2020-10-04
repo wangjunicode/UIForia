@@ -2,12 +2,26 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq.Expressions;
+using UIForia.Elements;
 using UIForia.Extensions;
 using UIForia.Parsing;
+using UIForia.Systems;
 using UIForia.Util;
+using UIForia.Util.Unsafe;
 using Debug = UnityEngine.Debug;
 
 namespace UIForia.Compilers {
+
+    internal enum CompileTarget {
+
+        EntryPoint,
+        HydratePoint,
+        Binding,
+        Input,
+        Element
+
+    }
 
     internal class Compilation {
 
@@ -15,7 +29,7 @@ namespace UIForia.Compilers {
         public CompilationType compilationType;
         public ProcessedType entryType;
         public TemplateParseCache parseCache;
-        
+
         public Dictionary<ProcessedType, UIModule> moduleMap;
         public Dictionary<ProcessedType, TemplateFileShell> templateMap;
 
@@ -40,17 +54,121 @@ namespace UIForia.Compilers {
 
         }
 
-        public void Compile() {
-            TemplateCompiler2 templateCompiler = new TemplateCompiler2(this);
+        public struct PendingCompilation {
 
-            templateCompiler.onTemplateCompiled += set => {
-                Debug.Log(set.processedType.GetType() + " compiled");
-                // todo -- consumer threads should pick up the results here
+            public int templateId;
+            public int targetIndex;
+            public CompileTarget type;
+            public LambdaExpression expression;
+            public Delegate result;
+
+        }
+
+        private LightList<PendingCompilation> pendingCompilations;
+        private LightList<TemplateData> compiledTemplates;
+        private LightList<TemplateExpressionSet> expressionSets;
+
+        private object locker = new object();
+
+        public CompilationResult CompileDynamic() {
+
+            TemplateCompiler2 templateCompiler = new TemplateCompiler2(this);
+            compiledTemplates = new LightList<TemplateData>(128);
+            expressionSets = new LightList<TemplateExpressionSet>(128);
+
+            templateCompiler.onTemplateCompiled += (expressionSet) => {
+                TemplateData templateData = new TemplateData() {
+                    bindings = new Action<LinqBindingNode>[expressionSet.bindings.Length],
+                    elements = new Action<TemplateSystem>[expressionSet.elementTemplates.Length],
+                    inputEventHandlers = new Action<LinqBindingNode, InputEventHolder>[expressionSet.inputEventHandlers.Length],
+                    type = expressionSet.processedType.rawType,
+                    tagName = expressionSet.processedType.tagName,
+                    templateId = expressionSet.processedType.templateId
+                };
+                expressionSets.Add(expressionSet);
+                compiledTemplates.Add(templateData);
             };
-            
-            // need to go from type and resolve module, template shell, template
+
+            pendingCompilations = new LightList<PendingCompilation>(128);
+
+            templateCompiler.onCompilationReady += (pending) => {
+
+                lock (locker) {
+                    pendingCompilations.Add(pending);
+                }
+
+            };
+
             templateCompiler.CompileTemplate(entryType);
-            
+
+            // todo -- convert to threaded compile
+            // todo -- fallback to FastCompile but find a way to support it if using .netstandard 2.0 with unity since it doesn't have ILGenerator or DynamicMethod, maybe a dll will work?
+
+            for (int i = 0; i < pendingCompilations.size; i++) {
+                ref PendingCompilation pending = ref pendingCompilations.array[i];
+
+                try {
+                    pending.result = pending.expression.Compile();
+                }
+                catch (Exception e) {
+                    Debug.LogException(e);
+                    pending.result = null;
+                }
+
+            }
+
+            // if no errors!
+            MapDynamicCompiledResults();
+
+            // if precompiled or generating
+            PrintTemplates();
+            return new CompilationResult();
+
+        }
+
+        private void PrintTemplates() {
+            IndentedStringBuilder builder = new IndentedStringBuilder(4096);
+
+            for (int i = 0; i < expressionSets.size; i++) {
+                builder.Clear();
+                expressionSets.array[i].ToCSharpCode(builder);
+                Debug.Log(builder);
+            }
+
+        }
+
+        private void MapDynamicCompiledResults() {
+
+            for (int i = 0; i < pendingCompilations.size; i++) {
+                ref PendingCompilation pending = ref pendingCompilations.array[i];
+                TemplateData template = compiledTemplates.array[pending.templateId];
+                switch (pending.type) {
+
+                    case CompileTarget.EntryPoint:
+                        template.entry = (Func<TemplateSystem, UIElement>) pending.result;
+                        break;
+
+                    case CompileTarget.HydratePoint:
+                        template.hydrate = (Action<TemplateSystem>) pending.result;
+                        break;
+
+                    case CompileTarget.Binding:
+                        template.bindings[pending.targetIndex] = (Action<LinqBindingNode>) pending.result;
+                        break;
+
+                    case CompileTarget.Input:
+                        template.inputEventHandlers[pending.targetIndex] = (Action<LinqBindingNode, InputEventHolder>) pending.result;
+                        break;
+
+                    case CompileTarget.Element:
+                        template.elements[pending.targetIndex] = (Action<TemplateSystem>) pending.result;
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
         }
 
         public void ResolveTagNames() {
@@ -126,7 +244,7 @@ namespace UIForia.Compilers {
             StructStack<int> stack = StructStack<int>.Get();
 
             templateMap[type] = shell;
-            
+
             ref TemplateASTNode rootNode = ref shell.templateNodes[template.templateIndex];
 
             int ptr = shell.templateNodes[template.templateIndex].firstChildIndex;
@@ -140,73 +258,87 @@ namespace UIForia.Compilers {
 
                 TemplateASTNode node = shell.templateNodes[idx];
 
-                if ((node.templateNodeType & TemplateNodeType.Slot) != 0) {
-                    switch (node.templateNodeType) {
-                        case TemplateNodeType.SlotDefine:
-                            MapTypeToTemplateNode(shell, idx, TypeProcessor.GetSlotDefine());
-                            break;
-                        case TemplateNodeType.SlotForward:
-                            MapTypeToTemplateNode(shell, idx, TypeProcessor.GetSlotForward());
-                            break;
-                        case TemplateNodeType.SlotOverride:
-                            MapTypeToTemplateNode(shell, idx, TypeProcessor.GetSlotOverride());
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
-                }
-                else if (node.templateNodeType == TemplateNodeType.Meta) {
-                    MapTypeToTemplateNode(shell, idx, TypeProcessor.GetMetaElement());
-                }
-                else {
-                    CharSpan moduleName = shell.GetCharSpan(node.moduleNameRange);
-                    CharSpan tagName = shell.GetCharSpan(node.tagNameRange);
+                // if ((node.templateNodeType & TemplateNodeType.Slot) != 0) {
+                switch (node.templateNodeType) {
+                    case TemplateNodeType.SlotDefine:
+                        MapTypeToTemplateNode(shell, idx, TypeProcessor.GetSlotDefine());
+                        break;
 
-                    // todo -- need to handle parsing generic tag syntax
-                    // todo -- avoid toString with string trick
-                    string tagNameString = tagName.ToString();
+                    case TemplateNodeType.SlotForward:
+                        MapTypeToTemplateNode(shell, idx, TypeProcessor.GetSlotForward());
+                        break;
 
-                    if (moduleName.HasValue) {
-                        UIModule searchModule = ResolveModule(moduleUsages, module, moduleName);
+                    case TemplateNodeType.SlotOverride:
+                        MapTypeToTemplateNode(shell, idx, TypeProcessor.GetSlotOverride());
+                        break;
 
-                        if (searchModule == null) {
-                            // keep going optimistically but dont start compiling
-                            diagnostics.LogError($"Unable to resolve tag <{moduleName}:{tagName}> because module {moduleName} could not be resolved", shell.filePath, node.lineNumber, node.columnNumber);
-                        }
-                        else if (searchModule.tagNameMap.TryGetValue(tagNameString, out ProcessedType processedType)) {
-                            MapTypeToTemplateNode(shell, idx, processedType);
+                    case TemplateNodeType.Text:
+                        MapTypeToTemplateNode(shell, idx, TypeProcessor.GetTextElement());
+                        break;
+
+                    case TemplateNodeType.Meta:
+                        MapTypeToTemplateNode(shell, idx, TypeProcessor.GetMetaElement());
+                        break;
+
+                    default: {
+                        // todo -- need to handle parsing generic tag syntax
+                        // todo -- avoid toString with string trick
+                        string tagName = shell.GetString(node.tagNameRange);
+                        string moduleName = shell.GetString(node.moduleNameRange);
+                        
+                        if (!string.IsNullOrEmpty(moduleName)) {
+                            UIModule searchModule = ResolveModule(moduleUsages, module, moduleName);
+
+                            if (searchModule == null) {
+                                // keep going optimistically but dont start compiling
+                                diagnostics.LogError($"Unable to resolve tag <{moduleName}:{tagName}> because module {moduleName} could not be resolved", shell.filePath, node.lineNumber, node.columnNumber);
+                            }
+                            else if (searchModule.tagNameMap.TryGetValue(tagName, out ProcessedType processedType)) {
+                                MapTypeToTemplateNode(shell, idx, processedType);
+                            }
+                            else {
+                                // keep going optimistically but dont start compiling
+                                diagnostics.LogError($"Unable to resolve tag <{moduleName}:{tagName}> because module `{moduleName}` did not declare a tag `{tagName}`", shell.filePath, node.lineNumber, node.columnNumber);
+                            }
                         }
                         else {
-                            // keep going optimistically but dont start compiling
-                            diagnostics.LogError($"Unable to resolve tag <{moduleName}:{tagName}> because module `{moduleName}` did not declare a tag `{tagName}`", shell.filePath, node.lineNumber, node.columnNumber);
+                            // need to know which modules to look in if no module name was provided
+                            ProcessedType processedType = ResolveTagName(module, tagName);
+                            if (processedType == null) {
+                                diagnostics.LogError($"Unable to resolve tag <{tagName}> because module `{module.name}` did not declare a tag `{tagName}` and none of its referenced implicit modules did either", shell.filePath, node.lineNumber, node.columnNumber);
+                            }
+                            else {
+                                MapTypeToTemplateNode(shell, idx, processedType);
+                            }
                         }
-                    }
-                    else {
-                        // need to know which modules to look in if no module name was provided
-                        ProcessedType processedType = ResolveTagName(module, tagNameString);
-                        if (processedType == null) {
-                            diagnostics.LogError($"Unable to resolve tag <{tagName}> because module `{module.name}` did not declare a tag `{tagName}` and none of its referenced implicit modules did either", shell.filePath, node.lineNumber, node.columnNumber);
-                        }
-                        else {
-                            MapTypeToTemplateNode(shell, idx, processedType);
-                        }
+
+                        break;
                     }
                 }
+
+                // }
+                // else if (node.templateNodeType == TemplateNodeType.Meta) {
+                // MapTypeToTemplateNode(shell, idx, TypeProcessor.GetMetaElement());
+                // }
+                // else {
+
+                // }
 
                 int childNodeId = node.firstChildIndex;
                 for (int i = 0; i < node.childCount; i++) {
                     stack.Push(childNodeId);
                     childNodeId = shell.templateNodes[childNodeId].nextSiblingIndex;
                 }
+
             }
 
             StructStack<int>.Release(ref stack);
         }
 
         private void MapTypeToTemplateNode(TemplateFileShell shell, int idx, ProcessedType processedType) {
-            
+
             shell.typeMappings[idx] = processedType;
-            
+
             if (processedType.DeclaresTemplate) {
                 if (resolvedTypeSet.Contains(processedType)) {
                     return;
@@ -227,7 +359,7 @@ namespace UIForia.Compilers {
             }
         }
 
-        private UIModule ResolveModule(StructList<ModuleUsage> moduleUsages, UIModule source, in CharSpan moduleName) {
+        private UIModule ResolveModule(StructList<ModuleUsage> moduleUsages, UIModule source, string moduleName) {
             for (int i = 0; i < moduleUsages.size; i++) {
                 if (moduleUsages.array[i].name == moduleName) {
                     return moduleUsages.array[i].module;
@@ -239,7 +371,7 @@ namespace UIForia.Compilers {
             foreach (KeyValuePair<ProcessedType, UIModule> kvp in moduleMap) {
                 if (kvp.Value.name == moduleName) {
                     moduleUsages.Add(new ModuleUsage() {
-                        name = moduleName.ToString(),
+                        name = moduleName,
                         module = kvp.Value
                     });
                     return kvp.Value;

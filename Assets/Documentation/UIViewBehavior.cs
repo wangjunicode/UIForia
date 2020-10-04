@@ -59,11 +59,12 @@ namespace UIForia {
 
         public void Start() {
 
-            UIForiaRuntime.CreateGameApplication("GameApp", typeof(SpaceGameRoot));
+            application = UIForiaRuntime.CreateGameApplication("GameApp", typeof(SpaceGameRoot));
+            
             return;
 #if UNITY_EDITOR
-                QualitySettings.vSyncCount = 0; // VSync must be disabled for target frame rate to work
-                UnityEngine.Application.targetFrameRate = 60;
+            QualitySettings.vSyncCount = 0; // VSync must be disabled for target frame rate to work
+            UnityEngine.Application.targetFrameRate = 60;
 
             // int width = 128;
             // Texture2D texture2D = new Texture2D(width, 1, TextureFormat.ARGB32, false, false);
@@ -90,7 +91,7 @@ namespace UIForia {
             // texture2D.anisoLevel = 1;
             // texture2D.wrapMode = TextureWrapMode.Repeat;
             // texture2D.Apply();
-           // GameObject.Find("RawImage").GetComponent<UnityEngine.UI.RawImage>().texture = texture2D;
+            // GameObject.Find("RawImage").GetComponent<UnityEngine.UI.RawImage>().texture = texture2D;
 
             unsafe {
                 // TextMaterialInfo m0 = new TextMaterialInfo();

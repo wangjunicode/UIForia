@@ -120,11 +120,12 @@ namespace UIForia {
             shell.slots = slots.ToArray();
             shell.charBuffer = charBuffer.ToArray();
             shell.styles = styles.ToArray();
-            
+
             dedupList.size = 0;
             charBuffer.size = 0;
             styles.size = 0;
             textContents.size = 0;
+            textExpressions.size = 0;
             rootNodes.size = 0;
             templateNodes.size = 0;
             attributeList.size = 0;
@@ -183,9 +184,10 @@ namespace UIForia {
 
             TemplateNodeType nodeType = 0;
 
+            AddChild(parentId.index, nodeId);
+            
             switch (slotType) {
                 case SlotType.Define:
-                    AddChild(parentId.index, nodeId);
                     nodeType = TemplateNodeType.SlotDefine;
                     break;
 
@@ -203,7 +205,7 @@ namespace UIForia {
             node.parentId = parentId.index;
 
             RangeInt slotNameRange = AddString(slotName);
-            node.moduleNameRange = slotNameRange;
+            node.tagNameRange = slotNameRange;
 
             ref TemplateASTRoot root = ref rootNodes.array[parentId.rootId];
 
@@ -247,13 +249,10 @@ namespace UIForia {
 
         }
 
-        
         public unsafe RangeInt AddString(in CharSpan span, bool attemptDeduplicate = false) {
-
 
             if (span.HasValue) {
 
-                
                 // todo -- we could de-dup this if we wanted to, exercise for later I think
                 // if (attemptDeduplicate) {
                 //     for (int i = 0; i < dedupList.size; i++) {
@@ -262,7 +261,7 @@ namespace UIForia {
                 //         }
                 //     }
                 // }
-                
+
                 int length = span.Length;
 
                 charBuffer.EnsureAdditionalCapacity(length);
@@ -310,7 +309,7 @@ namespace UIForia {
 
         private void SetTextContent(StructList<char> textContent, LineInfo lineInfo) {
             int nodeId = templateNodes.size - 1;
-
+            
             RangeInt range = new RangeInt(textExpressions.size, 0);
             try {
                 TextTemplateProcessor.ProcessTextExpressions(textContent, textExpressions);
@@ -387,13 +386,17 @@ namespace UIForia {
                 templateFileShellBuilder.SetTextContent(textContent, lineInfo);
             }
 
-            // public TemplateASTBuilder AddTextChild(IList<AttributeDefinition3> attributes, LineInfo templateLineInfo) {
-            //     return templateFileShellBuilder.CreateTextNode(this, templateLineInfo, attributes, TemplateNodeType.Text);
-            // }
+            public TemplateASTBuilder AddTextChild(IList<AttributeDefinition3> attributes, LineInfo templateLineInfo) {
+                return templateFileShellBuilder.CreateTextNode(this, templateLineInfo, attributes, TemplateNodeType.Text);
+            }
 
             // public TemplateASTBuilder AddRepeatChild(List<AttributeDefinition2> attributes, LineInfo lineInfo, string genericTypeResolver, string requireChildTypeExpression) {
             //     return templateFileShellBuilder.CreateRepeatNode(this, attributes, lineInfo, genericTypeResolver, requireChildTypeExpression);
             // }
+
+            public TemplateNodeType GetNodeType() {
+                return templateFileShellBuilder.templateNodes[index].templateNodeType;
+            }
 
         }
 
@@ -445,7 +448,7 @@ namespace UIForia {
             if (styles.size <= 0 || alias.length <= 0) {
                 return false;
             }
-            
+
             CharSpan aliasSpan = GetCharSpan(alias);
             for (int i = 0; i < styles.size; i++) {
                 RangeInt range = styles.array[i].alias;

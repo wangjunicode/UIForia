@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UIForia.NewStyleParsing;
 using UIForia.Parsing;
 using UIForia.Util;
@@ -26,29 +27,31 @@ namespace UIForia {
         public bool successfullyParsed;
         public bool checkedTimestamp;
 
+        private Dictionary<RangeInt, string> stringMap;
         // ----------------------
 
         public TemplateFileShell(string templateLocation = null) {
             this.filePath = templateLocation;
         }
 
-        public bool TryGetTextContent(int nodeIndex, out RangeInt textContent) {
-            throw new NotImplementedException();
-            if (textContents == null) {
-                textContent = default;
-                return false;
-            }
-
-            // for (int i = 0; i < textContents.Length; i++) {
-            //     if (textContents[i].index == nodeIndex) {
-            //         textContent = textContents[i].textExpressions;
-            //         return true;
-            //     }
-            // }
-
-            textContent = default;
-            return false;
-        }
+        // public bool TryGetTextContent(int nodeIndex, out RangeInt textContent) {
+        //     if (textContents == null) {
+        //         textContent = default;
+        //         return false;
+        //     }
+        //
+        //     ref TemplateASTNode node = ref templateNodes[nodeIndex];
+        //     RangeInt range = node.textContentRange;
+        //     for (int i = range.start; i < textContents.Length; i++) {
+        //         if (textContents[i].index == nodeIndex) {
+        //             textContent = textContents[i].textExpressions;
+        //             return true;
+        //         }
+        //     }
+        //
+        //     textContent = default;
+        //     return false;
+        // }
 
         public TemplateASTRoot GetRootTemplateForType(ProcessedType processedType) {
             unsafe {
@@ -64,22 +67,33 @@ namespace UIForia {
             return default;
         }
 
-        public bool IsTextConstant(int templateNodeId) {
-            if (TryGetTextContent(templateNodeId, out RangeInt textExpressionRange)) {
-                if (textExpressionRange.length == 0) return false;
-
-                for (int i = textExpressionRange.start; i < textExpressionRange.end; i++) {
-                    // if (textExpressions[i].isExpression) {
-                    //     return false;
-                    // }
-                }
-
-                return true;
+        public bool TryGetTextContent(int templateNodeId, StructList<TextContent> textContents) {
+            RangeInt range = templateNodes[templateNodeId].textContentRange;
+            if (range.length == 0) {
+                return false;
+            }
+            for (int i = range.start; i < range.end; i++) {
+               textContents.Add(this.textContents[i]);
             }
 
-            return false;
+            return true;
         }
+        
+        public bool IsTextConstant(int templateNodeId) {
+            RangeInt range = templateNodes[templateNodeId].textContentRange;
 
+            if (range.length == 0) {
+                return false;
+            }
+            
+            for (int i = range.start; i < range.end; i++) {
+                if (textContents[i].isExpression) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
         
         public void Serialize(ref ManagedByteBuffer buffer) {
             buffer.Write(filePath);
@@ -118,7 +132,14 @@ namespace UIForia {
                 return null;
             }
 
-            return new string(charBuffer, stringRange.start, stringRange.length);
+            stringMap = stringMap ?? new Dictionary<RangeInt, string>();
+
+            if (stringMap.TryGetValue(stringRange, out string retn)) {
+                return retn;
+            }
+            retn = new string(charBuffer, stringRange.start, stringRange.length);
+            stringMap[stringRange] = retn;
+            return retn;
         }
 
         public unsafe CharSpan GetCharSpan(RangeInt stringRange) {

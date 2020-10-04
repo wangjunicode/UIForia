@@ -62,9 +62,11 @@ namespace UIForia.Parsing {
             else if (typeof(UITextElement).IsAssignableFrom(rawType)) {
                 // might not be cheap -- explore skipping when we know 100% is or isn't a text element
                 flags |= Flags.IsTextElement;
+                archetype = ElementArchetype.Text;
             }
             else {
                 IsContainerElement = true;
+                archetype = ElementArchetype.Container;
             }
 
             this.IsUnresolvedGeneric = rawType.IsGenericTypeDefinition;

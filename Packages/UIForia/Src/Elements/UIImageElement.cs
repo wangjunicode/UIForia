@@ -5,6 +5,7 @@ using UnityEngine;
 namespace UIForia.Elements {
 
     [TemplateTagName("Image")]
+    [ContainerElement]
     public class UIImageElement : UIContainerElement {
 
         public string src;

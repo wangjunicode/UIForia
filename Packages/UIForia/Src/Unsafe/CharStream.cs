@@ -1210,7 +1210,7 @@ namespace UIForia.Util {
                 }
             }
 
-            int col = 0;
+            int col = 1;
             for (int i = x; i < ptr - 1; i++) {
                 col++;
             }
@@ -1801,7 +1801,7 @@ namespace UIForia.Util {
                 }
             }
 
-            int col = 0;
+            int col = 1;
             for (int i = x; i < rangeStart - 1; i++) {
                 col++;
             }

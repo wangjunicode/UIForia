@@ -6,20 +6,28 @@
     <Contents>
 
         <SpacePanel name="'StartMenu'">
-            <StartMenu style="container"/>
+<!--            <StartMenu style="container">-->
+<!--            </StartMenu>-->
+            <Div>
+                Text goes here
+            </Div>
+            <override:XXX>
+                <Panel/>
+            </override:XXX>
+            <Group></Group>
         </SpacePanel>
 
-        <SpacePanel name="'SinglePlayer'">
-            <SinglePlayer style="container"/>
-        </SpacePanel>
+<!--        <SpacePanel name="'SinglePlayer'">-->
+<!--            <SinglePlayer style="container"/>-->
+<!--        </SpacePanel>-->
 
-        <SpacePanel name="'JoinServer'">
-            <JoinServer style="container"/>
-        </SpacePanel>
+<!--        <SpacePanel name="'JoinServer'">-->
+<!--            <JoinServer style="container"/>-->
+<!--        </SpacePanel>-->
 
-        <SpacePanel name="'Settings'">
-            <Settings style="container"/>
-        </SpacePanel>
+<!--        <SpacePanel name="'Settings'">-->
+<!--            <Settings style="container"/>-->
+<!--        </SpacePanel>-->
 
         <!--        <SplashScreen />-->
 

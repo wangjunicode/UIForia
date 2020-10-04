@@ -24,27 +24,6 @@ namespace UIForia {
 
     }
 
-    public class PrecompileSettings {
-
-        public string assemblyName;
-        public string codeOutputPath;
-        public string styleOutputPath;
-        public string rootTypeName;
-        public string codeFileExtension;
-
-        public PrecompileSettings() {
-            this.assemblyName = "UIForia.Application";
-            this.styleOutputPath = Path.Combine(UnityEngine.Application.dataPath, "__UIForiaGenerated__");
-            this.codeOutputPath = Path.Combine(UnityEngine.Application.dataPath, "__UIForiaGenerated__");
-            this.codeFileExtension = "generated.cs";
-            this.rootTypeName = "UIForiaGeneratedApplication";
-        }
-
-    }
-
-    public class CompilationResult { }
-
-
     public static class UIForiaRuntime {
 
         private static LightList<Application> s_Applications;
@@ -141,7 +120,25 @@ namespace UIForia {
                 compilation.ResolveTagNames();
                 // ParseStyles()
 
-                compilation.Compile();
+                if (compilation.diagnostics.HasErrors()) {
+                    application.IsValid = false;
+                    compilation.diagnostics.Dump();
+                    return application;
+                }
+                
+                // todo -- make sure we are only compiling one app at a time
+                
+                CompilationResult compileResult = compilation.CompileDynamic();
+
+                if (compileResult.successful) {
+
+                    if (!application.IsValid) {
+                        application.Reset();
+                    }
+                    application.IsValid = true;
+                    application.Initialize();
+
+                }
                 
             }
 

@@ -430,7 +430,7 @@ namespace UIForia {
             CharSpan fullTagRange = GetFullTagRange(prefix, tagName);
 
             TemplateFileShellBuilder.TemplateASTBuilder element;
-            LineInfo lineInfo = default; // todo -- line info remapping
+            LineInfo lineInfo = tagName.GetLineInfo(); // todo -- line info remapping
 
             if (!prefix.HasValue || char.IsUpper(prefix[0])) {
                 element = elementStack.Peek().AddElementChild(prefix, tagName, attrBuffer, lineInfo);
@@ -521,7 +521,18 @@ namespace UIForia {
             while (elementStack.size > 0 && stream.HasMoreTokens && !hasCriticalError) {
 
                 if (TryParseTextContent(ref stream)) {
-                    elementStack.Peek().SetTextContent(textBuffer, default);
+                    TemplateFileShellBuilder.TemplateASTBuilder parent = elementStack.Peek();
+                    
+                    if (parent.GetNodeType() == TemplateNodeType.Text) {
+                        // todo -- line numbers are not correct
+                        parent.SetTextContent(textBuffer, default);
+                    }
+                    else {
+                        // todo -- line numbers are not correct
+                        TemplateFileShellBuilder.TemplateASTBuilder textNode = parent.AddTextChild(null, stream.GetLineInfo());
+                        textNode.SetTextContent(textBuffer, default);  
+                    }
+
                     continue;
                 }
 

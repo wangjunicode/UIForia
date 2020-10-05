@@ -65,7 +65,7 @@ namespace UIForia.Animation {
                     return viewport.width * width.value;
 
                 case UIFixedUnit.Em:
-                    return element.style.TextFontAsset.faceInfo.PointSize * width.value;
+                    return element.style.TextFontAsset.faceInfo.pointSize * width.value;
 
                 default:
                     return 0;
@@ -87,7 +87,7 @@ namespace UIForia.Animation {
                     return viewport.width * height.value;
 
                 case UIFixedUnit.Em:
-                    return element.style.TextFontAsset.faceInfo.PointSize * height.value;
+                    return element.style.TextFontAsset.faceInfo.pointSize * height.value;
 
                 default:
                     return 0;
@@ -130,7 +130,7 @@ namespace UIForia.Animation {
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderRight)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderLeft)));
                 case UIMeasurementUnit.Em:
-                    return Mathf.Max(0, element.style.TextFontAsset.faceInfo.PointSize * measurement.value);
+                    return Mathf.Max(0, element.style.TextFontAsset.faceInfo.pointSize * measurement.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -173,7 +173,7 @@ namespace UIForia.Animation {
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderBottom)
                                          - ResolveFixedWidth(element, viewport, parentStyle.BorderTop)));
                 case UIMeasurementUnit.Em:
-                    return Mathf.Max(0, element.style.TextFontAsset.faceInfo.PointSize * measurement.value);
+                    return Mathf.Max(0, element.style.TextFontAsset.faceInfo.pointSize * measurement.value);
 
                 default:
                     throw new ArgumentOutOfRangeException();

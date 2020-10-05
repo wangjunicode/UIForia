@@ -1,0 +1,14 @@
+﻿<UITemplate>
+
+    <Style src="SeedLib/SeedLibTheme.style"/>
+    <Style src="SeedLib/Button/Button.style"/>
+
+    <Contents style="button">
+        
+        <Image attr:id="img" style="icon" if.once="false" src="icon"/>
+        
+        <Text attr:id="text" style="text" if.once="false"/>
+
+    </Contents>
+
+</UITemplate>

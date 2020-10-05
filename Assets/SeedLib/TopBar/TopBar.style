@@ -1,0 +1,7 @@
+﻿import "SeedLib/SeedLibTheme.style" as theme;
+
+style topbar {
+    PreferredWidth = 1pca;
+    PreferredHeight = @theme.sp5;
+    BackgroundColor = Black;
+}

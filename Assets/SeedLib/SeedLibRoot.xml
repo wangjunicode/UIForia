@@ -1,0 +1,43 @@
+﻿<UITemplate>
+    
+    <Style src="SeedLib/SeedLibTheme.style"/>
+    <Style>
+        style root { 
+            PreferredSize = 1vw 1vh;
+        }
+        
+        style scroll {
+
+            FlexItemGrow = 1;
+            PreferredSize = 1pca 0px;
+            BackgroundColor = white;
+        
+        }
+        
+        style big {
+            PreferredHeight = 3000px;
+            BackgroundColor = white;
+            PreferredWidth = 100px;
+        }
+        
+    </Style>
+    <Contents style="root">
+        
+        <TopBar>
+            
+        </TopBar>
+        
+        <ScrollView style="scroll">
+            <Button attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
+            <Button attr:variant="Secondary" label="'Hello'"/>
+            <Button attr:variant="Primary" icon="'Icons/star'" />
+
+            <Button attr:disabled="true" attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
+            <Button attr:disabled="true" attr:variant="Primary" label="'Hello'"/>
+            <Button attr:disabled="true" attr:variant="Primary" icon="'Icons/star'" mouse:click="() => UnityEngine.Debug.Log('Click')"/>
+            
+        </ScrollView>
+        
+    </Contents>
+    
+</UITemplate>

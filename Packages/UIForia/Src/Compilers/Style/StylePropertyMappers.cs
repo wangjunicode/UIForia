@@ -34,7 +34,7 @@ namespace UIForia.Compilers.Style {
                 // Alignment
                 {"alignmenttarget", (targetStyle, property, context) => MapAlignmentTarget(targetStyle, property, context)},
                 {"alignmenttargetx", (targetStyle, property, context) => targetStyle.AlignmentTargetX = MapEnum<AlignmentTarget>(property.children[0], context)},
-                {"alignmenttargety", (targetStyle, property, context) => targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[0], context)}, 
+                {"alignmenttargety", (targetStyle, property, context) => targetStyle.AlignmentTargetY = MapEnum<AlignmentTarget>(property.children[0], context)},
 
                 {"alignmentorigin", (targetStyle, property, context) => MapAlignmentOrigin(targetStyle, property, context)},
                 {"alignmentoriginx", (targetStyle, property, context) => targetStyle.AlignmentOriginX = MapOffsetMeasurement(property.children[0], context)},
@@ -248,12 +248,11 @@ namespace UIForia.Compilers.Style {
                 {"shadowopacity", (targetStyle, property, context) => targetStyle.ShadowOpacity = MapNumber(property.children[0], context)},
 
                 {"material", (targetStyle, property, context) => targetStyle.Material = MapMaterial(property, context)},
-                
-                {"meshtype", (targetStyle, property, context) => targetStyle.MeshType = MapEnum<MeshType>(property.children[0], context) },
-                {"meshfilldirection", (targetStyle, property, context) => targetStyle.MeshFillDirection = MapEnum<MeshFillDirection>(property.children[0], context) },
-                {"meshfillorigin", (targetStyle, property, context) => targetStyle.MeshFillOrigin = MapEnum<MeshFillOrigin>(property.children[0], context) },
-                {"meshfillamount", (targetStyle, property, context) => targetStyle.MeshFillAmount = MapNumber(property.children[0], context) },
-                
+
+                {"meshtype", (targetStyle, property, context) => targetStyle.MeshType = MapEnum<MeshType>(property.children[0], context)},
+                {"meshfilldirection", (targetStyle, property, context) => targetStyle.MeshFillDirection = MapEnum<MeshFillDirection>(property.children[0], context)},
+                {"meshfillorigin", (targetStyle, property, context) => targetStyle.MeshFillOrigin = MapEnum<MeshFillOrigin>(property.children[0], context)},
+                {"meshfillamount", (targetStyle, property, context) => targetStyle.MeshFillAmount = MapNumber(property.children[0], context)},
 
             };
 
@@ -1341,6 +1340,12 @@ namespace UIForia.Compilers.Style {
 
                 case "em":
                     return UIMeasurementUnit.Em;
+
+                case "bw":
+                    return UIMeasurementUnit.BackgroundWidth;
+
+                case "bh":
+                    return UIMeasurementUnit.BackgroundHeight;
 
                 case "cnt":
                 case "content":

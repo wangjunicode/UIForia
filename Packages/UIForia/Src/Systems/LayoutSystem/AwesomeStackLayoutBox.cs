@@ -66,6 +66,8 @@ namespace UIForia.Systems {
 
             float alignment = element.style.AlignItemsHorizontal;
 
+            // SpaceDistribution extraSpace = element.style.DistributeExtraSpaceHorizontal;
+            
             float inset = paddingBorderHorizontalStart;
 
             while (ptr != null) {

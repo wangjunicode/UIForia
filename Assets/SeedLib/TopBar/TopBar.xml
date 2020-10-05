@@ -1,0 +1,21 @@
+﻿<UITemplate>
+    <Style src="SeedLib/SeedLibTheme.style"/>
+    <Style src="SeedLib/TopBar/TopBar.style"/>
+    
+    <Contents style="topbar">
+        
+        <define:LeftSection>
+            
+        </define:LeftSection>
+        
+        <define:MiddleSection>
+            
+        </define:MiddleSection>
+        
+        <define:RightSection>
+            
+        </define:RightSection>
+        
+    </Contents>
+    
+</UITemplate>

@@ -1,0 +1,75 @@
+﻿import "SeedLib/SeedLibTheme.style" as theme;
+
+style button {
+
+    BorderRadius = 50%;
+    PaddingLeft = @theme.sp4;
+    PaddingRight = @theme.sp4;
+    PaddingTop = @theme.sp2;
+    PaddingBottom = @theme.sp2;
+    TextColor = white;
+    TextFontAsset = @theme.GothamRound;
+    DistributeExtraSpace = CenterContent;
+    TextAlignment = Center;
+    TextFontSize = 24px;
+    Margin = @theme.sp3;
+    
+    [attr:configuration="label+icon"] {
+        LayoutType = Grid;
+        GridLayoutColTemplate = 1mx 1mx;
+        GridLayoutDirection = Horizontal;
+        GridLayoutColGap = @theme.sp1;
+    }
+    
+    [attr:configuration="label-only"] {
+    
+    }
+     
+    [attr:configuration="icon-only"] {
+        Padding = @theme.sp2;
+    }
+    
+    [attr:disabled] {
+        Opacity = 0.4;
+        PointerEvents = None;
+    }
+    
+    [attr:variant="Primary"] {
+        BackgroundColor = @theme.poppy100;
+        [hover] {
+            Border = 2px;
+            BorderColor = @theme.poppy700;
+        }
+    }
+    
+    [attr:variant="Secondary"] {
+        
+        [hover] {
+            Border = 2px;
+            BorderColor = @theme.poppy700;
+        }
+    
+        [active] {
+            BackgroundColor = @theme.poppy700;
+        }
+        
+        [focus] {
+            BackgroundColor = @theme.poppy700;
+            ShadowColor = @theme.poppy500;
+            ShadowSizeX = 2;
+            ShadowSizeY = 2;
+            ShadowOffsetY = 1;
+            ShadowIntensity = 5;
+        }
+    }
+
+}
+
+style text {
+    PaddingTop = 2px;
+}
+
+style icon {
+    PreferredSize = 0.25bw 0.25bh;
+    Padding = @theme.sp1;
+}

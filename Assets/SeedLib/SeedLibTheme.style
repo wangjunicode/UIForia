@@ -1,0 +1,137 @@
+﻿
+// -----------------------------------------
+// Color Palette
+// -----------------------------------------
+export const coal0 = #ffffff;
+export const coal50 = #eeeeee;
+export const coal100 = #dddddd;
+export const coal150 = #cccccc;
+export const coal200 = #bbbbbb;
+export const coal250 = #aaaaaa;
+export const coal300 = #999999;
+export const coal400 = #888888;
+export const coal500 = #777777;
+export const coal600 = #666666;
+export const coal700 = #555555;
+export const coal800 = #444444;
+export const coal850 = #333333;
+export const coal900 = #222222;
+export const coal950 = #111111;
+export const coal1000 = #000000;
+
+export const chili100 = #ffcccc;
+export const chili300 = #ff9898;
+export const chili500 = #ff5454;
+export const chili700 = #992828;
+export const chili900 = #5a1212;
+
+export const carrot100 = #ffd3c7;
+export const carrot300 = #ffa68e;
+export const carrot500 = #ff6b43;
+export const carrot700 = #993a20;
+export const carrot900 = #571e0e;
+
+export const pumpkin100 = #ffd9c2;
+export const pumpkin300 = #ffb385;
+export const pumpkin500 = #ff8133;
+export const pumpkin700 = #904517;
+export const pumpkin900 = #57270a;
+
+export const apricot100 = #ffe3be;
+export const apricot300 = #ffc67d;
+export const apricot500 = #ffa026;
+export const apricot700 = #8a5410;
+export const apricot900 = #4c2e07;
+
+export const lemon100 = #ffecbb;
+export const lemon300 = #ffd876;
+export const lemon500 = #ffbe1a;
+export const lemon700 = #87640c;
+export const lemon900 = #4c3805;
+
+export const wasabi100 = #ecedc1;
+export const wasabi300 = #d9db83;
+export const wasabi500 = #c0c330;
+export const wasabi700 = #666815;
+export const wasabi900 = #393a08;
+
+export const lime100 = #d9efc8;
+export const lime300 = #b3de91;
+export const lime500 = #80c847;
+export const lime700 = #416c1f;
+export const lime900 = #213c0d;
+
+export const apple100 = #b4f1d6;
+export const apple300 = #67e3ac;
+export const apple500 = #02d174;
+export const apple700 = #016e3e;
+export const apple900 = #013e23;
+
+export const mint100 = #b3ede5;
+export const mint300 = #67dbca;
+export const mint500 = #01c3a7;
+export const mint700 = #016858;
+export const mint900 = #003a32;
+
+export const poppy100 = #b3e9f4;
+export const poppy300 = #66d3e8;
+export const poppy500 = #00b5d9;
+export const poppy700 = #006073;
+export const poppy900 = #003641;
+
+export const lupine100 = #cadff6;
+export const lupine300 = #94bfec;
+export const lupine500 = #4c94e0;
+export const lupine700 = #255486;
+export const lupine900 = #102c4c;
+
+export const iris100 = #d5daf7;
+export const iris300 = #aab5ee;
+export const iris500 = #7283e3;
+export const iris700 = #39488f;
+export const iris900 = #1a2358;
+
+export const lavender100 = #e0d5f8;
+export const lavender300 = #c1abf0;
+export const lavender500 = #9873e6;
+export const lavender700 = #563a91;
+export const lavender900 = #2f1a59;
+
+export const viola100 = #e8d3ed;
+export const viola300 = #d1a6da;
+export const viola500 = #b26bc2;
+export const viola700 = #71377c;
+export const viola900 = #461a4f;
+
+export const orchid100 = #f0d1e2;
+export const orchid300 = #e0a1c4;
+export const orchid500 = #cc639d;
+export const orchid700 = #82325f;
+export const orchid900 = #4d1635;
+
+export const rose100 = #f8ced7;
+export const rose300 = #f09dae;
+export const rose500 = #e65b78;
+export const rose700 = #912e42;
+export const rose900 = #551322;
+
+// -----------------------------------------
+// Spacings
+// -----------------------------------------
+export const sp1 = 4;
+export const sp2 = 8;
+export const sp3 = 12;
+export const sp4 = 16;
+export const sp5 = 24;
+export const sp6 = 32;
+export const sp7 = 48;
+export const sp8 = 64;
+
+
+// -----------------------------------------
+// Fonts
+// -----------------------------------------
+export const GothamRound = url("Fonts/GothamRnd-Medium SDF");
+// -----------------------------------------
+// Cursors
+// -----------------------------------------

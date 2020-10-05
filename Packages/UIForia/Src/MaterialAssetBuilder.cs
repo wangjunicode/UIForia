@@ -10,7 +10,7 @@ namespace UIForia.Compilers {
 
 #if UNITY_EDITOR
         public static MaterialDatabase BuildMaterialDatabase(MaterialReference[] materialReferences) {
-            if (materialReferences == null) {
+            if (true || materialReferences == null) {
                 return new MaterialDatabase(new MaterialInfo[0], new MaterialPropertyInfo[0]);
             }
 

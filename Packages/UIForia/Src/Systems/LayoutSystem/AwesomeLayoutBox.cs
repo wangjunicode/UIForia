@@ -292,7 +292,6 @@ namespace UIForia.Systems {
 
             // todo -- margin
 
-
             if ((flags & LayoutBoxFlags.RequireAlignmentVertical) == 0 && !Mathf.Approximately(previousPosition, alignedPosition)) {
                 flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
@@ -418,6 +417,14 @@ namespace UIForia.Systems {
                     return parent.ResolveAutoWidth(this, measurement.value);
                 }
 
+                case UIMeasurementUnit.BackgroundWidth: {
+                    return value * element.style.BackgroundImage?.width ?? 0;
+                }
+
+                case UIMeasurementUnit.BackgroundHeight: {
+                    return value * element.style.BackgroundImage?.height ?? 0;
+                }
+
                 case UIMeasurementUnit.Content: {
                     return GetContentWidth(measurement.value);
                 }
@@ -447,6 +454,7 @@ namespace UIForia.Systems {
                     // ignored elements can use the output size of their parent since it has been resolved already
                     return ComputeBlockWidth(measurement.value);
                 }
+
                 case UIMeasurementUnit.Percentage:
                 case UIMeasurementUnit.ParentContentArea: {
                     return ComputeBlockContentAreaWidth(measurement.value);
@@ -616,11 +624,20 @@ namespace UIForia.Systems {
                 case UIMeasurementUnit.Content: {
                     return GetContentHeight(measurement.value);
                 }
+
                 case UIMeasurementUnit.FitContent:
                     throw new NotImplementedException();
 
                 case UIMeasurementUnit.Pixel:
                     return value;
+
+                case UIMeasurementUnit.BackgroundWidth: {
+                    return value * element.style.BackgroundImage?.width ?? 0;
+                }
+
+                case UIMeasurementUnit.BackgroundHeight: {
+                    return value * element.style.BackgroundImage?.height ?? 0;
+                }
 
                 case UIMeasurementUnit.Em:
                     return element.style.GetResolvedFontSize() * value;
@@ -655,10 +672,8 @@ namespace UIForia.Systems {
 
         public abstract void RunLayoutVertical(int frameId);
 
-     
-        
         public void GetWidths(ref LayoutSize size) {
-            
+
             // if((element.style.animationFlags & AnimationFlags.PreferredWidth) != 0) {
             //     AnimatedProperty animatedProperty;
             //     element.style.TryGetAnimatedProperty(StylePropertyId.PreferredWidth, out animatedProperty);
@@ -667,9 +682,9 @@ namespace UIForia.Systems {
             //     size.preferred = Mathf.Lerp(v0, v1, animatedProperty.time);
             // }
             // else {
-                size.preferred = ResolveWidth(element.style.PreferredWidth);
+            size.preferred = ResolveWidth(element.style.PreferredWidth);
             // }
-            
+
             size.minimum = ResolveWidth(element.style.MinWidth);
             size.maximum = ResolveWidth(element.style.MaxWidth);
             Vector2 viewSize = element.View.Viewport.size;
@@ -888,7 +903,7 @@ namespace UIForia.Systems {
             transformPivotY = element.style.TransformPivotY;
             transformScaleX = element.style.TransformScaleX;
             transformScaleY = element.style.TransformScaleY;
-            
+
             clipBehavior = element.style.ClipBehavior;
             clipBounds = element.style.ClipBounds;
             UpdateBlockProviderWidth();
@@ -910,11 +925,13 @@ namespace UIForia.Systems {
                         child.layoutResult.layoutParent = element.layoutResult; // todo -- multiple ignore levels?
                         // ignoredList.Add(child.layoutBox);
                         break;
+
                     case LayoutBehavior.TranscludeChildren:
                         child.layoutBox.parent = this;
                         child.layoutResult.layoutParent = element.layoutResult; // todo -- multiple ignore levels?
                         child.layoutBox.GetChildren(list);
                         break;
+
                     default:
                         list.Add(child.layoutBox);
                         break;

@@ -1,0 +1,235 @@
+﻿import "SeedLib/SeedLibTheme.style" as theme;
+
+style toggle-switch {
+    PreferredSize = 80px 32px;
+    BackgroundColor = @theme.coal300;
+    Overflow = Hidden;
+    BorderRadius = 50%;
+    TextFontSize = 16px;
+    Border = 2px;
+    TextColor = white;
+    TextFontAsset = @theme.GothamRound;
+
+    DistributeExtraSpaceVertical = CenterContent;
+    PaddingLeft = 2;
+    PaddingRight = 2;
+    FlexLayoutDirection = Horizontal;
+    ClipBounds = ContentBox;
+    Margin = @theme.sp2;
+    
+    [hover] {
+        BorderColor = @theme.coal700;
+    }
+    
+    [attr:status="on"] {
+       BackgroundColor = @theme.apple500;
+    }
+    
+    [attr:status="off"] {
+       BackgroundColor = @theme.coal300;
+    }
+        
+    [attr:status="animate_on"] {
+        run animation(bg-turn-on);
+    }
+    [attr:status="animate_off"] {
+        run animation(bg-turn-off);
+    }
+    
+    [attr:disabled] {
+        Opacity = 0.6; 
+        PointerEvents = None;
+    }
+    
+}
+
+style toggle-switch-small {
+    PreferredSize = 40px 20px;
+    BorderRadius = 50%;
+    PaddingLeft = 2;
+    PaddingRight = 2;
+    BackgroundColor = @theme.coal150;
+    Margin = @theme.sp2;
+    
+    [attr:status="on"] {
+       BackgroundColor = @theme.apple500;
+    }
+    
+    [attr:status="off"] {
+       BackgroundColor = @theme.coal150;
+       [hover] {
+           BackgroundColor = @theme.coal300;        
+       }
+    }
+        
+    [attr:status="animate_on"] {
+        run animation(bg-turn-on);
+        [hover] {
+            BackgroundColor = @theme.poppy700;        
+        }
+    }
+    
+    [attr:status="animate_off"] {
+        run animation(bg-turn-off);
+             
+        [hover] {
+           BackgroundColor = @theme.coal300;        
+        }
+    }
+    
+    [attr:disabled] {
+        Opacity = 0.6; 
+        PointerEvents = None;
+    }
+
+}
+
+style knob-small {
+    PreferredSize = 16px;
+    BackgroundColor = white;
+    BorderRadius = 50%;
+    AlignY = Center Parent;
+    AlignmentTargetX = ParentContentArea;
+    
+    [attr:status="on"] {
+        AlignmentOffsetX = -100%;
+        AlignmentOriginX = 100%;
+    }
+    
+    [attr:status="off"] {
+        AlignmentOffsetX = 0%;
+        AlignmentOriginX = 0%;
+        [hover] {
+            BackgroundColor = @theme.coal300;        
+        }
+    }
+    
+    [attr:status="animate_on"] {
+       run animation(knob-turn-on);
+    }
+    
+    [attr:status="animate_off"] {
+        run animation(knob-turn-off);
+    }
+    
+}
+
+style knob {
+    PreferredSize = 24px;
+    BackgroundColor = white;
+    BorderRadius = 50%;
+
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpace = CenterContent;
+    AlignmentTargetX = ParentContentArea;
+    
+    [attr:status="on"] {
+        AlignmentOffsetX = -100%;
+        AlignmentOriginX = 100%;
+    }
+    
+    [attr:status="off"] {
+        AlignmentOffsetX = 0%;
+        AlignmentOriginX = 0%;
+    }
+    
+    [attr:status="animate_on"] {
+       run animation(knob-turn-on);
+    }
+    
+    [attr:status="animate_off"] {
+        run animation(knob-turn-off);
+    }
+}
+
+style on {
+    PreferredWidth = 28px;
+    AlignX = -48px 0% Parent;
+    PaddingTop = 2px;
+}
+
+style off {
+    PreferredWidth = 28px;
+    TextAlignment = Right;
+    AlignX = 38px 0% Parent;
+    PaddingTop = 2px;
+}
+
+animation bg-turn-on {
+    [options] {
+        duration = 300;
+        timingFunction = CubicEaseInOut;
+    }
+    [keyframes] {
+        0% { BackgroundColor = @theme.coal300; }
+        100% { BackgroundColor = @theme.apple500; }
+    }
+}
+
+animation bg-turn-off {
+    [options] {
+        duration = 300;
+        timingFunction = CubicEaseInOut;
+    }
+    [keyframes] {
+        0% { BackgroundColor = @theme.apple500; }
+        100% { BackgroundColor = @theme.coal300; }
+    }
+}
+
+animation bg-turn-on-small {
+    [options] {
+        duration = 300;
+        timingFunction = CubicEaseInOut;
+    }
+    [keyframes] {
+        0% { BackgroundColor = @theme.coal150; }
+        100% { BackgroundColor = @theme.apple500; }
+    }
+}
+
+animation bg-turn-off-small {
+    [options] {
+        duration = 300;
+        timingFunction = CubicEaseInOut;
+    }
+    [keyframes] {
+        0% { BackgroundColor = @theme.apple500; }
+        100% { BackgroundColor = @theme.coal150; }
+    }
+}
+
+
+animation knob-turn-on {
+    [options] {
+        duration = 300;
+        timingFunction = CubicEaseInOut;
+    }
+    [keyframes] {
+        0% {
+            AlignmentOffsetX = 0;
+            AlignmentOriginX = 0;
+        }
+        100% {
+            AlignmentOffsetX = -100%;
+            AlignmentOriginX = 100%;
+        }
+    }
+}
+
+animation knob-turn-off {
+    [options] {
+        duration = 300;
+        timingFunction = CubicEaseInOut;
+    }
+    [keyframes] {
+        0% {
+            AlignmentOffsetX = -100%;
+            AlignmentOriginX = 100%;
+        }
+        100% { 
+            AlignmentOffsetX = 0;
+            AlignmentOriginX = 0;
+        }
+    }
+}

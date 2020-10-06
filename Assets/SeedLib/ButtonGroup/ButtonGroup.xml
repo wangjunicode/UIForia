@@ -1,0 +1,10 @@
+﻿<UITemplate>
+    
+    <Style src="SeedLib/SeedLibTheme.style"/>
+    <Style src="SeedLib/ButtonGroup/ButtonGroup.style"/>
+    
+    <Contents style="button-group">
+        <define:Children style="button-list"/>
+    </Contents>
+    
+</UITemplate>

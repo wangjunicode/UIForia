@@ -1,0 +1,58 @@
+﻿import "SeedLib/SeedLibTheme.style" as theme;
+
+style radio-button {
+    PreferredSize = 28px;
+    BackgroundColor = white;
+    BorderRadius = 50%;
+    Border = 2px;
+    BorderColor = @theme.coal100;
+    Margin = @theme.sp2;
+    DistributeExtraSpace = CenterContent;
+    
+    [active] {
+        BackgroundColor = @theme.poppy700;
+        Border = 0px;
+    }
+    
+    [hover] {
+        BorderColor = @theme.poppy700;
+    }
+    
+    [attr:labeled] {
+        Margin = 0, @theme.sp2, 0, 0;
+    }
+    
+    [attr:disabled] {
+        Opacity = 0.4;
+        PointerEvents = None;
+    }
+        
+    [attr:checked="checked"] {
+        BackgroundTint = black;
+        BackgroundImage = url("Icons/checkmark");
+    }
+    
+}
+
+style radio-button-checked {
+
+    PreferredSize = 0.66pca;
+    BackgroundColor = @theme.poppy500;
+    BorderRadius = 50%;
+    
+}
+
+style labeled-radio-button {
+
+    FlexLayoutDirection = Horizontal;
+    TextFontAsset = @theme.Whitney;
+    Padding = @theme.sp2;
+    DistributeExtraSpace = CenterContent;
+    TextFontSize = 24px;
+    
+    [attr:disabled] {
+        Opacity = 0.4;
+        PointerEvents = None;
+    }
+    
+}

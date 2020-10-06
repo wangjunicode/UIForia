@@ -1,0 +1,7 @@
+﻿<UITemplate>
+
+    <Style src="SeedLib/Checkbox/Checkbox.style"/>
+    
+    <Contents style="checkbox"/>
+    
+</UITemplate>

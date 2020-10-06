@@ -48,7 +48,7 @@ namespace UIForia.Editor {
 
             // Background
             new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundColor, ColorUtil.UnsetValue),
-            new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundTint, ColorUtil.UnsetValue),
+            new AnimatedPropertyGenerator<Color>(StylePropertyId.BackgroundTint, ColorUtil.UnsetValue, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetX, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<UIFixedLength>(StylePropertyId.BackgroundImageOffsetY, new UIFixedLength(0)),
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageScaleX, 1),

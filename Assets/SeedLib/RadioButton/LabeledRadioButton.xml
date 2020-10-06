@@ -1,0 +1,14 @@
+﻿<UITemplate>
+
+    <Style src="SeedLib/SeedLibTheme.style"/>
+    <Style src="SeedLib/RadioButton/RadioButton.style"/>
+
+    <Contents style="labeled-radio-button">
+
+        <RadioButton attr:labeled="true" sync:isChecked="isChecked"/>
+
+        <Text attr:id="text"/>
+
+    </Contents>
+
+</UITemplate>

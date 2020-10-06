@@ -1,0 +1,44 @@
+﻿import "SeedLib/SeedLibTheme.style" as theme;
+
+style checkbox {
+
+    PreferredSize = 28px;
+    BackgroundColor = white;
+    BorderRadius = 4px;
+    Border = 2px;
+    BorderColor = @theme.coal100;
+    Margin = @theme.sp2;
+    
+    [hover] {
+        BorderColor = @theme.coal300;
+    }
+    
+    [attr:labeled] {
+        Margin = 0, @theme.sp2, 0, 0;
+    }
+    
+    [attr:checked="mixed"] {
+        BackgroundTint = black;
+        BackgroundImage = url("Icons/minus");
+    }
+    
+    [attr:checked="checked"] {
+        BackgroundTint = black;
+        BackgroundImage = url("Icons/checkmark");
+    }
+
+}
+
+style labeled-checkbox {
+
+    FlexLayoutDirection = Horizontal;
+    TextFontAsset = @theme.Whitney;
+    Margin = @theme.sp2;
+    DistributeExtraSpace = CenterContent;
+    TextFontSize = 24px;
+    [attr:disabled] {
+        Opacity = 0.4;
+        PointerEvents = None;
+    }
+    
+}

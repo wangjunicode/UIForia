@@ -1,0 +1,42 @@
+﻿import "SeedLib/SeedLibTheme.style" as theme;
+
+style slider {
+    PreferredWidth = 150px;
+    PreferredHeight = 20px;
+    Margin = @theme.sp5;
+    Padding = 0px 10px;
+    Painter = "SeedLib::Slider";
+}
+
+style track {
+    PreferredSize = 1pca 4px;
+    BorderRadius = 50%;
+    BackgroundColor = @theme.coal150;
+    AlignY = Center Parent;
+}
+
+style trail {
+    PreferredSize = 0px 4px;
+    BorderRadius = 50%;
+    BackgroundColor = black;
+    AlignY = Center Parent;
+    AlignmentTargetX = ParentContentArea;
+}
+
+style handle-dot {
+    PreferredSize = 6px;
+    BorderRadius = 50%;
+    BackgroundColor = white;
+    AlignX = Center Parent;
+    AlignY = Center Parent;
+}
+
+style handle {
+    LayoutBehavior = Ignored;
+    PreferredSize = 20px;
+    BackgroundColor = black; 
+    AlignmentTarget = Parent;
+    AlignmentBoundaryX = Parent;
+    TransformRotation = 45;
+    BorderRadius = 25%;  
+}

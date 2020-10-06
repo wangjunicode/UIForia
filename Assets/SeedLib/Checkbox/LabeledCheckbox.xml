@@ -1,0 +1,14 @@
+﻿<UITemplate>
+
+    <Style src="SeedLib/SeedLibTheme.style"/>
+    <Style src="SeedLib/Checkbox/Checkbox.style"/>
+
+    <Contents style="labeled-checkbox">
+        
+        <Checkbox attr:labeled="true" sync:isChecked="isChecked" sync:isMixed="isMixed"/>
+        
+        <Text attr:id="text"/>
+        
+    </Contents>
+
+</UITemplate>

@@ -1,0 +1,14 @@
+﻿<UITemplate>
+
+    <Style path="SeedLib/ToggleSwitch/ToggleSwitch.style"/>
+
+    <Contents style="toggle-switch">
+
+        <Div attr:id="knob" style="knob">
+            <Text style="on">ON</Text>
+            <Text style="off">OFF</Text>
+        </Div>
+
+    </Contents>
+
+</UITemplate>

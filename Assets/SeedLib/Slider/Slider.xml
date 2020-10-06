@@ -1,0 +1,21 @@
+﻿<UITemplate>
+    
+    <Style src="SeedLib/Slider/Slider.style"/>
+    
+    <Contents style="slider">
+
+        <Div style="track"/>
+        
+        <Div attr:id="trail" style="trail"/>
+        
+        <Div drag:create="DragHandle($event)" attr:id="handle" style="handle">
+            <Div style="handle-dot"/>
+        </Div>
+        
+        <Div drag:create="DragHandle($event)" if.once="false" attr:id="handle-far" style="handle">
+            <Div style="handle-dot"/>
+        </Div>
+        
+    </Contents>
+
+</UITemplate>

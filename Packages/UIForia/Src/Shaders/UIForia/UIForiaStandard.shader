@@ -261,6 +261,7 @@ Shader "UIForia/Standard"
                 underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
                 faceColor = lerp(faceColor, underlayColor, hasUnderlay);
                 faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, clipPos, clipRect, clipUvs);
+                if(c < 0.005) return fixed4(0, 0, 0, 0);
                 return faceColor;               
 
             }

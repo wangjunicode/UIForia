@@ -3,17 +3,17 @@
 style button {
 
     BorderRadius = 50%;
-    PaddingLeft = @theme.sp4;
-    PaddingRight = @theme.sp4;
-    PaddingTop = @theme.sp2;
-    PaddingBottom = @theme.sp2;
+    PaddingLeft = @theme.sp3;
+    PaddingRight = @theme.sp3;
+    PaddingTop = @theme.sp1;
+    PaddingBottom = @theme.sp1;
     TextColor = white;
     TextFontAsset = @theme.GothamRound;
     DistributeExtraSpace = CenterContent;
     TextAlignment = Center;
-    TextFontSize = 24px;
-    Margin = @theme.sp3;
-    
+    TextFontSize = 16px;
+    Margin = @theme.sp4;
+    TextTransform = UpperCase;
     [attr:configuration="label+icon"] {
         LayoutType = Grid;
         GridLayoutColTemplate = 1mx 1mx;
@@ -26,7 +26,7 @@ style button {
     }
      
     [attr:configuration="icon-only"] {
-        Padding = @theme.sp2;
+        Padding = @theme.sp1;
     }
     
     [attr:disabled] {
@@ -35,26 +35,47 @@ style button {
     }
     
     [attr:variant="Primary"] {
-        BackgroundColor = @theme.poppy100;
+        BackgroundColor = @theme.poppy500;
         [hover] {
             Border = 2px;
             BorderColor = @theme.poppy700;
         }
-    }
-    
-    [attr:variant="Secondary"] {
         
-        [hover] {
-            Border = 2px;
-            BorderColor = @theme.poppy700;
-        }
-    
         [active] {
             BackgroundColor = @theme.poppy700;
         }
         
         [focus] {
-            BackgroundColor = @theme.poppy700;
+            Border = 2px;
+            BorderColor = @theme.poppy700;
+            ShadowColor = @theme.poppy500;
+            ShadowSizeX = 2;
+            ShadowSizeY = 2;
+            ShadowOffsetY = 1;
+            ShadowIntensity = 5;
+        }
+    }
+    
+    [attr:variant="Secondary"] {
+
+        BackgroundTint = @theme.coal600;
+        BackgroundColor = @theme.coal100;
+        TextColor = @theme.coal600;
+        
+        [hover] {
+            Border = 2px;
+            BorderColor = @theme.coal300;
+        }
+    
+        [active] {
+            BackgroundColor = @theme.coal300;
+            TextColor = white;
+            BackgroundTint = white;
+        }
+        
+        [focus] {
+            Border = 2px;
+            BorderColor = @theme.coal300;
             ShadowColor = @theme.poppy500;
             ShadowSizeX = 2;
             ShadowSizeY = 2;
@@ -70,6 +91,5 @@ style text {
 }
 
 style icon {
-    PreferredSize = 0.25bw 0.25bh;
-    Padding = @theme.sp1;
+    PreferredSize = 16px;
 }

@@ -126,7 +126,7 @@ namespace UIForia.Systems {
                                 return false;
                             }
 
-                            blockSize += track.resolvedBaseSize; 
+                            blockSize += track.resolvedBaseSize;
                         }
 
                         deferredList = deferredList ?? new StructList<int>();
@@ -296,9 +296,11 @@ namespace UIForia.Systems {
                         return ComputeBlockContentAreaWidth(cellSize.value);
                     }
                 }
+
                 case GridTemplateUnit.MinContent:
                 case GridTemplateUnit.MaxContent:
                     return -1;
+
                 default:
                     throw new ArgumentOutOfRangeException(cellSize.unit.ToString());
             }
@@ -339,9 +341,11 @@ namespace UIForia.Systems {
                         return ComputeBlockContentHeight(cellSize.value);
                     }
                 }
+
                 case GridTemplateUnit.MinContent:
                 case GridTemplateUnit.MaxContent:
                     return -1;
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -423,7 +427,7 @@ namespace UIForia.Systems {
                     }
                 }
             }
-            
+
         }
 
         /// See ComputeContentWidthContributionSizes, use height instead of width 
@@ -578,6 +582,7 @@ namespace UIForia.Systems {
                     case StylePropertyId.GridLayoutRowAlignment:
                         // layout? not sure what to do here since we just need to adjust alignment, not re calc sizes
                         break;
+
                     case StylePropertyId.GridLayoutDensity:
                     case StylePropertyId.GridLayoutDirection:
                         placementDirty = true;
@@ -590,6 +595,7 @@ namespace UIForia.Systems {
                         // todo -- history entry?
                         flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         break;
+
                     case StylePropertyId.GridLayoutRowAutoSize:
                     case StylePropertyId.GridLayoutRowTemplate:
                         flags |= LayoutBoxFlags.RequireLayoutVertical;
@@ -604,10 +610,12 @@ namespace UIForia.Systems {
                         flags |= LayoutBoxFlags.RequireLayoutVertical;
                         // todo -- don't need to compute sizes again, just need to reposition tracks and assign sizes to children
                         break;
+
                     case StylePropertyId.FitItemsHorizontal:
                     case StylePropertyId.AlignItemsHorizontal:
                         flags |= LayoutBoxFlags.RequireLayoutHorizontal;
                         break;
+
                     case StylePropertyId.FitItemsVertical:
                     case StylePropertyId.AlignItemsVertical:
                         flags |= LayoutBoxFlags.RequireLayoutVertical;
@@ -676,7 +684,14 @@ namespace UIForia.Systems {
                 remaining = Shrink(colTrackList, remaining);
             }
 
-            PositionTracks(colTrackList, element.style.GridLayoutColGap, paddingBorderHorizontalStart);
+            SpaceDistribution distribution = element.style.DistributeExtraSpaceHorizontal;
+            if (distribution == SpaceDistribution.Default) {
+                distribution = SpaceDistribution.AfterContent;
+            }
+
+            SpaceDistributionUtil.GetAlignmentOffsets(remaining, colTrackList.size, distribution, out float distributionOffset, out float spacerSize);
+
+            PositionTracks(colTrackList, element.style.GridLayoutColGap, paddingBorderHorizontalStart + distributionOffset, spacerSize);
 
             float alignment = element.style.AlignItemsHorizontal;
             LayoutFit fit = element.style.FitItemsHorizontal;
@@ -713,12 +728,12 @@ namespace UIForia.Systems {
             }
         }
 
-        private static void PositionTracks(StructList<GridTrack> trackList, float gap, float inset) {
+        private static void PositionTracks(StructList<GridTrack> trackList, float gap, float inset, float spacerSize = 0) {
             float offset = inset;
             for (int i = 0; i < trackList.size; i++) {
                 ref GridTrack track = ref trackList.array[i];
                 track.position = offset;
-                offset += gap + track.size;
+                offset += gap + track.size + spacerSize;
             }
         }
 
@@ -750,6 +765,10 @@ namespace UIForia.Systems {
             retn += element.style.GridLayoutRowGap * (rowTrackList.size - 1);
 
             float remaining = contentHeight - retn;
+            SpaceDistribution distribution = element.style.DistributeExtraSpaceVertical;
+            if (distribution == SpaceDistribution.Default) {
+                distribution = SpaceDistribution.AfterContent;
+            }
 
             if (remaining > 0) {
                 remaining = Grow(rowTrackList, remaining);
@@ -758,7 +777,8 @@ namespace UIForia.Systems {
                 remaining = Shrink(rowTrackList, remaining);
             }
 
-            PositionTracks(rowTrackList, element.style.GridLayoutRowGap, paddingBorderVerticalStart);
+            SpaceDistributionUtil.GetAlignmentOffsets(remaining, colTrackList.size, distribution, out float distributionOffset, out float spacerSize);
+            PositionTracks(rowTrackList, element.style.GridLayoutRowGap, paddingBorderVerticalStart + distributionOffset, spacerSize);
 
             float alignment = element.style.AlignItemsVertical;
             LayoutFit fit = element.style.FitItemsVertical;
@@ -809,7 +829,6 @@ namespace UIForia.Systems {
                     pieces += track.cellDefinition.growFactor;
                 }
             }
-
 
             if (pieces == 0) {
                 return 0;
@@ -966,6 +985,7 @@ namespace UIForia.Systems {
                     case GridTrackSizeType.RepeatFit:
                     case GridTrackSizeType.RepeatFill:
                         throw new NotImplementedException();
+
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
@@ -1091,7 +1111,6 @@ namespace UIForia.Systems {
                 int rowStart = placement.y;
                 int colSpan = placement.width;
                 int rowSpan = placement.height;
-
 
                 if (colStart < 1) {
                     colStart = 0;

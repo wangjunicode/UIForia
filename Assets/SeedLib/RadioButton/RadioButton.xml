@@ -1,0 +1,9 @@
+﻿<UITemplate>
+
+    <Style src="SeedLib/RadioButton/RadioButton.style"/>
+
+    <Contents style="radio-button">
+        <Div attr:id="selected" if.once="false" style="radio-button-checked"/>
+    </Contents>
+
+</UITemplate>

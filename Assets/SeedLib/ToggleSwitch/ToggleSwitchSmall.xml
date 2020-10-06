@@ -1,0 +1,11 @@
+﻿<UITemplate>
+
+    <Style path="SeedLib/ToggleSwitch/ToggleSwitch.style"/>
+
+    <Contents style="toggle-switch-small">
+
+        <Div attr:id="knob" style="knob-small"/>
+
+    </Contents>
+
+</UITemplate>

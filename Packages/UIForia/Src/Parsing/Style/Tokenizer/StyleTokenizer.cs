@@ -147,6 +147,9 @@ namespace UIForia.Parsing.Style.Tokenizer {
                 case "and": return new StyleToken(StyleTokenType.And, identifierLowerCase, context.line, context.column);
                 case "not": return new StyleToken(StyleTokenType.Not, identifierLowerCase, context.line, context.column);
                 case "style": return new StyleToken(StyleTokenType.Style, identifierLowerCase, context.line, context.column);
+                case "select": return new StyleToken(StyleTokenType.Select, identifierLowerCase, context.line, context.column);
+                case "children": return new StyleToken(StyleTokenType.Children, identifierLowerCase, context.line, context.column);
+                case "descendents": return new StyleToken(StyleTokenType.Descendents, identifierLowerCase, context.line, context.column);
                 case "animation": return new StyleToken(StyleTokenType.Animation, identifierLowerCase, context.line, context.column);
                 case "spritesheet": return new StyleToken(StyleTokenType.SpriteSheet, identifierLowerCase, context.line, context.column);
                 case "texture": return new StyleToken(StyleTokenType.Texture, identifierLowerCase, context.line, context.column);

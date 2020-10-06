@@ -1,43 +1,133 @@
 ﻿<UITemplate>
-    
+
     <Style src="SeedLib/SeedLibTheme.style"/>
     <Style>
-        style root { 
-            PreferredSize = 1vw 1vh;
+        style root {
+        PreferredSize = 1vw 1vh;
         }
-        
+
         style scroll {
 
-            FlexItemGrow = 1;
-            PreferredSize = 1pca 0px;
-            BackgroundColor = white;
-        
+        FlexItemGrow = 1;
+        PreferredSize = 1pca 0px;
+        BackgroundColor = white;
+
         }
-        
+
         style big {
-            PreferredHeight = 3000px;
-            BackgroundColor = white;
-            PreferredWidth = 100px;
+        PreferredHeight = 3000px;
+        BackgroundColor = white;
+        PreferredWidth = 100px;
         }
-        
+
+        style row {
+        FlexLayoutDirection = Horizontal;
+        }
+
+        style fill-parent-width {
+        PreferredWidth = 1pca;
+        }
+
     </Style>
     <Contents style="root">
-        
-        <TopBar>
-            
-        </TopBar>
-        
-        <ScrollView style="scroll">
-            <Button attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
-            <Button attr:variant="Secondary" label="'Hello'"/>
-            <Button attr:variant="Primary" icon="'Icons/star'" />
 
-            <Button attr:disabled="true" attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
-            <Button attr:disabled="true" attr:variant="Primary" label="'Hello'"/>
-            <Button attr:disabled="true" attr:variant="Primary" icon="'Icons/star'" mouse:click="() => UnityEngine.Debug.Log('Click')"/>
+        <TopBar>
+
+        </TopBar>
+
+        <ScrollView style="scroll">
+
+            <Group style="row">
+                <Button attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
+                <Button attr:variant="Primary" label="'Hello'"/>
+                <Button attr:variant="Primary" icon="'Icons/star'"/>
+                <Div style:PreferredWidth="300">
+                    <Button style="fill-parent-width" label="'Hello'" icon="'Icons/star'"/>
+                </Div>
+            </Group>
+
+            <Group style="row">
+                <Button attr:disabled="true" attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
+                <Button attr:disabled="true" attr:variant="Primary" label="'Hello'"/>
+                <Button attr:disabled="true" attr:variant="Primary" icon="'Icons/star'"/>
+                <Div style:PreferredWidth="300">
+                    <Button style="fill-parent-width" attr:disabled="true" attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
+                </Div>
+            </Group>
+
+            <Group style="row">
+                <Button attr:variant="Secondary" label="'Hello'" icon="'Icons/star'"/>
+                <Button attr:variant="Secondary" label="'Hello'"/>
+                <Button attr:variant="Secondary" icon="'Icons/star'"/>
+                <Div style:PreferredWidth="300">
+                    <Button style="fill-parent-width" attr:variant="Secondary" label="'Hello'" icon="'Icons/star'"/>
+                </Div>
+            </Group>
+
+            <Group style="row">
+                <Button attr:variant="Secondary" attr:disabled="true" label="'Hello'" icon="'Icons/star'"/>
+                <Button attr:variant="Secondary" attr:disabled="true" label="'Hello'"/>
+                <Button attr:variant="Secondary" attr:disabled="true" icon="'Icons/star'"/>
+                <Div style:PreferredWidth="300">
+                    <Button style="fill-parent-width" attr:variant="Secondary" attr:disabled="true" label="'Hello'" icon="'Icons/star'"/>
+                </Div>
+            </Group>
+
+            <Group style="row">
+                <Checkbox/>
+                <Checkbox isChecked.once="true"/>
+                <Checkbox isChecked.once="true" isMixed="true"/>
+            </Group>
+
+            <Group style="row">
+                <RadioButton/>
+                <RadioButton/>
+                <RadioButton isChecked.once="true"/>
+                <RadioButton isChecked.once="true"/>
+                <RadioButton attr:disabled="true" isChecked.once="true"/>
+                <RadioButton attr:disabled="true"/>
+            </Group>
+
+            <Group style="row">
+                <LabeledRadioButton label="'Label'"/>
+                <LabeledRadioButton attr:disabled="true" label="'Label'"/>
+            </Group>
+
+            <Group style="row">
+                <LabeledCheckbox label="'Label'"/>
+                <LabeledCheckbox label="'Long label'" isChecked.once="true"/>
+                <LabeledCheckbox label="'Super long label this is crazy please dont do this'" isChecked.once="true" isMixed="true"/>
+            </Group>
+
+            <Group style="row">
+                <Slider rangeStart="0" rangeEnd="10"/>
+                <Slider showTrail.once="true" rangeStart.once="0" rangeEnd.once="10" stepSize.once="2" value.once="7.6f"/>
+                <Div style:PreferredWidth="300">
+                    <Slider style="fill-parent-width" 
+                            showStepTicks="true"
+                            useBothHandles.once="true"
+                            showTrail.once="true" 
+                            rangeStart.once="0" 
+                            rangeEnd.once="10" 
+                            stepSize.once="2" 
+                            value.once="7.6f"/>
+                </Div>
+            </Group>
+
+            <Group style="row">
+                <ToggleSwitch/>
+                <ToggleSwitch attr:disabled="true"/>
+                <ToggleSwitch attr:disabled="true" value="true"/>
+            </Group>
             
+            <Group style="row">
+                <ToggleSwitchSmall/>
+                <ToggleSwitchSmall attr:disabled="true"/>
+                <ToggleSwitchSmall attr:disabled="true" value="true"/>
+            </Group>
+
         </ScrollView>
-        
+
     </Contents>
-    
+
 </UITemplate>

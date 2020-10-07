@@ -6,7 +6,7 @@ using UIForia.Util;
 
 namespace UIForia.Compilers {
 
-    public class AttributeCompilerContext {
+    internal class AttributeCompilerContext {
 
         public int depth;
         public ProcessedType elementType;

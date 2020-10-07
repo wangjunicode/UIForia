@@ -125,34 +125,43 @@ namespace UIForia {
                     compilation.diagnostics.Dump();
                     return application;
                 }
-                
+
                 // todo -- make sure we are only compiling one app at a time
-                
+
                 CompilationResult compileResult = compilation.CompileDynamic();
 
-                if (compileResult.successful) {
-
-                    if (!application.IsValid) {
-                        application.Reset();
-                    }
-                    application.IsValid = true;
-                    application.Initialize();
-
-                }
+                ApplicationSetup setup = new ApplicationSetup();
                 
+                setup.rootType = entryType;
+                setup.templateData = compileResult.compiledTemplates;
+                setup.typeTemplateMap = compileResult.templateDataMap;
+
+                if (compileResult.successful) {
+                    application.IsValid = true;
+                    try {
+                        application.Initialize(setup);
+                    }
+                    catch (Exception e) {
+                        application.IsValid = false;
+                        Debug.LogException(e);
+                    }
+                }
+                else {
+                    application.IsValid = false;
+                }
             }
 
             return application;
         }
 
         private static void CreateProcessedElementTypes() {
-
             // this should only run once on startup, the type map might get appended to during compilation but the types will never change
             // while an application is running
 
             if (TypeProcessor.typeMap.Count > 0) {
                 return;
             }
+
             Stopwatch sw = Stopwatch.StartNew();
 
             // todo -- this is totally threadsafe as long as I give each thread its own diagnostics and change the TypeProcessor.typeMap to be a concurrent dictionary

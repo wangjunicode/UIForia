@@ -1,0 +1,11 @@
+<UITemplate>
+
+    <Style src="ExpandTemplate/ExpandTemplate.style"/>
+    
+    <Contents attr:test="yes" style="expand">
+        <Div>
+            Hello this is expanded
+        </Div>
+    </Contents>
+
+</UITemplate>

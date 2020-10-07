@@ -37,7 +37,7 @@ namespace UIForia.Compilers {
         internal static IList<Type> elementTypes;
         internal static IList<MethodInfo> changeHandlers;
         internal static Dictionary<string, Func<TemplateLookup, TemplateLocation>> templateLocators;
-        internal static Dictionary<string, Func<string, string, string>> styleLocators;
+        internal static Dictionary<string, Func<StyleLookup, StyleLocation>> styleLocators;
         
         private static Stats stats;
 
@@ -62,7 +62,7 @@ namespace UIForia.Compilers {
             UnityEditor.TypeCache.MethodCollection styleLocationFunctions = UnityEditor.TypeCache.GetMethodsWithAttribute<StyleLocatorAttribute>();
 
             templateLocators = new Dictionary<string, Func<TemplateLookup, TemplateLocation>>();
-            styleLocators = new Dictionary<string, Func<string, string, string>>();
+            styleLocators = new Dictionary<string, Func<StyleLookup, StyleLocation>>();
             
             foreach (MethodInfo method in templateLocationFunctions) {
                 Func<TemplateLookup, TemplateLocation> del = null;
@@ -99,7 +99,7 @@ namespace UIForia.Compilers {
             }
 
             foreach (MethodInfo method in styleLocationFunctions) {
-                Func<string, string, string> del = null;
+                Func<StyleLookup, StyleLocation> del = null;
                 if (!method.IsStatic) { }
 
                 if (!method.IsPublic) { }
@@ -107,7 +107,7 @@ namespace UIForia.Compilers {
                 if (method.ReturnType != typeof(string)) { }
 
                 try {
-                    del = (Func<string, string, string>) Delegate.CreateDelegate(typeof(Func<string, string, string>), method, true);
+                    del = (Func<StyleLookup, StyleLocation>) Delegate.CreateDelegate(typeof(Func<StyleLookup, StyleLocation>), method, true);
                 }
                 catch (Exception e) {
                     Debug.Log(e);
@@ -115,7 +115,7 @@ namespace UIForia.Compilers {
 
                 StyleLocatorAttribute attr = method.GetCustomAttribute<StyleLocatorAttribute>();
 
-                if (styleLocators.TryGetValue(attr.name, out var _)) { }
+                if (styleLocators.TryGetValue(attr.name, out Func<StyleLookup, StyleLocation> _)) { }
                 else {
                     styleLocators.Add(attr.name, del);
                 }

@@ -120,9 +120,22 @@ namespace UIForia.Compilers {
             // if no errors!
             MapDynamicCompiledResults();
 
+            // todo -- get rid of template data map and replace with id mapping to template data
+            // allows multiple templates per element and gets rid of lots of dictionary lookups
+            Dictionary<Type, int> templateDataMap = new Dictionary<Type, int>(compiledTemplates.size);
+            
+            for (int i = 0; i < compiledTemplates.size; i++) {
+                templateDataMap[compiledTemplates.array[i].type] = i;
+            }
+            
             // if precompiled or generating
             PrintTemplates();
-            return new CompilationResult();
+            return new CompilationResult() {
+                successful = true,
+                rootType = entryType,
+                templateDataMap = templateDataMap,
+                compiledTemplates = compiledTemplates
+            };
 
         }
 

@@ -30,17 +30,16 @@ namespace UIForia {
 
         public static bool IsProbablyTemplate(string contents) {
             unsafe {
-
                 fixed (char* ptr = contents) {
                     CharStream stream = new CharStream(ptr, 0, contents.Length);
                     stream.ConsumeWhiteSpaceAndComments(CommentMode.XML);
                     if (stream.TryMatchRange("<?")) {
                         stream.ConsumeUntilFound("?>", out CharSpan _);
                     }
+
                     stream.ConsumeWhiteSpaceAndComments(CommentMode.XML);
                     return stream.HasMoreTokens && stream.TryMatchRange("<UITemplate");
                 }
-
             }
         }
 
@@ -53,7 +52,6 @@ namespace UIForia {
             elementStack.size = 0;
             textBuffer.size = 0;
             unsafe {
-
                 fixed (char* ptr = contents) {
                     CharStream stream = new CharStream(ptr, 0, contents.Length);
 
@@ -74,7 +72,6 @@ namespace UIForia {
                     openStack.Push(rootTagName); // push the <UITemplate> tag
 
                     while (stream.HasMoreTokens && !hasCriticalError) {
-
                         uint p = stream.Ptr;
                         stream.ConsumeWhiteSpaceAndComments(CommentMode.XML);
 
@@ -94,7 +91,6 @@ namespace UIForia {
                         if (!hasCriticalError && p == stream.Ptr) {
                             break;
                         }
-
                     }
 
                     // assert open stack is empty except for the <UITemplate> root node
@@ -145,7 +141,6 @@ namespace UIForia {
             }
 
             return true;
-
         }
 
         private const string s_Style = "</Style";
@@ -164,10 +159,8 @@ namespace UIForia {
                 }
 
                 unsafe {
-
                     int length = s_Style.Length;
                     fixed (char* styleTag = s_Style) {
-
                         // Note -- this will not consume comments which means we'll need to remove xml comments before actually parsing the style 
                         if (!stream.ConsumeUntilFound(styleTag, length, out CharSpan styleSource)) {
                             LogError("Expected to find a terminating </Style> tag but hit the end of the file without finding one.");
@@ -184,7 +177,6 @@ namespace UIForia {
                         stream.Advance();
 
                         builder.AddStyleSource(styleSource);
-
                     }
                 }
             }
@@ -209,7 +201,6 @@ namespace UIForia {
                 }
 
                 builder.AddStyleReference(srcAttr.Value.value, aliasAttr?.value ?? default);
-
             }
             else {
                 // invalid
@@ -221,7 +212,6 @@ namespace UIForia {
         }
 
         private bool ParseUsingAttributes(CharSpan usingSpan, ref CharStream stream) {
-
             ParseElementAttributes(ref stream);
 
             // ensure the <Using> is self closing
@@ -261,7 +251,7 @@ namespace UIForia {
             return null;
         }
 
-        private bool TryMakeAttribute(in CharSpan prefix, in CharSpan attrKey, in CharSpan attrValue, out AttributeDefinition3 attribute) {
+        private bool TryMakeAttribute(in CharSpan prefix, CharSpan attrKey, in CharSpan attrValue, out AttributeDefinition3 attribute) {
             AttributeType attributeType = default;
             AttributeFlags flags = default;
             attribute = default;
@@ -269,10 +259,34 @@ namespace UIForia {
             if (prefix.Length != 0) {
                 if (prefix == "attr") {
                     attributeType = AttributeType.Attribute;
+                    if (attrValue.HasValue) {
+                        if (!attrValue.StartsWith('{') && !attrValue.EndsWith('}')) {
+                            flags |= AttributeFlags.Const;
+                        }
+                    }
                 }
                 else if (prefix == "require") { }
                 else if (prefix == "generic") { }
-                else if (prefix == "style") { }
+                else if (prefix == "style") {
+                    attributeType = AttributeType.InstanceStyle;
+                    if (attrKey.Contains(".")) {
+                        if (attrKey.StartsWith("hover.")) {
+                            flags |= AttributeFlags.StyleStateHover;
+                            attrKey = attrKey.Substring("hover.".Length);
+                        }
+                        else if (attrKey.StartsWith("focus.")) {
+                            flags |= AttributeFlags.StyleStateFocus;
+                            attrKey = attrKey.Substring("focus.".Length);
+                        }
+                        else if (attrKey.StartsWith("active.")) {
+                            flags |= AttributeFlags.StyleStateActive;
+                            attrKey = attrKey.Substring("active.".Length);
+                        }
+                        else {
+                            diagnostics.LogWarning("Invalid style property");
+                        }
+                    }
+                }
                 else if (prefix == "inject") { }
                 else if (prefix == "property") {
                     attributeType = AttributeType.Property;
@@ -314,7 +328,6 @@ namespace UIForia {
                         LogError($"`{attrValue} is a reserved name and cannot be used as a context variable name");
                         return false;
                     }
-
                 }
                 else if (prefix == "sync") {
                     attributeType = AttributeType.Property;
@@ -370,7 +383,6 @@ namespace UIForia {
             stream.SetCommentMode(CommentMode.None);
 
             while (stream.HasMoreTokens && !hasCriticalError) {
-
                 // catch closing tag but don't step over it
                 if (stream.Current == '>' || (stream.Current == '/' && stream.Next == '>')) {
                     break;
@@ -408,9 +420,7 @@ namespace UIForia {
                 if (TryMakeAttribute(prefix, attrKey, attrValue, out AttributeDefinition3 attr)) {
                     attrBuffer.Add(attr);
                 }
-
             }
-
         }
 
         private unsafe CharSpan GetFullTagRange(in CharSpan prefix, in CharSpan tagName) {
@@ -418,7 +428,6 @@ namespace UIForia {
         }
 
         private bool TryParseElementTag(ref CharStream stream) {
-
             if (!TryParseTag(ref stream, false, out CharSpan prefix, out CharSpan tagName)) {
                 return false;
             }
@@ -465,20 +474,17 @@ namespace UIForia {
             }
 
             return true;
-
         }
 
         private bool TryFindIdAttribute(out RangeInt id) {
             for (int i = 0; i < attrBuffer.size; i++) {
                 if (attrBuffer.array[i].type == AttributeType.Attribute) {
-
                     CharSpan span = builder.GetCharSpan(attrBuffer.array[i].key);
 
                     if (span == "id") {
                         id = attrBuffer.array[i].value;
                         return true;
                     }
-
                 }
             }
 
@@ -519,10 +525,9 @@ namespace UIForia {
             // todo -- remap line numbers as post-processing step or on error
 
             while (elementStack.size > 0 && stream.HasMoreTokens && !hasCriticalError) {
-
                 if (TryParseTextContent(ref stream)) {
                     TemplateFileShellBuilder.TemplateASTBuilder parent = elementStack.Peek();
-                    
+
                     if (parent.GetNodeType() == TemplateNodeType.Text) {
                         // todo -- line numbers are not correct
                         parent.SetTextContent(textBuffer, default);
@@ -530,7 +535,7 @@ namespace UIForia {
                     else {
                         // todo -- line numbers are not correct
                         TemplateFileShellBuilder.TemplateASTBuilder textNode = parent.AddTextChild(null, stream.GetLineInfo());
-                        textNode.SetTextContent(textBuffer, default);  
+                        textNode.SetTextContent(textBuffer, default);
                     }
 
                     continue;
@@ -543,11 +548,9 @@ namespace UIForia {
                 }
 
                 TryParseElementClosingTag(ref stream);
-
             }
 
             openStack.Pop();
-
         }
 
         private bool TryParseTextContent(ref CharStream stream) {
@@ -555,7 +558,6 @@ namespace UIForia {
 
             bool hasNonWhitespace = false;
             while (stream.HasMoreTokens) {
-
                 char current = stream.Current;
 
                 switch (current) {
@@ -599,14 +601,12 @@ namespace UIForia {
                 }
 
                 stream.Advance();
-
             }
 
             return false;
         }
 
         private bool TryParseTag(ref CharStream stream, bool closing, out CharSpan prefix, out CharSpan tagName) {
-
             prefix = default;
             tagName = default;
 
@@ -628,7 +628,6 @@ namespace UIForia {
             }
 
             if (stream.TryParseCharacter(':')) {
-
                 if (!stream.TryParseMultiDottedIdentifier(out tagName, WhitespaceHandling.ConsumeAll, true)) {
                     LogError("Expected to find a valid tag name after the ':' while parsing tag `<" + prefixOrIdentifier + ":` ", prefixOrIdentifier.GetLineInfo());
                     return false;
@@ -652,7 +651,6 @@ namespace UIForia {
             }
 
             return true;
-
         }
 
         private unsafe bool TryParseElementClosingTag(ref CharStream stream) {
@@ -679,7 +677,6 @@ namespace UIForia {
             }
 
             return true;
-
         }
 
         private void LogError(string error, LineInfo lineInfo) {

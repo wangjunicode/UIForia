@@ -16,7 +16,7 @@ namespace UIForia.Compilers {
 
     }
 
-    public class TemplateExpressionSet {
+    internal class TemplateExpressionSet {
 
         public ProcessedType processedType;
         public LambdaExpression entryPoint;

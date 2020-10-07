@@ -6,16 +6,16 @@ using UIForia.Util;
 
 namespace UIForia.Compilers {
 
-    public readonly struct AttrInfo {
+    internal struct AttrInfo {
 
-        public readonly string key;
-        public readonly string value;
-        public readonly int depth;
-        public readonly int line;
-        public readonly int column;
-        public readonly AttributeType type;
-        public readonly AttributeFlags flags;
-        public readonly bool isInjected;
+        public string key;
+        public string value;
+        public int depth;
+        public int line;
+        public int column;
+        public AttributeType type;
+        public AttributeFlags flags;
+        public bool isInjected;
 
         public AttrInfo(int depth, in AttributeDefinition attr) {
             this.depth = depth;
@@ -98,7 +98,7 @@ namespace UIForia.Compilers {
 
     }
 
-    public struct SlotOverrideInfo {
+    internal struct SlotOverrideInfo {
 
         public ProcessedType rootType;
         public AttrInfo[] attributes;
@@ -106,7 +106,7 @@ namespace UIForia.Compilers {
 
     }
 
-    public class SlotOverrideChain {
+    internal class SlotOverrideChain {
 
         public string slotName;
         public SlotOverrideInfo[] chain;
@@ -118,7 +118,7 @@ namespace UIForia.Compilers {
 
     }
 
-    public class TemplateDataBuilder {
+    internal class TemplateDataBuilder {
 
         internal LambdaExpression entryPoint;
         internal LambdaExpression hydrate;

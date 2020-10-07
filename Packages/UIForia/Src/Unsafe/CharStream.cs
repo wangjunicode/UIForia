@@ -31,7 +31,7 @@ namespace UIForia.Util {
         XML
 
     }
-    
+
     public unsafe struct CharStream {
 
         private char* data;
@@ -98,9 +98,9 @@ namespace UIForia.Util {
                 int i = (int) ptr - 1;
                 int ds = (int) dataStart;
                 return i >= ds ? data[i] : '\0';
-            } 
+            }
         }
-        
+
         public char this[uint idx] {
             get => data[idx];
         }
@@ -145,7 +145,6 @@ namespace UIForia.Util {
             }
 
             fixed (char* s = str) {
-
                 if (UnsafeUtility.MemCmp(s, data + ptr, str.Length * 2) != 0) {
                     return false;
                 }
@@ -153,7 +152,6 @@ namespace UIForia.Util {
                 Advance((uint) str.Length);
                 return true;
             }
-
         }
 
         public bool TryMatchRange(in CharSpan charSpan) {
@@ -165,7 +163,6 @@ namespace UIForia.Util {
                 if (data[ptr + i] != charSpan[i]) {
                     return false;
                 }
-
             }
 
             Advance((uint) charSpan.Length);
@@ -262,11 +259,11 @@ namespace UIForia.Util {
             ConsumeWhiteSpaceAndComments();
             this.commentMode = lastMode;
         }
-        
+
         private static bool IsSpace(char c) {
             return c == ' ' || c == '\t' || c == '\n' || c == '\r';
         }
-        
+
         public void ConsumeWhiteSpaceAndComments() {
             while (true) {
                 while (ptr < dataEnd && char.IsWhiteSpace(data[ptr])) {
@@ -294,20 +291,19 @@ namespace UIForia.Util {
                 break;
             }
         }
-        
+
         public void ConsumeXMLComment() {
-            
             if (data[ptr] == '<' && ptr + 4 < dataEnd && data[ptr + 1] == '!' && data[ptr + 2] == '-' && data[ptr + 3] == '-') {
                 ptr += 4;
-                
+
                 while (ptr + 3 < dataEnd) {
-                    if(data[ptr] == '-' && data[ptr + 1] == '-' && data[ptr + 2] == '>') {
+                    if (data[ptr] == '-' && data[ptr + 1] == '-' && data[ptr + 2] == '>') {
                         ptr += 3;
                         return;
                     }
+
                     ptr++;
                 }
-                
             }
 
             // while (ptr < dataEnd) {
@@ -441,17 +437,17 @@ namespace UIForia.Util {
         }
 
         public bool TryGetStreamUntil(char terminator, out CharStream span, char escape) {
-            int i = (int)ptr;
+            int i = (int) ptr;
             char prev = '\0';
             if (i - 1 >= dataStart) {
                 prev = data[i - 1];
             }
-            
+
             while (i < dataEnd) {
                 char c = data[i];
                 if (c == terminator && prev != escape) {
                     span = new CharStream(data, (ushort) ptr, (ushort) i);
-                    ptr = (uint)i;
+                    ptr = (uint) i;
                     return true;
                 }
 
@@ -462,7 +458,7 @@ namespace UIForia.Util {
             span = default;
             return false;
         }
-        
+
         public bool TryGetStreamUntil(char terminator, out CharStream span) {
             uint i = ptr;
             while (i < dataEnd) {
@@ -552,7 +548,6 @@ namespace UIForia.Util {
         }
 
         public bool TryParseMultiDottedIdentifier(out CharSpan retn, WhitespaceHandling whitespaceHandling = WhitespaceHandling.ConsumeAll, bool allowMinus = false) {
-
             uint start = ptr;
 
             if ((whitespaceHandling & WhitespaceHandling.ConsumeBefore) != 0) {
@@ -567,7 +562,6 @@ namespace UIForia.Util {
             int end = identifier.rangeEnd;
 
             while (TryParseCharacter('.', WhitespaceHandling.None)) {
-
                 if (!TryParseIdentifier(out CharSpan endIdent, allowMinus, WhitespaceHandling.None)) {
                     retn = default;
                     ptr = start;
@@ -583,11 +577,9 @@ namespace UIForia.Util {
             }
 
             return true;
-
         }
 
         public bool TryParseDottedIdentifier(out CharSpan retn, out bool wasDotted, bool allowMinus = true) {
-
             if (!TryParseIdentifier(out CharSpan identifier, allowMinus, WhitespaceHandling.ConsumeBefore)) {
                 retn = default;
                 wasDotted = false;
@@ -610,7 +602,6 @@ namespace UIForia.Util {
             wasDotted = true;
             retn = new CharSpan(data, identifier.rangeStart, endIdent.rangeEnd);
             return true;
-
         }
 
         public bool TryParseDottedIdentifier(out CharSpan retn) {
@@ -757,7 +748,6 @@ namespace UIForia.Util {
 
                 return retn;
             }
-
         }
 
         public bool TryParseUInt(out uint intVal) {
@@ -1082,11 +1072,9 @@ namespace UIForia.Util {
             }
 
             return TryParseCharacter('>');
-
         }
 
         public bool TryParseXMLAttribute(out CharSpan key, out CharSpan value, bool requireQuotes = false) {
-
             uint start = ptr;
 
             while (ptr < dataEnd && char.IsWhiteSpace(data[ptr])) {
@@ -1115,7 +1103,6 @@ namespace UIForia.Util {
                 if (TryGetCharSpanTo('"', out value)) {
                     return true;
                 }
-
             }
             // read until we hit a space, > or end of input
             else if (TryGetCharSpanTo(' ', '>', out value)) {
@@ -1124,7 +1111,6 @@ namespace UIForia.Util {
 
             ptr = start;
             return false;
-
         }
 
         public bool TryParseXMLOpenTagIdentifier(out CharSpan identifier) {
@@ -1139,7 +1125,6 @@ namespace UIForia.Util {
             }
 
             return false;
-
         }
 
         public bool TryMatchRangeIgnoreCase(string str, WhitespaceHandling whitespaceHandling = WhitespaceHandling.ConsumeAll) {
@@ -1234,7 +1219,6 @@ namespace UIForia.Util {
         }
 
         public bool TryParseFixedLengthUnit(out UIFixedUnit fixedUnit) {
-
             while (ptr < dataEnd && char.IsWhiteSpace(data[ptr])) {
                 ptr++;
             }
@@ -1298,18 +1282,18 @@ namespace UIForia.Util {
             }
 
             ptr++;
-            
+
             uint rangeStart = ptr;
             for (uint i = ptr; i < dataEnd; i++) {
-                if(data[i] == quote && data[i - 1] != '\\') {
-                    span = new CharSpan(data, (int)rangeStart,(int) i);
+                if (data[i] == quote && data[i - 1] != '\\') {
+                    span = new CharSpan(data, (int) rangeStart, (int) i);
                     ptr = i + 1; // step over quote;
                     if ((whitespaceHandling & WhitespaceHandling.ConsumeAfter) != 0) {
                         ConsumeWhiteSpaceAndComments();
                     }
-                    
+
                     return true;
-                }    
+                }
             }
 
             ptr = start;
@@ -1338,40 +1322,40 @@ namespace UIForia.Util {
             uint i = ptr;
             uint save = ptr;
             char startChar = key[0];
-            
+
             while (i != dataEnd) {
-                
                 if (data[i] == startChar) {
                     ptr = i;
                     if (Previous != ' ') {
                         i++;
                         continue;
                     }
-                    if (TryMatchRange(key) && TryParseCharacter('=')) {
 
+                    if (TryMatchRange(key) && TryParseCharacter('=')) {
                         if (ptr + 1 >= dataEnd) {
                             i++;
                             continue;
                         }
+
                         char openQuote = data[ptr];
                         ptr++;
                         if (openQuote != '\'' && openQuote != '"') {
                             openQuote = '\0';
                         }
-                        
+
                         if (!TryParseFloat(out floatValue)) {
                             i++;
                             continue;
                         }
-                        
+
                         if (openQuote != '\0' && !TryParseCharacter(openQuote)) {
                             i++;
-                            continue;    
+                            continue;
                         }
-                        
+
                         ptr = save; // this method doesnt consume the stream
                         return true;
-                    }    
+                    }
                 }
 
                 i++;
@@ -1381,41 +1365,40 @@ namespace UIForia.Util {
             floatValue = 0;
             return false;
         }
-        
+
         public bool TryParseColorAttr(string key, out Color32 colorValue, char quote = '\0') {
             uint i = ptr;
             uint save = ptr;
             char startChar = key[0];
-            
+
             while (i != dataEnd) {
-                
                 if (data[i] == startChar) {
                     ptr = i;
                     if (Previous != ' ') {
                         i++;
                         continue;
                     }
-                    if (TryMatchRange(key) && TryParseCharacter('=')) {
 
+                    if (TryMatchRange(key) && TryParseCharacter('=')) {
                         char openQuote = data[ptr];
-                        
+
                         if (openQuote != '\'' && openQuote != '"') {
                             openQuote = '\0';
                         }
-                        
+
                         if (!TryParseColorProperty(out colorValue)) {
                             i++;
                             continue;
                         }
-                        
+
                         if (openQuote != '\0' && !TryParseCharacter(openQuote)) {
                             i++;
-                            continue;    
+                            continue;
                         }
-                        
+
                         ptr = save; // this method doesnt consume the stream
                         return true;
-                    }    
+                    }
                 }
 
                 i++;
@@ -1442,33 +1425,32 @@ namespace UIForia.Util {
                 return false;
             }
 
-            uint max = (uint)(dataEnd - length);
+            uint max = (uint) (dataEnd - length);
             uint idx = ptr;
             while (idx < max) {
-
                 while (idx < max && data[idx] != str[0]) {
                     idx++;
                 }
 
                 if (length == 1) {
-                    result = new CharSpan(data, (int)ptr, (int)idx + 1, baseOffset);
+                    result = new CharSpan(data, (int) ptr, (int) idx + 1, baseOffset);
                     ptr = (uint) (idx + length);
                     return true;
                 }
-                
+
                 bool found = true;
-                
+
                 // todo -- memcmp might be faster, depends on how big length is
                 for (int i = 1; i < length; i++) {
-                    if(data[idx + i] != str[i]) {
+                    if (data[idx + i] != str[i]) {
                         found = false;
                         break;
                     }
                 }
 
                 if (found) {
-                    result = new CharSpan(data, (int)ptr, (int)idx, baseOffset);
-                    ptr = idx + (uint)length;
+                    result = new CharSpan(data, (int) ptr, (int) idx, baseOffset);
+                    ptr = idx + (uint) length;
                     return true;
                 }
 
@@ -1477,15 +1459,13 @@ namespace UIForia.Util {
 
             result = default;
             return false;
-
         }
 
         public bool TryMatchRangeFast(char* str, int length) {
-            
             if (ptr + length < dataEnd) {
                 bool found = false;
                 for (int i = 0; i < length; i++) {
-                    if(data[ptr + i] != str[i]) {
+                    if (data[ptr + i] != str[i]) {
                         break;
                     }
                 }
@@ -1617,7 +1597,6 @@ namespace UIForia.Util {
         }
 
         public bool EqualsIgnoreCase(string str) {
-
             if (rangeEnd - rangeStart != str.Length) return false;
 
             fixed (char* s = str) {
@@ -1807,6 +1786,91 @@ namespace UIForia.Util {
             }
 
             return new LineInfo(line, col);
+        }
+
+        public bool Contains(char c) {
+            for (int i = rangeStart; i < rangeEnd; i++) {
+                char test = data[i];
+                if (test == c) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool Contains(string str) {
+            char c = str[0];
+            for (int i = rangeStart; i < rangeEnd; i++) {
+                char test = data[i];
+                if (test == c) {
+                    if (StringUtil.EqualsRangeUnsafe(str, data, i, str.Length)) {
+                        return true;
+                    }
+                }
+
+                if (i + str.Length >= rangeEnd) {
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        public bool StartsWith(string str) {
+            if (HasValue || Length < str.Length) {
+                return false;
+            }
+
+            return StringUtil.EqualsRangeUnsafe(str, data, rangeStart, str.Length);
+        }
+
+        public bool StartsWith(char c, bool trim = true) {
+            if (!trim) {
+                return HasValue && data[rangeStart] == c;
+            }
+
+            for (int i = rangeStart; i < rangeEnd; i++) {
+                char test = data[i];
+
+                if (char.IsWhiteSpace(test)) {
+                    continue;
+                }
+
+                if (test == c) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            return false;
+        }
+
+        public bool EndsWith(char c, bool trim = true) {
+            if (!trim) {
+                return HasValue && data[rangeEnd - 1] == c;
+            }
+
+            for (int i = rangeEnd - 1; i != rangeStart; i--) {
+                char test = data[i];
+
+                if (char.IsWhiteSpace(test)) {
+                    continue;
+                }
+
+                if (test == c) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            return false;
+        }
+
+        public CharSpan Substring(int length) {
+            return new CharSpan(data, rangeStart + length, rangeEnd);
         }
 
     }

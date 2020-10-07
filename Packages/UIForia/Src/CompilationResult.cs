@@ -1,4 +1,7 @@
-﻿using UIForia.Compilers;
+﻿using System;
+using System.Collections.Generic;
+using UIForia.Compilers;
+using UIForia.Parsing;
 using UIForia.Util;
 
 namespace UIForia {
@@ -7,10 +10,13 @@ namespace UIForia {
 
         public bool successful { get; internal set; }
 
-        internal LightList<TemplateExpressionSet> compiledTemplates;
+        public ProcessedType rootType;
+        internal LightList<TemplateData> compiledTemplates;
+        public Dictionary<Type, int> templateDataMap;
 
         internal CompilationResult() {
-            compiledTemplates = new LightList<TemplateExpressionSet>(32);
+            compiledTemplates = new LightList<TemplateData>(32);
+            templateDataMap = new Dictionary<Type, int>(32);
         }
 
     }

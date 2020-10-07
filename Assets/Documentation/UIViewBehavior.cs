@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using SpaceGameDemo;
-using UIForia.Compilers;
+using CompilerTest;
 using UIForia.Elements;
-using UIForia.Graphics;
 using UIForia.Text;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Debug = UnityEngine.Debug;
 
 namespace UIForia {
 
@@ -59,9 +55,10 @@ namespace UIForia {
 
         public void Start() {
 
-            application = UIForiaRuntime.CreateGameApplication("GameApp", typeof(SpaceGameRoot));
+            application = UIForiaRuntime.CreateGameApplication("GameApp", typeof(CompilerTestRoot));
             
             return;
+            
 #if UNITY_EDITOR
             QualitySettings.vSyncCount = 0; // VSync must be disabled for target frame rate to work
             UnityEngine.Application.targetFrameRate = 60;

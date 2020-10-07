@@ -30,7 +30,7 @@ namespace UIForia.Util {
         }
 
         public static int ColorToInt(Color32 color) {
-            // todo -- endianness probably matters
+            // todo -- endianness probably matters!
             return (color.r << 24) + (color.g << 16) + (color.b << 8) + (color.a << 0);
         }
 

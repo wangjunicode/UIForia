@@ -1,0 +1,7 @@
+
+style expand {
+
+    BackgroundColor = red;
+    PreferredSize = 300px;
+    
+}

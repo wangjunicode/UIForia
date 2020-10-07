@@ -22,12 +22,17 @@ namespace UIForia {
         private UIElement parent;
         private UIElement element;
         private TemplateData currentTemplateData;
-        private Dictionary<Type, TemplateData> templateDataMap;
-
+        private Application application;
 
         private Action<UIElement> onElementRegistered;
 
         private ElementSystem elementSystem;
+
+        // public TemplateSystem(ElementSystem elementSystem) {
+        //     this.elementSystem = elementSystem;
+        //     this.contextStack = new LightStack<ContextEntry>();
+        // }
+
         // private StyleSystem2 styleSystem;
         // private AttributeSystem attributeSystem;
 
@@ -36,14 +41,27 @@ namespace UIForia {
         // this.contextStack = new LightStack<ContextEntry>(16);
         // }
 
-        public void Initialize(Dictionary<Type, TemplateData> templateDataMap, ElementSystem elementSystem) {
-            this.templateDataMap = templateDataMap;
-            this.contextStack.Clear();
+        private ApplicationSetup applicationSetup;
+
+        internal TemplateSystem(Application application) {
+            this.application = application;
+            this.elementSystem = application.elementSystem;
+        }
+
+        internal void Initialize(ApplicationSetup applicationSetup) {
+            this.applicationSetup = applicationSetup;
+            this.contextStack = new LightStack<ContextEntry>();
             this.currentTemplateData = default;
             this.root = default;
             this.parent = default;
             this.element = default;
-            this.elementSystem = elementSystem;
+        }
+
+        public void CreateEntryPoint(UIElement attachPoint, Type currentType) {
+            int idx = applicationSetup.typeTemplateMap[applicationSetup.rootType];
+            currentTemplateData = applicationSetup.templateData.array[idx];
+
+            UIElement rootElement = currentTemplateData.entry.Invoke(this);
         }
 
         public void HydrateEntryPoint() {
@@ -61,13 +79,13 @@ namespace UIForia {
             contextStack.array[--contextStack.size] = default;
         }
 
-        public void HydrateElement(Type type) {
+        // leaving type here for documentation reasons, the real data is taken from templateIndex
+        public void HydrateElement(Type type, int templateIndex) {
             ref ContextEntry entry = ref contextStack.array[contextStack.size - 1];
 
             TemplateData oldTemplateData = currentTemplateData;
 
-            // this could definitely turn into a type id indexed array and not use a map
-            templateDataMap.TryGetValue(type, out currentTemplateData);
+            currentTemplateData = applicationSetup.templateData.array[templateIndex];
 
             UIElement oldRoot = root;
             root = element;
@@ -162,18 +180,22 @@ namespace UIForia {
         }
 
         public void InitializeEntryPoint(UIElement entry, int attrCount) {
-            // element = entry;
-            // root = entry;
-            // element.bindingNode = new LinqBindingNode();
-            // element.bindingNode.root = element;
-            // element.bindingNode.parent = null;
-            // element.bindingNode.element = entry;
-            // element.flags = UIElementFlags.Alive | UIElementFlags.Enabled | UIElementFlags.AncestorEnabled;
-            // // todo -- template id / origin id / lexical id or whatever
-            // // todo -- entry point needs some love
-            // element.id = elementSystem.CreateElement(element, 0, -9999, -99999, element.flags);
-            // // attributeSystem.InitializeAttributes(element.id, attrCount);
-            // onElementRegistered?.Invoke(element); // do this later in batches maybe? depends on when it must be called
+            element = entry;
+            root = entry;
+            element.bindingNode = new LinqBindingNode();
+            element.bindingNode.root = element;
+            element.bindingNode.parent = null;
+            element.bindingNode.element = entry;
+            element.flags = UIElementFlags.Alive | UIElementFlags.Enabled | UIElementFlags.AncestorEnabled;
+            // todo -- template id / origin id / lexical id or whatever
+            // todo -- entry point needs some love
+            element.id = elementSystem.CreateElement(element, 0, -9999, -99999, element.flags);
+            // attributeSystem.InitializeAttributes(element.id, attrCount);
+            if (attrCount > 0) {
+                element.attributes = new StructList<ElementAttribute>(attrCount);
+            }
+
+            onElementRegistered?.Invoke(element); // do this later in batches maybe? depends on when it must be called
         }
 
         // todo -- template origin info / id
@@ -190,25 +212,31 @@ namespace UIForia {
         public void InitializeElement(int attrCount) {
             element.flags |= UIElementFlags.Alive;
 
+
             // element.vertigoApplication = application;
             // if ((parent.flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet)) {
             //     element.flags |= UIElementFlags.Enabled | UIElementFlags.AncestorEnabled;
             // }
             //
-            // element.parent = parent;
+            element.application = application;
+            element.parent = parent;
             // // todo -- template id / origin id / lexical id or whatever
-            // element.id = elementSystem.CreateElement(element, parent.hierarchyDepth + 1, -9999, -99999, element.flags);
+            element.id = elementSystem.CreateElement(element, parent.hierarchyDepth + 1, -9999, -99999, element.flags);
             // styleSystem.CreateElement(element.id);
-            //
-            // attributeSystem.InitializeAttributes(element.id, attrCount);
-            //
-            // element.bindingNode = new LinqBindingNode();
-            // element.bindingNode.element = element;
-            // element.bindingNode.root = root;
-            //
-            // onElementRegistered?.Invoke(element); // do this later in batches maybe? depends on when it must be called
-            //
-            // element.hierarchyDepth = parent.hierarchyDepth + 1;
+
+            if (attrCount > 0) {
+                element.attributes = new StructList<ElementAttribute>(attrCount);
+            }
+
+            //attributeSystem.InitializeAttributes(element.id, attrCount);
+
+            element.bindingNode = new LinqBindingNode();
+            element.bindingNode.element = element;
+            element.bindingNode.root = root;
+
+            onElementRegistered?.Invoke(element); // do this later in batches maybe? depends on when it must be called
+
+            element.hierarchyDepth = parent.hierarchyDepth + 1;
         }
 
         public void InitializeSlotElement(int attrCount, int contextDepth) {
@@ -293,7 +321,6 @@ namespace UIForia {
 
         }
 
-        public void CreateEntryPoint(UIElement attachPoint, Type currentType) { }
 
         // public void CreateAppEntryPoint(UIWindow rootWindow, Type currentType) {
         //     if (templateDataMap.TryGetValue(currentType, out currentTemplateData)) {

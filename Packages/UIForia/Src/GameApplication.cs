@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Util;
@@ -35,7 +36,7 @@ namespace UIForia {
 
             GameApplication retn = new GameApplication(false, templateSettings, resourceManager, onRegister);
 
-            retn.Initialize();
+            retn.Initialize(default); // todo -- remove
 
             retn.SetCamera(camera);
 
@@ -49,7 +50,7 @@ namespace UIForia {
 
             GameApplication retn = new GameApplication(true, templateSettings, resourceManager, onRegister);
 
-            retn.Initialize();
+            retn.Initialize(default);
 
             retn.SetCamera(camera);
 

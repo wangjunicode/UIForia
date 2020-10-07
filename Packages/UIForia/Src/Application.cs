@@ -25,10 +25,20 @@ using Debug = UnityEngine.Debug;
 
 namespace UIForia {
 
+    internal struct ApplicationSetup {
+
+        public Dictionary<Type, int> typeTemplateMap;
+        public LightList<TemplateData> templateData;
+
+        public Type rootType;
+        // public StyleDatabase styleDatabase;
+
+    }
+
     public abstract class Application : IDisposable {
 
         private static SizeInt UIApplicationSize;
-        
+
         public bool IsValid { get; internal set; }
 
         public static float dpiScaleFactor = Mathf.Max(1, Screen.dpi / 100f);
@@ -59,6 +69,7 @@ namespace UIForia {
         internal UISoundSystem soundSystem;
         internal LinqBindingSystem linqBindingSystem;
         internal ElementSystem elementSystem;
+        internal TemplateSystem templateSystem;
 
         protected ResourceManager resourceManager;
 
@@ -93,7 +104,7 @@ namespace UIForia {
                 throw new Exception("UIForiaSettings are missing. Use the UIForia/Create UIForia Settings to create it");
             }
         }
-        
+
         protected TemplateSettings templateSettings;
 
         protected Application(string applicationName) {
@@ -101,7 +112,7 @@ namespace UIForia {
             this.resourceManager = new ResourceManager();
             this.viewRootIds = new DataList<ElementId>.Shared(8, Allocator.Persistent);
         }
-        
+
         protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
             this.templateSettings = templateSettings;
             this.onElementRegistered = onElementRegistered;
@@ -113,7 +124,6 @@ namespace UIForia {
 #if UNITY_EDITOR
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += OnEditorReload;
 #endif
-
         }
 
 #if UNITY_EDITOR
@@ -127,7 +137,7 @@ namespace UIForia {
         protected virtual void CreateSystems() {
             elementSystem = new ElementSystem(InitialElementCapacity);
             styleSystem = new StyleSystem(elementSystem);
-            textSystem = new TextSystem(this, elementSystem, templateSettings.textEffectDefs);
+            textSystem = new TextSystem(this, elementSystem, null); // todo -- register text effects //templateSettings.textEffectDefs);
             routingSystem = new RoutingSystem();
             linqBindingSystem = new LinqBindingSystem();
             soundSystem = new UISoundSystem();
@@ -135,16 +145,18 @@ namespace UIForia {
             layoutSystem = new LayoutSystem(this, elementSystem, textSystem);
             renderSystem = new RenderSystem2(this, layoutSystem, elementSystem);
             inputSystem = new GameInputSystem(layoutSystem, new KeyboardInputManager());
+            templateSystem = new TemplateSystem(this);
         }
 
-        internal void Initialize() {
 
+        internal void Initialize(ApplicationSetup applicationSetup) {
             systems = new List<ISystem>();
             views = new List<UIView>();
 
             frameId = 1;
 
             CreateSystems();
+
 
             textSystem.frameId = frameId;
 
@@ -161,6 +173,8 @@ namespace UIForia {
             // else {
             //     templateData = TemplateLoader.LoadRuntimeTemplates(templateSettings.rootType, templateSettings);
             // }
+            
+            templateSystem.Initialize(applicationSetup);
 
             viewRootIds.size = 0;
 
@@ -168,6 +182,8 @@ namespace UIForia {
 
             viewRootIds.Add(view.dummyRoot.id);
 
+            templateSystem.CreateEntryPoint(view.dummyRoot, applicationSetup.rootType);
+            return;
             UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this));
             view.Init(rootElement);
 
@@ -175,12 +191,10 @@ namespace UIForia {
 
             layoutSystem.OnViewAdded(view);
             renderSystem.OnViewAdded(view);
-
         }
 
         public UIView CreateView<T>(string name, Size size, in Matrix4x4 matrix) where T : UIElement {
             if (templateData.TryGetTemplate<T>(out DynamicTemplate dynamicTemplate)) {
-
                 UIElement element = templateData.templates[dynamicTemplate.templateId].Invoke(null, new TemplateScope(this));
 
                 UIView view = new UIView(views.Count, this, name, element, matrix, size);
@@ -301,12 +315,14 @@ namespace UIForia {
             //     return;
             // }
 
+            throw new NotImplementedException("reset not implemented");
+
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             Reset();
-           
 
-            Initialize();
+
+            // Initialize();
 
             onRefresh?.Invoke();
 
@@ -315,11 +331,10 @@ namespace UIForia {
         }
 
         internal void Destroy() {
-            
             if (!IsValid) {
                 return;
             }
-            
+
             Applications.Remove(this);
             templateData?.Destroy();
 
@@ -393,7 +408,6 @@ namespace UIForia {
                     stack.array[stack.size++] = ptr;
                     ptr = ptr.GetPreviousSibling();
                 }
-
             }
 
             inputSystem.OnElementDestroyed(element);
@@ -539,7 +553,6 @@ namespace UIForia {
         }
 
         internal unsafe void DoEnableElement(UIElement element) {
-
             // if element is not enabled (ie has a disabled ancestor or is not alive), no-op 
             if (element.isDestroyed) {
                 return;
@@ -615,7 +628,6 @@ namespace UIForia {
 
                 // only continue if calling enable didn't re-disable the element
                 if ((metaInfo.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
-
                     int childCount = elementSystem.hierarchyTable[child.id].childCount;
                     child.enableStateChangedFrameId = frameId;
                     if (stack.size + childCount >= stack.array.Length) {
@@ -628,9 +640,7 @@ namespace UIForia {
                         // inline stack push
                         stack.array[stack.size++].element = ptr;
                         ptr = instanceTable[hierarchyTable.array[ptr.id.index].prevSiblingId.index];
-
                     }
-
                 }
             }
 
@@ -720,10 +730,8 @@ namespace UIForia {
                         // inline stack push
                         stack.array[stack.size++].element = ptr;
                         ptr = instanceTable[hierarchyTable.array[ptr.id.index].prevSiblingId.index];
-
                     }
                 }
-
             }
 
             // was disabled in loop, need to reset it here
@@ -736,7 +744,6 @@ namespace UIForia {
             StructStack<ElemRef>.Release(ref stack);
 
             inputSystem.BlurOnDisableOrDestroy();
-
         }
 
         public UIElement GetElement(ElementId elementId) {
@@ -751,7 +758,6 @@ namespace UIForia {
         }
 
         public static void RefreshAll() {
-
             for (int i = 0; i < Applications.Count; i++) {
                 Applications[i].Refresh();
             }

@@ -65,16 +65,10 @@ namespace Tests.Mocks {
             }
 
             MockApplication app = new MockApplication(s_UsePreCompiledTemplates, settings, settings.resourceManager, null);
-            app.Initialize();
+            app.Initialize(default); // todo -- template data map
             return app;
         }
 
-         public static MockApplication Setup(TemplateSettings settings,  bool usePreCompiledTemplates = false) {
-            MockApplication app = new MockApplication(usePreCompiledTemplates, settings, null, null);
-            app.Initialize();
-            return app;
-        }
-         
         public new MockInputSystem InputSystem => (MockInputSystem) inputSystem;
         public UIElement RootElement => views[0].RootElement;
 

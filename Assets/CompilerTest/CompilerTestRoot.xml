@@ -1,0 +1,21 @@
+<UITemplate>
+
+    <Contents attr:id="entry-point">
+
+        <Group>
+
+            Hello this it text
+
+            <Panel attr:id="some-id"/>
+
+<!--            <ExpandTemplate/>-->
+            
+        </Group>
+        <Div>
+            Text goes here
+        </Div>
+        <Group></Group>
+
+    </Contents>
+
+</UITemplate>

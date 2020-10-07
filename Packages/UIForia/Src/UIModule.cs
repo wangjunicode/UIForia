@@ -21,8 +21,9 @@ namespace UIForia {
         public string location;
         public UIModuleDefinition data;
 
+        public Func<StyleLookup, StyleLocation> styleLocator;
         public Func<TemplateLookup, TemplateLocation> templateLocator;
-        public Func<string, string, string> styleLocator;
+        
         public Dictionary<string, ProcessedType> tagNameMap;
         public string path;
         public string name;
@@ -40,7 +41,7 @@ namespace UIForia {
             }
 
             if (!string.IsNullOrEmpty(data.StyleLocator)) {
-                if (TypeScanner.styleLocators.TryGetValue(data.StyleLocator, out Func<string, string, string> locator)) {
+                if (TypeScanner.styleLocators.TryGetValue(data.StyleLocator, out Func<StyleLookup, StyleLocation> locator)) {
                     this.styleLocator = locator;
                 }
             }
@@ -50,8 +51,8 @@ namespace UIForia {
             return templateLocator?.Invoke(lookup) ?? DefaultLocators.LocateTemplate(lookup);
         }
 
-        public string ResolveStyle(string elementPath, string stylePath) {
-            return styleLocator?.Invoke(elementPath, stylePath) ?? DefaultLocators.LocateStyle(elementPath, stylePath);
+        public StyleLocation ResolveStyle(StyleLookup styleLookup) {
+            return styleLocator?.Invoke(styleLookup) ?? DefaultLocators.LocateStyle(styleLookup);
         }
 
     }

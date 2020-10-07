@@ -1,5 +1,15 @@
 ﻿namespace UIForia {
 
+    public struct StyleLocation {
+
+        public readonly string filePath;
+
+        public StyleLocation(string filePath) {
+            this.filePath = filePath;
+        }
+
+    }
+
     public struct TemplateLocation {
 
         public readonly string filePath;

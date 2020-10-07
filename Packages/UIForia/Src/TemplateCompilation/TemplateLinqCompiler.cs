@@ -7,7 +7,7 @@ using UIForia.Util;
 
 namespace UIForia.Compilers {
 
-    public class TemplateLinqCompiler : LinqCompiler {
+    internal class TemplateLinqCompiler : LinqCompiler {
 
         [ThreadStatic] private static ParameterExpression elementParam;
 

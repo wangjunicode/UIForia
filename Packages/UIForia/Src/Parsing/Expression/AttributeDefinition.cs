@@ -26,8 +26,14 @@ namespace UIForia.Parsing.Expressions {
         ChangeHandler = 1 << 16,
         Drag = 1 << 17,
         PainterVar = 1 << 18,
+        RequireType = 1 << 19,
+        GenericType = 1 << 20,
 
-        RequireType
+        CreateDisabled = 1 << 21,
+        CreateLazy = 1 << 22,
+        DestroyChildrenOnDisable = 1 << 23,
+
+        MixinDefinition = 1 << 24
 
     }
 

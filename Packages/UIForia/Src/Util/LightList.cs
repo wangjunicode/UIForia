@@ -2,12 +2,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UIForia.Parsing;
-using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace UIForia.Util {
 
-    [DebuggerTypeProxy(typeof(LightList<>))]
     internal class LightListDebugView<T> {
 
         private readonly LightList<T> lightList;
@@ -16,6 +14,7 @@ namespace UIForia.Util {
         public T[] array;
 
         public LightListDebugView(LightList<T> lightList) {
+            Debug.Log("Created");
             this.lightList = lightList;
             array = lightList.ToArray();
         }

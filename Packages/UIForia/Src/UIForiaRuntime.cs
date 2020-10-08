@@ -93,6 +93,9 @@ namespace UIForia {
             Initialize();
 
             GameApplication2 application = new GameApplication2(GetUniqueApplicationName(applicationId));
+            
+            Application.Applications.Add(application);
+            
             if (entryType == null || entryType.IsGenericType || entryType.IsAbstract || !(typeof(UIElement).IsAssignableFrom(entryType))) {
                 application.IsValid = false;
                 throw new Exception("invalid type");

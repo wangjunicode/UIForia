@@ -265,8 +265,17 @@ namespace UIForia {
                         }
                     }
                 }
-                else if (prefix == "require") { }
-                else if (prefix == "generic") { }
+                else if (prefix == "require") {
+                    attributeType = AttributeType.RequireType;
+                }
+                else if (prefix == "generic") {
+                    if (attrKey == "type") {
+                        attributeType = AttributeType.GenericType;
+                    }
+                    else {
+                        return false; // error message?
+                    }
+                }
                 else if (prefix == "style") {
                     attributeType = AttributeType.InstanceStyle;
                     if (attrKey.Contains(".")) {
@@ -287,7 +296,34 @@ namespace UIForia {
                         }
                     }
                 }
-                else if (prefix == "inject") { }
+                else if (prefix == "mixin") {
+                    attributeType = AttributeType.MixinDefinition;
+                }
+                
+                else if (prefix == "inject") {
+                    throw new NotImplementedException("Inject attributes not implemented");
+                }
+                
+                else if (prefix == "create") {
+
+                    if (attrKey == "disabled") {
+                        attributeType = AttributeType.CreateDisabled;
+                    }
+                    else if (attrKey == "lazy") {
+                        attributeType = AttributeType.CreateLazy;
+                    }
+                    else {
+                        return false; // error message?
+                    }
+                }
+                else if (prefix == "disable") {
+                    if (attrKey == "destroy") {
+                        attributeType = AttributeType.DestroyChildrenOnDisable;
+                    }
+                    else {
+                        return false; // error message?
+                    }
+                }
                 else if (prefix == "property") {
                     attributeType = AttributeType.Property;
                 }
@@ -348,11 +384,10 @@ namespace UIForia {
                     }
                 }
                 else {
-                    LogError("Unknown attribute prefix: " + prefix);
+                    LogError("Unknown attribute prefix: " + prefix); // todo -- for the mixin case we need to prefix appropriately and this should not be an error. should handle this as part of validation
                     return false;
                 }
             }
-
             else {
                 attributeType = AttributeType.Property;
             }

@@ -1,0 +1,7 @@
+﻿<UITemplate>
+    <Contents>
+        
+        {value.ToString()}
+        
+    </Contents>
+</UITemplate>

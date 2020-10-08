@@ -166,6 +166,17 @@ namespace UIForia.Parsing {
             return s_TextElement;
         }
 
+        public static ProcessedType GetOrCreateGeneric(ProcessedType baseType, Type createdType) {
+
+            if (typeMap.TryGetValue(createdType, out ProcessedType retn)) {
+                return retn;
+            }
+            
+            retn = ProcessedType.CreateGeneric(baseType, createdType);
+            typeMap[createdType] = retn;
+            return retn;
+        }
+
     }
 
     public class TypeResolutionException : Exception {

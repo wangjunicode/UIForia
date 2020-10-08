@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using UIForia.Compilers;
 using UIForia.Elements;
 using UIForia.Parsing;
+using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.UIInput;
 using UIForia.Util;
@@ -21,6 +22,8 @@ namespace UIForia {
         private UIElement root;
         private UIElement parent;
         private UIElement element;
+        private UIView view;
+
         private TemplateData currentTemplateData;
         private Application application;
 
@@ -57,11 +60,18 @@ namespace UIForia {
             this.element = default;
         }
 
-        public void CreateEntryPoint(UIElement attachPoint, Type currentType) {
-            int idx = applicationSetup.typeTemplateMap[applicationSetup.rootType];
+        // todo -- prooobably need to some stack of contexts so we can create templates while creating templates
+        public UIElement CreateEntryPoint(UIView view, Type currentType) {
+            this.view = view;
+            int idx = applicationSetup.typeTemplateMap[currentType];
             currentTemplateData = applicationSetup.templateData.array[idx];
-
-            UIElement rootElement = currentTemplateData.entry.Invoke(this);
+            this.root = default;
+            this.parent = default;
+            this.element = default;
+            UIElement retn = currentTemplateData.entry.Invoke(this);
+            retn.style = new UIStyleSet(element); // todo -- new style system
+            retn.application = application;
+            return retn;
         }
 
         public void HydrateEntryPoint() {
@@ -101,6 +111,17 @@ namespace UIForia {
             contextStack.size--;
         }
 
+        public void CreateChildrenIfEnabled(int childrenTemplateIndex) {
+            if (element.isEnabled) {
+                currentTemplateData.elements[childrenTemplateIndex](this);
+            }
+            else {
+                element.flags |= UIElementFlags.HasDeferredChildrenCreation;
+                // todo -- need to store this template id / reference somewhere to hydrate it. 
+                // todo -- also need to actually invoke it somewhere 
+            }
+        }
+
         public void SetText(string value) {
             ((UITextElement) element).SetText(value);
         }
@@ -117,15 +138,15 @@ namespace UIForia {
         }
 
         public void OverrideSlot(string slotName, int slotTemplateId) {
-            // ref ContextEntry entry = ref contextStack.array[contextStack.size - 1];
-            // entry.overrides = entry.overrides ?? StructList<SlotOverride>.Get();
-            // entry.overrides.Add(new SlotOverride(slotName, root, currentTemplateData, slotTemplateId, SlotType.Override));
+            ref ContextEntry entry = ref contextStack.array[contextStack.size - 1];
+            entry.overrides = entry.overrides ?? StructList<SlotOverride>.Get();
+            entry.overrides.Add(new SlotOverride(slotName, root, currentTemplateData, slotTemplateId, SlotType.Override));
         }
 
         public void ForwardSlot(string slotName, int slotTemplateId) {
-            // ref ContextEntry entry = ref contextStack.array[contextStack.size - 1];
-            // entry.overrides = entry.overrides ?? StructList<SlotOverride>.Get();
-            // entry.overrides.Add(new SlotOverride(slotName, root, currentTemplateData, slotTemplateId, SlotType.Forward));
+            ref ContextEntry entry = ref contextStack.array[contextStack.size - 1];
+            entry.overrides = entry.overrides ?? StructList<SlotOverride>.Get();
+            entry.overrides.Add(new SlotOverride(slotName, root, currentTemplateData, slotTemplateId, SlotType.Forward));
         }
 
         public void AddChild(UIElement child, int templateIndex) {
@@ -140,56 +161,60 @@ namespace UIForia {
         }
 
         public void AddSlotChild(UIElement child, string slotName, int slotIndex) {
-            // ref ContextEntry entry = ref contextStack.array[contextStack.size - 1];
-            // UIElement lastElement = element;
-            // UIElement lastParent = parent;
-            // parent = element;
-            // element = child;
-            //
-            // elementSystem.AddChild(parent.id, child.id);
-            // // parent.children[parent.children.size++] = child;
-            //
-            // bool found = false;
-            // if (entry.overrides != null) {
-            //     for (int i = 0; i < entry.overrides.size; i++) {
-            //         ref SlotOverride slotOverride = ref entry.overrides.array[i];
-            //         if (slotOverride.slotName != slotName) {
-            //             continue;
-            //         }
-            //
-            //         found = true;
-            //         UIElement oldRoot = root;
-            //         TemplateData oldTemplateData = currentTemplateData;
-            //         currentTemplateData = slotOverride.templateData;
-            //         root = slotOverride.root;
-            //         ((UISlotDefinition) child).slotType = slotOverride.slotType;
-            //         currentTemplateData.elements[slotOverride.templateId](this);
-            //         root = oldRoot;
-            //         currentTemplateData = oldTemplateData;
-            //         break;
-            //     }
-            // }
-            //
-            // if (!found) {
-            //     currentTemplateData.elements[slotIndex](this);
-            //     ((UISlotDefinition) child).slotType = SlotType.Define;
-            // }
-            //
-            // parent = lastParent;
-            // element = lastElement;
+            ref ContextEntry entry = ref contextStack.array[contextStack.size - 1];
+            UIElement lastElement = element;
+            UIElement lastParent = parent;
+            parent = element;
+            element = child;
+
+            bool found = false;
+            if (entry.overrides != null) {
+                for (int i = 0; i < entry.overrides.size; i++) {
+                    ref SlotOverride slotOverride = ref entry.overrides.array[i];
+                    if (slotOverride.slotName != slotName) {
+                        continue;
+                    }
+
+                    found = true;
+                    UIElement oldRoot = root;
+                    TemplateData oldTemplateData = currentTemplateData;
+                    currentTemplateData = slotOverride.templateData;
+                    root = slotOverride.root;
+                    ((UISlotDefinition) child).slotType = slotOverride.slotType;
+                    currentTemplateData.elements[slotOverride.templateId](this);
+                    root = oldRoot;
+                    currentTemplateData = oldTemplateData;
+                    break;
+                }
+            }
+
+            if (!found) {
+                currentTemplateData.elements[slotIndex](this);
+                ((UISlotDefinition) child).slotType = SlotType.Define;
+            }
+            
+            elementSystem.AddChild(parent.id, child.id);
+
+            parent = lastParent;
+            element = lastElement;
         }
 
         public void InitializeEntryPoint(UIElement entry, int attrCount) {
             element = entry;
             root = entry;
+
+            element.style = new UIStyleSet(element);
             element.bindingNode = new LinqBindingNode();
             element.bindingNode.root = element;
             element.bindingNode.parent = null;
             element.bindingNode.element = entry;
+
             element.flags = UIElementFlags.Alive | UIElementFlags.Enabled | UIElementFlags.AncestorEnabled;
+
             // todo -- template id / origin id / lexical id or whatever
             // todo -- entry point needs some love
             element.id = elementSystem.CreateElement(element, 0, -9999, -99999, element.flags);
+
             // attributeSystem.InitializeAttributes(element.id, attrCount);
             if (attrCount > 0) {
                 element.attributes = new StructList<ElementAttribute>(attrCount);
@@ -198,9 +223,19 @@ namespace UIForia {
             onElementRegistered?.Invoke(element); // do this later in batches maybe? depends on when it must be called
         }
 
-        // todo -- template origin info / id
-        public void InitializeHydratedElement(int attrCount) {
+        public unsafe void InitializeHydratedElementDisabled(int attrCount) {
+            InitializeHydratedElement(attrCount);
+            ref ElementMetaInfo metaInfo = ref elementSystem.metaTable.array[element.id.id & ElementId.ENTITY_INDEX_MASK];
+            element.flags &= ~UIElementFlags.Enabled;
+            metaInfo.flags &= ~UIElementFlags.Enabled;
+        }
+
+        public unsafe void InitializeHydratedElement(int attrCount) {
+
+            ref ElementMetaInfo metaInfo = ref elementSystem.metaTable.array[element.id.id & ElementId.ENTITY_INDEX_MASK];
+            metaInfo.flags |= UIElementFlags.TemplateRoot;
             element.flags |= UIElementFlags.TemplateRoot;
+
             InitializeElement(attrCount);
 
             contextStack.Push(new ContextEntry() {
@@ -209,34 +244,53 @@ namespace UIForia {
             });
         }
 
-        public void InitializeElement(int attrCount) {
-            element.flags |= UIElementFlags.Alive;
+        public unsafe void InitializeElementDisabled(int attrCount) {
+            InitializeElement(attrCount);
+            ref ElementMetaInfo metaInfo = ref elementSystem.metaTable.array[element.id.id & ElementId.ENTITY_INDEX_MASK];
+            element.flags &= ~UIElementFlags.Enabled;
+            metaInfo.flags &= ~UIElementFlags.Enabled;
+        }
 
+        public unsafe void InitializeElement(int attrCount) {
+            const UIElementFlags defaultFlags = UIElementFlags.Enabled | UIElementFlags.Alive; // todo -- handle needs update, accept enabled as input | UIElementFlags.NeedsUpdate;
 
-            // element.vertigoApplication = application;
-            // if ((parent.flags & UIElementFlags.EnabledFlagSet) == (UIElementFlags.EnabledFlagSet)) {
-            //     element.flags |= UIElementFlags.Enabled | UIElementFlags.AncestorEnabled;
-            // }
-            //
+            // <Element create:disabled="true" create:children="lazy | eager" disable:destroy="children | self | descendents"/>
+
             element.application = application;
+            element.View = view;
             element.parent = parent;
-            // // todo -- template id / origin id / lexical id or whatever
-            element.id = elementSystem.CreateElement(element, parent.hierarchyDepth + 1, -9999, -99999, element.flags);
+
+            int templateId = -1;
+            element.id = elementSystem.CreateElement(element, parent.hierarchyDepth + 1, templateId, currentTemplateData.index, defaultFlags);
+            element.flags = defaultFlags;
+            element.hierarchyDepth = parent.hierarchyDepth + 1;
+
+            ref ElementMetaInfo metaInfo = ref elementSystem.metaTable.array[element.id.id & ElementId.ENTITY_INDEX_MASK];
+            element.isAncestorEnabled = parent.isEnabled;
+            if (element.parent.isEnabled) {
+                metaInfo.flags |= UIElementFlags.AncestorEnabled;
+            }
+            else {
+                metaInfo.flags &= ~UIElementFlags.AncestorEnabled;
+            }
+
             // styleSystem.CreateElement(element.id);
 
             if (attrCount > 0) {
+                // todo -- attribute system
                 element.attributes = new StructList<ElementAttribute>(attrCount);
+                // attributeSystem.InitializeAttributes(element.id, attrCount);
             }
 
-            //attributeSystem.InitializeAttributes(element.id, attrCount);
-
+            // todo -- dont create if no bindings, oooor make it a struct table lookup
+            element.style = new UIStyleSet(element); // todo -- new style system, make it a struct
             element.bindingNode = new LinqBindingNode();
             element.bindingNode.element = element;
             element.bindingNode.root = root;
 
-            onElementRegistered?.Invoke(element); // do this later in batches maybe? depends on when it must be called
+            onElementRegistered?.Invoke(element); // do this later in batches maybe? depends on when it must be called, could also generate as part of template?
 
-            element.hierarchyDepth = parent.hierarchyDepth + 1;
+            // if element overrides create or needs create bindings -> generate call to create in template generation
         }
 
         public void InitializeSlotElement(int attrCount, int contextDepth) {
@@ -320,14 +374,6 @@ namespace UIForia {
             public StructList<SlotOverride> overrides;
 
         }
-
-
-        // public void CreateAppEntryPoint(UIWindow rootWindow, Type currentType) {
-        //     if (templateDataMap.TryGetValue(currentType, out currentTemplateData)) {
-        //         UIElement retn = currentTemplateData.entry.Invoke(this);
-        //         rootWindow.SetRootElement(retn);
-        //     }
-        // }
 
     }
 

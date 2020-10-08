@@ -33,6 +33,7 @@ namespace UIForia.Parsing {
 
         private static int currentTypeId = -1;
         [ThreadStatic] private static LightList<string> s_StyleList;
+        public ProcessedType genericBase;
 
         internal ProcessedType(Type rawType, string elementPath, string templatePath, string templateId, string tagName, string implicitStyles, string[] styleSheets) {
             this.id = Interlocked.Add(ref currentTypeId, 1);
@@ -106,7 +107,6 @@ namespace UIForia.Parsing {
 
         }
 
-
         // This is threadsafe
         internal static ProcessedType CreateFromType(Type type, Diagnostics diagnostics) {
             LightList<string> styles = null;
@@ -124,7 +124,6 @@ namespace UIForia.Parsing {
             if (type.IsGenericTypeDefinition) {
                 tagName = tagName.Split('`')[0];
             }
-
 
             // this could probably be done the other way around, use type cache to get all types with attributes and blast through each one
 
@@ -302,6 +301,8 @@ namespace UIForia.Parsing {
             get => templatePath != null || templateId != null;
         }
 
+        public bool CreateDisabled { get; set; }
+
         public struct PropertyChangeHandlerDesc {
 
             public MethodInfo methodInfo;
@@ -336,11 +337,6 @@ namespace UIForia.Parsing {
             }
         }
 
-        // todo -- remove
-        public ProcessedType Reference() {
-            return this;
-        }
-
         public Expression GetConstructorExpression() {
             if (ctorExpr == null) {
                 ConstructorInfo constructorInfo = rawType.GetConstructor(Type.EmptyTypes);
@@ -352,6 +348,12 @@ namespace UIForia.Parsing {
             }
 
             return ctorExpr;
+        }
+
+        public static ProcessedType CreateGeneric(ProcessedType processedType, Type createdType) {
+            return new ProcessedType(createdType, processedType.elementPath, processedType.templatePath, processedType.templateId, processedType.tagName, processedType.implicitStyles, processedType.importedStyleSheets) {
+                genericBase = processedType
+            };
         }
 
     }

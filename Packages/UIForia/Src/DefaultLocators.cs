@@ -8,8 +8,7 @@ namespace UIForia {
         [TemplateLocator("UIForia.Default")]
         public static TemplateLocation LocateTemplate(TemplateLookup lookup) {
             if (string.IsNullOrEmpty(lookup.templatePath)) {
-                string fileName = Path.GetFileNameWithoutExtension(lookup.elementLocation);
-                return new TemplateLocation(Path.Combine(lookup.moduleLocation, fileName, fileName + ".xml"), lookup.templateId);
+                return new TemplateLocation(Path.ChangeExtension(lookup.elementLocation, "xml"), lookup.templateId);
             }
 
             // todo -- GetFullPath && Combine are not fast, write something better later

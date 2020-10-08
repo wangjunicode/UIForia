@@ -25,14 +25,17 @@ namespace UIForia.Elements {
         public UIStyleSet style; // todo -- make internal with accessor
         public LinqBindingNode bindingNode; // todo -- make internal with accessor
 
-        internal int enableStateChangedFrameId;
-        public StructList<ElementAttribute> attributes;
+        internal int enableStateChangedFrameId; // todo -- move this
+        public StructList<ElementAttribute> attributes; // todo -- remove
         public TemplateMetaData templateMetaData; // todo - internal / private / whatever
 
-        public UIView View { get; internal set; }
+        public UIView View { get; internal set; } // todo -- can remove and resolve via lookup somewhere else
         public Application application { get; internal set; }
+        
         public int hierarchyDepth { get; internal set; }
         internal int _siblingIndex;
+
+        internal UIMixin mixins; // todo -- consider moving to element system and off of uielement
 
         public int siblingIndex {
             get => _siblingIndex;
@@ -523,6 +526,57 @@ namespace UIForia.Elements {
 
         public Vector2 RelativePoint(Vector2 point) {
             return point - layoutResult.screenPosition - layoutResult.ContentRect.position;
+        }
+
+        public IList<T> GetMixins<T>(IList<T> result = null) where T : UIMixin {
+            result = result ?? new List<T>();
+            UIMixin ptr = mixins;
+
+            while (ptr != null) {
+                if (ptr is T typedPtr) {
+                    result.Add(typedPtr);
+                }
+
+                ptr = ptr.next;
+            }
+
+            return result;
+        }
+
+        public T GetMixin<T>(string name) where T : UIMixin {
+            if (mixins == null) {
+                return null;
+            }
+
+            UIMixin ptr = mixins;
+
+            while (ptr != null) {
+                if (ptr is T typedPtr && ptr.name == name) {
+                    return typedPtr;
+                }
+
+                ptr = ptr.next;
+            }
+
+            return null;
+        }
+
+        public T GetMixin<T>() where T : UIMixin {
+            if (mixins == null) {
+                return null;
+            }
+
+            UIMixin ptr = mixins;
+
+            while (ptr != null) {
+                if (ptr is T typedPtr) {
+                    return typedPtr;
+                }
+
+                ptr = ptr.next;
+            }
+
+            return null;
         }
 
     }

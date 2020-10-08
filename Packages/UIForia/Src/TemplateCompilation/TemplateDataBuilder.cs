@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Linq.Expressions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
@@ -129,9 +130,12 @@ namespace UIForia.Compilers {
         private static readonly SlotOverrideInfo[] s_EmptySlotOverrideInfo = { };
 
         private int dragCreatorIndex;
-        private int templateIndex;
+        private int elementFnIndex;
         private int eventHandlerIndex;
-
+        private int templateId;
+        private ITemplateCompilationHandler compilation;
+        private TemplateExpressionSet expressionSet;
+        
         public TemplateDataBuilder() {
             inputHandlerFns = new LightList<InputEventHandlerOutput>();
             elementFns = new LightList<TemplateOutput>();
@@ -139,12 +143,19 @@ namespace UIForia.Compilers {
             slotOverrideChains = new LightList<SlotOverrideChain>();
         }
 
+        public void Initialize(ITemplateCompilationHandler compilation, TemplateExpressionSet expressionSet) {
+            Clear();
+            this.templateId = expressionSet.index;
+            this.expressionSet = expressionSet;
+            this.compilation = compilation;
+        }
+
         public int GetNextDragCreateIndex() {
             return dragCreatorIndex++;
         }
 
-        public int GetNextTemplateIndex() {
-            return templateIndex++;
+        public int GetNextElementFunctionIndex() {
+            return elementFnIndex++;
         }
 
         public int GetNextInputHandlerIndex() {
@@ -163,6 +174,14 @@ namespace UIForia.Compilers {
                 tagName = tagName,
                 lineInfo = lineInfo
             };
+
+            compilation.OnExpressionReady(new CompiledExpression() {
+                expression = expression,
+                type = CompileTarget.Element,
+                targetIndex = elementSlotId,
+                templateId = templateId
+            });
+
         }
 
         public void SetInputHandlerFn(int index, InputHandlerResult handler) {
@@ -177,33 +196,44 @@ namespace UIForia.Compilers {
             };
         }
 
-        public TemplateExpressionSet Build(ProcessedType processedType) {
-            return new TemplateExpressionSet() {
-                bindings = bindingFns.ToArray(),
-                processedType = processedType,
-                entryPoint = entryPoint,
-                hydratePoint = hydrate,
-                elementTemplates = elementFns.ToArray(),
-                slotOverrideChains = slotOverrideChains?.ToArray(),
-                inputEventHandlers = inputHandlerFns.ToArray()
-            };
+        public TemplateExpressionSet Build() {
+            expressionSet.bindings = bindingFns.ToArray();
+            expressionSet.entryPoint = entryPoint;
+            expressionSet.hydratePoint = hydrate;
+            expressionSet.elementTemplates = elementFns.ToArray();
+            expressionSet.slotOverrideChains = slotOverrideChains.ToArray();
+            expressionSet.inputEventHandlers = inputHandlerFns.ToArray();
+            return expressionSet;
         }
 
         public void SetEntryPoint(LambdaExpression entryPoint) {
             this.entryPoint = entryPoint;
+            compilation.OnExpressionReady(new CompiledExpression() {
+                expression = entryPoint,
+                type = CompileTarget.EntryPoint,
+                targetIndex = 0, // unused
+                templateId = templateId
+            });
         }
 
         public void SetHydratePoint(LambdaExpression hydrate) {
             this.hydrate = hydrate;
+            compilation.OnExpressionReady(new CompiledExpression() {
+                expression = hydrate,
+                type = CompileTarget.HydratePoint,
+                targetIndex = 0, // unused
+                templateId = templateId
+            });
         }
 
-        public void Clear() {
+        private void Clear() {
             entryPoint = null;
             hydrate = null;
             elementFns.Clear();
             bindingFns.Clear();
             slotOverrideChains.Clear();
-            templateIndex = 0;
+            templateId = -1;
+            elementFnIndex = 0;
             dragCreatorIndex = 0;
             eventHandlerIndex = 0;
         }
@@ -310,7 +340,6 @@ namespace UIForia.Compilers {
         public LambdaExpression constLambda;
         public StructList<BindingVariableDesc> localVariables;
         public StructList<InputHandlerResult> inputHandlers;
-
 
         public BindingResult() {
             this.localVariables = new StructList<BindingVariableDesc>();

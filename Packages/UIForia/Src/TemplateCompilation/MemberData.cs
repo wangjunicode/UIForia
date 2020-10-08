@@ -15,11 +15,14 @@ namespace UIForia.Compilers {
         public static readonly MethodInfo InputHandlerGroup_AddDragEvent = typeof(InputHandlerGroup).GetMethod(nameof(InputHandlerGroup.AddDragEvent));
 
         public static readonly MethodInfo TemplateSystem_InitializeElement = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.InitializeElement));
+        public static readonly MethodInfo TemplateSystem_InitializeElementDisabled = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.InitializeElementDisabled));
         public static readonly MethodInfo TemplateSystem_InitializeHydratedElement = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.InitializeHydratedElement));
+        public static readonly MethodInfo TemplateSystem_InitializeHydratedElementDisabled = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.InitializeHydratedElementDisabled));
         public static readonly MethodInfo TemplateSystem_InitializeSlotElement = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.InitializeSlotElement));
         public static readonly MethodInfo TemplateSystem_InitializeEntryPoint = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.InitializeEntryPoint));
         public static readonly MethodInfo TemplateSystem_InitializeStaticAttribute = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.InitializeStaticAttribute));
         public static readonly MethodInfo TemplateSystem_InitializeDynamicAttribute = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.InitializeDynamicAttribute));
+        public static readonly MethodInfo TemplateSystem_CreateChildrenIfEnabled = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.CreateChildrenIfEnabled));
         public static readonly MethodInfo TemplateSystem_AddChild = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.AddChild));
         public static readonly MethodInfo TemplateSystem_AddSlotChild = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.AddSlotChild));
         public static readonly MethodInfo TemplateSystem_HydrateElement = typeof(TemplateSystem).GetMethod(nameof(TemplateSystem.HydrateElement));

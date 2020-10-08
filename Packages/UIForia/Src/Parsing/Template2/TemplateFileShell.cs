@@ -54,6 +54,11 @@ namespace UIForia {
         // }
 
         public TemplateASTRoot GetRootTemplateForType(ProcessedType processedType) {
+            
+            if (processedType.genericBase != null) {
+                processedType = processedType.genericBase;
+            }
+            
             unsafe {
                 fixed (char* buffer = charBuffer) {
                     for (int i = 0; i < rootNodes.Length; i++) {

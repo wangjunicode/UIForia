@@ -8,8 +8,14 @@
 
             <Panel attr:id="some-id"/>
 
-<!--            <ExpandTemplate/>-->
-            
+            <ExpandTemplate>
+
+                <override:SomeSlot>
+                    Hello from override
+                </override:SomeSlot>
+                
+            </ExpandTemplate>
+
         </Group>
         <Div>
             Text goes here

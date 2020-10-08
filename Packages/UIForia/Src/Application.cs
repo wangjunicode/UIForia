@@ -148,7 +148,6 @@ namespace UIForia {
             templateSystem = new TemplateSystem(this);
         }
 
-
         internal void Initialize(ApplicationSetup applicationSetup) {
             systems = new List<ISystem>();
             views = new List<UIView>();
@@ -156,7 +155,6 @@ namespace UIForia {
             frameId = 1;
 
             CreateSystems();
-
 
             textSystem.frameId = frameId;
 
@@ -173,7 +171,7 @@ namespace UIForia {
             // else {
             //     templateData = TemplateLoader.LoadRuntimeTemplates(templateSettings.rootType, templateSettings);
             // }
-            
+
             templateSystem.Initialize(applicationSetup);
 
             viewRootIds.size = 0;
@@ -182,9 +180,9 @@ namespace UIForia {
 
             viewRootIds.Add(view.dummyRoot.id);
 
-            templateSystem.CreateEntryPoint(view.dummyRoot, applicationSetup.rootType);
-            return;
-            UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this));
+            UIElement rootElement = templateSystem.CreateEntryPoint(view, applicationSetup.rootType);
+            
+            // UIElement rootElement = templateData.templates[0].Invoke(null, new TemplateScope(this));
             view.Init(rootElement);
 
             views.Add(view);
@@ -287,7 +285,6 @@ namespace UIForia {
             return view;
         }
 
-
         internal void Reset() {
             for (int i = views.Count - 1; i >= 0; i--) {
                 views[i].Destroy();
@@ -320,7 +317,6 @@ namespace UIForia {
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             Reset();
-
 
             // Initialize();
 
@@ -438,7 +434,7 @@ namespace UIForia {
                 rect = Camera.pixelRect;
             }
             else {
-                rect = new Rect(0, 0, 1920, 1080);
+                rect = new Rect(0, 0, Screen.width, Screen.height); 
             }
 
             UIApplicationSize.height = (int) rect.height;
@@ -787,8 +783,9 @@ namespace UIForia {
             return s_CustomPainters.ContainsKey(name);
         }
 
+        // todo -- deprecate
         public UIView[] GetViews() {
-            return views.ToArray();
+            return views?.ToArray() ?? new UIView[0];
         }
 
         internal void InitializeElement(UIElement child) {

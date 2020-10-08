@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq.Expressions;
 using UIForia.Elements;
 using UIForia.Extensions;
 using UIForia.Parsing;
 using UIForia.Systems;
 using UIForia.Util;
-using UIForia.Util.Unsafe;
 using Debug = UnityEngine.Debug;
 
 namespace UIForia.Compilers {
@@ -23,7 +21,7 @@ namespace UIForia.Compilers {
 
     }
 
-    internal class Compilation {
+    internal class Compilation : ITemplateCompilationHandler {
 
         public Application application;
         public CompilationType compilationType;
@@ -54,82 +52,80 @@ namespace UIForia.Compilers {
 
         }
 
-        public struct PendingCompilation {
-
-            public int templateId;
-            public int targetIndex;
-            public CompileTarget type;
-            public LambdaExpression expression;
-            public Delegate result;
-
-        }
-
-        private LightList<PendingCompilation> pendingCompilations;
+        private LightList<Delegate> compiledExpressions;
+        private LightList<CompiledExpression> pendingExpressions;
         private LightList<TemplateData> compiledTemplates;
-        private LightList<TemplateExpressionSet> expressionSets;
 
         private object locker = new object();
 
         public CompilationResult CompileDynamic() {
 
             TemplateCompiler2 templateCompiler = new TemplateCompiler2(this);
-            compiledTemplates = new LightList<TemplateData>(128);
-            expressionSets = new LightList<TemplateExpressionSet>(128);
 
-            templateCompiler.onTemplateCompiled += (expressionSet) => {
-                TemplateData templateData = new TemplateData() {
+            compiledTemplates = new LightList<TemplateData>(32);
+            pendingExpressions = new LightList<CompiledExpression>(512);
+            compiledExpressions = new LightList<Delegate>(512);
+
+            if (!templateCompiler.CompileApplication(entryType, out TemplateCompiler2.TemplateCompilationResult result)) {
+
+                diagnostics.Dump();
+
+                return new CompilationResult() {
+                    successful = false
+                };
+
+            }
+
+            compiledTemplates = new LightList<TemplateData>(result.templateExpressionSets.size);
+            for (int i = 0; i < result.templateExpressionSets.size; i++) {
+                TemplateExpressionSet expressionSet = result.templateExpressionSets.array[i];
+                compiledTemplates.AddUnchecked(new TemplateData() {
                     bindings = new Action<LinqBindingNode>[expressionSet.bindings.Length],
                     elements = new Action<TemplateSystem>[expressionSet.elementTemplates.Length],
                     inputEventHandlers = new Action<LinqBindingNode, InputEventHolder>[expressionSet.inputEventHandlers.Length],
                     type = expressionSet.processedType.rawType,
                     tagName = expressionSet.processedType.tagName,
                     templateId = expressionSet.processedType.templateId
-                };
-                expressionSets.Add(expressionSet);
-                compiledTemplates.Add(templateData);
-            };
-
-            pendingCompilations = new LightList<PendingCompilation>(128);
-
-            templateCompiler.onCompilationReady += (pending) => {
-
-                lock (locker) {
-                    pendingCompilations.Add(pending);
-                }
-
-            };
-
-            templateCompiler.CompileTemplate(entryType);
+                });
+            }
 
             // todo -- convert to threaded compile
             // todo -- fallback to FastCompile but find a way to support it if using .netstandard 2.0 with unity since it doesn't have ILGenerator or DynamicMethod, maybe a dll will work?
 
-            for (int i = 0; i < pendingCompilations.size; i++) {
-                ref PendingCompilation pending = ref pendingCompilations.array[i];
+            bool failed = false;
+            for (int i = 0; i < pendingExpressions.size; i++) {
+                ref CompiledExpression pending = ref pendingExpressions.array[i];
 
                 try {
-                    pending.result = pending.expression.Compile();
+                    compiledExpressions[i] = pending.expression.Compile();
                 }
                 catch (Exception e) {
+                    failed = true;
                     Debug.LogException(e);
-                    pending.result = null;
+                    break;
                 }
 
             }
 
-            // if no errors!
+            if (failed) {
+                return new CompilationResult() {
+                    successful = false
+                };
+            }
+
             MapDynamicCompiledResults();
 
             // todo -- get rid of template data map and replace with id mapping to template data
             // allows multiple templates per element and gets rid of lots of dictionary lookups
             Dictionary<Type, int> templateDataMap = new Dictionary<Type, int>(compiledTemplates.size);
-            
+
             for (int i = 0; i < compiledTemplates.size; i++) {
                 templateDataMap[compiledTemplates.array[i].type] = i;
             }
-            
+
             // if precompiled or generating
-            PrintTemplates();
+            PrintTemplates(result.templateExpressionSets);
+
             return new CompilationResult() {
                 successful = true,
                 rootType = entryType,
@@ -139,7 +135,7 @@ namespace UIForia.Compilers {
 
         }
 
-        private void PrintTemplates() {
+        private void PrintTemplates(LightList<TemplateExpressionSet> expressionSets) {
             IndentedStringBuilder builder = new IndentedStringBuilder(4096);
 
             for (int i = 0; i < expressionSets.size; i++) {
@@ -152,29 +148,30 @@ namespace UIForia.Compilers {
 
         private void MapDynamicCompiledResults() {
 
-            for (int i = 0; i < pendingCompilations.size; i++) {
-                ref PendingCompilation pending = ref pendingCompilations.array[i];
+            for (int i = 0; i < pendingExpressions.size; i++) {
+                ref CompiledExpression pending = ref pendingExpressions.array[i];
+                Delegate compiledExpression = compiledExpressions.array[i];
                 TemplateData template = compiledTemplates.array[pending.templateId];
                 switch (pending.type) {
 
                     case CompileTarget.EntryPoint:
-                        template.entry = (Func<TemplateSystem, UIElement>) pending.result;
+                        template.entry = (Func<TemplateSystem, UIElement>) compiledExpression;
                         break;
 
                     case CompileTarget.HydratePoint:
-                        template.hydrate = (Action<TemplateSystem>) pending.result;
+                        template.hydrate = (Action<TemplateSystem>) compiledExpression;
                         break;
 
                     case CompileTarget.Binding:
-                        template.bindings[pending.targetIndex] = (Action<LinqBindingNode>) pending.result;
+                        template.bindings[pending.targetIndex] = (Action<LinqBindingNode>) compiledExpression;
                         break;
 
                     case CompileTarget.Input:
-                        template.inputEventHandlers[pending.targetIndex] = (Action<LinqBindingNode, InputEventHolder>) pending.result;
+                        template.inputEventHandlers[pending.targetIndex] = (Action<LinqBindingNode, InputEventHolder>) compiledExpression;
                         break;
 
                     case CompileTarget.Element:
-                        template.elements[pending.targetIndex] = (Action<TemplateSystem>) pending.result;
+                        template.elements[pending.targetIndex] = (Action<TemplateSystem>) compiledExpression;
                         break;
 
                     default:
@@ -298,7 +295,7 @@ namespace UIForia.Compilers {
                         // todo -- avoid toString with string trick
                         string tagName = shell.GetString(node.tagNameRange);
                         string moduleName = shell.GetString(node.moduleNameRange);
-                        
+
                         if (!string.IsNullOrEmpty(moduleName)) {
                             UIModule searchModule = ResolveModule(moduleUsages, module, moduleName);
 
@@ -418,6 +415,36 @@ namespace UIForia.Compilers {
             }
 
             return null;
+        }
+
+        public Diagnostics Diagnostics => diagnostics;
+
+        public UIModule GetModuleForType(ProcessedType processedType) {
+            if (processedType.genericBase != null) {
+                processedType = processedType.genericBase;
+            }
+
+            moduleMap.TryGetValue(processedType, out UIModule module);
+            return module;
+        }
+
+        public void OnExpressionReady(CompiledExpression expression) {
+            lock (locker) {
+                pendingExpressions.Add(expression);
+                compiledExpressions.Add(null);
+            }
+        }
+
+        public TemplateFileShell GetTemplateForType(ProcessedType processedType) {
+
+            if (processedType.genericBase != null) {
+                templateMap.TryGetValue(processedType.genericBase, out TemplateFileShell fileShell);
+                return fileShell;
+            }
+            else {
+                templateMap.TryGetValue(processedType, out TemplateFileShell fileShell);
+                return fileShell;
+            }
         }
 
     }

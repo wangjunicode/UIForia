@@ -1,11 +1,32 @@
 <UITemplate>
 
     <Style src="ExpandTemplate/ExpandTemplate.style"/>
-    
+
     <Contents attr:test="yes" style="expand">
-        <Div>
-            Hello this is expanded
-        </Div>
+
+        <!-- Test that this works when enabling later on -->
+        <Group create:lazy="true">
+
+            <Div>
+                Hello this is expanded
+            </Div>
+            <Group>
+                Hello this is expanded
+            </Group>
+        </Group>
+
+        <GenericThing generic:type="float"/>
+        <GenericThing generic:type="string"/>
+        <GenericThing generic:type="UnityEngine.Vector3"/>
+        
+        <Panel>
+            
+            <define:SomeSlot>
+                Hello from default
+            </define:SomeSlot>
+            
+        </Panel>
+
     </Contents>
 
 </UITemplate>

@@ -25,10 +25,11 @@ namespace UIForia.Elements {
         // Layout Flags, get rid of these
         DebugLayout = 1 << 10,
         
-        SpecialLayoutProvider = 1 << 11,
+        HasDeferredChildrenCreation = 1 << 11,
 
         EnabledFlagSet = Alive | Enabled | AncestorEnabled,
         EnabledFlagSetWithUpdate = EnabledFlagSet | NeedsUpdate,
+
 
     }
 

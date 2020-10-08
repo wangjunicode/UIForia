@@ -31,6 +31,7 @@ namespace UIForia.Compilers {
         private static readonly string s_InputEventHandlerTypeName = typeof(Action<LinqBindingNode, InputEventHolder>[]).GetTypeName();
 
         private string guid;
+        public int index;
 
         public string GetGUID() {
             if (guid == null) {

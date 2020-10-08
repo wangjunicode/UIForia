@@ -230,11 +230,11 @@ namespace UIForia.Editor {
                 app.onRefresh += OnRefresh;
             }
 
-            if (s_SelectedApplication != null) {
+            if (s_SelectedApplication != null && s_SelectedApplication.IsValid) {
                 s_SelectedApplication.RenderSystem.DrawDebugOverlay -= DrawDebugOverlay;
             }
 
-            if (app != null) {
+            if (app != null && app.IsValid) {
                 app.RenderSystem.DrawDebugOverlay += DrawDebugOverlay;
             }
 

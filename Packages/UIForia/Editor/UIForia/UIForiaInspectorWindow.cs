@@ -428,7 +428,7 @@ namespace UIForia.Editor {
         public void OnGUI() {
             EditorGUIUtility.wideMode = true;
 
-            if (app == null) {
+            if (app == null || !app.IsValid) {
                 return;
             }
 
@@ -694,7 +694,12 @@ namespace UIForia.Editor {
                 case StylePropertyId.TextWhitespaceMode:
                     return DrawEnumWithValue<WhitespaceMode>(property, isEditable);
 
-                //
+                case StylePropertyId.BackgroundRectMinX:
+                case StylePropertyId.BackgroundRectMinY:
+                case StylePropertyId.BackgroundRectMaxX:
+                case StylePropertyId.BackgroundRectMaxY:
+                    return DrawFixedLength(property, isEditable);
+                
                 case StylePropertyId.TextTransform:
                     return DrawEnumWithValue<TextTransform>(property, isEditable);
 

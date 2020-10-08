@@ -110,7 +110,12 @@ namespace UIForia.Rendering {
             
             application.elementSystem.AddChild(dummyRoot.id, element.id);
             
-            application.InitializeElement(element);
+            // application.InitializeElement(element);
+            
+            if (element.isEnabled) {
+                application.DoEnableElement(element);
+            }
+            
             this.sizeChanged = true;
         }
 

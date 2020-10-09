@@ -121,8 +121,7 @@ namespace UIForia {
                 List<UIModule> moduleList = FindModules();
                 compilation.moduleMap = BuildModuleMap(moduleList);
                 compilation.ResolveTagNames();
-                // ParseStyles()
-
+                
                 if (compilation.diagnostics.HasErrors()) {
                     application.IsValid = false;
                     compilation.diagnostics.Dump();

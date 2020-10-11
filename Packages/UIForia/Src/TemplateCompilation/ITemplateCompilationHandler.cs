@@ -1,4 +1,5 @@
 ﻿using UIForia.Parsing;
+using UIForia.Style;
 
 namespace UIForia.Compilers {
 
@@ -11,6 +12,8 @@ namespace UIForia.Compilers {
         void OnExpressionReady(CompiledExpression compiledExpression);
 
         TemplateFileShell GetTemplateForType(ProcessedType processedType);
+
+        StyleFileShell GetStyleShell(StyleLocation location);
 
     }
 

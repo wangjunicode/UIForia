@@ -1,13 +1,36 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Style;
 using UIForia.Util;
 using UnityEngine;
 
 namespace UIForia.Compilers {
 
+    public struct StyleSheet2 { }
+
+    public class UIForiaStyleCompiler {
+
+        private Dictionary<StyleFileShell, StyleSheet2> styleSheetMap;
+
+        public bool Compile(StyleFileShell shell) {
+            if (styleSheetMap.TryGetValue(shell, out StyleSheet2 retn)) {
+                return true;
+            }
+
+            
+            
+            return true;
+        }
+
+    }
+
     public class UIForiaStyleParser {
 
+        public const int Version = 1;
+
         private bool hasCriticalError;
+        private bool hasErrors;
+
         private Diagnostics diagnostics;
         private string filePath;
 
@@ -21,6 +44,7 @@ namespace UIForia.Compilers {
         public bool TryParse(string filePath, string contents, out StyleFileShell result) {
             this.filePath = filePath;
             this.hasCriticalError = false;
+            this.hasErrors = false;
             this.builder.Clear();
             result = default;
 
@@ -76,18 +100,18 @@ namespace UIForia.Compilers {
 
         private bool ParseStyleDefinition(ref CharStream stream) {
             if (!stream.TryParseIdentifier(out CharSpan styleName)) {
-                LogError(ErrorMessages.ExpectedStyleName(), stream.GetLineInfo());
+                LogCriticalError(ErrorMessages.ExpectedStyleName(), stream.GetLineInfo());
                 return false;
             }
 
             if (!stream.TryGetSubStream('{', '}', out CharStream styleContents)) {
-                LogError(ErrorMessages.UnmatchedBraces("style " + styleName), stream.GetLineInfo());
+                LogCriticalError(ErrorMessages.UnmatchedBraces("style " + styleName), stream.GetLineInfo());
                 return false;
             }
 
             StyleFileShellBuilder.StyleASTBuilder styleNode = builder.AddStyleNode(styleName);
 
-            return TryParseStyleContents(styleNode, ref styleContents);
+            return true; //TryParseStyleContents(styleNode, ref styleContents);
         }
 
         private void ParsePropertyBlock(ref CharStream stream) { }
@@ -96,104 +120,145 @@ namespace UIForia.Compilers {
         private bool allowAttribute;
         private bool allowCondition;
         private bool allowSelectors;
-        
-        private bool TryParseStyleContents(StyleFileShellBuilder.StyleASTBuilder styleNode, ref CharStream styleContents) {
-            // variable block
-            // state header
-            // attribute header
-            // condition
-            // selector
-            // when
 
-            StructStack<int> stack = StructStack<int>.Get();
+        private StructStack<StyleFileShellBuilder.StyleASTBuilder> blockStack;
 
-            while (!hasCriticalError && styleContents.HasMoreTokens) {
-                if (styleContents.TryGetSubStream('[', ']', out CharStream blockContents)) {
-                    // parse block and set type 
+        private void ParseStyleBlock(ref CharStream stream) {
 
-                    if (blockContents.TryParseIdentifier(out CharSpan span)) {
-                        if (IsStateBlockHeader(span, out StyleState2 state)) {
-                            if (!allowStateBlock) {
-                                // diagnostics.LogWarning();
-                            }
-                            switch (state) {
-                                case StyleState2.Normal:
-                                    styleTarget = styleNode.normal;
-                                    break;
-                                case StyleState2.Hover:
-                                    break;
-                                case StyleState2.Focused:
-                                    break;
-                                case StyleState2.Active:
-                                    break;
-                                default:
-                                    throw new ArgumentOutOfRangeException();
-                            }
+            while (!hasCriticalError && stream.HasMoreTokens) {
+                uint start = stream.Ptr;
+                stream.ConsumeWhiteSpaceAndComments(CommentMode.DoubleSlash);
 
-                            ParseStyleBody(ref );
-                            
+                char c = stream.Current;
+                if (c == '[' && stream.TryGetSubStream('[', ']', out CharStream headerStream)) {
+
+                    if (IsStateBlockHeader(headerStream, out StyleState2 state)) { }
+
+                    else if (IsAttributeBlock(headerStream, out CharSpan attrKey, out CharSpan attrValue)) {
+
+                        if (!allowAttribute) {
+                            LogNonCriticalError("attribute not allowed here", attrKey.GetLineInfo());
                         }
-                        else { }
+
+                        blockStack.Push(blockStack.Peek().AddAttributeBlock(attrKey, attrValue));
+
+                        stream.ConsumeWhiteSpaceAndComments(CommentMode.DoubleSlash);
+
+                        if (!stream.TryGetSubStream('{', '}', out CharStream attributeBlock)) {
+                            LogCriticalError("");
+                        }
+
+                        ParseStyleBlock(ref stream);
+                        blockStack.Pop();
+
+                        continue;
+                    }
+                    else if (IsEventBlock(headerStream, out bool isEnter)) {
+                        // might or might not include a { } with styles,
+                        // could be decorating a run command or selector
                     }
 
-                    if (blockContents.TryMatchRange("normal")) { }
-                    else if (blockContents.TryMatchRange("hover")) { }
-                    else if (blockContents.TryMatchRange("focus")) { }
-                    else if (blockContents.TryMatchRange("active")) { }
-
-                    else if (blockContents.TryMatchRange("attr") && blockContents.TryParseCharacter(':')) { }
+                    // else if (IsTransitionBlock(headerStream)) { }
+                    // else if (IsVariableBlock(headerStream)) { }
                 }
+                else if (c == '#') {
+                    // ParseCondition();
+                    continue;
+                }
+                else if (c == 's' && stream.TryMatchRangeIgnoreCase("select")) { }
+                else if (c == 'w') { }
 
-                // look for keywords
-                // fall back to style names
+                if (stream.Ptr == start) {
+                    hasCriticalError = true;
+                    break;
+                }
+            }
 
-                if (styleContents.TryParseCharacter('#')) { }
+        }
 
-                if (styleContents.TryMatchRange("when")) { }
+        private bool IsEventBlock(CharStream headerStream, out bool isEnter) {
 
-                if (styleContents.TryMatchRangeIgnoreCase("selector")) { }
+            if (headerStream.TryMatchRangeIgnoreCase("enter")) {
+                isEnter = true;
+                return !headerStream.HasMoreTokens;
+            }
 
-                if (styleContents.TryParseIdentifier(out CharSpan propertyName)) {
-                    
-                    if (styleContents.TryParseCharacter(':')) { }
+            if (headerStream.TryMatchRangeIgnoreCase("exit")) {
+                isEnter = false;
+                return !headerStream.HasMoreTokens;
+            }
 
-                    if (styleContents.TryParseCharacter('=')) {
-                        
-                        styleContents.TryGetCharSpanTo(';', out CharSpan propertyValue);
+            isEnter = default;
+            return false;
+        }
 
-                        propertyListStack.Peek().AddProperty(new PropertyNode() {
-                            keyRange = default,
-                        });
+        private bool IsAttributeBlock(CharStream headerStream, out CharSpan attrKey, out CharSpan attrValue) {
+            headerStream.SetCommentMode(CommentMode.None);
 
+            attrKey = default;
+            attrValue = default;
+
+            if (!headerStream.TryMatchRangeIgnoreCase("attr")) {
+                return false;
+            }
+            
+            if (!headerStream.TryParseCharacter(':')) {
+                LogNonCriticalError("Expected a `:` after `attr`", headerStream.GetLineInfo());
+            }
+            else {
+
+                if (!headerStream.TryGetDelimitedSubstream('=', out CharStream keyStream)) {
+                    LogNonCriticalError($"Expected an attribute name after `attr:` {headerStream}", headerStream.GetLineInfo());
+                }
+                else {
+                    attrKey = new CharSpan(keyStream);
+                    if (!headerStream.TryParseCharacter('=')) {
+                        LogNonCriticalError($"Expected an `=` after {keyStream}", keyStream.GetLineInfo());
                     }
-                    
-                    LogError("invalid symbol");
-                    
+                    else {
+                        headerStream.TryParseDoubleQuotedString(out attrValue);
+                    }
                 }
-                
             }
 
             return true;
+
         }
 
-        private static bool IsStateBlockHeader(CharSpan blockName, out StyleState2 styleState) {
-            if (blockName.EqualsIgnoreCase("active")) {
+        private bool IsStateBlockHeader(CharStream blockName, out StyleState2 styleState) {
+            if (blockName.TryMatchRangeIgnoreCase("active")) {
                 styleState = StyleState2.Active;
+                if (blockName.HasMoreTokens) {
+                    LogNonCriticalError("Expected end of state header name", blockName.GetLineInfo());
+                }
+
                 return true;
             }
 
-            if (blockName.EqualsIgnoreCase("focus")) {
+            if (blockName.TryMatchRangeIgnoreCase("focus")) {
                 styleState = StyleState2.Focused;
+                if (blockName.HasMoreTokens) {
+                    LogNonCriticalError("Expected end of state header name", blockName.GetLineInfo());
+                }
+
                 return true;
             }
 
-            if (blockName.EqualsIgnoreCase("hover")) {
+            if (blockName.TryMatchRangeIgnoreCase("hover")) {
                 styleState = StyleState2.Hover;
+                if (blockName.HasMoreTokens) {
+                    LogNonCriticalError("Expected end of state header name", blockName.GetLineInfo());
+                }
+
                 return true;
             }
 
-            if (blockName.EqualsIgnoreCase("normal")) {
+            if (blockName.TryMatchRangeIgnoreCase("normal")) {
                 styleState = StyleState2.Normal;
+                if (blockName.HasMoreTokens) {
+                    LogNonCriticalError("Expected end of state header name", blockName.GetLineInfo());
+                }
+
                 return true;
             }
 
@@ -201,7 +266,7 @@ namespace UIForia.Compilers {
             return false;
         }
 
-        private void LogError(string error) {
+        private void LogCriticalError(string error) {
             if (diagnostics != null) {
                 diagnostics.LogError(error);
             }
@@ -212,7 +277,7 @@ namespace UIForia.Compilers {
             hasCriticalError = true;
         }
 
-        private void LogError(string error, LineInfo lineInfo) {
+        private void LogCriticalError(string error, LineInfo lineInfo) {
             if (diagnostics != null) {
                 diagnostics.LogError(error, filePath, lineInfo.line, lineInfo.column);
             }
@@ -221,6 +286,15 @@ namespace UIForia.Compilers {
             }
 
             hasCriticalError = true;
+        }
+
+        private void LogNonCriticalError(string error, LineInfo lineInfo) {
+            if (diagnostics != null) {
+                diagnostics.LogError(error, filePath, lineInfo.line, lineInfo.column);
+            }
+            else {
+                Debug.Log(error);
+            }
         }
 
         internal static class ErrorMessages {

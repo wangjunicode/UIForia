@@ -1,11 +1,8 @@
-using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace UIForia.Style {
  
-
-    [Serializable]
     [DebuggerDisplay("{PropertyParsers.s_PropertyNames[index]}")]
     [StructLayout(LayoutKind.Explicit)]
     public partial struct PropertyId {
@@ -14,7 +11,7 @@ namespace UIForia.Style {
         [FieldOffset(0)] public readonly ushort index;
         [FieldOffset(2)] public readonly PropertyTypeFlags typeFlags;
         [FieldOffset(3)] internal StyleState2Byte state;
-
+        
         public PropertyId(ushort id, PropertyTypeFlags typeFlags) {
             this.id = 0;
             this.state = 0;

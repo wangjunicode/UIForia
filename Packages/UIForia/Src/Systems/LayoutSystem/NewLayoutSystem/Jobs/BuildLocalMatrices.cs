@@ -4,6 +4,7 @@ using UIForia.Systems;
 using UIForia.Util;
 using UIForia.Util.Unsafe;
 using Unity.Burst;
+using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -32,7 +33,6 @@ namespace UIForia.Layout {
         }
 
         private void Run(int start, int end) {
-
             int isBurstActive = 1;
             CheckIsBurst(&isBurstActive);
             // todo -- burst version is acting strange

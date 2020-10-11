@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using UIForia.Graphics;
 using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Style;
 using UIForia.Text;
 using UIForia.Util.Unsafe;
 using Unity.Mathematics;
@@ -63,6 +64,7 @@ namespace UIForia.Editor {
             ListTemplateGenerator.Generate<UIForiaGlyph>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<TextMaterialInfo>(outputPathRoot, contents);
             ListTemplateGenerator.Generate<ElementId>(outputPathRoot, contents);
+            ListTemplateGenerator.Generate<StyleId>(outputPathRoot, contents);
             
         }
 

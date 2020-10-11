@@ -27,7 +27,6 @@ namespace UIForia {
     public static class UIForiaRuntime {
 
         private static LightList<Application> s_Applications;
-        private static TemplateParseCache s_ParseCache;
 
         public static void Initialize() {
 #if UNITY_EDITOR
@@ -111,10 +110,12 @@ namespace UIForia {
 
                 Compilation compilation = new Compilation();
                 compilation.entryType = TypeProcessor.GetProcessedType(entryType);
-                compilation.parseCache = new TemplateParseCache();
+                compilation.templateParseCache = new TemplateParseCache();
+                compilation.styleParseCache = new StyleParseCache();
                 compilation.compilationType = CompilationType.Dynamic;
                 compilation.application = application;
-                compilation.parseCache.Initialize();
+                compilation.templateParseCache.Initialize();
+                compilation.styleParseCache.Initialize();
 
                 // this should be done PER application so that if one app is running and we refresh another,
                 // the running one won't need to adjust itself until it gets refreshed

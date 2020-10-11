@@ -2,6 +2,7 @@
 using System.IO;
 using CompilerTest;
 using UIForia.Elements;
+using UIForia.Style;
 using UIForia.Text;
 using Unity.Mathematics;
 using UnityEngine;

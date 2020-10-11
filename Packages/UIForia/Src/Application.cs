@@ -10,6 +10,7 @@ using UIForia.Layout;
 using UIForia.Rendering;
 using UIForia.Routing;
 using UIForia.Sound;
+using UIForia.Style;
 using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Text;
@@ -70,6 +71,9 @@ namespace UIForia {
         internal LinqBindingSystem linqBindingSystem;
         internal ElementSystem elementSystem;
         internal TemplateSystem templateSystem;
+
+        private GameObject gameObject;
+        public StyleSystem2 styleSystem2;
 
         protected ResourceManager resourceManager;
 
@@ -1001,8 +1005,6 @@ namespace UIForia {
         public static void SetCustomPainters(Dictionary<string, Type> dictionary) {
             s_CustomPainters = dictionary;
         }
-
-        private GameObject gameObject;
 
         public GameObject GetDummyGameObject() {
             if (gameObject == null) {

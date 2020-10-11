@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Extensions;
 using UIForia.Parsing;
 using UIForia.Parsing.Expressions;
+using UIForia.Style;
 using UIForia.Text;
 using UIForia.Util;
 using UnityEngine;
@@ -20,12 +18,11 @@ namespace UIForia.Compilers {
 
         private State state;
 
+        private readonly UIForiaStyleCompiler styleCompiler;
         private readonly AttributeCompiler attributeCompiler;
 
         private readonly Dictionary<ProcessedType, TemplateExpressionSet> compiledTemplates;
-
-        private StyleSheetImporter importer = new StyleSheetImporter("", new ResourceManager());
-
+        
         private static readonly Dictionary<Type, MethodInfo> s_CreateVariableMethodCache = new Dictionary<Type, MethodInfo>();
         private static readonly Dictionary<Type, MethodInfo> s_ReferenceVariableMethodCache = new Dictionary<Type, MethodInfo>();
 
@@ -34,7 +31,6 @@ namespace UIForia.Compilers {
         private readonly AttributeCompilerContext attrCompilerContext;
         private readonly TemplateLinqCompiler typeResolver;
         private Diagnostics diagnostics;
-        private readonly StringBuilder stringBuilder;
 
         private ITemplateCompilationHandler compilationHandler;
 
@@ -42,9 +38,9 @@ namespace UIForia.Compilers {
         private StructList<CompiledExpression> pendingCompilations;
 
         public TemplateCompiler2(ITemplateCompilationHandler compilationHandler) {
+            this.styleCompiler = new UIForiaStyleCompiler();
             this.compilationHandler = compilationHandler;
             this.diagnostics = compilationHandler.Diagnostics;
-            this.stringBuilder = new StringBuilder(512);
             this.statePool = new LightList<State>();
             this.stateStack = new StructStack<State>();
             this.attrCompilerContext = new AttributeCompilerContext();
@@ -201,19 +197,26 @@ namespace UIForia.Compilers {
                     StyleLocation location = module.ResolveStyle(lookup);
 
                     // todo -- use style cache in the same way as template cache, will require new style format!
-                    if (!string.IsNullOrEmpty(location.filePath)) {
-                        if (!File.Exists(location.filePath)) {
-                            diagnostics.LogWarning($"Failed to location style file at {location.filePath}");
-                            continue;
-                        }
-
-                        StyleSheet sheet = importer.ImportStyleSheetFromFile(location.filePath);
-
-                        state.styleReferences.Add(new StyleSheetReference() {
-                            alias = lookup.styleAlias,
-                            styleSheet = sheet
-                        });
+                    if (string.IsNullOrEmpty(location.filePath)) {
+                        diagnostics.LogWarning("Cannot resolve style file: " + location.filePath);
+                        continue;
                     }
+
+                    StyleFileShell styleShell = compilationHandler.GetStyleShell(location);
+
+                    styleCompiler.Compile(styleShell);
+                    
+                    // if (!File.Exists(location.filePath)) {
+                    //     diagnostics.LogWarning($"Failed to location style file at {location.filePath}");
+                    //     continue;
+                    // }
+                    //
+                    // StyleSheet sheet = importer.ImportStyleSheetFromFile(location.filePath);
+                    //
+                    // state.styleReferences.Add(new StyleSheetReference() {
+                    //     alias = lookup.styleAlias,
+                    //     styleSheet = sheet
+                    // });
                 }
             }
         }

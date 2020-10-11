@@ -3,6 +3,7 @@ using System.Diagnostics;
 using UIForia.Compilers;
 using UIForia.Layout;
 using UIForia.Rendering;
+using UIForia.Style;
 using UIForia.Systems;
 using UIForia.UIInput;
 using UIForia.Util;
@@ -14,7 +15,9 @@ namespace UIForia.Elements {
     public abstract class UIElement : IHierarchical {
 
         public ElementId id;
-
+        
+        public StyleSet style2 => new StyleSet(id, application.styleSystem2);
+        
         public InputHandlerGroup inputHandlers; // todo -- internal with accessor
 
         internal UIElementFlags flags;

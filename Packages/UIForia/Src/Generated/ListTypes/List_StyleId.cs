@@ -1,31 +1,33 @@
-﻿////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 // This file is auto-generated.
 // Do not hand modify this file.
 // It will be overwritten next time the generator is run.
 ////////////////////////////////////////////////////////////////////////////////
 
+using System;
+using System.Diagnostics;
+using UIForia.Util;
+using UIForia.Util.Unsafe;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-// #NAMESPACES#
+using UIForia.Style;
 
 namespace UIForia.ListTypes {
 
-    public struct TTEMPLATE { }
-
-    [System.Diagnostics.DebuggerTypeProxy(typeof(DebugView_TTEMPLATE))]
-    internal unsafe struct List_TTEMPLATE : UIForia.Util.IBasicList<TTEMPLATE> {
+    [DebuggerTypeProxy(typeof(DebugView_StyleId))]
+    internal unsafe struct List_StyleId : IBasicList<StyleId> {
 
         public int size;
         private ushort capacityShiftBits;
-        private UIForia.Util.Unsafe.AllocatorUShort allocator;
+        private AllocatorUShort allocator;
 
-        [NativeDisableUnsafePtrRestriction] public TTEMPLATE* array;
+        [NativeDisableUnsafePtrRestriction] public StyleId* array;
 
         private const int k_MinCapacity = 4;
 
-        public List_TTEMPLATE(int initialCapacity, Allocator allocator, bool clearMemory = false) {
-            this.allocator = UIForia.Util.Unsafe.TypedUnsafe.CompressAllocatorToUShort(allocator);
+        public List_StyleId(int initialCapacity, Allocator allocator, bool clearMemory = false) {
+            this.allocator = TypedUnsafe.CompressAllocatorToUShort(allocator);
             this.size = 0;
             this.capacityShiftBits = 0;
             this.array = default;
@@ -37,16 +39,16 @@ namespace UIForia.ListTypes {
         }
 
         private void Initialize(int capacity, Allocator allocator, bool clearMemory) {
-            this.allocator = UIForia.Util.Unsafe.TypedUnsafe.CompressAllocatorToUShort(allocator);
-            capacity = UIForia.Util.BitUtil.EnsurePowerOfTwo(capacity > k_MinCapacity ? capacity : k_MinCapacity);
-            this.array = (TTEMPLATE*) UnsafeUtility.Malloc(sizeof(TTEMPLATE) * capacity, UnsafeUtility.AlignOf<TTEMPLATE>(), allocator);
-            this.capacityShiftBits = (ushort) UIForia.Util.BitUtil.GetPowerOfTwoBitIndex((uint) capacity);
+            this.allocator = TypedUnsafe.CompressAllocatorToUShort(allocator);
+            capacity = BitUtil.EnsurePowerOfTwo(capacity > k_MinCapacity ? capacity : k_MinCapacity);
+            this.array = (StyleId*) UnsafeUtility.Malloc(sizeof(StyleId) * capacity, UnsafeUtility.AlignOf<StyleId>(), allocator);
+            this.capacityShiftBits = (ushort) BitUtil.GetPowerOfTwoBitIndex((uint) capacity);
             if (clearMemory) {
-                UnsafeUtility.MemClear(array, sizeof(TTEMPLATE) * capacity);
+                UnsafeUtility.MemClear(array, sizeof(StyleId) * capacity);
             }
         }
 
-        public ref TTEMPLATE this[int index] {
+        public ref StyleId this[int index] {
             get => ref array[index];
         }
 
@@ -55,7 +57,7 @@ namespace UIForia.ListTypes {
             this.size = size;
         }
 
-        public void Add(in TTEMPLATE item) {
+        public void Add(in StyleId item) {
             if (size + 1 >= (1 << capacityShiftBits)) {
                 EnsureCapacity(size + 1);
             }
@@ -63,17 +65,13 @@ namespace UIForia.ListTypes {
             array[size++] = item;
         }
 
-        public void AddUnchecked(in TTEMPLATE item) {
+        public void AddUnchecked(in StyleId item) {
             array[size++] = item;
         }
 
-        public void AddRange(TTEMPLATE* items, int itemCount) {
+        public void AddRange(StyleId* items, int itemCount) {
             EnsureAdditionalCapacity(itemCount);
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-            Util.Unsafe.TypedUnsafe.MemCpy(array + size, items, itemCount);
-#else
-            Util.Unsafe.TypedUnsafe.MemCpy(array + size, items, itemCount);
-#endif
+            TypedUnsafe.MemCpy(array + size, items, itemCount);
             size += itemCount;
         }
 
@@ -93,11 +91,11 @@ namespace UIForia.ListTypes {
                 return;
             }
 
-            capacity = UIForia.Util.BitUtil.EnsurePowerOfTwo(desiredCapacity < k_MinCapacity ? k_MinCapacity : desiredCapacity);
-            Allocator fullAllocator = Util.Unsafe.TypedUnsafe.ConvertCompressedAllocator(allocator);
+            capacity = BitUtil.EnsurePowerOfTwo(desiredCapacity < k_MinCapacity ? k_MinCapacity : desiredCapacity);
+            Allocator fullAllocator = TypedUnsafe.ConvertCompressedAllocator(allocator);
 
-            long bytesToMalloc = sizeof(TTEMPLATE) * capacity;
-            void* newPointer = UnsafeUtility.Malloc(bytesToMalloc, UnsafeUtility.AlignOf<TTEMPLATE>(), fullAllocator);
+            long bytesToMalloc = sizeof(StyleId) * capacity;
+            void* newPointer = UnsafeUtility.Malloc(bytesToMalloc, UnsafeUtility.AlignOf<StyleId>(), fullAllocator);
 
             if (clearMemory) {
                 byte* bytePtr = (byte*) newPointer;
@@ -105,13 +103,13 @@ namespace UIForia.ListTypes {
             }
 
             if (array != default) {
-                int bytesToCopy = size * sizeof(TTEMPLATE);
+                int bytesToCopy = size * sizeof(StyleId);
                 UnsafeUtility.MemCpy(newPointer, array, bytesToCopy);
                 UnsafeUtility.Free(array, fullAllocator);
             }
 
-            capacityShiftBits = (ushort) UIForia.Util.BitUtil.GetPowerOfTwoBitIndex((uint) capacity);
-            array = (TTEMPLATE*) newPointer;
+            capacityShiftBits = (ushort) BitUtil.GetPowerOfTwoBitIndex((uint) capacity);
+            array = (StyleId*) newPointer;
         }
 
         public void EnsureAdditionalCapacity(int additional) {
@@ -134,11 +132,11 @@ namespace UIForia.ListTypes {
             size = count;
         }
 
-        public ref TTEMPLATE Get(int index) {
+        public ref StyleId Get(int index) {
             return ref array[index];
         }
 
-        public void Set(in TTEMPLATE item, int index) {
+        public void Set(in StyleId item, int index) {
             array[index] = item;
         }
 
@@ -148,13 +146,13 @@ namespace UIForia.ListTypes {
 
         public void Dispose() {
             if (array != default) {
-                UnsafeUtility.Free(array, Util.Unsafe.TypedUnsafe.ConvertCompressedAllocator(allocator));
+                UnsafeUtility.Free(array, TypedUnsafe.ConvertCompressedAllocator(allocator));
             }
 
             this = default;
         }
 
-        public TTEMPLATE* GetPointer(int index) {
+        public StyleId* GetPointer(int index) {
             return array + index;
         }
 
@@ -162,17 +160,17 @@ namespace UIForia.ListTypes {
             array[index] = array[--size];
         }
 
-        public TTEMPLATE GetLast() {
+        public StyleId GetLast() {
             return array[size - 1];
         }
 
-        public void CopyFrom(TTEMPLATE* data, int count) {
+        public void CopyFrom(StyleId* data, int count) {
             EnsureCapacity(count);
             size = count;
-            Util.Unsafe.TypedUnsafe.MemCpy(array, data, size);
+            TypedUnsafe.MemCpy(array, data, size);
         }
 
-        public void CopyFrom(TTEMPLATE* data, int count, Allocator allocator) {
+        public void CopyFrom(StyleId* data, int count, Allocator allocator) {
             if (array == null) {
                 Initialize(count, allocator, false);
             }
@@ -181,24 +179,24 @@ namespace UIForia.ListTypes {
             }
 
             size = count;
-            Util.Unsafe.TypedUnsafe.MemCpy(array, data, size);
+            TypedUnsafe.MemCpy(array, data, size);
         }
 
-        [System.Diagnostics.DebuggerTypeProxy(typeof(Util.Unsafe.DataListDebugView<>))]
-        public struct Shared : System.IDisposable {
+        [DebuggerTypeProxy(typeof(DataListDebugView<>))]
+        public struct Shared : IDisposable {
 
-            [NativeDisableUnsafePtrRestriction] public List_TTEMPLATE* state;
+            [NativeDisableUnsafePtrRestriction] public List_StyleId* state;
 
             public Shared(int initialCapacity, Allocator allocator, bool clear = false) {
-                this.state = Util.Unsafe.TypedUnsafe.Malloc<List_TTEMPLATE>(1, allocator);
-                *this.state = new List_TTEMPLATE(initialCapacity, allocator, clear);
+                this.state = TypedUnsafe.Malloc<List_StyleId>(1, allocator);
+                *this.state = new List_StyleId(initialCapacity, allocator, clear);
             }
 
-            public void Add(in TTEMPLATE item) {
+            public void Add(in StyleId item) {
                 state->Add(item);
             }
 
-            public void AddRange(TTEMPLATE* items, int itemCount) {
+            public void AddRange(StyleId* items, int itemCount) {
                 state->AddRange(items, itemCount);
             }
 
@@ -210,11 +208,11 @@ namespace UIForia.ListTypes {
                 state->EnsureAdditionalCapacity(additional);
             }
 
-            public ref TTEMPLATE GetReference(int index) {
+            public ref StyleId GetReference(int index) {
                 return ref state->Get(index);
             }
 
-            public TTEMPLATE* GetPointer(int index) {
+            public StyleId* GetPointer(int index) {
                 return state->GetPointer(index);
             }
 
@@ -227,19 +225,19 @@ namespace UIForia.ListTypes {
                 get => state->Capacity;
             }
 
-            public ref TTEMPLATE this[int index] {
+            public ref StyleId this[int index] {
                 get => ref state->Get(index);
             }
 
-            public void Set(in TTEMPLATE item, int index) {
+            public void Set(in StyleId item, int index) {
                 state->Set(item, index);
             }
 
             public void Dispose() {
                 if (state != null) {
-                    Allocator allocator = Util.Unsafe.TypedUnsafe.ConvertCompressedAllocator(state->allocator);
+                    Allocator allocator = TypedUnsafe.ConvertCompressedAllocator(state->allocator);
                     state->Dispose();
-                    Util.Unsafe.TypedUnsafe.Dispose(state, allocator);
+                    TypedUnsafe.Dispose(state, allocator);
                 }
 
                 this = default;
@@ -250,11 +248,11 @@ namespace UIForia.ListTypes {
                 state->size = count;
             }
 
-            public TTEMPLATE* GetArrayPointer() {
+            public StyleId* GetArrayPointer() {
                 return state->array;
             }
 
-            public void AddUnchecked(in TTEMPLATE item) {
+            public void AddUnchecked(in StyleId item) {
                 state->AddUnchecked(item);
             }
 
@@ -268,7 +266,7 @@ namespace UIForia.ListTypes {
                 state->array[i] = state->array[--state->size];
             }
 
-            public void FilterSwapRemove<TFilter>(TFilter filter) where TFilter : Util.Unsafe.IListFilter<TTEMPLATE> {
+            public void FilterSwapRemove<TFilter>(TFilter filter) where TFilter : IListFilter<StyleId> {
                 int itemCount = state->size;
 
                 for (int i = 0; i < itemCount; i++) {
@@ -283,25 +281,25 @@ namespace UIForia.ListTypes {
 
         }
 
-        public struct DebugView_TTEMPLATE {
+        public struct DebugView_StyleId {
 
             public int size;
             public int capacity;
-            public TTEMPLATE[] data;
+            public StyleId[] data;
 
-            public DebugView_TTEMPLATE(List_TTEMPLATE target) {
+            public DebugView_StyleId(List_StyleId target) {
                 this.size = target.size;
                 this.capacity = target.Capacity;
-                this.data = new TTEMPLATE[size];
+                this.data = new StyleId[size];
                 for (int i = 0; i < size; i++) {
                     data[i] = target[i];
                 }
             }
 
-            public DebugView_TTEMPLATE(List_TTEMPLATE.Shared target) {
+            public DebugView_StyleId(List_StyleId.Shared target) {
                 this.size = target.size;
                 this.capacity = target.capacity;
-                this.data = new TTEMPLATE[size];
+                this.data = new StyleId[size];
                 for (int i = 0; i < size; i++) {
                     data[i] = target[i];
                 }

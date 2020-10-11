@@ -1,8 +1,10 @@
 using System;
 using System.Diagnostics;
+using UIForia.Sound;
 using UnityEngine;
 
-namespace UIForia.Sound {
+namespace UIForia {
+
     [DebuggerDisplay("{unit}({value})")]
     public struct UITimeMeasurement {
 
@@ -33,6 +35,7 @@ namespace UIForia.Sound {
                 switch (unit) {
                     case UITimeMeasurementUnit.Milliseconds: return value * 0.001f;
                     case UITimeMeasurementUnit.Percentage: throw new Exception("Cannot convert % to seconds.");
+
                     case UITimeMeasurementUnit.Unset:
                     case UITimeMeasurementUnit.Seconds:
                     default:
@@ -46,6 +49,7 @@ namespace UIForia.Sound {
                 switch (unit) {
                     case UITimeMeasurementUnit.Seconds: return value * 1000;
                     case UITimeMeasurementUnit.Percentage: throw new Exception("Cannot convert % to milliseconds.");
+
                     case UITimeMeasurementUnit.Unset:
                     case UITimeMeasurementUnit.Milliseconds:
                     default:
@@ -57,7 +61,7 @@ namespace UIForia.Sound {
         public static bool operator ==(UITimeMeasurement a, UITimeMeasurement b) {
             return Mathf.Approximately(a.value, b.value) && a.unit == b.unit;
         }
-        
+
         public static bool operator !=(UITimeMeasurement a, UITimeMeasurement b) {
             return !(a == b);
         }
@@ -66,13 +70,17 @@ namespace UIForia.Sound {
             switch (unit) {
                 case UITimeMeasurementUnit.Percentage:
                     return value * 100 + "%";
+
                 case UITimeMeasurementUnit.Seconds:
                     return value + "s";
+
                 default:
                 case UITimeMeasurementUnit.Milliseconds:
                 case UITimeMeasurementUnit.Unset:
                     return value + "ms";
             }
         }
+
     }
+
 }

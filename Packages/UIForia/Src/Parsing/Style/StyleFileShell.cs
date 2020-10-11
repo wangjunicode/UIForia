@@ -1,3 +1,5 @@
+using System;
+using UIForia.NewStyleParsing;
 using UIForia.Style;
 using UIForia.Util;
 using UnityEngine;
@@ -20,15 +22,7 @@ namespace UIForia.Style {
 
     }
 
-    public struct StylePart {
-
-        public int type;
-        public int dataIndex;
-        public LineInfo lineInfo;
-        public int firstChild;
-        public int nextSibling;
-
-    }
+ 
 
     public struct StyleBlockNode {
 
@@ -82,11 +76,24 @@ namespace UIForia.Style {
 
         public struct StyleASTBuilder {
 
+            private StyleFileShellBuilder builder;
+            internal readonly int index;
+
+            internal StyleASTBuilder(int index, StyleFileShellBuilder builder) {
+                this.index = index;
+                this.builder = builder;
+            }
+            
             public void AddConditionNode(CharSpan condition) {
             }
 
             public void AddStyleProperty(CharSpan key, CharSpan value) {
                 
+            }
+
+            public StyleASTBuilder AddAttributeBlock(CharSpan key, CharSpan value) {
+                // builder.AddAttributeBlock();
+                return default;
             }
 
         }
@@ -96,6 +103,16 @@ namespace UIForia.Style {
 
     }
 
-    public class StyleFileShell { }
+    public class StyleFileShell {
+
+        public DateTime lastWriteTime;
+        public bool checkedTimestamp;
+        public string filePath;
+
+        public void Serialize(ref ManagedByteBuffer buffer) {
+            throw new NotImplementedException();
+        }
+
+    }
 
 }

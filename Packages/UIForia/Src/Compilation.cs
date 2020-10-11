@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Extensions;
 using UIForia.Parsing;
+using UIForia.Style;
 using UIForia.Systems;
 using UIForia.Util;
 using Debug = UnityEngine.Debug;
@@ -26,7 +28,7 @@ namespace UIForia.Compilers {
         public Application application;
         public CompilationType compilationType;
         public ProcessedType entryType;
-        public TemplateParseCache parseCache;
+        public TemplateParseCache templateParseCache;
 
         public Dictionary<ProcessedType, UIModule> moduleMap;
         public Dictionary<ProcessedType, TemplateFileShell> templateMap;
@@ -57,6 +59,7 @@ namespace UIForia.Compilers {
         private LightList<TemplateData> compiledTemplates;
 
         private object locker = new object();
+        public StyleParseCache styleParseCache;
 
         public CompilationResult CompileDynamic() {
 
@@ -223,7 +226,7 @@ namespace UIForia.Compilers {
 
             TemplateLocation templatePath = module.ResolveTemplate(lookup);
 
-            if (!parseCache.TryGetTemplateFile(templatePath.filePath, out TemplateFileShell shell)) {
+            if (!templateParseCache.TryGetTemplateFile(templatePath.filePath, out TemplateFileShell shell)) {
                 // either file not found, not in cache, or write times don't match
 
                 if (!File.Exists(templatePath.filePath)) {
@@ -240,7 +243,7 @@ namespace UIForia.Compilers {
 
                 shell.lastWriteTime = timestamp;
                 shell.checkedTimestamp = true;
-                parseCache.SetTemplateFile(templatePath.filePath, shell);
+                templateParseCache.SetTemplateFile(templatePath.filePath, shell);
             }
 
             // I think this is the right place to check the parse cache and update our parse 
@@ -445,6 +448,11 @@ namespace UIForia.Compilers {
                 templateMap.TryGetValue(processedType, out TemplateFileShell fileShell);
                 return fileShell;
             }
+        }
+
+        public StyleFileShell GetStyleShell(StyleLocation location) {
+            styleParseCache.TryGetStyle(location.filePath, out StyleFileShell shell);
+            return shell;
         }
 
     }

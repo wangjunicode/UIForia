@@ -1,4 +1,5 @@
-﻿using UIForia.Animation;
+﻿using UIForia;
+using UIForia.Animation;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Sound;

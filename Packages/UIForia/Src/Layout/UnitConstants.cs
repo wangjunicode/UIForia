@@ -18,8 +18,8 @@ namespace UIForia.Layout {
         public const int ParentWidth = 1 << 12;
         public const int MaxContent = 1 << 13;
         public const int MinContent = 1 << 14;
-        public const int MaxContentSelf = 1 << 15;
-        public const int MinContentSelf = 1 << 16;
+        public const int BackgroundWidth = 1 << 15;
+        public const int BackgroundHeight = 1 << 16;
         public const int ParentHeight = 1 << 17;
         public const int ParentContentArea = 1 << 18;
         public const int ParentContentAreaWidth = 1 << 19;
@@ -35,6 +35,7 @@ namespace UIForia.Layout {
 
         public const int Seconds = 1 << 29;
         public const int Milliseconds = 1 << 30;
+
     }
 
 }

@@ -17,6 +17,8 @@ namespace UIForia.Layout {
         IntrinsicMinimum = UnitConstants.MinContent,
         IntrinsicPreferred = UnitConstants.MaxContent,
         FitContent = UnitConstants.FitContent,
+        BackgroundWidth = UnitConstants.BackgroundWidth,
+        BackgroundHeight = UnitConstants.BackgroundHeight,
 
         Auto = 0
 

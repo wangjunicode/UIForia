@@ -11,15 +11,10 @@ style button {
     TextFontAsset = @theme.GothamRound;
     DistributeExtraSpace = CenterContent;
     TextAlignment = Center;
-    TextFontSize = 16px;
+    TextFontSize = 9px;
     Margin = @theme.sp4;
     TextTransform = UpperCase;
-    [attr:configuration="label+icon"] {
-        LayoutType = Grid;
-        GridLayoutColTemplate = 1mx 1mx;
-        GridLayoutDirection = Horizontal;
-        GridLayoutColGap = @theme.sp1;
-    }
+    FlexLayoutDirection = Horizontal;
     
     [attr:configuration="label-only"] {
     
@@ -87,9 +82,9 @@ style button {
 }
 
 style text {
-    PaddingTop = 2px;
+    MarginLeft = @theme.sp1;
 }
 
 style icon {
-    PreferredSize = 16px;
+    PreferredSize = 8px;
 }

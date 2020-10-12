@@ -1,0 +1,20 @@
+<UITemplate>
+    
+    <Style src="SeedLib/Notification/Notification.style"/>
+    
+    <Contents style="notification">
+        <Div style="notification-ribbon" />
+        
+        <Image src="avatarIcon" style="notification-icon" />
+        
+        <Text style="notification-title">{title}</Text>
+        
+        <Text style="notification-description">{description}</Text>
+        
+        <Div style="notification-button-group">
+            <Image src="actionIcon" if="isActionable" style="notification-button mr-sp1" mouse:click="onActionClicked()"/>
+            <Image src="'Icons/close'" if="isClosable" style="notification-button" mouse:click="onClose()"/>
+        </Div>
+        
+    </Contents>
+</UITemplate>

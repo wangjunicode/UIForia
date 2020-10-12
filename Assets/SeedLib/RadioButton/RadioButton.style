@@ -1,7 +1,7 @@
 ﻿import "SeedLib/SeedLibTheme.style" as theme;
 
 style radio-button {
-    PreferredSize = 28px;
+    PreferredSize = 14px;
     BackgroundColor = white;
     BorderRadius = 50%;
     Border = 2px;
@@ -48,7 +48,7 @@ style labeled-radio-button {
     TextFontAsset = @theme.Whitney;
     Padding = @theme.sp2;
     DistributeExtraSpace = CenterContent;
-    TextFontSize = 24px;
+    TextFontSize = 12px;
     
     [attr:disabled] {
         Opacity = 0.4;

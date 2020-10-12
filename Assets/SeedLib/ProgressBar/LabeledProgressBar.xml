@@ -1,0 +1,13 @@
+<UITemplate>
+
+    <Style src="SeedLib/ProgressBar/ProgressBar.style"/>
+
+    <Contents style="labeled-progress-bar">
+
+        <ProgressBar attr:labeled="true" sync:progress="progress" sync:color="color"/>
+
+        <Text style="label">{(int)(progress * 100)}%</Text>
+
+    </Contents>
+
+</UITemplate>

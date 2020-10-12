@@ -120,20 +120,30 @@ export const rose900 = #551322;
 // -----------------------------------------
 // Spacings
 // -----------------------------------------
-export const sp1 = 8; // 4;
-export const sp2 = 16; // 8;
-export const sp3 = 24; //12;
-export const sp4 = 32; //16;
-export const sp5 = 48; //24;
-export const sp6 = 64; //32;
-export const sp7 = 128; //48;
-export const sp8 = 256; //64;
+export const sp1 = 4;  
+export const sp2 = 8;
+export const sp3 = 12;
+export const sp4 = 16;
+export const sp5 = 24;
+export const sp6 = 32;
+export const sp7 = 48;
+export const sp8 = 64;
+
+//export const sp1 = 8; // 4;  
+//export const sp2 = 16; // 8;
+//export const sp3 = 24; //12;
+//export const sp4 = 32; //16;
+//export const sp5 = 48; //24;
+//export const sp6 = 64; //32;
+//export const sp7 = 128; //48;
+//export const sp8 = 256; //64;
 
 
 // -----------------------------------------
 // Fonts
 // -----------------------------------------
 export const GothamRound = url("Fonts/GothamRnd-Medium SDF");
+export const GothamRoundBold = url("Fonts/GothamRnd-Bold SDF");
 export const Whitney = url("Fonts/Whitney-Medium SDF");
 // -----------------------------------------
 // Cursors

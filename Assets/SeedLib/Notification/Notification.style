@@ -1,0 +1,232 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style notification {
+    BackgroundColor = black;
+    LayoutType = Grid;
+    PreferredWidth = 256px;
+    GridLayoutColTemplate = 8px 48px 1fr 44px;
+    GridLayoutRowTemplate = 22px 1mx;
+    CornerBevelBottomRight = 20;
+    Margin = @theme.sp1;
+    
+    [attr:variant="primary"] {
+        BackgroundTint = @theme.poppy700;
+    }
+    
+    [attr:variant="secondary"] {
+        BackgroundTint = @theme.coal700;
+    }
+    
+    [attr:variant="success"] {
+        BackgroundTint = @theme.apple700;
+    }
+    
+    [attr:variant="danger"] {
+        BackgroundTint = @theme.chili700;
+    }
+    
+    [attr:variant="warning"] {
+        BackgroundTint = @theme.lemon700;
+    }
+        
+    [attr:variant="info"] {
+        BackgroundTint = @theme.mint700;
+    }
+    
+}
+
+style notification-ribbon {
+    GridItemX = 0;
+    GridItemY = 0;
+    GridItemHeight = 2;
+    PreferredSize = 100% 0;
+    LayoutFitVertical = Fill;
+    BackgroundColor = @theme.poppy700;
+    
+    [attr:variant="primary"] {
+        BackgroundColor = @theme.poppy700;
+    }
+    
+    [attr:variant="secondary"] {
+        BackgroundColor = @theme.coal700;
+    }
+    
+    [attr:variant="success"] {
+        BackgroundColor = @theme.apple700;
+    }
+    
+    [attr:variant="danger"] {
+        BackgroundColor = @theme.chili700;
+    }
+    
+    [attr:variant="warning"] {
+        BackgroundColor = @theme.lemon700;
+    }
+        
+    [attr:variant="info"] {
+        BackgroundColor = @theme.mint700;
+    }
+}
+
+style notification-icon {
+    GridItemX = 1;
+    GridItemY = 0;
+    Margin = @theme.sp2;
+    BorderRadius = 50%;
+    PreferredSize = 32px;
+    GridItemHeight = 2;
+     
+    [attr:variant="primary"] {
+        BackgroundColor = @theme.poppy300;
+    }
+    
+    [attr:variant="secondary"] {
+        BackgroundColor = @theme.coal300;
+    }
+    
+    [attr:variant="success"] {
+        BackgroundColor = @theme.apple300;
+    }
+    
+    [attr:variant="danger"] {
+        BackgroundColor = @theme.chili300;
+    }
+    
+    [attr:variant="warning"] {
+        BackgroundColor = @theme.lemon300;
+    }
+        
+    [attr:variant="info"] {
+        BackgroundColor = @theme.mint300;
+    }
+    
+    
+}
+
+style notification-title {
+    GridItemX = 2;
+    GridItemY = 0;
+    TextColor = @theme.poppy500;
+    TextFontSize = 8px;
+    TextFontAsset = @theme.GothamRound;
+    MarginTop = @theme.sp3;
+    
+    [attr:variant="primary"] {
+        TextColor = @theme.poppy500;
+    }
+    
+    [attr:variant="secondary"] {
+        TextColor = @theme.coal500;
+    }
+    
+    [attr:variant="success"] {
+        TextColor = @theme.apple500;
+    }
+    
+    [attr:variant="danger"] {
+        TextColor = @theme.chili500;
+    }
+    
+    [attr:variant="warning"] {
+        TextColor = @theme.lemon500;
+    }
+        
+    [attr:variant="info"] {
+        TextColor = @theme.mint500;
+    }
+}
+
+style notification-button-group {
+    AlignX = 100% parent;
+    LayoutBehavior = Ignored;
+    FlexLayoutDirection = Horizontal;
+    Padding = @theme.sp2;
+}
+
+style notification-button {
+    PreferredSize = 14px;
+    
+    [attr:variant="primary"] {
+         BackgroundTint = @theme.poppy700;
+        [hover] {
+            BackgroundTint = @theme.poppy500;
+        }
+    }
+    
+    [attr:variant="secondary"] {
+        BackgroundTint = @theme.coal700;
+        [hover] {
+            BackgroundTint = @theme.coal500;
+        }
+    }
+    
+    [attr:variant="success"] {
+        BackgroundTint = @theme.apple700;
+        [hover] {
+            BackgroundTint = @theme.apple500;
+        }
+    }
+    
+    [attr:variant="danger"] {
+        BackgroundTint = @theme.chili700;
+        [hover] {
+            BackgroundTint = @theme.chili500;
+        }
+    }
+    
+    [attr:variant="warning"] {
+        BackgroundTint = @theme.lemon700;
+        [hover] {
+            BackgroundTint = @theme.lemon500;
+        }
+    }
+        
+    [attr:variant="info"] {
+        BackgroundTint = @theme.mint700;
+        [hover] {
+            BackgroundTint = @theme.mint500;
+        }
+    }
+}
+
+// TODO: Move to proper place.
+style mr-sp1 {
+    MarginRight = @theme.sp1;
+}
+
+style notification-description {
+    GridItemX = 2;
+    GridItemY = 1;
+    GridItemWidth = 2;
+    TextColor = @theme.poppy100;
+    TextFontSize = 12px;
+    TextFontAsset = @theme.Whitney;
+    PreferredWidth = 100%;
+    PaddingRight = @theme.sp2;
+    MarginBottom = @theme.sp3;
+    
+    [attr:variant="primary"] {
+        TextColor = @theme.poppy100;
+    }
+    
+    [attr:variant="secondary"] {
+        TextColor = @theme.coal100;
+    }
+    
+    [attr:variant="success"] {
+        TextColor = @theme.apple100;
+    }
+    
+    [attr:variant="danger"] {
+        TextColor = @theme.chili100;
+    }
+    
+    [attr:variant="warning"] {
+        TextColor = @theme.lemon100;
+    }
+        
+    [attr:variant="info"] {
+        TextColor = @theme.mint100;
+    }
+    
+}

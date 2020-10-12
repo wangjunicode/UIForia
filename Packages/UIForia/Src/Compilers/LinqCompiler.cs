@@ -471,6 +471,10 @@ namespace UIForia.Compilers {
             return AddStatement(Visit(input));
         }
 
+        public Expression Statement(Type targetType, ASTNode input) {
+            return AddStatement(VisitUnchecked(targetType, input));
+        }
+
         public Expression RawExpression(Expression expression) {
             return AddStatement(expression);
         }

@@ -1,0 +1,37 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style progress-bar {
+
+    PreferredSize = 150px 4px;
+    BorderRadius = 50%;
+    BackgroundColor = @theme.coal50;
+    Margin = @theme.sp2;
+    [attr:variant="thick"] {
+        PreferredHeight = 8px;
+    }      
+    
+    [attr:labeled] {
+        PreferredWidth = 1psz;
+        Margin = 0, @theme.sp1, 0, 0;
+        FlexItemShrink = 1;
+    }
+    
+}
+
+style progress-bar-fill {
+
+    PreferredSize = 1psz;
+    BorderRadius = 50%;
+    MeshType = FillHorizontal;
+   
+}
+
+style labeled-progress-bar {
+    PreferredWidth = 175px;
+    TextFontAsset = @theme.GothamRoundBold;
+    TextFontSize = 8px;
+    TextColor = black;
+    FlexLayoutDirection = Horizontal;
+    Margin = @theme.sp2;
+    DistributeExtraSpaceVertical = CenterContent;
+}

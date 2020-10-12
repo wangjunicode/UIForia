@@ -2,7 +2,7 @@
 
 style checkbox {
 
-    PreferredSize = 28px;
+    PreferredSize = 14px;
     BackgroundColor = white;
     BorderRadius = 4px;
     Border = 2px;
@@ -35,7 +35,7 @@ style labeled-checkbox {
     TextFontAsset = @theme.Whitney;
     Margin = @theme.sp2;
     DistributeExtraSpace = CenterContent;
-    TextFontSize = 24px;
+    TextFontSize = 12px;
     [attr:disabled] {
         Opacity = 0.4;
         PointerEvents = None;

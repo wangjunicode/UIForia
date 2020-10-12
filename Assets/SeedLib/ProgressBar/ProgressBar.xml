@@ -1,0 +1,11 @@
+<UITemplate>
+
+    <Style src="SeedLib/ProgressBar/ProgressBar.style"/>
+    
+    <Contents style="progress-bar">
+
+        <Div attr:id="fill-bar" style="progress-bar-fill"/>
+
+    </Contents>
+
+</UITemplate>

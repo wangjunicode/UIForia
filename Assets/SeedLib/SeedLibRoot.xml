@@ -14,6 +14,9 @@
 
         }
 
+        style padded {
+        Padding = 30px;
+        }
         style big {
         PreferredHeight = 3000px;
         BackgroundColor = white;
@@ -37,94 +40,132 @@
 
         <ScrollView style="scroll">
 
-            <Group style="row">
-                <Button attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
-                <Button attr:variant="Primary" label="'Hello'"/>
-                <Button attr:variant="Primary" icon="'Icons/star'"/>
-                <Div style:PreferredWidth="300">
-                    <Button style="fill-parent-width" label="'Hello'" icon="'Icons/star'"/>
-                </Div>
-            </Group>
+            <override:Children style="padded">
+                <Group>
+                    
+                    <Notification title="'Notification Title'" description="'Notification Description Notification Description Notification Description Notification Description'" attr:variant="primary" actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onActionClicked="actionClick" onClose="click" />
+                    <Notification title="'Notification Title'" description="'Notification Description Notification Description Notification Description Notification Description'" attr:variant="secondary" actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onActionClicked="actionClick" onClose="click" />
+                    <Notification title="'Notification Title'" description="'Notification Description Notification Description Notification Description Notification Description'" attr:variant="success" actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onActionClicked="actionClick" onClose="click" />
+                    <Notification title="'Notification Title'" description="'Notification Description Notification Description Notification Description Notification Description'" attr:variant="danger" actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onActionClicked="actionClick" onClose="click" />
+                    <Notification title="'Notification Title'" description="'Notification Description Notification Description Notification Description Notification Description'" attr:variant="warning" actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onActionClicked="actionClick" onClose="click" />
+                    <Notification title="'Notification Title'" description="'Notification Description Notification Description Notification Description Notification Description'" attr:variant="info" actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onActionClicked="actionClick" onClose="click" />
+                    <!--
+                    <Notification actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onClose="() => UnityEngine.Debug.Log('Close clicked')" onActionClicked="() => UnityEngine.Debug.Log('Action clicked')" />    
+                    <Notification actionIcon="'Icons/star'" onClose="() => UnityEngine.Debug.Log('Close clicked')" onActionClicked="() => UnityEngine.Debug.Log('Action clicked')" />-->
+                </Group>
 
-            <Group style="row">
-                <Button attr:disabled="true" attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
-                <Button attr:disabled="true" attr:variant="Primary" label="'Hello'"/>
-                <Button attr:disabled="true" attr:variant="Primary" icon="'Icons/star'"/>
-                <Div style:PreferredWidth="300">
-                    <Button style="fill-parent-width" attr:disabled="true" attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
-                </Div>
-            </Group>
+                <Group style="row">
+                    <Button attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
+                    <Button attr:variant="Primary" label="'Hello'"/>
+                    <Button attr:variant="Primary" icon="'Icons/star'"/>
+                    <Div style:PreferredWidth="300">
+                        <Button style="fill-parent-width" label="'Hello'" icon="'Icons/star'"/>
+                    </Div>
+                </Group>
 
-            <Group style="row">
-                <Button attr:variant="Secondary" label="'Hello'" icon="'Icons/star'"/>
-                <Button attr:variant="Secondary" label="'Hello'"/>
-                <Button attr:variant="Secondary" icon="'Icons/star'"/>
-                <Div style:PreferredWidth="300">
-                    <Button style="fill-parent-width" attr:variant="Secondary" label="'Hello'" icon="'Icons/star'"/>
-                </Div>
-            </Group>
+                <Group style="row">
+                    <Button attr:disabled="true" attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
+                    <Button attr:disabled="true" attr:variant="Primary" label="'Hello'"/>
+                    <Button attr:disabled="true" attr:variant="Primary" icon="'Icons/star'"/>
+                    <Div style:PreferredWidth="300">
+                        <Button style="fill-parent-width" attr:disabled="true" attr:variant="Primary" label="'Hello'" icon="'Icons/star'"/>
+                    </Div>
+                </Group>
 
-            <Group style="row">
-                <Button attr:variant="Secondary" attr:disabled="true" label="'Hello'" icon="'Icons/star'"/>
-                <Button attr:variant="Secondary" attr:disabled="true" label="'Hello'"/>
-                <Button attr:variant="Secondary" attr:disabled="true" icon="'Icons/star'"/>
-                <Div style:PreferredWidth="300">
-                    <Button style="fill-parent-width" attr:variant="Secondary" attr:disabled="true" label="'Hello'" icon="'Icons/star'"/>
-                </Div>
-            </Group>
+                <Group style="row">
+                    <Button attr:variant="Secondary" label="'Hello'" icon="'Icons/star'"/>
+                    <Button attr:variant="Secondary" label="'Hello'"/>
+                    <Button attr:variant="Secondary" icon="'Icons/star'"/>
+                    <Div style:PreferredWidth="300">
+                        <Button style="fill-parent-width" attr:variant="Secondary" label="'Hello'" icon="'Icons/star'"/>
+                    </Div>
+                </Group>
 
-            <Group style="row">
-                <Checkbox/>
-                <Checkbox isChecked.once="true"/>
-                <Checkbox isChecked.once="true" isMixed="true"/>
-            </Group>
+                <Group style="row">
+                    <Button attr:variant="Secondary" attr:disabled="true" label="'Hello'" icon="'Icons/star'"/>
+                    <Button attr:variant="Secondary" attr:disabled="true" label="'Hello'"/>
+                    <Button attr:variant="Secondary" attr:disabled="true" icon="'Icons/star'"/>
+                    <Div style:PreferredWidth="300">
+                        <Button style="fill-parent-width" attr:variant="Secondary" attr:disabled="true" label="'Hello'" icon="'Icons/star'"/>
+                    </Div>
+                </Group>
 
-            <Group style="row">
-                <RadioButton/>
-                <RadioButton/>
-                <RadioButton isChecked.once="true"/>
-                <RadioButton isChecked.once="true"/>
-                <RadioButton attr:disabled="true" isChecked.once="true"/>
-                <RadioButton attr:disabled="true"/>
-            </Group>
+                <Group style="row">
+                    <Checkbox/>
+                    <Checkbox isChecked.once="true"/>
+                    <Checkbox isChecked.once="true" isMixed="true"/>
+                </Group>
 
-            <Group style="row">
-                <LabeledRadioButton label="'Label'"/>
-                <LabeledRadioButton attr:disabled="true" label="'Label'"/>
-            </Group>
+                <Group style="row">
+                    <RadioButton/>
+                    <RadioButton/>
+                    <RadioButton isChecked.once="true"/>
+                    <RadioButton isChecked.once="true"/>
+                    <RadioButton attr:disabled="true" isChecked.once="true"/>
+                    <RadioButton attr:disabled="true"/>
+                </Group>
 
-            <Group style="row">
-                <LabeledCheckbox label="'Label'"/>
-                <LabeledCheckbox label="'Long label'" isChecked.once="true"/>
-                <LabeledCheckbox label="'Super long label this is crazy please dont do this'" isChecked.once="true" isMixed="true"/>
-            </Group>
+                <Group style="row">
+                    <LabeledRadioButton label="'Label'"/>
+                    <LabeledRadioButton attr:disabled="true" label="'Label'"/>
+                </Group>
 
-            <Group style="row">
-                <Slider rangeStart="0" rangeEnd="10"/>
-                <Slider showTrail.once="true" rangeStart.once="0" rangeEnd.once="10" stepSize.once="2" value.once="7.6f"/>
-                <Div style:PreferredWidth="300">
-                    <Slider style="fill-parent-width" 
-                            showStepTicks="true"
-                            useBothHandles.once="true"
-                            showTrail.once="true" 
-                            rangeStart.once="0" 
-                            rangeEnd.once="10" 
-                            stepSize.once="2" 
-                            value.once="7.6f"/>
-                </Div>
-            </Group>
+                <Group style="row">
+                    <LabeledCheckbox label="'Label'"/>
+                    <LabeledCheckbox label="'Long label'" isChecked.once="true"/>
+                    <LabeledCheckbox label="'Super long label this is crazy please dont do this'" isChecked.once="true" isMixed="true"/>
+                </Group>
 
-            <Group style="row">
-                <ToggleSwitch/>
-                <ToggleSwitch attr:disabled="true"/>
-                <ToggleSwitch attr:disabled="true" value="true"/>
-            </Group>
-            
-            <Group style="row">
-                <ToggleSwitchSmall/>
-                <ToggleSwitchSmall attr:disabled="true"/>
-                <ToggleSwitchSmall attr:disabled="true" value="true"/>
-            </Group>
+                <Group style="row">
+                    <Slider rangeStart="0" rangeEnd="10"/>
+                    <Slider showTrail.once="true" rangeStart.once="0" rangeEnd.once="10" stepSize.once="2" value.once="7.6f"/>
+                    <Div style:PreferredWidth="300">
+                        <Slider style="fill-parent-width"
+                                showStepTicks="true"
+                                useBothHandles.once="true"
+                                showTrail.once="true"
+                                rangeStart.once="0"
+                                rangeEnd.once="10"
+                                stepSize.once="2"
+                                value.once="7.6f"/>
+                    </Div>
+                </Group>
+
+                <Group style="row">
+                    <ToggleSwitch/>
+                    <ToggleSwitch attr:disabled="true"/>
+                    <ToggleSwitch attr:disabled="true" value="true"/>
+                </Group>
+
+                <Group style="row">
+                    <ToggleSwitchSmall/>
+                    <ToggleSwitchSmall attr:disabled="true"/>
+                    <ToggleSwitchSmall attr:disabled="true" value="true"/>
+                </Group>
+
+                <Group style="row">
+                    <ProgressBar color="SeedLib.ThemeColors.apple500" progress="0.5"/>
+                    <ProgressBar color="SeedLib.ThemeColors.apple500" progress="0.25"/>
+                    <ProgressBar color="SeedLib.ThemeColors.apple500" progress="0"/>
+                    <ProgressBar color="SeedLib.ThemeColors.apple500" progress="1"/>
+                </Group>
+
+                <Group style="row">
+                    <ProgressBar attr:variant="thick" color="SeedLib.ThemeColors.poppy500" progress="0.5"/>
+                    <ProgressBar attr:variant="thick" color="SeedLib.ThemeColors.poppy500" progress="0.25"/>
+                    <ProgressBar attr:variant="thick" color="SeedLib.ThemeColors.poppy500" progress="0"/>
+                    <ProgressBar attr:variant="thick" color="SeedLib.ThemeColors.poppy500" progress="1"/>
+                </Group>
+                
+                <Group style="row">
+                    <LabeledProgressBar attr:variant="thick" color="SeedLib.ThemeColors.poppy500" progress="0.5"/>
+                    <LabeledProgressBar attr:variant="thick" color="SeedLib.ThemeColors.poppy500" progress="0.25"/>
+                    <LabeledProgressBar attr:variant="thick" color="SeedLib.ThemeColors.poppy500" progress="0.352521"/>
+                    <LabeledProgressBar attr:variant="thick" color="SeedLib.ThemeColors.poppy500" progress="5"/>
+                </Group>
+
+                
+            </override:Children>
 
         </ScrollView>
 

@@ -2326,7 +2326,7 @@ namespace UIForia.Compilers {
             else {
                 LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
 
-                closure.Statement(astNode);
+                closure.Statement(eventInfo.EventHandlerType, astNode);
                 LambdaExpression lambda = closure.BuildLambda();
                 ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
                 compiler.Assign(evtFn, lambda);

@@ -1,0 +1,7 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style separator {
+    PreferredWidth = 1pca;
+    PreferredHeight = 1px;
+    BackgroundColor = @theme.coal100;
+}

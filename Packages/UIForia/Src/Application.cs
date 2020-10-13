@@ -26,7 +26,7 @@ namespace UIForia {
 
         public static float dpiScaleFactor = Mathf.Max(1, Screen.dpi / 96f);
 
-        public static readonly float originalDpiScaleFactor = Mathf.Max(1, Screen.dpi / 100f);
+        public static readonly float originalDpiScaleFactor = Mathf.Max(1, Screen.dpi / 96f);
 
         public float DPIScaleFactor {
             get => dpiScaleFactor;

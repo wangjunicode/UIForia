@@ -1,37 +1,8 @@
 ﻿<UITemplate>
 
     <Style src="SeedLib/SeedLibTheme.style"/>
-    <Style>
-        style root {
-        PreferredSize = 1vw 1vh;
-        }
-
-        style scroll {
-
-        FlexItemGrow = 1;
-        PreferredSize = 1pca 0px;
-        BackgroundColor = white;
-
-        }
-
-        style padded {
-        Padding = 30px;
-        }
-        style big {
-        PreferredHeight = 3000px;
-        BackgroundColor = white;
-        PreferredWidth = 100px;
-        }
-
-        style row {
-        FlexLayoutDirection = Horizontal;
-        }
-
-        style fill-parent-width {
-        PreferredWidth = 1pca;
-        }
-
-    </Style>
+    <Style src="SeedLib/SeedLibRoot.style"/>
+    
     <Contents style="root">
 
         <TopBar>
@@ -42,6 +13,38 @@
 
             <override:Children style="padded">
                 <Group>
+
+                    <Div style="list-container" style:PreferredWidth="300">
+                        <ItemList label="'Ingredients'" items="items">
+                            <ListItem icon="$item.Icon">
+                                <Text style="h6">{$item.Name}</Text>
+                                <Checkbox />
+                            </ListItem>
+                        </ItemList>
+                        
+                        <Separator style="list-separator" />
+                        
+                        <ItemList label="'Ingredients'" items="items" attr:variant="dense">
+                            <ListItem icon="$item.Icon">
+                                <Text style="h6">{$item.Name}</Text>
+                                <Checkbox />
+                            </ListItem>
+                        </ItemList>
+
+                        <Separator style="list-separator" />
+
+                        <ItemList label="'Ingredients'" items="items" attr:variant="dense+striped">
+                            <ListItem icon="$item.Icon">
+                                <Text style="h6">{$item.Name}</Text>
+                                <Checkbox />
+                            </ListItem>
+                        </ItemList>
+                    </Div>
+                    
+
+                </Group>
+                
+                <Group>
                     
                     <Notification title="'Notification Title'" description="'Notification Description Notification Description Notification Description Notification Description'" attr:variant="primary" actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onActionClicked="actionClick" onClose="click" />
                     <Notification title="'Notification Title'" description="'Notification Description Notification Description Notification Description Notification Description'" attr:variant="secondary" actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onActionClicked="actionClick" onClose="click" />
@@ -49,9 +52,7 @@
                     <Notification title="'Notification Title'" description="'Notification Description Notification Description Notification Description Notification Description'" attr:variant="danger" actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onActionClicked="actionClick" onClose="click" />
                     <Notification title="'Notification Title'" description="'Notification Description Notification Description Notification Description Notification Description'" attr:variant="warning" actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onActionClicked="actionClick" onClose="click" />
                     <Notification title="'Notification Title'" description="'Notification Description Notification Description Notification Description Notification Description'" attr:variant="info" actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onActionClicked="actionClick" onClose="click" />
-                    <!--
-                    <Notification actionIcon="$element.application.ResourceManager.GetTexture('Icons/star')" onClose="() => UnityEngine.Debug.Log('Close clicked')" onActionClicked="() => UnityEngine.Debug.Log('Action clicked')" />    
-                    <Notification actionIcon="'Icons/star'" onClose="() => UnityEngine.Debug.Log('Close clicked')" onActionClicked="() => UnityEngine.Debug.Log('Action clicked')" />-->
+                    
                 </Group>
 
                 <Group style="row">

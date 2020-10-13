@@ -1,0 +1,39 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style root {
+PreferredSize = 1vw 1vh;
+}
+
+style scroll {
+
+FlexItemGrow = 1;
+PreferredSize = 1pca 0px;
+BackgroundColor = white;
+
+}
+
+style padded {
+Padding = 30px;
+}
+style big {
+PreferredHeight = 3000px;
+BackgroundColor = white;
+PreferredWidth = 100px;
+}
+
+style row {
+FlexLayoutDirection = Horizontal;
+}
+
+style fill-parent-width {
+PreferredWidth = 1pca;
+}
+
+style list-container {
+    Padding = @theme.sp4;
+}
+
+style list-separator {
+    MarginTop = @theme.sp4;
+    MarginBottom = @theme.sp4;
+}

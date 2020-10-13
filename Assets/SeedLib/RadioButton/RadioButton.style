@@ -6,7 +6,6 @@ style radio-button {
     BorderRadius = 50%;
     Border = 2px;
     BorderColor = @theme.coal100;
-    Margin = @theme.sp2;
     DistributeExtraSpace = CenterContent;
     
     [active] {

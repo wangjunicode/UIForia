@@ -1,0 +1,17 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style item-list {
+    PreferredWidth = 1pca;
+    Painter = "SeedLib::ItemList";    
+}
+
+style item-list-children {
+    LayoutType = Grid;
+    GridLayoutDirection = Horizontal;
+    GridLayoutColAutoSize = 1pca;
+    GridLayoutRowGap = @theme.sp2;
+    
+    [attr:variant="dense"] {
+        GridLayoutRowGap = @theme.sp1;
+    }
+}

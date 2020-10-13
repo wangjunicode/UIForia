@@ -1,0 +1,20 @@
+<UITemplate>
+
+    <Style src="SeedLib/List/ItemList.style"/>
+    <Style src="SeedLib/SeedLibTheme.style"/>
+    
+    <Contents style="item-list">
+        <ListHeading label="label"/>
+        <Repeat style="item-list-children" list="items" >
+            <define:Children style="transclude" expose:item="$item" expose:index="$index" require:type="SeedLib.ListItem"/>
+        </Repeat>
+    </Contents>
+    
+    <Contents id="dense" style="item-list">
+        <ListHeading label="label"/>
+        <Repeat style="item-list-children-dense" list="items" >
+            <define:Children style="transclude" expose:item="$item" expose:index="$index" require:type="SeedLib.ListItem"/>
+        </Repeat>
+    </Contents>
+
+</UITemplate>

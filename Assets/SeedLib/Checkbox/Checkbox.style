@@ -7,7 +7,6 @@ style checkbox {
     BorderRadius = 4px;
     Border = 2px;
     BorderColor = @theme.coal100;
-    Margin = @theme.sp2;
     
     [hover] {
         BorderColor = @theme.coal300;

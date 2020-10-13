@@ -1,0 +1,12 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style list-heading-label {
+    TextFontAsset = @theme.GothamRound;
+    TextFontSize = 8px;
+    TextTransform = UpperCase;
+    MarginBottom = @theme.sp3;
+    
+    [attr:variant="dense"] {
+        MarginBottom = @theme.sp2;
+    }
+}

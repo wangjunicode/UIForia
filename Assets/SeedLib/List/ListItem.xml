@@ -1,0 +1,10 @@
+<UITemplate>
+
+    <Style src="SeedLib/List/ListItem.style"/>
+    
+    <Contents style="list-item">
+        <Image src="icon" style="list-item-icon"/>
+        <define:Children style="list-item-children" />
+    </Contents>
+    
+</UITemplate>

@@ -1,0 +1,25 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style list-item {
+    FlexLayoutDirection = Horizontal;
+    FlexItemGrow = 1;
+    LayoutFitHorizontal = Fill;
+}
+
+style list-item-icon {
+    PreferredSize = 24px;
+    BackgroundTint = black;
+    MarginRight = @theme.sp1;
+    
+    [attr:dense="true"] {
+        PreferredSize = 16px;
+    }
+}
+
+style list-item-children {
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceHorizontal = BetweenContent;
+    DistributeExtraSpaceVertical = CenterContent;
+    FlexItemGrow = 1;
+    AlignY = 50% Parent;
+}

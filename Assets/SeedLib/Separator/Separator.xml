@@ -1,0 +1,7 @@
+<UITemplate>
+
+    <Style src="SeedLib/Separator/Separator.style"/>
+    
+    <Contents style="separator"/>
+    
+</UITemplate>

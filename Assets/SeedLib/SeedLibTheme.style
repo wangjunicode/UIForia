@@ -144,7 +144,25 @@ export const sp8 = 64;
 // -----------------------------------------
 export const GothamRound = url("Fonts/GothamRnd-Medium SDF");
 export const GothamRoundBold = url("Fonts/GothamRnd-Bold SDF");
+// TODO: Figure out correct narrow font.
+export const GothamNarrow = url("Fonts/GothamNarrow-Medium SDF");
 export const Whitney = url("Fonts/Whitney-Medium SDF");
 // -----------------------------------------
 // Cursors
 // -----------------------------------------
+
+
+// -----------------------------------------
+// Util styles
+// -----------------------------------------
+style transclude {
+    LayoutBehavior = TranscludeChildren;
+}
+
+// -----------------------------------------
+// Typography
+// -----------------------------------------
+style h6 {
+    TextFontAsset = @GothamNarrow;
+    TextFontSize = 12px;
+}

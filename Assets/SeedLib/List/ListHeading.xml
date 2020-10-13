@@ -1,0 +1,8 @@
+<UITemplate>
+
+    <Style src="SeedLib/List/ListHeading.style"/>
+    <Contents style="list-heading-label">
+        <Text>{label}</Text>
+    </Contents>
+    
+</UITemplate>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Util;
@@ -12,6 +13,20 @@ namespace SeedLib {
         public Action click => Click;
         public Action actionClick => ActionClicked;
         
+        public struct ListItemData {
+            public ImageLocator Icon;
+            public string Name;
+        }
+        
+        public List<ListItemData> items = new List<ListItemData>();
+
+        public override void OnEnable() {
+            items.Add(new ListItemData() {Icon = "Icons/success", Name = "Meat"});            
+            items.Add(new ListItemData() {Icon = "Icons/success", Name = "Tomato"});
+            items.Add(new ListItemData() {Icon = "Icons/success", Name = "Carrot"});
+            items.Add(new ListItemData() {Icon = "Icons/success", Name = "Headers"});
+        }
+
         public void Click() {
             Debug.Log("clicked");
         }

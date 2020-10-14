@@ -642,8 +642,13 @@ namespace UIForia.Systems {
                                 result.alignedPosition.x = 0;
                             }
 
-                            if (result.alignedPosition.x + result.actualSize.width > box.parent.finalWidth) {
-                                result.alignedPosition.x -= (result.alignedPosition.x + result.actualSize.width) - box.parent.finalWidth;
+                            AwesomeLayoutBox parent = box.parent;
+                            if (parent == null) {
+                                parent = element.parent.layoutBox;
+                            }
+                            
+                            if (result.alignedPosition.x + result.actualSize.width > parent.finalWidth) {
+                                result.alignedPosition.x -= (result.alignedPosition.x + result.actualSize.width) - parent.finalWidth;
                             }
 
                             break;

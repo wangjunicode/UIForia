@@ -30,6 +30,7 @@ namespace UIForia {
         }
 
         public void Start() {
+
             type = Type.GetType(typeName);
             if (type == null) return;
 

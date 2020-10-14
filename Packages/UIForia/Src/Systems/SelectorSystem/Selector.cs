@@ -22,7 +22,7 @@ namespace Systems.SelectorSystem {
             if (rootQuery.next == null) {
                 // match!    
                 for (int i = 0; i < result.size; i++) {
-                    result.array[i].style.SetSelectorStyle(matchStyle);
+                    // result.array[i].style.SetSelectorStyle(matchStyle);
                 }
 
                 result.Release();
@@ -31,7 +31,7 @@ namespace Systems.SelectorSystem {
 
             for (int i = 0; i < result.size; i++) {
                 if (rootQuery.next.Run(origin, result.array[i])) {
-                    result.array[i].style.SetSelectorStyle(matchStyle);
+                    // result.array[i].style.SetSelectorStyle(matchStyle);
                 }
             }
 

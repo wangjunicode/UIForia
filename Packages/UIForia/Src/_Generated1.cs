@@ -2121,6 +2121,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundTint, out property)) return property.AsColor;
+                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.BackgroundTint), out property)) return property.AsColor;
                     return DefaultStyleValues_Generated.BackgroundTint;
                 }
             }
@@ -4937,6 +4938,7 @@ namespace UIForia.Rendering {
                     case StylePropertyId.Opacity: return true;
                     case StylePropertyId.ClipBehavior: return true;
                     case StylePropertyId.PointerEvents: return true;
+                    case StylePropertyId.BackgroundTint: return true;
                     case StylePropertyId.TextColor: return true;
                     case StylePropertyId.TextFontAsset: return true;
                     case StylePropertyId.TextFontSize: return true;

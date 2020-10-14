@@ -123,6 +123,8 @@ namespace UIForia.Elements {
         public bool __internal_isEnabledAndNeedsUpdate => (flags & UIElementFlags.EnabledFlagSetWithUpdate ) == (UIElementFlags.EnabledFlagSetWithUpdate);
         
         public bool isSelfEnabled => (flags & UIElementFlags.Enabled) != 0;
+        
+        public bool hasBeenEnabled => (flags & UIElementFlags.HasBeenEnabled) != 0;
 
         public bool isSelfDisabled => (flags & UIElementFlags.Enabled) == 0;
 

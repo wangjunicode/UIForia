@@ -61,7 +61,7 @@ namespace UIForia.Parsing.Style.Tokenizer {
         Texture,
         Sound,
         Cursor,
-        
+
         BooleanAnd,
         BooleanOr,
         BooleanNot,

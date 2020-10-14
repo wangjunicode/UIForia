@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UIForia;
 using UIForia.Attributes;
@@ -15,11 +16,8 @@ namespace SeedLib {
     public class ItemList<T> : __ItemList {
         public string label;
         public IList<T> items;
-
+        public Func<T, RepeatItemKey> keyFn;
     }
-
-    [Template("SeedLib/List/ItemList.xml#dense")]
-    public class ItemListDense<T> : ItemList<T> { }
 
     [CustomPainter("SeedLib::ItemList")]
     public class ItemListPainter : StandardRenderBox {

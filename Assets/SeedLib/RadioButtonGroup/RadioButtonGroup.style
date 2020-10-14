@@ -1,0 +1,8 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style radio-button-group {
+    [attr:disabled="true"] {
+        Opacity = 0.4;
+        PointerEvents = None;
+    }
+}

@@ -5,11 +5,9 @@ PreferredSize = 1vw 1vh;
 }
 
 style scroll {
-
-FlexItemGrow = 1;
-PreferredSize = 1pca 0px;
-BackgroundColor = white;
-
+    FlexItemGrow = 1;
+    PreferredSize = 1pca 0px;
+    BackgroundColor = #F2F2F2;
 }
 
 style padded {
@@ -22,7 +20,12 @@ PreferredWidth = 100px;
 }
 
 style row {
-FlexLayoutDirection = Horizontal;
+    FlexLayoutDirection = Horizontal;
+}
+
+style margin-tb {
+    MarginTop = 10px;
+    MarginBottom = 10px;
 }
 
 style fill-parent-width {
@@ -36,4 +39,8 @@ style list-container {
 style list-separator {
     MarginTop = @theme.sp4;
     MarginBottom = @theme.sp4;
+}
+
+style mr {
+    MarginRight = @theme.sp4;
 }

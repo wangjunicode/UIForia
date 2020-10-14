@@ -1,18 +1,17 @@
 ﻿import "SeedLib/SeedLibTheme.style" as theme;
 
 style toggle-switch {
-    PreferredSize = 80px 32px;
+    PreferredSize = 40px 16px;
     BackgroundColor = @theme.coal300;
-    Overflow = Hidden;
     BorderRadius = 50%;
-    TextFontSize = 16px;
-    Border = 2px;
+    Overflow = hidden;
+    TextFontSize = 8px;
+    Border = 1px;
     TextColor = white;
     TextFontAsset = @theme.GothamRound;
 
     DistributeExtraSpaceVertical = CenterContent;
-    PaddingLeft = 2;
-    PaddingRight = 2;
+  
     FlexLayoutDirection = Horizontal;
     ClipBounds = ContentBox;
     Margin = @theme.sp2;
@@ -44,10 +43,10 @@ style toggle-switch {
 }
 
 style toggle-switch-small {
-    PreferredSize = 40px 20px;
+    PreferredSize = 20px 10px;
     BorderRadius = 50%;
-    PaddingLeft = 2;
-    PaddingRight = 2;
+    PaddingLeft = 1;
+    PaddingRight = 1;
     BackgroundColor = @theme.coal150;
     Margin = @theme.sp2;
     
@@ -85,7 +84,7 @@ style toggle-switch-small {
 }
 
 style knob-small {
-    PreferredSize = 16px;
+    PreferredSize = 8px;
     BackgroundColor = white;
     BorderRadius = 50%;
     AlignY = Center Parent;
@@ -99,9 +98,6 @@ style knob-small {
     [attr:status="off"] {
         AlignmentOffsetX = 0%;
         AlignmentOriginX = 0%;
-        [hover] {
-            BackgroundColor = @theme.coal300;        
-        }
     }
     
     [attr:status="animate_on"] {
@@ -115,7 +111,7 @@ style knob-small {
 }
 
 style knob {
-    PreferredSize = 24px;
+    PreferredSize = 12px;
     BackgroundColor = white;
     BorderRadius = 50%;
 
@@ -143,16 +139,18 @@ style knob {
 }
 
 style on {
-    PreferredWidth = 28px;
-    AlignX = -48px 0% Parent;
-    PaddingTop = 2px;
+    PreferredWidth = 18px;
+    AlignX = -22px 0% Parent;
+    PaddingTop = 1px;
+    TextFontAsset = @theme.GothamRound;
 }
 
 style off {
-    PreferredWidth = 28px;
+    PreferredWidth = 18px;
     TextAlignment = Right;
-    AlignX = 38px 0% Parent;
-    PaddingTop = 2px;
+    AlignX = 14px 0% Parent;
+    PaddingTop = 1px;
+    TextFontAsset = @theme.GothamRound;
 }
 
 animation bg-turn-on {

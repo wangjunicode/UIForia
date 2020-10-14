@@ -1,0 +1,62 @@
+﻿import "SeedLib/SeedLibTheme.style" as theme;
+
+style toggle-group {
+    [attr:disabled="true"] {
+        Opacity = 0.6;
+        PointerEvents = None;
+    }
+}
+
+style toggle-list {
+    FlexLayoutDirection = Horizontal;
+}
+
+style toggle-group-item {
+    Padding = @theme.sp1 @theme.sp3;
+    
+    TextFontSize = 9px;
+    TextFontAsset = @theme.GothamRound;
+    TextTransform = UpperCase;
+    
+    [attr:round-left="true"] {
+        BorderRadiusTopLeft = 50%;
+        BorderRadiusBottomLeft = 50%;
+    }
+    
+    [attr:round-right="true"] {
+        BorderRadiusTopRight = 50%;
+        BorderRadiusBottomRight = 50%;
+    }
+    
+    [hover] {
+        Border = 1px;
+    }
+    
+    [attr:selected="primary"] {
+        BackgroundColor = @theme.poppy700;
+        
+    }
+    
+    [attr:selected="secondary"] {
+        BackgroundColor = @theme.coal300;
+        TextColor = white;
+    }
+    
+    [attr:variant="primary"] {
+        BackgroundColor = @theme.poppy500;
+        TextColor = white;
+    
+        [hover] {
+            BorderColor = @theme.poppy700;
+        }
+    }
+    
+    [attr:variant="secondary"] {
+        BackgroundColor = @theme.coal100;
+        TextColor = @theme.coal600;
+    
+        [hover] {
+            BorderColor = @theme.coal300;
+        }
+    }
+}

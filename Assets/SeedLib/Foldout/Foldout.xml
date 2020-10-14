@@ -1,0 +1,12 @@
+<UITemplate>
+    
+    <Style src="SeedLib/Foldout/Foldout.style"/>
+    
+    <Contents>
+        <Div style="foldout-title-row">
+            <Image style="foldout-icon" src="'Icons/right'"/>
+            <define:Title />
+        </Div>
+        <define:Children />
+    </Contents>
+</UITemplate>

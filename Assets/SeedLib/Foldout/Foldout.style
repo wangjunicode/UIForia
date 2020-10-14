@@ -1,0 +1,10 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style foldout-title-row {
+    FlexLayoutDirection = Horizontal;
+}
+
+style foldout-icon {
+    PreferredSize = 16px;
+    BackgroundTint = @theme.coal300;
+}

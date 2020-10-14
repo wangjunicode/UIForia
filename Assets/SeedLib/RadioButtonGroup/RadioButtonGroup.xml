@@ -1,0 +1,8 @@
+<UITemplate>
+    <Style src="SeedLib/RadioButtonGroup/RadioButtonGroup.style"/>
+    
+    <Contents style="radio-button-group">
+        <define:Children style="radio-button-list" require:type="SeedLib.LabeledRadioButton"/>    
+    </Contents>
+    
+</UITemplate>

@@ -495,6 +495,20 @@ namespace UIForia.Elements {
 
             return null;
         }
+        
+        // traverses hierarchy upwards
+        public T FindNextWithInterface<T>(){
+            UIElement ptr = this;
+            while (ptr != null) {
+                if (ptr is T retn) {
+                    return retn;
+                }
+
+                ptr = ptr.parent;
+            }
+
+            return default;
+        }
 
         public void RunBindings() {
             flags &= ~UIElementFlags.NeedsUpdate;

@@ -1,0 +1,14 @@
+﻿<UITemplate>
+    
+    <Style src="SeedLib/SeedLibTheme.style"/>
+    <Style src="SeedLib/ToggleGroup/ToggleGroup.style"/>
+    
+    <Contents style="toggle-group">
+        <define:Children style="toggle-list" require:type="SeedLib.ISelectable"/>
+    </Contents>
+    
+    <Contents id="item" style="toggle-group-item">
+        {text}
+    </Contents>
+    
+</UITemplate>

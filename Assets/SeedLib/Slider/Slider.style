@@ -3,20 +3,20 @@
 style slider {
     PreferredWidth = 150px;
     PreferredHeight = 20px;
-    Margin = @theme.sp5;
+
     Padding = 0px 10px;
     Painter = "SeedLib::Slider";
 }
 
 style track {
-    PreferredSize = 1pca 4px;
+    PreferredSize = 1pca 2px;
     BorderRadius = 50%;
     BackgroundColor = @theme.coal150;
     AlignY = Center Parent;
 }
 
 style trail {
-    PreferredSize = 0px 4px;
+    PreferredSize = 0px 2px;
     BorderRadius = 50%;
     BackgroundColor = black;
     AlignY = Center Parent;
@@ -24,7 +24,7 @@ style trail {
 }
 
 style handle-dot {
-    PreferredSize = 6px;
+    PreferredSize = 4px;
     BorderRadius = 50%;
     BackgroundColor = white;
     AlignX = Center Parent;
@@ -33,10 +33,11 @@ style handle-dot {
 
 style handle {
     LayoutBehavior = Ignored;
-    PreferredSize = 20px;
+    PreferredSize = 16px;
     BackgroundColor = black; 
     AlignmentTarget = Parent;
     AlignmentBoundaryX = Parent;
     TransformRotation = 45;
+    AlignmentOffsetY = 2px;
     BorderRadius = 25%;  
 }

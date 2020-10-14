@@ -12,6 +12,9 @@ namespace SeedLib {
 
         public Action click => Click;
         public Action actionClick => ActionClicked;
+        public Action toggleLeft => ToggleLeft;
+        public Action toggleMiddle => ToggleMiddle;
+        public Action toggleRight => ToggleRight;
         
         public struct ListItemData {
             public ImageLocator Icon;
@@ -33,6 +36,18 @@ namespace SeedLib {
 
         public void ActionClicked() {
             Debug.Log("action-clicked");
+        }
+
+        public void ToggleLeft() {
+            Debug.Log("Toggled Left");
+        }
+        
+        public void ToggleMiddle() {
+            Debug.Log("Toggled Middle");
+        }
+        
+        public void ToggleRight() {
+            Debug.Log("Toggled Right");
         }
 
     }

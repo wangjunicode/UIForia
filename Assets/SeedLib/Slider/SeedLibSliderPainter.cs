@@ -1,5 +1,6 @@
 ﻿using UIForia;
 using UIForia.Rendering;
+using UIForia.Util;
 using UnityEngine;
 
 namespace SeedLib {
@@ -33,11 +34,12 @@ namespace SeedLib {
             path2D.SetTransform(element.layoutResult.matrix.ToMatrix4x4());
             path2D.SetFill(Color.black);
             steps++;
-            float inset = element.layoutResult.HorizontalPaddingBorderStart - 1;
-            float widthStep = (width - 2) / (steps - 1);
+            float inset = element.layoutResult.HorizontalPaddingBorderStart;
+            float widthStep = (width) / (steps - 1);
             for (int i = 0; i < steps; i++) {
+                float x = (int)MathUtil.Round((i * widthStep), stepSize);
                 path2D.BeginPath();
-                path2D.Circle(inset + (i * widthStep), 24, 2);
+                path2D.Circle(inset + x - 2, 24, 2);
                 path2D.Fill();
             }
 

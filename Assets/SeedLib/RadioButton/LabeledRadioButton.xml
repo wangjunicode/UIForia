@@ -5,7 +5,9 @@
 
     <Contents style="labeled-radio-button">
 
-        <RadioButton attr:labeled="true" sync:isChecked="isChecked"/>
+        <Div style="radio-button" attr:labeled="true">
+            <Div attr:id="selected" if="isChecked" style="radio-button-checked"/>    
+        </Div>
 
         <Text attr:id="text"/>
 

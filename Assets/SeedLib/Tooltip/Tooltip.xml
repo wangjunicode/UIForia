@@ -1,0 +1,14 @@
+<UITemplate>
+    <Style src="SeedLib/Tooltip/Tooltip.style"/>
+    <Style src="SeedLib/SeedLibTheme.style"/>
+    
+    <Contents style="tooltip">
+        <Text style="h6 mb1">{title}</Text>
+        <define:Children />
+    </Contents>
+    
+    <Contents id="simple" style="tooltip">
+        <Text style="h6">{title}</Text>
+    </Contents>
+    
+</UITemplate>

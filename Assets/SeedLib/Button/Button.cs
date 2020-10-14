@@ -4,27 +4,6 @@ using UIForia.Elements;
 namespace SeedLib {
 
     [Template("SeedLib/Button/Button.xml")]
-    public class SecondaryButton : UIElement {
-
-        public override void OnEnable() {
-            string variant = "Secondary";
-            SetAttribute("variant", variant);
-            FindById("text").SetAttribute("variant", variant);
-            FindById("img").SetAttribute("variant", variant);
-        }
-
-        protected override void OnSetAttribute(string attrName, string newValue, string oldValue) {
-            if (attrName == "variant" && newValue != "Secondary") {
-                string variant = "Secondary";
-                SetAttribute("variant", variant);
-                FindById("text").SetAttribute("variant", variant);
-                FindById("img").SetAttribute("variant", variant);
-            }
-        }
-        
-    }
-
-    [Template("SeedLib/Button/Button.xml")]
     public class Button : UIElement {
 
         private string _label;
@@ -33,13 +12,13 @@ namespace SeedLib {
         public override void OnEnable() {
             string variant = GetAttribute("variant");
             switch (variant) {
-                case "Primary":
+                case "primary":
                     break;
-                case "Secondary":
+                case "secondary":
                     break;
                 default:
-                    SetAttribute("variant", "Primary");
-                    variant = "Primary";
+                    SetAttribute("variant", "primary");
+                    variant = "primary";
                     break;
             }
             

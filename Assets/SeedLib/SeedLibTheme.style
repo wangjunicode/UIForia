@@ -159,10 +159,31 @@ style transclude {
     LayoutBehavior = TranscludeChildren;
 }
 
+style mb1 {
+    MarginBottom = @sp1;
+}
+
+style mb2 {
+    MarginBottom = @sp2;
+}
+
+style mb3 {
+    MarginBottom = @sp3;
+}
+
+style m4 {
+    Margin = @sp4;
+}
+
 // -----------------------------------------
 // Typography
 // -----------------------------------------
 style h6 {
     TextFontAsset = @GothamNarrow;
+    TextFontSize = 12px;
+}
+
+style p {
+    TextFontAsset = @Whitney;
     TextFontSize = 12px;
 }

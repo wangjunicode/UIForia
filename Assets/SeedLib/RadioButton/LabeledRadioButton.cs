@@ -5,17 +5,26 @@ using UIForia.UIInput;
 namespace SeedLib {
 
     [Template("SeedLib/RadioButton/LabeledRadioButton.xml")]
-    public class LabeledRadioButton : UIElement {
+    public class LabeledRadioButton : UIElement, ISelectable {
 
         public bool isChecked;
         public string _label;
 
         private UITextElement textElement;
+        // set, when part of a group.
+        private RadioButtonGroup buttonGroup;
+
+        public override void OnEnable() {
+            buttonGroup = FindParent<RadioButtonGroup>();
+        }
 
         [OnMouseClick]
         public void OnClick(MouseInputEvent evt) {
             isChecked = !isChecked;
-            evt.StopPropagation();
+
+            if (buttonGroup == null) {
+                evt.StopPropagation();    
+            }
         }
         
         public string label {
@@ -30,6 +39,14 @@ namespace SeedLib {
                 textElement.SetText(_label);
                 
             }
+        }
+
+        public override void OnUpdate() {
+            if (buttonGroup == null) {
+                return;
+            }
+            
+            isChecked = buttonGroup.IsSelected(siblingIndex);
         }
 
     }

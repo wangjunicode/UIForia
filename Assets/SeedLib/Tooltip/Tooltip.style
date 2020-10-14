@@ -1,0 +1,15 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style tooltip {
+    BackgroundColor = @theme.coal1000;
+    TextColor = white;
+    Padding = @theme.sp2 @theme.sp3;
+    BorderRadius = 5px;
+    Border = 1px;
+    BorderColor = white;
+    ShadowColor = black;
+    ShadowOpacity = 0.5;
+    ShadowIntensity = 10;
+    ShadowSizeX = 0;
+    ShadowOffsetY = 2;
+}

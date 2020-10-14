@@ -29,7 +29,7 @@ style button {
         PointerEvents = None;
     }
     
-    [attr:variant="Primary"] {
+    [attr:variant="primary"] {
         BackgroundColor = @theme.poppy500;
         [hover] {
             Border = 2px;
@@ -51,7 +51,7 @@ style button {
         }
     }
     
-    [attr:variant="Secondary"] {
+    [attr:variant="secondary"] {
 
         BackgroundTint = @theme.coal600;
         BackgroundColor = @theme.coal100;

@@ -4,7 +4,7 @@ style radio-button {
     PreferredSize = 14px;
     BackgroundColor = white;
     BorderRadius = 50%;
-    Border = 2px;
+    Border = 1px;
     BorderColor = @theme.coal100;
     DistributeExtraSpace = CenterContent;
     

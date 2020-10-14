@@ -5,7 +5,7 @@ style checkbox {
     PreferredSize = 14px;
     BackgroundColor = white;
     BorderRadius = 4px;
-    Border = 2px;
+    Border = 1px;
     BorderColor = @theme.coal100;
     
     [hover] {

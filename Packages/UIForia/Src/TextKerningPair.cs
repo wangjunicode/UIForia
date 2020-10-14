@@ -1,4 +1,5 @@
-using UIForiaTMPro;
+
+using TMPro;
 
 namespace UIForia {
 
@@ -6,8 +7,8 @@ namespace UIForia {
 
         public uint firstGlyph;
         public uint secondGlyph;
-        public GlyphValueRecord firstGlyphAdjustments;
-        public GlyphValueRecord secondGlyphAdjustments;
+        public GlyphValueRecord_Legacy firstGlyphAdjustments;
+        public GlyphValueRecord_Legacy secondGlyphAdjustments;
 
     }
 

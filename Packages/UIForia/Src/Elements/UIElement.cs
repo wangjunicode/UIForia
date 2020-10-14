@@ -347,6 +347,7 @@ namespace UIForia.Elements {
                     else {
                         string oldValue = attrs[i].value;
                         attrs[i] = new ElementAttribute(name, value);
+                        OnSetAttribute(name, value, oldValue);
                         application.OnAttributeSet(this, name, value, oldValue);
                         return;
                     }
@@ -354,8 +355,11 @@ namespace UIForia.Elements {
             }
 
             attributes.Add(new ElementAttribute(name, value));
+            OnSetAttribute(name, value, null);
             application.OnAttributeSet(this, name, value, null);
         }
+
+        protected virtual void OnSetAttribute(string attrName, string newValue, string oldValue) { }
 
         public bool TryGetAttribute(string key, out string value) {
             if (attributes == null) {

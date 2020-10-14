@@ -30,3 +30,4 @@ Material:
     - _ZTest: 1
     - _ZWrite: 1
     m_Colors: []
+  m_BuildTextureStacks: []

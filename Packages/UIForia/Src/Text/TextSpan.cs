@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using SVGX;
-using UIForiaTMPro;
+using TMPro;
 using UIForia.Util;
 using UnityEngine;
 
@@ -401,7 +401,7 @@ namespace UIForia.Text {
             TextDisplayData textDisplayData = GetTextDisplayData();
 
             float smallCapsMultiplier = (textTransform == TextTransform.SmallCaps) ? 0.8f : 1f;
-            float fontScale = fontSize * smallCapsMultiplier / fontAsset.faceInfo.PointSize * fontAsset.faceInfo.Scale;
+            float fontScale = fontSize * smallCapsMultiplier / fontAsset.faceInfo.pointSize * fontAsset.faceInfo.scale;
 
             Vector3 ratios = TextUtil.ComputeRatios(textDisplayData);
 
@@ -417,7 +417,8 @@ namespace UIForia.Text {
             int atlasWidth = fontAsset.atlas.width;
             int atlasHeight = fontAsset.atlas.height;
 
-            float fontAscender = fontAsset.faceInfo.Ascender;
+            float fontAscender = fontAsset.faceInfo.ascentLine;
+            float fontDescender = fontAsset.faceInfo.descentLine;
 
             if ((fontStyle & FontStyle.Bold) != 0) {
                 stylePadding = fontAsset.boldStyle / 4.0f * gradientScale * scaleRatioA;
@@ -437,18 +438,18 @@ namespace UIForia.Text {
             float shear = (fontStyle & FontStyle.Italic) != 0 ? fontAsset.italicStyle * 0.01f : 0;
 
             float fontScaleMultiplier = textTransform == TextTransform.SuperScript || textTransform == TextTransform.SubScript
-                ? fontAsset.faceInfo.SubSize
+                ? fontAsset.faceInfo.subscriptSize
                 : 1;
 
             FontAsset currentFontAsset = fontAsset;
 
-            float fontBaseLineOffset = currentFontAsset.faceInfo.Baseline * fontScale * fontScaleMultiplier * currentFontAsset.faceInfo.Scale;
+            float fontBaseLineOffset = currentFontAsset.faceInfo.baseline * fontScale * fontScaleMultiplier * currentFontAsset.faceInfo.scale;
 
             // fontBaseLineOffset = 0; //+= currentFontAsset.faceInfo.SuperscriptOffset * fontScale * fontScaleMultiplier;
 
             // I am not sure if using a standard line height for words is correct. TMP does not use the font info, it uses max char ascender & descender for a line
             // seems to me that this would produce weird results with multiline text
-            float lineHeight = (fontAsset.faceInfo.Ascender - fontAsset.faceInfo.Descender) * fontScale;
+            float lineHeight = (fontAsset.faceInfo.ascentLine - fontAsset.faceInfo.descentLine) * fontScale;
 
             CharInfo[] characters = characterList.array;
             WordInfo[] words = wordInfoList.array;
@@ -476,12 +477,12 @@ namespace UIForia.Text {
                         continue;
                     }
 
-                    GlyphValueRecord glyphAdjustments = charInfo.glyphAdjustment;
+                    GlyphValueRecord_Legacy glyphAdjustments = charInfo.glyphAdjustment;
 
                     float currentElementScale = fontScale * fontScaleMultiplier * glyph.scale;
 
                     topLeft.x = xAdvance + (glyph.xOffset - padding - stylePadding + glyphAdjustments.xPlacement) * currentElementScale;
-                    topLeft.y = fontBaseLineOffset + (fontAscender - (glyph.yOffset + padding)) * currentElementScale;
+                    topLeft.y = fontBaseLineOffset + ((fontAscender) - (glyph.yOffset + padding)) * currentElementScale;
                     bottomRight.x = topLeft.x + (glyph.width + padding * 2 + stylePadding * 2) * currentElementScale;
                     bottomRight.y = topLeft.y + (glyph.height + padding * 2) * currentElementScale;
 
@@ -567,7 +568,7 @@ namespace UIForia.Text {
                 return;
             }
 
-            GlyphValueRecord glyphAdjustments = default;
+            GlyphValueRecord_Legacy glyphAdjustments = default;
             int idx = 0;
 
             glyphAdjustments = kerningDictionary.GetOrDefault(((charInfos[1].character) << 16) + charInfos[0].character).firstGlyphAdjustments;

@@ -1,0 +1,86 @@
+﻿import "SeedLib/SeedLibTheme.style" as theme;
+
+style popover {
+    MinSize = 60px 40px;
+    LayoutType = stack;
+    LayoutBehavior = Ignored;
+    AlignmentTargetX = Screen;
+    AlignmentTargetY = Screen;
+    ZIndex = 1000;
+    AlignmentBoundaryX = Clipper;
+    AlignmentBoundaryY = Clipper;
+}
+
+style popover-content {
+    
+    BackgroundColor = white;
+    Border = 1px;
+    BorderColor = @theme.coal300;
+    LayoutFit = Fill;
+    BorderRadius = 8px;
+    ShadowColor = black;
+    ShadowOpacity = 0.3;    
+    
+}
+
+style popover-children {
+    Padding = @theme.sp2;
+}
+
+style triangle-underlay {
+
+    TransformRotation = 45;
+    PreferredSize = 24px;
+    LayoutBehavior = Ignored;
+    Border = 1px;
+    BorderColor = @theme.coal300;
+    ShadowColor = black;
+    ShadowOpacity = 0.3;    
+    Painter = "SeedLib::Popover::TipPart";   
+    BackgroundColor = white;
+    
+    [attr:edge="left"] {
+        BorderRadiusTopRight = 2px;
+
+    }
+    
+    [attr:edge="right"] {
+        BorderRadiusBottomLeft = 2px;
+        TransformPositionX = -12px;
+    }
+    
+    [attr:edge="top"] {
+        BorderRadiusBottomRight = 2px;
+    }
+    
+    [attr:edge="bottom"] {
+        BorderRadiusTopLeft = 2px;
+        TransformPositionY = -12px;
+    }
+}
+
+style triangle-overlay {
+
+    TransformRotation = 45;
+    BackgroundColor = white;
+    PreferredSize = 30px;
+    LayoutBehavior = Ignored;
+    Painter = "SeedLib::Popover::TipPart";   
+    
+    [attr:edge="left"] {
+        TransformPositionX = -6px;
+    }
+    
+    [attr:edge="right"] {
+        TransformPositionX = -9px;
+    }
+    
+    [attr:edge="top"] {
+        TransformPositionY = -6px;
+    }
+    
+    [attr:edge="bottom"] {
+        TransformPositionY = -9px;
+    }
+    
+}

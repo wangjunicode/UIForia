@@ -566,8 +566,6 @@ namespace UIForia.Rendering {
             element.layoutResult.matrix.GetMatrix4x4(ref matrix);
             ctx.DrawBatchedGeometry(geometry, range, matrix, clipper);
         }
-
-      
         
         public void RenderFromMaterial(RenderContext ctx) {
 

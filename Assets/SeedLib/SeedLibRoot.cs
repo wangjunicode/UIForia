@@ -64,6 +64,9 @@ namespace SeedLib {
             Debug.Log("Toggled Right");
         }
 
+        public void OnNumberValueChanged(float newValue) {
+            Debug.Log("OnNumberValueChanged:" + newValue);
+        }
     }
     
     public static class ThemeColors {

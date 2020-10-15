@@ -55,7 +55,7 @@ namespace UIForia.Compilers.Style {
                             .Find(importedConstant.propertyName, s_FindStyleConstant);
 
                         if (importedStyleConstant.name == null) {
-                            throw new CompileException(importedConstant, "Could not find referenced property in imported scope.");
+                            throw new CompileException(importedConstant, $"Could not find referenced property '{importedConstant.propertyName}' in imported scope '{referenceNode.identifier}'.");
                         }
 
                         return importedStyleConstant.value;

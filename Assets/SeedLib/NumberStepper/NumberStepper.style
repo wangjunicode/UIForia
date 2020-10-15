@@ -1,0 +1,90 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style <NumberStepper> {
+    PreferredSize = 1pca 1.6em;
+    MarginBottom = 10px;
+    FlexLayoutDirection = Horizontal;
+    
+    [attr:disabled="true"] {
+        Opacity = 0.4;
+        PointerEvents = None;
+    }
+}
+
+style stepper-container {
+    FlexLayoutDirection = Horizontal;
+    PreferredWidth = 1pca;
+}
+
+style input-element {
+    TextFontSize = 15px;
+    Overflow = Hidden;
+    TextFontAsset = @theme.GothamNarrow;
+    Border = 1px;
+    BorderColor = @theme.coal100;
+    BackgroundColor = white;
+    BorderRadius = 4px;
+    MinWidth = 50px;
+    MinHeight = 1.6em;
+    MarginRight = 4px;
+    MarginBottom = 0px;
+    FlexItemGrow = 1;
+    PreferredHeight = 1psz;
+    [hover] {
+        Cursor = @theme.cursorTextInput;
+    }
+    [focus] {
+        BorderColor = @theme.coal200;
+    }
+}
+
+style vertical-center-within-input {
+    AlignX = 8px Parent;
+    AlignY = 50% Parent;
+}
+
+style placeholder-slot {
+    TextColor = rgb(150, 150, 150);
+}
+
+style arrows {
+    PreferredSize = 24px 1psz;
+    Opacity = 1;
+    AlignY = 0% Parent;
+    AlignX = 100% Parent;
+}
+
+style disabled-arrows {
+    Opacity = 0.4;
+}
+
+style arrow-container {
+    BackgroundColor = @theme.poppy500;
+    Border = 1px;
+    BorderColor = @theme.poppy500;
+    PreferredSize = 1pca 0.5pca;
+    DistributeExtraSpace = CenterContent;
+    [hover] {
+        BorderColor = @theme.poppy700;
+    }
+    [active] {
+        BackgroundColor = @theme.poppy700; 
+    }
+}
+
+style arrow {
+    PreferredSize = 12px 12px;
+    TransformRotation = 90;
+}
+
+style rotate-up {
+    TransformRotation = -90;
+}
+
+style arrow-up {
+    BorderRadius = 4px 4px 0 0;
+
+}
+style arrow-down {
+    BorderRadius = 0 0 4px 4px;
+}

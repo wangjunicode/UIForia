@@ -72,6 +72,16 @@
                     <Div style="margin-tb"></Div>
                     More here
                 </Popover>
+                
+                <Group style="m4">
+                    <Div style:PreferredWidth="200">
+                        Number stepper
+                        <NumberStepper min="1" max="50" defaultValue="1" onChange:value="OnNumberValueChanged($newValue)"/>
+                        Number stepper (Disabled)
+                        <NumberStepper min="1" max="50" onChange:value="OnNumberValueChanged($newValue)" disabled="true"/>
+                    </Div>
+                </Group>
+                
                 <Group style="m4">
                     <Div style:PreferredWidth="300">
                         Select (Default)

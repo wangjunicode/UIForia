@@ -151,6 +151,7 @@ export const Whitney = url("Fonts/Whitney-Medium SDF");
 // Cursors
 // -----------------------------------------
 
+export const cursorTextInput = url("Cursors/Text Input Cursor")
 
 // -----------------------------------------
 // Util styles

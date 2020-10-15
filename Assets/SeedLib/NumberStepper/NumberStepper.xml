@@ -1,0 +1,29 @@
+<UITemplate>
+    <Style path="SeedLib/NumberStepper/NumberStepper.style" />
+
+    <Contents>
+
+        <Group style="stepper-container">
+            <Input attr:id="input-element"
+                   sync:value="value"
+                   onChange:value="InputValueChanged()"
+                   style="input-element"
+                   placeholder="placeholder"
+                   disabled="disabled"
+                   key:down="OnKeyPressed($event)"
+                   key:heldDown.focus="OnKeyHeldDownWithFocus($event)"
+                   onSubmit="Submit()"
+            />
+
+            <Group style="arrows {disabled ? 'disabled-arrows'}">
+                <Div style="arrow-container arrow-up" mouse:Down="Increment($event)" mouse:heldDown="IncrementContinuously($event)">
+                    <Image src="'Icons/right'" style="arrow rotate-up" />
+                </Div>
+                <Div style="arrow-container arrow-down" mouse:Down="Decrement($event)" mouse:heldDown="DecrementContinuously($event)">
+                    <Image src="'Icons/right'" style="arrow" />
+                </Div>
+            </Group>
+        </Group>
+
+    </Contents>
+</UITemplate>

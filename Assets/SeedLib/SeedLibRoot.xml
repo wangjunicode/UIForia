@@ -11,14 +11,67 @@
     </Style>
     <Contents style="root">
 
-        <TopBar>
-
-        </TopBar>
 
         <ScrollView style="scroll">
 
             <override:Children style="padded">
 
+                <Group style="margin-tb">
+                
+                    <Button style:MarginLeft="500" attr:id="popover-button" label="'Show Popover'"/>
+                    
+                    <Popover edge="SeedLib.PopOverEdge.Left"  targetElement="FindById('popover-button')">
+                        Content here
+                        <Div style="margin-tb"></Div>
+                        More here
+                        <Div style="margin-tb"></Div>
+                        More here
+                        <Div style="margin-tb"></Div>
+                        More here
+                        <Div style="margin-tb"></Div>
+                        More here
+                        <Div style="margin-tb"></Div>
+                        More here
+                    </Popover>
+                    
+                </Group>
+                <Group style="margin-tb">
+
+                    <Button style:MarginLeft="500" attr:id="popover-button-1" label="'Show Popover'"/>
+
+                    <Popover edge="SeedLib.PopOverEdge.Right"  targetElement="FindById('popover-button-1')">
+                        Content here
+                        <Div style="margin-tb"></Div>
+                        More here
+                        <Div style="margin-tb"></Div>
+                        More here
+                        <Div style="margin-tb"></Div>
+                        More here
+                        <Div style="margin-tb"></Div>
+                        More here
+                        <Div style="margin-tb"></Div>
+                        More here
+                    </Popover>
+
+                </Group>
+
+                <Button style:TransformPositionX="-30" style:MarginBottom="300" attr:id="popover-button-2" label="'Show Popover but this one is longer hopefully they center'"/>
+
+                <Popover edge="SeedLib.PopOverEdge.Top"  targetElement="FindById('popover-button-2')">
+                    <Slider showTrail.once="true" rangeStart.once="0" rangeEnd.once="10" stepSize.once="2" value.once="7.6f"/>
+
+                </Popover>
+                <Popover edge="SeedLib.PopOverEdge.Bottom"  targetElement="FindById('popover-button-2')">
+                    Content here
+                    <Div style="margin-tb"></Div>
+                    More here and this is really long
+                    <Div style="margin-tb"></Div>
+                    More here and this is really long
+                    <Div style="margin-tb"></Div>
+                    More here and this is really long
+                    <Div style="margin-tb"></Div>
+                    More here
+                </Popover>
                 <Group style="m4">
                     Primary
                     <ToggleGroup style="mb3" attr:variant="primary">

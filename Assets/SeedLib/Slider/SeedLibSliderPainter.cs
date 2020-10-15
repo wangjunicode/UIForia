@@ -18,6 +18,7 @@ namespace SeedLib {
             base.PaintBackground(ctx);
             Slider slider = element as Slider;
             float stepSize = slider.stepSize;
+            
             if (!slider.showStepTicks || stepSize <= 0) {
                 return;
             }

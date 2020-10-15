@@ -1,0 +1,19 @@
+﻿<UITemplate>
+
+    <Style src="SeedLib/Popover/Popover.style"/>
+
+    <Contents style="popover">
+        <!-- To draw the tip of the popup, we use a bordered & shadowed rect -->
+        <!-- Then we draw a filling rect, then overlay another rect on top to paint-->
+        <!-- over the border and shadow of the first. The result is a nice looking bordered & shadowed triangle-->
+        <Div attr:id="underlay" style="triangle-underlay"/>
+
+        <Div style="popover-content"/>
+
+        <Div attr:id="overlay" style="triangle-overlay"/>
+
+        <define:Children style="popover-children"/>
+
+    </Contents>
+
+</UITemplate>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style src="SeedLib/Select/Select.style"/>
+    <Style src="SeedLib/SeedLibTheme.style"/>
+        
+    <Using namespace="UIForia.Elements"/>
+    <Using namespace="UIForia.Rendering"/>
+
+    <Contents style="select">
+
+        <define:select-display if="validSelection" style="select-display" expose:selectedOption="options[selectedIndex]">
+            {options[selectedIndex].Label}
+        </define:select-display>
+
+        <define:placeholder if="!validSelection" style="select-display select-placeholder">
+            Select a value
+        </define:placeholder>
+
+        <Group id="chevron-holder" style="select-chevron-holder">
+            <Div style="chevron-up"/>
+            <Div style="chevron-down"/>
+        </Group>
+
+        <ScrollView style="select-options" attr:id="option-list" if="selecting" disableOverflowX="true">
+
+            <Repeat attr:id="repeated-options" list="options" style="transclude">
+
+                <define:Children style="select-option {$index == keyboardNavigationIndex ? 'keyboard-selected'}"
+                                 expose:option="$item"
+                                 expose:index="$index"
+                                 expose:isSelected="DisplaySelectedIcon($index)"
+                                 mouse:click="SelectElement($event, $index)">
+                    <define:selectedIcon if="DisplaySelectedIcon($index)"
+                                         expose:option="$item"
+                                         expose:index="$index"
+                                         expose:isSelected="DisplaySelectedIcon($index)">
+                        <Image src="selectedElementIcon" style="selected-element-icon"/>
+                    </define:selectedIcon>
+                    <define:option style="select-label"
+                                   expose:option="$item"
+                                   expose:index="$index"
+                                   expose:isSelected="DisplaySelectedIcon($index)">
+                        {$item.Label}
+                    </define:option>
+                </define:Children>
+
+            </Repeat>
+            
+        </ScrollView>
+
+    </Contents>
+
+</UITemplate>

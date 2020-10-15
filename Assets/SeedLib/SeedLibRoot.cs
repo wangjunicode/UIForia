@@ -15,6 +15,8 @@ namespace SeedLib {
         public Action toggleLeft => ToggleLeft;
         public Action toggleMiddle => ToggleMiddle;
         public Action toggleRight => ToggleRight;
+
+        #region ListSample
         
         public struct ListItemData {
             public ImageLocator Icon;
@@ -22,6 +24,18 @@ namespace SeedLib {
         }
         
         public List<ListItemData> items = new List<ListItemData>();
+        
+        #endregion //ListSample
+
+        #region SelectSample
+
+        public List<ISelectOption<string>> activities = new List<ISelectOption<string>>() {
+                new SelectOption<string>("Sleep", "sleep"), 
+                new SelectOption<string>("Work", "work"), 
+                new SelectOption<string>("Recreation", "recreation")
+        };
+        
+        #endregion //SelectSample
 
         public override void OnEnable() {
             items.Add(new ListItemData() {Icon = "Icons/success", Name = "Meat"});            
@@ -51,7 +65,7 @@ namespace SeedLib {
         }
 
     }
-
+    
     public static class ThemeColors {
 
         public static Color coal0 = ColorUtil.ColorFromRGBHash(0xffffff);

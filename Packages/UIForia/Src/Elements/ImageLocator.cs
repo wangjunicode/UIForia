@@ -7,6 +7,8 @@ namespace UIForia.Elements {
         public readonly Texture texture;
         public readonly string imagePath;
 
+        public bool isValid => texture != null || imagePath != null;
+
         public ImageLocator(Texture texture) {
             this.texture = texture;
             this.imagePath = null;

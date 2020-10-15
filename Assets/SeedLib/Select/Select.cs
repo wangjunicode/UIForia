@@ -1,12 +1,13 @@
-using System;
 using System.Collections.Generic;
+using UIForia;
 using UIForia.Attributes;
+using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems;
 using UIForia.UIInput;
 using UnityEngine;
 
-namespace UIForia.Elements {
+namespace SeedLib {
 
     public interface ISelectOption<out T> {
 
@@ -31,7 +32,7 @@ namespace UIForia.Elements {
         public EnumSelectOption(T value) : base (value.ToString(), value) { }
     }
 
-    [Template(TemplateType.Internal, "Elements/Select.xml")]
+    [Template("SeedLib/Select/Select.xml")]
     public class Select<T> : UIElement, IFocusable {
 
         private const string disabledAttributeValue = "select-disabled";
@@ -46,11 +47,11 @@ namespace UIForia.Elements {
 
         public T selectedValue;
 
-        public string selectedElementIcon = "icons/ui_icon_popover_checkmark@2x";
+        public ImageLocator selectedElementIcon = new ImageLocator("Icons/checkmark");
 
         public bool disabled;
 
-        public bool disableOverflowX;
+        public bool disableOverflowX = true;
         public bool disableOverflowY;
 
         public IList<ISelectOption<T>> options;
@@ -59,6 +60,7 @@ namespace UIForia.Elements {
         internal UIChildrenElement childrenElement;
         internal UIElement optionList;
         internal UIElement repeat;
+        internal UIElement chevronHolderElement;
 
         public bool validSelection => options != null && selectedIndex >= 0 && selectedIndex < options.Count;
 
@@ -76,9 +78,22 @@ namespace UIForia.Elements {
 
         public override void OnCreate() {
             childrenElement = FindById<UIChildrenElement>("option-children");
+            chevronHolderElement = FindById<UIGroupElement>("chevron-holder");
             optionList = this["option-list"];
             repeat = this["repeated-options"];
             application.InputSystem.RegisterFocusable(this);
+        }
+
+        public override void OnEnable() {
+            TryGetAttribute("variant", out string variant);
+            chevronHolderElement.SetAttributeRecursive("variant", variant);
+        }
+
+        protected override void OnSetAttribute(string attrName, string newValue, string oldValue) {
+            if (attrName == "variant") {
+                TryGetAttribute("variant", out string variant);
+                chevronHolderElement.SetAttributeRecursive("variant", variant);
+            }
         }
 
         public override void OnUpdate() {
@@ -92,7 +107,7 @@ namespace UIForia.Elements {
                 SetAttribute("disabled", disabledAttributeValue);
                 DisableAllChildren(this);
             }
-            
+
             // optionList.style.SetVisibility(selecting ? Visibility.Visible : Visibility.Hidden, StyleState.Normal);
         }
 
@@ -109,6 +124,10 @@ namespace UIForia.Elements {
                 return;
             }
 
+            if (selectedValue == null && defaultValue != null) {
+                selectedValue = defaultValue;
+            }
+
             for (int i = 0; i < options.Count; i++) {
                 if (options[i].Value.Equals(selectedValue)) {
                     if (selectedIndex != i) {
@@ -119,8 +138,8 @@ namespace UIForia.Elements {
                     return;
                 }
             }
-
-            selectedValue = defaultValue;
+            
+            selectedValue = default;
             selectedIndex = -1;
         }
 
@@ -165,7 +184,8 @@ namespace UIForia.Elements {
                 // space and return should only choose the currently keyboard-selected item
                 if (keyboardNavigationIndex > -1) {
                     SetSelectedValue(keyboardNavigationIndex);
-                    childrenElement.children[selectedIndex].style.ExitState(StyleState.Hover);
+                    // TODO(roman): Fix keyboard navigation.
+                    //childrenElement.children[selectedIndex].style.ExitState(StyleState.Hover);
                 }
 
                 return;
@@ -193,7 +213,7 @@ namespace UIForia.Elements {
                         keyboardNavigationIndex = 0;
                     }
 
-                    childrenElement.children[keyboardNavigationIndex].style.EnterState(StyleState.Hover);
+                    //childrenElement.children[keyboardNavigationIndex].style.EnterState(StyleState.Hover);
                 }
             }
         }
@@ -236,7 +256,7 @@ namespace UIForia.Elements {
 
                 if (evt.keyCode == KeyCode.UpArrow) {
                     if (keyboardNavigationIndex > -1) {
-                        childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
+                        //childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
                     }
 
                     keyboardNavigationIndex--;
@@ -249,7 +269,7 @@ namespace UIForia.Elements {
                 }
                 else if (evt.keyCode == KeyCode.DownArrow) {
                     if (keyboardNavigationIndex > -1) {
-                        childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
+                        //childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
                     }
 
                     keyboardNavigationIndex++;
@@ -294,7 +314,7 @@ namespace UIForia.Elements {
         [OnMouseMove]
         public void OnMouseMove() {
             if (keyboardNavigationIndex > 0) {
-                childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
+                //childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
             }
         }
 
@@ -345,7 +365,7 @@ namespace UIForia.Elements {
         }
 
         public bool DisplaySelectedIcon(int index) {
-            return selectedElementIcon != null && selectedIndex == index;
+            return selectedElementIcon.isValid && selectedIndex == index;
         }
 
     }

@@ -20,6 +20,19 @@
             <override:Children style="padded">
 
                 <Group style="m4">
+                    <Div style:PreferredWidth="300">
+                        Select (Default)
+                        <Select defaultValue="activities[0].Value" options="activities"/>
+                        Select (Default Disabled)
+                        <Select defaultValue="activities[0].Value" options="activities" disabled="true"/>
+                        Select (Small)
+                        <Select attr:variant="small" defaultValue="activities[0].Value" options="activities"/>
+                        Select (Small Disabled)
+                        <Select attr:variant="small" defaultValue="activities[0].Value" options="activities" disabled="true"/>
+                    </Div>
+                </Group>
+
+                <Group style="m4">
                     Primary
                     <ToggleGroup style="mb3" attr:variant="primary">
                         <ToggleGroupItem text="'Left'" onToggle="toggleLeft"/>

@@ -1,0 +1,156 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style select {
+    LayoutType = Stack;
+    AlignItemsVertical = Center Parent;
+    BackgroundColor = white;
+    BorderRadius = 4px;
+    Border = 1px;
+    BorderColor = @theme.coal150;
+    PaddingRight = 24px;
+    PaddingLeft = @theme.sp2;
+    PaddingTop = @theme.sp1;
+    PaddingBottom = @theme.sp1;
+    
+    PreferredHeight = 24px;
+    PreferredWidth = 1pca;
+    
+    // h6
+    TextFontAsset = @theme.GothamNarrow;
+    TextFontSize = 12px;
+
+    [hover] {
+        BorderColor = @theme.poppy700;
+    }
+
+    [attr:disabled] {
+        Opacity = 0.4;
+        PointerEvents = None;
+    }
+    
+    [attr:variant="small"] {
+        TextFontAsset = @theme.GothamRound;
+        TextFontSize = 8px;
+        TextTransform = UpperCase;
+        
+        PreferredHeight = 16px;
+    }
+}
+
+style select-option {
+    TextColor = black;
+    Padding = 2px 0;
+    DistributeExtraSpaceVertical = CenterContent;
+    FlexLayoutDirection = Horizontal;
+    BackgroundColor = clear;
+    LayoutFitHorizontal = Grow;
+    ClipBehavior = Normal;
+    PreferredWidth = 1psz;
+    
+    BackgroundTint = black;
+    
+    [hover] {
+        TextColor = white;
+        BackgroundTint = white;
+        BackgroundColor = @theme.poppy500;
+    }
+}
+
+style select-label {
+    PaddingLeft = 24px; // @theme.sp1 + icon-size(16) + @theme.sp1
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = CenterContent;
+    FlexItemGrow = 1;
+    [hover] {
+        MinWidth = 1cnt;
+    }
+}
+
+style selected-element-icon {
+    PreferredSize = 16px;
+    LayoutBehavior = Ignored;
+    AlignmentOffsetX = @theme.sp1;
+    AlignY = 50% Parent;
+}
+
+
+style transclude {
+    LayoutBehavior = TranscludeChildren;
+}
+
+style select-chevron {
+    PreferredSize = 2px 1px;
+    BackgroundColor = white;
+}
+
+style select-chevron-holder {
+    LayoutBehavior = Ignored;
+    AlignmentTargetX = Parent;
+    AlignX = 100%;
+    BackgroundColor = @theme.poppy500;
+    PreferredSize = 16px 1psz;
+    Border = 1px;
+    BorderColor = @theme.poppy700;
+    BorderRadius = 0 4px 4px 0;
+    DistributeExtraSpaceVertical = CenterContent;
+    DistributeExtraSpaceHorizontal = CenterContent;
+    PaddingTop = 0px;
+    PaddingBottom = 0px;
+    
+    [attr:variant="small"] {
+        PreferredWidth = 12px;
+    }
+}
+
+style chevron-down {
+    AlignmentOffsetY = -2px;
+    PreferredSize = 12px;
+    BackgroundImage = url("Icons/chevron_down");
+    
+    [attr:variant="small"] {
+        AlignmentOffsetY = -8px;
+        AlignmentOffsetX = -1px;
+    }
+}
+
+style chevron-up {
+    PreferredSize = 12px;
+    BackgroundImage = url("Icons/chevron_up");
+    
+    [attr:variant="small"] {
+        AlignmentOffsetY = -2px;
+        AlignmentOffsetX = -1px;
+    }
+}
+
+style select-options {
+    // attention: load bearing comma
+    AlignY = -3px, Parent;
+    AlignX = -10px, Parent;
+    BackgroundColor = white;
+    LayoutFitHorizontal = FillParent;
+    BorderRadius = 4px;
+    BorderColor = @theme.coal200;
+    Border = 1px;
+    MaxHeight = 312px;
+    Padding = @theme.sp1 0;
+    ZIndex = 20;
+    ClipBehavior = Never;
+    LayoutBehavior = Ignored;
+    PreferredWidth = 1psz;
+    AlignmentBoundary = Clipper;
+}
+
+style select-display {
+    TextColor = black;
+    MarginRight = 12px;
+}
+
+style select-placeholder {
+    TextColor = #666;
+}
+
+style keyboard-selected {
+    TextColor = white;
+    BackgroundColor = red;
+}

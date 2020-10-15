@@ -41,7 +41,7 @@ namespace SeedLib {
 
         public int selectedIndex { get; private set; } = -1;
 
-        public int keyboardNavigationIndex = -1;
+        //public int keyboardNavigationIndex = -1;
 
         public T defaultValue;
 
@@ -169,127 +169,128 @@ namespace SeedLib {
             selectedValue = options[selectedIndex].Value;
         }
 
-        [OnKeyDownWithFocus]
-        public void OnKeyDownNavigate(KeyboardInputEvent evt) {
-            if (disabled) {
-                return;
-            }
+        // NOTE(roman): Keyboard navigation is disabled for now.
+        // [OnKeyDownWithFocus]
+        // public void OnKeyDownNavigate(KeyboardInputEvent evt) {
+        //     if (disabled) {
+        //         return;
+        //     }
+        //
+        //     if (selecting && evt.keyCode == KeyCode.Escape) {
+        //         selecting = false;
+        //         return;
+        //     }
+        //
+        //     if (selecting && (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.Space)) {
+        //         // space and return should only choose the currently keyboard-selected item
+        //         if (keyboardNavigationIndex > -1) {
+        //             SetSelectedValue(keyboardNavigationIndex);
+        //             // TODO(roman): Fix keyboard navigation.
+        //             //childrenElement.children[selectedIndex].style.ExitState(StyleState.Hover);
+        //         }
+        //
+        //         return;
+        //     }
+        //
+        //     // just submit the form if we have focus and are not in selection mode
+        //     if (!selecting && evt.keyCode == KeyCode.Return) {
+        //         Input.DelayEvent(this, new SubmitEvent());
+        //         return;
+        //     }
+        //
+        //     // enable tab navigation
+        //     if (evt.keyCode == KeyCode.Tab) {
+        //         Input.DelayEvent(this, new TabNavigationEvent(evt));
+        //         return;
+        //     }
+        //
+        //     if (!selecting) {
+        //         // enter selection mode if we have focus and press space
+        //         if (evt.keyCode == KeyCode.Space) {
+        //             selecting = true;
+        //
+        //             keyboardNavigationIndex = selectedIndex;
+        //             if (keyboardNavigationIndex == -1) {
+        //                 keyboardNavigationIndex = 0;
+        //             }
+        //
+        //             //childrenElement.children[keyboardNavigationIndex].style.EnterState(StyleState.Hover);
+        //         }
+        //     }
+        // }
+        //
+        // [OnKeyHeldDownWithFocus()]
+        // public void OnKeyboardNavigate(KeyboardInputEvent evt) {
+        //     if (disabled) {
+        //         return;
+        //     }
+        //
+        //     if (debounce - Time.realtimeSinceStartup > -0.1) {
+        //         return;
+        //     }
+        //
+        //     debounce = Time.realtimeSinceStartup;
+        //
+        //     if (!selecting) {
+        //         // if we are NOT in selection mode using the arrow keys should just cycle through the options and set them immediately
+        //         if (evt.keyCode == KeyCode.UpArrow) {
+        //             selectedIndex--;
+        //             if (selectedIndex < 0) {
+        //                 selectedIndex = options.Count - 1;
+        //             }
+        //
+        //             SetSelectedValue(selectedIndex);
+        //             evt.StopPropagation();
+        //         }
+        //         else if (evt.keyCode == KeyCode.DownArrow) {
+        //             selectedIndex++;
+        //             if (selectedIndex == options.Count) {
+        //                 selectedIndex = 0;
+        //             }
+        //
+        //             SetSelectedValue(selectedIndex);
+        //             evt.StopPropagation();
+        //         }
+        //     }
+        //     else {
+        //         // use the up/down arrows to navigate through the options but only visually. pressing space or return will set the new value for real.
+        //
+        //         if (evt.keyCode == KeyCode.UpArrow) {
+        //             if (keyboardNavigationIndex > -1) {
+        //                 //childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
+        //             }
+        //
+        //             keyboardNavigationIndex--;
+        //             if (keyboardNavigationIndex < 0) {
+        //                 keyboardNavigationIndex = options.Count - 1;
+        //             }
+        //
+        //             ScrollElementIntoView();
+        //             evt.StopPropagation();
+        //         }
+        //         else if (evt.keyCode == KeyCode.DownArrow) {
+        //             if (keyboardNavigationIndex > -1) {
+        //                 //childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
+        //             }
+        //
+        //             keyboardNavigationIndex++;
+        //             if (keyboardNavigationIndex == options.Count) {
+        //                 keyboardNavigationIndex = 0;
+        //             }
+        //
+        //             ScrollElementIntoView();
+        //             evt.StopPropagation();
+        //         }
+        //     }
+        // }
 
-            if (selecting && evt.keyCode == KeyCode.Escape) {
-                selecting = false;
-                return;
-            }
-
-            if (selecting && (evt.keyCode == KeyCode.Return || evt.keyCode == KeyCode.Space)) {
-                // space and return should only choose the currently keyboard-selected item
-                if (keyboardNavigationIndex > -1) {
-                    SetSelectedValue(keyboardNavigationIndex);
-                    // TODO(roman): Fix keyboard navigation.
-                    //childrenElement.children[selectedIndex].style.ExitState(StyleState.Hover);
-                }
-
-                return;
-            }
-
-            // just submit the form if we have focus and are not in selection mode
-            if (!selecting && evt.keyCode == KeyCode.Return) {
-                Input.DelayEvent(this, new SubmitEvent());
-                return;
-            }
-
-            // enable tab navigation
-            if (evt.keyCode == KeyCode.Tab) {
-                Input.DelayEvent(this, new TabNavigationEvent(evt));
-                return;
-            }
-
-            if (!selecting) {
-                // enter selection mode if we have focus and press space
-                if (evt.keyCode == KeyCode.Space) {
-                    selecting = true;
-
-                    keyboardNavigationIndex = selectedIndex;
-                    if (keyboardNavigationIndex == -1) {
-                        keyboardNavigationIndex = 0;
-                    }
-
-                    //childrenElement.children[keyboardNavigationIndex].style.EnterState(StyleState.Hover);
-                }
-            }
-        }
-
-        [OnKeyHeldDownWithFocus()]
-        public void OnKeyboardNavigate(KeyboardInputEvent evt) {
-            if (disabled) {
-                return;
-            }
-
-            if (debounce - Time.realtimeSinceStartup > -0.1) {
-                return;
-            }
-
-            debounce = Time.realtimeSinceStartup;
-
-            if (!selecting) {
-                // if we are NOT in selection mode using the arrow keys should just cycle through the options and set them immediately
-                if (evt.keyCode == KeyCode.UpArrow) {
-                    selectedIndex--;
-                    if (selectedIndex < 0) {
-                        selectedIndex = options.Count - 1;
-                    }
-
-                    SetSelectedValue(selectedIndex);
-                    evt.StopPropagation();
-                }
-                else if (evt.keyCode == KeyCode.DownArrow) {
-                    selectedIndex++;
-                    if (selectedIndex == options.Count) {
-                        selectedIndex = 0;
-                    }
-
-                    SetSelectedValue(selectedIndex);
-                    evt.StopPropagation();
-                }
-            }
-            else {
-                // use the up/down arrows to navigate through the options but only visually. pressing space or return will set the new value for real.
-
-                if (evt.keyCode == KeyCode.UpArrow) {
-                    if (keyboardNavigationIndex > -1) {
-                        //childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
-                    }
-
-                    keyboardNavigationIndex--;
-                    if (keyboardNavigationIndex < 0) {
-                        keyboardNavigationIndex = options.Count - 1;
-                    }
-
-                    ScrollElementIntoView();
-                    evt.StopPropagation();
-                }
-                else if (evt.keyCode == KeyCode.DownArrow) {
-                    if (keyboardNavigationIndex > -1) {
-                        //childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
-                    }
-
-                    keyboardNavigationIndex++;
-                    if (keyboardNavigationIndex == options.Count) {
-                        keyboardNavigationIndex = 0;
-                    }
-
-                    ScrollElementIntoView();
-                    evt.StopPropagation();
-                }
-            }
-        }
-
-        private void ScrollElementIntoView() {
-            if (keyboardNavigationIndex < 0 || keyboardNavigationIndex >= options.Count) {
-                return;
-            }
-
-            // repeat[keyboardNavigationIndex].ScrollIntoView();
-        }
+        // private void ScrollElementIntoView() {
+        //     if (keyboardNavigationIndex < 0 || keyboardNavigationIndex >= options.Count) {
+        //         return;
+        //     }
+        //
+        //     // repeat[keyboardNavigationIndex].ScrollIntoView();
+        // }
 
         [OnMouseClick]
         public void BeginSelecting(MouseInputEvent evt) {
@@ -311,12 +312,12 @@ namespace SeedLib {
             evt.Consume();
         }
 
-        [OnMouseMove]
-        public void OnMouseMove() {
-            if (keyboardNavigationIndex > 0) {
-                //childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
-            }
-        }
+        // [OnMouseMove]
+        // public void OnMouseMove() {
+        //     if (keyboardNavigationIndex > 0) {
+        //         //childrenElement.children[keyboardNavigationIndex].style.ExitState(StyleState.Hover);
+        //     }
+        // }
 
         public void AdjustOptionPosition() {
             if (validSelection) {

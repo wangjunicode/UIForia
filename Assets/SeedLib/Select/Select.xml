@@ -26,7 +26,7 @@
 
             <Repeat attr:id="repeated-options" list="options" style="transclude">
 
-                <define:Children style="select-option {$index == keyboardNavigationIndex ? 'keyboard-selected'}"
+                <define:Children style="select-option"
                                  expose:option="$item"
                                  expose:index="$index"
                                  expose:isSelected="DisplaySelectedIcon($index)"

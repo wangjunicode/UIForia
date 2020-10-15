@@ -30,6 +30,7 @@ style input-element {
     MarginBottom = 0px;
     FlexItemGrow = 1;
     PreferredHeight = 1psz;
+    CaretColor = @theme.poppy500;
     [hover] {
         Cursor = @theme.cursorTextInput;
     }

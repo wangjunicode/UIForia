@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Util;
 using UnityEngine;
 
 namespace SeedLib {
-
     [Template("SeedLib/SeedLibRoot.xml")]
     public class SeedLibRoot : UIElement {
-
         public string inputText = "Text";
         public string inputText2 = "";
 
@@ -20,31 +19,66 @@ namespace SeedLib {
         public Action toggleRight => ToggleRight;
 
         #region ListSample
-        
         public struct ListItemData {
             public ImageLocator Icon;
             public string Name;
         }
-        
+
         public List<ListItemData> items = new List<ListItemData>();
-        
         #endregion //ListSample
 
         #region SelectSample
-
         public List<ISelectOption<string>> activities = new List<ISelectOption<string>>() {
-                new SelectOption<string>("Sleep", "sleep"), 
-                new SelectOption<string>("Work", "work"), 
-                new SelectOption<string>("Recreation", "recreation")
+                new SelectOption<string>("Sleep", "sleep"), new SelectOption<string>("Work", "work"), new SelectOption<string>("Recreation", "recreation")
         };
-        
         #endregion //SelectSample
 
+        #region Tree Sample
+        public class Category {
+            public class Resource {
+                public class ContainerInfo {
+                    public string name;
+                    public int count;
+                }
+
+                public string name;
+                public List<ContainerInfo> containers = new List<ContainerInfo>();
+            }
+
+            public string name;
+            public List<Resource> resources = new List<Resource>();
+        }
+
+        public List<Category> categories = new List<Category>();
+        #endregion // Tree Sample
+
         public override void OnEnable() {
-            items.Add(new ListItemData() {Icon = "Icons/success", Name = "Meat"});            
+            items.Add(new ListItemData() {Icon = "Icons/success", Name = "Meat"});
             items.Add(new ListItemData() {Icon = "Icons/success", Name = "Tomato"});
             items.Add(new ListItemData() {Icon = "Icons/success", Name = "Carrot"});
             items.Add(new ListItemData() {Icon = "Icons/success", Name = "Headers"});
+
+            // Tree sample
+            categories.Add(
+                    new Category() {
+                            name = "Food",
+                            resources = new List<Category.Resource>() {
+                                    new Category.Resource() {
+                                            name = "Frozen Pizza",
+                                            containers = new List<Category.Resource.ContainerInfo>() {
+                                                    new Category.Resource.ContainerInfo() {name = "Svenni's Freezer", count = 37},
+                                                    new Category.Resource.ContainerInfo() {name = "Nando's Pizza Vault", count = 12}
+                                            },
+                                    },
+                                    new Category.Resource() {
+                                            name = "Food Paste",
+                                            containers = new List<Category.Resource.ContainerInfo>() {
+                                                    new Category.Resource.ContainerInfo() {name = "Matt's Freezer", count = 50},
+                                                    new Category.Resource.ContainerInfo() {name = "Roman's Inventory", count = 11}
+                                            }
+                                    }
+                            }
+                    });
         }
 
         public void Click() {
@@ -58,11 +92,11 @@ namespace SeedLib {
         public void ToggleLeft() {
             Debug.Log("Toggled Left");
         }
-        
+
         public void ToggleMiddle() {
             Debug.Log("Toggled Middle");
         }
-        
+
         public void ToggleRight() {
             Debug.Log("Toggled Right");
         }
@@ -70,10 +104,13 @@ namespace SeedLib {
         public void OnNumberValueChanged(float newValue) {
             Debug.Log("OnNumberValueChanged:" + newValue);
         }
-    }
-    
-    public static class ThemeColors {
 
+        public float TotalResourceCount(Category.Resource resource) {
+            return resource.containers.Sum(x => x.count);
+        }
+    }
+
+    public static class ThemeColors {
         public static Color coal0 = ColorUtil.ColorFromRGBHash(0xffffff);
         public static Color coal50 = ColorUtil.ColorFromRGBHash(0xeeeeee);
         public static Color coal100 = ColorUtil.ColorFromRGBHash(0xdddddd);
@@ -186,7 +223,5 @@ namespace SeedLib {
         public static Color rose500 = ColorUtil.ColorFromRGBHash(0xe65b78);
         public static Color rose700 = ColorUtil.ColorFromRGBHash(0x912e42);
         public static Color rose900 = ColorUtil.ColorFromRGBHash(0x551322);
-
     }
-
 }

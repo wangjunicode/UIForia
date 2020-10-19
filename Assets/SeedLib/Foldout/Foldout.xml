@@ -1,12 +1,14 @@
 <UITemplate>
     
     <Style src="SeedLib/Foldout/Foldout.style"/>
+    <Style src="SeedLib/SeedLibTheme.style"/>
     
-    <Contents>
+    <Contents style="foldout">
         <Div style="foldout-title-row">
-            <Image style="foldout-icon" src="'Icons/right'"/>
-            <define:Title />
+            <Image style="foldout-icon {expanded ? 'rotate-90'}" src="'Icons/right'" mouse:click="ToggleExpanded()"/>
+            <define:Title style="label-small foldout-title">{title}</define:Title>
         </Div>
-        <define:Children />
+        <define:Children style="foldout-children" if="expanded" />
     </Contents>
+    
 </UITemplate>

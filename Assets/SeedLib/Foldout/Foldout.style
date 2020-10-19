@@ -2,9 +2,46 @@ import "SeedLib/SeedLibTheme.style" as theme;
 
 style foldout-title-row {
     FlexLayoutDirection = Horizontal;
+    PreferredHeight = 12px;
 }
 
 style foldout-icon {
     PreferredSize = 16px;
     BackgroundTint = @theme.coal300;
+    TransformRotation = 0;
+}
+
+style rotate-90 {
+    TransformRotation = 90;
+}
+
+style foldout-children {
+    PaddingLeft = @theme.sp1;
+    PaddingTop = @theme.sp3;
+}
+
+style foldout-title {
+    AlignY = 100% Parent;
+}
+
+//////////////////////////////////////////////////////////////////
+// ListItemFoldout
+//////////////////////////////////////////////////////////////////
+
+style align-y-center {
+    AlignY = 50% Parent;
+}
+
+style ml {
+    MarginLeft = 4px;
+}
+
+style tree-foldout-title-row {
+    FlexLayoutDirection = Horizontal;
+    PreferredHeight = 1cnt;
+}
+
+style tree-foldout-children {
+    PaddingTop = @theme.sp2;
+    PaddingLeft = @theme.sp3;
 }

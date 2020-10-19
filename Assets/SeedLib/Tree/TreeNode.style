@@ -1,0 +1,16 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style tree-node {
+    PaddingLeft = 24px;
+    DistributeExtraSpaceVertical = CenterContent;
+    PreferredWidth = 1pca;
+    MarginBottom = @theme.sp2;
+}
+
+style tree-node-children {
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceHorizontal = BeforeContent;
+    DistributeExtraSpaceVertical = CenterContent;
+    FlexItemGrow = 1;
+    AlignY = 50% Parent;
+}

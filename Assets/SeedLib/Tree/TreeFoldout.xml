@@ -1,0 +1,19 @@
+<UITemplate>
+
+    <Style src="SeedLib/Tree/TreeFoldout.style"/>
+    <Style src="SeedLib/Foldout/Foldout.style"/>
+    <Style src="SeedLib/List/ListItem.style"/>
+    <Style src="SeedLib/SeedLibTheme.style"/>
+
+    <Contents style="tree-foldout">
+        <Div style="tree-foldout-title-row">
+            <Image style="foldout-icon tree-foldout-icon p1 {expanded ? 'rotate-90'}" src="'Icons/right'" mouse:click="ToggleExpanded()"/>
+            <Image src="icon" style="list-item-icon ml"/>
+            <define:Title style="h6 list-item-children" expose:title="title">
+                <Text style="align-left">{title}</Text>
+            </define:Title>
+        </Div>
+        <define:Children style="tree-foldout-children" if="expanded" />
+    </Contents>
+
+</UITemplate>

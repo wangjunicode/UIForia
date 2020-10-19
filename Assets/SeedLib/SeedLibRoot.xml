@@ -5,11 +5,11 @@
 
     <Style>
         style small-padded {
-        Padding = 8px;
+            Padding = 8px;
         }
         
         style horizontal {
-        FlexLayoutDirection = Horizontal;
+            FlexLayoutDirection = Horizontal;
         }
 
     </Style>
@@ -76,6 +76,44 @@
                     <Div style="margin-tb"></Div>
                     More here
                 </Popover>
+
+                <Group style="margin-tb" style:PreferredWidth="300">
+
+                    Tree (Static)
+                    <Foldout title="'Group 1'">
+                        <TreeFoldout icon="'Icons/success'" title="'Object Name'">
+                            <TreeNode  icon="'Icons/success'" title="'Object Name'"/>
+                        </TreeFoldout>
+                    </Foldout>
+
+                    Tree (Binding)
+                    <Repeat list="categories">
+
+                        <Foldout title="$item.name">
+                            <Repeat list="$item.resources" style="transclude" var:resource="item">
+
+                                <TreeFoldout icon="'Icons/success'" title="$resource.name">
+
+                                    <override:Title>
+                                        {$title}
+                                        <Text style="h6">{TotalResourceCount($resource)}</Text>
+                                    </override:Title>
+
+                                    <Repeat list="$resource.containers" style="transclude" var:container="item">
+                                        <TreeNode icon="'Icons/success'" title="$container.name">
+                                            <Text style="h6">{$container.count}</Text>
+                                        </TreeNode>
+                                    </Repeat>
+
+                                </TreeFoldout>
+
+                            </Repeat>
+
+                        </Foldout>
+
+                    </Repeat>
+                </Group>
+
 
                 <Group style="m4">
                     <Div style:PreferredWidth="200">
@@ -173,15 +211,7 @@
                     </Tooltip>
                 </Group>
 
-                <!--                <Group>-->
-                <!--                    <Foldout>-->
-                <!--                        Test-->
-                <!--                        -->
-                <!--                        <override:Title>-->
-                <!--                            Group1-->
-                <!--                        </override:Title>-->
-                <!--                    </Foldout>-->
-                <!--                </Group>-->
+
 
                 <Group>
 

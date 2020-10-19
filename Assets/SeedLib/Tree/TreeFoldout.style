@@ -1,0 +1,26 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style tree-foldout {
+    PreferredWidth = 1pca;
+}
+
+style tree-foldout-icon {
+    AlignY = 50% Parent;
+    MarginLeft = 4px;
+}
+
+style align-left {
+    AlignX = 0% Parent;
+}
+
+style tree-foldout-title-row {
+    FlexLayoutDirection = Horizontal;
+    PreferredHeight = 1cnt;
+    PreferredWidth = 1pca;
+}
+
+style tree-foldout-children {
+    PreferredWidth = 1pca;
+    PaddingTop = @theme.sp2;
+    PaddingLeft = @theme.sp3;
+}

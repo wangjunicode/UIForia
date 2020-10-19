@@ -1,0 +1,13 @@
+<UITemplate>
+
+    <Style src="SeedLib/Tree/TreeNode.style"/>
+    <Style src="SeedLib/List/ListItem.style"/>
+    <Style src="SeedLib/SeedLibTheme.style"/>
+
+    <Contents style="list-item tree-node">
+        <Image src="icon" style="list-item-icon"/>
+        <define:Title style="h6">{title}</define:Title>
+        <define:Children style="tree-node-children" />
+    </Contents>
+
+</UITemplate>

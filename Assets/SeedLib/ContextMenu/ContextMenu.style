@@ -1,0 +1,57 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style context-menu {
+    
+    Border = 1px;
+    BorderColor = @theme.coal50;
+    PaddingTop = @theme.sp1;
+    PaddingBottom = 3px;
+    BorderRadius = 8px;
+    BackgroundColor = @theme.coal50;
+}
+
+style context-menu-header {
+    AlignX = Center Parent;
+    PreferredHeight = 16px;
+    TextFontAsset = @theme.GothamNarrow;
+    TextFontStyle = Bold;
+}
+
+style context-menu-item-group {
+    BorderTop = 1px;
+    BorderColor = @theme.coal150;
+    PaddingTop = 2px; //@theme.sp1;
+    PaddingBottom = 2px;// @theme.sp1;
+}
+
+style context-menu-item {
+    TextFontAsset = @theme.GothamNarrow;
+    TextColor = black;
+    TextFontSize = 12px;
+    MarginTop = 2px; //@theme.sp1;
+    PaddingLeft = @theme.sp2;
+    PaddingRight = @theme.sp2;
+    PreferredWidth  = 185px;
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = CenterContent;
+    
+    [attr:mouse-over="true"] {
+        BackgroundColor = @theme.poppy100;
+    }
+    
+}
+
+style context-menu-icon {
+    PreferredSize = 16px;
+    BackgroundTint = black;
+    MarginRight = @theme.sp2;
+}
+
+style context-menu-text {
+    PreferredWidth = 137px;
+}
+
+style context-menu-caret {
+    PreferredSize = 16px;
+    BackgroundTint = black;
+}

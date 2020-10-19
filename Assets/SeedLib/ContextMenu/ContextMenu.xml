@@ -1,0 +1,34 @@
+<UITemplate>
+
+    <Style src="SeedLib/ContextMenu/ContextMenu.style"/>
+    <Style src="SeedLib/SeedLibTheme.style"/>
+
+    <Contents style="context-menu">
+
+        <Text if="HasHeader" style="context-menu-header h6">{registry.GetMenuHeader()}</Text>
+
+        <Repeat list="registry.GetMenuGroups()">
+
+            <ContextMenuItemGroup items="$item"/>
+
+        </Repeat>
+
+    </Contents>
+
+    <Contents id="item" style="context-menu-item">
+        
+        <Image src="item.icon" style="context-menu-icon"/>
+        
+        <Text style="context-menu-text">{item.label}</Text>
+        
+        <Image if="item.subMenu != null" src="'Icons/right'" style="context-menu-icon"/>
+        
+    </Contents>
+
+    <Contents id="group" style="context-menu-item-group">
+        <Repeat list="items">
+            <ContextMenuItem item="$item"/>
+        </Repeat>
+    </Contents>
+
+</UITemplate>

@@ -26,6 +26,10 @@ style progress-bar-fill {
    
 }
 
+style label {
+    PreferredWidth = 24px;
+}
+
 style labeled-progress-bar {
     PreferredWidth = 175px;
     TextFontAsset = @theme.GothamRoundBold;

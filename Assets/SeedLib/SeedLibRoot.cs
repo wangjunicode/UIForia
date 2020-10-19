@@ -16,32 +16,82 @@ namespace SeedLib {
         public Action toggleMiddle => ToggleMiddle;
         public Action toggleRight => ToggleRight;
 
+        public ContextMenuRegistry contextMenuRegistry;
+
         #region ListSample
-        
+
         public struct ListItemData {
+
             public ImageLocator Icon;
             public string Name;
+
         }
-        
+
         public List<ListItemData> items = new List<ListItemData>();
-        
+
         #endregion //ListSample
 
         #region SelectSample
 
         public List<ISelectOption<string>> activities = new List<ISelectOption<string>>() {
-                new SelectOption<string>("Sleep", "sleep"), 
-                new SelectOption<string>("Work", "work"), 
-                new SelectOption<string>("Recreation", "recreation")
+            new SelectOption<string>("Sleep", "sleep"),
+            new SelectOption<string>("Work", "work"),
+            new SelectOption<string>("Recreation", "recreation")
         };
-        
+
         #endregion //SelectSample
 
+        public override void OnCreate() {
+            contextMenuRegistry = new ContextMenuRegistry();
+
+            contextMenuRegistry.Register<FakeContextData>("menu_0", (data, builder) => {
+                // data holds contextual info that is user specified
+
+                builder.SetHeader("Basic Assembler");
+
+                builder.AddMenuGroup((group) => {
+                    group.AddMenuItem("Show Info", "Icons/information 1", () => { Debug.Log("Showing info"); });
+
+                    group.AddMenuItem("Production Queue", "Icons/settings", () => { Debug.Log("Showing Production Queue"); });
+
+                    group.AddMenuItem("Share Settings", "Icons/house", (submenu) => {
+                        submenu.AddMenuItem("On", "Icons/active", () => { Debug.Log("Turned on"); });
+
+                        submenu.AddMenuItem("Off", "Icons/inactive", () => { Debug.Log("Turned off"); });
+                    });
+                });
+
+                builder.AddMenuGroup((group) => {
+                    group.AddMenuItem("Repair", "Icons/configure", (submenu) => {
+                        submenu.AddMenuItem("Repair Thing", "Icons/configure", () => { });
+                        submenu.AddMenuItem("Repair Other Thing", "Icons/configure", () => { });
+                    });
+
+                    group.AddMenuItem("Clean", "Icons/done", (submenu) => {
+                        submenu.AddMenuItem("Clean Thing", "Icons/done", () => { });
+                        submenu.AddMenuItem("Clean Other Thing", "Icons/done", () => { });
+                    });
+                });
+
+                builder.AddMenuGroup((group) => {
+                    group.AddMenuItem("Package", "Icons/light", () => { Debug.Log("Packaging"); });
+
+                    group.AddMenuItem("Move Location", "Icons/rename", () => { Debug.Log("Moving"); });
+
+                    group.AddMenuItem("Recycle", "Icons/passion", () => { Debug.Log("Recycling"); });
+                });
+            });
+        }
+
         public override void OnEnable() {
-            items.Add(new ListItemData() {Icon = "Icons/success", Name = "Meat"});            
+            items.Add(new ListItemData() {Icon = "Icons/success", Name = "Meat"});
             items.Add(new ListItemData() {Icon = "Icons/success", Name = "Tomato"});
             items.Add(new ListItemData() {Icon = "Icons/success", Name = "Carrot"});
             items.Add(new ListItemData() {Icon = "Icons/success", Name = "Headers"});
+
+            contextMenuRegistry.Show("menu_0", 100, 100, new FakeContextData() {
+                label = "Hello Menu"
+            });
         }
 
         public void Click() {
@@ -55,11 +105,11 @@ namespace SeedLib {
         public void ToggleLeft() {
             Debug.Log("Toggled Left");
         }
-        
+
         public void ToggleMiddle() {
             Debug.Log("Toggled Middle");
         }
-        
+
         public void ToggleRight() {
             Debug.Log("Toggled Right");
         }
@@ -67,8 +117,9 @@ namespace SeedLib {
         public void OnNumberValueChanged(float newValue) {
             Debug.Log("OnNumberValueChanged:" + newValue);
         }
+
     }
-    
+
     public static class ThemeColors {
 
         public static Color coal0 = ColorUtil.ColorFromRGBHash(0xffffff);

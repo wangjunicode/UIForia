@@ -18,7 +18,7 @@ namespace SeedLib {
             if (itemList.TryGetAttribute("variant", out string attribute) && attribute.Contains("dense")) {
                 image.SetAttribute("dense", "true");    
             } else {
-                image.SetAttribute("dense", "false");
+                image.SetAttribute("dense", null);
             }
         }
     }

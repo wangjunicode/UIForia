@@ -12,6 +12,16 @@ namespace SeedLib {
         public void ToggleExpanded() {
             expanded = !expanded;
         }
+        
+        public override void OnEnable() {
+            UIElement children = FindById<UIElement>("foldout-children");
+            
+            if (TryGetAttribute("variant", out string attribute) && attribute.Contains("dense")) {
+                children.SetAttribute("dense", "true");    
+            } else {
+                children.SetAttribute("dense", "false");
+            }
+        }
     }
 
 }

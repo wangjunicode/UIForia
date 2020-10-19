@@ -18,30 +18,12 @@ style rotate-90 {
 style foldout-children {
     PaddingLeft = @theme.sp1;
     PaddingTop = @theme.sp3;
+    
+    [attr:dense="true"] {
+        PaddingTop = @theme.sp2;
+    }
 }
 
 style foldout-title {
     AlignY = 100% Parent;
-}
-
-//////////////////////////////////////////////////////////////////
-// ListItemFoldout
-//////////////////////////////////////////////////////////////////
-
-style align-y-center {
-    AlignY = 50% Parent;
-}
-
-style ml {
-    MarginLeft = 4px;
-}
-
-style tree-foldout-title-row {
-    FlexLayoutDirection = Horizontal;
-    PreferredHeight = 1cnt;
-}
-
-style tree-foldout-children {
-    PaddingTop = @theme.sp2;
-    PaddingLeft = @theme.sp3;
 }

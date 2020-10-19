@@ -5,6 +5,10 @@ style tree-node {
     DistributeExtraSpaceVertical = CenterContent;
     PreferredWidth = 1pca;
     MarginBottom = @theme.sp2;
+    
+    [attr:dense="true"] {
+        MarginBottom = @theme.sp1;
+    }
 }
 
 style tree-node-children {

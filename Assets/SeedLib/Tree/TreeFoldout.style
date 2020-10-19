@@ -23,4 +23,8 @@ style tree-foldout-children {
     PreferredWidth = 1pca;
     PaddingTop = @theme.sp2;
     PaddingLeft = @theme.sp3;
+    
+    [attr:dense="true"] {
+        PaddingTop = @theme.sp1;
+    }
 }

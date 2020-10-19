@@ -8,12 +8,12 @@
     <Contents style="tree-foldout">
         <Div style="tree-foldout-title-row">
             <Image style="foldout-icon tree-foldout-icon p1 {expanded ? 'rotate-90'}" src="'Icons/right'" mouse:click="ToggleExpanded()"/>
-            <Image src="icon" style="list-item-icon ml"/>
+            <Image id="title-icon" src="icon" style="list-item-icon ml"/>
             <define:Title style="h6 list-item-children" expose:title="title">
                 <Text style="align-left">{title}</Text>
             </define:Title>
         </Div>
-        <define:Children style="tree-foldout-children" if="expanded" />
+        <define:Children id="foldout-children" style="tree-foldout-children" if="expanded" />
     </Contents>
 
 </UITemplate>

@@ -19,6 +19,78 @@
 
             <override:Children style="padded">
 
+                <Group style="margin-tb" style:PreferredWidth="300">
+
+                    Tree (Static)
+                    <Foldout title="'Group 1'" style:BackgroundColor="UnityEngine.Color.white">
+                        <TreeFoldout icon="'Icons/success'" title="'Object Name'">
+                            <TreeNode  icon="'Icons/success'" title="'Object Name'"/>
+                        </TreeFoldout>
+                    </Foldout>
+
+                    Tree (Default)
+                    <Group style="horizontal">
+                        <Group style:BackgroundColor="UnityEngine.Color.white" style:MarginRight="16">
+                            Default
+                            <Repeat list="categories">
+
+                                <Foldout title="$item.name">
+                                    <Repeat list="$item.resources" style="transclude" var:resource="item">
+
+                                        <TreeFoldout icon="'Icons/success'" title="$resource.name">
+
+                                            <override:Title>
+                                                {$title}
+                                                <Text style="h6">{TotalResourceCount($resource)}</Text>
+                                            </override:Title>
+
+                                            <Repeat list="$resource.containers" style="transclude" var:container="item">
+                                                <TreeNode icon="'Icons/success'" title="$container.name">
+                                                    <Text style="h6">{$container.count}</Text>
+                                                </TreeNode>
+                                            </Repeat>
+
+                                        </TreeFoldout>
+
+                                    </Repeat>
+
+                                </Foldout>
+
+                            </Repeat>
+                        </Group>
+
+                        <Group style:BackgroundColor="UnityEngine.Color.white">
+                            Tree (Dense)
+                            <Repeat list="categories">
+
+                                <Foldout title="$item.name" attr:variant="dense">
+                                    <Repeat list="$item.resources" style="transclude" var:resource="item">
+
+                                        <TreeFoldout icon="'Icons/success'" title="$resource.name" attr:variant="dense">
+
+                                            <override:Title>
+                                                {$title}
+                                                <Text style="h6">{TotalResourceCount($resource)}</Text>
+                                            </override:Title>
+
+                                            <Repeat list="$resource.containers" style="transclude" var:container="item">
+                                                <TreeNode icon="'Icons/success'" title="$container.name">
+                                                    <Text style="h6">{$container.count}</Text>
+                                                </TreeNode>
+                                            </Repeat>
+
+                                        </TreeFoldout>
+
+                                    </Repeat>
+
+                                </Foldout>
+
+                            </Repeat>
+                        </Group>
+                    </Group>
+
+                </Group>
+
                 <Div style:BackgroundColor="UnityEngine.Color.white" style="small-padded margin-tb">
                     
                 <ContextMenu registry="contextMenuRegistry"/>
@@ -80,44 +152,6 @@
                     <Div style="margin-tb"></Div>
                     More here
                 </Popover>
-
-                <Group style="margin-tb" style:PreferredWidth="300">
-
-                    Tree (Static)
-                    <Foldout title="'Group 1'">
-                        <TreeFoldout icon="'Icons/success'" title="'Object Name'">
-                            <TreeNode  icon="'Icons/success'" title="'Object Name'"/>
-                        </TreeFoldout>
-                    </Foldout>
-
-                    Tree (Binding)
-                    <Repeat list="categories">
-
-                        <Foldout title="$item.name">
-                            <Repeat list="$item.resources" style="transclude" var:resource="item">
-
-                                <TreeFoldout icon="'Icons/success'" title="$resource.name">
-
-                                    <override:Title>
-                                        {$title}
-                                        <Text style="h6">{TotalResourceCount($resource)}</Text>
-                                    </override:Title>
-
-                                    <Repeat list="$resource.containers" style="transclude" var:container="item">
-                                        <TreeNode icon="'Icons/success'" title="$container.name">
-                                            <Text style="h6">{$container.count}</Text>
-                                        </TreeNode>
-                                    </Repeat>
-
-                                </TreeFoldout>
-
-                            </Repeat>
-
-                        </Foldout>
-
-                    </Repeat>
-                </Group>
-
 
                 <Group style="m4">
                     <Div style:PreferredWidth="200">

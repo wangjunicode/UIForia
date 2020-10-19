@@ -8,7 +8,7 @@
             <Image style="foldout-icon {expanded ? 'rotate-90'}" src="'Icons/right'" mouse:click="ToggleExpanded()"/>
             <define:Title style="label-small foldout-title">{title}</define:Title>
         </Div>
-        <define:Children style="foldout-children" if="expanded" />
+        <define:Children id="foldout-children" style="foldout-children" if="expanded" />
     </Contents>
     
 </UITemplate>

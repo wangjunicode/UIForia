@@ -1,0 +1,18 @@
+<UITemplate>
+    <Style path="SeedLib/InputField/InputField.style" />
+    <Style src="SeedLib/SeedLibTheme.style"/>
+
+    <Contents style="input">
+
+        <Text attr:id="input-element-text" style="input-element-text h6"/>
+
+        <define:placeholder if="ShowPlaceholder" style="placeholder-slot">
+
+            <Text style="h6" attr:id="placeholder-text">{placeholder}</Text>
+
+        </define:placeholder>
+
+    </Contents>
+
+</UITemplate>
+

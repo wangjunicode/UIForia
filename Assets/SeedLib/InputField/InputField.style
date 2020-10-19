@@ -1,0 +1,41 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style input {
+    LayoutType = Stack;
+    PreferredHeight = 1cnt;
+    
+    Border = 1px;
+    BorderColor = @theme.coal100;
+    BorderRadius = 4px;
+    
+    BackgroundColor = white;
+    Padding = @theme.sp2;
+    PreferredWidth = 1pca;
+    Overflow = Hidden;
+    ClipBounds = ContentBox;
+    CaretColor = @theme.poppy500;
+    DistributeExtraSpaceVertical = CenterContent;
+    
+    [hover] {
+        Cursor = @theme.cursorTextInput;
+    }
+    [focus] {
+        BorderColor = @theme.coal200;
+    }
+    
+    [attr:disabled="true"] {
+        PointerEvents = None;
+        Opacity = 0.4f;
+    }
+}
+
+style input-element-text {
+    TextWhitespaceMode = NoWrap;
+    MinHeight = 1em;
+    TextColor = @theme.coal850;
+}
+
+style placeholder-slot {
+    PreferredHeight = 1cnt;
+    TextColor = @theme.coal250;
+}

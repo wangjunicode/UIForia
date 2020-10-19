@@ -1,5 +1,7 @@
 <UITemplate>
     <Style path="SeedLib/NumberStepper/NumberStepper.style" />
+    <Style path="SeedLib/InputField/InputField.style" />
+    <Style src="SeedLib/SeedLibTheme.style"/>
 
     <Contents>
 
@@ -7,7 +9,7 @@
             <Input attr:id="input-element"
                    sync:value="value"
                    onChange:value="InputValueChanged()"
-                   style="input-element"
+                   style="input h6"
                    placeholder="placeholder"
                    disabled="disabled"
                    key:down="OnKeyPressed($event)"

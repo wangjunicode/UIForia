@@ -188,3 +188,9 @@ style p {
     TextFontAsset = @Whitney;
     TextFontSize = 12px;
 }
+
+style label-small {
+    TextFontAsset = @GothamRound;
+    TextFontSize = 8px;
+    TextTransform = UpperCase;
+}

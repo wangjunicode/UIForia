@@ -16,29 +16,6 @@ style stepper-container {
     PreferredWidth = 1pca;
 }
 
-style input-element {
-    TextFontSize = 15px;
-    Overflow = Hidden;
-    TextFontAsset = @theme.GothamNarrow;
-    Border = 1px;
-    BorderColor = @theme.coal100;
-    BackgroundColor = white;
-    BorderRadius = 4px;
-    MinWidth = 50px;
-    MinHeight = 1.6em;
-    MarginRight = 4px;
-    MarginBottom = 0px;
-    FlexItemGrow = 1;
-    PreferredHeight = 1psz;
-    CaretColor = @theme.poppy500;
-    [hover] {
-        Cursor = @theme.cursorTextInput;
-    }
-    [focus] {
-        BorderColor = @theme.coal200;
-    }
-}
-
 style vertical-center-within-input {
     AlignX = 8px Parent;
     AlignY = 50% Parent;

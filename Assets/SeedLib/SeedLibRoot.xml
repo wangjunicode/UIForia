@@ -7,6 +7,10 @@
         style small-padded {
         Padding = 8px;
         }
+        
+        style horizontal {
+        FlexLayoutDirection = Horizontal;
+        }
 
     </Style>
     <Contents style="root">
@@ -79,6 +83,17 @@
 
                 <Group style="m4">
                     <Div style:PreferredWidth="200">
+                        Input Field
+                        <InputField sync:value="inputText"/>
+                        Input Field (Disabled)
+                        <InputField sync:value="inputText" attr:disabled="true"/>
+                        Input Field (Placeholder)
+                        <InputField sync:value="inputText2" placeholder="'Placeholder'"/>
+                    </Div>
+                </Group>
+
+                <Group style="m4">
+                    <Div style:PreferredWidth="200"> 
                         Number stepper
                         <NumberStepper min="1" max="50" defaultValue="1" onChange:value="OnNumberValueChanged($newValue)"/>
                         Number stepper (Disabled)

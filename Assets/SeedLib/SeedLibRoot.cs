@@ -10,6 +10,9 @@ namespace SeedLib {
     [Template("SeedLib/SeedLibRoot.xml")]
     public class SeedLibRoot : UIElement {
 
+        public string inputText = "Text";
+        public string inputText2 = "";
+
         public Action click => Click;
         public Action actionClick => ActionClicked;
         public Action toggleLeft => ToggleLeft;

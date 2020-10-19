@@ -15,16 +15,20 @@
     </Style>
     <Contents style="root">
 
-
         <ScrollView style="scroll">
 
             <override:Children style="padded">
 
-                <Group style="margin-tb">
-                
-                    <Button style:MarginLeft="500" attr:id="popover-button" label="'Show Popover'"/>
+                <Div style:BackgroundColor="UnityEngine.Color.white" style="small-padded margin-tb">
                     
-                    <Popover edge="SeedLib.PopOverEdge.Left"  targetElement="FindById('popover-button')">
+                <ContextMenu registry="contextMenuRegistry"/>
+                
+                </Div>
+                <Group style="margin-tb">
+
+                    <Button style:MarginLeft="500" attr:id="popover-button" label="'Show Popover'"/>
+
+                    <Popover edge="SeedLib.PopOverEdge.Left" targetElement="FindById('popover-button')">
                         Content here
                         <Div style="margin-tb"></Div>
                         More here
@@ -37,13 +41,13 @@
                         <Div style="margin-tb"></Div>
                         More here
                     </Popover>
-                    
+
                 </Group>
                 <Group style="margin-tb">
 
                     <Button style:MarginLeft="500" attr:id="popover-button-1" label="'Show Popover'"/>
 
-                    <Popover edge="SeedLib.PopOverEdge.Right"  targetElement="FindById('popover-button-1')">
+                    <Popover edge="SeedLib.PopOverEdge.Right" targetElement="FindById('popover-button-1')">
                         Content here
                         <Div style="margin-tb"></Div>
                         More here
@@ -61,11 +65,11 @@
 
                 <Button style:TransformPositionX="-30" style:MarginBottom="300" attr:id="popover-button-2" label="'Show Popover but this one is longer hopefully they center'"/>
 
-                <Popover edge="SeedLib.PopOverEdge.Top"  targetElement="FindById('popover-button-2')">
+                <Popover edge="SeedLib.PopOverEdge.Top" targetElement="FindById('popover-button-2')">
                     <Slider showTrail.once="true" rangeStart.once="0" rangeEnd.once="10" stepSize.once="2" value.once="7.6f"/>
 
                 </Popover>
-                <Popover edge="SeedLib.PopOverEdge.Bottom"  targetElement="FindById('popover-button-2')">
+                <Popover edge="SeedLib.PopOverEdge.Bottom" targetElement="FindById('popover-button-2')">
                     Content here
                     <Div style="margin-tb"></Div>
                     More here and this is really long
@@ -134,7 +138,7 @@
                         <NumberStepper min="1" max="50" onChange:value="OnNumberValueChanged($newValue)" disabled="true"/>
                     </Div>
                 </Group>
-                
+
                 <Group style="m4">
                     <Div style:PreferredWidth="300">
                         Select (Default)
@@ -215,8 +219,9 @@
 
                 <Group>
 
+                    Default List
                     <Div style="list-container" style:PreferredWidth="300" style:BackgroundColor="UnityEngine.Color.white">
-                        Default List
+
                         <ItemList label="'Ingredients'" items="items">
                             <ListItem icon="$item.Icon">
                                 <Text style="h6">{$item.Name}</Text>
@@ -226,7 +231,17 @@
 
                         <Separator style="list-separator"/>
 
-                        Dense List
+                        <ItemList label="'Ingredients'" items="items">
+                            <ListItem icon="$item.Icon">
+                                <Text style="h6">{$item.Name}</Text>
+                                <Checkbox/>
+                            </ListItem>
+                        </ItemList>
+
+                    </Div>
+                    Dense List
+                    <Div style="list-container" style:PreferredWidth="300" style:BackgroundColor="UnityEngine.Color.white">
+
                         <ItemList label="'Ingredients'" items="items" attr:variant="dense">
                             <ListItem icon="$item.Icon">
                                 <Text style="h6">{$item.Name}</Text>
@@ -235,8 +250,17 @@
                         </ItemList>
 
                         <Separator style="list-separator"/>
+                        <ItemList label="'Ingredients'" items="items" attr:variant="dense">
+                            <ListItem icon="$item.Icon">
+                                <Text style="h6">{$item.Name}</Text>
+                                <Checkbox/>
+                            </ListItem>
+                        </ItemList>
+                    </Div>
 
-                        Dense Striped List
+                    Dense Striped List
+                    <Div style="list-container" style:PreferredWidth="300" style:BackgroundColor="UnityEngine.Color.white">
+
                         <ItemList label="'Ingredients'" items="items" attr:variant="dense+striped">
                             <ListItem icon="$item.Icon">
                                 <Text style="h6">{$item.Name}</Text>
@@ -354,12 +378,12 @@
                     Toggle Switch (Big)
                     <ToggleSwitch/>
                 </Group>
-                
+
                 <Group style="margin-tb">
                     Toggle Switch (Big) Disabled - Off
                     <ToggleSwitch attr:disabled="true"/>
                 </Group>
-                
+
                 <Group style="margin-tb">
                     Toggle Switch (Big) Disabled - On
                     <ToggleSwitch attr:disabled="true" value="true"/>
@@ -369,12 +393,12 @@
                     Toggle Switch (Small)
                     <ToggleSwitchSmall/>
                 </Group>
-                
+
                 <Group style="margin-tb">
                     Toggle Switch (Small) Disabled -- Off
                     <ToggleSwitchSmall attr:disabled="true"/>
                 </Group>
-                
+
                 <Group style="margin-tb">
                     Toggle Switch (Small) Disabled -- On
                     <ToggleSwitchSmall attr:disabled="true" value="true"/>

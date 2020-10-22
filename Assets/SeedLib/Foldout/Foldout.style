@@ -17,11 +17,8 @@ style rotate-90 {
 
 style foldout-children {
     PaddingLeft = @theme.sp1;
-    PaddingTop = @theme.sp3;
+    PaddingTop = @theme.sp1;
     
-    [attr:dense="true"] {
-        PaddingTop = @theme.sp2;
-    }
 }
 
 style foldout-title {

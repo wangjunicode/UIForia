@@ -80,7 +80,6 @@ namespace SeedLib {
 
         public bool selected;
         public string text;
-        public Action onToggle;
 
         private ToggleGroup toggleGroup;
         private string variant;
@@ -110,14 +109,14 @@ namespace SeedLib {
                 SetAttribute("round-right", null);
             }
 
-            if (toggleGroup.IsSelected(siblingIndex)) {
+            selected = toggleGroup.IsSelected(siblingIndex);
+            if (selected) {
                 SetAttribute("selected", variant);
             }
             else {
                 SetAttribute("selected", null);
             }
         }
-        
     }
     
 }

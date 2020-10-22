@@ -2,6 +2,11 @@ import "SeedLib/SeedLibTheme.style" as theme;
 
 style tree-foldout {
     PreferredWidth = 1pca;
+    MarginTop = @theme.sp2;
+    
+    [attr:dense="true"] {
+        MarginTop = @theme.sp1;
+    }
 }
 
 style tree-foldout-icon {
@@ -21,10 +26,6 @@ style tree-foldout-title-row {
 
 style tree-foldout-children {
     PreferredWidth = 1pca;
-    PaddingTop = @theme.sp2;
     PaddingLeft = @theme.sp3;
     
-    [attr:dense="true"] {
-        PaddingTop = @theme.sp1;
-    }
 }

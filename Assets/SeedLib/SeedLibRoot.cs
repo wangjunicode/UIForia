@@ -5,6 +5,7 @@ using UIForia.Attributes;
 using UIForia.Elements;
 using UIForia.Util;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace SeedLib {
     [Template("SeedLib/SeedLibRoot.xml")]
@@ -14,10 +15,7 @@ namespace SeedLib {
 
         public Action click => Click;
         public Action actionClick => ActionClicked;
-        public Action toggleLeft => ToggleLeft;
-        public Action toggleMiddle => ToggleMiddle;
-        public Action toggleRight => ToggleRight;
-
+        
         public ContextMenuRegistry contextMenuRegistry;
 
         #region ListSample
@@ -56,9 +54,11 @@ namespace SeedLib {
         }
 
         public List<Category> categories = new List<Category>();
+        public List<Category> categoriesBig = new List<Category>();
+
         #endregion // Tree Sample
 
-                public override void OnCreate() {
+        public override void OnCreate() {
             contextMenuRegistry = new ContextMenuRegistry();
 
             contextMenuRegistry.Register<FakeContextData>("menu_0", (data, builder) => {
@@ -131,6 +131,21 @@ namespace SeedLib {
                                     }
                             }
                     });
+
+            for (int i = 0; i < 2; ++i) {
+                var category = new Category() {name = "Category Name " + i};
+                for (int j = 0; j < 2; ++j) {
+                    var resource = new Category.Resource() {name = "Resource Name " + j};
+                    for (int k = 0; k < 10; ++k) {
+                        var container = new Category.Resource.ContainerInfo() {name = "Container " + k, count = Random.Range(1, 99)};
+                        resource.containers.Add(container);
+                    }
+                    
+                    category.resources.Add(resource);
+                }
+                
+                categoriesBig.Add(category);
+            }
         }
 
         public void Click() {
@@ -139,18 +154,6 @@ namespace SeedLib {
 
         public void ActionClicked() {
             Debug.Log("action-clicked");
-        }
-
-        public void ToggleLeft() {
-            Debug.Log("Toggled Left");
-        }
-
-        public void ToggleMiddle() {
-            Debug.Log("Toggled Middle");
-        }
-
-        public void ToggleRight() {
-            Debug.Log("Toggled Right");
         }
 
         public void OnNumberValueChanged(float newValue) {

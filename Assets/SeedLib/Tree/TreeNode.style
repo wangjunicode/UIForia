@@ -4,10 +4,10 @@ style tree-node {
     PaddingLeft = 24px;
     DistributeExtraSpaceVertical = CenterContent;
     PreferredWidth = 1pca;
-    MarginBottom = @theme.sp2;
+    MarginTop = @theme.sp2;
     
     [attr:dense="true"] {
-        MarginBottom = @theme.sp1;
+        MarginTop = @theme.sp1;
     }
 }
 

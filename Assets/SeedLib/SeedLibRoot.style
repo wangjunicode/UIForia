@@ -11,12 +11,12 @@ style scroll {
 }
 
 style padded {
-Padding = 30px;
+    Padding = 30px;
 }
 style big {
-PreferredHeight = 3000px;
-BackgroundColor = white;
-PreferredWidth = 100px;
+    PreferredHeight = 3000px;
+    BackgroundColor = white;
+    PreferredWidth = 100px;
 }
 
 style row {
@@ -29,7 +29,7 @@ style margin-tb {
 }
 
 style fill-parent-width {
-PreferredWidth = 1pca;
+    PreferredWidth = 1pca;
 }
 
 style list-container {
@@ -43,4 +43,8 @@ style list-separator {
 
 style mr {
     MarginRight = @theme.sp4;
+}
+
+style striped-tree {
+    Painter = "SeedLib::StripedTreePainter";
 }

@@ -9,7 +9,7 @@
             <Input attr:id="input-element"
                    sync:value="value"
                    onChange:value="InputValueChanged()"
-                   style="input h6"
+                   style="input h6 stepper-input"
                    placeholder="placeholder"
                    disabled="disabled"
                    key:down="OnKeyPressed($event)"
@@ -17,12 +17,12 @@
                    onSubmit="Submit()"
             />
 
-            <Group style="arrows {disabled ? 'disabled-arrows'}">
-                <Div style="arrow-container arrow-up" mouse:Down="Increment($event)" mouse:heldDown="IncrementContinuously($event)">
-                    <Image src="'Icons/right'" style="arrow rotate-up" />
+            <Group style="arrows">
+                <Div style="arrow-box arrow-up" mouse:Down="Increment($event)" mouse:heldDown="IncrementContinuously($event)">
+                    <Image style="arrow-icon" />
                 </Div>
-                <Div style="arrow-container arrow-down" mouse:Down="Decrement($event)" mouse:heldDown="DecrementContinuously($event)">
-                    <Image src="'Icons/right'" style="arrow" />
+                <Div style="arrow-box arrow-down" mouse:Down="Decrement($event)" mouse:heldDown="DecrementContinuously($event)">
+                    <Image style="arrow-icon" />
                 </Div>
             </Group>
         </Group>

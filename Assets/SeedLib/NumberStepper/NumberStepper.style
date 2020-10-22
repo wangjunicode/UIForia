@@ -16,6 +16,12 @@ style stepper-container {
     PreferredWidth = 1pca;
 }
 
+style stepper-input {
+    PreferredWidth = 1cnt;
+    FlexItemGrow = 1;
+    MarginRight = @theme.sp1;
+}
+
 style vertical-center-within-input {
     AlignX = 8px Parent;
     AlignY = 50% Parent;
@@ -26,43 +32,43 @@ style placeholder-slot {
 }
 
 style arrows {
-    PreferredSize = 24px 1psz;
-    Opacity = 1;
-    AlignY = 0% Parent;
-    AlignX = 100% Parent;
-}
-
-style disabled-arrows {
-    Opacity = 0.4;
-}
-
-style arrow-container {
-    BackgroundColor = @theme.poppy500;
+    PreferredHeight = 1pca;
     Border = 1px;
-    BorderColor = @theme.poppy500;
-    PreferredSize = 1pca 0.5pca;
-    DistributeExtraSpace = CenterContent;
-    [hover] {
-        BorderColor = @theme.poppy700;
-    }
+    BorderColor = @theme.coal100;
+    BackgroundColor = white;
+    BorderRadius = 4px;
+}
+
+style arrow-box {
+    BorderRadius = 4px 4px 0px 0px;
+
     [active] {
-        BackgroundColor = @theme.poppy700; 
+        BackgroundColor = @theme.coal300; 
     }
 }
 
-style arrow {
-    PreferredSize = 12px 12px;
-    TransformRotation = 90;
-}
-
-style rotate-up {
-    TransformRotation = -90;
+style arrow-icon {
+    BackgroundImage = url("Icons/chevron_up@1x");
+    BackgroundTint = @theme.coal950;
+    PreferredSize = 12px;
+    
+    [hover] {
+        BackgroundTint = @theme.coal300;
+    }
+    
+    [active] {
+        BackgroundTint = @theme.coal100;
+    }
 }
 
 style arrow-up {
-    BorderRadius = 4px 4px 0 0;
-
+    AlignY = 0% Parent;
+    PaddingTop = 2px;
+    
 }
+
 style arrow-down {
-    BorderRadius = 0 0 4px 4px;
+    PaddingTop = 2px;
+    TransformRotation = 180;
+    AlignY = 100% Parent;
 }

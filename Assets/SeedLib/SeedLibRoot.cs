@@ -13,6 +13,9 @@ namespace SeedLib {
         public string inputText = "Text";
         public string inputText2 = "";
 
+        public int stepperValue = 1;
+        public int labeledStepperValue = 1;
+
         public Action click => Click;
         public Action actionClick => ActionClicked;
         

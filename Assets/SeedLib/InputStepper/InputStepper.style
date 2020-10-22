@@ -1,6 +1,6 @@
 import "SeedLib/SeedLibTheme.style" as theme;
 
-style <NumberStepper> {
+style <InputStepper> {
     PreferredSize = 1pca 1.6em;
     MarginBottom = 10px;
     FlexLayoutDirection = Horizontal;
@@ -71,4 +71,20 @@ style arrow-down {
     PaddingTop = 2px;
     TransformRotation = 180;
     AlignY = 100% Parent;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+// LabeledInputStepper
+//////////////////////////////////////////////////////////////////////////////////////
+
+style labeled-stepper {
+    [attr:disabled="true"] {
+        Opacity = 0.4;
+        PointerEvents = None;
+    }
+}
+
+style stepper-label {
+    PaddingTop = @theme.sp2;
+    PaddingBottom = @theme.sp2;
 }

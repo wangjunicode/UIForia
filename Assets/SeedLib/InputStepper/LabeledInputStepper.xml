@@ -1,0 +1,8 @@
+<UITemplate>
+    <Style src="SeedLib/SeedLibTheme.style"/>
+    <Style path="SeedLib/InputStepper/InputStepper.style" />
+    <Contents style="labeled-stepper">
+        <Text style="p stepper-label" id="text"/>
+        <InputStepper sync:min="min" sync:max="max" sync:step="step" sync:value="value"/>
+    </Contents>
+</UITemplate>

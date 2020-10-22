@@ -4,10 +4,10 @@ using UIForia.Elements;
 using UIForia.UIInput;
 using UnityEngine;
 
-namespace Klang.Seed.Client.UI.UIForia {
+namespace SeedLib {
 
-    [Template("SeedLib/NumberStepper/NumberStepper.xml")]
-    public class NumberStepper : BaseInputElement {
+    [Template("SeedLib/InputStepper/InputStepper.xml")]
+    public class InputStepper : BaseInputElement {
 
         public int min = Int32.MinValue;
 
@@ -16,8 +16,6 @@ namespace Klang.Seed.Client.UI.UIForia {
         public int step = 1;
 
         public int value;
-
-        public int defaultValue;
 
         public string placeholder;
 
@@ -36,11 +34,6 @@ namespace Klang.Seed.Client.UI.UIForia {
             inputElement = FindById<UIInputElement>("input-element");
         }
         
-        [OnPropertyChanged(nameof(defaultValue))]
-        public void OnDisabledChanged() {
-            value = Mathf.Clamp(defaultValue, min, max);
-        }
-
         public void OnKeyPressed(KeyboardInputEvent evt) {
             
             if (inputElement.HasDisabledAttr()) {

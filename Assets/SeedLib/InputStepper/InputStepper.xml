@@ -1,5 +1,5 @@
 <UITemplate>
-    <Style path="SeedLib/NumberStepper/NumberStepper.style" />
+    <Style path="SeedLib/InputStepper/InputStepper.style" />
     <Style path="SeedLib/InputField/InputField.style" />
     <Style src="SeedLib/SeedLibTheme.style"/>
 

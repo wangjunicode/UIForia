@@ -17,7 +17,7 @@ style toggle-switch {
     Margin = @theme.sp2;
     
     [hover] {
-        BorderColor = @theme.coal700;
+        BorderColor = @theme.poppy900;
     }
     
     [attr:status="on"] {
@@ -45,6 +45,7 @@ style toggle-switch {
 style toggle-switch-small {
     PreferredSize = 20px 10px;
     BorderRadius = 50%;
+    Border = 1px;
     PaddingLeft = 1;
     PaddingRight = 1;
     BackgroundColor = @theme.coal150;
@@ -52,6 +53,9 @@ style toggle-switch-small {
     
     [attr:status="on"] {
        BackgroundColor = @theme.apple500;
+       [hover] {
+            BorderColor = @theme.poppy900;
+       }
     }
     
     [attr:status="off"] {
@@ -64,7 +68,7 @@ style toggle-switch-small {
     [attr:status="animate_on"] {
         run animation(bg-turn-on);
         [hover] {
-            BackgroundColor = @theme.poppy700;        
+            BorderColor = @theme.poppy900;      
         }
     }
     
@@ -72,7 +76,7 @@ style toggle-switch-small {
         run animation(bg-turn-off);
              
         [hover] {
-           BackgroundColor = @theme.coal300;        
+           BackgroundColor = @theme.coal300;
         }
     }
     
@@ -171,7 +175,7 @@ animation bg-turn-off {
     }
     [keyframes] {
         0% { BackgroundColor = @theme.apple500; }
-        100% { BackgroundColor = @theme.coal300; }
+        100% { BackgroundColor = @theme.coal150; }
     }
 }
 

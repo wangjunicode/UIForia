@@ -24,6 +24,14 @@ style button {
         Padding = @theme.sp1;
     }
     
+    [attr:configuration="icon-only"] and [attr:size-variant="medium"] {
+        Padding = 5px;
+    }
+    
+    [attr:configuration="icon-only"] and [attr:size-variant="large"] {
+        Padding = @theme.sp3;
+    }
+    
     [attr:disabled] {
         Opacity = 0.4;
         PointerEvents = None;
@@ -113,7 +121,7 @@ style icon {
     
     [attr:size-variant="large"] {
         PreferredSize = 16px;
-        MarginRight = @theme.sp3; //@theme.sp1 * 125%;
+        MarginRight = @theme.sp3; //@theme.sp1 * 200%;
     }
     
     [attr:configuration="icon-only"] {

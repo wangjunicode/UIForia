@@ -1,7 +1,7 @@
 import "SeedLib/SeedLibTheme.style" as theme;
 
 style root {
-PreferredSize = 1vw 1vh;
+    PreferredSize = 1vw 1vh;
 }
 
 style scroll {
@@ -21,6 +21,7 @@ style big {
 
 style row {
     FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = CenterContent;
 }
 
 style margin-tb {
@@ -30,6 +31,8 @@ style margin-tb {
 
 style fill-parent-width {
     PreferredWidth = 1pca;
+    FlexItemGrow = 1;
+    LayoutFitHorizontal = Fill;
 }
 
 style list-container {

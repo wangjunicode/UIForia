@@ -21,10 +21,15 @@ namespace SeedLib {
                     variant = "primary";
                     break;
             }
-            
-            FindById("text").SetAttribute("variant", variant);
-            FindById("img").SetAttribute("variant", variant);
-            
+
+            UIElement text = FindById("text");
+            UIElement img = FindById("img");
+            text.SetAttribute("variant", variant);
+            img.SetAttribute("variant", variant);
+
+            TryGetAttribute("size-variant", out string sizeVariant);
+            text.SetAttribute("size-variant", sizeVariant);
+            img.SetAttribute("size-variant", sizeVariant);
         }
 
         private void AdjustSpacing() {
@@ -46,6 +51,7 @@ namespace SeedLib {
                 text.SetEnabled(false);
                 image.SetEnabled(true);
                 SetAttribute("configuration", "icon-only");
+                image.SetAttribute("configuration", "icon-only");
             }
             else if (hasLabel) {
                 SetAttribute("configuration", "label-only");

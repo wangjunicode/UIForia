@@ -79,12 +79,44 @@ style button {
         }
     }
 
+    [attr:size-variant="medium"] {
+        TextFontSize = 11px;
+        
+        PaddingLeft = 15px; // @theme.sp3 * 125%;
+        PaddingRight = 15px;// @theme.sp3 * 125%;
+        PaddingTop = 5px; //@theme.sp1  * 125%;
+        PaddingBottom = 5px; //@theme.sp1 * 125%;
+    }
+    
+    [attr:size-variant="large"] {
+        TextFontSize = 18px;
+            
+        PaddingLeft = @theme.sp5; // @theme.sp3 * 200%;
+        PaddingRight = @theme.sp5; // @theme.sp3 * 200%;
+        PaddingTop = @theme.sp3; //@theme.sp1  * 200%;
+        PaddingBottom = @theme.sp3; //@theme.sp1 * 200%;
+    }
 }
 
 style text {
-    MarginLeft = @theme.sp1;
+
 }
 
 style icon {
     PreferredSize = 8px;
+    MarginRight = @theme.sp1;
+    
+    [attr:size-variant="medium"] {
+        PreferredSize = 10px;
+        MarginRight = 5px; //@theme.sp1 * 125%;
+    }
+    
+    [attr:size-variant="large"] {
+        PreferredSize = 16px;
+        MarginRight = @theme.sp3; //@theme.sp1 * 125%;
+    }
+    
+    [attr:configuration="icon-only"] {
+        MarginRight = 0;
+    }
 }

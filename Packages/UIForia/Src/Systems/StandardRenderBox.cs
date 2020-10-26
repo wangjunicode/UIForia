@@ -1,17 +1,11 @@
-using System;
 using System.Diagnostics;
-using SVGX;
 using UIForia.Layout;
 using UIForia.Rendering.Vertigo;
-using UIForia.Systems;
 using UIForia.Util;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.UI;
 using Vertigo;
-using Debug = UnityEngine.Debug;
-using Object = System.Object;
 
 namespace UIForia.Rendering {
 
@@ -79,7 +73,7 @@ namespace UIForia.Rendering {
 
         public override void OnDestroy() {
             if (renderTexture != null) {
-                UnityEngine.Object.Destroy(renderTexture);
+                Object.Destroy(renderTexture);
             }
         }
 
@@ -625,7 +619,6 @@ namespace UIForia.Rendering {
             element.layoutResult.matrix.GetMatrix4x4(ref matrix);
             ctx.DrawBatchedGeometry(geometry, range, matrix, clipper);
         }
-
 
         public void RenderFromMaterial(RenderContext ctx) {
             if (!element.application.materialDatabase.TryGetMaterial(materialId, out MaterialInfo info)) {

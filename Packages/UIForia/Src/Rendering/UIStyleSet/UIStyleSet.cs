@@ -696,6 +696,7 @@ namespace UIForia.Rendering {
 
             StyleProperty currentValue;
             if (TryGetPropertyValueInState(property.propertyId, currentState, out currentValue)) {
+
                 if (oldValue != currentValue) {
                     propertyMap[(int) property.propertyId] = currentValue;
                     styleSystem?.SetStyleProperty(element, currentValue);
@@ -927,6 +928,7 @@ namespace UIForia.Rendering {
         }
 #endif
 
+        // base -> selectors -> instance
         public void SetBaseStyles(LightList<UIStyleGroupContainer> styles) {
             // todo -- this could be a lot faster, this is happening every frame in dynamic bindings :(
 
@@ -1078,13 +1080,16 @@ namespace UIForia.Rendering {
             animatedProperties.Add(new AnimatedProperty(propertyId, v0, v1, time));
             // styleSystem.SetStyleProperty(element, propertyId);
         }
-
-        private LightList<UIStyle> selectorStyles;
-
-        public void SetSelectorStyle(UIStyle matchStyle) {
-            selectorStyles = selectorStyles ?? new LightList<UIStyle>();
+        
+        public void SetAlignmentPercentageX(float percentage, StyleState state = StyleState.Normal) {
+            SetAlignmentOriginX(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), state);
+            SetAlignmentOffsetX(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), state);
         }
-
+        
+        public void SetAlignmentPercentageY(float percentage, StyleState state = StyleState.Normal) {
+            SetAlignmentOriginY(new OffsetMeasurement(percentage, OffsetMeasurementUnit.Percent), state);
+            SetAlignmentOffsetY(new OffsetMeasurement(-percentage, OffsetMeasurementUnit.Percent), state);
+        }
     }
 
     [Flags]

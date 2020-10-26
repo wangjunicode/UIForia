@@ -231,7 +231,7 @@ Shader "UIForia/Standard"
 
                 float outlineWidth = 0; //i.texCoord2.y;
                 float outlineSoftness = 0; //i.texCoord2.z;
-                float c = tex2D(_FontTexture, i.texCoord0.zw).a;
+                float c = tex2D(_FontTexture, float2(i.texCoord0.z, 1 - i.texCoord0.w)).a;
 
                 float scaleRatio = _FontScaleRatioA;
                 
@@ -261,6 +261,7 @@ Shader "UIForia/Standard"
                 underlayColor = faceColor + fixed4(underlayColor.rgb * underlayColor.a, underlayColor.a)  * (saturate(d - underlayBias)) * (1 - faceColor.a);
                 faceColor = lerp(faceColor, underlayColor, hasUnderlay);
                 faceColor = UIForiaAlphaClipColor(faceColor, _MaskTexture, clipPos, clipRect, clipUvs);
+                if(c < 0.005) return fixed4(0, 0, 0, 0);
                 return faceColor;               
 
             }

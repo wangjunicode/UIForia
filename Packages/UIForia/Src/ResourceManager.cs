@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
-using UIForia.Rendering;
-using UIForiaTMPro;
+using TMPro;
 using UIForia.Util;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -10,7 +8,7 @@ namespace UIForia {
 
     public class ResourceManager {
 
-        private struct AssetEntry<T> where T : UnityEngine.Object {
+        private struct AssetEntry<T> where T : Object {
 
             public T asset;
             public int id;
@@ -88,9 +86,9 @@ namespace UIForia {
                 return null;
             }
 
-            if (tmpFontAsset.fontAssetType != TMP_FontAsset.FontAssetTypes.SDF) {
-                throw new Exception($"UIForia currently supports only SDF Fonts. {path} is not an SDF font, please reference another");
-            }
+            //if (tmpFontAsset. != TMP_FontAsset.FontAssetTypes.SDF) {
+            //    throw new Exception($"UIForia currently supports only SDF Fonts. {path} is not an SDF font, please reference another");
+            //}
 
             FontAsset retn = new FontAsset(tmpFontAsset);
             s_FontMap.Add(path, retn);
@@ -102,7 +100,7 @@ namespace UIForia {
             return GetResource(path, s_AudioMap);
         }
 
-        private T AddResource<T>(string path, T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private T AddResource<T>(string path, T resource, IntMap<AssetEntry<T>> map) where T : Object {
             if (resource == null || path == null) {
                 return null;
             }
@@ -128,7 +126,7 @@ namespace UIForia {
             return resource;
         }
 
-        private T AddResource<T>(T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private T AddResource<T>(T resource, IntMap<AssetEntry<T>> map) where T : Object {
             int id = resource.GetHashCode();
             AssetEntry<T> entry;
             if (map.TryGetValue(id, out entry)) {
@@ -142,13 +140,13 @@ namespace UIForia {
             return resource;
         }
 
-        private T GetResource<T>(int id, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private T GetResource<T>(int id, IntMap<AssetEntry<T>> map) where T : Object {
             AssetEntry<T> entry;
             map.TryGetValue(id, out entry);
             return entry.asset;
         }
 
-        private T GetResource<T>(string path, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private T GetResource<T>(string path, IntMap<AssetEntry<T>> map) where T : Object {
             T resource;
             if (path == null) {
                 return null;
@@ -184,7 +182,7 @@ namespace UIForia {
             return resource;
         }
 
-        private void RemoveResource<T>(T resource, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private void RemoveResource<T>(T resource, IntMap<AssetEntry<T>> map) where T : Object {
             if (resource == null) return;
             int id = resource.GetHashCode();
             AssetEntry<T> entry;
@@ -194,7 +192,7 @@ namespace UIForia {
             }
         }
 
-        private void RemoveResource<T>(string path, IntMap<AssetEntry<T>> map) where T : UnityEngine.Object {
+        private void RemoveResource<T>(string path, IntMap<AssetEntry<T>> map) where T : Object {
             if (string.IsNullOrEmpty(path)) {
                 return;
             }

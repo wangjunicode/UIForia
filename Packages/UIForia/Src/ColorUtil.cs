@@ -28,6 +28,16 @@ namespace UIForia.Util {
                 (byte) ((value >> 0) & 0xff)
             );
         }
+        
+         public static Color32 ColorFromRGBHash(int value) {
+            // todo -- endianness probably matters
+            return new Color32(
+                (byte) ((value >> 16) & 0xff),
+                (byte) ((value >> 8) & 0xff),
+                (byte) ((value >> 0) & 0xff),
+                255
+            );
+        }
 
         public static int ColorToInt(Color32 color) {
             // todo -- endianness probably matters

@@ -147,7 +147,7 @@ namespace UIForia.Compilers {
             this.lateCompiler = new UIForiaLinqCompiler();
             this.typeResolver = new UIForiaLinqCompiler();
             this.materialDatabase = materialDatabase;
-            
+
             Func<string, LinqCompiler, Expression> resolveAlias = ResolveAlias;
 
             this.createdCompiler.resolveAlias = resolveAlias;
@@ -432,7 +432,6 @@ namespace UIForia.Compilers {
 
             return nodeExpr;
         }
-
 
         private Expression CompileRepeatList(CompilationContext ctx, RepeatNode repeatNode) {
             ParameterExpression nodeExpr = ctx.ElementExpr;
@@ -1076,9 +1075,9 @@ namespace UIForia.Compilers {
                 CompileRemainingChangeHandlerStores(templateNode.processedType.rawType, changeHandlerDefinitions);
 
                 CompileEnabledThisFrame(templateNode.processedType);
-                
+
                 CompileAfterPropertyUpdates(templateNode.processedType);
-                
+
                 CompileAttributeBindings(attributes);
 
                 CompileInstanceStyleBindings(attributes);
@@ -1109,9 +1108,9 @@ namespace UIForia.Compilers {
 
         private void CompileEnabledThisFrame(ProcessedType processed) {
             if (processed.requiresOnEnable) {
-               // ParameterExpression element = updateCompiler.GetElement();
-                
-            }    
+                // ParameterExpression element = updateCompiler.GetElement();
+
+            }
         }
 
         private void CompileCheckChangeHandlers(StructList<ChangeHandlerDefinition> changeHandlers) {
@@ -1348,7 +1347,7 @@ namespace UIForia.Compilers {
         }
 
         private void CompileContextVariable(in AttributeDefinition attr, ref StructList<ContextAliasActions> contextModifications) {
-           
+
             createdCompiler.SetupAttributeData(attr);
             SetImplicitContext(createdCompiler, attr);
 
@@ -1442,7 +1441,6 @@ namespace UIForia.Compilers {
 
         private void CompileStyleBindings(CompilationContext ctx, string tagName, StructList<AttributeDefinition> attributes) {
             LightList<StyleRefInfo> styleIds = LightList<StyleRefInfo>.Get();
-
 
             StyleSheetReference[] styleRefs = ctx.innerTemplate?.templateMetaData.styleReferences;
 
@@ -1598,7 +1596,6 @@ namespace UIForia.Compilers {
                 Expression templateContext = Expression.ArrayIndex(templateMetaDataExpr, Expression.Constant(styleExpression.templateMetaData.id));
                 for (int k = 0; k < expressionList.size; k++) {
                     TextExpression textExpression = expressionList.array[k];
-
 
                     if (textExpression.isExpression) {
                         Expression dynamicStyleList = updateCompiler.TypeWrapStatement(s_DynamicStyleListTypeWrapper, typeof(DynamicStyleList), textExpression.text);
@@ -2264,7 +2261,6 @@ namespace UIForia.Compilers {
                         closure.Release();
                         LightList<Parameter>.Release(ref parameters);
 
-
                         return;
                     }
                 }
@@ -2330,7 +2326,7 @@ namespace UIForia.Compilers {
             else {
                 LinqCompiler closure = compiler.CreateClosure(parameters, returnType);
 
-                closure.Statement(astNode);
+                closure.Statement(eventInfo.EventHandlerType, astNode);
                 LambdaExpression lambda = closure.BuildLambda();
                 ParameterExpression evtFn = compiler.AddVariable(lambda.Type, "evtFn");
                 compiler.Assign(evtFn, lambda);
@@ -2608,7 +2604,17 @@ namespace UIForia.Compilers {
             Expression expr = GetContextVariableValue(compiler, ctxVar, "");
             compiler.SetImplicitContext(castElement);
             string key = attr.key;
-            compiler.IfEqual(expr, right, () => { compiler.Assign(assignableStatement, Expression.Field(castElement, castElement.Type.GetField(key))); });
+            FieldInfo fieldInfo = castElement.Type.GetField(key);
+            if (fieldInfo != null) {
+                compiler.IfEqual(expr, right, () => { compiler.Assign(assignableStatement, Expression.Field(castElement, fieldInfo)); });
+            }
+            else {
+                PropertyInfo propertyInfo = castElement.Type.GetProperty(key);
+                if (propertyInfo != null) {
+                    compiler.IfEqual(expr, right, () => { compiler.Assign(assignableStatement, Expression.Property(castElement, propertyInfo)); });
+                }
+            }
+
             compiler.EndIsolatedSection();
         }
 
@@ -2670,7 +2676,6 @@ namespace UIForia.Compilers {
             MemberExpression valueField = Expression.Field(target, contextVarType.GetField(nameof(ContextVariable<object>.value)));
             updateCompiler.Assign(valueField, value);
         }
-
 
         private Expression ResolveAlias(string aliasName, LinqCompiler compiler) {
             if (aliasName == "oldValue") {
@@ -2769,9 +2774,11 @@ namespace UIForia.Compilers {
                         case '<':
                             depth++;
                             break;
+
                         case '>':
                             depth--;
                             break;
+
                         case ',': {
                             if (depth == 0) {
                                 strings.Add(replaceSpec.Substring(rangeStart, ptr));
@@ -2812,7 +2819,6 @@ namespace UIForia.Compilers {
                 Type createdType = ReflectionUtil.CreateGenericType(processedType.rawType, resolvedTypes);
                 return TypeProcessor.AddResolvedGenericElementType(createdType, processedType.templateAttr, processedType.tagName);
             }
-
 
             typeResolver.Reset();
             resolvingTypeOnly = true;

@@ -7,8 +7,8 @@ namespace UIForia.Elements {
     [TemplateTagName("Image")]
     public class UIImageElement : UIContainerElement {
 
-        public string src;
-        public Texture2D texture;
+        public ImageLocator? src;
+        internal Texture texture;
         private Mesh mesh;
 
         public float Width;
@@ -20,27 +20,21 @@ namespace UIForia.Elements {
         
         [OnPropertyChanged(nameof(src))]
         public void OnSrcChanged() {
-            if (src != null) {
-                texture = application.ResourceManager.GetTexture(src);
-                if (texture == null) {
-                    Debug.Log($"Cannot find image resource {src}");
-                }
-            }
-
             SetupBackground();
         }
 
-        [OnPropertyChanged(nameof(texture))]
-        public void OnTextureChanged() {
+        public override void OnEnable() {
             SetupBackground();
         }
 
         private void SetupBackground() {
-            if (texture == null) {
+            if (src == null) {
+                style.SetBackgroundImage(null, StyleState.Normal);
                 return;
             }
 
-            style.SetBackgroundImage(texture, StyleState.Normal);
+            texture = src.Value.texture ?? application.ResourceManager.GetTexture(src.Value.imagePath);
+            style.SetBackgroundImage((Texture2D)texture, StyleState.Normal);
             if (Width > 0) {
                 style.SetPreferredHeight(Width * texture.height / texture.width, StyleState.Normal);
                 style.SetPreferredWidth(Width, StyleState.Normal);

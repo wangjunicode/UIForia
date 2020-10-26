@@ -1,13 +1,18 @@
+using System;
 using UnityEngine;
 
 namespace UIForia.Util {
 
     public static class MathUtil {
 
+        public static float Round(float amountToRound, float nearstOf, float fairness = 0.5f) {
+            return (float) Math.Floor(amountToRound / nearstOf + fairness) * nearstOf;
+        }
+
         public static float RemapRange(float s, float a1, float a2, float b1, float b2) {
             return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
         }
-        
+
         public static float PercentOfRange(float v, float bottom, float top) {
             float div = top - bottom;
             return div == 0 ? 0 : (v - bottom) / div;
@@ -26,7 +31,7 @@ namespace UIForia.Util {
 
             return !(u < 0.0f) && !(u > 1.0f) && !(v < 0.0f) && !(v > 1.0f);
         }
-        
+
         public static bool LineSegmentsIntersection(Vector2 p1, Vector2 p2, Vector2 p3, Vector3 p4, out Vector2 intersection) {
             intersection = Vector2.zero;
 

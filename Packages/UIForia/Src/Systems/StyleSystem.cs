@@ -30,6 +30,7 @@ namespace UIForia.Systems {
         public void OnElementCreated(UIElement element) { }
 
         public void OnUpdate() {
+            
             if (onStylePropertyChanged == null) {
                 return;
             }

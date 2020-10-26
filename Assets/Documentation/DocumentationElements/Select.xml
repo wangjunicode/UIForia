@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UITemplate>
+    
+    <Style>
+
+        style select {
+        
+            LayoutType = Stack;
+            AlignItemsVertical = Center Parent;
+            BackgroundColor = white;
+            MinSize = 32px 24px;
+            BorderRadius = 8px;
+            Border = 1px;
+            BorderColor = #B2B2B2;
+            PaddingRight = 24px;
+            PaddingLeft = 12px;
+        
+            [hover] {
+                BorderColor = #00B5D9;
+            }
+        
+            [attr:disabled] {
+                BorderColor = rgba(178, 178, 178, 102);
+                TextColor = rgba(0, 0, 0, 102);
+                [hover] {
+                    BorderColor = rgba(178, 178, 178, 102);
+                }
+            }
+        }
+
+        style select-option {
+            TextColor = black;
+            Padding = 4px 8px 4px 4px;
+            DistributeExtraSpaceVertical = CenterContent;
+            FlexLayoutDirection = Horizontal;
+            BackgroundColor = clear;
+            LayoutFitHorizontal = Grow;
+            ClipBehavior = Normal;
+            PreferredWidth = 1psz;
+            [hover] {
+                TextColor = white;
+                BackgroundColor = #006d82;
+            }
+        }
+
+        style select-label {
+            PaddingLeft = 20px;
+            FlexLayoutDirection = Horizontal;
+            DistributeExtraSpaceVertical = CenterContent;
+            FlexItemGrow = 1;
+            [hover] {
+                MinWidth = 1cnt;
+            }
+        }
+
+        style selected-element-icon {
+            PreferredSize = 12px;
+            LayoutBehavior = Ignored;
+            BackgroundTint = black;
+            AlignY = 50% Parent;
+            AlignX = 4px Parent;
+            [hover] {
+                BackgroundTint = white;
+            }
+        }
+
+
+        style transclude {
+            LayoutBehavior = TranscludeChildren;
+        }
+
+        style select-chevron {
+            PreferredSize = 2px 1px;
+            BackgroundColor = white;
+        }
+
+        style select-chevron-holder {
+            LayoutBehavior = Ignored;
+            AlignmentTargetX = Parent;
+            AlignX = 100%;
+            BackgroundColor = #00b5d0;
+            PreferredSize = 24px 1psz;
+            BorderColor = #006d82;
+            BorderRadius = 0 8px 8px 0;
+            DistributeExtraSpaceVertical = CenterContent;
+            DistributeExtraSpaceHorizontal = CenterContent;
+            PaddingTop = 4px;
+            PaddingBottom = 4px;
+
+            [attr:disabled="select-disabled"] {
+                BorderColor = #666;
+                BackgroundColor = #999;
+            }
+        }
+
+        style chevron-down {
+            PreferredSize = 8px 5px;
+            BackgroundImage = url("UIForia/icons/ui_selectbox_down_chevron@2x");
+        }
+
+        style chevron-up {
+            MarginTop = 1px;
+            MarginBottom = 3px;
+            PreferredSize = 8px 5px;
+            BackgroundImage = url("UIForia/icons/ui_selectbox_up_chevron@2x");
+        }
+
+        style select-options {
+            // attention: load bearing comma
+            AlignY = -3px, Parent;
+            AlignX = -10px, Parent;
+            BackgroundColor = white;
+            LayoutFitHorizontal = FillParent;
+            BorderRadius = 4px;
+            BorderColor = black;
+            Border = 1px;
+            MaxHeight = 312px;
+            Padding = 8px 0;
+            ZIndex = 20;
+            ClipBehavior = Never;
+            LayoutBehavior = Ignored;
+            PreferredWidth = 1psz;
+            AlignmentBoundary = Clipper;
+        }
+        
+        style select-display {
+            TextColor = black;
+            MarginRight = 12px;
+            [attr:disabled] {
+                TextColor = rgba(0, 0, 0, 102);
+            }
+        }
+
+        style select-placeholder {
+            TextColor = #666;
+        }
+
+        style keyboard-selected {
+            TextColor = white;
+            BackgroundColor = red;
+        }
+        
+    </Style>
+
+    <Using namespace="UIForia.Elements"/>
+    <Using namespace="UIForia.Rendering"/>
+
+    <Contents style="select">
+
+        <define:select-display if="validSelection" style="select-display" expose:selectedOption="options[selectedIndex]">
+            {options[selectedIndex].Label}
+        </define:select-display>
+
+        <define:placeholder if="!validSelection" style="select-display select-placeholder">
+            Select a value
+        </define:placeholder>
+
+        <Group style="select-chevron-holder">
+            <Div style="chevron-up"/>
+            <Div style="chevron-down"/>
+        </Group>
+
+        <ScrollView style="select-options" attr:id="option-list" if="selecting" disableOverflowX="true">
+
+            <Repeat attr:id="repeated-options" list="options" style="transclude">
+
+                <define:Children style="select-option {$index == keyboardNavigationIndex ? 'keyboard-selected'}"
+                                 expose:option="$item"
+                                 expose:index="$index"
+                                 expose:isSelected="DisplaySelectedIcon($index)"
+                                 mouse:click="SelectElement($event, $index)">
+                    <define:selectedIcon if="DisplaySelectedIcon($index)"
+                                         expose:option="$item"
+                                         expose:index="$index"
+                                         expose:isSelected="DisplaySelectedIcon($index)">
+                        <Image src="selectedElementIcon" style="selected-element-icon"/>
+                    </define:selectedIcon>
+                    <define:option style="select-label"
+                                   expose:option="$item"
+                                   expose:index="$index"
+                                   expose:isSelected="DisplaySelectedIcon($index)">
+                        <Text>{$item.Label}</Text>
+                    </define:option>
+                </define:Children>
+
+            </Repeat>
+            
+        </ScrollView>
+
+    </Contents>
+
+</UITemplate>

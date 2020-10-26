@@ -6,7 +6,7 @@ style input {
     
     Border = 1px;
     BorderColor = @theme.coal100;
-    BorderRadius = 4px;
+    BorderRadius = @theme.textInputBorderRadius;
     
     BackgroundColor = white;
     Padding = @theme.sp2;

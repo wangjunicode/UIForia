@@ -1,0 +1,28 @@
+<UITemplate>
+    <Style src="SeedLib/SeedLibTheme.style"/>
+    <Style path="SeedLib/SearchBox/SearchBox.style" />
+    <Contents style="search-box">
+        <Div id="search-box-input" style="search-box-input">
+            <Image style="icon search-icon" src="'Icons/search'"/>
+            <InputField id="text-field" style="text-input" sync:value="searchTerm" sync:placeholder="placeholder"/>
+            <Image if="searchTerm.Length > 0" style="icon close-icon" src="'Icons/close'" mouse:click="ClearSearchTerm()"/>    
+        </Div>
+
+        <Popover style="results-popover" if="searchResults.Count > 0" edge="SeedLib.PopOverEdge.Bottom" targetElement="$root">
+            
+            <override:Children style="results-popover-children">
+                
+                <ItemList style="results-item-list" items="searchResults" attr:content-sized="true">
+
+                    <ListItem style="result-list-item" icon="$item.Icon" attr:selected="{$item == selectedSearchResult}" mouse:click="OnSelectedSearchResult($item)">
+                        <Text style="h6 search-result-text">{$item.Text}</Text>
+                    </ListItem>
+
+                </ItemList>
+                
+            </override:Children>
+            
+        </Popover>
+        
+    </Contents>
+</UITemplate>

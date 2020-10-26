@@ -8,10 +8,14 @@ style item-list {
 style item-list-children {
     LayoutType = Grid;
     GridLayoutDirection = Horizontal;
-    GridLayoutColAutoSize = 1pca;
     GridLayoutRowGap = @theme.sp2;
+    GridLayoutColAutoSize = 1pca;
     
     [attr:variant="dense"] {
         GridLayoutRowGap = @theme.sp1;
+    }
+    
+    [attr:content-sized] {
+        GridLayoutColAutoSize = 1mx;
     }
 }

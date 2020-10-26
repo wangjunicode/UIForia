@@ -1,0 +1,92 @@
+import "SeedLib/SeedLibTheme.style" as theme;
+
+style search-box {
+    FlexItemGrow = 1;
+    LayoutFitHorizontal = Fill;
+}
+
+style search-box-input {
+    FlexLayoutDirection = Horizontal;
+    DistributeExtraSpaceVertical = CenterContent;
+    FlexItemGrow = 1;
+    LayoutFitHorizontal = Fill;
+    BackgroundColor = white;
+    Border = 1px;
+    BorderColor = @theme.coal100;
+    BorderRadius = @theme.textInputBorderRadius;
+    
+    [attr:focus-within="true"] {
+        BorderColor = @theme.coal300;
+    }
+}
+
+style text-input {
+    Border = 0px;
+    PaddingRight = 0px;
+    PaddingLeft = 0px;
+    PreferredWidth = 1cnt;
+    FlexItemGrow = 1;
+    LayoutFitHorizontal = Fill;
+}
+
+style icon {
+    PreferredSize = 16px;
+    Margin = @theme.sp1;
+}
+
+style search-icon {
+    BackgroundTint = @theme.coal300;
+}
+
+style close-icon {
+    BackgroundTint = @theme.poppy500;
+    
+    [hover] {
+        BackgroundTint = @theme.poppy300;
+    }
+    
+    [active] {
+        BackgroundTint = @theme.poppy700;
+    }
+}
+
+style results-popover {
+    PreferredWidth = 1cnt;
+}
+
+style results-popover-children {
+    PaddingRight = 1px;
+    PaddingLeft = 1px;
+}
+
+style search-result-text {
+    AlignX = 0% Parent;
+}
+
+style results-item-list {
+    PreferredWidth = 1cnt;
+}
+
+style result-list-item {
+    PaddingRight = @theme.sp2;
+    PaddingLeft = @theme.sp2;
+
+    [hover] {
+        BackgroundColor = @theme.coal50;
+    }
+    
+    [active] {
+        BackgroundColor = @theme.poppy500;
+        TextColor = white;
+    }
+    
+    [attr:selected="True"] {
+        BackgroundColor = @theme.poppy500;
+        TextColor = white;
+        
+        [hover] {
+            BackgroundColor = @theme.poppy500;
+            TextColor = white;
+        }
+    }
+}

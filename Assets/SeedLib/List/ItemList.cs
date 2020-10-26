@@ -7,16 +7,21 @@ using UIForia.Rendering;
 using UnityEngine;
 
 namespace SeedLib {
-    
+    // Class is used as a tag for Find method.
     public abstract class __ItemList : UIElement {
-    
     } 
 
     [Template("SeedLib/List/ItemList.xml")]
     public class ItemList<T> : __ItemList {
-        public string label;
+        public string label = "";
         public IList<T> items;
         public Func<T, RepeatItemKey> keyFn;
+
+        public override void OnEnable() {
+            TryGetAttribute("content-sized", out string attr);
+            UIElement itemListChildren = FindById("item-list-children");
+            itemListChildren.SetAttribute("content-sized", attr);
+        }
     }
 
     [CustomPainter("SeedLib::ItemList")]

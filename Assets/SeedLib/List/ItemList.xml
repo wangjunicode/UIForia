@@ -4,8 +4,8 @@
     <Style src="SeedLib/SeedLibTheme.style"/>
     
     <Contents style="item-list">
-        <ListHeading label="label"/>
-        <Repeat style="item-list-children" list="items" keyFn="keyFn">
+        <ListHeading if="(label != null) &amp;&amp; (label.Length > 0)" label="label"/>
+        <Repeat id="item-list-children" style="item-list-children" list="items" keyFn="keyFn">
             <define:Children style="transclude" expose:item="$item" expose:index="$index" require:type="SeedLib.ListItem"/>
         </Repeat>
     </Contents>

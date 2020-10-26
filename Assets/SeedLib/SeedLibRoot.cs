@@ -18,15 +18,13 @@ namespace SeedLib {
 
         public Action click => Click;
         public Action actionClick => ActionClicked;
-        
+
         public ContextMenuRegistry contextMenuRegistry;
 
         #region ListSample
         public struct ListItemData {
-
             public ImageLocator Icon;
             public string Name;
-
         }
 
         public List<ListItemData> items = new List<ListItemData>();
@@ -58,49 +56,100 @@ namespace SeedLib {
 
         public List<Category> categories = new List<Category>();
         public List<Category> categoriesBig = new List<Category>();
-
         #endregion // Tree Sample
+
+        #region SearchBox sample
+        public class CustomSearchResult : ISearchResult {
+            public CustomSearchResult(string text) {
+                this.Text = text;
+                this.Icon = new ImageLocator("Icons/success");
+            }
+
+            public ImageLocator Icon { get; }
+            public string Text { get; }
+        }
+
+        public List<ISearchResult> searchResults = new List<ISearchResult>();
+
+        public void OnSearchTermChanged(string searchTerm) {
+            if (string.IsNullOrEmpty(searchTerm)) {
+                searchResults.Clear();
+                return;
+            }
+            
+            if (searchResults.Count == 0) {
+                searchResults.AddRange(
+                        new ISearchResult[] {
+                                new CustomSearchResult("Kernel"),
+                                new CustomSearchResult("Colonel Sanders"),
+                                new CustomSearchResult("KoRn"),
+                                new CustomSearchResult("Kremlin"),
+                                new CustomSearchResult("K Records")
+                        });
+            }
+        }
+
+        public void OnSelectedSearchResult(ISearchResult searchResult) {
+            if (searchResult != null) {
+                Debug.Log("Selected: " + searchResult.Text);
+            }
+        }
+        #endregion SearchBox sample
 
         public override void OnCreate() {
             contextMenuRegistry = new ContextMenuRegistry();
 
-            contextMenuRegistry.Register<FakeContextData>("menu_0", (data, builder) => {
-                // data holds contextual info that is user specified
+            contextMenuRegistry.Register<FakeContextData>(
+                    "menu_0",
+                    (data, builder) => {
+                        // data holds contextual info that is user specified
 
-                builder.SetHeader("Basic Assembler");
+                        builder.SetHeader("Basic Assembler");
 
-                builder.AddMenuGroup((group) => {
-                    group.AddMenuItem("Show Info", "Icons/information 1", () => { Debug.Log("Showing info"); });
+                        builder.AddMenuGroup(
+                                (group) => {
+                                    group.AddMenuItem("Show Info", "Icons/information 1", () => { Debug.Log("Showing info"); });
 
-                    group.AddMenuItem("Production Queue", "Icons/settings", () => { Debug.Log("Showing Production Queue"); });
+                                    group.AddMenuItem("Production Queue", "Icons/settings", () => { Debug.Log("Showing Production Queue"); });
 
-                    group.AddMenuItem("Share Settings", "Icons/house", (submenu) => {
-                        submenu.AddMenuItem("On", "Icons/active", () => { Debug.Log("Turned on"); });
+                                    group.AddMenuItem(
+                                            "Share Settings",
+                                            "Icons/house",
+                                            (submenu) => {
+                                                submenu.AddMenuItem("On", "Icons/active", () => { Debug.Log("Turned on"); });
 
-                        submenu.AddMenuItem("Off", "Icons/inactive", () => { Debug.Log("Turned off"); });
+                                                submenu.AddMenuItem("Off", "Icons/inactive", () => { Debug.Log("Turned off"); });
+                                            });
+                                });
+
+                        builder.AddMenuGroup(
+                                (group) => {
+                                    group.AddMenuItem(
+                                            "Repair",
+                                            "Icons/configure",
+                                            (submenu) => {
+                                                submenu.AddMenuItem("Repair Thing", "Icons/configure", () => { });
+                                                submenu.AddMenuItem("Repair Other Thing", "Icons/configure", () => { });
+                                            });
+
+                                    group.AddMenuItem(
+                                            "Clean",
+                                            "Icons/done",
+                                            (submenu) => {
+                                                submenu.AddMenuItem("Clean Thing", "Icons/done", () => { });
+                                                submenu.AddMenuItem("Clean Other Thing", "Icons/done", () => { });
+                                            });
+                                });
+
+                        builder.AddMenuGroup(
+                                (group) => {
+                                    group.AddMenuItem("Package", "Icons/light", () => { Debug.Log("Packaging"); });
+
+                                    group.AddMenuItem("Move Location", "Icons/rename", () => { Debug.Log("Moving"); });
+
+                                    group.AddMenuItem("Recycle", "Icons/passion", () => { Debug.Log("Recycling"); });
+                                });
                     });
-                });
-
-                builder.AddMenuGroup((group) => {
-                    group.AddMenuItem("Repair", "Icons/configure", (submenu) => {
-                        submenu.AddMenuItem("Repair Thing", "Icons/configure", () => { });
-                        submenu.AddMenuItem("Repair Other Thing", "Icons/configure", () => { });
-                    });
-
-                    group.AddMenuItem("Clean", "Icons/done", (submenu) => {
-                        submenu.AddMenuItem("Clean Thing", "Icons/done", () => { });
-                        submenu.AddMenuItem("Clean Other Thing", "Icons/done", () => { });
-                    });
-                });
-
-                builder.AddMenuGroup((group) => {
-                    group.AddMenuItem("Package", "Icons/light", () => { Debug.Log("Packaging"); });
-
-                    group.AddMenuItem("Move Location", "Icons/rename", () => { Debug.Log("Moving"); });
-
-                    group.AddMenuItem("Recycle", "Icons/passion", () => { Debug.Log("Recycling"); });
-                });
-            });
         }
 
         public override void OnEnable() {
@@ -143,10 +192,10 @@ namespace SeedLib {
                         var container = new Category.Resource.ContainerInfo() {name = "Container " + k, count = Random.Range(1, 99)};
                         resource.containers.Add(container);
                     }
-                    
+
                     category.resources.Add(resource);
                 }
-                
+
                 categoriesBig.Add(category);
             }
         }

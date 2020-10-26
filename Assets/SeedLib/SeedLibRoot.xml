@@ -18,6 +18,15 @@
         <ScrollView style="scroll">
 
             <override:Children style="padded">
+                
+                <Group style="margin-tb" style:PreferredWidth="300">
+                    SearchBox
+                    <SearchBox placeholder="'Search the wiki...'" 
+                               onChange:searchTerm="OnSearchTermChanged($newValue)" 
+                               sync:searchResults="searchResults"
+                               onChange:selectedSearchResult="OnSelectedSearchResult($newValue)"
+                    />
+                </Group>
 
                 <Group style="margin-tb" style:PreferredWidth="300">
                     Tree

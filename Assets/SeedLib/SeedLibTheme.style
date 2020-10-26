@@ -147,6 +147,7 @@ export const GothamRoundBold = url("Fonts/GothamRnd-Bold SDF");
 // TODO: Figure out correct narrow font.
 export const GothamNarrow = url("Fonts/GothamNarrow-Medium SDF");
 export const Whitney = url("Fonts/Whitney-Medium SDF");
+
 // -----------------------------------------
 // Cursors
 // -----------------------------------------
@@ -154,8 +155,16 @@ export const Whitney = url("Fonts/Whitney-Medium SDF");
 export const cursorTextInput = url("Cursors/Text Input Cursor")
 
 // -----------------------------------------
-// Util styles
+// Util consts
 // -----------------------------------------
+
+export const textInputBorderRadius = 3px;
+
+// -----------------------------------------
+// Util styles
+// TODO: Bring more util styles from Seed
+// -----------------------------------------
+
 style transclude {
     LayoutBehavior = TranscludeChildren;
 }
@@ -183,6 +192,7 @@ style p1 {
 // -----------------------------------------
 // Typography
 // -----------------------------------------
+
 style h6 {
     TextFontAsset = @GothamNarrow;
     TextFontSize = 12px;

@@ -71,6 +71,7 @@ namespace UIForia.Rendering {
         public RenderTexture renderTexture;
         public SimpleRectPacker.PackedRect rect;
         public Color color;
+        public Vector2 offset;
 
         public RenderOperation(int batchIndex) {
             this.batchIndex = batchIndex;
@@ -79,6 +80,7 @@ namespace UIForia.Rendering {
             this.rect = default;
             this.renderTexture = null;
             this.color = default;
+            this.offset = default;
         }
 
     }
@@ -170,7 +172,7 @@ namespace UIForia.Rendering {
             currentBatch.transformData.Add(transform);
             FinalizeCurrentBatch();
         }
-        
+
         public void DrawMesh(Mesh mesh, Material material, in Matrix4x4 transform) {
             FinalizeCurrentBatch();
             currentBatch = new Batch();
@@ -684,7 +686,9 @@ namespace UIForia.Rendering {
             });
         }
 
-        public void SetRenderTexture(RenderTexture texture) {
+        public void SetRenderTexture(RenderTexture texture, Vector2 offset = default) {
+            FinalizeCurrentBatch();
+
             if (texture == null) {
                 renderCommandList.Add(new RenderOperation() {
                     operationType = RenderOperationType.PopRenderTexture,
@@ -695,6 +699,7 @@ namespace UIForia.Rendering {
                 renderCommandList.Add(new RenderOperation() {
                     operationType = RenderOperationType.PushRenderTexture,
                     renderTexture = texture,
+                    offset = offset,
                     rect = new SimpleRectPacker.PackedRect()
                 });
             }
@@ -795,7 +800,7 @@ namespace UIForia.Rendering {
             Vector3 cameraOrigin = camera.transform.position;
             cameraOrigin.z += 200;
             cameraOrigin.x -= 0.5f * (Application.UiApplicationSize.width);
-            cameraOrigin.y += 0.5f * (Application.UiApplicationSize.height); 
+            cameraOrigin.y += 0.5f * (Application.UiApplicationSize.height);
 
             if (Application.UiApplicationSize.width % 2 != 0) {
                 cameraOrigin.x -= 0.5f;
@@ -859,12 +864,19 @@ namespace UIForia.Rendering {
 //                            int width = cmd.renderTexture.width / 2;
 //                            int height = cmd.renderTexture.height / 2;
 //                            Matrix4x4 projection = camera.projectionMatrix; //Matrix4x4.Ortho(-width, width, -height, height, 0.1f, 9999);
-//                            commandBuffer.SetViewProjectionMatrices(cameraMatrix, projection);
+//                        commandBuffer.SetViewProjectionMatrices(cameraMatrix, camera.projectionMatrix);
 //                            commandBuffer.ClearRenderTarget(true, true, cmd.color);
 //                        }
 //
 //                        // always push so pop will pop the right texture, duplicate refs are ok
 //                        rtStack.Push(new RenderArea(cmd.renderTexture, cmd.rect));
+
+                        // todo -- in order for this to be 'correct' we need to blit previous contents onto it at proper offset
+                        commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, cmd.renderTexture, Vector2.one, cmd.offset);
+                        commandBuffer.SetRenderTarget(cmd.renderTexture);
+                        commandBuffer.ClearRenderTarget(true, false, Color.clear);
+                        commandBuffer.SetViewProjectionMatrices(cameraMatrix, camera.projectionMatrix);
+                        
                         break;
 
                     case RenderOperationType.ClearRenderTextureRegion:

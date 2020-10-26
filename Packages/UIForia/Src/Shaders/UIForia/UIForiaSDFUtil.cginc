@@ -57,7 +57,8 @@ fixed4 UIForiaAlphaClipColor(fixed4 color, sampler2D clipTexture, float2 clipPos
     
     half2 unpackedSizeXY = UnpackSize(clipData.x);
     half2 unpackedSizeZW = UnpackSize(clipData.y);
-                
+    
+
     // point in rect, does not handle rotation, need to be sure box & point are in the same same aligned coordinate space
     float2 s = step(float2(unpackedSizeXY.x, unpackedSizeZW.y), clipPos) - step(float2(unpackedSizeZW.x , unpackedSizeXY.y), clipPos);
     

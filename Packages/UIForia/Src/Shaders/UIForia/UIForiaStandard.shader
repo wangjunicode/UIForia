@@ -120,7 +120,7 @@ Shader "UIForia/Standard"
                     float weight = Vert_CharacterWeight; 
 
                     fixed4 unpackedOutline = UnpackColor(asuint(Vert_CharacterPackedOutline));
-                    float outlineWidth = 0; unpackedOutline.x;
+                    float outlineWidth = 0; // unpackedOutline.x;
                     float outlineSoftness = 0; // unpackedOutline.y;
                     
                     // todo -- glow

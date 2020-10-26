@@ -10,6 +10,8 @@ using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 using Vertigo;
+using Debug = UnityEngine.Debug;
+using Object = System.Object;
 
 namespace UIForia.Rendering {
 
@@ -21,6 +23,65 @@ namespace UIForia.Rendering {
         Contain = 1 << 2,
         Fill = 1 << 3,
         None = 1 << 4
+
+    }
+
+    [CustomPainter("UIForia::CircleMask")]
+    public class CircularMaskRenderBox : StandardRenderBox {
+
+        private RenderTexture renderTexture;
+
+        private Path2D path2D;
+
+        public override void Enable() {
+            path2D = new Path2D();
+            hasForeground = true;
+        }
+
+        private int width;
+        private int height;
+
+        public override void PaintBackground(RenderContext ctx) {
+            // base.PaintBackground(ctx);
+
+            int intWidth = (int) element.layoutResult.ActualWidth;
+            int intHeight = (int) element.layoutResult.ActualHeight;
+
+            int min = Mathf.Min(intWidth, intHeight);
+            int prevMin = Mathf.Min(width, height);
+
+            if (width != intWidth || height != intHeight) {
+                width = intWidth;
+                height = intHeight;
+
+                if (renderTexture == null) {
+                    renderTexture = new RenderTexture(width, height, 24);
+                }
+                else {
+                    renderTexture.Release();
+                    renderTexture = new RenderTexture(width, height, 24);
+                }
+            }
+            ctx.SetRenderTexture(renderTexture, element.layoutResult.screenPosition);
+        }
+
+        public override void PaintForeground(RenderContext ctx) {
+            ctx.SetRenderTexture(null);
+            path2D.Clear();
+            path2D.SetTransform(element.layoutResult.matrix.ToMatrix4x4());
+            path2D.BeginPath();
+            path2D.SetFill(renderTexture);
+            path2D.Ellipse(0, 0, width / 2, height / 2);
+            path2D.Fill();
+            path2D.EndPath();
+            ctx.DrawPath(path2D);
+        }
+
+        public override void OnDestroy() {
+            if (renderTexture != null) {
+                UnityEngine.Object.Destroy(renderTexture);
+            }
+        }
 
     }
 
@@ -41,7 +102,7 @@ namespace UIForia.Rendering {
 
     }
 
-    
+
     [DebuggerDisplay("{element.ToString()}")]
     public class StandardRenderBox : RenderBox {
 
@@ -77,11 +138,11 @@ namespace UIForia.Rendering {
         protected MeshFillDirection meshFillDirection;
 
         public MaterialId materialId;
-        
+
         private PooledMesh mesh;
         private MaterialPropertyBlock propertyBlock;
         private static readonly int s_Main = Shader.PropertyToID("_MainTex");
-        
+
         public StandardRenderBox() {
             this.uniqueId = "UIForia::StandardRenderBox";
             this.geometry = new UIForiaGeometry();
@@ -119,7 +180,6 @@ namespace UIForia.Rendering {
             meshFillAmount = element.style.MeshFillAmount;
             meshFillDirection = element.style.MeshFillDirection;
             meshFillOrigin = element.style.MeshFillOrigin;
-
         }
 
         public override void OnStylePropertyChanged(StructList<StyleProperty> propertyList) {
@@ -467,7 +527,6 @@ namespace UIForia.Rendering {
         }
 
         public override void PaintBackground(RenderContext ctx) {
-
             if (materialId.id != 0) {
                 RenderFromMaterial(ctx);
                 return;
@@ -567,11 +626,9 @@ namespace UIForia.Rendering {
             ctx.DrawBatchedGeometry(geometry, range, matrix, clipper);
         }
 
-      
-        
-        public void RenderFromMaterial(RenderContext ctx) {
 
-            if (!element.application.materialDatabase.TryGetMaterial(materialId, out MaterialInfo info)) { 
+        public void RenderFromMaterial(RenderContext ctx) {
+            if (!element.application.materialDatabase.TryGetMaterial(materialId, out MaterialInfo info)) {
                 return;
             }
 
@@ -582,25 +639,24 @@ namespace UIForia.Rendering {
             Size size = element.layoutResult.actualSize;
 
             propertyBlock = propertyBlock ?? new MaterialPropertyBlock();
-            
+
             if (!ReferenceEquals(backgroundImage, null)) {
                 propertyBlock.SetTexture(s_Main, backgroundImage);
             }
-            
+
             element.application.materialDatabase.GetInstanceProperties(element.id, materialId, propertyBlock);
-            
+
             // todo -- will want to set the properties that are expected by UI shaders
             // clip rect is in world space it seems, I'm not sure how to replicate it. seems to be in 2 point form, x + height & width + y? seems odd
             // propertyBlock.SetVector("_ClipRect", new Vector4(100, 100, 100, 100));
-            
+
             geometry.Clear();
             geometry.FillMeshType(0, 0, size.width, size.height, meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
             geometry.ToMesh(mesh);
-            
+
             Matrix4x4 matrix = default;
             element.layoutResult.matrix.GetMatrix4x4(ref matrix);
             ctx.DrawMesh(mesh.mesh, info.material, propertyBlock, matrix);
-
         }
 
     }

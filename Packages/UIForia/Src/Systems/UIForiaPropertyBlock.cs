@@ -29,6 +29,7 @@ namespace UIForia.Rendering {
         public static readonly int s_ClipRectKey = Shader.PropertyToID("_ClipRects");
         public static readonly int s_CornerDataKey = Shader.PropertyToID("_CornerData");
         public static readonly int s_DPIScaleKey = Shader.PropertyToID("_DPIScale");
+        public static readonly int s_ClipOffset = Shader.PropertyToID("_ClipOffset");
 
         public UIForiaPropertyBlock(Material material, int size) {
             this.material = material;
@@ -59,6 +60,7 @@ namespace UIForia.Rendering {
             matBlock.SetVectorArray(s_ClipRectKey, clipRects);
             matBlock.SetVectorArray(s_CornerDataKey, cornerData);
             matBlock.SetFloat(s_DPIScaleKey, 1f / Application.dpiScaleFactor);
+            
             if (data.mainTexture != null) {
                 matBlock.SetTexture(s_MainTextureKey, data.mainTexture);
             }

@@ -473,7 +473,7 @@ namespace UIForia.Text {
                     TextGlyph glyph = charInfo.glyph;
                     if (glyph == null) {
                         // todo -- replace missing glyph with a question mark?
-                        Debug.Log($"Missing glyph for character '{(char)charInfo.character}' (char code {charInfo.character}) in font {fontAsset.name}");
+                        // Debug.Log($"Missing glyph for character '{(char)charInfo.character}' (char code {charInfo.character}) in font {fontAsset.name}");
                         continue;
                     }
 

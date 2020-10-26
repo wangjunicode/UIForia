@@ -3,6 +3,11 @@ import "SeedLib/SeedLibTheme.style" as theme;
 style search-box {
     FlexItemGrow = 1;
     LayoutFitHorizontal = Fill;
+    
+    [attr:disabled] {
+        PointerEvents = None;
+        Opacity = 0.4;
+    }
 }
 
 style search-box-input {

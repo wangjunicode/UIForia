@@ -26,6 +26,8 @@
                                sync:searchResults="searchResults"
                                onChange:selectedSearchResult="OnSelectedSearchResult($newValue)"
                     />
+                    SearchBox (Disabled)
+                    <SearchBox placeholder="'Search the wiki...'" attr:disabled="true"/>
                 </Group>
 
                 <Group style="margin-tb" style:PreferredWidth="300">

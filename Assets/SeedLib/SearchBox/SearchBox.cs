@@ -28,6 +28,10 @@ namespace SeedLib {
             searchTerm = string.Empty;
             selectedSearchResult = null;
         }
+
+        public bool HasSearchResults() {
+            return searchResults != null && searchResults.Count > 0;
+        }
         
         public override void OnCreate() {
             searchBoxInput = FindById("search-box-input");

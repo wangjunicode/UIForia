@@ -8,7 +8,7 @@
             <Image if="searchTerm.Length > 0" style="icon close-icon" src="'Icons/close'" mouse:click="ClearSearchTerm()"/>    
         </Div>
 
-        <Popover style="results-popover" if="searchResults.Count > 0" edge="SeedLib.PopOverEdge.Bottom" targetElement="$root">
+        <Popover style="results-popover" if="HasSearchResults()" edge="SeedLib.PopOverEdge.Bottom" targetElement="$root">
             
             <override:Children style="results-popover-children">
                 

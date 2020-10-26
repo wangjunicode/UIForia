@@ -1113,12 +1113,16 @@ namespace TemplateBinding {
             Assert.AreEqual("baseVal", e.oldValue);
         }
 
+        public interface IGenericInterface<T> {
+            T Value { get; }
+        }
+
         [Template("Data/TemplateBindings/TemplateBindingTest_ResolveGenericType.xml")]
         public class TemplateBindingTest_ResolveGeneric_Outer : UIElement {
-
-            public LightList<ISelectOption<string>> list;
-            public ISelectOption<ISelectOption<string>> option;
-
+        
+            public LightList<IGenericInterface<string>> list;
+            public IGenericInterface<IGenericInterface<string>> option;
+        
         }
 
         [Template("Data/TemplateBindings/TemplateBindingTest_ResolveGeneric.xml")]
@@ -1126,7 +1130,7 @@ namespace TemplateBinding {
 
             public LightList<TType0> list;
 
-            public ISelectOption<TType0> option;
+            public IGenericInterface<TType0> option;
 
             public TType0 val;
 
@@ -1136,8 +1140,8 @@ namespace TemplateBinding {
         public void ResolveGeneric() {
             MockApplication app = MockApplication.Setup<TemplateBindingTest_ResolveGeneric_Outer>();
             TemplateBindingTest_ResolveGeneric_Outer e = (TemplateBindingTest_ResolveGeneric_Outer) app.RootElement;
-            Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[0]);
-            Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<ISelectOption<string>>>(e[1]);
+            Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<IGenericInterface<string>>>(e[0]);
+            Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<IGenericInterface<string>>>(e[1]);
             Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<float>>(e[2]);
         }
 

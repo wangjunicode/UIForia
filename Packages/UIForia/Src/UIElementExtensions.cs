@@ -23,6 +23,13 @@ namespace UIForia.Elements {
 
         }
 
+        public static void SetAttributeRecursive(this UIElement self, string attrName, string attrValue) {
+            self.SetAttribute(attrName, attrValue);
+            for (int i = 0; i < self.children.size; i++) {
+                self.children[i].SetAttributeRecursive(attrName, attrValue);
+            }
+        }
+
     }
 
 }

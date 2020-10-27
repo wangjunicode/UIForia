@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using UIForia.Attributes;
 using UnityEngine;
 
 namespace UIForia {
@@ -27,7 +28,7 @@ namespace UIForia {
         public string applicationName;
         public Type rootType;
         public ResourceManager resourceManager;
-        public Func<Type, string, string> filePathResolver;
+        public Func<Type, TemplateAttribute, string> filePathResolver;
         public List<Type> dynamicallyCreatedTypes;
         // todo - support more file formats
         public readonly string templateFileExtension = ".xml";

@@ -26,7 +26,7 @@ namespace UIForia.Parsing {
                 return templateAttr.filePath;
             }
 
-            string path = settings.filePathResolver?.Invoke(processedType.rawType, templateAttr.templateId);
+            string path = settings.filePathResolver?.Invoke(processedType.rawType, templateAttr);
 
             if (path != null) {
                 return path;

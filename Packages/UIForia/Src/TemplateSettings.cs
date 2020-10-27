@@ -71,6 +71,10 @@ namespace UIForia {
             return Path.GetFullPath(Path.Combine(templateResolutionBasePath, templateAttrTemplate)); 
         }
 
+        public virtual string GetRelativeStylePath(string stylePath) {
+            return Path.Combine(templateResolutionBasePath, styleBasePath, stylePath); 
+        }
+
     }
 
 }

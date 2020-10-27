@@ -10,14 +10,14 @@ namespace UIForia.Compilers.Style {
 
     public class StyleSheetImporter {
 
-        private readonly string basePath;
+        private readonly TemplateSettings templateSettings;
         private readonly Dictionary<string, StyleSheet> cachedStyleSheets;
         private readonly StyleSheetCompiler compiler;
         private int importedStyleGroupCount;
         public string importResolutionPath; // hack for now that can handle reading imports from streaming assets
 
-        public StyleSheetImporter(string basePath, ResourceManager resourceManager) {
-            this.basePath = basePath;
+        public StyleSheetImporter(TemplateSettings templateSettings, ResourceManager resourceManager) {
+            this.templateSettings = templateSettings;
             this.compiler = new StyleSheetCompiler(this, resourceManager);
             this.cachedStyleSheets = new Dictionary<string, StyleSheet>();
         }
@@ -27,7 +27,14 @@ namespace UIForia.Compilers.Style {
         public int NextStyleGroupId => importedStyleGroupCount++;
 
         public StyleSheet Import(in StyleDefinition styleDefinition, MaterialDatabase materialDatabase, bool storeContents = false) {
-            string path = Path.Combine(importResolutionPath ?? basePath, styleDefinition.importPath);
+
+            string path;
+            if (importResolutionPath != null) {
+                path = Path.Combine(importResolutionPath, styleDefinition.importPath);
+            }
+            else {
+                path = templateSettings.GetRelativeStylePath(styleDefinition.importPath);
+            }
 
             if (cachedStyleSheets.TryGetValue(path, out StyleSheet retn)) {
                 return retn;

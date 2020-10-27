@@ -25,9 +25,11 @@ namespace UIForia.Parsing {
             if (templateAttr.templateType == TemplateType.Internal) {
                 return templateAttr.filePath;
             }
-            
-            if (settings.filePathResolver != null) {
-                return settings.filePathResolver(processedType.rawType, templateAttr.templateId);
+
+            string path = settings.filePathResolver?.Invoke(processedType.rawType, templateAttr.templateId);
+
+            if (path != null) {
+                return path;
             }
 
             string namespacePath = processedType.rawType.Namespace;

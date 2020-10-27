@@ -59,7 +59,7 @@ namespace UIForia {
             }
         }
 
-        public string GetInternalTemplatePath(string fileName) {
+        public virtual string GetInternalTemplatePath(string fileName) {
             return Path.GetFullPath(Path.Combine(GetCallPath(), fileName));
         }
 
@@ -67,7 +67,7 @@ namespace UIForia {
             return Path.GetDirectoryName(callerFilePath);
         }
 
-        public string GetTemplatePath(string templateAttrTemplate) {
+        public virtual string GetTemplatePath(string templateAttrTemplate) {
             return Path.GetFullPath(Path.Combine(templateResolutionBasePath, templateAttrTemplate)); 
         }
 

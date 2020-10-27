@@ -108,7 +108,8 @@ style notification-title {
     GridItemY = 0;
     TextColor = @theme.poppy500;
     TextFontSize = 8px;
-    TextFontAsset = @theme.GothamRound;
+    TextFontAsset = @theme.GothamRoundBold;
+    TextTransform = UpperCase;
     MarginTop = @theme.sp3;
     
     [attr:variant="primary"] {

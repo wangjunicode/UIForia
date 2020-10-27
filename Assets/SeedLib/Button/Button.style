@@ -8,7 +8,7 @@ style button {
     PaddingTop = @theme.sp1;
     PaddingBottom = @theme.sp1;
     TextColor = white;
-    TextFontAsset = @theme.GothamRound;
+    TextFontAsset = @theme.GothamRoundBold;
     DistributeExtraSpace = CenterContent;
     TextAlignment = Center;
     TextFontSize = 9px;

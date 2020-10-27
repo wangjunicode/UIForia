@@ -411,61 +411,61 @@
 
                 Button (Primary)
                 <Group style="row">
-                    <Button attr:variant="primary" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="primary" label="'Hello'"/>
+                    <Button attr:variant="primary" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="primary" label="'Button'"/>
                     <Button attr:variant="primary" icon="'Icons/star'"/>
 
-                    <Button attr:variant="primary" attr:size-variant="medium" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="primary" attr:size-variant="medium" label="'Hello'"/>
+                    <Button attr:variant="primary" attr:size-variant="medium" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="primary" attr:size-variant="medium" label="'Button'"/>
                     <Button attr:variant="primary" attr:size-variant="medium" icon="'Icons/star'"/>
 
-                    <Button attr:variant="primary" attr:size-variant="large" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="primary" attr:size-variant="large" label="'Hello'"/>
+                    <Button attr:variant="primary" attr:size-variant="large" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="primary" attr:size-variant="large" label="'Button'"/>
                     <Button attr:variant="primary" attr:size-variant="large" icon="'Icons/star'"/>
                 </Group>
 
                 Button (Primary+Disabled)
                 <Group style="row">
-                    <Button attr:variant="primary" attr:disabled="true" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="primary" attr:disabled="true" label="'Hello'"/>
+                    <Button attr:variant="primary" attr:disabled="true" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="primary" attr:disabled="true" label="'Button'"/>
                     <Button attr:variant="primary" attr:disabled="true" icon="'Icons/star'"/>
 
-                    <Button attr:variant="primary" attr:disabled="true" attr:size-variant="medium" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="primary" attr:disabled="true" attr:size-variant="medium" label="'Hello'"/>
+                    <Button attr:variant="primary" attr:disabled="true" attr:size-variant="medium" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="primary" attr:disabled="true" attr:size-variant="medium" label="'Button'"/>
                     <Button attr:variant="primary" attr:disabled="true" attr:size-variant="medium" icon="'Icons/star'"/>
 
-                    <Button attr:variant="primary" attr:disabled="true" attr:size-variant="large" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="primary" attr:disabled="true" attr:size-variant="large" label="'Hello'"/>
+                    <Button attr:variant="primary" attr:disabled="true" attr:size-variant="large" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="primary" attr:disabled="true" attr:size-variant="large" label="'Button'"/>
                     <Button attr:variant="primary" attr:disabled="true" attr:size-variant="large" icon="'Icons/star'"/>
                 </Group>
 
                 Button (Secondary)
                 <Group style="row">
-                    <Button attr:variant="secondary" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="secondary" label="'Hello'"/>
+                    <Button attr:variant="secondary" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="secondary" label="'Button'"/>
                     <Button attr:variant="secondary" icon="'Icons/star'"/>
 
-                    <Button attr:variant="secondary" attr:size-variant="medium" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="secondary" attr:size-variant="medium" label="'Hello'"/>
+                    <Button attr:variant="secondary" attr:size-variant="medium" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="secondary" attr:size-variant="medium" label="'Button'"/>
                     <Button attr:variant="secondary" attr:size-variant="medium" icon="'Icons/star'"/>
 
-                    <Button attr:variant="secondary" attr:size-variant="large" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="secondary" attr:size-variant="large" label="'Hello'"/>
+                    <Button attr:variant="secondary" attr:size-variant="large" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="secondary" attr:size-variant="large" label="'Button'"/>
                     <Button attr:variant="secondary" attr:size-variant="large" icon="'Icons/star'"/>
                 </Group>
 
                 Button (Secondary+Disabled)
                 <Group style="row">
-                    <Button attr:variant="secondary" attr:disabled="true" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="secondary" attr:disabled="true" label="'Hello'"/>
+                    <Button attr:variant="secondary" attr:disabled="true" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="secondary" attr:disabled="true" label="'Button'"/>
                     <Button attr:variant="secondary" attr:disabled="true" icon="'Icons/star'"/>
 
-                    <Button attr:variant="secondary" attr:size-variant="medium"  attr:disabled="true" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="secondary" attr:size-variant="medium" attr:disabled="true" label="'Hello'"/>
+                    <Button attr:variant="secondary" attr:size-variant="medium"  attr:disabled="true" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="secondary" attr:size-variant="medium" attr:disabled="true" label="'Button'"/>
                     <Button attr:variant="secondary" attr:size-variant="medium" attr:disabled="true" icon="'Icons/star'"/>
 
-                    <Button attr:variant="secondary" attr:size-variant="large" attr:disabled="true" label="'Hello'" icon="'Icons/star'"/>
-                    <Button attr:variant="secondary" attr:size-variant="large" attr:disabled="true" label="'Hello'"/>
+                    <Button attr:variant="secondary" attr:size-variant="large" attr:disabled="true" label="'Button'" icon="'Icons/star'"/>
+                    <Button attr:variant="secondary" attr:size-variant="large" attr:disabled="true" label="'Button'"/>
                     <Button attr:variant="secondary" attr:size-variant="large" attr:disabled="true" icon="'Icons/star'"/>
                 </Group>
 

@@ -15,7 +15,7 @@ style toggle-group-item {
     Padding = @theme.sp1 @theme.sp3;
     
     TextFontSize = 9px;
-    TextFontAsset = @theme.GothamRound;
+    TextFontAsset = @theme.GothamRoundBold;
     TextTransform = UpperCase;
     
     [attr:round-left="true"] {

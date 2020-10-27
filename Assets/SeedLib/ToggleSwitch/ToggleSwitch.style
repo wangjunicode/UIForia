@@ -8,7 +8,7 @@ style toggle-switch {
     TextFontSize = 8px;
     Border = 1px;
     TextColor = white;
-    TextFontAsset = @theme.GothamRound;
+    TextFontAsset = @theme.GothamRoundBold;
 
     DistributeExtraSpaceVertical = CenterContent;
   
@@ -146,7 +146,6 @@ style on {
     PreferredWidth = 18px;
     AlignX = -22px 0% Parent;
     PaddingTop = 1px;
-    TextFontAsset = @theme.GothamRound;
 }
 
 style off {
@@ -154,7 +153,6 @@ style off {
     TextAlignment = Right;
     AlignX = 14px 0% Parent;
     PaddingTop = 1px;
-    TextFontAsset = @theme.GothamRound;
 }
 
 animation bg-turn-on {

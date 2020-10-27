@@ -19,8 +19,10 @@ using TextAlignment = UIForia.Text.TextAlignment;
 public class StyleSheetCompilerTests {
 
     public static StyleSheetCompiler NewStyleSheetCompiler() {
-        string path = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests");
-        return new StyleSheetCompiler(new StyleSheetImporter(path,  new ResourceManager()), new ResourceManager());
+        TemplateSettings templateSettings = new TemplateSettings {
+            templateResolutionBasePath = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests")
+        };
+        return new StyleSheetCompiler(new StyleSheetImporter(templateSettings, new ResourceManager()), new ResourceManager());
     }
 
     [Test]

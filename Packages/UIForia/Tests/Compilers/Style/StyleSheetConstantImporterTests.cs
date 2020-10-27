@@ -1,10 +1,11 @@
 using System.IO;
 using NUnit.Framework;
 using Tests.Mocks;
+using UIForia;
 using UIForia.Compilers.Style;
 using UIForia.Parsing.Style.AstNodes;
 using UIForia.Util;
-using UnityEngine;
+using Application = UnityEngine.Application;
 
 [TestFixture]
 public class StyleSheetConstantImporterTests {
@@ -60,8 +61,10 @@ public class StyleSheetConstantImporterTests {
     public void ImportAndUseConsts() {
         LightList<StyleASTNode> nodes = new LightList<StyleASTNode>();
         nodes.Add(StyleASTNodeFactory.ImportNode("importedThing", "Data/Styles/ImportFromMe.style"));
-        string basepath = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests");
-        StyleCompileContext context = new StyleSheetConstantImporter(new StyleSheetImporter(basepath, null)).CreateContext(nodes, default);
+        TemplateSettings templateSettings = new TemplateSettings {
+            templateResolutionBasePath = Path.Combine(Application.dataPath, "..", "Packages", "UIForia", "Tests")
+        };
+        StyleCompileContext context = new StyleSheetConstantImporter(new StyleSheetImporter(templateSettings, null)).CreateContext(nodes, default);
         Assert.AreEqual(1, context.importedStyleConstants.Count);
         Assert.AreEqual(1, context.importedStyleConstants["importedThing"].Count);
         Assert.AreEqual("colorRed", context.importedStyleConstants["importedThing"][0].name);

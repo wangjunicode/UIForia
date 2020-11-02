@@ -129,12 +129,12 @@ namespace Src.Systems {
                 renderBox.clipper = currentElement.layoutResult.clipper;
                 renderBox.traversalIndex = idx++;
 
-                if (wrapperList.size + (currentElement.children.size * 2) >= wrapperList.array.Length) {
-                    wrapperList.EnsureAdditionalCapacity(currentElement.children.size * 2);
+                if (wrapperList.size + 2 + (currentElement.children.size * 2) >= wrapperList.array.Length) {
+                    wrapperList.EnsureAdditionalCapacity(2 + (currentElement.children.size * 2));
                 }
 
-                if (elemRefStack.size + currentElement.children.size >= elemRefStack.array.Length) {
-                    elemRefStack.EnsureAdditionalCapacity(currentElement.children.size);
+                if (elemRefStack.size + 2 + currentElement.children.size >= elemRefStack.array.Length) {
+                    elemRefStack.EnsureAdditionalCapacity(2 + (currentElement.children.size * 2));
                 }
 
                 if (!renderBox.culled && renderBox.visibility != Visibility.Hidden) {

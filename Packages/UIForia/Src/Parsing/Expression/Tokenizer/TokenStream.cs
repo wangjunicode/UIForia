@@ -130,19 +130,16 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
         public int FindMatchingTernaryColon() {
             int i = 0;
             int level = 0;
+            int store = ptr;
             while (HasTokenAt(i)) {
                 ExpressionTokenType expressionToken = Peek(i);
                 // find paren open, recurse
 
                 if (expressionToken == ExpressionTokenType.ParenOpen) {
-                    Save();
-                    Set(CurrentIndex + i);
-                    i = FindMatchingIndex(ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose);
-//                    level++;
-                    Restore();
-                }
-                else if (expressionToken == ExpressionTokenType.ParenClose) {
-//                    level--;
+                    store = ptr;
+                    ptr += i;
+                    i += FindMatchingIndex(ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose);
+                    ptr = store;
                 }
                 // avoid false positives from ?. and ?[
                 else if (expressionToken == ExpressionTokenType.QuestionMark && HasTokenAt(i + 1) && Peek(i + 1) != ExpressionTokenType.QuestionMark && Peek(i + 1) != ExpressionTokenType.Dot && Peek(i + 1) != ExpressionTokenType.ArrayAccessOpen) {
@@ -228,9 +225,9 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
         public TokenStream GetSubStreamTo(int index) {
             return new TokenStream(tokens.GetRange(ptr, index - ptr));
         }
-        
-         public TokenStream GetSubStreamFromRange(int start, int end) {
-             return new TokenStream(tokens.GetRange(start, end - start));
+
+        public TokenStream GetSubStreamFromRange(int start, int end) {
+            return new TokenStream(tokens.GetRange(start, end - start));
         }
 
         [DebuggerStepThrough]
@@ -269,19 +266,18 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
 
         public TokenStream AdvanceAndGetSubStreamBetween(ExpressionTokenType open, ExpressionTokenType close) {
             int index = FindMatchingIndexNoAdvance(open, close);
-            
+
             if (index == -1) {
                 return default;
             }
 
-            TokenStream retn = GetSubStreamFromRange(ptr + 1, index); 
-            
-            Set(index + 1);
-            
-            return retn;
+            TokenStream retn = GetSubStreamFromRange(ptr + 1, index);
 
+            Set(index + 1);
+
+            return retn;
         }
-        
+
         public TokenStream GetSubStreamBetween(ExpressionTokenType open, ExpressionTokenType close) {
             int index = FindMatchingIndexNoAdvance(open, close);
             if (index == -1) {
@@ -289,7 +285,6 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
             }
 
             return GetSubStreamFromRange(ptr + 1, index);
-
         }
 
     }

@@ -4,7 +4,6 @@ using System.Diagnostics;
 
 namespace UIForia.Util {
 
-    [DebuggerTypeProxy(typeof(StructList<>))]
     internal class StructListDebugView<T> where T : struct {
 
         private readonly StructList<T> structList;

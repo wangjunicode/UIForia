@@ -827,23 +827,22 @@ public class ExpressionParserTests {
 
     [Test]
     public void Parse_Ternary_Nested() {
-
         ASTNode root = ExpressionParser.Parse(("thing != null ? thing.floatValue > 5 ? 1 : default : default"));
-        
+
         OperatorNode outerTernary = AssertOpNode(root, OperatorType.TernaryCondition);
 
         OperatorNode outerCondition = AssertOpNode(outerTernary.left, OperatorType.NotEquals);
         OperatorNode outerSelection = AssertOpNode(outerTernary.right, OperatorType.TernarySelection);
-        
+
         Assert.AreEqual("thing", AssertInstanceOfAndReturn<IdentifierNode>(outerCondition.left).name);
         Assert.AreEqual("null", AssertInstanceOfAndReturn<LiteralNode>(outerCondition.right).rawValue);
-        
+
         OperatorNode innerTernary = AssertOpNode(outerSelection.left, OperatorType.TernaryCondition);
-        
+
         OperatorNode innerCondition = AssertInstanceOfAndReturn<OperatorNode>(innerTernary.left);
         Assert.IsInstanceOf<MemberAccessExpressionNode>(innerCondition.left);
         Assert.AreEqual("5", AssertInstanceOfAndReturn<LiteralNode>(innerCondition.right).rawValue);
-        
+
         OperatorNode innerSelection = AssertOpNode(innerTernary.right, OperatorType.TernarySelection);
         Assert.AreEqual("1", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.left).rawValue);
         Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.right).rawValue);
@@ -855,13 +854,12 @@ public class ExpressionParserTests {
     public void Parse_Ternary_Partial() {
         ASTNode root = ExpressionParser.Parse(("1 > 2 ? 5"));
         OperatorNode condition = AssertOpNode(root, OperatorType.TernaryCondition);
-        
+
         OperatorNode gtNode = AssertOpNode(condition.left, OperatorType.GreaterThan);
         OperatorNode selection = AssertOpNode(condition.right, OperatorType.TernarySelection);
 
         Assert.AreEqual("5", AssertInstanceOfAndReturn<LiteralNode>(selection.left).rawValue);
         Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(selection.right).rawValue);
-
     }
 
     private OperatorNode AssertOpNode(ASTNode node, OperatorType operatorType) {
@@ -873,153 +871,168 @@ public class ExpressionParserTests {
     [Test]
     public void Parse_Ternary_Partial_Nested() {
         ASTNode root = ExpressionParser.Parse(("thing != null ? thing.floatValue > 5 ? 1"));
-        
+
         OperatorNode outerTernary = AssertOpNode(root, OperatorType.TernaryCondition);
 
         OperatorNode outerCondition = AssertOpNode(outerTernary.left, OperatorType.NotEquals);
         OperatorNode outerSelection = AssertOpNode(outerTernary.right, OperatorType.TernarySelection);
-        
+
         Assert.AreEqual("thing", AssertInstanceOfAndReturn<IdentifierNode>(outerCondition.left).name);
         Assert.AreEqual("null", AssertInstanceOfAndReturn<LiteralNode>(outerCondition.right).rawValue);
-        
+
         OperatorNode innerTernary = AssertOpNode(outerSelection.left, OperatorType.TernaryCondition);
-        
+
         OperatorNode innerCondition = AssertInstanceOfAndReturn<OperatorNode>(innerTernary.left);
         Assert.IsInstanceOf<MemberAccessExpressionNode>(innerCondition.left);
         Assert.AreEqual("5", AssertInstanceOfAndReturn<LiteralNode>(innerCondition.right).rawValue);
-        
+
         OperatorNode innerSelection = AssertOpNode(innerTernary.right, OperatorType.TernarySelection);
         Assert.AreEqual("1", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.left).rawValue);
         Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.right).rawValue);
 
         Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(outerSelection.right).rawValue);
     }
-    
+
     [Test]
     public void Parse_Ternary_Partial_Nested_WithFull() {
         ASTNode root = ExpressionParser.Parse(("thing != null ? thing.floatValue > 5 ? 1 : 12"));
-        
+
         OperatorNode outerTernary = AssertOpNode(root, OperatorType.TernaryCondition);
 
         OperatorNode outerCondition = AssertOpNode(outerTernary.left, OperatorType.NotEquals);
         OperatorNode outerSelection = AssertOpNode(outerTernary.right, OperatorType.TernarySelection);
-        
+
         Assert.AreEqual("thing", AssertInstanceOfAndReturn<IdentifierNode>(outerCondition.left).name);
         Assert.AreEqual("null", AssertInstanceOfAndReturn<LiteralNode>(outerCondition.right).rawValue);
-        
+
         OperatorNode innerTernary = AssertOpNode(outerSelection.left, OperatorType.TernaryCondition);
-        
+
         OperatorNode innerCondition = AssertInstanceOfAndReturn<OperatorNode>(innerTernary.left);
         Assert.IsInstanceOf<MemberAccessExpressionNode>(innerCondition.left);
         Assert.AreEqual("5", AssertInstanceOfAndReturn<LiteralNode>(innerCondition.right).rawValue);
-        
+
         OperatorNode innerSelection = AssertOpNode(innerTernary.right, OperatorType.TernarySelection);
         Assert.AreEqual("1", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.left).rawValue);
         Assert.AreEqual("12", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.right).rawValue);
 
         Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(outerSelection.right).rawValue);
     }
-    
+
     [Test]
     public void Parse_Ternary_Partial_Nested_WithFullParens() {
         ASTNode root = ExpressionParser.Parse(("thing != null ? (thing.floatValue > 5 ? 1) : 12"));
-        
+
         OperatorNode outerTernary = AssertOpNode(root, OperatorType.TernaryCondition);
 
         OperatorNode outerCondition = AssertOpNode(outerTernary.left, OperatorType.NotEquals);
         OperatorNode outerSelection = AssertOpNode(outerTernary.right, OperatorType.TernarySelection);
-        
+
         Assert.AreEqual("thing", AssertInstanceOfAndReturn<IdentifierNode>(outerCondition.left).name);
         Assert.AreEqual("null", AssertInstanceOfAndReturn<LiteralNode>(outerCondition.right).rawValue);
 
         ParenNode parenNode = AssertInstanceOfAndReturn<ParenNode>(outerSelection.left);
         OperatorNode innerTernary = AssertOpNode(parenNode.expression, OperatorType.TernaryCondition);
-        
+
         OperatorNode innerCondition = AssertInstanceOfAndReturn<OperatorNode>(innerTernary.left);
         Assert.IsInstanceOf<MemberAccessExpressionNode>(innerCondition.left);
         Assert.AreEqual("5", AssertInstanceOfAndReturn<LiteralNode>(innerCondition.right).rawValue);
-        
+
         OperatorNode innerSelection = AssertOpNode(innerTernary.right, OperatorType.TernarySelection);
         Assert.AreEqual("1", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.left).rawValue);
         Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.right).rawValue);
 
         Assert.AreEqual("12", AssertInstanceOfAndReturn<LiteralNode>(outerSelection.right).rawValue);
     }
-    
+
     [Test]
     public void Parse_Ternary_WithSafeAccess() {
         ASTNode root = ExpressionParser.Parse(("thing != null ? thing?.floatValue > 5 ? 1"));
-        
+
         OperatorNode outerTernary = AssertOpNode(root, OperatorType.TernaryCondition);
 
         OperatorNode outerCondition = AssertOpNode(outerTernary.left, OperatorType.NotEquals);
         OperatorNode outerSelection = AssertOpNode(outerTernary.right, OperatorType.TernarySelection);
-        
+
         Assert.AreEqual("thing", AssertInstanceOfAndReturn<IdentifierNode>(outerCondition.left).name);
         Assert.AreEqual("null", AssertInstanceOfAndReturn<LiteralNode>(outerCondition.right).rawValue);
-        
+
         OperatorNode innerTernary = AssertOpNode(outerSelection.left, OperatorType.TernaryCondition);
-        
+
         OperatorNode innerCondition = AssertOpNode(innerTernary.left, OperatorType.GreaterThan);
         Assert.IsInstanceOf<MemberAccessExpressionNode>(innerCondition.left);
         Assert.AreEqual("5", AssertInstanceOfAndReturn<LiteralNode>(innerCondition.right).rawValue);
-        
+
         OperatorNode innerSelection = AssertOpNode(innerTernary.right, OperatorType.TernarySelection);
         Assert.AreEqual("1", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.left).rawValue);
         Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.right).rawValue);
 
         Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(outerSelection.right).rawValue);
     }
-    
+
     [Test]
     public void Parse_Ternary_WithSafeAccess_Coalesce() {
         ASTNode root = ExpressionParser.Parse(("thing != null ? thing?.floatValue ?? 10 > 5 ? 1"));
-        
+
         OperatorNode outerTernary = AssertOpNode(root, OperatorType.TernaryCondition);
 
         OperatorNode outerCondition = AssertOpNode(outerTernary.left, OperatorType.NotEquals);
         OperatorNode outerSelection = AssertOpNode(outerTernary.right, OperatorType.TernarySelection);
-        
+
         Assert.AreEqual("thing", AssertInstanceOfAndReturn<IdentifierNode>(outerCondition.left).name);
         Assert.AreEqual("null", AssertInstanceOfAndReturn<LiteralNode>(outerCondition.right).rawValue);
-        
+
         OperatorNode innerTernary = AssertOpNode(outerSelection.left, OperatorType.TernaryCondition);
-        
+
         OperatorNode innerCondition = AssertInstanceOfAndReturn<OperatorNode>(innerTernary.left);
         OperatorNode coalesce = AssertOpNode(innerCondition.left, OperatorType.Coalesce);
-        
+
         Assert.IsInstanceOf<MemberAccessExpressionNode>(coalesce.left);
         Assert.IsInstanceOf<LiteralNode>(coalesce.right);
-        
+
         Assert.AreEqual("5", AssertInstanceOfAndReturn<LiteralNode>(innerCondition.right).rawValue);
-        
+
         OperatorNode innerSelection = AssertOpNode(innerTernary.right, OperatorType.TernarySelection);
         Assert.AreEqual("1", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.left).rawValue);
         Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(innerSelection.right).rawValue);
 
         Assert.AreEqual("default", AssertInstanceOfAndReturn<LiteralNode>(outerSelection.right).rawValue);
+    }
+
+    [Test]
+    public void Parse_Ternary_WithParenExpression() {
+        ASTNode root = ExpressionParser.Parse("thing != null ? data.ToString() : 'Anything'}");
+        OperatorNode outerTernary = AssertOpNode(root, OperatorType.TernaryCondition);
+
+        OperatorNode outerCondition = AssertOpNode(outerTernary.left, OperatorType.NotEquals);
+        OperatorNode outerSelection = AssertOpNode(outerTernary.right, OperatorType.TernarySelection);
+
+        Assert.AreEqual("thing", AssertInstanceOfAndReturn<IdentifierNode>(outerCondition.left).name);
+        Assert.AreEqual("null", AssertInstanceOfAndReturn<LiteralNode>(outerCondition.right).rawValue);
+
+        MemberAccessExpressionNode access = AssertInstanceOfAndReturn<MemberAccessExpressionNode>(outerSelection.left);
+        LiteralNode anything = AssertInstanceOfAndReturn<LiteralNode>(outerSelection.right);
+        Assert.AreEqual(anything.rawValue, "Anything");
+
     }
 
     [Test]
     public void Parse_Assignment() {
         ASTNode root = ExpressionParser.Parse("thing.x = 5");
     }
-    
-     [Test]
+
+    [Test]
     public void Parse_PlusEqual() {
         ASTNode root = ExpressionParser.Parse("thing.x += 5");
     }
-    
+
     [Test]
     public void Parse_MethodChainExpression() {
         ASTNode root = ExpressionParser.Parse(("Method()().Property"));
-
     }
-    
+
     [Test]
     public void Parse_ParenExpression_DotAccess() {
         ASTNode root = ExpressionParser.Parse(("(5 + 8).ToString()"));
-
     }
 
 }

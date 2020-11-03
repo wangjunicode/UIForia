@@ -2,12 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UIForia.Parsing;
-using UnityEngine;
 
 namespace UIForia.Util {
 
-    [DebuggerTypeProxy(typeof(LightList<>))]
     internal class LightListDebugView<T> {
 
         private readonly LightList<T> lightList;

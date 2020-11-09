@@ -91,7 +91,11 @@ namespace UIForia.Rendering.Vertigo {
         }
 
         public void Release(PooledMesh mesh) {
+            if (mesh == null) return;
             if (mesh.isActive) {
+                if (mesh.mesh == null) {
+                    return;
+                }
                 mesh.mesh.Clear(true);
                 dynamicPool.Add(mesh);
                 mesh.isActive = false;

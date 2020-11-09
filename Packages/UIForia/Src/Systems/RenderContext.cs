@@ -872,7 +872,7 @@ namespace UIForia.Rendering {
 //                        rtStack.Push(new RenderArea(cmd.renderTexture, cmd.rect));
 
                         // todo -- in order for this to be 'correct' we need to blit previous contents onto it at proper offset
-                        commandBuffer.Blit(BuiltinRenderTextureType.CameraTarget, cmd.renderTexture, Vector2.one, cmd.offset);
+                        commandBuffer.Blit(camera.targetTexture, cmd.renderTexture, Vector2.one, cmd.offset);
                         commandBuffer.SetRenderTarget(cmd.renderTexture);
                         commandBuffer.ClearRenderTarget(true, false, Color.clear);
                         commandBuffer.SetViewProjectionMatrices(cameraMatrix, camera.projectionMatrix);
@@ -922,7 +922,8 @@ namespace UIForia.Rendering {
                         break;
 
                     case RenderOperationType.PopRenderTexture:
-                        commandBuffer.SetRenderTarget(BuiltinRenderTextureType.CameraTarget);
+                        commandBuffer.SetRenderTarget(camera.targetTexture);
+                        commandBuffer.SetViewProjectionMatrices(cameraMatrix, camera.projectionMatrix);
                         break;
 
                     case RenderOperationType.SetScissorRect:

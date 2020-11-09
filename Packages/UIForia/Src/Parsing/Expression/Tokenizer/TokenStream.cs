@@ -138,6 +138,7 @@ namespace UIForia.Parsing.Expressions.Tokenizer {
                 if (expressionToken == ExpressionTokenType.ParenOpen) {
                     store = ptr;
                     ptr += i;
+                    // FindMatchingIndex returns an advance value to the closing paren
                     i += FindMatchingIndex(ExpressionTokenType.ParenOpen, ExpressionTokenType.ParenClose);
                     ptr = store;
                 }

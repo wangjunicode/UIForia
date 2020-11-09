@@ -16,6 +16,24 @@ style root-container {
     PreferredSize = 1vw 1vh;
 }
 
+style painted-mask {
+    PreferredSize = 200px 200px;
+    BackgroundColor = orange;
+    AlignX = Center Screen;
+    AlignY = Center Screen;
+    LayoutBehavior = Ignored;
+    FlexLayoutDirection = Horizontal;
+    ZIndex = 800;
+    Painter = "UIForia::CircleMask";
+}
+
+style masked-item {
+
+    PreferredSize = 50px;
+    BackgroundColor = black;
+    
+}
+
 style custom-material {
     PreferredSize = 200px 200px;
     BackgroundColor = orange;

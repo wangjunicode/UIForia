@@ -1,10 +1,11 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
 using UIForia.Elements;
 using UnityEngine;
 
 namespace UIForia {
-    
+
     public class UIViewBehavior : MonoBehaviour {
 
         public Type type;
@@ -13,7 +14,7 @@ namespace UIForia {
         public Application application;
         public bool usePreCompiledTemplates;
         public string styleBasePath;
-        
+
         [HideInInspector] public string applicationName = "Game App 2";
 
         public TemplateSettings GetTemplateSettings(Type type) {
@@ -28,7 +29,7 @@ namespace UIForia {
 
             return settings;
         }
-
+        
         public void Start() {
 
             type = Type.GetType(typeName);
@@ -36,7 +37,7 @@ namespace UIForia {
 
             TemplateSettings settings = GetTemplateSettings(type);
             settings.materialAssets = GetComponent<UIForiaAssets>()?.materialReferences;
-            
+
 #if UNITY_EDITOR
             application = usePreCompiledTemplates
                 ? GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection)
@@ -44,7 +45,6 @@ namespace UIForia {
 #else
             application = GameApplication.CreateFromPrecompiledTemplates(settings, camera, DoDependencyInjection);
 #endif
-
         }
 
         // optional!

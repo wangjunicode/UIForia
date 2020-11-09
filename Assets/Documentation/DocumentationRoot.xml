@@ -40,7 +40,17 @@
                         <Heading2>Hi, this is the demo.</Heading2>
                         <Paragraph>Choose a demo from the menu on the left.</Paragraph>
 
-                        <Group style="custom-material"/>
+<!--                        <Group style="custom-material"/>-->
+                        <Group style="painted-mask">
+                        
+                            <Group style="masked-item"/>
+                            <Group style="masked-item"/>
+                            <Group style="masked-item"/>
+                            <Group style="masked-item"/>
+                            
+                        </Group>
+                                                    <Group style="masked-item"/>
+
                     </Group>
     
                     <AlignmentDemo style="demo-panel-route" attr:route="/AlignmentDemo"/>

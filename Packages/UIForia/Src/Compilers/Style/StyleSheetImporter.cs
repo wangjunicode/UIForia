@@ -26,7 +26,7 @@ namespace UIForia.Compilers.Style {
 
         public int NextStyleGroupId => importedStyleGroupCount++;
 
-        public StyleSheet Import(in StyleDefinition styleDefinition, MaterialDatabase materialDatabase, bool storeContents = false) {
+        public StyleSheet Import(in StyleDefinition styleDefinition, MaterialDatabase materialDatabase, bool storeContents = false, string originPath = "") {
 
             string path;
             if (importResolutionPath != null) {
@@ -51,7 +51,7 @@ namespace UIForia.Compilers.Style {
                 contents = File.ReadAllText(path);
             }
             else {
-                throw new ParseException(path + " failed to parse style, file doesn't exist or body is not defined");
+                throw new ParseException(path + " failed to parse style, file doesn't exist or body is not defined. (from " + originPath + ")");
             }
             
             try {

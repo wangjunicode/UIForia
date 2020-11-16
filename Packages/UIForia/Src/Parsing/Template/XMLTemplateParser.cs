@@ -12,6 +12,7 @@ using UIForia.Parsing.Expressions.AstNodes;
 using UIForia.Templates;
 using UIForia.Text;
 using UIForia.Util;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace UIForia.Parsing {
@@ -37,6 +38,8 @@ namespace UIForia.Parsing {
 
     public class XMLTemplateParser {
 
+        public static ProfilerMarker profilerMarker = new ProfilerMarker("UIForia::TemplateParser");
+        
         private readonly XmlParserContext parserContext;
         private readonly Dictionary<string, TemplateShell> parsedFiles;
         private TemplateSettings settings;
@@ -150,6 +153,7 @@ namespace UIForia.Parsing {
         }
 
         internal void Parse(TemplateRootNode templateRootNode, ProcessedType processedType) {
+            profilerMarker.Begin();
             TemplateAttribute templateAttr = processedType.templateAttr;
 
             string filePath = templateAttr.filePath;
@@ -164,6 +168,7 @@ namespace UIForia.Parsing {
             parsedFiles.Add(filePath, shell);
 
             ParseContentTemplate(templateRootNode, shell, processedType);
+            profilerMarker.End();
         }
 
         internal TemplateShell GetOuterTemplateShell(TemplateAttribute templateAttribute) {

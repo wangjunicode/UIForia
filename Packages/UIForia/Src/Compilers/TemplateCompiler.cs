@@ -274,7 +274,7 @@ namespace UIForia.Compilers {
             for (int i = 0; i < templateRootNode.templateShell.styles.size; i++) {
                 ref StyleDefinition styleDef = ref templateRootNode.templateShell.styles.array[i];
 
-                StyleSheet sheet = templateData.ImportStyleSheet(styleDef, materialDatabase);
+                StyleSheet sheet = templateData.ImportStyleSheet(styleDef, materialDatabase, templateRootNode.templateShell.filePath);
 
                 if (sheet != null) {
                     ctx.AddStyleSheet(styleDef.alias, sheet);

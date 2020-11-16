@@ -2,23 +2,20 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Mono.Linq.Expressions;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
-using UIForia.Exceptions;
-using UIForia.Parsing;
 using UIForia.Util;
-using Debug = UnityEngine.Debug;
+using UnityEngine;
 
 namespace UIForia.Compilers {
 
     public static class TemplateLoader {
 
         public static CompiledTemplateData LoadRuntimeTemplates(Type type, TemplateSettings templateSettings) {
+            
             CompiledTemplateData compiledTemplateData = TemplateCompiler.CompileTemplates(type, templateSettings);
 
             // Stopwatch stopwatch = Stopwatch.StartNew();

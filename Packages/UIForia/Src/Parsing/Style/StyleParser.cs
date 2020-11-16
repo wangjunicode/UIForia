@@ -7,12 +7,15 @@ using UIForia.Parsing.Style.Tokenizer;
 using UIForia.Rendering;
 using UIForia.Text;
 using UIForia.Util;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace UIForia.Parsing.Style {
 
     public struct StyleParser {
 
+        public static ProfilerMarker profilerMarker = new ProfilerMarker("UIForia::StyleParser");
+        
         private StyleTokenStream tokenStream;
 
         /// <summary>

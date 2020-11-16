@@ -104,7 +104,7 @@ namespace UIForia {
             return binding;
         }
 
-        public StyleSheet ImportStyleSheet(in StyleDefinition styleDefinition, MaterialDatabase materialDatabase) {
+        public StyleSheet ImportStyleSheet(in StyleDefinition styleDefinition, MaterialDatabase materialDatabase, string originPath = "") {
             return styleImporter.Import(styleDefinition, materialDatabase, true);
         }
 

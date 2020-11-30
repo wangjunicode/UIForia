@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using UIForia.Extensions;
+#if !UNITY_WEBGL
 using System.Linq.Expressions;
+#endif
 
 namespace UIForia.Util {
-
     public struct ListAccessor<T> {
 
         private static readonly Func<List<T>, T[]> arrayGetter;
@@ -12,19 +14,32 @@ namespace UIForia.Util {
         private static readonly Func<List<T>, int, int> sizeSetter;
 
         static ListAccessor() {
+#if !UNITY_WEBGL
             arrayGetter = (Func<List<T>, T[]>) CreateFieldGetter("_items");
             arraySetter = (Func<List<T>, T[], T[]>) CreateFieldSetter(typeof(T[]), "_items");
             sizeGetter = (Func<List<T>, int>) CreateFieldGetter("_size");
             sizeSetter = (Func<List<T>, int, int>) CreateFieldSetter(typeof(int), "_size");
+#endif
         }
 
         public static void SetArray(List<T> list, T[] array, int count) {
+#if !UNITY_WEBGL
             arraySetter(list, array);
             sizeSetter(list, count);
+#else
+            list.Clear();
+            for (int i = 0; i < count; i++) {
+                list.Add(array[i]);
+            }
+#endif
         }
 
         public static T[] GetArray(List<T> list) {
+#if !UNITY_WEBGL
             return arrayGetter(list);
+#else
+            return list.ToArray();
+#endif          
         }
 
         public static void SetCount(List<T> list, int count) {
@@ -99,6 +114,7 @@ namespace UIForia.Util {
             SetArray(target, targetArray, currentSize + count);
         }
 
+#if !UNITY_WEBGL
         private static Delegate CreateFieldGetter(string fieldName) {
             ParameterExpression paramExpression = Expression.Parameter(typeof(List<T>));
             Expression fieldGetterExpression = Expression.Field(paramExpression, fieldName);
@@ -106,6 +122,7 @@ namespace UIForia.Util {
         }
 
         private static Delegate CreateFieldSetter(Type fieldType, string fieldName) {
+
             ParameterExpression paramExpression0 = Expression.Parameter(typeof(List<T>));
             ParameterExpression paramExpression1 = Expression.Parameter(fieldType, fieldName);
             MemberExpression fieldGetter = Expression.Field(paramExpression0, fieldName);
@@ -115,8 +132,8 @@ namespace UIForia.Util {
                 paramExpression0,
                 paramExpression1
             ).Compile();
+
         }
-
+#endif
     }
-
 }

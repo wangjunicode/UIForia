@@ -50,6 +50,12 @@ namespace UIForia.Compilers.Style {
             else if (File.Exists(path)) {
                 contents = File.ReadAllText(path);
             }
+            else if (path.StartsWith("http")) {
+                contents = templateSettings.httpStreamingAssetsAdapter?.GetResource(path);
+                if (contents == null) {
+                    throw new ParseException(path + " cannot be resolved, please setup a HttpStreamingAssetsAdapter in your TemplateSettings.");
+                }
+            }
             else {
                 throw new ParseException(path + " failed to parse style, file doesn't exist or body is not defined. (from " + originPath + ")");
             }

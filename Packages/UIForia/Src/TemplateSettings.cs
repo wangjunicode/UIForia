@@ -8,6 +8,10 @@ using UnityEngine;
 
 namespace UIForia {
 
+    public interface HttpStreamingAssetsAdapter {
+        string GetResource(string path);
+    }
+
     public class TemplateSettings {
 
         public string assemblyName;
@@ -34,6 +38,7 @@ namespace UIForia {
         public readonly string templateFileExtension = ".xml";
 
         public MaterialReference[] materialAssets;
+        public HttpStreamingAssetsAdapter httpStreamingAssetsAdapter;
 
         public TemplateSettings() {
             this.applicationName = "DefaultApplication";
@@ -74,7 +79,6 @@ namespace UIForia {
         public virtual string GetRelativeStylePath(string stylePath) {
             return Path.Combine(templateResolutionBasePath, styleBasePath, stylePath); 
         }
-
     }
 
 }

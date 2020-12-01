@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Mono.Linq.Expressions;
 using NUnit.Framework;
+using Tests;
 using UIForia.Bindings;
 using UIForia.Compilers;
 using UIForia.Elements;
@@ -256,7 +257,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<float>();
         compiler.Return("5f");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () => 
         {
             return 5f;
@@ -272,7 +273,7 @@ public class TestLinqCompiler {
         );
         compiler.Return("thing.floatValue");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             float retn_val;
@@ -302,7 +303,7 @@ public class TestLinqCompiler {
         );
         compiler.Return("thing.floatValue");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             return thing.floatValue;
@@ -325,7 +326,7 @@ public class TestLinqCompiler {
         );
         compiler.Return("thing.vec3Array[0].x");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             return thing.vec3Array[0].x;
@@ -348,7 +349,7 @@ public class TestLinqCompiler {
         );
         compiler.Return("thing.vec3Array[0].x");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             float retn_val;
@@ -389,7 +390,7 @@ public class TestLinqCompiler {
         );
         compiler.Return("thing.vec3Array[0].x");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             float retn_val;
@@ -429,7 +430,7 @@ public class TestLinqCompiler {
         compiler.Return("thing.vec3Array[1]");
         Assert.AreEqual(thing.vec3Array[1], compiler.Compile<Func<LinqThing, Vector3>>()(thing));
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             UnityEngine.Vector3 retn_val;
@@ -489,7 +490,7 @@ public class TestLinqCompiler {
 
         compiler.Return("thing.vec3Array[arg0 + thing.intVal - arg1]");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
         {
             UnityEngine.Vector3 retn_val;
@@ -540,7 +541,7 @@ public class TestLinqCompiler {
         compiler.SetOutOfBoundsCheckingEnabled(false);
         compiler.Return("thing.vec3Array[arg0 + thing.intVal - arg1]");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
         {
             UnityEngine.Vector3 retn_val;
@@ -586,7 +587,7 @@ public class TestLinqCompiler {
         compiler.SetNullCheckingEnabled(false);
         compiler.Return("thing.vec3Array[arg0 + thing.intVal - arg1]");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
         {
             return thing.vec3Array[(arg0 + thing.intVal) - arg1];
@@ -620,7 +621,7 @@ public class TestLinqCompiler {
         compiler.Return("thing.vec3Array?[arg0 + thing.intVal - arg1] ?? Vector3.one");
         // compiler.Log();
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing, int arg0, int arg1) =>
         {
             UnityEngine.Vector3 retn_val;
@@ -674,7 +675,7 @@ public class TestLinqCompiler {
         LinqCompiler compiler = new LinqCompiler();
         compiler.SetSignature<Color>();
         compiler.Return("UnityEngine.Color.red");
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () => 
         {
             return UnityEngine.Color.red;
@@ -689,7 +690,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<float>();
         compiler.AddNamespace("UIForia.Test.NamespaceTest.SomeNamespace");
         compiler.Return("NamespaceTestClass.FloatValueConst");
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () => 
         {
             return UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatValueConst;
@@ -723,7 +724,7 @@ public class TestLinqCompiler {
 
         compiler.Return("thing.floatValue + thing2.floatValue");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing, TestLinqCompiler.LinqThing thing2, TestLinqCompiler.ExpressionErrorLogger logger) =>
         {
             float retn_val;
@@ -780,7 +781,7 @@ public class TestLinqCompiler {
 
         Assert.AreEqual(element.intVal, fn(element)());
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root) =>
         {
             UnityEngine.Vector3[] vectors;
@@ -864,7 +865,7 @@ public class TestLinqCompiler {
 
         compiler.Return("0 + 'str1'");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             return @""0str1"";
@@ -891,7 +892,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<string>(new Parameter<Tuple<string>>("s"));
         compiler.Return("1 + s.Item1");
         Tuple<string> s = new Tuple<string>("hello");
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (System.Tuple<string> s) =>
         {
             string retn_val;
@@ -920,7 +921,7 @@ public class TestLinqCompiler {
         thing.svHolderVec3.value.z = 12;
         Assert.AreEqual(12, fn(thing));
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root) => 
         {
             return root.svHolderVec3.value.z;
@@ -941,7 +942,7 @@ public class TestLinqCompiler {
         thing.refValueHolderVec3 = new ValueHolder<Vector3>();
         thing.refValueHolderVec3.value.z = 12;
         Assert.AreEqual(12, fn(thing));
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root) =>
         {
             float retn_val;
@@ -969,7 +970,7 @@ public class TestLinqCompiler {
         thing.nestedValueHolder.value.value = new Vector3(10, 11, 12);
         Assert.AreEqual(12, fn(thing));
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root) =>
         {
             float retn_val;
@@ -1022,7 +1023,7 @@ public class TestLinqCompiler {
 
         Assert.AreEqual(42, element.floatValue);
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             TestLinqCompiler.ValueHolder<float> nullCheck;
@@ -1041,7 +1042,7 @@ public class TestLinqCompiler {
         retn:
             return;
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1058,7 +1059,7 @@ public class TestLinqCompiler {
         fn.Invoke(root, element);
 
         Assert.AreEqual(42, element.floatValue);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             float right;
@@ -1069,7 +1070,7 @@ public class TestLinqCompiler {
                 element.floatValue = right;
             }
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1086,7 +1087,7 @@ public class TestLinqCompiler {
         fn.Invoke(root, element);
 
         Assert.AreEqual(42, element.floatValue);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             TestLinqCompiler.ValueHolder<UnityEngine.Vector3> nullCheck;
@@ -1105,7 +1106,7 @@ public class TestLinqCompiler {
         retn:
             return;
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1128,7 +1129,7 @@ public class TestLinqCompiler {
         fn.Invoke(root, element);
 
         Assert.AreEqual(42, element.floatValue);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             UnityEngine.Vector3[] nullCheck;
@@ -1151,7 +1152,7 @@ public class TestLinqCompiler {
         retn:
             return;
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1176,7 +1177,7 @@ public class TestLinqCompiler {
         fn.Invoke(root, element);
 
         Assert.AreEqual(42, element.floatValue);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             float? nullableAccess;
@@ -1202,7 +1203,7 @@ public class TestLinqCompiler {
         retn:
             return;
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1227,7 +1228,7 @@ public class TestLinqCompiler {
         fn.Invoke(root, element);
 
         Assert.AreEqual(42, element.floatValue);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             float? nullableAccess;
@@ -1253,7 +1254,7 @@ public class TestLinqCompiler {
         retn:
             return;
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1279,7 +1280,7 @@ public class TestLinqCompiler {
         root.vec3List = null;
         Assert.AreEqual(2f, fn(root));
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root) =>
         {
             float? nullableAccess;
@@ -1312,7 +1313,7 @@ public class TestLinqCompiler {
         fn.Invoke(root, element);
 
         Assert.AreEqual(42, element.floatValue);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
        (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             UnityEngine.Vector3 outVar;
@@ -1339,7 +1340,7 @@ public class TestLinqCompiler {
         retn:
             return;
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1362,7 +1363,7 @@ public class TestLinqCompiler {
         fn.Invoke(root, element);
 
         Assert.AreEqual(42, element.floatValue);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             System.Collections.Generic.List<UnityEngine.Vector3> nullCheck;
@@ -1385,7 +1386,7 @@ public class TestLinqCompiler {
         retn:
             return;
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1414,7 +1415,7 @@ public class TestLinqCompiler {
 
         Assert.AreEqual(14415, element.floatValue);
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             UnityEngine.Vector3 outVar;
@@ -1432,7 +1433,7 @@ public class TestLinqCompiler {
         retn:
             return;
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1455,7 +1456,7 @@ public class TestLinqCompiler {
         fn.Invoke(root, element);
 
         Assert.AreEqual(42, element.floatValue);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             System.Collections.Generic.List<UnityEngine.Vector3> nullCheck;
@@ -1478,7 +1479,7 @@ public class TestLinqCompiler {
         retn:
             return;
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1496,7 +1497,7 @@ public class TestLinqCompiler {
 
         Assert.AreEqual(34, element.svHolderVec3.value.x);
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             TestLinqCompiler.StructValueHolder<UnityEngine.Vector3> svHolderVec3_assign;
@@ -1513,7 +1514,7 @@ public class TestLinqCompiler {
                 element.svHolderVec3 = svHolderVec3_assign;
             }
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1531,7 +1532,7 @@ public class TestLinqCompiler {
 
         Assert.AreEqual(35, element.svHolderVec3.value.x);
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             TestLinqCompiler.StructValueHolder<UnityEngine.Vector3> svHolderVec3_assign;
@@ -1550,7 +1551,7 @@ public class TestLinqCompiler {
                 element.svHolderVec3 = svHolderVec3_assign;
             }
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1574,7 +1575,7 @@ public class TestLinqCompiler {
 
         Assert.AreEqual(42, element.svHolderVec3.value.x);
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing root, TestLinqCompiler.LinqThing element) =>
         {
             TestLinqCompiler.StructValueHolder<UnityEngine.Vector3> svHolderVec3_assign;
@@ -1605,7 +1606,7 @@ public class TestLinqCompiler {
         retn:
             return;
         }
-        ", PrintCode(expr));
+        ", TestUtils.PrintCode(expr));
     }
 
     [Test]
@@ -1615,7 +1616,7 @@ public class TestLinqCompiler {
         object CompileAndReset<T>(string input, Type type) where T : Delegate {
             compiler.SetSignature(type);
             compiler.Return(input);
-            AssertStringsEqual(@"() => 
+            TestUtils.AssertStringsEqual(@"() => 
             {
                 return {input};
             }".Replace("{input}", input), compiler.Print());
@@ -1820,7 +1821,7 @@ public class TestLinqCompiler {
         compiler.SetNullCheckingEnabled(false);
         compiler.AddNamespace("System.Collections.Generic");
         compiler.Return("thing.vec3Array[0].x is System.Collections.Generic.List<float>");
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             return thing.vec3Array[0].x is System.Collections.Generic.List<float>;
@@ -1846,7 +1847,7 @@ public class TestLinqCompiler {
         compiler.Return("thing.vec3Array as IList");
         // compiler.Log();
         Assert.AreEqual(thing.vec3Array, compiler.Compile<Func<LinqThing, IList>>()(thing));
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             return thing.vec3Array as System.Collections.IList;
@@ -1875,7 +1876,7 @@ public class TestLinqCompiler {
         compiler.Return("(IReadOnlyList<Vector3>)thing.vec3Array");
         // compiler.Log();
         Assert.AreEqual(thing.vec3Array, compiler.Compile<Func<LinqThing, IReadOnlyList<Vector3>>>()(thing));
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             return ((System.Collections.Generic.IReadOnlyList<UnityEngine.Vector3>)thing.vec3Array);
@@ -1890,7 +1891,7 @@ public class TestLinqCompiler {
         compiler.AddNamespace("UnityEngine");
         compiler.Return("new Vector3()");
         Assert.AreEqual(new Vector3(), compiler.Compile<Func<Vector3>>()());
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             return new UnityEngine.Vector3();
@@ -1907,7 +1908,7 @@ public class TestLinqCompiler {
         compiler.Return("new Vector3(1f, 2f, 3f)");
 
         Assert.AreEqual(new Vector3(1, 2, 3), compiler.Compile<Func<Vector3>>()());
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             return new UnityEngine.Vector3(1f, 2f, 3f);
@@ -1927,7 +1928,7 @@ public class TestLinqCompiler {
         Assert.AreEqual(8, thing.x);
         Assert.AreEqual(2, thing.y);
         Assert.AreEqual(0, thing.f);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
            () =>
             {
                 return new ThingWithOptionals(8, 2);
@@ -1966,7 +1967,7 @@ public class TestLinqCompiler {
         Assert.AreEqual(0, thing.x);
         Assert.AreEqual(2, thing.y);
         Assert.AreEqual(12, thing.f);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
            () =>
             {
                 return new ThingWithOptionals(new ThingWithOptionals(12f, 2), 2);
@@ -1980,7 +1981,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<TestEnum>();
         compiler.Return("TestEnum.One");
         Assert.AreEqual(TestEnum.One, compiler.Compile<Func<TestEnum>>()());
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             return TestEnum.One;
@@ -1995,7 +1996,7 @@ public class TestLinqCompiler {
         compiler.Return("UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatValue");
         // compiler.Log();
         Assert.AreEqual(NamespaceTestClass.FloatValue, compiler.Compile<Func<float>>()());
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             return UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.FloatValue;
@@ -2008,7 +2009,7 @@ public class TestLinqCompiler {
         // compiler.Log();
 
         Assert.AreEqual(NamespaceTestClass.FloatArray[0], compiler.Compile<Func<float>>()());
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             float retn_val;
@@ -2038,7 +2039,7 @@ public class TestLinqCompiler {
         compiler.AddNamespace("UIForia.Test.NamespaceTest.SomeNamespace");
         compiler.Return("TypeChainTest.TypeChainChild.TypeChainEnd.SomeValue");
         Assert.AreEqual(TypeChainTest.TypeChainChild.TypeChainEnd.SomeValue, compiler.Compile<Func<float>>()());
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             return UIForia.Test.NamespaceTest.SomeNamespace.TypeChainTest.TypeChainChild.TypeChainEnd.SomeValue;
@@ -2052,7 +2053,7 @@ public class TestLinqCompiler {
         compiler.AddNamespace("UnityEngine");
         compiler.Return("TypeChainTest.TypeChainChild.TypeChainEnd<Vector3>.Value");
         Assert.AreEqual(TypeChainTest.TypeChainChild.TypeChainEnd<Vector3>.Value, compiler.Compile<Func<Vector3>>()());
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             return UIForia.Test.NamespaceTest.SomeNamespace.TypeChainTest.TypeChainChild.TypeChainEnd<UnityEngine.Vector3>.Value;
@@ -2067,7 +2068,7 @@ public class TestLinqCompiler {
         compiler.Return("UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.SubType1.FloatValue");
 
         Assert.AreEqual(NamespaceTestClass.SubType1.FloatValue, compiler.Compile<Func<float>>()());
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
            () =>
             {
                 return UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.SubType1.FloatValue;
@@ -2079,7 +2080,7 @@ public class TestLinqCompiler {
         compiler.Return("UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.SubType1<string>.IntValue");
 
         Assert.AreEqual(NamespaceTestClass.SubType1<string>.IntValue, compiler.Compile<Func<int>>()());
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
            () =>
             {
                 return UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.SubType1<string>.IntValue;
@@ -2091,7 +2092,7 @@ public class TestLinqCompiler {
         compiler.Return("UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.SubType1<string, UnityEngine.Vector3>.StringValue");
 
         Assert.AreEqual(NamespaceTestClass.SubType1<string, Vector3>.StringValue, compiler.Compile<Func<string>>()());
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
            () =>
             {
                 return UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.SubType1<string, UnityEngine.Vector3>.StringValue;
@@ -2103,7 +2104,7 @@ public class TestLinqCompiler {
         compiler.Return("UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.SubType1<int>.NestedSubType1<int>.NestedIntValue");
 
         Assert.AreEqual(NamespaceTestClass.SubType1<int>.NestedSubType1<int>.NestedIntValue, compiler.Compile<Func<int>>()());
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
            () =>
             {
                 return UIForia.Test.NamespaceTest.SomeNamespace.NamespaceTestClass.SubType1<int>.NestedSubType1<int>.NestedIntValue;
@@ -2186,7 +2187,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<float>();
         compiler.Return("UnityEngine.Color.red.r");
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             return UnityEngine.Color.red.r;
@@ -2202,7 +2203,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<Color>();
         compiler.Return("UnityEngine.Color.red");
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             return UnityEngine.Color.red;
@@ -2219,7 +2220,7 @@ public class TestLinqCompiler {
         compiler.AddNamespace("UnityEngine");
         compiler.Return("Color.HSVToRGB(0.5f, 0.5f, 0.5f)");
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             return UnityEngine.Color.HSVToRGB(0.5f, 0.5f, 0.5f);
@@ -2235,7 +2236,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<Color>();
         compiler.Return("UnityEngine.Color.HSVToRGB(0.5f, 0.5f, 0.5f)");
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             return UnityEngine.Color.HSVToRGB(0.5f, 0.5f, 0.5f);
@@ -2250,7 +2251,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<bool>();
         compiler.Return("3 > 4 ? true : false");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             bool ternaryOutput;
@@ -2274,7 +2275,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<float>(new Parameter<LinqThing>("thing", ParameterFlags.NeverNull));
         compiler.Return("thing ? thing.floatValue");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             float ternaryOutput;
@@ -2310,7 +2311,7 @@ public class TestLinqCompiler {
 
         Assert.AreEqual(10, fn(null));
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             int ternaryOutput;
@@ -2344,7 +2345,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<int>(new Parameter<LinqThing>("thing"));
         compiler.Return("thing ? thing.floatValue > 5 ? 1");
         // compiler.Log();
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             int ternaryOutput;
@@ -2395,7 +2396,7 @@ public class TestLinqCompiler {
 
         LinqThing thing = new LinqThing();
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             TestLinqCompiler.LinqThing retn_val;
@@ -2449,7 +2450,7 @@ public class TestLinqCompiler {
 
         LinqThing thing = new LinqThing();
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             TestLinqCompiler.LinqThing retn_val;
@@ -2494,7 +2495,7 @@ public class TestLinqCompiler {
         compiler.SetSignature<LinqThing>(new Parameter<LinqThing>("thing"));
         compiler.Return("thing.Method(thing.GetIntValue(thing.vec3Array[0].y))");
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             TestLinqCompiler.LinqThing retn_val;
@@ -2534,7 +2535,7 @@ public class TestLinqCompiler {
         compiler.Return("thing.FnReturningFunction()(123)");
         // compiler.Log();
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             int retn_val;
@@ -2569,7 +2570,7 @@ public class TestLinqCompiler {
         compiler.Return("thing.indexable[123456][2]");
         // compiler.Log();
 
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         (TestLinqCompiler.LinqThing thing) =>
         {
             return ((int)thing.indexable[123456][2]);
@@ -2590,7 +2591,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(12, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value = 12;
@@ -2608,7 +2609,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(15, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value += 5;
@@ -2625,7 +2626,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(5, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value -= 5;
@@ -2642,7 +2643,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(50, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value *= 5;
@@ -2659,7 +2660,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(2, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value /= 5;
@@ -2676,7 +2677,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(1, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value %= 3;
@@ -2693,7 +2694,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(2, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value &= 3;
@@ -2710,7 +2711,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(11, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value |= 3;
@@ -2727,7 +2728,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(9, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value ^= 3;
@@ -2744,7 +2745,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(80, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value <<= 3;
@@ -2761,7 +2762,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(1, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value >>= 3;
@@ -2778,7 +2779,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(11, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             ++TestLinqCompiler.StaticThing.value;
@@ -2795,7 +2796,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(9, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             --TestLinqCompiler.StaticThing.value;
@@ -2812,7 +2813,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(11, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value++;
@@ -2829,7 +2830,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(9, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.value--;
@@ -2856,7 +2857,7 @@ public class TestLinqCompiler {
         Action fn = compiler.Compile<Action>();
         fn();
         Assert.AreEqual(11, StaticThing.value);
-        AssertStringsEqual(@"
+        TestUtils.AssertStringsEqual(@"
         () =>
         {
             TestLinqCompiler.StaticThing.Increment();
@@ -2875,34 +2876,6 @@ public class TestLinqCompiler {
 
         Assert.AreEqual("13", str);
     }
-
-    public void AssertStringsEqual(string a, string b) {
-        string[] splitA = a.Trim().Split('\n');
-        string[] splitB = b.Trim().Split('\n');
-
-        Assert.AreEqual(splitA.Length, splitB.Length);
-
-        for (int i = 0; i < splitA.Length; i++) {
-            Assert.AreEqual(splitA[i].Trim(), splitB[i].Trim());
-        }
-    }
-
-    private static string PrintCode(IList<Expression> expressions) {
-        string retn = "";
-        for (int i = 0; i < expressions.Count; i++) {
-            retn += expressions[i].ToCSharpCode();
-            if (i != expressions.Count - 1) {
-                retn += "\n";
-            }
-        }
-
-        return retn;
-    }
-
-    private static string PrintCode(Expression expression) {
-        return expression.ToCSharpCode();
-    }
-
 }
 
 namespace UIForia.Test.NamespaceTest.SomeNamespace {

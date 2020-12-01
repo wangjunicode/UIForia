@@ -1951,6 +1951,7 @@ namespace UIForia.Compilers {
                     if (expressionParts[i].isExpression) {
                         updateCompiler.SetImplicitContext(updateCompiler.GetCastRoot());
 
+                        updateCompiler.BeginIsolatedSection();
                         Expression val = updateCompiler.Value(expressionParts[i].text);
                         if (val.Type.IsEnum) {
                             MethodCallExpression toString = ExpressionFactory.CallInstanceUnchecked(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
@@ -2020,6 +2021,8 @@ namespace UIForia.Compilers {
                                 updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, toString));
                                 break;
                         }
+                        
+                        updateCompiler.EndIsolatedSection();
                     }
                     else {
                         updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, Expression.Constant(expressionParts[i].text)));

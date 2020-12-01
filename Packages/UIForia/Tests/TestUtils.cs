@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using Mono.Linq.Expressions;
 using NUnit.Framework;
 using UIForia.Elements;
 
@@ -128,6 +131,32 @@ namespace Tests {
 
         }
 
+        public static void AssertStringsEqual(string a, string b) {
+            string[] splitA = a.Trim().Split('\n');
+            string[] splitB = b.Trim().Split('\n');
+
+            Assert.AreEqual(splitA.Length, splitB.Length);
+
+            for (int i = 0; i < splitA.Length; i++) {
+                Assert.AreEqual(splitA[i].Trim(), splitB[i].Trim());
+            }
+        }
+
+        public static string PrintCode(IList<Expression> expressions) {
+            string retn = "";
+            for (int i = 0; i < expressions.Count; i++) {
+                retn += expressions[i].ToCSharpCode();
+                if (i != expressions.Count - 1) {
+                    retn += "\n";
+                }
+            }
+
+            return retn;
+        }
+
+        public static string PrintCode(Expression expression) {
+            return expression.ToCSharpCode();
+        }
     }
 
 }

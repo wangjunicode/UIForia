@@ -279,6 +279,24 @@ namespace UIForia.Systems {
 
                         break;
                     }
+                    case ClipBehavior.Skip: {
+                        ClipData currentClipper = clipStack.array[clipStack.size - 2];
+                        StructList<ElemRef> clipList = currentClipper.clipList;
+
+                        if (currentElement.layoutResult.clipper != currentClipper) {
+                            layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
+                            currentElement.layoutResult.clipper = currentClipper;
+                        }
+
+                        // this is inlined because it was identified as a hot point, inlining this makes it run significantly faster
+                        if (clipList.size + 1 > clipList.array.Length) {
+                            Array.Resize(ref clipList.array, (clipList.size + 1) * 2);
+                        }
+
+                        clipList.array[clipList.size++].element = currentElement;
+
+                        break;
+                    }
                     case ClipBehavior.View: {
                         if (currentElement.layoutResult.clipper != viewClipper) {
                             layoutBox.flags |= LayoutBoxFlags.RecomputeClipping;
@@ -936,8 +954,57 @@ namespace UIForia.Systems {
                         LayoutResult result = currentElement.layoutResult;
                         currentBox.flags &= ~LayoutBoxFlags.RequiresMatrixUpdate;
 
-                        result.localPosition.x = result.alignedPosition.x;
-                        result.localPosition.y = result.alignedPosition.y;
+                        float scrollPixelAmountX = 0;
+                        float scrollPixelAmountY = 0;
+                        if (layoutSystem.horizontalScrollFixed.Contains(currentElement)) {
+                            ScrollView scrollView = currentElement.FindParent<ScrollView>();
+                            scrollPixelAmountX = scrollView.scrollPixelAmountX;
+                        }
+                        
+                        if (layoutSystem.verticalScrollFixed.Contains(currentElement)) {
+                            ScrollView scrollView = currentElement.FindParent<ScrollView>();
+                            scrollPixelAmountY = scrollView.scrollPixelAmountY;
+                        }
+                        // TODO(roman): Handling removing stuff from the hor/ver scroll lists
+                        // for (int j = 0; j < layoutSystem.horizontalScrollFixed.size; ++j) {
+                        //     UIElement element = layoutSystem.horizontalScrollFixed[j];
+                        //     if (!element.isEnabled || element.style.ScrollBehaviorX != ScrollBehavior.Fixed) {
+                        //         layoutSystem.horizontalScrollFixed.SwapRemoveAt(j);
+                        //         j--;
+                        //         continue;
+                        //     }
+                        //
+                        //     ScrollView scrollView = element.FindParent<ScrollView>();
+                        //     if (scrollView == null) {
+                        //         layoutSystem.horizontalScrollFixed.SwapRemoveAt(j);
+                        //         j--;
+                        //         continue;
+                        //     }
+                        //
+                        //     element.layoutResult.alignedPosition.x += scrollView.scrollPixelAmountX;
+                        // }
+            
+                        // for (int j = 0; j < layoutSystem.verticalScrollFixed.size; ++j) {
+                        //     UIElement element = layoutSystem.verticalScrollFixed[j];
+                        //     if (!element.isEnabled || element.style.ScrollBehaviorY != ScrollBehavior.Fixed) {
+                        //         layoutSystem.verticalScrollFixed.SwapRemoveAt(j);
+                        //         j--;
+                        //         continue;
+                        //     }
+                        //
+                        //     ScrollView scrollView = element.FindParent<ScrollView>();
+                        //     if (scrollView == null) {
+                        //         layoutSystem.verticalScrollFixed.SwapRemoveAt(j);
+                        //         j--;
+                        //         continue;
+                        //     }
+                        //
+                        //     element.layoutResult.alignedPosition.y += scrollView.scrollPixelAmountY;
+                        // }
+
+
+                        result.localPosition.x = result.alignedPosition.x - scrollPixelAmountX;
+                        result.localPosition.y = result.alignedPosition.y - scrollPixelAmountY;
 
                         ref SVGXMatrix localMatrix = ref result.localMatrix;
 

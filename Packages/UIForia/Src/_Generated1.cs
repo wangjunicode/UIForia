@@ -901,6 +901,20 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.LayoutBehavior, (int)value), state); }
         }
         
+        public UIForia.Layout.ScrollBehavior ScrollBehaviorX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollBehaviorX, state).AsScrollBehavior; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollBehaviorX, (int)value), state); }
+        }
+        
+        public UIForia.Layout.ScrollBehavior ScrollBehaviorY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ScrollBehaviorY, state).AsScrollBehavior; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.ScrollBehaviorY, (int)value), state); }
+        }
+        
         public int ZIndex {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.ZIndex, state).AsInt; }
@@ -1884,6 +1898,20 @@ namespace UIForia.Rendering {
             get { return (UIForia.Layout.LayoutBehavior)FindEnumProperty(StylePropertyId.LayoutBehavior); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.LayoutBehavior, (int)value)); }
+        }
+            
+        public UIForia.Layout.ScrollBehavior ScrollBehaviorX {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.ScrollBehavior)FindEnumProperty(StylePropertyId.ScrollBehaviorX); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.ScrollBehaviorX, (int)value)); }
+        }
+            
+        public UIForia.Layout.ScrollBehavior ScrollBehaviorY {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return (UIForia.Layout.ScrollBehavior)FindEnumProperty(StylePropertyId.ScrollBehaviorY); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.ScrollBehaviorY, (int)value)); }
         }
             
         public int ZIndex {
@@ -3159,6 +3187,24 @@ namespace UIForia.Rendering {
                 }
             }
 
+            public UIForia.Layout.ScrollBehavior ScrollBehaviorX { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollBehaviorX, out property)) return property.AsScrollBehavior;
+                    return DefaultStyleValues_Generated.ScrollBehaviorX;
+                }
+            }
+
+            public UIForia.Layout.ScrollBehavior ScrollBehaviorY { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.ScrollBehaviorY, out property)) return property.AsScrollBehavior;
+                    return DefaultStyleValues_Generated.ScrollBehaviorY;
+                }
+            }
+
             public int ZIndex { 
                 [System.Diagnostics.DebuggerStepThrough]
                 get { 
@@ -4294,6 +4340,22 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.LayoutBehavior, state).AsLayoutBehavior;
         }
         
+        public void SetScrollBehaviorX(in UIForia.Layout.ScrollBehavior? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ScrollBehaviorX, (int)value), state);
+        }
+
+        public UIForia.Layout.ScrollBehavior GetScrollBehaviorX(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ScrollBehaviorX, state).AsScrollBehavior;
+        }
+        
+        public void SetScrollBehaviorY(in UIForia.Layout.ScrollBehavior? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.ScrollBehaviorY, (int)value), state);
+        }
+
+        public UIForia.Layout.ScrollBehavior GetScrollBehaviorY(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.ScrollBehaviorY, state).AsScrollBehavior;
+        }
+        
         public void SetZIndex(in int? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.ZIndex, value), state);
         }
@@ -4649,6 +4711,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.LayoutType, (int)LayoutType);
 				case StylePropertyId.LayoutBehavior:
 					 return new StyleProperty(StylePropertyId.LayoutBehavior, (int)LayoutBehavior);
+				case StylePropertyId.ScrollBehaviorX:
+					 return new StyleProperty(StylePropertyId.ScrollBehaviorX, (int)ScrollBehaviorX);
+				case StylePropertyId.ScrollBehaviorY:
+					 return new StyleProperty(StylePropertyId.ScrollBehaviorY, (int)ScrollBehaviorY);
 				case StylePropertyId.ZIndex:
 					 return new StyleProperty(StylePropertyId.ZIndex, ZIndex);
 				case StylePropertyId.RenderLayerOffset:
@@ -4812,6 +4878,8 @@ namespace UIForia.Rendering {
                     case StylePropertyId.TransformRotation: return typeof(System.Single);
                     case StylePropertyId.LayoutType: return typeof(UIForia.Layout.LayoutType);
                     case StylePropertyId.LayoutBehavior: return typeof(UIForia.Layout.LayoutBehavior);
+                    case StylePropertyId.ScrollBehaviorX: return typeof(UIForia.Layout.ScrollBehavior);
+                    case StylePropertyId.ScrollBehaviorY: return typeof(UIForia.Layout.ScrollBehavior);
                     case StylePropertyId.ZIndex: return typeof(System.Int32);
                     case StylePropertyId.RenderLayerOffset: return typeof(System.Int32);
                     case StylePropertyId.RenderLayer: return typeof(UIForia.Rendering.RenderLayer);

@@ -191,6 +191,9 @@ namespace UIForia.Compilers.Style {
 
                 {"layouttype", (targetStyle, property, context) => targetStyle.LayoutType = MapEnum<LayoutType>(property.children[0], context)},
                 {"layoutbehavior", (targetStyle, property, context) => targetStyle.LayoutBehavior = MapEnum<LayoutBehavior>(property.children[0], context)},
+                {"scrollbehaviorx", (targetStyle, property, context) => targetStyle.ScrollBehaviorX = MapEnum<ScrollBehavior>(property.children[0], context)},
+                {"scrollbehaviory", (targetStyle, property, context) => targetStyle.ScrollBehaviorY = MapEnum<ScrollBehavior>(property.children[0], context)},
+                
                 {"zindex", (targetStyle, property, context) => targetStyle.ZIndex = (int) MapNumber(property.children[0], context)},
                 {"renderlayer", (targetStyle, property, context) => targetStyle.RenderLayer = MapEnum<RenderLayer>(property.children[0], context)},
                 {"renderlayeroffset", (targetStyle, property, context) => targetStyle.RenderLayerOffset = (int) MapNumber(property.children[0], context)},

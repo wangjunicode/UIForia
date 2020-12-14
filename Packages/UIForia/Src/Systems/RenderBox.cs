@@ -104,6 +104,7 @@ namespace UIForia.Rendering {
         internal ClipData clipper;
         public bool didRender;
         public int traversalIndex;
+        public int scrollFix;
 
         public virtual RenderBounds RenderBounds {
             get {
@@ -133,6 +134,7 @@ namespace UIForia.Rendering {
             layer = element.style.Layer;
             clipBehavior = element.style.ClipBehavior;
             visibility = element.style.Visibility;
+            scrollFix = element.style.ScrollBehaviorX == ScrollBehavior.Fixed || element.style.ScrollBehaviorY == ScrollBehavior.Fixed ? 1 : 0;
         }
 
         public virtual void OnDestroy() { }

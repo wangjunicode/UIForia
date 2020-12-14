@@ -5,7 +5,8 @@ namespace UIForia.Layout {
         Never,
         Normal,
         View,
-        Screen
+        Screen,
+        Skip
 
     }
 

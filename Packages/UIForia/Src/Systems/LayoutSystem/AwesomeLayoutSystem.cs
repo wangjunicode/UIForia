@@ -15,9 +15,14 @@ namespace UIForia.Systems {
         private LightList<AwesomeLayoutRunner> runners;
         internal int traversalIndex;
 
+        internal LightList<UIElement> horizontalScrollFixed;
+        internal LightList<UIElement> verticalScrollFixed;
+
         public AwesomeLayoutSystem(Application application) {
             this.application = application;
             this.runners = new LightList<AwesomeLayoutRunner>();
+            this.horizontalScrollFixed = new LightList<UIElement>();
+            this.verticalScrollFixed = new LightList<UIElement>();
 
             // for (int i = 0; i < application.views.Count; i++) {
             //     runners.Add(new AwesomeLayoutRunner(this, application.views[i].dummyRoot));
@@ -60,6 +65,13 @@ namespace UIForia.Systems {
                 }
             }
 
+            if (currentElement.style.ScrollBehaviorX == ScrollBehavior.Fixed) {
+                horizontalScrollFixed.Add(currentElement);
+            } 
+            if (currentElement.style.ScrollBehaviorY == ScrollBehavior.Fixed) {
+                verticalScrollFixed.Add(currentElement);
+            }
+            
             currentElement.layoutBox.Initialize(currentElement, application.frameId);
         }
 
@@ -293,7 +305,7 @@ namespace UIForia.Systems {
             traversalIndex = 0;
             for (int i = 0; i < runners.size; i++) {
                 runners[i].RunLayout();
-            }
+            } 
         }
 
         public void OnDestroy() { }

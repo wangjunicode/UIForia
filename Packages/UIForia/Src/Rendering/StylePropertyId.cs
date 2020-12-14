@@ -119,6 +119,8 @@ namespace UIForia.Rendering {
 
         LayoutType,
         LayoutBehavior,
+        ScrollBehaviorX,
+        ScrollBehaviorY,
 
         ZIndex,
         RenderLayer,

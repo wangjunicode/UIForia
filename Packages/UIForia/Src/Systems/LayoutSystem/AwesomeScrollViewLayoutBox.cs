@@ -40,6 +40,8 @@ namespace UIForia.Systems {
             float alignedPosition = originBase + originOffset + (contentWidth * -scrollOffsetPercentage);
             firstChild.ApplyLayoutHorizontalExplicit(alignedPosition, contentWidth, frameId);
             firstChild.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
+            
+            scrollView.scrollPixelAmountX = alignedPosition;
 
             AwesomeLayoutBox verticalTrack = element.children.array[1].layoutBox;
             AwesomeLayoutBox verticalHandle = element.children.array[2].layoutBox;
@@ -51,12 +53,12 @@ namespace UIForia.Systems {
             float horizontalWidth = scrollView.verticalScrollingEnabled ? contentAreaWidth - trackSize : contentAreaWidth;
 
             if (verticalTrack != null && verticalTrack.element.isEnabled) {
-                verticalTrack.ApplyLayoutHorizontalExplicit(paddingBorderHorizontalStart + contentAreaWidth - trackSize, trackSize, frameId);
+                verticalTrack.ApplyLayoutHorizontalExplicit(paddingBorderHorizontalStart + paddingBorderHorizontalEnd + contentAreaWidth - trackSize, trackSize, frameId);
                 verticalTrack.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
 
             if (verticalHandle != null && verticalHandle.element.isEnabled) {
-                verticalHandle.ApplyLayoutHorizontalExplicit(paddingBorderHorizontalStart + contentAreaWidth - trackSize, trackSize, frameId);
+                verticalHandle.ApplyLayoutHorizontalExplicit(paddingBorderHorizontalStart + paddingBorderHorizontalEnd + contentAreaWidth - trackSize, trackSize, frameId);
                 verticalHandle.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
             }
 
@@ -91,6 +93,7 @@ namespace UIForia.Systems {
             firstChild.ApplyLayoutVerticalExplicit(alignedPosition, contentHeight, frameId);
             firstChild.flags |= LayoutBoxFlags.RequiresMatrixUpdate;
 
+            scrollView.scrollPixelAmountY = alignedPosition - originBase;
 
             AwesomeLayoutBox verticalTrack = element.children.array[1].layoutBox;
             AwesomeLayoutBox verticalHandle = element.children.array[2].layoutBox;

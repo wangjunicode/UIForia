@@ -284,6 +284,7 @@ namespace UIForia.Rendering {
         public LayoutType AsLayoutType => (LayoutType) int0;
         public TextTransform AsTextTransform => (TextTransform) int0;
         public LayoutBehavior AsLayoutBehavior => (LayoutBehavior) int0;
+        public ScrollBehavior AsScrollBehavior => (ScrollBehavior)int0;
 
         public IReadOnlyList<GridTrackSize> AsGridTemplate => (IReadOnlyList<GridTrackSize>) objectField;
         public Visibility AsVisibility => (Visibility) int0;

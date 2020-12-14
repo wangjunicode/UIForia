@@ -165,7 +165,20 @@ namespace Src.Systems {
                             child.renderBox.Enable();
                         }
 
-                        elemRefStack.array[elemRefStack.size++].element = child;
+                        if (child.renderBox.scrollFix == 1) {
+                            elemRefStack.array[elemRefStack.size++].element = child;
+                        }
+                    }
+
+                }
+
+                
+                for (int i = currentElement.children.size - 1; i >= 0; i--) {
+                    UIElement child = currentElement.children.array[i];
+                    if ((child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
+                        if (child.renderBox.scrollFix == 0) {
+                            elemRefStack.array[elemRefStack.size++].element = child;
+                        }
                     }
 
                 }

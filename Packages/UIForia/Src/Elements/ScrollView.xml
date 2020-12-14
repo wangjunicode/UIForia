@@ -11,11 +11,13 @@
         style scroll-track {
             BackgroundColor = @trackColor;
             BorderRadius = 3px;
+            ClipBehavior = Skip;
         }
 
         style scroll-handle {
             BorderRadius = 50%;
             BackgroundColor = grey;
+            ClipBehavior = Skip;
         }
 
     </Style>

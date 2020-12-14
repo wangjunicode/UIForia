@@ -37,6 +37,9 @@ namespace UIForia.Elements {
         internal int xDirection;
         internal int yDirection;
 
+        internal float scrollPixelAmountX;
+        internal float scrollPixelAmountY;
+
         internal UIElement verticalHandle;
         internal UIElement horizontalHandle;
         
@@ -59,6 +62,9 @@ namespace UIForia.Elements {
         }
 
         public override void OnUpdate() {
+            scrollPixelAmountX = 0;
+            scrollPixelAmountY = 0;
+            
             if (isScrollingY) {
                 elapsedTotalTime += Time.unscaledDeltaTime;
 

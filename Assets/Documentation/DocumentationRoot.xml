@@ -28,10 +28,11 @@
                 <Anchor href="'/SoundSystemDemo'">Sound Demo</Anchor>
                 <Anchor href="'/StylePropertiesDemo'">Style Properties</Anchor>
                 <Anchor href="'/TransclusionDemo'">Transclusion</Anchor>
+                <Anchor href="'/ScrollBehaviorDemo'">Scroll Behavior</Anchor>
 
             </ScrollView>
 
-            <ScrollView disableAutoScroll="true" style="demo-panel" attr:router="demo" attr:defaultRoute="/index">
+            <ScrollView disableAutoScroll="true" style="demo-panel" attr:router="demo" attr:defaultRoute="/ScrollBehaviorDemo">
 
                 <override:Children style="demo-panel-children">
                     
@@ -68,6 +69,7 @@
                     <SoundSystemDemo style="demo-panel-route" attr:route="/SoundSystemDemo"/>
                     <StylePropertiesDemo style="demo-panel-route" attr:route="/StylePropertiesDemo"/>
                     <TransclusionDemo style="demo-panel-route" attr:route="/TransclusionDemo"/>
+                    <ScrollBehaviorDemo style="demo-panel-route" attr:route="/ScrollBehaviorDemo"/>
                 </override:Children>
                 
             </ScrollView>

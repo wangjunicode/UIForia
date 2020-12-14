@@ -690,6 +690,11 @@ namespace UIForia.Editor {
 
                 case StylePropertyId.LayoutBehavior:
                     return DrawEnumWithValue<LayoutBehavior>(property, isEditable);
+                
+                case StylePropertyId.ScrollBehaviorX:
+                    return DrawEnumWithValue<ScrollBehavior>(property, isEditable);
+                case StylePropertyId.ScrollBehaviorY:
+                    return DrawEnumWithValue<ScrollBehavior>(property, isEditable);
 
                 case StylePropertyId.ZIndex:
                 case StylePropertyId.RenderLayerOffset:

@@ -195,6 +195,8 @@ namespace UIForia.Editor {
             // Layout
             new PropertyGenerator<LayoutType>(StylePropertyId.LayoutType, LayoutType.Flex),
             new PropertyGenerator<LayoutBehavior>(StylePropertyId.LayoutBehavior, LayoutBehavior.Normal),
+            new PropertyGenerator<ScrollBehavior>(StylePropertyId.ScrollBehaviorX, ScrollBehavior.Default), 
+            new PropertyGenerator<ScrollBehavior>(StylePropertyId.ScrollBehaviorY, ScrollBehavior.Default),
             new AnimatedPropertyGenerator<int>(StylePropertyId.ZIndex, 0, InheritanceType.Inherited),
             new AnimatedPropertyGenerator<int>(StylePropertyId.RenderLayerOffset, 0),
             new AnimatedPropertyGenerator<RenderLayer>(StylePropertyId.RenderLayer, RenderLayer.Default),

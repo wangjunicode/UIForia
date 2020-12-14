@@ -142,6 +142,8 @@ namespace UIForia.Rendering {
 		public const float TransformRotation = 0f;
 		public const LayoutType LayoutType = UIForia.Layout.LayoutType.Flex;
 		public const LayoutBehavior LayoutBehavior = UIForia.Layout.LayoutBehavior.Normal;
+		public const ScrollBehavior ScrollBehaviorX = UIForia.Layout.ScrollBehavior.Default;
+		public const ScrollBehavior ScrollBehaviorY = UIForia.Layout.ScrollBehavior.Default;
 		public const int ZIndex = 0;
 		public const int RenderLayerOffset = 0;
 		public const RenderLayer RenderLayer = UIForia.Rendering.RenderLayer.Default;
@@ -413,6 +415,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.LayoutType, (int)UIForia.Layout.LayoutType.Flex);
 				case StylePropertyId.LayoutBehavior:
 					 return new StyleProperty(StylePropertyId.LayoutBehavior, (int)UIForia.Layout.LayoutBehavior.Normal);
+				case StylePropertyId.ScrollBehaviorX:
+					 return new StyleProperty(StylePropertyId.ScrollBehaviorX, (int)UIForia.Layout.ScrollBehavior.Default);
+				case StylePropertyId.ScrollBehaviorY:
+					 return new StyleProperty(StylePropertyId.ScrollBehaviorY, (int)UIForia.Layout.ScrollBehavior.Default);
 				case StylePropertyId.ZIndex:
 					 return new StyleProperty(StylePropertyId.ZIndex, 0);
 				case StylePropertyId.RenderLayerOffset:

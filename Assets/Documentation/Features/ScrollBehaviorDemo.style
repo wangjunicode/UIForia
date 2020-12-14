@@ -1,0 +1,16 @@
+style scroll {
+    PreferredHeight = 512px;
+}
+
+style scroll-fixed {
+    ScrollBehaviorY = Fixed;
+    BackgroundColor = blue;
+}
+
+style simple-cell {
+    PreferredSize = 200px;
+    Border = 1px;
+    BorderColor = black;
+    BackgroundColor = yellow;
+}
+

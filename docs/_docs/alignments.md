@@ -135,7 +135,7 @@ bounds:
 | View              | The aligned element will not leave the view.                                                                                                               |
 | Screen            | The aligned element will not leave the screen.                                                                                                             |
 | Clipper           | Refers to the next element in the hierarchy that clips this element. A parent that defines `Overflow = Hidden;` for example. Ultimately the view / screen. |
-
+![](/assets/img/alignment_boundary.gif)
 
 ## AlignX AlignY
 `AlignX = AlignmentOrigin [AlignmentOffset] [AlignmentTarget] [AlignmentDirection]`

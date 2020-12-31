@@ -113,11 +113,14 @@ They have to be on a single line and be surrounded by quotation marks `"string"`
 Used for things that need to measured and can relate to other element sizes.
  * `Pixel`  in style sheets: `px` -- one device pixel
  * `ParentContentArea` in style sheets: `pca` The measure of the parents size minus its padding and border
+ * `Percent` in style sheets: `%` the percentage of an element's size on the related axis
  * `ParentSize` in style sheets: `psz` The total measure of the parent's size
  * `Em` in style sheets: `em` the em size of the current font applied to the element
  * `Content` in style sheets: `cnt` the size of the element's content
  * `ViewWidth` in style sheets: `vw` the width of the root element in the element's hierarchy
  * `ViewHeight` in style sheets: `vh` the height of the root element in the element's hierarchy
+ * `BackgroundWidth` in style sheets: `bw` the width of the element's `BackgroundImage`
+ * `BackgroundHeight` in style sheets: `bh` the height of the element's `BackgroundImage`
  
 ### UIFixedLength
 Used for tings that have lengths relative to an element.

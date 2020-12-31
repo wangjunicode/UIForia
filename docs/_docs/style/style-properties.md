@@ -262,7 +262,8 @@ This property lets you opt-out of the normal layout flow.
 
 - `Ignored` is usually used with [alignments](/docs/alignments) or transforms. To
     place an element at a specific place without affecting the layout of siblings.
-    In a grid it will *not* count towards any cell in a row or column track.
+    In a grid it will *not* count towards any cell in a row or column track. The
+    parent's size will not be affected by the Ignored element.
  
 - `TranscludeChildren` is automatically applied to all `<Children />` elements but
     can be applied to any user element as well. Useful when a dedicated custom
@@ -270,7 +271,9 @@ This property lets you opt-out of the normal layout flow.
     apply.
  
 ### `LayoutType`
-`Grid` or `Flex`  
+- [Flex](/docs/layout/flex)
+- [Grid](/docs/layout/grid)
+- [Stack](/docs/layout/stack)
 
 ### `Margin` : [UIMeasurement](/docs/types#uimeasurement) 
 1-4 parameter shorthand. Sets space around elements, outside of any defined borders.   

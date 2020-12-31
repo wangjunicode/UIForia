@@ -111,8 +111,10 @@ AlignmentTarget = Screen;
 AlignmentDirection = Start End;
 AlignmentOrigin = 20px;
 ```
- 
-Note: `AlignmentDirection` **cannot** be used in animations!
+
+
+{% include alert.html type="info" title="Note: `AlignmentDirection` **cannot** be used in animations!" %}
+
 
 ## AlignmentBoundary
 ```
@@ -136,6 +138,7 @@ bounds:
 | Screen            | The aligned element will not leave the screen.                                                                                                             |
 | Clipper           | Refers to the next element in the hierarchy that clips this element. A parent that defines `Overflow = Hidden;` for example. Ultimately the view / screen. |
 
+![](/assets/img/alignment_boundary.gif)
 
 ## AlignX AlignY
 `AlignX = AlignmentOrigin [AlignmentOffset] [AlignmentTarget] [AlignmentDirection]`

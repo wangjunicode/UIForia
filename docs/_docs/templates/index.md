@@ -8,6 +8,8 @@ layout: page
 order: 9
 ---
 
+# Templates
+
 UIForia has a very sophisticated template engine that takes in an
 XML-like template syntax and converts it to IL code that is executed.
 There are two ways this can happen, either at application start up time
@@ -109,12 +111,6 @@ public class MyElement : UIElement {
     </Contents>
 </UITemplate>
 ```
-
-### Sync
-
-### OnChange
-
-### If
 
 ### Attributes
 
@@ -261,27 +257,3 @@ in your expression.
 <!-- Instance style is set only once instead of every frame -->
 <Element style.once:hover.backgroundColor="myColor"/>
 ```
-
-
-
-### Input Handlers
-
-#### Mouse
-#### Keyboard
-#### Touch
-#### Controller
-
-### Context Variables
-
-### Repeat Variables
-
-### Aliases
-
-### Generic Elements
-
-### Slots
-#### define
-#### override
-#### forward
-    
-    

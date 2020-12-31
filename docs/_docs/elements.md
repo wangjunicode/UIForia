@@ -3,7 +3,7 @@ title: Elements
 description: Built-in Elements
 layout: page
 tags:
- - InputElement
+ - Input
  - Select
  - ScrollView
  - Repeat
@@ -64,6 +64,10 @@ columns. You also have the advantage of adding styles to the text nodes.
     </Contents>
 </UITemplate> 
 ```
+
+By default all text will be content sized, i.e. a long sentence will take up a lot of horizontal space.
+If you want text to wrap you just need to specify the Text's `PreferredWidth` (or `MaxWidth`). 
+Check out the [text syle properties](/docs/style/style-properties#text) too!
 
 ## Containers
 Containers serve only structural purposes, i.e. for better readability you'd use 
@@ -129,47 +133,35 @@ style <Button> {
 This one emulates a for-each loop. The `<Repeat>` element takes one required and a couple
 of optional parameters:
 
-| Parameter   | Required | Type                | Description                                                                                                                                             |
-|-------------|----------|---------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| list        | (x)      | `RepeatableList<T>` | Data that you want to iterate                                                                                                                      |
-| as          |          | `string`            |  Change the variable alias of the current iteration item from the default `item` to something else. The alias can then be   referred to as `$yourItem`. |
-| lengthAlias |          | `string`            |  Similar to `as` the `lengthAlias` changes the variable alias that refers to the length of the list.                                                    |
-| indexAs     |          | `string`            |  Same as above, `indexAs` gives the index variable a new name.                                                                                          |
+| Parameter | Required | Type            | Description                                                                                                                                             |
+|-----------|----------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| list      | (x)      | `List or array` | Data that you want to iterate                                                                                                                           |
+| start     |          | `int`           | The start index to iterate from                                                                                                                         |
+| end       |          | `int`           | End index, non inclusive                                                                                                                                |
+| count     |          | `int`           | Can be used instead of the `list` property if you only want the equivalent of a for-loop. `start` and `end` cannot be used in conjunction with `count`. |
+
+Additionally you can access a few context variables inside the element body:
+
+`$item` - the current iteration's item, only available if `list` is set
+`$index` - the current iteration index, works for `list` and `count` both
+
 
 ``` xml
 <Repeat list="data.entries">
-    <Div>{$item.name}  is the value at index {$index} / {$length}</Div>
+    <Div>{$item.name}  is the value at index {$index} / {data.entries.Count}</Div>
+</Repeat>
+
+prints: 
+line 0
+line 1
+line 2
+<Repeat count="3">
+    <Div>line {$index}</Div>
 </Repeat>
 ```
 
-### RepeatableList
-As of right now you have to wrap your data in a `RepeatableList<T>` to use the `Repeat` element.
-Items added to RepeatableList will result in new elements being created, removing items will destroy the elements.
-Right now you have to keep that fact in mind when using `<Repeat>`. Rather than removing and adding items
-to the list, which will cause some significant garbage when done every frame, you could instead use 
-`RepeatableList.Upsert` to change the data at an index. Since bindings run every frame you will see your
-data being updated. But instead of deleting and recreating a `UIElement` for the changed value UIForia 
-will just update its bound values.
-
-```
-[Template("MyElement.xml")]
-public class MyElement : UIElement {
-
-    public RepeatableList<string> currentlyActiveUserNames;
-    
-    public override void OnCreate() {
-        currentlyActiveUserNames = new [] { "foo", "bar" };
-    }
-    
-    public override void OnUpdate() {
-        List<string> users = ActiveUserSystem.GetActiveUsers();
-        currentlyActiveUserNames.ReplaceList(users);       
-    }
-}
-```
-
-## InputElement
-The InputElement supports generic typed values. It's one of the basic form elements (forms is an upcoming feature, stay tuned).
+## Input
+The Input element supports generic typed values. It's one of the basic form elements (forms is an upcoming feature, stay tuned).
 
 | Parameter      | Required | Type                                   | Description                                                                                      |
 |:---------------|:---------|:---------------------------------------|:-------------------------------------------------------------------------------------------------|
@@ -190,18 +182,18 @@ numbers with a super high precision.
 ### Examples
 
 ``` xml
-<Input value.read.write="name" placeholder="'Enter your name'" />
+<Input value:sync="name" placeholder="'Enter your name'" />
 ```
 
 is a shorthand for the generic version:
 
 ``` xml
-<InputElement--string value.read.write="name" placeholder="'Enter your name'" />
+<Input value:sync="name" placeholder="'Enter your name'" />
 ```
 
 `value` is an `int`:
 ``` xml
-<InputElement--int value.read.write="age" placeholder="'Enter your age'" />
+<Input value:sync="age" placeholder="'Enter your age'" />
 ```
 
 ## Select
@@ -213,24 +205,23 @@ is a shorthand for the generic version:
 | selectedIndex       |          | int                              | yes                    | You can bind to the selectedIndex in addition or as an alternative to seletedValue.                                                      |
 | onIndexChanged      |          | `Action<int>`                    | *                      | Gets executed when the selected value changes and thus the selectedIndex with it.                                                        |
 | defaultValue        |          | T                                |                        | Will be used if the `selectedValue` is null or unset.                                                                                    |
-| options             | yes      | RepeatableList<ISelectOption<T>> |                        | The backing data for the select element.                                                                                                 |
+| options             | yes      | List<ISelectOption<T>> |                        | The backing data for the select element.                                                                                                 |
 | selectedElementIcon |          | string                           |                        | Defaults to `"icons/ui_icon_popover_checkmark@2x"`; it's the little icon that gets drawn next to the selected value in the options list. |
 | disabled            |          | bool                             |                        | Disables the select element                                                                                                              |
 | scrollSpeed         |          | float                            |                        | Default: 10                                                                                                                              |
 | disableOverflowX    |          | bool                             |                        | Disables horizontal scrolling                                                                                                            |
 | disableOverflowY    |          | bool                             |                        | Disables vertical scrolling                                                                                                              |
 
-## Write Bindings
+## Sync Bindings
 <span class="badge badge-info">A more detailed article around bindings will come later!</span>
 
-As seen in `InputElement` and `Select` you can opt-in to write bindings for some of their parameters.
+As seen in `Input` and `Select` you can opt-in to write bindings for some of their parameters.
 That allows for automatic write-back into your custom element's property. By default all property bindings
 are read bindings. Element properties can be configured with binding options.
 
-These two examples are the same for instance, since `.read` is implicitly added for every property binding:
+In this example the `name` property will be updated 
 ``` xml
-<InputElement--string value.read.write="name" placeholder="'Enter your name'" />
-<InputElement--string value.read.write="name" placeholder.read="'Enter your name'" />
+<Input value:sync="name" onChange:value="MyChangeHandler($newValue, $oldValue)" placeholder="'Enter your name'" />
 ```
 
 That roughly translates to: 
@@ -241,60 +232,61 @@ For the value field it would be
 - if the `value` changes due to some action inside of the input element write that change back to `name`  
 
 
-## Custom Generic Types for InputElement or Select
- 
-When using custom generic types make sure you import it in your template `<Using namespace="your.name.space" />`:
+## Custom Generic Types for Input or Select
+
+UIForia can figure out generic types on its own, so this works:
+
+```c#
+public class MyElement<T> : UIElement {
+   public T value;
+}
+```
+
 ``` xml
 <UITemplate>
-    <Using namespace="your.name.space" />
     <Using namespace="UIForia.Animation" />
     <Contents>
-        <InputElement--CustomType value.read.write="myval" />
-        <Select--AnimationDirection options="directions" selectedValue.read.write="direction" />
+        <MyElement value="myval" />
+        <Input value:sync="myval" />
+        <Select options="directions" selectedValue:sync="direction" />
     </Contents>
 </UITemplate>
 ```
 
 ## ScrollView
 Use this element if you want to define a fixed size area that may have children occupying more than that space.
-The ScrollView element must not be content sized, otherwise you'll never see any scroll bars. Basically any other size will work.
 
-| Parameter        | Required | Type  | Description                                                                                                           |
-|:-----------------|:---------|:------|:----------------------------------------------------------------------------------------------------------------------|
-| scrollSpeed      |          | float | Default: 50                                                                                                           |
-| fadeTime         |          | float | Default: 2 - the time it takes until the scroll handles start to fade out                                             |
-| fadeTarget       |          | float | By default the scroll handles disappear. Set this parameter to a value between 0 and 1 to change their final opacity. |
-| disableOverflowX |          | bool  | Disables horizontal scrolling                                                                                         |
-| disableOverflowY |          | bool  | Disables vertical scrolling                                                                                           |
+<span class="badge badge-warning">The ScrollView element must not be content sized, otherwise you'll never see any scroll bars. Basically any other size will work.</span>
+
+| Parameter         | Required | Type  | Description                                           |
+|-------------------|----------|-------|-------------------------------------------------------|
+| scrollSpeedX      |          | float | Default: 16                                           |
+| scrollSpeedY      |          | float | Default: 48                                           |
+| disableOverflowX  |          | bool  | Disables horizontal scrolling                         |
+| disableOverflowY  |          | bool  | Disables vertical scrolling                           |
+| disableAutoScroll |          | bool  | Default: false                                        |
+| isOverflowingX    |          | bool  | read-only, true if the horizontal axis is overflowing |
+| isOverflowingY    |          | bool  | read-only, true if the vertical axis is overflowing   |
+
+### AutoScrolling - disableAutoScroll
+By default the ScrollView will reset its scroll position if the content size changed. 
+You can disable this behavior with `disableAutoScroll="true"`. That is useful for chats
+or other situations when data keeps updating the scroll view's content size and manual
+scroll position adjustment is required.
+
+### ScrollIntoView
+Every UIElement has a method `ScrollIntoView()` that will automatically set its parent's 
+scroll position so that the element's top or bottom edge aligns with the
+ScrollView's upper or lower edge, depending on the necessary scroll direction.
 
 ### ScrollView API
+
 Use `FindBy` in your element to get a reference to the ScrollView, then you may use one of the following
 methods to change the scroll position.
-
-#### `ScrollElementIntoView(UIElement element)`
-The passed in element must be a child of the ScrollView, of course. The resulting
-scroll position will be so that the element's top or bottom edge aligns with the 
-ScrollView's upper or lower edge, depending on the necessary scroll direction.
 
 #### `ScrollToHorizontalPercent(float percentage)`
 `percentage` must be a value between 0 and 1. 
 
 #### `ScrollToVerticalPercent(float percentage)`
 `percentage` must be a value between 0 and 1.
- 
-#### UIScrollEvent
-ScrollViews also consume UIScrollEvents. When any child of a ScrollView raises
-this event the scroll position will be changed to the event's `ScrollDestinationX`
-or `ScrollDestinationY` properties. If any of them is smaller than 0 there
-will be no scrolling in that axis.
-
-To raise an event you'd do this:
-
-```
-public void ScrollUp(MouseInputEvent evt) {
-    TriggerEvent(new UIScrollEvent(-1, 0));
-}
-```
-
-## Dynamic
 

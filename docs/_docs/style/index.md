@@ -12,9 +12,6 @@ tags:
 
 # Style Sheets
 
-
-
-
 ## Syntax
 
 Keyword           | Description
@@ -26,7 +23,6 @@ Keyword           | Description
 `from`            | Specify the style file location that should be imported. More details in the section about imports.
 `style`           | Creates a style definition.
 `[attr:attrName]` | Used inside a style group to create an attribute style group. See the attribute section below for more.
-`not` / `and`     | Used in conjunction with attribute style definitions. See the attribute section below for more.
 
 ### Syntax Highlighting
 There aren't any IDE plugins yet, but we created a Rider file type configuration file that gives you at
@@ -38,7 +34,7 @@ The `.style` extension should be mapped accordingly after a restart.
 ## Create an element style
   
 ```
-Style <Group> {
+style <Group> {
 
 }
 ```
@@ -54,39 +50,29 @@ export const baseDirection = Vertical;
 ## Reference UIForia Enums
 `const anotherDirection = Horizontal;`
 
-
-## Import Exported Constants from other Style Files
-`import vars as Constants from "file.style";`
+## Import constants from other style sheets
+```
+import "Theme.style" as theme;
+style my-style {
+    TextColor = @theme.lime400;
+}
+```
 
 ## Create a style definition that can be assigned in the template via the style attribute
 ```
 style MattsStyleSheet {
 
-   // styles not applied in a block implicitly belong to the 'default' group
-   // states applies in a block not wrapped in a group block belong to the 'default' group
+    [attr:attrName] {
+        [state-name-here] {
+            BackgroundColor = @Constants.color0;
+        }
+    }
 
-   // example:
-   // [hover] {}
-
-   [attr:attrName] {
-       [state-name-here] {
-           BackgroundColor = @Constants.color0;
-       }
-   }
+    [attr:name="matt"] {
+        // only applies if the element has an 
+    }
 
    [attr:attrName="value"] {}
-
-   [attr:attrName="value"] and [attr:other] {}
-
-   not [attr:attrName] {}
-
-   not [$siblingIndex % 3 == 0] {
-       MarginTop: @vars.margin1;
-   }
-
-   not [$siblingIndex > 2] {
-       @use styleNameHere;
-   }
 
    [state-name-here] {
        // block of styles
@@ -96,22 +82,20 @@ style MattsStyleSheet {
 }
 ```
 
-
-
-
 ## Style by Attributes
  
 So you want to add a special style for your element based on its attributes?
  
 ```<Input attr:disabled="true" text="'some text'" style="button"/>```
-  
-Be aware of UIForia's distinction between attributes and properties. To set an attribute you have to use the
-`x-` notation. 
 
-To add a stylable `disabled` attribute you have to write `x-disabled` and assign your value.  
+UIForia attributes always expect plain strings as values in contrast to properties,
+which expect expressions (hence the double quoting when passing strings):
 
-UIForia attributes always expect plain strings as values in contrast to properties, which expect expressions (hence 
-the double quoting when passing strings).  
+```<Div attr:id="myId" />```
+
+So in order to use expressions with attributes you need to use the curly-brace notation:
+
+```<Div attr:id="{GetId()}" />```
 
 After defining an attribute in your element, go to your style definition and add an attribute style group like this:
 ```
@@ -128,6 +112,11 @@ style button {
 }
 ```
 
+Note when using booleans in expressions: 
+
+```<Div attr:disabled="{IsDisabled}" />```
+
+This will result in `[attr:disabled="True"]`, with a capital T!
 
 ## Colors
 The colors are defined by CSS color values.

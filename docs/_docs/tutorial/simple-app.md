@@ -138,7 +138,7 @@ style big-text {
 You can add any style property to these sub style groups of course. Hover over the text to change its color to
 yellow or hold your left mouse button down to change it to green. Notice that `[focus]` is a bit special,
 as it requires the element to be focusable in the first place. A simple text can not get focus (yet) but an
-[`<Input>` element](/docs/elements#inputelement) might!
+[`<Input>` element](/docs/elements#input) might!
 
 There's a whole [guide around style sheets](/docs/style), which you should check out.
 You should also have a look at the [list of built-in elements](/docs/elements#built-in-elements).

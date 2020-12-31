@@ -37,6 +37,3 @@ injection though!
 
 ## List of all supported colors
 {% include colors.html %}
-
-## Types
-

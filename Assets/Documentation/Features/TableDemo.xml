@@ -1,0 +1,95 @@
+<UITemplate>
+    <Style src="Documentation/Features/TableDemo.style" />
+
+    <Style>
+
+        style container {
+            FlexLayoutDirection = Horizontal;
+            PreferredSize = 500px;
+            BackgroundColor = white;
+        }
+
+        style w100h100 {
+            PreferredSize = 100px;
+            BackgroundColor = red;
+            Border = 1px;
+            BorderColor = black;
+        }
+
+
+    </Style>
+    
+    <Contents style="table-demo">
+        <!-- Column Headers -->
+<!--        Pinned Left-->
+<!--        <Div style="table-container">-->
+<!--            <ScrollView style="table-scroll">-->
+<!--                <Div style="table-header-row scroll-fixed-y">-->
+<!--                    <Div style="col1 scroll-fixed">Header1</Div>-->
+<!--                    <Div style="col2">Header2</Div>-->
+<!--                    <Div style="col3">Header3</Div>-->
+<!--                </Div>-->
+<!--                <Div style="table-body">-->
+<!--                    <Div style="table-column col1 scroll-fixed">-->
+<!--                        <Div style="table-cell">Row 0: Column 0</Div>-->
+<!--                        <Div style="table-cell">Row 1: Column 0</Div>-->
+<!--                        <Div style="table-cell">Row 2: Column 0</Div>-->
+<!--                    </Div>-->
+<!--                    <Div style="table-column col2">-->
+<!--                        <Div style="table-cell">Row 0: Column 1</Div>-->
+<!--                        <Div style="table-cell">Row 1: Column 1</Div>-->
+<!--                        <Div style="table-cell">Row 2: Column 1</Div>-->
+<!--                    </Div>-->
+<!--                    <Div style="table-column col3">-->
+<!--                        <Div style="table-cell">Row 0: Column 2</Div>-->
+<!--                        <Div style="table-cell">Row 1: Column 2</Div>-->
+<!--                        <Div style="table-cell">Row 2: Column 2</Div>-->
+<!--                    </Div>-->
+<!--                </Div>-->
+<!--            </ScrollView>-->
+<!--        </Div>-->
+
+
+
+        <Div style="container">
+            <Group style='w100h100'/>
+            <Group style='w100h100'/>
+            <Group style='w100h100'/>    
+        </Div>
+        
+
+        Pinned Right
+        <Div style="table-container">
+            <ScrollView style="table-scroll">
+                <Div style="table-header-row scroll-fixed-y">
+                    <Div style="col1">Header1</Div>
+                    <Div style="col2">Header2</Div>
+                    <Div style="col3">Header3</Div>
+                    <Div style="col4  scroll-fixed">Header4</Div>
+                </Div>
+                <Div style="table-body">
+                    <Div style="table-column col1">
+                        <Div style="table-cell">Row 0: Column 0</Div>
+                        <Div style="table-cell">Row 1: Column 0</Div>
+                        <Div style="table-cell">Row 2: Column 0</Div>
+                    </Div>
+                    <Div style="table-column col2  ">
+                        <Div style="table-cell">Row 0: Column 1</Div>
+                        <Div style="table-cell">Row 1: Column 1</Div>
+                        <Div style="table-cell">Row 2: Column 1</Div>
+                    </Div>
+                    <Div style="table-column col3">
+                        <Div style="table-cell">Row 0: Column 2</Div>
+                        <Div style="table-cell">Row 1: Column 2</Div>
+                        <Div style="table-cell">Row 2: Column 2</Div>
+                    </Div>
+                    <Div style="table-column col4  scroll-fixed">
+                        <Div style="table-cell">Row 0: Column 2</Div>
+                        <Div style="table-cell">Row 1: Column 2</Div>
+                        <Div style="table-cell">Row 2: Column 2</Div>
+                    </Div>
+                </Div>
+            </ScrollView>
+        </Div>
+    </Contents>
+</UITemplate>

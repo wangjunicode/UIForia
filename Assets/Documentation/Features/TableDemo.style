@@ -1,0 +1,63 @@
+style table-demo {
+
+}
+
+style table-container {
+    BackgroundColor = white;
+}
+
+style table-scroll {
+    PreferredWidth = 500px;
+    PreferredHeight = 200px;
+}
+
+style table-header-row {
+    FlexLayoutDirection = Horizontal;
+    TextFontSize = 20;
+    MarginBottom = 5;
+}
+
+style table-body {
+    FlexLayoutDirection = Horizontal;
+}
+
+style table-column {
+}
+
+style table-cell {
+    PreferredHeight = 100px;
+    BorderColor = black;
+    Border = 1px;
+    MarginBottom = 1px;
+    PreferredWidth = 1pca;
+}
+
+style col1 {
+    BackgroundColor = red;
+    PreferredWidth = 200px;
+}
+
+style col2 {
+    BackgroundColor = blue;
+    PreferredWidth = 200px;
+}
+
+style col3 {
+    BackgroundColor = green;
+    PreferredWidth = 200px;
+}
+
+style col4 {
+    BackgroundColor = yellow;
+    PreferredWidth = 100px;
+}
+
+style scroll-fixed {
+    ScrollBehaviorX = Fixed;
+    AlignmentTarget = Parent;
+    AlignmentBoundary = Clipper;
+}
+
+style scroll-fixed-y {
+    ScrollBehaviorY = Fixed;
+}

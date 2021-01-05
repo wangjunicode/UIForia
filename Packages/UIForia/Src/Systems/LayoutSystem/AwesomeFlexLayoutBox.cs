@@ -568,6 +568,10 @@ namespace UIForia.Systems {
                 // available size is equal to base size but we need to take up base size + margin in the layout
                 track.remaining -= item.baseWidth + item.widthData.marginStart + item.widthData.marginEnd;
             }
+            
+            float gap = element.style.GridLayoutColGap;
+
+            track.remaining -= gap * (items.size - 1);
 
             if (track.remaining > 0) {
                 GrowHorizontal(ref track);
@@ -588,7 +592,6 @@ namespace UIForia.Systems {
             SpaceDistributionUtil.GetAlignmentOffsets(track.remaining, track.endIndex - track.startIndex, alignment, out offset, out spacerSize);
 
             float itemAlignment = element.style.AlignItemsHorizontal;
-            float gap = 0; //element.style.GridLayoutColGap;
 
             for (int i = 0; i < items.size; i++) {
                 ref FlexItem item = ref items.array[i];
@@ -677,6 +680,10 @@ namespace UIForia.Systems {
                 item.availableSize = item.baseHeight;
                 remaining -= item.baseHeight + item.heightData.marginStart + item.heightData.marginEnd;
             }
+            
+            float gap = element.style.GridLayoutColGap;
+
+            remaining -= gap * (items.size - 1);
 
             if (remaining > 0) {
                 remaining = GrowVertical(remaining);
@@ -696,7 +703,6 @@ namespace UIForia.Systems {
 
             SpaceDistributionUtil.GetAlignmentOffsets(remaining, childCount, alignment, out offset, out spacerSize);
             float itemAlignment = element.style.AlignItemsVertical;
-            float gap = 0; //element.style.GridLayoutColGap;
 
             for (int i = 0; i < items.size; i++) {
                 ref FlexItem item = ref items.array[i];
@@ -738,7 +744,6 @@ namespace UIForia.Systems {
             }
 
             float itemAlignment = element.style.AlignItemsVertical;
-            //float gap = 0; //element.style.GridLayoutColGap;
 
             for (int i = 0; i < items.size; i++) {
                 ref FlexItem item = ref items.array[i];

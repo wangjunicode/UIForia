@@ -202,6 +202,20 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 500, 100, 250), root[2].layoutResult.AllocatedRect);
         }
 
-    }
+        [Template("Data/Layout/FlexVertical/FlexVertical_Gap.xml")]
+        public class FlexVertical_Gap : UIElement {
+        }
 
+        [Test]
+        public void Gap() {
+            MockApplication app = MockApplication.Setup<FlexVertical_Gap>();
+            FlexVertical_Gap root = (FlexVertical_Gap)app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 110, 100, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 220, 100, 100), root[2].layoutResult.AllocatedRect);
+        }
+    }
 }

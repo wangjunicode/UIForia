@@ -214,6 +214,174 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 350, 200, 100), root[4].layoutResult.AllocatedRect);
         }
 
+        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_WrapWhenTrackFullWithGap.xml")]
+        public class FlexHorizontalWrap_WrapWhenTrackFullWithGap : UIElement { }
+        
+        [Test]
+        public void WrapWhenTrackFullWithGap() {
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_WrapWhenTrackFullWithGap>();
+            FlexHorizontalWrap_WrapWhenTrackFullWithGap root = (FlexHorizontalWrap_WrapWhenTrackFullWithGap) app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 110, 100, 100), root[1].layoutResult.AllocatedRect);
+        }
+        
+        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_NoWrapWithGap.xml")]
+        public class FlexHorizontalWrap_NoWrapWithGap : UIElement { }
+        
+        [Test]
+        public void NoWrapWithGap() {
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_NoWrapWithGap>();
+            FlexHorizontalWrap_NoWrapWithGap root = (FlexHorizontalWrap_NoWrapWithGap) app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+        }
+        
+        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_NoWrapTwoItemsWithGap.xml")]
+        public class FlexHorizontalWrap_NoWrapTwoItemsWithGap : UIElement { }
+        
+        [Test]
+        public void NoWrapTwoItemsWithGap() {
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_NoWrapTwoItemsWithGap>();
+            FlexHorizontalWrap_NoWrapTwoItemsWithGap root = (FlexHorizontalWrap_NoWrapTwoItemsWithGap) app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(110, 0, 100, 100), root[1].layoutResult.AllocatedRect);
+        }
+        
+        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_WrapWhenItemTooBigWithGap.xml")]
+        public class FlexHorizontalWrap_WrapWhenItemTooBigWithGap : UIElement { }
+        
+        [Test]
+        public void WrapWhenItemTooBigWithGap() {
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_WrapWhenItemTooBigWithGap>();
+            FlexHorizontalWrap_WrapWhenItemTooBigWithGap root = (FlexHorizontalWrap_WrapWhenItemTooBigWithGap) app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual(new Rect(0, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 110, 800, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 220, 200, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(210, 220, 200, 100), root[3].layoutResult.AllocatedRect);
+        }
+
+        
+        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWap_DistributeSpaceBetweenTracksWithGap.xml")]
+        public class FlexHorizontalWap_DistributeSpaceBetweenTracksWithGap : UIElement { }
+
+        [Test]
+        public void DistributeSpaceBetweenTracksWithGap() {
+            MockApplication app = MockApplication.Setup<FlexHorizontalWap_DistributeSpaceBetweenTracksWithGap>();
+            FlexHorizontalWap_DistributeSpaceBetweenTracksWithGap root = (FlexHorizontalWap_DistributeSpaceBetweenTracksWithGap) app.RootElement;
+
+            root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AfterContent, StyleState.Normal);
+            app.Update();
+
+            Assert.AreEqual(new Rect(0, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(210, 0, 200, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 110, 390, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 110, 200, 100), root[3].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 220, 200, 100), root[4].layoutResult.AllocatedRect);
+            
+            root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.BeforeContent, StyleState.Normal);
+            app.Update();
+            
+            Assert.AreEqual(new Rect(0, 280, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(210, 280, 200, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 390, 390, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 390, 200, 100), root[3].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 500, 200, 100), root[4].layoutResult.AllocatedRect);
+            
+            root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.BetweenContent, StyleState.Normal);
+            app.Update();
+            
+            Assert.AreEqual(new Rect(0, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(210, 0, 200, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 250, 390, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 250, 200, 100), root[3].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 500, 200, 100), root[4].layoutResult.AllocatedRect);
+            
+            // todo(roman): talk with Matt about proper behaviour in this case.
+            // root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AroundContent, StyleState.Normal);
+            // app.Update();
+            //
+            // Assert.AreEqual(new Rect(0, 50, 200, 100), root[0].layoutResult.AllocatedRect);
+            // Assert.AreEqual(new Rect(200, 50, 200, 100), root[1].layoutResult.AllocatedRect);
+            // Assert.AreEqual(new Rect(0, 250, 400, 100), root[2].layoutResult.AllocatedRect);
+            // Assert.AreEqual(new Rect(400, 250, 200, 100), root[3].layoutResult.AllocatedRect);
+            // Assert.AreEqual(new Rect(0, 450, 200, 100), root[4].layoutResult.AllocatedRect);
+            
+            root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.CenterContent, StyleState.Normal);
+            app.Update();
+            
+            Assert.AreEqual(new Rect(0, 140, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(210, 140, 200, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 250, 390, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 250, 200, 100), root[3].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 360, 200, 100), root[4].layoutResult.AllocatedRect);
+        }
+        
+         [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWap_DistributeSpaceInTrackWithGap.xml")]
+        public class FlexHorizontalWap_DistributeSpaceInTrackWithGap : UIElement { }
+
+        [Test]
+        public void DistributeSpaceInTrackWitGap() {
+            MockApplication app = MockApplication.Setup<FlexHorizontalWap_DistributeSpaceInTrackWithGap>();
+            FlexHorizontalWap_DistributeSpaceInTrackWithGap root = (FlexHorizontalWap_DistributeSpaceInTrackWithGap) app.RootElement;
+
+            root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.AfterContent, StyleState.Normal);
+            app.Update();
+
+            Assert.AreEqual(new Rect(0, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(210, 0, 200, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 110, 390, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 110, 200, 100), root[3].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 220, 200, 100), root[4].layoutResult.AllocatedRect);
+
+            root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.BeforeContent, StyleState.Normal);
+            app.Update();
+            
+            Assert.AreEqual(new Rect(190, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 0, 200, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 110, 390, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 110, 200, 100), root[3].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 220, 200, 100), root[4].layoutResult.AllocatedRect);
+            
+            root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.BetweenContent, StyleState.Normal);
+            app.Update();
+            
+            Assert.AreEqual(new Rect(0, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 0, 200, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 110, 390, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 110, 200, 100), root[3].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(200, 220, 200, 100), root[4].layoutResult.AllocatedRect);
+            
+            // todo(roman): Talk to Matt about proper behavior here.
+            // root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.AroundContent, StyleState.Normal);
+            // app.Update();
+            //
+            // Assert.AreEqual(new Rect(50, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+            // Assert.AreEqual(new Rect(350, 0, 200, 100), root[1].layoutResult.AllocatedRect);
+            // Assert.AreEqual(new Rect(0, 100, 400, 100), root[2].layoutResult.AllocatedRect);
+            // Assert.AreEqual(new Rect(400, 100, 200, 100), root[3].layoutResult.AllocatedRect);
+            // Assert.AreEqual(new Rect(200, 200, 200, 100), root[4].layoutResult.AllocatedRect);
+            
+            root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.CenterContent, StyleState.Normal);
+            app.Update();
+            
+            Assert.AreEqual(new Rect(95, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(305, 0, 200, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 110, 390, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 110, 200, 100), root[3].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(200, 220, 200, 100), root[4].layoutResult.AllocatedRect);
+        }
+        
     }
 
 }

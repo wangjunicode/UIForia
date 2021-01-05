@@ -178,6 +178,8 @@ namespace UIForia.Systems {
 
         private void RunLayoutHorizontalStep_HorizontalDirection_Wrapped(int frameId) {
             float contentAreaWidth = finalWidth - (paddingBorderHorizontalStart + paddingBorderHorizontalEnd);
+            float gap = element.style.GridLayoutColGap;
+            
             Track currentTrack = new Track(contentAreaWidth, 0);
             wrappedTracks = wrappedTracks ?? new StructList<Track>(4);
             wrappedTracks.QuickClear();
@@ -211,22 +213,41 @@ namespace UIForia.Systems {
                         currentTrack = new Track(contentAreaWidth, i + 1);
                     }
                 }
-                else if (currentTrack.remaining - itemSize == 0) {
-                    currentTrack.remaining -= itemSize;
-                    currentTrack.endIndex = i + 1;
-                    wrappedTracks.Add(currentTrack);
-                    currentTrack = new Track(contentAreaWidth, i + 1);
-                }
-                else if (currentTrack.remaining - itemSize < 0) {
-                    currentTrack.endIndex = i;
-                    wrappedTracks.Add(currentTrack);
-                    currentTrack = new Track(contentAreaWidth, i);
-                    currentTrack.remaining -= itemSize;
-                    currentTrack.endIndex = i + 1;
-                }
-                else {
-                    currentTrack.remaining -= itemSize;
-                    currentTrack.endIndex = i + 1;
+                // todo(roman): Clean-up duplication somehow.
+                else if (currentTrack.IsEmpty) {
+                    if (currentTrack.remaining - itemSize == 0) {
+                        // perfect fit here, no need to add a gap.
+                        currentTrack.remaining -= itemSize;
+                        currentTrack.endIndex = i + 1;
+                        wrappedTracks.Add(currentTrack);
+                        currentTrack = new Track(contentAreaWidth, i + 1);
+                    } else if (currentTrack.remaining - itemSize < 0) {
+                        currentTrack.endIndex = i;
+                        wrappedTracks.Add(currentTrack);
+                        currentTrack = new Track(contentAreaWidth, i);
+                        currentTrack.remaining -= itemSize;
+                        currentTrack.endIndex = i + 1;
+                    } else {
+                        currentTrack.remaining -= itemSize;
+                        currentTrack.endIndex = i + 1;
+                    }
+                } else {
+                    if (currentTrack.remaining - (gap + itemSize) == 0) {
+                        // perfect fit here, no need to add a gap.
+                        currentTrack.remaining -= gap + itemSize;
+                        currentTrack.endIndex = i + 1;
+                        wrappedTracks.Add(currentTrack);
+                        currentTrack = new Track(contentAreaWidth, i + 1);
+                    } else if (currentTrack.remaining - (gap + itemSize) < 0) {
+                        currentTrack.endIndex = i;
+                        wrappedTracks.Add(currentTrack);
+                        currentTrack = new Track(contentAreaWidth, i);
+                        currentTrack.remaining -= itemSize;
+                        currentTrack.endIndex = i + 1;
+                    } else {
+                        currentTrack.remaining -= (gap + itemSize);
+                        currentTrack.endIndex = i + 1;
+                    }
                 }
             }
 
@@ -235,7 +256,7 @@ namespace UIForia.Systems {
             }
 
             float itemAlignment = element.style.AlignItemsHorizontal;
-            float gap = 0; // something like element.style.GridLayoutColGap might be interesting here
+            
             SpaceDistribution alignment = element.style.DistributeExtraSpaceHorizontal;
 
             if (alignment == SpaceDistribution.Default) {
@@ -766,6 +787,7 @@ namespace UIForia.Systems {
 
         private void RunLayoutVerticalStep_HorizontalDirection_Wrapped(int frameId) {
             float contentStartY = paddingBorderVerticalStart;
+            float gap = element.style.GridLayoutColGap;
 
             float verticalAlignment = element.style.AlignItemsVertical;
             LayoutFit verticalLayoutFit = element.style.FitItemsVertical;
@@ -794,6 +816,8 @@ namespace UIForia.Systems {
                 remainingHeight -= maxHeight;
             }
 
+            remainingHeight -= gap * (wrappedTracks.size - 1);
+
             float offset = 0;
             float spacerSize = 0;
 
@@ -804,8 +828,7 @@ namespace UIForia.Systems {
 
                 float height = track.height;
                 float y = contentStartY + offset;
-                offset += height + spacerSize;
-
+                
                 for (int j = track.startIndex; j < track.endIndex; j++) {
                     ref FlexItem item = ref items.array[j];
 
@@ -823,6 +846,8 @@ namespace UIForia.Systems {
                         frameId
                     );
                 }
+                
+                offset += height + spacerSize + gap;
             }
         }
 

@@ -71,6 +71,22 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 100, 300, 100), root[2].layoutResult.AllocatedRect);
             Assert.AreEqual(new Rect(300, 100, 200, 100), root[3].layoutResult.AllocatedRect);
         }
+        
+        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_WrapWhenItemOverflowsWithGap.xml")]
+        public class FlexHorizontalWrap_WrapWhenItemOverflowsWithGap : UIElement { }
+
+        [Test]
+        public void WrapWhenItemOverflowsWithGap() {
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_WrapWhenItemOverflowsWithGap>();
+            FlexHorizontalWrap_WrapWhenItemOverflowsWithGap root = (FlexHorizontalWrap_WrapWhenItemOverflowsWithGap) app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual(new Rect(0, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(210, 0, 200, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 120, 300, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(310, 120, 200, 100), root[3].layoutResult.AllocatedRect);
+        }
 
         [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_GrowInTrack.xml")]
         public class FlexHorizontalWrap_GrowInTrack : UIElement { }

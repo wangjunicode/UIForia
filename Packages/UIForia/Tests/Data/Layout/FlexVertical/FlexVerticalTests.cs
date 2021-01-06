@@ -204,6 +204,9 @@ namespace Layout {
 
         [Template("Data/Layout/FlexVertical/FlexVertical_Gap.xml")]
         public class FlexVertical_Gap : UIElement {
+            public UIElement containerGap => children[0];
+            public UIElement containerGapHorizontal => children[1];
+            public UIElement containerGapVertical => children[2];
         }
 
         [Test]
@@ -213,9 +216,21 @@ namespace Layout {
 
             app.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 110, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(0, 220, 100, 100), root[2].layoutResult.AllocatedRect);
+            UIElement container = root.containerGap;
+            Assert.AreEqual(new Rect(0, 0, 100, 100), container[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 110, 100, 100), container[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 220, 100, 100), container[2].layoutResult.AllocatedRect);
+            
+            // gap not applied
+            container = root.containerGapHorizontal;
+            Assert.AreEqual(new Rect(0, 0, 100, 100), container[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 100, 100, 100), container[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 200, 100, 100), container[2].layoutResult.AllocatedRect);
+            
+            container = root.containerGapVertical;
+            Assert.AreEqual(new Rect(0, 0, 100, 100), container[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 110, 100, 100), container[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 220, 100, 100), container[2].layoutResult.AllocatedRect);
         }
     }
 }

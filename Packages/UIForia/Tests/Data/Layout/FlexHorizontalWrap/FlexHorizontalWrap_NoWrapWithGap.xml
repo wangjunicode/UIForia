@@ -7,7 +7,7 @@
             PreferredSize = 100px;
             BackgroundColor = Yellow;
             FlexLayoutWrap = WrapHorizontal;
-            GridLayoutColGap = 10;
+            FlexLayoutGap = 10;
         }
 
         style child {

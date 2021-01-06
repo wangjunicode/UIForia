@@ -78,6 +78,8 @@ namespace UIForia.Editor {
             // Flex Layout
             new PropertyGenerator<LayoutDirection>(StylePropertyId.FlexLayoutDirection, LayoutDirection.Vertical),
             new PropertyGenerator<LayoutWrap>(StylePropertyId.FlexLayoutWrap, LayoutWrap.None),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.FlexLayoutGapHorizontal, 0),
+            new AnimatedPropertyGenerator<float>(StylePropertyId.FlexLayoutGapVertical, 0),
 
             // Grid Item
             new PropertyGenerator<GridItemPlacement>(StylePropertyId.GridItemX, new GridItemPlacement(-1)),

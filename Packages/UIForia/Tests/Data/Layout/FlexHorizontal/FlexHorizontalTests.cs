@@ -204,18 +204,36 @@ namespace Layout {
         }
 
         [Template("Data/Layout/FlexHorizontal/FlexHorizontal_Gap.xml")] 
-        public class FlexHorizontal_Gap : UIElement { }
+        public class FlexHorizontal_Gap : UIElement { 
+            public UIElement containerGap => children[0];
+            public UIElement containerGapHorizontal => children[1];
+            public UIElement containerGapVertical => children[2];
+        }
 
         [Test]
         public void Gap() {
             MockApplication app = MockApplication.Setup<FlexHorizontal_Gap>();
-            FlexHorizontal_Gap root = (FlexHorizontal_Gap) app.RootElement;
+            FlexHorizontal_Gap root = (FlexHorizontal_Gap)app.RootElement;
 
             app.Update();
 
-            Assert.AreEqual(new Rect(0, 0, 100, 100), root[0].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(110, 0, 100, 100), root[1].layoutResult.AllocatedRect);
-            Assert.AreEqual(new Rect(220, 0, 100, 100), root[2].layoutResult.AllocatedRect);
+            UIElement container = root.containerGap;
+            Assert.AreEqual(new Rect(0, 0, 100, 500), container[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(110, 0, 100, 500), container[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(220, 0, 100, 500), container[2].layoutResult.AllocatedRect);
+            
+            container = root.containerGapHorizontal;
+            Assert.AreEqual(new Rect(0, 0, 100, 500), container[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(110, 0, 100, 500), container[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(220, 0, 100, 500), container[2].layoutResult.AllocatedRect);
+            
+            // gap not applied
+            container = root.containerGapVertical;
+            Assert.AreEqual(new Rect(0, 0, 100, 500), container[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(100, 0, 100, 500), container[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(200, 0, 100, 500), container[2].layoutResult.AllocatedRect);
         }
+        
     }
+    
 }

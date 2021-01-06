@@ -163,7 +163,10 @@ namespace UIForia.Compilers.Style {
                 {"flexitemshrink", (targetStyle, property, context) => targetStyle.FlexItemShrink = (int) MapNumber(property.children[0], context)},
                 {"flexlayoutwrap", (targetStyle, property, context) => targetStyle.FlexLayoutWrap = MapEnum<LayoutWrap>(property.children[0], context)},
                 {"flexlayoutdirection", (targetStyle, property, context) => targetStyle.FlexLayoutDirection = MapEnum<LayoutDirection>(property.children[0], context)},
-
+                {"flexlayoutgaphorizontal", (targetStyle, property, context) => targetStyle.FlexLayoutGapHorizontal = MapNumberOrPixels(property.children[0], context)},
+                {"flexlayoutgapvertical", (targetStyle, property, context) => targetStyle.FlexLayoutGapVertical = MapNumberOrPixels(property.children[0], context)},
+                {"flexlayoutgap", (targetStyle, property, context) => MapFlexLayoutGap(targetStyle, property, context)},
+                
                 {"radiallayoutstartangle", (targetStyle, property, context) => targetStyle.RadialLayoutStartAngle = MapNumber(property.children[0], context)},
                 {"radiallayoutendangle", (targetStyle, property, context) => targetStyle.RadialLayoutEndAngle = MapNumber(property.children[0], context)},
                 {"radiallayoutradius", (targetStyle, property, context) => targetStyle.RadialLayoutRadius = MapFixedLength(property.children[0], context)},
@@ -720,6 +723,17 @@ namespace UIForia.Compilers.Style {
 
             targetStyle.PreferredWidth = x;
             targetStyle.PreferredHeight = y;
+        }
+        
+        private static void MapFlexLayoutGap(UIStyle targetStyle, PropertyNode property, StyleCompileContext context) {
+            float gapHorizontal = MapNumberOrPixels(property.children[0], context);
+            float gapVertical = gapHorizontal;
+            if (property.children.Count > 1) {
+                gapVertical = MapNumberOrPixels(property.children[1], context);
+            }
+            
+            targetStyle.FlexLayoutGapHorizontal = gapHorizontal;
+            targetStyle.FlexLayoutGapVertical = gapVertical;
         }
 
         private static CursorStyle MapCursor(PropertyNode property, StyleCompileContext context) {

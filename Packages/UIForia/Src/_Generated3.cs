@@ -51,6 +51,8 @@ namespace UIForia.Rendering {
 		public const int FlexItemShrink = 0;
 		public const LayoutDirection FlexLayoutDirection = UIForia.Layout.LayoutDirection.Vertical;
 		public const LayoutWrap FlexLayoutWrap = UIForia.Layout.LayoutWrap.None;
+		public const float FlexLayoutGapHorizontal = 0f;
+		public const float FlexLayoutGapVertical = 0f;
 		public static readonly GridItemPlacement GridItemX = new GridItemPlacement(-1);
 		public static readonly GridItemPlacement GridItemY = new GridItemPlacement(-1);
 		public static readonly GridItemPlacement GridItemWidth = new GridItemPlacement(1);
@@ -233,6 +235,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)UIForia.Layout.LayoutDirection.Vertical);
 				case StylePropertyId.FlexLayoutWrap:
 					 return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)UIForia.Layout.LayoutWrap.None);
+				case StylePropertyId.FlexLayoutGapHorizontal:
+					 return new StyleProperty(StylePropertyId.FlexLayoutGapHorizontal, 0f);
+				case StylePropertyId.FlexLayoutGapVertical:
+					 return new StyleProperty(StylePropertyId.FlexLayoutGapVertical, 0f);
 				case StylePropertyId.GridItemX:
 					 return new StyleProperty(StylePropertyId.GridItemX, new GridItemPlacement(-1));
 				case StylePropertyId.GridItemY:

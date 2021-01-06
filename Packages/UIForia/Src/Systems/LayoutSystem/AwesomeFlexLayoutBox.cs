@@ -178,7 +178,7 @@ namespace UIForia.Systems {
 
         private void RunLayoutHorizontalStep_HorizontalDirection_Wrapped(int frameId) {
             float contentAreaWidth = finalWidth - (paddingBorderHorizontalStart + paddingBorderHorizontalEnd);
-            float gap = element.style.GridLayoutColGap;
+            float gap = element.style.FlexLayoutGapHorizontal;
             
             Track currentTrack = new Track(contentAreaWidth, 0);
             wrappedTracks = wrappedTracks ?? new StructList<Track>(4);
@@ -590,7 +590,7 @@ namespace UIForia.Systems {
                 track.remaining -= item.baseWidth + item.widthData.marginStart + item.widthData.marginEnd;
             }
             
-            float gap = element.style.GridLayoutColGap;
+            float gap = element.style.FlexLayoutGapHorizontal;
 
             track.remaining -= gap * (items.size - 1);
 
@@ -702,7 +702,7 @@ namespace UIForia.Systems {
                 remaining -= item.baseHeight + item.heightData.marginStart + item.heightData.marginEnd;
             }
             
-            float gap = element.style.GridLayoutColGap;
+            float gap = element.style.FlexLayoutGapVertical;
 
             remaining -= gap * (items.size - 1);
 
@@ -787,7 +787,7 @@ namespace UIForia.Systems {
 
         private void RunLayoutVerticalStep_HorizontalDirection_Wrapped(int frameId) {
             float contentStartY = paddingBorderVerticalStart;
-            float gap = element.style.GridLayoutColGap;
+            float gap = element.style.FlexLayoutGapVertical;
 
             float verticalAlignment = element.style.AlignItemsVertical;
             LayoutFit verticalLayoutFit = element.style.FitItemsVertical;

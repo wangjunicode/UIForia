@@ -80,6 +80,25 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 250, 500, 100), root[1].layoutResult.AllocatedRect);
             Assert.AreEqual(new Rect(0, 450, 500, 100), root[2].layoutResult.AllocatedRect);
         }
+        
+        [Test]
+        public void DistributeSpaceVertical_AroundContentIgnoresGap() {
+            MockApplication app = MockApplication.Setup<FlexVertical_DistributeSpaceVertical>();
+            FlexVertical_DistributeSpaceVertical root = (FlexVertical_DistributeSpaceVertical) app.RootElement;
+            
+            root.style.SetFlexLayoutGapHorizontal(20, StyleState.Normal);
+            root.style.SetFlexLayoutGapVertical(20, StyleState.Normal);
+
+            // makes math cleaner
+            root.style.SetPreferredHeight(600f, StyleState.Normal);
+            root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AroundContent, StyleState.Normal);
+
+            app.Update();
+
+            Assert.AreEqual(new Rect(0, 50, 500, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 250, 500, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 450, 500, 100), root[2].layoutResult.AllocatedRect);
+        }
 
         [Test]
         public void DistributeSpaceVertical_BetweenContent() {

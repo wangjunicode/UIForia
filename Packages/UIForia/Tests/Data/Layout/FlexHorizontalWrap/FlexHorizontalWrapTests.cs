@@ -323,15 +323,15 @@ namespace Layout {
             Assert.AreEqual(new Rect(400, 250, 200, 100), root[3].layoutResult.AllocatedRect);
             Assert.AreEqual(new Rect(0, 500, 200, 100), root[4].layoutResult.AllocatedRect);
             
-            // todo(roman): talk with Matt about proper behaviour in this case.
-            // root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AroundContent, StyleState.Normal);
-            // app.Update();
-            //
-            // Assert.AreEqual(new Rect(0, 50, 200, 100), root[0].layoutResult.AllocatedRect);
-            // Assert.AreEqual(new Rect(200, 50, 200, 100), root[1].layoutResult.AllocatedRect);
-            // Assert.AreEqual(new Rect(0, 250, 400, 100), root[2].layoutResult.AllocatedRect);
-            // Assert.AreEqual(new Rect(400, 250, 200, 100), root[3].layoutResult.AllocatedRect);
-            // Assert.AreEqual(new Rect(0, 450, 200, 100), root[4].layoutResult.AllocatedRect);
+            // gap is not applied when AroundContent distribution is used.
+            root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AroundContent, StyleState.Normal);
+            app.Update();
+            
+            Assert.AreEqual(new Rect(0, 50, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(210, 50, 200, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 250, 390, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 250, 200, 100), root[3].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 450, 200, 100), root[4].layoutResult.AllocatedRect);
             
             root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.CenterContent, StyleState.Normal);
             app.Update();
@@ -344,7 +344,7 @@ namespace Layout {
         }
         
         [Test]
-        public void DistributeSpaceInTrackWitGap() {
+        public void DistributeSpaceInTrackWithGap() {
             MockApplication app = MockApplication.Setup<FlexHorizontalWrap_DistributeSpaceInTrack>();
             FlexHorizontalWrap_DistributeSpaceInTrack root = (FlexHorizontalWrap_DistributeSpaceInTrack) app.RootElement;
             
@@ -378,15 +378,15 @@ namespace Layout {
             Assert.AreEqual(new Rect(400, 110, 200, 100), root[3].layoutResult.AllocatedRect);
             Assert.AreEqual(new Rect(200, 220, 200, 100), root[4].layoutResult.AllocatedRect);
             
-            // todo(roman): Talk to Matt about proper behavior here.
-            // root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.AroundContent, StyleState.Normal);
-            // app.Update();
-            //
-            // Assert.AreEqual(new Rect(50, 0, 200, 100), root[0].layoutResult.AllocatedRect);
-            // Assert.AreEqual(new Rect(350, 0, 200, 100), root[1].layoutResult.AllocatedRect);
-            // Assert.AreEqual(new Rect(0, 100, 400, 100), root[2].layoutResult.AllocatedRect);
-            // Assert.AreEqual(new Rect(400, 100, 200, 100), root[3].layoutResult.AllocatedRect);
-            // Assert.AreEqual(new Rect(200, 200, 200, 100), root[4].layoutResult.AllocatedRect);
+            // gap is not applied when AroundContent distribution is used.
+            root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.AroundContent, StyleState.Normal);
+            app.Update();
+            
+            Assert.AreEqual(new Rect(50, 0, 200, 100), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(350, 0, 200, 100), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(0, 110, 400, 100), root[2].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(400, 110, 200, 100), root[3].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(200, 220, 200, 100), root[4].layoutResult.AllocatedRect);
             
             root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.CenterContent, StyleState.Normal);
             app.Update();

@@ -122,7 +122,7 @@ namespace Layout {
             Assert.AreEqual(new Rect(300, 200, 300, 100), root[4].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWap_DistributeSpaceInTrack.xml")]
+        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_DistributeSpaceInTrack.xml")]
         public class FlexHorizontalWrap_DistributeSpaceInTrack : UIElement { }
 
         [Test]
@@ -176,13 +176,13 @@ namespace Layout {
             Assert.AreEqual(new Rect(200, 200, 200, 100), root[4].layoutResult.AllocatedRect);
         }
 
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWap_DistributeSpaceBetweenTracks.xml")]
-        public class FlexHorizontalWap_DistributeSpaceBetweenTracks : UIElement { }
+        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_DistributeSpaceBetweenTracks.xml")]
+        public class FlexHorizontalWrap_DistributeSpaceBetweenTracks : UIElement { }
 
         [Test]
         public void DistributeSpaceBetweenTracks() {
-            MockApplication app = MockApplication.Setup<FlexHorizontalWap_DistributeSpaceBetweenTracks>();
-            FlexHorizontalWap_DistributeSpaceBetweenTracks root = (FlexHorizontalWap_DistributeSpaceBetweenTracks) app.RootElement;
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_DistributeSpaceBetweenTracks>();
+            FlexHorizontalWrap_DistributeSpaceBetweenTracks root = (FlexHorizontalWrap_DistributeSpaceBetweenTracks) app.RootElement;
 
             root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AfterContent, StyleState.Normal);
             app.Update();
@@ -271,13 +271,13 @@ namespace Layout {
             Assert.AreEqual(new Rect(110, 0, 100, 100), root[1].layoutResult.AllocatedRect);
         }
         
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWrap_WrapWhenItemTooBigWithGap.xml")]
-        public class FlexHorizontalWrap_WrapWhenItemTooBigWithGap : UIElement { }
-        
         [Test]
         public void WrapWhenItemTooBigWithGap() {
-            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_WrapWhenItemTooBigWithGap>();
-            FlexHorizontalWrap_WrapWhenItemTooBigWithGap root = (FlexHorizontalWrap_WrapWhenItemTooBigWithGap) app.RootElement;
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_WrapWhenItemTooBig>();
+            FlexHorizontalWrap_WrapWhenItemTooBig root = (FlexHorizontalWrap_WrapWhenItemTooBig) app.RootElement;
+            
+            root.style.SetFlexLayoutGapHorizontal(10, StyleState.Normal);
+            root.style.SetFlexLayoutGapVertical(10, StyleState.Normal);
 
             app.Update();
 
@@ -288,13 +288,13 @@ namespace Layout {
         }
 
         
-        [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWap_DistributeSpaceBetweenTracksWithGap.xml")]
-        public class FlexHorizontalWap_DistributeSpaceBetweenTracksWithGap : UIElement { }
-
         [Test]
         public void DistributeSpaceBetweenTracksWithGap() {
-            MockApplication app = MockApplication.Setup<FlexHorizontalWap_DistributeSpaceBetweenTracksWithGap>();
-            FlexHorizontalWap_DistributeSpaceBetweenTracksWithGap root = (FlexHorizontalWap_DistributeSpaceBetweenTracksWithGap) app.RootElement;
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_DistributeSpaceBetweenTracks>();
+            FlexHorizontalWrap_DistributeSpaceBetweenTracks root = (FlexHorizontalWrap_DistributeSpaceBetweenTracks) app.RootElement;
+            
+            root.style.SetFlexLayoutGapHorizontal(10, StyleState.Normal);
+            root.style.SetFlexLayoutGapVertical(10, StyleState.Normal);
 
             root.style.SetDistributeExtraSpaceVertical(SpaceDistribution.AfterContent, StyleState.Normal);
             app.Update();
@@ -343,13 +343,13 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 360, 200, 100), root[4].layoutResult.AllocatedRect);
         }
         
-         [Template("Data/Layout/FlexHorizontalWrap/FlexHorizontalWap_DistributeSpaceInTrackWithGap.xml")]
-        public class FlexHorizontalWap_DistributeSpaceInTrackWithGap : UIElement { }
-
         [Test]
         public void DistributeSpaceInTrackWitGap() {
-            MockApplication app = MockApplication.Setup<FlexHorizontalWap_DistributeSpaceInTrackWithGap>();
-            FlexHorizontalWap_DistributeSpaceInTrackWithGap root = (FlexHorizontalWap_DistributeSpaceInTrackWithGap) app.RootElement;
+            MockApplication app = MockApplication.Setup<FlexHorizontalWrap_DistributeSpaceInTrack>();
+            FlexHorizontalWrap_DistributeSpaceInTrack root = (FlexHorizontalWrap_DistributeSpaceInTrack) app.RootElement;
+            
+            root.style.SetFlexLayoutGapHorizontal(10, StyleState.Normal);
+            root.style.SetFlexLayoutGapVertical(10, StyleState.Normal);
 
             root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.AfterContent, StyleState.Normal);
             app.Update();

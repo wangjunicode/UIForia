@@ -264,6 +264,20 @@ namespace UIForia.Rendering {
             set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)value), state); }
         }
         
+        public float FlexLayoutGapHorizontal {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutGapHorizontal, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutGapHorizontal, value), state); }
+        }
+        
+        public float FlexLayoutGapVertical {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.FlexLayoutGapVertical, state).AsFloat; }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { m_StyleSet.SetProperty(new StyleProperty(StylePropertyId.FlexLayoutGapVertical, value), state); }
+        }
+        
         public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemX {
             [System.Diagnostics.DebuggerStepThrough]
             get { return m_StyleSet.GetPropertyValueInState(StylePropertyId.GridItemX, state).AsGridItemPlacement; }
@@ -1261,6 +1275,20 @@ namespace UIForia.Rendering {
             get { return (UIForia.Layout.LayoutWrap)FindEnumProperty(StylePropertyId.FlexLayoutWrap); }
             [System.Diagnostics.DebuggerStepThrough]
             set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)value)); }
+        }
+            
+        public float FlexLayoutGapHorizontal {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.FlexLayoutGapHorizontal); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutGapHorizontal, value)); }
+        }
+            
+        public float FlexLayoutGapVertical {
+            [System.Diagnostics.DebuggerStepThrough]
+            get { return FindFloatProperty(StylePropertyId.FlexLayoutGapVertical); }
+            [System.Diagnostics.DebuggerStepThrough]
+            set { SetProperty(new StyleProperty(StylePropertyId.FlexLayoutGapVertical, value)); }
         }
             
         public UIForia.Layout.LayoutTypes.GridItemPlacement GridItemX {
@@ -2340,6 +2368,24 @@ namespace UIForia.Rendering {
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutWrap, out property)) return property.AsLayoutWrap;
                     return DefaultStyleValues_Generated.FlexLayoutWrap;
+                }
+            }
+
+            public float FlexLayoutGapHorizontal { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutGapHorizontal, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.FlexLayoutGapHorizontal;
+                }
+            }
+
+            public float FlexLayoutGapVertical { 
+                [System.Diagnostics.DebuggerStepThrough]
+                get { 
+                    StyleProperty property;
+                    if (propertyMap.TryGetValue((int) StylePropertyId.FlexLayoutGapVertical, out property)) return property.AsFloat;
+                    return DefaultStyleValues_Generated.FlexLayoutGapVertical;
                 }
             }
 
@@ -3612,6 +3658,22 @@ namespace UIForia.Rendering {
             return GetPropertyValueInState(StylePropertyId.FlexLayoutWrap, state).AsLayoutWrap;
         }
         
+        public void SetFlexLayoutGapHorizontal(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.FlexLayoutGapHorizontal, value), state);
+        }
+
+        public float GetFlexLayoutGapHorizontal(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.FlexLayoutGapHorizontal, state).AsFloat;
+        }
+        
+        public void SetFlexLayoutGapVertical(in float? value, StyleState state) {
+            SetProperty(new StyleProperty(StylePropertyId.FlexLayoutGapVertical, value), state);
+        }
+
+        public float GetFlexLayoutGapVertical(StyleState state) {
+            return GetPropertyValueInState(StylePropertyId.FlexLayoutGapVertical, state).AsFloat;
+        }
+        
         public void SetGridItemX(in UIForia.Layout.LayoutTypes.GridItemPlacement? value, StyleState state) {
             SetProperty(new StyleProperty(StylePropertyId.GridItemX, value), state);
         }
@@ -4529,6 +4591,10 @@ namespace UIForia.Rendering {
 					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)FlexLayoutDirection);
 				case StylePropertyId.FlexLayoutWrap:
 					 return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)FlexLayoutWrap);
+				case StylePropertyId.FlexLayoutGapHorizontal:
+					 return new StyleProperty(StylePropertyId.FlexLayoutGapHorizontal, FlexLayoutGapHorizontal);
+				case StylePropertyId.FlexLayoutGapVertical:
+					 return new StyleProperty(StylePropertyId.FlexLayoutGapVertical, FlexLayoutGapVertical);
 				case StylePropertyId.GridItemX:
 					 return new StyleProperty(StylePropertyId.GridItemX, GridItemX);
 				case StylePropertyId.GridItemY:
@@ -4787,6 +4853,8 @@ namespace UIForia.Rendering {
                     case StylePropertyId.FlexItemShrink: return typeof(System.Int32);
                     case StylePropertyId.FlexLayoutDirection: return typeof(UIForia.Layout.LayoutDirection);
                     case StylePropertyId.FlexLayoutWrap: return typeof(UIForia.Layout.LayoutWrap);
+                    case StylePropertyId.FlexLayoutGapHorizontal: return typeof(System.Single);
+                    case StylePropertyId.FlexLayoutGapVertical: return typeof(System.Single);
                     case StylePropertyId.GridItemX: return typeof(UIForia.Layout.LayoutTypes.GridItemPlacement);
                     case StylePropertyId.GridItemY: return typeof(UIForia.Layout.LayoutTypes.GridItemPlacement);
                     case StylePropertyId.GridItemWidth: return typeof(UIForia.Layout.LayoutTypes.GridItemPlacement);
@@ -4924,6 +4992,8 @@ namespace UIForia.Rendering {
                     case StylePropertyId.CornerBevelBottomLeft: return true;
                     case StylePropertyId.FlexItemGrow: return true;
                     case StylePropertyId.FlexItemShrink: return true;
+                    case StylePropertyId.FlexLayoutGapHorizontal: return true;
+                    case StylePropertyId.FlexLayoutGapVertical: return true;
                     case StylePropertyId.GridLayoutColGap: return true;
                     case StylePropertyId.GridLayoutRowGap: return true;
                     case StylePropertyId.RadialLayoutStartAngle: return true;

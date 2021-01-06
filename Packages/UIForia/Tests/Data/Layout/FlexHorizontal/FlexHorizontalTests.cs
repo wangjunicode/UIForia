@@ -80,6 +80,25 @@ namespace Layout {
             Assert.AreEqual(new Rect(250, 0, 100, 500), root[1].layoutResult.AllocatedRect);
             Assert.AreEqual(new Rect(450, 0, 100, 500), root[2].layoutResult.AllocatedRect);
         }
+        
+        [Test]
+        public void DistributeSpaceHorizontal_AroundContentIgnoresGap() {
+            MockApplication app = MockApplication.Setup<FlexHorizontal_DistributeSpaceHorizontal>();
+            FlexHorizontal_DistributeSpaceHorizontal root = (FlexHorizontal_DistributeSpaceHorizontal) app.RootElement;
+            
+            root.style.SetFlexLayoutGapHorizontal(20, StyleState.Normal);
+            root.style.SetFlexLayoutGapVertical(20, StyleState.Normal);
+
+            // makes math cleaner
+            root.style.SetPreferredWidth(600f, StyleState.Normal);
+            root.style.SetDistributeExtraSpaceHorizontal(SpaceDistribution.AroundContent, StyleState.Normal);
+
+            app.Update();
+
+            Assert.AreEqual(new Rect(50, 0, 100, 500), root[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(250, 0, 100, 500), root[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(450, 0, 100, 500), root[2].layoutResult.AllocatedRect);
+        }
 
         [Test]
         public void DistributeSpaceHorizontal_BetweenContent() {
@@ -203,6 +222,37 @@ namespace Layout {
             Assert.AreEqual(new Rect(500, 0, 250, 100), root[2].layoutResult.AllocatedRect);
         }
 
-    }
+        [Template("Data/Layout/FlexHorizontal/FlexHorizontal_Gap.xml")] 
+        public class FlexHorizontal_Gap : UIElement { 
+            public UIElement containerGap => children[0];
+            public UIElement containerGapHorizontal => children[1];
+            public UIElement containerGapVertical => children[2];
+        }
 
+        [Test]
+        public void Gap() {
+            MockApplication app = MockApplication.Setup<FlexHorizontal_Gap>();
+            FlexHorizontal_Gap root = (FlexHorizontal_Gap)app.RootElement;
+
+            app.Update();
+
+            UIElement container = root.containerGap;
+            Assert.AreEqual(new Rect(0, 0, 100, 500), container[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(110, 0, 100, 500), container[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(220, 0, 100, 500), container[2].layoutResult.AllocatedRect);
+            
+            container = root.containerGapHorizontal;
+            Assert.AreEqual(new Rect(0, 0, 100, 500), container[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(110, 0, 100, 500), container[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(220, 0, 100, 500), container[2].layoutResult.AllocatedRect);
+            
+            // gap not applied
+            container = root.containerGapVertical;
+            Assert.AreEqual(new Rect(0, 0, 100, 500), container[0].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(100, 0, 100, 500), container[1].layoutResult.AllocatedRect);
+            Assert.AreEqual(new Rect(200, 0, 100, 500), container[2].layoutResult.AllocatedRect);
+        }
+        
+    }
+    
 }

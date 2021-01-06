@@ -4,27 +4,23 @@
 
         style container {
             FlexLayoutDirection = Horizontal;
-            PreferredSize = 600px;
+            PreferredWidth = 100px;
+            PreferredHeight = 210px;
             BackgroundColor = Yellow;
             FlexLayoutWrap = WrapHorizontal;
+            FlexLayoutGap = 10;
         }
 
         style child {
-            PreferredSize = 200px 100px;
+            PreferredSize = 100px 100px;
             BackgroundColor = red;
         }
         
-        style bigger {
-            PreferredSize = 300px 100px;
-            BackgroundColor = blue;
-        }
         
     </Style>
 
     <Contents style="container">
         <Group style='child'/>
-        <Group style='child'/>
-        <Group style='bigger'/>
         <Group style='child'/>
     </Contents>
 </UITemplate>

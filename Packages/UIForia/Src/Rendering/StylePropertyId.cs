@@ -47,6 +47,8 @@ namespace UIForia.Rendering {
 
         FlexLayoutWrap,
         FlexLayoutDirection,
+        FlexLayoutGapHorizontal,
+        FlexLayoutGapVertical,
 
         FlexItemGrow,
         FlexItemShrink,

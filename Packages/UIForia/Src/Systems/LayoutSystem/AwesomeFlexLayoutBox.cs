@@ -216,40 +216,39 @@ namespace UIForia.Systems {
                         currentTrack = new Track(contentAreaWidth, i + 1);
                     }
                 }
-                // todo(roman): Clean-up duplication somehow.
-                else if (currentTrack.IsEmpty) {
-                    if (currentTrack.remaining - itemSize == 0) {
-                        // perfect fit here, no need to add a gap.
-                        currentTrack.remaining -= itemSize;
-                        currentTrack.endIndex = i + 1;
-                        wrappedTracks.Add(currentTrack);
-                        currentTrack = new Track(contentAreaWidth, i + 1);
-                    } else if (currentTrack.remaining - itemSize < 0) {
-                        currentTrack.endIndex = i;
-                        wrappedTracks.Add(currentTrack);
-                        currentTrack = new Track(contentAreaWidth, i);
-                        currentTrack.remaining -= itemSize;
-                        currentTrack.endIndex = i + 1;
+                else {
+                    if (currentTrack.IsEmpty) {
+                        if (currentTrack.remaining - itemSize == 0) {
+                            currentTrack.remaining -= itemSize;
+                            currentTrack.endIndex = i + 1;
+                            wrappedTracks.Add(currentTrack);
+                            currentTrack = new Track(contentAreaWidth, i + 1);
+                        } else if (currentTrack.remaining - itemSize < 0) {
+                            currentTrack.endIndex = i;
+                            wrappedTracks.Add(currentTrack);
+                            currentTrack = new Track(contentAreaWidth, i);
+                            currentTrack.remaining -= itemSize;
+                            currentTrack.endIndex = i + 1;
+                        } else {
+                            currentTrack.remaining -= itemSize;
+                            currentTrack.endIndex = i + 1;
+                        }
                     } else {
-                        currentTrack.remaining -= itemSize;
-                        currentTrack.endIndex = i + 1;
-                    }
-                } else {
-                    if (currentTrack.remaining - (gap + itemSize) == 0) {
-                        // perfect fit here, no need to add a gap.
-                        currentTrack.remaining -= gap + itemSize;
-                        currentTrack.endIndex = i + 1;
-                        wrappedTracks.Add(currentTrack);
-                        currentTrack = new Track(contentAreaWidth, i + 1);
-                    } else if (currentTrack.remaining - (gap + itemSize) < 0) {
-                        currentTrack.endIndex = i;
-                        wrappedTracks.Add(currentTrack);
-                        currentTrack = new Track(contentAreaWidth, i);
-                        currentTrack.remaining -= itemSize;
-                        currentTrack.endIndex = i + 1;
-                    } else {
-                        currentTrack.remaining -= (gap + itemSize);
-                        currentTrack.endIndex = i + 1;
+                        if (currentTrack.remaining - (gap + itemSize) == 0) {
+                            currentTrack.remaining -= gap + itemSize;
+                            currentTrack.endIndex = i + 1;
+                            wrappedTracks.Add(currentTrack);
+                            currentTrack = new Track(contentAreaWidth, i + 1);
+                        } else if (currentTrack.remaining - (gap + itemSize) < 0) {
+                            currentTrack.endIndex = i;
+                            wrappedTracks.Add(currentTrack);
+                            currentTrack = new Track(contentAreaWidth, i);
+                            currentTrack.remaining -= itemSize;
+                            currentTrack.endIndex = i + 1;
+                        } else {
+                            currentTrack.remaining -= (gap + itemSize);
+                            currentTrack.endIndex = i + 1;
+                        }
                     }
                 }
             }

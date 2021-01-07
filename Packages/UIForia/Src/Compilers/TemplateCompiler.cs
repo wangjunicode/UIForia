@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
+using UIForia.Attributes;
 using UIForia.Compilers.Style;
 using UIForia.Elements;
 using UIForia.Exceptions;
@@ -2761,94 +2762,119 @@ namespace UIForia.Compilers {
             Type generic = processedType.rawType;
             Type[] arguments = processedType.rawType.GetGenericArguments();
             Type[] resolvedTypes = new Type[arguments.Length];
+            
+            ResolveTypesUsingAncestor resolveTypesAttr = generic.GetCustomAttribute<ResolveTypesUsingAncestor>();
+            if (resolveTypesAttr != null) {
+                var parent = templateNode.parent;
+                while (parent != null) {
+                    Type rawType = parent.processedType.rawType;
+                    if (rawType.IsGenericType && rawType.GetGenericTypeDefinition() == resolveTypesAttr.ancestorType) {
+                        var genericArguments = parent.processedType.rawType.GetGenericArguments();
+                        if (genericArguments.Length != resolvedTypes.Length) {
+                            throw new CompileException("Unable to resolve arguments using ancestor. Generic argument count mismatch");
+                        }
+                        
+                        for (int i = 0; i < genericArguments.Length; ++i) {
+                            resolvedTypes[i] = genericArguments[i];
+                        }
 
-            if (templateNode.genericTypeResolver != null) {
-                string replaceSpec = templateNode.genericTypeResolver.Replace("[", "<").Replace("]", ">");
+                        break;
+                    }
 
-                int ptr = 0;
-                int rangeStart = 0;
-                int depth = 0;
+                    parent = parent.parent;
+                }
+            } else {
+                if (templateNode.genericTypeResolver != null) {
+                    string replaceSpec = templateNode.genericTypeResolver.Replace("[", "<").Replace("]", ">");
 
-                LightList<string> strings = LightList<string>.Get();
+                    int ptr = 0;
+                    int rangeStart = 0;
+                    int depth = 0;
 
-                while (ptr != replaceSpec.Length) {
-                    char c = replaceSpec[ptr];
-                    switch (c) {
-                        case '<':
-                            depth++;
-                            break;
+                    LightList<string> strings = LightList<string>.Get();
 
-                        case '>':
-                            depth--;
-                            break;
+                    while (ptr != replaceSpec.Length) {
+                        char c = replaceSpec[ptr];
+                        switch (c) {
+                            case '<':
+                                depth++;
+                                break;
 
-                        case ',': {
-                            if (depth == 0) {
-                                strings.Add(replaceSpec.Substring(rangeStart, ptr));
-                                rangeStart = ptr;
+                            case '>':
+                                depth--;
+                                break;
+
+                            case ',': {
+                                if (depth == 0) {
+                                    strings.Add(replaceSpec.Substring(rangeStart, ptr));
+                                    rangeStart = ptr;
+                                }
+
+                                break;
+                            }
+                        }
+
+                        ptr++;
+                    }
+
+                    if (rangeStart != ptr) {
+                        strings.Add(replaceSpec.Substring(rangeStart, ptr));
+                    }
+
+                    if (arguments.Length != strings.size) {
+                        throw new CompileException(
+                                $"Unable to resolve generic type of tag <{templateNode.tagName}>. Expected {arguments.Length} arguments but was only provided {strings.size} {templateNode.genericTypeResolver}");
+                    }
+
+                    for (int i = 0; i < strings.size; i++) {
+                        if (ExpressionParser.TryParseTypeName(strings[i], out TypeLookup typeLookup)) {
+                            Type type = TypeProcessor.ResolveType(typeLookup, (IReadOnlyList<string>)namespaces);
+
+                            if (type == null) {
+                                throw CompileException.UnresolvedType(typeLookup, (IReadOnlyList<string>)namespaces);
                             }
 
-                            break;
+                            resolvedTypes[i] = type;
+                        } else {
+                            throw new CompileException(
+                                    $"Unable to resolve generic type of tag <{templateNode.tagName}>. Failed to parse generic specifier {strings[i]}. Original expression = {templateNode.genericTypeResolver}");
                         }
                     }
 
-                    ptr++;
+                    strings.Release();
+                    Type createdType = ReflectionUtil.CreateGenericType(processedType.rawType, resolvedTypes);
+                    return TypeProcessor.AddResolvedGenericElementType(createdType, processedType.templateAttr, processedType.tagName);
                 }
 
-                if (rangeStart != ptr) {
-                    strings.Add(replaceSpec.Substring(rangeStart, ptr));
+                // run before
+                typeResolver.Reset();
+                resolvingTypeOnly = true;
+                typeResolver.SetSignature(new Parameter(rootType, "__root", ParameterFlags.NeverNull));
+                typeResolver.SetImplicitContext(typeResolver.GetParameter("__root"));
+                typeResolver.resolveAlias = ResolveAlias;
+                typeResolver.Setup(rootType, null, (LightList<string>)namespaces);
+
+                //    can have different attrs
+                if (templateNode.attributes == null) {
+                    throw CompileException.UnresolvedGenericElement(processedType, templateNode.TemplateNodeDebugData);
                 }
 
-                if (arguments.Length != strings.size) {
-                    throw new CompileException($"Unable to resolve generic type of tag <{templateNode.tagName}>. Expected {arguments.Length} arguments but was only provided {strings.size} {templateNode.genericTypeResolver}");
-                }
+                for (int i = 0; i < templateNode.attributes.size; i++) {
+                    ref AttributeDefinition attr = ref templateNode.attributes.array[i];
 
-                for (int i = 0; i < strings.size; i++) {
-                    if (ExpressionParser.TryParseTypeName(strings[i], out TypeLookup typeLookup)) {
-                        Type type = TypeProcessor.ResolveType(typeLookup, (IReadOnlyList<string>) namespaces);
+                    if (attr.type != AttributeType.Property)
+                        continue;
 
-                        if (type == null) {
-                            throw CompileException.UnresolvedType(typeLookup, (IReadOnlyList<string>) namespaces);
+                    if (ReflectionUtil.IsField(generic, attr.key, out FieldInfo fieldInfo)) {
+                        if (fieldInfo.FieldType.IsGenericParameter || fieldInfo.FieldType.IsGenericType || fieldInfo.FieldType.IsConstructedGenericType) {
+                            if (ValidForGenericResolution(fieldInfo.FieldType)) {
+                                HandleType(fieldInfo.FieldType, attr);
+                            }
                         }
-
-                        resolvedTypes[i] = type;
-                    }
-                    else {
-                        throw new CompileException($"Unable to resolve generic type of tag <{templateNode.tagName}>. Failed to parse generic specifier {strings[i]}. Original expression = {templateNode.genericTypeResolver}");
-                    }
-                }
-
-                strings.Release();
-                Type createdType = ReflectionUtil.CreateGenericType(processedType.rawType, resolvedTypes);
-                return TypeProcessor.AddResolvedGenericElementType(createdType, processedType.templateAttr, processedType.tagName);
-            }
-
-            typeResolver.Reset();
-            resolvingTypeOnly = true;
-            typeResolver.SetSignature(new Parameter(rootType, "__root", ParameterFlags.NeverNull));
-            typeResolver.SetImplicitContext(typeResolver.GetParameter("__root"));
-            typeResolver.resolveAlias = ResolveAlias;
-            typeResolver.Setup(rootType, null, (LightList<string>) namespaces);
-
-            if (templateNode.attributes == null) {
-                throw CompileException.UnresolvedGenericElement(processedType, templateNode.TemplateNodeDebugData);
-            }
-
-            for (int i = 0; i < templateNode.attributes.size; i++) {
-                ref AttributeDefinition attr = ref templateNode.attributes.array[i];
-
-                if (attr.type != AttributeType.Property) continue;
-
-                if (ReflectionUtil.IsField(generic, attr.key, out FieldInfo fieldInfo)) {
-                    if (fieldInfo.FieldType.IsGenericParameter || fieldInfo.FieldType.IsGenericType || fieldInfo.FieldType.IsConstructedGenericType) {
-                        if (ValidForGenericResolution(fieldInfo.FieldType)) {
-                            HandleType(fieldInfo.FieldType, attr);
+                    } else if (ReflectionUtil.IsProperty(generic, attr.key, out PropertyInfo propertyInfo)) {
+                        if (propertyInfo.PropertyType.IsGenericParameter || propertyInfo.PropertyType.IsGenericType || propertyInfo.PropertyType.IsConstructedGenericType) {
+                            HandleType(propertyInfo.PropertyType, attr);
                         }
-                    }
-                }
-                else if (ReflectionUtil.IsProperty(generic, attr.key, out PropertyInfo propertyInfo)) {
-                    if (propertyInfo.PropertyType.IsGenericParameter || propertyInfo.PropertyType.IsGenericType || propertyInfo.PropertyType.IsConstructedGenericType) {
-                        HandleType(propertyInfo.PropertyType, attr);
                     }
                 }
             }

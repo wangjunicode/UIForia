@@ -251,5 +251,19 @@ namespace Layout {
             Assert.AreEqual(new Rect(0, 110, 100, 100), container[1].layoutResult.AllocatedRect);
             Assert.AreEqual(new Rect(0, 220, 100, 100), container[2].layoutResult.AllocatedRect);
         }
+        
+        [Template("Data/Layout/FlexVertical/FlexVertical_GapContentSize.xml")]
+        public class FlexVertical_GapContentSize : UIElement {
+        }
+
+        [Test]
+        public void GapContentSize() {
+            MockApplication app = MockApplication.Setup<FlexVertical_GapContentSize>();
+            FlexVertical_GapContentSize root = (FlexVertical_GapContentSize)app.RootElement;
+
+            app.Update();
+
+            Assert.AreEqual(new Rect(0, 0, 100, 320), root.layoutResult.AllocatedRect);
+        }
     }
 }

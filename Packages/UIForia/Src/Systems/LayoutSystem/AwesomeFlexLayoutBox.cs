@@ -38,6 +38,13 @@ namespace UIForia.Systems {
                 float baseSize = Mathf.Max(widths.minimum, Mathf.Min(widths.preferred, widths.maximum));
                 totalSize += baseSize + widths.marginStart + widths.marginEnd;
             }
+            
+            float gap = element.style.FlexLayoutGapHorizontal;
+            if (element.style.DistributeExtraSpaceHorizontal == SpaceDistribution.AroundContent) {
+                gap = 0;
+            }
+
+            totalSize += gap * (items.size - 1);
 
             return totalSize;
         }
@@ -106,6 +113,13 @@ namespace UIForia.Systems {
                 float baseSize = Mathf.Max(heights.minimum, Mathf.Min(heights.preferred, heights.maximum));
                 totalSize += baseSize + heights.marginStart + heights.marginEnd;
             }
+            
+            float gap = element.style.FlexLayoutGapHorizontal;
+            if (element.style.DistributeExtraSpaceHorizontal == SpaceDistribution.AroundContent) {
+                gap = 0;
+            }
+
+            totalSize += gap * (items.size - 1);
 
             return totalSize;
         }

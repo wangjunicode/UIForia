@@ -100,6 +100,7 @@ namespace UIForia.Rendering {
         public bool hasForeground;
         public int zIndex;
         public int layer;
+        public int viewDepthIdx;
         protected Path2D clipPath;
         internal ClipData clipper;
         public bool didRender;

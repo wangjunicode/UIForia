@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Documentation.Features;
 using UIForia.Elements;
 using UnityEngine;
 
@@ -26,6 +28,7 @@ namespace UIForia {
             settings.codeFileExtension = "generated.cs";
             settings.templateResolutionBasePath = Path.Combine(UnityEngine.Application.dataPath);
             settings.styleBasePath = styleBasePath ?? string.Empty;
+            settings.dynamicallyCreatedTypes = new List<Type>() {typeof(LayerDemoView)};
 
             return settings;
         }

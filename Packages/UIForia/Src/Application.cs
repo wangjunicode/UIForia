@@ -168,6 +168,8 @@ namespace UIForia {
             for (int i = 0; i < systems.Count; i++) {
                 systems[i].OnViewAdded(view);
             }
+            
+            SortViews();
 
             //timer.Stop();
             //Debug.Log("Initialized UIForia application in " + timer.Elapsed.TotalSeconds.ToString("F2") + " seconds");

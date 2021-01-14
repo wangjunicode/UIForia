@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using SVGX;
 using UIForia.Elements;
 using UIForia.Rendering;
@@ -33,23 +35,23 @@ namespace Src.Systems {
         private Camera camera;
         private CommandBuffer commandBuffer;
         private RenderContext renderContext;
-        internal LightList<RenderOwner> renderOwners;
+        internal RenderOwner renderOwner;
+        private IList<UIView> views;
 
         public VertigoRenderSystem(Camera camera, Application application) {
             this.camera = camera;
             this.commandBuffer = new CommandBuffer(); // todo -- per view
             this.commandBuffer.name = "UIForia Main Command Buffer";
             this.renderContext = new RenderContext(application.settings);
-            this.renderOwners = new LightList<RenderOwner>();
+            this.renderOwner = new RenderOwner();
 
             if (this.camera != null) {
                 this.camera.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, commandBuffer);
             }
 
             application.StyleSystem.onStylePropertyChanged += HandleStylePropertyChanged;
-            application.onViewsSorted += uiViews => {
-                renderOwners.Sort((o1, o2) => o1.view.Depth.CompareTo(o2.view.Depth));
-            };
+            
+            views = application.views;
         }
 
         private void HandleStylePropertyChanged(UIElement element, StructList<StyleProperty> propertyList) {
@@ -62,7 +64,7 @@ namespace Src.Systems {
                 ref StyleProperty property = ref properties[i];
                 switch (property.propertyId) {
                     case StylePropertyId.Painter:
-                        ReplaceRenderBox(element, property.AsString);
+                        renderOwner.CreateRenderBox(element);
                         break;
                 }
             }
@@ -70,18 +72,10 @@ namespace Src.Systems {
             element.renderBox.OnStylePropertyChanged(propertyList);
         }
 
-        private void ReplaceRenderBox(UIElement element, string painterId) {
-            renderOwners[0].CreateRenderBox(element);
-        }
-
         public event Action<RenderContext> DrawDebugOverlay2;
 
         public void OnReset() {
             commandBuffer.Clear();
-            for (int i = 0; i < renderOwners.size; i++) {
-                renderOwners[i].Destroy();
-            }
-            renderOwners.QuickClear();
             renderContext.clipContext.Destroy();
             renderContext.clipContext = new ClipContext(Application.Settings);
         }
@@ -95,10 +89,8 @@ namespace Src.Systems {
             // for now we can make batching not cross view boundaries, eventually that would be cool though
 
             camera.orthographicSize = Screen.height * 0.5f;
-
-            for (int i = 0; i < renderOwners.size; i++) {
-                renderOwners.array[i].Render(renderContext);
-            }
+            
+            renderOwner.Render(renderContext, views);
 
             DrawDebugOverlay2?.Invoke(renderContext);
             renderContext.Render(camera, commandBuffer);
@@ -110,18 +102,9 @@ namespace Src.Systems {
             renderContext.Destroy();
         }
 
-        public void OnViewAdded(UIView view) {
-            renderOwners.Add(new RenderOwner(view, camera));
-        }
+        public void OnViewAdded(UIView view) { }
 
-        public void OnViewRemoved(UIView view) {
-            for (int i = 0; i < renderOwners.size; i++) {
-                if (renderOwners.array[i].view == view) {
-                    renderOwners.RemoveAt(i);
-                    return;
-                }
-            }
-        }
+        public void OnViewRemoved(UIView view) { }
 
         public void OnElementEnabled(UIElement element) { }
 

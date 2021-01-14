@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Rendering;
@@ -11,40 +12,40 @@ namespace Src.Systems {
 
     public class RenderOwner {
 
-        internal UIView view;
         internal readonly RenderBoxPool painterPool;
         private readonly StructStack<ElemRef> elemRefStack;
         private readonly StructList<RenderOperationWrapper> wrapperList;
 
         private static readonly DepthComparer2 s_RenderComparer = new DepthComparer2();
 
-        public RenderOwner(UIView view, Camera camera) {
-            this.view = view;
+        public RenderOwner() {
             this.painterPool = new RenderBoxPool();
-            this.view.dummyRoot.renderBox = new RootRenderBox();
-            this.view.dummyRoot.renderBox.element = view.dummyRoot;
             this.elemRefStack = new StructStack<ElemRef>(32);
             this.wrapperList = new StructList<RenderOperationWrapper>(32);
         }
 
-        public void Render(RenderContext renderContext) {
-            GatherBoxDataParallel();
+        public void Render(RenderContext renderContext, IList<UIView> views) {
+            GatherBoxData(views);
 
-            DrawClipShapes(renderContext);
+            DrawClipShapes(renderContext, views);
 
             Draw(renderContext);
 
 //            drawList.QuickClear();
         }
 
-        private void DrawClipShapes(RenderContext ctx) {
-            LightList<ClipData> clippers = view.application.LayoutSystem.GetLayoutRunner(view.dummyRoot).clipperList;
-            for (int i = 0; i < clippers.size; i++) {
-                ClipData clipData = clippers.array[i];
-                if (!clipData.isCulled && clipData.visibleBoxCount > 0) {
-                    clipData.clipPath = clipData.renderBox?.GetClipShape();
-                    ctx.DrawClipData(clipData);
-                }
+        private void DrawClipShapes(RenderContext ctx, IList<UIView> views) {
+            for (int viewIdx = 0; viewIdx < views.Count; ++viewIdx) {
+                UIView view = views[viewIdx];
+                
+                LightList<ClipData> clippers = view.application.LayoutSystem.GetLayoutRunner(view.dummyRoot).clipperList;
+                for (int i = 0; i < clippers.size; i++) {
+                    ClipData clipData = clippers.array[i];
+                    if (!clipData.isCulled && clipData.visibleBoxCount > 0) {
+                        clipData.clipPath = clipData.renderBox?.GetClipShape();
+                        ctx.DrawClipData(clipData);
+                    }
+                }    
             }
         }
 
@@ -109,82 +110,83 @@ namespace Src.Systems {
 
         }
 
-        // this is intended to be run while layout is running (ie in parallel)
-        public void GatherBoxDataParallel() {
-            UIElement root = view.dummyRoot;
-
-            int frameId = root.application.frameId;
+        public void GatherBoxData(IList<UIView> views) {
 
             int idx = 0;
 
             wrapperList.QuickClear();
 
-            elemRefStack.array[elemRefStack.size++].element = root;
-
-            while (elemRefStack.size > 0) {
-                UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
-                RenderBox renderBox = currentElement.renderBox;
-
-                renderBox.culled = renderBox.element.layoutResult.isCulled;
-                renderBox.clipper = currentElement.layoutResult.clipper;
-                renderBox.traversalIndex = idx++;
-
-                if (wrapperList.size + 2 + (currentElement.children.size * 2) >= wrapperList.array.Length) {
-                    wrapperList.EnsureAdditionalCapacity(2 + (currentElement.children.size * 2));
-                }
-
-                if (elemRefStack.size + 2 + currentElement.children.size >= elemRefStack.array.Length) {
-                    elemRefStack.EnsureAdditionalCapacity(2 + (currentElement.children.size * 2));
-                }
-
-                if (!renderBox.culled && renderBox.visibility != Visibility.Hidden) {
-                    
-                    ref RenderOperationWrapper backgroundOp = ref wrapperList.array[wrapperList.size++];
-                    backgroundOp.renderBox = renderBox;
-                    backgroundOp.renderOperation = DrawCommandType.BackgroundTransparent;
-
-                    if (renderBox.hasForeground) {
-                        ref RenderOperationWrapper foreground = ref wrapperList.array[wrapperList.size++];
-                        foreground.renderBox = renderBox;
-                        foreground.renderOperation = DrawCommandType.ForegroundTransparent;
-                    }
-                    
-                }
-
-                for (int i = currentElement.children.size - 1; i >= 0; i--) {
-                    UIElement child = currentElement.children.array[i];
-                    if ((child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
-                        // todo change check on painter
-                        if (child.renderBox == null) {
-                            CreateRenderBox(child);
-                            Debug.Assert(child.renderBox != null, "child.renderBox != null");
-                            child.renderBox.Enable();
-                        }
-                        else if (child.enableStateChangedFrameId == frameId) {
-                            UpdateRenderBox(child);
-                            child.renderBox.Enable();
-                        }
-
-                        if (child.renderBox.scrollFix == 1) {
-                            elemRefStack.array[elemRefStack.size++].element = child;
-                        }
-                    }
-
-                }
-
+            for (int viewIdx = 0; viewIdx < views.Count; ++viewIdx) {
+                UIView view = views[viewIdx];
+                UIElement dummyRoot = view.dummyRoot;
+                int frameId = view.application.frameId;
                 
-                for (int i = currentElement.children.size - 1; i >= 0; i--) {
-                    UIElement child = currentElement.children.array[i];
-                    if ((child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
-                        if (child.renderBox.scrollFix == 0) {
-                            elemRefStack.array[elemRefStack.size++].element = child;
+                if (dummyRoot.renderBox == null) {
+                    dummyRoot.renderBox = new RootRenderBox();
+                    dummyRoot.renderBox.element = dummyRoot;
+                }
+                
+                elemRefStack.array[elemRefStack.size++].element = dummyRoot;
+
+                while (elemRefStack.size > 0) {
+                    UIElement currentElement = elemRefStack.array[--elemRefStack.size].element;
+                    RenderBox renderBox = currentElement.renderBox;
+
+                    renderBox.culled = renderBox.element.layoutResult.isCulled;
+                    renderBox.clipper = currentElement.layoutResult.clipper;
+                    renderBox.traversalIndex = idx++;
+                    renderBox.viewDepthIdx = viewIdx;
+
+                    if (wrapperList.size + 2 + (currentElement.children.size * 2) >= wrapperList.array.Length) {
+                        wrapperList.EnsureAdditionalCapacity(2 + (currentElement.children.size * 2));
+                    }
+
+                    if (elemRefStack.size + 2 + currentElement.children.size >= elemRefStack.array.Length) {
+                        elemRefStack.EnsureAdditionalCapacity(2 + (currentElement.children.size * 2));
+                    }
+
+                    if (!renderBox.culled && renderBox.visibility != Visibility.Hidden) {
+                        ref RenderOperationWrapper backgroundOp = ref wrapperList.array[wrapperList.size++];
+                        backgroundOp.renderBox = renderBox;
+                        backgroundOp.renderOperation = DrawCommandType.BackgroundTransparent;
+
+                        if (renderBox.hasForeground) {
+                            ref RenderOperationWrapper foreground = ref wrapperList.array[wrapperList.size++];
+                            foreground.renderBox = renderBox;
+                            foreground.renderOperation = DrawCommandType.ForegroundTransparent;
                         }
                     }
 
+                    for (int i = currentElement.children.size - 1; i >= 0; i--) {
+                        UIElement child = currentElement.children.array[i];
+                        if ((child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
+                            // todo change check on painter
+                            if (child.renderBox == null) {
+                                CreateRenderBox(child);
+                                Debug.Assert(child.renderBox != null, "child.renderBox != null");
+                                child.renderBox.Enable();
+                            } else if (child.enableStateChangedFrameId == frameId) {
+                                UpdateRenderBox(child);
+                                child.renderBox.Enable();
+                            }
+
+                            if (child.renderBox.scrollFix == 1) {
+                                elemRefStack.array[elemRefStack.size++].element = child;
+                            }
+                        }
+                    }
+
+                    for (int i = currentElement.children.size - 1; i >= 0; i--) {
+                        UIElement child = currentElement.children.array[i];
+                        if ((child.flags & UIElementFlags.EnabledFlagSet) == UIElementFlags.EnabledFlagSet) {
+                            if (child.renderBox.scrollFix == 0) {
+                                elemRefStack.array[elemRefStack.size++].element = child;
+                            }
+                        }
+                    }
                 }
             }
 
-            
             RegularSortList();
 //            BubbleSortWrapperList();
 
@@ -390,19 +392,19 @@ namespace Src.Systems {
             public int Compare(RenderOperationWrapper a, RenderOperationWrapper b) {
                 RenderBox rbA = a.renderBox;
                 RenderBox rbB = b.renderBox;
+                
+                if (rbA.layer != rbB.layer) {
+                    return rbA.layer - rbB.layer;
+                }
+                
+                // view might be a layer
+                if (rbA.viewDepthIdx != rbB.viewDepthIdx) {
+                    return rbA.viewDepthIdx - rbB.viewDepthIdx;// rbA.viewDepthIdx >  ? -1 : 1;
+                }
 
                 if (a.renderOperation != b.renderOperation) {
                     return (int) a.renderOperation - (int) b.renderOperation;
                 }
-
-                if (rbA.layer != rbB.layer) {
-                    return rbA.layer - rbB.layer;
-                }
-
-                // view might be a layer
-//                if (rbA.viewDepthIdx != rbB.viewDepthIdx) {
-//                    return rbA.viewDepthIdx > rbB.viewDepthIdx ? -1 : 1;
-//                }
 
                 if (rbA.zIndex != rbB.zIndex) {
                     return rbA.zIndex - rbB.zIndex;

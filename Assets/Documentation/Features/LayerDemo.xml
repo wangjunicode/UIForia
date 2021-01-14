@@ -1,0 +1,26 @@
+<UITemplate>
+    
+    <Style>
+        style view {
+            PreferredSize = 400;
+        }
+        
+        style full-width {
+            PreferredWidth = 1vw;
+            PreferredHeight = 100px;
+            BackgroundColor = pink;
+            Layer = 1;
+        }
+    </Style>
+    
+    <!-- Main content. In addition, two views are loaded from code. -->
+    <Contents>
+        <!-- When `Layer = 1` is set, this element is rendered on top of dynamically created views. -->
+        <Div style="full-width"/>
+    </Contents>
+    
+    <!-- Content of dynamically created views -->
+    <Contents id="view" style="view">
+    </Contents>
+    
+</UITemplate>

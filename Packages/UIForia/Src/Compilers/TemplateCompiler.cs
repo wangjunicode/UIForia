@@ -1957,6 +1957,7 @@ namespace UIForia.Compilers {
                         if (val.Type.IsEnum) {
                             MethodCallExpression toString = ExpressionFactory.CallInstanceUnchecked(val, val.Type.GetMethod("ToString", Type.EmptyTypes));
                             updateCompiler.RawExpression(ExpressionFactory.CallInstanceUnchecked(s_StringBuilderExpr, s_StringBuilder_AppendString, toString));
+                            updateCompiler.EndIsolatedSection();
                             continue;
                         }
 

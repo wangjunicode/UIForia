@@ -1145,6 +1145,94 @@ namespace TemplateBinding {
             Assert.IsInstanceOf<TemplateBindingTest_ResolveGeneric_Inner1<float>>(e[2]);
         }
 
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveTypesUsingAncestor.xml#ancestor")]
+        public class TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor<T> : UIElement {
+            public T val;
+            public Type Type => val.GetType();
+        }
+        
+        [ResolveTypesUsingAncestor(typeof(TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor<>))]
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveTypesUsingAncestor.xml#child")]
+        public class TemplateBindingTest_ResolveTypesUsingAncestor_Child<T> : UIElement {
+            public T val;
+            public Type Type => val.GetType();
+        }
+        
+        [ResolveTypesUsingAncestor(typeof(TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor<>))]
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveTypesUsingAncestor.xml#grandchild")]
+        public class TemplateBindingTest_ResolveTypesUsingAncestor_Grandchild<T> : UIElement {
+            public T val;
+            public Type Type => val.GetType();
+        }
+        
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveTypesUsingAncestor.xml#ancestor")]
+        public class TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor2<Type1, Type2, Type3> : UIElement {
+            public Type1 val1;
+            public Type2 val2;
+            public Type3 val3;
+            public Type Type => val1.GetType();
+        }
+        
+        [ResolveTypesUsingAncestor(typeof(TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor2<,,>))]
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveTypesUsingAncestor.xml#child")]
+        public class TemplateBindingTest_ResolveTypesUsingAncestor_Child2<Type1, Type2, Type3> : UIElement {
+            public Type1 val1;
+            public Type2 val2;
+            public Type3 val3;
+            public Type Type => val1.GetType();
+        }
+        
+        [ResolveTypesUsingAncestor(typeof(TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor2<,,>))]
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveTypesUsingAncestor.xml#grandchild")]
+        public class TemplateBindingTest_ResolveTypesUsingAncestor_Grandchild2<Type1, Type2, Type3> : UIElement {
+            public Type1 val1;
+            public Type2 val2;
+            public Type3 val3;
+            public Type Type => val1.GetType();
+        }
+
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveTypesUsingAncestor.xml")]
+        public class TemplateBindingTest_ResolveTypesUsingAncestor : UIElement {
+            public List<int> list;
+        }
+        
+        [Test]
+        public void ResolveTypesUsingAncestor() {
+            MockApplication app = MockApplication.Setup<TemplateBindingTest_ResolveTypesUsingAncestor>();
+            TemplateBindingTest_ResolveTypesUsingAncestor e = (TemplateBindingTest_ResolveTypesUsingAncestor) app.RootElement;
+            Assert.IsInstanceOf<TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor<string>>(e.FindById("ancestor"));
+            Assert.IsInstanceOf<TemplateBindingTest_ResolveTypesUsingAncestor_Child<string>>(e.FindById("child"));
+            Assert.IsInstanceOf<TemplateBindingTest_ResolveTypesUsingAncestor_Grandchild<string>>(e.FindById("grandchild"));
+            
+            Assert.IsInstanceOf<TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor2<string, List<int>, float>>(e.FindById("ancestor2"));
+            Assert.IsInstanceOf<TemplateBindingTest_ResolveTypesUsingAncestor_Child2<string, List<int>, float>>(e.FindById("child2"));
+            Assert.IsInstanceOf<TemplateBindingTest_ResolveTypesUsingAncestor_Grandchild2<string, List<int>, float>>(e.FindById("grandchild2"));
+        }
+        
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveTypesUsingAncestorMismatch.xml#ancestor")]
+        public class TemplateBindingTest_ResolveTypesUsingAncestor_Mismatch_Ancestor<Type1, Type2> : UIElement {
+            public Type1 val1;
+            public Type2 val2;
+            public Type Type => val1.GetType();
+        }
+        
+        [ResolveTypesUsingAncestor(typeof(TemplateBindingTest_ResolveTypesUsingAncestor_Mismatch_Ancestor<,>))]
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveTypesUsingAncestorMismatch.xml#child")]
+        public class TemplateBindingTest_ResolveTypesUsingAncestor_Mismatch_Child<T> : UIElement {
+            public T val;
+            public Type Type => val.GetType();
+        }
+        
+        [Template("Data/TemplateBindings/TemplateBindingTest_ResolveTypesUsingAncestorMismatch.xml")]
+        public class TemplateBindingTest_ResolveTypesUsingAncestor_Mismatch : UIElement {
+        }
+                
+        [Test]
+        public void ResolveTypesUsingAncestorMismatch() {
+            CompileException exception = Assert.Throws<CompileException>(() => { MockApplication.Setup<TemplateBindingTest_ResolveTypesUsingAncestor_Mismatch>(); });
+            Assert.IsTrue(exception.Message.Contains("Unable to resolve arguments using ancestor"));
+        }
+
         [Template("Data/TemplateBindings/TemplateBindingTest_SlotContext.xml#level-2")]
         public class TemplateBindingTest_ResolveSlotContext_2 : UIElement {
 

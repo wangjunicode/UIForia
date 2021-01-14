@@ -1,0 +1,20 @@
+<UITemplate>
+    
+    <Contents id="ancestor">
+        {Type}
+        <define:Children />
+    </Contents>
+
+    <Contents id="child">
+        {Type}
+    </Contents>
+    
+    <Contents>
+        
+        <TemplateBindingTest_ResolveTypesUsingAncestor_Mismatch_Ancestor id="ancestor" val1="'hello'" val2="300f">
+            <TemplateBindingTest_ResolveTypesUsingAncestor_Mismatch_Child id="child"/>
+        </TemplateBindingTest_ResolveTypesUsingAncestor_Mismatch_Ancestor>
+       
+    </Contents>
+    
+</UITemplate>

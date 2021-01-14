@@ -114,7 +114,7 @@ namespace UIForia.Systems {
                 totalSize += baseSize + heights.marginStart + heights.marginEnd;
             }
             
-            float gap = element.style.FlexLayoutGapHorizontal;
+            float gap = element.style.FlexLayoutGapVertical;
             if (element.style.DistributeExtraSpaceHorizontal == SpaceDistribution.AroundContent) {
                 gap = 0;
             }

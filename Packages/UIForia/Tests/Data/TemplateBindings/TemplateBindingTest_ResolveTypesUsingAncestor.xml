@@ -1,0 +1,34 @@
+<UITemplate>
+    
+    <Contents id="ancestor">
+        {Type}
+        <define:Children />
+    </Contents>
+
+    <Contents id="child">
+        {Type}
+    </Contents>
+    
+    <Contents id="grandchild">
+        {Type}
+    </Contents>
+    
+    <Contents>
+        
+        <TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor id="ancestor" val="'hello'">
+            <TemplateBindingTest_ResolveTypesUsingAncestor_Child id="child"/>
+            <Div>
+                <TemplateBindingTest_ResolveTypesUsingAncestor_Grandchild id="grandchild"/>
+            </Div>
+        </TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor>
+
+        <TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor2 id="ancestor2" val1="'hello'" val2="list" val3="3f">
+            <TemplateBindingTest_ResolveTypesUsingAncestor_Child2 id="child2"/>
+            <Div>
+                <TemplateBindingTest_ResolveTypesUsingAncestor_Grandchild2 id="grandchild2"/>
+            </Div>
+        </TemplateBindingTest_ResolveTypesUsingAncestor_Ancestor2>
+        
+    </Contents>
+    
+</UITemplate>

@@ -94,7 +94,7 @@ namespace UIForia.Systems.Input {
         }
 
         public bool IsKeyDownThisFrame(KeyCode keyCode) {
-            return (GetKeyState(keyCode) & KeyState.DownThisFrame) != 0;
+            return (GetKeyState(keyCode) ^ KeyState.DownThisFrame) == 0;
         }
 
         public bool IsKeyUp(KeyCode keyCode) {
@@ -120,7 +120,7 @@ namespace UIForia.Systems.Input {
         }
 
         public bool IsKeyUpThisFrame(char character) {
-            return (GetKeyState(character) & KeyState.UpThisFrame) != 0;
+            return (GetKeyState(character) ^ KeyState.UpThisFrame) == 0;
         }
 
     }

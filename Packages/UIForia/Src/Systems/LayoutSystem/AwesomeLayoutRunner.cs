@@ -1313,10 +1313,7 @@ namespace UIForia.Systems {
 
                 if (PolygonUtil.PointInOrientedBounds(point, layoutResult.orientedBounds)) {
                     // todo -- make this property look up not slow
-                    if (element.style.Visibility == Visibility.Hidden) {
-                        continue;
-                    }
-
+                    
                     if (element.style.PointerEvents == PointerEvents.None) {
                         continue;
                     }

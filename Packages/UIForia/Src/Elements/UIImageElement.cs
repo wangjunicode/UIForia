@@ -34,6 +34,11 @@ namespace UIForia.Elements {
             }
 
             texture = src.Value.texture ?? application.ResourceManager.GetTexture(src.Value.imagePath);
+            if (texture == null) {
+                style.SetBackgroundImage(null, StyleState.Normal);
+                return;
+            }
+            
             style.SetBackgroundImage((Texture2D)texture, StyleState.Normal);
             if (Width > 0) {
                 style.SetPreferredHeight(Width * texture.height / texture.width, StyleState.Normal);

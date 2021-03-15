@@ -1,0 +1,5 @@
+<UITemplate>
+    <Contents>
+        <Image Width="32" Height="32" src="'not_existing_path'" />
+    </Contents>
+</UITemplate>

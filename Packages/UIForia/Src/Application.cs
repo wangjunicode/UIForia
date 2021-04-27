@@ -337,7 +337,12 @@ namespace UIForia {
 
                 current.flags &= ~(UIElementFlags.Alive);
                 current.enableStateChangedFrameId = frameId;
-                current.OnDestroy();
+                try {
+                    current.OnDestroy();
+                } catch (Exception ex) {
+                    Debug.LogError(ex);
+                }
+                
                 toInternalDestroy.Add(current);
 
                 UIElement[] children = current.children.array;
@@ -517,7 +522,7 @@ namespace UIForia {
                     child.OnEnable();
                 }
                 catch (Exception e) {
-                    Debug.Log(e);
+                    Debug.LogError(e);
                 }
 
                 // We need to run all runCommands now otherwise animations in [normal] style groups won't run after enabling.
@@ -594,7 +599,7 @@ namespace UIForia {
                     child.OnDisable();
                 }
                 catch (Exception e) {
-                    Debug.Log(e);
+                    Debug.LogError(e);
                 }
                 // }
 
@@ -731,12 +736,11 @@ namespace UIForia {
                     }
 
                     try {
-                        
                         onElementRegistered?.Invoke(current);
                         current.OnCreate();
                     }
                     catch (Exception e) {
-                        Debug.LogWarning(e);
+                        Debug.LogError(e);
                     }
                 }
 
@@ -795,7 +799,7 @@ namespace UIForia {
                         current.OnCreate();
                     }
                     catch (Exception e) {
-                        Debug.Log(e);
+                        Debug.LogError(e);
                     }
 
                     view.ElementRegistered(current);

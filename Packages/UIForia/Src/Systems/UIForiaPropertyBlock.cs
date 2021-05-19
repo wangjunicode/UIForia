@@ -81,10 +81,13 @@ namespace UIForia.Rendering {
             Array.Copy(matrices.array, 0, transformData, 0, matrices.size);
             Array.Copy(data.colors.array, 0, colorData, 0, data.colors.size);
             Array.Copy(data.objectData0.array, 0, objectData, 0, data.objectData0.size);
+            Array.Copy(data.clipRects.array, 0, clipRects, 0, data.clipRects.size);
             
             matBlock.SetMatrixArray(s_TransformDataKey, transformData);
             matBlock.SetVectorArray(s_ColorDataKey, colorData);
             matBlock.SetVectorArray(s_ObjectDataKey, objectData);
+            matBlock.SetVectorArray(s_ClipRectKey, clipRects);
+            matBlock.SetFloat(s_DPIScaleKey, 1f / Application.dpiScaleFactor);
             if (data.mainTexture != null) {
                 material.SetTexture(s_MainTextureKey, data.mainTexture);
             }

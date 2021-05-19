@@ -102,7 +102,7 @@ namespace UIForia.Rendering {
         public int layer;
         public int viewDepthIdx;
         protected Path2D clipPath;
-        internal ClipData clipper;
+        public ClipData clipper;
         public bool didRender;
         public int traversalIndex;
         public int scrollFix;

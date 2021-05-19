@@ -55,6 +55,8 @@
             float4 _ObjectData[BATCH_SIZE];
             float4 _GradientData[BATCH_SIZE];
             float4 _ColorData[BATCH_SIZE];
+            float4 _ClipRects[BATCH_SIZE];
+            float _DPIScale;
 
             // todo -- better not to use a 4x4, paths are always 2d
             float4x4 _TransformData[BATCH_SIZE];
@@ -114,6 +116,9 @@
             fixed4 frag (UIForiaPathFragData i) : SV_Target {              
                 float2 size = i.texCoord2.xy;
                 float minSize = min(size.x, size.y);
+
+                float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y) * _DPIScale;
+                float4 clipRect = _ClipRects[(int)Frag_ObjectIndex];
 
                 float4 objectInfo = _ObjectData[(int)Frag_ObjectIndex];
                 float4 colorInfo = _ColorData[(int)Frag_ObjectIndex];
@@ -219,7 +224,8 @@
                     // todo -- mask my target channel
                     return fixed4(a, a, a, a);
                 #else
-                    return lerp(retn, mainColor, mainColorOnly);
+                    float4 r = lerp(retn, mainColor, mainColorOnly);
+                    return UIForiaAlphaClipColor(r, _MainTexture, clipPos, clipRect, float4(0, 0, 0, 0));
                 #endif
             }
 

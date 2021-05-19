@@ -992,7 +992,7 @@ namespace UIForia.Rendering {
             return area.renderTexture; //.Peek();
         }
 
-        public void DrawPath(Path2D path) {
+        public void DrawPath(Path2D path, ClipData clipper = null) {
             // path drawing always breaks batch for now
             path.UpdateGeometry();
 
@@ -1075,18 +1075,26 @@ namespace UIForia.Rendering {
 
                 currentBatch.uiforiaData.objectData0.EnsureAdditionalCapacity(objectEnd - objectStart);
                 currentBatch.uiforiaData.colors.EnsureAdditionalCapacity(objectEnd - objectStart);
+                currentBatch.uiforiaData.clipRects.EnsureAdditionalCapacity(objectEnd - objectStart);
+                
                 Vector4[] objectData = currentBatch.uiforiaData.objectData0.array;
                 Vector4[] colorData = currentBatch.uiforiaData.colors.array;
+                Vector4[] clipRects = currentBatch.uiforiaData.clipRects.array;
                 int insertIdx = currentBatch.uiforiaData.objectData0.size;
+                
+                Vector4 packedBoundsAndChannel = (clipper != null) ? clipper.packedBoundsAndChannel : new Vector4(0, VertigoUtil.PackSizeVector(6553f, 6553f));  
 
                 for (int j = objectStart; j < objectEnd; j++) {
                     objectData[insertIdx] = path.objectDataList.array[j].objectData;
                     colorData[insertIdx] = path.objectDataList.array[j].colorData;
+                    clipRects[insertIdx] = packedBoundsAndChannel;                    
+
                     insertIdx++;
                 }
 
                 currentBatch.uiforiaData.objectData0.size = insertIdx;
                 currentBatch.uiforiaData.colors.size = insertIdx;
+                currentBatch.uiforiaData.clipRects.size = insertIdx;
 
                 int start = positionList.size;
 

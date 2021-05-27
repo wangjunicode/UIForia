@@ -14,6 +14,7 @@ using UIForia.Sound;
 using UIForia.Systems;
 using UIForia.Systems.Input;
 using UIForia.Util;
+using Unity.Profiling;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Debug = UnityEngine.Debug;
@@ -381,6 +382,10 @@ namespace UIForia {
 
         private LightList<UIElement> activeBuffer = new LightList<UIElement>(32);
         private LightList<UIElement> queuedBuffer = new LightList<UIElement>(32);
+        
+        private static readonly ProfilerMarker PerfMarker_Bindings = new ProfilerMarker("Application.Bindings");
+        private static readonly ProfilerMarker PerfMarker_Layout = new ProfilerMarker("Application.Layout");
+        private static readonly ProfilerMarker PerfMarker_Render = new ProfilerMarker("Application.Render");
 
         public void Update() {
             // input queries against last frame layout
@@ -416,10 +421,14 @@ namespace UIForia {
             bindingTimer.Reset();
             bindingTimer.Start();
 
+            PerfMarker_Bindings.Begin();
+
             // right now, out of order elements wont get bindings until next frame. this miiight be ok but probably will cause weirdness. likely want this to change
             for (int i = 0; i < views.Count; i++) {
                 linqBindingSystem.NewUpdateFn(views[i].RootElement);
             }
+
+            PerfMarker_Bindings.End();
 
             // bool loop = true;
 
@@ -454,12 +463,20 @@ namespace UIForia {
             // todo -- read changed data into layout/render thread
             layoutTimer.Reset();
             layoutTimer.Start();
+            
+            PerfMarker_Layout.Begin();
             layoutSystem.OnUpdate();
+            PerfMarker_Layout.End();
+            
             layoutTimer.Stop();
 
             renderTimer.Reset();
             renderTimer.Start();
+
+            PerfMarker_Render.Begin();
             renderSystem.OnUpdate();
+            PerfMarker_Render.End();
+            
             renderTimer.Stop();
 
             m_AfterUpdateTaskSystem.OnUpdate();

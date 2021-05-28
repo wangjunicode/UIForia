@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Util;
+using Unity.Profiling;
 using UnityEngine;
 
 namespace UIForia.Systems {
@@ -62,9 +64,23 @@ namespace UIForia.Systems {
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }
 
-        public void NewUpdateFn(UIElement element) {
-            // Debug.Log($"{new string(' ', element.hierarchyDepth * 4)}Before {element.GetDisplayName()}");
+#if PROFILE_BINDINGS
+        private readonly Dictionary<int, ProfilerMarker> updateBindingMarkers = new Dictionary<int, ProfilerMarker>();
+        private readonly Dictionary<int, ProfilerMarker> lateBindingMarkers = new Dictionary<int, ProfilerMarker>();
+#endif
 
+        public void NewUpdateFn(UIElement element) {
+
+#if PROFILE_BINDINGS
+            int elementId = element.id;
+            if (!updateBindingMarkers.TryGetValue(elementId, out ProfilerMarker marker)) {
+                marker = new ProfilerMarker(ProfilerCategory.Scripts, element.GetDisplayName() + " " + elementId);
+                updateBindingMarkers.Add(elementId, marker);
+            }
+      
+            marker.Begin();
+#endif
+            // Debug.Log($"{new string(' ', element.hierarchyDepth * 4)}Before {element.GetDisplayName()}");
             element.bindingNode?.updateBindings?.Invoke(element.bindingNode.root, element);
 
             if (element.isEnabled) {
@@ -74,9 +90,22 @@ namespace UIForia.Systems {
                 }
 
                 // Debug.Log($"{new string(' ', element.hierarchyDepth * 4)}After {element.GetDisplayName()}");
+#if PROFILE_BINDINGS
+                if (!lateBindingMarkers.TryGetValue(elementId, out ProfilerMarker lateMarker)) {
+                    lateMarker = new ProfilerMarker(ProfilerCategory.Scripts, element.GetDisplayName() + " " + elementId);
+                    lateBindingMarkers.Add(elementId, marker);
+                }
 
+                lateMarker.Begin();
+#endif
                 element.bindingNode?.lateBindings?.Invoke(element.bindingNode.root, element);
+#if PROFILE_BINDINGS
+                lateMarker.End();
+#endif
             }
+#if PROFILE_BINDINGS
+            marker.End();
+#endif
         }
         
         public void BeginFrame() {

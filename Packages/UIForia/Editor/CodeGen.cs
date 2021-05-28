@@ -56,7 +56,7 @@ namespace UIForia.Editor {
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageTileX, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageTileY, 1),
             new AnimatedPropertyGenerator<float>(StylePropertyId.BackgroundImageRotation, 0),
-            new PropertyGenerator<Texture2D>(StylePropertyId.BackgroundImage, null),
+            new PropertyGenerator<Texture>(StylePropertyId.BackgroundImage, null),
             new PropertyGenerator<BackgroundFit>(StylePropertyId.BackgroundFit, BackgroundFit.Fill),
 
             // Border
@@ -540,7 +540,9 @@ namespace UIForia.Rendering {
             if (typeof(Texture2D) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsTexture2D;";
             }
-
+            if (typeof(Texture) == propertyGenerator.type) {
+                return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsTexture;";
+            }
             if (typeof(IReadOnlyList<GridTrackSize>) == propertyGenerator.type) {
                 return $"GetProperty(StylePropertyId.{propertyGenerator.propertyIdName}).AsGridTemplate;";
             }

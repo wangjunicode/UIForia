@@ -37,7 +37,7 @@ namespace UIForia.Rendering {
 		public const float BackgroundImageTileX = 1f;
 		public const float BackgroundImageTileY = 1f;
 		public const float BackgroundImageRotation = 0f;
-		public static readonly Texture2D BackgroundImage = default(Texture2D);
+		public static readonly Texture BackgroundImage = default(Texture);
 		public const BackgroundFit BackgroundFit = UIForia.Rendering.BackgroundFit.Fill;
 		public static readonly Color BorderColorTop = new Color(-1f, -1f, -1f, -1f);
 		public static readonly Color BorderColorRight = new Color(-1f, -1f, -1f, -1f);
@@ -208,7 +208,7 @@ namespace UIForia.Rendering {
 				case StylePropertyId.BackgroundImageRotation:
 					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, 0f);
 				case StylePropertyId.BackgroundImage:
-					 return new StyleProperty(StylePropertyId.BackgroundImage, default(Texture2D));
+					 return new StyleProperty(StylePropertyId.BackgroundImage, default(Texture));
 				case StylePropertyId.BackgroundFit:
 					 return new StyleProperty(StylePropertyId.BackgroundFit, (int)UIForia.Rendering.BackgroundFit.Fill);
 				case StylePropertyId.BorderColorTop:

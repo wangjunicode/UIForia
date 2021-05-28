@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using UIForia.Elements;
 using UIForia.Layout;
 using UIForia.Rendering.Vertigo;
 using UIForia.Util;
@@ -90,8 +91,8 @@ namespace UIForia.Rendering {
 
         public override void PaintBackground(RenderContext ctx) {
             base.PaintBackground(ctx);
-            //  imageGeometry.mainTexture = ((UIImageElement) element).texture;
-            // ctx.DrawBatchedGeometry(imageGeometry, new GeometryRange(0, 4, 0, 6), element.layoutResult.matrix.ToMatrix4x4());
+            imageGeometry.mainTexture = ((UIImageElement) element).texture;
+            ctx.DrawBatchedGeometry(imageGeometry, new GeometryRange(0, 4, 0, 6), element.layoutResult.matrix.ToMatrix4x4());
         }
 
     }

@@ -255,7 +255,7 @@ namespace UIForia.Rendering {
         public Color AsColor => new StyleColor(int0);
 
         public FontAsset AsFont => (FontAsset) objectField;
-        public Texture2D AsTexture => (Texture2D) objectField;
+        public Texture AsTexture => (Texture) objectField;
 
         public FontStyle AsFontStyle => (FontStyle) int0;
         public TextAlignment AsTextAlignment => (TextAlignment) int0;

@@ -2155,11 +2155,25 @@ namespace UIForia.Compilers {
             return TypeWrapStatement(typeWrapper, targetType, ExpressionParser.Parse(input));
         }
 
+        private static int counter = 0;
         private Expression Visit(Type targetType, ASTNode node) {
             Type nonNullableTarget = targetType;
             // todo -- doesn't currently handle nested nullables...but that's crazy anyway
             if (nonNullableTarget != null && nonNullableTarget.IsNullableType()) {
                 nonNullableTarget = targetType.GetGenericArguments()[0];
+            }
+
+            if (node is IdentifierNode {name: "$thing"} && targetType != null) {
+                ++counter;
+                if (counter == 1) {
+                        
+                }
+
+                if (counter == 2) {
+                    
+                }
+                
+                Debug.Log($"Bla {counter}");
             }
 
             Expression retn = VisitUnchecked(targetType, node);

@@ -33,7 +33,7 @@ namespace UIForia.Parsing {
     }
     
         
-    public abstract class TemplateNode {
+    public abstract class TemplateNode : ICloneable {
 
         public StructList<AttributeDefinition> attributes;
         public LightList<TemplateNode> children;
@@ -56,6 +56,22 @@ namespace UIForia.Parsing {
             this.lineInfo = templateLineInfo;
         }
 
+        protected TemplateNode(TemplateNode other) {
+            attributes = other.attributes;
+            children = other.children;
+            root = other.root;
+            parent = other.parent;
+            processedType = other.processedType;
+            originalString = other.originalString;
+            tagName = other.tagName;
+            namespaceName = other.namespaceName;
+            lineInfo = other.lineInfo;
+            genericTypeResolver = other.genericTypeResolver;
+            requireType = other.requireType;
+            isModified = other.isModified;
+        }
+
+        public abstract object Clone();
         public virtual void AddChild(TemplateNode child) {
             children = children ?? new LightList<TemplateNode>();
             children.Add(child);

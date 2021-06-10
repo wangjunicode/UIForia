@@ -15,6 +15,15 @@ namespace UIForia.Parsing {
             this.templateShell = templateShell;
         }
 
+        public TemplateRootNode(TemplateRootNode other) : base(other) {
+            templateName = other.templateName;
+            templateShell = other.templateShell;
+        }
+
+        public override object Clone() {
+            return new TemplateRootNode(this);
+        }
+
         public void AddSlot(SlotNode slotNode) {
             slotDefinitionNodes = slotDefinitionNodes ?? new LightList<SlotNode>(4);
             slotDefinitionNodes.Add(slotNode);
@@ -37,10 +46,34 @@ namespace UIForia.Parsing {
             return false;
         }
 
+        private LightList<TemplateNode> ResetGenericTypes(LightList<TemplateNode> children) {
+
+            LightList<TemplateNode> newChildren = new LightList<TemplateNode>(children);
+            
+            for (int i = 0; i < newChildren.size; ++i) {
+                TemplateNode child = newChildren[i];
+                if (child.processedType.rawType.IsGenericType) {
+                    TemplateNode clone = (TemplateNode)child.Clone();
+                    clone.processedType = TypeProcessor.GetProcessedType(clone.processedType.rawType.GetGenericTypeDefinition());
+                    newChildren[i] = clone;
+                }
+
+                if (child.children != null && child.children.size > 0) {
+                    child.children = ResetGenericTypes(child.children);
+                }
+            }
+
+            return newChildren;
+            
+        }
+
         public TemplateRootNode Clone(ProcessedType overrideType) {
             TemplateRootNode rootNode = new TemplateRootNode(templateName, templateShell, overrideType, attributes, lineInfo);
-            rootNode.children = children;
+            
+            //rootNode.children = children;
+            rootNode.children = ResetGenericTypes(children);
             rootNode.slotDefinitionNodes = slotDefinitionNodes;
+            
             return rootNode;
         }
 

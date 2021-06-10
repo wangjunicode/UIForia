@@ -2478,6 +2478,11 @@ namespace UIForia.Compilers {
             try {
                 compiler.SetupAttributeData(attr);
                 compiler.SetImplicitContext(castElement);
+
+                if (attr.key == "item") {
+                    
+                }
+                
                 left = compiler.AssignableStatement(attr.key);
             }
             catch (Exception e) {

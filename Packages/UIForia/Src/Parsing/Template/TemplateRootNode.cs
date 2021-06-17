@@ -18,6 +18,7 @@ namespace UIForia.Parsing {
         public TemplateRootNode(TemplateRootNode other) : base(other) {
             templateName = other.templateName;
             templateShell = other.templateShell;
+            slotDefinitionNodes = other.slotDefinitionNodes;
         }
 
         public override object Clone() {

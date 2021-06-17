@@ -47,13 +47,14 @@ namespace UIForia.Parsing {
             return false;
         }
 
-        private LightList<TemplateNode> ResetGenericTypes(LightList<TemplateNode> children) {
-
+        // Recursively resets resolved generic types of children.
+        // This forces type resolution for nested generic types.
+        private static LightList<TemplateNode> ResetGenericTypes(LightList<TemplateNode> children) {
             LightList<TemplateNode> newChildren = new LightList<TemplateNode>(children);
             
             for (int i = 0; i < newChildren.size; ++i) {
                 TemplateNode child = newChildren[i];
-                if (child.processedType.rawType.IsGenericType) {
+                if (child.processedType.rawType.IsGenericType && !(child is RepeatNode)) {
                     TemplateNode clone = (TemplateNode)child.Clone();
                     clone.processedType = TypeProcessor.GetProcessedType(clone.processedType.rawType.GetGenericTypeDefinition());
                     newChildren[i] = clone;
@@ -65,13 +66,11 @@ namespace UIForia.Parsing {
             }
 
             return newChildren;
-            
         }
 
         public TemplateRootNode Clone(ProcessedType overrideType) {
             TemplateRootNode rootNode = new TemplateRootNode(templateName, templateShell, overrideType, attributes, lineInfo);
             
-            //rootNode.children = children;
             rootNode.children = ResetGenericTypes(children);
             rootNode.slotDefinitionNodes = slotDefinitionNodes;
             

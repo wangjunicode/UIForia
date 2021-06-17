@@ -7,6 +7,12 @@ namespace UIForia.Parsing {
 
         public RepeatNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo) : base(root, parent, processedType, attributes, in templateLineInfo) { }
 
+        private RepeatNode(RepeatNode other):base(other) { }
+        
+        public override object Clone() {
+            return new RepeatNode(this);
+        }
+
         public string GetItemVariableName() {
             if (attributes == null) {
                 return "item";
@@ -40,7 +46,6 @@ namespace UIForia.Parsing {
 
             return "index";
         }
-
     }
 
 }

@@ -25,6 +25,16 @@ namespace UIForia.Parsing {
             this.tagName = slotName;
         }
 
+        private SlotNode(SlotNode other): base(other) {
+            slotName = other.slotName;
+            slotType = other.slotType;
+            injectedAttributes = other.injectedAttributes;
+        }
+        
+        public override object Clone() {
+            return new SlotNode(this);
+        }
+
         public AttributeDefinition[] GetAttributes(AttributeType expose) {
             if (attributes == null) {
                 return null;

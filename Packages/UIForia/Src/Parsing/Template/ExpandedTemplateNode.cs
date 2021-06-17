@@ -12,6 +12,14 @@ namespace UIForia.Parsing {
         public ExpandedTemplateNode(TemplateRootNode root, TemplateNode parent, ProcessedType processedType, StructList<AttributeDefinition> attributes, in TemplateLineInfo templateLineInfo)
             : base(root, parent, processedType, attributes, templateLineInfo) { }
 
+        private ExpandedTemplateNode(ExpandedTemplateNode other):base(other) {
+            slotOverrideNodes = other.slotOverrideNodes;
+        }
+
+        public override object Clone() {
+            return new ExpandedTemplateNode(this);
+        }
+
         public override void AddChild(TemplateNode child) {
             if (child is SlotNode slotNode) {
                 AddSlotOverride(slotNode);

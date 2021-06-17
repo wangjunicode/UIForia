@@ -16,6 +16,15 @@ namespace UIForia.Parsing {
             this.processedType = processedType;
         }
 
+        private TextNode(TextNode other) : base(other) {
+            rawTextContent = other.rawTextContent;
+            textExpressionList = other.textExpressionList;
+        }
+        
+        public override object Clone() {
+            return new TextNode(this);
+        }
+
         public bool IsTextConstant() {
             if (textExpressionList == null || textExpressionList.size == 0) return false;
 

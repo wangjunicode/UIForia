@@ -332,7 +332,7 @@ namespace UIForia.Rendering {
             // geometry.FillRect(size.width, size.height);
             geometry.FillMeshType(0, 0, size.width, size.height, meshType, meshFillOrigin, meshFillAmount, meshFillDirection);
 
-            if (!ReferenceEquals(backgroundImage, null)) {
+            if (backgroundImage != null) {
                 Vector3[] positions = geometry.positionList.array;
                 Vector4[] texCoord0 = geometry.texCoordList0.array;
 
@@ -634,7 +634,7 @@ namespace UIForia.Rendering {
 
             propertyBlock = propertyBlock ?? new MaterialPropertyBlock();
 
-            if (!ReferenceEquals(backgroundImage, null)) {
+            if (backgroundImage != null) {
                 propertyBlock.SetTexture(s_Main, backgroundImage);
             }
 

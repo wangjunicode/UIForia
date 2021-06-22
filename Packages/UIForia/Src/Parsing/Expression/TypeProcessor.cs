@@ -486,9 +486,7 @@ namespace UIForia.Parsing {
                 name.StartsWith("NLog") ||
                 name.StartsWith("JetBrains") ||
                 name.StartsWith("Zenject") ||
-                name.StartsWith("ECORuntime") ||
                 name.StartsWith("SeedProtos") ||
-                name.StartsWith("StaticData") ||
                 
                 name.Contains("mscorlib") ||
                 name.Contains("UnityEngine") ||

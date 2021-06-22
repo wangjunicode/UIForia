@@ -48,19 +48,20 @@ namespace UIForia.Parsing {
         private static int NextTypeId => currentTypeId++;
 
         private static readonly string[] s_SingleNamespace = new string[1];
-
-        private static void FilterAssemblies() {
-            if (processedTypes) return;
-            processedTypes = true;
-
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
+        
+        internal static int FilterAssembliesInternal(LightList<ProcessedType> outTemplateTypes,
+                Dictionary<Type, ProcessedType> outTypeMap,
+                Dictionary<string, TypeList> outTemplateTypeMap,
+                Dictionary<string, ProcessedType> outGenericMap,
+                Dictionary<string, LightList<Assembly>> outNamespaceMap) {
 
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
             int count = 0;
             for (int i = 0; i < assemblies.Length; i++) {
                 Assembly assembly = assemblies[i];
-
+                // Uncomment to profile assembiles.
+                // var marker = new ProfilerMarker(assembly.FullName);
+                // using var auto = marker.Auto();
                 if (assembly == null || assembly.IsDynamic) {
                     continue;
                 }
@@ -96,19 +97,19 @@ namespace UIForia.Parsing {
                                 ProcessedType processedType = new ProcessedType(currentType, templateAttr, tagName);
                                 processedType.IsUnresolvedGeneric = true;
                                 try {
-                                    s_GenericMap.Add(tagName, processedType);
+                                    outGenericMap.Add(tagName, processedType);
                                 }
                                 catch (Exception) {
                                     Debug.LogError($"UIForia does not support multiple elements with the same tag name. Tried to register type {processedType.rawType} for `{tagName}` " +
-                                                   $"but this tag name was already taken by type {s_GenericMap[tagName].rawType}. For generic overload types with multiple arguments you need to supply a unique [TagName] attribute");
+                                                   $"but this tag name was already taken by type {outGenericMap[tagName].rawType}. For generic overload types with multiple arguments you need to supply a unique [TagName] attribute");
                                     continue;
                                 }
 
-                                typeMap[currentType] = processedType;
+                                outTypeMap[currentType] = processedType;
 
-                                if (!s_NamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> namespaceList)) {
+                                if (!outNamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> namespaceList)) {
                                     namespaceList = new LightList<Assembly>(2);
-                                    s_NamespaceMap.Add(currentType.Namespace ?? "null", namespaceList);
+                                    outNamespaceMap.Add(currentType.Namespace ?? "null", namespaceList);
                                 }
 
                                 if (!namespaceList.Contains(assembly)) {
@@ -129,14 +130,14 @@ namespace UIForia.Parsing {
                                 ProcessedType processedType = new ProcessedType(currentType, templateAttr, tagName);
 
                                 if (templateAttr != null) {
-                                    templateTypes.Add(processedType);
+                                    outTemplateTypes.Add(processedType);
                                 }
 
                                 // if (templateTypeMap.ContainsKey(tagName)) {
                                 //     Debug.Log($"Tried to add template key `{tagName}` from type {currentType} but it was already defined by {templateTypeMap.GetOrDefault(tagName).rawType}");
                                 // }
 
-                                if (templateTypeMap.TryGetValue(tagName, out TypeList typeList)) {
+                                if (outTemplateTypeMap.TryGetValue(tagName, out TypeList typeList)) {
                                     if (typeList.types != null) {
                                         Array.Resize(ref typeList.types, typeList.types.Length + 1);
                                         typeList.types[typeList.types.Length - 1] = processedType;
@@ -149,12 +150,12 @@ namespace UIForia.Parsing {
                                 }
                                 else {
                                     typeList.mainType = processedType;
-                                    templateTypeMap[tagName] = typeList;
+                                    outTemplateTypeMap[tagName] = typeList;
                                 }
 
                                 // templateTypeMap.Add(tagName, processedType);
                                 processedType.id = NextTypeId;
-                                typeMap[currentType] = processedType;
+                                outTypeMap[currentType] = processedType;
                             }
                         }
 
@@ -162,9 +163,9 @@ namespace UIForia.Parsing {
                             continue;
                         }
 
-                        if (!s_NamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> list)) {
+                        if (!outNamespaceMap.TryGetValue(currentType.Namespace ?? "null", out LightList<Assembly> list)) {
                             list = new LightList<Assembly>(2);
-                            s_NamespaceMap.Add(currentType.Namespace ?? "null", list);
+                            outNamespaceMap.Add(currentType.Namespace ?? "null", list);
                         }
 
                         if (!list.Contains(assembly)) {
@@ -178,6 +179,16 @@ namespace UIForia.Parsing {
                 }
             }
 
+            return count;
+        }
+
+        private static void FilterAssemblies() {
+            if (processedTypes) return;
+            processedTypes = true;
+
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            int count = FilterAssembliesInternal(templateTypes, typeMap, templateTypeMap, s_GenericMap, s_NamespaceMap);
             watch.Stop();
             Debug.Log($"Loaded types in: {watch.ElapsedMilliseconds} ms from {count} assemblies");
         }
@@ -454,8 +465,7 @@ namespace UIForia.Parsing {
         private static bool FilterAssembly(Assembly assembly) {
             string name = assembly.FullName;
 
-            if (assembly.IsDynamic ||
-                name.StartsWith("System,") ||
+            if (name.StartsWith("System,") ||
                 name.StartsWith("Accessibility") ||
                 name.StartsWith("Boo") ||
                 name.StartsWith("I18N") ||
@@ -466,11 +476,23 @@ namespace UIForia.Parsing {
                 name.StartsWith("Mono") ||
                 name.StartsWith("Unity.") ||
                 name.StartsWith("ExCSS.") ||
+
+                // Temporary: Way to filter out heavy assemblies.
+                // Will be different in the new version.
+                name.StartsWith("Nest") ||
+                name.StartsWith("unityplastic") ||
+                name.StartsWith("bee") ||
+                name.StartsWith("Sirenix") ||
+                name.StartsWith("NLog") ||
+                name.StartsWith("JetBrains") ||
+                name.StartsWith("Zenject") ||
+                name.StartsWith("ECORuntime") ||
+                name.StartsWith("SeedProtos") ||
+                name.StartsWith("StaticData") ||
+                
                 name.Contains("mscorlib") ||
-                name.Contains("JetBrains") ||
                 name.Contains("UnityEngine") ||
-                name.Contains("UnityEditor") ||
-                name.Contains("Jetbrains")) {
+                name.Contains("UnityEditor")) {
                 return false;
             }
 

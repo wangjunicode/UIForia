@@ -1,0 +1,8 @@
+{
+  "name": "Demo.Editor",
+  "references": [
+    "UIForia.Src",
+    "Demo"
+  ],
+  "includePlatforms": ["Editor"]
+}

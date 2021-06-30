@@ -279,7 +279,7 @@ namespace UIForia.Rendering {
         }
 
         private static void AddMissingProperties(LightList<StylePropertyId> toUpdate, UIStyle style) {
-            int count = style.PropertyCount;
+            int count = style.propertyCount;
             StyleProperty[] properties = style.array;
 
             for (int i = 0; i < count; i++) {

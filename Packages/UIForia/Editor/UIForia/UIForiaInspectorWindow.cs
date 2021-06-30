@@ -442,7 +442,7 @@ namespace UIForia.Editor {
             if (expanded) {
                 EditorGUI.indentLevel++;
                 // todo -- sort?
-                for (int i = 0; i < style.PropertyCount; i++) {
+                for (int i = 0; i < style.propertyCount; i++) {
                     DrawStyleProperty(style[i], false);
                 }
 

@@ -12,20 +12,20 @@ namespace UIForia.Rendering {
         public UIStyle(int capacity = 8) {
             if (capacity <= 0) capacity = 8;
             this.array = new StyleProperty[capacity];
-            this.PropertyCount = 0;
+            this.propertyCount = 0;
         }
 
         public UIStyle(UIStyle toCopy) : this() {
-            this.PropertyCount = toCopy.PropertyCount;
-            this.array = new StyleProperty[toCopy.PropertyCount];
-            Array.Copy(toCopy.array, 0, array, 0, toCopy.PropertyCount);
+            this.propertyCount = toCopy.propertyCount;
+            this.array = new StyleProperty[toCopy.propertyCount];
+            Array.Copy(toCopy.array, 0, array, 0, toCopy.propertyCount);
         }
 
-        public int PropertyCount { get; internal set; }
+        public int propertyCount;
 
         public StyleProperty this[int index] {
             get {
-                if (index < 0 || index >= PropertyCount) return default;
+                if (index < 0 || index >= propertyCount) return default;
                 return array[index];
             }
         }
@@ -50,7 +50,7 @@ namespace UIForia.Rendering {
         }
 
         public bool DefinesProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < PropertyCount; i++) {
+            for (int i = 0; i < propertyCount; i++) {
                 if (array[i].propertyId == propertyId) return true;
             }
 
@@ -59,7 +59,7 @@ namespace UIForia.Rendering {
         
 
         private UIMeasurement FindUIMeasurementProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < PropertyCount; i++) {
+            for (int i = 0; i < propertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
                     return array[i].AsUIMeasurement;
                 }
@@ -69,7 +69,7 @@ namespace UIForia.Rendering {
         }
         
         private MaterialId FindMaterialIdProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < PropertyCount; i++) {
+            for (int i = 0; i < propertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
                     return array[i].AsMaterialId;
                 }
@@ -79,7 +79,7 @@ namespace UIForia.Rendering {
         }
         
         private OffsetMeasurement FindOffsetMeasurementProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < PropertyCount; i++) {
+            for (int i = 0; i < propertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
                     return array[i].AsOffsetMeasurement;
                 }
@@ -89,7 +89,7 @@ namespace UIForia.Rendering {
         }
 
         private UIFixedLength FindUIFixedLengthProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < PropertyCount; i++) {
+            for (int i = 0; i < propertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
                     return array[i].AsUIFixedLength;
                 }
@@ -121,7 +121,7 @@ namespace UIForia.Rendering {
         internal void SetProperty(in StyleProperty property) {
             StylePropertyId propertyId = property.propertyId;
             if (!property.hasValue) {
-                for (int i = 0; i < PropertyCount; i++) {
+                for (int i = 0; i < propertyCount; i++) {
                     if (array[i].propertyId == propertyId) {
                         RemoveAt(i);
                         return;
@@ -131,36 +131,36 @@ namespace UIForia.Rendering {
             }
 
             // todo -- binary search or int map
-            for (int i = 0; i < PropertyCount; i++) {
+            for (int i = 0; i < propertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
                     array[i] = property;
                     return;
                 }
             }
 
-            if (PropertyCount + 1 >= array.Length) {
+            if (propertyCount + 1 >= array.Length) {
                 Array.Resize(ref array, array.Length + 8);
             }
 
-            array[PropertyCount++] = property;
+            array[propertyCount++] = property;
         }
         
         private  void RemoveAt(int index) {
-            if ((uint) index >= (uint) PropertyCount) return;
-            if (index == PropertyCount - 1) {
-                array[--PropertyCount] = default;
+            if ((uint) index >= (uint) propertyCount) return;
+            if (index == propertyCount - 1) {
+                array[--propertyCount] = default;
             }
             else {
-                for (int j = index; j < PropertyCount - 1; j++) {
+                for (int j = index; j < propertyCount - 1; j++) {
                     array[j] = array[j + 1];
                 }
 
-                array[--PropertyCount] = default;
+                array[--propertyCount] = default;
             }
         }
         
         public StyleProperty GetProperty(StylePropertyId propertyId) {
-            for (int i = 0; i < PropertyCount; i++) {
+            for (int i = 0; i < propertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
                     return array[i];
                 }
@@ -170,7 +170,7 @@ namespace UIForia.Rendering {
         }
        
         public bool TryGetProperty(StylePropertyId propertyId, out StyleProperty property) {
-            for (int i = 0; i < PropertyCount; i++) {
+            for (int i = 0; i < propertyCount; i++) {
                 if (array[i].propertyId == propertyId) {
                     property = array[i];
                     return true;
@@ -182,7 +182,7 @@ namespace UIForia.Rendering {
         }
 
         public static UIStyle Merge(UIStyle destination, UIStyle source) {
-            if (source == null || source.PropertyCount == 0) {
+            if (source == null || source.propertyCount == 0) {
                 return destination;
             }
 
@@ -190,7 +190,7 @@ namespace UIForia.Rendering {
                 return new UIStyle(source);
             }
 
-            for (int pIndex = 0; pIndex < source.PropertyCount; pIndex++) {
+            for (int pIndex = 0; pIndex < source.propertyCount; pIndex++) {
                 StyleProperty prop = source.array[pIndex];
                 destination.SetProperty(prop);
             }

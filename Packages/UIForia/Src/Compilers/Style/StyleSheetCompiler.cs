@@ -224,13 +224,13 @@ namespace UIForia.Compilers.Style {
                     }
                 }
 
-                StructList<StyleKeyFrameValue> styleKeyValues = new StructList<StyleKeyFrameValue>(s_ScratchStyle.PropertyCount);
+                StructList<StyleKeyFrameValue> styleKeyValues = new StructList<StyleKeyFrameValue>(s_ScratchStyle.propertyCount);
 
-                for (int j = 0; j < s_ScratchStyle.PropertyCount; j++) {
+                for (int j = 0; j < s_ScratchStyle.propertyCount; j++) {
                     styleKeyValues[j] = new StyleKeyFrameValue(s_ScratchStyle[j]);
                 }
 
-                styleKeyValues.size = s_ScratchStyle.PropertyCount;
+                styleKeyValues.size = s_ScratchStyle.propertyCount;
 
                 for (int keyframeIndex = 0; keyframeIndex < keyFrameNode.keyframes.Count; keyframeIndex++) {
                     float time = keyFrameNode.keyframes[keyframeIndex] / 100f;
@@ -242,7 +242,7 @@ namespace UIForia.Compilers.Style {
                     nextKeyframeIndex++;
                 }
 
-                s_ScratchStyle.PropertyCount = 0;
+                s_ScratchStyle.propertyCount = 0;
             }
 
             return frames;

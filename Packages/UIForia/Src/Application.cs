@@ -93,6 +93,9 @@ namespace UIForia {
 
         private TemplateSettings templateSettings;
         private bool isPreCompiled;
+        
+        private static readonly ObjectPool<UIStyleSet> s_StyleSetPool = new ObjectPool<UIStyleSet>(null, null, 1024);
+        private static readonly ObjectPool<LayoutResult> s_LayoutResultPool = new ObjectPool<LayoutResult>(null, null, 1024);
 
         protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
             this.isPreCompiled = isPreCompiled;
@@ -371,7 +374,17 @@ namespace UIForia {
             }
 
             for (int i = 0; i < toInternalDestroy.size; i++) {
-                toInternalDestroy[i].InternalDestroy();
+                var elementToDestroy = toInternalDestroy[i];
+                elementToDestroy.InternalDestroy();
+                
+                s_StyleSetPool.Release(elementToDestroy.style);
+                elementToDestroy.style = null;
+                
+                s_LayoutResultPool.Release(elementToDestroy.layoutResult);
+                elementToDestroy.layoutResult = null;
+                
+                LinqBindingNode.Release(elementToDestroy.bindingNode);
+                elementToDestroy.bindingNode = null;
             }
 
             LightList<UIElement>.Release(ref toInternalDestroy);
@@ -753,7 +766,10 @@ namespace UIForia {
                     }
 
                     try {
-                        onElementRegistered?.Invoke(current);
+                        if ((current.flags & UIElementFlags.InternalElement) == 0) {
+                            onElementRegistered?.Invoke(current);    
+                        }
+                        
                         current.OnCreate();
                     }
                     catch (Exception e) {
@@ -811,8 +827,10 @@ namespace UIForia {
                         systems[i].OnElementCreated(current);
                     }
 
-                    onElementRegistered?.Invoke(current);
                     try {
+                        if ((current.flags & UIElementFlags.InternalElement) == 0) {
+                            onElementRegistered?.Invoke(current);
+                        }
                         current.OnCreate();
                     }
                     catch (Exception e) {
@@ -920,9 +938,10 @@ namespace UIForia {
             element.application = this;
             element.templateMetaData = templateData.templateMetaData[originTemplateId];
             element.id = NextElementId;
-            element.style = new UIStyleSet(element);
-            element.layoutResult = new LayoutResult(element);
-            element.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
+            element.style = s_StyleSetPool.Get();
+            element.style.Initialize(element);
+            element.layoutResult = s_LayoutResultPool.Get();
+            element.flags |= UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
 
             element.children = LightList<UIElement>.GetMinSize(childCount);
 
@@ -948,9 +967,11 @@ namespace UIForia {
             instance.application = this;
             instance.templateMetaData = templateData.templateMetaData[originTemplateId];
             instance.id = NextElementId;
-            instance.style = new UIStyleSet(instance);
-            instance.layoutResult = new LayoutResult(instance);
-            instance.flags = UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
+            instance.style = s_StyleSetPool.Get();
+            instance.style.Initialize(instance);
+            instance.layoutResult = s_LayoutResultPool.Get();
+            instance.layoutResult.Initialize(instance);
+            instance.flags |= UIElementFlags.Enabled | UIElementFlags.Alive | UIElementFlags.NeedsUpdate;
 
             instance.children = LightList<UIElement>.GetMinSize(childCount);
 

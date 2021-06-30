@@ -12,10 +12,13 @@ namespace UIForia.Util {
         private readonly Action<T> m_ActionOnRelease;
 
         [DebuggerStepThrough]
-        public ObjectPool(Action<T> actionOnGet = null, Action<T> actionOnRelease = null) {
+        public ObjectPool(Action<T> actionOnGet = null, Action<T> actionOnRelease = null, int preallocate = 0) {
             this.m_ActionOnGet = actionOnGet;
             this.m_ActionOnRelease = actionOnRelease;
-            this.m_Stack = new Stack<T>();
+            this.m_Stack = new Stack<T>(preallocate);
+            for (int i = 0; i < preallocate; i++) {
+                m_Stack.Push(new T());
+            }
         }
         
         public int TotalCount { get; private set; }

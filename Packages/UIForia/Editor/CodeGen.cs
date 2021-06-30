@@ -243,7 +243,7 @@ namespace UIForia.Rendering {
         __REPLACE__UIStyleSet_Methods
 
         public StyleProperty GetComputedStyleProperty(StylePropertyId propertyId) {
-        __REPLACE_UIStyleSet_GetComputed  
+            __REPLACE_UIStyleSet_GetComputed  
         }
 
     }
@@ -378,15 +378,14 @@ namespace UIForia.Rendering {
 
 
         private static string GetComputedStyle() {
-            string code = "\t\t\tswitch(propertyId) {\n";
-
-            for (int i = 0; i < properties.Length; i++) {
-                code += $"\t\t\t\tcase {nameof(StylePropertyId)}.{properties[i].propertyIdName}:\n";
-                code += $"\t\t\t\t\t return {properties[i].StyleSetGetComputed};\n";
+            string code = @"if ((isInheritedMap & (1UL << (int)propertyId)) != 0) {
+                if (propertyMap.TryGetValue((int)propertyId, out StyleProperty property)) {
+                    return property; 
+                }
             }
 
-            code += "\t\t\t\tdefault: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);\n";
-            code += "\t\t\t\t}";
+            if ((int)propertyId < inheritedProperties.Length) return inheritedProperties[(int)propertyId];
+            return DefaultStyleValues_Generated.GetPropertyValue(propertyId);";
             return code;
         }
 
@@ -439,8 +438,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.__NAME__, out property)) return property.As__CAST_TYPE__;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.__NAME__), out property)) return property.As__CAST_TYPE__;
-                    return DefaultStyleValues_Generated.__NAME__;
+                    return inheritedProperties[(int) StylePropertyId.__NAME__].As__CAST_TYPE__;
                 }
             }";
             }

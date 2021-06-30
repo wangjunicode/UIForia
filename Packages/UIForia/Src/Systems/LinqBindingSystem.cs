@@ -59,6 +59,7 @@ namespace UIForia.Systems {
 
         public void OnElementDestroyed(UIElement element) {
             // if destroying current or ancestor of current need to bail out
+            
             iteratorIndex = 0;
         }
 

@@ -18,6 +18,10 @@ namespace UIForia.Elements {
         
         internal TextInfo TextInfo => textInfo;
 
+        public UITextElement() {
+            flags = UIElementFlags.InternalElement;
+        }
+
         public override void OnEnable() {
             SetText(text);
             textSpan.SetStyle(style.GetTextStyle());

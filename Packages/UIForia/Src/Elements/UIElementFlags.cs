@@ -19,6 +19,7 @@ namespace UIForia.Elements {
         InTagIndex = 1 << 9,
         
         NeedsUpdate = 1 << 10,
+        InternalElement = 1 << 11,
         
         SelfAndAncestorEnabled = Alive | Enabled | AncestorEnabled,
 

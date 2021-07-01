@@ -17,6 +17,7 @@ namespace UIForia.Systems {
         public bool IsReference => reference != null;
 
         public abstract ContextVariable CreateReference();
+        public abstract void Release();
 
     }
 
@@ -37,10 +38,6 @@ namespace UIForia.Systems {
         public ContextVariable() {
         }
 
-        ~ContextVariable() {
-            s_Pool.Release(this);
-        }
-
         public void Initialize(int id, string name, T value) {
             this.id = id;
             this.name = name;
@@ -57,6 +54,11 @@ namespace UIForia.Systems {
             return var;
         }
 
+        public override void Release() {
+            this.next?.Release();
+            s_Pool.Release(this);
+            this.next = null;
+        }
     }
 
     public class LinqBindingNode {
@@ -258,6 +260,7 @@ namespace UIForia.Systems {
 
         public static void Release(LinqBindingNode node) {
             s_NodePool.Release(node);
+            node.localVariable?.Release();
         }
 
         public ContextVariable<T> GetRepeatItem<T>(int id) {

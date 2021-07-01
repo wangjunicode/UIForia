@@ -8,6 +8,9 @@ namespace UIForia.Systems {
 
         void RegisterKeyboardHandler(UIElement element);
         
+        /// <summary>
+        /// Can contain destroyed elements (released to pool). Check "isDestroyed" flag before processing the element. 
+        /// </summary>
         IReadOnlyList<UIElement> ElementsThisFrame { get; }
         
 #if UNITY_EDITOR

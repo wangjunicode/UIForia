@@ -482,7 +482,7 @@ namespace UIForia.Rendering {
         }
 
         private void SortStyles() {
-            availableStyles.Sort((a, b) => a.priority < b.priority ? 1 : -1);
+            availableStyles.BubbleSort((a, b) => a.priority < b.priority ? 1 : -1);
         }
 
         public StyleProperty GetPropertyValue(StylePropertyId propertyId) {

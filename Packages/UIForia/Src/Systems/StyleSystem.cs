@@ -80,7 +80,6 @@ namespace UIForia.Systems {
         }
 
         public void OnElementDestroyed(UIElement element) {
-            element.style = null;
             m_ChangeSets.Remove(element.id);
         }
 

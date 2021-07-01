@@ -1275,6 +1275,11 @@ namespace UIForia.Systems {
 
             for (int i = 0; i < queryableElements.size; i++) {
                 UIElement element = queryableElements.array[i].element;
+                // could be stale reference to released (to pool) element.
+                if (element.isDestroyed) {
+                    continue;
+                }
+                
                 if (element is IPointerQueryHandler pointerQueryHandler) {
                     if (pointerQueryHandler.ContainsPoint(point)) {
                         retn.Add(element);

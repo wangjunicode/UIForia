@@ -5,6 +5,10 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Group")]
     public class UIGroupElement : UIContainerElement {
+    
+        public UIGroupElement() {
+            flags = UIElementFlags.InternalElement;
+        }
 
         public override string GetDisplayName() {
             return "Group";
@@ -14,6 +18,10 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Panel")]
     public class UIPanelElement : UIContainerElement {
+    
+        public UIPanelElement() {
+            flags = UIElementFlags.InternalElement;
+        }
 
         public override string GetDisplayName() {
             return "Panel";
@@ -23,6 +31,10 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Section")]
     public class UISectionElement : UIContainerElement {
+    
+        public UISectionElement() {
+            flags = UIElementFlags.InternalElement;
+        }
 
         public override string GetDisplayName() {
             return "Section";
@@ -32,6 +44,10 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Div")]
     public class UIDivElement : UIContainerElement {
+    
+        public UIDivElement() {
+            flags = UIElementFlags.InternalElement;
+        }
 
         public override string GetDisplayName() {
             return "Div";
@@ -41,6 +57,10 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Header")]
     public class UIHeaderElement : UIContainerElement {
+    
+        public UIHeaderElement() {
+            flags = UIElementFlags.InternalElement;
+        }
 
         public override string GetDisplayName() {
             return "Header";
@@ -50,6 +70,10 @@ namespace UIForia.Elements {
 
     [TemplateTagName("Footer")]
     public class UIFooterElement : UIContainerElement {
+    
+        public UIFooterElement() {
+            flags = UIElementFlags.InternalElement;
+        }
 
         public override string GetDisplayName() {
             return "Footer";

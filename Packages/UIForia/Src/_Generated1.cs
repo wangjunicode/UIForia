@@ -2038,8 +2038,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Visibility, out property)) return property.AsVisibility;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Visibility), out property)) return property.AsVisibility;
-                    return DefaultStyleValues_Generated.Visibility;
+                    return inheritedProperties[(int) StylePropertyId.Visibility].AsVisibility;
                 }
             }
 
@@ -2048,8 +2047,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Opacity, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Opacity), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.Opacity;
+                    return inheritedProperties[(int) StylePropertyId.Opacity].AsFloat;
                 }
             }
 
@@ -2139,8 +2137,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ClipBehavior, out property)) return property.AsClipBehavior;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.ClipBehavior), out property)) return property.AsClipBehavior;
-                    return DefaultStyleValues_Generated.ClipBehavior;
+                    return inheritedProperties[(int) StylePropertyId.ClipBehavior].AsClipBehavior;
                 }
             }
 
@@ -2158,8 +2155,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.PointerEvents, out property)) return property.AsPointerEvents;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.PointerEvents), out property)) return property.AsPointerEvents;
-                    return DefaultStyleValues_Generated.PointerEvents;
+                    return inheritedProperties[(int) StylePropertyId.PointerEvents].AsPointerEvents;
                 }
             }
 
@@ -2177,8 +2173,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.BackgroundTint, out property)) return property.AsColor;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.BackgroundTint), out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.BackgroundTint;
+                    return inheritedProperties[(int) StylePropertyId.BackgroundTint].AsColor;
                 }
             }
 
@@ -2907,8 +2902,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextColor, out property)) return property.AsColor;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextColor), out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.TextColor;
+                    return inheritedProperties[(int) StylePropertyId.TextColor].AsColor;
                 }
             }
 
@@ -2917,8 +2911,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextFontAsset, out property)) return property.AsFont;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFontAsset), out property)) return property.AsFont;
-                    return DefaultStyleValues_Generated.TextFontAsset;
+                    return inheritedProperties[(int) StylePropertyId.TextFontAsset].AsFont;
                 }
             }
 
@@ -2927,8 +2920,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextFontSize, out property)) return property.AsUIFixedLength;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFontSize), out property)) return property.AsUIFixedLength;
-                    return DefaultStyleValues_Generated.TextFontSize;
+                    return inheritedProperties[(int) StylePropertyId.TextFontSize].AsUIFixedLength;
                 }
             }
 
@@ -2937,8 +2929,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextFontStyle, out property)) return property.AsFontStyle;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFontStyle), out property)) return property.AsFontStyle;
-                    return DefaultStyleValues_Generated.TextFontStyle;
+                    return inheritedProperties[(int) StylePropertyId.TextFontStyle].AsFontStyle;
                 }
             }
 
@@ -2947,8 +2938,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextAlignment, out property)) return property.AsTextAlignment;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextAlignment), out property)) return property.AsTextAlignment;
-                    return DefaultStyleValues_Generated.TextAlignment;
+                    return inheritedProperties[(int) StylePropertyId.TextAlignment].AsTextAlignment;
                 }
             }
 
@@ -2957,8 +2947,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextOutlineWidth, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextOutlineWidth), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextOutlineWidth;
+                    return inheritedProperties[(int) StylePropertyId.TextOutlineWidth].AsFloat;
                 }
             }
 
@@ -2967,8 +2956,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextOutlineColor, out property)) return property.AsColor;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextOutlineColor), out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.TextOutlineColor;
+                    return inheritedProperties[(int) StylePropertyId.TextOutlineColor].AsColor;
                 }
             }
 
@@ -2977,8 +2965,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.CaretColor, out property)) return property.AsColor;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.CaretColor), out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.CaretColor;
+                    return inheritedProperties[(int) StylePropertyId.CaretColor].AsColor;
                 }
             }
 
@@ -2987,8 +2974,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.SelectionBackgroundColor, out property)) return property.AsColor;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.SelectionBackgroundColor), out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.SelectionBackgroundColor;
+                    return inheritedProperties[(int) StylePropertyId.SelectionBackgroundColor].AsColor;
                 }
             }
 
@@ -2997,8 +2983,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.SelectionTextColor, out property)) return property.AsColor;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.SelectionTextColor), out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.SelectionTextColor;
+                    return inheritedProperties[(int) StylePropertyId.SelectionTextColor].AsColor;
                 }
             }
 
@@ -3007,8 +2992,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextOutlineSoftness, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextOutlineSoftness), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextOutlineSoftness;
+                    return inheritedProperties[(int) StylePropertyId.TextOutlineSoftness].AsFloat;
                 }
             }
 
@@ -3017,8 +3001,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowColor, out property)) return property.AsColor;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextGlowColor), out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.TextGlowColor;
+                    return inheritedProperties[(int) StylePropertyId.TextGlowColor].AsColor;
                 }
             }
 
@@ -3027,8 +3010,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowOffset, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextGlowOffset), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextGlowOffset;
+                    return inheritedProperties[(int) StylePropertyId.TextGlowOffset].AsFloat;
                 }
             }
 
@@ -3037,8 +3019,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowInner, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextGlowInner), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextGlowInner;
+                    return inheritedProperties[(int) StylePropertyId.TextGlowInner].AsFloat;
                 }
             }
 
@@ -3047,8 +3028,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowOuter, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextGlowOuter), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextGlowOuter;
+                    return inheritedProperties[(int) StylePropertyId.TextGlowOuter].AsFloat;
                 }
             }
 
@@ -3057,8 +3037,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextGlowPower, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextGlowPower), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextGlowPower;
+                    return inheritedProperties[(int) StylePropertyId.TextGlowPower].AsFloat;
                 }
             }
 
@@ -3067,8 +3046,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayColor, out property)) return property.AsColor;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlayColor), out property)) return property.AsColor;
-                    return DefaultStyleValues_Generated.TextUnderlayColor;
+                    return inheritedProperties[(int) StylePropertyId.TextUnderlayColor].AsColor;
                 }
             }
 
@@ -3077,8 +3055,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayX, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlayX), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextUnderlayX;
+                    return inheritedProperties[(int) StylePropertyId.TextUnderlayX].AsFloat;
                 }
             }
 
@@ -3087,8 +3064,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayY, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlayY), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextUnderlayY;
+                    return inheritedProperties[(int) StylePropertyId.TextUnderlayY].AsFloat;
                 }
             }
 
@@ -3097,8 +3073,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayDilate, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlayDilate), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextUnderlayDilate;
+                    return inheritedProperties[(int) StylePropertyId.TextUnderlayDilate].AsFloat;
                 }
             }
 
@@ -3107,8 +3082,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlaySoftness, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlaySoftness), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextUnderlaySoftness;
+                    return inheritedProperties[(int) StylePropertyId.TextUnderlaySoftness].AsFloat;
                 }
             }
 
@@ -3117,8 +3091,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextFaceDilate, out property)) return property.AsFloat;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextFaceDilate), out property)) return property.AsFloat;
-                    return DefaultStyleValues_Generated.TextFaceDilate;
+                    return inheritedProperties[(int) StylePropertyId.TextFaceDilate].AsFloat;
                 }
             }
 
@@ -3127,8 +3100,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextUnderlayType, out property)) return property.AsUnderlayType;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextUnderlayType), out property)) return property.AsUnderlayType;
-                    return DefaultStyleValues_Generated.TextUnderlayType;
+                    return inheritedProperties[(int) StylePropertyId.TextUnderlayType].AsUnderlayType;
                 }
             }
 
@@ -3137,8 +3109,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextTransform, out property)) return property.AsTextTransform;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextTransform), out property)) return property.AsTextTransform;
-                    return DefaultStyleValues_Generated.TextTransform;
+                    return inheritedProperties[(int) StylePropertyId.TextTransform].AsTextTransform;
                 }
             }
 
@@ -3147,8 +3118,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.TextWhitespaceMode, out property)) return property.AsWhitespaceMode;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.TextWhitespaceMode), out property)) return property.AsWhitespaceMode;
-                    return DefaultStyleValues_Generated.TextWhitespaceMode;
+                    return inheritedProperties[(int) StylePropertyId.TextWhitespaceMode].AsWhitespaceMode;
                 }
             }
 
@@ -3256,8 +3226,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.ZIndex, out property)) return property.AsInt;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.ZIndex), out property)) return property.AsInt;
-                    return DefaultStyleValues_Generated.ZIndex;
+                    return inheritedProperties[(int) StylePropertyId.ZIndex].AsInt;
                 }
             }
 
@@ -3284,8 +3253,7 @@ namespace UIForia.Rendering {
                 get { 
                     StyleProperty property;
                     if (propertyMap.TryGetValue((int) StylePropertyId.Layer, out property)) return property.AsInt;
-                    if (propertyMap.TryGetValue(BitUtil.SetHighLowBits(1, (int) StylePropertyId.Layer), out property)) return property.AsInt;
-                    return DefaultStyleValues_Generated.Layer;
+                    return inheritedProperties[(int) StylePropertyId.Layer].AsInt;
                 }
             }
 
@@ -4516,297 +4484,14 @@ namespace UIForia.Rendering {
         
 
         public StyleProperty GetComputedStyleProperty(StylePropertyId propertyId) {
-        			switch(propertyId) {
-				case StylePropertyId.Visibility:
-					 return new StyleProperty(StylePropertyId.Visibility, (int)Visibility);
-				case StylePropertyId.Opacity:
-					 return new StyleProperty(StylePropertyId.Opacity, Opacity);
-				case StylePropertyId.Cursor:
-					 return new StyleProperty(StylePropertyId.Cursor, Cursor);
-				case StylePropertyId.Painter:
-					 return new StyleProperty(StylePropertyId.Painter, Painter);
-				case StylePropertyId.Material:
-					 return new StyleProperty(StylePropertyId.Material, Material);
-				case StylePropertyId.MeshType:
-					 return new StyleProperty(StylePropertyId.MeshType, (int)MeshType);
-				case StylePropertyId.MeshFillDirection:
-					 return new StyleProperty(StylePropertyId.MeshFillDirection, (int)MeshFillDirection);
-				case StylePropertyId.MeshFillOrigin:
-					 return new StyleProperty(StylePropertyId.MeshFillOrigin, (int)MeshFillOrigin);
-				case StylePropertyId.MeshFillAmount:
-					 return new StyleProperty(StylePropertyId.MeshFillAmount, MeshFillAmount);
-				case StylePropertyId.OverflowX:
-					 return new StyleProperty(StylePropertyId.OverflowX, (int)OverflowX);
-				case StylePropertyId.OverflowY:
-					 return new StyleProperty(StylePropertyId.OverflowY, (int)OverflowY);
-				case StylePropertyId.ClipBehavior:
-					 return new StyleProperty(StylePropertyId.ClipBehavior, (int)ClipBehavior);
-				case StylePropertyId.ClipBounds:
-					 return new StyleProperty(StylePropertyId.ClipBounds, (int)ClipBounds);
-				case StylePropertyId.PointerEvents:
-					 return new StyleProperty(StylePropertyId.PointerEvents, (int)PointerEvents);
-				case StylePropertyId.BackgroundColor:
-					 return new StyleProperty(StylePropertyId.BackgroundColor, BackgroundColor);
-				case StylePropertyId.BackgroundTint:
-					 return new StyleProperty(StylePropertyId.BackgroundTint, BackgroundTint);
-				case StylePropertyId.BackgroundImageOffsetX:
-					 return new StyleProperty(StylePropertyId.BackgroundImageOffsetX, BackgroundImageOffsetX);
-				case StylePropertyId.BackgroundImageOffsetY:
-					 return new StyleProperty(StylePropertyId.BackgroundImageOffsetY, BackgroundImageOffsetY);
-				case StylePropertyId.BackgroundImageScaleX:
-					 return new StyleProperty(StylePropertyId.BackgroundImageScaleX, BackgroundImageScaleX);
-				case StylePropertyId.BackgroundImageScaleY:
-					 return new StyleProperty(StylePropertyId.BackgroundImageScaleY, BackgroundImageScaleY);
-				case StylePropertyId.BackgroundImageTileX:
-					 return new StyleProperty(StylePropertyId.BackgroundImageTileX, BackgroundImageTileX);
-				case StylePropertyId.BackgroundImageTileY:
-					 return new StyleProperty(StylePropertyId.BackgroundImageTileY, BackgroundImageTileY);
-				case StylePropertyId.BackgroundImageRotation:
-					 return new StyleProperty(StylePropertyId.BackgroundImageRotation, BackgroundImageRotation);
-				case StylePropertyId.BackgroundImage:
-					 return new StyleProperty(StylePropertyId.BackgroundImage, BackgroundImage);
-				case StylePropertyId.BackgroundFit:
-					 return new StyleProperty(StylePropertyId.BackgroundFit, (int)BackgroundFit);
-				case StylePropertyId.BorderColorTop:
-					 return new StyleProperty(StylePropertyId.BorderColorTop, BorderColorTop);
-				case StylePropertyId.BorderColorRight:
-					 return new StyleProperty(StylePropertyId.BorderColorRight, BorderColorRight);
-				case StylePropertyId.BorderColorBottom:
-					 return new StyleProperty(StylePropertyId.BorderColorBottom, BorderColorBottom);
-				case StylePropertyId.BorderColorLeft:
-					 return new StyleProperty(StylePropertyId.BorderColorLeft, BorderColorLeft);
-				case StylePropertyId.CornerBevelTopLeft:
-					 return new StyleProperty(StylePropertyId.CornerBevelTopLeft, CornerBevelTopLeft);
-				case StylePropertyId.CornerBevelTopRight:
-					 return new StyleProperty(StylePropertyId.CornerBevelTopRight, CornerBevelTopRight);
-				case StylePropertyId.CornerBevelBottomRight:
-					 return new StyleProperty(StylePropertyId.CornerBevelBottomRight, CornerBevelBottomRight);
-				case StylePropertyId.CornerBevelBottomLeft:
-					 return new StyleProperty(StylePropertyId.CornerBevelBottomLeft, CornerBevelBottomLeft);
-				case StylePropertyId.FlexItemGrow:
-					 return new StyleProperty(StylePropertyId.FlexItemGrow, FlexItemGrow);
-				case StylePropertyId.FlexItemShrink:
-					 return new StyleProperty(StylePropertyId.FlexItemShrink, FlexItemShrink);
-				case StylePropertyId.FlexLayoutDirection:
-					 return new StyleProperty(StylePropertyId.FlexLayoutDirection, (int)FlexLayoutDirection);
-				case StylePropertyId.FlexLayoutWrap:
-					 return new StyleProperty(StylePropertyId.FlexLayoutWrap, (int)FlexLayoutWrap);
-				case StylePropertyId.FlexLayoutGapHorizontal:
-					 return new StyleProperty(StylePropertyId.FlexLayoutGapHorizontal, FlexLayoutGapHorizontal);
-				case StylePropertyId.FlexLayoutGapVertical:
-					 return new StyleProperty(StylePropertyId.FlexLayoutGapVertical, FlexLayoutGapVertical);
-				case StylePropertyId.GridItemX:
-					 return new StyleProperty(StylePropertyId.GridItemX, GridItemX);
-				case StylePropertyId.GridItemY:
-					 return new StyleProperty(StylePropertyId.GridItemY, GridItemY);
-				case StylePropertyId.GridItemWidth:
-					 return new StyleProperty(StylePropertyId.GridItemWidth, GridItemWidth);
-				case StylePropertyId.GridItemHeight:
-					 return new StyleProperty(StylePropertyId.GridItemHeight, GridItemHeight);
-				case StylePropertyId.GridLayoutDirection:
-					 return new StyleProperty(StylePropertyId.GridLayoutDirection, (int)GridLayoutDirection);
-				case StylePropertyId.GridLayoutDensity:
-					 return new StyleProperty(StylePropertyId.GridLayoutDensity, (int)GridLayoutDensity);
-				case StylePropertyId.GridLayoutColTemplate:
-					 return new StyleProperty(StylePropertyId.GridLayoutColTemplate, GridLayoutColTemplate);
-				case StylePropertyId.GridLayoutRowTemplate:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowTemplate, GridLayoutRowTemplate);
-				case StylePropertyId.GridLayoutColAutoSize:
-					 return new StyleProperty(StylePropertyId.GridLayoutColAutoSize, GridLayoutColAutoSize);
-				case StylePropertyId.GridLayoutRowAutoSize:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowAutoSize, GridLayoutRowAutoSize);
-				case StylePropertyId.GridLayoutColGap:
-					 return new StyleProperty(StylePropertyId.GridLayoutColGap, GridLayoutColGap);
-				case StylePropertyId.GridLayoutRowGap:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowGap, GridLayoutRowGap);
-				case StylePropertyId.GridLayoutColAlignment:
-					 return new StyleProperty(StylePropertyId.GridLayoutColAlignment, (int)GridLayoutColAlignment);
-				case StylePropertyId.GridLayoutRowAlignment:
-					 return new StyleProperty(StylePropertyId.GridLayoutRowAlignment, (int)GridLayoutRowAlignment);
-				case StylePropertyId.AlignItemsHorizontal:
-					 return new StyleProperty(StylePropertyId.AlignItemsHorizontal, AlignItemsHorizontal);
-				case StylePropertyId.AlignItemsVertical:
-					 return new StyleProperty(StylePropertyId.AlignItemsVertical, AlignItemsVertical);
-				case StylePropertyId.FitItemsVertical:
-					 return new StyleProperty(StylePropertyId.FitItemsVertical, (int)FitItemsVertical);
-				case StylePropertyId.FitItemsHorizontal:
-					 return new StyleProperty(StylePropertyId.FitItemsHorizontal, (int)FitItemsHorizontal);
-				case StylePropertyId.DistributeExtraSpaceHorizontal:
-					 return new StyleProperty(StylePropertyId.DistributeExtraSpaceHorizontal, (int)DistributeExtraSpaceHorizontal);
-				case StylePropertyId.DistributeExtraSpaceVertical:
-					 return new StyleProperty(StylePropertyId.DistributeExtraSpaceVertical, (int)DistributeExtraSpaceVertical);
-				case StylePropertyId.RadialLayoutStartAngle:
-					 return new StyleProperty(StylePropertyId.RadialLayoutStartAngle, RadialLayoutStartAngle);
-				case StylePropertyId.RadialLayoutEndAngle:
-					 return new StyleProperty(StylePropertyId.RadialLayoutEndAngle, RadialLayoutEndAngle);
-				case StylePropertyId.RadialLayoutRadius:
-					 return new StyleProperty(StylePropertyId.RadialLayoutRadius, RadialLayoutRadius);
-				case StylePropertyId.AlignmentDirectionX:
-					 return new StyleProperty(StylePropertyId.AlignmentDirectionX, (int)AlignmentDirectionX);
-				case StylePropertyId.AlignmentDirectionY:
-					 return new StyleProperty(StylePropertyId.AlignmentDirectionY, (int)AlignmentDirectionY);
-				case StylePropertyId.AlignmentTargetX:
-					 return new StyleProperty(StylePropertyId.AlignmentTargetX, (int)AlignmentTargetX);
-				case StylePropertyId.AlignmentTargetY:
-					 return new StyleProperty(StylePropertyId.AlignmentTargetY, (int)AlignmentTargetY);
-				case StylePropertyId.AlignmentOriginX:
-					 return new StyleProperty(StylePropertyId.AlignmentOriginX, AlignmentOriginX);
-				case StylePropertyId.AlignmentOriginY:
-					 return new StyleProperty(StylePropertyId.AlignmentOriginY, AlignmentOriginY);
-				case StylePropertyId.AlignmentOffsetX:
-					 return new StyleProperty(StylePropertyId.AlignmentOffsetX, AlignmentOffsetX);
-				case StylePropertyId.AlignmentOffsetY:
-					 return new StyleProperty(StylePropertyId.AlignmentOffsetY, AlignmentOffsetY);
-				case StylePropertyId.AlignmentBoundaryX:
-					 return new StyleProperty(StylePropertyId.AlignmentBoundaryX, (int)AlignmentBoundaryX);
-				case StylePropertyId.AlignmentBoundaryY:
-					 return new StyleProperty(StylePropertyId.AlignmentBoundaryY, (int)AlignmentBoundaryY);
-				case StylePropertyId.LayoutFitHorizontal:
-					 return new StyleProperty(StylePropertyId.LayoutFitHorizontal, (int)LayoutFitHorizontal);
-				case StylePropertyId.LayoutFitVertical:
-					 return new StyleProperty(StylePropertyId.LayoutFitVertical, (int)LayoutFitVertical);
-				case StylePropertyId.MinWidth:
-					 return new StyleProperty(StylePropertyId.MinWidth, MinWidth);
-				case StylePropertyId.MaxWidth:
-					 return new StyleProperty(StylePropertyId.MaxWidth, MaxWidth);
-				case StylePropertyId.PreferredWidth:
-					 return new StyleProperty(StylePropertyId.PreferredWidth, PreferredWidth);
-				case StylePropertyId.MinHeight:
-					 return new StyleProperty(StylePropertyId.MinHeight, MinHeight);
-				case StylePropertyId.MaxHeight:
-					 return new StyleProperty(StylePropertyId.MaxHeight, MaxHeight);
-				case StylePropertyId.PreferredHeight:
-					 return new StyleProperty(StylePropertyId.PreferredHeight, PreferredHeight);
-				case StylePropertyId.MarginTop:
-					 return new StyleProperty(StylePropertyId.MarginTop, MarginTop);
-				case StylePropertyId.MarginRight:
-					 return new StyleProperty(StylePropertyId.MarginRight, MarginRight);
-				case StylePropertyId.MarginBottom:
-					 return new StyleProperty(StylePropertyId.MarginBottom, MarginBottom);
-				case StylePropertyId.MarginLeft:
-					 return new StyleProperty(StylePropertyId.MarginLeft, MarginLeft);
-				case StylePropertyId.BorderTop:
-					 return new StyleProperty(StylePropertyId.BorderTop, BorderTop);
-				case StylePropertyId.BorderRight:
-					 return new StyleProperty(StylePropertyId.BorderRight, BorderRight);
-				case StylePropertyId.BorderBottom:
-					 return new StyleProperty(StylePropertyId.BorderBottom, BorderBottom);
-				case StylePropertyId.BorderLeft:
-					 return new StyleProperty(StylePropertyId.BorderLeft, BorderLeft);
-				case StylePropertyId.BorderRadiusTopLeft:
-					 return new StyleProperty(StylePropertyId.BorderRadiusTopLeft, BorderRadiusTopLeft);
-				case StylePropertyId.BorderRadiusTopRight:
-					 return new StyleProperty(StylePropertyId.BorderRadiusTopRight, BorderRadiusTopRight);
-				case StylePropertyId.BorderRadiusBottomRight:
-					 return new StyleProperty(StylePropertyId.BorderRadiusBottomRight, BorderRadiusBottomRight);
-				case StylePropertyId.BorderRadiusBottomLeft:
-					 return new StyleProperty(StylePropertyId.BorderRadiusBottomLeft, BorderRadiusBottomLeft);
-				case StylePropertyId.PaddingTop:
-					 return new StyleProperty(StylePropertyId.PaddingTop, PaddingTop);
-				case StylePropertyId.PaddingRight:
-					 return new StyleProperty(StylePropertyId.PaddingRight, PaddingRight);
-				case StylePropertyId.PaddingBottom:
-					 return new StyleProperty(StylePropertyId.PaddingBottom, PaddingBottom);
-				case StylePropertyId.PaddingLeft:
-					 return new StyleProperty(StylePropertyId.PaddingLeft, PaddingLeft);
-				case StylePropertyId.TextColor:
-					 return new StyleProperty(StylePropertyId.TextColor, TextColor);
-				case StylePropertyId.TextFontAsset:
-					 return new StyleProperty(StylePropertyId.TextFontAsset, TextFontAsset);
-				case StylePropertyId.TextFontSize:
-					 return new StyleProperty(StylePropertyId.TextFontSize, TextFontSize);
-				case StylePropertyId.TextFontStyle:
-					 return new StyleProperty(StylePropertyId.TextFontStyle, (int)TextFontStyle);
-				case StylePropertyId.TextAlignment:
-					 return new StyleProperty(StylePropertyId.TextAlignment, (int)TextAlignment);
-				case StylePropertyId.TextOutlineWidth:
-					 return new StyleProperty(StylePropertyId.TextOutlineWidth, TextOutlineWidth);
-				case StylePropertyId.TextOutlineColor:
-					 return new StyleProperty(StylePropertyId.TextOutlineColor, TextOutlineColor);
-				case StylePropertyId.CaretColor:
-					 return new StyleProperty(StylePropertyId.CaretColor, CaretColor);
-				case StylePropertyId.SelectionBackgroundColor:
-					 return new StyleProperty(StylePropertyId.SelectionBackgroundColor, SelectionBackgroundColor);
-				case StylePropertyId.SelectionTextColor:
-					 return new StyleProperty(StylePropertyId.SelectionTextColor, SelectionTextColor);
-				case StylePropertyId.TextOutlineSoftness:
-					 return new StyleProperty(StylePropertyId.TextOutlineSoftness, TextOutlineSoftness);
-				case StylePropertyId.TextGlowColor:
-					 return new StyleProperty(StylePropertyId.TextGlowColor, TextGlowColor);
-				case StylePropertyId.TextGlowOffset:
-					 return new StyleProperty(StylePropertyId.TextGlowOffset, TextGlowOffset);
-				case StylePropertyId.TextGlowInner:
-					 return new StyleProperty(StylePropertyId.TextGlowInner, TextGlowInner);
-				case StylePropertyId.TextGlowOuter:
-					 return new StyleProperty(StylePropertyId.TextGlowOuter, TextGlowOuter);
-				case StylePropertyId.TextGlowPower:
-					 return new StyleProperty(StylePropertyId.TextGlowPower, TextGlowPower);
-				case StylePropertyId.TextUnderlayColor:
-					 return new StyleProperty(StylePropertyId.TextUnderlayColor, TextUnderlayColor);
-				case StylePropertyId.TextUnderlayX:
-					 return new StyleProperty(StylePropertyId.TextUnderlayX, TextUnderlayX);
-				case StylePropertyId.TextUnderlayY:
-					 return new StyleProperty(StylePropertyId.TextUnderlayY, TextUnderlayY);
-				case StylePropertyId.TextUnderlayDilate:
-					 return new StyleProperty(StylePropertyId.TextUnderlayDilate, TextUnderlayDilate);
-				case StylePropertyId.TextUnderlaySoftness:
-					 return new StyleProperty(StylePropertyId.TextUnderlaySoftness, TextUnderlaySoftness);
-				case StylePropertyId.TextFaceDilate:
-					 return new StyleProperty(StylePropertyId.TextFaceDilate, TextFaceDilate);
-				case StylePropertyId.TextUnderlayType:
-					 return new StyleProperty(StylePropertyId.TextUnderlayType, (int)TextUnderlayType);
-				case StylePropertyId.TextTransform:
-					 return new StyleProperty(StylePropertyId.TextTransform, (int)TextTransform);
-				case StylePropertyId.TextWhitespaceMode:
-					 return new StyleProperty(StylePropertyId.TextWhitespaceMode, (int)TextWhitespaceMode);
-				case StylePropertyId.TransformPositionX:
-					 return new StyleProperty(StylePropertyId.TransformPositionX, TransformPositionX);
-				case StylePropertyId.TransformPositionY:
-					 return new StyleProperty(StylePropertyId.TransformPositionY, TransformPositionY);
-				case StylePropertyId.TransformPivotX:
-					 return new StyleProperty(StylePropertyId.TransformPivotX, TransformPivotX);
-				case StylePropertyId.TransformPivotY:
-					 return new StyleProperty(StylePropertyId.TransformPivotY, TransformPivotY);
-				case StylePropertyId.TransformScaleX:
-					 return new StyleProperty(StylePropertyId.TransformScaleX, TransformScaleX);
-				case StylePropertyId.TransformScaleY:
-					 return new StyleProperty(StylePropertyId.TransformScaleY, TransformScaleY);
-				case StylePropertyId.TransformRotation:
-					 return new StyleProperty(StylePropertyId.TransformRotation, TransformRotation);
-				case StylePropertyId.LayoutType:
-					 return new StyleProperty(StylePropertyId.LayoutType, (int)LayoutType);
-				case StylePropertyId.LayoutBehavior:
-					 return new StyleProperty(StylePropertyId.LayoutBehavior, (int)LayoutBehavior);
-				case StylePropertyId.ScrollBehaviorX:
-					 return new StyleProperty(StylePropertyId.ScrollBehaviorX, (int)ScrollBehaviorX);
-				case StylePropertyId.ScrollBehaviorY:
-					 return new StyleProperty(StylePropertyId.ScrollBehaviorY, (int)ScrollBehaviorY);
-				case StylePropertyId.ZIndex:
-					 return new StyleProperty(StylePropertyId.ZIndex, ZIndex);
-				case StylePropertyId.RenderLayerOffset:
-					 return new StyleProperty(StylePropertyId.RenderLayerOffset, RenderLayerOffset);
-				case StylePropertyId.RenderLayer:
-					 return new StyleProperty(StylePropertyId.RenderLayer, (int)RenderLayer);
-				case StylePropertyId.Layer:
-					 return new StyleProperty(StylePropertyId.Layer, Layer);
-				case StylePropertyId.ShadowColor:
-					 return new StyleProperty(StylePropertyId.ShadowColor, ShadowColor);
-				case StylePropertyId.ShadowTint:
-					 return new StyleProperty(StylePropertyId.ShadowTint, ShadowTint);
-				case StylePropertyId.ShadowOffsetX:
-					 return new StyleProperty(StylePropertyId.ShadowOffsetX, ShadowOffsetX);
-				case StylePropertyId.ShadowOffsetY:
-					 return new StyleProperty(StylePropertyId.ShadowOffsetY, ShadowOffsetY);
-				case StylePropertyId.ShadowSizeX:
-					 return new StyleProperty(StylePropertyId.ShadowSizeX, ShadowSizeX);
-				case StylePropertyId.ShadowSizeY:
-					 return new StyleProperty(StylePropertyId.ShadowSizeY, ShadowSizeY);
-				case StylePropertyId.ShadowIntensity:
-					 return new StyleProperty(StylePropertyId.ShadowIntensity, ShadowIntensity);
-				case StylePropertyId.ShadowOpacity:
-					 return new StyleProperty(StylePropertyId.ShadowOpacity, ShadowOpacity);
-				default: throw new System.ArgumentOutOfRangeException(nameof(propertyId), propertyId, null);
-				}  
+            if ((isInheritedMap & (1UL << (int)propertyId)) != 0) {
+                if (propertyMap.TryGetValue((int)propertyId, out StyleProperty property)) {
+                    return property; 
+                }
+            }
+
+            if ((int)propertyId < inheritedProperties.Length) return inheritedProperties[(int)propertyId];
+            return DefaultStyleValues_Generated.GetPropertyValue(propertyId);  
         }
 
     }

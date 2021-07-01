@@ -67,10 +67,18 @@ namespace UIForia.Rendering {
             this.dummyRoot = new UIViewRootElement();
             this.dummyRoot.application = application;
             this.dummyRoot.flags |= UIElementFlags.EnabledFlagSet;
-            this.dummyRoot.style = new UIStyleSet(dummyRoot);
-            this.dummyRoot.layoutResult = new LayoutResult(dummyRoot);
+            this.dummyRoot.style = new UIStyleSet();
+            this.dummyRoot.style.Initialize(dummyRoot);
+            this.dummyRoot.layoutResult = new LayoutResult();
+            this.dummyRoot.layoutResult.Initialize(dummyRoot);
             this.dummyRoot.View = this;
             this.dummyRoot.children = new LightList<UIElement>(1);
+            
+            int count = StyleUtil.InheritedProperties.Count;
+            for (int i = 0; i < count; i++) {
+                dummyRoot.style.inheritedProperties[i] = DefaultStyleValues_Generated.GetPropertyValue((StylePropertyId)i); 
+            }
+            
             this.dummyRoot.AddChild(element);
             this.sizeChanged = true;
         }

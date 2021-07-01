@@ -248,6 +248,13 @@ namespace UIForia.Util {
             System.Array.Sort(array, 0, size, s_Comparer);
             s_Comparer.cmp = null;
         }
+        
+        public void BubbleSort(Comparison<T> comparison) {
+            if (size < 2) return;
+            s_Comparer.cmp = comparison;
+            ArrayUtil.BubbleSort(array, size, s_Comparer);
+            s_Comparer.cmp = null;
+        }
 
         internal static int FloorLog2(int n) {
             int num = 0;

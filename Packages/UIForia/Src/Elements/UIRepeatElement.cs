@@ -57,6 +57,10 @@ namespace UIForia.Elements {
 
     public abstract class UIRepeatElement : UIElement {
 
+        protected UIRepeatElement() {
+            flags = UIElementFlags.InternalElement;
+        }
+
         public int templateSpawnId;
         public int indexVarId;
         public UIElement templateContextRoot;
@@ -77,7 +81,7 @@ namespace UIForia.Elements {
                 for (int i = 0; i < diff; i++) {
                     UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
                     
-                    ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", prevCount + i);
+                    ContextVariable<int> indexVariable = ContextVariable<int>.Create(indexVarId, "index", prevCount + i);
 
                     child.bindingNode.CreateLocalContextVariable(indexVariable);
                 }
@@ -176,8 +180,9 @@ namespace UIForia.Elements {
 
                 if (keypair.element == null) {
                     UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
-                    ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
-                    ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);
+                    
+                    ContextVariable<int> indexVariable = ContextVariable<int>.Create(indexVarId, "index", default);
+                    ContextVariable<T> itemVariable = ContextVariable<T>.Create(itemVarId, "item", default);
                     child.bindingNode.CreateLocalContextVariable(itemVariable);
                     child.bindingNode.CreateLocalContextVariable(indexVariable);
                     keypair.element = child;
@@ -221,8 +226,8 @@ namespace UIForia.Elements {
                         UIElement child = application.CreateTemplate(templateSpawnId, templateContextRoot, this, scope);
 
                         
-                        ContextVariable<int> indexVariable = new ContextVariable<int>(indexVarId, "index", default);
-                        ContextVariable<T> itemVariable = new ContextVariable<T>(itemVarId, "item", default);
+                        ContextVariable<int> indexVariable = ContextVariable<int>.Create(indexVarId, "index", default);
+                        ContextVariable<T> itemVariable = ContextVariable<T>.Create(itemVarId, "item", default);
 
                         child.bindingNode.CreateLocalContextVariable(itemVariable);
                         child.bindingNode.CreateLocalContextVariable(indexVariable);

@@ -19,7 +19,7 @@ namespace UIForia.Rendering {
     [DebuggerDisplay("id = {element.id} state = {currentState}")]
     public partial class UIStyleSet {
 
-        public readonly UIElement element;
+        public UIElement element;
 
         internal StyleState currentState;
         internal StyleState containedStates;
@@ -28,7 +28,10 @@ namespace UIForia.Rendering {
         private UIStyleGroup instanceStyle;
         internal readonly StructList<StyleEntry> availableStyles;
         internal readonly LightList<UIStyleGroupContainer> styleGroupContainers; // probably only need to store the names
-        internal readonly IntMap<StyleProperty> propertyMap;
+        internal readonly Dictionary<int, StyleProperty> propertyMap;
+        internal readonly StyleProperty[] inheritedProperties;
+
+        internal ulong isInheritedMap;
 
         // idea -- for styles are inactive, sort them to the back of the available styles list,
         // then we have to look though less of an array (also track a count for how many styles are active)
@@ -37,16 +40,28 @@ namespace UIForia.Rendering {
         // improve lookup time
         // support selectors
 
-        public UIStyleSet(UIElement element) {
-            this.element = element;
+        public UIStyleSet() {
             this.currentState = StyleState.Normal;
             this.containedStates = StyleState.Normal;
             this.availableStyles = new StructList<StyleEntry>(4);
             this.styleGroupContainers = new LightList<UIStyleGroupContainer>(3);
-            this.propertyMap = new IntMap<StyleProperty>();
+            this.propertyMap = new Dictionary<int, StyleProperty>(31);
+            this.inheritedProperties = new StyleProperty[StyleUtil.InheritedProperties.Count];
             this.hasAttributeStyles = false;
         }
 
+        public void Initialize(UIElement element) {
+            this.element = element;
+            this.currentState = StyleState.Normal;
+            this.containedStates = StyleState.Normal;
+            this.hasAttributeStyles = false;
+            this.instanceStyle = null;
+            this.availableStyles.Clear();
+            this.styleGroupContainers.Clear();
+            this.propertyMap.Clear();
+            this.isInheritedMap = 0;
+        }
+        
         public StyleState CurrentState => currentState;
 
         public UIStyleSetStateProxy Normal => new UIStyleSetStateProxy(this, StyleState.Normal);
@@ -87,29 +102,6 @@ namespace UIForia.Rendering {
             }
 
             availableStyles.Add(new StyleEntry(group, styleRunCommand, styleType, styleState, availableStyles.Count, ruleCount));
-        }
-
-        internal void ClearPropertyMap() {
-            // when clearing the property map we want to retain the styles that we have inherited from elsewhere
-            // to do this, we need to read in the inherited values, store them, clear the map, then write the values back
-            LightList<StyleProperty> inherited = LightList<StyleProperty>.Get();
-            inherited.EnsureCapacity(StyleUtil.InheritedProperties.Count);
-            StyleProperty[] inheritedArray = inherited.Array;
-            for (int i = 0; i < StyleUtil.InheritedProperties.Count; i++) {
-                int key = BitUtil.SetHighLowBits(1, (int) StyleUtil.InheritedProperties[i]);
-                if (propertyMap.TryGetValue(key, out StyleProperty inheritedValue)) {
-                    inherited.AddUnchecked(inheritedValue);
-                }
-            }
-
-            propertyMap.Clear();
-            // re-apply values
-            for (int i = 0; i < inherited.Count; i++) {
-                int key = BitUtil.SetHighLowBits(1, (int) inheritedArray[i].propertyId);
-                propertyMap.Add(key, inheritedArray[i]);
-            }
-
-            LightList<StyleProperty>.Release(ref inherited);
         }
 
         public void internal_AddBaseStyle(UIStyleGroupContainer style) {
@@ -177,7 +169,8 @@ namespace UIForia.Rendering {
 
             availableStyles.Clear();
             styleGroupContainers.Clear();
-            ClearPropertyMap();
+            isInheritedMap = 0;
+            propertyMap.Clear();
 
             styleGroupContainers.EnsureCapacity(updatedStyles.size);
 
@@ -279,7 +272,7 @@ namespace UIForia.Rendering {
         }
 
         private static void AddMissingProperties(LightList<StylePropertyId> toUpdate, UIStyle style) {
-            int count = style.PropertyCount;
+            int count = style.propertyCount;
             StyleProperty[] properties = style.array;
 
             for (int i = 0; i < count; i++) {
@@ -385,16 +378,12 @@ namespace UIForia.Rendering {
                 return;
             }
 
-            int count = StyleUtil.InheritedProperties.Count;
-
             UIStyleSet parentStyle = element.parent.style;
 
             if (parentStyle == null) return;
 
-            for (int i = 0; i < count; i++) {
-                int propertyId = (int) StyleUtil.InheritedProperties[i];
-                int key = BitUtil.SetHighLowBits(1, propertyId);
-                propertyMap[key] = parentStyle.GetComputedStyleProperty(StyleUtil.InheritedProperties[i]);
+            for (int i = 0; i < inheritedProperties.Length; i++) {
+                inheritedProperties[i] = parentStyle.GetComputedStyleProperty((StylePropertyId)i); 
             }
         }
 
@@ -403,20 +392,13 @@ namespace UIForia.Rendering {
                 return false;
             }
 
-            int key = BitUtil.SetHighLowBits(1, (int) property.propertyId);
-            StyleProperty current;
-            if (propertyMap.TryGetValue(key, out current)) {
-                if (current != property) {
-                    propertyMap[key] = property;
-                    return true;
-                }
-
-                return false;
-            }
-            else {
-                propertyMap[key] = property;
+            StyleProperty current = inheritedProperties[(int)property.propertyId];
+            if (current != property) {
+                inheritedProperties[(int)property.propertyId] = property;
                 return true;
             }
+            
+            return false;
         }
 
         public bool IsInState(StyleState state) {
@@ -500,7 +482,7 @@ namespace UIForia.Rendering {
         }
 
         private void SortStyles() {
-            availableStyles.Sort((a, b) => a.priority < b.priority ? 1 : -1);
+            availableStyles.BubbleSort((a, b) => a.priority < b.priority ? 1 : -1);
         }
 
         public StyleProperty GetPropertyValue(StylePropertyId propertyId) {
@@ -699,11 +681,13 @@ namespace UIForia.Rendering {
 
                 if (oldValue != currentValue) {
                     propertyMap[(int) property.propertyId] = currentValue;
+                    isInheritedMap |= 1UL << (int)property.propertyId;
                     styleSystem?.SetStyleProperty(element, currentValue);
                 }
             }
             else {
                 propertyMap.Remove((int) property.propertyId);
+                isInheritedMap &= ~(1UL << (int)property.propertyId);
                 styleSystem?.SetStyleProperty(element, property);
             }
         }
@@ -795,15 +779,17 @@ namespace UIForia.Rendering {
             for (int i = 0; i < toUpdate.Count; i++) {
                 StylePropertyId propertyId = propertyIdArray[i];
 
-                StyleProperty oldValue = propertyMap[(int) propertyId];
+                propertyMap.TryGetValue((int)propertyId, out StyleProperty oldValue);
                 if (TryGetPropertyValueInState(propertyId, currentState, out StyleProperty property)) {
                     if (oldValue != property) {
                         propertyMap[(int) property.propertyId] = property;
+                        isInheritedMap |= 1UL << (int)property.propertyId;
                         styleSystem?.SetStyleProperty(element, property);
                     }
                 }
                 else {
                     propertyMap.Remove((int) propertyId);
+                    isInheritedMap &= ~(1UL << (int)property.propertyId);
                     styleSystem?.SetStyleProperty(element, GetPropertyValue(propertyId));
                 }
             }

@@ -441,6 +441,9 @@ namespace UIForia.Systems {
                 if (m_ElementsThisFrame.Count > 0) {
                     for (int i = 0; i < m_ElementsThisFrame.Count; i++) {
                         UIElement element = m_ElementsThisFrame[i];
+                        if (element.isDestroyed) {
+                            continue;
+                        }
 
                         if (element.style.IsDefined(StylePropertyId.Cursor)) {
                             newCursor = element.style.Cursor;

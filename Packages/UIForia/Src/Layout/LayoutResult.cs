@@ -71,7 +71,34 @@ namespace UIForia.Layout {
         public float HorizontalPaddingBorderStart => padding.left + border.left;
         public float HorizontalPaddingBorderEnd => padding.right + border.right;
 
-        internal LayoutResult(UIElement element) {
+        public LayoutResult() {
+            this.matrix = SVGXMatrix.identity;
+        }
+
+        public void Initialize(UIElement element) {
+            localRotation = default;
+            localScale = default;
+            localPosition = default;
+            scale = default;
+            screenPosition = default;
+            pivot = default;
+            actualSize = default;
+            allocatedSize = default;
+            rotation = default;
+            border = default;
+            padding = default;
+            margin = default;
+            localMatrix = default;
+            pivotOffset = default;
+            allocatedPosition = default;
+            alignedPosition = default;
+            layoutParent = default;
+            orientedBounds = default;
+            axisAlignedBounds = default;
+            clipper = default;
+            isCulled = default;
+            rebuildGeometry = default;
+
             this.element = element;
             this.matrix = SVGXMatrix.identity;
         }

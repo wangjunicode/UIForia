@@ -5,6 +5,22 @@ using UnityEngine;
 
 namespace UIForia.Rendering {
 
+    // TODO: Currently not used. Consider using to optimize property lookup.
+    public unsafe struct PropertyLookup {
+        public fixed ulong map[3];
+        
+        public bool Get(int idx) {
+            int mapIdx = idx >> 6; // divide by 64
+            int shift = (idx - (mapIdx << 6)); // multiply by 64
+            return (map[mapIdx] & ((1ul << shift))) != 0;
+        }
+        public void Set(int idx) {
+            int mapIdx = idx >> 6;
+            int shift = (idx - (mapIdx << 6));
+            map[mapIdx] |= (1ul << shift);
+        }
+    }
+
     public partial class UIStyle {
 
         internal StyleProperty[] array;

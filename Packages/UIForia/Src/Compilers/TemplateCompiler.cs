@@ -114,8 +114,6 @@ namespace UIForia.Compilers {
         internal static readonly MethodInfo s_LinqBindingNode_GetContextVariable = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetContextVariable));
         internal static readonly MethodInfo s_LinqBindingNode_GetRepeatItem = typeof(LinqBindingNode).GetMethod(nameof(LinqBindingNode.GetRepeatItem));
         internal static readonly FieldInfo s_LinqBindingNode_ReferencedContext = typeof(LinqBindingNode).GetField(nameof(LinqBindingNode.referencedContexts));
-        
-        internal static readonly MethodInfo s_ContextVariable_Create = typeof(ContextVariable<>).GetMethod("Create", BindingFlags.Public | BindingFlags.Static);
 
         internal static readonly MethodInfo s_EventUtil_Subscribe = typeof(EventUtil).GetMethod(nameof(EventUtil.Subscribe));
 
@@ -1379,7 +1377,8 @@ namespace UIForia.Compilers {
             ReflectionUtil.TypeArray3[1] = typeof(string);
             ReflectionUtil.TypeArray3[2] = expressionType;
             
-            Expression createCall = ExpressionFactory.CallStaticUnchecked(s_ContextVariable_Create, Expression.Constant(variableDefinition.id), Expression.Constant(attr.key), Expression.Default(expressionType));
+            MethodInfo createMethod = type.GetMethod("Create");
+            Expression createCall = ExpressionFactory.CallStaticUnchecked(createMethod, Expression.Constant(variableDefinition.id), Expression.Constant(attr.key), Expression.Default(expressionType));
             Expression access = Expression.MakeMemberAccess(createdCompiler.GetCastElement(), s_UIElement_BindingNode);
             Expression createVariable = ExpressionFactory.CallInstanceUnchecked(access, s_LinqBindingNode_CreateLocalContextVariable, createCall);
 
@@ -1926,7 +1925,8 @@ namespace UIForia.Compilers {
             ReflectionUtil.TypeArray3[1] = typeof(string);
             ReflectionUtil.TypeArray3[2] = definition.type;
 
-            Expression createCall = ExpressionFactory.CallStaticUnchecked(s_ContextVariable_Create, Expression.Constant(definition.id), Expression.Constant(definition.name), Expression.Default(definition.type));
+            MethodInfo createMethod = type.GetMethod("Create");
+            Expression createCall = ExpressionFactory.CallStaticUnchecked(createMethod, Expression.Constant(definition.id), Expression.Constant(definition.name), Expression.Default(definition.type));
             Expression access = Expression.MakeMemberAccess(createdCompiler.GetElement(), s_UIElement_BindingNode);
             
             contextVarType = type;

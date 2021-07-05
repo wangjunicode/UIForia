@@ -160,6 +160,7 @@ namespace UIForia.Parsing {
 
             if (parsedFiles.TryGetValue(filePath, out TemplateShell rootNode)) {
                 ParseContentTemplate(templateRootNode, rootNode, processedType);
+                profilerMarker.End();
                 return;
             }
 

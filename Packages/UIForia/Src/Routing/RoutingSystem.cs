@@ -90,7 +90,7 @@ namespace UIForia.Routing {
                 router.AddRoute(route);
 
                 if (router.defaultRoute != path) {
-                    element.SetEnabled(false);
+                    element.flags &= ~UIElementFlags.Enabled;
                 }
             }
             

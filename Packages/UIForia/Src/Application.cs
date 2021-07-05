@@ -382,9 +382,11 @@ namespace UIForia {
                 
                 s_LayoutResultPool.Release(elementToDestroy.layoutResult);
                 elementToDestroy.layoutResult = null;
-                
-                LinqBindingNode.Release(elementToDestroy.bindingNode);
-                elementToDestroy.bindingNode = null;
+
+                if (elementToDestroy.bindingNode != null) {
+                    LinqBindingNode.Release(elementToDestroy.bindingNode);
+                    elementToDestroy.bindingNode = null;    
+                }
             }
 
             LightList<UIElement>.Release(ref toInternalDestroy);

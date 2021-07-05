@@ -10,8 +10,7 @@ namespace UIForia.Rendering {
     public class UIViewRootElement : UIElement, IPointerQueryHandler {
 
         public UIViewRootElement() {
-            flags |= UIElementFlags.ImplicitElement;
-            flags |= UIElementFlags.Created;
+            flags |= UIElementFlags.ImplicitElement | UIElementFlags.Created | UIElementFlags.InternalElement;
         }
 
         public bool ContainsPoint(Vector2 point) {

@@ -154,6 +154,9 @@ namespace UIForia.Compilers {
 
                 case "hover":
                     return InputEventType.MouseHover;
+                
+                case "update":
+                    return InputEventType.MouseUpdate;
 
                 case "scroll":
                     return InputEventType.MouseScroll;

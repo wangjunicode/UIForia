@@ -875,7 +875,7 @@ namespace UIForia.Systems {
                 for (int j = 0; j < handlers.size; j++) {
                     InputHandlerGroup.HandlerData handlerData = handlers.array[j];
 
-                    if (handlerData.eventType != eventType) {
+                    if ((handlerData.eventType & eventType) == 0) {
                         continue;
                     }
 

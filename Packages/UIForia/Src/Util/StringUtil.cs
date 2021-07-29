@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine;
 
 namespace UIForia.Util {
 
     public static class StringUtil {
 
-        public static CharStringBuilder s_CharStringBuilder = new CharStringBuilder(128);
-
-        public static readonly char[] s_SplitComma = {','};
+        public static readonly CharStringBuilder s_CharStringBuilder = new CharStringBuilder(128);
 
         public static unsafe string InlineReplace(this string target, char oldValue, char newValue) {
             if (target == null) return null;
@@ -23,10 +23,10 @@ namespace UIForia.Util {
             return target;
         }
 
-        public static int FindMatchingIndex(string input, char open, char close) {
+        public static int FindMatchingIndex(string input, char open, char close, int startOffset = 0) {
             int start = -1;
 
-            for (int i = 0; i < input.Length; i++) {
+            for (int i = startOffset; i < input.Length; i++) {
                 if (input[i] == open) {
                     start = i;
                     break;
@@ -67,76 +67,85 @@ namespace UIForia.Util {
             }
         }
 
-        public static unsafe int CharCompareOrdinal(string strA, char* chars, int start, int length) {
-            if (strA == null && length == 0) return 0;
+        public static unsafe int CharCompareOrdinal(string strA, char* bp, int start, int blength) {
+            // adapted https://github.com/microsoft/referencesource/blob/master/mscorlib/system/string.cs to support char* comparison
+            int length = strA.Length < blength ? strA.Length : blength;
+            int diffOffset = -1;
+            bp += start;
+            fixed (char* ap = strA) {
+                char* a = ap;
+                char* b = bp;
 
-            if (EqualsRangeUnsafe(strA, chars, start, length)) {
-                return 0;
-            }
-
-            if (strA == null) {
-                return -1;
-            }
-
-            if (length == 0) {
-                return 1;
-            }
-
-            int num1 = Math.Min(strA.Length, length);
-            int num2 = -1;
-            fixed (char* chPtr1 = strA) {
-                char* chPtr2 = chars + start;
-                char* chPtr3 = chPtr1;
-                char* chPtr4 = chPtr2;
-                for (; num1 >= 10; num1 -= 10) {
-                    if (*(int*) chPtr3 != *(int*) chPtr4) {
-                        num2 = 0;
+                // unroll the loop
+                while (length >= 10) {
+                    if (*(int*) a != *(int*) b) {
+                        diffOffset = 0;
                         break;
                     }
 
-                    if (*(int*) (chPtr3 + 2) != *(int*) (chPtr4 + 2)) {
-                        num2 = 2;
+                    if (*(int*) (a + 2) != *(int*) (b + 2)) {
+                        diffOffset = 2;
                         break;
                     }
 
-                    if (*(int*) (chPtr3 + 4) != *(int*) (chPtr4 + 4)) {
-                        num2 = 4;
+                    if (*(int*) (a + 4) != *(int*) (b + 4)) {
+                        diffOffset = 4;
                         break;
                     }
 
-                    if (*(int*) (chPtr3 + 6) != *(int*) (chPtr4 + 6)) {
-                        num2 = 6;
+                    if (*(int*) (a + 6) != *(int*) (b + 6)) {
+                        diffOffset = 6;
                         break;
                     }
 
-                    if (*(int*) (chPtr3 + 8) != *(int*) (chPtr4 + 8)) {
-                        num2 = 8;
+                    if (*(int*) (a + 8) != *(int*) (b + 8)) {
+                        diffOffset = 8;
                         break;
                     }
 
-                    chPtr3 += 10;
-                    chPtr4 += 10;
+                    a += 10;
+                    b += 10;
+                    length -= 10;
                 }
 
-                if (num2 != -1) {
-                    char* chPtr5 = chPtr3 + num2;
-                    char* chPtr6 = chPtr4 + num2;
-                    int num3;
-                    return (num3 = (int) *chPtr5 - (int) *chPtr6) != 0 ? num3 : chPtr5[1] - chPtr6[1];
+                if (diffOffset != -1) {
+                    // we already see a difference in the unrolled loop above
+                    a += diffOffset;
+                    b += diffOffset;
+                    int order;
+                    if ((order = (int) *a - (int) *b) != 0) {
+                        return order;
+                    }
+
+                    return ((int) *(a + 1) - (int) *(b + 1));
                 }
 
-                for (; num1 > 0 && *(int*) chPtr3 == *(int*) chPtr4; num1 -= 2) {
-                    chPtr3 += 2;
-                    chPtr4 += 2;
+                // now go back to slower code path and do comparison on 2 bytes one time.
+                // Note: c# strings are always even byte counts (padded by runtime) but our char * is not
+                // so we can't do the same compare logic c# does (int by int), we drop down to 1-1 char comparisons
+                while (length > 0) {
+                    if (*a != *b) {
+                        break;
+                    }
+
+                    a++;
+                    b++;
+                    length--;
                 }
 
-                if (num1 <= 0) {
-                    return strA.Length - length;
+                if (length > 0) {
+                    int c;
+                    // found a different int on above loop
+                    if ((c = (int) *a - (int) *b) != 0) {
+                        return c;
+                    }
+
+                    return ((int) *(a + 1) - (int) *(b + 1));
                 }
 
-                int num4;
-                return (num4 = (int) *chPtr3 - (int) *chPtr4) != 0 ? num4 : chPtr3[1] - chPtr4[1];
-
+                // At this point, we have compared all the characters in at least one string.
+                // The longer string will be larger.
+                return strA.Length - blength;
             }
         }
 
@@ -204,6 +213,44 @@ namespace UIForia.Util {
             return EqualsRangeUnsafe(str, span.data, span.rangeStart, span.rangeEnd - span.rangeStart);
         }
 
+        public static unsafe bool EqualsRangeUnsafe(char[] a, int aStart, string str) {
+            fixed (char* strptr = str) {
+                return EqualsRangeUnsafe(a, aStart, strptr, 0, str.Length);
+            }
+        }
+
+        public static unsafe bool EqualsRangeUnsafe(char[] a, int aStart, char* bPtr, int bStart, int length) {
+            fixed (char* aPtr = a) {
+                char* chPtr1 = aPtr + aStart;
+                char* chPtr2 = bPtr + bStart;
+
+                char* chPtr3 = chPtr1;
+                char* chPtr4 = chPtr2;
+
+                // todo -- assumes 64 bit
+                for (; length >= 12; length -= 12) {
+                    if (*(long*) chPtr3 != *(long*) chPtr4 || *(long*) (chPtr3 + 4) != *(long*) (chPtr4 + 4) || *(long*) (chPtr3 + 8) != *(long*) (chPtr4 + 8)) {
+                        return false;
+                    }
+
+                    chPtr3 += 12;
+                    chPtr4 += 12;
+                }
+
+                for (; length > 0 && *(int*) chPtr3 == *(int*) chPtr4; length -= 2) {
+                    chPtr3 += 2;
+                    chPtr4 += 2;
+                }
+
+                if (length == 1) {
+                    return *chPtr3 == *chPtr4;
+                }
+
+                return length <= 0;
+            }
+
+        }
+
         public static unsafe bool EqualsRangeUnsafe(char[] a, int aStart, char[] b, int bStart, int length) {
             fixed (char* aPtr = a) {
                 fixed (char* bPtr = b) {
@@ -254,34 +301,9 @@ namespace UIForia.Util {
             }
 
             fixed (char* strPtr = str) {
-                char* bPtr = b;
-                char* chPtr2 = bPtr + bStart;
-
-                char* chPtr3 = strPtr;
-                char* chPtr4 = chPtr2;
-
-                // todo -- assumes 64 bit
-                for (; length >= 12; length -= 12) {
-                    if (*(long*) chPtr3 != *(long*) chPtr4 || *(long*) (chPtr3 + 4) != *(long*) (chPtr4 + 4) || *(long*) (chPtr3 + 8) != *(long*) (chPtr4 + 8)) {
-                        return false;
-                    }
-
-                    chPtr3 += 12;
-                    chPtr4 += 12;
-                }
-
-                for (; length > 0 && *(int*) chPtr3 == *(int*) chPtr4; length -= 2) {
-                    chPtr3 += 2;
-                    chPtr4 += 2;
-                }
-
-                if (length == 1) {
-                    return *chPtr3 == *chPtr4;
-                }
-
-                return length <= 0;
-
+                return UnsafeUtility.MemCmp(strPtr, b + bStart, sizeof(char) * length) == 0;
             }
+
         }
 
         // [ThreadStatic] private static StringBuilder s_PerThreadStringBuilder;
@@ -330,6 +352,35 @@ namespace UIForia.Util {
                 }
             }
         }
+
+        // public static unsafe int WhitespaceSplitRanges(string str, StructList<RangeInt> outputList) {
+        //     int retn = 0;
+        //     int ptr = 0;
+        //     int len = str.Length;
+        //
+        //     RangeInt range = new RangeInt();
+        //     bool inWord = false;
+        //
+        //     fixed (char* cbuffer = str) {
+        //         while (ptr < len) {
+        //             char c = cbuffer[ptr++];
+        //             if (char.IsWhiteSpace(c)) {
+        //                 if (inWord) {
+        //                     range.length = ptr - range.start;
+        //                     outputList.Add(range);
+        //                     retn++;
+        //                     range = default;
+        //                 }
+        //             }
+        //             else if (!inWord) {
+        //                 inWord = true;
+        //                 range.start = ptr;
+        //             }
+        //         }
+        //     }
+        //     
+        //     return retn;
+        // }
 
     }
 

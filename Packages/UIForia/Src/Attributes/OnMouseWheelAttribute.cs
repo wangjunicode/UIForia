@@ -5,7 +5,7 @@ namespace UIForia.Attributes {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class OnMouseWheelAttribute : MouseEventHandlerAttribute {
 
-        public OnMouseWheelAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnMouseWheelAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(modifiers, InputEventType.MouseScroll, phase) { }
 
         public OnMouseWheelAttribute(EventPhase phase)

@@ -5,7 +5,7 @@ namespace UIForia.Attributes {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class OnMouseDownAttribute : MouseEventHandlerAttribute {
 
-        public OnMouseDownAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnMouseDownAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(modifiers, InputEventType.MouseDown, phase) { }
 
 

@@ -1,9 +1,9 @@
-namespace UIForia.UIInput {
+namespace UIForia {
 
-    public enum EventPhase {
+    public enum EventPhase : byte {
 
-        Capture,
-        Bubble
+        BeforeUpdate,
+        AfterUpdate
 
     }
 

@@ -1,0 +1,96 @@
+
+
+// templates start
+template CharacterAvatar : CompilerTest.CharacterAvatar(avatarName = "x", attr:selected) {
+    
+    Text("Avatar " + avatarName)
+
+    // var defines variables. the var keyword is required in addition to the type, unlike c#
+    var int value = 42;
+    var string prefixedName = "char: " + avatarName;
+
+    // regular if trees can be used to manage control flow
+    // each is scoped as in C#, so variables declared inside one branch 
+    // are not availabe to other branches
+    
+    if(valString != "something") {
+        Text("Hello" + val)
+    }   
+    else if(valString == s) {
+        Text("xxx" + val)
+    }
+    else {
+        Text("yyy" + val)
+    }
+
+    // implicit slot does not require the overrider to specificy the override keyword (but they can, and must if they want to access the arguments)
+    slot implicit (string av = prefixedName) {
+        Text("Name is " + av + " value = " + value);
+        Text(avatarName);
+    }
+    
+    run value = value + 12; // run nodes can be used to run arbirary c# code or update local variables 
+
+    slot nameplate (string name = prefixedName) // slot definition with no body but with a argument 
+
+    slot nothing; // slot definition with no body 
+
+    // render can take 'slot', 'portal', or 'fn' and will invoke the corresponding target with the argument list   
+    render slot nameplate("super!");
+    render slot nameplate("duper!");
+
+
+    // foreach exposes 'index', 'length', and 'list' implicitly
+    // they can be used in the extrusion list like an any other extrusion 
+    foreach(item in list) [index / 2 as idx, list as xyz, length] {
+        Text("im in a loop! with value " + item + " at index " + index)
+        Text("Index over 2 is " + idx);
+        Text("Length is " + length);
+        
+        var int whatever = index + xyz.Count;
+
+        if(idx % 2 == 0) {
+            Text("Index " + index + " is even");
+            continue; // will spin the loop again 
+        }
+        break; // can be used to jump out of loops
+        slot implicit {
+            Text(index.ToString())
+        }
+    }
+
+    // if there are children in a template node, it must provide an `implicit` slot in order to to function 
+    // if no override keywords are used, all child nodes are considered members of the implicit slot override
+    CharacterAvatar(avatarName = s) {
+        Text("Hi from implicit slot")
+    }
+
+    CharacterAvatar(avatarName = s) {
+        override implicit {
+            Text("Hi from implicit slot that was explicitly overridden")
+        }
+    }
+
+    CharacterAvatar(avatarName = s) {
+
+
+        override nameplate [name] {
+            Text("elephant " + name);
+        }
+
+        // override a slot and don't look at the extrusion list, or there isnt an extrusion list
+        override nothing {
+            Text("elephant");
+        }
+
+        // explicitly overriding the implicit slot
+        // usually done to explicitly access the extrusion list for the slot 
+        override implicit [value]  {
+            Text("Implicit text child" + value)
+
+            Text(s)
+        }
+       
+    }
+
+}

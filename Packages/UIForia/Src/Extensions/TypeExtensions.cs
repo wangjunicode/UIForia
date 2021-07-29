@@ -3,11 +3,16 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
+using UIForia.Compilers;
 using UIForia.Util;
 
 namespace UIForia.Extensions {
 
     public static class TypeExtensions {
+
+        public static string GetTypeName(this Type type) {
+            return TypeNameGenerator.GetTypeName(type);
+        }
 
         internal class CacheDict<TKey, TValue> {
 
@@ -79,7 +84,10 @@ namespace UIForia.Extensions {
 
         private static readonly CacheDict<MethodBase, ParameterInfo[]> _ParamInfoCache = new CacheDict<MethodBase, ParameterInfo[]>(75);
 
-        // internal static Delegate CreateDelegate(this MethodInfo methodInfo, Type delegateType, object target) {
+        // internal static Delegate CreateDelegate(
+        //     this MethodInfo methodInfo,
+        //     Type delegateType,
+        //     object target) {
         //     DynamicMethod dynamicMethod = methodInfo as DynamicMethod;
         //     if ((MethodInfo) dynamicMethod != (MethodInfo) null)
         //         return dynamicMethod.CreateDelegate(delegateType, target);
@@ -111,33 +119,29 @@ namespace UIForia.Extensions {
             return (pi.Attributes & ParameterAttributes.Out) == ParameterAttributes.Out;
         }
 
-        internal static MethodInfo GetMethodValidated(
-            this Type type,
-            string name,
-            BindingFlags bindingAttr,
-            Binder binder,
-            Type[] types,
-            ParameterModifier[] modifiers) {
+        internal static MethodInfo GetMethodValidated(this Type type, string name, BindingFlags bindingAttr, Binder binder, Type[] types, ParameterModifier[] modifiers) {
             MethodInfo method = type.GetMethod(name, bindingAttr, binder, types, modifiers);
-            if (!method.MatchesArgumentTypes(types))
-                return (MethodInfo) null;
-            return method;
+            return !method.MatchesArgumentTypes(types) ? null : method;
         }
 
         private static bool MatchesArgumentTypes(this MethodInfo mi, Type[] argTypes) {
-            if (mi == (MethodInfo) null || argTypes == null)
+            if (mi == null || argTypes == null) {
                 return false;
+            }
+
             ParameterInfo[] parameters = mi.GetParameters();
-            if (parameters.Length != argTypes.Length)
+            if (parameters.Length != argTypes.Length) {
                 return false;
+            }
+
             for (int index = 0; index < parameters.Length; ++index) {
-                if (!TypeUtil.AreReferenceAssignable(parameters[index].ParameterType, argTypes[index]))
+                if (!TypeUtil.AreReferenceAssignable(parameters[index].ParameterType, argTypes[index])) {
                     return false;
+                }
             }
 
             return true;
         }
-
 
         public static bool Implements(this Type type, Type interfaceType) {
             if (!interfaceType.IsInterface) {
@@ -172,59 +176,76 @@ namespace UIForia.Extensions {
                 case "boolean":
                     parsedTypeName = "System.Boolean";
                     break;
+
                 case "byte":
                     parsedTypeName = "System.Byte";
                     break;
+
                 case "char":
                     parsedTypeName = "System.Char";
                     break;
+
                 case "datetime":
                     parsedTypeName = "System.DateTime";
                     break;
+
                 case "datetimeoffset":
                     parsedTypeName = "System.DateTimeOffset";
                     break;
+
                 case "decimal":
                     parsedTypeName = "System.Decimal";
                     break;
+
                 case "double":
                     parsedTypeName = "System.Double";
                     break;
+
                 case "float":
                     parsedTypeName = "System.Single";
                     break;
+
                 case "int16":
                 case "short":
                     parsedTypeName = "System.Int16";
                     break;
+
                 case "int32":
                 case "int":
                     parsedTypeName = "System.Int32";
                     break;
+
                 case "int64":
                 case "long":
                     parsedTypeName = "System.Int64";
                     break;
+
                 case "object":
                     parsedTypeName = "System.Object";
                     break;
+
                 case "sbyte":
                     parsedTypeName = "System.SByte";
                     break;
+
                 case "string":
                     parsedTypeName = "System.String";
                     break;
+
                 case "timespan":
                     parsedTypeName = "System.TimeSpan";
                     break;
+
                 case "uint16":
                 case "ushort":
                     parsedTypeName = "System.UInt16";
                     break;
+
                 case "uint32":
                 case "uint":
                     parsedTypeName = "System.UInt32";
                     break;
+
                 case "uint64":
                 case "ulong":
                     parsedTypeName = "System.UInt64";

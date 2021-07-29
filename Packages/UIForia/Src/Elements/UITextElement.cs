@@ -1,135 +1,90 @@
-using SVGX;
-using UIForia.Attributes;
-using UIForia.Rendering;
-using UIForia.Systems;
 using UIForia.Text;
 
 namespace UIForia.Elements {
 
-    [TemplateTagName("Text")]
-    public class UITextElement : UIElement, IStyleChangeHandler {
+    [TagName("Default", "Text")]
+    public unsafe class UITextElement : UIElement {
 
-        public string text;
-        internal TextInfo textInfo;
-        internal TextSpan textSpan;
-
-        private bool shouldUpdateSpanStyle;
-        private SVGXTextStyle spanStyle;
-        
-        internal TextInfo TextInfo => textInfo;
-
-        public UITextElement() {
-            flags = UIElementFlags.InternalElement;
+        // [ImplicitTemplateArgument]
+        public string text {
+            get => GetText();
+            set => SetText(value);
         }
 
-        public override void OnEnable() {
-            SetText(text);
-            textSpan.SetStyle(style.GetTextStyle());
+        internal string _text;
+        internal RichText _richText;
+
+        public RichText richText {
+            get => _richText;
+            set => _richText = value; // todo detect changes accordingly 
         }
 
-        public override void OnDisable() {
-            textSpan?.parent?.RemoveChild(textSpan);
-        }
+        internal TextId textId; // set at creation time and unset when destroyed 
+        internal TextDataTable* textTable; // set at creation time and unset when destroyed
+
+        private bool stringIsDirty;
+        private bool layoutContentChanged;
+
+        internal bool LayoutContentChanged => layoutContentChanged || richText != null && richText.layoutContentChanged;
 
         public string GetText() {
-            return text;
+
+            if (!stringIsDirty) {
+                return _text;
+            }
+
+            stringIsDirty = false;
+
+            int size = textTable->GetMainThreadContent(textId, out char* cbuffer);
+
+            _text = size <= 0
+                ? string.Empty
+                : new string(cbuffer, 0, size);
+
+            return _text;
+        }
+
+        private static readonly char[] s_EmptyChars = { };
+
+        public void SetTextFromCharacters(char[] newText, int length) {
+
+            if (newText == null) newText = s_EmptyChars;
+
+            if (textTable == null) {
+                // todo -- do this before create via template compiler 
+                textTable = application.textDataTable;
+                textId = textTable->AllocateTextId(elementId);
+            }
+
+            fixed (char* newTextPtr = newText) {
+                stringIsDirty = textTable->SetMainThreadTextData(textId, newTextPtr, length);
+            }
         }
 
         public void SetText(string newText) {
-            if (textSpan == null) {
-                if (parent is UITextElement textParent) {
-                    textSpan = new TextSpan(text, style.GetTextStyle());
-                    textInfo = textParent.textInfo;
-                    textParent.textSpan.InsertChild(textSpan, (uint) siblingIndex);
-                }
-                else {
-                    textInfo = new TextInfo(newText, style.GetTextStyle());
-                    textSpan = textInfo.rootSpan;
-                }
+
+            if (newText == null) newText = string.Empty;
+
+            if (textTable == null) {
+                // todo -- do this before create via template compiler 
+                textTable = application.textDataTable;
+                textId = textTable->AllocateTextId(elementId);
             }
 
-            if (this.text == newText) {
-                return;
+            fixed (char* newTextPtr = newText) {
+                textTable->SetMainThreadTextData(textId, newTextPtr, newText.Length);
+                stringIsDirty = false;
+                _text = newText;
             }
 
-            this.text = newText;
-            textSpan.SetText(text);
         }
 
         public override string GetDisplayName() {
-            return "Text";
-        }
-
-        public void OnStylePropertyChanged(in StyleProperty property) {
-            switch (property.propertyId) {
-                
-                case StylePropertyId.TextFontSize:
-                    textSpan.SetFontSize(style.GetResolvedFontSize());
-                    break;
-
-                case StylePropertyId.TextFontStyle:
-                    textSpan.SetFontStyle(property.AsFontStyle);
-                    break;
-
-                case StylePropertyId.TextAlignment:
-                    textSpan.SetTextAlignment(property.AsTextAlignment);
-                    break;
-
-                case StylePropertyId.TextFontAsset:
-                    textSpan.SetFont(property.AsFont);
-                    break;
-
-                case StylePropertyId.TextTransform:
-                    textSpan.SetTextTransform(property.AsTextTransform);
-                    break;
-
-                case StylePropertyId.TextWhitespaceMode:
-                    textSpan.SetWhitespaceMode(property.AsWhitespaceMode);
-                    break;
-
-                case StylePropertyId.TextColor:
-                    textSpan.SetTextColor(property.AsColor);
-                    break;
-
-                case StylePropertyId.TextGlowColor:
-                    textSpan.SetGlowColor(property.AsColor);
-                    break;
-
-                case StylePropertyId.TextGlowOffset:
-                    textSpan.SetGlowOffset(property.AsFloat);
-                    break;
-
-                case StylePropertyId.TextGlowOuter:
-                    textSpan.SetGlowOuter(property.AsFloat);
-                    break;
-
-                case StylePropertyId.TextUnderlayX:
-                    textSpan.SetUnderlayX(property.AsFloat);
-                    break;
-
-                case StylePropertyId.TextUnderlayY:
-                    break;
-
-                case StylePropertyId.TextUnderlayDilate:
-                    textSpan.SetUnderlayDilate(property.AsFloat);
-                    break;
-
-                case StylePropertyId.TextUnderlayColor:
-                    textSpan.SetUnderlayColor(property.AsColor);
-                    break;
-
-                case StylePropertyId.TextUnderlaySoftness:
-                    textSpan.SetUnderlaySoftness(property.AsFloat);
-                    break;
-
-                case StylePropertyId.TextFaceDilate:
-                    textSpan.SetFaceDilate(property.AsFloat);
-                    break;
-
-                case StylePropertyId.TextGlowPower:
-                case StylePropertyId.TextUnderlayType:
-                    break;
+            if (text == null) {
+                return "Text";
             }
+
+            return "Text('" + text + "')";
         }
 
     }

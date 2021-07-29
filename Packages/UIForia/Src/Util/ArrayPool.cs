@@ -1,133 +1,141 @@
-using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
 
 namespace UIForia.Util {
 
-    public static class ArrayPool<T> {
+    internal static class ArrayPool<T> {
 
-        private static readonly List<T[]> s_ArrayPool = new List<T[]>();
+        [ThreadStatic] private static T[] array0;
+        [ThreadStatic] private static T[] array1;
+        [ThreadStatic] private static T[] array2;
+        [ThreadStatic] private static T[] array3;
+        [ThreadStatic] private static T[] array4;
+        [ThreadStatic] private static T[] array5;
+        [ThreadStatic] private static T[] array6;
+        [ThreadStatic] private static T[] array7;
+        [ThreadStatic] private static T[] array8;
 
-        // ReSharper disable once StaticMemberInGenericType
-        private static int MaxPoolSize = 16;
-
-        public static T[] Empty { get; } = new T[0];
-
-        public static void SetMaxPoolSize(int poolSize) {
-            MaxPoolSize = poolSize;
+        public static T[] GetOrAllocate(int count) {
+            if (count <= 8) return Get(count);
+            return new T[count];
         }
 
-        public static T[] GetMinSize(int minSize) {
-            minSize = Mathf.Max(0, minSize);
-            for (int i = 0; i < s_ArrayPool.Count; i++) {
-                if (s_ArrayPool[i].Length >= minSize) {
-                    T[] retn = s_ArrayPool[i];
-                    s_ArrayPool.RemoveAt(i);
-                    return retn;
-                }
-            }
-
-            return new T[minSize];
-        }
-
-        public static T[] GetExactSize(int size) {
-            size = Mathf.Max(0, size);
-            for (int i = 0; i < s_ArrayPool.Count; i++) {
-                if (s_ArrayPool[i].Length == size) {
-                    T[] retn = s_ArrayPool[i];
-                    s_ArrayPool.RemoveAt(i);
-                    return retn;
-                }
-            }
-
-            return new T[size];
-        }
-
-        public static void Resize(ref T[] array, int minSize) {
-            minSize = Mathf.Max(0, minSize);
-            T[] retn = null;
-            
-            for (int i = 0; i < s_ArrayPool.Count; i++) {
-                if (s_ArrayPool[i].Length >= minSize) {
-                    retn = s_ArrayPool[i];
-                    s_ArrayPool[i] = array;
-                    Array.Copy(array, 0, retn, 0, array.Length);
-                    Array.Clear(array, 0, array.Length);
-                    array = retn;
-                    return;
-                }
-            }
-
-            retn = new T[minSize];
-            
-            Array.Copy(array, 0, retn, 0, array.Length);
-
-            if (s_ArrayPool.Count < 8) {
-                Array.Clear(array, 0, array.Length);
-                s_ArrayPool.Add(array);
-            }
-            else {
-                int minLengthIndex = 0;
-                int minLength = 0;
-                
-                for (int i = 0; i < s_ArrayPool.Count; i++) {
-                    if (s_ArrayPool[i].Length < minLength) {
-                        minLength = s_ArrayPool[i].Length;
-                        minLength = i;
-                    }
-                }
-
-                s_ArrayPool[minLengthIndex] = array;
-
-            }
-
-            array = retn;
-        }
-
-        public static void Release(ref T[] array) {
-            if (array == null || array.Length == 0) return;
-            Array.Clear(array, 0, array.Length);
-            if (s_ArrayPool.Count == MaxPoolSize) {
-                int minCount = int.MaxValue;
-                int minIndex = 0;
-                for (int i = 0; i < s_ArrayPool.Count; i++) {
-                    if (s_ArrayPool[i].Length < minCount) {
-                        minCount = s_ArrayPool[i].Length;
-                        minIndex = i;
-                    }
-                }
-
-                if (array.Length > minCount) {
-                    s_ArrayPool[minIndex] = array;
-                }
-            }
-            else {
-                if (s_ArrayPool.Contains(array)) {
-                    return;
-                }
-
-                s_ArrayPool.Add(array);
-            }
-
-            array = null;
-        }
-
-        public static T[] CopyFromList(IList<T> source) {
-            T[] retn = GetMinSize(source.Count);
-            for (int i = 0; i < source.Count; i++) {
-                retn[i] = source[i];
-            }
-
+        public static T[] Get(T t0) {
+            T[] retn = Get(1);
+            retn[0] = t0;
             return retn;
         }
 
-        public static T[] Copy(T[] other) {
-            T[] retn = GetExactSize(other.Length);
-            for (int i = 0; i < retn.Length; i++) {
-                retn[i] = other[i];
-            }
-
+        public static T[] Get(T t0, T t1) {
+            T[] retn = Get(2);
+            retn[0] = t0;
+            retn[1] = t1;
             return retn;
+        }
+
+        public static T[] Get(T t0, T t1, T t2) {
+            T[] retn = Get(3);
+            retn[0] = t0;
+            retn[1] = t1;
+            retn[2] = t2;
+            return retn;
+        }
+
+        public static T[] Get(T t0, T t1, T t2, T t3) {
+            T[] retn = Get(4);
+            retn[0] = t0;
+            retn[1] = t1;
+            retn[2] = t2;
+            retn[3] = t3;
+            return retn;
+        }
+
+        public static T[] Get(T t0, T t1, T t2, T t3, T t4) {
+            T[] retn = Get(5);
+            retn[0] = t0;
+            retn[1] = t1;
+            retn[2] = t2;
+            retn[3] = t3;
+            retn[4] = t4;
+            return retn;
+        }
+
+        public static T[] Get(T t0, T t1, T t2, T t3, T t4, T t5) {
+            T[] retn = Get(6);
+            retn[0] = t0;
+            retn[1] = t1;
+            retn[2] = t2;
+            retn[3] = t3;
+            retn[4] = t4;
+            retn[5] = t5;
+            return retn;
+        }
+
+        public static T[] Get(T t0, T t1, T t2, T t3, T t4, T t5, T t6) {
+            T[] retn = Get(7);
+            retn[0] = t0;
+            retn[1] = t1;
+            retn[2] = t2;
+            retn[3] = t3;
+            retn[4] = t4;
+            retn[5] = t5;
+            retn[6] = t6;
+            return retn;
+        }
+
+        public static T[] Get(T t0, T t1, T t2, T t3, T t4, T t5, T t6, T t7) {
+            T[] retn = Get(7);
+            retn[0] = t0;
+            retn[1] = t1;
+            retn[2] = t2;
+            retn[3] = t3;
+            retn[4] = t4;
+            retn[5] = t5;
+            retn[6] = t6;
+            retn[7] = t7;
+            return retn;
+        }
+
+        public static T[] Get(int count) {
+            switch (count) {
+                case 0:
+                    array0 ??= new T[0];
+                    return array0;
+
+                case 1:
+                    array1 ??= new T[1];
+                    return array1;
+
+                case 2:
+                    array2 ??= new T[2];
+                    return array2;
+
+                case 3:
+                    array3 ??= new T[3];
+                    return array3;
+
+                case 4:
+                    array4 ??= new T[4];
+                    return array4;
+
+                case 5:
+                    array5 ??= new T[5];
+                    return array5;
+
+                case 6:
+                    array6 ??= new T[6];
+                    return array6;
+
+                case 7:
+                    array7 ??= new T[7];
+                    return array7;
+
+                case 8:
+                    array8 ??= new T[8];
+                    return array8;
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(count), "Array pool supports only up to 8 arguments");
+            }
         }
 
     }

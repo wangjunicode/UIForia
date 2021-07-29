@@ -51,7 +51,7 @@ namespace UIForia.Util {
 
         [DebuggerStepThrough]
         public LightList(int minCapacity = 8) {
-            if (minCapacity < 1) minCapacity = 8;
+            if (minCapacity < 0) minCapacity = 0;
             this.array = new T[minCapacity];
             this.size = 0;
         }
@@ -100,8 +100,8 @@ namespace UIForia.Util {
             array[size] = item;
             size++;
         }
-        
-         public T AddReturn(T item) {
+
+        public T AddReturn(T item) {
             if (size + 1 > array.Length) {
                 System.Array.Resize(ref array, (size + 1) * 2);
             }
@@ -109,7 +109,7 @@ namespace UIForia.Util {
             array[size] = item;
             size++;
             return item;
-         }
+        }
 
         [DebuggerStepThrough]
         public void AddRange(IEnumerable<T> collection) {
@@ -124,14 +124,6 @@ namespace UIForia.Util {
                 return;
             }
 
-            if (collection is List<T> l) {
-                EnsureAdditionalCapacity(l.Count);
-                T[] a = ListAccessor<T>.GetArray(l);
-                System.Array.Copy(a, 0, array, size, l.Count);
-                size += l.Count;
-                return;
-            }
-
             if (collection is T[] cArray) {
                 EnsureAdditionalCapacity(cArray.Length);
                 System.Array.Copy(cArray, 0, array, size, cArray.Length);
@@ -139,7 +131,7 @@ namespace UIForia.Util {
                 return;
             }
 
-            foreach (var item in collection) {
+            foreach (T item in collection) {
                 Add(item);
             }
         }
@@ -342,7 +334,6 @@ namespace UIForia.Util {
             return false;
         }
 
-
         public int FindIndex<U>(U closureArg, Func<T, U, bool> fn) {
             for (int i = 0; i < size; i++) {
                 if (fn(array[i], closureArg)) {
@@ -481,11 +472,15 @@ namespace UIForia.Util {
             return new Enumerator(this);
         }
 
+        private static int lockRef;
+
         public static LightList<T> Get() {
             if (s_LightListPool.Count > 0) {
+                SpinLock.Lock(ref lockRef);
                 LightList<T> retn = s_LightListPool[s_LightListPool.Count - 1];
-                retn.isPooled = false;
                 s_LightListPool.RemoveAt(s_LightListPool.Count - 1);
+                SpinLock.Unlock(ref lockRef);
+                retn.isPooled = false;
                 return retn;
             }
 
@@ -505,11 +500,6 @@ namespace UIForia.Util {
             return new LightList<T>(minSize);
         }
 
-        public static LightList<T> PreSize(int size) {
-            LightList<T> list = GetMinSize(size);
-            list.size = size;
-            return list;
-        }
 
         public void Release() {
             if (isPooled) {
@@ -518,7 +508,9 @@ namespace UIForia.Util {
 
             isPooled = true;
             Clear();
+            SpinLock.Lock(ref lockRef);
             s_LightListPool.Add(this);
+            SpinLock.Unlock(ref lockRef);
         }
 
         public static void Release(ref LightList<T> toRelease) {

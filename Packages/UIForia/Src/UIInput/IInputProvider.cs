@@ -39,8 +39,7 @@ namespace UIForia.UIInput {
         void UnRegisterFocusable(IFocusable focusable);
         void FocusNext();
         void FocusPrevious();
-
-        void DelayEvent(UIElement origin, UIEvent evt);
+        
 
     }
 

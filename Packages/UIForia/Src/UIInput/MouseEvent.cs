@@ -1,4 +1,5 @@
 ﻿using UIForia.Elements;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.UIInput {
@@ -8,27 +9,35 @@ namespace UIForia.UIInput {
         public readonly InputEventType type;
         public readonly KeyboardModifiers modifiers;
 
-        private readonly EventPropagator source;
-        public readonly UIElement element;
+        private readonly UIForiaRuntimeSystem source;
+        public readonly ElementId elementId;
+        private int frameId; // use this to make sure the evt is valid 
         
-        public MouseInputEvent(EventPropagator source, InputEventType type, KeyboardModifiers modifiers, bool isFocused, UIElement element) {
+        internal MouseInputEvent(UIForiaRuntimeSystem source, InputEventType type, KeyboardModifiers modifiers, bool isFocused, ElementId elementId) {
             this.source = source;
             this.type = type;
             this.modifiers = modifiers;
-            this.element = element;
+            this.elementId = elementId;
+            this.frameId = source.currentFrameId;
         }
 
         public void Consume() {
-            source.isConsumed = true;
+            if (frameId == source.currentFrameId) {
+                source.consumedEvents |= type;
+            }
         }
 
         public void StopPropagation() {
-            source.shouldStopPropagation = true;
+            if (frameId == source.currentFrameId) {
+                source.consumedEvents |= type;
+            }
         }
 
-        public UIElement Origin => source.origin;
-
-        public bool IsConsumed => source.isConsumed;
+        public bool IsConsumed {
+            get {
+                return frameId != source.currentFrameId || (source.consumedEvents & type) != 0; 
+            }
+        }
 
         public bool Alt => (modifiers & KeyboardModifiers.Alt) != 0;
 
@@ -46,6 +55,7 @@ namespace UIForia.UIInput {
 
         public bool Windows => (modifiers & KeyboardModifiers.Windows) != 0;
 
+        // todo -- probably wants to either ensure source is at same frame or copy this data
         public bool IsMouseLeftDown => source.mouseState.isLeftMouseDown;
         public bool IsMouseLeftDownThisFrame => source.mouseState.isLeftMouseDownThisFrame;
         public bool IsMouseLeftUpThisFrame => source.mouseState.isLeftMouseUpThisFrame;
@@ -61,14 +71,14 @@ namespace UIForia.UIInput {
         public bool IsDoubleClick => source.mouseState.isDoubleClick;
         public bool IsTripleClick => source.mouseState.isTripleClick;
 
-        public Vector2 ScrollDelta => source.mouseState.scrollDelta;
+        public float2 ScrollDelta => source.mouseState.scrollDelta;
 
-        public Vector2 MousePosition => source.mouseState.mousePosition;
-        public Vector2 MousePositionInvertY => new Vector2(source.mouseState.mousePosition.x, source.origin.application.Height - source.mouseState.mousePosition.y);
-        public Vector2 LeftMouseDownPosition => source.mouseState.leftMouseButtonState.downPosition;
-        public Vector2 RightMouseDownPosition => source.mouseState.rightMouseButtonState.downPosition;
-        public Vector2 MiddleMouseDownPosition => source.mouseState.middleMouseButtonState.downPosition;
-        public Vector2 DragDelta => source.mouseState.MouseDelta;
+        public float2 MousePosition => source.mouseState.mousePosition;
+        public float2 MousePositionInvertY => new float2(source.mouseState.mousePosition.x, source.application.Height - source.mouseState.mousePosition.y);
+        public float2 LeftMouseDownPosition => source.mouseState.leftMouseButtonState.downPosition;
+        public float2 RightMouseDownPosition => source.mouseState.rightMouseButtonState.downPosition;
+        public float2 MiddleMouseDownPosition => source.mouseState.middleMouseButtonState.downPosition;
+        public float2 DragDelta => source.mouseState.MouseDelta;
 
     }
 

@@ -1,0 +1,65 @@
+﻿a. flex-v(300px, 1cnt)
+    b. flex-v(1s, 2cnt)
+        c. flex-h(1s, 1strcnt)
+            d. text(1s, 1cnt)
+            e. text(1cnt, 1cnt) -> pre pass solves these? 
+        f. flex-h(200, 200)
+        g. flex-h(ctrl, asp(2:1) -> 1strcnt)
+            text(1s, cnt) -> cnt depends on 
+            
+bottom up first pass
+a. (300, 1cnt) { 300, unknowable_RequireChildValue }
+    b(1s, 2cnt) { unknowable_RequireStretchValue, unknowable_RequireChildValue }
+        c(1s, 1strcnt) { unknowable_RequireStretchValue, unknowable_RequireChildValue | unknowable_RequireStretchValue }
+            d text (1s, 1cnt) { 0 + unknowable_RequireStretchValue, unknowable_RequireDependentAxis }
+            e text (1cnt, 1cnt) { layout(text) = 80, layout(text) = 20 }
+        f(200, 200) { 200, 200 }
+        g. flex-h(ctrl, asp(2:1) -> 1strcnt) { unknowable_RequiresDependentAxis, unknowable_RequireChildValue }
+            h text(1s, cnt) { unknown_RequiresParentValue, unknown_RequireDependentAxis }
+            
+top down first pass 
+a. (300, 1cnt) { 300, unknowable_RequireChildValue }
+    b(1s, 2cnt) { 300, unknowable_RequireChildValue } -> cannot layout because of unsolvable children 
+        c. (1s, 1strcnt) { unknowable_RequireStretchValue, unknowable_RequireChildValue | unknowable_RequireStretchValue }
+            d text (1s, 1cnt) { 0 + unknowable_RequireStretchValue, unknowable_RequireDependentAxis }
+            e text (1cnt, 1cnt) { layout(text) = 80, layout(text) = 20 }
+        f. (200, 200) { 200, 200 }
+        g. flex-h(ctrl, asp(2:1) -> 1strcnt) { unknowable_RequiresDependentAxis, unknowable_RequireChildValue } dependent axis require child data where child data require dependent axis
+            h text(1s -> 0, cnt) { unknowable_RequireStretchValue, unknown_RequireDependentAxis } // if parent unknowable for child reason && we have stretch, remove stretch
+            h text(1s -> 0, cnt) { unknowable_RequireStretchValue, unknown_RequireDependentAxis } // if parent unknowable for child reason && we have stretch, remove stretch
+            h text(1s -> 0, cnt) { unknowable_RequireStretchValue, unknown_RequireDependentAxis } // if parent unknowable for child reason && we have stretch, remove stretch
+            h text(1s -> 0, cnt) { unknowable_RequireStretchValue, unknown_RequireDependentAxis } // if parent unknowable for child reason && we have stretch, remove stretch
+            
+            i aspect(2:1 cnt, ctrl) { unknowable_RequireChildValue, unknown_RequireDependentAxis } 
+                j flex(1s, 500) { unknowable_RequireParentSize, 500 }
+                 
+            k flex-v(ctrl, 2:1 cnt) { unknowable_RequiresDependentAxis, unknowable_RequireChildValue } 
+                l text(1s, cnt) { 0, unknown_RequireDependentAxis }
+                 
+// fold paradoxes before we even start?
+    
+    if require parent size & parent require child size -> child size goes to 0
+    find loops of dependent -> require child -> dependent those are unsolvable and the dependent axis goes to 0
+
+    for each element bottom up
+        if require dependentAxis && required axis needs stretch && parent on that axis points back down -> stretch 0
+        if require dependentAxis && required axis needs parent -> parent 0
+
+bottom up second pass -> if we hit a parent with unsolvable children: we have a bug in the layout system 
+a. (300, 1cnt) { 300, unknowable_RequireChildValue }
+    b(1s, 2cnt) { 300, unknowable_RequireChildValue } -> cannot layout because of unsolvable children 
+        c(1s, 1strcnt) { unknowable_RequireStretchValue, unknowable_RequireChildValue | unknowable_RequireStretchValue }
+            d text (1s, 1cnt) { 0 + unknowable_RequireStretchValue, unknowable_RequireDependentAxis } // 
+            e text (1cnt, 1cnt) { layout(text) = 80, layout(text) = 20 }
+        f(200, 200) { 200, 200 }
+        g. flex-h(ctrl, asp(2:1) -> 1strcnt) { 200, 100 + unknowable_RequireStretchValue }
+            h text(1s -> 0, cnt) { 0, layout(0) == 100 } // if parent unknowable for child reason && we have stretch, remove stretch
+
+top down second pass -> if we hit a parent without a size -> we have a bug in the layout system 
+a. (300, 1cnt) { 300, b.height }
+    b(1s, 2cnt) { 300, c.height + f.height * 2 } 
+        c(1s, 1strcnt) { 300, max(d.height, e.height) + 1s == c.height + f.height }
+            d(1s, 1cnt) { 300 - e.width, layout(300 - e.width) } // is this propagation done in visting of parent or of element itself or both?
+            e(1cnt, 1cnt) { layout(text) = 80, layout(text) = 20 }
+        f(200, 200) { 200, 200 }
+        g. flex-h(ctrl, asp(2:1) -> 1strcnt)

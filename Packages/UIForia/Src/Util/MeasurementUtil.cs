@@ -1,367 +1,157 @@
 using System;
 using System.Diagnostics;
-using UIForia.Elements;
 using UIForia.Layout;
-using UIForia.Rendering;
+using UIForia.Layout.LayoutTypes;
 using UIForia.Systems;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace UIForia.Util {
 
-    public static class MeasurementUtil {
+    internal static class MeasurementUtil {
 
-        public static float ResolveOriginBaseX(LayoutResult result, float viewportX, AlignmentTarget target, AlignmentDirection direction, InputSystem inputSystem) {
-            switch (target) {
-                case AlignmentTarget.Unset:
-                case AlignmentTarget.LayoutBox:
-                    return result.allocatedPosition.x;
+        public static ResolvedGridCellSize ResolveGridCellSize(CheckedArray<Rect> viewRects, float appWidth, float appHeight, int viewIdx, GridCellDefinition size, float emSize) {
+            ResolvedGridCellSize retn = default;
 
-                case AlignmentTarget.Parent:
-                    return 0;
+            retn.stretch = size.stretch;
+            retn.unit = ResolveGridCellSizeUnit.Pixel;
 
-                case AlignmentTarget.ParentContentArea:
-                    LayoutResult parentResult = result.layoutParent;
-                    if (parentResult == null) return 0;
+            switch (size.unit) {
 
-                    if (direction == AlignmentDirection.Start) {
-                        return parentResult.padding.left + parentResult.border.left;
-                    }
-                    else {
-                        return parentResult.padding.right + parentResult.border.right;
-                    }
+                case 0:
+                case GridTemplateUnit.Stretch:
+                case GridTemplateUnit.Pixel:
+                    retn.value = size.value;
+                    break;
 
-                case AlignmentTarget.Template:
-                    // todo handle transclusion
-                    return 0;
+                case GridTemplateUnit.Em:
+                    retn.value = emSize * size.value;
+                    break;
 
-                case AlignmentTarget.TemplateContentArea:
-                    // todo handle transclusion
-                    return 0;
+                case GridTemplateUnit.ViewportWidth:
+                    retn.value = size.value * viewRects[viewIdx].width;
+                    break;
 
-                case AlignmentTarget.View: {
-                    if (result.element.parent == null) return 0;
-                    LayoutResult ptr = result.element.parent.layoutResult;
-                    float output = viewportX;
-                    while (ptr != null) {
-                        output -= ptr.alignedPosition.x;
-                        if (ptr.element.parent == null) {
-                            return output;
-                        }
+                case GridTemplateUnit.ViewportHeight:
+                    retn.value = size.value * viewRects[viewIdx].height;
+                    break;
 
-                        ptr = ptr.element.parent.layoutResult;
-                    }
+                case GridTemplateUnit.ApplicationWidth:
+                    retn.value = size.value * appWidth;
+                    break;
 
-                    return output;
-                }
+                case GridTemplateUnit.ApplicationHeight:
+                    retn.value = size.value * appHeight;
+                    break;
 
-                case AlignmentTarget.Screen: {
-                    if (result.element.parent == null) return 0;
-                    LayoutResult ptr = result.element.parent.layoutResult;
-                    float output = 0;
-                    while (ptr != null) {
-                        output -= ptr.alignedPosition.x;
-                        if (ptr.element.parent == null) {
-                            return output;
-                        }
+                case GridTemplateUnit.MinContent:
+                    retn.value = size.value;
+                    retn.unit = ResolveGridCellSizeUnit.MinContent;
+                    break;
 
-                        ptr = ptr.element.parent.layoutResult;
-                    }
+                case GridTemplateUnit.MaxContent:
+                    retn.value = size.value;
+                    retn.unit = ResolveGridCellSizeUnit.MaxContent;
+                    break;
 
-                    return output;
-                }
-
-                case AlignmentTarget.Mouse: {
-                    float dist = GetXDistanceToScreen(result);
-                    return inputSystem.MousePosition.x + dist;
-                }
+                case GridTemplateUnit.Percent:
+                    retn.value = size.value;
+                    retn.unit = ResolveGridCellSizeUnit.Percent;
+                    break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(target), target, null);
+                    throw new ArgumentOutOfRangeException();
             }
+
+            return retn;
+
         }
 
-        public static float ResolveOriginBaseY(LayoutResult result, float viewportY, AlignmentTarget target, AlignmentDirection direction, InputSystem inputSystem) {
-            switch (target) {
-                case AlignmentTarget.Unset:
-                case AlignmentTarget.LayoutBox:
-                    return result.allocatedPosition.y;
+        public static ResolvedSpacerSize ResolveSpacerSize(CheckedArray<Rect> viewRects, float appWidth, float appHeight, int viewIdx, UISpaceSize space, float emSize) {
 
-                case AlignmentTarget.Parent:
-                    return 0;
+            ResolvedSpacerSize retn = default;
 
-                case AlignmentTarget.ParentContentArea:
-                    LayoutResult parentResult = result.layoutParent;
-                    if (parentResult == null) return 0;
+            retn.stretch = space.stretch;
 
-                    if (direction == AlignmentDirection.Start) {
-                        return parentResult.padding.top + parentResult.border.top;
-                    }
-                    else {
-                        return parentResult.padding.bottom + parentResult.border.bottom;
-                    }
+            switch (space.unit) {
 
-                case AlignmentTarget.Template:
-                    throw new NotImplementedException();
+                case UISpaceSizeUnit.Unset:
+                case UISpaceSizeUnit.Stretch:
+                case UISpaceSizeUnit.Pixel:
+                    retn.value = space.fixedValue;
+                    break;
 
-                case AlignmentTarget.TemplateContentArea:
-                    throw new NotImplementedException();
+                case UISpaceSizeUnit.Em:
+                    retn.value = emSize * space.fixedValue;
+                    break;
 
-                case AlignmentTarget.View: {
-                    if (result.element.parent == null) return 0;
+                case UISpaceSizeUnit.ViewportWidth:
+                    retn.value = space.fixedValue * viewRects[viewIdx].width;
+                    break;
 
-                    LayoutResult ptr = result.element.parent.layoutResult;
-                    float output = viewportY;
-                    while (ptr != null) {
-                        output -= ptr.alignedPosition.y;
-                        if (ptr.element.parent == null) {
-                            return output;
-                        }
+                case UISpaceSizeUnit.ViewportHeight:
+                    retn.value = space.fixedValue * viewRects[viewIdx].height;
+                    break;
 
-                        ptr = ptr.element.parent.layoutResult;
-                    }
+                case UISpaceSizeUnit.ApplicationWidth:
+                    retn.value = space.fixedValue * appWidth;
+                    break;
 
-                    return output;
-                }
-
-                case AlignmentTarget.Screen: {
-                    if (result.element.parent == null) return 0;
-                    LayoutResult ptr = result.element.parent.layoutResult;
-                    float output = 0;
-                    while (ptr != null) {
-                        output -= ptr.alignedPosition.y;
-                        if (ptr.element.parent == null) {
-                            return output;
-                        }
-
-                        ptr = ptr.element.parent.layoutResult;
-                    }
-
-                    return output;
-                }
-
-                case AlignmentTarget.Mouse:
-                    float dist = GetYDistanceToScreen(result);
-                    return inputSystem.MousePosition.y + dist;
+                case UISpaceSizeUnit.ApplicationHeight:
+                    retn.value = space.fixedValue * appHeight;
+                    break;
 
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(target), target, null);
+                    throw new ArgumentOutOfRangeException();
             }
+
+            return retn;
         }
 
-        public static float GetXDistanceToClipper(LayoutResult result, out float width) {
-            LayoutResult ptr = result.element.parent.layoutResult;
+        public static float ResolveTransformPivot(float baseSize, in ViewParameters viewParameters, float emSize, UIFixedLength fixedSize) {
+            switch (fixedSize.unit) {
 
-            float output = 0;
-
-            ClipData clipper = result.clipper;
-
-            if (clipper == null) {
-                width = ptr.element.application.Width;
-                return GetXDistanceToScreen(result);
-            }
-
-            LayoutResult clipResult = clipper.element.layoutResult;
-
-            width = clipResult.actualSize.width;
-
-            while (ptr != clipResult) {
-                output -= ptr.alignedPosition.x;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
-
-                ptr = ptr.element.parent.layoutResult;
-            }
-
-            return output;
-        }
-
-        public static float GetYDistanceToClipper(LayoutResult result, out float height) {
-            LayoutResult ptr = result.element.parent.layoutResult;
-
-            float output = 0;
-
-            ClipData clipper = result.clipper;
-
-            if (clipper == null) {
-                height = ptr.element.application.Height;
-                return GetYDistanceToScreen(result);
-            }
-
-            LayoutResult clipResult = clipper.element.layoutResult;
-
-            height = clipResult.actualSize.height;
-
-            while (ptr != clipResult) {
-                output -= ptr.alignedPosition.y;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
-
-                ptr = ptr.element.parent.layoutResult;
-            }
-
-            return output;
-        }
-
-        public static float GetXDistanceToView(LayoutResult result) {
-            LayoutResult view = result.element.View.RootElement.layoutResult;
-
-            float output = 0;
-
-            LayoutResult ptr = result.element.parent.layoutResult;
-
-            while (ptr != view) {
-                output -= ptr.alignedPosition.x;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
-
-                ptr = ptr.element.parent.layoutResult;
-            }
-
-            return output;
-        }
-
-        public static float GetYDistanceToView(LayoutResult result) {
-            LayoutResult view = result.element.View.RootElement.layoutResult;
-
-            float output = 0;
-
-            LayoutResult ptr = result.element.parent.layoutResult;
-
-            while (ptr != view) {
-                output -= ptr.alignedPosition.y;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
-
-                ptr = ptr.element.parent.layoutResult;
-            }
-
-            return output;
-        }
-
-
-        public static float GetXDistanceToScreen(LayoutResult result) {
-            if (result.element.parent == null) return 0;
-
-            LayoutResult ptr = result.element.parent.layoutResult;
-            float output = 0;
-            while (ptr != null) {
-                output -= ptr.alignedPosition.x;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
-
-                ptr = ptr.element.parent.layoutResult;
-            }
-
-            return output;
-        }
-
-        public static float GetYDistanceToScreen(LayoutResult result) {
-            if (result.element.parent == null) return 0;
-            LayoutResult ptr = result.element.parent.layoutResult;
-            float output = 0;
-            while (ptr != null) {
-                output -= ptr.alignedPosition.y;
-                if (ptr.element.parent == null) {
-                    return output;
-                }
-
-                ptr = ptr.element.parent.layoutResult;
-            }
-
-            return output;
-        }
-
-        public static float ResolveOffsetOriginSizeX(LayoutResult layoutResult, float viewportWidth, AlignmentTarget target) {
-            switch (target) {
-                case AlignmentTarget.Unset:
-                case AlignmentTarget.LayoutBox:
-                    return layoutResult.allocatedSize.width;
-
-                case AlignmentTarget.Parent:
-                    if (layoutResult.layoutParent == null) {
-                        return viewportWidth;
-                    }
-
-                    return layoutResult.layoutParent.actualSize.width;
-
-                case AlignmentTarget.ParentContentArea:
-                    if (layoutResult.layoutParent == null) {
-                        return viewportWidth;
-                    }
-
-                    return Mathf.Max(0, layoutResult.layoutParent.ContentAreaWidth);
-
-                case AlignmentTarget.Template:
-                    // todo handle transclusion
-                    return 0;
-
-                case AlignmentTarget.TemplateContentArea:
-                    // todo handle transclusion
-                    return 0;
-
-                case AlignmentTarget.View:
-                    return viewportWidth;
-
-                case AlignmentTarget.Screen:
-                    return layoutResult.element.application.Width;
-
-                case AlignmentTarget.Mouse: {
-                    return 0;
-                }
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(target), target, null);
+                case UIFixedUnit.Unset:
+                case UIFixedUnit.Pixel:
+                    return fixedSize.value;
+
+                case UIFixedUnit.Percent:
+                    return baseSize * fixedSize.value;
+
+                case UIFixedUnit.Em:
+                    return emSize;
+
+                case UIFixedUnit.ViewportWidth:
+                    return viewParameters.viewWidth;
+
+                case UIFixedUnit.ViewportHeight:
+                    return viewParameters.viewHeight;
             }
         }
 
-        public static float ResolveOffsetOriginSizeY(LayoutResult result, float viewportHeight, AlignmentTarget target) {
-            switch (target) {
-                case AlignmentTarget.Unset:
-                case AlignmentTarget.LayoutBox:
-                    return result.allocatedSize.height;
+        public static float ResolveFixedLayoutSize(in ViewParameters viewParameters, float emSize, UIFixedLength fixedSize) {
+            switch (fixedSize.unit) {
 
-                case AlignmentTarget.Parent:
-                    if (result.layoutParent == null) {
-                        return viewportHeight;
-                    }
-
-                    return result.layoutParent.actualSize.height;
-
-                case AlignmentTarget.ParentContentArea:
-                    if (result.layoutParent == null) {
-                        return viewportHeight;
-                    }
-
-                    return Mathf.Max(0, result.layoutParent.ContentAreaHeight);
-
-                case AlignmentTarget.Template:
-                    // todo handle transclusion
-                    return 0;
-
-                case AlignmentTarget.TemplateContentArea:
-                    // todo handle transclusion
-                    return 0;
-
-                case AlignmentTarget.View:
-                    return viewportHeight;
-
-                case AlignmentTarget.Screen:
-                    return result.element.application.Height;
-
-                case AlignmentTarget.Mouse: {
-                    return 0;
-                }
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(target), target, null);
+                case UIFixedUnit.Unset:
+                case UIFixedUnit.Percent: // percent not supported in layouts
+                case UIFixedUnit.Pixel:
+                    return fixedSize.value;
+
+                case UIFixedUnit.Em:
+                    return fixedSize.value * emSize;
+
+                case UIFixedUnit.ViewportWidth:
+                    return viewParameters.viewWidth;
+
+                case UIFixedUnit.ViewportHeight:
+                    return viewParameters.viewHeight;
             }
         }
 
         [DebuggerStepThrough]
-        public static float ResolveFixedSize(float baseSize, float viewWidth, float viewHeight, float emSize, UIFixedLength fixedSize) {
+        public static float ResolveFixedSize(float baseSize, in ViewParameters viewParameters, float emSize, UIFixedLength fixedSize) {
             switch (fixedSize.unit) {
                 case UIFixedUnit.Pixel:
                     return fixedSize.value;
@@ -370,101 +160,16 @@ namespace UIForia.Util {
                     return baseSize * fixedSize.value;
 
                 case UIFixedUnit.ViewportHeight:
-                    return viewHeight * fixedSize.value;
+                    return viewParameters.viewHeight * fixedSize.value;
 
                 case UIFixedUnit.ViewportWidth:
-                    return viewWidth * fixedSize.value;
+                    return viewParameters.viewWidth * fixedSize.value;
 
                 case UIFixedUnit.Em:
                     return emSize * fixedSize.value;
 
                 default:
                     return 0;
-            }
-        }
-
-        public static float ResolveOffsetMeasurement(UIElement element, float viewportWidth, float viewportHeight, in OffsetMeasurement measurement, float percentageRelativeVal) {
-            switch (measurement.unit) {
-                case OffsetMeasurementUnit.Unset:
-                    return 0;
-
-                case OffsetMeasurementUnit.Pixel:
-                    return measurement.value;
-
-                case OffsetMeasurementUnit.Em:
-                    return element.style.GetResolvedFontSize() * measurement.value;
-
-                case OffsetMeasurementUnit.ActualWidth:
-                    return measurement.value * element.layoutResult.actualSize.width;
-
-                case OffsetMeasurementUnit.ActualHeight:
-                    return measurement.value * element.layoutResult.actualSize.height;
-
-                case OffsetMeasurementUnit.AllocatedWidth:
-                    return measurement.value * element.layoutResult.allocatedSize.width;
-
-                case OffsetMeasurementUnit.AllocatedHeight:
-                    return measurement.value * element.layoutResult.allocatedSize.height;
-
-                case OffsetMeasurementUnit.ContentWidth:
-                    throw new NotImplementedException();
-//                    return ResolveContentWidth(box) * measurement.value;
-
-                case OffsetMeasurementUnit.ContentHeight:
-                    throw new NotImplementedException();
-//                    return ResolveContentHeight(box) * measurement.value;
-
-                case OffsetMeasurementUnit.ContentAreaWidth:
-                    throw new NotImplementedException();
-//                    return box.contentSize.width * measurement.value;
-
-                case OffsetMeasurementUnit.ContentAreaHeight:
-                    throw new NotImplementedException();
-//                    return box.contentSize.height * measurement.value;
-
-                case OffsetMeasurementUnit.ViewportWidth:
-                    return viewportWidth * measurement.value;
-
-                case OffsetMeasurementUnit.ViewportHeight:
-                    return viewportHeight * measurement.value;
-
-                case OffsetMeasurementUnit.ParentWidth:
-                    throw new NotImplementedException();
-                // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
-//                    if (box.parent == null) return 0;
-//                    return box.ResolveLayoutParent().size.width * measurement.value;
-
-                case OffsetMeasurementUnit.ParentHeight:
-                    throw new NotImplementedException();
-
-                // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
-//                    if (box.parent == null) return 0;
-//                    return box.ResolveLayoutParent().size.height * measurement.value;
-
-                case OffsetMeasurementUnit.ParentContentAreaWidth:
-                    throw new NotImplementedException();
-
-                // if box.parent is null the box is the root, otherwise call ResolveLayoutParent to handle transclusion
-//                    if (box.parent == null) return 0;
-//                    return box.ResolveLayoutParent().contentSize.width * measurement.value;
-
-                case OffsetMeasurementUnit.ParentContentAreaHeight:
-                    throw new NotImplementedException();
-
-//                    if (box.parent == null) return 0;
-//                    return box.ResolveLayoutParent().contentSize.height * measurement.value;
-
-                case OffsetMeasurementUnit.ScreenWidth:
-                    return element.application.Width * measurement.value;
-
-                case OffsetMeasurementUnit.ScreenHeight:
-                    return element.application.Height * measurement.value;
-
-                case OffsetMeasurementUnit.Percent:
-                    return percentageRelativeVal * measurement.value;
-
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
         }
 

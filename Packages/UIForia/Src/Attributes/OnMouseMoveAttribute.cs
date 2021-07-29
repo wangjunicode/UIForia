@@ -5,7 +5,7 @@ namespace UIForia.Attributes {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class OnMouseMoveAttribute : MouseEventHandlerAttribute {
 
-        public OnMouseMoveAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnMouseMoveAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(modifiers, InputEventType.MouseMove, phase) { }
 
         public OnMouseMoveAttribute(EventPhase phase)

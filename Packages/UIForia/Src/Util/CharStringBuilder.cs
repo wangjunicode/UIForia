@@ -1,11 +1,37 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.Collections.LowLevel.Unsafe;
 using ZFormat;
 
 namespace UIForia.Util {
 
     public class CharStringBuilder {
+
+        [ThreadStatic] private static LightList<CharStringBuilder> s_Builders;
+
+        public static CharStringBuilder Get() {
+            s_Builders = s_Builders ?? new LightList<CharStringBuilder>();
+            if (s_Builders.size > 0) {
+                s_Builders.size--;
+                CharStringBuilder retn = s_Builders[s_Builders.size];
+                s_Builders[s_Builders.size] = null;
+                retn.size = 0;
+                return retn;
+            }
+
+            return new CharStringBuilder();
+        }
+
+        public static void Release(CharStringBuilder builder) {
+            s_Builders = s_Builders ?? new LightList<CharStringBuilder>();
+            if (s_Builders.size >= 16) {
+                return;
+            }
+
+            builder.size = 0;
+            s_Builders.Add(builder);
+        }
 
         public int size;
         public char[] characters;
@@ -34,49 +60,8 @@ namespace UIForia.Util {
             size = 0;
         }
 
-        public CharStringBuilder Append(string str) {
-            // was previously  AppendCharacterRange(strMem, 0, str.Length); return this;
-            // but profiling showed it was decently faster to inline this since its called very frequently
-
-            if (str == null || str.Length == 0) return this;
-
-            unsafe {
-                fixed (char* smem = str) {
-                    int strLength = str.Length;
-
-                    if (size + strLength >= characters.Length) {
-                        Array.Resize(ref characters, (size + strLength) * 2);
-                    }
-
-                    fixed (char* dmem = characters) {
-                        char* d = (dmem + size);
-                        char* s = (smem);
-                        int length = strLength;
-
-                        // while we can treat our data as a long, do that (4 = size of 4 characters (16 bits))
-                        for (; length >= 4; length -= 4) {
-                            *(long*) d = *(long*) s;
-                            s += 4;
-                            d += 4;
-                        }
-
-                        // while we can treat our data as ints, do that (2 = size of 2 characters (16 bits))
-                        for (; length > 0; length -= 2) {
-                            *(int*) d = *(int*) s;
-                            s += 2;
-                            d += 2;
-                        }
-
-                        // if we have an odd input length, just assign the last one
-                        if (length == 1) {
-                            *d = *s;
-                        }
-                    }
-
-                    size += strLength;
-                }
-            }
-
+        public unsafe CharStringBuilder Append(CharSpan span) {
+            AppendCharacterRange(span.data, span.rangeStart, span.rangeEnd);
             return this;
         }
 
@@ -116,6 +101,31 @@ namespace UIForia.Util {
             size += strLength;
         }
 
+        public CharStringBuilder Append(IToStringBuffer bufferable) {
+            bufferable.ToStringBuffer(this);
+            return this;
+        }
+
+        public CharStringBuilder Append(string str) {
+            if (str == null || str.Length == 0) return this;
+
+            unsafe {
+                fixed (char* smem = str) {
+                    int strLength = str.Length;
+
+                    if (size + strLength >= characters.Length) {
+                        Array.Resize(ref characters, (size + strLength) * 2);
+                    }
+                    fixed (char* dmem = characters) {
+                        UnsafeUtility.MemCpy(dmem + size, smem, strLength * 2);
+                    }
+                    size += strLength;
+                }
+            }
+
+            return this;
+        }
+        
         public CharStringBuilder Append(short val) {
             ZNumberFormatter.Instance.NumberToChars(val);
             Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
@@ -135,9 +145,6 @@ namespace UIForia.Util {
             }
 
             if (value >= 100000000) {
-                // ZFormat.ZNumberFormatter.Instance.NumberToChars(value);
-                //  Append(ZNumberFormatter.Instance.Chars, ZNumberFormatter.Instance.Count);
-                //this.NumberToChars((string) null, value, znfi);
 
                 AppendIntegerDigits((uint) value);
 
@@ -196,7 +203,6 @@ namespace UIForia.Util {
             Append(val.ToString());
             return this;
         }
-
 
         public CharStringBuilder Append(byte val) {
             ZNumberFormatter.Instance.NumberToChars(val);
@@ -499,15 +505,19 @@ namespace UIForia.Util {
                     case 8:
                         num2 = val1;
                         break;
+
                     case 16:
                         num2 = val2;
                         break;
+
                     case 24:
                         num2 = 0;
                         break;
+
                     case 32:
                         num2 = 0;
                         break;
+
                     default:
                         num2 = 0U;
                         break;
@@ -526,24 +536,31 @@ namespace UIForia.Util {
                         }
 
                         return;
+
                     case 2:
                         characters[--len] = (char) (48 | (int) (num3 >> 4) & 15);
                         goto case 1;
+
                     case 3:
                         characters[--len] = (char) (48 | (int) (num3 >>= 4) & 15);
                         goto case 2;
+
                     case 4:
                         characters[--len] = (char) (48 | (int) (num3 >>= 4) & 15);
                         goto case 3;
+
                     case 5:
                         characters[--len] = (char) (48 | (int) (num3 >>= 4) & 15);
                         goto case 4;
+
                     case 6:
                         characters[--len] = (char) (48 | (int) (num3 >>= 4) & 15);
                         goto case 5;
+
                     case 7:
                         characters[--len] = (char) (48 | (int) (num3 >>= 4) & 15);
                         goto case 6;
+
                     case 8:
                         characters[--len] = (char) (48 | (int) (num3 >>= 4) & 15);
                         goto case 7;

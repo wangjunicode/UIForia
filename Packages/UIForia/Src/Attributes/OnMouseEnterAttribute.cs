@@ -5,7 +5,7 @@ namespace UIForia.Attributes {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class OnMouseEnterAttribute : MouseEventHandlerAttribute {
 
-        public OnMouseEnterAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnMouseEnterAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(modifiers, InputEventType.MouseEnter, phase) { }
 
         public OnMouseEnterAttribute(EventPhase phase)

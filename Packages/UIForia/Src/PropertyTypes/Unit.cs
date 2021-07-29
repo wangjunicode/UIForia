@@ -1,0 +1,45 @@
+namespace UIForia {
+
+    public enum Unit : byte {
+        
+        Unset = 0,
+        Width,
+        Height,
+        Content,
+        ContentHeight,
+        ContentWidth,
+        Em,
+        ParentWidth,
+        ParentHeight,
+        MaxContent,
+        MinContent,
+        ContentAreaWidth,
+        ContentAreaHeight,
+        ParentSize,
+        Percent,
+        Pixel,
+        ScreenWidth,
+        ScreenHeight,
+        ViewportWidth,
+        ViewportHeight,
+        Seconds,
+        Milliseconds,
+        BackgroundImageWidth,
+        BackgroundImageHeight,
+        Stretch,
+        ApplicationWidth,
+        ApplicationHeight,
+        MaxChild,
+        MinChild,
+        FontPoint,
+        Controlled,
+        StretchContent,
+        FitContent,
+        Degrees,
+        Radians,
+        FillRemaining,
+        LineHeight,
+
+    }
+
+}

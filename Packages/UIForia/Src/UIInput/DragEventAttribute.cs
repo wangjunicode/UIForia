@@ -8,7 +8,7 @@ namespace UIForia.UIInput {
         public readonly EventPhase phase;
         public readonly KeyboardModifiers modifiers;
 
-        public OnDragCreateAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble) {
+        public OnDragCreateAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate) {
             this.modifiers = modifiers;
             this.phase = phase;
         }
@@ -40,10 +40,10 @@ namespace UIForia.UIInput {
     [AttributeUsage(AttributeTargets.Method)]
     public class OnDragEnterAttribute : DragEventHandlerAttribute {
 
-        public OnDragEnterAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragEnterAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(requiredType, modifiers, InputEventType.DragEnter, phase) { }
 
-        public OnDragEnterAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragEnterAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(null, modifiers, InputEventType.DragEnter, phase) { }
 
         public OnDragEnterAttribute(EventPhase phase)
@@ -54,10 +54,10 @@ namespace UIForia.UIInput {
     [AttributeUsage(AttributeTargets.Method)]
     public class OnDragExitAttribute : DragEventHandlerAttribute {
 
-        public OnDragExitAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragExitAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(requiredType, modifiers, InputEventType.DragExit, phase) { }
 
-        public OnDragExitAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragExitAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(null, modifiers, InputEventType.DragExit, phase) { }
 
 
@@ -69,10 +69,10 @@ namespace UIForia.UIInput {
     [AttributeUsage(AttributeTargets.Method)]
     public class OnDragMoveAttribute : DragEventHandlerAttribute {
 
-        public OnDragMoveAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragMoveAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(requiredType, modifiers, InputEventType.DragMove, phase) { }
 
-        public OnDragMoveAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragMoveAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(null, modifiers, InputEventType.DragMove, phase) { }
 
 
@@ -84,10 +84,10 @@ namespace UIForia.UIInput {
     [AttributeUsage(AttributeTargets.Method)]
     public class OnDragHoverAttribute : DragEventHandlerAttribute {
 
-        public OnDragHoverAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragHoverAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(requiredType, modifiers, InputEventType.DragHover, phase) { }
 
-        public OnDragHoverAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragHoverAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(null, modifiers, InputEventType.DragHover, phase) { }
 
 
@@ -99,10 +99,10 @@ namespace UIForia.UIInput {
     [AttributeUsage(AttributeTargets.Method)]
     public class OnDragCancelAttribute : DragEventHandlerAttribute {
 
-        public OnDragCancelAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragCancelAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(requiredType, modifiers, InputEventType.DragCancel, phase) { }
 
-        public OnDragCancelAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragCancelAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(null, modifiers, InputEventType.DragCancel, phase) { }
 
 
@@ -114,10 +114,10 @@ namespace UIForia.UIInput {
     [AttributeUsage(AttributeTargets.Method)]
     public class OnDragDropAttribute : DragEventHandlerAttribute {
 
-        public OnDragDropAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragDropAttribute(Type requiredType, KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(requiredType, modifiers, InputEventType.DragDrop, phase) { }
 
-        public OnDragDropAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnDragDropAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(null, modifiers, InputEventType.DragDrop, phase) { }
 
 

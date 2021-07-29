@@ -5,7 +5,7 @@ namespace UIForia.Attributes {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class OnMouseExitAttribute : MouseEventHandlerAttribute {
 
-        public OnMouseExitAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.Bubble)
+        public OnMouseExitAttribute(KeyboardModifiers modifiers = KeyboardModifiers.None, EventPhase phase = EventPhase.BeforeUpdate)
             : base(modifiers, InputEventType.MouseExit, phase) { }
 
         public OnMouseExitAttribute(EventPhase phase)

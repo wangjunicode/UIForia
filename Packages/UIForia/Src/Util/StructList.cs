@@ -1,8 +1,25 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UIForia.Compilers;
+using UIForia.Parsing.Expressions.Tokenizer;
+using UnityEngine;
 
 namespace UIForia.Util {
+
+    internal unsafe interface IBasicList<T> where T : unmanaged {
+
+        void SetSize(int size);
+
+        void Add(in T item);
+
+        void AddUnchecked(in T item);
+
+        // void EnsureCapacity(int size);
+        //
+        // T* GetArrayPointer();
+
+    }
 
     internal class StructListDebugView<T> where T : struct {
 
@@ -24,7 +41,10 @@ namespace UIForia.Util {
 
         public T[] array;
         public int size;
-        private bool isInPool;
+        internal bool isInPool;
+
+        // ReSharper disable once StaticMemberInGenericType
+        private static readonly object lockRef = new object();
 
         public T[] Array => array;
 
@@ -75,7 +95,7 @@ namespace UIForia.Util {
         }
 
         public void AddRange(IList<T> collection, int resizeFactor = 1) {
-            
+
             if (size + collection.Count >= array.Length) {
                 System.Array.Resize(ref array, size + collection.Count * resizeFactor);
             }
@@ -95,7 +115,8 @@ namespace UIForia.Util {
 
             if (count < HandCopyThreshold) {
                 int idx = size;
-                for (int i = start; i < count; i++) {
+                int end = start + count;
+                for (int i = start; i < end; i++) {
                     array[idx++] = collection[i];
                 }
             }
@@ -223,7 +244,6 @@ namespace UIForia.Util {
 //            IntroSort(array, start, length + start - 1, 2 * FloorLog2(length), comparison);
 //        }
 
-
         private class Cmp : IComparer<T> {
 
             public Comparison<T> cmp;
@@ -248,13 +268,6 @@ namespace UIForia.Util {
             System.Array.Sort(array, 0, size, s_Comparer);
             s_Comparer.cmp = null;
         }
-        
-        public void BubbleSort(Comparison<T> comparison) {
-            if (size < 2) return;
-            s_Comparer.cmp = comparison;
-            ArrayUtil.BubbleSort(array, size, s_Comparer);
-            s_Comparer.cmp = null;
-        }
 
         internal static int FloorLog2(int n) {
             int num = 0;
@@ -264,12 +277,9 @@ namespace UIForia.Util {
         }
 
         public StructList<T> GetRange(int index, int count, StructList<T> retn = null) {
-            if (retn == null) {
-                retn = GetMinSize(count);
-            }
-            else {
-                retn.EnsureCapacity(count);
-            }
+            retn ??= Get();
+
+            retn.EnsureCapacity(count);
 
             System.Array.Copy(array, index, retn.array, 0, count);
             retn.size = count;
@@ -283,50 +293,26 @@ namespace UIForia.Util {
         }
 
         public static StructList<T> Get() {
-            StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>();
-            retn.isInPool = false;
-            return retn;
+            lock (lockRef) {
+                StructList<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new StructList<T>();
+                retn.isInPool = false;
+                return retn;
+            }
         }
 
-        public static StructList<T> GetMinSize(int minCapacity) {
-            
-            if (minCapacity < 1) minCapacity = 4;
-
-            if (s_Pool.size == 0) {
-                return new StructList<T>(minCapacity) {isInPool = false};
-            }
-            
-            for (int i = 0; i < s_Pool.size; i++) {
-                    
-                StructList<T> list = s_Pool.array[i];
-                    
-                if (list.array.Length < minCapacity) {
-                    continue;
-                }
-                    
-                if (s_Pool.size == 1) {
-                    s_Pool.array[i] = null;    
-                }
-                else {
-                    s_Pool.array[i] = s_Pool.array[s_Pool.size - 1];
-                    s_Pool.array[s_Pool.size - 1] = null;    
-                }
-
-                s_Pool.size -= 1;
-                        
-                list.isInPool = false;
-                
-                return list;
-            }
-
-            return new StructList<T>(minCapacity) {isInPool = false};;
-            
+        public void Release() {
+            StructList<T> cpy = this;
+            Release(ref cpy);
         }
-        
-        public static StructList<T> PreSize(int size) {
-            StructList<T> list = GetMinSize(size);
-            list.size = size;
-            return list;
+
+        public static void Release(ref StructList<T> toPool) {
+            lock (lockRef) {
+                if (toPool.isInPool) return;
+                toPool.Clear();
+                toPool.isInPool = true;
+                s_Pool.Add(toPool);
+                toPool = null;
+            }
         }
 
         private static void SwapIfGreater(T[] keys, IComparer<T> comparer, int a, int b) {
@@ -344,7 +330,7 @@ namespace UIForia.Util {
             a[i] = a[j];
             a[j] = obj;
         }
-        
+
         public void QuickSort(IComparer<T> comparer) {
             QuickSort(array, 0, size - 1, comparer);
         }
@@ -357,7 +343,7 @@ namespace UIForia.Util {
                 startIndex++;
 
                 while (endIndex >= startIndex) {
-                    
+
                     int cmpStart_pivot = comparer.Compare(array[startIndex], array[pivot]);
                     int cmpEnd_pivot = comparer.Compare(array[endIndex], array[pivot]);
 
@@ -396,48 +382,6 @@ namespace UIForia.Util {
                 break;
             }
         }
-
-//         private static void QuickSort(T[] array, int startIndex, int endIndex, IComparer<T> comparer) {
-//            while (true) {
-//                int left = startIndex;
-//                int right = endIndex;
-//                int pivot = startIndex;
-//                startIndex++;
-//
-//                while (endIndex >= startIndex) {
-//                    int cmpStart = comparer.Compare(array[startIndex], array[pivot]);
-//
-//                    if (cmpStart >= 0 && comparer.Compare(array[endIndex], array[pivot]) < 0) {
-//                        Swap(array, startIndex, endIndex);
-//                    }
-//                    else if (comparer.Compare(array[startIndex], array[pivot]) >= 0) {
-//                        endIndex--;
-//                    }
-//                    else if (comparer.Compare(array[endIndex], array[pivot]) < 0) {
-//                        startIndex++;
-//                    }
-//                    else {
-//                        endIndex--;
-//                        startIndex++;
-//                    }
-//                }
-//
-//                Swap(array, pivot, endIndex);
-//                pivot = endIndex;
-//
-//                if (pivot > left) {
-//                    QuickSort(array, left, pivot, comparer);
-//                }
-//
-//                if (right > pivot + 1) {
-//                    startIndex = pivot + 1;
-//                    endIndex = right;
-//                    continue;
-//                }
-//
-//                break;
-//            }
-//        }
 
         private static void IntroSort(T[] keys, int lo, int hi, int depthLimit, IComparer<T> comparer) {
             int num1;
@@ -533,28 +477,6 @@ namespace UIForia.Util {
             }
         }
 
-        public void QuickRelease() {
-            size = 0;
-            if (isInPool) return;
-            isInPool = true;
-            s_Pool.Add(this);
-        }
-
-        public void Release() {
-            Clear();
-            if (isInPool) return;
-            isInPool = true;
-            s_Pool.Add(this);
-        }
-
-        public static void Release(ref StructList<T> toPool) {
-            toPool.Clear();
-            if (toPool.isInPool) return;
-            toPool.isInPool = true;
-            s_Pool.Add(toPool);
-            toPool = null;
-        }
-
         public void Insert(int index, in T item) {
             if (size + 1 >= array.Length) {
                 System.Array.Resize(ref array, (size + 1) * 2);
@@ -570,6 +492,10 @@ namespace UIForia.Util {
         }
 
         public T[] ToArray() {
+            if (size == 0) {
+                return ArrayPool<T>.Get(0);
+            }
+
             T[] retn = new T[size];
             System.Array.Copy(array, 0, retn, 0, size);
             return retn;
@@ -580,11 +506,16 @@ namespace UIForia.Util {
         }
 
         public void RemoveAt(int index) {
+            if (index == size - 1) {
+                array[--size] = default;
+                return;
+            }
+
             --size;
             System.Array.Copy(array, index + 1, array, index, size - index);
             array[size] = default;
         }
-        
+
         public void RemoveAt(int index, out T retn) {
             --size;
             retn = array[index];
@@ -626,6 +557,25 @@ namespace UIForia.Util {
             System.Array.Copy(array, 0, retn.array, 0, size);
             retn.size = size;
             return retn;
+        }
+
+        public void SetSize(int length) {
+            EnsureCapacity(length);
+            size = length;
+        }
+
+        public ref T AddRef(in T item) {
+            Add(item);
+            return ref array[size - 1];
+        }
+
+        public StructList<T> Slice(RangeInt range) {
+            StructList<T> list = StructList<T>.Get();
+            for (int i = range.start; i < range.end; i++) {
+                list.Add(array[i]);
+            }
+
+            return list;
         }
 
     }

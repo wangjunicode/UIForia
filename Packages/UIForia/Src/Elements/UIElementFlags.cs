@@ -3,36 +3,18 @@
 namespace UIForia.Elements {
 
     [Flags]
-    internal enum UIElementFlags {
+    public enum UIElementFlags : ushort {
 
-        // Element Flags
-        ImplicitElement = 1,
-        Enabled = 1 << 1,
-        AncestorEnabled = 1 << 2,
-        Alive = 1 << 3,
-        HasBeenEnabled = 1 << 4,
-        Primitive = 1 << 5,
-        Created = 1 << 6, // can maybe get rid fo this when revisiting 
-        TemplateRoot = 1 << 7,
-        IndexChanged = 1 << 8,
-    
-        InTagIndex = 1 << 9,
-        
-        NeedsUpdate = 1 << 10,
-        InternalElement = 1 << 11,
-        
-        SelfAndAncestorEnabled = Alive | Enabled | AncestorEnabled,
+        None = 0,
 
-        // Layout Flags
-        DebugLayout = 1 << 16,
-        LayoutHierarchyDirty = 1 << 19,
-        LayoutTransformNotIdentity = 1 << 20,
-        LayoutFitWidthDirty = 1 << 24,
-        LayoutFitHeightDirty = 1 << 25,
-        LayoutTypeOrBehaviorDirty = 1 << 26,
-
-        EnabledFlagSet = Alive | Enabled | AncestorEnabled,
-        EnabledFlagSetWithUpdate = EnabledFlagSet | NeedsUpdate,
+        ViewRoot = 1 << 0,
+        Enabled = 1 << 1,            // DO NOT MOVE THIS INDEX
+        InitThisFrame = 1 << 2,      // DO NOT MOVE THIS INDEX 
+        HasBeenEnabled = 1 << 3,
+        TemplateRoot = 1 << 4,
+        StyleListChanged = 1 << 5,
+        RequireDisableInvoke = 1 << 6,
+        HasCustomInputHandling = 1 << 7
 
     }
 

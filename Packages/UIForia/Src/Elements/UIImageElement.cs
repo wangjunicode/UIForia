@@ -1,5 +1,5 @@
+using System;
 using UIForia.Attributes;
-using UIForia.Rendering;
 using UnityEngine;
 
 namespace UIForia.Elements {
@@ -7,48 +7,31 @@ namespace UIForia.Elements {
     [TemplateTagName("Image")]
     public class UIImageElement : UIContainerElement {
 
-        public ImageLocator? src;
-        internal Texture texture;
-        private Mesh mesh;
+        public string src;
+        public Texture texture;
 
-        public float Width;
-        public float Height;
-        
-        public UIImageElement() {
-            flags |= UIElementFlags.Primitive;
-        }
-        
         [OnPropertyChanged(nameof(src))]
         public void OnSrcChanged() {
-            SetupBackground();
+            throw new NotImplementedException();
         }
 
-        public override void OnEnable() {
+        [OnPropertyChanged(nameof(texture))]
+        public void OnTextureChanged() {
             SetupBackground();
+
         }
 
         private void SetupBackground() {
-            if (src == null) {
-                style.SetBackgroundImage(null, StyleState.Normal);
-                return;
-            }
-
-            texture = src.Value.texture ?? application.ResourceManager.GetTexture(src.Value.imagePath);
-            if (texture == null) {
-                style.SetBackgroundImage(null, StyleState.Normal);
-                return;
-            }
-            
-            style.SetBackgroundImage((Texture2D)texture, StyleState.Normal);
-            if (Width > 0) {
-                style.SetPreferredHeight(Width * texture.height / texture.width, StyleState.Normal);
-                style.SetPreferredWidth(Width, StyleState.Normal);
-            }
-
-            if (Height > 0) {
-                style.SetPreferredWidth(Height * texture.width / texture.height, StyleState.Normal);
-                style.SetPreferredHeight(Height, StyleState.Normal);
-            } 
+          
+            // if (Width > 0) {
+            //     style.SetPreferredHeight(Width * texture.height / texture.width, StyleState.Normal);
+            //     style.SetPreferredWidth(Width, StyleState.Normal);
+            // }
+            //
+            // if (Height > 0) {
+            //     style.SetPreferredWidth(Height * texture.width / texture.height, StyleState.Normal);
+            //     style.SetPreferredHeight(Height, StyleState.Normal);
+            // } 
         }
 
         public override string GetDisplayName() {

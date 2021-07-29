@@ -9,26 +9,27 @@ namespace UIForia.UIInput {
         public readonly KeyboardModifiers modifiers;
         public readonly char character;
         public InputEventType eventType;
-        private readonly EventPropagator source;
 
-        public KeyboardInputEvent(EventPropagator source, InputEventType type, KeyCode keyCode, char character, KeyboardModifiers modifiers, bool isFocused) {
-            this.source = source;
+        public KeyboardInputEvent(InputEventType type, KeyCode keyCode, char character, KeyboardModifiers modifiers, bool isFocused) {
             this.eventType = type;
             this.keyCode = keyCode;
             this.modifiers = modifiers;
             this.character = character;
             this.isFocused = isFocused;
-        }
-
-        public void Consume() {
-            source.isConsumed = true;
+            this.stopPropagation = false;
+            this.stopPropagationImmediately = false;
         }
 
         public void StopPropagation() {
-            source.shouldStopPropagation = true;
+            stopPropagation = true;
         }
-        
-        public bool IsConsumed => source.isConsumed;
+
+        public void StopPropagationImmediately() {
+            stopPropagationImmediately = true;
+        }
+
+        internal bool stopPropagation { get; private set; }
+        internal bool stopPropagationImmediately { get; private set; }
 
         public bool alt => (modifiers & KeyboardModifiers.Alt) != 0;
 

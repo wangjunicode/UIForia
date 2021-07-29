@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace UIForia.UIInput {
+namespace UIForia {
 
     [Flags]
-    public enum KeyboardModifiers {
+    public enum KeyboardModifiers : byte {
 
         None = 0,
         Alt = 1 << 0,

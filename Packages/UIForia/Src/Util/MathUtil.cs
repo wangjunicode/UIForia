@@ -1,16 +1,43 @@
-using System;
 using UnityEngine;
 
 namespace UIForia.Util {
 
     public static class MathUtil {
 
-        public static float Round(float amountToRound, float nearstOf, float fairness = 0.5f) {
-            return (float) Math.Floor(amountToRound / nearstOf + fairness) * nearstOf;
-        }
-
         public static float RemapRange(float s, float a1, float a2, float b1, float b2) {
             return b1 + (s - a1) * (b2 - b1) / (a2 - a1);
+        }
+
+        public static byte Float01ToByte(float value) {
+            if (value < 0) value = 0;
+            else if (value > 1) value = 1;
+            return (byte) (value * 255f);
+        }
+
+        public static byte FloatMinus1To1ToByte(float value) {
+            if (value < -1) {
+                value = -1;
+            }
+            else if (value > 1) {
+                value = 1;
+            }
+
+            return (byte) RemapRange(value, -1, 1, 0, 255);
+        }
+
+        public static ushort FloatPercentageToUshort(float value) {
+            return (ushort) RemapRange(value, 0, 1, 0, ushort.MaxValue);
+        }
+
+        public static ushort FloatMinus1To1ToUshort(float value) {
+            if (value < -1) {
+                value = -1;
+            }
+            else if (value > 1) {
+                value = 1;
+            }
+
+            return (ushort) RemapRange(value, -1, 1, 0, ushort.MaxValue);
         }
 
         public static float PercentOfRange(float v, float bottom, float top) {
@@ -60,6 +87,45 @@ namespace UIForia.Util {
 
         public static bool Between(float val, float min, float max) {
             return val >= min && val <= max;
+        }
+
+        public static bool Between(int val, int min, int max) {
+            return val >= min && val <= max;
+        }
+
+        public static float Clamp01(float val) {
+            if (val < 0) return 0;
+            if (val > 1) return 1;
+            return val;
+        }
+
+        public static void MinMax(float v0, float v1, out float min, out float max) {
+            if (v0 < v1) {
+                min = v0;
+                max = v1;
+            }
+            else {
+                min = v1;
+                max = v0;
+            }
+        }
+
+        public static float UShortToFloatOneMinusOne(ushort value) {
+            return RemapRange(value, 0, ushort.MaxValue, -1f, 1f);
+        }
+
+        public static int Nearest8(int number) {
+            return ((number + 7) & (-8));
+        }
+
+        public static int Nearest64(int number) {
+
+            int remainder = number % 64;
+            if (remainder == 0)
+                return number;
+
+            return number + 64 - remainder;
+
         }
 
     }

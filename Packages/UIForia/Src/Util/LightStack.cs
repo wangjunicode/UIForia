@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
-using UIForia.Compilers;
 using UnityEngine;
+using Object = System.Object;
 
 namespace UIForia.Util {
 
@@ -16,7 +16,7 @@ namespace UIForia.Util {
 
         public T Previous => PeekAtUnchecked(size - 1);
 
-        [ThreadStatic] private static LightList<LightStack<T>> s_Pool;
+        private static LightList<LightStack<T>> s_Pool;
 
         [DebuggerStepThrough]
         public LightStack(int capacity = 8) {
@@ -50,13 +50,13 @@ namespace UIForia.Util {
         }
 
         [DebuggerStepThrough]
-        public T PeekAtUnchecked(int idx) {
-            return array[idx];
+        public ref T PeekAtUnchecked(int idx) {
+            return ref array[idx];
         }
 
         [DebuggerStepThrough]
-        public T PeekRelativeUnchecked(int cnt) {
-            return array[size - cnt];
+        public ref T PeekRelativeUnchecked(int cnt) {
+            return ref array[size - cnt];
         }
 
         [DebuggerStepThrough]
@@ -85,32 +85,29 @@ namespace UIForia.Util {
             size = 0;
         }
 
-
+        // ReSharper disable once StaticMemberInGenericType
+        private static readonly object lockRef = new object();
+        
         [DebuggerStepThrough]
         public static LightStack<T> Get() {
-            s_Pool = s_Pool ?? new LightList<LightStack<T>>(4);
-            LightStack<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new LightStack<T>();
-            retn.isPooled = false;
-            return retn;
+            lock (lockRef) {
+                s_Pool ??= new LightList<LightStack<T>>(4);
+                LightStack<T> retn = s_Pool.Count > 0 ? s_Pool.RemoveLast() : new LightStack<T>();
+                retn.isPooled = false;
+                return retn;
+            }
         }
-
-        public void Release() {
-            Array.Clear(array, 0, size);
-            size = 0;
-            if (isPooled) return;
-            isPooled = true;
-            s_Pool = s_Pool ?? new LightList<LightStack<T>>(4);
-            s_Pool.Add(this);
-        }
-
+       
         [DebuggerStepThrough]
         public static void Release(ref LightStack<T> toPool) {
-            Array.Clear(toPool.array, 0, toPool.size);
-            toPool.size = 0;
-            if (toPool.isPooled) return;
-            toPool.isPooled = true;
-            s_Pool = s_Pool ?? new LightList<LightStack<T>>(4);
-            s_Pool.Add(toPool);
+            lock (lockRef) {
+                Array.Clear(toPool.array, 0, toPool.size);
+                toPool.size = 0;
+                if (toPool.isPooled) return;
+                toPool.isPooled = true;
+                s_Pool ??= new LightList<LightStack<T>>(4);
+                s_Pool.Add(toPool);
+            }
         }
 
         [DebuggerStepThrough]
@@ -123,8 +120,8 @@ namespace UIForia.Util {
         }
 
         [DebuggerStepThrough]
-        public T PeekUnchecked() {
-            return array[size - 1];
+        public ref T PeekUnchecked() {
+            return ref array[size - 1];
         }
 
         public bool Contains(T item) {

@@ -334,6 +334,11 @@ namespace UIForia.Systems {
                 element.layoutBox.Destroy();
                 element.layoutBox = null;
             }
+
+            // Force parent hierarchy update for transcluded children, as this element `layoutBox` is not linked to the layout box of the parent element.
+            if (element.style.LayoutBehavior == LayoutBehavior.TranscludeChildren && element.parent != null && element.parent.layoutBox != null) {
+                element.parent.layoutBox.flags |= LayoutBoxFlags.GatherChildren;
+            }
         }
 
         public void OnAttributeSet(UIElement element, string attributeName, string currentValue, string previousValue) { }

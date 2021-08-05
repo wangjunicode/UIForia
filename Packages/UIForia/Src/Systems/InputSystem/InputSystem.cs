@@ -349,7 +349,14 @@ namespace UIForia.Systems {
             // todo -- bug!
             queryResults.Sort((a, b) => {
                 int viewDepthComparison = b.View.Depth - a.View.Depth;
-                if (viewDepthComparison != 0) return viewDepthComparison;
+                if (viewDepthComparison != 0) {
+                    return viewDepthComparison;
+                }
+
+                if (b.layoutBox.layer != a.layoutBox.layer) {
+                    return b.layoutBox.layer - a.layoutBox.layer;
+                }
+                
                 if (b.layoutBox.zIndex != a.layoutBox.zIndex) {
                     return b.layoutBox.zIndex - a.layoutBox.zIndex;
                 }

@@ -262,6 +262,9 @@ namespace UIForia.Systems {
                     case StylePropertyId.LayoutFitVertical:
                         element.flags |= UIElementFlags.LayoutFitHeightDirty;
                         break;
+                    case StylePropertyId.Layer:
+                        element.layoutBox.layer = property.AsInt;
+                        break;
                     case StylePropertyId.ZIndex:
                         element.layoutBox.zIndex = property.AsInt;
                         break;

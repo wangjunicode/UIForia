@@ -37,6 +37,7 @@ namespace UIForia.Systems {
         public ClipBehavior clipBehavior;
         public ClipBounds clipBounds;
         public int traversalIndex;
+        public int layer;
         public int zIndex;
 
         public OffsetMeasurement transformPositionX;
@@ -894,6 +895,7 @@ namespace UIForia.Systems {
                 flags |= LayoutBoxFlags.Ignored;
             }
 
+            layer = element.style.Layer;
             zIndex = element.style.ZIndex;
 
             transformRotation = element.style.TransformRotation;

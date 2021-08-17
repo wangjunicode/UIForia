@@ -1,0 +1,20 @@
+﻿style parent {
+    PreferredHeight = 100px;
+    BackgroundColor = blue;
+    [attr:disable-pointer-events="True"] {
+        PointerEvents = None;
+    }
+}
+
+style child {
+    BackgroundColor = red;
+    MarginLeft = 20px;
+    [attr:disable-pointer-events="True"] {
+        PointerEvents = None;
+    }
+}
+
+style button {
+    PreferredHeight = 30px;
+    BackgroundColor = green;
+}

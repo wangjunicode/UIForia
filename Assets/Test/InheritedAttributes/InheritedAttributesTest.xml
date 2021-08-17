@@ -1,0 +1,25 @@
+﻿<UITemplate>
+
+    <Style src="Test/InheritedAttributes/InheritedAttributesTest.style"/>
+    
+    <Contents>
+        
+        <Div id="parent" style="parent" attr:disable-pointer-events="{!parentEnabled}">
+            Parent
+            <Text>PointerEvents: {parent.style.PointerEvents}</Text>
+            <Div id="child" style="child" attr:disable-pointer-events="{!childEnabled}" mouse:click="OnChildClick()">
+                Child
+                <Text>Click count: {clickCount}</Text>
+                <Text>PointerEvents: {child.style.PointerEvents}</Text>
+            </Div>
+        </Div>
+        <Div style="button" mouse:click="OnButtonClicked()">
+            Click to enable PointerEvents on parent
+        </Div>
+        <Div style="button" mouse:click="OnButton2Clicked()">
+            Click to enable PointerEvents on child
+        </Div>
+        
+    </Contents>
+    
+</UITemplate>

@@ -670,24 +670,40 @@ namespace UIForia.Rendering {
                 return;
             }
 
-            StyleProperty oldValue = GetPropertyValue(property.propertyId);
+            StylePropertyId propertyId = property.propertyId;
+            StyleProperty oldValue = GetPropertyValue(propertyId);
 
             style.SetProperty(property);
 
             IStyleSystem styleSystem = element.application.styleSystem;
 
             StyleProperty currentValue;
-            if (TryGetPropertyValueInState(property.propertyId, currentState, out currentValue)) {
+            if (TryGetPropertyValueInState(propertyId, currentState, out currentValue)) {
 
                 if (oldValue != currentValue) {
-                    propertyMap[(int) property.propertyId] = currentValue;
-                    isInheritedMap |= 1UL << (int)property.propertyId;
+                    propertyMap[(int) propertyId] = currentValue;
+                    isInheritedMap |= 1UL << (int)propertyId;
+                    
+                    if (StyleUtil.IsInherited(propertyId)) {
+                        if (inheritedProperties[(int)propertyId].hasValue) {
+                            inheritedProperties[(int)propertyId] = DefaultStyleValues_Generated.GetPropertyValue(propertyId);    
+                        }
+                    }
+                    
                     styleSystem?.SetStyleProperty(element, currentValue);
                 }
             }
             else {
-                propertyMap.Remove((int) property.propertyId);
-                isInheritedMap &= ~(1UL << (int)property.propertyId);
+                propertyMap.Remove((int) propertyId);
+                isInheritedMap &= ~(1UL << (int)propertyId);
+                
+                if (StyleUtil.IsInherited(propertyId)) {
+                    var parentStyle = element.parent.style;
+                    if (parentStyle != null) {
+                        inheritedProperties[(int)propertyId] = parentStyle.GetComputedStyleProperty(propertyId);    
+                    }
+                }
+                
                 styleSystem?.SetStyleProperty(element, property);
             }
         }
@@ -784,12 +800,27 @@ namespace UIForia.Rendering {
                     if (oldValue != property) {
                         propertyMap[(int) property.propertyId] = property;
                         isInheritedMap |= 1UL << (int)property.propertyId;
+
+                        if (StyleUtil.IsInherited(property.propertyId)) {
+                            if (inheritedProperties[(int)propertyId].hasValue) {
+                                inheritedProperties[(int)propertyId] = DefaultStyleValues_Generated.GetPropertyValue(propertyId);    
+                            }
+                        }
+                        
                         styleSystem?.SetStyleProperty(element, property);
                     }
                 }
                 else {
                     propertyMap.Remove((int) propertyId);
                     isInheritedMap &= ~(1UL << (int)property.propertyId);
+                    
+                    if (StyleUtil.IsInherited(propertyId)) {
+                        var parentStyle = element.parent.style;
+                        if (parentStyle != null) {
+                            inheritedProperties[(int)propertyId] = parentStyle.GetComputedStyleProperty(propertyId);    
+                        }
+                    }
+                    
                     styleSystem?.SetStyleProperty(element, GetPropertyValue(propertyId));
                 }
             }

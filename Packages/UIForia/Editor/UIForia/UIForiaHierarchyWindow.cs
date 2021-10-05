@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using SVGX;
@@ -51,12 +52,10 @@ namespace UIForia.Editor {
         public static Application s_SelectedApplication;
 
         public void OnEnable() {
-            firstLoad = true;
-            state = new TreeViewState();
-            autoRepaintOnSceneChange = true;
-            wantsMouseMove = true;
-            wantsMouseEnterLeaveWindow = true;
+            EditorApplication.playModeStateChanged += OnPlayModeChanged;
             
+            Reset();
+
             if (!ColorUtility.TryParseHtmlString(EditorPrefs.GetString("UIForia.Inspector.ContentColor"), out contentColor)) {
                 contentColor = new Color32(140, 182, 193, 175);
             }
@@ -86,6 +85,24 @@ namespace UIForia.Editor {
             drawDebugBox = EditorPrefs.GetBool("UIForia.Inspector.DrawDebugBox", true);
         }
 
+        public void OnDisable() {
+            EditorApplication.playModeStateChanged -= OnPlayModeChanged;
+        }
+        
+        private void OnPlayModeChanged(PlayModeStateChange change) {
+            if (change == PlayModeStateChange.EnteredPlayMode) {
+                Reset();    
+            }
+        }
+
+        private void Reset() {
+            firstLoad = true;
+            state = new TreeViewState();
+            autoRepaintOnSceneChange = true;
+            wantsMouseMove = true;
+            wantsMouseEnterLeaveWindow = true;
+        }
+
         private void OnElementSelectionChanged(UIElement element) {
             if (element != null) {
                 s_SelectedElementId = element.id;
@@ -98,12 +115,8 @@ namespace UIForia.Editor {
         private void Refresh(UIElement element) {
             needsReload = true;
         }
-        
-        private void Refresh(UIView view) {
-            needsReload = true;
-        }
 
-        public void OnRefresh() {
+        private void OnRefresh() {
             s_SelectedElementId = -1;
             treeView?.Destroy();
 
@@ -156,7 +169,7 @@ namespace UIForia.Editor {
                 oldApp.onElementDestroyed -= Refresh;
                // oldApp.onViewAdded -= Refresh;
                 oldApp.onElementEnabled -= Refresh;
-                //oldApp.onRefresh -= OnRefresh;
+                oldApp.onRefresh -= OnRefresh;
             }
 
             treeView?.Destroy();

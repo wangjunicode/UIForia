@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using UIForia.Elements;
 using UIForia.Rendering;
 using UIForia.Systems.Input;
@@ -28,9 +29,11 @@ namespace UIForia.Systems {
 #endif
 
         private List<UIElement> m_ElementsLastFrame;
+        // Elements after sort and before ancestor check
+        private LightList<UIElement> m_AllElementsThisFrame;
 
         // temporary hack for the building system, this should be formalized and use ElementRef instead
-        public IReadOnlyList<UIElement> ElementsThisFrame => m_ElementsLastFrame;
+        public IReadOnlyList<UIElement> AllElementsThisFrame => m_AllElementsThisFrame;
 
         private CursorStyle currentCursor;
 
@@ -68,6 +71,7 @@ namespace UIForia.Systems {
             this.m_MouseDownElements = new LightList<UIElement>();
             this.m_ElementsThisFrame = new List<UIElement>();
             this.m_ElementsLastFrame = new List<UIElement>();
+            this.m_AllElementsThisFrame = LightList<UIElement>.Get();
             this.m_EnteredElements = new List<UIElement>();
             this.m_ExitedElements = new List<UIElement>();
             this.m_ActiveElements = new List<UIElement>();
@@ -332,6 +336,8 @@ namespace UIForia.Systems {
             }
         }
 
+        private StringBuilder builder = new StringBuilder();
+
         private void ProcessMouseInput() {
             // if element does not have state requested -> hover flag, drag listener, pointer events = none, don't add
             // buckets feel like a lot of overhead
@@ -345,6 +351,19 @@ namespace UIForia.Systems {
             // if not dragging only attempt intersections with elements who have hover state (if mouse is present) or drag create or mouse / touch interactions
 
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
+            
+            
+
+            bool bLog = queryResults.Count > 0;
+
+            if (bLog) {
+                builder.Clear();
+                foreach (var e in queryResults) {
+                    builder.AppendLine(e.GetDisplayName());
+                }
+
+                UnityEngine.Debug.Log($"Before Sort elements {queryResults.Count}: {builder}");
+            }
 
             // todo -- bug!
             queryResults.Sort((a, b) => {
@@ -363,7 +382,18 @@ namespace UIForia.Systems {
 
                 return b.layoutBox.traversalIndex - a.layoutBox.traversalIndex;
             });
+            
+            if (bLog) {
+                builder.Clear();
+                foreach (var e in queryResults) {
+                    builder.AppendLine(e.GetDisplayName());
+                }
 
+                UnityEngine.Debug.Log($"After Sort elements {queryResults.Count}: {builder}");
+            }
+
+            bool releaseQueryResults = true;
+            
             if (!IsDragging) {
                 LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
 
@@ -382,9 +412,24 @@ namespace UIForia.Systems {
                         }
                     }
 
-                    LightList<UIElement>.Release(ref queryResults);
+                    LightList<UIElement>.Release(ref m_AllElementsThisFrame);
+                    m_AllElementsThisFrame = queryResults;
                     queryResults = ancestorElements;
+                    
+                    if (bLog) {
+                        builder.Clear();
+                        foreach (var e in queryResults) {
+                            builder.AppendLine(e.GetDisplayName());
+                        }
+
+                        UnityEngine.Debug.Log($"After Ancestor check {queryResults.Count}: {builder}");    
+                    }
                 }
+            } else {
+                LightList<UIElement>.Release(ref m_AllElementsThisFrame);
+                m_AllElementsThisFrame = queryResults;
+                // Do not release query results, because this list is cached in a m_AllElementsThisFrame member field.
+                releaseQueryResults = false;
             }
 
             bool didMouseMove = mouseState.DidMove;
@@ -474,7 +519,18 @@ namespace UIForia.Systems {
                 }
             }
 
-            LightList<UIElement>.Release(ref queryResults);
+            if (bLog) {
+                builder.Clear();
+                foreach (var e in m_ElementsThisFrame) {
+                    builder.AppendLine(e.GetDisplayName());
+                }
+
+                UnityEngine.Debug.Log($"Elements this frame {m_ElementsThisFrame.Count}: {builder}");    
+            }
+
+            if (releaseQueryResults) {
+                LightList<UIElement>.Release(ref queryResults);    
+            }
         }
 
         private static bool IsParentOf(UIElement element, UIElement child) {

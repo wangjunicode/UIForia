@@ -11,7 +11,7 @@ namespace UIForia.Systems {
         /// <summary>
         /// Can contain destroyed elements (released to pool). Check "isDestroyed" flag before processing the element. 
         /// </summary>
-        IReadOnlyList<UIElement> ElementsThisFrame { get; }
+        IReadOnlyList<UIElement> AllElementsThisFrame { get; }
         
 #if UNITY_EDITOR
         List<UIElement> DebugElementsThisFrame { get; }

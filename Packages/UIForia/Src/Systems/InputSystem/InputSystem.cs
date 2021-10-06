@@ -28,9 +28,11 @@ namespace UIForia.Systems {
 #endif
 
         private List<UIElement> m_ElementsLastFrame;
+        // Elements after sort and before ancestor check
+        private LightList<UIElement> m_AllElementsThisFrame;
 
         // temporary hack for the building system, this should be formalized and use ElementRef instead
-        public IReadOnlyList<UIElement> ElementsThisFrame => m_ElementsLastFrame;
+        public IReadOnlyList<UIElement> AllElementsThisFrame => m_AllElementsThisFrame;
 
         private CursorStyle currentCursor;
 
@@ -68,6 +70,7 @@ namespace UIForia.Systems {
             this.m_MouseDownElements = new LightList<UIElement>();
             this.m_ElementsThisFrame = new List<UIElement>();
             this.m_ElementsLastFrame = new List<UIElement>();
+            this.m_AllElementsThisFrame = LightList<UIElement>.Get();
             this.m_EnteredElements = new List<UIElement>();
             this.m_ExitedElements = new List<UIElement>();
             this.m_ActiveElements = new List<UIElement>();
@@ -344,6 +347,7 @@ namespace UIForia.Systems {
             // if dragging only attempt intersections with elements who have drag responders
             // if not dragging only attempt intersections with elements who have hover state (if mouse is present) or drag create or mouse / touch interactions
 
+            bool releaseQueryResults = true;
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
 
             // todo -- bug!
@@ -363,7 +367,7 @@ namespace UIForia.Systems {
 
                 return b.layoutBox.traversalIndex - a.layoutBox.traversalIndex;
             });
-
+            
             if (!IsDragging) {
                 LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
 
@@ -382,9 +386,15 @@ namespace UIForia.Systems {
                         }
                     }
 
-                    LightList<UIElement>.Release(ref queryResults);
+                    LightList<UIElement>.Release(ref m_AllElementsThisFrame);
+                    m_AllElementsThisFrame = queryResults;
                     queryResults = ancestorElements;
                 }
+            } else {
+                LightList<UIElement>.Release(ref m_AllElementsThisFrame);
+                m_AllElementsThisFrame = queryResults;
+                // Do not release query results, because this list is cached in a m_AllElementsThisFrame member field.
+                releaseQueryResults = false;
             }
 
             bool didMouseMove = mouseState.DidMove;
@@ -474,7 +484,9 @@ namespace UIForia.Systems {
                 }
             }
 
-            LightList<UIElement>.Release(ref queryResults);
+            if (releaseQueryResults) {
+                LightList<UIElement>.Release(ref queryResults);    
+            }
         }
 
         private static bool IsParentOf(UIElement element, UIElement child) {

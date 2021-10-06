@@ -387,8 +387,8 @@ namespace UIForia.Systems {
                         }
                     }
                     
-                    LightList<UIElement>.Release(ref queryResults);
                     m_AllElementsThisFrame.AddRange(queryResults);
+                    LightList<UIElement>.Release(ref queryResults);
                     queryResults = ancestorElements;
                 }
             } else {

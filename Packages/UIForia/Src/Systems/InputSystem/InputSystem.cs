@@ -387,7 +387,7 @@ namespace UIForia.Systems {
                             ancestorElements.Add(element);
                         }
                     }
-                    
+
                     LightList<UIElement>.Release(ref queryResults);
                     queryResults = ancestorElements;
                 }
@@ -479,6 +479,8 @@ namespace UIForia.Systems {
                     m_MouseDownElements.AddRange(m_ElementsThisFrame);
                 }
             }
+
+            LightList<UIElement>.Release(ref queryResults);
         }
 
         private static bool IsParentOf(UIElement element, UIElement child) {

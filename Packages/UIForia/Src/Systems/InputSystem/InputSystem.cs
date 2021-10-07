@@ -28,9 +28,11 @@ namespace UIForia.Systems {
 #endif
 
         private List<UIElement> m_ElementsLastFrame;
+        // Elements after sort and before ancestor check
+        private List<UIElement> m_AllElementsThisFrame;
 
         // temporary hack for the building system, this should be formalized and use ElementRef instead
-        public IReadOnlyList<UIElement> ElementsThisFrame => m_ElementsLastFrame;
+        public IReadOnlyList<UIElement> AllElementsThisFrame => m_AllElementsThisFrame;
 
         private CursorStyle currentCursor;
 
@@ -68,6 +70,7 @@ namespace UIForia.Systems {
             this.m_MouseDownElements = new LightList<UIElement>();
             this.m_ElementsThisFrame = new List<UIElement>();
             this.m_ElementsLastFrame = new List<UIElement>();
+            this.m_AllElementsThisFrame = new List<UIElement>();
             this.m_EnteredElements = new List<UIElement>();
             this.m_ExitedElements = new List<UIElement>();
             this.m_ActiveElements = new List<UIElement>();
@@ -363,6 +366,9 @@ namespace UIForia.Systems {
 
                 return b.layoutBox.traversalIndex - a.layoutBox.traversalIndex;
             });
+            
+            m_AllElementsThisFrame.Clear();
+            m_AllElementsThisFrame.AddRange(queryResults);
 
             if (!IsDragging) {
                 LightList<UIElement> ancestorElements = LightList<UIElement>.Get();

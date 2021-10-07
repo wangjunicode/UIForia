@@ -347,8 +347,6 @@ namespace UIForia.Systems {
             // if dragging only attempt intersections with elements who have drag responders
             // if not dragging only attempt intersections with elements who have hover state (if mouse is present) or drag create or mouse / touch interactions
 
-            m_AllElementsThisFrame.Clear();
-            
             LightList<UIElement> queryResults = (LightList<UIElement>) m_LayoutSystem.QueryPoint(mouseState.mousePosition, LightList<UIElement>.Get());
 
             // todo -- bug!
@@ -368,6 +366,9 @@ namespace UIForia.Systems {
 
                 return b.layoutBox.traversalIndex - a.layoutBox.traversalIndex;
             });
+            
+            m_AllElementsThisFrame.Clear();
+            m_AllElementsThisFrame.AddRange(queryResults);
 
             if (!IsDragging) {
                 LightList<UIElement> ancestorElements = LightList<UIElement>.Get();
@@ -387,12 +388,9 @@ namespace UIForia.Systems {
                         }
                     }
                     
-                    m_AllElementsThisFrame.AddRange(queryResults);
                     LightList<UIElement>.Release(ref queryResults);
                     queryResults = ancestorElements;
                 }
-            } else {
-                m_AllElementsThisFrame.AddRange(queryResults);
             }
 
             bool didMouseMove = mouseState.DidMove;

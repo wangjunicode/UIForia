@@ -88,10 +88,10 @@ namespace UIForia.Rendering {
     public class RenderContext {
 
         internal const int k_ObjectCount_Small = 16;
-        internal const int k_ObjectCount_Medium = 64;
-        internal const int k_ObjectCount_Large = 128;
-        internal const int k_ObjectCount_Huge = 512;
-        internal const int k_ObjectCount_Massive = 1024;
+        internal const int k_ObjectCount_Medium = 32;
+        internal const int k_ObjectCount_Large = 64;
+        internal const int k_ObjectCount_Huge = 128;
+        internal const int k_ObjectCount_Massive = 256;
 
         internal StructList<Vector3> positionList;
         internal StructList<Vector4> texCoordList0;

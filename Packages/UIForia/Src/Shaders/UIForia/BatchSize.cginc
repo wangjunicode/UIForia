@@ -5,18 +5,18 @@
 
 #elif BATCH_SIZE_MEDIUM
 
-    #define BATCH_SIZE 64
+    #define BATCH_SIZE 32
     
 #elif BATCH_SIZE_LARGE
 
-    #define BATCH_SIZE 128
+    #define BATCH_SIZE 64
     
 #elif BATCH_SIZE_HUGE
     
-    #define BATCH_SIZE 512
+    #define BATCH_SIZE 128
 
 #else
     
-    #define BATCH_SIZE 1024
+    #define BATCH_SIZE 256
         
 #endif 

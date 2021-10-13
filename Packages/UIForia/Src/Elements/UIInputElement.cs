@@ -160,18 +160,17 @@ namespace UIForia.Elements {
                 case KeyCode.RightArrow:
                     HandleRightArrow(evt);
                     break;
-                case KeyCode.C when evt.onlyControl && selectionRange.HasSelection:
+                case KeyCode.C when evt.onlyControl && selectionRange.HasSelection && evt.eventType == InputEventType.KeyDown:
                     HandleCopy(evt);
                     break;
-                case KeyCode.V when evt.onlyControl && selectionRange.HasSelection:
+                case KeyCode.V when evt.onlyControl && evt.eventType == InputEventType.KeyDown:
                     HandlePaste(evt);
                     break;
-                case KeyCode.X when evt.onlyControl && selectionRange.HasSelection:
+                case KeyCode.X when evt.onlyControl && selectionRange.HasSelection && evt.eventType == InputEventType.KeyDown:
                     HandleCut(evt);
                     break;
-                case KeyCode.A when evt.onlyControl && selectionRange.HasSelection:
+                case KeyCode.A when evt.onlyControl && evt.eventType == InputEventType.KeyDown:
                     HandleSelectAll(evt);
-                    //
                     break;
                 default:
                     OnTextEntered(evt);

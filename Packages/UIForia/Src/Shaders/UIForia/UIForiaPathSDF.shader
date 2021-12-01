@@ -117,7 +117,7 @@
                 float2 size = i.texCoord2.xy;
                 float minSize = min(size.x, size.y);
 
-                float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y) * _DPIScale;
+                float2 clipPos = float2(i.vertex.x, _ProjectionParams.x < 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y) * _DPIScale;
                 float4 clipRect = _ClipRects[(int)Frag_ObjectIndex];
 
                 float4 objectInfo = _ObjectData[(int)Frag_ObjectIndex];

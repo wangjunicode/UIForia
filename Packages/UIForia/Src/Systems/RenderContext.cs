@@ -786,7 +786,7 @@ namespace UIForia.Rendering {
 
         private void ProcessDrawCommands(Camera camera, CommandBuffer commandBuffer) {
             Matrix4x4 cameraMatrix = camera.cameraToWorldMatrix;
-            commandBuffer.SetViewProjectionMatrices(cameraMatrix, camera.projectionMatrix);
+            commandBuffer.SetViewProjectionMatrices(cameraMatrix, GL.GetGPUProjectionMatrix(camera.projectionMatrix, false));
 
             RenderOperation[] renderCommands = this.renderCommandList.array;
             int commandCount = renderCommandList.size;

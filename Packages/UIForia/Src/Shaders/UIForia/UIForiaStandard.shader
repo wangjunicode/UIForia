@@ -29,7 +29,8 @@ Shader "UIForia/Standard"
             #pragma fragment frag
             #pragma shader_feature UIFORIA_TEXTURE_CLIP
 
-            #pragma multi_compile __ BATCH_SIZE_SMALL BATCH_SIZE_MEDIUM BATCH_SIZE_LARGE BATCH_SIZE_HUGE BATCH_SIZE_MASSIVE
+            #pragma multi_compile __ BATCH_SIZE_SMALL BATCH_SIZE_MEDIUM BATCH_SIZE_LARGE BATCH_SIZE_HUGE BATCH_SIZE_MASSIVE 
+            #pragma shader_feature INVERT_Y
 
             #include "./BatchSize.cginc"
             #include "UnityCG.cginc"
@@ -94,8 +95,13 @@ Shader "UIForia/Standard"
                 
                 half2 size = UnpackSize(Vert_PackedSize);
                 v.vertex = mul(transform, float4(v.vertex.xyz, 1));
-                
+
+                #if !INVERT_Y
+                o.vertex = float4(UnityObjectToViewPos(v.vertex) / float3(0.5 * _ScreenParams.x, _ProjectionParams.x * 0.5 * _ScreenParams.y, 1.0), 1.0);
+                #else
                 o.vertex = float4(UnityObjectToViewPos(v.vertex) / float3(0.5 * _ScreenParams.x, 0.5 * (_ProjectionParams.x > 0 ?  1.0 - _ScreenParams.y :  _ScreenParams.y), 1.0), 1.0);
+                #endif
+                
                 float4 screenPos = ComputeScreenPos(o.vertex);
                 o.texCoord0 = v.texCoord0;
                 o.color = _ColorData[objectIndex];
@@ -178,8 +184,13 @@ Shader "UIForia/Standard"
             }
             
             fixed4 frag (v2f i) : SV_Target {           
-                
+
+                #if !INVERT_Y
+                float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y) * _DPIScale;
+                #else
                 float2 clipPos = float2(i.vertex.x, _ProjectionParams.x < 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y) * _DPIScale;
+                #endif
+                
                 float4 clipRect = _ClipRects[(uint)i.texCoord1.w];
                 float4 clipUvs = _ClipUVs[(uint)i.texCoord1.w];           
                 float opacity = _ObjectData[(uint)i.texCoord1.w].w;              

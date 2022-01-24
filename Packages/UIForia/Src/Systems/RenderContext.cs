@@ -131,13 +131,26 @@ namespace UIForia.Rendering {
             s_MaxTextureSize = Mathf.Min(maxTextureSize, 4096);
         }
 
-        internal RenderContext(UIForiaSettings settings) {
+        internal RenderContext(UIForiaSettings settings, bool invertY) {
             // todo -- use atlas size form settings
             int atlasWidth = 1024;
             int atlasHeight = 1024;
             this.pendingBatches = new StructList<Batch>();
             this.uiforiaMeshPool = new MeshPool();
-            this.uiforiaMaterialPool = new UIForiaMaterialPool(settings.batchedMaterial);
+
+            Material batchedMaterial = settings.batchedMaterial;
+            if (invertY) {
+                batchedMaterial = new Material(settings.batchedMaterial);
+                batchedMaterial.EnableKeyword("INVERT_Y");
+            }
+
+            Material sdfPathMaterial = settings.sdfPathMaterial;
+            if (invertY) {
+                sdfPathMaterial = new Material(settings.sdfPathMaterial);
+                sdfPathMaterial.EnableKeyword("INVERT_Y");
+            }
+            
+            this.uiforiaMaterialPool = new UIForiaMaterialPool(batchedMaterial);
             this.positionList = new StructList<Vector3>(128);
             this.texCoordList0 = new StructList<Vector4>(128);
             this.texCoordList1 = new StructList<Vector4>(128);
@@ -148,7 +161,7 @@ namespace UIForia.Rendering {
             this.areaStack = new StructStack<RenderArea>();
             this.fixedRenderStateList = new StructList<FixedRenderState>();
             this.clipContext = new ClipContext(settings);
-            this.pathMaterialPool = new UIForiaMaterialPool(settings.sdfPathMaterial);
+            this.pathMaterialPool = new UIForiaMaterialPool(sdfPathMaterial);
             this.textAtlas = new RenderTexture(atlasWidth, atlasHeight, 0, RenderTextureFormat.DefaultHDR);
             this.spriteAtlas = new RenderTexture(atlasWidth, atlasHeight, 0, RenderTextureFormat.DefaultHDR);
             this.spriteAtlas.name = "UIForia Sprite Atlas";

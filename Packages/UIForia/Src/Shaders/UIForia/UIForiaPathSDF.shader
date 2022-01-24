@@ -27,6 +27,7 @@
             #pragma fragment frag
             
             #pragma multi_compile __ BATCH_SIZE_SMALL BATCH_SIZE_MEDIUM BATCH_SIZE_LARGE BATCH_SIZE_HUGE BATCH_SIZE_MASSIVE SHADOW PRE_MULTIPLY_ALPHA
+            #pragma shader_feature INVERT_Y
             
             #include "./BatchSize.cginc"
             #include "UnityCG.cginc"
@@ -117,7 +118,12 @@
                 float2 size = i.texCoord2.xy;
                 float minSize = min(size.x, size.y);
 
+                #if !INVERT_Y
+                float2 clipPos = float2(i.vertex.x, _ProjectionParams.x > 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y) * _DPIScale;
+                #else
                 float2 clipPos = float2(i.vertex.x, _ProjectionParams.x < 0 ? i.vertex.y : _ScreenParams.y - i.vertex.y) * _DPIScale;
+                #endif
+                
                 float4 clipRect = _ClipRects[(int)Frag_ObjectIndex];
 
                 float4 objectInfo = _ObjectData[(int)Frag_ObjectIndex];

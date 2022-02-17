@@ -99,13 +99,12 @@ namespace UIForia {
 
         public readonly bool invertY;
 
-        protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered, bool invertY) {
+        protected Application(bool isPreCompiled, TemplateSettings templateSettings, ResourceManager resourceManager, Action<UIElement> onElementRegistered) {
             this.isPreCompiled = isPreCompiled;
             this.templateSettings = templateSettings;
             this.onElementRegistered = onElementRegistered;
             this.id = templateSettings.applicationName;
             this.resourceManager = resourceManager ?? new ResourceManager();
-            this.invertY = invertY;
             Settings = Settings ? Settings : Resources.Load<UIForiaSettings>("UIForiaSettings");
             if (Settings == null) {
                 throw new Exception("UIForiaSettings are missing. Use the UIForia/Create UIForia Settings to create it");

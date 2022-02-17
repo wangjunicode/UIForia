@@ -27,7 +27,7 @@
             #pragma fragment frag
             
             #pragma multi_compile __ BATCH_SIZE_SMALL BATCH_SIZE_MEDIUM BATCH_SIZE_LARGE BATCH_SIZE_HUGE BATCH_SIZE_MASSIVE SHADOW PRE_MULTIPLY_ALPHA
-            #pragma multi_compile_local __ INVERT_Y
+            #pragma multi_compile __ INVERT_Y
             
             #include "./BatchSize.cginc"
             #include "UnityCG.cginc"

@@ -139,17 +139,8 @@ namespace UIForia.Rendering {
             this.uiforiaMeshPool = new MeshPool();
 
             Material batchedMaterial = settings.batchedMaterial;
-            if (invertY) {
-                batchedMaterial = new Material(settings.batchedMaterial);
-                batchedMaterial.EnableKeyword("INVERT_Y");
-            }
-
             Material sdfPathMaterial = settings.sdfPathMaterial;
-            if (invertY) {
-                sdfPathMaterial = new Material(settings.sdfPathMaterial);
-                sdfPathMaterial.EnableKeyword("INVERT_Y");
-            }
-            
+
             this.uiforiaMaterialPool = new UIForiaMaterialPool(batchedMaterial);
             this.positionList = new StructList<Vector3>(128);
             this.texCoordList0 = new StructList<Vector4>(128);
@@ -561,7 +552,7 @@ namespace UIForia.Rendering {
         }
 
 
-        public void Render(Camera camera, CommandBuffer commandBuffer) {
+        public void Render(Camera camera, CommandBuffer commandBuffer, bool renderIntoTexture = false) {
             commandBuffer.Clear();
             for (int i = 0; i < meshesToRelease.size; i++) {
                 meshesToRelease[i].Release();
@@ -608,7 +599,7 @@ namespace UIForia.Rendering {
 #endif
             FinalizeCurrentBatch();
 
-            ProcessDrawCommands(camera, commandBuffer);
+            ProcessDrawCommands(camera, commandBuffer, renderIntoTexture);
 
 #if DEBUG
 
@@ -797,9 +788,14 @@ namespace UIForia.Rendering {
             return area;
         }
 
-        private void ProcessDrawCommands(Camera camera, CommandBuffer commandBuffer) {
+        private void ProcessDrawCommands(Camera camera, CommandBuffer commandBuffer, bool renderIntoTexture) {
             Matrix4x4 cameraMatrix = camera.cameraToWorldMatrix;
-            commandBuffer.SetViewProjectionMatrices(cameraMatrix, GL.GetGPUProjectionMatrix(camera.projectionMatrix, false));
+            commandBuffer.SetViewProjectionMatrices(cameraMatrix, GL.GetGPUProjectionMatrix(camera.projectionMatrix, renderIntoTexture));
+            if (renderIntoTexture) {
+                commandBuffer.EnableShaderKeyword("INVERT_Y");
+            } else {
+                commandBuffer.DisableShaderKeyword("INVERT_Y");
+            }
 
             RenderOperation[] renderCommands = this.renderCommandList.array;
             int commandCount = renderCommandList.size;

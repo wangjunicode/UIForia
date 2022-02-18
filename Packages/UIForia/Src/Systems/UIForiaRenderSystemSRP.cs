@@ -18,7 +18,7 @@ namespace Src.Systems {
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData) {
             CommandBuffer cmd = CommandBufferPool.Get(_ProfilerTag);
-            _renderContext.Render(renderingData.cameraData.camera, cmd);
+            _renderContext.Render(renderingData.cameraData.camera, cmd, renderingData.cameraData.IsCameraProjectionMatrixFlipped());
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
         }
